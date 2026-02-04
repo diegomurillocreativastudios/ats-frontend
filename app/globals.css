@@ -2,25 +2,80 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0D0D0D;
+
+  /* ATS RRHH Official Colors */
+  --vo-purple: #6E3385;
+  --vo-purple-hover: #5A2A6D;
+  --vo-magenta: #9C2B82;
+  --vo-magenta-hover: #7D2168;
+  --vo-navy: #496FB3;
+  --vo-sky: #71BCED;
+  --vo-pink: #C73277;
+  --vo-pink-hover: #A02961;
+  --vo-yellow: #E6AC4B;
+
+  /* Semantic Colors */
+  --success: #22C55E;
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --muted: #F9FAFB;
+  --muted-foreground: #6B7280;
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-vo-purple: var(--vo-purple);
+  --color-vo-purple-hover: var(--vo-purple-hover);
+  --color-vo-magenta: var(--vo-magenta);
+  --color-vo-magenta-hover: var(--vo-magenta-hover);
+  --color-vo-navy: var(--vo-navy);
+  --color-vo-sky: var(--vo-sky);
+  --color-vo-pink: var(--vo-pink);
+  --color-vo-pink-hover: var(--vo-pink-hover);
+  --color-vo-yellow: var(--vo-yellow);
+
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --font-grotesk: "Space Grotesk", sans-serif;
+  --font-inter: "Inter", sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button {
+  font-family: var(--font-grotesk);
+}
+
+body {
+  font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
 }
