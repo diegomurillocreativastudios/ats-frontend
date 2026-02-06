@@ -1,5 +1,5 @@
 {
-  "version": "2.6",
+  "version": "2.7",
   "children": [
     {
       "type": "frame",
@@ -1315,7 +1315,7 @@
                               "id": "70Cxr",
                               "name": "logoText",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 18,
                               "fontWeight": "700"
@@ -2312,7 +2312,7 @@
                           "id": "80geq",
                           "name": "reportDLogoText",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 16,
                           "fontWeight": "600"
@@ -4158,7 +4158,7 @@
                   "id": "BAEKg",
                   "name": "reportMLogo",
                   "fill": "$color-primary",
-                  "content": "Creativa AI",
+                  "content": "ATS App",
                   "fontFamily": "Inter",
                   "fontSize": 16,
                   "fontWeight": "700"
@@ -4928,7 +4928,7 @@
                           "id": "OGZbZ",
                           "name": "configDLogoText",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 18,
                           "fontWeight": "700"
@@ -5906,7 +5906,7 @@
                       "id": "tSkxw",
                       "name": "candDetailDLogoText",
                       "fill": "$color-foreground",
-                      "content": "Creativa AI",
+                      "content": "ATS App",
                       "fontFamily": "Inter",
                       "fontSize": 18,
                       "fontWeight": "700"
@@ -9595,7 +9595,7 @@
                           "id": "beWJY",
                           "name": "rrhhDLogoName",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 16,
                           "fontWeight": "700"
@@ -12262,7 +12262,7 @@
                           "id": "Cc5hK",
                           "name": "candListDLogoName",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 16,
                           "fontWeight": "700"
@@ -14338,7 +14338,7 @@
                           "id": "GlRYk",
                           "name": "vacantesDLogoText",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 16,
                           "fontWeight": "600"
@@ -17143,7 +17143,7 @@
                           "id": "6xTda",
                           "name": "evalDLogoText",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 16,
                           "fontWeight": "600"
@@ -18272,7 +18272,7 @@
                           "id": "hPKDn",
                           "name": "entrDLogoText",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 16,
                           "fontWeight": "600"
@@ -21426,7 +21426,7 @@
                           "id": "0MT1V",
                           "name": "msgDLogoText",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 16,
                           "fontWeight": "600"
@@ -22396,7 +22396,7 @@
                           "id": "7MT9W",
                           "name": "contrDLogoText",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 16,
                           "fontWeight": "600"
@@ -26073,7 +26073,7 @@
                           "id": "l6dgO",
                           "name": "cfgUserDLogoText",
                           "fill": "$color-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 18,
                           "fontWeight": "700"
@@ -29643,7 +29643,7 @@
                               "id": "jHiNR",
                               "name": "loginBrandName",
                               "fill": "$color-primary-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 32,
                               "fontWeight": "700"
@@ -30234,7 +30234,7 @@
                           "id": "vJrlC",
                           "name": "tabletBrandName",
                           "fill": "$color-primary-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 20,
                           "fontWeight": "700"
@@ -30585,7 +30585,7 @@
                       "id": "2YCzP",
                       "name": "mobileLogoName",
                       "fill": "$color-foreground",
-                      "content": "Creativa AI",
+                      "content": "ATS App",
                       "fontFamily": "Inter",
                       "fontSize": 24,
                       "fontWeight": "700"
@@ -30999,7 +30999,7 @@
                               "id": "kSTlb",
                               "name": "regBrandName",
                               "fill": "$color-secondary-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 32,
                               "fontWeight": "700"
@@ -31620,7 +31620,7 @@
                           "name": "regBtn",
                           "width": "fill_container",
                           "height": 48,
-                          "fill": "$color-primary",
+                          "fill": "$color-secondary",
                           "cornerRadius": 6,
                           "gap": 8,
                           "padding": [
@@ -31675,7 +31675,7 @@
                               "type": "text",
                               "id": "qWeSM",
                               "name": "regFootLink",
-                              "fill": "$color-primary",
+                              "fill": "$color-secondary",
                               "content": "Inicia sesión",
                               "fontFamily": "Inter",
                               "fontSize": 14,
@@ -31748,7 +31748,7 @@
                           "id": "F9wJg",
                           "name": "regTabletName",
                           "fill": "$color-secondary-foreground",
-                          "content": "Creativa AI",
+                          "content": "ATS App",
                           "fontFamily": "Inter",
                           "fontSize": 20,
                           "fontWeight": "700"
@@ -32253,7 +32253,7 @@
                           "name": "regTabletBtn",
                           "width": "fill_container",
                           "height": 44,
-                          "fill": "$color-primary",
+                          "fill": "$color-secondary",
                           "cornerRadius": 6,
                           "gap": 8,
                           "padding": [
@@ -32308,7 +32308,7 @@
                               "type": "text",
                               "id": "fPq4b",
                               "name": "regTabletFootL",
-                              "fill": "$color-primary",
+                              "fill": "$color-secondary",
                               "content": "Inicia sesión",
                               "fontFamily": "Inter",
                               "fontSize": 13,
@@ -32373,7 +32373,7 @@
                       "id": "8yUhV",
                       "name": "regMobileName",
                       "fill": "$color-foreground",
-                      "content": "Creativa AI",
+                      "content": "ATS App",
                       "fontFamily": "Inter",
                       "fontSize": 20,
                       "fontWeight": "700"
@@ -32851,7 +32851,7 @@
                       "name": "regMobileBtn",
                       "width": "fill_container",
                       "height": 48,
-                      "fill": "$color-primary",
+                      "fill": "$color-secondary",
                       "cornerRadius": 6,
                       "gap": 8,
                       "padding": [
@@ -32906,7 +32906,7 @@
                           "type": "text",
                           "id": "cXhfD",
                           "name": "regMobileFootL",
-                          "fill": "$color-primary",
+                          "fill": "$color-secondary",
                           "content": "Inicia sesión",
                           "fontFamily": "Inter",
                           "fontSize": 13,
@@ -33015,7 +33015,7 @@
                               "id": "hURiF",
                               "name": "candLogoName",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 16,
                               "fontWeight": "700"
@@ -34407,7 +34407,7 @@
                               "id": "n2TOH",
                               "name": "tabletLogoName",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 16,
                               "fontWeight": "700"
@@ -35608,7 +35608,7 @@
                               "id": "B0rlH",
                               "name": "perfilLogoName",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 16,
                               "fontWeight": "700"
@@ -36770,7 +36770,7 @@
                               "id": "3dj2A",
                               "name": "ptLogoName",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 16,
                               "fontWeight": "700"
@@ -37898,7 +37898,7 @@
                               "id": "q5Arp",
                               "name": "docsLogoName",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 16,
                               "fontWeight": "700"
@@ -40045,7 +40045,7 @@
                               "id": "LecuM",
                               "name": "estadoDLogoName",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 16,
                               "fontWeight": "700"
@@ -42565,7 +42565,7 @@
                               "id": "9DQqr",
                               "name": "evalsDLogoName",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 16,
                               "fontWeight": "700"
@@ -44305,7 +44305,7 @@
                               "id": "hWdiT",
                               "name": "entrevDLogoName",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 16,
                               "fontWeight": "700"
@@ -46036,7 +46036,7 @@
                               "id": "uzrAY",
                               "name": "mensajesDLogoName",
                               "fill": "$color-foreground",
-                              "content": "Creativa AI",
+                              "content": "ATS App",
                               "fontFamily": "Inter",
                               "fontSize": 16,
                               "fontWeight": "700"
