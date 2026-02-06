@@ -1,4 +1,3 @@
-````md
 # ATS App
 
 ATS App es una aplicación web (SaaS) para gestionar procesos de reclutamiento tipo **ATS (Applicant Tracking System)**.
@@ -75,11 +74,6 @@ La app normalmente corre en:
 
 * `http://localhost:3000`
 
-Rutas iniciales:
-
-* `/iniciar-sesion`
-* `/crear-cuenta`
-
 ---
 
 ## Build y ejecución en producción (local)
@@ -101,23 +95,10 @@ npm run lint
 
 ---
 
-## Estructura principal
-
-* `app/` → Rutas y vistas (App Router)
-* `app/iniciar-sesion/page.jsx` → Vista Iniciar Sesión
-* `app/crear-cuenta/page.jsx` → Vista Crear Cuenta
-* `components/` → Componentes reutilizables (ej. auth/layouts)
-* `public/` → Assets estáticos (imágenes, íconos, etc.)
-
----
-
 ## Notas
 
 * Las pantallas de autenticación están implementadas **pixel-perfect** según `design.pen`,
   incluyendo variantes **desktop / tablet / mobile**.
 * La marca visible en UI es **“ATS App”**.
 
-```
-
-Si me pegás tu `package.json` (scripts) te lo ajusto 100% a tus comandos reales (por ejemplo si usan `pnpm dev`, `next dev -p 3001`, etc.).
-```
+---
