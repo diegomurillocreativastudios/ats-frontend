@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ATS App
 
-## Getting Started
+ATS App es una aplicación web (SaaS) para gestionar procesos de reclutamiento tipo **ATS (Applicant Tracking System)**.
+Incluye flujos de autenticación (Iniciar sesión / Crear cuenta) y servirá como base para módulos de vacantes,
+candidatos, entrevistas, evaluaciones, comunicaciones y contratación.
 
-First, run the development server:
+## Stack
+- **Next.js (App Router)**
+- **React**
+- **TailwindCSS**
+- (El resto de módulos/servicios se irán integrando según avance el proyecto)
+
+---
+
+## Requisitos
+- **Node.js** recomendado: **18+** (ideal 20+)
+- **npm** (o tu gestor favorito: pnpm/yarn, si el repo ya lo usa)
+
+> Tip: si ya existe un `.nvmrc`, usá esa versión de Node para evitar problemas.
+
+---
+
+## Clonar el proyecto
+```bash
+git clone <URL_DEL_REPO>
+cd <NOMBRE_DEL_REPO>
+````
+
+---
+
+## Instalar dependencias
+
+Con **npm**:
+
+```bash
+npm install
+```
+
+Si el proyecto usa **pnpm**:
+
+```bash
+pnpm install
+```
+
+Si usa **yarn**:
+
+```bash
+yarn
+```
+
+---
+
+## Variables de entorno
+
+Si el proyecto requiere variables, creá el archivo:
+
+```bash
+cp .env.example .env.local
+```
+
+Luego completá los valores en `.env.local`.
+
+> Si no existe `.env.example`, podés crear `.env.local` manualmente cuando sea necesario.
+
+---
+
+## Correr la app en local (modo desarrollo)
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La app normalmente corre en:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+* `http://localhost:3000`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Build y ejecución en producción (local)
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Otros comandos útiles
 
-## Deploy on Vercel
+Lint:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run lint
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Notas
+
+* Las pantallas de autenticación están implementadas **pixel-perfect** según `design.pen`,
+  incluyendo variantes **desktop / tablet / mobile**.
+* La marca visible en UI es **“ATS App”**.
+
+---
