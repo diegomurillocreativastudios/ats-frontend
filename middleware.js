@@ -24,11 +24,19 @@ export function middleware(request) {
     return NextResponse.redirect(new URL('/auth/registrarse', request.url));
   }
 
+  const hasToken = request.cookies.get(AUTH_COOKIE)?.value;
+  const isAuthPage =
+    pathname === '/auth/iniciar-sesion' ||
+    pathname === '/auth/registrarse' ||
+    pathname.startsWith('/auth/forgot-password');
+
+  if (hasToken && isAuthPage) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
   if (isPublicPath(pathname)) {
     return NextResponse.next();
   }
-
-  const hasToken = request.cookies.get(AUTH_COOKIE)?.value;
 
   if (!hasToken) {
     const loginUrl = new URL('/auth/iniciar-sesion', request.url);

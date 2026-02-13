@@ -16,6 +16,7 @@ export default function IniciarSesion() {
     email: "",
     password: ""
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [errors, setErrors] = useState({});
@@ -197,7 +198,7 @@ export default function IniciarSesion() {
 
                 <Input
                   label="Contraseña"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="••••••••"
                   required
@@ -206,6 +207,24 @@ export default function IniciarSesion() {
                   error={errors.password}
                   disabled={loading}
                 />
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="showPassword"
+                    checked={showPassword}
+                    onChange={(e) => setShowPassword(e.target.checked)}
+                    disabled={loading}
+                    className="h-4 w-4 rounded border-input accent-vo-purple focus:ring-vo-purple focus:ring-2 focus:ring-offset-0"
+                    aria-label="Mostrar contraseña"
+                  />
+                  <label
+                    htmlFor="showPassword"
+                    className="text-xs md:text-[13px] text-foreground cursor-pointer"
+                  >
+                    Mostrar contraseña
+                  </label>
+                </div>
 
                 <div className="flex justify-center md:justify-end">
                   <Link
