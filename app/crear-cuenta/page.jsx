@@ -2,45 +2,80 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Input from "@/components/auth/Input";
 import Button from "@/components/auth/Button";
 import AuthBrand from "@/components/auth/AuthBrand";
+import { apiClient } from "@/lib/api";
 
 export default function CrearCuenta() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
-    phone: "",
     password: "",
-    confirmPassword: "",
-    acceptTerms: false
+    confirmPassword: ""
   });
+  const [showPasswords, setShowPasswords] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value
-    });
+    }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    setMessage(null);
   };
 
-  const handleSubmit = (e) => {
+  const getMessageFromError = (err) => {
+    if (err.errors && typeof err.errors === "object") {
+      const messages = Object.values(err.errors)
+        .flat()
+        .filter((m) => typeof m === "string" && m.trim());
+      if (messages.length > 0) return messages.join(" ");
+    }
+    if (err.message) return err.message;
+    if (err.detail) return typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail);
+    if (err.error) return err.error;
+    if (err.title && typeof err.title === "string") return err.title;
+    if (err.status === 409) return "Este correo ya está registrado.";
+    if (err.status >= 500) return "Error del servidor. Intenta más tarde.";
+    return "Error al crear la cuenta. Intenta de nuevo.";
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage(null);
+    setErrors({});
+
     if (formData.password !== formData.confirmPassword) {
-      alert("Las contraseñas no coinciden");
+      setErrors((prev) => ({ ...prev, confirmPassword: "Las contraseñas no coinciden" }));
       return;
     }
-    if (!formData.acceptTerms) {
-      alert("Debes aceptar los términos y condiciones");
-      return;
-    }
+
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await apiClient.post("/register", {
+        email: formData.email,
+        password: formData.password
+      });
+      setMessage({ type: "success", text: "Cuenta creada correctamente. Ya puedes iniciar sesión." });
+      setTimeout(() => {
+        router.push("/iniciar-sesion");
+      }, 2000);
+    } catch (err) {
+      setMessage({
+        type: "error",
+        text: getMessageFromError(err)
+      });
+    } finally {
       setLoading(false);
-      console.log("Form submitted:", formData);
-    }, 1500);
+    }
   };
 
   return (
@@ -123,56 +158,25 @@ export default function CrearCuenta() {
               </p>
             </div>
 
+            {/* Message (success / error) */}
+            {message && (
+              <div
+                className={`p-4 rounded-md border ${
+                  message.type === "error"
+                    ? "bg-red-50 border-red-200 text-red-700"
+                    : "bg-green-50 border-green-200 text-green-700"
+                }`}
+                role="alert"
+                aria-live="polite"
+              >
+                <p className="text-sm">{message.text}</p>
+              </div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               {/* Inputs Container */}
               <div className="flex flex-col gap-3.5 md:gap-4">
-                {/* Name Row - Desktop */}
-                <div className="hidden lg:grid grid-cols-2 gap-4">
-                  <Input
-                    label="Nombre"
-                    type="text"
-                    name="firstName"
-                    placeholder="Juan"
-                    required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                  />
-                  <Input
-                    label="Apellido"
-                    type="text"
-                    name="lastName"
-                    placeholder="Pérez"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* Name Fields - Mobile & Tablet */}
-                <div className="lg:hidden">
-                  <Input
-                    label="Nombre"
-                    type="text"
-                    name="firstName"
-                    placeholder="Juan"
-                    required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="lg:hidden">
-                  <Input
-                    label="Apellido"
-                    type="text"
-                    name="lastName"
-                    placeholder="Pérez"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-                </div>
-
                 <Input
                   label="Correo electrónico"
                   type="email"
@@ -181,53 +185,50 @@ export default function CrearCuenta() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                />
-
-                <Input
-                  label="Teléfono"
-                  type="tel"
-                  name="phone"
-                  placeholder="+52 55 1234 5678"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
+                  error={errors.email}
+                  disabled={loading}
                 />
 
                 <Input
                   label="Contraseña"
-                  type="password"
+                  type={showPasswords ? "text" : "password"}
                   name="password"
                   placeholder="Mínimo 8 caracteres"
                   required
                   value={formData.password}
                   onChange={handleChange}
+                  error={errors.password}
+                  disabled={loading}
                 />
 
                 <Input
                   label="Confirmar contraseña"
-                  type="password"
+                  type={showPasswords ? "text" : "password"}
                   name="confirmPassword"
                   placeholder="Repetir contraseña"
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  error={errors.confirmPassword}
+                  disabled={loading}
                 />
 
-                {/* Terms Checkbox */}
+                {/* Mostrar contraseñas */}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    id="terms"
-                    name="acceptTerms"
-                    checked={formData.acceptTerms}
-                    onChange={handleChange}
-                    className="h-4 w-4 rounded border-input text-vo-magenta focus:ring-vo-magenta"
+                    id="showPasswords"
+                    checked={showPasswords}
+                    onChange={(e) => setShowPasswords(e.target.checked)}
+                    disabled={loading}
+                    className="h-4 w-4 rounded border-input accent-vo-magenta focus:ring-vo-magenta"
+                    aria-label="Mostrar contraseñas"
                   />
-                  <label htmlFor="terms" className="text-xs md:text-[13px] lg:text-[13px] text-foreground">
-                    Acepto los{" "}
-                    <Link href="/terminos" className="text-vo-magenta hover:underline">
-                      Términos y Condiciones
-                    </Link>
+                  <label
+                    htmlFor="showPasswords"
+                    className="text-xs md:text-[13px] lg:text-[13px] text-foreground cursor-pointer"
+                  >
+                    Mostrar contraseñas
                   </label>
                 </div>
               </div>
