@@ -8,7 +8,7 @@ import Button from "@/components/auth/Button";
 import AuthBrand from "@/components/auth/AuthBrand";
 import { apiClient } from "@/lib/api";
 
-export default function CrearCuenta() {
+export default function Registrarse() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
@@ -66,7 +66,7 @@ export default function CrearCuenta() {
       });
       setMessage({ type: "success", text: "Cuenta creada correctamente. Ya puedes iniciar sesión." });
       setTimeout(() => {
-        router.push("/iniciar-sesion");
+        router.push("/auth/iniciar-sesion");
       }, 2000);
     } catch (err) {
       setMessage({
@@ -80,9 +80,7 @@ export default function CrearCuenta() {
 
   return (
     <div className="min-h-screen flex font-inter">
-      {/* Desktop: Left Panel */}
       <div className="hidden lg:flex flex-1 bg-vo-magenta text-white flex-col justify-center px-16 gap-8">
-        {/* Brand Section */}
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-4">
             <div className="h-14 w-14 rounded-xl bg-white/10 flex items-center justify-center text-[32px] font-bold">
@@ -103,7 +101,6 @@ export default function CrearCuenta() {
           </p>
         </div>
 
-        {/* Benefits */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <svg className="w-5 h-5 text-vo-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +123,6 @@ export default function CrearCuenta() {
         </div>
       </div>
 
-      {/* Tablet: Top Header */}
       <div className="hidden md:flex lg:hidden fixed top-0 left-0 right-0 bg-vo-magenta text-white h-[120px] items-center justify-between px-8 gap-4 z-10">
         <div className="flex items-center gap-3">
           <div className="h-11 w-11 rounded-[10px] bg-white/10 flex items-center justify-center text-[22px] font-bold">
@@ -137,20 +133,16 @@ export default function CrearCuenta() {
         <p className="text-sm text-white/80">Sistema de Reclutamiento Inteligente</p>
       </div>
 
-      {/* Right Panel: Form */}
       <div className="flex-1 flex items-center justify-center bg-background px-6 md:px-10 lg:px-12 py-6 md:py-40 lg:py-0 md:max-w-full lg:max-w-[560px]">
         <div className="w-full md:max-w-[500px] lg:max-w-[420px]">
-          {/* Mobile Logo */}
           <div className="md:hidden w-full flex justify-center mb-5">
             <AuthBrand size="mobile-register" variant="light-secondary" />
           </div>
 
-          {/* Form Container */}
           <div className="flex flex-col gap-5 md:gap-5 lg:gap-6">
-            {/* Form Header */}
             <div className="flex flex-col items-center md:items-start gap-1 md:gap-1.5 lg:gap-2 text-center md:text-left">
               <h2 className="text-[22px] md:text-2xl lg:text-[28px] font-bold text-foreground">
-                Crear Cuenta
+                Registrarse
               </h2>
               <p className="text-sm md:text-sm lg:text-base text-muted-foreground">
                 Completa tus datos{" "}
@@ -158,7 +150,6 @@ export default function CrearCuenta() {
               </p>
             </div>
 
-            {/* Message (success / error) */}
             {message && (
               <div
                 className={`p-4 rounded-md border ${
@@ -173,9 +164,7 @@ export default function CrearCuenta() {
               </div>
             )}
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {/* Inputs Container */}
               <div className="flex flex-col gap-3.5 md:gap-4">
                 <Input
                   label="Correo electrónico"
@@ -213,7 +202,6 @@ export default function CrearCuenta() {
                   disabled={loading}
                 />
 
-                {/* Mostrar contraseñas */}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -233,17 +221,15 @@ export default function CrearCuenta() {
                 </div>
               </div>
 
-              {/* Button */}
               <Button type="submit" variant="secondary" disabled={loading}>
                 {loading ? "Creando cuenta..." : "Crear Cuenta"}
               </Button>
             </form>
 
-            {/* Footer */}
             <div className="flex items-center justify-center gap-1 text-[13px] md:text-[13px] lg:text-sm">
               <span className="text-muted-foreground">¿Ya tienes cuenta?</span>
               <Link
-                href="/iniciar-sesion"
+                href="/auth/iniciar-sesion"
                 className="font-medium text-vo-magenta hover:underline"
               >
                 Inicia sesión

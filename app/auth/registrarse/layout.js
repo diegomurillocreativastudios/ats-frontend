@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Regístrate",
+  title: "Registrarse",
 };
 
 export default function AuthRegistrateLayout({ children }) {

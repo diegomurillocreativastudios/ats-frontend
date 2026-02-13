@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Iniciar Sesión",
+  title: "Iniciar Sesion",
 };
 
 export default function AuthIniciarSesionLayout({ children }) {
