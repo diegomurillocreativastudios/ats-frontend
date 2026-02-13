@@ -1,18 +1,12 @@
 # Documentación API Backend – ATS Frontend
 
-Base URL del backend (desde `.env.local`):
-
-```env
-API_URL=https://backend-7eop.onrender.com
-```
-
-**Importante:** Para usar la API desde el cliente (páginas con `'use client'`), define en `.env.local` también:
+Base URL del backend (desde `.env.local`). En todo el proyecto se utiliza únicamente esta variable:
 
 ```env
 NEXT_PUBLIC_API_URL=https://backend-7eop.onrender.com
 ```
 
-Así podrás usar `process.env.NEXT_PUBLIC_API_URL` en el navegador. La variable `API_URL` sin prefijo solo está disponible en el servidor (API routes, Server Components, etc.).
+Úsala en el código como `process.env.NEXT_PUBLIC_API_URL`.
 
 ---
 
@@ -25,12 +19,7 @@ Crea un módulo para no repetir la base URL y el manejo de errores:
 **Archivo sugerido:** `lib/api.js` (o `lib/apiClient.js`)
 
 ```javascript
-const getBaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL || '';
-  }
-  return process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || '';
-};
+const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || '';
 
 export const apiClient = {
   async request(endpoint, options = {}) {
