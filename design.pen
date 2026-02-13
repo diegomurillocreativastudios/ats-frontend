@@ -31166,7 +31166,7 @@
                               "id": "EQVGs",
                               "name": "regTitle",
                               "fill": "$color-foreground",
-                              "content": "Crear Cuenta",
+                              "content": "Registrarse",
                               "fontFamily": "Inter",
                               "fontSize": 28,
                               "fontWeight": "700"
@@ -31601,7 +31601,7 @@
                               "id": "qMT4L",
                               "name": "regTabletTitle",
                               "fill": "$color-foreground",
-                              "content": "Crear Cuenta",
+                              "content": "Registrarse",
                               "fontFamily": "Inter",
                               "fontSize": 24,
                               "fontWeight": "700"
@@ -32010,7 +32010,7 @@
                           "id": "m83xH",
                           "name": "regMobileTitle",
                           "fill": "$color-foreground",
-                          "content": "Crear Cuenta",
+                          "content": "Registrarse",
                           "fontFamily": "Inter",
                           "fontSize": 22,
                           "fontWeight": "700"
