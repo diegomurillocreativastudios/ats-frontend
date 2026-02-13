@@ -31193,141 +31193,6 @@
                           "children": [
                             {
                               "type": "frame",
-                              "id": "L8F38",
-                              "name": "nameRow",
-                              "width": "fill_container",
-                              "gap": 16,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "ceSh4",
-                                  "name": "firstName",
-                                  "width": "fill_container",
-                                  "layout": "vertical",
-                                  "gap": 6,
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "x7CFv",
-                                      "name": "label",
-                                      "fill": "$color-foreground",
-                                      "content": "Nombre",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 14,
-                                      "fontWeight": "500"
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "D8MOZ",
-                                      "name": "field",
-                                      "width": "fill_container",
-                                      "height": 44,
-                                      "fill": "$color-background",
-                                      "cornerRadius": 6,
-                                      "stroke": {
-                                        "align": "inside",
-                                        "thickness": 1,
-                                        "fill": "$color-input"
-                                      },
-                                      "gap": 8,
-                                      "padding": [
-                                        12,
-                                        16
-                                      ],
-                                      "alignItems": "center",
-                                      "children": [
-                                        {
-                                          "type": "text",
-                                          "id": "jCUrm",
-                                          "name": "placeholder",
-                                          "fill": "$color-muted-foreground",
-                                          "content": "Juan",
-                                          "fontFamily": "Inter",
-                                          "fontSize": 14,
-                                          "fontWeight": "normal"
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "rwW52",
-                                      "name": "helper",
-                                      "enabled": false,
-                                      "fill": "$color-muted-foreground",
-                                      "content": "Ingresa tu correo electrónico",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 12,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "LZbO1",
-                                  "name": "lastName",
-                                  "width": "fill_container",
-                                  "layout": "vertical",
-                                  "gap": 6,
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "IRQ8R",
-                                      "name": "label",
-                                      "fill": "$color-foreground",
-                                      "content": "Apellido",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 14,
-                                      "fontWeight": "500"
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "Y98lV",
-                                      "name": "field",
-                                      "width": "fill_container",
-                                      "height": 44,
-                                      "fill": "$color-background",
-                                      "cornerRadius": 6,
-                                      "stroke": {
-                                        "align": "inside",
-                                        "thickness": 1,
-                                        "fill": "$color-input"
-                                      },
-                                      "gap": 8,
-                                      "padding": [
-                                        12,
-                                        16
-                                      ],
-                                      "alignItems": "center",
-                                      "children": [
-                                        {
-                                          "type": "text",
-                                          "id": "1rmeO",
-                                          "name": "placeholder",
-                                          "fill": "$color-muted-foreground",
-                                          "content": "Pérez",
-                                          "fontFamily": "Inter",
-                                          "fontSize": 14,
-                                          "fontWeight": "normal"
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "wmAoL",
-                                      "name": "helper",
-                                      "enabled": false,
-                                      "fill": "$color-muted-foreground",
-                                      "content": "Ingresa tu correo electrónico",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 12,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
                               "id": "WUSTc",
                               "name": "regEmail",
                               "width": "fill_container",
@@ -31379,69 +31244,6 @@
                                 {
                                   "type": "text",
                                   "id": "Hl0sz",
-                                  "name": "helper",
-                                  "enabled": false,
-                                  "fill": "$color-muted-foreground",
-                                  "content": "Ingresa tu correo electrónico",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 12,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "vXlNz",
-                              "name": "regPhone",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "gap": 6,
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "ZsckN",
-                                  "name": "label",
-                                  "fill": "$color-foreground",
-                                  "content": "Teléfono",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 14,
-                                  "fontWeight": "500"
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "UwEST",
-                                  "name": "field",
-                                  "width": "fill_container",
-                                  "height": 44,
-                                  "fill": "$color-background",
-                                  "cornerRadius": 6,
-                                  "stroke": {
-                                    "align": "inside",
-                                    "thickness": 1,
-                                    "fill": "$color-input"
-                                  },
-                                  "gap": 8,
-                                  "padding": [
-                                    12,
-                                    16
-                                  ],
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "lrbRb",
-                                      "name": "placeholder",
-                                      "fill": "$color-muted-foreground",
-                                      "content": "+52 55 1234 5678",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "wbYD9",
                                   "name": "helper",
                                   "enabled": false,
                                   "fill": "$color-muted-foreground",
@@ -31605,7 +31407,7 @@
                                   "id": "PQWBl",
                                   "name": "termsText",
                                   "fill": "$color-foreground",
-                                  "content": "Acepto los Términos y Condiciones",
+                                  "content": "Mostrar contraseñas",
                                   "fontFamily": "Inter",
                                   "fontSize": 13,
                                   "fontWeight": "normal"
@@ -31826,141 +31628,6 @@
                           "children": [
                             {
                               "type": "frame",
-                              "id": "D1tdN",
-                              "name": "regTabletNameRow",
-                              "width": "fill_container",
-                              "gap": 16,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "DTzPt",
-                                  "name": "regTabletFirst",
-                                  "width": "fill_container",
-                                  "layout": "vertical",
-                                  "gap": 6,
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "jYSPD",
-                                      "name": "label",
-                                      "fill": "$color-foreground",
-                                      "content": "Nombre",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 14,
-                                      "fontWeight": "500"
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "9upYn",
-                                      "name": "field",
-                                      "width": "fill_container",
-                                      "height": 44,
-                                      "fill": "$color-background",
-                                      "cornerRadius": 6,
-                                      "stroke": {
-                                        "align": "inside",
-                                        "thickness": 1,
-                                        "fill": "$color-input"
-                                      },
-                                      "gap": 8,
-                                      "padding": [
-                                        12,
-                                        16
-                                      ],
-                                      "alignItems": "center",
-                                      "children": [
-                                        {
-                                          "type": "text",
-                                          "id": "yOeMa",
-                                          "name": "placeholder",
-                                          "fill": "$color-muted-foreground",
-                                          "content": "Juan",
-                                          "fontFamily": "Inter",
-                                          "fontSize": 14,
-                                          "fontWeight": "normal"
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "TQJ09",
-                                      "name": "helper",
-                                      "enabled": false,
-                                      "fill": "$color-muted-foreground",
-                                      "content": "Ingresa tu correo electrónico",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 12,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "uXJqt",
-                                  "name": "regTabletLast",
-                                  "width": "fill_container",
-                                  "layout": "vertical",
-                                  "gap": 6,
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "WAkR8",
-                                      "name": "label",
-                                      "fill": "$color-foreground",
-                                      "content": "Apellido",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 14,
-                                      "fontWeight": "500"
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "SVorC",
-                                      "name": "field",
-                                      "width": "fill_container",
-                                      "height": 44,
-                                      "fill": "$color-background",
-                                      "cornerRadius": 6,
-                                      "stroke": {
-                                        "align": "inside",
-                                        "thickness": 1,
-                                        "fill": "$color-input"
-                                      },
-                                      "gap": 8,
-                                      "padding": [
-                                        12,
-                                        16
-                                      ],
-                                      "alignItems": "center",
-                                      "children": [
-                                        {
-                                          "type": "text",
-                                          "id": "0iXxs",
-                                          "name": "placeholder",
-                                          "fill": "$color-muted-foreground",
-                                          "content": "Pérez",
-                                          "fontFamily": "Inter",
-                                          "fontSize": 14,
-                                          "fontWeight": "normal"
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "XYdrx",
-                                      "name": "helper",
-                                      "enabled": false,
-                                      "fill": "$color-muted-foreground",
-                                      "content": "Ingresa tu correo electrónico",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 12,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
                               "id": "qEvFK",
                               "name": "regTabletEmail",
                               "width": "fill_container",
@@ -32012,69 +31679,6 @@
                                 {
                                   "type": "text",
                                   "id": "ruYMF",
-                                  "name": "helper",
-                                  "enabled": false,
-                                  "fill": "$color-muted-foreground",
-                                  "content": "Ingresa tu correo electrónico",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 12,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "PjKqF",
-                              "name": "regTabletPhone",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "gap": 6,
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "dsVd4",
-                                  "name": "label",
-                                  "fill": "$color-foreground",
-                                  "content": "Teléfono",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 14,
-                                  "fontWeight": "500"
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "ubBqi",
-                                  "name": "field",
-                                  "width": "fill_container",
-                                  "height": 44,
-                                  "fill": "$color-background",
-                                  "cornerRadius": 6,
-                                  "stroke": {
-                                    "align": "inside",
-                                    "thickness": 1,
-                                    "fill": "$color-input"
-                                  },
-                                  "gap": 8,
-                                  "padding": [
-                                    12,
-                                    16
-                                  ],
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "MgJ9o",
-                                      "name": "placeholder",
-                                      "fill": "$color-muted-foreground",
-                                      "content": "+52 55 1234 5678",
-                                      "fontFamily": "Inter",
-                                      "fontSize": 14,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "HHctj",
                                   "name": "helper",
                                   "enabled": false,
                                   "fill": "$color-muted-foreground",
@@ -32238,7 +31842,7 @@
                                   "id": "ooYMR",
                                   "name": "regTabletTermsT",
                                   "fill": "$color-foreground",
-                                  "content": "Acepto los Términos y Condiciones",
+                                  "content": "Mostrar contraseñas",
                                   "fontFamily": "Inter",
                                   "fontSize": 13,
                                   "fontWeight": "normal"
@@ -32433,132 +32037,6 @@
                       "children": [
                         {
                           "type": "frame",
-                          "id": "DLXQz",
-                          "name": "regMobileFirst",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 6,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "GablQ",
-                              "name": "label",
-                              "fill": "$color-foreground",
-                              "content": "Nombre",
-                              "fontFamily": "Inter",
-                              "fontSize": 14,
-                              "fontWeight": "500"
-                            },
-                            {
-                              "type": "frame",
-                              "id": "FGqdV",
-                              "name": "field",
-                              "width": "fill_container",
-                              "height": 44,
-                              "fill": "$color-background",
-                              "cornerRadius": 6,
-                              "stroke": {
-                                "align": "inside",
-                                "thickness": 1,
-                                "fill": "$color-input"
-                              },
-                              "gap": 8,
-                              "padding": [
-                                12,
-                                16
-                              ],
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "goWtg",
-                                  "name": "placeholder",
-                                  "fill": "$color-muted-foreground",
-                                  "content": "Juan",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 14,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "text",
-                              "id": "Jy8CD",
-                              "name": "helper",
-                              "enabled": false,
-                              "fill": "$color-muted-foreground",
-                              "content": "Ingresa tu correo electrónico",
-                              "fontFamily": "Inter",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "4aUXu",
-                          "name": "regMobileLast",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 6,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "umGUS",
-                              "name": "label",
-                              "fill": "$color-foreground",
-                              "content": "Apellido",
-                              "fontFamily": "Inter",
-                              "fontSize": 14,
-                              "fontWeight": "500"
-                            },
-                            {
-                              "type": "frame",
-                              "id": "skWfw",
-                              "name": "field",
-                              "width": "fill_container",
-                              "height": 44,
-                              "fill": "$color-background",
-                              "cornerRadius": 6,
-                              "stroke": {
-                                "align": "inside",
-                                "thickness": 1,
-                                "fill": "$color-input"
-                              },
-                              "gap": 8,
-                              "padding": [
-                                12,
-                                16
-                              ],
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "U4Rve",
-                                  "name": "placeholder",
-                                  "fill": "$color-muted-foreground",
-                                  "content": "Pérez",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 14,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "text",
-                              "id": "zjhif",
-                              "name": "helper",
-                              "enabled": false,
-                              "fill": "$color-muted-foreground",
-                              "content": "Ingresa tu correo electrónico",
-                              "fontFamily": "Inter",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
                           "id": "GLbqU",
                           "name": "regMobileEmail",
                           "width": "fill_container",
@@ -32610,69 +32088,6 @@
                             {
                               "type": "text",
                               "id": "UzWOy",
-                              "name": "helper",
-                              "enabled": false,
-                              "fill": "$color-muted-foreground",
-                              "content": "Ingresa tu correo electrónico",
-                              "fontFamily": "Inter",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "cvld1",
-                          "name": "regMobilePhone",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 6,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "tK5Zv",
-                              "name": "label",
-                              "fill": "$color-foreground",
-                              "content": "Teléfono",
-                              "fontFamily": "Inter",
-                              "fontSize": 14,
-                              "fontWeight": "500"
-                            },
-                            {
-                              "type": "frame",
-                              "id": "ahBmj",
-                              "name": "field",
-                              "width": "fill_container",
-                              "height": 44,
-                              "fill": "$color-background",
-                              "cornerRadius": 6,
-                              "stroke": {
-                                "align": "inside",
-                                "thickness": 1,
-                                "fill": "$color-input"
-                              },
-                              "gap": 8,
-                              "padding": [
-                                12,
-                                16
-                              ],
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "wPHli",
-                                  "name": "placeholder",
-                                  "fill": "$color-muted-foreground",
-                                  "content": "+52 55 1234 5678",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 14,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "text",
-                              "id": "nQ6f8",
                               "name": "helper",
                               "enabled": false,
                               "fill": "$color-muted-foreground",
@@ -32836,7 +32251,7 @@
                               "id": "Da3CE",
                               "name": "regMobileTermsT",
                               "fill": "$color-foreground",
-                              "content": "Acepto los Términos y Condiciones",
+                              "content": "Mostrar contraseñas",
                               "fontFamily": "Inter",
                               "fontSize": 12,
                               "fontWeight": "normal"
