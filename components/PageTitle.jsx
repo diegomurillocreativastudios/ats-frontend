@@ -1,19 +1,31 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { getPageTitle } from "@/lib/pageTitles";
 
 /**
- * Componente genérico que actualiza el título del documento (<title>)
- * según la ruta actual. Se usa en el layout raíz para todas las vistas.
+ * En el cliente usa la URL real (window.location) como fallback cuando
+ * usePathname() aún no está listo en la primera carga.
+ */
+const getCurrentPath = (pathname) => {
+  if (pathname != null && pathname !== "") return pathname;
+  if (typeof window !== "undefined" && window.location?.pathname) {
+    return window.location.pathname;
+  }
+  return "/";
+};
+
+/**
+ * Actualiza el título en navegaciones del cliente (backup para rutas sin layout con metadata).
+ * El título inicial lo envía el servidor vía metadata en cada layout de ruta.
  */
 export default function PageTitle() {
   const pathname = usePathname();
 
-  useEffect(() => {
-    const title = getPageTitle(pathname ?? "/");
-    document.title = title;
+  useLayoutEffect(() => {
+    const path = getCurrentPath(pathname ?? undefined);
+    document.title = getPageTitle(path);
   }, [pathname]);
 
   return null;
