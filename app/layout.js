@@ -16,7 +16,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata = {
   title: { default: "ATS", template: "ATS | %s" },
-  description: "Sistema de Gestión de Reclutamiento Inteligente",
+  description: "Portal del candidato - Resumen de tu proceso de selección",
 };
 
 export default function RootLayout({ children }) {
