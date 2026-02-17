@@ -16,6 +16,12 @@ export async function POST() {
     path: AUTH_COOKIES.path,
     maxAge: 0,
   });
+  if (AUTH_COOKIES.user) {
+    response.cookies.set(AUTH_COOKIES.user, '', {
+      path: AUTH_COOKIES.path,
+      maxAge: 0,
+    });
+  }
 
   return response;
 }

@@ -77,6 +77,32 @@ export async function POST(request) {
       });
     }
 
+    let userPayload;
+    if (data.user && typeof data.user === 'object') {
+      const u = data.user;
+      const fullName = u.name ?? u.fullName ?? [u.firstName, u.lastName].filter(Boolean).join(' ').trim();
+      userPayload = {
+        id: u.id,
+        name: fullName || u.email || '',
+        email: u.email ?? '',
+        role: u.role ?? u.type ?? null,
+      };
+    } else {
+      userPayload = {
+        id: null,
+        name: '',
+        email: String(email || '').trim(),
+        role: null,
+      };
+    }
+    response.cookies.set(AUTH_COOKIES.user, JSON.stringify(userPayload), {
+      path: AUTH_COOKIES.path,
+      maxAge: expiresIn,
+      sameSite: 'lax',
+      secure: isProd,
+      httpOnly: false,
+    });
+
     return response;
   } catch (err) {
     return NextResponse.json(

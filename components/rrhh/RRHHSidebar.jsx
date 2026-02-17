@@ -13,6 +13,8 @@ import {
   BarChart3,
   Settings,
 } from "lucide-react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getInitials } from "@/lib/getInitials";
 
 const navItems = [
   { href: "/portal-rrhh", label: "Dashboard", icon: LayoutDashboard },
@@ -28,6 +30,10 @@ const navItems = [
 
 export default function RRHHSidebar() {
   const pathname = usePathname();
+  const { user, loading } = useCurrentUser();
+  const displayName = user?.name || user?.email || "Usuario";
+  const initials = getInitials(user?.name, user?.email);
+  const roleLabel = user?.role || "Administrador";
 
   return (
     <aside
@@ -35,16 +41,18 @@ export default function RRHHSidebar() {
       aria-label="Navegación Portal RRHH"
     >
       <div className="flex flex-col gap-6">
-        <div className="flex items-center gap-3 px-5">
+        <Link
+          href="/"
+          className="flex items-center gap-3 px-5 transition-opacity hover:opacity-90 focus:outline-none"
+          aria-label="Ir al inicio - ATS App"
+        >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-vo-purple">
-            <span className="font-inter text-lg font-bold leading-none text-white" aria-hidden>
-              A
-            </span>
+            <Briefcase className="h-5 w-5 text-white" aria-hidden />
           </div>
           <span className="font-inter text-base font-bold text-foreground">
             ATS App
           </span>
-        </div>
+        </Link>
         <nav className="flex flex-col gap-1 px-3" aria-label="Menú RRHH">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -75,15 +83,18 @@ export default function RRHHSidebar() {
       </div>
       <div className="mt-4 px-3 pb-3">
         <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-vo-navy font-inter text-xs font-semibold text-white">
-            AD
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-vo-navy font-inter text-xs font-semibold text-white"
+            aria-hidden
+          >
+            {loading ? "..." : initials}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate font-inter text-sm font-medium text-foreground">
-              Admin RRHH
+              {loading ? "Cargando..." : displayName}
             </p>
             <p className="font-inter text-xs text-muted-foreground">
-              Administrador
+              {roleLabel}
             </p>
           </div>
         </div>
