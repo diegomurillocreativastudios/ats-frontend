@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Inicio", icon: Home },
+  { href: "/portal-candidato", label: "Inicio", icon: Home },
   { href: "/portal-candidato/perfil", label: "Mi Perfil", icon: User },
   { href: "/portal-candidato/documentos", label: "Documentos", icon: FileText },
   { href: "/portal-candidato/estado", label: "Mi Estado", icon: Activity },
@@ -45,8 +45,8 @@ export default function CandidateSidebar() {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
-              item.href === "/"
-                ? pathname === "/"
+              item.href === "/portal-candidato"
+                ? pathname === "/portal-candidato"
                 : pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
