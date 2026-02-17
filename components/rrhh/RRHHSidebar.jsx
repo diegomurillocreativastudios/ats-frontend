@@ -3,50 +3,54 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Home,
-  User,
-  FileText,
-  Activity,
+  LayoutDashboard,
+  Users,
+  Briefcase,
   ClipboardList,
   Calendar,
-  Mail,
+  MessageSquare,
+  FileCheck,
+  BarChart3,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
-  { href: "/portal-candidato", label: "Inicio", icon: Home },
-  { href: "/portal-candidato/perfil", label: "Mi Perfil", icon: User },
-  { href: "/portal-candidato/documentos", label: "Documentos", icon: FileText },
-  { href: "/portal-candidato/estado", label: "Mi Estado", icon: Activity },
-  { href: "/portal-candidato/evaluaciones", label: "Evaluaciones", icon: ClipboardList },
-  { href: "/portal-candidato/entrevistas", label: "Entrevistas", icon: Calendar },
-  { href: "/portal-candidato/mensajes", label: "Mensajes", icon: Mail },
+  { href: "/portal-rrhh", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/portal-rrhh/candidatos", label: "Candidatos", icon: Users },
+  { href: "/portal-rrhh/vacantes", label: "Vacantes", icon: Briefcase },
+  { href: "/portal-rrhh/evaluaciones", label: "Evaluaciones", icon: ClipboardList },
+  { href: "/portal-rrhh/entrevistas", label: "Entrevistas", icon: Calendar },
+  { href: "/portal-rrhh/comunicaciones", label: "Comunicaciones", icon: MessageSquare },
+  { href: "/portal-rrhh/contratacion", label: "Contratación", icon: FileCheck },
+  { href: "/portal-rrhh/reportes", label: "Reportes", icon: BarChart3 },
+  { href: "/portal-rrhh/configuracion", label: "Configuración", icon: Settings },
 ];
 
-export default function CandidateSidebar() {
+export default function RRHHSidebar() {
   const pathname = usePathname();
 
   return (
     <aside
       className="flex w-[260px] shrink-0 flex-col justify-between border-r border-border bg-card py-6 pl-6 pr-0"
-      aria-label="Navegación principal"
+      aria-label="Navegación Portal RRHH"
     >
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3 px-5">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-vo-purple">
-            <span className="font-inter text-lg font-bold leading-none text-vo-purple-foreground">
-              C
+            <span className="font-inter text-lg font-bold leading-none text-white" aria-hidden>
+              A
             </span>
           </div>
           <span className="font-inter text-base font-bold text-foreground">
             ATS App
           </span>
         </div>
-        <nav className="flex flex-col gap-1 px-3" aria-label="Menú candidato">
+        <nav className="flex flex-col gap-1 px-3" aria-label="Menú RRHH">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
-              item.href === "/portal-candidato"
-                ? pathname === "/portal-candidato"
+              item.href === "/portal-rrhh"
+                ? pathname === "/portal-rrhh"
                 : pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
@@ -72,14 +76,14 @@ export default function CandidateSidebar() {
       <div className="mt-4 px-3 pb-3">
         <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-vo-navy font-inter text-xs font-semibold text-white">
-            MC
+            AD
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate font-inter text-sm font-medium text-foreground">
-              María Castro
+              Admin RRHH
             </p>
             <p className="font-inter text-xs text-muted-foreground">
-              Candidato
+              Administrador
             </p>
           </div>
         </div>
