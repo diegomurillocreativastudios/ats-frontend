@@ -24,14 +24,18 @@ export default function IniciarSesion() {
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isAdminDemo =
+      formData.email?.trim().toLowerCase() === "admin" &&
+      formData.password === "admin";
+
     if (!formData.email) {
       newErrors.email = "El email es requerido";
-    } else if (!emailRegex.test(formData.email)) {
+    } else if (!isAdminDemo && !emailRegex.test(formData.email)) {
       newErrors.email = "Email inválido";
     }
     if (!formData.password) {
       newErrors.password = "La contraseña es requerida";
-    } else if (formData.password.length < 8) {
+    } else if (!isAdminDemo && formData.password.length < 8) {
       newErrors.password = "La contraseña debe tener al menos 8 caracteres";
     }
     setErrors(newErrors);
@@ -182,7 +186,7 @@ export default function IniciarSesion() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
               <div className="flex flex-col gap-4 md:gap-4 lg:gap-5">
                 <Input
                   label="Correo electrónico"
