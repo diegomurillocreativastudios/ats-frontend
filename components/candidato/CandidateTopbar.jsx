@@ -6,7 +6,11 @@ const DESKTOP_PADDING = "px-8";
 const TABLET_PADDING = "px-5";
 const MOBILE_PADDING = "px-4";
 
-export default function CandidateTopbar({ variant = "desktop" }) {
+export default function CandidateTopbar({
+  variant = "desktop",
+  /** Etiqueta del breadcrumb (ej. "Inicio", "Documentos"). Desktop only. */
+  breadcrumbLabel = "Inicio",
+}) {
   const isDesktop = variant === "desktop";
   const isTablet = variant === "tablet";
   const isMobile = variant === "mobile";
@@ -63,7 +67,7 @@ export default function CandidateTopbar({ variant = "desktop" }) {
               isDesktop ? "" : "sr-only"
             }`}
           >
-            Inicio
+            {breadcrumbLabel}
           </span>
         </div>
       </div>

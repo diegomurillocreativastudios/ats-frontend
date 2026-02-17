@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Home,
   User,
@@ -12,16 +13,18 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Inicio", icon: Home, active: true },
-  { href: "/candidato/perfil", label: "Mi Perfil", icon: User },
-  { href: "/candidato/documentos", label: "Documentos", icon: FileText },
-  { href: "/candidato/estado", label: "Mi Estado", icon: Activity },
-  { href: "/candidato/evaluaciones", label: "Evaluaciones", icon: ClipboardList },
-  { href: "/candidato/entrevistas", label: "Entrevistas", icon: Calendar },
-  { href: "/candidato/mensajes", label: "Mensajes", icon: Mail },
+  { href: "/", label: "Inicio", icon: Home },
+  { href: "/portal-candidato/perfil", label: "Mi Perfil", icon: User },
+  { href: "/portal-candidato/documentos", label: "Documentos", icon: FileText },
+  { href: "/portal-candidato/estado", label: "Mi Estado", icon: Activity },
+  { href: "/portal-candidato/evaluaciones", label: "Evaluaciones", icon: ClipboardList },
+  { href: "/portal-candidato/entrevistas", label: "Entrevistas", icon: Calendar },
+  { href: "/portal-candidato/mensajes", label: "Mensajes", icon: Mail },
 ];
 
 export default function CandidateSidebar() {
+  const pathname = usePathname();
+
   return (
     <aside
       className="flex w-[260px] shrink-0 flex-col justify-between border-r border-border bg-card py-6 pl-6 pr-0"
@@ -41,7 +44,10 @@ export default function CandidateSidebar() {
         <nav className="flex flex-col gap-1 px-3" aria-label="Menú candidato">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = item.active;
+            const isActive =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
