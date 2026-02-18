@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
+import NuevaVacanteModal from "@/components/rrhh/NuevaVacanteModal";
 
 const MOCK_VACANCIES = [
   {
@@ -125,6 +126,12 @@ const VacancyCard = ({ vacancy }) => {
 export default function VacantesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
+  const [isNuevaVacanteOpen, setIsNuevaVacanteOpen] = useState(false);
+
+  const handleNuevaVacanteSubmit = (data) => {
+    // TODO: integrar con API del backend
+    console.log("Nueva vacante:", data);
+  };
 
   const filteredVacancies = MOCK_VACANCIES.filter((v) => {
     const matchesSearch =
@@ -159,14 +166,15 @@ export default function VacantesPage() {
                     Gestiona las posiciones abiertas
                   </p>
                 </div>
-                <Link
-                  href="/portal-rrhh/vacantes/nueva"
+                <button
+                  type="button"
+                  onClick={() => setIsNuevaVacanteOpen(true)}
                   className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                   aria-label="Crear nueva vacante"
                 >
                   <Plus className="h-4 w-4" aria-hidden />
                   Nueva Vacante
-                </Link>
+                </button>
               </section>
               <section className="flex flex-col gap-6 p-8" aria-label="Lista de vacantes">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
@@ -205,13 +213,14 @@ export default function VacantesPage() {
                       <p className="font-inter text-sm text-muted-foreground">
                         No se encontraron vacantes
                       </p>
-                      <Link
-                        href="/portal-rrhh/vacantes/nueva"
+                      <button
+                        type="button"
+                        onClick={() => setIsNuevaVacanteOpen(true)}
                         className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                       >
                         <Plus className="h-4 w-4" aria-hidden />
                         Crear vacante
-                      </Link>
+                      </button>
                     </div>
                   ) : (
                     filteredVacancies.map((vacancy) => (
@@ -242,15 +251,16 @@ export default function VacantesPage() {
                   Gestiona las posiciones abiertas
                 </p>
               </div>
-              <Link
-                href="/portal-rrhh/vacantes/nueva"
+              <button
+                type="button"
+                onClick={() => setIsNuevaVacanteOpen(true)}
                 className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                 aria-label="Crear nueva vacante"
               >
                 <Plus className="h-4 w-4" aria-hidden />
                 <span className="hidden sm:inline">Nueva Vacante</span>
                 <span className="sm:hidden" aria-hidden>Nueva</span>
-              </Link>
+              </button>
             </section>
             <section className="flex flex-col gap-4" aria-label="Filtros y lista">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -289,13 +299,14 @@ export default function VacantesPage() {
                     <p className="font-inter text-sm text-muted-foreground">
                       No se encontraron vacantes
                     </p>
-                    <Link
-                      href="/portal-rrhh/vacantes/nueva"
+                    <button
+                      type="button"
+                      onClick={() => setIsNuevaVacanteOpen(true)}
                       className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                     >
                       <Plus className="h-4 w-4" aria-hidden />
                       Crear vacante
-                    </Link>
+                    </button>
                   </div>
                 ) : (
                   filteredVacancies.map((vacancy) => (
@@ -307,6 +318,12 @@ export default function VacantesPage() {
           </div>
         </main>
       </div>
+
+      <NuevaVacanteModal
+        isOpen={isNuevaVacanteOpen}
+        onClose={() => setIsNuevaVacanteOpen(false)}
+        onSubmit={handleNuevaVacanteSubmit}
+      />
     </div>
   );
 }
