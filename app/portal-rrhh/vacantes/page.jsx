@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -15,39 +15,39 @@ import {
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import NuevaVacanteModal from "@/components/rrhh/NuevaVacanteModal";
+import { apiClient } from "@/lib/api";
 
-const MOCK_VACANCIES = [
-  {
-    id: "1",
-    title: "UX/UI Designer Senior",
-    department: "Diseño",
-    location: "Remoto",
-    candidates: 24,
-    interviews: 5,
-    status: "activa",
-    icon: Palette,
-  },
-  {
-    id: "2",
-    title: "Frontend Developer",
-    department: "Tecnología",
-    location: "Híbrido",
-    candidates: 18,
-    interviews: 3,
-    status: "activa",
-    icon: Code,
-  },
-  {
-    id: "3",
-    title: "Backend Developer",
-    department: "Tecnología",
-    location: "Remoto",
-    candidates: 12,
-    interviews: 8,
-    status: "cerrada",
-    icon: Code,
-  },
-];
+const ICON_BY_DEPARTMENT = {
+  diseño: Palette,
+  design: Palette,
+  tecnología: Code,
+  technology: Code,
+  tech: Code,
+};
+
+const mapVacancyFromApi = (item, index = 0) => {
+  const id = String(item?.id ?? item?.uuid ?? index);
+  const title = item.title ?? item.name ?? "";
+  const department = item.department ?? item.department_name ?? "—";
+  const location = item.location ?? item.work_arrangement ?? "—";
+  const candidates = item.candidates ?? item.candidates_count ?? item.applicants_count ?? 0;
+  const interviews = item.interviews ?? item.interviews_count ?? 0;
+  const rawStatus = (item.status ?? item.state ?? "active").toLowerCase();
+  const status =
+    rawStatus.includes("active") || rawStatus === "activa" || rawStatus === "open"
+      ? "activa"
+      : rawStatus.includes("closed") || rawStatus === "cerrada"
+        ? "cerrada"
+        : "pausada";
+  const deptLower = String(department).toLowerCase();
+  const icon =
+    ICON_BY_DEPARTMENT[deptLower] ??
+    (title.toLowerCase().includes("design") || title.toLowerCase().includes("ux")
+      ? Palette
+      : Code);
+
+  return { id, title, department, location, candidates, interviews, status, icon };
+};
 
 const STATUS_LABELS = {
   activa: { label: "Activa", bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
@@ -124,16 +124,39 @@ const VacancyCard = ({ vacancy }) => {
 };
 
 export default function VacantesPage() {
+  const [vacancies, setVacancies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
   const [isNuevaVacanteOpen, setIsNuevaVacanteOpen] = useState(false);
 
-  const handleNuevaVacanteSubmit = (data) => {
-    // TODO: integrar con API del backend
-    console.log("Nueva vacante:", data);
+  const fetchVacancies = useCallback(async () => {
+    setLoading(true);
+    setFetchError(null);
+    try {
+      const data = await apiClient.get("/api/recruiter/vacancies");
+      const list = Array.isArray(data) ? data : data?.vacancies ?? data?.items ?? data?.data ?? [];
+      setVacancies(list.map((item, i) => mapVacancyFromApi(item, i)));
+    } catch (err) {
+      setFetchError(
+        err?.message || err?.detail || "No se pudieron cargar las vacantes."
+      );
+      setVacancies([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchVacancies();
+  }, [fetchVacancies]);
+
+  const handleNuevaVacanteSubmit = () => {
+    fetchVacancies();
   };
 
-  const filteredVacancies = MOCK_VACANCIES.filter((v) => {
+  const filteredVacancies = vacancies.filter((v) => {
     const matchesSearch =
       !searchQuery ||
       v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -207,7 +230,27 @@ export default function VacantesPage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                  {filteredVacancies.length === 0 ? (
+                  {loading ? (
+                    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
+                      <p className="font-inter text-sm text-muted-foreground">
+                        Cargando vacantes...
+                      </p>
+                    </div>
+                  ) : fetchError ? (
+                    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
+                      <p className="font-inter text-sm text-destructive" role="alert">
+                        {fetchError}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={fetchVacancies}
+                        className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  ) : filteredVacancies.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
                       <Briefcase className="h-12 w-12 text-muted-foreground" aria-hidden />
                       <p className="font-inter text-sm text-muted-foreground">
@@ -293,7 +336,27 @@ export default function VacantesPage() {
                 </div>
               </div>
               <div className="flex flex-col gap-4">
-                {filteredVacancies.length === 0 ? (
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-12 text-center md:py-16">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
+                    <p className="font-inter text-sm text-muted-foreground">
+                      Cargando vacantes...
+                    </p>
+                  </div>
+                ) : fetchError ? (
+                  <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-12 text-center md:py-16">
+                    <p className="font-inter text-sm text-destructive" role="alert">
+                      {fetchError}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={fetchVacancies}
+                      className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                ) : filteredVacancies.length === 0 ? (
                   <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-12 text-center md:py-16">
                     <Briefcase className="h-12 w-12 text-muted-foreground" aria-hidden />
                     <p className="font-inter text-sm text-muted-foreground">
