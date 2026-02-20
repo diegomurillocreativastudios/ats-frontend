@@ -10,9 +10,11 @@ import {
   Calendar,
   CheckSquare,
   FileText,
+  Loader2,
   Mail,
   Phone,
   Scale,
+  Sparkles,
   User,
   Users,
 } from "lucide-react";
@@ -299,6 +301,9 @@ export default function VacanteDetallePage() {
   const [vacancy, setVacancy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [smartCandidates, setSmartCandidates] = useState(null);
+  const [loadingSmart, setLoadingSmart] = useState(false);
+  const [smartError, setSmartError] = useState(null);
 
   const fetchVacancy = useCallback(async () => {
     if (!id) {
@@ -325,6 +330,26 @@ export default function VacanteDetallePage() {
     fetchVacancy();
   }, [fetchVacancy]);
 
+  const handleSearchSmartRecommendations = useCallback(async () => {
+    if (!id) return;
+    setLoadingSmart(true);
+    setSmartError(null);
+    setSmartCandidates(null);
+    try {
+      const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=20&minScore=0.7`;
+      const data = await apiClient.post(url, {});
+      const list = Array.isArray(data) ? data : data?.candidates ?? data?.results ?? [];
+      setSmartCandidates(list);
+    } catch (err) {
+      setSmartError(
+        err?.message ?? err?.detail ?? "No se pudo cargar el match."
+      );
+      setSmartCandidates([]);
+    } finally {
+      setLoadingSmart(false);
+    }
+  }, [id]);
+
   useEffect(() => {
     if (vacancy?.title) {
       document.title = `ATS | ${vacancy.title}`;
@@ -333,6 +358,8 @@ export default function VacanteDetallePage() {
 
   const statusConfig = vacancy ? getStatusConfig(vacancy.status) : STATUS_LABELS.activa;
   const matches = Array.isArray(vacancy?.matches) ? vacancy.matches : [];
+  const displayCandidates =
+    smartCandidates !== null ? smartCandidates : matches;
 
   const breadcrumbLabel = vacancy?.title ? vacancy.title : "Detalle de vacante";
 
@@ -464,20 +491,48 @@ export default function VacanteDetallePage() {
                     className="flex flex-col gap-4"
                     aria-label="Candidatos con match"
                   >
+                    <button
+                      type="button"
+                      onClick={handleSearchSmartRecommendations}
+                      disabled={loadingSmart}
+                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+                      aria-label="Buscar match"
+                    >
+                      {loadingSmart ? (
+                        <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                      ) : (
+                        <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+                      )}
+                      {loadingSmart
+? "Buscando match..."
+                      : "Match"}
+                    </button>
                     <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
                       <Users className="h-5 w-5" aria-hidden />
-                      Candidatos ({matches.length})
+                      Candidatos ({displayCandidates.length})
+                      {smartCandidates !== null && (
+                        <span className="font-inter text-sm font-normal text-muted-foreground">
+                          (match)
+                        </span>
+                      )}
                     </h2>
-                    {matches.length === 0 ? (
+                    {smartError && (
+                      <p className="font-inter text-sm text-destructive" role="alert">
+                        {smartError}
+                      </p>
+                    )}
+                    {displayCandidates.length === 0 ? (
                       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-12 text-center">
                         <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                         <p className="font-inter text-sm text-muted-foreground">
-                          Aún no hay candidatos con match para esta vacante.
+                          {smartCandidates !== null
+                            ? "No se encontraron candidatos con match."
+                            : "Aún no hay candidatos con match para esta vacante."}
                         </p>
                       </div>
                     ) : (
                       <ul className="flex flex-col gap-4" role="list">
-                        {matches.map((match, index) => (
+                        {displayCandidates.map((match, index) => (
                           <li key={match.candidateDocumentId ?? match.candidateProfileId ?? index}>
                             <MatchCard match={match} />
                           </li>
@@ -616,20 +671,48 @@ export default function VacanteDetallePage() {
                   className="flex flex-col gap-4"
                   aria-label="Candidatos con match"
                 >
+                  <button
+                    type="button"
+                    onClick={handleSearchSmartRecommendations}
+                    disabled={loadingSmart}
+                    className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+                    aria-label="Buscar match"
+                  >
+                    {loadingSmart ? (
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                    ) : (
+                      <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+                    )}
+                    {loadingSmart
+                      ? "Buscando match..."
+                      : "Match"}
+                  </button>
                   <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
                     <Users className="h-4 w-4" aria-hidden />
-                    Candidatos ({matches.length})
+                    Candidatos ({displayCandidates.length})
+                    {smartCandidates !== null && (
+                      <span className="font-inter text-sm font-normal text-muted-foreground">
+                        (match)
+                      </span>
+                    )}
                   </h2>
-                  {matches.length === 0 ? (
+                  {smartError && (
+                    <p className="font-inter text-sm text-destructive" role="alert">
+                      {smartError}
+                    </p>
+                  )}
+                  {displayCandidates.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-10 text-center">
                       <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                       <p className="font-inter text-sm text-muted-foreground">
-                        Aún no hay candidatos con match para esta vacante.
+                        {smartCandidates !== null
+                          ? "No se encontraron candidatos con match."
+                          : "Aún no hay candidatos con match para esta vacante."}
                       </p>
                     </div>
                   ) : (
                     <ul className="flex flex-col gap-4" role="list">
-                      {matches.map((match, index) => (
+                      {displayCandidates.map((match, index) => (
                         <li key={match.candidateDocumentId ?? match.candidateProfileId ?? index}>
                           <MatchCard match={match} />
                         </li>
