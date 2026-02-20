@@ -12,6 +12,7 @@ import {
   FileText,
   Mail,
   Phone,
+  Scale,
   User,
   Users,
 } from "lucide-react";
@@ -67,8 +68,23 @@ const getStatusConfig = (status) => {
   return STATUS_LABELS[key] ?? STATUS_LABELS.activa;
 };
 
-/** Renders requirements as string (list/paragraphs), object (key-value list or badges), or array (bullet list). */
-const RequirementsDisplay = ({ value }) => {
+/** Formats requirement key for display (e.g. reactjs -> React.js). */
+const formatRequirementKey = (key) => {
+  const k = String(key).trim().toLowerCase();
+  const map = {
+    reactjs: "React.js",
+    nextjs: "Next.js",
+    tailwindcss: "Tailwind CSS",
+    javascript: "JavaScript",
+    typescript: "TypeScript",
+    html: "HTML",
+    css: "CSS",
+  };
+  return map[k] ?? k.charAt(0).toUpperCase() + k.slice(1);
+};
+
+/** Renders requirements as string (list/paragraphs), object (key -> level), or array (bullet list). attributeWeights optional: key -> weight to show next to each requirement value. */
+const RequirementsDisplay = ({ value, attributeWeights }) => {
   if (value == null) return null;
 
   if (typeof value === "object" && !Array.isArray(value)) {
@@ -76,25 +92,43 @@ const RequirementsDisplay = ({ value }) => {
       ([k]) => k != null && !String(k).startsWith("additionalProp")
     );
     if (entries.length === 0) return null;
+    const weights =
+      attributeWeights && typeof attributeWeights === "object"
+        ? attributeWeights
+        : {};
     return (
       <ul className="flex flex-col gap-2 font-inter text-sm text-muted-foreground" role="list">
-        {entries.map(([key, val]) => (
-          <li
-            key={key}
-            className="flex flex-wrap items-center gap-2"
-          >
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1 font-medium text-foreground">
-              {String(key).trim()}
-            </span>
-            <span className="text-muted-foreground">
-              {typeof val === "object" && val !== null
-                ? Object.entries(val)
-                    .map(([k, v]) => `${k}: ${v}`)
-                    .join(", ")
-                : String(val ?? "—")}
-            </span>
-          </li>
-        ))}
+        {entries.map(([key, val]) => {
+          const levelText =
+            typeof val === "object" && val !== null
+              ? Object.entries(val)
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join(", ")
+              : String(val ?? "—");
+          const weight =
+            typeof weights[key] === "number" && Number.isFinite(weights[key])
+              ? weights[key]
+              : null;
+          return (
+            <li
+              key={key}
+              className="flex flex-wrap items-center gap-2"
+            >
+              <span className="requirement_key inline-flex items-center gap-1.5 rounded-md bg-vo-purple/10 px-2.5 py-1 font-medium text-vo-purple">
+                {formatRequirementKey(key)}
+              </span>
+              <span className="requirement_value inline-flex items-center rounded-md bg-vo-sky/10 px-2.5 py-1 text-vo-sky">
+                {levelText}
+              </span>
+              {weight != null && (
+                <span className="requirement_weight inline-flex items-center gap-1.5 rounded-md bg-vo-pink/10 px-2.5 py-1 text-vo-pink">
+                  <Scale className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {weight * 10}
+                </span>
+              )}
+            </li>
+          );
+        })}
       </ul>
     );
   }
@@ -416,7 +450,10 @@ export default function VacanteDetallePage() {
                               <CheckSquare className="h-4 w-4" aria-hidden />
                               Requisitos
                             </h2>
-                            <RequirementsDisplay value={vacancy.requirements} />
+                            <RequirementsDisplay
+                              value={vacancy.requirements}
+                              attributeWeights={vacancy.weights?.attributes}
+                            />
                           </div>
                         )}
                       </div>
@@ -564,7 +601,10 @@ export default function VacanteDetallePage() {
                               <CheckSquare className="h-3.5 w-3.5" aria-hidden />
                               Requisitos
                             </h2>
-                            <RequirementsDisplay value={vacancy.requirements} />
+                            <RequirementsDisplay
+                              value={vacancy.requirements}
+                              attributeWeights={vacancy.weights?.attributes}
+                            />
                           </div>
                         )}
                       </div>
