@@ -8,7 +8,7 @@ import DocumentsList from "@/components/candidato/DocumentsList";
 import { apiClient } from "@/lib/api";
 
 const PROCESAR_ENDPOINT = "/Ingest/upload";
-const ENTITY_TYPE_CV = "CV";
+const ENTITY_TYPE = "Candidate";
 
 export default function DocumentosContent() {
   const [processMessage, setProcessMessage] = useState(null);
@@ -17,7 +17,7 @@ export default function DocumentosContent() {
     setProcessMessage(null);
     const formData = new FormData();
     formData.append("File", file);
-    formData.append("EntityType", ENTITY_TYPE_CV);
+    formData.append("EntityType", ENTITY_TYPE);
     await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
     setProcessMessage({ type: "success", text: "Documento procesado correctamente." });
   };
