@@ -28,14 +28,6 @@ export default function PortalRRHHDashboardPage() {
                 <h1 className="font-inter text-[28px] font-bold text-foreground">
                   Dashboard de Reclutamiento
                 </h1>
-                <Link
-                  href="/portal-rrhh/vacantes/nueva"
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label="Crear nueva vacante"
-                >
-                  <Plus className="h-4 w-4" aria-hidden />
-                  Nueva Vacante
-                </Link>
               </section>
               <section aria-label="Estadísticas">
                 <RRHHDashboardStats />
