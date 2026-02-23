@@ -10,9 +10,11 @@ import {
   Calendar,
   CheckSquare,
   FileText,
+  Loader2,
   Mail,
   Phone,
   Scale,
+  Sparkles,
   User,
   Users,
 } from "lucide-react";
@@ -176,17 +178,12 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
   );
 };
 
-const MatchCard = ({ match }) => {
+const MatchCard = ({ match, candidateId, isSelected, onToggle }) => {
+  const [showMatchedAttrs, setShowMatchedAttrs] = useState(false);
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
   );
-  const componentScores =
-    match.componentScores && typeof match.componentScores === "object"
-      ? Object.entries(match.componentScores).filter(
-          ([k]) => !k.startsWith("additionalProp")
-        )
-      : [];
   const matchedAttrs =
     match.matchedAttributes && typeof match.matchedAttributes === "object"
       ? Object.entries(match.matchedAttributes).filter(
@@ -199,6 +196,14 @@ const MatchCard = ({ match }) => {
       ? `/portal-rrhh/candidatos/${match.candidateProfileId}`
       : null;
 
+  const handleCheckboxChange = (e) => {
+    onToggle?.(candidateId, e.target.checked);
+  };
+
+  const handleToggleDetails = () => {
+    setShowMatchedAttrs((prev) => !prev);
+  };
+
   return (
     <article
       className="rounded-xl border border-border bg-card p-5"
@@ -206,11 +211,25 @@ const MatchCard = ({ match }) => {
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-4">
-          <div
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-base font-semibold text-white"
-            aria-hidden
-          >
-            {initials}
+          <div className="flex shrink-0 items-start gap-3">
+            <label
+              className="flex cursor-pointer items-center justify-center focus-within:ring-2 focus-within:ring-vo-purple focus-within:ring-offset-2 rounded"
+              aria-label={`Seleccionar ${emptyToDash(match.name)}`}
+            >
+              <input
+                type="checkbox"
+                checked={isSelected ?? false}
+                onChange={handleCheckboxChange}
+                className="h-4 w-4 rounded border-border text-vo-purple focus:ring-vo-purple focus:ring-offset-0 cursor-pointer"
+                aria-label={`Seleccionar candidato ${emptyToDash(match.name)}`}
+              />
+            </label>
+            <div
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-base font-semibold text-white"
+              aria-hidden
+            >
+              {initials}
+            </div>
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <h3 className="font-inter text-base font-semibold text-foreground">
@@ -236,7 +255,9 @@ const MatchCard = ({ match }) => {
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex flex-col items-center rounded-lg bg-muted/50 px-4 py-2">
             <span className="font-inter text-lg font-semibold text-foreground">
-              {typeof match.totalScore === "number" ? match.totalScore : "—"}
+              {typeof match.totalScore === "number"
+                ? (match.totalScore * 100).toFixed(2)
+                : "—"}
             </span>
             <span className="font-inter text-xs text-muted-foreground">
               Puntaje
@@ -254,31 +275,29 @@ const MatchCard = ({ match }) => {
           )}
         </div>
       </div>
-      {(componentScores.length > 0 || matchedAttrs.length > 0) && (
+      {matchedAttrs.length > 0 && (
         <div className="mt-4 border-t border-border pt-4">
-          {componentScores.length > 0 && (
-            <div className="mb-3">
-              <span className="font-inter text-xs font-medium text-muted-foreground">
-                Puntajes por componente
-              </span>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {componentScores.map(([key, val]) => (
-                  <span
-                    key={key}
-                    className="inline-flex rounded-md bg-muted px-2.5 py-1 font-inter text-xs text-foreground"
-                  >
-                    {key}: {typeof val === "number" ? val : safeString(val)}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          {matchedAttrs.length > 0 && (
-            <div>
+          <button
+            type="button"
+            onClick={handleToggleDetails}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleToggleDetails();
+              }
+            }}
+            className="inline-flex items-center gap-2 font-inter text-sm font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+            aria-label={showMatchedAttrs ? "Ocultar atributos coincidentes" : "Ver más detalles"}
+            aria-expanded={showMatchedAttrs}
+          >
+            {showMatchedAttrs ? "Menos detalles" : "Más detalles"}
+          </button>
+          {showMatchedAttrs && (
+            <div className="mt-3">
               <span className="font-inter text-xs font-medium text-muted-foreground">
                 Atributos coincidentes
               </span>
-              <ul className="mt-1 list-inside list-disc font-inter text-xs text-foreground">
+              <ul className="mt-1 list-inside list-disc font-inter text-xs text-foreground" role="list">
                 {matchedAttrs.map(([key, val]) => (
                   <li key={key}>
                     {key}: {safeString(val)}
@@ -299,6 +318,12 @@ export default function VacanteDetallePage() {
   const [vacancy, setVacancy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [smartCandidates, setSmartCandidates] = useState(null);
+  const [loadingSmart, setLoadingSmart] = useState(false);
+  const [smartError, setSmartError] = useState(null);
+  const [loadingMatch, setLoadingMatch] = useState(false);
+  const [matchError, setMatchError] = useState(null);
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState(() => new Set());
 
   const fetchVacancy = useCallback(async () => {
     if (!id) {
@@ -325,6 +350,26 @@ export default function VacanteDetallePage() {
     fetchVacancy();
   }, [fetchVacancy]);
 
+  const handleSearchSmartRecommendations = useCallback(async () => {
+    if (!id) return;
+    setLoadingSmart(true);
+    setSmartError(null);
+    setSmartCandidates(null);
+    try {
+      const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=20&minScore=0.7`;
+      const data = await apiClient.post(url, {});
+      const list = Array.isArray(data) ? data : data?.candidates ?? data?.results ?? [];
+      setSmartCandidates(list);
+    } catch (err) {
+      setSmartError(
+        err?.message ?? err?.detail ?? "No se pudo cargar el match."
+      );
+      setSmartCandidates([]);
+    } finally {
+      setLoadingSmart(false);
+    }
+  }, [id]);
+
   useEffect(() => {
     if (vacancy?.title) {
       document.title = `ATS | ${vacancy.title}`;
@@ -333,6 +378,58 @@ export default function VacanteDetallePage() {
 
   const statusConfig = vacancy ? getStatusConfig(vacancy.status) : STATUS_LABELS.activa;
   const matches = Array.isArray(vacancy?.matches) ? vacancy.matches : [];
+  const displayCandidates =
+    smartCandidates !== null ? smartCandidates : matches;
+
+  const getCandidateId = (match, index) =>
+    match.candidateDocumentId ?? match.candidateProfileId ?? `candidate-${index}`;
+
+  const handleToggleCandidate = useCallback((id, checked) => {
+    setSelectedCandidateIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const handleSelectAllCandidates = useCallback(() => {
+    if (displayCandidates.length === 0) return;
+    setSelectedCandidateIds(
+      new Set(displayCandidates.map((m, i) => getCandidateId(m, i)))
+    );
+  }, [displayCandidates]);
+
+  const handleDeselectAllCandidates = useCallback(() => {
+    setSelectedCandidateIds(new Set());
+  }, []);
+
+  /** Selected candidate document IDs to send to the match API. */
+  const selectedDocumentIds = displayCandidates
+    .map((m, i) => (selectedCandidateIds.has(getCandidateId(m, i)) ? m.candidateDocumentId : null))
+    .filter((docId) => docId != null && String(docId).trim() !== "");
+
+  const handleMatch = useCallback(async () => {
+    if (!id) return;
+    const docIds = displayCandidates
+      .map((m, i) => (selectedCandidateIds.has(getCandidateId(m, i)) ? m.candidateDocumentId : null))
+      .filter((docId) => docId != null && String(docId).trim() !== "");
+    if (docIds.length === 0) return;
+    setLoadingMatch(true);
+    setMatchError(null);
+    try {
+      await apiClient.post(`/api/recruiter/vacancies/${id}/match`, docIds);
+      await fetchVacancy();
+    } catch (err) {
+      setMatchError(
+        err?.message ?? err?.detail ?? "No se pudo ejecutar el match."
+      );
+    } finally {
+      setLoadingMatch(false);
+    }
+  }, [id, displayCandidates, selectedCandidateIds, fetchVacancy]);
+
+  const selectedCount = selectedCandidateIds.size;
 
   const breadcrumbLabel = vacancy?.title ? vacancy.title : "Detalle de vacante";
 
@@ -464,24 +561,108 @@ export default function VacanteDetallePage() {
                     className="flex flex-col gap-4"
                     aria-label="Candidatos con match"
                   >
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleSearchSmartRecommendations}
+                        disabled={loadingSmart}
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+                        aria-label="Buscar"
+                      >
+                        {loadingSmart ? (
+                          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                        ) : (
+                          <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+                        )}
+                        {loadingSmart
+                          ? "Buscando..."
+                          : "Search"}
+                      </button>
+                      {smartCandidates !== null && (
+                        <button
+                          type="button"
+                          onClick={handleMatch}
+                          disabled={loadingMatch || selectedDocumentIds.length === 0}
+                          className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          aria-label="Ejecutar match con candidatos seleccionados"
+                        >
+                          {loadingMatch ? (
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                          ) : (
+                            <Scale className="h-4 w-4 shrink-0" aria-hidden />
+                          )}
+                          {loadingMatch ? "Ejecutando match..." : "Match"}
+                        </button>
+                      )}
+                    </div>
+                    {matchError && (
+                      <p className="font-inter text-sm text-destructive" role="alert">
+                        {matchError}
+                      </p>
+                    )}
                     <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
                       <Users className="h-5 w-5" aria-hidden />
-                      Candidatos ({matches.length})
+                      Candidatos ({displayCandidates.length})
+                      {smartCandidates !== null && (
+                        <span className="font-inter text-sm font-normal text-muted-foreground">
+                          (match)
+                        </span>
+                      )}
                     </h2>
-                    {matches.length === 0 ? (
+                    {displayCandidates.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={handleSelectAllCandidates}
+                          className="font-inter text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                          aria-label="Seleccionar todos los candidatos"
+                        >
+                          Seleccionar todos
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleDeselectAllCandidates}
+                          className="font-inter text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                          aria-label="Desmarcar todos los candidatos"
+                        >
+                          Desmarcar todos
+                        </button>
+                        {selectedCount > 0 && (
+                          <span className="font-inter text-sm text-muted-foreground" aria-live="polite">
+                            {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {smartError && (
+                      <p className="font-inter text-sm text-destructive" role="alert">
+                        {smartError}
+                      </p>
+                    )}
+                    {displayCandidates.length === 0 ? (
                       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-12 text-center">
                         <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                         <p className="font-inter text-sm text-muted-foreground">
-                          Aún no hay candidatos con match para esta vacante.
+                          {smartCandidates !== null
+                            ? "No se encontraron candidatos con match."
+                            : "Aún no hay candidatos con match para esta vacante."}
                         </p>
                       </div>
                     ) : (
                       <ul className="flex flex-col gap-4" role="list">
-                        {matches.map((match, index) => (
-                          <li key={match.candidateDocumentId ?? match.candidateProfileId ?? index}>
-                            <MatchCard match={match} />
-                          </li>
-                        ))}
+                        {displayCandidates.map((match, index) => {
+                          const candidateId = getCandidateId(match, index);
+                          return (
+                            <li key={candidateId}>
+                              <MatchCard
+                                match={match}
+                                candidateId={candidateId}
+                                isSelected={selectedCandidateIds.has(candidateId)}
+                                onToggle={handleToggleCandidate}
+                              />
+                            </li>
+                          );
+                        })}
                       </ul>
                     )}
                   </section>
@@ -616,24 +797,108 @@ export default function VacanteDetallePage() {
                   className="flex flex-col gap-4"
                   aria-label="Candidatos con match"
                 >
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleSearchSmartRecommendations}
+                      disabled={loadingSmart}
+                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+                      aria-label="Buscar"
+                    >
+                      {loadingSmart ? (
+                        <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                      ) : (
+                        <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+                      )}
+                      {loadingSmart
+                        ? "Buscando..."
+                        : "Search"}
+                    </button>
+                    {smartCandidates !== null && (
+                      <button
+                        type="button"
+                        onClick={handleMatch}
+                        disabled={loadingMatch || selectedDocumentIds.length === 0}
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label="Ejecutar match con candidatos seleccionados"
+                      >
+                        {loadingMatch ? (
+                          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                        ) : (
+                          <Scale className="h-4 w-4 shrink-0" aria-hidden />
+                        )}
+                        {loadingMatch ? "Ejecutando match..." : "Match"}
+                      </button>
+                    )}
+                  </div>
+                  {matchError && (
+                    <p className="font-inter text-sm text-destructive" role="alert">
+                      {matchError}
+                    </p>
+                  )}
                   <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
                     <Users className="h-4 w-4" aria-hidden />
-                    Candidatos ({matches.length})
+                    Candidatos ({displayCandidates.length})
+                    {smartCandidates !== null && (
+                      <span className="font-inter text-sm font-normal text-muted-foreground">
+                        (match)
+                      </span>
+                    )}
                   </h2>
-                  {matches.length === 0 ? (
+                  {displayCandidates.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleSelectAllCandidates}
+                        className="font-inter text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                        aria-label="Seleccionar todos los candidatos"
+                      >
+                        Seleccionar todos
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDeselectAllCandidates}
+                        className="font-inter text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                        aria-label="Desmarcar todos los candidatos"
+                      >
+                        Desmarcar todos
+                      </button>
+                      {selectedCount > 0 && (
+                        <span className="font-inter text-sm text-muted-foreground" aria-live="polite">
+                          {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {smartError && (
+                    <p className="font-inter text-sm text-destructive" role="alert">
+                      {smartError}
+                    </p>
+                  )}
+                  {displayCandidates.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-10 text-center">
                       <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                       <p className="font-inter text-sm text-muted-foreground">
-                        Aún no hay candidatos con match para esta vacante.
+                        {smartCandidates !== null
+                          ? "No se encontraron candidatos con match."
+                          : "Aún no hay candidatos con match para esta vacante."}
                       </p>
                     </div>
                   ) : (
                     <ul className="flex flex-col gap-4" role="list">
-                      {matches.map((match, index) => (
-                        <li key={match.candidateDocumentId ?? match.candidateProfileId ?? index}>
-                          <MatchCard match={match} />
-                        </li>
-                      ))}
+                      {displayCandidates.map((match, index) => {
+                        const candidateId = getCandidateId(match, index);
+                        return (
+                          <li key={candidateId}>
+                            <MatchCard
+                              match={match}
+                              candidateId={candidateId}
+                              isSelected={selectedCandidateIds.has(candidateId)}
+                              onToggle={handleToggleCandidate}
+                            />
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </section>
