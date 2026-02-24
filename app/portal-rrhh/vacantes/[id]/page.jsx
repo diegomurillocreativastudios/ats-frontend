@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -68,6 +68,21 @@ const getStatusConfig = (status) => {
   if (!status) return STATUS_LABELS.activa;
   const key = String(status).toLowerCase();
   return STATUS_LABELS[key] ?? STATUS_LABELS.activa;
+};
+
+const KANBAN_STAGES = [
+  "Applied",
+  "Screening",
+  "Interview",
+  "Offer",
+  "Hired",
+];
+
+const normalizeKanbanStage = (value) => {
+  if (value == null || String(value).trim() === "") return KANBAN_STAGES[0];
+  const key = String(value).trim().toLowerCase();
+  const found = KANBAN_STAGES.find((s) => s.toLowerCase() === key);
+  return found ?? KANBAN_STAGES[0];
 };
 
 /** Formats requirement key for display (e.g. reactjs -> React.js). */
@@ -312,6 +327,146 @@ const MatchCard = ({ match, candidateId, isSelected, onToggle }) => {
   );
 };
 
+const KanbanCard = ({ match, candidateId, stage }) => {
+  const initials = getInitials(
+    emptyToDash(match.name) !== "—" ? match.name : "",
+    match.email ?? ""
+  );
+  const detailHref =
+    match.candidateProfileId
+      ? `/portal-rrhh/candidatos/${match.candidateProfileId}`
+      : null;
+  const score =
+    typeof match.totalScore === "number"
+      ? (match.totalScore * 100).toFixed(0)
+      : "—";
+
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData("application/json", JSON.stringify({ candidateId, stage }));
+    e.dataTransfer.effectAllowed = "move";
+    e.currentTarget.setAttribute("data-dragging", "true");
+  };
+
+  const handleDragEnd = (e) => {
+    e.currentTarget.removeAttribute("data-dragging");
+  };
+
+  return (
+    <div
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      className="cursor-grab rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"
+      role="button"
+      tabIndex={0}
+      aria-label={`Mover ${emptyToDash(match.name)} a otra etapa`}
+      aria-describedby={`kanban-card-${candidateId}`}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-sm font-semibold text-white"
+          aria-hidden
+        >
+          {initials}
+        </div>
+        <div className="min-w-0 flex-1" id={`kanban-card-${candidateId}`}>
+          <p className="truncate font-inter text-sm font-medium text-foreground">
+            {emptyToDash(match.name)}
+          </p>
+          <p className="flex items-center gap-1.5 font-inter text-xs text-muted-foreground">
+            <span>Puntaje: {score}</span>
+          </p>
+        </div>
+        {detailHref && (
+          <Link
+            href={detailHref}
+            className="shrink-0 rounded p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={`Ver perfil de ${emptyToDash(match.name)}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <User className="h-4 w-4" aria-hidden />
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const KanbanColumn = ({
+  stage,
+  candidates,
+  onDrop,
+  onDragEnter,
+  onDragLeave,
+  isOver,
+}) => {
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    onDragLeave?.();
+    try {
+      const raw = e.dataTransfer.getData("application/json");
+      const payload = raw ? JSON.parse(raw) : null;
+      if (payload?.candidateId && payload.stage !== stage) {
+        onDrop?.(payload.candidateId, stage);
+      }
+    } catch {
+      // ignore invalid payload
+    }
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    onDragEnter?.(stage);
+  };
+
+  const handleDragLeave = (e) => {
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    onDragLeave?.();
+  };
+
+  return (
+    <div
+      className="flex min-w-[200px] max-w-[260px] flex-1 flex-col rounded-xl border border-border bg-muted/30"
+      aria-label={`Columna ${stage}`}
+    >
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <h3 className="font-inter text-sm font-semibold text-foreground">
+          {stage}
+        </h3>
+        <span
+          className="rounded-full bg-muted px-2 py-0.5 font-inter text-xs text-muted-foreground"
+          aria-live="polite"
+        >
+          {candidates.length}
+        </span>
+      </div>
+      <div
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        className={`flex min-h-[120px] flex-1 flex-col gap-2 p-3 transition-colors ${isOver ? "bg-vo-purple/10" : ""}`}
+        data-stage={stage}
+      >
+        {candidates.map(({ match, candidateId }) => (
+          <KanbanCard
+            key={candidateId}
+            match={match}
+            candidateId={candidateId}
+            stage={stage}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function VacanteDetallePage() {
   const params = useParams();
   const id = params?.id ?? null;
@@ -324,6 +479,8 @@ export default function VacanteDetallePage() {
   const [loadingMatch, setLoadingMatch] = useState(false);
   const [matchError, setMatchError] = useState(null);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState(() => new Set());
+  const [candidateStageOverrides, setCandidateStageOverrides] = useState(() => ({}));
+  const [dragOverStage, setDragOverStage] = useState(null);
 
   const fetchVacancy = useCallback(async () => {
     if (!id) {
@@ -377,12 +534,47 @@ export default function VacanteDetallePage() {
   }, [vacancy?.title]);
 
   const statusConfig = vacancy ? getStatusConfig(vacancy.status) : STATUS_LABELS.activa;
-  const matches = Array.isArray(vacancy?.matches) ? vacancy.matches : [];
+  const vacancyCandidates = Array.isArray(vacancy?.aiMatchSuggestions)
+    ? vacancy.aiMatchSuggestions
+    : Array.isArray(vacancy?.matches)
+      ? vacancy.matches
+      : [];
   const displayCandidates =
-    smartCandidates !== null ? smartCandidates : matches;
+    smartCandidates !== null ? smartCandidates : vacancyCandidates;
 
   const getCandidateId = (match, index) =>
     match.candidateDocumentId ?? match.candidateProfileId ?? `candidate-${index}`;
+
+  const candidatesByStage = useMemo(() => {
+    if (vacancyCandidates.length === 0) {
+      return KANBAN_STAGES.map((stage) => ({ stage, candidates: [] }));
+    }
+    const withMeta = vacancyCandidates.map((match, i) => {
+      const candidateId = getCandidateId(match, i);
+      const stage =
+        candidateStageOverrides[candidateId] ??
+        normalizeKanbanStage(match.applicationStage);
+      return { match, candidateId, stage };
+    });
+    return KANBAN_STAGES.map((stage) => ({
+      stage,
+      candidates: withMeta
+        .filter((c) => c.stage === stage)
+        .map((c) => ({ match: c.match, candidateId: c.candidateId })),
+    }));
+  }, [vacancyCandidates, candidateStageOverrides]);
+
+  const handleKanbanStageDrop = useCallback((candidateId, newStage) => {
+    setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
+  }, []);
+
+  const handleKanbanDragEnter = useCallback((stage) => {
+    setDragOverStage(stage);
+  }, []);
+
+  const handleKanbanDragLeave = useCallback(() => {
+    setDragOverStage(null);
+  }, []);
 
   const handleToggleCandidate = useCallback((id, checked) => {
     setSelectedCandidateIds((prev) => {
@@ -419,7 +611,7 @@ export default function VacanteDetallePage() {
     setMatchError(null);
     try {
       await apiClient.post(`/api/recruiter/vacancies/${id}/match`, docIds);
-      await fetchVacancy();
+      window.location.reload();
     } catch (err) {
       setMatchError(
         err?.message ?? err?.detail ?? "No se pudo ejecutar el match."
@@ -427,7 +619,7 @@ export default function VacanteDetallePage() {
     } finally {
       setLoadingMatch(false);
     }
-  }, [id, displayCandidates, selectedCandidateIds, fetchVacancy]);
+  }, [id, displayCandidates, selectedCandidateIds]);
 
   const selectedCount = selectedCandidateIds.size;
 
@@ -600,71 +792,127 @@ export default function VacanteDetallePage() {
                         {matchError}
                       </p>
                     )}
-                    <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
-                      <Users className="h-5 w-5" aria-hidden />
-                      Candidatos ({displayCandidates.length})
-                      {smartCandidates !== null && (
-                        <span className="font-inter text-sm font-normal text-muted-foreground">
-                          (match)
-                        </span>
-                      )}
-                    </h2>
-                    {displayCandidates.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={handleSelectAllCandidates}
-                          className="font-inter text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
-                          aria-label="Seleccionar todos los candidatos"
-                        >
-                          Seleccionar todos
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleDeselectAllCandidates}
-                          className="font-inter text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
-                          aria-label="Desmarcar todos los candidatos"
-                        >
-                          Desmarcar todos
-                        </button>
-                        {selectedCount > 0 && (
-                          <span className="font-inter text-sm text-muted-foreground" aria-live="polite">
-                            {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
-                          </span>
-                        )}
-                      </div>
-                    )}
                     {smartError && (
                       <p className="font-inter text-sm text-destructive" role="alert">
                         {smartError}
                       </p>
                     )}
-                    {displayCandidates.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-12 text-center">
-                        <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
-                        <p className="font-inter text-sm text-muted-foreground">
-                          {smartCandidates !== null
-                            ? "No se encontraron candidatos con match."
-                            : "Aún no hay candidatos con match para esta vacante."}
-                        </p>
+
+                    {/* 1. Search results container (above) */}
+                    <div className="flex flex-col gap-3">
+                      <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
+                        <Sparkles className="h-5 w-5" aria-hidden />
+                        Resultados de búsqueda
+                        {smartCandidates !== null && (
+                          <span className="font-inter text-sm font-normal text-muted-foreground">
+                            ({smartCandidates.length})
+                          </span>
+                        )}
+                      </h2>
+                      <div
+                        className="rounded-xl border border-border bg-card p-6"
+                        aria-label="Resultados de búsqueda"
+                      >
+                        {smartCandidates === null ? (
+                          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                            <Sparkles className="h-12 w-12 text-muted-foreground" aria-hidden />
+                            <p className="font-inter text-sm text-muted-foreground">
+                              Haz clic en Search para ver candidatos recomendados.
+                            </p>
+                          </div>
+                        ) : smartCandidates.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                            <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
+                            <p className="font-inter text-sm text-muted-foreground">
+                              No se encontraron candidatos con match.
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="mb-4 flex flex-wrap items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={handleSelectAllCandidates}
+                                className="font-inter text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                                aria-label="Seleccionar todos los candidatos"
+                              >
+                                Seleccionar todos
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleDeselectAllCandidates}
+                                className="font-inter text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                                aria-label="Desmarcar todos los candidatos"
+                              >
+                                Desmarcar todos
+                              </button>
+                              {selectedCount > 0 && (
+                                <span className="font-inter text-sm text-muted-foreground" aria-live="polite">
+                                  {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
+                                </span>
+                              )}
+                            </div>
+                            <ul className="flex flex-col gap-4" role="list">
+                              {smartCandidates.map((match, index) => {
+                                const candidateId = getCandidateId(match, index);
+                                return (
+                                  <li key={candidateId}>
+                                    <MatchCard
+                                      match={match}
+                                      candidateId={candidateId}
+                                      isSelected={selectedCandidateIds.has(candidateId)}
+                                      onToggle={handleToggleCandidate}
+                                    />
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </>
+                        )}
                       </div>
-                    ) : (
-                      <ul className="flex flex-col gap-4" role="list">
-                        {displayCandidates.map((match, index) => {
-                          const candidateId = getCandidateId(match, index);
-                          return (
-                            <li key={candidateId}>
-                              <MatchCard
-                                match={match}
-                                candidateId={candidateId}
-                                isSelected={selectedCandidateIds.has(candidateId)}
-                                onToggle={handleToggleCandidate}
+                    </div>
+
+                    {/* 2. Kanban board container (below) */}
+                    <div className="flex flex-col gap-3">
+                      <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
+                        <Users className="h-5 w-5" aria-hidden />
+                        Tablero Kanban
+                        <span className="font-inter text-sm font-normal text-muted-foreground">
+                          ({vacancyCandidates.length})
+                        </span>
+                      </h2>
+                      <div
+                        className="rounded-xl border border-border bg-card p-6"
+                        aria-label="Contenedor del tablero Kanban"
+                      >
+                        {vacancyCandidates.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                            <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
+                            <p className="font-inter text-sm text-muted-foreground">
+                              Aún no hay candidatos con match para esta vacante.
+                            </p>
+                          </div>
+                        ) : (
+                          <div
+                            className="flex gap-4 overflow-x-auto pb-2"
+                            role="region"
+                            aria-label="Tablero Kanban de candidatos"
+                          >
+                            {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
+                              <KanbanColumn
+                                key={stage}
+                                stage={stage}
+                                candidates={stageCandidates}
+                                onDrop={handleKanbanStageDrop}
+                                onDragEnter={handleKanbanDragEnter}
+                                onDragLeave={handleKanbanDragLeave}
+                                isOver={dragOverStage === stage}
                               />
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </section>
                 </>
               ) : null}
@@ -836,71 +1084,127 @@ export default function VacanteDetallePage() {
                       {matchError}
                     </p>
                   )}
-                  <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
-                    <Users className="h-4 w-4" aria-hidden />
-                    Candidatos ({displayCandidates.length})
-                    {smartCandidates !== null && (
-                      <span className="font-inter text-sm font-normal text-muted-foreground">
-                        (match)
-                      </span>
-                    )}
-                  </h2>
-                  {displayCandidates.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={handleSelectAllCandidates}
-                        className="font-inter text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
-                        aria-label="Seleccionar todos los candidatos"
-                      >
-                        Seleccionar todos
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleDeselectAllCandidates}
-                        className="font-inter text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
-                        aria-label="Desmarcar todos los candidatos"
-                      >
-                        Desmarcar todos
-                      </button>
-                      {selectedCount > 0 && (
-                        <span className="font-inter text-sm text-muted-foreground" aria-live="polite">
-                          {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
-                        </span>
-                      )}
-                    </div>
-                  )}
                   {smartError && (
                     <p className="font-inter text-sm text-destructive" role="alert">
                       {smartError}
                     </p>
                   )}
-                  {displayCandidates.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-10 text-center">
-                      <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
-                      <p className="font-inter text-sm text-muted-foreground">
-                        {smartCandidates !== null
-                          ? "No se encontraron candidatos con match."
-                          : "Aún no hay candidatos con match para esta vacante."}
-                      </p>
+
+                  {/* 1. Search results container (above) */}
+                  <div className="flex flex-col gap-3">
+                    <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
+                      <Sparkles className="h-4 w-4" aria-hidden />
+                      Resultados de búsqueda
+                      {smartCandidates !== null && (
+                        <span className="font-inter text-sm font-normal text-muted-foreground">
+                          ({smartCandidates.length})
+                        </span>
+                      )}
+                    </h2>
+                    <div
+                      className="rounded-xl border border-border bg-card p-5"
+                      aria-label="Resultados de búsqueda"
+                    >
+                      {smartCandidates === null ? (
+                        <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+                          <Sparkles className="h-10 w-10 text-muted-foreground" aria-hidden />
+                          <p className="font-inter text-sm text-muted-foreground">
+                            Haz clic en Search para ver candidatos recomendados.
+                          </p>
+                        </div>
+                      ) : smartCandidates.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+                          <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
+                          <p className="font-inter text-sm text-muted-foreground">
+                            No se encontraron candidatos con match.
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="mb-4 flex flex-wrap items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={handleSelectAllCandidates}
+                              className="font-inter text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                              aria-label="Seleccionar todos los candidatos"
+                            >
+                              Seleccionar todos
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleDeselectAllCandidates}
+                              className="font-inter text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                              aria-label="Desmarcar todos los candidatos"
+                            >
+                              Desmarcar todos
+                            </button>
+                            {selectedCount > 0 && (
+                              <span className="font-inter text-sm text-muted-foreground" aria-live="polite">
+                                {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
+                              </span>
+                            )}
+                          </div>
+                          <ul className="flex flex-col gap-4" role="list">
+                            {smartCandidates.map((match, index) => {
+                              const candidateId = getCandidateId(match, index);
+                              return (
+                                <li key={candidateId}>
+                                  <MatchCard
+                                    match={match}
+                                    candidateId={candidateId}
+                                    isSelected={selectedCandidateIds.has(candidateId)}
+                                    onToggle={handleToggleCandidate}
+                                  />
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </>
+                      )}
                     </div>
-                  ) : (
-                    <ul className="flex flex-col gap-4" role="list">
-                      {displayCandidates.map((match, index) => {
-                        const candidateId = getCandidateId(match, index);
-                        return (
-                          <li key={candidateId}>
-                            <MatchCard
-                              match={match}
-                              candidateId={candidateId}
-                              isSelected={selectedCandidateIds.has(candidateId)}
-                              onToggle={handleToggleCandidate}
+                  </div>
+
+                  {/* 2. Kanban board container (below) */}
+                  <div className="flex flex-col gap-3">
+                    <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
+                      <Users className="h-4 w-4" aria-hidden />
+                      Tablero Kanban
+                      <span className="font-inter text-sm font-normal text-muted-foreground">
+                        ({vacancyCandidates.length})
+                      </span>
+                    </h2>
+                    <div
+                      className="rounded-xl border border-border bg-card p-5"
+                      aria-label="Contenedor del tablero Kanban"
+                    >
+                      {vacancyCandidates.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+                          <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
+                          <p className="font-inter text-sm text-muted-foreground">
+                            Aún no hay candidatos con match para esta vacante.
+                          </p>
+                        </div>
+                      ) : (
+                        <div
+                          className="flex gap-3 overflow-x-auto pb-2"
+                          role="region"
+                          aria-label="Tablero Kanban de candidatos"
+                        >
+                          {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
+                            <KanbanColumn
+                              key={stage}
+                              stage={stage}
+                              candidates={stageCandidates}
+                              onDrop={handleKanbanStageDrop}
+                              onDragEnter={handleKanbanDragEnter}
+                              onDragLeave={handleKanbanDragLeave}
+                              isOver={dragOverStage === stage}
                             />
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </section>
               </>
             ) : null}

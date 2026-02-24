@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
-import { Upload, X, Sparkles, Loader2 } from "lucide-react";
+import { Upload, X, Sparkles, Loader2, Check } from "lucide-react";
 
-const CV_KEYWORDS = ["cv", "curriculum", "curriculum vitae", "resume"];
+const CV_KEYWORDS = ["cv", "curriculum", "curriculum vitae", "resume", "hoja de vida", "hojadevida"];
 
 const isResumeLikeFile = (fileName) => {
   const lower = (fileName || "").toLowerCase();
@@ -48,6 +48,7 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
   const [error, setError] = useState(null);
   const [processingIndex, setProcessingIndex] = useState(null);
   const [isProcessingAll, setIsProcessingAll] = useState(false);
+  const [processedIndices, setProcessedIndices] = useState(() => new Set());
 
   const processFiles = useCallback((fileList) => {
     if (!fileList?.length) return;
@@ -111,11 +112,23 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
   const removeFile = (index) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
     setError(null);
+    setProcessedIndices((prev) => {
+      const next = new Set();
+      prev.forEach((i) => {
+        if (i < index) next.add(i);
+        if (i > index) next.add(i - 1);
+      });
+      return next;
+    });
+    if (processingIndex === index) setProcessingIndex(null);
+    else if (processingIndex !== null && processingIndex > index) setProcessingIndex((p) => p - 1);
   };
 
   const clearAll = () => {
     setFiles([]);
     setError(null);
+    setProcessedIndices(new Set());
+    setProcessingIndex(null);
   };
 
   const processableFiles = files
@@ -128,6 +141,7 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
     setProcessingIndex(index);
     try {
       await Promise.resolve(onProcess(file, index));
+      setProcessedIndices((prev) => new Set([...prev, index]));
     } catch (err) {
       const message = err?.message || err?.detail || "Error al procesar el documento.";
       setError(message);
@@ -137,15 +151,20 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
   };
 
   const handleProcessAllClick = async () => {
-    if (!onProcessAll || processableFiles.length < 2 || isProcessingAll || processingIndex !== null) return;
+    if (!onProcess || processableFiles.length < 2 || isProcessingAll || processingIndex !== null) return;
     setError(null);
     setIsProcessingAll(true);
     try {
-      await Promise.resolve(onProcessAll(processableFiles.map(({ file }) => file)));
+      for (const { file, index } of processableFiles) {
+        setProcessingIndex(index);
+        await Promise.resolve(onProcess(file, index));
+        setProcessedIndices((prev) => new Set([...prev, index]));
+      }
     } catch (err) {
       const message = err?.message || err?.detail || "Error al procesar los documentos.";
       setError(message);
     } finally {
+      setProcessingIndex(null);
       setIsProcessingAll(false);
     }
   };
@@ -201,7 +220,7 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
               {files.length !== 1 ? "s" : ""}
             </span>
             <div className="flex items-center gap-2">
-              {processableFiles.length >= 2 && onProcessAll && (
+              {processableFiles.length >= 2 && onProcess && (
                 <button
                   type="button"
                   onClick={handleProcessAllClick}
@@ -242,21 +261,37 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
                     {formatFileSize(file.size)}
                   </span>
                   {showProcessButton && (
-                    <button
-                      type="button"
-                      onClick={() => handleProcessClick(file, index)}
-                      disabled={processingIndex !== null || isProcessingAll}
-                      className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-inter text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
-                      aria-label={`Procesar con IA: ${file.name}`}
-                      aria-busy={processingIndex === index}
-                    >
-                      {processingIndex === index ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-vo-yellow-foreground" aria-hidden />
+                    <>
+                      {processedIndices.has(index) ? (
+                        <span
+                          className="flex shrink-0 items-center gap-1.5 rounded-md border border-success bg-success/10 px-2.5 py-1.5 font-inter text-xs font-medium text-success"
+                          aria-label={`Procesado: ${file.name}`}
+                        >
+                          <Check className="h-3.5 w-3.5 text-success" aria-hidden />
+                          Listo
+                        </span>
+                      ) : processingIndex === index ? (
+                        <span
+                          className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-inter text-xs font-medium text-vo-yellow-foreground"
+                          aria-busy
+                          aria-label={`Procesando: ${file.name}`}
+                        >
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-vo-yellow-foreground" aria-hidden />
+                          Procesando…
+                        </span>
                       ) : (
-                        <Sparkles className="h-3.5 w-3.5 text-vo-yellow-foreground" aria-hidden />
+                        <button
+                          type="button"
+                          onClick={() => handleProcessClick(file, index)}
+                          disabled={processingIndex !== null || isProcessingAll}
+                          className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-inter text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
+                          aria-label={`Procesar con IA: ${file.name}`}
+                        >
+                          <Sparkles className="h-3.5 w-3.5 text-vo-yellow-foreground" aria-hidden />
+                          Procesar
+                        </button>
                       )}
-                      {processingIndex === index ? "Procesando…" : "Procesar"}
-                    </button>
+                    </>
                   )}
                   <button
                     type="button"
