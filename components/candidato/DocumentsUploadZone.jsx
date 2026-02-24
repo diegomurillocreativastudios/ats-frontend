@@ -37,14 +37,17 @@ const validateFile = (file) => {
 };
 
 /**
- * @param {{ onProcess?: (file: File, index: number) => void | Promise<void> }} props - Callback al hacer clic en "Procesar" (solo para archivos tipo CV/Resume). Puede ser async.
+ * @param {{ onProcess?: (file: File, index: number) => void | Promise<void>, onProcessAll?: (files: File[]) => void | Promise<void> }} props
+ * - onProcess: callback al hacer clic en "Procesar" (solo para archivos tipo CV/Resume). Puede ser async.
+ * - onProcessAll: callback al hacer clic en "Procesar todos" (múltiples CV/Resume). Puede ser async.
  */
-export default function DocumentsUploadZone({ onProcess } = {}) {
+export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
   const inputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState([]);
   const [error, setError] = useState(null);
   const [processingIndex, setProcessingIndex] = useState(null);
+  const [isProcessingAll, setIsProcessingAll] = useState(false);
 
   const processFiles = useCallback((fileList) => {
     if (!fileList?.length) return;
@@ -115,8 +118,12 @@ export default function DocumentsUploadZone({ onProcess } = {}) {
     setError(null);
   };
 
+  const processableFiles = files
+    .map((file, index) => ({ file, index }))
+    .filter(({ file }) => isResumeLikeFile(file.name));
+
   const handleProcessClick = async (file, index) => {
-    if (!onProcess || processingIndex !== null) return;
+    if (!onProcess || processingIndex !== null || isProcessingAll) return;
     setError(null);
     setProcessingIndex(index);
     try {
@@ -126,6 +133,20 @@ export default function DocumentsUploadZone({ onProcess } = {}) {
       setError(message);
     } finally {
       setProcessingIndex(null);
+    }
+  };
+
+  const handleProcessAllClick = async () => {
+    if (!onProcessAll || processableFiles.length < 2 || isProcessingAll || processingIndex !== null) return;
+    setError(null);
+    setIsProcessingAll(true);
+    try {
+      await Promise.resolve(onProcessAll(processableFiles.map(({ file }) => file)));
+    } catch (err) {
+      const message = err?.message || err?.detail || "Error al procesar los documentos.";
+      setError(message);
+    } finally {
+      setIsProcessingAll(false);
     }
   };
 
@@ -174,18 +195,37 @@ export default function DocumentsUploadZone({ onProcess } = {}) {
 
       {files.length > 0 && (
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="font-inter text-sm font-medium text-foreground">
               {files.length} archivo{files.length !== 1 ? "s" : ""} seleccionado
               {files.length !== 1 ? "s" : ""}
             </span>
-            <button
-              type="button"
-              onClick={clearAll}
-              className="font-inter text-sm font-medium text-vo-purple hover:underline"
-            >
-              Quitar todos
-            </button>
+            <div className="flex items-center gap-2">
+              {processableFiles.length >= 2 && onProcessAll && (
+                <button
+                  type="button"
+                  onClick={handleProcessAllClick}
+                  disabled={isProcessingAll || processingIndex !== null}
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-inter text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
+                  aria-label="Procesar todos los CV/Resume con IA"
+                  aria-busy={isProcessingAll}
+                >
+                  {isProcessingAll ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-vo-yellow-foreground" aria-hidden />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5 text-vo-yellow-foreground" aria-hidden />
+                  )}
+                  {isProcessingAll ? "Procesando…" : "Procesar todos"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={clearAll}
+                className="font-inter text-sm font-medium text-vo-purple hover:underline"
+              >
+                Quitar todos
+              </button>
+            </div>
           </div>
           <ul className="flex flex-col gap-2" aria-label="Archivos seleccionados para subir">
             {files.map((file, index) => {
@@ -205,7 +245,7 @@ export default function DocumentsUploadZone({ onProcess } = {}) {
                     <button
                       type="button"
                       onClick={() => handleProcessClick(file, index)}
-                      disabled={processingIndex !== null}
+                      disabled={processingIndex !== null || isProcessingAll}
                       className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-inter text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
                       aria-label={`Procesar con IA: ${file.name}`}
                       aria-busy={processingIndex === index}

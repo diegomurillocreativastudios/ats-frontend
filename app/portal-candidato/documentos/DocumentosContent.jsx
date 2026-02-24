@@ -22,6 +22,27 @@ export default function DocumentosContent() {
     setProcessMessage({ type: "success", text: "Documento procesado correctamente." });
   };
 
+  const handleProcessAll = async (files) => {
+    if (!files?.length) return;
+    setProcessMessage(null);
+    const total = files.length;
+    try {
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("File", file);
+        formData.append("EntityType", ENTITY_TYPE);
+        await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
+      }
+      setProcessMessage({
+        type: "success",
+        text: `${total} documento${total !== 1 ? "s" : ""} procesado${total !== 1 ? "s" : ""} correctamente.`,
+      });
+    } catch (err) {
+      const message = err?.message || err?.detail || "Error al procesar los documentos.";
+      setProcessMessage({ type: "error", text: message });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       {/* Desktop: sidebar + main */}
@@ -51,7 +72,7 @@ export default function DocumentosContent() {
                   {processMessage.text}
                 </p>
               )}
-              <DocumentsUploadZone onProcess={handleProcess} />
+              <DocumentsUploadZone onProcess={handleProcess} onProcessAll={handleProcessAll} />
               <DocumentsList />
             </div>
           </main>
@@ -83,7 +104,7 @@ export default function DocumentosContent() {
                 {processMessage.text}
               </p>
             )}
-            <DocumentsUploadZone onProcess={handleProcess} />
+            <DocumentsUploadZone onProcess={handleProcess} onProcessAll={handleProcessAll} />
             <DocumentsList />
           </div>
         </main>
