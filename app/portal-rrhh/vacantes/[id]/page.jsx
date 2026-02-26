@@ -70,7 +70,9 @@ const getStatusConfig = (status) => {
   return STATUS_LABELS[key] ?? STATUS_LABELS.activa;
 };
 
-const KANBAN_STAGES = [
+const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
+
+const FALLBACK_KANBAN_STAGES = [
   "Applied",
   "Screening",
   "Interview",
@@ -78,11 +80,12 @@ const KANBAN_STAGES = [
   "Hired",
 ];
 
-const normalizeKanbanStage = (value) => {
-  if (value == null || String(value).trim() === "") return KANBAN_STAGES[0];
+const normalizeKanbanStage = (value, stageNames = FALLBACK_KANBAN_STAGES) => {
+  if (!stageNames?.length) return FALLBACK_KANBAN_STAGES[0];
+  if (value == null || String(value).trim() === "") return stageNames[0];
   const key = String(value).trim().toLowerCase();
-  const found = KANBAN_STAGES.find((s) => s.toLowerCase() === key);
-  return found ?? KANBAN_STAGES[0];
+  const found = stageNames.find((s) => s.toLowerCase() === key);
+  return found ?? stageNames[0];
 };
 
 /** Formats requirement key for display (e.g. reactjs -> React.js). */
@@ -481,6 +484,24 @@ export default function VacanteDetallePage() {
   const [selectedCandidateIds, setSelectedCandidateIds] = useState(() => new Set());
   const [candidateStageOverrides, setCandidateStageOverrides] = useState(() => ({}));
   const [dragOverStage, setDragOverStage] = useState(null);
+  const [stages, setStages] = useState([]);
+
+  const fetchStages = useCallback(async () => {
+    try {
+      const data = await apiClient.get(
+        `/api/recruiter/companies/${COMPANY_ID}/stages`
+      );
+      const list = Array.isArray(data) ? data : data?.stages ?? data?.items ?? data?.data ?? [];
+      const mapped = list.map((item, i) => ({
+        id: String(item?.id ?? item?.uuid ?? i),
+        name: item.name ?? item.stage_name ?? "",
+        order: item.orderIndex ?? item.order ?? i,
+      }));
+      setStages(mapped.sort((a, b) => a.order - b.order));
+    } catch {
+      setStages([]);
+    }
+  }, []);
 
   const fetchVacancy = useCallback(async () => {
     if (!id) {
@@ -506,6 +527,18 @@ export default function VacanteDetallePage() {
   useEffect(() => {
     fetchVacancy();
   }, [fetchVacancy]);
+
+  useEffect(() => {
+    fetchStages();
+  }, [fetchStages]);
+
+  const kanbanStageNames = useMemo(
+    () =>
+      stages.length > 0
+        ? stages.map((s) => s.name).filter(Boolean)
+        : FALLBACK_KANBAN_STAGES,
+    [stages]
+  );
 
   const handleSearchSmartRecommendations = useCallback(async () => {
     if (!id) return;
@@ -547,22 +580,22 @@ export default function VacanteDetallePage() {
 
   const candidatesByStage = useMemo(() => {
     if (vacancyCandidates.length === 0) {
-      return KANBAN_STAGES.map((stage) => ({ stage, candidates: [] }));
+      return kanbanStageNames.map((stage) => ({ stage, candidates: [] }));
     }
     const withMeta = vacancyCandidates.map((match, i) => {
       const candidateId = getCandidateId(match, i);
       const stage =
         candidateStageOverrides[candidateId] ??
-        normalizeKanbanStage(match.applicationStage);
+        normalizeKanbanStage(match.applicationStage, kanbanStageNames);
       return { match, candidateId, stage };
     });
-    return KANBAN_STAGES.map((stage) => ({
+    return kanbanStageNames.map((stage) => ({
       stage,
       candidates: withMeta
         .filter((c) => c.stage === stage)
         .map((c) => ({ match: c.match, candidateId: c.candidateId })),
     }));
-  }, [vacancyCandidates, candidateStageOverrides]);
+  }, [vacancyCandidates, candidateStageOverrides, kanbanStageNames]);
 
   const handleKanbanStageDrop = useCallback((candidateId, newStage) => {
     setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
