@@ -34,27 +34,31 @@ export default function EtapaModal({ isOpen, onClose, onSubmit, editingStage, co
     e.preventDefault();
     if (!validate()) return;
 
-    const payload = {
-      name: name.trim(),
-    };
-
     setLoading(true);
     setSubmitError(null);
 
     try {
+      const wasCreating = !isEditing;
+      
       if (isEditing) {
+        const payload = {
+          name: name.trim(),
+          orderIndex: editingStage.order,
+        };
         await apiClient.put(
           `/api/recruiter/companies/${companyId}/stages/${editingStage.id}`,
           payload
         );
+        handleClose();
+        onSubmit?.(false);
       } else {
-        await apiClient.post(
+        const created = await apiClient.post(
           `/api/recruiter/companies/${companyId}/stages`,
-          payload
+          { name: name.trim() }
         );
+        handleClose();
+        onSubmit?.(true, created);
       }
-      handleClose();
-      onSubmit?.();
     } catch (err) {
       setSubmitError(
         err?.message || err?.detail || `No se pudo ${isEditing ? "actualizar" : "crear"} la etapa. Intenta de nuevo.`

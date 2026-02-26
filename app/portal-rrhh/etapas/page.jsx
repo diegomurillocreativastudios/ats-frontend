@@ -13,6 +13,7 @@ import {
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import EtapaModal from "@/components/rrhh/EtapaModal";
+import EstadosModal from "@/components/rrhh/EstadosModal";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
 import { apiClient } from "@/lib/api";
 import "react-nestable/dist/styles/index.css";
@@ -24,7 +25,7 @@ const mapStageFromApi = (item, index = 0) => {
   const id = String(item?.id ?? item?.uuid ?? index);
   const name = item.name ?? item.stage_name ?? "";
   const description = item.description ?? "";
-  const order = item.order ?? item.stage_order ?? index + 1;
+  const order = item.orderIndex ?? item.order ?? item.stage_order ?? index;
 
   return { id, name, description, order };
 };
@@ -57,7 +58,7 @@ const renderStageItem = ({ item, collapseIcon, handler }) => {
             Orden:
           </span>
           <span className="font-inter text-sm font-semibold text-foreground">
-            {item.order}
+            {item.order + 1}
           </span>
         </div>
         <button
@@ -94,6 +95,7 @@ export default function EtapasPage() {
   const [stageToDelete, setStageToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [reorderLoading, setReorderLoading] = useState(false);
+  const [isEstadosModalOpen, setIsEstadosModalOpen] = useState(false);
 
   const fetchStages = useCallback(async () => {
     setLoading(true);
@@ -118,8 +120,46 @@ export default function EtapasPage() {
     fetchStages();
   }, [fetchStages]);
 
-  const handleModalSubmit = () => {
-    fetchStages();
+  const handleModalSubmit = async (wasCreating, createdStage) => {
+    await fetchStages();
+    
+    // If a new stage was created, put it first (order 0) and reorder the rest
+    if (wasCreating && createdStage) {
+      try {
+        const data = await apiClient.get(
+          `/api/recruiter/companies/${COMPANY_ID}/stages`
+        );
+        const list = Array.isArray(data) ? data : data?.stages ?? data?.items ?? data?.data ?? [];
+        const mappedStages = list.map((item, i) => mapStageFromApi(item, i));
+        
+        const createdId = String(createdStage?.id ?? createdStage?.uuid ?? "");
+        const newStage = mappedStages.find((s) => String(s.id) === createdId);
+        const others = mappedStages
+          .filter((s) => String(s.id) !== createdId)
+          .sort((a, b) => a.order - b.order);
+        
+        // New stage first (order 0), then the rest in their current order
+        const sortedStages = newStage ? [newStage, ...others] : [...mappedStages].sort((a, b) => a.order - b.order);
+        const reorderedStages = sortedStages.map((stage, index) => ({
+          ...stage,
+          order: index,
+        }));
+        
+        await Promise.all(
+          reorderedStages.map((stage) =>
+            apiClient.put(
+              `/api/recruiter/companies/${COMPANY_ID}/stages/${stage.id}`,
+              { name: stage.name, orderIndex: stage.order }
+            )
+          )
+        );
+        
+        await fetchStages();
+      } catch (err) {
+        console.error("Error reordering stages:", err);
+      }
+    }
+    
     setEditingStage(null);
   };
 
@@ -143,7 +183,39 @@ export default function EtapasPage() {
       );
       setIsDeleteModalOpen(false);
       setStageToDelete(null);
-      await fetchStages();
+      
+      // After deleting, reorder all remaining stages
+      try {
+        const data = await apiClient.get(
+          `/api/recruiter/companies/${COMPANY_ID}/stages`
+        );
+        const list = Array.isArray(data) ? data : data?.stages ?? data?.items ?? data?.data ?? [];
+        const mappedStages = list.map((item, i) => mapStageFromApi(item, i));
+        
+        // Sort by current order and reassign sequential order
+        const sortedStages = [...mappedStages].sort((a, b) => a.order - b.order);
+        const reorderedStages = sortedStages.map((stage, index) => ({
+          ...stage,
+          order: index,
+        }));
+        
+        // Update all stages with new order
+        await Promise.all(
+          reorderedStages.map((stage) =>
+            apiClient.put(
+              `/api/recruiter/companies/${COMPANY_ID}/stages/${stage.id}`,
+              { name: stage.name, orderIndex: stage.order }
+            )
+          )
+        );
+        
+        // Refresh the list
+        await fetchStages();
+      } catch (err) {
+        console.error("Error reordering stages after delete:", err);
+        // Still refresh even if reorder fails
+        await fetchStages();
+      }
     } catch (err) {
       setFetchError(
         err?.message || err?.detail || "No se pudo eliminar la etapa. Intenta de nuevo."
@@ -170,7 +242,8 @@ export default function EtapasPage() {
 
     const updatedStages = items.map((item, index) => ({
       ...item,
-      order: index + 1,
+      order: index,
+      orderIndex: index,
     }));
 
     setStages(updatedStages);
@@ -181,7 +254,7 @@ export default function EtapasPage() {
         updatedStages.map((stage) =>
           apiClient.put(
             `/api/recruiter/companies/${COMPANY_ID}/stages/${stage.id}`,
-            { name: stage.name, order: stage.order }
+            { name: stage.name, orderIndex: stage.order }
           )
         )
       );
@@ -239,15 +312,25 @@ export default function EtapasPage() {
                     Gestiona las etapas del proceso de reclutamiento
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleNewStage}
-                  className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label="Crear nueva etapa"
-                >
-                  <Plus className="h-4 w-4" aria-hidden />
-                  Nueva Etapa
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsEstadosModalOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 self-start rounded-md border border-border bg-background px-6 py-3 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                    aria-label="Gestionar estados"
+                  >
+                    Estados
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNewStage}
+                    className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                    aria-label="Crear nueva etapa"
+                  >
+                    <Plus className="h-4 w-4" aria-hidden />
+                    Nueva Etapa
+                  </button>
+                </div>
               </section>
               <section className="flex flex-col gap-6 p-8" aria-label="Lista de etapas">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -342,16 +425,26 @@ export default function EtapasPage() {
                   Gestiona las etapas del proceso de reclutamiento
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleNewStage}
-                className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                aria-label="Crear nueva etapa"
-              >
-                <Plus className="h-4 w-4" aria-hidden />
-                <span className="hidden sm:inline">Nueva Etapa</span>
-                <span className="sm:hidden" aria-hidden>Nueva</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEstadosModalOpen(true)}
+                  className="inline-flex items-center justify-center gap-2 self-start rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                  aria-label="Gestionar estados"
+                >
+                  Estados
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNewStage}
+                  className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                  aria-label="Crear nueva etapa"
+                >
+                  <Plus className="h-4 w-4" aria-hidden />
+                  <span className="hidden sm:inline">Nueva Etapa</span>
+                  <span className="sm:hidden" aria-hidden>Nueva</span>
+                </button>
+              </div>
             </section>
             <section className="flex flex-col gap-4" aria-label="Filtros y lista">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -445,6 +538,11 @@ export default function EtapasPage() {
         confirmText="Aceptar"
         cancelText="Cancelar"
         loading={deleteLoading}
+      />
+
+      <EstadosModal
+        isOpen={isEstadosModalOpen}
+        onClose={() => setIsEstadosModalOpen(false)}
       />
     </div>
   );
