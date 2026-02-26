@@ -20,6 +20,7 @@ const navItems = [
   { href: "/portal-rrhh", label: "Dashboard", icon: LayoutDashboard },
   { href: "/portal-rrhh/candidatos", label: "Candidatos", icon: Users },
   { href: "/portal-rrhh/vacantes", label: "Vacantes", icon: Briefcase },
+  { href: "/portal-rrhh/etapas", label: "Etapas", icon: ClipboardList },
   { href: "/portal-rrhh/evaluaciones", label: "Evaluaciones", icon: ClipboardList },
   { href: "/portal-rrhh/entrevistas", label: "Entrevistas", icon: Calendar },
   { href: "/portal-rrhh/comunicaciones", label: "Comunicaciones", icon: MessageSquare },
