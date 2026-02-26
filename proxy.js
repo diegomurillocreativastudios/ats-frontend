@@ -14,7 +14,7 @@ const isPublicPath = (pathname) => {
   return publicPaths.some((p) => pathname === p || pathname.startsWith(p + '/'));
 };
 
-export function middleware(request) {
+export function proxy(request) {
   const { pathname } = request.nextUrl;
 
   if (pathname === '/iniciar-sesion') {
