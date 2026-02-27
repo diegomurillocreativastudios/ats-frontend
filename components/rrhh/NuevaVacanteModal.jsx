@@ -15,6 +15,7 @@ const toSnakeCase = (str) =>
 
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
+const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
 
 export const createEmptyRequirement = () => ({
   id: crypto.randomUUID?.() ?? `req-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -26,6 +27,7 @@ export const createEmptyRequirement = () => ({
 export default function NuevaVacanteModal({ isOpen, onClose, onSubmit }) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [departamento, setDepartamento] = useState("");
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -71,6 +73,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit }) {
     if (!descripcion.trim()) {
       nextErrors.descripcion = "La descripción es requerida";
     }
+    if (!departamento.trim()) {
+      nextErrors.departamento = "El departamento es requerido";
+    }
     requerimientos.forEach((req) => {
       const hasName = !!req.requirementName.trim();
       const hasValue = !!req.requirementValue.trim();
@@ -107,6 +112,8 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit }) {
     const payload = {
       title: nombre.trim(),
       description: descripcion.trim(),
+      department: departamento.trim(),
+      companyId: COMPANY_ID,
       requirements,
       weights: {
         semantic: 0.5,
@@ -133,6 +140,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit }) {
   const handleClose = () => {
     setNombre("");
     setDescripcion("");
+    setDepartamento("");
     setRequerimientos([createEmptyRequirement()]);
     setErrors({});
     setSubmitError(null);
@@ -221,6 +229,33 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit }) {
           {errors.descripcion && (
             <p id="descripcion-error" className="font-inter text-sm text-vo-pink" role="alert">
               {errors.descripcion}
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="vacante-departamento"
+            className="font-inter text-sm font-medium text-foreground"
+          >
+            Departamento <span className="text-vo-pink">*</span>
+          </label>
+          <select
+            id="vacante-departamento"
+            value={departamento}
+            onChange={(e) => setDepartamento(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            aria-invalid={!!errors.departamento}
+            aria-describedby={errors.departamento ? "departamento-error" : undefined}
+          >
+            <option value="">Selecciona un departamento</option>
+            <option value="Desarrollo de Software">Desarrollo de Software</option>
+            <option value="Diseño">Diseño</option>
+            <option value="Ordenanza">Ordenanza</option>
+          </select>
+          {errors.departamento && (
+            <p id="departamento-error" className="font-inter text-sm text-vo-pink" role="alert">
+              {errors.departamento}
             </p>
           )}
         </div>
