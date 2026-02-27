@@ -567,26 +567,43 @@ export default function VacanteDetallePage() {
   }, [vacancy?.title]);
 
   const statusConfig = vacancy ? getStatusConfig(vacancy.status) : STATUS_LABELS.activa;
+  /** AI match suggestions from vacancy (for "Posibles candidatos" container). */
   const vacancyCandidates = Array.isArray(vacancy?.aiMatchSuggestions)
     ? vacancy.aiMatchSuggestions
     : Array.isArray(vacancy?.matches)
       ? vacancy.matches
       : [];
-  const displayCandidates =
-    smartCandidates !== null ? smartCandidates : vacancyCandidates;
+
+  /** Applicants for Kanban board. */
+  const applicants = Array.isArray(vacancy?.applicants) ? vacancy.applicants : [];
 
   const getCandidateId = (match, index) =>
-    match.candidateDocumentId ?? match.candidateProfileId ?? `candidate-${index}`;
+    match.candidateDocumentId ?? match.candidateProfileId ?? match?.id ?? `candidate-${index}`;
+
+  /** Stable key for matching (same person in search vs aiMatchSuggestions). */
+  const getMatchKey = (m) => m?.candidateDocumentId ?? m?.candidateProfileId ?? null;
+
+  /** Search results to show: exclude anyone already in aiMatchSuggestions. */
+  const searchResultsToDisplay = useMemo(() => {
+    if (smartCandidates == null || smartCandidates.length === 0) return [];
+    const aiMatchKeys = new Set(
+      vacancyCandidates.map((m) => getMatchKey(m)).filter(Boolean)
+    );
+    return smartCandidates.filter((m) => !aiMatchKeys.has(getMatchKey(m)));
+  }, [smartCandidates, vacancyCandidates]);
+
+  /** Candidates from Search only (for selection and Match button in Search container). */
+  const displayCandidates = searchResultsToDisplay;
 
   const candidatesByStage = useMemo(() => {
-    if (vacancyCandidates.length === 0) {
+    if (applicants.length === 0) {
       return kanbanStageNames.map((stage) => ({ stage, candidates: [] }));
     }
-    const withMeta = vacancyCandidates.map((match, i) => {
+    const withMeta = applicants.map((match, i) => {
       const candidateId = getCandidateId(match, i);
       const stage =
         candidateStageOverrides[candidateId] ??
-        normalizeKanbanStage(match.applicationStage, kanbanStageNames);
+        normalizeKanbanStage(match.applicationStage ?? match.stage, kanbanStageNames);
       return { match, candidateId, stage };
     });
     return kanbanStageNames.map((stage) => ({
@@ -595,7 +612,7 @@ export default function VacanteDetallePage() {
         .filter((c) => c.stage === stage)
         .map((c) => ({ match: c.match, candidateId: c.candidateId })),
     }));
-  }, [vacancyCandidates, candidateStageOverrides, kanbanStageNames]);
+  }, [applicants, candidateStageOverrides, kanbanStageNames]);
 
   const handleKanbanStageDrop = useCallback((candidateId, newStage) => {
     setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
@@ -803,7 +820,7 @@ export default function VacanteDetallePage() {
                           ? "Buscando..."
                           : "Search"}
                       </button>
-                      {smartCandidates !== null && (
+                      {displayCandidates.length > 0 && (
                         <button
                           type="button"
                           onClick={handleMatch}
@@ -831,14 +848,14 @@ export default function VacanteDetallePage() {
                       </p>
                     )}
 
-                    {/* 1. Search results container (above) */}
+                    {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                     <div className="flex flex-col gap-3">
                       <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
                         <Sparkles className="h-5 w-5" aria-hidden />
                         Resultados de búsqueda
                         {smartCandidates !== null && (
                           <span className="font-inter text-sm font-normal text-muted-foreground">
-                            ({smartCandidates.length})
+                            ({searchResultsToDisplay.length})
                           </span>
                         )}
                       </h2>
@@ -853,11 +870,13 @@ export default function VacanteDetallePage() {
                               Haz clic en Search para ver candidatos recomendados.
                             </p>
                           </div>
-                        ) : smartCandidates.length === 0 ? (
+                        ) : searchResultsToDisplay.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-inter text-sm text-muted-foreground">
-                              No se encontraron candidatos con match.
+                              {smartCandidates.length === 0
+                                ? "No se encontraron candidatos en la búsqueda."
+                                : "Los candidatos encontrados ya están en Posibles candidatos."}
                             </p>
                           </div>
                         ) : (
@@ -886,7 +905,7 @@ export default function VacanteDetallePage() {
                               )}
                             </div>
                             <ul className="flex flex-col gap-4" role="list">
-                              {smartCandidates.map((match, index) => {
+                              {searchResultsToDisplay.map((match, index) => {
                                 const candidateId = getCandidateId(match, index);
                                 return (
                                   <li key={candidateId}>
@@ -905,24 +924,64 @@ export default function VacanteDetallePage() {
                       </div>
                     </div>
 
-                    {/* 2. Kanban board container (below) */}
+                    {/* 2. Posibles candidatos (AI match suggestions) */}
                     <div className="flex flex-col gap-3">
                       <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
                         <Users className="h-5 w-5" aria-hidden />
-                        Tablero Kanban
+                        Posibles candidatos
                         <span className="font-inter text-sm font-normal text-muted-foreground">
                           ({vacancyCandidates.length})
                         </span>
                       </h2>
                       <div
                         className="rounded-xl border border-border bg-card p-6"
-                        aria-label="Contenedor del tablero Kanban"
+                        aria-label="Posibles candidatos"
                       >
                         {vacancyCandidates.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-inter text-sm text-muted-foreground">
-                              Aún no hay candidatos con match para esta vacante.
+                              No hay sugerencias de match para esta vacante.
+                            </p>
+                          </div>
+                        ) : (
+                          <ul className="flex flex-col gap-4" role="list">
+                            {vacancyCandidates.map((match, index) => {
+                              const candidateId = getCandidateId(match, index);
+                              return (
+                                <li key={candidateId}>
+                                  <MatchCard
+                                    match={match}
+                                    candidateId={candidateId}
+                                    isSelected={false}
+                                    onToggle={() => {}}
+                                  />
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 3. Kanban board (applicants) */}
+                    <div className="flex flex-col gap-3">
+                      <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
+                        <Users className="h-5 w-5" aria-hidden />
+                        Tablero Kanban
+                        <span className="font-inter text-sm font-normal text-muted-foreground">
+                          ({applicants.length})
+                        </span>
+                      </h2>
+                      <div
+                        className="rounded-xl border border-border bg-card p-6"
+                        aria-label="Contenedor del tablero Kanban"
+                      >
+                        {applicants.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                            <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
+                            <p className="font-inter text-sm text-muted-foreground">
+                              Aún no hay postulantes en esta vacante.
                             </p>
                           </div>
                         ) : (
@@ -1095,7 +1154,7 @@ export default function VacanteDetallePage() {
                         ? "Buscando..."
                         : "Search"}
                     </button>
-                    {smartCandidates !== null && (
+                    {displayCandidates.length > 0 && (
                       <button
                         type="button"
                         onClick={handleMatch}
@@ -1123,14 +1182,14 @@ export default function VacanteDetallePage() {
                     </p>
                   )}
 
-                  {/* 1. Search results container (above) */}
+                  {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                   <div className="flex flex-col gap-3">
                     <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
                       <Sparkles className="h-4 w-4" aria-hidden />
                       Resultados de búsqueda
                       {smartCandidates !== null && (
                         <span className="font-inter text-sm font-normal text-muted-foreground">
-                          ({smartCandidates.length})
+                          ({searchResultsToDisplay.length})
                         </span>
                       )}
                     </h2>
@@ -1145,11 +1204,13 @@ export default function VacanteDetallePage() {
                             Haz clic en Search para ver candidatos recomendados.
                           </p>
                         </div>
-                      ) : smartCandidates.length === 0 ? (
+                      ) : searchResultsToDisplay.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-inter text-sm text-muted-foreground">
-                            No se encontraron candidatos con match.
+                            {smartCandidates.length === 0
+                              ? "No se encontraron candidatos en la búsqueda."
+                              : "Los candidatos encontrados ya están en Posibles candidatos."}
                           </p>
                         </div>
                       ) : (
@@ -1178,7 +1239,7 @@ export default function VacanteDetallePage() {
                             )}
                           </div>
                           <ul className="flex flex-col gap-4" role="list">
-                            {smartCandidates.map((match, index) => {
+                            {searchResultsToDisplay.map((match, index) => {
                               const candidateId = getCandidateId(match, index);
                               return (
                                 <li key={candidateId}>
@@ -1197,24 +1258,64 @@ export default function VacanteDetallePage() {
                     </div>
                   </div>
 
-                  {/* 2. Kanban board container (below) */}
+                  {/* 2. Posibles candidatos (AI match suggestions) */}
                   <div className="flex flex-col gap-3">
                     <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
                       <Users className="h-4 w-4" aria-hidden />
-                      Tablero Kanban
+                      Posibles candidatos
                       <span className="font-inter text-sm font-normal text-muted-foreground">
                         ({vacancyCandidates.length})
                       </span>
                     </h2>
                     <div
                       className="rounded-xl border border-border bg-card p-5"
-                      aria-label="Contenedor del tablero Kanban"
+                      aria-label="Posibles candidatos"
                     >
                       {vacancyCandidates.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-inter text-sm text-muted-foreground">
-                            Aún no hay candidatos con match para esta vacante.
+                            No hay sugerencias de match para esta vacante.
+                          </p>
+                        </div>
+                      ) : (
+                        <ul className="flex flex-col gap-4" role="list">
+                          {vacancyCandidates.map((match, index) => {
+                            const candidateId = getCandidateId(match, index);
+                            return (
+                              <li key={candidateId}>
+                                <MatchCard
+                                  match={match}
+                                  candidateId={candidateId}
+                                  isSelected={false}
+                                  onToggle={() => {}}
+                                />
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 3. Kanban board (applicants) */}
+                  <div className="flex flex-col gap-3">
+                    <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
+                      <Users className="h-4 w-4" aria-hidden />
+                      Tablero Kanban
+                      <span className="font-inter text-sm font-normal text-muted-foreground">
+                        ({applicants.length})
+                      </span>
+                    </h2>
+                    <div
+                      className="rounded-xl border border-border bg-card p-5"
+                      aria-label="Contenedor del tablero Kanban"
+                    >
+                      {applicants.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+                          <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
+                          <p className="font-inter text-sm text-muted-foreground">
+                            Aún no hay postulantes en esta vacante.
                           </p>
                         </div>
                       ) : (
