@@ -714,14 +714,14 @@ export default function VacanteDetallePage() {
   const breadcrumbLabel = vacancy?.title ? vacancy.title : "Detalle de vacante";
 
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
-      {/* Desktop: sidebar + main */}
-      <div className="hidden lg:flex lg:min-h-screen">
+    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
+      {/* Desktop: sidebar + main — fixed height so only main scrolls */}
+      <div className="hidden h-full lg:flex">
         <RRHHSidebar />
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <RRHHTopbar variant="desktop" breadcrumbLabel={breadcrumbLabel} />
-          <main className="flex-1 overflow-auto">
-            <div className="flex flex-col p-8">
+          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="min-w-0 flex flex-col p-8">
               {loading ? (
                 <div
                   className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
@@ -1072,11 +1072,11 @@ export default function VacanteDetallePage() {
         </div>
       </div>
 
-      {/* Tablet & Mobile */}
-      <div className="flex min-h-screen flex-col lg:hidden">
+      {/* Tablet & Mobile — fixed height so only main scrolls */}
+      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
         <RRHHTopbar variant="tablet" breadcrumbLabel={breadcrumbLabel} />
-        <main className="flex-1 overflow-auto">
-          <div className="flex flex-col p-4 md:p-6">
+        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="min-w-0 flex flex-col p-4 md:p-6">
             {loading ? (
               <div
                 className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"

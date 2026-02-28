@@ -44,14 +44,14 @@ export default function DocumentosContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
-      {/* Desktop: sidebar + main */}
-      <div className="hidden lg:flex lg:min-h-screen">
+    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
+      {/* Desktop: sidebar + main — fixed height so only main scrolls */}
+      <div className="hidden h-full lg:flex">
         <CandidateSidebar />
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <CandidateTopbar variant="desktop" breadcrumbLabel="Documentos" />
-          <main className="flex-1 overflow-auto">
-            <div className="flex flex-col gap-8 p-8">
+          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="min-w-0 flex flex-col gap-8 p-8">
               <section aria-label="Título de sección">
                 <h1 className="font-inter text-[28px] font-bold text-foreground">
                   Documentos
@@ -79,11 +79,11 @@ export default function DocumentosContent() {
         </div>
       </div>
 
-      {/* Tablet & Mobile: topbar + content */}
-      <div className="flex min-h-screen flex-col lg:hidden">
+      {/* Tablet & Mobile: topbar + content — fixed height so only main scrolls */}
+      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
         <CandidateTopbar variant="tablet" breadcrumbLabel="Documentos" />
-        <main className="flex-1 overflow-auto">
-          <div className="flex flex-col gap-5 p-4 md:gap-6 md:p-6">
+        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
             <section aria-label="Título de sección">
               <h1 className="font-inter text-xl font-bold text-foreground md:text-2xl">
                 Documentos

@@ -292,14 +292,14 @@ export default function EtapasPage() {
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
-      {/* Desktop: sidebar + main */}
-      <div className="hidden lg:flex lg:min-h-screen">
+    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
+      {/* Desktop: sidebar + main — fixed height so only main scrolls */}
+      <div className="hidden h-full lg:flex">
         <RRHHSidebar />
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <RRHHTopbar variant="desktop" breadcrumbLabel="Etapas" />
-          <main className="flex-1 overflow-auto">
-            <div className="flex flex-col">
+          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="min-w-0 flex flex-col">
               <section
                 className="flex flex-col gap-4 border-b border-border px-8 py-5 sm:flex-row sm:items-center sm:justify-between"
                 aria-label="Encabezado de etapas"
@@ -408,11 +408,11 @@ export default function EtapasPage() {
         </div>
       </div>
 
-      {/* Tablet & Mobile: topbar + content */}
-      <div className="flex min-h-screen flex-col lg:hidden">
+      {/* Tablet & Mobile: topbar + content — fixed height so only main scrolls */}
+      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
         <RRHHTopbar variant="tablet" breadcrumbLabel="Etapas" />
-        <main className="flex-1 overflow-auto">
-          <div className="flex flex-col gap-5 p-4 md:gap-6 md:p-6">
+        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
             <section
               className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
               aria-label="Encabezado de etapas"
