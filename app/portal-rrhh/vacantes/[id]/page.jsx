@@ -331,15 +331,24 @@ const MatchCard = ({ match, candidateId, isSelected, onToggle }) => {
   );
 };
 
-const KanbanCard = ({ match, candidateId, stage }) => {
+const mapStatusFromApi = (item, index = 0) => {
+  const id = String(item?.id ?? item?.uuid ?? index);
+  const name = item?.name ?? item?.status_name ?? "";
+  return { id, name };
+};
+
+const KanbanCard = ({
+  match,
+  candidateId,
+  stage,
+  statuses,
+  currentStatusId,
+  onStatusChange,
+}) => {
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
   );
-  const detailHref =
-    match.candidateProfileId
-      ? `/portal-rrhh/candidatos/${match.candidateProfileId}`
-      : null;
   const score =
     typeof match.totalScore === "number"
       ? (match.totalScore * 100).toFixed(0)
@@ -354,6 +363,15 @@ const KanbanCard = ({ match, candidateId, stage }) => {
   const handleDragEnd = (e) => {
     e.currentTarget.removeAttribute("data-dragging");
   };
+
+  const handleStatusChange = (e) => {
+    e.stopPropagation();
+    const value = e.target.value;
+    if (value) onStatusChange?.(candidateId, value);
+  };
+
+  const handleSelectMouseDown = (e) => e.stopPropagation();
+  const handleSelectClick = (e) => e.stopPropagation();
 
   return (
     <div
@@ -381,16 +399,22 @@ const KanbanCard = ({ match, candidateId, stage }) => {
             <span>Puntaje: {score}</span>
           </p>
         </div>
-        {detailHref && (
-          <Link
-            href={detailHref}
-            className="shrink-0 rounded p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            aria-label={`Ver perfil de ${emptyToDash(match.name)}`}
-            onClick={(e) => e.stopPropagation()}
+        {statuses.length > 0 ? (
+          <select
+            value={currentStatusId ?? ""}
+            onChange={handleStatusChange}
+            onMouseDown={handleSelectMouseDown}
+            onClick={handleSelectClick}
+            className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 font-inter text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={`Estado de ${emptyToDash(match.name)}`}
           >
-            <User className="h-4 w-4" aria-hidden />
-          </Link>
-        )}
+            {statuses.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name || s.id}
+              </option>
+            ))}
+          </select>
+        ) : null}
       </div>
     </div>
   );
@@ -403,6 +427,9 @@ const KanbanColumn = ({
   onDragEnter,
   onDragLeave,
   isOver,
+  statuses,
+  candidateStatusOverrides,
+  onStatusChange,
 }) => {
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -434,9 +461,23 @@ const KanbanColumn = ({
     onDragLeave?.();
   };
 
+  const getCurrentStatusId = (match, candidateId) => {
+    const override = candidateStatusOverrides?.[candidateId];
+    if (override) return override;
+    const fromMatch =
+      match.applicationStatusId ??
+      match.statusId ??
+      (statuses.find(
+        (s) =>
+          (s.name || "").toLowerCase() ===
+          (match.applicationStatus ?? match.status ?? stage ?? "").toLowerCase()
+      )?.id);
+    return fromMatch ?? statuses[0]?.id ?? "";
+  };
+
   return (
     <div
-      className="flex min-w-[200px] max-w-[260px] flex-1 flex-col rounded-xl border border-border bg-muted/30"
+      className="flex min-h-[320px] min-w-[400px] max-w-[520px] flex-1 flex-col rounded-xl border border-border bg-muted/30"
       aria-label={`Columna ${stage}`}
     >
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -455,7 +496,7 @@ const KanbanColumn = ({
         onDrop={handleDrop}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        className={`flex min-h-[120px] flex-1 flex-col gap-2 p-3 transition-colors ${isOver ? "bg-vo-purple/10" : ""}`}
+        className={`flex min-h-[260px] flex-1 flex-col gap-3 p-4 transition-colors ${isOver ? "bg-vo-purple/10" : ""}`}
         data-stage={stage}
       >
         {candidates.map(({ match, candidateId }) => (
@@ -464,6 +505,9 @@ const KanbanColumn = ({
             match={match}
             candidateId={candidateId}
             stage={stage}
+            statuses={statuses}
+            currentStatusId={getCurrentStatusId(match, candidateId)}
+            onStatusChange={onStatusChange}
           />
         ))}
       </div>
@@ -487,8 +531,10 @@ export default function VacanteDetallePage() {
   const [selectedCandidateIds, setSelectedCandidateIds] = useState(() => new Set());
   const [selectedPossibleCandidateIds, setSelectedPossibleCandidateIds] = useState(() => new Set());
   const [candidateStageOverrides, setCandidateStageOverrides] = useState(() => ({}));
+  const [candidateStatusOverrides, setCandidateStatusOverrides] = useState(() => ({}));
   const [dragOverStage, setDragOverStage] = useState(null);
   const [stages, setStages] = useState([]);
+  const [statuses, setStatuses] = useState([]);
 
   const fetchStages = useCallback(async () => {
     try {
@@ -504,6 +550,18 @@ export default function VacanteDetallePage() {
       setStages(mapped.sort((a, b) => a.order - b.order));
     } catch {
       setStages([]);
+    }
+  }, []);
+
+  const fetchStatuses = useCallback(async () => {
+    try {
+      const data = await apiClient.get(
+        `/api/recruiter/companies/${COMPANY_ID}/statuses`
+      );
+      const list = Array.isArray(data) ? data : data?.statuses ?? data?.items ?? data?.data ?? [];
+      setStatuses(list.map((item, i) => mapStatusFromApi(item, i)));
+    } catch {
+      setStatuses([]);
     }
   }, []);
 
@@ -535,6 +593,10 @@ export default function VacanteDetallePage() {
   useEffect(() => {
     fetchStages();
   }, [fetchStages]);
+
+  useEffect(() => {
+    fetchStatuses();
+  }, [fetchStatuses]);
 
   const kanbanStageNames = useMemo(
     () =>
@@ -629,6 +691,10 @@ export default function VacanteDetallePage() {
 
   const handleKanbanDragLeave = useCallback(() => {
     setDragOverStage(null);
+  }, []);
+
+  const handleStatusChange = useCallback((candidateId, statusId) => {
+    setCandidateStatusOverrides((prev) => ({ ...prev, [candidateId]: statusId }));
   }, []);
 
   const handleToggleCandidate = useCallback((id, checked) => {
@@ -914,7 +980,7 @@ export default function VacanteDetallePage() {
                             <p className="font-inter text-sm text-muted-foreground">
                               {smartCandidates.length === 0
                                 ? "No se encontraron candidatos en la búsqueda."
-                                : "Los candidatos encontrados ya están en Posibles candidatos o en el Tablero Kanban."}
+                                : "Los candidatos encontrados ya están en Posibles candidatos o en Etapas."}
                             </p>
                           </div>
                         ) : (
@@ -1027,7 +1093,7 @@ export default function VacanteDetallePage() {
                     <div className="flex flex-col gap-3">
                       <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
                         <Users className="h-5 w-5" aria-hidden />
-                        Tablero Kanban
+                        Etapas
                         <span className="font-inter text-sm font-normal text-muted-foreground">
                           ({applicants.length})
                         </span>
@@ -1047,7 +1113,7 @@ export default function VacanteDetallePage() {
                           <div
                             className="flex gap-4 overflow-x-auto pb-2"
                             role="region"
-                            aria-label="Tablero Kanban de candidatos"
+                            aria-label="Etapas de candidatos"
                           >
                             {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
                               <KanbanColumn
@@ -1058,6 +1124,9 @@ export default function VacanteDetallePage() {
                                 onDragEnter={handleKanbanDragEnter}
                                 onDragLeave={handleKanbanDragLeave}
                                 isOver={dragOverStage === stage}
+                                statuses={statuses}
+                                candidateStatusOverrides={candidateStatusOverrides}
+                                onStatusChange={handleStatusChange}
                               />
                             ))}
                           </div>
@@ -1269,7 +1338,7 @@ export default function VacanteDetallePage() {
                           <p className="font-inter text-sm text-muted-foreground">
                             {smartCandidates.length === 0
                               ? "No se encontraron candidatos en la búsqueda."
-                              : "Los candidatos encontrados ya están en Posibles candidatos o en el Tablero Kanban."}
+                              : "Los candidatos encontrados ya están en Posibles candidatos o en Etapas."}
                           </p>
                         </div>
                       ) : (
@@ -1382,7 +1451,7 @@ export default function VacanteDetallePage() {
                   <div className="flex flex-col gap-3">
                     <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
                       <Users className="h-4 w-4" aria-hidden />
-                      Tablero Kanban
+                      Etapas
                       <span className="font-inter text-sm font-normal text-muted-foreground">
                         ({applicants.length})
                       </span>
@@ -1402,7 +1471,7 @@ export default function VacanteDetallePage() {
                         <div
                           className="flex gap-3 overflow-x-auto pb-2"
                           role="region"
-                          aria-label="Tablero Kanban de candidatos"
+                          aria-label="Etapas de candidatos"
                         >
                           {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
                             <KanbanColumn
@@ -1413,6 +1482,9 @@ export default function VacanteDetallePage() {
                               onDragEnter={handleKanbanDragEnter}
                               onDragLeave={handleKanbanDragLeave}
                               isOver={dragOverStage === stage}
+                              statuses={statuses}
+                              candidateStatusOverrides={candidateStatusOverrides}
+                              onStatusChange={handleStatusChange}
                             />
                           ))}
                         </div>
