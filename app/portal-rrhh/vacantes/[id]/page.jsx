@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   Briefcase,
   Building2,
   Calendar,
@@ -481,7 +482,10 @@ export default function VacanteDetallePage() {
   const [smartError, setSmartError] = useState(null);
   const [loadingMatch, setLoadingMatch] = useState(false);
   const [matchError, setMatchError] = useState(null);
+  const [loadingStartProcess, setLoadingStartProcess] = useState(false);
+  const [startProcessError, setStartProcessError] = useState(null);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState(() => new Set());
+  const [selectedPossibleCandidateIds, setSelectedPossibleCandidateIds] = useState(() => new Set());
   const [candidateStageOverrides, setCandidateStageOverrides] = useState(() => ({}));
   const [dragOverStage, setDragOverStage] = useState(null);
   const [stages, setStages] = useState([]);
@@ -583,14 +587,15 @@ export default function VacanteDetallePage() {
   /** Stable key for matching (same person in search vs aiMatchSuggestions). */
   const getMatchKey = (m) => m?.candidateDocumentId ?? m?.candidateProfileId ?? null;
 
-  /** Search results to show: exclude anyone already in aiMatchSuggestions. */
+  /** Search results to show: exclude anyone already in aiMatchSuggestions or applicants. */
   const searchResultsToDisplay = useMemo(() => {
     if (smartCandidates == null || smartCandidates.length === 0) return [];
-    const aiMatchKeys = new Set(
-      vacancyCandidates.map((m) => getMatchKey(m)).filter(Boolean)
-    );
-    return smartCandidates.filter((m) => !aiMatchKeys.has(getMatchKey(m)));
-  }, [smartCandidates, vacancyCandidates]);
+    const existingKeys = new Set([
+      ...vacancyCandidates.map((m) => getMatchKey(m)).filter(Boolean),
+      ...applicants.map((m) => getMatchKey(m)).filter(Boolean),
+    ]);
+    return smartCandidates.filter((m) => !existingKeys.has(getMatchKey(m)));
+  }, [smartCandidates, vacancyCandidates, applicants]);
 
   /** Candidates from Search only (for selection and Match button in Search container). */
   const displayCandidates = searchResultsToDisplay;
@@ -645,6 +650,39 @@ export default function VacanteDetallePage() {
   const handleDeselectAllCandidates = useCallback(() => {
     setSelectedCandidateIds(new Set());
   }, []);
+
+  const handleTogglePossibleCandidate = useCallback((candidateId, checked) => {
+    setSelectedPossibleCandidateIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(candidateId);
+      else next.delete(candidateId);
+      return next;
+    });
+  }, []);
+
+  const handleStartProcess = useCallback(async () => {
+    if (!id) return;
+    const candidateProfileIds = vacancyCandidates
+      .map((match, index) => (selectedPossibleCandidateIds.has(getCandidateId(match, index)) ? match.candidateProfileId : null))
+      .filter((pid) => pid != null && String(pid).trim() !== "");
+    if (candidateProfileIds.length === 0) return;
+    setLoadingStartProcess(true);
+    setStartProcessError(null);
+    try {
+      await apiClient.post("/api/recruiter/applications/start", {
+        vacancyId: id,
+        candidateProfileIds,
+      });
+      setSelectedPossibleCandidateIds(new Set());
+      await fetchVacancy();
+    } catch (err) {
+      setStartProcessError(
+        err?.message ?? err?.detail ?? "No se pudo iniciar el proceso."
+      );
+    } finally {
+      setLoadingStartProcess(false);
+    }
+  }, [id, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy]);
 
   /** Selected candidate document IDs to send to the match API. */
   const selectedDocumentIds = displayCandidates
@@ -818,7 +856,7 @@ export default function VacanteDetallePage() {
                         )}
                         {loadingSmart
                           ? "Buscando..."
-                          : "Search"}
+                          : "Buscar"}
                       </button>
                       {displayCandidates.length > 0 && (
                         <button
@@ -826,14 +864,14 @@ export default function VacanteDetallePage() {
                           onClick={handleMatch}
                           disabled={loadingMatch || selectedDocumentIds.length === 0}
                           className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label="Ejecutar match con candidatos seleccionados"
+                          aria-label="Preparar candidatos seleccionados"
                         >
                           {loadingMatch ? (
                             <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                           ) : (
                             <Scale className="h-4 w-4 shrink-0" aria-hidden />
                           )}
-                          {loadingMatch ? "Ejecutando match..." : "Match"}
+                          {loadingMatch ? "Preparando..." : "Preparar"}
                         </button>
                       )}
                     </div>
@@ -876,7 +914,7 @@ export default function VacanteDetallePage() {
                             <p className="font-inter text-sm text-muted-foreground">
                               {smartCandidates.length === 0
                                 ? "No se encontraron candidatos en la búsqueda."
-                                : "Los candidatos encontrados ya están en Posibles candidatos."}
+                                : "Los candidatos encontrados ya están en Posibles candidatos o en el Tablero Kanban."}
                             </p>
                           </div>
                         ) : (
@@ -926,13 +964,34 @@ export default function VacanteDetallePage() {
 
                     {/* 2. Posibles candidatos (AI match suggestions) */}
                     <div className="flex flex-col gap-3">
-                      <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
-                        <Users className="h-5 w-5" aria-hidden />
-                        Posibles candidatos
-                        <span className="font-inter text-sm font-normal text-muted-foreground">
-                          ({vacancyCandidates.length})
-                        </span>
-                      </h2>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
+                          <Users className="h-5 w-5" aria-hidden />
+                          Posibles candidatos
+                          <span className="font-inter text-sm font-normal text-muted-foreground">
+                            ({vacancyCandidates.length})
+                          </span>
+                        </h2>
+                        <button
+                          type="button"
+                          disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
+                          className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
+                          aria-label="Iniciar proceso con candidatos seleccionados"
+                          onClick={handleStartProcess}
+                        >
+                          {loadingStartProcess ? (
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                          ) : (
+                            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                          )}
+                          {loadingStartProcess ? "Iniciando..." : "Iniciar proceso"}
+                        </button>
+                      </div>
+                      {startProcessError && (
+                        <p className="font-inter text-sm text-destructive" role="alert">
+                          {startProcessError}
+                        </p>
+                      )}
                       <div
                         className="rounded-xl border border-border bg-card p-6"
                         aria-label="Posibles candidatos"
@@ -953,8 +1012,8 @@ export default function VacanteDetallePage() {
                                   <MatchCard
                                     match={match}
                                     candidateId={candidateId}
-                                    isSelected={false}
-                                    onToggle={() => {}}
+                                    isSelected={selectedPossibleCandidateIds.has(candidateId)}
+                                    onToggle={handleTogglePossibleCandidate}
                                   />
                                 </li>
                               );
@@ -1152,7 +1211,7 @@ export default function VacanteDetallePage() {
                       )}
                       {loadingSmart
                         ? "Buscando..."
-                        : "Search"}
+                        : "Buscar"}
                     </button>
                     {displayCandidates.length > 0 && (
                       <button
@@ -1160,14 +1219,14 @@ export default function VacanteDetallePage() {
                         onClick={handleMatch}
                         disabled={loadingMatch || selectedDocumentIds.length === 0}
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label="Ejecutar match con candidatos seleccionados"
+                        aria-label="Preparar candidatos seleccionados"
                       >
                         {loadingMatch ? (
                           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                         ) : (
                           <Scale className="h-4 w-4 shrink-0" aria-hidden />
                         )}
-                        {loadingMatch ? "Ejecutando match..." : "Match"}
+                        {loadingMatch ? "Preparando..." : "Preparar"}
                       </button>
                     )}
                   </div>
@@ -1210,7 +1269,7 @@ export default function VacanteDetallePage() {
                           <p className="font-inter text-sm text-muted-foreground">
                             {smartCandidates.length === 0
                               ? "No se encontraron candidatos en la búsqueda."
-                              : "Los candidatos encontrados ya están en Posibles candidatos."}
+                              : "Los candidatos encontrados ya están en Posibles candidatos o en el Tablero Kanban."}
                           </p>
                         </div>
                       ) : (
@@ -1260,13 +1319,34 @@ export default function VacanteDetallePage() {
 
                   {/* 2. Posibles candidatos (AI match suggestions) */}
                   <div className="flex flex-col gap-3">
-                    <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
-                      <Users className="h-4 w-4" aria-hidden />
-                      Posibles candidatos
-                      <span className="font-inter text-sm font-normal text-muted-foreground">
-                        ({vacancyCandidates.length})
-                      </span>
-                    </h2>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
+                        <Users className="h-4 w-4" aria-hidden />
+                        Posibles candidatos
+                        <span className="font-inter text-sm font-normal text-muted-foreground">
+                          ({vacancyCandidates.length})
+                        </span>
+                      </h2>
+                      <button
+                        type="button"
+                        disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
+                        aria-label="Iniciar proceso con candidatos seleccionados"
+                        onClick={handleStartProcess}
+                      >
+                        {loadingStartProcess ? (
+                          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                        ) : (
+                          <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                        )}
+                        {loadingStartProcess ? "Iniciando..." : "Iniciar proceso"}
+                      </button>
+                    </div>
+                    {startProcessError && (
+                      <p className="font-inter text-sm text-destructive" role="alert">
+                        {startProcessError}
+                      </p>
+                    )}
                     <div
                       className="rounded-xl border border-border bg-card p-5"
                       aria-label="Posibles candidatos"
@@ -1287,8 +1367,8 @@ export default function VacanteDetallePage() {
                                 <MatchCard
                                   match={match}
                                   candidateId={candidateId}
-                                  isSelected={false}
-                                  onToggle={() => {}}
+                                  isSelected={selectedPossibleCandidateIds.has(candidateId)}
+                                  onToggle={handleTogglePossibleCandidate}
                                 />
                               </li>
                             );
