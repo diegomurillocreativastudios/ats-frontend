@@ -299,23 +299,17 @@ const CandidateProfileModal = ({ match, onClose }) => {
       ? Object.entries(match.componentScores).filter(([k]) => !k.startsWith("additionalProp"))
       : [];
 
-  const matchedAttrs =
-    match.matchedAttributes && typeof match.matchedAttributes === "object" && !Array.isArray(match.matchedAttributes)
-      ? Object.entries(match.matchedAttributes).filter(([k]) => !k.startsWith("additionalProp"))
-      : [];
-
-  const matchedPaths = Array.isArray(match.matchedAttributePaths)
-    ? match.matchedAttributePaths
-    : match.matchedAttributePaths && typeof match.matchedAttributePaths === "object"
-      ? Object.entries(match.matchedAttributePaths)
-      : [];
+  const qualitativeReasoning =
+    match.qualitativeReasoning != null && String(match.qualitativeReasoning).trim() !== ""
+      ? String(match.qualitativeReasoning).trim()
+      : null;
 
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
   );
 
-  const hasContent = componentScores.length > 0 || matchedAttrs.length > 0 || matchedPaths.length > 0;
+  const hasContent = componentScores.length > 0 || qualitativeReasoning != null;
 
   return (
     <div
@@ -409,66 +403,17 @@ const CandidateProfileModal = ({ match, onClose }) => {
                 </div>
               )}
 
-              {/* Matched Attributes */}
-              {matchedAttrs.length > 0 && (
+              {/* Qualitative Reasoning */}
+              {qualitativeReasoning != null && (
                 <div>
                   <h3 className="mb-3 font-inter text-sm font-semibold text-foreground">
-                    Atributos coincidentes
+                    Razonamiento cualitativo
                   </h3>
-                  <ul className="flex flex-col gap-3" role="list">
-                    {matchedAttrs.map(([key, val]) => {
-                      const items = Array.isArray(val)
-                        ? val.filter((v) => v != null && String(v).trim() !== "")
-                        : typeof val === "string"
-                          ? val.split(/(?<=[.!?])\s+(?=[A-Z])/).map((s) => s.trim()).filter(Boolean)
-                          : [val];
-                      return (
-                        <li key={key} className="flex flex-col gap-1.5">
-                          <span className="inline-flex w-fit items-center rounded-md bg-vo-purple/10 px-2.5 py-1 font-inter text-xs font-medium text-vo-purple">
-                            {formatRequirementKey(key)}
-                          </span>
-                          <ul className="flex flex-col gap-1 pl-1" role="list">
-                            {items.map((item, i) => (
-                              <li key={i} className="flex items-start gap-2 font-inter text-xs leading-relaxed text-muted-foreground">
-                                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" aria-hidden />
-                                {typeof item === "string" ? item : safeString(item)}
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-
-              {/* Matched Attribute Paths */}
-              {matchedPaths.length > 0 && (
-                <div>
-                  <h3 className="mb-3 font-inter text-sm font-semibold text-foreground">
-                    Fragmentos del CV
-                  </h3>
-                  <ul className="flex flex-col gap-2" role="list">
-                    {matchedPaths.map((item, i) => {
-                      const [key, val] = Array.isArray(item) ? item : [null, item];
-                      const text = typeof val === "string" ? val : safeString(val);
-                      return (
-                        <li
-                          key={i}
-                          className="rounded-lg border border-border bg-muted/30 p-3"
-                        >
-                          {key && (
-                            <span className="mb-1.5 inline-flex items-center rounded bg-vo-purple/10 px-2 py-0.5 font-inter text-xs font-medium capitalize text-vo-purple">
-                              {formatRequirementKey(key)}
-                            </span>
-                          )}
-                          <p className="font-inter text-xs leading-relaxed text-muted-foreground">
-                            {text}
-                          </p>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <div className="rounded-lg border border-border bg-muted/30 p-4">
+                    <p className="font-inter text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                      {qualitativeReasoning}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
