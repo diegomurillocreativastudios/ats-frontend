@@ -10,6 +10,7 @@ import {
   Building2,
   Calendar,
   CheckSquare,
+  Download,
   FileText,
   Loader2,
   Mail,
@@ -18,10 +19,12 @@ import {
   Sparkles,
   User,
   Users,
+  X,
 } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import { apiClient } from "@/lib/api";
+import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
 
 const formatDate = (value) => {
@@ -87,6 +90,59 @@ const normalizeKanbanStage = (value, stageNames = FALLBACK_KANBAN_STAGES) => {
   const key = String(value).trim().toLowerCase();
   const found = stageNames.find((s) => s.toLowerCase() === key);
   return found ?? stageNames[0];
+};
+
+/** Converts a raw score/attribute key into a natural human-readable label. */
+const formatScoreKey = (key) => {
+  const k = String(key).trim();
+  const map = {
+    QualitativeScore: "Puntaje cualitativo",
+    qualitativeScore: "Puntaje cualitativo",
+    qualitative_score: "Puntaje cualitativo",
+    VectorSimilarity: "Similitud semántica",
+    vectorSimilarity: "Similitud semántica",
+    vector_similarity: "Similitud semántica",
+    SemanticScore: "Puntaje semántico",
+    semanticScore: "Puntaje semántico",
+    semantic_score: "Puntaje semántico",
+    TotalScore: "Puntaje total",
+    totalScore: "Puntaje total",
+    total_score: "Puntaje total",
+    attribute_aggregate: "Atributos en conjunto",
+    AttributeAggregate: "Atributos en conjunto",
+    attributeAggregate: "Atributos en conjunto",
+    KeywordScore: "Coincidencia de palabras clave",
+    keywordScore: "Coincidencia de palabras clave",
+    keyword_score: "Coincidencia de palabras clave",
+    ExperienceScore: "Experiencia",
+    experienceScore: "Experiencia",
+    experience_score: "Experiencia",
+    EducationScore: "Educación",
+    educationScore: "Educación",
+    education_score: "Educación",
+    SkillsScore: "Habilidades",
+    skillsScore: "Habilidades",
+    skills_score: "Habilidades",
+  };
+  if (map[k]) return map[k];
+
+  // Handle attr_* prefix (e.g. attr_reactjs -> React.js)
+  const attrMatch = k.match(/^attr_(.+)$/i);
+  if (attrMatch) {
+    const inner = attrMatch[1];
+    const knownAttr = {
+      reactjs: "React.js", nextjs: "Next.js", tailwindcss: "Tailwind CSS",
+      javascript: "JavaScript", typescript: "TypeScript", html: "HTML", css: "CSS",
+    };
+    return knownAttr[inner.toLowerCase()] ?? (inner.charAt(0).toUpperCase() + inner.slice(1));
+  }
+
+  // Convert camelCase / snake_case to words
+  const words = k
+    .replace(/_/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
 };
 
 /** Formats requirement key for display (e.g. reactjs -> React.js). */
@@ -197,137 +253,359 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
   );
 };
 
-const MatchCard = ({ match, candidateId, isSelected, onToggle }) => {
-  const [showMatchedAttrs, setShowMatchedAttrs] = useState(false);
+const CandidateProfileModal = ({ match, onClose }) => {
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  const handleDownloadCV = async () => {
+    if (!match.storagePath) return;
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      const token = getAccessToken();
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+      const url = `${baseUrl}/api/Storage/files/${encodeURIComponent(match.storagePath)}`;
+      const res = await fetch(url, {
+        method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("No se pudo descargar el CV.");
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objUrl;
+      a.download = match.storagePath.split("/").pop() || "cv.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objUrl);
+    } catch (err) {
+      setDownloadError(err?.message ?? "Error al descargar.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const componentScores =
+    match.componentScores && typeof match.componentScores === "object" && !Array.isArray(match.componentScores)
+      ? Object.entries(match.componentScores).filter(([k]) => !k.startsWith("additionalProp"))
+      : [];
+
+  const matchedAttrs =
+    match.matchedAttributes && typeof match.matchedAttributes === "object" && !Array.isArray(match.matchedAttributes)
+      ? Object.entries(match.matchedAttributes).filter(([k]) => !k.startsWith("additionalProp"))
+      : [];
+
+  const matchedPaths = Array.isArray(match.matchedAttributePaths)
+    ? match.matchedAttributePaths
+    : match.matchedAttributePaths && typeof match.matchedAttributePaths === "object"
+      ? Object.entries(match.matchedAttributePaths)
+      : [];
+
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
   );
-  const matchedAttrs =
-    match.matchedAttributes && typeof match.matchedAttributes === "object"
-      ? Object.entries(match.matchedAttributes).filter(
-          ([k]) => !k.startsWith("additionalProp")
-        )
-      : [];
 
-  const detailHref =
-    match.candidateProfileId
-      ? `/portal-rrhh/candidatos/${match.candidateProfileId}`
-      : null;
-
-  const handleCheckboxChange = (e) => {
-    onToggle?.(candidateId, e.target.checked);
-  };
-
-  const handleToggleDetails = () => {
-    setShowMatchedAttrs((prev) => !prev);
-  };
+  const hasContent = componentScores.length > 0 || matchedAttrs.length > 0 || matchedPaths.length > 0;
 
   return (
-    <article
-      className="rounded-xl border border-border bg-card p-5"
-      aria-label={`Candidato ${emptyToDash(match.name)}`}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Perfil de ${emptyToDash(match.name)}`}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-1 items-start gap-4">
-          <div className="flex shrink-0 items-start gap-3">
-            <label
-              className="flex cursor-pointer items-center justify-center focus-within:ring-2 focus-within:ring-vo-purple focus-within:ring-offset-2 rounded"
-              aria-label={`Seleccionar ${emptyToDash(match.name)}`}
-            >
-              <input
-                type="checkbox"
-                checked={isSelected ?? false}
-                onChange={handleCheckboxChange}
-                className="h-4 w-4 rounded border-border text-vo-purple focus:ring-vo-purple focus:ring-offset-0 cursor-pointer"
-                aria-label={`Seleccionar candidato ${emptyToDash(match.name)}`}
-              />
-            </label>
+      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-white shadow-xl dark:bg-card">
+        {/* Header */}
+        <div className="flex items-start justify-between border-b border-border p-6">
+          <div className="flex items-center gap-4">
             <div
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-base font-semibold text-white"
               aria-hidden
             >
               {initials}
             </div>
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <h3 className="font-inter text-base font-semibold text-foreground">
-              {emptyToDash(match.name)}
-            </h3>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-inter text-sm text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                {emptyToDash(match.email)}
-              </span>
-              {match.phone != null && String(match.phone).trim() !== "" && (
+            <div className="flex flex-col gap-0.5">
+              <h2 className="font-inter text-lg font-semibold text-foreground">
+                {emptyToDash(match.name)}
+              </h2>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 font-inter text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                  {emptyToDash(match.phone)}
+                  <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {emptyToDash(match.email)}
                 </span>
+                {match.phone != null && String(match.phone).trim() !== "" && (
+                  <span className="flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                    {emptyToDash(match.phone)}
+                  </span>
+                )}
+              </div>
+              <p className="font-inter text-xs text-muted-foreground">
+                Subido: {formatDate(match.uploadedAt)}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label="Cerrar modal"
+          >
+            <X className="h-5 w-5" aria-hidden />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {!hasContent ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+              <User className="h-10 w-10 text-muted-foreground" aria-hidden />
+              <p className="font-inter text-sm text-muted-foreground">
+                No hay información adicional disponible.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-6">
+              {/* Component Scores */}
+              {componentScores.length > 0 && (
+                <div>
+                  <h3 className="mb-3 font-inter text-sm font-semibold text-foreground">
+                    Puntuación por componente
+                  </h3>
+                  <ul className="flex flex-col gap-2.5" role="list">
+                    {componentScores.map(([key, val]) => {
+                      const pct = typeof val === "number" ? (val * 100).toFixed(1) : null;
+                      const barWidth = typeof val === "number" ? Math.min(val * 100, 100) : 0;
+                      return (
+                        <li key={key} className="flex items-center gap-3">
+                          <span className="w-40 shrink-0 font-inter text-xs text-muted-foreground">
+                            {formatScoreKey(key)}
+                          </span>
+                          <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-vo-purple transition-all"
+                              style={{ width: `${barWidth}%` }}
+                              aria-hidden
+                            />
+                          </div>
+                          <span className="w-14 text-right font-inter text-xs font-medium text-foreground">
+                            {pct != null ? `${pct}%` : safeString(val)}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {/* Matched Attributes */}
+              {matchedAttrs.length > 0 && (
+                <div>
+                  <h3 className="mb-3 font-inter text-sm font-semibold text-foreground">
+                    Atributos coincidentes
+                  </h3>
+                  <ul className="flex flex-col gap-3" role="list">
+                    {matchedAttrs.map(([key, val]) => {
+                      const items = Array.isArray(val)
+                        ? val.filter((v) => v != null && String(v).trim() !== "")
+                        : typeof val === "string"
+                          ? val.split(/(?<=[.!?])\s+(?=[A-Z])/).map((s) => s.trim()).filter(Boolean)
+                          : [val];
+                      return (
+                        <li key={key} className="flex flex-col gap-1.5">
+                          <span className="inline-flex w-fit items-center rounded-md bg-vo-purple/10 px-2.5 py-1 font-inter text-xs font-medium text-vo-purple">
+                            {formatRequirementKey(key)}
+                          </span>
+                          <ul className="flex flex-col gap-1 pl-1" role="list">
+                            {items.map((item, i) => (
+                              <li key={i} className="flex items-start gap-2 font-inter text-xs leading-relaxed text-muted-foreground">
+                                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" aria-hidden />
+                                {typeof item === "string" ? item : safeString(item)}
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {/* Matched Attribute Paths */}
+              {matchedPaths.length > 0 && (
+                <div>
+                  <h3 className="mb-3 font-inter text-sm font-semibold text-foreground">
+                    Fragmentos del CV
+                  </h3>
+                  <ul className="flex flex-col gap-2" role="list">
+                    {matchedPaths.map((item, i) => {
+                      const [key, val] = Array.isArray(item) ? item : [null, item];
+                      const text = typeof val === "string" ? val : safeString(val);
+                      return (
+                        <li
+                          key={i}
+                          className="rounded-lg border border-border bg-muted/30 p-3"
+                        >
+                          {key && (
+                            <span className="mb-1.5 inline-flex items-center rounded bg-vo-purple/10 px-2 py-0.5 font-inter text-xs font-medium capitalize text-vo-purple">
+                              {formatRequirementKey(key)}
+                            </span>
+                          )}
+                          <p className="font-inter text-xs leading-relaxed text-muted-foreground">
+                            {text}
+                          </p>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               )}
             </div>
-            <p className="font-inter text-xs text-muted-foreground">
-              Subido: {formatDate(match.uploadedAt)}
-            </p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between border-t border-border p-6">
+          <div>
+            {downloadError && (
+              <p className="font-inter text-xs text-destructive" role="alert">
+                {downloadError}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {match.storagePath && (
+              <button
+                type="button"
+                onClick={handleDownloadCV}
+                disabled={downloading}
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Descargar CV del candidato"
+              >
+                {downloading ? (
+                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                ) : (
+                  <Download className="h-4 w-4 shrink-0" aria-hidden />
+                )}
+                {downloading ? "Descargando..." : "Descargar CV"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+              aria-label="Cerrar perfil"
+            >
+              Cerrar
+            </button>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-col items-center rounded-lg bg-muted/50 px-4 py-2">
-            <span className="font-inter text-lg font-semibold text-foreground">
-              {typeof match.totalScore === "number"
-                ? (match.totalScore * 100).toFixed(2)
-                : "—"}
-            </span>
-            <span className="font-inter text-xs text-muted-foreground">
-              Puntaje
-            </span>
+      </div>
+    </div>
+  );
+};
+
+const MatchCard = ({ match, candidateId, isSelected, onToggle }) => {
+  const [showModal, setShowModal] = useState(false);
+  const initials = getInitials(
+    emptyToDash(match.name) !== "—" ? match.name : "",
+    match.email ?? ""
+  );
+
+  const handleCheckboxChange = (e) => {
+    onToggle?.(candidateId, e.target.checked);
+  };
+
+  const handleOpenModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
+
+  return (
+    <>
+      <article
+        className="rounded-xl border border-border bg-card p-5"
+        aria-label={`Candidato ${emptyToDash(match.name)}`}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-4">
+            <div className="flex shrink-0 items-start gap-3">
+              <label
+                className="flex cursor-pointer items-center justify-center focus-within:ring-2 focus-within:ring-vo-purple focus-within:ring-offset-2 rounded"
+                aria-label={`Seleccionar ${emptyToDash(match.name)}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected ?? false}
+                  onChange={handleCheckboxChange}
+                  className="h-4 w-4 rounded border-border text-vo-purple focus:ring-vo-purple focus:ring-offset-0 cursor-pointer"
+                  aria-label={`Seleccionar candidato ${emptyToDash(match.name)}`}
+                />
+              </label>
+              <div
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-base font-semibold text-white"
+                aria-hidden
+              >
+                {initials}
+              </div>
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <h3 className="font-inter text-base font-semibold text-foreground">
+                {emptyToDash(match.name)}
+              </h3>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-inter text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {emptyToDash(match.email)}
+                </span>
+                {match.phone != null && String(match.phone).trim() !== "" && (
+                  <span className="flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                    {emptyToDash(match.phone)}
+                  </span>
+                )}
+              </div>
+              <p className="font-inter text-xs text-muted-foreground">
+                Subido: {formatDate(match.uploadedAt)}
+              </p>
+            </div>
           </div>
-          {detailHref && (
-            <Link
-              href={detailHref}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col items-center rounded-lg bg-muted/50 px-4 py-2">
+              <span className="font-inter text-lg font-semibold text-foreground">
+                {typeof (match.semanticScore ?? match.totalScore) === "number"
+                  ? ((match.semanticScore ?? match.totalScore) * 100).toFixed(2)
+                  : "—"}
+              </span>
+              <span className="font-inter text-xs text-muted-foreground">
+                Puntaje
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenModal}
               className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
               aria-label={`Ver perfil de ${emptyToDash(match.name)}`}
             >
               <User className="h-4 w-4" aria-hidden />
               Ver perfil
-            </Link>
-          )}
+            </button>
+          </div>
         </div>
-      </div>
-      {matchedAttrs.length > 0 && (
-        <div className="mt-4 border-t border-border pt-4">
-          <button
-            type="button"
-            onClick={handleToggleDetails}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleToggleDetails();
-              }
-            }}
-            className="inline-flex items-center gap-2 font-inter text-sm font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
-            aria-label={showMatchedAttrs ? "Ocultar atributos coincidentes" : "Ver más detalles"}
-            aria-expanded={showMatchedAttrs}
-          >
-            {showMatchedAttrs ? "Menos detalles" : "Más detalles"}
-          </button>
-          {showMatchedAttrs && (
-            <div className="mt-3">
-              <span className="font-inter text-xs font-medium text-muted-foreground">
-                Atributos coincidentes
-              </span>
-              <ul className="mt-1 list-inside list-disc font-inter text-xs text-foreground" role="list">
-                {matchedAttrs.map(([key, val]) => (
-                  <li key={key}>
-                    {key}: {safeString(val)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+      </article>
+      {showModal && (
+        <CandidateProfileModal match={match} onClose={handleCloseModal} />
       )}
-    </article>
+    </>
   );
 };
 
@@ -349,10 +627,8 @@ const KanbanCard = ({
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
   );
-  const score =
-    typeof match.totalScore === "number"
-      ? (match.totalScore * 100).toFixed(0)
-      : "—";
+  const rawScore = match.semanticScore ?? match.totalScore;
+  const score = typeof rawScore === "number" ? (rawScore * 100).toFixed(0) : "—";
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData("application/json", JSON.stringify({ candidateId, stage }));
