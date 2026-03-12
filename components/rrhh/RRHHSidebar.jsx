@@ -23,12 +23,12 @@ const navItems = [
   { href: "/portal-rrhh/vacantes", label: "Vacantes", icon: Briefcase },
   { href: "/portal-rrhh/etapas", label: "Etapas", icon: ClipboardList },
   { href: "/portal-rrhh/plantillas", label: "Plantillas", icon: FileText },
-  { href: "/portal-rrhh/evaluaciones", label: "Evaluaciones", icon: ClipboardList },
-  { href: "/portal-rrhh/entrevistas", label: "Entrevistas", icon: Calendar },
-  { href: "/portal-rrhh/comunicaciones", label: "Comunicaciones", icon: MessageSquare },
-  { href: "/portal-rrhh/contratacion", label: "Contratación", icon: FileCheck },
-  { href: "/portal-rrhh/reportes", label: "Reportes", icon: BarChart3 },
-  { href: "/portal-rrhh/configuracion", label: "Configuración", icon: Settings },
+  { href: "/portal-rrhh/evaluaciones", label: "Evaluaciones", icon: ClipboardList, disabled: true },
+  { href: "/portal-rrhh/entrevistas", label: "Entrevistas", icon: Calendar, disabled: true },
+  { href: "/portal-rrhh/comunicaciones", label: "Comunicaciones", icon: MessageSquare, disabled: true },
+  { href: "/portal-rrhh/contratacion", label: "Contratación", icon: FileCheck, disabled: true },
+  { href: "/portal-rrhh/reportes", label: "Reportes", icon: BarChart3, disabled: true },
+  { href: "/portal-rrhh/configuracion", label: "Configuración", icon: Settings, disabled: true },
 ];
 
 export default function RRHHSidebar() {
@@ -63,15 +63,35 @@ export default function RRHHSidebar() {
               item.href === "/portal-rrhh"
                 ? pathname === "/portal-rrhh"
                 : pathname === item.href || pathname.startsWith(item.href + "/");
+            const isDisabled = Boolean(item.disabled);
+            const baseClasses =
+              "flex items-center gap-3 rounded-md px-4 py-3 font-inter text-sm transition-colors";
+            const enabledClasses = isActive
+              ? "bg-[#F3E8FF] text-vo-purple font-medium"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground";
+            const disabledClasses =
+              "cursor-not-allowed text-muted-foreground/60";
+
+            if (isDisabled) {
+              return (
+                <button
+                  key={item.href}
+                  type="button"
+                  className={`${baseClasses} ${disabledClasses}`}
+                  aria-disabled="true"
+                  tabIndex={-1}
+                >
+                  <Icon className="h-5 w-5 shrink-0" aria-hidden />
+                  {item.label}
+                </button>
+              );
+            }
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-md px-4 py-3 font-inter text-sm transition-colors ${
-                  isActive
-                    ? "bg-[#F3E8FF] text-vo-purple font-medium"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
+                className={`${baseClasses} ${enabledClasses}`}
                 aria-current={isActive ? "page" : undefined}
               >
                 <Icon
