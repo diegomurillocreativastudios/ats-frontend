@@ -24,10 +24,10 @@ const formatFileSize = (bytes) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-const validateFile = (file) => {
+const validateFile = (file, allowedTypes, allowedExtensions) => {
   const extension = "." + file.name.split(".").pop()?.toLowerCase();
   const typeOk =
-    ACCEPTED_TYPES.includes(file.type) || ACCEPTED_EXTENSIONS.includes(extension);
+    allowedTypes.includes(file.type) || allowedExtensions.includes(extension);
   const sizeOk = file.size <= MAX_SIZE_BYTES;
   if (!typeOk)
     return { valid: false, error: `Tipo no permitido. Solo PDF, DOC o DOCX.` };
@@ -37,11 +37,27 @@ const validateFile = (file) => {
 };
 
 /**
- * @param {{ onProcess?: (file: File, index: number) => void | Promise<void>, onProcessAll?: (files: File[]) => void | Promise<void> }} props
+ * @param {{
+ *  onProcess?: (file: File, index: number) => void | Promise<void>,
+ *  onProcessAll?: (files: File[]) => void | Promise<void>,
+ *  acceptedTypes?: string[],
+ *  acceptedExtensions?: string[],
+ *  accept?: string,
+ *  helperText?: string,
+ * }} props
  * - onProcess: callback al hacer clic en "Procesar" (solo para archivos tipo CV/Resume). Puede ser async.
  * - onProcessAll: callback al hacer clic en "Procesar todos" (múltiples CV/Resume). Puede ser async.
+ * - acceptedTypes / acceptedExtensions: sobreescriben los tipos/extensiones permitidos.
+ * - accept: valor para el atributo `accept` del input, si se quiere personalizar.
  */
-export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
+export default function DocumentsUploadZone({
+  onProcess,
+  onProcessAll,
+  acceptedTypes,
+  acceptedExtensions,
+  accept,
+  helperText,
+} = {}) {
   const inputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState([]);
@@ -50,6 +66,15 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
   const [isProcessingAll, setIsProcessingAll] = useState(false);
   const [processedIndices, setProcessedIndices] = useState(() => new Set());
 
+  const effectiveAcceptedTypes =
+    Array.isArray(acceptedTypes) && acceptedTypes.length > 0
+      ? acceptedTypes
+      : ACCEPTED_TYPES;
+  const effectiveAcceptedExtensions =
+    Array.isArray(acceptedExtensions) && acceptedExtensions.length > 0
+      ? acceptedExtensions
+      : ACCEPTED_EXTENSIONS;
+
   const processFiles = useCallback((fileList) => {
     if (!fileList?.length) return;
     setError(null);
@@ -57,7 +82,11 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
     let firstError = null;
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i];
-      const { valid, error: msg } = validateFile(file);
+      const { valid, error: msg } = validateFile(
+        file,
+        effectiveAcceptedTypes,
+        effectiveAcceptedExtensions
+      );
       if (valid) {
         newFiles.push(file);
       } else if (!firstError) {
@@ -189,7 +218,10 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
         <input
           ref={inputRef}
           type="file"
-          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          accept={
+            accept ||
+            ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          }
           multiple
           className="sr-only"
           aria-hidden
@@ -202,7 +234,7 @@ export default function DocumentsUploadZone({ onProcess, onProcessAll } = {}) {
           {isDragging ? "Suelta los archivos aquí" : "Arrastra archivos aquí o haz clic para subir"}
         </p>
         <p className="text-center font-inter text-xs text-muted-foreground">
-          PDF, DOC, DOCX hasta 10 MB
+          {helperText || "PDF, DOC, DOCX hasta 10 MB"}
         </p>
       </div>
 

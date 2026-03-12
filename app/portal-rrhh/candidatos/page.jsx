@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Search, Eye, Users } from "lucide-react";
+import { Search, Eye, Users, Plus } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import { apiClient } from "@/lib/api";
 import { getInitials } from "@/lib/getInitials";
+import Modal from "@/components/ui/Modal";
+import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -105,6 +107,36 @@ export default function CandidatosPage() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState(null);
+
+  const handleOpenUploadModal = () => {
+    setUploadMessage(null);
+    setIsUploadModalOpen(true);
+  };
+
+  const handleCloseUploadModal = () => {
+    setIsUploadModalOpen(false);
+  };
+
+  const handleProcessUpload = async (file) => {
+    setUploadMessage(null);
+    const formData = new FormData();
+    formData.append("File", file);
+    formData.append("EntityType", "Candidate");
+    try {
+      await apiClient.postFormData("/Ingest/upload", formData);
+      setUploadMessage({
+        type: "success",
+        text: "CV cargado y procesado correctamente.",
+      });
+      await fetchCandidates();
+    } catch (err) {
+      const message =
+        err?.message || err?.detail || "Error al procesar el CV.";
+      setUploadMessage({ type: "error", text: message });
+    }
+  };
 
   const fetchCandidates = useCallback(async () => {
     setLoading(true);
@@ -146,7 +178,7 @@ export default function CandidatosPage() {
 
   const mainContent = (
     <section className="flex flex-col gap-6" aria-label="Lista de candidatos">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="relative w-full max-w-[320px]">
           <Search
             className="absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground"
@@ -161,6 +193,14 @@ export default function CandidatosPage() {
             aria-label="Buscar candidatos"
           />
         </div>
+        <button
+          type="button"
+          onClick={handleOpenUploadModal}
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+        >
+          <Plus className="h-4 w-4" aria-hidden />
+          <span>Agregar candidato</span>
+        </button>
       </div>
       <div className="overflow-hidden rounded-lg border border-border bg-card">
         {loading ? (
@@ -275,6 +315,37 @@ export default function CandidatosPage() {
               </section>
             </div>
           </main>
+          <Modal
+            isOpen={isUploadModalOpen}
+            onClose={handleCloseUploadModal}
+            title="Agregar candidato"
+            size="lg"
+          >
+            <div className="flex flex-col gap-4">
+              <p className="font-inter text-sm text-muted-foreground">
+                Sube el CV del candidato en formato PDF para crear su perfil automáticamente.
+              </p>
+              {uploadMessage && (
+                <p
+                  role="alert"
+                  className={`font-inter text-sm ${
+                    uploadMessage.type === "success"
+                      ? "text-success"
+                      : "text-destructive"
+                  }`}
+                >
+                  {uploadMessage.text}
+                </p>
+              )}
+              <DocumentsUploadZone
+                onProcess={handleProcessUpload}
+                acceptedTypes={["application/pdf"]}
+                acceptedExtensions={[".pdf"]}
+                accept="application/pdf,.pdf"
+                helperText="Solo archivos PDF hasta 10 MB"
+              />
+            </div>
+          </Modal>
         </div>
       </div>
 
