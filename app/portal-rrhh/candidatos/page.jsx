@@ -343,6 +343,7 @@ export default function CandidatosPage() {
                 acceptedExtensions={[".pdf"]}
                 accept="application/pdf,.pdf"
                 helperText="Solo archivos PDF hasta 10 MB"
+                processAllAcceptedFiles
               />
             </div>
           </Modal>

@@ -44,11 +44,13 @@ const validateFile = (file, allowedTypes, allowedExtensions) => {
  *  acceptedExtensions?: string[],
  *  accept?: string,
  *  helperText?: string,
+ *  processAllAcceptedFiles?: boolean,
  * }} props
- * - onProcess: callback al hacer clic en "Procesar" (solo para archivos tipo CV/Resume). Puede ser async.
- * - onProcessAll: callback al hacer clic en "Procesar todos" (múltiples CV/Resume). Puede ser async.
+ * - onProcess: callback al hacer clic en "Procesar". Puede ser async.
+ * - onProcessAll: callback al hacer clic en "Procesar todos". Puede ser async.
  * - acceptedTypes / acceptedExtensions: sobreescriben los tipos/extensiones permitidos.
  * - accept: valor para el atributo `accept` del input, si se quiere personalizar.
+ * - processAllAcceptedFiles: si true, todos los archivos aceptados son procesables (no solo los que tienen CV/Resume en el nombre).
  */
 export default function DocumentsUploadZone({
   onProcess,
@@ -57,6 +59,7 @@ export default function DocumentsUploadZone({
   acceptedExtensions,
   accept,
   helperText,
+  processAllAcceptedFiles = false,
 } = {}) {
   const inputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -160,9 +163,11 @@ export default function DocumentsUploadZone({
     setProcessingIndex(null);
   };
 
-  const processableFiles = files
-    .map((file, index) => ({ file, index }))
-    .filter(({ file }) => isResumeLikeFile(file.name));
+  const processableFiles = processAllAcceptedFiles
+    ? files.map((file, index) => ({ file, index }))
+    : files
+        .map((file, index) => ({ file, index }))
+        .filter(({ file }) => isResumeLikeFile(file.name));
 
   const handleProcessClick = async (file, index) => {
     if (!onProcess || processingIndex !== null || isProcessingAll) return;
@@ -280,7 +285,7 @@ export default function DocumentsUploadZone({
           </div>
           <ul className="flex flex-col gap-2" aria-label="Archivos seleccionados para subir">
             {files.map((file, index) => {
-              const showProcessButton = isResumeLikeFile(file.name);
+              const showProcessButton = processAllAcceptedFiles || isResumeLikeFile(file.name);
               return (
                 <li
                   key={`${file.name}-${index}`}

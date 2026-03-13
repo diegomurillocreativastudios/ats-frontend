@@ -461,7 +461,7 @@ const CandidateProfileModal = ({ match, onClose }) => {
   );
 };
 
-const MatchCard = ({ match, candidateId, isSelected, onToggle }) => {
+const MatchCard = ({ match, candidateId, isSelected, onToggle, showVerPerfil = false }) => {
   const [showModal, setShowModal] = useState(false);
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
@@ -535,19 +535,21 @@ const MatchCard = ({ match, candidateId, isSelected, onToggle }) => {
                 Puntaje
               </span>
             </div>
-            <button
-              type="button"
-              onClick={handleOpenModal}
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              aria-label={`Ver perfil de ${emptyToDash(match.name)}`}
-            >
-              <User className="h-4 w-4" aria-hidden />
-              Ver perfil
-            </button>
+            {showVerPerfil && (
+              <button
+                type="button"
+                onClick={handleOpenModal}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                aria-label={`Ver perfil de ${emptyToDash(match.name)}`}
+              >
+                <User className="h-4 w-4" aria-hidden />
+                Ver perfil
+              </button>
+            )}
           </div>
         </div>
       </article>
-      {showModal && (
+      {showVerPerfil && showModal && (
         <CandidateProfileModal match={match} onClose={handleCloseModal} />
       )}
     </>
@@ -756,6 +758,8 @@ export default function VacanteDetallePage() {
   const [dragOverStage, setDragOverStage] = useState(null);
   const [stages, setStages] = useState([]);
   const [statuses, setStatuses] = useState([]);
+  const [moveStageError, setMoveStageError] = useState(null);
+  const [loadingMoveStage, setLoadingMoveStage] = useState(false);
 
   const fetchStages = useCallback(async () => {
     try {
@@ -902,9 +906,43 @@ export default function VacanteDetallePage() {
     }));
   }, [applicants, candidateStageOverrides, kanbanStageNames]);
 
-  const handleKanbanStageDrop = useCallback((candidateId, newStage) => {
-    setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
-  }, []);
+  const handleKanbanStageDrop = useCallback(
+    async (candidateId, newStage) => {
+      setMoveStageError(null);
+      const applicant = applicants.find(
+        (m, i) => getCandidateId(m, i) === candidateId
+      );
+      const applicationId = applicant?.applicationId ?? applicant?.application_id;
+      const stageObj = stages.find(
+        (s) => (s.name || "").trim() === (newStage || "").trim()
+      );
+      const stageId = stageObj?.id ?? stageObj?.uuid;
+
+      setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
+
+      if (applicationId && stageId) {
+        setLoadingMoveStage(true);
+        try {
+          await apiClient.patch(
+            `/api/recruiter/applications/${applicationId}/move-to-stage`,
+            { stageId, notes: "" }
+          );
+        } catch (err) {
+          const message =
+            err?.message ?? err?.detail ?? "No se pudo mover el candidato de etapa.";
+          setMoveStageError(message);
+          setCandidateStageOverrides((prev) => {
+            const next = { ...prev };
+            delete next[candidateId];
+            return next;
+          });
+        } finally {
+          setLoadingMoveStage(false);
+        }
+      }
+    },
+    [applicants, stages]
+  );
 
   const handleKanbanDragEnter = useCallback((stage) => {
     setDragOverStage(stage);
@@ -1301,6 +1339,7 @@ export default function VacanteDetallePage() {
                                     candidateId={candidateId}
                                     isSelected={selectedPossibleCandidateIds.has(candidateId)}
                                     onToggle={handleTogglePossibleCandidate}
+                                    showVerPerfil
                                   />
                                 </li>
                               );
@@ -1319,6 +1358,11 @@ export default function VacanteDetallePage() {
                           ({applicants.length})
                         </span>
                       </h2>
+                      {moveStageError && (
+                        <p className="font-inter text-sm text-destructive" role="alert">
+                          {moveStageError}
+                        </p>
+                      )}
                       <div
                         className="rounded-xl border border-border bg-card p-6"
                         aria-label="Contenedor del tablero Kanban"
@@ -1659,6 +1703,7 @@ export default function VacanteDetallePage() {
                                   candidateId={candidateId}
                                   isSelected={selectedPossibleCandidateIds.has(candidateId)}
                                   onToggle={handleTogglePossibleCandidate}
+                                  showVerPerfil
                                 />
                               </li>
                             );
@@ -1677,6 +1722,11 @@ export default function VacanteDetallePage() {
                         ({applicants.length})
                       </span>
                     </h2>
+                    {moveStageError && (
+                      <p className="font-inter text-sm text-destructive" role="alert">
+                        {moveStageError}
+                      </p>
+                    )}
                     <div
                       className="rounded-xl border border-border bg-card p-5"
                       aria-label="Contenedor del tablero Kanban"
