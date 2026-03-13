@@ -790,24 +790,28 @@ export default function VacanteDetallePage() {
     }
   }, []);
 
-  const fetchVacancy = useCallback(async () => {
+  const fetchVacancy = useCallback(async (silent = false) => {
     if (!id) {
-      setLoading(false);
-      setFetchError("Falta el ID de la vacante.");
+      if (!silent) setLoading(false);
+      if (!silent) setFetchError("Falta el ID de la vacante.");
       return;
     }
-    setLoading(true);
-    setFetchError(null);
+    if (!silent) {
+      setLoading(true);
+      setFetchError(null);
+    }
     try {
       const data = await apiClient.get(`/api/recruiter/vacancies/${id}`);
       setVacancy(data);
     } catch (err) {
-      setFetchError(
-        err?.message ?? err?.detail ?? "No se pudo cargar la vacante."
-      );
-      setVacancy(null);
+      if (!silent) {
+        setFetchError(
+          err?.message ?? err?.detail ?? "No se pudo cargar la vacante."
+        );
+        setVacancy(null);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [id]);
 
@@ -999,7 +1003,7 @@ export default function VacanteDetallePage() {
         candidateProfileIds,
       });
       setSelectedPossibleCandidateIds(new Set());
-      await fetchVacancy();
+      await fetchVacancy(true);
     } catch (err) {
       setStartProcessError(
         err?.message ?? err?.detail ?? "No se pudo iniciar el proceso."
@@ -1024,7 +1028,7 @@ export default function VacanteDetallePage() {
     setMatchError(null);
     try {
       await apiClient.post(`/api/recruiter/vacancies/${id}/match`, docIds);
-      window.location.reload();
+      await fetchVacancy(true);
     } catch (err) {
       setMatchError(
         err?.message ?? err?.detail ?? "No se pudo ejecutar el match."
@@ -1032,7 +1036,7 @@ export default function VacanteDetallePage() {
     } finally {
       setLoadingMatch(false);
     }
-  }, [id, displayCandidates, selectedCandidateIds]);
+  }, [id, displayCandidates, selectedCandidateIds, fetchVacancy]);
 
   const selectedCount = selectedCandidateIds.size;
 
