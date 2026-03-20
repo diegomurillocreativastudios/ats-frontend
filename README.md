@@ -95,6 +95,42 @@ npm run lint
 
 ---
 
+## Pruebas Automatizadas
+
+El proyecto utiliza **Vitest** para pruebas unitarias y **Playwright** para pruebas de integración/E2E.
+
+### 1. Configuración inicial (Solo una vez)
+Después de instalar las dependencias, debés instalar los binarios de los navegadores para Playwright:
+```bash
+npx playwright install chromium
+```
+
+### 2. Ejecutar Pruebas Unitarias (Vitest)
+```bash
+npm run test
+```
+
+### 3. Ejecutar Pruebas E2E (Playwright)
+
+#### **Opción A: Ciclo Completo (RECOMENDADO)**
+Este comando automatiza todo: limpia la base de datos de pruebas, levanta el backend, el frontend, corre los tests y apaga todo al finalizar.
+```bash
+npm run test:e2e:full
+```
+
+#### **Opción B: Manual**
+**Requisito**: Tanto el backend (`dotnet run`) como el frontend (`npm run dev`) deben estar corriendo en terminales separadas.
+```bash
+npm run test:e2e
+```
+
+Para abrir el reporte visual después de una falla:
+```bash
+npx playwright show-report
+```
+
+---
+
 ## Notas
 
 * Las pantallas de autenticación están implementadas **pixel-perfect** según `design.pen`,
