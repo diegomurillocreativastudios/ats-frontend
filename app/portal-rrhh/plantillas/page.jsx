@@ -15,13 +15,29 @@ import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
 import { apiClient } from "@/lib/api";
 
 const mapTemplateFromApi = (item, index = 0) => {
-  const id = item?.id ?? item?.uuid ?? index;
-  const name = item.name ?? item.templateName ?? "";
-  const subject = item.subjectTemplate ?? item.subject ?? "";
-  const body = item.bodyTemplate ?? item.body ?? item.content ?? "";
+  const id = item?.id ?? index;
+  const name = item.name ?? "";
+  const type = item.type ?? "Notification";
+
+  // Notification fields
+  const subject = item.subjectTemplate ?? "";
+  const body = item.bodyTemplate ?? "";
   const channels = Array.isArray(item?.channels) ? item.channels : [];
 
-  return { id, name, subject, body, channels };
+  // Document fields
+  const contentTemplate = item.contentTemplate ?? "";
+  const outputFormat = item.outputFormat ?? "PDF";
+
+  // Questionnaire fields
+  const description = item.description ?? "";
+  const isMandatory = !!item.isMandatory;
+
+  return {
+    id, name, type,
+    subject, body, channels,
+    contentTemplate, outputFormat,
+    description, isMandatory
+  };
 };
 
 const TemplateCard = ({ template, onEdit, onDelete }) => {
@@ -38,17 +54,40 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
           <FileText className="h-6 w-6 text-vo-purple" aria-hidden />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <h3 className="font-inter text-base font-semibold text-foreground">
-            {template.name}
-          </h3>
-          {template.subject && (
-            <p className="font-inter text-sm text-muted-foreground line-clamp-1">
-              {template.subject}
+          <div className="flex items-center gap-2">
+            <h3 className="font-inter text-base font-semibold text-foreground">
+              {template.name}
+            </h3>
+            <span className={`rounded-full px-2 py-0.5 font-inter text-[10px] font-bold uppercase tracking-wider ${template.type === 'Notification' ? 'bg-blue-100 text-blue-700' :
+                template.type === 'Document' ? 'bg-emerald-100 text-emerald-700' :
+                  'bg-amber-100 text-amber-700'
+              }`}>
+              {template.type === 'Notification' ? 'Notificación' :
+                template.type === 'Document' ? 'Documento' : 'Cuestionario'}
+            </span>
+          </div>
+          {template.type === 'Notification' && (
+            <>
+              {template.subject && (
+                <p className="font-inter text-sm text-muted-foreground line-clamp-1">
+                  <span className="font-semibold">Asunto:</span> {template.subject}
+                </p>
+              )}
+              {template.body && (
+                <p className="font-inter text-sm text-muted-foreground line-clamp-2 italic">
+                  "{template.body}"
+                </p>
+              )}
+            </>
+          )}
+          {template.type === 'Document' && (
+            <p className="font-inter text-sm text-muted-foreground line-clamp-2">
+              <span className="font-semibold">Formato:</span> {template.outputFormat}
             </p>
           )}
-          {template.body && (
+          {template.type === 'Questionnaire' && (
             <p className="font-inter text-sm text-muted-foreground line-clamp-2">
-              {template.body}
+              {template.description} {template.isMandatory && <span className="text-vo-pink">(Obligatorio)</span>}
             </p>
           )}
         </div>
@@ -92,7 +131,7 @@ export default function PlantillasPage() {
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await apiClient.get("/api/Notification/templates");
+      const data = await apiClient.get("/api/Templates");
       const list = Array.isArray(data) ? data : data?.templates ?? data?.items ?? data?.data ?? [];
       setTemplates(list.map((item, i) => mapTemplateFromApi(item, i)));
     } catch (err) {
@@ -130,7 +169,7 @@ export default function PlantillasPage() {
     setDeleteLoading(true);
     try {
       await apiClient.delete(
-        `/api/Notification/templates/${templateToDelete.id}`
+        `/api/Templates/${templateToDelete.id}`
       );
       setIsDeleteModalOpen(false);
       setTemplateToDelete(null);
@@ -167,7 +206,9 @@ export default function PlantillasPage() {
       !searchQuery ||
       (t.name && t.name.toLowerCase().includes(q)) ||
       (t.subject && t.subject.toLowerCase().includes(q)) ||
-      (t.body && t.body.toLowerCase().includes(q))
+      (t.body && t.body.toLowerCase().includes(q)) ||
+      (t.description && t.description.toLowerCase().includes(q)) ||
+      (t.type && t.type.toLowerCase().includes(q))
     );
   });
 
