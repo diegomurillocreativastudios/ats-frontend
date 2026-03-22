@@ -339,7 +339,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit }) {
                           htmlFor={`scale-${req.id}`}
                           className="font-inter text-xs text-muted-foreground"
                         >
-                          Nivel (1-10)
+                          Importancia (1-10)
                         </label>
                         <span className="font-inter text-xs font-medium text-foreground tabular-nums">
                           {req.scale}

@@ -283,7 +283,12 @@ export default function DocumentsUploadZone({
               </button>
             </div>
           </div>
-          <ul className="flex flex-col gap-2" aria-label="Archivos seleccionados para subir">
+          <div
+            className="max-h-[min(280px,45vh)] overflow-y-auto overscroll-y-contain pr-1"
+            role="region"
+            aria-label="Lista de archivos seleccionados"
+          >
+            <ul className="flex flex-col gap-2">
             {files.map((file, index) => {
               const showProcessButton = processAllAcceptedFiles || isResumeLikeFile(file.name);
               return (
@@ -341,7 +346,8 @@ export default function DocumentsUploadZone({
                 </li>
               );
             })}
-          </ul>
+            </ul>
+          </div>
         </div>
       )}
     </div>

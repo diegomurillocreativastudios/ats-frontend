@@ -125,7 +125,7 @@ export default function RRHHTopbar({
           </button>
           {menuOpen && (
             <div
-              className="absolute right-0 top-full z-50 mt-2 min-w-[160px] rounded-lg border border-border bg-card py-1 shadow-lg"
+              className="bg-white absolute right-0 top-full z-50 mt-2 min-w-[160px] rounded-lg border border-border bg-card py-1 shadow-lg"
               role="menu"
             >
               <button

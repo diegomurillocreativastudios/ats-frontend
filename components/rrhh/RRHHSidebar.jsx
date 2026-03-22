@@ -3,32 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
   Users,
   Briefcase,
   ClipboardList,
   FileText,
-  Calendar,
-  MessageSquare,
-  FileCheck,
-  BarChart3,
-  Settings,
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getInitials } from "@/lib/getInitials";
 
 const navItems = [
-  { href: "/portal-rrhh", label: "Dashboard", icon: LayoutDashboard },
   { href: "/portal-rrhh/candidatos", label: "Candidatos", icon: Users },
   { href: "/portal-rrhh/vacantes", label: "Vacantes", icon: Briefcase },
   { href: "/portal-rrhh/etapas", label: "Etapas", icon: ClipboardList },
   { href: "/portal-rrhh/plantillas", label: "Plantillas", icon: FileText },
-  { href: "/portal-rrhh/evaluaciones", label: "Evaluaciones", icon: ClipboardList, disabled: true },
-  { href: "/portal-rrhh/entrevistas", label: "Entrevistas", icon: Calendar, disabled: true },
-  { href: "/portal-rrhh/comunicaciones", label: "Comunicaciones", icon: MessageSquare, disabled: true },
-  { href: "/portal-rrhh/contratacion", label: "Contratación", icon: FileCheck, disabled: true },
-  { href: "/portal-rrhh/reportes", label: "Reportes", icon: BarChart3, disabled: true },
-  { href: "/portal-rrhh/configuracion", label: "Configuración", icon: Settings, disabled: true },
 ];
 
 export default function RRHHSidebar() {
@@ -60,32 +47,12 @@ export default function RRHHSidebar() {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
-              item.href === "/portal-rrhh"
-                ? pathname === "/portal-rrhh"
-                : pathname === item.href || pathname.startsWith(item.href + "/");
-            const isDisabled = Boolean(item.disabled);
+              pathname === item.href || pathname.startsWith(item.href + "/");
             const baseClasses =
               "flex items-center gap-3 rounded-md px-4 py-3 font-inter text-sm transition-colors";
             const enabledClasses = isActive
               ? "bg-[#F3E8FF] text-vo-purple font-medium"
               : "text-muted-foreground hover:bg-muted hover:text-foreground";
-            const disabledClasses =
-              "cursor-not-allowed text-muted-foreground/60";
-
-            if (isDisabled) {
-              return (
-                <button
-                  key={item.href}
-                  type="button"
-                  className={`${baseClasses} ${disabledClasses}`}
-                  aria-disabled="true"
-                  tabIndex={-1}
-                >
-                  <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                  {item.label}
-                </button>
-              );
-            }
 
             return (
               <Link

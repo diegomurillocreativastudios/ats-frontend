@@ -31,7 +31,11 @@ export function proxy(request) {
     pathname.startsWith('/auth/forgot-password');
 
   if (hasToken && isAuthPage) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/portal-rrhh/candidatos', request.url));
+  }
+
+  if (pathname === '/' && hasToken) {
+    return NextResponse.redirect(new URL('/portal-rrhh/candidatos', request.url));
   }
 
   if (isPublicPath(pathname)) {

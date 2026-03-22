@@ -87,7 +87,9 @@ export default function IniciarSesion() {
         typeof window !== "undefined"
           ? new URLSearchParams(window.location.search).get("from")
           : null;
-      router.push(from && from.startsWith("/") ? from : "/portal-rrhh");
+      router.push(
+        from && from.startsWith("/") ? from : "/portal-rrhh/candidatos"
+      );
     } catch (err) {
       setMessage({
         type: "error",

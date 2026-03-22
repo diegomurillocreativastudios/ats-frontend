@@ -6,7 +6,9 @@ import { Search, Eye, Users, Plus } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import { apiClient } from "@/lib/api";
+import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
+import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay";
 import Modal from "@/components/ui/Modal";
 import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
 
@@ -31,8 +33,8 @@ const mapCandidateFromApi = (item, index = 0) => {
   const id = String(item?.documentId ?? item?.id ?? item?.uuid ?? index);
   const name = emptyToDash(item?.name) === "—" ? "Sin nombre" : (item?.name ?? "Sin nombre").trim();
   const email = emptyToDash(item?.email);
-  const phone = emptyToDash(item?.phone);
-  const country = emptyToDash(item?.country);
+  const phone = formatPhoneSvDisplay(item?.phone);
+  const country = resolveCountryDisplay(item?.country, phone);
   const headline = emptyToDash(item?.headline);
   const summary = emptyToDash(item?.summary);
   const date = formatDate(item?.uploadedAt ?? item?.createdAt ?? item?.created_at ?? null);

@@ -1176,7 +1176,7 @@ export default function VacanteDetallePage() {
                         onClick={handleSearchSmartRecommendations}
                         disabled={loadingSmart}
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
-                        aria-label="Buscar"
+                        aria-label="Busqueda preliminar"
                       >
                         {loadingSmart ? (
                           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
@@ -1185,7 +1185,7 @@ export default function VacanteDetallePage() {
                         )}
                         {loadingSmart
                           ? "Buscando..."
-                          : "Buscar"}
+                          : "Busqueda preliminar"}
                       </button>
                       {displayCandidates.length > 0 && (
                         <button
@@ -1193,14 +1193,14 @@ export default function VacanteDetallePage() {
                           onClick={handleMatch}
                           disabled={loadingMatch || selectedDocumentIds.length === 0}
                           className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label="Preparar candidatos seleccionados"
+                          aria-label="Analisis preliminar"
                         >
                           {loadingMatch ? (
                             <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                           ) : (
                             <Scale className="h-4 w-4 shrink-0" aria-hidden />
                           )}
-                          {loadingMatch ? "Preparando..." : "Preparar"}
+                          {loadingMatch ? "Analizando..." : "Analisis preliminar"}
                         </button>
                       )}
                     </div>
@@ -1305,7 +1305,7 @@ export default function VacanteDetallePage() {
                           type="button"
                           disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
                           className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
-                          aria-label="Iniciar proceso con candidatos seleccionados"
+                          aria-label="Incluir al proceso con candidatos seleccionados"
                           onClick={handleStartProcess}
                         >
                           {loadingStartProcess ? (
@@ -1313,7 +1313,7 @@ export default function VacanteDetallePage() {
                           ) : (
                             <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                           )}
-                          {loadingStartProcess ? "Iniciando..." : "Iniciar proceso"}
+                          {loadingStartProcess ? "Incluyendo..." : "Incluir al proceso"}
                         </button>
                       </div>
                       {startProcessError && (
