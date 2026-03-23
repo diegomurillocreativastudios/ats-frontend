@@ -28,9 +28,12 @@ const emptyToDash = (value) => (value && String(value).trim() ? String(value).tr
 /**
  * Maps API candidate document to table row shape.
  * API shape: documentId, profileId, name, email, phone, country, headline, uploadedAt, summary
+ * Rutas y GET /api/recruiter/candidates/{id} usan profileId (no documentId).
  */
 const mapCandidateFromApi = (item, index = 0) => {
-  const id = String(item?.documentId ?? item?.id ?? item?.uuid ?? index);
+  const id = String(
+    item?.profileId ?? item?.documentId ?? item?.id ?? item?.uuid ?? index
+  );
   const name = emptyToDash(item?.name) === "—" ? "Sin nombre" : (item?.name ?? "Sin nombre").trim();
   const email = emptyToDash(item?.email);
   const phone = formatPhoneSvDisplay(item?.phone);

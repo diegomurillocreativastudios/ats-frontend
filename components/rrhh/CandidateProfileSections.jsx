@@ -5,6 +5,53 @@ import { ExternalLink, Link2, Phone, Video } from "lucide-react";
 const emptyToDash = (value) =>
   value != null && String(value).trim() !== "" ? String(value).trim() : "—";
 
+/** API puede devolver un objeto o un string JSON (p. ej. JobPreferences). */
+const parseJsonObjectIfString = (value) => {
+  if (value == null) return null
+  if (typeof value === "object" && !Array.isArray(value)) return value
+  if (typeof value === "string") {
+    const trimmed = value.trim()
+    if (!trimmed) return null
+    try {
+      const parsed = JSON.parse(trimmed)
+      if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed
+      }
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
+/**
+ * API puede devolver un array de objetos o un array de strings JSON (cada ítem es un objeto serializado).
+ */
+const normalizeObjectArray = (raw) => {
+  if (!Array.isArray(raw)) return []
+  const out = []
+  for (const item of raw) {
+    if (item == null) continue
+    if (typeof item === "object" && !Array.isArray(item)) {
+      out.push(item)
+      continue
+    }
+    if (typeof item === "string") {
+      const trimmed = item.trim()
+      if (!trimmed) continue
+      try {
+        const parsed = JSON.parse(trimmed)
+        if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+          out.push(parsed)
+        }
+      } catch {
+        /* skip invalid */
+      }
+    }
+  }
+  return out
+}
+
 export const SectionCard = ({ title, icon: Icon, children, sectionId }) => (
   <section
     className="rounded-xl border border-border bg-card p-5 md:p-6"
@@ -35,22 +82,28 @@ export const InfoGrid = ({ items }) => (
 );
 
 export const JobPreferencesBlock = ({ prefs }) => {
-  if (!prefs || typeof prefs !== "object") {
+  const parsed = parseJsonObjectIfString(prefs)
+  if (!parsed) {
     return <p className="font-inter text-sm text-muted-foreground">—</p>;
   }
-  const sectors = Array.isArray(prefs.Sectors) ? prefs.Sectors : [];
+  const sectors = Array.isArray(parsed.Sectors) ? parsed.Sectors : [];
   const sectorsText = sectors.length > 0 ? sectors.join(", ") : null;
 
+  const minSalary = parsed.MinSalary ?? parsed.minSalary
+  const disabilityRaw = parsed.Disability ?? parsed.disability
+  const disabilityDisplay =
+    disabilityRaw === true ? "Sí" : disabilityRaw === false ? "No" : null
+
   const items = [
-    { label: "Rol deseado", value: prefs.DesiredRole ?? prefs.desiredRole },
-    { label: "Salario mínimo", value: prefs.MinSalary ?? prefs.minSalary },
+    { label: "Rol deseado", value: parsed.DesiredRole ?? parsed.desiredRole },
+    { label: "Salario mínimo", value: minSalary },
     {
       label: "Nivel educativo",
-      value: prefs.EducationLevel ?? prefs.educationLevel,
+      value: parsed.EducationLevel ?? parsed.educationLevel,
     },
-    { label: "Ciudad deseada", value: prefs.DesiredCity ?? prefs.desiredCity },
-    { label: "Disponibilidad", value: prefs.Availability ?? prefs.availability },
-    { label: "Discapacidad", value: prefs.Disability ?? prefs.disability },
+    { label: "Ciudad deseada", value: parsed.DesiredCity ?? parsed.desiredCity },
+    { label: "Disponibilidad", value: parsed.Availability ?? parsed.availability },
+    { label: "Discapacidad", value: disabilityDisplay },
   ];
 
   return (
@@ -69,7 +122,8 @@ export const JobPreferencesBlock = ({ prefs }) => {
 };
 
 export const WorkExperienceList = ({ items }) => {
-  if (!Array.isArray(items) || items.length === 0) {
+  const list = normalizeObjectArray(items ?? []);
+  if (list.length === 0) {
     return (
       <p className="font-inter text-sm text-muted-foreground">
         Sin experiencia laboral registrada.
@@ -78,7 +132,7 @@ export const WorkExperienceList = ({ items }) => {
   }
   return (
     <ul className="flex flex-col gap-5" role="list">
-      {items.map((job, index) => {
+      {list.map((job, index) => {
         const company = job.Company ?? job.company ?? "";
         const role = job.Role ?? job.role ?? "";
         const start = job.StartDate ?? job.startDate ?? "";
@@ -110,7 +164,8 @@ export const WorkExperienceList = ({ items }) => {
 };
 
 export const EducationList = ({ items }) => {
-  if (!Array.isArray(items) || items.length === 0) {
+  const list = normalizeObjectArray(items ?? []);
+  if (list.length === 0) {
     return (
       <p className="font-inter text-sm text-muted-foreground">
         Sin educación registrada.
@@ -119,7 +174,7 @@ export const EducationList = ({ items }) => {
   }
   return (
     <ul className="flex flex-col gap-4" role="list">
-      {items.map((edu, index) => {
+      {list.map((edu, index) => {
         const institution = edu.Institution ?? edu.institution ?? "";
         const degree = edu.Degree ?? edu.degree ?? "";
         const start = edu.StartDate ?? edu.startDate ?? "";
@@ -147,14 +202,15 @@ export const EducationList = ({ items }) => {
 };
 
 export const LanguagesList = ({ items }) => {
-  if (!Array.isArray(items) || items.length === 0) {
+  const list = normalizeObjectArray(items ?? []);
+  if (list.length === 0) {
     return (
       <p className="font-inter text-sm text-muted-foreground">—</p>
     );
   }
   return (
     <ul className="flex flex-wrap gap-2" role="list">
-      {items.map((lang, index) => {
+      {list.map((lang, index) => {
         const name = lang.Language ?? lang.language ?? "";
         const level = lang.Level ?? lang.level ?? "";
         const label = [name, level].filter(Boolean).join(" — ");
@@ -236,7 +292,8 @@ export const SocialLinksList = ({ links }) => {
 };
 
 export const ReferencesList = ({ items }) => {
-  if (!Array.isArray(items) || items.length === 0) {
+  const list = normalizeObjectArray(items ?? []);
+  if (list.length === 0) {
     return (
       <p className="font-inter text-sm text-muted-foreground">
         Sin referencias registradas.
@@ -245,7 +302,7 @@ export const ReferencesList = ({ items }) => {
   }
   return (
     <ul className="flex flex-col gap-3" role="list">
-      {items.map((ref, index) => {
+      {list.map((ref, index) => {
         const name = ref.Name ?? ref.name ?? "";
         const position = ref.Position ?? ref.position ?? "";
         const company = ref.Company ?? ref.company ?? "";

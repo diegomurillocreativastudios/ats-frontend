@@ -221,6 +221,13 @@ export default function CandidatoDetallePage() {
   const initials = getInitials(fullName, email);
 
   const breadcrumbLabel = loading ? "Candidato" : fullName;
+  const breadcrumbTrail = useMemo(
+    () => [
+      { label: "Candidatos", href: "/portal-rrhh/candidatos" },
+      { label: breadcrumbLabel },
+    ],
+    [breadcrumbLabel]
+  );
 
   useEffect(() => {
     if (!loading && fullName) {
@@ -273,14 +280,6 @@ export default function CandidatoDetallePage() {
     ],
     [email, phoneDisplay, countryDisplay, birthCity, birthDateRaw, marital, gender]
   );
-
-  const normalizedDataJsonPretty = useMemo(() => {
-    try {
-      return JSON.stringify(nd, null, 2);
-    } catch {
-      return "{}";
-    }
-  }, [nd]);
 
   const mainInner = (
     <>
@@ -370,7 +369,7 @@ export default function CandidatoDetallePage() {
                   {fullName}
                 </h1>
                 {summary ? (
-                  <p className="mt-2 font-inter text-sm font-medium text-vo-purple">
+                  <p className="mt-3 max-w-3xl font-inter text-sm leading-relaxed text-muted-foreground">
                     {summary}
                   </p>
                 ) : null}
@@ -527,23 +526,6 @@ export default function CandidatoDetallePage() {
                 </pre>
               </SectionCard>
             ) : null}
-
-            <SectionCard
-              title="normalizedData (JSON completo)"
-              icon={FileText}
-              sectionId="sec-nd-json"
-            >
-              <p className="mb-3 font-inter text-xs text-muted-foreground">
-                Objeto parseado devuelto por{" "}
-                <span className="font-mono">GET /api/recruiter/candidates/{"{id}"}</span>
-              </p>
-              <pre
-                className="max-h-[min(480px,50vh)] overflow-auto rounded-lg border border-border bg-muted/40 p-4 font-mono text-xs leading-relaxed text-foreground"
-                tabIndex={0}
-              >
-                {normalizedDataJsonPretty}
-              </pre>
-            </SectionCard>
           </div>
         </>
       )}
@@ -555,7 +537,11 @@ export default function CandidatoDetallePage() {
       <div className="hidden h-full lg:flex">
         <RRHHSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar variant="desktop" breadcrumbLabel={breadcrumbLabel} />
+          <RRHHTopbar
+            variant="desktop"
+            breadcrumbLabel={breadcrumbLabel}
+            breadcrumbTrail={breadcrumbTrail}
+          />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col p-8">{mainInner}</div>
           </main>
@@ -563,7 +549,11 @@ export default function CandidatoDetallePage() {
       </div>
 
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar variant="tablet" breadcrumbLabel={breadcrumbLabel} />
+        <RRHHTopbar
+          variant="tablet"
+          breadcrumbLabel={breadcrumbLabel}
+          breadcrumbTrail={breadcrumbTrail}
+        />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col p-4 md:p-6">{mainInner}</div>
         </main>

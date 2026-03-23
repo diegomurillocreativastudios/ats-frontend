@@ -1042,13 +1042,25 @@ export default function VacanteDetallePage() {
 
   const breadcrumbLabel = vacancy?.title ? vacancy.title : "Detalle de vacante";
 
+  const breadcrumbTrail = useMemo(
+    () => [
+      { label: "Vacantes", href: "/portal-rrhh/vacantes" },
+      { label: breadcrumbLabel },
+    ],
+    [breadcrumbLabel]
+  );
+
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
       {/* Desktop: sidebar + main — fixed height so only main scrolls */}
       <div className="hidden h-full lg:flex">
         <RRHHSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar variant="desktop" breadcrumbLabel={breadcrumbLabel} />
+          <RRHHTopbar
+            variant="desktop"
+            breadcrumbLabel={breadcrumbLabel}
+            breadcrumbTrail={breadcrumbTrail}
+          />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col p-8">
               {loading ? (
@@ -1412,7 +1424,11 @@ export default function VacanteDetallePage() {
 
       {/* Tablet & Mobile — fixed height so only main scrolls */}
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar variant="tablet" breadcrumbLabel={breadcrumbLabel} />
+        <RRHHTopbar
+          variant="tablet"
+          breadcrumbLabel={breadcrumbLabel}
+          breadcrumbTrail={breadcrumbTrail}
+        />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col p-4 md:p-6">
             {loading ? (

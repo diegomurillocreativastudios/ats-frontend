@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { Fragment, useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Bell, Menu, LogOut } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -10,9 +11,15 @@ const DESKTOP_PADDING = "px-8";
 const TABLET_PADDING = "px-5";
 const MOBILE_PADDING = "px-4";
 
+/**
+ * @typedef {{ label: string, href?: string }} BreadcrumbSegment
+ * @param {{ variant?: string, breadcrumbLabel?: string, breadcrumbTrail?: BreadcrumbSegment[] }} props
+ */
+
 export default function RRHHTopbar({
   variant = "desktop",
   breadcrumbLabel = "Dashboard",
+  breadcrumbTrail = null,
 }) {
   const isDesktop = variant === "desktop";
   const isTablet = variant === "tablet";
@@ -52,6 +59,11 @@ export default function RRHHTopbar({
         ? "px-4 md:px-5"
         : MOBILE_PADDING;
 
+  const hasTrail = Array.isArray(breadcrumbTrail) && breadcrumbTrail.length > 0
+  const breadcrumbScreenReaderText = hasTrail
+    ? ["Portal RRHH", ...breadcrumbTrail.map((s) => s.label)].join(" > ")
+    : `Portal RRHH > ${breadcrumbLabel}`
+
   const heightClass =
     variant === "mobile" ? "h-14" : variant === "tablet" ? "h-14 md:h-16" : "h-16";
 
@@ -70,16 +82,60 @@ export default function RRHHTopbar({
             <Menu className="h-6 w-6 text-foreground md:h-6" aria-hidden />
           </button>
         )}
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {isDesktop && (
             <>
               <span className="font-inter text-sm text-muted-foreground">
                 Portal RRHH
               </span>
               <ChevronRight
-                className="h-4 w-4 text-muted-foreground"
+                className="h-4 w-4 shrink-0 text-muted-foreground"
                 aria-hidden
               />
+              {hasTrail ? (
+                <nav
+                  className="flex min-w-0 flex-wrap items-center gap-2"
+                  aria-label="Migas de pan"
+                >
+                  {breadcrumbTrail.map((segment, index) => {
+                    const isLast = index === breadcrumbTrail.length - 1
+                    const showLink = Boolean(segment.href) && !isLast
+                    return (
+                      <Fragment key={`${segment.label}-${index}`}>
+                        {showLink ? (
+                          <Link
+                            href={segment.href}
+                            className="font-inter text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                          >
+                            {segment.label}
+                          </Link>
+                        ) : (
+                          <span
+                            className={`min-w-0 truncate font-inter text-sm ${
+                              isLast
+                                ? "font-medium text-foreground"
+                                : "text-muted-foreground"
+                            }`}
+                            aria-current={isLast ? "page" : undefined}
+                          >
+                            {segment.label}
+                          </span>
+                        )}
+                        {!isLast ? (
+                          <ChevronRight
+                            className="h-4 w-4 shrink-0 text-muted-foreground"
+                            aria-hidden
+                          />
+                        ) : null}
+                      </Fragment>
+                    )
+                  })}
+                </nav>
+              ) : (
+                <span className="font-inter text-sm font-medium text-foreground">
+                  {breadcrumbLabel}
+                </span>
+              )}
             </>
           )}
           {(isTablet || isMobile) && (
@@ -92,13 +148,9 @@ export default function RRHHTopbar({
               </span>
             </div>
           )}
-          <span
-            className={`font-inter text-sm font-medium text-foreground ${
-              isDesktop ? "" : "sr-only"
-            }`}
-          >
-            {breadcrumbLabel}
-          </span>
+          {!isDesktop ? (
+            <span className="sr-only">{breadcrumbScreenReaderText}</span>
+          ) : null}
         </div>
       </div>
       <div className="flex items-center gap-3">
