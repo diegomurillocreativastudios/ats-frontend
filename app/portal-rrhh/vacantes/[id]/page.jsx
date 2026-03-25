@@ -46,6 +46,44 @@ const formatDate = (value) => {
 const emptyToDash = (value) =>
   value != null && String(value).trim() !== "" ? String(value).trim() : "—";
 
+/** Mensaje legible desde el objeto que lanza `apiClient` en errores HTTP. */
+const extractApiErrorMessage = (err) => {
+  if (err == null) return null
+  if (typeof err === "string") return err
+  const msg =
+    err.message ??
+    err.detail ??
+    err.title ??
+    (typeof err.errors === "string" ? err.errors : null)
+  if (msg != null && String(msg).trim() !== "") return String(msg).trim()
+  if (Array.isArray(err.errors)) {
+    const first = err.errors[0]
+    if (typeof first === "string") return first
+    if (first?.message) return String(first.message)
+  }
+  return null
+}
+
+/**
+ * El API de move-to-stage exige un "estado de postulación por defecto" en la empresa.
+ * Si falta, el backend devuelve un mensaje en inglés; aquí lo traducimos y damos contexto.
+ */
+const normalizeMoveStageError = (err) => {
+  const fallback = "No se pudo mover el candidato de etapa."
+  const raw = extractApiErrorMessage(err) ?? fallback
+  const lower = raw.toLowerCase()
+  const isDefaultStatusMissing =
+    lower.includes("default application status") ||
+    lower.includes("missing default application status")
+  if (isDefaultStatusMissing) {
+    return {
+      text: "Falta el estado de postulación por defecto de la empresa. El servidor lo necesita al mover candidatos entre etapas. Configúralo en Etapas (estados) o pide a un administrador que lo haga.",
+      showEstadosLink: true,
+    }
+  }
+  return { text: raw, showEstadosLink: false }
+}
+
 /** Converts any value to a string safe for React (never render an object). */
 const safeString = (value) => {
   if (value == null) return "—";
@@ -825,6 +863,27 @@ const KanbanCard = ({
   );
 };
 
+const MoveStageErrorBanner = ({ error }) => {
+  if (!error) return null
+  return (
+    <div
+      className="flex flex-col gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2"
+      role="alert"
+    >
+      <p className="font-inter text-sm text-destructive">{error.text}</p>
+      {error.showEstadosLink ? (
+        <Link
+          href="/portal-rrhh/etapas"
+          className="font-inter text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+          aria-label="Ir a la sección Etapas para administrar estados de postulación"
+        >
+          Ir a Etapas y administrar estados
+        </Link>
+      ) : null}
+    </div>
+  )
+}
+
 const KanbanColumn = ({
   stage,
   candidates,
@@ -1284,9 +1343,7 @@ export default function VacanteDetallePage() {
             { stageId, notes: "" }
           );
         } catch (err) {
-          const message =
-            err?.message ?? err?.detail ?? "No se pudo mover el candidato de etapa.";
-          setMoveStageError(message);
+          setMoveStageError(normalizeMoveStageError(err))
           setCandidateStageOverrides((prev) => {
             const next = { ...prev };
             delete next[candidateId];
@@ -1900,11 +1957,7 @@ export default function VacanteDetallePage() {
                           ({applicants.length})
                         </span>
                       </h2>
-                      {moveStageError && (
-                        <p className="font-inter text-sm text-destructive" role="alert">
-                          {moveStageError}
-                        </p>
-                      )}
+                      <MoveStageErrorBanner error={moveStageError} />
                       <div
                         className="rounded-xl border border-border bg-card p-6"
                         aria-label="Contenedor del tablero Kanban"
@@ -2443,11 +2496,7 @@ export default function VacanteDetallePage() {
                         ({applicants.length})
                       </span>
                     </h2>
-                    {moveStageError && (
-                      <p className="font-inter text-sm text-destructive" role="alert">
-                        {moveStageError}
-                      </p>
-                    )}
+                    <MoveStageErrorBanner error={moveStageError} />
                     <div
                       className="rounded-xl border border-border bg-card p-5"
                       aria-label="Contenedor del tablero Kanban"
