@@ -14,9 +14,11 @@ import {
   FileText,
   Loader2,
   Mail,
+  Plus,
   Phone,
   Scale,
   Sparkles,
+  Trash2,
   User,
   Users,
   X,
@@ -75,6 +77,22 @@ const getStatusConfig = (status) => {
 };
 
 const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
+const REQUIREMENT_SCALE_MIN = 1;
+const REQUIREMENT_SCALE_MAX = 10;
+
+const toSnakeCase = (str) =>
+  String(str ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "");
+
+const createEmptyRequirement = () => ({
+  id: crypto.randomUUID?.() ?? `req-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  requirementName: "",
+  requirementValue: "",
+  scale: 5,
+});
 
 const FALLBACK_KANBAN_STAGES = [
   "Applied",
@@ -744,6 +762,13 @@ export default function VacanteDetallePage() {
   const [vacancy, setVacancy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editRequirements, setEditRequirements] = useState(() => [createEmptyRequirement()]);
+  const [editErrors, setEditErrors] = useState({});
+  const [savingVacancy, setSavingVacancy] = useState(false);
+  const [saveVacancyError, setSaveVacancyError] = useState(null);
   const [smartCandidates, setSmartCandidates] = useState(null);
   const [loadingSmart, setLoadingSmart] = useState(false);
   const [smartError, setSmartError] = useState(null);
@@ -818,6 +843,169 @@ export default function VacanteDetallePage() {
   useEffect(() => {
     fetchVacancy();
   }, [fetchVacancy]);
+
+  const hydrateEditFormFromVacancy = useCallback((v) => {
+    if (!v) return;
+    setEditTitle(String(v.title ?? "").trim());
+    setEditDescription(String(v.description ?? "").trim());
+
+    const rawReqs = v.requirements;
+    const reqObj =
+      rawReqs && typeof rawReqs === "object" && !Array.isArray(rawReqs)
+        ? rawReqs
+        : null;
+    const attributes =
+      v.weights && typeof v.weights === "object" && typeof v.weights.attributes === "object" && !Array.isArray(v.weights.attributes)
+        ? v.weights.attributes
+        : {};
+
+    if (!reqObj) {
+      setEditRequirements([createEmptyRequirement()]);
+      return;
+    }
+
+    const entries = Object.entries(reqObj).filter(
+      ([k]) => k != null && !String(k).startsWith("additionalProp")
+    );
+
+    if (entries.length === 0) {
+      setEditRequirements([createEmptyRequirement()]);
+      return;
+    }
+
+    setEditRequirements(
+      entries.map(([key, value]) => {
+        const attrWeight = attributes?.[key];
+        const scaleFromWeight =
+          typeof attrWeight === "number" && Number.isFinite(attrWeight)
+            ? Math.round(attrWeight * 10)
+            : 5;
+        const boundedScale = Math.min(
+          REQUIREMENT_SCALE_MAX,
+          Math.max(REQUIREMENT_SCALE_MIN, scaleFromWeight)
+        );
+        return {
+          id: crypto.randomUUID?.() ?? `req-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          requirementName: String(key ?? ""),
+          requirementValue: typeof value === "string" ? value : safeString(value),
+          scale: boundedScale,
+        };
+      })
+    );
+  }, []);
+
+  const validateEditForm = useCallback(() => {
+    const nextErrors = {};
+    if (!String(editTitle ?? "").trim()) nextErrors.title = "El nombre es requerido";
+    if (!String(editDescription ?? "").trim()) nextErrors.description = "La descripción es requerida";
+
+    editRequirements.forEach((req) => {
+      const hasName = !!String(req.requirementName ?? "").trim();
+      const hasValue = !!String(req.requirementValue ?? "").trim();
+      if (hasName && !hasValue) nextErrors[`req-value-${req.id}`] = "Valor requerido";
+      if (!hasName && hasValue) nextErrors[`req-name-${req.id}`] = "Nombre requerido";
+    });
+
+    setEditErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }, [editTitle, editDescription, editRequirements]);
+
+  const handleEditVacancy = useCallback(() => {
+    if (!vacancy) return;
+    setSaveVacancyError(null);
+    setEditErrors({});
+    hydrateEditFormFromVacancy(vacancy);
+    setIsEditing(true);
+  }, [vacancy, hydrateEditFormFromVacancy]);
+
+  const handleAddRequirement = useCallback(() => {
+    setEditRequirements((prev) => [...prev, createEmptyRequirement()]);
+  }, []);
+
+  const handleRemoveRequirement = useCallback((reqId) => {
+    setEditRequirements((prev) => {
+      const next = prev.filter((r) => r.id !== reqId);
+      return next.length === 0 ? [createEmptyRequirement()] : next;
+    });
+    setEditErrors((prev) => {
+      const next = { ...prev };
+      delete next[`req-name-${reqId}`];
+      delete next[`req-value-${reqId}`];
+      return next;
+    });
+  }, []);
+
+  const handleUpdateRequirement = useCallback((reqId, field, value) => {
+    setEditRequirements((prev) =>
+      prev.map((r) =>
+        r.id === reqId
+          ? {
+              ...r,
+              [field]: field === "scale" ? parseInt(value, 10) || 1 : value,
+            }
+          : r
+      )
+    );
+  }, []);
+
+  const handleSaveVacancy = useCallback(async () => {
+    if (!id || !vacancy) return;
+    if (!validateEditForm()) return;
+
+    const validReqs = editRequirements.filter(
+      (r) => String(r.requirementName ?? "").trim() && String(r.requirementValue ?? "").trim()
+    );
+
+    const requirements = {};
+    const attributes = {};
+
+    validReqs.forEach((r) => {
+      const key = toSnakeCase(r.requirementName);
+      if (!key) return;
+      requirements[key] = String(r.requirementValue ?? "").trim();
+      const scaleNumber = typeof r.scale === "number" ? r.scale : parseInt(r.scale, 10) || 5;
+      const boundedScale = Math.min(REQUIREMENT_SCALE_MAX, Math.max(REQUIREMENT_SCALE_MIN, scaleNumber));
+      attributes[key] = boundedScale / 10;
+    });
+
+    const semanticWeight =
+      typeof vacancy?.weights?.semantic === "number" && Number.isFinite(vacancy.weights.semantic)
+        ? vacancy.weights.semantic
+        : 0.5;
+
+    const payload = {
+      title: String(editTitle ?? "").trim(),
+      description: String(editDescription ?? "").trim(),
+      companyId: vacancy.companyId ?? COMPANY_ID,
+      requirements,
+      weights: {
+        semantic: semanticWeight,
+        attributes,
+      },
+    };
+
+    const vacancyStatusId =
+      vacancy?.vacancyStatusId ??
+      vacancy?.statusId ??
+      vacancy?.vacancy_status_id ??
+      vacancy?.status_id;
+    if (vacancyStatusId) payload.vacancyStatusId = vacancyStatusId;
+
+    setSavingVacancy(true);
+    setSaveVacancyError(null);
+    try {
+      const updated = await apiClient.put(`/api/recruiter/vacancies/${id}`, payload);
+      setVacancy(updated ?? vacancy);
+      setIsEditing(false);
+      if (!updated) {
+        await fetchVacancy(true);
+      }
+    } catch (err) {
+      setSaveVacancyError(err?.message ?? err?.detail ?? "No se pudo guardar la vacante.");
+    } finally {
+      setSavingVacancy(false);
+    }
+  }, [id, vacancy, editTitle, editDescription, editRequirements, validateEditForm, fetchVacancy]);
 
   useEffect(() => {
     fetchStages();
@@ -1128,9 +1316,32 @@ export default function VacanteDetallePage() {
                           />
                         </div>
                         <div className="flex min-w-0 flex-1 flex-col gap-2">
-                          <h1 className="font-inter text-2xl font-bold text-foreground">
-                            {emptyToDash(vacancy.title)}
-                          </h1>
+                          {isEditing ? (
+                            <div className="flex flex-col gap-2">
+                              <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-desktop">
+                                Nombre de la vacante <span className="text-vo-pink">*</span>
+                              </label>
+                              <input
+                                id="edit-vacancy-title-desktop"
+                                type="text"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-invalid={!!editErrors.title}
+                                aria-describedby={editErrors.title ? "edit-title-error-desktop" : undefined}
+                                placeholder="Ej: Frontend Developer"
+                              />
+                              {editErrors.title && (
+                                <p id="edit-title-error-desktop" className="font-inter text-sm text-vo-pink" role="alert">
+                                  {editErrors.title}
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <h1 className="font-inter text-2xl font-bold text-foreground">
+                              {emptyToDash(vacancy.title)}
+                            </h1>
+                          )}
                           <div className="flex flex-wrap items-center gap-4 font-inter text-sm text-muted-foreground">
                             <span className="flex items-center gap-1.5">
                               <Building2 className="h-4 w-4 shrink-0" aria-hidden />
@@ -1148,30 +1359,181 @@ export default function VacanteDetallePage() {
                           </span>
                         </div>
                       </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        {!isEditing ? (
+                          <button
+                            type="button"
+                            onClick={handleEditVacancy}
+                            className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            aria-label="Editar vacante"
+                          >
+                            Editar vacante
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={handleSaveVacancy}
+                            disabled={savingVacancy}
+                            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label="Guardar vacante"
+                          >
+                            {savingVacancy ? (
+                              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                            ) : null}
+                            {savingVacancy ? "Guardando..." : "Guardar"}
+                          </button>
+                        )}
+                      </div>
                     </div>
+                    {saveVacancyError && (
+                      <p className="mt-4 font-inter text-sm text-destructive" role="alert">
+                        {saveVacancyError}
+                      </p>
+                    )}
                     {(vacancy.description || vacancy.requirements) && (
                       <div className="mt-6 grid gap-6 border-t border-border pt-6 md:grid-cols-2">
-                        {vacancy.description && (
+                        {(vacancy.description || isEditing) && (
                           <div>
                             <h2 className="mb-2 flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
                               <FileText className="h-4 w-4" aria-hidden />
                               Descripción
                             </h2>
-                            <p className="font-inter text-sm text-muted-foreground whitespace-pre-wrap">
-                              {safeString(vacancy.description)}
-                            </p>
+                            {isEditing ? (
+                              <div className="flex flex-col gap-2">
+                                <textarea
+                                  value={editDescription}
+                                  onChange={(e) => setEditDescription(e.target.value)}
+                                  rows={5}
+                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
+                                  aria-label="Editar descripción de la vacante"
+                                  aria-invalid={!!editErrors.description}
+                                  aria-describedby={editErrors.description ? "edit-description-error-desktop" : undefined}
+                                  placeholder="Describe el puesto, responsabilidades y competencias..."
+                                />
+                                {editErrors.description && (
+                                  <p id="edit-description-error-desktop" className="font-inter text-sm text-vo-pink" role="alert">
+                                    {editErrors.description}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="font-inter text-sm text-muted-foreground whitespace-pre-wrap">
+                                {safeString(vacancy.description)}
+                              </p>
+                            )}
                           </div>
                         )}
-                        {vacancy.requirements && (
+                        {(vacancy.requirements || isEditing) && (
                           <div>
-                            <h2 className="mb-2 flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
-                              <CheckSquare className="h-4 w-4" aria-hidden />
-                              Requisitos
-                            </h2>
-                            <RequirementsDisplay
-                              value={vacancy.requirements}
-                              attributeWeights={vacancy.weights?.attributes}
-                            />
+                            <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+                              <h2 className="flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
+                                <CheckSquare className="h-4 w-4" aria-hidden />
+                                Requisitos
+                              </h2>
+                              {isEditing && (
+                                <button
+                                  type="button"
+                                  onClick={handleAddRequirement}
+                                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                                  aria-label="Agregar requerimiento"
+                                >
+                                  <Plus className="h-4 w-4" aria-hidden />
+                                  Agregar
+                                </button>
+                              )}
+                            </div>
+                            {isEditing ? (
+                              <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-3 max-h-[320px] overflow-y-auto pr-1">
+                                  {editRequirements.map((req, index) => (
+                                    <div
+                                      key={req.id}
+                                      className="flex flex-col gap-2 rounded-lg border border-border bg-white p-3"
+                                    >
+                                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+                                        <div className="flex-1 space-y-1">
+                                          <input
+                                            type="text"
+                                            value={req.requirementName}
+                                            onChange={(e) =>
+                                              handleUpdateRequirement(req.id, "requirementName", e.target.value)
+                                            }
+                                            placeholder="Nombre (ej: Licencia de conducir)"
+                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                                            aria-label={`Requerimiento ${index + 1} - Nombre`}
+                                            aria-invalid={!!editErrors[`req-name-${req.id}`]}
+                                          />
+                                          {editErrors[`req-name-${req.id}`] && (
+                                            <p className="font-inter text-xs text-vo-pink" role="alert">
+                                              {editErrors[`req-name-${req.id}`]}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className="flex-1 space-y-1">
+                                          <input
+                                            type="text"
+                                            value={req.requirementValue}
+                                            onChange={(e) =>
+                                              handleUpdateRequirement(req.id, "requirementValue", e.target.value)
+                                            }
+                                            placeholder="Valor (ej: Pesada)"
+                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                                            aria-label={`Requerimiento ${index + 1} - Valor`}
+                                            aria-invalid={!!editErrors[`req-value-${req.id}`]}
+                                          />
+                                          {editErrors[`req-value-${req.id}`] && (
+                                            <p className="font-inter text-xs text-vo-pink" role="alert">
+                                              {editErrors[`req-value-${req.id}`]}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className="flex min-w-[160px] flex-col gap-1 sm:shrink-0">
+                                          <div className="flex items-center justify-between">
+                                            <label
+                                              htmlFor={`edit-scale-desktop-${req.id}`}
+                                              className="font-inter text-xs text-muted-foreground"
+                                            >
+                                              Importancia (1-10)
+                                            </label>
+                                            <span className="font-inter text-xs font-medium text-foreground tabular-nums">
+                                              {req.scale}
+                                            </span>
+                                          </div>
+                                          <input
+                                            id={`edit-scale-desktop-${req.id}`}
+                                            type="range"
+                                            min={REQUIREMENT_SCALE_MIN}
+                                            max={REQUIREMENT_SCALE_MAX}
+                                            value={req.scale}
+                                            onChange={(e) =>
+                                              handleUpdateRequirement(req.id, "scale", e.target.value)
+                                            }
+                                            className="h-2 w-full cursor-pointer accent-vo-purple"
+                                            aria-label={`Requerimiento ${index + 1} - Nivel promedio del 1 al 10`}
+                                          />
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveRequirement(req.id)}
+                                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-vo-purple"
+                                          aria-label={`Eliminar requerimiento ${index + 1}`}
+                                        >
+                                          <Trash2 className="h-4 w-4" aria-hidden />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                <p className="font-inter text-xs text-muted-foreground">
+                                  Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
+                                </p>
+                              </div>
+                            ) : (
+                              <RequirementsDisplay
+                                value={vacancy.requirements}
+                                attributeWeights={vacancy.weights?.attributes}
+                              />
+                            )}
                           </div>
                         )}
                       </div>
@@ -1496,9 +1858,32 @@ export default function VacanteDetallePage() {
                         />
                       </div>
                       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                        <h1 className="font-inter text-xl font-bold text-foreground">
-                          {emptyToDash(vacancy.title)}
-                        </h1>
+                        {isEditing ? (
+                          <div className="flex flex-col gap-2">
+                            <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-mobile">
+                              Nombre de la vacante <span className="text-vo-pink">*</span>
+                            </label>
+                            <input
+                              id="edit-vacancy-title-mobile"
+                              type="text"
+                              value={editTitle}
+                              onChange={(e) => setEditTitle(e.target.value)}
+                              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                              aria-invalid={!!editErrors.title}
+                              aria-describedby={editErrors.title ? "edit-title-error-mobile" : undefined}
+                              placeholder="Ej: Frontend Developer"
+                            />
+                            {editErrors.title && (
+                              <p id="edit-title-error-mobile" className="font-inter text-sm text-vo-pink" role="alert">
+                                {editErrors.title}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <h1 className="font-inter text-xl font-bold text-foreground">
+                            {emptyToDash(vacancy.title)}
+                          </h1>
+                        )}
                         <div className="flex flex-wrap items-center gap-3 font-inter text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -1516,29 +1901,181 @@ export default function VacanteDetallePage() {
                         </span>
                       </div>
                     </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      {!isEditing ? (
+                        <button
+                          type="button"
+                          onClick={handleEditVacancy}
+                          className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                          aria-label="Editar vacante"
+                        >
+                          Editar vacante
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleSaveVacancy}
+                          disabled={savingVacancy}
+                          className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          aria-label="Guardar vacante"
+                        >
+                          {savingVacancy ? (
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                          ) : null}
+                          {savingVacancy ? "Guardando..." : "Guardar"}
+                        </button>
+                      )}
+                    </div>
+                    {saveVacancyError && (
+                      <p className="font-inter text-sm text-destructive" role="alert">
+                        {saveVacancyError}
+                      </p>
+                    )}
                     {(vacancy.description || vacancy.requirements) && (
                       <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
-                        {vacancy.description && (
+                        {(vacancy.description || isEditing) && (
                           <div>
                             <h2 className="mb-1.5 flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
                               <FileText className="h-3.5 w-3.5" aria-hidden />
                               Descripción
                             </h2>
-                            <p className="font-inter text-sm text-muted-foreground whitespace-pre-wrap">
-                              {safeString(vacancy.description)}
-                            </p>
+                            {isEditing ? (
+                              <div className="flex flex-col gap-2">
+                                <textarea
+                                  value={editDescription}
+                                  onChange={(e) => setEditDescription(e.target.value)}
+                                  rows={5}
+                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
+                                  aria-label="Editar descripción de la vacante"
+                                  aria-invalid={!!editErrors.description}
+                                  aria-describedby={editErrors.description ? "edit-description-error-mobile" : undefined}
+                                  placeholder="Describe el puesto, responsabilidades y competencias..."
+                                />
+                                {editErrors.description && (
+                                  <p id="edit-description-error-mobile" className="font-inter text-sm text-vo-pink" role="alert">
+                                    {editErrors.description}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="font-inter text-sm text-muted-foreground whitespace-pre-wrap">
+                                {safeString(vacancy.description)}
+                              </p>
+                            )}
                           </div>
                         )}
-                        {vacancy.requirements && (
+                        {(vacancy.requirements || isEditing) && (
                           <div>
-                            <h2 className="mb-1.5 flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
-                              <CheckSquare className="h-3.5 w-3.5" aria-hidden />
-                              Requisitos
-                            </h2>
-                            <RequirementsDisplay
-                              value={vacancy.requirements}
-                              attributeWeights={vacancy.weights?.attributes}
-                            />
+                            <div className="mb-1.5 flex flex-wrap items-center justify-between gap-3">
+                              <h2 className="flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
+                                <CheckSquare className="h-3.5 w-3.5" aria-hidden />
+                                Requisitos
+                              </h2>
+                              {isEditing && (
+                                <button
+                                  type="button"
+                                  onClick={handleAddRequirement}
+                                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                                  aria-label="Agregar requerimiento"
+                                >
+                                  <Plus className="h-4 w-4" aria-hidden />
+                                  Agregar
+                                </button>
+                              )}
+                            </div>
+                            {isEditing ? (
+                              <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-3 max-h-[320px] overflow-y-auto pr-1">
+                                  {editRequirements.map((req, index) => (
+                                    <div
+                                      key={req.id}
+                                      className="flex flex-col gap-2 rounded-lg border border-border bg-white p-3"
+                                    >
+                                      <div className="flex flex-col gap-2">
+                                        <div className="space-y-1">
+                                          <input
+                                            type="text"
+                                            value={req.requirementName}
+                                            onChange={(e) =>
+                                              handleUpdateRequirement(req.id, "requirementName", e.target.value)
+                                            }
+                                            placeholder="Nombre (ej: Licencia de conducir)"
+                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                                            aria-label={`Requerimiento ${index + 1} - Nombre`}
+                                            aria-invalid={!!editErrors[`req-name-${req.id}`]}
+                                          />
+                                          {editErrors[`req-name-${req.id}`] && (
+                                            <p className="font-inter text-xs text-vo-pink" role="alert">
+                                              {editErrors[`req-name-${req.id}`]}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className="space-y-1">
+                                          <input
+                                            type="text"
+                                            value={req.requirementValue}
+                                            onChange={(e) =>
+                                              handleUpdateRequirement(req.id, "requirementValue", e.target.value)
+                                            }
+                                            placeholder="Valor (ej: Pesada)"
+                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                                            aria-label={`Requerimiento ${index + 1} - Valor`}
+                                            aria-invalid={!!editErrors[`req-value-${req.id}`]}
+                                          />
+                                          {editErrors[`req-value-${req.id}`] && (
+                                            <p className="font-inter text-xs text-vo-pink" role="alert">
+                                              {editErrors[`req-value-${req.id}`]}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                          <div className="flex items-center justify-between">
+                                            <label
+                                              htmlFor={`edit-scale-mobile-${req.id}`}
+                                              className="font-inter text-xs text-muted-foreground"
+                                            >
+                                              Importancia (1-10)
+                                            </label>
+                                            <span className="font-inter text-xs font-medium text-foreground tabular-nums">
+                                              {req.scale}
+                                            </span>
+                                          </div>
+                                          <input
+                                            id={`edit-scale-mobile-${req.id}`}
+                                            type="range"
+                                            min={REQUIREMENT_SCALE_MIN}
+                                            max={REQUIREMENT_SCALE_MAX}
+                                            value={req.scale}
+                                            onChange={(e) =>
+                                              handleUpdateRequirement(req.id, "scale", e.target.value)
+                                            }
+                                            className="h-2 w-full cursor-pointer accent-vo-purple"
+                                            aria-label={`Requerimiento ${index + 1} - Nivel promedio del 1 al 10`}
+                                          />
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveRequirement(req.id)}
+                                          className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                                          aria-label={`Eliminar requerimiento ${index + 1}`}
+                                        >
+                                          <Trash2 className="h-4 w-4" aria-hidden />
+                                          Eliminar
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                <p className="font-inter text-xs text-muted-foreground">
+                                  Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
+                                </p>
+                              </div>
+                            ) : (
+                              <RequirementsDisplay
+                                value={vacancy.requirements}
+                                attributeWeights={vacancy.weights?.attributes}
+                              />
+                            )}
                           </div>
                         )}
                       </div>
