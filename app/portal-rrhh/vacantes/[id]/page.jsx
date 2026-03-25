@@ -14,6 +14,7 @@ import {
   FileText,
   Loader2,
   Mail,
+  ExternalLink,
   Plus,
   Phone,
   Scale,
@@ -59,6 +60,90 @@ const safeString = (value) => {
       .join(", ");
   }
   return "—";
+};
+
+const SCORE_KEYS_AGGREGATE = ["attribute_aggregate", "AttributeAggregate", "attributeAggregate"];
+const SCORE_KEYS_QUALITATIVE = ["QualitativeScore", "qualitativeScore", "qualitative_score"];
+const SCORE_KEYS_SEMANTIC = [
+  "VectorSimilarity",
+  "vectorSimilarity",
+  "vector_similarity",
+  "SemanticScore",
+  "semanticScore",
+  "semantic_score",
+];
+
+const findScoreEntry = (entries, keyList) => {
+  for (const key of keyList) {
+    const found = entries.find(([k]) => k === key);
+    if (found) return found;
+  }
+  return null;
+};
+
+const partitionComponentScores = (entries) => {
+  const isReserved = (k) =>
+    SCORE_KEYS_AGGREGATE.includes(k) ||
+    SCORE_KEYS_QUALITATIVE.includes(k) ||
+    SCORE_KEYS_SEMANTIC.includes(k);
+  const attributeIndividuals = entries
+    .filter(([k]) => !isReserved(k))
+    .sort(([a], [b]) => String(a).localeCompare(String(b)));
+  return {
+    attributeIndividuals,
+    aggregateEntry: findScoreEntry(entries, SCORE_KEYS_AGGREGATE),
+    qualitativeEntry: findScoreEntry(entries, SCORE_KEYS_QUALITATIVE),
+    semanticEntry: findScoreEntry(entries, SCORE_KEYS_SEMANTIC),
+  };
+};
+
+const ScoreBarRow = ({
+  scoreKey,
+  val,
+  labelClass,
+  barClass,
+  valueClass,
+  barTrackClass = "bg-slate-200/90 dark:bg-slate-200/90",
+  isTotalRow = false,
+  hideLabel = false,
+}) => {
+  const pct = typeof val === "number" ? (val * 100).toFixed(1) : null;
+  const barWidth = typeof val === "number" ? Math.min(val * 100, 100) : 0;
+  const labelText = formatScoreKey(scoreKey);
+  return (
+    <li
+      className={
+        isTotalRow
+          ? "flex flex-col gap-2.5 rounded-lg border border-sky-200/80 bg-sky-50/70 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 dark:border-sky-200/80 dark:bg-sky-50/70"
+          : "flex items-center gap-3"
+      }
+    >
+      {hideLabel ? (
+        <span className="sr-only">{labelText}</span>
+      ) : (
+        <span
+          className={`w-full shrink-0 font-inter text-xs sm:w-44 ${labelClass} ${isTotalRow ? "font-semibold" : ""}`}
+        >
+          {labelText}
+        </span>
+      )}
+      <div
+        className={`h-2.5 min-w-0 flex-1 overflow-hidden rounded-full ${barTrackClass}`}
+        role="presentation"
+      >
+        <div
+          className={`h-full rounded-full transition-all ${barClass}`}
+          style={{ width: `${barWidth}%` }}
+          aria-hidden
+        />
+      </div>
+      <span
+        className={`w-full shrink-0 text-left font-inter text-xs font-semibold tabular-nums sm:w-[3.25rem] sm:text-right ${valueClass}`}
+      >
+        {pct != null ? `${pct}%` : safeString(val)}
+      </span>
+    </li>
+  );
 };
 
 const STATUS_LABELS = {
@@ -271,7 +356,7 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
   );
 };
 
-const CandidateProfileModal = ({ match, onClose }) => {
+const CandidateProfileModal = ({ match, candidateId, onClose }) => {
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(null);
 
@@ -317,6 +402,32 @@ const CandidateProfileModal = ({ match, onClose }) => {
       ? Object.entries(match.componentScores).filter(([k]) => !k.startsWith("additionalProp"))
       : [];
 
+  const {
+    attributeIndividuals,
+    aggregateEntry,
+    qualitativeEntry,
+    semanticEntry,
+  } = partitionComponentScores(componentScores);
+
+  const hasAttributeBlock =
+    attributeIndividuals.length > 0 || aggregateEntry != null;
+
+  /** GET /api/recruiter/candidates/{id} usa profileId; mismo criterio que el listado de candidatos. */
+  const idForProfilePage =
+    match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
+      ? String(match.candidateProfileId).trim()
+      : match.candidateDocumentId != null && String(match.candidateDocumentId).trim() !== ""
+        ? String(match.candidateDocumentId).trim()
+        : candidateId != null &&
+            String(candidateId).trim() !== "" &&
+            !String(candidateId).startsWith("candidate-")
+          ? String(candidateId).trim()
+          : null;
+
+  const profileHref = idForProfilePage
+    ? `/portal-rrhh/candidatos/${encodeURIComponent(idForProfilePage)}`
+    : null;
+
   const qualitativeReasoning =
     match.qualitativeReasoning != null && String(match.qualitativeReasoning).trim() !== ""
       ? String(match.qualitativeReasoning).trim()
@@ -337,7 +448,7 @@ const CandidateProfileModal = ({ match, onClose }) => {
       aria-label={`Perfil de ${emptyToDash(match.name)}`}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-white shadow-xl dark:bg-card">
+      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-white text-slate-900 shadow-xl dark:bg-white">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-border p-6">
           <div className="flex items-center gap-4">
@@ -348,10 +459,10 @@ const CandidateProfileModal = ({ match, onClose }) => {
               {initials}
             </div>
             <div className="flex flex-col gap-0.5">
-              <h2 className="font-inter text-lg font-semibold text-foreground">
+              <h2 className="font-inter text-lg font-semibold text-slate-900">
                 {emptyToDash(match.name)}
               </h2>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 font-inter text-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 font-inter text-sm text-slate-600">
                 <span className="flex items-center gap-1.5">
                   <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   {emptyToDash(match.email)}
@@ -363,7 +474,7 @@ const CandidateProfileModal = ({ match, onClose }) => {
                   </span>
                 )}
               </div>
-              <p className="font-inter text-xs text-muted-foreground">
+              <p className="font-inter text-xs text-slate-600">
                 Subido: {formatDate(match.uploadedAt)}
               </p>
             </div>
@@ -371,7 +482,7 @@ const CandidateProfileModal = ({ match, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            className="rounded-md p-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
             aria-label="Cerrar modal"
           >
             <X className="h-5 w-5" aria-hidden />
@@ -382,8 +493,8 @@ const CandidateProfileModal = ({ match, onClose }) => {
         <div className="flex-1 overflow-y-auto p-6">
           {!hasContent ? (
             <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-              <User className="h-10 w-10 text-muted-foreground" aria-hidden />
-              <p className="font-inter text-sm text-muted-foreground">
+              <User className="h-10 w-10 text-slate-400" aria-hidden />
+              <p className="font-inter text-sm text-slate-600">
                 No hay información adicional disponible.
               </p>
             </div>
@@ -391,47 +502,88 @@ const CandidateProfileModal = ({ match, onClose }) => {
             <div className="flex flex-col gap-6">
               {/* Component Scores */}
               {componentScores.length > 0 && (
-                <div>
-                  <h3 className="mb-3 font-inter text-sm font-semibold text-foreground">
-                    Puntuación por componente
-                  </h3>
-                  <ul className="flex flex-col gap-2.5" role="list">
-                    {componentScores.map(([key, val]) => {
-                      const pct = typeof val === "number" ? (val * 100).toFixed(1) : null;
-                      const barWidth = typeof val === "number" ? Math.min(val * 100, 100) : 0;
-                      return (
-                        <li key={key} className="flex items-center gap-3">
-                          <span className="w-40 shrink-0 font-inter text-xs text-muted-foreground">
-                            {formatScoreKey(key)}
-                          </span>
-                          <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                            <div
-                              className="h-full rounded-full bg-vo-purple transition-all"
-                              style={{ width: `${barWidth}%` }}
-                              aria-hidden
-                            />
-                          </div>
-                          <span className="w-14 text-right font-inter text-xs font-medium text-foreground">
-                            {pct != null ? `${pct}%` : safeString(val)}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                <div className="flex flex-col gap-5">
+                  {hasAttributeBlock && (
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-sky-200/60 dark:bg-white dark:ring-border">
+                      <h3 className="mb-3.5 font-inter text-sm font-semibold text-sky-900 dark:text-sky-900">
+                        Atributos
+                      </h3>
+                      <ul className="flex flex-col gap-3" role="list">
+                        {attributeIndividuals.map(([key, val]) => (
+                          <ScoreBarRow
+                            key={key}
+                            scoreKey={key}
+                            val={val}
+                            labelClass="text-slate-800 dark:text-slate-800"
+                            barClass="bg-sky-500 dark:bg-sky-500"
+                            valueClass="text-slate-900 dark:text-slate-900"
+                            barTrackClass="bg-slate-200/95 dark:bg-slate-200/95"
+                          />
+                        ))}
+                        {aggregateEntry != null && (
+                          <ScoreBarRow
+                            scoreKey={aggregateEntry[0]}
+                            val={aggregateEntry[1]}
+                            labelClass="text-slate-800 dark:text-slate-800"
+                            barClass="bg-sky-600 dark:bg-sky-600"
+                            valueClass="text-slate-900 dark:text-slate-900"
+                            barTrackClass="bg-slate-200/95 dark:bg-slate-200/95"
+                            isTotalRow
+                          />
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {qualitativeEntry != null && (
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70 dark:bg-white dark:ring-border">
+                      <h3 className="mb-3.5 font-inter text-sm font-semibold text-amber-950 dark:text-amber-950">
+                        Puntaje cualitativo
+                      </h3>
+                      <ul className="flex flex-col gap-2.5" role="list">
+                        <ScoreBarRow
+                          scoreKey={qualitativeEntry[0]}
+                          val={qualitativeEntry[1]}
+                          labelClass="text-amber-900"
+                          barClass="bg-amber-500 dark:bg-amber-500"
+                          valueClass="text-amber-950 dark:text-amber-950"
+                          barTrackClass="bg-amber-200/80 dark:bg-amber-200/80"
+                          hideLabel
+                        />
+                      </ul>
+                    </div>
+                  )}
+
+                  {semanticEntry != null && (
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-vo-purple/25 dark:bg-white dark:ring-border">
+                      <h3 className="mb-3.5 font-inter text-sm font-semibold text-vo-purple">
+                        Similitud semántica
+                      </h3>
+                      <ul className="flex flex-col gap-2.5" role="list">
+                        <ScoreBarRow
+                          scoreKey={semanticEntry[0]}
+                          val={semanticEntry[1]}
+                          labelClass="text-vo-purple"
+                          barClass="bg-vo-purple"
+                          valueClass="text-violet-900 dark:text-violet-900"
+                          barTrackClass="bg-violet-200/80 dark:bg-violet-200/80"
+                          hideLabel
+                        />
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Qualitative Reasoning */}
               {qualitativeReasoning != null && (
-                <div>
-                  <h3 className="mb-3 font-inter text-sm font-semibold text-foreground">
+                <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-border/60 dark:bg-white">
+                  <h3 className="mb-3 font-inter text-sm font-semibold text-slate-900">
                     Razonamiento cualitativo
                   </h3>
-                  <div className="rounded-lg border border-border bg-muted/30 p-4">
-                    <p className="font-inter text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                      {qualitativeReasoning}
-                    </p>
-                  </div>
+                  <p className="font-inter text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                    {qualitativeReasoning}
+                  </p>
                 </div>
               )}
             </div>
@@ -447,13 +599,13 @@ const CandidateProfileModal = ({ match, onClose }) => {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-3">
             {match.storagePath && (
               <button
                 type="button"
                 onClick={handleDownloadCV}
                 disabled={downloading}
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-white px-4 py-2.5 font-inter text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Descargar CV del candidato"
               >
                 {downloading ? (
@@ -463,6 +615,18 @@ const CandidateProfileModal = ({ match, onClose }) => {
                 )}
                 {downloading ? "Descargando..." : "Descargar CV"}
               </button>
+            )}
+            {profileHref != null && (
+              <Link
+                href={profileHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border border-vo-purple/40 bg-white px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                aria-label="Abrir perfil del candidato en una nueva pestaña"
+              >
+                <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
+                Ver perfil completo
+              </Link>
             )}
             <button
               type="button"
@@ -568,7 +732,7 @@ const MatchCard = ({ match, candidateId, isSelected, onToggle, showVerPerfil = f
         </div>
       </article>
       {showVerPerfil && showModal && (
-        <CandidateProfileModal match={match} onClose={handleCloseModal} />
+        <CandidateProfileModal match={match} candidateId={candidateId} onClose={handleCloseModal} />
       )}
     </>
   );
