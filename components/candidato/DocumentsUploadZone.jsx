@@ -177,6 +177,9 @@ export default function DocumentsUploadZone({
       await Promise.resolve(onProcess(file, index));
       setProcessedIndices((prev) => new Set([...prev, index]));
     } catch (err) {
+      // Si el error fue lanzado "silenciosamente" (ej. para mostrar el error
+      // solo en el modal superior), no mostramos un segundo mensaje aquí.
+      if (err?.silent) return;
       const message = err?.message || err?.detail || "Error al procesar el documento.";
       setError(message);
     } finally {
@@ -195,6 +198,7 @@ export default function DocumentsUploadZone({
         setProcessedIndices((prev) => new Set([...prev, index]));
       }
     } catch (err) {
+      if (err?.silent) return;
       const message = err?.message || err?.detail || "Error al procesar los documentos.";
       setError(message);
     } finally {

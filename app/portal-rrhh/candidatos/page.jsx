@@ -138,8 +138,17 @@ export default function CandidatosPage() {
       await fetchCandidates();
     } catch (err) {
       const message =
-        err?.message || err?.detail || "Error al procesar el CV.";
+        err?.detail ||
+        err?.message ||
+        "Error al procesar el CV.";
+
       setUploadMessage({ type: "error", text: message });
+
+      // Importante: re-lanzar el error para que `DocumentsUploadZone` no marque
+      // el archivo como "Listo" cuando el backend realmente falló.
+      const silentErr = new Error(message);
+      silentErr.silent = true;
+      throw silentErr;
     }
   };
 
@@ -333,10 +342,10 @@ export default function CandidatosPage() {
               {uploadMessage && (
                 <p
                   role="alert"
-                  className={`font-inter text-sm ${
+                  className={`rounded-md border px-4 py-3 font-inter text-sm ${
                     uploadMessage.type === "success"
-                      ? "text-success"
-                      : "text-destructive"
+                      ? "border-success/30 bg-success/10 text-success"
+                      : "border-vo-pink/30 bg-vo-pink/10 text-vo-pink"
                   }`}
                 >
                   {uploadMessage.text}
