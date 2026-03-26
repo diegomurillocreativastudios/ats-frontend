@@ -16,6 +16,7 @@ import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import NuevaVacanteModal from "@/components/rrhh/NuevaVacanteModal";
 import { apiClient } from "@/lib/api";
+import RematchButton from "@/components/rrhh/RematchButton";
 
 const ICON_BY_DEPARTMENT = {
   diseño: Palette,
@@ -46,7 +47,17 @@ const mapVacancyFromApi = (item, index = 0) => {
       ? Palette
       : Code);
 
-  return { id, title, department, location, candidates, interviews, status, icon };
+  return { 
+    id, 
+    title, 
+    department, 
+    location, 
+    candidates, 
+    interviews, 
+    status, 
+    icon,
+    needsRematch: !!item.needsRematch 
+  };
 };
 
 const STATUS_LABELS = {
@@ -111,13 +122,21 @@ const VacancyCard = ({ vacancy }) => {
         >
           {statusConfig.label}
         </span>
-        <Link
-          href={`/portal-rrhh/vacantes/${vacancy.id}`}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-6 py-3 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-          aria-label={`Ver detalles de vacante ${vacancy.title}`}
-        >
-          Ver detalles
-        </Link>
+        <div className="flex items-center gap-3">
+          <RematchButton 
+            vacancyId={vacancy.id} 
+            needsRematch={vacancy.needsRematch} 
+            variant="list"
+            onSuccess={fetchVacancies}
+          />
+          <Link
+            href={`/portal-rrhh/vacantes/${vacancy.id}`}
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-6 py-3 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={`Ver detalles de vacante ${vacancy.title}`}
+          >
+            Ver detalles
+          </Link>
+        </div>
       </div>
     </article>
   );
