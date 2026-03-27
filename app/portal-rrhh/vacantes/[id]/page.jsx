@@ -12,6 +12,7 @@ import {
   CheckSquare,
   Download,
   FileText,
+  Info,
   Loader2,
   Mail,
   ExternalLink,
@@ -184,6 +185,24 @@ const ScoreBarRow = ({
     </li>
   );
 };
+
+const ScoreTooltip = ({ text, accentClass = "text-slate-500" }) => (
+  <span className="group relative inline-flex items-center">
+    <button
+      type="button"
+      className={`inline-flex h-4 w-4 items-center justify-center rounded-full ${accentClass} transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2`}
+      aria-label={text}
+    >
+      <Info className="h-3.5 w-3.5" aria-hidden />
+    </button>
+    <span
+      role="tooltip"
+      className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-md border border-border bg-white px-3 py-2 text-left font-inter text-xs font-normal leading-relaxed text-slate-700 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+    >
+      {text}
+    </span>
+  </span>
+);
 
 const STATUS_LABELS = {
   activa: { label: "Activa", bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
@@ -576,9 +595,15 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
 
                   {qualitativeEntry != null && (
                     <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70 dark:bg-white dark:ring-border">
-                      <h3 className="mb-3.5 font-inter text-sm font-semibold text-amber-950 dark:text-amber-950">
-                        Puntaje cualitativo
-                      </h3>
+                      <div className="mb-3.5 flex items-center gap-1.5">
+                        <h3 className="font-inter text-sm font-semibold text-amber-950 dark:text-amber-950">
+                          Puntaje cualitativo
+                        </h3>
+                        <ScoreTooltip
+                          text="Evalua la compatibilidad del candidato en aspectos cualitativos como experiencia, habilidades y contexto del perfil respecto a la vacante."
+                          accentClass="text-amber-800"
+                        />
+                      </div>
                       <ul className="flex flex-col gap-2.5" role="list">
                         <ScoreBarRow
                           scoreKey={qualitativeEntry[0]}
@@ -595,9 +620,15 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
 
                   {semanticEntry != null && (
                     <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-vo-purple/25 dark:bg-white dark:ring-border">
-                      <h3 className="mb-3.5 font-inter text-sm font-semibold text-vo-purple">
-                        Similitud semántica
-                      </h3>
+                      <div className="mb-3.5 flex items-center gap-1.5">
+                        <h3 className="font-inter text-sm font-semibold text-vo-purple">
+                          Similitud semántica
+                        </h3>
+                        <ScoreTooltip
+                          text="Mide que tan alineado esta el contenido del CV con la descripcion de la vacante usando comparacion semantica de texto."
+                          accentClass="text-vo-purple"
+                        />
+                      </div>
                       <ul className="flex flex-col gap-2.5" role="list">
                         <ScoreBarRow
                           scoreKey={semanticEntry[0]}

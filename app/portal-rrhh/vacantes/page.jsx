@@ -66,7 +66,7 @@ const STATUS_LABELS = {
   pausada: { label: "Pausada", bgClass: "bg-amber-100", textClass: "text-amber-800" },
 };
 
-const VacancyCard = ({ vacancy }) => {
+const VacancyCard = ({ vacancy, onRefresh }) => {
   const Icon = vacancy.icon;
   const statusConfig = STATUS_LABELS[vacancy.status] ?? STATUS_LABELS.activa;
 
@@ -127,7 +127,7 @@ const VacancyCard = ({ vacancy }) => {
             vacancyId={vacancy.id} 
             needsRematch={vacancy.needsRematch} 
             variant="list"
-            onSuccess={fetchVacancies}
+            onSuccess={onRefresh}
           />
           <Link
             href={`/portal-rrhh/vacantes/${vacancy.id}`}
@@ -286,7 +286,7 @@ export default function VacantesPage() {
                     </div>
                   ) : (
                     filteredVacancies.map((vacancy) => (
-                      <VacancyCard key={vacancy.id} vacancy={vacancy} />
+                      <VacancyCard key={vacancy.id} vacancy={vacancy} onRefresh={fetchVacancies} />
                     ))
                   )}
                 </div>
@@ -392,7 +392,7 @@ export default function VacantesPage() {
                   </div>
                 ) : (
                   filteredVacancies.map((vacancy) => (
-                    <VacancyCard key={vacancy.id} vacancy={vacancy} />
+                    <VacancyCard key={vacancy.id} vacancy={vacancy} onRefresh={fetchVacancies} />
                   ))
                 )}
               </div>
