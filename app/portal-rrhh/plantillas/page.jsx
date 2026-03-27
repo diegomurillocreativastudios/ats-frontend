@@ -12,6 +12,7 @@ import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import PlantillaModal from "@/components/rrhh/PlantillaModal";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
+import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 
 const mapTemplateFromApi = (item, index = 0) => {
@@ -126,6 +127,15 @@ export default function PlantillasPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    variant: "success",
+    message: "",
+  });
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
@@ -174,10 +184,15 @@ export default function PlantillasPage() {
       setIsDeleteModalOpen(false);
       setTemplateToDelete(null);
       await fetchTemplates();
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: "Plantilla eliminada correctamente.",
+      });
     } catch (err) {
-      setFetchError(
-        err?.message || err?.detail || "No se pudo eliminar la plantilla. Intenta de nuevo."
-      );
+      const msg =
+        err?.message || err?.detail || "No se pudo eliminar la plantilla. Intenta de nuevo.";
+      setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
       setDeleteLoading(false);
     }
@@ -415,6 +430,9 @@ export default function PlantillasPage() {
         onClose={handleCloseModal}
         onSubmit={handleModalSubmit}
         editingTemplate={editingTemplate}
+        onSnackbar={(message, variant = "success") =>
+          setSnackbar({ open: true, message, variant })
+        }
       />
 
       <DeleteConfirmModal
@@ -426,6 +444,13 @@ export default function PlantillasPage() {
         confirmText="Aceptar"
         cancelText="Cancelar"
         loading={deleteLoading}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        onClose={handleCloseSnackbar}
+        variant={snackbar.variant}
+        message={snackbar.message}
       />
     </div>
   );

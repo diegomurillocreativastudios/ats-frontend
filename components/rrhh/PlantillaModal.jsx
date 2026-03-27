@@ -40,7 +40,7 @@ const buildPayload = (formData, isEditing, editingTemplate) => {
   return payload;
 };
 
-export default function PlantillaModal({ isOpen, onClose, onSubmit, editingTemplate }) {
+export default function PlantillaModal({ isOpen, onClose, onSubmit, editingTemplate, onSnackbar }) {
   const [formData, setFormData] = useState({
     type: "Notification",
     name: "",
@@ -131,15 +131,18 @@ export default function PlantillaModal({ isOpen, onClose, onSubmit, editingTempl
           `/api/Templates/${editingTemplate.id}`,
           payload
         );
+        onSnackbar?.("Plantilla actualizada correctamente.", "success");
       } else {
         await apiClient.post("/api/Templates", payload);
+        onSnackbar?.("Plantilla creada correctamente.", "success");
       }
       handleClose();
       onSubmit?.();
     } catch (err) {
-      setSubmitError(
+      const msg =
         err?.message || err?.detail || `No se pudo ${isEditing ? "actualizar" : "crear"} la plantilla. Intenta de nuevo.`
-      );
+      setSubmitError(msg);
+      onSnackbar?.(msg, "error");
     } finally {
       setLoading(false);
     }

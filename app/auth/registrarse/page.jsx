@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Input from "@/components/auth/Input";
 import Button from "@/components/auth/Button";
 import AuthBrand from "@/components/auth/AuthBrand";
+import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 
 export default function Registrarse() {
@@ -19,6 +20,10 @@ export default function Registrarse() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [errors, setErrors] = useState({});
+
+  const handleCloseSnackbar = useCallback(() => {
+    setMessage(null);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -150,20 +155,6 @@ export default function Registrarse() {
               </p>
             </div>
 
-            {message && (
-              <div
-                className={`p-4 rounded-md border ${
-                  message.type === "error"
-                    ? "bg-red-50 border-red-200 text-red-700"
-                    : "bg-green-50 border-green-200 text-green-700"
-                }`}
-                role="alert"
-                aria-live="polite"
-              >
-                <p className="text-sm">{message.text}</p>
-              </div>
-            )}
-
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-3.5 md:gap-4">
                 <Input
@@ -238,6 +229,13 @@ export default function Registrarse() {
           </div>
         </div>
       </div>
+
+      <Snackbar
+        open={!!message}
+        onClose={handleCloseSnackbar}
+        variant={message?.type === "error" ? "error" : "success"}
+        message={message?.text ?? ""}
+      />
     </div>
   );
 }

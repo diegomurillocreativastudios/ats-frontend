@@ -8,7 +8,13 @@ import { apiClient } from "@/lib/api";
  * A specialized button to trigger a vacancy rematch.
  * Shows a prominent alert state if needsRematch is true.
  */
-export default function RematchButton({ vacancyId, needsRematch, onSuccess, variant = "default" }) {
+export default function RematchButton({
+  vacancyId,
+  needsRematch,
+  onSuccess,
+  onSnackbar,
+  variant = "default",
+}) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [errorMessage, setErrorMessage] = useState("");
@@ -25,16 +31,23 @@ export default function RematchButton({ vacancyId, needsRematch, onSuccess, vari
       await apiClient.request(`/api/recruiter/vacancies/${vacancyId}/rematch`, {
         method: "POST",
       });
-      setStatus("success");
+      if (onSnackbar) {
+        onSnackbar("Match reajustado correctamente.", "success");
+      } else {
+        setStatus("success");
+        setTimeout(() => setStatus("idle"), 3000);
+      }
       if (onSuccess) onSuccess();
-      
-      // Reset status after 3 seconds
-      setTimeout(() => setStatus("idle"), 3000);
     } catch (err) {
       console.error("Rematch failed:", err);
-      setStatus("error");
-      setErrorMessage(err?.message || "Error al re-ajustar match");
-      setTimeout(() => setStatus("idle"), 5000);
+      const msg = err?.message || "Error al re-ajustar match";
+      if (onSnackbar) {
+        onSnackbar(msg, "error");
+      } else {
+        setStatus("error");
+        setErrorMessage(msg);
+        setTimeout(() => setStatus("idle"), 5000);
+      }
     } finally {
       setLoading(false);
     }
@@ -46,7 +59,7 @@ export default function RematchButton({ vacancyId, needsRematch, onSuccess, vari
 
   const isListVariant = variant === "list";
 
-  if (status === "success") {
+  if (!onSnackbar && status === "success") {
     return (
       <div className="flex items-center gap-2 text-green-600 font-inter text-sm animate-in fade-in duration-300">
         <CheckCircle2 className="h-4 w-4" />
@@ -55,7 +68,7 @@ export default function RematchButton({ vacancyId, needsRematch, onSuccess, vari
     );
   }
 
-  if (status === "error") {
+  if (!onSnackbar && status === "error") {
     return (
       <div className="flex items-center gap-2 text-destructive font-inter text-xs animate-in fade-in duration-300 max-w-[150px]">
         <AlertCircle className="h-4 w-4 shrink-0" />

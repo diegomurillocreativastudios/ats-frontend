@@ -1,30 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import CandidateSidebar from "@/components/candidato/CandidateSidebar";
 import CandidateTopbar from "@/components/candidato/CandidateTopbar";
 import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
 import DocumentsList from "@/components/candidato/DocumentsList";
+import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 
 const PROCESAR_ENDPOINT = "/Ingest/upload";
 const ENTITY_TYPE = "Candidate";
 
 export default function DocumentosContent() {
-  const [processMessage, setProcessMessage] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    variant: "success",
+    message: "",
+  });
+
+  const handleCloseSnackbar = useCallback(() => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  }, []);
 
   const handleProcess = async (file, _index) => {
-    setProcessMessage(null);
     const formData = new FormData();
     formData.append("File", file);
     formData.append("EntityType", ENTITY_TYPE);
-    await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
-    setProcessMessage({ type: "success", text: "Documento procesado correctamente." });
+    try {
+      await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: "Documento procesado correctamente.",
+      });
+    } catch (err) {
+      const message = err?.message || err?.detail || "Error al procesar el documento.";
+      setSnackbar({ open: true, variant: "error", message });
+      const silentErr = new Error(message);
+      silentErr.silent = true;
+      throw silentErr;
+    }
   };
 
   const handleProcessAll = async (files) => {
     if (!files?.length) return;
-    setProcessMessage(null);
     const total = files.length;
     try {
       for (const file of files) {
@@ -33,13 +52,14 @@ export default function DocumentosContent() {
         formData.append("EntityType", ENTITY_TYPE);
         await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
       }
-      setProcessMessage({
-        type: "success",
-        text: `${total} documento${total !== 1 ? "s" : ""} procesado${total !== 1 ? "s" : ""} correctamente.`,
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: `${total} documento${total !== 1 ? "s" : ""} procesado${total !== 1 ? "s" : ""} correctamente.`,
       });
     } catch (err) {
       const message = err?.message || err?.detail || "Error al procesar los documentos.";
-      setProcessMessage({ type: "error", text: message });
+      setSnackbar({ open: true, variant: "error", message });
     }
   };
 
@@ -60,18 +80,6 @@ export default function DocumentosContent() {
                   Sube y gestiona los documentos de tu proceso de selección
                 </p>
               </section>
-              {processMessage && (
-                <p
-                  role="alert"
-                  className={`font-inter text-sm ${
-                    processMessage.type === "success"
-                      ? "text-success"
-                      : "text-destructive"
-                  }`}
-                >
-                  {processMessage.text}
-                </p>
-              )}
               <DocumentsUploadZone onProcess={handleProcess} onProcessAll={handleProcessAll} />
               <DocumentsList />
             </div>
@@ -92,23 +100,18 @@ export default function DocumentosContent() {
                 Sube y gestiona tus documentos
               </p>
             </section>
-            {processMessage && (
-              <p
-                role="alert"
-                className={`font-inter text-sm ${
-                  processMessage.type === "success"
-                    ? "text-success"
-                    : "text-destructive"
-                }`}
-              >
-                {processMessage.text}
-              </p>
-            )}
             <DocumentsUploadZone onProcess={handleProcess} onProcessAll={handleProcessAll} />
             <DocumentsList />
           </div>
         </main>
       </div>
+
+      <Snackbar
+        open={snackbar.open}
+        onClose={handleCloseSnackbar}
+        variant={snackbar.variant}
+        message={snackbar.message}
+      />
     </div>
   );
 }

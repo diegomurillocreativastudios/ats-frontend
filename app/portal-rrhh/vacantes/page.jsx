@@ -14,6 +14,7 @@ import {
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import NuevaVacanteModal from "@/components/rrhh/NuevaVacanteModal";
+import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 import RematchButton from "@/components/rrhh/RematchButton";
 
@@ -104,7 +105,7 @@ const STATUS_LABELS = {
   borrador: { label: "Borrador", bgClass: "bg-slate-100", textClass: "text-slate-700" },
 };
 
-const VacancyCard = ({ vacancy, onRefresh }) => {
+const VacancyCard = ({ vacancy, onRefresh, onSnackbar }) => {
   const Icon = vacancy.icon;
   const statusConfig = STATUS_LABELS[vacancy.status] ?? STATUS_LABELS.activa;
 
@@ -177,6 +178,7 @@ const VacancyCard = ({ vacancy, onRefresh }) => {
             needsRematch={vacancy.needsRematch} 
             variant="list"
             onSuccess={onRefresh}
+            onSnackbar={onSnackbar}
           />
           <Link
             href={`/portal-rrhh/vacantes/${vacancy.id}`}
@@ -198,6 +200,15 @@ export default function VacantesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
   const [isNuevaVacanteOpen, setIsNuevaVacanteOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    variant: "success",
+    message: "",
+  });
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   const fetchVacancies = useCallback(async () => {
     setLoading(true);
@@ -222,6 +233,11 @@ export default function VacantesPage() {
 
   const handleNuevaVacanteSubmit = () => {
     fetchVacancies();
+    setSnackbar({
+      open: true,
+      variant: "success",
+      message: "Vacante creada correctamente.",
+    });
   };
 
   const filteredVacancies = vacancies.filter((v) => {
@@ -340,7 +356,14 @@ export default function VacantesPage() {
                     </div>
                   ) : (
                     filteredVacancies.map((vacancy) => (
-                      <VacancyCard key={vacancy.id} vacancy={vacancy} onRefresh={fetchVacancies} />
+                      <VacancyCard
+                        key={vacancy.id}
+                        vacancy={vacancy}
+                        onRefresh={fetchVacancies}
+                        onSnackbar={(message, variant = "success") =>
+                          setSnackbar({ open: true, message, variant })
+                        }
+                      />
                     ))
                   )}
                 </div>
@@ -446,7 +469,14 @@ export default function VacantesPage() {
                   </div>
                 ) : (
                   filteredVacancies.map((vacancy) => (
-                    <VacancyCard key={vacancy.id} vacancy={vacancy} onRefresh={fetchVacancies} />
+                    <VacancyCard
+                      key={vacancy.id}
+                      vacancy={vacancy}
+                      onRefresh={fetchVacancies}
+                      onSnackbar={(message, variant = "success") =>
+                        setSnackbar({ open: true, message, variant })
+                      }
+                    />
                   ))
                 )}
               </div>
@@ -459,6 +489,16 @@ export default function VacantesPage() {
         isOpen={isNuevaVacanteOpen}
         onClose={() => setIsNuevaVacanteOpen(false)}
         onSubmit={handleNuevaVacanteSubmit}
+        onSnackbar={(message, variant = "error") =>
+          setSnackbar({ open: true, message, variant })
+        }
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        onClose={handleCloseSnackbar}
+        variant={snackbar.variant}
+        message={snackbar.message}
       />
     </div>
   );

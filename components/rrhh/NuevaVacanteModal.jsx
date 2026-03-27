@@ -24,7 +24,7 @@ export const createEmptyRequirement = () => ({
   scale: 5,
 });
 
-export default function NuevaVacanteModal({ isOpen, onClose, onSubmit }) {
+export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackbar }) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
@@ -124,9 +124,10 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit }) {
       handleClose();
       onSubmit?.(data);
     } catch (err) {
-      setSubmitError(
+      const msg =
         err?.message || err?.detail || "No se pudo crear la vacante. Intenta de nuevo."
-      );
+      setSubmitError(msg)
+      onSnackbar?.(msg, "error")
     } finally {
       setLoading(false);
     }

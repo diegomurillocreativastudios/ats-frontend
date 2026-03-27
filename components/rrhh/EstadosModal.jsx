@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
+import Snackbar from "@/components/ui/Snackbar";
 
 const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
 
@@ -112,7 +113,7 @@ const StatusItem = ({ status, onEdit, onDelete, onDefaultActivate, defaultSwitch
   );
 };
 
-export default function EstadosModal({ isOpen, onClose }) {
+export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
   const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
@@ -126,9 +127,29 @@ export default function EstadosModal({ isOpen, onClose }) {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [defaultSwitchLoading, setDefaultSwitchLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    variant: "success",
+  });
+
+  const showSnackbar = useCallback(
+    (message, variant = "success") => {
+      if (onSnackbar) {
+        onSnackbar(message, variant);
+        return;
+      }
+      setSnackbar({ open: true, message, variant });
+    },
+    [onSnackbar]
+  );
+
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  }, []);
 
   const fetchStatuses = useCallback(async (silent = false) => {
-    if (!isOpen) return;
+    if (!isOpen) return false;
 
     if (!silent) {
       setLoading(true);
@@ -140,17 +161,20 @@ export default function EstadosModal({ isOpen, onClose }) {
       );
       const list = Array.isArray(data) ? data : data?.statuses ?? data?.items ?? data?.data ?? [];
       setStatuses(list.map((item, i) => mapStatusFromApi(item, i)));
+      return true;
     } catch (err) {
-      setFetchError(
-        err?.message || err?.detail || "No se pudieron cargar los estados."
-      );
+      const msg =
+        err?.message || err?.detail || "No se pudieron cargar los estados.";
+      setFetchError(msg);
       setStatuses([]);
+      showSnackbar(msg, "error");
+      return false;
     } finally {
       if (!silent) {
         setLoading(false);
       }
     }
-  }, [isOpen]);
+  }, [isOpen, showSnackbar]);
 
   useEffect(() => {
     fetchStatuses();
@@ -191,11 +215,15 @@ export default function EstadosModal({ isOpen, onClose }) {
           }
         );
       }
-      await fetchStatuses(true);
+      const refreshed = await fetchStatuses(true);
+      if (refreshed) {
+        showSnackbar("Estado por defecto cambiado", "info");
+      }
     } catch (err) {
-      setFetchError(
-        err?.message || err?.detail || "No se pudo actualizar el estado por defecto."
-      );
+      const msg =
+        err?.message || err?.detail || "No se pudo actualizar el estado por defecto.";
+      setFetchError(msg);
+      showSnackbar(msg, "error");
     } finally {
       setDefaultSwitchLoading(false);
     }
@@ -216,11 +244,15 @@ export default function EstadosModal({ isOpen, onClose }) {
       );
       setIsDeleteModalOpen(false);
       setStatusToDelete(null);
-      await fetchStatuses();
+      const refreshed = await fetchStatuses();
+      if (refreshed) {
+        showSnackbar("Estado eliminado", "success");
+      }
     } catch (err) {
-      setFetchError(
-        err?.message || err?.detail || "No se pudo eliminar el estado. Intenta de nuevo."
-      );
+      const msg =
+        err?.message || err?.detail || "No se pudo eliminar el estado. Intenta de nuevo.";
+      setFetchError(msg);
+      showSnackbar(msg, "error");
     } finally {
       setDeleteLoading(false);
     }
@@ -270,6 +302,8 @@ export default function EstadosModal({ isOpen, onClose }) {
     setSubmitLoading(true);
     setSubmitError(null);
 
+    const wasEditing = Boolean(editingStatus);
+
     try {
       if (editingStatus) {
         await apiClient.put(
@@ -283,21 +317,29 @@ export default function EstadosModal({ isOpen, onClose }) {
         );
       }
       handleCloseForm();
-      await fetchStatuses();
+      const refreshed = await fetchStatuses(true);
+      if (refreshed) {
+        showSnackbar(
+          wasEditing ? "Estado actualizado" : "Estado creado exitosamente",
+          "success"
+        );
+      }
     } catch (err) {
-      setSubmitError(
-        err?.message || err?.detail || `No se pudo ${editingStatus ? "actualizar" : "crear"} el estado. Intenta de nuevo.`
-      );
+      const msg =
+        err?.message ||
+        err?.detail ||
+        `No se pudo ${editingStatus ? "actualizar" : "crear"} el estado. Intenta de nuevo.`;
+      setSubmitError(msg);
+      showSnackbar(msg, "error");
     } finally {
       setSubmitLoading(false);
     }
   };
 
 
-  if (!isOpen) return null;
-
   return (
     <>
+      {isOpen && (
       <div
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
         onClick={onClose}
@@ -456,7 +498,9 @@ export default function EstadosModal({ isOpen, onClose }) {
           )}
         </div>
       </div>
+      )}
 
+      {isOpen && (
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
@@ -467,6 +511,16 @@ export default function EstadosModal({ isOpen, onClose }) {
         cancelText="Cancelar"
         loading={deleteLoading}
       />
+      )}
+
+      {!onSnackbar && (
+        <Snackbar
+          open={snackbar.open}
+          onClose={handleSnackbarClose}
+          variant={snackbar.variant}
+          message={snackbar.message}
+        />
+      )}
     </>
   );
 }

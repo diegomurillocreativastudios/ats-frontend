@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Input from "@/components/auth/Input";
 import Button from "@/components/auth/Button";
 import AuthBrand from "@/components/auth/AuthBrand";
+import Snackbar from "@/components/ui/Snackbar";
 
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : "";
@@ -41,6 +42,10 @@ export default function IniciarSesion() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  const handleCloseSnackbar = useCallback(() => {
+    setMessage(null);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -175,19 +180,6 @@ export default function IniciarSesion() {
               </p>
             </div>
 
-            {message && (
-              <div
-                className={`p-4 rounded-md border text-sm ${
-                  message.type === "error"
-                    ? "bg-red-50 border-red-200 text-red-700"
-                    : "bg-green-50 border-green-200 text-green-700"
-                }`}
-                role="alert"
-              >
-                <p>{message.text}</p>
-              </div>
-            )}
-
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
               <div className="flex flex-col gap-4 md:gap-4 lg:gap-5">
                 <Input
@@ -274,6 +266,13 @@ export default function IniciarSesion() {
           </div>
         </div>
       </div>
+
+      <Snackbar
+        open={!!message}
+        onClose={handleCloseSnackbar}
+        variant={message?.type === "error" ? "error" : "success"}
+        message={message?.text ?? ""}
+      />
     </div>
   );
 }

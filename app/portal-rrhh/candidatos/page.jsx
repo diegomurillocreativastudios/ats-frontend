@@ -10,6 +10,7 @@ import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay";
 import Modal from "@/components/ui/Modal";
+import Snackbar from "@/components/ui/Snackbar";
 import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
 
 const formatDate = (value) => {
@@ -113,10 +114,17 @@ export default function CandidatosPage() {
   const [fetchError, setFetchError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadMessage, setUploadMessage] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    variant: "success",
+    message: "",
+  });
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   const handleOpenUploadModal = () => {
-    setUploadMessage(null);
     setIsUploadModalOpen(true);
   };
 
@@ -125,24 +133,29 @@ export default function CandidatosPage() {
   };
 
   const handleProcessUpload = async (file) => {
-    setUploadMessage(null);
     const formData = new FormData();
     formData.append("File", file);
     formData.append("EntityType", "Candidate");
     try {
       await apiClient.postFormData("/Ingest/upload", formData);
-      setUploadMessage({
-        type: "success",
-        text: "CV cargado y procesado correctamente.",
-      });
       await fetchCandidates();
+      setIsUploadModalOpen(false);
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: "CV cargado y procesado correctamente.",
+      });
     } catch (err) {
       const message =
         err?.detail ||
         err?.message ||
         "Error al procesar el CV.";
 
-      setUploadMessage({ type: "error", text: message });
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message,
+      });
 
       // Importante: re-lanzar el error para que `DocumentsUploadZone` no marque
       // el archivo como "Listo" cuando el backend realmente falló.
@@ -291,8 +304,11 @@ export default function CandidatosPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredCandidates.map((candidate) => (
-                  <CandidateRow key={candidate.id} candidate={candidate} />
+                {filteredCandidates.map((candidate, index) => (
+                  <CandidateRow
+                    key={`${candidate.id}-${index}`}
+                    candidate={candidate}
+                  />
                 ))}
               </tbody>
             </table>
@@ -339,18 +355,6 @@ export default function CandidatosPage() {
               <p className="font-inter text-sm text-muted-foreground">
                 Sube el CV del candidato en formato PDF para crear su perfil automáticamente.
               </p>
-              {uploadMessage && (
-                <p
-                  role="alert"
-                  className={`rounded-md border px-4 py-3 font-inter text-sm ${
-                    uploadMessage.type === "success"
-                      ? "border-success/30 bg-success/10 text-success"
-                      : "border-vo-pink/30 bg-vo-pink/10 text-vo-pink"
-                  }`}
-                >
-                  {uploadMessage.text}
-                </p>
-              )}
               <DocumentsUploadZone
                 onProcess={handleProcessUpload}
                 acceptedTypes={["application/pdf"]}
@@ -386,6 +390,13 @@ export default function CandidatosPage() {
           </div>
         </main>
       </div>
+
+      <Snackbar
+        open={snackbar.open}
+        onClose={handleCloseSnackbar}
+        variant={snackbar.variant}
+        message={snackbar.message}
+      />
     </div>
   );
 }

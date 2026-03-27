@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
+import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 import RematchButton from "@/components/rrhh/RematchButton";
 import { getAccessToken } from "@/lib/auth";
@@ -1037,6 +1038,15 @@ export default function VacanteDetallePage() {
   const [editErrors, setEditErrors] = useState({});
   const [savingVacancy, setSavingVacancy] = useState(false);
   const [saveVacancyError, setSaveVacancyError] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    variant: "success",
+    message: "",
+  });
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
   const [smartCandidates, setSmartCandidates] = useState(null);
   const [loadingSmart, setLoadingSmart] = useState(false);
   const [smartError, setSmartError] = useState(null);
@@ -1055,6 +1065,37 @@ export default function VacanteDetallePage() {
   const [loadingMoveStage, setLoadingMoveStage] = useState(false);
   const [applicationStatusError, setApplicationStatusError] = useState(null);
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
+
+  const possibleCandidatesSectionDesktopRef = useRef(null);
+  const possibleCandidatesSectionMobileRef = useRef(null);
+  const etapasSectionDesktopRef = useRef(null);
+  const etapasSectionMobileRef = useRef(null);
+
+  const scrollToPossibleCandidates = useCallback(() => {
+    const run = () => {
+      if (typeof window === "undefined") return;
+      const isLg = window.matchMedia("(min-width: 1024px)").matches;
+      const el = isLg
+        ? possibleCandidatesSectionDesktopRef.current
+        : possibleCandidatesSectionMobileRef.current;
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    requestAnimationFrame(() => {
+      requestAnimationFrame(run);
+    });
+  }, []);
+
+  const scrollToEtapas = useCallback(() => {
+    const run = () => {
+      if (typeof window === "undefined") return;
+      const isLg = window.matchMedia("(min-width: 1024px)").matches;
+      const el = isLg ? etapasSectionDesktopRef.current : etapasSectionMobileRef.current;
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    requestAnimationFrame(() => {
+      requestAnimationFrame(run);
+    });
+  }, []);
 
   const fetchStages = useCallback(async () => {
     try {
@@ -1267,11 +1308,18 @@ export default function VacanteDetallePage() {
       const updated = await apiClient.put(`/api/recruiter/vacancies/${id}`, payload);
       setVacancy(updated ?? vacancy);
       setIsEditing(false);
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: "Cambios guardados correctamente.",
+      });
       if (!updated) {
         await fetchVacancy(true);
       }
     } catch (err) {
-      setSaveVacancyError(err?.message ?? err?.detail ?? "No se pudo guardar la vacante.");
+      const msg = err?.message ?? err?.detail ?? "No se pudo guardar la vacante."
+      setSaveVacancyError(msg);
+      setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
       setSavingVacancy(false);
     }
@@ -1303,11 +1351,20 @@ export default function VacanteDetallePage() {
       const data = await apiClient.post(url, {});
       const list = Array.isArray(data) ? data : data?.candidates ?? data?.results ?? [];
       setSmartCandidates(list);
+      const count = list.length;
+      setSnackbar({
+        open: true,
+        variant: count > 0 ? "success" : "info",
+        message:
+          count > 0
+            ? `Se encontraron ${count} candidato${count === 1 ? "" : "s"}.`
+            : "No se encontraron candidatos con ese criterio.",
+      });
     } catch (err) {
-      setSmartError(
-        err?.message ?? err?.detail ?? "No se pudo cargar el match."
-      );
+      const msg = err?.message ?? err?.detail ?? "No se pudo cargar el match.";
+      setSmartError(msg);
       setSmartCandidates([]);
+      setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
       setLoadingSmart(false);
     }
@@ -1387,6 +1444,11 @@ export default function VacanteDetallePage() {
             `/api/recruiter/applications/${applicationId}/move-to-stage`,
             { stageId, notes: "" }
           );
+          setSnackbar({
+            open: true,
+            variant: "success",
+            message: "Candidato movido de etapa.",
+          });
           /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
           try {
             await fetchVacancy(true);
@@ -1404,7 +1466,13 @@ export default function VacanteDetallePage() {
             /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
           }
         } catch (err) {
-          setMoveStageError(normalizeMoveStageError(err))
+          const normalized = normalizeMoveStageError(err);
+          setMoveStageError(normalized);
+          setSnackbar({
+            open: true,
+            variant: "error",
+            message: normalized.text,
+          });
           setCandidateStageOverrides((prev) => {
             const next = { ...prev };
             delete next[candidateId];
@@ -1449,6 +1517,11 @@ export default function VacanteDetallePage() {
           `/api/recruiter/applications/${applicationId}/application-status`,
           { applicationStatusId: statusId }
         );
+        setSnackbar({
+          open: true,
+          variant: "success",
+          message: "Estado de postulación actualizado.",
+        });
         try {
           await fetchVacancy(true);
           setCandidateStatusOverrides((prev) => {
@@ -1460,7 +1533,13 @@ export default function VacanteDetallePage() {
           /* El estado ya se guardó; si falla recargar la vacante, el override mantiene la UI coherente. */
         }
       } catch (err) {
-        setApplicationStatusError(normalizeApplicationStatusError(err));
+        const normalized = normalizeApplicationStatusError(err);
+        setApplicationStatusError(normalized);
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: normalized.text,
+        });
         setCandidateStatusOverrides((prev) => {
           const next = { ...prev };
           delete next[candidateId];
@@ -1517,14 +1596,20 @@ export default function VacanteDetallePage() {
       });
       setSelectedPossibleCandidateIds(new Set());
       await fetchVacancy(true);
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: "Proceso iniciado para los candidatos seleccionados.",
+      });
+      scrollToEtapas();
     } catch (err) {
-      setStartProcessError(
-        err?.message ?? err?.detail ?? "No se pudo iniciar el proceso."
-      );
+      const msg = err?.message ?? err?.detail ?? "No se pudo iniciar el proceso.";
+      setStartProcessError(msg);
+      setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
       setLoadingStartProcess(false);
     }
-  }, [id, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy]);
+  }, [id, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas]);
 
   /** Selected candidate document IDs to send to the match API. */
   const selectedDocumentIds = displayCandidates
@@ -1542,14 +1627,20 @@ export default function VacanteDetallePage() {
     try {
       await apiClient.post(`/api/recruiter/vacancies/${id}/match`, docIds);
       await fetchVacancy(true);
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: "Match ejecutado correctamente.",
+      });
+      scrollToPossibleCandidates();
     } catch (err) {
-      setMatchError(
-        err?.message ?? err?.detail ?? "No se pudo ejecutar el match."
-      );
+      const msg = err?.message ?? err?.detail ?? "No se pudo ejecutar el match.";
+      setMatchError(msg);
+      setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
       setLoadingMatch(false);
     }
-  }, [id, displayCandidates, selectedCandidateIds, fetchVacancy]);
+  }, [id, displayCandidates, selectedCandidateIds, fetchVacancy, scrollToPossibleCandidates]);
 
   const selectedCount = selectedCandidateIds.size;
 
@@ -1691,6 +1782,9 @@ export default function VacanteDetallePage() {
                               vacancyId={id} 
                               needsRematch={vacancy.needsRematch} 
                               onSuccess={() => fetchVacancy(true)}
+                              onSnackbar={(message, variant = "success") =>
+                                setSnackbar({ open: true, message, variant })
+                              }
                             />
                             <button
                               type="button"
@@ -1998,7 +2092,10 @@ export default function VacanteDetallePage() {
                     </div>
 
                     {/* 2. Posibles candidatos (AI match suggestions) */}
-                    <div className="flex flex-col gap-3">
+                    <div
+                      ref={possibleCandidatesSectionDesktopRef}
+                      className="flex flex-col gap-3 scroll-mt-4"
+                    >
                       <div className="flex flex-wrap items-center gap-3">
                         <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
                           <Users className="h-5 w-5" aria-hidden />
@@ -2060,7 +2157,10 @@ export default function VacanteDetallePage() {
                     </div>
 
                     {/* 3. Kanban board (applicants) */}
-                    <div className="flex flex-col gap-3">
+                    <div
+                      ref={etapasSectionDesktopRef}
+                      className="flex flex-col gap-3 scroll-mt-4"
+                    >
                       <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
                         <Users className="h-5 w-5" aria-hidden />
                         Etapas
@@ -2539,7 +2639,10 @@ export default function VacanteDetallePage() {
                   </div>
 
                   {/* 2. Posibles candidatos (AI match suggestions) */}
-                  <div className="flex flex-col gap-3">
+                  <div
+                    ref={possibleCandidatesSectionMobileRef}
+                    className="flex flex-col gap-3 scroll-mt-4"
+                  >
                     <div className="flex flex-wrap items-center gap-3">
                       <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
                         <Users className="h-4 w-4" aria-hidden />
@@ -2601,7 +2704,10 @@ export default function VacanteDetallePage() {
                   </div>
 
                   {/* 3. Kanban board (applicants) */}
-                  <div className="flex flex-col gap-3">
+                  <div
+                    ref={etapasSectionMobileRef}
+                    className="flex flex-col gap-3 scroll-mt-4"
+                  >
                     <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
                       <Users className="h-4 w-4" aria-hidden />
                       Etapas
@@ -2653,6 +2759,13 @@ export default function VacanteDetallePage() {
           </div>
         </main>
       </div>
+
+      <Snackbar
+        open={snackbar.open}
+        onClose={handleCloseSnackbar}
+        variant={snackbar.variant}
+        message={snackbar.message}
+      />
     </div>
   );
 }

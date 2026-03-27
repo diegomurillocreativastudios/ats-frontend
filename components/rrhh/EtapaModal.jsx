@@ -1,15 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api";
+import { buildRecruiterStagePutPayload } from "@/lib/recruiterStagePayload";
+import Snackbar from "@/components/ui/Snackbar";
 
-export default function EtapaModal({ isOpen, onClose, onSubmit, editingStage, companyId }) {
+export default function EtapaModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  onSnackbar,
+  editingStage,
+  companyId,
+  setAsDefaultOnCreate = false,
+}) {
   const [name, setName] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    variant: "success",
+  });
+
+  const showSnackbar = useCallback(
+    (message, variant = "success") => {
+      if (onSnackbar) {
+        onSnackbar(message, variant);
+        return;
+      }
+      setSnackbar({ open: true, message, variant });
+    },
+    [onSnackbar]
+  );
+
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  }, []);
 
   const isEditing = !!editingStage;
 
@@ -41,28 +71,31 @@ export default function EtapaModal({ isOpen, onClose, onSubmit, editingStage, co
       const wasCreating = !isEditing;
       
       if (isEditing) {
-        const payload = {
+        const payload = buildRecruiterStagePutPayload({
+          ...editingStage,
           name: name.trim(),
-          orderIndex: editingStage.order,
-        };
+        });
         await apiClient.put(
           `/api/recruiter/companies/${companyId}/stages/${editingStage.id}`,
           payload
         );
+        showSnackbar("Etapa actualizada correctamente.", "success");
         handleClose();
         onSubmit?.(false);
       } else {
         const created = await apiClient.post(
           `/api/recruiter/companies/${companyId}/stages`,
-          { name: name.trim() }
+          { name: name.trim(), isDefault: Boolean(setAsDefaultOnCreate) }
         );
+        showSnackbar("Etapa creada correctamente.", "success");
         handleClose();
         onSubmit?.(true, created);
       }
     } catch (err) {
-      setSubmitError(
+      const msg =
         err?.message || err?.detail || `No se pudo ${isEditing ? "actualizar" : "crear"} la etapa. Intenta de nuevo.`
-      );
+      setSubmitError(msg);
+      showSnackbar(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -99,6 +132,7 @@ export default function EtapaModal({ isOpen, onClose, onSubmit, editingStage, co
   );
 
   return (
+    <>
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
@@ -147,5 +181,14 @@ export default function EtapaModal({ isOpen, onClose, onSubmit, editingStage, co
         )}
       </form>
     </Modal>
+    {!onSnackbar && (
+      <Snackbar
+        open={snackbar.open}
+        onClose={handleSnackbarClose}
+        variant={snackbar.variant}
+        message={snackbar.message}
+      />
+    )}
+    </>
   );
 }
