@@ -5,12 +5,11 @@ import Link from "next/link";
 import {
   Plus,
   Search,
-  ChevronDown,
   Building2,
-  MapPin,
   Palette,
   Code,
   Briefcase,
+  Tag,
 } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
@@ -26,20 +25,53 @@ const ICON_BY_DEPARTMENT = {
   tech: Code,
 };
 
+const formatRequirements = (req) => {
+  if (req == null) return "";
+  if (typeof req === "string") return req.trim();
+  if (typeof req === "object" && !Array.isArray(req)) {
+    return Object.entries(req)
+      .filter(([, v]) => v != null && String(v).trim() !== "")
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(" · ");
+  }
+  return "";
+};
+
+const mapStatusKey = (item) => {
+  const raw = String(item?.status ?? item?.state ?? "open").toLowerCase().trim();
+  if (raw === "open" || raw === "active" || raw === "activa" || raw.includes("abierta")) {
+    return "activa";
+  }
+  if (raw === "closed" || raw === "cerrada" || raw.includes("cerrad")) {
+    return "cerrada";
+  }
+  if (raw === "draft" || raw === "borrador") {
+    return "borrador";
+  }
+  if (raw === "paused" || raw === "pausada" || raw.includes("paus")) {
+    return "pausada";
+  }
+  return "activa";
+};
+
 const mapVacancyFromApi = (item, index = 0) => {
   const id = String(item?.id ?? item?.uuid ?? index);
   const title = item.title ?? item.name ?? "";
-  const department = item.department ?? item.department_name ?? "—";
-  const location = item.location ?? item.work_arrangement ?? "—";
-  const candidates = item.candidates ?? item.candidates_count ?? item.applicants_count ?? 0;
-  const interviews = item.interviews ?? item.interviews_count ?? 0;
-  const rawStatus = (item.status ?? item.state ?? "active").toLowerCase();
-  const status =
-    rawStatus.includes("active") || rawStatus === "activa" || rawStatus === "open"
-      ? "activa"
-      : rawStatus.includes("closed") || rawStatus === "cerrada"
-        ? "cerrada"
-        : "pausada";
+  const company = item.company ?? item.companyName ?? "";
+  const jobCategory = item.jobCategory ?? item.job_category ?? "";
+  const department =
+    jobCategory || (item.department ?? item.department_name ?? "—");
+  const location = item.location ?? item.work_arrangement ?? company ?? "—";
+  const description = item.description ?? "";
+  const requirementsSummary = formatRequirements(item.requirements);
+  const candidates =
+    item.candidatesAmount ??
+    item.candidates ??
+    item.candidates_count ??
+    item.applicants_count ??
+    0;
+  const interviews = item.interviews ?? item.interviews_count ?? null;
+  const status = mapStatusKey(item);
   const deptLower = String(department).toLowerCase();
   const icon =
     ICON_BY_DEPARTMENT[deptLower] ??
@@ -47,16 +79,21 @@ const mapVacancyFromApi = (item, index = 0) => {
       ? Palette
       : Code);
 
-  return { 
-    id, 
-    title, 
-    department, 
-    location, 
-    candidates, 
-    interviews, 
-    status, 
+  return {
+    id,
+    title,
+    description,
+    company: company || "—",
+    jobCategory: jobCategory || "—",
+    department,
+    location,
+    requirementsSummary,
+    candidates,
+    interviews,
+    status,
     icon,
-    needsRematch: !!item.needsRematch 
+    needsRematch: !!item.needsRematch,
+    createdAt: item.createdAt ?? item.created_at,
   };
 };
 
@@ -64,6 +101,7 @@ const STATUS_LABELS = {
   activa: { label: "Activa", bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
   cerrada: { label: "Cerrada", bgClass: "bg-muted", textClass: "text-muted-foreground" },
   pausada: { label: "Pausada", bgClass: "bg-amber-100", textClass: "text-amber-800" },
+  borrador: { label: "Borrador", bgClass: "bg-slate-100", textClass: "text-slate-700" },
 };
 
 const VacancyCard = ({ vacancy, onRefresh }) => {
@@ -86,16 +124,25 @@ const VacancyCard = ({ vacancy, onRefresh }) => {
           <h3 className="font-inter text-base font-semibold text-foreground">
             {vacancy.title}
           </h3>
-          {/* <div className="flex flex-wrap items-center gap-4 font-inter text-[13px] text-muted-foreground">
-            <span className="flex items-center gap-1.5">
+          {/* Empresa + categoría — oculto hasta definir UX
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-inter text-[13px] text-muted-foreground">
+            <span className="flex min-w-0 items-center gap-1.5">
               <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              {vacancy.department}
+              <span className="truncate">{vacancy.company}</span>
             </span>
-            <span className="flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              {vacancy.location}
+            <span className="flex min-w-0 items-center gap-1.5">
+              <Tag className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="truncate">{vacancy.jobCategory}</span>
             </span>
-          </div> */}
+          </div>
+          */}
+          {/* Requisitos (requirements) — oculto hasta definir UX
+          {vacancy.requirementsSummary ? (
+            <p className="line-clamp-2 font-inter text-[12px] leading-snug text-muted-foreground">
+              {vacancy.requirementsSummary}
+            </p>
+          ) : null}
+          */}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-4 sm:gap-6">
@@ -108,14 +155,16 @@ const VacancyCard = ({ vacancy, onRefresh }) => {
               Candidatos
             </span>
           </div>
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="font-inter text-lg font-semibold text-foreground">
-              {vacancy.interviews}
-            </span>
-            <span className="font-inter text-xs text-muted-foreground">
-              Entrevistas
-            </span>
-          </div>
+          {vacancy.interviews != null ? (
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="font-inter text-lg font-semibold text-foreground">
+                {vacancy.interviews}
+              </span>
+              <span className="font-inter text-xs text-muted-foreground">
+                Entrevistas
+              </span>
+            </div>
+          ) : null}
         </div>
         <span
           className={`inline-flex items-center rounded-xl px-2.5 py-1 font-inter text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
@@ -176,10 +225,15 @@ export default function VacantesPage() {
   };
 
   const filteredVacancies = vacancies.filter((v) => {
+    const q = searchQuery.toLowerCase().trim();
     const matchesSearch =
-      !searchQuery ||
-      v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.department.toLowerCase().includes(searchQuery.toLowerCase());
+      !q ||
+      v.title.toLowerCase().includes(q) ||
+      v.company.toLowerCase().includes(q) ||
+      v.jobCategory.toLowerCase().includes(q) ||
+      v.department.toLowerCase().includes(q) ||
+      (v.description && v.description.toLowerCase().includes(q)) ||
+      (v.requirementsSummary && v.requirementsSummary.toLowerCase().includes(q));
     const matchesStatus =
       statusFilter === "todas" || v.status === statusFilter;
     return matchesSearch && matchesStatus;
