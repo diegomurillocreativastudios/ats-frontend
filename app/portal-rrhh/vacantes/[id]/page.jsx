@@ -1387,6 +1387,22 @@ export default function VacanteDetallePage() {
             `/api/recruiter/applications/${applicationId}/move-to-stage`,
             { stageId, notes: "" }
           );
+          /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
+          try {
+            await fetchVacancy(true);
+            setCandidateStageOverrides((prev) => {
+              const next = { ...prev };
+              delete next[candidateId];
+              return next;
+            });
+            setCandidateStatusOverrides((prev) => {
+              const next = { ...prev };
+              delete next[candidateId];
+              return next;
+            });
+          } catch {
+            /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
+          }
         } catch (err) {
           setMoveStageError(normalizeMoveStageError(err))
           setCandidateStageOverrides((prev) => {
@@ -1399,7 +1415,7 @@ export default function VacanteDetallePage() {
         }
       }
     },
-    [applicants, stages]
+    [applicants, stages, fetchVacancy]
   );
 
   const handleKanbanDragEnter = useCallback((stage) => {

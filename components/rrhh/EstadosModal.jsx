@@ -162,7 +162,10 @@ export default function EstadosModal({ isOpen, onClose }) {
     setIsFormOpen(true);
   };
 
-  /** Solo un isDefault true: sincroniza todos los estados en el API. */
+  /** Solo un isDefault true: sincroniza todos los estados en el API.
+   *  Orden secuencial: primero el nuevo default a true (evita 500 si el backend exige al menos uno),
+   *  luego el resto a false. Promise.all en paralelo podía aplicar antes el false del anterior.
+   */
   const handleDefaultActivate = async (targetStatus) => {
     if (defaultSwitchLoading) return;
     if (targetStatus.isDefault) return;
@@ -170,17 +173,24 @@ export default function EstadosModal({ isOpen, onClose }) {
     setDefaultSwitchLoading(true);
     setFetchError(null);
     try {
-      await Promise.all(
-        statuses.map((s) =>
-          apiClient.put(
-            `/api/recruiter/companies/${COMPANY_ID}/statuses/${s.id}`,
-            {
-              name: s.name,
-              isDefault: s.id === targetStatus.id,
-            }
-          )
-        )
+      const target = statuses.find((s) => s.id === targetStatus.id) ?? targetStatus;
+      await apiClient.put(
+        `/api/recruiter/companies/${COMPANY_ID}/statuses/${target.id}`,
+        {
+          name: target.name,
+          isDefault: true,
+        }
       );
+      for (const s of statuses) {
+        if (s.id === target.id) continue;
+        await apiClient.put(
+          `/api/recruiter/companies/${COMPANY_ID}/statuses/${s.id}`,
+          {
+            name: s.name,
+            isDefault: false,
+          }
+        );
+      }
       await fetchStatuses(true);
     } catch (err) {
       setFetchError(
