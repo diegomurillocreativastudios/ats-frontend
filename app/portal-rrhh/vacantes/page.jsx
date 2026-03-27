@@ -86,7 +86,7 @@ const VacancyCard = ({ vacancy, onRefresh }) => {
           <h3 className="font-inter text-base font-semibold text-foreground">
             {vacancy.title}
           </h3>
-          <div className="flex flex-wrap items-center gap-4 font-inter text-[13px] text-muted-foreground">
+          {/* <div className="flex flex-wrap items-center gap-4 font-inter text-[13px] text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {vacancy.department}
@@ -95,7 +95,7 @@ const VacancyCard = ({ vacancy, onRefresh }) => {
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {vacancy.location}
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-4 sm:gap-6">
@@ -234,7 +234,7 @@ export default function VacantesPage() {
                       aria-label="Buscar vacantes"
                     />
                   </div>
-                  <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5">
+                  {/* <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5">
                     <span className="font-inter text-sm text-foreground">
                       Todas las vacantes
                     </span>
@@ -246,7 +246,7 @@ export default function VacantesPage() {
                     >
                       <ChevronDown className="h-4 w-4" aria-hidden />
                     </button>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="flex flex-col gap-4">
                   {loading ? (
@@ -340,7 +340,7 @@ export default function VacantesPage() {
                     aria-label="Buscar vacantes"
                   />
                 </div>
-                <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5">
+                {/* <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5">
                   <span className="font-inter text-sm text-foreground">
                     Todas las vacantes
                   </span>
@@ -352,7 +352,7 @@ export default function VacantesPage() {
                   >
                     <ChevronDown className="h-4 w-4" aria-hidden />
                   </button>
-                </div>
+                </div> */}
               </div>
               <div className="flex flex-col gap-4">
                 {loading ? (
