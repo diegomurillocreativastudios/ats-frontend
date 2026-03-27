@@ -86,6 +86,12 @@ const normalizeMoveStageError = (err) => {
   return { text: raw, showEstadosLink: false }
 }
 
+const normalizeApplicationStatusError = (err) => {
+  const fallback = "No se pudo actualizar el estado de la postulación."
+  const raw = extractApiErrorMessage(err) ?? fallback
+  return { text: raw, showEstadosLink: false }
+}
+
 /** Converts any value to a string safe for React (never render an object). */
 const safeString = (value) => {
   if (value == null) return "—";
@@ -814,6 +820,9 @@ const mapStatusFromApi = (item, index = 0) => {
   return { id, name };
 };
 
+const getCandidateId = (match, index) =>
+  match.candidateDocumentId ?? match.candidateProfileId ?? match?.id ?? `candidate-${index}`;
+
 const KanbanCard = ({
   match,
   candidateId,
@@ -821,6 +830,7 @@ const KanbanCard = ({
   statuses,
   currentStatusId,
   onStatusChange,
+  statusSelectDisabled,
 }) => {
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
@@ -880,7 +890,8 @@ const KanbanCard = ({
             onChange={handleStatusChange}
             onMouseDown={handleSelectMouseDown}
             onClick={handleSelectClick}
-            className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 font-inter text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            disabled={statusSelectDisabled}
+            className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 font-inter text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             aria-label={`Estado de ${emptyToDash(match.name)}`}
           >
             {statuses.map((s) => (
@@ -926,6 +937,7 @@ const KanbanColumn = ({
   statuses,
   candidateStatusOverrides,
   onStatusChange,
+  updatingStatusCandidateId,
 }) => {
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -1004,6 +1016,7 @@ const KanbanColumn = ({
             statuses={statuses}
             currentStatusId={getCurrentStatusId(match, candidateId)}
             onStatusChange={onStatusChange}
+            statusSelectDisabled={updatingStatusCandidateId === candidateId}
           />
         ))}
       </div>
@@ -1040,6 +1053,8 @@ export default function VacanteDetallePage() {
   const [statuses, setStatuses] = useState([]);
   const [moveStageError, setMoveStageError] = useState(null);
   const [loadingMoveStage, setLoadingMoveStage] = useState(false);
+  const [applicationStatusError, setApplicationStatusError] = useState(null);
+  const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
 
   const fetchStages = useCallback(async () => {
     try {
@@ -1315,9 +1330,6 @@ export default function VacanteDetallePage() {
   /** Applicants for Kanban board. */
   const applicants = Array.isArray(vacancy?.applicants) ? vacancy.applicants : [];
 
-  const getCandidateId = (match, index) =>
-    match.candidateDocumentId ?? match.candidateProfileId ?? match?.id ?? `candidate-${index}`;
-
   /** Stable key for matching (same person in search vs aiMatchSuggestions). */
   const getMatchKey = (m) => m?.candidateDocumentId ?? m?.candidateProfileId ?? null;
 
@@ -1356,6 +1368,7 @@ export default function VacanteDetallePage() {
   const handleKanbanStageDrop = useCallback(
     async (candidateId, newStage) => {
       setMoveStageError(null);
+      setApplicationStatusError(null);
       const applicant = applicants.find(
         (m, i) => getCandidateId(m, i) === candidateId
       );
@@ -1397,9 +1410,52 @@ export default function VacanteDetallePage() {
     setDragOverStage(null);
   }, []);
 
-  const handleStatusChange = useCallback((candidateId, statusId) => {
-    setCandidateStatusOverrides((prev) => ({ ...prev, [candidateId]: statusId }));
-  }, []);
+  const handleStatusChange = useCallback(
+    async (candidateId, statusId) => {
+      setApplicationStatusError(null);
+      setMoveStageError(null);
+      const applicant = applicants.find(
+        (m, i) => getCandidateId(m, i) === candidateId
+      );
+      const applicationId = applicant?.applicationId ?? applicant?.application_id;
+      if (!applicationId) {
+        setApplicationStatusError({
+          text: "No se encontró el ID de la postulación para actualizar el estado.",
+          showEstadosLink: false,
+        });
+        return;
+      }
+
+      setCandidateStatusOverrides((prev) => ({ ...prev, [candidateId]: statusId }));
+      setUpdatingStatusCandidateId(candidateId);
+      try {
+        await apiClient.patch(
+          `/api/recruiter/applications/${applicationId}/application-status`,
+          { applicationStatusId: statusId }
+        );
+        try {
+          await fetchVacancy(true);
+          setCandidateStatusOverrides((prev) => {
+            const next = { ...prev };
+            delete next[candidateId];
+            return next;
+          });
+        } catch {
+          /* El estado ya se guardó; si falla recargar la vacante, el override mantiene la UI coherente. */
+        }
+      } catch (err) {
+        setApplicationStatusError(normalizeApplicationStatusError(err));
+        setCandidateStatusOverrides((prev) => {
+          const next = { ...prev };
+          delete next[candidateId];
+          return next;
+        });
+      } finally {
+        setUpdatingStatusCandidateId(null);
+      }
+    },
+    [applicants, fetchVacancy]
+  );
 
   const handleToggleCandidate = useCallback((id, checked) => {
     setSelectedCandidateIds((prev) => {
@@ -1997,6 +2053,7 @@ export default function VacanteDetallePage() {
                         </span>
                       </h2>
                       <MoveStageErrorBanner error={moveStageError} />
+                      <MoveStageErrorBanner error={applicationStatusError} />
                       <div
                         className="rounded-xl border border-border bg-card p-6"
                         aria-label="Contenedor del tablero Kanban"
@@ -2026,6 +2083,7 @@ export default function VacanteDetallePage() {
                                 statuses={statuses}
                                 candidateStatusOverrides={candidateStatusOverrides}
                                 onStatusChange={handleStatusChange}
+                                updatingStatusCandidateId={updatingStatusCandidateId}
                               />
                             ))}
                           </div>
@@ -2536,6 +2594,7 @@ export default function VacanteDetallePage() {
                       </span>
                     </h2>
                     <MoveStageErrorBanner error={moveStageError} />
+                    <MoveStageErrorBanner error={applicationStatusError} />
                     <div
                       className="rounded-xl border border-border bg-card p-5"
                       aria-label="Contenedor del tablero Kanban"
@@ -2565,6 +2624,7 @@ export default function VacanteDetallePage() {
                               statuses={statuses}
                               candidateStatusOverrides={candidateStatusOverrides}
                               onStatusChange={handleStatusChange}
+                              updatingStatusCandidateId={updatingStatusCandidateId}
                             />
                           ))}
                         </div>
