@@ -30,7 +30,7 @@ const validateFile = (file, allowedTypes, allowedExtensions) => {
     allowedTypes.includes(file.type) || allowedExtensions.includes(extension);
   const sizeOk = file.size <= MAX_SIZE_BYTES;
   if (!typeOk)
-    return { valid: false, error: `Tipo no permitido. Solo PDF, DOC o DOCX.` };
+    return { valid: false, error: `Tipo no permitido. Solo .PDF` };
   if (!sizeOk)
     return { valid: false, error: `El archivo supera 10 MB (${formatFileSize(file.size)}).` };
   return { valid: true };
