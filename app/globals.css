@@ -17,6 +17,9 @@
 
   /* Semantic Colors */
   --success: #22C55E;
+  --success-foreground: #ffffff;
+  --destructive: #c73277;
+  --destructive-foreground: #ffffff;
   --border: #E5E7EB;
   --input: #E5E7EB;
   --muted: #F9FAFB;
@@ -41,6 +44,9 @@
   --color-vo-yellow: var(--vo-yellow);
 
   --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-muted: var(--muted);

@@ -1,53 +1,91 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Input from "@/components/auth/Input";
 import Button from "@/components/auth/Button";
 import AuthBrand from "@/components/auth/AuthBrand";
+import Snackbar from "@/components/ui/Snackbar";
+import { apiClient } from "@/lib/api";
 
-export default function CrearCuenta() {
+export default function Registrarse() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
-    phone: "",
     password: "",
-    confirmPassword: "",
-    acceptTerms: false
+    confirmPassword: ""
   });
+  const [showPasswords, setShowPasswords] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [errors, setErrors] = useState({});
+
+  const handleCloseSnackbar = useCallback(() => {
+    setMessage(null);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value
-    });
+    }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    setMessage(null);
   };
 
-  const handleSubmit = (e) => {
+  const getMessageFromError = (err) => {
+    if (err.errors && typeof err.errors === "object") {
+      const messages = Object.values(err.errors)
+        .flat()
+        .filter((m) => typeof m === "string" && m.trim());
+      if (messages.length > 0) return messages.join(" ");
+    }
+    if (err.message) return err.message;
+    if (err.detail) return typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail);
+    if (err.error) return err.error;
+    if (err.title && typeof err.title === "string") return err.title;
+    if (err.status === 409) return "Este correo ya está registrado.";
+    if (err.status >= 500) return "Error del servidor. Intenta más tarde.";
+    return "Error al crear la cuenta. Intenta de nuevo.";
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage(null);
+    setErrors({});
+
     if (formData.password !== formData.confirmPassword) {
-      alert("Las contraseñas no coinciden");
+      setErrors((prev) => ({ ...prev, confirmPassword: "Las contraseñas no coinciden" }));
       return;
     }
-    if (!formData.acceptTerms) {
-      alert("Debes aceptar los términos y condiciones");
-      return;
-    }
+
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await apiClient.post("/register", {
+        email: formData.email,
+        password: formData.password
+      });
+      setMessage({ type: "success", text: "Cuenta creada correctamente. Ya puedes iniciar sesión." });
+      setTimeout(() => {
+        router.push("/auth/iniciar-sesion");
+      }, 2000);
+    } catch (err) {
+      setMessage({
+        type: "error",
+        text: getMessageFromError(err)
+      });
+    } finally {
       setLoading(false);
-      console.log("Form submitted:", formData);
-    }, 1500);
+    }
   };
 
   return (
     <div className="min-h-screen flex font-inter">
-      {/* Desktop: Left Panel */}
       <div className="hidden lg:flex flex-1 bg-vo-magenta text-white flex-col justify-center px-16 gap-8">
-        {/* Brand Section */}
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-4">
             <div className="h-14 w-14 rounded-xl bg-white/10 flex items-center justify-center text-[32px] font-bold">
@@ -68,7 +106,6 @@ export default function CrearCuenta() {
           </p>
         </div>
 
-        {/* Benefits */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <svg className="w-5 h-5 text-vo-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +128,6 @@ export default function CrearCuenta() {
         </div>
       </div>
 
-      {/* Tablet: Top Header */}
       <div className="hidden md:flex lg:hidden fixed top-0 left-0 right-0 bg-vo-magenta text-white h-[120px] items-center justify-between px-8 gap-4 z-10">
         <div className="flex items-center gap-3">
           <div className="h-11 w-11 rounded-[10px] bg-white/10 flex items-center justify-center text-[22px] font-bold">
@@ -102,20 +138,16 @@ export default function CrearCuenta() {
         <p className="text-sm text-white/80">Sistema de Reclutamiento Inteligente</p>
       </div>
 
-      {/* Right Panel: Form */}
       <div className="flex-1 flex items-center justify-center bg-background px-6 md:px-10 lg:px-12 py-6 md:py-40 lg:py-0 md:max-w-full lg:max-w-[560px]">
         <div className="w-full md:max-w-[500px] lg:max-w-[420px]">
-          {/* Mobile Logo */}
           <div className="md:hidden w-full flex justify-center mb-5">
             <AuthBrand size="mobile-register" variant="light-secondary" />
           </div>
 
-          {/* Form Container */}
           <div className="flex flex-col gap-5 md:gap-5 lg:gap-6">
-            {/* Form Header */}
             <div className="flex flex-col items-center md:items-start gap-1 md:gap-1.5 lg:gap-2 text-center md:text-left">
               <h2 className="text-[22px] md:text-2xl lg:text-[28px] font-bold text-foreground">
-                Crear Cuenta
+                Registrarse
               </h2>
               <p className="text-sm md:text-sm lg:text-base text-muted-foreground">
                 Completa tus datos{" "}
@@ -123,56 +155,8 @@ export default function CrearCuenta() {
               </p>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {/* Inputs Container */}
               <div className="flex flex-col gap-3.5 md:gap-4">
-                {/* Name Row - Desktop */}
-                <div className="hidden lg:grid grid-cols-2 gap-4">
-                  <Input
-                    label="Nombre"
-                    type="text"
-                    name="firstName"
-                    placeholder="Juan"
-                    required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                  />
-                  <Input
-                    label="Apellido"
-                    type="text"
-                    name="lastName"
-                    placeholder="Pérez"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* Name Fields - Mobile & Tablet */}
-                <div className="lg:hidden">
-                  <Input
-                    label="Nombre"
-                    type="text"
-                    name="firstName"
-                    placeholder="Juan"
-                    required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="lg:hidden">
-                  <Input
-                    label="Apellido"
-                    type="text"
-                    name="lastName"
-                    placeholder="Pérez"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-                </div>
-
                 <Input
                   label="Correo electrónico"
                   type="email"
@@ -181,68 +165,62 @@ export default function CrearCuenta() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                />
-
-                <Input
-                  label="Teléfono"
-                  type="tel"
-                  name="phone"
-                  placeholder="+52 55 1234 5678"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
+                  error={errors.email}
+                  disabled={loading}
                 />
 
                 <Input
                   label="Contraseña"
-                  type="password"
+                  type={showPasswords ? "text" : "password"}
                   name="password"
                   placeholder="Mínimo 8 caracteres"
                   required
                   value={formData.password}
                   onChange={handleChange}
+                  error={errors.password}
+                  disabled={loading}
                 />
 
                 <Input
                   label="Confirmar contraseña"
-                  type="password"
+                  type={showPasswords ? "text" : "password"}
                   name="confirmPassword"
                   placeholder="Repetir contraseña"
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  error={errors.confirmPassword}
+                  disabled={loading}
                 />
 
-                {/* Terms Checkbox */}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    id="terms"
-                    name="acceptTerms"
-                    checked={formData.acceptTerms}
-                    onChange={handleChange}
-                    className="h-4 w-4 rounded border-input text-vo-magenta focus:ring-vo-magenta"
+                    id="showPasswords"
+                    checked={showPasswords}
+                    onChange={(e) => setShowPasswords(e.target.checked)}
+                    disabled={loading}
+                    className="h-4 w-4 rounded border-input accent-vo-magenta focus:ring-vo-magenta"
+                    aria-label="Mostrar contraseñas"
                   />
-                  <label htmlFor="terms" className="text-xs md:text-[13px] lg:text-[13px] text-foreground">
-                    Acepto los{" "}
-                    <Link href="/terminos" className="text-vo-magenta hover:underline">
-                      Términos y Condiciones
-                    </Link>
+                  <label
+                    htmlFor="showPasswords"
+                    className="text-xs md:text-[13px] lg:text-[13px] text-foreground cursor-pointer"
+                  >
+                    Mostrar contraseñas
                   </label>
                 </div>
               </div>
 
-              {/* Button */}
               <Button type="submit" variant="secondary" disabled={loading}>
                 {loading ? "Creando cuenta..." : "Crear Cuenta"}
               </Button>
             </form>
 
-            {/* Footer */}
             <div className="flex items-center justify-center gap-1 text-[13px] md:text-[13px] lg:text-sm">
               <span className="text-muted-foreground">¿Ya tienes cuenta?</span>
               <Link
-                href="/iniciar-sesion"
+                href="/auth/iniciar-sesion"
                 className="font-medium text-vo-magenta hover:underline"
               >
                 Inicia sesión
@@ -251,6 +229,13 @@ export default function CrearCuenta() {
           </div>
         </div>
       </div>
+
+      <Snackbar
+        open={!!message}
+        onClose={handleCloseSnackbar}
+        variant={message?.type === "error" ? "error" : "success"}
+        message={message?.text ?? ""}
+      />
     </div>
   );
 }
