@@ -6,6 +6,9 @@ const publicPaths = [
   '/auth/iniciar-sesion',
   '/auth/registrarse',
   '/auth/forgot-password',
+  '/auth/restablecer-contrasena',
+  '/restablecer-contrasena',
+  '/recuperar-contrasena',
 ];
 
 const isPublicPath = (pathname) => {
@@ -25,17 +28,24 @@ export function proxy(request) {
   }
 
   const hasToken = request.cookies.get(AUTH_COOKIE)?.value;
+  /** Pantallas de login/registro/forgot: si ya hay sesión, ir al portal. */
   const isAuthPage =
     pathname === '/auth/iniciar-sesion' ||
     pathname === '/auth/registrarse' ||
-    pathname.startsWith('/auth/forgot-password');
+    pathname.startsWith('/auth/forgot-password') ||
+    pathname === '/recuperar-contrasena';
 
+  /**
+   * NO incluir /auth/restablecer-contrasena: el enlace del mail debe abrirse aunque
+   * el usuario tenga cookie de sesión (si no, el proxy redirige a seleccion-portal
+   * y nunca ve el formulario de nueva contraseña).
+   */
   if (hasToken && isAuthPage) {
-    return NextResponse.redirect(new URL('/portal-rrhh/candidatos', request.url));
+    return NextResponse.redirect(new URL("/seleccion-portal", request.url));
   }
 
-  if (pathname === '/' && hasToken) {
-    return NextResponse.redirect(new URL('/portal-rrhh/candidatos', request.url));
+  if (pathname === "/" && hasToken) {
+    return NextResponse.redirect(new URL("/seleccion-portal", request.url));
   }
 
   if (isPublicPath(pathname)) {

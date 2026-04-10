@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test"
-import { loginAsDemoUser } from "./helpers/auth"
+import { loginAsDemoUser, openRRHHPortalFromSelector } from "./helpers/auth"
 
 test.describe("Template Management E2E", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsDemoUser(page)
+    await openRRHHPortalFromSelector(page)
   })
 
   test("should allow a user to create and delete a Notification template", async ({

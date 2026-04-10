@@ -21,10 +21,18 @@ export async function fillLoginForm(
 }
 
 /**
- * Flujo estándar: ir a login, credenciales demo, esperar portal RRHH.
+ * Tras login exitoso, la app muestra la pantalla de elección de portal.
  */
 export async function loginAsDemoUser(page: Page): Promise<void> {
   await page.goto("/auth/iniciar-sesion")
   await fillLoginForm(page, E2E_DEMO_EMAIL, E2E_DEMO_PASSWORD)
-  await page.waitForURL(/\/portal-rrhh\//, { timeout: 30_000 })
+  await page.waitForURL(/\/seleccion-portal/, { timeout: 30_000 })
+}
+
+/**
+ * Desde `/seleccion-portal`, entra al portal RRHH (flujos que antes asumían ir directo a RRHH).
+ */
+export async function openRRHHPortalFromSelector(page: Page): Promise<void> {
+  await page.getByTestId("portal-selector-rrhh").click()
+  await page.waitForURL(/\/portal-rrhh\//, { timeout: 15_000 })
 }

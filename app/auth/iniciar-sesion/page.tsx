@@ -112,7 +112,7 @@ export default function IniciarSesion() {
           ? new URLSearchParams(window.location.search).get("from")
           : null;
       router.push(
-        from && from.startsWith("/") ? from : "/portal-rrhh/candidatos"
+        from && from.startsWith("/") ? from : "/seleccion-portal"
       );
     } catch (err: unknown) {
       setMessage({
@@ -253,7 +253,7 @@ export default function IniciarSesion() {
 
                 <div className="flex justify-center md:justify-end">
                   <Link
-                    href="/recuperar-contrasena"
+                    href="/auth/forgot-password"
                     className="text-[13px] font-medium text-vo-purple hover:underline"
                   >
                     ¿Olvidaste tu contraseña?

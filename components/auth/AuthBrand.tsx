@@ -38,6 +38,11 @@ export default function AuthBrand({ size = "large", variant = "primary" }) {
       text: "text-foreground",
       textLogo: "text-white"
     },
+    "light-navy": {
+      logo: "bg-vo-navy",
+      text: "text-foreground",
+      textLogo: "text-white"
+    },
     "light-secondary": {
       logo: "bg-vo-magenta",
       text: "text-foreground",

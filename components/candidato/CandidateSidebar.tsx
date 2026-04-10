@@ -17,7 +17,7 @@ import { getInitials } from "@/lib/getInitials";
 
 const navItems = [
   { href: "/portal-candidato", label: "Inicio", icon: Home },
-  { href: "/portal-candidato/perfil", label: "Mi Perfil", icon: User },
+  { href: "/mi-perfil", label: "Mi Perfil", icon: User },
   { href: "/portal-candidato/documentos", label: "Documentos", icon: FileText },
   { href: "/portal-candidato/estado", label: "Mi Estado", icon: Activity },
   { href: "/portal-candidato/evaluaciones", label: "Evaluaciones", icon: ClipboardList },

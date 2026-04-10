@@ -19,8 +19,17 @@ test.describe("@smoke Auth", () => {
     await expect(page).toHaveURL(/\/auth\/iniciar-sesion/)
   })
 
-  test("login demo redirige al portal RRHH", async ({ page }) => {
+  test("restablecer contraseña sin email ni token muestra aviso", async ({
+    page,
+  }) => {
+    await page.goto("/restablecer-contrasena")
+    await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
+  })
+
+  test("login demo muestra la selección de portal", async ({ page }) => {
     await loginAsDemoUser(page)
-    await expect(page).toHaveURL(/\/portal-rrhh\//)
+    await expect(page).toHaveURL(/\/seleccion-portal/)
+    await expect(page.getByTestId("portal-selector-candidato")).toBeVisible()
+    await expect(page.getByTestId("portal-selector-rrhh")).toBeVisible()
   })
 })

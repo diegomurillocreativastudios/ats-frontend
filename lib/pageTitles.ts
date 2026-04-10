@@ -20,10 +20,15 @@ export const CUSTOM_PAGE_TITLES = {
   "/": "Portal Candidato",
   "/auth/iniciar-sesion": "Iniciar Sesion",
   "/auth/registrarse": "Registrarse",
+  "/auth/forgot-password": "Olvidaste tu contraseña",
+  "/auth/restablecer-contrasena": "Restablecer contraseña",
+  "/restablecer-contrasena": "Restablecer contraseña",
   "/portal-candidato/documentos": "Portal Candidato | Documentos",
   "/portal-rrhh": "Portal RRHH | Candidatos",
   "/portal-rrhh/vacantes": "Portal RRHH | Vacantes",
   "/portal-rrhh/candidatos": "Portal RRHH | Candidatos",
+  "/seleccion-portal": "Elegí un portal",
+  "/mi-perfil": "Mi perfil",
 };
 
 const BASE_TITLE = "ATS";

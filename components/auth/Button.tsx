@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react"
 
 interface AuthButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
-  variant?: "primary" | "secondary" | "outline"
+  variant?: "primary" | "secondary" | "outline" | "navy"
 }
 
 export default function Button({
@@ -16,7 +16,8 @@ export default function Button({
   const variants = {
     primary: "bg-vo-purple hover:bg-vo-purple/90 text-white disabled:opacity-50 disabled:cursor-not-allowed",
     secondary: "bg-vo-magenta hover:bg-vo-magenta/90 text-white disabled:opacity-50 disabled:cursor-not-allowed",
-    outline: "bg-background border border-border hover:bg-muted text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+    outline: "bg-background border border-border hover:bg-muted text-foreground disabled:opacity-50 disabled:cursor-not-allowed",
+    navy: "bg-vo-navy hover:bg-vo-navy/90 text-white disabled:opacity-50 disabled:cursor-not-allowed",
   };
 
   return (

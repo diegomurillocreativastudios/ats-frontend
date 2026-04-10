@@ -13,5 +13,5 @@ export default async function HomePage() {
   if (!hasToken) {
     redirect("/auth/iniciar-sesion")
   }
-  redirect("/portal-rrhh/candidatos")
+  redirect("/seleccion-portal")
 }
