@@ -6,6 +6,7 @@ interface AuthInputProps
     | "name"
     | "type"
     | "placeholder"
+    | "autoComplete"
     | "required"
     | "value"
     | "onChange"
@@ -23,6 +24,7 @@ export default function Input({
   label,
   type = "text",
   placeholder,
+  autoComplete,
   required = false,
   name,
   value,
@@ -43,6 +45,7 @@ export default function Input({
         type={type}
         name={name}
         placeholder={placeholder}
+        autoComplete={autoComplete}
         required={required}
         value={value}
         onChange={handleChange}

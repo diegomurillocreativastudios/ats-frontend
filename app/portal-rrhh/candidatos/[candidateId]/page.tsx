@@ -10,7 +10,6 @@ import {
   Building2,
   Download,
   FileText,
-  FolderOpen,
   GraduationCap,
   Languages,
   Loader2,
@@ -34,7 +33,6 @@ import {
   SocialLinksList,
   ReferencesList,
   RecognitionsList,
-  VideoLinkBlock,
   emptyToDash,
 } from "@/components/rrhh/CandidateProfileSections";
 import { apiClient } from "@/lib/api";
@@ -43,6 +41,10 @@ import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay"
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  mergeRecruiterNormalizedWithCanonicalProfile,
+  pickEmbeddedCanonicalProfile,
+} from "@/lib/recruiter-canonical-profile-merge"
 
 interface CandidateProfileState {
   id: string | number | null
@@ -195,8 +197,27 @@ export default function CandidatoDetallePage() {
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await apiClient.get(`/api/recruiter/candidates/${candidateId}`);
-      setProfile(extractProfile(data));
+      const data = await apiClient.get(`/api/recruiter/candidates/${candidateId}`)
+      const base = extractProfile(data)
+      const root = (data as Record<string, unknown> | null | undefined)?.data ?? data
+      let canonical: unknown = null
+      if (root && typeof root === "object" && !Array.isArray(root)) {
+        canonical = pickEmbeddedCanonicalProfile(root as Record<string, unknown>)
+      }
+      if (!canonical) {
+        try {
+          canonical = await apiClient.get(
+            `/api/recruiter/candidates/${encodeURIComponent(String(candidateId))}/profile`
+          )
+        } catch {
+          canonical = null
+        }
+      }
+      const normalizedData = mergeRecruiterNormalizedWithCanonicalProfile(
+        base.normalizedData,
+        canonical
+      )
+      setProfile({ ...base, normalizedData })
     } catch (err: unknown) {
       setFetchError(
         getApiErrorMessage(err) ||
@@ -234,7 +255,6 @@ export default function CandidatoDetallePage() {
   const languages = nd.Languages ?? nd.languages ?? [];
   const skills = nd.Skills ?? nd.skills ?? [];
   const socialLinks = nd.SocialLinks ?? nd.socialLinks ?? [];
-  const videoLink = nd.VideoLink ?? nd.videoLink ?? null;
   const references = nd.References ?? nd.references ?? [];
   const recognitions = nd.Recognitions ?? nd.recognitions ?? [];
 
@@ -477,19 +497,11 @@ export default function CandidatoDetallePage() {
               icon={FileText}
               sectionId="sec-links"
             >
-              <div className="flex flex-col gap-4">
-                <div>
-                  <p className="mb-2 font-inter text-xs font-medium text-muted-foreground">
-                    Redes y web
-                  </p>
-                  <SocialLinksList links={socialLinks} />
-                </div>
-                <div>
-                  <p className="mb-2 font-inter text-xs font-medium text-muted-foreground">
-                    Video
-                  </p>
-                  <VideoLinkBlock videoLink={videoLink} />
-                </div>
+              <div>
+                <p className="mb-2 font-inter text-xs font-medium text-muted-foreground">
+                  Redes y web
+                </p>
+                <SocialLinksList links={socialLinks} />
               </div>
             </SectionCard>
 
@@ -507,29 +519,6 @@ export default function CandidatoDetallePage() {
               sectionId="sec-awards"
             >
               <RecognitionsList items={recognitions} />
-            </SectionCard>
-
-            <SectionCard
-              title="Metadatos (API)"
-              icon={FolderOpen}
-              sectionId="sec-api-meta"
-            >
-              <InfoGrid
-                items={[
-                  {
-                    label: "ID del perfil",
-                    value: emptyToDash(profile?.id ?? candidateId),
-                  },
-                ]}
-              />
-              <div className="mt-4">
-                <p className="mb-1 font-inter text-xs font-medium text-muted-foreground">
-                  storagePath
-                </p>
-                <p className="break-all font-mono text-sm text-foreground">
-                  {emptyToDash(profile?.storagePath)}
-                </p>
-              </div>
             </SectionCard>
 
             {profile?.normalizedDataParseFailed && profile?.normalizedDataRaw ? (

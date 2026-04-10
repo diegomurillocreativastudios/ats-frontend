@@ -42,15 +42,18 @@ export default function IniciarSesion() {
 
   const validateForm = () => {
     const newErrors: Partial<Record<keyof LoginFormState, string>> = {}
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const rawLogin = formData.email?.trim() ?? ""
+    /** Solo exigimos formato de correo si el usuario escribió algo con @ (usuario tipo `admin` no es email). */
+    const looksLikeEmail = rawLogin.includes("@")
+    /** Demo local: usuario `admin` + contraseña `admin` (relaja regla de longitud de contraseña). */
     const isAdminDemo =
-      formData.email?.trim().toLowerCase() === "admin" &&
-      formData.password === "admin";
+      rawLogin.toLowerCase() === "admin" && formData.password === "admin"
 
-    if (!formData.email) {
-      newErrors.email = "El email es requerido";
-    } else if (!isAdminDemo && !emailRegex.test(formData.email)) {
-      newErrors.email = "Email inválido";
+    if (!rawLogin) {
+      newErrors.email = "Ingresá tu usuario o correo electrónico"
+    } else if (looksLikeEmail && !emailRegex.test(rawLogin)) {
+      newErrors.email = "Correo electrónico inválido"
     }
     if (!formData.password) {
       newErrors.password = "La contraseña es requerida";
@@ -208,10 +211,11 @@ export default function IniciarSesion() {
             >
               <div className="flex flex-col gap-4 md:gap-4 lg:gap-5">
                 <Input
-                  label="Correo electrónico"
-                  type="email"
+                  label="Usuario o correo electrónico"
+                  type="text"
                   name="email"
-                  placeholder="nombre@empresa.com"
+                  placeholder="admin o nombre@empresa.com"
+                  autoComplete="username"
                   required
                   value={formData.email}
                   onChange={handleChange}

@@ -1,7 +1,8 @@
 import type { Page } from "@playwright/test"
 
 /**
- * Credenciales demo documentadas para E2E (validación client-side + API `/login`).
+ * Credenciales demo para E2E (validación client-side + API `/login`).
+ * El primer campo acepta usuario `admin` (no hace falta formato de correo) con contraseña `admin`.
  * Requiere backend accesible vía `NEXT_PUBLIC_API_URL` si el login remoto falla.
  */
 export const E2E_DEMO_EMAIL = "admin"

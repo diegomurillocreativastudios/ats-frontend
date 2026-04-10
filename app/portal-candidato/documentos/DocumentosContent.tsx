@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useCallback } from "react"
 import CandidateSidebar from "@/components/candidato/CandidateSidebar"
 import CandidateTopbar from "@/components/candidato/CandidateTopbar"
 import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone"
 import DocumentsList from "@/components/candidato/DocumentsList"
-import Snackbar from "@/components/ui/Snackbar"
+import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage, createSilentError } from "@/lib/api-error"
 
@@ -13,31 +13,19 @@ const PROCESAR_ENDPOINT = "/Ingest/upload";
 const ENTITY_TYPE = "Candidate";
 
 export default function DocumentosContent() {
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    variant: "success",
-    message: "",
-  });
-
-  const handleCloseSnackbar = useCallback(() => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  }, []);
+  const { showSnackbar } = useCandidateSnackbar()
 
   const handleProcess = async (file: File, _index: number) => {
     const formData = new FormData();
     formData.append("File", file);
     formData.append("EntityType", ENTITY_TYPE);
     try {
-      await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
-      setSnackbar({
-        open: true,
-        variant: "success",
-        message: "Documento procesado correctamente.",
-      });
+      await apiClient.postFormData(PROCESAR_ENDPOINT, formData)
+      showSnackbar("Documento procesado correctamente.", "success")
     } catch (err: unknown) {
       const message =
         getApiErrorMessage(err) || "Error al procesar el documento."
-      setSnackbar({ open: true, variant: "error", message })
+      showSnackbar(message, "error")
       throw createSilentError(message)
     }
   }
@@ -52,15 +40,14 @@ export default function DocumentosContent() {
         formData.append("EntityType", ENTITY_TYPE);
         await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
       }
-      setSnackbar({
-        open: true,
-        variant: "success",
-        message: `${total} documento${total !== 1 ? "s" : ""} procesado${total !== 1 ? "s" : ""} correctamente.`,
-      });
+      showSnackbar(
+        `${total} documento${total !== 1 ? "s" : ""} procesado${total !== 1 ? "s" : ""} correctamente.`,
+        "success"
+      )
     } catch (err: unknown) {
       const message =
         getApiErrorMessage(err) || "Error al procesar los documentos."
-      setSnackbar({ open: true, variant: "error", message })
+      showSnackbar(message, "error")
     }
   }
 
@@ -106,13 +93,6 @@ export default function DocumentosContent() {
           </div>
         </main>
       </div>
-
-      <Snackbar
-        open={snackbar.open}
-        onClose={handleCloseSnackbar}
-        variant={snackbar.variant}
-        message={snackbar.message}
-      />
     </div>
-  );
+  )
 }

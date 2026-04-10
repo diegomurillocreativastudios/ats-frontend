@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Link2, Phone, Video } from "lucide-react";
+import { ExternalLink, Link2, Phone } from "lucide-react";
 
 const emptyToDash = (value) =>
   value != null && String(value).trim() !== "" ? String(value).trim() : "—";
@@ -81,30 +81,59 @@ export const InfoGrid = ({ items }) => (
   </dl>
 );
 
-export const JobPreferencesBlock = ({ prefs }) => {
-  const parsed = parseJsonObjectIfString(prefs)
-  if (!parsed) {
-    return <p className="font-inter text-sm text-muted-foreground">—</p>;
-  }
-  const sectors = Array.isArray(parsed.Sectors) ? parsed.Sectors : [];
-  const sectorsText = sectors.length > 0 ? sectors.join(", ") : null;
+interface JobPreferencesBlockProps {
+  prefs: unknown
+  fallbackMinSalary?: number | null
+  fallbackAvailability?: string | null
+  fallbackHasDisability?: boolean | null
+}
 
-  const minSalary = parsed.MinSalary ?? parsed.minSalary
-  const disabilityRaw = parsed.Disability ?? parsed.disability
+export const JobPreferencesBlock = ({
+  prefs,
+  fallbackMinSalary,
+  fallbackAvailability,
+  fallbackHasDisability,
+}: JobPreferencesBlockProps) => {
+  const parsed = parseJsonObjectIfString(prefs)
+  const sectors = Array.isArray(parsed?.Sectors) ? parsed.Sectors : []
+  const sectorsText = sectors.length > 0 ? sectors.join(", ") : null
+
+  const minSalary =
+    parsed?.MinSalary ?? parsed?.minSalary ?? fallbackMinSalary ?? null
+  const disabilityRaw = parsed?.Disability ?? parsed?.disability
   const disabilityDisplay =
-    disabilityRaw === true ? "Sí" : disabilityRaw === false ? "No" : null
+    disabilityRaw === true
+      ? "Sí"
+      : disabilityRaw === false
+        ? "No"
+        : fallbackHasDisability === true
+          ? "Sí"
+          : fallbackHasDisability === false
+            ? "No"
+            : null
 
   const items = [
-    { label: "Rol deseado", value: parsed.DesiredRole ?? parsed.desiredRole },
+    { label: "Rol deseado", value: parsed?.DesiredRole ?? parsed?.desiredRole },
     { label: "Salario mínimo", value: minSalary },
     {
       label: "Nivel educativo",
-      value: parsed.EducationLevel ?? parsed.educationLevel,
+      value: parsed?.EducationLevel ?? parsed?.educationLevel,
     },
-    { label: "Ciudad deseada", value: parsed.DesiredCity ?? parsed.desiredCity },
-    { label: "Disponibilidad", value: parsed.Availability ?? parsed.availability },
+    { label: "Ciudad deseada", value: parsed?.DesiredCity ?? parsed?.desiredCity },
+    {
+      label: "Disponibilidad",
+      value: parsed?.Availability ?? parsed?.availability ?? fallbackAvailability,
+    },
     { label: "Discapacidad", value: disabilityDisplay },
-  ];
+  ]
+
+  const hasAnyObjective =
+    Boolean(sectorsText) ||
+    items.some((row) => row.value != null && String(row.value).trim() !== "")
+
+  if (!hasAnyObjective) {
+    return <p className="font-inter text-sm text-muted-foreground">—</p>
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -118,8 +147,8 @@ export const JobPreferencesBlock = ({ prefs }) => {
       </div>
       <InfoGrid items={items} />
     </div>
-  );
-};
+  )
+}
 
 export const WorkExperienceList = ({ items }) => {
   const list = normalizeObjectArray(items ?? []);
@@ -346,28 +375,6 @@ export const RecognitionsList = ({ items }) => {
         <li key={i}>{typeof r === "string" ? r : JSON.stringify(r)}</li>
       ))}
     </ul>
-  );
-};
-
-export const VideoLinkBlock = ({ videoLink }) => {
-  if (!videoLink || String(videoLink).trim() === "") {
-    return <p className="font-inter text-sm text-muted-foreground">—</p>;
-  }
-  const href = normalizeUrl(String(videoLink));
-  if (!href) {
-    return <p className="font-inter text-sm text-foreground">{String(videoLink)}</p>;
-  }
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 font-inter text-sm text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
-    >
-      <Video className="h-4 w-4 shrink-0" aria-hidden />
-      Ver video
-      <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
-    </a>
   );
 };
 

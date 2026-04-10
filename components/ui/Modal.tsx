@@ -27,6 +27,8 @@ interface ModalProps {
   children: ReactNode
   footer?: ReactNode
   size?: keyof typeof SIZE_CLASSES
+  /** Clases extra para el cuerpo (p. ej. overflow-visible si hay menús absolutos). */
+  bodyClassName?: string
   closeOnOverlayClick?: boolean
   closeOnEscape?: boolean
 }
@@ -38,6 +40,7 @@ export default function Modal({
   children,
   footer,
   size = "md",
+  bodyClassName = "",
   closeOnOverlayClick = true,
   closeOnEscape = true,
 }: ModalProps) {
@@ -98,7 +101,7 @@ export default function Modal({
             <X className="h-5 w-5" aria-hidden />
           </button>
         </header>
-        <div className={MODAL_STYLES.body}>{children}</div>
+        <div className={`${MODAL_STYLES.body} ${bodyClassName}`.trim()}>{children}</div>
         {footer && <footer className={MODAL_STYLES.footer}>{footer}</footer>}
       </div>
     </div>

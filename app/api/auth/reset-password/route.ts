@@ -38,13 +38,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (password.length < 8) {
-      return NextResponse.json(
-        { message: "La contraseña debe tener al menos 8 caracteres" },
-        { status: 400 }
-      )
-    }
-
     const baseUrl = getBaseUrl().replace(/\/$/, "")
     if (!baseUrl) {
       return NextResponse.json(

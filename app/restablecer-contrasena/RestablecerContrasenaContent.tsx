@@ -77,8 +77,6 @@ export default function RestablecerContrasenaContent() {
     const next: Partial<Record<keyof FormState, string>> = {}
     if (!formData.password) {
       next.password = "La contraseña es requerida"
-    } else if (formData.password.length < 8) {
-      next.password = "La contraseña debe tener al menos 8 caracteres"
     }
     if (formData.password !== formData.confirmPassword) {
       next.confirmPassword = "Las contraseñas no coinciden"
@@ -318,7 +316,7 @@ export default function RestablecerContrasenaContent() {
                 d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span className="text-base">Mínimo 8 caracteres</span>
+            <span className="text-base">Elegí una contraseña que recuerdes</span>
           </div>
           {isEmailFlow ? (
             <div className="flex items-center gap-3">
@@ -402,7 +400,7 @@ export default function RestablecerContrasenaContent() {
                   label="Nueva contraseña"
                   type={showPasswords ? "text" : "password"}
                   name="password"
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="Tu nueva contraseña"
                   required
                   value={formData.password}
                   onChange={handleChange}
