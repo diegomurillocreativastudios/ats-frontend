@@ -17,7 +17,7 @@ export default function EtapaModal({
   setAsDefaultOnCreate = false,
 }) {
   const [name, setName] = useState("");
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [snackbar, setSnackbar] = useState({
@@ -52,7 +52,7 @@ export default function EtapaModal({
   }, [isOpen, editingStage]);
 
   const validate = () => {
-    const nextErrors = {};
+    const nextErrors: Record<string, string> = {};
     if (!name.trim()) {
       nextErrors.name = "El nombre es requerido";
     }

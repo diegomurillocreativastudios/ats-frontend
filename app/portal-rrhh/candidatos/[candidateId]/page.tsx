@@ -41,13 +41,21 @@ import { apiClient } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
-import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay";
+import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay"
+import { getApiErrorMessage } from "@/lib/api-error"
+
+interface CandidateProfileState {
+  id: string | number | null
+  storagePath: string | null
+  normalizedData: Record<string, unknown>
+  normalizedDataRaw: string | null
+  normalizedDataParseFailed: boolean
+}
 
 /**
  * GET /api/recruiter/candidates/{id} puede devolver normalizedData como objeto o como string JSON (OpenAPI).
- * @returns {{ normalizedData: object, rawString: string | null, parseFailed: boolean }}
  */
-const parseNormalizedDataField = (rawNd) => {
+const parseNormalizedDataField = (rawNd: unknown) => {
   if (rawNd == null) {
     return { normalizedData: {}, rawString: null, parseFailed: false };
   }
@@ -88,23 +96,29 @@ const META_KEYS = new Set([
 /**
  * Respuesta de GET /api/recruiter/candidates/{id}: id, normalizedData, storagePath.
  */
-const extractProfile = (raw) => {
-  const empty = {
+const extractProfile = (raw: unknown): CandidateProfileState => {
+  const empty: CandidateProfileState = {
     id: null,
     storagePath: null,
     normalizedData: {},
     normalizedDataRaw: null,
     normalizedDataParseFailed: false,
   };
-  if (!raw) return empty;
+  if (!raw) return empty
 
-  const root = raw.data ?? raw;
-  const id = root.id ?? root.documentId ?? null;
-  const storagePath = root.storagePath ?? root.storage_path ?? null;
+  const top = raw as Record<string, unknown>
+  const root = (top["data"] ?? top) as Record<string, unknown>
+  const id = (root["id"] ?? root["documentId"] ?? null) as
+    | string
+    | number
+    | null
+  const storagePath = (root["storagePath"] ??
+    root["storage_path"] ??
+    null) as string | null
 
   const { normalizedData, rawString, parseFailed } = parseNormalizedDataField(
-    root.normalizedData
-  );
+    root["normalizedData"]
+  )
 
   if (Object.keys(normalizedData).length > 0 || rawString != null) {
     return {
@@ -117,16 +131,16 @@ const extractProfile = (raw) => {
   }
 
   const hasLegacyKeys =
-    root.FirstName != null ||
-    root.firstName != null ||
-    root.WorkExperience != null ||
-    root.workExperience != null;
+    root["FirstName"] != null ||
+    root["firstName"] != null ||
+    root["WorkExperience"] != null ||
+    root["workExperience"] != null
 
   if (hasLegacyKeys) {
-    const legacy = { ...root };
+    const legacy = { ...root }
     META_KEYS.forEach((k) => {
-      delete legacy[k];
-    });
+      delete legacy[k]
+    })
     return {
       id,
       storagePath,
@@ -145,26 +159,31 @@ const extractProfile = (raw) => {
   };
 };
 
-const formatBirthDate = (value) => {
-  if (!value) return null;
-  const d = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(d.getTime())) return emptyToDash(value);
+const formatBirthDate = (value: unknown) => {
+  if (!value) return null
+  const d =
+    value instanceof Date
+      ? value
+      : typeof value === "string"
+        ? new Date(value)
+        : null
+  if (!d || Number.isNaN(d.getTime())) return emptyToDash(value)
   return d.toLocaleDateString("es-CL", {
     day: "numeric",
     month: "long",
     year: "numeric",
-  });
-};
+  })
+}
 
 export default function CandidatoDetallePage() {
   const params = useParams();
   const candidateId = params?.candidateId ?? null;
 
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(null);
-  const [downloading, setDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState(null);
+  const [profile, setProfile] = useState<CandidateProfileState | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+  const [downloading, setDownloading] = useState(false)
+  const [downloadError, setDownloadError] = useState<string | null>(null)
 
   const fetchCandidate = useCallback(async () => {
     if (!candidateId) {
@@ -178,11 +197,12 @@ export default function CandidatoDetallePage() {
     try {
       const data = await apiClient.get(`/api/recruiter/candidates/${candidateId}`);
       setProfile(extractProfile(data));
-    } catch (err) {
+    } catch (err: unknown) {
       setFetchError(
-        err?.message ?? err?.detail ?? "No se pudo cargar el perfil del candidato."
-      );
-      setProfile(null);
+        getApiErrorMessage(err) ||
+          "No se pudo cargar el perfil del candidato."
+      )
+      setProfile(null)
     } finally {
       setLoading(false);
     }
@@ -192,7 +212,7 @@ export default function CandidatoDetallePage() {
     fetchCandidate();
   }, [fetchCandidate]);
 
-  const nd = profile?.normalizedData ?? {};
+  const nd = (profile?.normalizedData ?? {}) as Record<string, any>
   const firstName = nd.FirstName ?? nd.firstName ?? "";
   const lastName = nd.LastName ?? nd.lastName ?? "";
   const fullName = [firstName, lastName].filter(Boolean).join(" ").trim() || "Candidato";
@@ -258,8 +278,8 @@ export default function CandidatoDetallePage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(objUrl);
-    } catch (err) {
-      setDownloadError(err?.message ?? "Error al descargar.");
+    } catch (err: unknown) {
+      setDownloadError(getApiErrorMessage(err) || "Error al descargar.")
     } finally {
       setDownloading(false);
     }

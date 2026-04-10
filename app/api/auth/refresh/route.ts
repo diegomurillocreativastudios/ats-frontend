@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { AUTH_COOKIES } from '@/lib/auth';
+import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
+import { AUTH_COOKIES } from "@/lib/auth"
+import { getApiErrorMessage } from "@/lib/api-error"
 
 const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -77,10 +78,10 @@ export async function POST() {
     });
 
     return response;
-  } catch (err) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { message: err.message || 'Error al renovar sesión' },
+      { message: getApiErrorMessage(err) || "Error al renovar sesión" },
       { status: 500 }
-    );
+    )
   }
 }

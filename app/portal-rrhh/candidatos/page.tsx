@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Search, Eye, Users, Plus } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
-import { apiClient } from "@/lib/api";
+import { apiClient } from "@/lib/api"
+import { createSilentError } from "@/lib/api-error"
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay";
@@ -159,9 +160,7 @@ export default function CandidatosPage() {
 
       // Importante: re-lanzar el error para que `DocumentsUploadZone` no marque
       // el archivo como "Listo" cuando el backend realmente falló.
-      const silentErr = new Error(message);
-      silentErr.silent = true;
-      throw silentErr;
+      throw createSilentError(message)
     }
   };
 

@@ -8,8 +8,9 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { apiClient } from "@/lib/api";
-import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
+import { apiClient } from "@/lib/api"
+import { getApiErrorMessage } from "@/lib/api-error"
+import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import Snackbar from "@/components/ui/Snackbar";
 
 const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
@@ -123,7 +124,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
   const [statusToDelete, setStatusToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [formData, setFormData] = useState({ name: "" });
-  const [formErrors, setFormErrors] = useState({});
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [defaultSwitchLoading, setDefaultSwitchLoading] = useState(false);
@@ -148,7 +149,8 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
     setSnackbar((prev) => ({ ...prev, open: false }));
   }, []);
 
-  const fetchStatuses = useCallback(async (silent = false) => {
+  const fetchStatuses = useCallback(async (silentFlag?: unknown) => {
+    const silent = silentFlag === true
     if (!isOpen) return false;
 
     if (!silent) {
@@ -162,9 +164,9 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
       const list = Array.isArray(data) ? data : data?.statuses ?? data?.items ?? data?.data ?? [];
       setStatuses(list.map((item, i) => mapStatusFromApi(item, i)));
       return true;
-    } catch (err) {
+    } catch (err: unknown) {
       const msg =
-        err?.message || err?.detail || "No se pudieron cargar los estados.";
+        getApiErrorMessage(err) || "No se pudieron cargar los estados.";
       setFetchError(msg);
       setStatuses([]);
       showSnackbar(msg, "error");
@@ -248,9 +250,9 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
       if (refreshed) {
         showSnackbar("Estado eliminado", "success");
       }
-    } catch (err) {
+    } catch (err: unknown) {
       const msg =
-        err?.message || err?.detail || "No se pudo eliminar el estado. Intenta de nuevo.";
+        getApiErrorMessage(err) || "No se pudo eliminar el estado. Intenta de nuevo.";
       setFetchError(msg);
       showSnackbar(msg, "error");
     } finally {
@@ -280,7 +282,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
   };
 
   const validateForm = () => {
-    const errors = {};
+    const errors: Record<string, string> = {};
     if (!formData.name.trim()) {
       errors.name = "El nombre es requerido";
     }
@@ -324,10 +326,9 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
           "success"
         );
       }
-    } catch (err) {
+    } catch (err: unknown) {
       const msg =
-        err?.message ||
-        err?.detail ||
+        getApiErrorMessage(err) ||
         `No se pudo ${editingStatus ? "actualizar" : "crear"} el estado. Intenta de nuevo.`;
       setSubmitError(msg);
       showSnackbar(msg, "error");

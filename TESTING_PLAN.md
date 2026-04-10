@@ -70,12 +70,13 @@ The project is configured for automated testing in the cloud:
 ### [Vitest](https://vitest.dev/) (Unit & Component Testing)
 - **Target**: `components/`, `lib/`, `hooks/`.
 - **Mocking**: Use `vi.mock` for `apiClient` to avoid real network calls.
-- **Execution**: `npm run test`.
+- **Execution**: `npm run test` (Vitest no incluye `tests/e2e`).
 
 ### [Playwright](https://playwright.dev/) (End-to-End Testing)
-- **Target**: `app/` (page flows).
-- **Execution**: `npx playwright test`.
-- **Environment**: Requires the backend (`engine`) and frontend (`npm run dev`) to be running.
+- **Target**: `app/` (page flows); helpers en `tests/e2e/helpers/`.
+- **Execution**: `npm run test:e2e` (ver **README**: `PLAYWRIGHT_SKIP_WEBSERVER`, `PLAYWRIGHT_BASE_URL`, UI mode).
+- **Locators**: `data-testid` en login (`auth-login-*`); preferir roles y labels según reglas del proyecto.
+- **Entorno**: Los flujos con login requieren API (`NEXT_PUBLIC_API_URL`) y backend accesible, salvo tests que solo validan UI.
 
 ---
 

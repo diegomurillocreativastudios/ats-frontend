@@ -28,7 +28,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
@@ -65,7 +65,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   };
 
   const validate = () => {
-    const nextErrors = {};
+    const nextErrors: Record<string, string> = {};
     if (!nombre.trim()) {
       nextErrors.nombre = "El nombre es requerido";
     }

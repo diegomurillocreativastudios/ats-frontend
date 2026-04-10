@@ -1,29 +1,47 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Input from "@/components/auth/Input";
-import Button from "@/components/auth/Button";
-import AuthBrand from "@/components/auth/AuthBrand";
-import Snackbar from "@/components/ui/Snackbar";
+import {
+  useState,
+  useCallback,
+  type ChangeEvent,
+  type FormEvent,
+} from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import Input from "@/components/auth/Input"
+import Button from "@/components/auth/Button"
+import AuthBrand from "@/components/auth/AuthBrand"
+import Snackbar from "@/components/ui/Snackbar"
+import { getApiErrorMessage } from "@/lib/api-error"
 
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : "";
 
+interface LoginFormState {
+  email: string
+  password: string
+}
+
+interface SnackbarState {
+  type: "success" | "error"
+  text: string
+}
+
 export default function IniciarSesion() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
+  const router = useRouter()
+  const [formData, setFormData] = useState<LoginFormState>({
     email: "",
-    password: ""
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
-  const [errors, setErrors] = useState({});
+    password: "",
+  })
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState<SnackbarState | null>(null)
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof LoginFormState, string>>
+  >({})
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: Partial<Record<keyof LoginFormState, string>> = {}
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isAdminDemo =
       formData.email?.trim().toLowerCase() === "admin" &&
@@ -39,24 +57,25 @@ export default function IniciarSesion() {
     } else if (!isAdminDemo && formData.password.length < 8) {
       newErrors.password = "La contraseña debe tener al menos 8 caracteres";
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleCloseSnackbar = useCallback(() => {
-    setMessage(null);
-  }, []);
+    setMessage(null)
+  }, [])
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    const field = name as keyof LoginFormState
+    setFormData((prev) => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }))
     }
-    setMessage(null);
-  };
+    setMessage(null)
+  }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage(null);
     if (!validateForm()) return;
@@ -95,11 +114,12 @@ export default function IniciarSesion() {
       router.push(
         from && from.startsWith("/") ? from : "/portal-rrhh/candidatos"
       );
-    } catch (err) {
+    } catch (err: unknown) {
       setMessage({
         type: "error",
-        text: err.message || "Error de conexión. Intenta de nuevo."
-      });
+        text:
+          getApiErrorMessage(err) || "Error de conexión. Intenta de nuevo.",
+      })
     } finally {
       setLoading(false);
     }
@@ -180,7 +200,12 @@ export default function IniciarSesion() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
+            <form
+              onSubmit={handleSubmit}
+              noValidate
+              className="flex flex-col gap-6"
+              data-testid="auth-login-form"
+            >
               <div className="flex flex-col gap-4 md:gap-4 lg:gap-5">
                 <Input
                   label="Correo electrónico"
@@ -192,6 +217,7 @@ export default function IniciarSesion() {
                   onChange={handleChange}
                   error={errors.email}
                   disabled={loading}
+                  testId="auth-login-email"
                 />
 
                 <Input
@@ -204,6 +230,7 @@ export default function IniciarSesion() {
                   onChange={handleChange}
                   error={errors.password}
                   disabled={loading}
+                  testId="auth-login-password"
                 />
 
                 <div className="flex items-center gap-2">
@@ -235,7 +262,11 @@ export default function IniciarSesion() {
               </div>
 
               <div className="flex flex-col gap-4">
-                <Button type="submit" disabled={loading}>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  data-testid="auth-login-submit"
+                >
                   {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
                 </Button>
 

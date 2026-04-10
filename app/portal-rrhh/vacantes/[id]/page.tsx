@@ -28,8 +28,9 @@ import {
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import Snackbar from "@/components/ui/Snackbar";
-import { apiClient } from "@/lib/api";
-import RematchButton from "@/components/rrhh/RematchButton";
+import { apiClient } from "@/lib/api"
+import { getApiErrorMessage } from "@/lib/api-error"
+import RematchButton from "@/components/rrhh/RematchButton"
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
 
@@ -1035,7 +1036,7 @@ export default function VacanteDetallePage() {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editRequirements, setEditRequirements] = useState(() => [createEmptyRequirement()]);
-  const [editErrors, setEditErrors] = useState({});
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [savingVacancy, setSavingVacancy] = useState(false);
   const [saveVacancyError, setSaveVacancyError] = useState(null);
   const [snackbar, setSnackbar] = useState({
@@ -1126,7 +1127,8 @@ export default function VacanteDetallePage() {
     }
   }, []);
 
-  const fetchVacancy = useCallback(async (silent = false) => {
+  const fetchVacancy = useCallback(async (silentFlag?: unknown) => {
+    const silent = silentFlag === true
     if (!id) {
       if (!silent) setLoading(false);
       if (!silent) setFetchError("Falta el ID de la vacante.");
@@ -1139,10 +1141,10 @@ export default function VacanteDetallePage() {
     try {
       const data = await apiClient.get(`/api/recruiter/vacancies/${id}`);
       setVacancy(data);
-    } catch (err) {
+    } catch (err: unknown) {
       if (!silent) {
         setFetchError(
-          err?.message ?? err?.detail ?? "No se pudo cargar la vacante."
+          getApiErrorMessage(err) || "No se pudo cargar la vacante."
         );
         setVacancy(null);
       }
@@ -1206,7 +1208,7 @@ export default function VacanteDetallePage() {
   }, []);
 
   const validateEditForm = useCallback(() => {
-    const nextErrors = {};
+    const nextErrors: Record<string, string> = {};
     if (!String(editTitle ?? "").trim()) nextErrors.title = "El nombre es requerido";
     if (!String(editDescription ?? "").trim()) nextErrors.description = "La descripción es requerida";
 
@@ -1284,7 +1286,7 @@ export default function VacanteDetallePage() {
         ? vacancy.weights.semantic
         : 0.5;
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       title: String(editTitle ?? "").trim(),
       description: String(editDescription ?? "").trim(),
       companyId: vacancy.companyId ?? COMPANY_ID,

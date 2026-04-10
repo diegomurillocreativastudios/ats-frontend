@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { AUTH_COOKIES } from '@/lib/auth';
+import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
+import { AUTH_COOKIES } from "@/lib/auth"
+import { getApiErrorMessage } from "@/lib/api-error"
 
 const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -14,7 +15,7 @@ export async function GET() {
 
     const baseUrl = getBaseUrl().replace(/\/$/, '');
     const endpoints = ['/me', '/user/me', '/users/me', '/auth/me'];
-    let lastError = null;
+    let lastError: unknown = null
 
     for (const endpoint of endpoints) {
       try {
@@ -54,13 +55,16 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { message: lastError?.message || 'No se pudo obtener el usuario' },
+      {
+        message:
+          getApiErrorMessage(lastError) || "No se pudo obtener el usuario",
+      },
       { status: 404 }
-    );
-  } catch (err) {
+    )
+  } catch (err: unknown) {
     return NextResponse.json(
-      { message: err.message || 'Error al obtener usuario' },
+      { message: getApiErrorMessage(err) || "Error al obtener usuario" },
       { status: 500 }
-    );
+    )
   }
 }

@@ -1,11 +1,12 @@
-"use client";
+"use client"
 
-import { useRef, useState, useCallback } from "react";
-import { Upload, X, Sparkles, Loader2, Check } from "lucide-react";
+import { useRef, useState, useCallback, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
+import { Upload, X, Sparkles, Loader2, Check } from "lucide-react"
+import { getApiErrorMessage, isSilentError } from "@/lib/api-error"
 
-const CV_KEYWORDS = ["cv", "curriculum", "curriculum vitae", "resume", "hoja de vida", "hojadevida"];
+const CV_KEYWORDS = ["cv", "curriculum", "curriculum vitae", "resume", "hoja de vida", "hojadevida"]
 
-const isResumeLikeFile = (fileName) => {
+const isResumeLikeFile = (fileName: string) => {
   const lower = (fileName || "").toLowerCase();
   return CV_KEYWORDS.some((keyword) => lower.includes(keyword));
 };
@@ -18,13 +19,17 @@ const ACCEPTED_TYPES = [
 const ACCEPTED_EXTENSIONS = [".pdf", ".doc", ".docx"];
 const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
-const formatFileSize = (bytes) => {
+const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-const validateFile = (file, allowedTypes, allowedExtensions) => {
+const validateFile = (
+  file: File,
+  allowedTypes: string[],
+  allowedExtensions: string[]
+) => {
   const extension = "." + file.name.split(".").pop()?.toLowerCase();
   const typeOk =
     allowedTypes.includes(file.type) || allowedExtensions.includes(extension);
@@ -36,22 +41,16 @@ const validateFile = (file, allowedTypes, allowedExtensions) => {
   return { valid: true };
 };
 
-/**
- * @param {{
- *  onProcess?: (file: File, index: number) => void | Promise<void>,
- *  onProcessAll?: (files: File[]) => void | Promise<void>,
- *  acceptedTypes?: string[],
- *  acceptedExtensions?: string[],
- *  accept?: string,
- *  helperText?: string,
- *  processAllAcceptedFiles?: boolean,
- * }} props
- * - onProcess: callback al hacer clic en "Procesar". Puede ser async.
- * - onProcessAll: callback al hacer clic en "Procesar todos". Puede ser async.
- * - acceptedTypes / acceptedExtensions: sobreescriben los tipos/extensiones permitidos.
- * - accept: valor para el atributo `accept` del input, si se quiere personalizar.
- * - processAllAcceptedFiles: si true, todos los archivos aceptados son procesables (no solo los que tienen CV/Resume en el nombre).
- */
+interface DocumentsUploadZoneProps {
+  onProcess?: (file: File, index: number) => void | Promise<void>
+  onProcessAll?: (files: File[]) => void | Promise<void>
+  acceptedTypes?: string[]
+  acceptedExtensions?: string[]
+  accept?: string
+  helperText?: string
+  processAllAcceptedFiles?: boolean
+}
+
 export default function DocumentsUploadZone({
   onProcess,
   onProcessAll,
@@ -60,14 +59,14 @@ export default function DocumentsUploadZone({
   accept,
   helperText,
   processAllAcceptedFiles = false,
-} = {}) {
-  const inputRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [files, setFiles] = useState([]);
-  const [error, setError] = useState(null);
-  const [processingIndex, setProcessingIndex] = useState(null);
-  const [isProcessingAll, setIsProcessingAll] = useState(false);
-  const [processedIndices, setProcessedIndices] = useState(() => new Set());
+}: DocumentsUploadZoneProps = {}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [files, setFiles] = useState<File[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [processingIndex, setProcessingIndex] = useState<number | null>(null)
+  const [isProcessingAll, setIsProcessingAll] = useState(false)
+  const [processedIndices, setProcessedIndices] = useState(() => new Set<number>())
 
   const effectiveAcceptedTypes =
     Array.isArray(acceptedTypes) && acceptedTypes.length > 0
@@ -78,13 +77,13 @@ export default function DocumentsUploadZone({
       ? acceptedExtensions
       : ACCEPTED_EXTENSIONS;
 
-  const processFiles = useCallback((fileList) => {
-    if (!fileList?.length) return;
-    setError(null);
-    const newFiles = [];
-    let firstError = null;
+  const processFiles = useCallback((fileList: File[]) => {
+    if (!fileList?.length) return
+    setError(null)
+    const newFiles: File[] = []
+    let firstError: string | null = null
     for (let i = 0; i < fileList.length; i++) {
-      const file = fileList[i];
+      const file = fileList[i]
       const { valid, error: msg } = validateFile(
         file,
         effectiveAcceptedTypes,
@@ -96,44 +95,45 @@ export default function DocumentsUploadZone({
         firstError = msg;
       }
     }
-    if (firstError) setError(firstError);
+    if (firstError) setError(firstError)
     if (newFiles.length > 0) {
-      setFiles((prev) => [...prev, ...newFiles]);
+      setFiles((prev) => [...prev, ...newFiles])
     }
-  }, []);
+  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions])
 
   const handleClick = () => {
     setError(null);
     inputRef.current?.click();
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleClick();
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
     if (selected?.length) processFiles(Array.from(selected));
     e.target.value = "";
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.currentTarget.contains(e.relatedTarget)) return;
-    setIsDragging(false);
-  };
+  const handleDragLeave = (e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const rel = e.relatedTarget
+    if (rel instanceof Node && e.currentTarget.contains(rel)) return
+    setIsDragging(false)
+  }
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -141,19 +141,20 @@ export default function DocumentsUploadZone({
     if (dropped?.length) processFiles(Array.from(dropped));
   };
 
-  const removeFile = (index) => {
+  const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
     setError(null);
     setProcessedIndices((prev) => {
-      const next = new Set();
+      const next = new Set<number>()
       prev.forEach((i) => {
-        if (i < index) next.add(i);
-        if (i > index) next.add(i - 1);
-      });
-      return next;
-    });
-    if (processingIndex === index) setProcessingIndex(null);
-    else if (processingIndex !== null && processingIndex > index) setProcessingIndex((p) => p - 1);
+        if (i < index) next.add(i)
+        if (i > index) next.add(i - 1)
+      })
+      return next
+    })
+    if (processingIndex === index) setProcessingIndex(null)
+    else if (processingIndex !== null && processingIndex > index)
+      setProcessingIndex((p) => (p !== null ? p - 1 : null))
   };
 
   const clearAll = () => {
@@ -169,19 +170,16 @@ export default function DocumentsUploadZone({
         .map((file, index) => ({ file, index }))
         .filter(({ file }) => isResumeLikeFile(file.name));
 
-  const handleProcessClick = async (file, index) => {
+  const handleProcessClick = async (file: File, index: number) => {
     if (!onProcess || processingIndex !== null || isProcessingAll) return;
     setError(null);
     setProcessingIndex(index);
     try {
       await Promise.resolve(onProcess(file, index));
       setProcessedIndices((prev) => new Set([...prev, index]));
-    } catch (err) {
-      // Si el error fue lanzado "silenciosamente" (ej. para mostrar el error
-      // solo en el modal superior), no mostramos un segundo mensaje aquí.
-      if (err?.silent) return;
-      const message = err?.message || err?.detail || "Error al procesar el documento.";
-      setError(message);
+    } catch (err: unknown) {
+      if (isSilentError(err)) return
+      setError(getApiErrorMessage(err) || "Error al procesar el documento.")
     } finally {
       setProcessingIndex(null);
     }
@@ -197,10 +195,9 @@ export default function DocumentsUploadZone({
         await Promise.resolve(onProcess(file, index));
         setProcessedIndices((prev) => new Set([...prev, index]));
       }
-    } catch (err) {
-      if (err?.silent) return;
-      const message = err?.message || err?.detail || "Error al procesar los documentos.";
-      setError(message);
+    } catch (err: unknown) {
+      if (isSilentError(err)) return
+      setError(getApiErrorMessage(err) || "Error al procesar los documentos.")
     } finally {
       setProcessingIndex(null);
       setIsProcessingAll(false);

@@ -11,16 +11,22 @@ const DESKTOP_PADDING = "px-8";
 const TABLET_PADDING = "px-5";
 const MOBILE_PADDING = "px-4";
 
-/**
- * @typedef {{ label: string, href?: string }} BreadcrumbSegment
- * @param {{ variant?: string, breadcrumbLabel?: string, breadcrumbTrail?: BreadcrumbSegment[] }} props
- */
+interface BreadcrumbSegment {
+  label: string
+  href?: string
+}
+
+interface RRHHTopbarProps {
+  variant?: "desktop" | "tablet" | "mobile"
+  breadcrumbLabel?: string
+  breadcrumbTrail?: BreadcrumbSegment[] | null
+}
 
 export default function RRHHTopbar({
   variant = "desktop",
   breadcrumbLabel = "Dashboard",
   breadcrumbTrail = null,
-}) {
+}: RRHHTopbarProps) {
   const isDesktop = variant === "desktop";
   const isTablet = variant === "tablet";
   const isMobile = variant === "mobile";

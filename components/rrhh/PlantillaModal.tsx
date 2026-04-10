@@ -17,7 +17,7 @@ const slugify = (text) => {
 
 const buildPayload = (formData, isEditing, editingTemplate) => {
   const type = formData.type || "Notification";
-  const payload = {
+  const payload: Record<string, unknown> = {
     $type: type,
     id: isEditing && editingTemplate ? editingTemplate.id : 0,
     type: type,
@@ -40,7 +40,19 @@ const buildPayload = (formData, isEditing, editingTemplate) => {
   return payload;
 };
 
-export default function PlantillaModal({ isOpen, onClose, onSubmit, editingTemplate, onSnackbar }) {
+export default function PlantillaModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  editingTemplate,
+  onSnackbar,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onSubmit?: () => void
+  editingTemplate?: Record<string, unknown> | null
+  onSnackbar?: (message: string, variant?: string) => void
+}) {
   const [formData, setFormData] = useState({
     type: "Notification",
     name: "",
@@ -53,7 +65,7 @@ export default function PlantillaModal({ isOpen, onClose, onSubmit, editingTempl
     description: "",
     isMandatory: false,
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
@@ -61,17 +73,22 @@ export default function PlantillaModal({ isOpen, onClose, onSubmit, editingTempl
 
   useEffect(() => {
     if (isOpen && editingTemplate) {
+      const t = editingTemplate
       setFormData({
-        type: editingTemplate.type ?? "Notification",
-        name: editingTemplate.name ?? "",
-        slug: editingTemplate.slug ?? "",
-        subject: editingTemplate.subject ?? editingTemplate.subjectTemplate ?? "",
-        body: editingTemplate.body ?? editingTemplate.bodyTemplate ?? editingTemplate.content ?? "",
-        contentTemplate: editingTemplate.contentTemplate ?? "",
-        outputFormat: editingTemplate.outputFormat ?? "PDF",
-        description: editingTemplate.description ?? "",
-        isMandatory: !!editingTemplate.isMandatory,
-        channels: editingTemplate.channels ?? [],
+        type: String(t["type"] ?? "Notification"),
+        name: String(t["name"] ?? ""),
+        slug: String(t["slug"] ?? ""),
+        subject: String(
+          t["subject"] ?? t["subjectTemplate"] ?? ""
+        ),
+        body: String(
+          t["body"] ?? t["bodyTemplate"] ?? t["content"] ?? ""
+        ),
+        contentTemplate: String(t["contentTemplate"] ?? ""),
+        outputFormat: String(t["outputFormat"] ?? "PDF"),
+        description: String(t["description"] ?? ""),
+        isMandatory: Boolean(t["isMandatory"]),
+        channels: Array.isArray(t["channels"]) ? t["channels"] : [],
       });
     } else if (isOpen && !editingTemplate) {
       setFormData({
@@ -90,7 +107,7 @@ export default function PlantillaModal({ isOpen, onClose, onSubmit, editingTempl
   }, [isOpen, editingTemplate]);
 
   const validate = () => {
-    const nextErrors = {};
+    const nextErrors: Record<string, string> = {};
     if (!formData.name.trim()) {
       nextErrors.name = "El nombre es requerido";
     }
@@ -149,7 +166,18 @@ export default function PlantillaModal({ isOpen, onClose, onSubmit, editingTempl
   };
 
   const handleClose = () => {
-    setFormData({ name: "", slug: "", subject: "", body: "", channels: [] });
+    setFormData({
+      type: "Notification",
+      name: "",
+      slug: "",
+      subject: "",
+      body: "",
+      contentTemplate: "",
+      outputFormat: "PDF",
+      description: "",
+      isMandatory: false,
+      channels: [],
+    });
     setErrors({});
     setSubmitError(null);
     onClose?.();

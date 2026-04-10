@@ -1,59 +1,84 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Input from "@/components/auth/Input";
-import Button from "@/components/auth/Button";
-import AuthBrand from "@/components/auth/AuthBrand";
-import Snackbar from "@/components/ui/Snackbar";
-import { apiClient } from "@/lib/api";
+import {
+  useState,
+  useCallback,
+  type ChangeEvent,
+  type FormEvent,
+} from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import Input from "@/components/auth/Input"
+import Button from "@/components/auth/Button"
+import AuthBrand from "@/components/auth/AuthBrand"
+import Snackbar from "@/components/ui/Snackbar"
+import { apiClient } from "@/lib/api"
+
+interface RegisterFormState {
+  email: string
+  password: string
+  confirmPassword: string
+}
+
+interface SnackbarState {
+  type: "success" | "error"
+  text: string
+}
+
+const getMessageFromError = (err: unknown) => {
+  if (typeof err !== "object" || err === null) {
+    return "Error al crear la cuenta. Intenta de nuevo."
+  }
+  const e = err as Record<string, unknown>
+  if (e.errors && typeof e.errors === "object") {
+    const messages = Object.values(e.errors as Record<string, unknown[]>)
+      .flat()
+      .filter((m) => typeof m === "string" && m.trim())
+    if (messages.length > 0) return messages.join(" ")
+  }
+  if (typeof e.message === "string") return e.message
+  if (e.detail !== undefined)
+    return typeof e.detail === "string" ? e.detail : JSON.stringify(e.detail)
+  if (typeof e.error === "string") return e.error
+  if (typeof e.title === "string") return e.title
+  if (e.status === 409) return "Este correo ya está registrado."
+  if (typeof e.status === "number" && e.status >= 500)
+    return "Error del servidor. Intenta más tarde."
+  return "Error al crear la cuenta. Intenta de nuevo."
+}
 
 export default function Registrarse() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
+  const router = useRouter()
+  const [formData, setFormData] = useState<RegisterFormState>({
     email: "",
     password: "",
-    confirmPassword: ""
-  });
-  const [showPasswords, setShowPasswords] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
-  const [errors, setErrors] = useState({});
+    confirmPassword: "",
+  })
+  const [showPasswords, setShowPasswords] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState<SnackbarState | null>(null)
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof RegisterFormState, string>>
+  >({})
 
   const handleCloseSnackbar = useCallback(() => {
-    setMessage(null);
-  }, []);
+    setMessage(null)
+  }, [])
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target
+    const field = name as keyof RegisterFormState
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+      [field]: type === "checkbox" ? checked : value,
+    }))
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }))
     }
-    setMessage(null);
-  };
+    setMessage(null)
+  }
 
-  const getMessageFromError = (err) => {
-    if (err.errors && typeof err.errors === "object") {
-      const messages = Object.values(err.errors)
-        .flat()
-        .filter((m) => typeof m === "string" && m.trim());
-      if (messages.length > 0) return messages.join(" ");
-    }
-    if (err.message) return err.message;
-    if (err.detail) return typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail);
-    if (err.error) return err.error;
-    if (err.title && typeof err.title === "string") return err.title;
-    if (err.status === 409) return "Este correo ya está registrado.";
-    if (err.status >= 500) return "Error del servidor. Intenta más tarde.";
-    return "Error al crear la cuenta. Intenta de nuevo.";
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage(null);
     setErrors({});
@@ -73,11 +98,11 @@ export default function Registrarse() {
       setTimeout(() => {
         router.push("/auth/iniciar-sesion");
       }, 2000);
-    } catch (err) {
+    } catch (err: unknown) {
       setMessage({
         type: "error",
-        text: getMessageFromError(err)
-      });
+        text: getMessageFromError(err),
+      })
     } finally {
       setLoading(false);
     }

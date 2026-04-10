@@ -77,8 +77,8 @@ const Snackbar = ({
     message: "",
     variant: "info",
   });
-  const closeTimerRef = useRef(null);
-  const autoHideTimerRef = useRef(null);
+  const closeTimerRef = useRef<number | null>(null)
+  const autoHideTimerRef = useRef<number | null>(null)
   const closingFromUiRef = useRef(false);
 
   const config = VARIANT_CONFIG[snapshot.variant] ?? VARIANT_CONFIG.info;

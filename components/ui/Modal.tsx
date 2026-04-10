@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import { useEffect, useCallback } from "react";
-import { X } from "lucide-react";
+import { useEffect, useCallback, type ReactNode, type MouseEvent } from "react"
+import { X } from "lucide-react"
 
 const MODAL_STYLES = {
   overlay:
     "fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4",
-  getContent: (sizeClass) =>
+  getContent: (sizeClass: string) =>
     `relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-white shadow-xl ${sizeClass}`,
   header: "shrink-0 flex items-center justify-between border-b border-border px-6 py-4",
   body: "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 py-5",
@@ -20,6 +20,17 @@ const SIZE_CLASSES = {
   lg: "max-w-2xl",
 };
 
+interface ModalProps {
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: ReactNode
+  footer?: ReactNode
+  size?: keyof typeof SIZE_CLASSES
+  closeOnOverlayClick?: boolean
+  closeOnEscape?: boolean
+}
+
 export default function Modal({
   isOpen,
   onClose,
@@ -29,22 +40,21 @@ export default function Modal({
   size = "md",
   closeOnOverlayClick = true,
   closeOnEscape = true,
-}) {
-  const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md;
+}: ModalProps) {
+  const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md
   const handleEscape = useCallback(
-    (e) => {
-      if (closeOnEscape && e.key === "Escape") {
-        onClose?.();
-      }
+    (e: Event) => {
+      if (!closeOnEscape || !(e instanceof KeyboardEvent) || e.key !== "Escape") return
+      onClose?.()
     },
     [closeOnEscape, onClose]
-  );
+  )
 
-  const handleOverlayClick = (e) => {
+  const handleOverlayClick = (e: MouseEvent<HTMLDivElement>) => {
     if (closeOnOverlayClick && e.target === e.currentTarget) {
-      onClose?.();
+      onClose?.()
     }
-  };
+  }
 
   useEffect(() => {
     if (isOpen) {

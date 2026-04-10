@@ -97,37 +97,51 @@ npm run lint
 
 ## Pruebas Automatizadas
 
-El proyecto utiliza **Vitest** para pruebas unitarias y **Playwright** para pruebas de integración/E2E.
+El proyecto utiliza **Vitest** para pruebas unitarias / componentes y **Playwright** para E2E (flujos de usuario).
 
-### 1. Configuración inicial (Solo una vez)
-Después de instalar las dependencias, debés instalar los binarios de los navegadores para Playwright:
+### 1. Configuración inicial (solo una vez)
+
 ```bash
 npx playwright install chromium
 ```
 
-### 2. Ejecutar Pruebas Unitarias (Vitest)
+### 2. Pruebas unitarias (Vitest)
+
 ```bash
 npm run test
 ```
 
-### 3. Ejecutar Pruebas E2E (Playwright)
+Modo watch: `npm run test:watch`
 
-#### **Opción A: Ciclo Completo (RECOMENDADO)**
-Este comando automatiza todo: limpia la base de datos de pruebas, levanta el backend, el frontend, corre los tests y apaga todo al finalizar.
+### 3. Pruebas E2E (Playwright)
+
+Por defecto, `npm run test:e2e` **levanta el frontend** con `npm run dev` si no hay nada en el puerto (ver `playwright.config.ts`). Los tests de login y plantillas **requieren el API** configurado en `.env.local` (`NEXT_PUBLIC_API_URL`) y backend accesible.
+
+| Comando | Descripción |
+|--------|-------------|
+| `npm run test:e2e` | Ejecuta todos los E2E (Chromium). |
+| `npm run test:e2e:ui` | Interfaz interactiva de Playwright (ideal para QA). |
+| `npm run test:e2e:headed` | Navegador visible. |
+| `npm run test:e2e:report` | Abre el último reporte HTML. |
+
+**Ya tenés el front en marcha** (por ejemplo `npm run dev` en otra terminal):
+
 ```bash
-npm run test:e2e:full
+PLAYWRIGHT_SKIP_WEBSERVER=1 npm run test:e2e
 ```
 
-#### **Opción B: Manual**
-**Requisito**: Tanto el backend (`dotnet run`) como el frontend (`npm run dev`) deben estar corriendo en terminales separadas.
+**Otra URL base** (staging, etc.):
+
 ```bash
-npm run test:e2e
+PLAYWRIGHT_BASE_URL=https://staging.ejemplo.com npm run test:e2e
 ```
 
-Para abrir el reporte visual después de una falla:
-```bash
-npx playwright show-report
-```
+#### Ciclo completo front + API + base de datos (monorepo con engine)
+
+- **Windows:** `npm run test:e2e:full` (PowerShell, ver `tests/e2e/run-e2e-full.ps1`).
+- **macOS / Linux:** `npm run test:e2e:full:unix` (bash, ver `tests/e2e/run-e2e-full.sh`).
+
+Detalle de escenarios y prioridades: `TESTING_PLAN.md`.
 
 ---
 

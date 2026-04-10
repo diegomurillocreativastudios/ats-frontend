@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
-import { AUTH_COOKIES } from '@/lib/auth';
+import { NextResponse, type NextRequest } from "next/server"
+import { AUTH_COOKIES } from "@/lib/auth"
+import { getApiErrorMessage } from "@/lib/api-error"
 
-const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || '';
+const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || ""
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = body;
@@ -104,10 +105,10 @@ export async function POST(request) {
     });
 
     return response;
-  } catch (err) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { message: err.message || 'Error al iniciar sesión' },
+      { message: getApiErrorMessage(err) || "Error al iniciar sesión" },
       { status: 500 }
-    );
+    )
   }
 }

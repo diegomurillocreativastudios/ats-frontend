@@ -1,12 +1,13 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
-import CandidateSidebar from "@/components/candidato/CandidateSidebar";
-import CandidateTopbar from "@/components/candidato/CandidateTopbar";
-import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
-import DocumentsList from "@/components/candidato/DocumentsList";
-import Snackbar from "@/components/ui/Snackbar";
-import { apiClient } from "@/lib/api";
+import { useState, useCallback } from "react"
+import CandidateSidebar from "@/components/candidato/CandidateSidebar"
+import CandidateTopbar from "@/components/candidato/CandidateTopbar"
+import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone"
+import DocumentsList from "@/components/candidato/DocumentsList"
+import Snackbar from "@/components/ui/Snackbar"
+import { apiClient } from "@/lib/api"
+import { getApiErrorMessage, createSilentError } from "@/lib/api-error"
 
 const PROCESAR_ENDPOINT = "/Ingest/upload";
 const ENTITY_TYPE = "Candidate";
@@ -22,7 +23,7 @@ export default function DocumentosContent() {
     setSnackbar((prev) => ({ ...prev, open: false }));
   }, []);
 
-  const handleProcess = async (file, _index) => {
+  const handleProcess = async (file: File, _index: number) => {
     const formData = new FormData();
     formData.append("File", file);
     formData.append("EntityType", ENTITY_TYPE);
@@ -33,16 +34,15 @@ export default function DocumentosContent() {
         variant: "success",
         message: "Documento procesado correctamente.",
       });
-    } catch (err) {
-      const message = err?.message || err?.detail || "Error al procesar el documento.";
-      setSnackbar({ open: true, variant: "error", message });
-      const silentErr = new Error(message);
-      silentErr.silent = true;
-      throw silentErr;
+    } catch (err: unknown) {
+      const message =
+        getApiErrorMessage(err) || "Error al procesar el documento."
+      setSnackbar({ open: true, variant: "error", message })
+      throw createSilentError(message)
     }
-  };
+  }
 
-  const handleProcessAll = async (files) => {
+  const handleProcessAll = async (files: File[]) => {
     if (!files?.length) return;
     const total = files.length;
     try {
@@ -57,11 +57,12 @@ export default function DocumentosContent() {
         variant: "success",
         message: `${total} documento${total !== 1 ? "s" : ""} procesado${total !== 1 ? "s" : ""} correctamente.`,
       });
-    } catch (err) {
-      const message = err?.message || err?.detail || "Error al procesar los documentos.";
-      setSnackbar({ open: true, variant: "error", message });
+    } catch (err: unknown) {
+      const message =
+        getApiErrorMessage(err) || "Error al procesar los documentos."
+      setSnackbar({ open: true, variant: "error", message })
     }
-  };
+  }
 
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
