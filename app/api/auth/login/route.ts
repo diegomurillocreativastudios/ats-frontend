@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { fetchBackendSessionUser } from "@/lib/fetch-backend-session-user"
 
 const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || ""
 
@@ -36,7 +37,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const accessToken = data.accessToken ?? data.token;
+    const accessToken =
+      data.accessToken ?? data.access_token ?? data.token;
     const refreshToken = data.refreshToken;
     const expiresIn = Number(data.expiresIn) || 3600;
 
@@ -78,23 +80,41 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    let userPayload;
-    if (data.user && typeof data.user === 'object') {
-      const u = data.user;
-      const fullName = u.name ?? u.fullName ?? [u.firstName, u.lastName].filter(Boolean).join(' ').trim();
+    let userPayload: {
+      id: string | null
+      name: string
+      email: string
+      role: string | null
+    }
+    if (data.user && typeof data.user === "object") {
+      const u = data.user as Record<string, unknown>
+      const fullName =
+        (u.name as string | undefined) ??
+        (u.fullName as string | undefined) ??
+        [u.firstName, u.lastName].filter(Boolean).join(" ").trim()
       userPayload = {
-        id: u.id,
-        name: fullName || u.email || '',
-        email: u.email ?? '',
-        role: u.role ?? u.type ?? null,
-      };
+        id: u.id != null ? String(u.id) : null,
+        name: fullName || String(u.email ?? "") || "",
+        email: String(u.email ?? ""),
+        role: (u.role ?? u.type ?? null) as string | null,
+      }
     } else {
       userPayload = {
         id: null,
-        name: '',
-        email: String(email || '').trim(),
+        name: "",
+        email: String(email || "").trim(),
         role: null,
-      };
+      }
+    }
+
+    const hydrated = await fetchBackendSessionUser(baseUrl, accessToken)
+    if (hydrated) {
+      userPayload = {
+        id: hydrated.id ?? userPayload.id,
+        name: hydrated.name || userPayload.name || userPayload.email,
+        email: hydrated.email || userPayload.email,
+        role: hydrated.role ?? userPayload.role,
+      }
     }
     response.cookies.set(AUTH_COOKIES.user, JSON.stringify(userPayload), {
       path: AUTH_COOKIES.path,

@@ -1,8 +1,9 @@
 import { Briefcase, ClipboardList, Calendar, Mail } from "lucide-react";
+import type { CandidatePortalStats } from "@/lib/candidate-dashboard";
 
 const STAT_CONFIG = [
   {
-    value: "3",
+    key: "activeApplications" as const,
     label: "Postulaciones",
     labelDesktop: "Postulaciones Activas",
     icon: Briefcase,
@@ -10,7 +11,7 @@ const STAT_CONFIG = [
     iconColor: "text-vo-purple",
   },
   {
-    value: "2",
+    key: "pendingEvaluations" as const,
     label: "Evaluaciones",
     labelDesktop: "Evaluaciones Pendientes",
     icon: ClipboardList,
@@ -18,7 +19,7 @@ const STAT_CONFIG = [
     iconColor: "text-vo-navy",
   },
   {
-    value: "1",
+    key: "upcomingInterviews" as const,
     label: "Entrevistas",
     labelDesktop: "Entrevista Próxima",
     icon: Calendar,
@@ -26,7 +27,7 @@ const STAT_CONFIG = [
     iconColor: "text-success",
   },
   {
-    value: "4",
+    key: "unreadMessages" as const,
     label: "Mensajes",
     labelDesktop: "Mensajes Sin Leer",
     icon: Mail,
@@ -35,11 +36,30 @@ const STAT_CONFIG = [
   },
 ];
 
+function formatStatValue(
+  stats: CandidatePortalStats | null | undefined,
+  loading: boolean,
+  key: keyof CandidatePortalStats
+) {
+  if (loading) return "—"
+  if (!stats) return "0"
+  const n = stats[key]
+  return Number.isFinite(n) ? String(n) : "0"
+}
+
 export default function StatCard({
   useDesktopLabels = false,
   compact = false,
   /** When true, use 2 cols on mobile and 4 on md+ (tablet/mobile layout). When false, use 4 cols on lg (desktop). */
   responsiveGrid = false,
+  stats = null,
+  loading = false,
+}: {
+  useDesktopLabels?: boolean;
+  compact?: boolean;
+  responsiveGrid?: boolean;
+  stats?: CandidatePortalStats | null;
+  loading?: boolean;
 }) {
   const gridClass = responsiveGrid
     ? "grid-cols-2 md:grid-cols-4"
@@ -53,9 +73,10 @@ export default function StatCard({
       {STAT_CONFIG.map((stat) => {
         const Icon = stat.icon;
         const label = useDesktopLabels ? stat.labelDesktop : stat.label;
+        const value = formatStatValue(stats, loading, stat.key);
         return (
           <div
-            key={stat.label}
+            key={stat.key}
             className={`rounded-lg border border-border bg-card ${
               compact ? "p-3" : "p-4 md:p-4 lg:p-6"
             } flex flex-col gap-2`}
@@ -77,7 +98,7 @@ export default function StatCard({
                 compact ? "text-xl" : "text-2xl lg:text-[28px]"
               }`}
             >
-              {stat.value}
+              {value}
             </span>
             <span className="font-inter text-xs text-muted-foreground md:text-xs lg:text-sm">
               {label}

@@ -14,7 +14,13 @@ export async function GET() {
     }
 
     const baseUrl = getBaseUrl().replace(/\/$/, '');
-    const endpoints = ['/me', '/user/me', '/users/me', '/auth/me'];
+    const endpoints = [
+      '/api/auth/session',
+      '/me',
+      '/user/me',
+      '/users/me',
+      '/auth/me',
+    ];
     let lastError: unknown = null
 
     for (const endpoint of endpoints) {
@@ -30,11 +36,21 @@ export async function GET() {
           const data = await res.json().catch(() => ({}));
           const user = data.user ?? data;
           if (user && (user.id != null || user.email || user.name)) {
+            const rolesArr = Array.isArray(user.roles) ? user.roles : [];
             const payload = {
-              id: user.id,
-              name: user.name ?? user.fullName ?? user.email ?? '',
-              email: user.email ?? '',
-              role: user.role ?? user.type ?? null,
+              id: user.id != null ? String(user.id) : null,
+              name:
+                user.name ??
+                user.userName ??
+                user.fullName ??
+                (user.email ? String(user.email).split("@")[0] : "") ??
+                "",
+              email: user.email ?? "",
+              role:
+                user.role ??
+                user.type ??
+                (rolesArr.length > 0 ? rolesArr[0] : null) ??
+                null,
             };
             return NextResponse.json(payload);
           }
