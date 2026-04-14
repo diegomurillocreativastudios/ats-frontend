@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
-const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || ""
+const isDev = process.env.NODE_ENV === "development"
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,12 +24,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const baseUrl = getBaseUrl().replace(/\/$/, "")
+    const baseUrl = getServerBackendBaseUrl()
     if (!baseUrl) {
       return NextResponse.json(
         {
           message:
-            "El servicio no está configurado. Verificá NEXT_PUBLIC_API_URL.",
+            "El servicio no está configurado. Definí NEXT_PUBLIC_API_URL o API_URL (backend en red accesible desde Next.js).",
         },
         { status: 503 }
       )
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
+      cache: "no-store",
     })
 
     const data = (await res.json().catch(() => ({}))) as Record<
@@ -45,15 +47,28 @@ export async function POST(request: NextRequest) {
       unknown
     >
 
+    if (isDev) {
+      console.info("[forgot-password] backend HTTP", res.status, {
+        exists: data.exists ?? data.Exists,
+        success: data.success ?? data.Success,
+      })
+    }
+
     if (!res.ok) {
+      if (isDev) {
+        console.warn("[forgot-password] backend error body", data)
+      }
       const raw =
         data.message ??
         data.detail ??
         "No se pudo procesar la solicitud."
       const text = Array.isArray(raw) ? raw[0] : raw
+      const headers = new Headers()
+      const retryAfter = res.headers.get("retry-after")
+      if (retryAfter) headers.set("retry-after", retryAfter)
       return NextResponse.json(
         { message: typeof text === "string" ? text : String(text) },
-        { status: res.status }
+        { status: res.status, headers }
       )
     }
 

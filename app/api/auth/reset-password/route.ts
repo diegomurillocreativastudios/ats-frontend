@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { getApiErrorMessage } from "@/lib/api-error"
-
-const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || ""
+import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,25 +37,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const baseUrl = getBaseUrl().replace(/\/$/, "")
+    const baseUrl = getServerBackendBaseUrl()
     if (!baseUrl) {
       return NextResponse.json(
         {
           message:
-            "El servicio de restablecimiento no está configurado. Contactá al administrador.",
+            "El servicio de restablecimiento no está configurado. Definí NEXT_PUBLIC_API_URL o API_URL.",
         },
         { status: 503 }
       )
     }
 
     const payload = token
-      ? { password, token }
+      ? { password, token, email: null }
       : { password, email }
 
     const res = await fetch(`${baseUrl}/auth/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      cache: "no-store",
     })
 
     const data = (await res.json().catch(() => ({}))) as Record<
@@ -71,7 +71,10 @@ export async function POST(request: NextRequest) {
         "No se pudo restablecer la contraseña."
       const text = Array.isArray(raw) ? raw[0] : raw
       const msg = typeof text === "string" ? text : String(text)
-      return NextResponse.json({ message: msg }, { status: res.status })
+      const headers = new Headers()
+      const retryAfter = res.headers.get("retry-after")
+      if (retryAfter) headers.set("retry-after", retryAfter)
+      return NextResponse.json({ message: msg }, { status: res.status, headers })
     }
 
     return NextResponse.json({

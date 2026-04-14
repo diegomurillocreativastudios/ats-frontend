@@ -3,6 +3,7 @@
 import {
   useState,
   useCallback,
+  useEffect,
   type ChangeEvent,
   type FormEvent,
 } from "react"
@@ -66,6 +67,24 @@ export default function IniciarSesion() {
 
   const handleCloseSnackbar = useCallback(() => {
     setMessage(null)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("passwordReset") !== "success") return
+    setMessage({
+      type: "success",
+      text: "Tu contraseña se actualizó correctamente. Iniciá sesión con tu nueva clave.",
+    })
+    const url = new URL(window.location.href)
+    url.searchParams.delete("passwordReset")
+    const qs = url.searchParams.toString()
+    window.history.replaceState(
+      {},
+      "",
+      `${url.pathname}${qs ? `?${qs}` : ""}`
+    )
   }, [])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

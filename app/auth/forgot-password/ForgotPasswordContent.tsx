@@ -3,11 +3,11 @@
 import {
   useState,
   useCallback,
+  useEffect,
   type ChangeEvent,
   type FormEvent,
 } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import Input from "@/components/auth/Input"
 import Button from "@/components/auth/Button"
 import AuthBrand from "@/components/auth/AuthBrand"
@@ -23,15 +23,23 @@ interface SnackbarState {
 }
 
 export default function ForgotPasswordContent() {
-  const router = useRouter()
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<SnackbarState | null>(null)
   const [error, setError] = useState("")
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0)
 
   const handleCloseSnackbar = useCallback(() => {
     setMessage(null)
   }, [])
+
+  useEffect(() => {
+    if (rateLimitSecondsLeft <= 0) return
+    const id = window.setInterval(() => {
+      setRateLimitSecondsLeft((s) => (s <= 1 ? 0 : s - 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [rateLimitSecondsLeft])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value)
@@ -70,6 +78,13 @@ export default function ForgotPasswordContent() {
       const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
+        if (res.status === 429) {
+          const ra = res.headers.get("retry-after")
+          const sec = ra ? parseInt(ra, 10) : 60
+          setRateLimitSecondsLeft(
+            Number.isFinite(sec) && sec > 0 ? sec : 60
+          )
+        }
         const text =
           data.message ||
           data.detail ||
@@ -83,20 +98,22 @@ export default function ForgotPasswordContent() {
 
       const exists = Boolean(data.exists ?? data.Exists)
       const success = Boolean(data.success ?? data.Success)
-
-      if (exists && success) {
-        router.push(
-          `/restablecer-contrasena?email=${encodeURIComponent(email.trim())}`
-        )
-        return
-      }
-
       const serverMessage =
         typeof data.message === "string"
           ? data.message
           : typeof data.Message === "string"
             ? data.Message
             : ""
+
+      if (success && exists) {
+        setMessage({
+          type: "success",
+          text:
+            serverMessage ||
+            "Te enviamos un correo con un enlace para restablecer tu contraseña.",
+        })
+        return
+      }
 
       setMessage({
         type: "error",
@@ -221,7 +238,7 @@ export default function ForgotPasswordContent() {
                   value={email}
                   onChange={handleChange}
                   error={error}
-                  disabled={loading}
+                  disabled={loading || rateLimitSecondsLeft > 0}
                   testId="auth-forgot-email"
                   accent="navy"
                 />
@@ -229,10 +246,14 @@ export default function ForgotPasswordContent() {
                 <Button
                   type="submit"
                   variant="navy"
-                  disabled={loading}
+                  disabled={loading || rateLimitSecondsLeft > 0}
                   data-testid="auth-forgot-submit"
                 >
-                  {loading ? "Verificando..." : "Continuar"}
+                  {loading
+                    ? "Enviando..."
+                    : rateLimitSecondsLeft > 0
+                      ? `Reintentá en ${rateLimitSecondsLeft}s`
+                      : "Enviar instrucciones"}
                 </Button>
               </div>
             </form>

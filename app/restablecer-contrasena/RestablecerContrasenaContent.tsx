@@ -3,12 +3,13 @@
 import {
   useState,
   useCallback,
+  useEffect,
   type ChangeEvent,
   type FormEvent,
 } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { CheckCircle2, AlertCircle } from "lucide-react"
+import { AlertCircle } from "lucide-react"
 import Input from "@/components/auth/Input"
 import Button from "@/components/auth/Button"
 import AuthBrand from "@/components/auth/AuthBrand"
@@ -53,8 +54,8 @@ export default function RestablecerContrasenaContent() {
   })
   const [showPasswords, setShowPasswords] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [message, setMessage] = useState<SnackbarState | null>(null)
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0)
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>(
     {}
   )
@@ -62,6 +63,14 @@ export default function RestablecerContrasenaContent() {
   const handleCloseSnackbar = useCallback(() => {
     setMessage(null)
   }, [])
+
+  useEffect(() => {
+    if (rateLimitSecondsLeft <= 0) return
+    const id = window.setInterval(() => {
+      setRateLimitSecondsLeft((s) => (s <= 1 ? 0 : s - 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [rateLimitSecondsLeft])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -77,6 +86,8 @@ export default function RestablecerContrasenaContent() {
     const next: Partial<Record<keyof FormState, string>> = {}
     if (!formData.password) {
       next.password = "La contraseña es requerida"
+    } else if (formData.password.length < 8) {
+      next.password = "La contraseña debe tener al menos 8 caracteres"
     }
     if (formData.password !== formData.confirmPassword) {
       next.confirmPassword = "Las contraseñas no coinciden"
@@ -106,6 +117,13 @@ export default function RestablecerContrasenaContent() {
       const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
+        if (res.status === 429) {
+          const ra = res.headers.get("retry-after")
+          const sec = ra ? parseInt(ra, 10) : 60
+          setRateLimitSecondsLeft(
+            Number.isFinite(sec) && sec > 0 ? sec : 60
+          )
+        }
         const text =
           data.message ||
           data.detail ||
@@ -117,7 +135,7 @@ export default function RestablecerContrasenaContent() {
         return
       }
 
-      setSuccess(true)
+      router.replace("/auth/iniciar-sesion?passwordReset=success")
     } catch (err: unknown) {
       setMessage({
         type: "error",
@@ -127,10 +145,6 @@ export default function RestablecerContrasenaContent() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleGoToLogin = () => {
-    router.push("/auth/iniciar-sesion")
   }
 
   const noopChange = () => {}
@@ -200,63 +214,6 @@ export default function RestablecerContrasenaContent() {
                   Volver a iniciar sesión
                 </Link>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (success) {
-    return (
-      <div className="flex min-h-screen font-inter">
-        <div className="hidden flex-col justify-center bg-vo-navy text-white md:flex md:w-80 md:gap-6 md:px-10 lg:flex-1 lg:gap-8 lg:px-16">
-          <div className="flex flex-col md:gap-6 lg:gap-6">
-            <div className="flex items-center md:gap-3 lg:gap-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-white/10 text-[22px] font-bold lg:h-14 lg:w-14 lg:rounded-xl lg:text-[32px]">
-                C
-              </div>
-              <div className="text-xl font-bold leading-none lg:text-[32px]">
-                ATS App
-              </div>
-            </div>
-            <div className="hidden lg:block">
-              <h1 className="text-[40px] font-bold leading-[1.2]">
-                Contraseña actualizada
-              </h1>
-              <p className="mt-6 text-lg leading-normal text-white/80">
-                Ya podés iniciar sesión con tu nueva contraseña.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-1 items-center justify-center bg-background px-6 py-10 md:max-w-[448px] md:px-10 lg:max-w-[560px] lg:px-16">
-          <div className="w-full md:max-w-[360px] lg:max-w-[400px]">
-            <div className="mb-6 flex justify-center md:hidden">
-              <AuthBrand size="mobile-login" variant="light-navy" />
-            </div>
-            <div
-              className="flex flex-col items-center gap-6 text-center md:items-start md:text-left"
-              role="status"
-              aria-live="polite"
-              data-testid="auth-reset-success"
-            >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-vo-navy/10 text-vo-navy">
-                <CheckCircle2 className="h-8 w-8" aria-hidden />
-              </div>
-              <div>
-                <h2 className="font-inter text-[22px] font-bold text-foreground md:text-2xl lg:text-[28px]">
-                  Listo
-                </h2>
-                <p className="mt-2 font-inter text-sm text-muted-foreground md:text-base">
-                  Tu contraseña se actualizó correctamente. Iniciá sesión con la
-                  nueva clave.
-                </p>
-              </div>
-              <Button type="button" variant="navy" onClick={handleGoToLogin}>
-                Ir a iniciar sesión
-              </Button>
             </div>
           </div>
         </div>
@@ -396,19 +353,24 @@ export default function RestablecerContrasenaContent() {
                   />
                 ) : null}
 
-                <Input
-                  label="Nueva contraseña"
-                  type={showPasswords ? "text" : "password"}
-                  name="password"
-                  placeholder="Tu nueva contraseña"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={errors.password}
-                  disabled={loading}
-                  testId="auth-reset-password"
-                  accent="navy"
-                />
+                <div className="flex flex-col gap-1">
+                  <Input
+                    label="Nueva contraseña"
+                    type={showPasswords ? "text" : "password"}
+                    name="password"
+                    placeholder="Tu nueva contraseña"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    error={errors.password}
+                    disabled={loading}
+                    testId="auth-reset-password"
+                    accent="navy"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Mínimo 8 caracteres
+                  </p>
+                </div>
 
                 <Input
                   label="Confirmar contraseña"
@@ -446,10 +408,14 @@ export default function RestablecerContrasenaContent() {
               <Button
                 type="submit"
                 variant="navy"
-                disabled={loading}
+                disabled={loading || rateLimitSecondsLeft > 0}
                 data-testid="auth-reset-submit"
               >
-                {loading ? "Guardando..." : "Guardar contraseña"}
+                {loading
+                  ? "Guardando..."
+                  : rateLimitSecondsLeft > 0
+                    ? `Reintentá en ${rateLimitSecondsLeft}s`
+                    : "Guardar contraseña"}
               </Button>
             </form>
 

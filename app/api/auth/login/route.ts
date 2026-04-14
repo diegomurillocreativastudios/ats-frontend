@@ -2,8 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { fetchBackendSessionUser } from "@/lib/fetch-backend-session-user"
-
-const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || ""
+import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,11 +16,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl = getBaseUrl().replace(/\/$/, '');
+    const baseUrl = getServerBackendBaseUrl()
     const res = await fetch(`${baseUrl}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
+      cache: 'no-store',
     });
 
     const data = await res.json().catch(() => ({}));

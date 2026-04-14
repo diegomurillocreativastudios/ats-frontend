@@ -2,8 +2,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
-
-const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || '';
+import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
 export async function GET() {
   try {
@@ -13,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ message: 'No autorizado' }, { status: 401 });
     }
 
-    const baseUrl = getBaseUrl().replace(/\/$/, '');
+    const baseUrl = getServerBackendBaseUrl();
     const endpoints = [
       '/api/auth/session',
       '/me',
@@ -31,6 +30,7 @@ export async function GET() {
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
+          cache: 'no-store',
         });
         if (res.ok) {
           const data = await res.json().catch(() => ({}));

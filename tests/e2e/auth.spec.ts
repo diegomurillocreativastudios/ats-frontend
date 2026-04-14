@@ -26,6 +26,13 @@ test.describe("@smoke Auth", () => {
     await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
   })
 
+  test("ruta /auth/restablecer-contrasena sin token muestra aviso (enlace del mail)", async ({
+    page,
+  }) => {
+    await page.goto("/auth/restablecer-contrasena")
+    await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
+  })
+
   test("login demo muestra la selección de portal", async ({ page }) => {
     await loginAsDemoUser(page)
     await expect(page).toHaveURL(/\/seleccion-portal/)

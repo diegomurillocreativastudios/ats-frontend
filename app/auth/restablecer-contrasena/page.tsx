@@ -1,18 +1,22 @@
-import { redirect } from "next/navigation"
+import { Suspense } from "react"
+import RestablecerContrasenaContent from "@/app/restablecer-contrasena/RestablecerContrasenaContent"
 
-type Search = Record<string, string | string[] | undefined>
+export const metadata = {
+  title: { absolute: "ATS | Restablecer contraseña" },
+  description:
+    "Definí una nueva contraseña con el enlace del correo o tras verificar tu correo",
+}
 
-export default async function AuthRestablecerContrasenaRedirectPage({
-  searchParams,
-}: {
-  searchParams: Promise<Search>
-}) {
-  const sp = await searchParams
-  const q = new URLSearchParams()
-  const token = sp.token
-  const email = sp.email
-  if (typeof token === "string") q.set("token", token)
-  if (typeof email === "string") q.set("email", email)
-  const suffix = q.toString() ? `?${q.toString()}` : ""
-  redirect(`/restablecer-contrasena${suffix}`)
+const LoadingFallback = () => (
+  <div className="flex min-h-screen items-center justify-center bg-background font-inter text-muted-foreground">
+    <p className="text-sm">Cargando…</p>
+  </div>
+)
+
+export default function AuthRestablecerContrasenaPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <RestablecerContrasenaContent />
+    </Suspense>
+  )
 }
