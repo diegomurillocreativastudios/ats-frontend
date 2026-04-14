@@ -302,6 +302,7 @@ const formatScoreKey = (key) => {
     const knownAttr = {
       reactjs: "React.js", nextjs: "Next.js", tailwindcss: "Tailwind CSS",
       javascript: "JavaScript", typescript: "TypeScript", html: "HTML", css: "CSS",
+      dotnet: ".NET",
     };
     return knownAttr[inner.toLowerCase()] ?? (inner.charAt(0).toUpperCase() + inner.slice(1));
   }
@@ -325,6 +326,7 @@ const formatRequirementKey = (key) => {
     typescript: "TypeScript",
     html: "HTML",
     css: "CSS",
+    dotnet: ".NET",
   };
   return map[k] ?? k.charAt(0).toUpperCase() + k.slice(1);
 };
@@ -494,17 +496,53 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
     ? `/portal-rrhh/candidatos/${encodeURIComponent(idForProfilePage)}`
     : null;
 
-  const qualitativeReasoning =
+  const qualitativeReasoningLegacy =
     match.qualitativeReasoning != null && String(match.qualitativeReasoning).trim() !== ""
       ? String(match.qualitativeReasoning).trim()
       : null;
+
+  const qualitativeReasoningPositive =
+    match.qualitativeReasoningPositive != null && String(match.qualitativeReasoningPositive).trim() !== ""
+      ? String(match.qualitativeReasoningPositive).trim()
+      : null;
+
+  const qualitativeReasoningNegative =
+    match.qualitativeReasoningNegative != null && String(match.qualitativeReasoningNegative).trim() !== ""
+      ? String(match.qualitativeReasoningNegative).trim()
+      : null;
+
+  const hasSplitQualitative =
+    qualitativeReasoningPositive != null || qualitativeReasoningNegative != null;
+
+  const hasQualitativeBlock =
+    qualitativeReasoningLegacy != null ||
+    qualitativeReasoningPositive != null ||
+    qualitativeReasoningNegative != null;
+
+  const matchedAttributesEntries =
+    match.matchedAttributes && typeof match.matchedAttributes === "object" && !Array.isArray(match.matchedAttributes)
+      ? Object.entries(match.matchedAttributes).filter(([k]) => !String(k).startsWith("additionalProp"))
+      : [];
+
+  const matchedAttributePaths =
+    match.matchedAttributePaths && typeof match.matchedAttributePaths === "object" && !Array.isArray(match.matchedAttributePaths)
+      ? match.matchedAttributePaths
+      : null;
+
+  const hasMatchedAttributesBlock = matchedAttributesEntries.length > 0;
 
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
   );
 
-  const hasContent = componentScores.length > 0 || qualitativeReasoning != null;
+  const hasContent =
+    componentScores.length > 0 || hasQualitativeBlock || hasMatchedAttributesBlock;
+
+  const totalScorePercent =
+    typeof match.totalScore === "number" && Number.isFinite(match.totalScore)
+      ? (match.totalScore * 100).toFixed(1)
+      : null;
 
   return (
     <div
@@ -543,6 +581,11 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               <p className="font-inter text-xs text-slate-600">
                 Subido: {formatDate(match.uploadedAt)}
               </p>
+              {totalScorePercent != null && (
+                <p className="font-inter text-xs font-semibold text-vo-purple">
+                  Puntaje total del match: {totalScorePercent}%
+                </p>
+              )}
             </div>
           </div>
           <button
@@ -653,16 +696,71 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 </div>
               )}
 
-              {/* Qualitative Reasoning */}
-              {qualitativeReasoning != null && (
-                <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-border/60 dark:bg-white">
+              {/* Coincidencia de atributos (CV vs vacante) */}
+              {hasMatchedAttributesBlock && (
+                <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/70 dark:bg-white dark:ring-border">
                   <h3 className="mb-3 font-inter text-sm font-semibold text-slate-900">
-                    Razonamiento cualitativo
+                    Coincidencia de atributos
                   </h3>
-                  <p className="font-inter text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
-                    {qualitativeReasoning}
-                  </p>
+                  <ul className="flex flex-col gap-2.5 font-inter text-sm text-slate-700" role="list">
+                    {matchedAttributesEntries.map(([attrKey, attrVal]) => {
+                      const pathVal =
+                        matchedAttributePaths && matchedAttributePaths[attrKey] != null
+                          ? String(matchedAttributePaths[attrKey])
+                          : null;
+                      return (
+                        <li key={attrKey} className="flex flex-col gap-0.5 rounded-lg bg-emerald-50/80 px-3 py-2 dark:bg-emerald-50/80">
+                          <span className="font-medium text-emerald-950">
+                            {formatRequirementKey(attrKey)}
+                          </span>
+                          <span className="text-slate-700">{emptyToDash(String(attrVal ?? ""))}</span>
+                          {pathVal != null && pathVal !== "" && (
+                            <span className="font-inter text-xs text-slate-500">
+                              Ruta: {pathVal}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
+              )}
+
+              {/* Razonamiento cualitativo: API nuevo (positivo/negativo) o legado (texto único) */}
+              {hasSplitQualitative ? (
+                <div className="flex flex-col gap-4">
+                  {qualitativeReasoningPositive != null && (
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/50 dark:bg-white">
+                      <h3 className="mb-3 font-inter text-sm font-semibold text-emerald-900">
+                        Fortalezas
+                      </h3>
+                      <p className="font-inter text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                        {qualitativeReasoningPositive}
+                      </p>
+                    </div>
+                  )}
+                  {qualitativeReasoningNegative != null && (
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70 dark:bg-white">
+                      <h3 className="mb-3 font-inter text-sm font-semibold text-amber-950">
+                        Aspectos a considerar
+                      </h3>
+                      <p className="font-inter text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                        {qualitativeReasoningNegative}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                qualitativeReasoningLegacy != null && (
+                  <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-border/60 dark:bg-white">
+                    <h3 className="mb-3 font-inter text-sm font-semibold text-slate-900">
+                      Razonamiento cualitativo
+                    </h3>
+                    <p className="font-inter text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                      {qualitativeReasoningLegacy}
+                    </p>
+                  </div>
+                )
               )}
             </div>
           )}
