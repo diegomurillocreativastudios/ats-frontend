@@ -503,7 +503,7 @@ export function CandidateSelfProfileView({
             <div className="min-w-0 space-y-2">
               {validationError ? (
                 <div
-                  className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 font-inter text-sm text-amber-900 dark:text-amber-100"
+                  className="rounded-xl border border-amber-900/20 bg-amber-50 px-4 py-3 font-inter text-sm leading-snug text-amber-950 shadow-sm selection:bg-amber-200 selection:text-amber-950 dark:border-amber-900/20 dark:bg-amber-50 dark:text-amber-950"
                   role="status"
                 >
                   {validationError}
