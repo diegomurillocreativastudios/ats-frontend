@@ -22,18 +22,25 @@ export async function fillLoginForm(
 }
 
 /**
- * Tras login exitoso, la app muestra la pantalla de elección de portal.
+ * Tras login exitoso, la app puede mostrar `/seleccion-portal` o redirigir al portal
+ * si el usuario ya tiene rol (ver `proxy.ts`).
  */
 export async function loginAsDemoUser(page: Page): Promise<void> {
   await page.goto("/auth/iniciar-sesion")
   await fillLoginForm(page, E2E_DEMO_EMAIL, E2E_DEMO_PASSWORD)
-  await page.waitForURL(/\/seleccion-portal/, { timeout: 30_000 })
+  await page.waitForURL(
+    /\/(seleccion-portal|portal-rrhh|portal-candidato)/,
+    { timeout: 30_000 }
+  )
 }
 
 /**
- * Desde `/seleccion-portal`, entra al portal RRHH (flujos que antes asumían ir directo a RRHH).
+ * Desde `/seleccion-portal`, entra al portal RRHH. Si el login ya dejó al usuario en RRHH, no hace nada.
  */
 export async function openRRHHPortalFromSelector(page: Page): Promise<void> {
+  const pathname = new URL(page.url()).pathname
+  if (/^\/portal-rrhh(\/|$)/.test(pathname)) return
+
   await page.getByTestId("portal-selector-rrhh").click()
-  await page.waitForURL(/\/portal-rrhh\//, { timeout: 15_000 })
+  await page.waitForURL(/\/portal-rrhh(\/|$)/, { timeout: 15_000 })
 }

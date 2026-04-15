@@ -33,10 +33,16 @@ test.describe("@smoke Auth", () => {
     await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
   })
 
-  test("login demo muestra la selección de portal", async ({ page }) => {
+  test("login demo completa sesión (selector o portal según rol)", async ({
+    page,
+  }) => {
     await loginAsDemoUser(page)
-    await expect(page).toHaveURL(/\/seleccion-portal/)
-    await expect(page.getByTestId("portal-selector-candidato")).toBeVisible()
-    await expect(page.getByTestId("portal-selector-rrhh")).toBeVisible()
+    const pathname = new URL(page.url()).pathname
+    if (pathname.startsWith("/seleccion-portal")) {
+      await expect(page.getByTestId("portal-selector-candidato")).toBeVisible()
+      await expect(page.getByTestId("portal-selector-rrhh")).toBeVisible()
+      return
+    }
+    await expect(page).toHaveURL(/\/portal-(rrhh|candidato)/)
   })
 })
