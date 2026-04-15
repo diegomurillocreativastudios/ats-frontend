@@ -24,6 +24,7 @@ import {
   User,
   Users,
   X,
+  MapPin,
 } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
@@ -33,6 +34,11 @@ import { getApiErrorMessage } from "@/lib/api-error"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
+import {
+  getCountryIso2SelectOptions,
+  mergeLegacySelectOption,
+  formatCountryCodeLabel,
+} from "@/lib/profile-form-options";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -1133,6 +1139,7 @@ export default function VacanteDetallePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [editCountryCode, setEditCountryCode] = useState("");
   const [editRequirements, setEditRequirements] = useState(() => [createEmptyRequirement()]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [savingVacancy, setSavingVacancy] = useState(false);
@@ -1146,6 +1153,7 @@ export default function VacanteDetallePage() {
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
+
   const [smartCandidates, setSmartCandidates] = useState(null);
   const [loadingSmart, setLoadingSmart] = useState(false);
   const [smartError, setSmartError] = useState(null);
@@ -1169,6 +1177,13 @@ export default function VacanteDetallePage() {
   const possibleCandidatesSectionMobileRef = useRef(null);
   const etapasSectionDesktopRef = useRef(null);
   const etapasSectionMobileRef = useRef(null);
+
+  const countrySelectOptions = useMemo(() => {
+    const base = getCountryIso2SelectOptions();
+    const raw = vacancy?.countryCode ?? vacancy?.country_code;
+    if (raw == null || String(raw).trim() === "") return base;
+    return mergeLegacySelectOption(base, String(raw).trim().toUpperCase());
+  }, [vacancy?.countryCode, vacancy?.country_code]);
 
   const scrollToPossibleCandidates = useCallback(() => {
     const run = () => {
@@ -1257,6 +1272,12 @@ export default function VacanteDetallePage() {
 
   const hydrateEditFormFromVacancy = useCallback((v) => {
     if (!v) return;
+    const ccRaw = v.countryCode ?? v.country_code;
+    setEditCountryCode(
+      ccRaw != null && String(ccRaw).trim() !== ""
+        ? String(ccRaw).trim().toUpperCase()
+        : ""
+    );
     setEditTitle(String(v.title ?? "").trim());
     setEditDescription(String(v.description ?? "").trim());
 
@@ -1402,6 +1423,9 @@ export default function VacanteDetallePage() {
       vacancy?.status_id;
     if (vacancyStatusId) payload.vacancyStatusId = vacancyStatusId;
 
+    const nextCountry = editCountryCode.trim();
+    payload.countryCode = nextCountry === "" ? "" : nextCountry.toUpperCase();
+
     setSavingVacancy(true);
     setSaveVacancyError(null);
     try {
@@ -1423,7 +1447,7 @@ export default function VacanteDetallePage() {
     } finally {
       setSavingVacancy(false);
     }
-  }, [id, vacancy, editTitle, editDescription, editRequirements, validateEditForm, fetchVacancy]);
+  }, [id, vacancy, editTitle, editDescription, editCountryCode, editRequirements, validateEditForm, fetchVacancy]);
 
   useEffect(() => {
     fetchStages();
@@ -1833,25 +1857,46 @@ export default function VacanteDetallePage() {
                         </div>
                         <div className="flex min-w-0 flex-1 flex-col gap-2">
                           {isEditing ? (
-                            <div className="flex flex-col gap-2">
-                              <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-desktop">
-                                Nombre de la vacante <span className="text-vo-pink">*</span>
-                              </label>
-                              <input
-                                id="edit-vacancy-title-desktop"
-                                type="text"
-                                value={editTitle}
-                                onChange={(e) => setEditTitle(e.target.value)}
-                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-invalid={!!editErrors.title}
-                                aria-describedby={editErrors.title ? "edit-title-error-desktop" : undefined}
-                                placeholder="Ej: Frontend Developer"
-                              />
-                              {editErrors.title && (
-                                <p id="edit-title-error-desktop" className="font-inter text-sm text-vo-pink" role="alert">
-                                  {editErrors.title}
-                                </p>
-                              )}
+                            <div className="flex flex-col gap-4">
+                              <div className="flex flex-col gap-2">
+                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-desktop">
+                                  Nombre de la vacante <span className="text-vo-pink">*</span>
+                                </label>
+                                <input
+                                  id="edit-vacancy-title-desktop"
+                                  type="text"
+                                  value={editTitle}
+                                  onChange={(e) => setEditTitle(e.target.value)}
+                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  aria-invalid={!!editErrors.title}
+                                  aria-describedby={editErrors.title ? "edit-title-error-desktop" : undefined}
+                                  placeholder="Ej: Frontend Developer"
+                                />
+                                {editErrors.title && (
+                                  <p id="edit-title-error-desktop" className="font-inter text-sm text-vo-pink" role="alert">
+                                    {editErrors.title}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-desktop">
+                                  País al que aplica la vacante
+                                </label>
+                                <select
+                                  id="edit-vacancy-country-desktop"
+                                  value={editCountryCode}
+                                  onChange={(e) => setEditCountryCode(e.target.value)}
+                                  className="h-10 w-full max-w-md rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  aria-label="País al que aplica la vacante"
+                                >
+                                  <option value="">Sin especificar</option>
+                                  {countrySelectOptions.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                      {opt.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
                             </div>
                           ) : (
                             <h1 className="font-inter text-2xl font-bold text-foreground">
@@ -1863,6 +1908,14 @@ export default function VacanteDetallePage() {
                               <Building2 className="h-4 w-4 shrink-0" aria-hidden />
                               {emptyToDash(vacancy.department)}
                             </span>
+                            {!isEditing ? (
+                              <span className="flex min-w-0 items-center gap-1.5">
+                                <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+                                <span className="min-w-0">
+                                  {formatCountryCodeLabel(vacancy.countryCode ?? vacancy.country_code)}
+                                </span>
+                              </span>
+                            ) : null}
                             <span className="flex items-center gap-1.5">
                               <Calendar className="h-4 w-4 shrink-0" aria-hidden />
                               Creada: {formatDate(vacancy.createdAt)}
@@ -2389,25 +2442,46 @@ export default function VacanteDetallePage() {
                       </div>
                       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                         {isEditing ? (
-                          <div className="flex flex-col gap-2">
-                            <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-mobile">
-                              Nombre de la vacante <span className="text-vo-pink">*</span>
-                            </label>
-                            <input
-                              id="edit-vacancy-title-mobile"
-                              type="text"
-                              value={editTitle}
-                              onChange={(e) => setEditTitle(e.target.value)}
-                              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                              aria-invalid={!!editErrors.title}
-                              aria-describedby={editErrors.title ? "edit-title-error-mobile" : undefined}
-                              placeholder="Ej: Frontend Developer"
-                            />
-                            {editErrors.title && (
-                              <p id="edit-title-error-mobile" className="font-inter text-sm text-vo-pink" role="alert">
-                                {editErrors.title}
-                              </p>
-                            )}
+                          <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-2">
+                              <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-mobile">
+                                Nombre de la vacante <span className="text-vo-pink">*</span>
+                              </label>
+                              <input
+                                id="edit-vacancy-title-mobile"
+                                type="text"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-invalid={!!editErrors.title}
+                                aria-describedby={editErrors.title ? "edit-title-error-mobile" : undefined}
+                                placeholder="Ej: Frontend Developer"
+                              />
+                              {editErrors.title && (
+                                <p id="edit-title-error-mobile" className="font-inter text-sm text-vo-pink" role="alert">
+                                  {editErrors.title}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-mobile">
+                                País al que aplica la vacante
+                              </label>
+                              <select
+                                id="edit-vacancy-country-mobile"
+                                value={editCountryCode}
+                                onChange={(e) => setEditCountryCode(e.target.value)}
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label="País al que aplica la vacante"
+                              >
+                                <option value="">Sin especificar</option>
+                                {countrySelectOptions.map((opt) => (
+                                  <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
                           </div>
                         ) : (
                           <h1 className="font-inter text-xl font-bold text-foreground">
@@ -2419,6 +2493,14 @@ export default function VacanteDetallePage() {
                             <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
                             {emptyToDash(vacancy.department)}
                           </span>
+                          {!isEditing ? (
+                            <span className="flex min-w-0 items-center gap-1">
+                              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                              <span className="min-w-0">
+                                {formatCountryCodeLabel(vacancy.countryCode ?? vacancy.country_code)}
+                              </span>
+                            </span>
+                          ) : null}
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
                             {formatDate(vacancy.createdAt)}

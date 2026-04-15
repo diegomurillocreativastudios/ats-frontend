@@ -10,6 +10,7 @@ import {
   Code,
   Briefcase,
   Tag,
+  MapPin,
 } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
@@ -17,6 +18,7 @@ import NuevaVacanteModal from "@/components/rrhh/NuevaVacanteModal";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 import RematchButton from "@/components/rrhh/RematchButton";
+import { formatCountryCodeLabel } from "@/lib/profile-form-options";
 
 const ICON_BY_DEPARTMENT = {
   diseño: Palette,
@@ -73,6 +75,12 @@ const mapVacancyFromApi = (item, index = 0) => {
     0;
   const interviews = item.interviews ?? item.interviews_count ?? null;
   const status = mapStatusKey(item);
+  const countryCodeRaw = item.countryCode ?? item.country_code ?? null;
+  const countryCode =
+    countryCodeRaw != null && String(countryCodeRaw).trim() !== ""
+      ? String(countryCodeRaw).trim().toUpperCase()
+      : null;
+  const countryLabel = formatCountryCodeLabel(countryCode);
   const deptLower = String(department).toLowerCase();
   const icon =
     ICON_BY_DEPARTMENT[deptLower] ??
@@ -95,6 +103,8 @@ const mapVacancyFromApi = (item, index = 0) => {
     icon,
     needsRematch: !!item.needsRematch,
     createdAt: item.createdAt ?? item.created_at,
+    countryCode,
+    countryLabel,
   };
 };
 
@@ -125,6 +135,10 @@ const VacancyCard = ({ vacancy, onRefresh, onSnackbar }) => {
           <h3 className="font-inter text-base font-semibold text-foreground">
             {vacancy.title}
           </h3>
+          <p className="mt-0.5 flex min-w-0 items-center gap-1.5 font-inter text-[13px] text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="truncate">{vacancy.countryLabel}</span>
+          </p>
           {/* Empresa + categoría — oculto hasta definir UX
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-inter text-[13px] text-muted-foreground">
             <span className="flex min-w-0 items-center gap-1.5">
@@ -249,7 +263,9 @@ export default function VacantesPage() {
       v.jobCategory.toLowerCase().includes(q) ||
       v.department.toLowerCase().includes(q) ||
       (v.description && v.description.toLowerCase().includes(q)) ||
-      (v.requirementsSummary && v.requirementsSummary.toLowerCase().includes(q));
+      (v.requirementsSummary && v.requirementsSummary.toLowerCase().includes(q)) ||
+      (v.countryLabel && v.countryLabel.toLowerCase().includes(q)) ||
+      (v.countryCode && v.countryCode.toLowerCase().includes(q));
     const matchesStatus =
       statusFilter === "todas" || v.status === statusFilter;
     return matchesSearch && matchesStatus;

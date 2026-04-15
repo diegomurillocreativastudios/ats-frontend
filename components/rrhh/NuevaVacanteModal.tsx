@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api";
+import { getCountryIso2SelectOptions } from "@/lib/profile-form-options";
 
 const toSnakeCase = (str) =>
   str
@@ -25,8 +26,10 @@ export const createEmptyRequirement = () => ({
 });
 
 export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackbar }) {
+  const countryOptions = useMemo(() => getCountryIso2SelectOptions(), []);
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [countryCode, setCountryCode] = useState("");
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -105,7 +108,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
       }
     });
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       title: nombre.trim(),
       description: descripcion.trim(),
       companyId: COMPANY_ID,
@@ -115,6 +118,10 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         attributes,
       },
     };
+    const cc = countryCode.trim().toUpperCase();
+    if (cc && /^[A-Z]{2}$/.test(cc)) {
+      payload.countryCode = cc;
+    }
 
     setLoading(true);
     setSubmitError(null);
@@ -136,6 +143,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const handleClose = () => {
     setNombre("");
     setDescripcion("");
+    setCountryCode("");
     setRequerimientos([createEmptyRequirement()]);
     setErrors({});
     setSubmitError(null);
@@ -226,6 +234,32 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
               {errors.descripcion}
             </p>
           )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="vacante-pais"
+            className="font-inter text-sm font-medium text-foreground"
+          >
+            País al que aplica la vacante
+          </label>
+          <select
+            id="vacante-pais"
+            value={countryCode}
+            onChange={(e) => setCountryCode(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="País al que aplica la vacante"
+          >
+            <option value="">Sin especificar</option>
+            {countryOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <p className="font-inter text-xs text-muted-foreground">
+            Opcional. Si no eliges país, la vacante quedará sin país asignado.
+          </p>
         </div>
 
         {submitError && (
