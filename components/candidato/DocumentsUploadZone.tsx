@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useCallback, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
+import { useRef, useState, useCallback, type ReactNode, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
 import { Upload, X, Sparkles, Loader2, Check } from "lucide-react"
 import { getApiErrorMessage, isSilentError } from "@/lib/api-error"
 
@@ -41,6 +41,11 @@ const validateFile = (
   return { valid: true };
 };
 
+export interface DocumentsUploadZoneLeftContext {
+  files: File[]
+  clearStagedFiles: () => void
+}
+
 interface DocumentsUploadZoneProps {
   onProcess?: (file: File, index: number) => void | Promise<void>
   onProcessAll?: (files: File[]) => void | Promise<void>
@@ -49,6 +54,9 @@ interface DocumentsUploadZoneProps {
   accept?: string
   helperText?: string
   processAllAcceptedFiles?: boolean
+  leftActions?:
+    | ReactNode
+    | ((context: DocumentsUploadZoneLeftContext) => ReactNode)
 }
 
 export default function DocumentsUploadZone({
@@ -59,6 +67,7 @@ export default function DocumentsUploadZone({
   accept,
   helperText,
   processAllAcceptedFiles = false,
+  leftActions,
 }: DocumentsUploadZoneProps = {}) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -164,6 +173,11 @@ export default function DocumentsUploadZone({
     setProcessingIndex(null);
   };
 
+  const resolvedLeftActions =
+    typeof leftActions === "function"
+      ? leftActions({ files, clearStagedFiles: clearAll })
+      : leftActions
+
   const processableFiles = processAllAcceptedFiles
     ? files.map((file, index) => ({ file, index }))
     : files
@@ -253,10 +267,13 @@ export default function DocumentsUploadZone({
       {files.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-inter text-sm font-medium text-foreground">
-              {files.length} archivo{files.length !== 1 ? "s" : ""} seleccionado
-              {files.length !== 1 ? "s" : ""}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {resolvedLeftActions}
+              <span className="font-inter text-sm font-medium text-foreground">
+                {files.length} archivo{files.length !== 1 ? "s" : ""} seleccionado
+                {files.length !== 1 ? "s" : ""}
+              </span>
+            </div>
             <div className="flex items-center gap-2">
               {processableFiles.length >= 2 && onProcess && (
                 <button

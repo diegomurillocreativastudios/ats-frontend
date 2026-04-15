@@ -1,13 +1,31 @@
 "use client";
 
 import { FileText, Download } from "lucide-react";
+import type { CandidateDocument } from "@/lib/candidate-documents"
+
+interface DocumentsListProps {
+  documents?: CandidateDocument[]
+}
+
+const resolveDocumentName = (doc: CandidateDocument) => {
+  if (!doc.storagePath) return `Documento ${doc.id}`
+  const segment = doc.storagePath.split("/").filter(Boolean).pop()
+  if (!segment) return `Documento ${doc.id}`
+
+  const rawName = segment.trim()
+  const nameWithoutUuidPrefix = rawName.replace(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_/i,
+    ""
+  )
+  const nameWithoutNumericPrefix = nameWithoutUuidPrefix.replace(/^\d+_/, "")
+
+  return nameWithoutNumericPrefix || rawName
+}
 
 /**
  * Lista de documentos del candidato.
- * Por ahora no se muestran ítems hasta que se implemente el GET del backend.
- * @param {{ documents?: Array<{ id: string; name: string; type?: string; date?: string; size?: string }> }} props
  */
-export default function DocumentsList({ documents = [] }) {
+export default function DocumentsList({ documents = [] }: DocumentsListProps) {
   return (
     <div className="flex flex-col gap-3 md:gap-4">
       <h2 className="font-inter text-sm font-semibold text-foreground md:text-base">
@@ -29,18 +47,13 @@ export default function DocumentsList({ documents = [] }) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-inter text-sm font-medium text-foreground md:text-base">
-                  {doc.name}
+                  {resolveDocumentName(doc)}
                 </p>
-                {(doc.type || doc.date || doc.size) && (
-                  <p className="font-inter text-xs text-muted-foreground md:text-sm">
-                    {[doc.type, doc.date, doc.size].filter(Boolean).join(" · ")}
-                  </p>
-                )}
               </div>
               <button
                 type="button"
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md hover:bg-muted"
-                aria-label={`Descargar ${doc.name}`}
+                aria-label={`Descargar ${resolveDocumentName(doc)}`}
               >
                 <Download className="h-4 w-4 text-muted-foreground md:h-5 md:w-5" aria-hidden />
               </button>

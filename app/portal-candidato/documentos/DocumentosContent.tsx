@@ -1,19 +1,38 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
+import { Upload } from "lucide-react"
 import CandidateSidebar from "@/components/candidato/CandidateSidebar"
 import CandidateTopbar from "@/components/candidato/CandidateTopbar"
-import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone"
+import DocumentsUploadZone, {
+  type DocumentsUploadZoneLeftContext,
+} from "@/components/candidato/DocumentsUploadZone"
 import DocumentsList from "@/components/candidato/DocumentsList"
 import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage, createSilentError } from "@/lib/api-error"
+import { useCandidateDocuments } from "@/hooks/useCandidateDocuments"
 
 const PROCESAR_ENDPOINT = "/Ingest/upload";
 const ENTITY_TYPE = "Candidate";
+const GENERAL_DOCUMENT_KEYWORDS = [
+  "cv",
+  "resume",
+  "curriculum",
+  "curriculum vitae",
+  "hoja de vida",
+  "hojadevida",
+]
+
+const isResumeLikeDocument = (fileName: string) => {
+  const normalizedName = (fileName || "").toLowerCase()
+  return GENERAL_DOCUMENT_KEYWORDS.some((keyword) => normalizedName.includes(keyword))
+}
 
 export default function DocumentosContent() {
+  const [isUploadingGeneralDocument, setIsUploadingGeneralDocument] = useState(false)
   const { showSnackbar } = useCandidateSnackbar()
+  const { candidateId, documents, loading, error, refetch } = useCandidateDocuments()
 
   const handleProcess = async (file: File, _index: number) => {
     const formData = new FormData();
@@ -21,6 +40,7 @@ export default function DocumentosContent() {
     formData.append("EntityType", ENTITY_TYPE);
     try {
       await apiClient.postFormData(PROCESAR_ENDPOINT, formData)
+      await refetch()
       showSnackbar("Documento procesado correctamente.", "success")
     } catch (err: unknown) {
       const message =
@@ -40,6 +60,7 @@ export default function DocumentosContent() {
         formData.append("EntityType", ENTITY_TYPE);
         await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
       }
+      await refetch()
       showSnackbar(
         `${total} documento${total !== 1 ? "s" : ""} procesado${total !== 1 ? "s" : ""} correctamente.`,
         "success"
@@ -50,6 +71,71 @@ export default function DocumentosContent() {
       showSnackbar(message, "error")
     }
   }
+
+  const handleSubmitGeneralDocuments = useCallback(
+    async (files: File[], clearStagedFiles: () => void) => {
+      if (!files.length) {
+        showSnackbar("Selecciona al menos un archivo para subir.", "error")
+        return
+      }
+      if (!candidateId) {
+        showSnackbar("No se pudo identificar tu perfil de candidato.", "error")
+        return
+      }
+      const blocked = files.find((file) => isResumeLikeDocument(file.name))
+      if (blocked) {
+        showSnackbar(
+          `Este endpoint es solo para documentos generales. Quita o reemplaza archivos tipo CV/Resume (por ejemplo: ${blocked.name}).`,
+          "error"
+        )
+        return
+      }
+
+      setIsUploadingGeneralDocument(true)
+      try {
+        for (const file of files) {
+          const formData = new FormData()
+          formData.append("File", file)
+          await apiClient.postFormData(
+            `/api/candidate/${encodeURIComponent(candidateId)}/documents`,
+            formData
+          )
+        }
+        await refetch()
+        clearStagedFiles()
+        showSnackbar(
+          files.length === 1
+            ? "Documento general subido correctamente."
+            : `${files.length} documentos generales subidos correctamente.`,
+          "success"
+        )
+      } catch (err: unknown) {
+        const message =
+          getApiErrorMessage(err) || "No se pudo subir el documento general."
+        showSnackbar(message, "error")
+      } finally {
+        setIsUploadingGeneralDocument(false)
+      }
+    },
+    [candidateId, refetch, showSnackbar]
+  )
+
+  const renderGeneralUploadLeft = ({
+    files,
+    clearStagedFiles,
+  }: DocumentsUploadZoneLeftContext) => (
+    <button
+      type="button"
+      onClick={() => void handleSubmitGeneralDocuments(files, clearStagedFiles)}
+      disabled={!candidateId || isUploadingGeneralDocument || files.length === 0}
+      className="inline-flex items-center justify-center gap-2 rounded-md border border-vo-pink bg-vo-pink px-3 py-2 font-inter text-xs font-medium text-white hover:bg-vo-pink-hover disabled:cursor-not-allowed disabled:opacity-60"
+      aria-label="Subir documentos generales del candidato"
+      aria-busy={isUploadingGeneralDocument}
+    >
+      <Upload className="h-3.5 w-3.5" aria-hidden />
+      {isUploadingGeneralDocument ? "Subiendo..." : "Subir documento general"}
+    </button>
+  )
 
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
@@ -68,8 +154,25 @@ export default function DocumentosContent() {
                   Sube y gestiona los documentos de tu proceso de selección
                 </p>
               </section>
-              <DocumentsUploadZone onProcess={handleProcess} onProcessAll={handleProcessAll} />
-              <DocumentsList />
+              <DocumentsUploadZone
+                onProcess={handleProcess}
+                onProcessAll={handleProcessAll}
+                leftActions={renderGeneralUploadLeft}
+              />
+              {loading ? (
+                <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-inter text-sm text-muted-foreground">
+                  Cargando documentos...
+                </p>
+              ) : (
+                <>
+                  {error ? (
+                    <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-4 text-sm text-destructive">
+                      {error}
+                    </p>
+                  ) : null}
+                  <DocumentsList documents={documents} />
+                </>
+              )}
             </div>
           </main>
         </div>
@@ -88,8 +191,25 @@ export default function DocumentosContent() {
                 Sube y gestiona tus documentos
               </p>
             </section>
-            <DocumentsUploadZone onProcess={handleProcess} onProcessAll={handleProcessAll} />
-            <DocumentsList />
+            <DocumentsUploadZone
+              onProcess={handleProcess}
+              onProcessAll={handleProcessAll}
+              leftActions={renderGeneralUploadLeft}
+            />
+            {loading ? (
+              <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-inter text-sm text-muted-foreground">
+                Cargando documentos...
+              </p>
+            ) : (
+              <>
+                {error ? (
+                  <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-4 text-sm text-destructive">
+                    {error}
+                  </p>
+                ) : null}
+                <DocumentsList documents={documents} />
+              </>
+            )}
           </div>
         </main>
       </div>
