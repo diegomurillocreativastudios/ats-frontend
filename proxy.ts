@@ -1,39 +1,83 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from "next/server"
+import { AUTH_COOKIES } from "@/lib/auth"
 
-const AUTH_COOKIE = 'ats_access_token';
+const AUTH_ROUTE = "/auth/iniciar-sesion"
+const CANDIDATE_HOME = "/portal-candidato"
+const RECRUITER_HOME = "/portal-rrhh"
+const PORTAL_SELECTOR = "/seleccion-portal"
 
 const publicPaths = [
-  '/auth/iniciar-sesion',
-  '/auth/registrarse',
-  '/auth/forgot-password',
-  '/auth/restablecer-contrasena',
-  '/restablecer-contrasena',
-  '/recuperar-contrasena',
-];
+  "/auth/iniciar-sesion",
+  "/auth/registrarse",
+  "/auth/forgot-password",
+  "/auth/restablecer-contrasena",
+  "/restablecer-contrasena",
+  "/recuperar-contrasena",
+]
 
-const isPublicPath = (pathname) => {
-  if (pathname.startsWith('/api/')) return true;
-  if (pathname.startsWith('/_next') || pathname.startsWith('/favicon')) return true;
-  return publicPaths.some((p) => pathname === p || pathname.startsWith(p + '/'));
-};
+function normalizeRole(rawRole: string | null): "candidate" | "recruiter" | null {
+  if (!rawRole) return null
+  const role = rawRole.trim().toLowerCase()
 
-export function proxy(request) {
-  const { pathname } = request.nextUrl;
-
-  if (pathname === '/iniciar-sesion') {
-    return NextResponse.redirect(new URL('/auth/iniciar-sesion', request.url));
-  }
-  if (pathname === '/crear-cuenta') {
-    return NextResponse.redirect(new URL('/auth/registrarse', request.url));
+  if (role.includes("candidate") || role.includes("candidato")) return "candidate"
+  if (
+    role.includes("recruiter") ||
+    role.includes("rrhh") ||
+    role.includes("human resources") ||
+    role.includes("human_resources")
+  ) {
+    return "recruiter"
   }
 
-  const hasToken = request.cookies.get(AUTH_COOKIE)?.value;
-  /** Pantallas de login/registro/forgot: si ya hay sesión, ir al portal. */
+  return null
+}
+
+function getSessionRole(request: NextRequest): "candidate" | "recruiter" | null {
+  const userCookie = request.cookies.get(AUTH_COOKIES.user)?.value
+  if (!userCookie) return null
+
+  try {
+    const parsed = JSON.parse(userCookie) as { role?: unknown; roles?: unknown }
+    if (typeof parsed.role === "string") return normalizeRole(parsed.role)
+    if (Array.isArray(parsed.roles) && typeof parsed.roles[0] === "string") {
+      return normalizeRole(parsed.roles[0])
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+function getRoleHomePath(role: "candidate" | "recruiter" | null): string {
+  if (role === "candidate") return CANDIDATE_HOME
+  if (role === "recruiter") return RECRUITER_HOME
+  return PORTAL_SELECTOR
+}
+
+const isPublicPath = (pathname: string) => {
+  if (pathname.startsWith("/api/")) return true
+  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) return true
+  return publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+}
+
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const hasToken = Boolean(request.cookies.get(AUTH_COOKIES.access)?.value)
+  const role = getSessionRole(request)
+
+  if (pathname === "/iniciar-sesion") {
+    return NextResponse.redirect(new URL("/auth/iniciar-sesion", request.url))
+  }
+  if (pathname === "/crear-cuenta") {
+    return NextResponse.redirect(new URL("/auth/registrarse", request.url))
+  }
+
   const isAuthPage =
-    pathname === '/auth/iniciar-sesion' ||
-    pathname === '/auth/registrarse' ||
-    pathname.startsWith('/auth/forgot-password') ||
-    pathname === '/recuperar-contrasena';
+    pathname === "/auth/iniciar-sesion" ||
+    pathname === "/auth/registrarse" ||
+    pathname.startsWith("/auth/forgot-password") ||
+    pathname === "/recuperar-contrasena"
 
   /**
    * NO incluir /auth/restablecer-contrasena: el enlace del mail debe abrirse aunque
@@ -41,28 +85,67 @@ export function proxy(request) {
    * y nunca ve el formulario de nueva contraseña).
    */
   if (hasToken && isAuthPage) {
-    return NextResponse.redirect(new URL("/seleccion-portal", request.url));
+    const dest = getRoleHomePath(role)
+    return NextResponse.redirect(new URL(dest, request.url))
   }
 
   if (pathname === "/" && hasToken) {
-    return NextResponse.redirect(new URL("/seleccion-portal", request.url));
+    const dest = getRoleHomePath(role)
+    return NextResponse.redirect(new URL(dest, request.url))
+  }
+
+  if (pathname === PORTAL_SELECTOR && hasToken && role) {
+    const url = request.nextUrl.clone()
+    url.pathname = getRoleHomePath(role)
+    url.search = ""
+    return NextResponse.redirect(url)
   }
 
   if (isPublicPath(pathname)) {
-    return NextResponse.next();
+    return NextResponse.next()
   }
 
   if (!hasToken) {
-    const loginUrl = new URL('/auth/iniciar-sesion', request.url);
-    if (pathname !== '/') {
-      loginUrl.searchParams.set('from', pathname);
+    const loginUrl = new URL(AUTH_ROUTE, request.url)
+    if (pathname !== "/") {
+      loginUrl.searchParams.set("from", `${pathname}${request.nextUrl.search}`)
     }
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(loginUrl)
   }
 
-  return NextResponse.next();
+  const isPortalCandidateRoute =
+    pathname === CANDIDATE_HOME || pathname.startsWith(`${CANDIDATE_HOME}/`)
+  const isPortalRecruiterRoute =
+    pathname === RECRUITER_HOME || pathname.startsWith(`${RECRUITER_HOME}/`)
+  const isMiPerfilRoute =
+    pathname === "/mi-perfil" || pathname.startsWith("/mi-perfil/")
+
+  if (isPortalCandidateRoute && role === "recruiter") {
+    const url = request.nextUrl.clone()
+    url.pathname = RECRUITER_HOME
+    url.search = ""
+    return NextResponse.redirect(url)
+  }
+
+  if (isPortalRecruiterRoute && role === "candidate") {
+    const url = request.nextUrl.clone()
+    url.pathname = CANDIDATE_HOME
+    url.search = ""
+    return NextResponse.redirect(url)
+  }
+
+  if (isMiPerfilRoute && role === "recruiter") {
+    const url = request.nextUrl.clone()
+    url.pathname = RECRUITER_HOME
+    url.search = ""
+    return NextResponse.redirect(url)
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)$).*)'],
-};
+  matcher: [
+    "/((?!_next/static|_next/image|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)$).*)",
+  ],
+}
