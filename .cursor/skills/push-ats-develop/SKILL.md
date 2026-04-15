@@ -1,13 +1,13 @@
 ---
 name: push-ats-develop
-description: Publica la rama develop del backend ATS en origin y en el remoto mirror (GitLab.com). Úsala cuando el usuario pida push a develop, desplegar develop, sincronizar develop con mirror, o mencione push-ats-develop.
+description: Publica la rama develop del frontend ATS (este repo) en origin (GitLab) y en el remoto mirror (GitHub). Úsala cuando el usuario pida push a develop, desplegar develop, sincronizar develop con mirror, o mencione push-ats-develop.
 ---
 
-# Push ATS — rama `develop`
+# Push ATS — rama `develop` (ats-frontend)
 
 ## Cuándo aplicar
 
-El usuario quiere **subir `develop`** a **origin** y al **mirror** del repo `ats-backend` (o equivalente en este workspace).
+El usuario quiere **subir `develop`** del repositorio **ats-frontend** a **origin** y al **mirror** (mismo historial en GitLab y GitHub de trabajo).
 
 ## Prerrequisitos
 
@@ -18,7 +18,7 @@ El usuario quiere **subir `develop`** a **origin** y al **mirror** del repo `ats
 
 1. **Situación actual:** `git status -sb` y rama actual (`git branch --show-current`).
 2. **Objetivo:** que la rama remota `develop` en `origin` y `mirror` reciban los commits que el usuario quiere publicar (normalmente desde la rama local `develop`).
-3. **Comandos** (en el directorio raíz del repo):
+3. **Comandos** (en el directorio raíz del repo **ats-frontend**):
 
 ```bash
 git push origin develop
