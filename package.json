@@ -14,7 +14,8 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
     "test:e2e:full": "powershell -ExecutionPolicy Bypass -File tests/e2e/run-e2e-full.ps1",
-    "test:e2e:full:unix": "bash tests/e2e/run-e2e-full.sh"
+    "test:e2e:full:unix": "bash tests/e2e/run-e2e-full.sh",
+    "migrate:interview-status-codes": "node scripts/migrate-interview-status-codes.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.564.0",

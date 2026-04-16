@@ -1,0 +1,165 @@
+/**
+ * Convierte un instante UTC (ISO 8601 del API) al formato `datetime-local` en zona local.
+ */
+export function utcIsoToLocalDatetimeInputValue(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ""
+  const pad = (n: number) => String(n).padStart(2, "0")
+  const y = d.getFullYear()
+  const m = pad(d.getMonth() + 1)
+  const day = pad(d.getDate())
+  const h = pad(d.getHours())
+  const min = pad(d.getMinutes())
+  return `${y}-${m}-${day}T${h}:${min}`
+}
+
+/**
+ * Interpreta un valor de `input[type="datetime-local"]` como hora local y lo serializa a ISO UTC.
+ */
+export function localDatetimeInputToUtcIso(value: string): string {
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) {
+    throw new Error("Fecha u hora inválida")
+  }
+  return d.toISOString()
+}
+
+/**
+ * Muestra fecha/hora en zona local del navegador (el API envía UTC en ISO).
+ */
+export function formatInterviewLocalDateTime(iso: string | null | undefined): string {
+  if (iso == null || String(iso).trim() === "") return "—"
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return "—"
+  return d.toLocaleString("es-CL", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+const pad2 = (n: number) => String(n).padStart(2, "0")
+
+/**
+ * Fecha local `YYYY-MM-DD` para usar en `input type="date"`.
+ */
+export function getTodayDateInputValue(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
+}
+
+/**
+ * Separa `YYYY-MM-DDTHH:mm` (datetime-local) en fecha y hora `HH:mm`.
+ */
+export function splitDatetimeLocal(value: string): { date: string; time: string } {
+  const trimmed = value.trim()
+  if (!trimmed) return { date: "", time: "" }
+  const tIndex = trimmed.indexOf("T")
+  if (tIndex === -1) {
+    return { date: trimmed.slice(0, 10), time: "" }
+  }
+  const date = trimmed.slice(0, tIndex)
+  const timePart = trimmed.slice(tIndex + 1)
+  const time = timePart.slice(0, 5)
+  return { date, time }
+}
+
+/**
+ * Compone datetime-local a partir de `YYYY-MM-DD` y `HH:mm`.
+ */
+export function combineDatetimeLocal(date: string, time: string): string {
+  if (!date || !time) return ""
+  const parts = time.split(":")
+  const hh = pad2(Number.parseInt(parts[0] ?? "0", 10))
+  const mm = pad2(Number.parseInt(parts[1] ?? "0", 10))
+  return `${date}T${hh}:${mm}`
+}
+
+/**
+ * Etiqueta legible tipo calendario: "Jueves, 16 de abril".
+ */
+export function formatInterviewScheduleDateLabel(dateStr: string): string {
+  if (!dateStr) return ""
+  const d = new Date(`${dateStr}T12:00:00`)
+  if (Number.isNaN(d.getTime())) return ""
+  const raw = d.toLocaleDateString("es-CL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  })
+  if (!raw) return ""
+  return raw.charAt(0).toUpperCase() + raw.slice(1)
+}
+
+/**
+ * Suma minutos a una hora `HH:mm` del mismo día (envuelve pasada la medianoche).
+ */
+export function addMinutesToClockTime(timeHHmm: string, addMinutes: number): string {
+  const [h, m] = timeHHmm.split(":").map((x) => parseInt(x, 10))
+  if (Number.isNaN(h) || Number.isNaN(m)) return "09:00"
+  let total = h * 60 + m + addMinutes
+  total = ((total % (24 * 60)) + (24 * 60)) % (24 * 60)
+  const hh = Math.floor(total / 60)
+  const mm = total % 60
+  return `${pad2(hh)}:${pad2(mm)}`
+}
+
+/**
+ * Minutos entre dos horas el mismo día; si la hora fin es menor o igual, cuenta hasta el día siguiente (cruce de medianoche).
+ */
+export function sameDayMinutesFromStartToEnd(
+  timeStart: string,
+  timeEnd: string
+): number {
+  const [sh, sm] = timeStart.split(":").map((x) => parseInt(x, 10))
+  const [eh, em] = timeEnd.split(":").map((x) => parseInt(x, 10))
+  if ([sh, sm, eh, em].some((n) => Number.isNaN(n))) return 0
+  let a = sh * 60 + sm
+  let b = eh * 60 + em
+  if (b <= a) b += 24 * 60
+  return b - a
+}
+
+const QUARTER_MINUTES = [0, 15, 30, 45] as const
+
+/**
+ * Etiqueta corta para listas de hora (p. ej. 10:15 o 10:15 a. m. según locale).
+ */
+export function formatTimePickerLabel(hhmm: string): string {
+  if (!hhmm || hhmm.length < 4) return ""
+  const parts = hhmm.split(":")
+  const h = Number.parseInt(parts[0] ?? "0", 10)
+  const m = Number.parseInt(parts[1] ?? "0", 10)
+  if (Number.isNaN(h) || Number.isNaN(m)) return hhmm
+  const d = new Date(2000, 0, 1, h, m)
+  return d.toLocaleTimeString("es-CL", {
+    hour: "numeric",
+    minute: "2-digit",
+  })
+}
+
+/**
+ * Opciones de hora cada 15 minutos (00:00 … 23:45).
+ */
+export function getQuarterHourTimeOptions(): { value: string; label: string }[] {
+  const options: { value: string; label: string }[] = []
+  for (let hour = 0; hour < 24; hour++) {
+    for (const minute of QUARTER_MINUTES) {
+      const value = `${pad2(hour)}:${pad2(minute)}`
+      options.push({ value, label: formatTimePickerLabel(value) })
+    }
+  }
+  return options
+}
+
+/**
+ * Indica si `HH:mm` cae en un cuarto de hora exacto.
+ */
+export function isQuarterHourTime(hhmm: string): boolean {
+  const parts = hhmm.split(":")
+  const m = Number.parseInt(parts[1] ?? "", 10)
+  if (Number.isNaN(m)) return false
+  return m % 15 === 0
+}

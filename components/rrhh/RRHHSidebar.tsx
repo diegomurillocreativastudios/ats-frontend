@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Users,
   Briefcase,
+  Calendar,
   ClipboardList,
   FileText,
 } from "lucide-react";
@@ -14,6 +15,7 @@ import { getInitials } from "@/lib/getInitials";
 const navItems = [
   { href: "/portal-rrhh/candidatos", label: "Candidatos", icon: Users },
   { href: "/portal-rrhh/vacantes", label: "Vacantes", icon: Briefcase },
+  { href: "/portal-rrhh/entrevistas", label: "Entrevistas", icon: Calendar },
   { href: "/portal-rrhh/etapas", label: "Etapas", icon: ClipboardList },
   { href: "/portal-rrhh/plantillas", label: "Plantillas", icon: FileText },
 ];
@@ -46,8 +48,11 @@ export default function RRHHSidebar() {
         <nav className="flex flex-col gap-1 px-3" aria-label="Menú RRHH">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              pathname === item.href || pathname.startsWith(item.href + "/");
+            const isEntrevistasItem = item.href === "/portal-rrhh/entrevistas";
+            const isActive = isEntrevistasItem
+              ? pathname.startsWith("/portal-rrhh/entrevistas") ||
+                pathname.startsWith("/portal-rrhh/interviews/")
+              : pathname === item.href || pathname.startsWith(item.href + "/");
             const baseClasses =
               "flex items-center gap-3 rounded-md px-4 py-3 font-inter text-sm transition-colors";
             const enabledClasses = isActive

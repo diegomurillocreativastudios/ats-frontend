@@ -1947,6 +1947,13 @@ export default function VacanteDetallePage() {
                             >
                               Editar vacante
                             </button>
+                            <Link
+                              href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              aria-label="Ver entrevistas de esta vacante"
+                            >
+                              Entrevistas
+                            </Link>
                           </>
                         ) : (
                           <button
@@ -2515,14 +2522,23 @@ export default function VacanteDetallePage() {
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                       {!isEditing ? (
-                        <button
-                          type="button"
-                          onClick={handleEditVacancy}
-                          className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                          aria-label="Editar vacante"
-                        >
-                          Editar vacante
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={handleEditVacancy}
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            aria-label="Editar vacante"
+                          >
+                            Editar vacante
+                          </button>
+                          <Link
+                            href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            aria-label="Ver entrevistas de esta vacante"
+                          >
+                            Entrevistas
+                          </Link>
+                        </>
                       ) : (
                         <button
                           type="button"

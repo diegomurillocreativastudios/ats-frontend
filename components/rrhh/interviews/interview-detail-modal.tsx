@@ -1,0 +1,40 @@
+"use client"
+
+import Modal from "@/components/ui/Modal"
+import { InterviewDetailPanel } from "@/components/rrhh/interviews/interview-detail-panel"
+
+export interface InterviewDetailModalProps {
+  isOpen: boolean
+  onClose: () => void
+  interviewId: string | null
+  vacancyIdFromQuery?: string | null
+  onSaved?: () => void
+}
+
+export function InterviewDetailModal({
+  isOpen,
+  onClose,
+  interviewId,
+  vacancyIdFromQuery = null,
+  onSaved,
+}: InterviewDetailModalProps) {
+  if (!interviewId) return null
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Ver / editar entrevista"
+      size="lg"
+      closeOnOverlayClick={false}
+    >
+      <InterviewDetailPanel
+        interviewId={interviewId}
+        vacancyIdFromQuery={vacancyIdFromQuery}
+        variant="modal"
+        onClose={onClose}
+        onSaved={onSaved}
+      />
+    </Modal>
+  )
+}

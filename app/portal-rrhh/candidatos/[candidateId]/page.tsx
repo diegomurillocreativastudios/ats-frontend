@@ -360,14 +360,25 @@ export default function CandidatoDetallePage() {
       ) : (
         <>
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <Link
-              href="/portal-rrhh/candidatos"
-              className="inline-flex w-fit items-center gap-2 font-inter text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
-              aria-label="Volver a candidatos"
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden />
-              Volver a candidatos
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/portal-rrhh/candidatos"
+                className="inline-flex w-fit items-center gap-2 font-inter text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                aria-label="Volver a candidatos"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden />
+                Volver a candidatos
+              </Link>
+              {candidateId ? (
+                <Link
+                  href={`/portal-rrhh/candidatos/${encodeURIComponent(String(candidateId))}/interviews`}
+                  className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                  aria-label="Ver entrevistas de este candidato"
+                >
+                  Entrevistas
+                </Link>
+              ) : null}
+            </div>
             {profile?.storagePath ? (
               <div className="flex flex-col items-end gap-1">
                 <button
