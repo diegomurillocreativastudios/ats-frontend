@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sparkles, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { apiClient } from "@/lib/api";
 
@@ -18,6 +18,13 @@ export default function RematchButton({
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [errorMessage, setErrorMessage] = useState("");
+  const [isDismissedAfterSuccess, setIsDismissedAfterSuccess] = useState(false);
+
+  useEffect(() => {
+    if (needsRematch) {
+      setIsDismissedAfterSuccess(false);
+    }
+  }, [needsRematch]);
 
   const handleRematch = async (e) => {
     e.preventDefault();
@@ -31,7 +38,9 @@ export default function RematchButton({
       await apiClient.request(`/api/recruiter/vacancies/${vacancyId}/rematch`, {
         method: "POST",
       });
+      setIsDismissedAfterSuccess(true);
       if (onSnackbar) {
+        setStatus("idle");
         onSnackbar("Match reajustado correctamente.", "success");
       } else {
         setStatus("success");
@@ -40,8 +49,10 @@ export default function RematchButton({
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Rematch failed:", err);
+      setIsDismissedAfterSuccess(false);
       const msg = err?.message || "Error al re-ajustar match";
       if (onSnackbar) {
+        setStatus("idle");
         onSnackbar(msg, "error");
       } else {
         setStatus("error");
@@ -53,7 +64,7 @@ export default function RematchButton({
     }
   };
 
-  if (!needsRematch && status === "idle") {
+  if ((!needsRematch || isDismissedAfterSuccess) && status === "idle") {
     return null;
   }
 
