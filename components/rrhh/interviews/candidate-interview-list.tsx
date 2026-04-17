@@ -105,8 +105,8 @@ export function CandidateInterviewList({
                     <td className="px-4 py-3 tabular-nums">
                       {formatInterviewLocalDateTime(row.scheduledAtUtc)}
                     </td>
-                    <td className="max-w-[200px] truncate px-4 py-3 font-mono text-xs text-muted-foreground">
-                      {row.vacancyId}
+                    <td className="max-w-[240px] truncate px-4 py-3 text-sm text-foreground">
+                      {row.jobTitle?.trim() || row.vacancyId}
                     </td>
                     <td className="px-4 py-3">
                       <InterviewStatusBadge

@@ -13,6 +13,7 @@ import {
   type VacancyApplicantOption,
 } from "@/lib/api/interviews"
 import { localDatetimeInputToUtcIso } from "@/lib/interview-datetime"
+import { InterviewerRecruiterSelect } from "@/components/rrhh/interviews/interviewer-recruiter-select"
 import { InterviewScheduleRow } from "@/components/rrhh/interviews/interview-schedule-controls"
 import Snackbar from "@/components/ui/Snackbar"
 
@@ -301,12 +302,10 @@ export function InterviewForm(props: InterviewFormProps) {
           <label htmlFor="interview-interviewer" className="font-inter text-sm font-medium">
             Entrevistador(a)
           </label>
-          <input
+          <InterviewerRecruiterSelect
             id="interview-interviewer"
-            type="text"
             value={interviewerName}
-            onChange={(e) => setInterviewerName(e.target.value)}
-            className="h-10 rounded-md border border-input bg-background px-3 font-inter text-sm"
+            onChange={setInterviewerName}
           />
         </div>
 

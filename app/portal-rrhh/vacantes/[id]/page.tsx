@@ -39,6 +39,7 @@ import {
   mergeLegacySelectOption,
   formatCountryCodeLabel,
 } from "@/lib/profile-form-options";
+import { formatVacancyDetailDocumentTitle } from "@/lib/pageTitles";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -1022,7 +1023,7 @@ const MoveStageErrorBanner = ({ error }) => {
       <p className="font-inter text-sm text-destructive">{error.text}</p>
       {error.showEstadosLink ? (
         <Link
-          href="/portal-rrhh/etapas"
+          href="/portal-admin/etapas"
           className="font-inter text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
           aria-label="Ir a la sección Etapas para administrar estados de postulación"
         >
@@ -1495,10 +1496,14 @@ export default function VacanteDetallePage() {
   }, [id]);
 
   useEffect(() => {
-    if (vacancy?.title) {
-      document.title = `ATS | ${vacancy.title}`;
-    }
-  }, [vacancy?.title]);
+    if (!id) return;
+    if (loading) return;
+    document.title = formatVacancyDetailDocumentTitle(
+      vacancy?.title != null && String(vacancy.title).trim() !== ""
+        ? vacancy.title
+        : null
+    );
+  }, [id, loading, vacancy?.title]);
 
   const statusConfig = vacancy ? getStatusConfig(vacancy.status) : STATUS_LABELS.activa;
   /** AI match suggestions from vacancy (for "Posibles candidatos" container). */

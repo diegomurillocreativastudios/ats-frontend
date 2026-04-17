@@ -332,7 +332,7 @@ export default function CandidatosPage() {
               >
                 <div className="flex flex-col gap-1">
                   <h1 className="font-inter text-2xl font-bold text-foreground">
-                    Gestión de Candidatos
+                    Candidatos
                   </h1>
                   <p className="font-inter text-sm text-muted-foreground">
                     Revisa y gestiona todos los candidatos
@@ -378,7 +378,7 @@ export default function CandidatosPage() {
             >
               <div className="flex flex-col gap-1">
                 <h1 className="font-inter text-xl font-bold text-foreground md:text-2xl">
-                  Gestión de Candidatos
+                  Candidatos
                 </h1>
                 <p className="font-inter text-sm text-muted-foreground">
                   Revisa y gestiona todos los candidatos

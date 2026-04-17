@@ -42,10 +42,10 @@ export default function NextActivitiesCard({
           Próximas Actividades
         </h2>
         <Link
-          href="/portal-candidato/evaluaciones"
+          href="/portal-candidato/entrevistas"
           className="font-inter text-xs font-medium text-vo-purple hover:underline md:text-sm"
         >
-          Ver todas
+          Ver entrevistas
         </Link>
       </div>
       {loading ? (
@@ -66,8 +66,8 @@ export default function NextActivitiesCard({
         </div>
       ) : activities.length === 0 ? (
         <p className="font-inter text-sm text-muted-foreground">
-          No hay actividades próximas registradas. Cuando tengas evaluaciones o
-          citas, aparecerán aquí.
+          No hay actividades próximas registradas. Cuando tengas entrevistas u
+          otras citas, aparecerán aquí.
         </p>
       ) : (
         <div className="flex flex-col gap-3">

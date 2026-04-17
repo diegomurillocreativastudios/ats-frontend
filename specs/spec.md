@@ -16,7 +16,7 @@ Documento vivo que describe el estado **actual** del repositorio `ats-frontend`,
 |--------|-------------|
 | **Nombre en UI** | ATS App |
 | **Dominio** | SaaS tipo **ATS** (Applicant Tracking System): reclutamiento, vacantes, candidatos, etapas, plantillas, documentos. |
-| **Portales** | **Candidato** (`/portal-candidato`, documentos, perfil) y **RRHH** (`/portal-rrhh`, vacantes, candidatos, plantillas, etapas). |
+| **Portales** | **Candidato** (`/portal-candidato`, documentos, perfil), **RRHH** (`/portal-rrhh`, vacantes, candidatos, plantillas, etapas) y **Administración** (`/portal-admin`, rol `admin` — `specs/spec-portal-admin.md`). |
 | **Idioma UI** | Principalmente español (rutas y copys en español). |
 
 ---
@@ -129,6 +129,7 @@ Documentar aquí cada variable que use el código; valores reales solo en `.env.
 ### 5.5 Guardas y entrada
 
 - **`app/page.ts`:** si no hay `ats_access_token` → `/auth/iniciar-sesion`; si hay → `/seleccion-portal`.
+- **`app/portal-admin/layout.tsx`:** exige sesión y rol `admin` (`requirePortalAdminUser` en `lib/server-session-user.ts`); si no → login o `/seleccion-portal`.
 - Tras login exitoso, el producto dirige a selección de portal (`/seleccion-portal`).
 - **`proxy.ts`:** lógica documentada para paths públicos, redirects desde `/iniciar-sesion` y `/crear-cuenta`, y exclusión de reset con token si hay sesión — requiere **middleware** para aplicarse globalmente *(estado actual: archivo presente, middleware no registrado)*.
 
@@ -141,7 +142,9 @@ Documentar aquí cada variable que use el código; valores reales solo en `.env.
 | Ruta | Descripción breve |
 |------|-------------------|
 | `/` | Redirección según cookie (ver §5.5). |
-| `/seleccion-portal` | Elección entre portal candidato y RRHH. |
+| `/seleccion-portal` | Elección entre portal candidato, RRHH y (si rol admin) administración. |
+| `/portal-admin` | Redirección a `/portal-admin/usuarios` (solo rol `admin`). |
+| `/portal-admin/usuarios` | Gestión de usuarios (listado, filtros, paginación, modales; `lib/api/admin-users.ts`). |
 | `/auth/iniciar-sesion` | Login. |
 | `/auth/registrarse` | Registro. |
 | `/auth/forgot-password` | Olvidé contraseña (wrapper puede delegar a contenido compartido). |
@@ -175,6 +178,7 @@ Documentar aquí cada variable que use el código; valores reales solo en `.env.
 | Auth | `components/auth/` | `AuthBrand`, inputs y botones específicos auth |
 | Candidato | `components/candidato/` | Sidebars, topbar, tarjetas dashboard, documentos, edición de perfil, snackbar |
 | RRHH | `components/rrhh/` | Sidebar, topbar, modales (vacante, plantilla, etapa, estados), listas recientes, stats |
+| Admin | `components/portal-admin/` | Sidebar y shell del portal administración |
 | UI genérico | `components/ui/` | `Button`, `Input`, `Modal`, `Snackbar` |
 | Global | `components/` | `PageTitle` (título documento según ruta) |
 
@@ -186,8 +190,8 @@ Inventario orientativo (ampliar al agregar archivos):
 
 | Ámbito | Archivos / tema |
 |--------|------------------|
-| API | `api.ts`, `api-error.ts`, `server-backend-url.ts` |
-| Auth | `auth.ts`, `fetch-backend-session-user.ts` |
+| API | `api.ts`, `api-error.ts`, `server-backend-url.ts`, `api/admin-users.ts` (admin usuarios) |
+| Auth | `auth.ts`, `fetch-backend-session-user.ts`, `server-session-user.ts`, `roles.ts` |
 | Candidato / perfil | `candidate-*.ts`, `profile-form-options.ts`, `recruiter-canonical-profile-merge.ts`, etc. |
 | UX / formato | `pageTitles.ts`, `getInitials.ts`, `formatPhoneSv.ts`, `normalizeCountryDisplay.ts` |
 | RRHH | `recruiterStagePayload.ts` |

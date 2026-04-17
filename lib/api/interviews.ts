@@ -6,6 +6,8 @@ export type InterviewStatus = "Scheduled" | "Completed" | "Cancelled" | "NoShow"
 export interface Interview {
   id: string
   vacancyId: string
+  /** Título de la vacante u oferta si el API lo envía (p. ej. portal candidato). */
+  jobTitle: string | null
   candidateProfileId: string
   scheduledAtUtc: string
   durationMinutes: number | null
@@ -137,15 +139,39 @@ function pickBool(
   return defaultValue
 }
 
+/**
+ * Enum C# típico sin valores explícitos (mismo orden que `InterviewStatus` en specs).
+ * Solo se usa cuando el JSON trae número (p. ej. sin `JsonStringEnumConverter`).
+ */
+function mapInterviewStatusFromNumericOrdinal(n: number): InterviewStatus {
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0 || n > 3) {
+    return "Scheduled"
+  }
+  const map: InterviewStatus[] = [
+    "Scheduled",
+    "Completed",
+    "Cancelled",
+    "NoShow",
+  ]
+  return map[n] ?? "Scheduled"
+}
+
 function normalizeStatus(value: unknown): InterviewStatus {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return mapInterviewStatusFromNumericOrdinal(value)
+  }
   const s = value != null ? String(value).trim() : ""
+  if (!s) return "Scheduled"
   if (STATUS_SET.has(s)) return s as InterviewStatus
   const lower = s.toLowerCase()
   if (lower === "scheduled") return "Scheduled"
   if (lower === "completed") return "Completed"
   if (lower === "cancelled" || lower === "canceled") return "Cancelled"
   if (lower === "noshow" || lower === "no_show" || lower === "no-show") return "NoShow"
-  return "Scheduled"
+  if (/^\d$/.test(s)) {
+    return mapInterviewStatusFromNumericOrdinal(Number.parseInt(s, 10))
+  }
+  return mapInterviewStatusFromCodeOrLabel(s)
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -202,6 +228,7 @@ function pickInterviewTypeMeta(r: Record<string, unknown>): {
 
 function mapInterviewStatusFromCodeOrLabel(raw: string): InterviewStatus {
   const trimmed = raw.trim()
+  if (!trimmed) return "Scheduled"
   if (STATUS_SET.has(trimmed)) return trimmed as InterviewStatus
   const normalized = trimmed
     .normalize("NFD")
@@ -238,7 +265,104 @@ function mapInterviewStatusFromCodeOrLabel(raw: string): InterviewStatus {
   ) {
     return "NoShow"
   }
+  const compact = normalized.replace(/_/g, "")
+  if (
+    compact.includes("noshow") ||
+    compact.includes("noasist") ||
+    compact.includes("ausente")
+  ) {
+    return "NoShow"
+  }
+  if (compact.includes("cancel")) return "Cancelled"
+  if (
+    (compact.includes("complet") && !compact.includes("incomplet")) ||
+    compact.includes("finaliz") ||
+    compact.includes("cerrad")
+  ) {
+    return "Completed"
+  }
+  if (
+    compact.includes("schedul") ||
+    compact.includes("program") ||
+    compact.includes("agendad") ||
+    compact.includes("pendient")
+  ) {
+    return "Scheduled"
+  }
   return "Scheduled"
+}
+
+function nestedInterviewStatusRecord(
+  raw: unknown
+): Record<string, unknown> | null {
+  const o = asRecord(raw)
+  if (!o) return null
+  const code = pickString(o, [
+    "code",
+    "Code",
+    "key",
+    "Key",
+    "value",
+    "Value",
+  ])
+  const displayName = pickString(o, [
+    "displayName",
+    "display_name",
+    "DisplayName",
+    "name",
+    "Name",
+    "label",
+    "Label",
+    "title",
+    "Title",
+  ])
+  const innerStatus = o.status ?? o.Status
+  const innerNum =
+    typeof innerStatus === "number" && Number.isFinite(innerStatus)
+      ? innerStatus
+      : null
+  const innerStr =
+    typeof innerStatus === "string" && innerStatus.trim() !== ""
+      ? innerStatus.trim()
+      : null
+  if (code || displayName || innerNum != null || innerStr) return o
+  return null
+}
+
+function extractInterviewStatusPayload(r: Record<string, unknown>): unknown {
+  for (const key of [
+    "interviewStatus",
+    "InterviewStatus",
+    "interview_status",
+  ]) {
+    const v = r[key]
+    if (nestedInterviewStatusRecord(v)) return v
+  }
+  for (const key of ["status", "Status", "state", "State"]) {
+    const v = r[key]
+    if (v == null) continue
+    if (typeof v === "string" && v.trim() === "") continue
+    if (typeof v === "object" && !Array.isArray(v)) {
+      if (nestedInterviewStatusRecord(v)) return v
+      continue
+    }
+    return v
+  }
+  const flat = pickString(r, [
+    "statusName",
+    "status_name",
+    "StatusName",
+    "interviewStatusName",
+    "interview_status_name",
+    "InterviewStatusName",
+    "statusLabel",
+    "status_label",
+    "StatusLabel",
+    "statusDisplayName",
+    "status_display_name",
+    "StatusDisplayName",
+  ])
+  return flat ?? null
 }
 
 function normalizeInterviewStatusMeta(r: Record<string, unknown>): {
@@ -248,27 +372,60 @@ function normalizeInterviewStatusMeta(r: Record<string, unknown>): {
   isStatusTerminal: boolean | null
 } {
   const rootStatusId =
-    pickString(r, ["interviewStatusId", "interview_status_id"]) ?? null
-  const s = r.status ?? r.Status
-  const nested = asRecord(s)
-  if (nested) {
-    const code = pickString(nested, ["code", "key"]) ?? ""
+    pickString(r, [
+      "interviewStatusId",
+      "interview_status_id",
+      "InterviewStatusId",
+    ]) ?? null
+  const s = extractInterviewStatusPayload(r)
+  if (s == null) {
+    return {
+      status: "Scheduled",
+      statusDisplayName: null,
+      interviewStatusId: rootStatusId,
+      isStatusTerminal: null,
+    }
+  }
+
+  const nestedKnown = nestedInterviewStatusRecord(s)
+  if (nestedKnown) {
+    const code =
+      pickString(nestedKnown, [
+        "code",
+        "Code",
+        "key",
+        "Key",
+        "value",
+        "Value",
+      ]) ?? ""
     const displayName =
-      pickString(nested, [
+      pickString(nestedKnown, [
         "displayName",
         "display_name",
+        "DisplayName",
         "name",
+        "Name",
         "label",
+        "Label",
+        "title",
+        "Title",
       ]) ?? null
-    const id = pickString(nested, ["id", "uuid"]) ?? rootStatusId
+    const id = pickString(nestedKnown, ["id", "uuid"]) ?? rootStatusId
     let isTerminal: boolean | null = null
-    if (typeof nested.isTerminal === "boolean") isTerminal = nested.isTerminal
-    else if (typeof nested.is_terminal === "boolean") {
-      isTerminal = nested.is_terminal as boolean
+    if (typeof nestedKnown.isTerminal === "boolean") {
+      isTerminal = nestedKnown.isTerminal
+    } else if (typeof nestedKnown.is_terminal === "boolean") {
+      isTerminal = nestedKnown.is_terminal as boolean
     }
-    const mapped = mapInterviewStatusFromCodeOrLabel(
-      code || displayName || ""
-    )
+    const inner = nestedKnown.status ?? nestedKnown.Status
+    let mapped: InterviewStatus
+    if (typeof inner === "number" && Number.isFinite(inner)) {
+      mapped = mapInterviewStatusFromNumericOrdinal(Number(inner))
+    } else if (typeof inner === "string" && inner.trim() !== "") {
+      mapped = normalizeStatus(inner)
+    } else {
+      mapped = mapInterviewStatusFromCodeOrLabel(code || displayName || "")
+    }
     return {
       status: mapped,
       statusDisplayName: displayName,
@@ -276,9 +433,15 @@ function normalizeInterviewStatusMeta(r: Record<string, unknown>): {
       isStatusTerminal: isTerminal,
     }
   }
+  const rootDisplayName =
+    pickString(r, [
+      "statusDisplayName",
+      "status_display_name",
+      "StatusDisplayName",
+    ]) ?? null
   return {
     status: normalizeStatus(s),
-    statusDisplayName: null,
+    statusDisplayName: rootDisplayName,
     interviewStatusId: rootStatusId,
     isStatusTerminal: null,
   }
@@ -290,6 +453,19 @@ export function normalizeInterview(raw: unknown): Interview {
     pickString(r, ["id", "uuid", "interviewId", "interview_id"]) ?? ""
   const vacancyId =
     pickString(r, ["vacancyId", "vacancy_id", "VacancyId"]) ?? ""
+  const jobTitle =
+    pickString(r, [
+      "jobTitle",
+      "job_title",
+      "JobTitle",
+      "vacancyTitle",
+      "vacancy_title",
+      "VacancyTitle",
+      "vacancyName",
+      "vacancy_name",
+      "positionTitle",
+      "position_title",
+    ]) ?? null
   const candidateProfileId =
     pickString(r, [
       "candidateProfileId",
@@ -308,6 +484,7 @@ export function normalizeInterview(raw: unknown): Interview {
   return {
     id,
     vacancyId,
+    jobTitle,
     candidateProfileId,
     scheduledAtUtc,
     durationMinutes: pickNumber(r, ["durationMinutes", "duration_minutes"]),
@@ -393,6 +570,18 @@ export async function getInterviewsByCandidate(
   const data = await apiClient.get(
     `/api/recruiter/candidates/${encodeURIComponent(candidateProfileId)}/interviews${qs}`
   )
+  return normalizeInterviewList(data)
+}
+
+/**
+ * Entrevistas del candidato autenticado (portal).
+ * Contrato: `GET /api/candidate/interviews` — ver `specs/spec-portal-candidato-entrevistas.md`.
+ */
+export async function getCandidateSelfInterviews(
+  query: ListInterviewsQuery = {}
+): Promise<Interview[]> {
+  const qs = buildQueryString(query)
+  const data = await apiClient.get(`/api/candidate/interviews${qs}`)
   return normalizeInterviewList(data)
 }
 

@@ -1,11 +1,12 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 import { Loader2 } from "lucide-react"
 import { useParams } from "next/navigation"
 import { RrhhInterviewsShell } from "@/components/rrhh/interviews/rrhh-interviews-shell"
 import { InterviewList } from "@/components/rrhh/interviews/interview-list"
 import { useRecruiterVacancySummary } from "@/hooks/use-recruiter-vacancy-summary"
+import { formatEntrevistasByVacancyDocumentTitle } from "@/lib/pageTitles"
 
 export default function EntrevistasByVacancyPage() {
   const params = useParams()
@@ -13,6 +14,19 @@ export default function EntrevistasByVacancyPage() {
   const vacancyId = Array.isArray(raw) ? raw[0] : raw ?? ""
 
   const vacancySummary = useRecruiterVacancySummary(vacancyId)
+
+  useEffect(() => {
+    if (!vacancyId) return
+    if (vacancySummary.loading) return
+    document.title = formatEntrevistasByVacancyDocumentTitle(
+      vacancySummary.error ? null : vacancySummary.title
+    )
+  }, [
+    vacancyId,
+    vacancySummary.loading,
+    vacancySummary.title,
+    vacancySummary.error,
+  ])
 
   const trail =
     vacancyId.length > 0

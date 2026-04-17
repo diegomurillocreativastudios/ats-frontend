@@ -10,7 +10,7 @@ test.describe("Template Management E2E", () => {
   test("should allow a user to create and delete a Notification template", async ({
     page,
   }) => {
-    await page.goto("/portal-rrhh/plantillas")
+    await page.goto("/portal-admin/plantillas")
     await expect(page.getByRole("heading", { name: "Plantillas" }).first()).toBeVisible()
 
     const templateName = `E2E Test Template ${Date.now()}`
@@ -35,7 +35,7 @@ test.describe("Template Management E2E", () => {
   test("should allow a user to create and delete a Document template", async ({
     page,
   }) => {
-    await page.goto("/portal-rrhh/plantillas")
+    await page.goto("/portal-admin/plantillas")
     await expect(page.getByRole("heading", { name: "Plantillas" }).first()).toBeVisible()
 
     const docName = `E2E Doc ${Date.now()}`

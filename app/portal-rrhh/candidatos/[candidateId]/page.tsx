@@ -41,6 +41,7 @@ import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { formatCandidatoDetailDocumentTitle } from "@/lib/pageTitles"
 import {
   mergeRecruiterNormalizedWithCanonicalProfile,
   pickEmbeddedCanonicalProfile,
@@ -269,11 +270,15 @@ export default function CandidatoDetallePage() {
     [breadcrumbLabel]
   );
 
+  const hasProfile = profile != null
+
   useEffect(() => {
-    if (!loading && fullName) {
-      document.title = `ATS | ${fullName}`;
-    }
-  }, [loading, fullName]);
+    if (!candidateId) return
+    if (loading) return
+    document.title = formatCandidatoDetailDocumentTitle(
+      hasProfile ? fullName : null
+    )
+  }, [candidateId, loading, hasProfile, fullName])
 
   const handleDownloadCv = async () => {
     const path = profile?.storagePath;

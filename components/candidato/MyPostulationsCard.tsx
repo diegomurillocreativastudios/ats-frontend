@@ -30,10 +30,10 @@ export default function MyPostulationsCard({
           Mis Postulaciones
         </h2>
         <Link
-          href="/portal-candidato/estado"
+          href="/portal-candidato"
           className="font-inter text-xs font-medium text-vo-purple hover:underline lg:text-sm"
         >
-          Ver todas
+          Ir al inicio
         </Link>
       </div>
       {loading ? (

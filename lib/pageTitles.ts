@@ -5,55 +5,248 @@
  * @returns {string} Título formateado
  */
 export const segmentToTitle = (segment) => {
-  if (!segment || typeof segment !== "string") return "";
+  if (!segment || typeof segment !== "string") return ""
   return segment
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-};
+    .join(" ")
+}
+
+const BASE_TITLE = "ATS"
+
+const PORTAL_RRHH = "Portal RRHH"
+const PORTAL_CANDIDATO = "Portal Candidato"
+const PORTAL_ADMIN = "Portal Admin"
+const CUENTA = "Cuenta"
+
+/** Une partes con " | " (siempre incluye el prefijo ATS). */
+function joinDocumentTitle(...parts) {
+  return parts.filter((p) => p != null && String(p).trim() !== "").join(" | ")
+}
+
+/** UUID típico en rutas (vacante, candidato, entrevista). */
+function isUuidSegment(s) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    String(s),
+  )
+}
+
+const RRHH_PATH_LABEL = {
+  entrevistas: "Entrevistas",
+  vacantes: "Vacantes",
+  candidatos: "Candidatos",
+  etapas: "Etapas",
+  plantillas: "Plantillas",
+  interviews: "Entrevistas",
+}
+
+const CANDIDATO_PATH_LABEL = {
+  documentos: "Documentos",
+  entrevistas: "Entrevistas",
+}
+
+const ADMIN_PATH_LABEL = {
+  etapas: "Etapas",
+  entrevistas: "Entrevistas",
+  plantillas: "Plantillas",
+  usuarios: "Usuarios",
+}
+
+/** Listado de entrevistas de una vacante: `/portal-rrhh/entrevistas/<vacancyId>`. */
+const ENTREVISTAS_BY_VACANCY_PATH = /^\/portal-rrhh\/entrevistas\/[^/]+$/
+
+/** Detalle de vacante RRHH: `/portal-rrhh/vacantes/<vacancyId>`. */
+const VACANCY_DETAIL_PATH = /^\/portal-rrhh\/vacantes\/[^/]+$/
+
+/** Detalle de candidato RRHH: `/portal-rrhh/candidatos/<candidateId>` (sin subrutas). */
+const CANDIDATO_DETAIL_PATH = /^\/portal-rrhh\/candidatos\/[^/]+$/
+
+export function isEntrevistasByVacancyPath(pathname) {
+  const normalized =
+    pathname.endsWith("/") && pathname.length > 1
+      ? pathname.slice(0, -1)
+      : pathname
+  return ENTREVISTAS_BY_VACANCY_PATH.test(normalized)
+}
+
+export function isVacancyDetailPath(pathname) {
+  const normalized =
+    pathname.endsWith("/") && pathname.length > 1
+      ? pathname.slice(0, -1)
+      : pathname
+  return VACANCY_DETAIL_PATH.test(normalized)
+}
+
+export function isCandidatoDetailPath(pathname) {
+  const normalized =
+    pathname.endsWith("/") && pathname.length > 1
+      ? pathname.slice(0, -1)
+      : pathname
+  return CANDIDATO_DETAIL_PATH.test(normalized)
+}
+
+/** Título estable hasta que el cliente cargue el nombre de la vacante. */
+export function getEntrevistasByVacancyStaticTitle() {
+  return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Entrevistas")
+}
+
+/** Título final: entrevistas de una vacante con nombre legible. */
+export function formatEntrevistasByVacancyDocumentTitle(vacancyDisplayName) {
+  const name =
+    vacancyDisplayName != null && String(vacancyDisplayName).trim() !== ""
+      ? String(vacancyDisplayName).trim()
+      : "Vacante"
+  return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Entrevistas", name)
+}
+
+/** Hasta que el cliente cargue el título de la vacante. */
+export function getVacancyDetailStaticTitle() {
+  return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Vacantes")
+}
+
+/** Detalle de vacante con nombre legible. */
+export function formatVacancyDetailDocumentTitle(vacancyDisplayName) {
+  const name =
+    vacancyDisplayName != null && String(vacancyDisplayName).trim() !== ""
+      ? String(vacancyDisplayName).trim()
+      : "Vacante"
+  return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Vacantes", name)
+}
+
+/** Hasta que el cliente cargue el nombre del candidato. */
+export function getCandidatoDetailStaticTitle() {
+  return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Candidatos")
+}
+
+/** Detalle de candidato con nombre legible (por defecto «Candidato»). */
+export function formatCandidatoDetailDocumentTitle(displayName) {
+  const raw = displayName != null ? String(displayName).trim() : ""
+  const name = raw !== "" ? raw : "Candidato"
+  return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Candidatos", name)
+}
+
+/** Sufijo (puede incluir ` | `) que se antepone a `ATS | …` para rutas exactas. */
+const EXACT_PATH_SUFFIX = {
+  "/": joinDocumentTitle(PORTAL_CANDIDATO, "Inicio"),
+  "/mi-perfil": joinDocumentTitle(CUENTA, "Mi perfil"),
+  "/seleccion-portal": joinDocumentTitle(CUENTA, "Elegí un portal"),
+  "/recuperar-contrasena": joinDocumentTitle(CUENTA, "Recuperar contraseña"),
+  "/restablecer-contrasena": joinDocumentTitle(CUENTA, "Restablecer contraseña"),
+  "/auth/iniciar-sesion": joinDocumentTitle(CUENTA, "Iniciar sesión"),
+  "/auth/registrarse": joinDocumentTitle(CUENTA, "Registrarse"),
+  "/auth/forgot-password": joinDocumentTitle(CUENTA, "Olvidaste tu contraseña"),
+  "/auth/restablecer-contrasena": joinDocumentTitle(
+    CUENTA,
+    "Restablecer contraseña",
+  ),
+}
+
+function titlePortalRrhh(normalizedPath) {
+  const prefix = "/portal-rrhh"
+  if (!normalizedPath.startsWith(prefix)) return null
+
+  if (isEntrevistasByVacancyPath(normalizedPath)) {
+    return getEntrevistasByVacancyStaticTitle()
+  }
+  if (isVacancyDetailPath(normalizedPath)) {
+    return getVacancyDetailStaticTitle()
+  }
+  if (isCandidatoDetailPath(normalizedPath)) {
+    return getCandidatoDetailStaticTitle()
+  }
+
+  const rest = normalizedPath.slice(prefix.length)
+  const segs = rest.split("/").filter(Boolean)
+  if (segs.length === 0) {
+    return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Candidatos")
+  }
+
+  const labels = []
+  for (const s of segs) {
+    if (isUuidSegment(s)) continue
+    labels.push(RRHH_PATH_LABEL[s] ?? segmentToTitle(s))
+  }
+  if (labels.length === 0) {
+    return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Inicio")
+  }
+  return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, ...labels)
+}
+
+function titlePortalCandidato(normalizedPath) {
+  const prefix = "/portal-candidato"
+  if (!normalizedPath.startsWith(prefix)) return null
+
+  const rest = normalizedPath.slice(prefix.length)
+  const segs = rest.split("/").filter(Boolean)
+  if (segs.length === 0) {
+    return joinDocumentTitle(BASE_TITLE, PORTAL_CANDIDATO, "Inicio")
+  }
+
+  const labels = []
+  for (const s of segs) {
+    if (isUuidSegment(s)) continue
+    labels.push(CANDIDATO_PATH_LABEL[s] ?? segmentToTitle(s))
+  }
+  if (labels.length === 0) {
+    return joinDocumentTitle(BASE_TITLE, PORTAL_CANDIDATO, "Inicio")
+  }
+  return joinDocumentTitle(BASE_TITLE, PORTAL_CANDIDATO, ...labels)
+}
+
+function titlePortalAdmin(normalizedPath) {
+  const prefix = "/portal-admin"
+  if (!normalizedPath.startsWith(prefix)) return null
+
+  const rest = normalizedPath.slice(prefix.length)
+  const segs = rest.split("/").filter(Boolean)
+  if (segs.length === 0) {
+    return joinDocumentTitle(BASE_TITLE, PORTAL_ADMIN, "Inicio")
+  }
+
+  const labels = []
+  for (const s of segs) {
+    if (isUuidSegment(s)) continue
+    labels.push(ADMIN_PATH_LABEL[s] ?? segmentToTitle(s))
+  }
+  if (labels.length === 0) {
+    return joinDocumentTitle(BASE_TITLE, PORTAL_ADMIN, "Inicio")
+  }
+  return joinDocumentTitle(BASE_TITLE, PORTAL_ADMIN, ...labels)
+}
 
 /**
- * Mapa opcional de rutas a títulos personalizados.
- * Si una ruta no está aquí, se deriva automáticamente con segmentToTitle.
- */
-export const CUSTOM_PAGE_TITLES = {
-  "/": "Portal Candidato",
-  "/auth/iniciar-sesion": "Iniciar Sesion",
-  "/auth/registrarse": "Registrarse",
-  "/auth/forgot-password": "Olvidaste tu contraseña",
-  "/auth/restablecer-contrasena": "Restablecer contraseña",
-  "/restablecer-contrasena": "Restablecer contraseña",
-  "/portal-candidato/documentos": "Portal Candidato | Documentos",
-  "/portal-rrhh": "Portal RRHH | Candidatos",
-  "/portal-rrhh/vacantes": "Portal RRHH | Vacantes",
-  "/portal-rrhh/candidatos": "Portal RRHH | Candidatos",
-  "/seleccion-portal": "Elegí un portal",
-  "/mi-perfil": "Mi perfil",
-};
-
-const BASE_TITLE = "ATS";
-
-/**
- * Obtiene el título de la página según la ruta.
- * @param {string} pathname - Ruta actual (ej: "/crear-cuenta")
- * @returns {string} Título completo para el documento (ej: "ATS | Crear Cuenta")
+ * Título del documento según la ruta: `ATS | [portal o Cuenta] | [pantalla …]`.
+ * @param {string} pathname - Ruta actual (ej: "/portal-rrhh/entrevistas")
+ * @returns {string}
  */
 export const getPageTitle = (pathname) => {
-  const normalizedPath = pathname.endsWith("/") && pathname.length > 1
-    ? pathname.slice(0, -1)
-    : pathname;
+  const normalizedPath =
+    pathname.endsWith("/") && pathname.length > 1
+      ? pathname.slice(0, -1)
+      : pathname
 
-  const customTitle = CUSTOM_PAGE_TITLES[normalizedPath];
-  if (customTitle) {
-    return `${BASE_TITLE} | ${customTitle}`;
+  const exactSuffix = EXACT_PATH_SUFFIX[normalizedPath]
+  if (exactSuffix) {
+    return joinDocumentTitle(BASE_TITLE, exactSuffix)
   }
 
-  const segments = normalizedPath.split("/").filter(Boolean);
+  const rrhh = titlePortalRrhh(normalizedPath)
+  if (rrhh) return rrhh
+
+  const cand = titlePortalCandidato(normalizedPath)
+  if (cand) return cand
+
+  const adm = titlePortalAdmin(normalizedPath)
+  if (adm) return adm
+
+  const segments = normalizedPath.split("/").filter(Boolean)
   if (segments.length === 0) {
-    return BASE_TITLE;
+    return BASE_TITLE
   }
 
-  const lastSegment = segments[segments.length - 1];
-  const pageTitle = segmentToTitle(lastSegment);
-  return pageTitle ? `${BASE_TITLE} | ${pageTitle}` : BASE_TITLE;
-};
+  const lastSegment = segments[segments.length - 1]
+  const pageTitle = segmentToTitle(lastSegment)
+  return pageTitle
+    ? joinDocumentTitle(BASE_TITLE, pageTitle)
+    : BASE_TITLE
+}

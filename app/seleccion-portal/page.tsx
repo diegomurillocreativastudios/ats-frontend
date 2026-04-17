@@ -1,12 +1,17 @@
 import Link from "next/link"
-import { Briefcase, Users } from "lucide-react"
+import { Briefcase, Shield, Users } from "lucide-react"
+import { getServerSessionUser } from "@/lib/server-session-user"
+import { isAdminRole } from "@/lib/roles"
 
 export const metadata = {
   title: { absolute: "ATS | Elegí un portal" },
   description: "Seleccioná el portal de candidato o el de reclutamiento",
 }
 
-export default function SeleccionPortalPage() {
+export default async function SeleccionPortalPage() {
+  const sessionUser = await getServerSessionUser()
+  const showAdmin = isAdminRole(sessionUser?.role)
+
   return (
     <div className="min-h-screen bg-muted/40 font-inter text-foreground">
       <div className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-4 py-12 md:px-6">
@@ -20,7 +25,11 @@ export default function SeleccionPortalPage() {
           </p>
         </header>
 
-        <div className="grid gap-4 md:grid-cols-2 md:gap-6">
+        <div
+          className={`grid gap-4 md:gap-6 ${
+            showAdmin ? "md:grid-cols-3" : "md:grid-cols-2"
+          }`}
+        >
           <Link
             href="/portal-candidato"
             data-testid="portal-selector-candidato"
@@ -60,6 +69,28 @@ export default function SeleccionPortalPage() {
               Entrar →
             </span>
           </Link>
+
+          {showAdmin ? (
+            <Link
+              href="/portal-admin/usuarios"
+              data-testid="portal-selector-admin"
+              className="group flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-colors hover:border-vo-purple/40 hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+              aria-label="Ir al portal de administración"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-vo-navy/10 text-vo-navy">
+                <Shield className="h-6 w-6" aria-hidden />
+              </span>
+              <span className="mt-4 font-inter text-lg font-semibold text-foreground group-hover:text-vo-purple">
+                Portal administración
+              </span>
+              <span className="mt-2 font-inter text-sm text-muted-foreground">
+                Usuarios y configuración de plataforma
+              </span>
+              <span className="mt-4 font-inter text-sm font-medium text-vo-purple group-hover:underline">
+                Entrar →
+              </span>
+            </Link>
+          ) : null}
         </div>
 
         <p className="mt-10 text-center font-inter text-xs text-muted-foreground">

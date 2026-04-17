@@ -125,7 +125,9 @@ export function sameDayMinutesFromStartToEnd(
 const QUARTER_MINUTES = [0, 15, 30, 45] as const
 
 /**
- * Etiqueta corta para listas de hora (p. ej. 10:15 o 10:15 a. m. según locale).
+ * Etiqueta corta para listas de hora (12 h, español: "10:15 a. m.").
+ * Formato manual (sin `toLocaleTimeString`) para que servidor y cliente coincidan
+ * en hidratación: Node y el navegador pueden usar espacios Unicode distintos alrededor de "a. m." / "p. m.".
  */
 export function formatTimePickerLabel(hhmm: string): string {
   if (!hhmm || hhmm.length < 4) return ""
@@ -133,11 +135,10 @@ export function formatTimePickerLabel(hhmm: string): string {
   const h = Number.parseInt(parts[0] ?? "0", 10)
   const m = Number.parseInt(parts[1] ?? "0", 10)
   if (Number.isNaN(h) || Number.isNaN(m)) return hhmm
-  const d = new Date(2000, 0, 1, h, m)
-  return d.toLocaleTimeString("es-CL", {
-    hour: "numeric",
-    minute: "2-digit",
-  })
+  const isPM = h >= 12
+  const hour12 = h % 12 === 0 ? 12 : h % 12
+  const suffix = isPM ? "p. m." : "a. m."
+  return `${hour12}:${pad2(m)} ${suffix}`
 }
 
 /**

@@ -2,19 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-import {
-  Briefcase,
-  Calendar,
-  ListChecks,
-  Loader2,
-  MapPin,
-  Tags,
-  Users,
-} from "lucide-react"
+import { Briefcase, Calendar, Loader2, MapPin, Users } from "lucide-react"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
-import { InterviewStatusesCrudModal } from "@/components/rrhh/interviews/interview-statuses-crud-modal"
-import { InterviewTypesCrudModal } from "@/components/rrhh/interviews/interview-types-crud-modal"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatCountryCodeLabel } from "@/lib/profile-form-options"
@@ -84,9 +74,6 @@ export default function EntrevistasHubPage() {
   const [vacancies, setVacancies] = useState<VacancyRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [interviewTypesModalOpen, setInterviewTypesModalOpen] = useState(false)
-  const [interviewStatusesModalOpen, setInterviewStatusesModalOpen] =
-    useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -150,33 +137,13 @@ export default function EntrevistasHubPage() {
         className="flex flex-col gap-4 border-b border-border px-4 py-5 md:px-8"
         aria-label="Encabezado de entrevistas"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-          <div className="flex min-w-0 flex-col gap-1">
-            <h1 className="font-inter text-2xl font-bold text-foreground">
-              Entrevistas
-            </h1>
-            <p className="font-inter text-sm text-muted-foreground">
-              Elige una vacante para ver y gestionar sus entrevistas.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 self-start sm:justify-end">
-            <button
-              type="button"
-              onClick={() => setInterviewTypesModalOpen(true)}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-vo-magenta px-4 py-2.5 font-inter text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-magenta-hover focus:outline-none focus:ring-2 focus:ring-vo-magenta focus:ring-offset-2"
-            >
-              <Tags className="h-4 w-4 shrink-0" aria-hidden />
-              Tipos de entrevista
-            </button>
-            <button
-              type="button"
-              onClick={() => setInterviewStatusesModalOpen(true)}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-vo-pink px-4 py-2.5 font-inter text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-pink-hover focus:outline-none focus:ring-2 focus:ring-vo-pink focus:ring-offset-2"
-            >
-              <ListChecks className="h-4 w-4 shrink-0" aria-hidden />
-              Estados de entrevista
-            </button>
-          </div>
+        <div className="flex min-w-0 flex-col gap-1">
+          <h1 className="font-inter text-2xl font-bold text-foreground">
+            Entrevistas
+          </h1>
+          <p className="font-inter text-sm text-muted-foreground">
+            Elige una vacante para ver y gestionar sus entrevistas.
+          </p>
         </div>
       </section>
       <section className="flex flex-col gap-4 p-4 md:p-8" aria-label="Vacantes">
@@ -291,14 +258,6 @@ export default function EntrevistasHubPage() {
 
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <InterviewTypesCrudModal
-        isOpen={interviewTypesModalOpen}
-        onClose={() => setInterviewTypesModalOpen(false)}
-      />
-      <InterviewStatusesCrudModal
-        isOpen={interviewStatusesModalOpen}
-        onClose={() => setInterviewStatusesModalOpen(false)}
-      />
       <div className="hidden h-full lg:flex">
         <RRHHSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">

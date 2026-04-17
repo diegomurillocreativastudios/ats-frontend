@@ -18,6 +18,7 @@ import {
   localDatetimeInputToUtcIso,
   utcIsoToLocalDatetimeInputValue,
 } from "@/lib/interview-datetime"
+import { InterviewerRecruiterSelect } from "@/components/rrhh/interviews/interviewer-recruiter-select"
 import { InterviewScheduleRow } from "@/components/rrhh/interviews/interview-schedule-controls"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
 import Snackbar from "@/components/ui/Snackbar"
@@ -340,13 +341,11 @@ export function InterviewDetailPanel({
           >
             Entrevistador(a)
           </label>
-          <input
+          <InterviewerRecruiterSelect
             id="detail-interviewer"
-            type="text"
             value={interviewerName}
-            onChange={(e) => setInterviewerName(e.target.value)}
+            onChange={setInterviewerName}
             disabled={!isEditable}
-            className="h-10 rounded-md border border-input bg-background px-3 font-inter text-sm disabled:opacity-60"
           />
         </div>
 

@@ -1,4 +1,4 @@
-import { Briefcase, ClipboardList, Calendar, Mail } from "lucide-react";
+import { Briefcase, Calendar } from "lucide-react";
 import type { CandidatePortalStats } from "@/lib/candidate-dashboard";
 
 const STAT_CONFIG = [
@@ -11,28 +11,12 @@ const STAT_CONFIG = [
     iconColor: "text-vo-purple",
   },
   {
-    key: "pendingEvaluations" as const,
-    label: "Evaluaciones",
-    labelDesktop: "Evaluaciones Pendientes",
-    icon: ClipboardList,
-    iconBg: "bg-[#DBEAFE]",
-    iconColor: "text-vo-navy",
-  },
-  {
     key: "upcomingInterviews" as const,
     label: "Entrevistas",
-    labelDesktop: "Entrevista Próxima",
+    labelDesktop: "Entrevistas Próximas",
     icon: Calendar,
     iconBg: "bg-[#DCFCE7]",
     iconColor: "text-success",
-  },
-  {
-    key: "unreadMessages" as const,
-    label: "Mensajes",
-    labelDesktop: "Mensajes Sin Leer",
-    icon: Mail,
-    iconBg: "bg-[#FEF3C7]",
-    iconColor: "text-amber-600",
   },
 ];
 
@@ -62,8 +46,8 @@ export default function StatCard({
   loading?: boolean;
 }) {
   const gridClass = responsiveGrid
-    ? "grid-cols-2 md:grid-cols-4"
-    : "sm:grid-cols-2 lg:grid-cols-4";
+    ? "grid-cols-2"
+    : "sm:grid-cols-2 lg:grid-cols-2";
   return (
     <div
       className={`grid w-full gap-4 ${gridClass} ${

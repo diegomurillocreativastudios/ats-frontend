@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Briefcase,
-  Home,
-  User,
-  FileText,
-  Activity,
-  ClipboardList,
-  Calendar,
-  Mail,
-} from "lucide-react";
+import { Briefcase, Home, User, FileText, Calendar } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getInitials } from "@/lib/getInitials";
 
@@ -19,10 +10,7 @@ const navItems = [
   { href: "/portal-candidato", label: "Inicio", icon: Home },
   { href: "/mi-perfil", label: "Mi Perfil", icon: User },
   { href: "/portal-candidato/documentos", label: "Documentos", icon: FileText },
-  { href: "/portal-candidato/estado", label: "Mi Estado", icon: Activity },
-  { href: "/portal-candidato/evaluaciones", label: "Evaluaciones", icon: ClipboardList },
   { href: "/portal-candidato/entrevistas", label: "Entrevistas", icon: Calendar },
-  { href: "/portal-candidato/mensajes", label: "Mensajes", icon: Mail },
 ];
 
 export default function CandidateSidebar() {
