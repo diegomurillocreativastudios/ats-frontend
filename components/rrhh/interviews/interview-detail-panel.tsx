@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 import {
+  deleteRecruiterInterview,
   fetchInterviewTypes,
   getInterviewById,
   getInterviewHttpErrorMessage,
@@ -21,6 +22,8 @@ import {
 import { InterviewerRecruiterSelect } from "@/components/rrhh/interviews/interviewer-recruiter-select"
 import { InterviewScheduleRow } from "@/components/rrhh/interviews/interview-schedule-controls"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
+import { InterviewCalendarWidget } from "@/components/rrhh/interviews/interview-calendar-widget"
+import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import Snackbar from "@/components/ui/Snackbar"
 
 const STATUS_ACTIONS: { value: InterviewStatus; label: string }[] = [
@@ -37,6 +40,8 @@ export interface InterviewDetailPanelProps {
   variant?: "page" | "modal"
   onClose?: () => void
   onSaved?: () => void
+  /** Tras borrado exitoso (p. ej. quitar fila del listado en modal). */
+  onDeleted?: (interviewId: string) => void
 }
 
 export function InterviewDetailPanel({
@@ -45,6 +50,7 @@ export function InterviewDetailPanel({
   variant = "page",
   onClose,
   onSaved,
+  onDeleted,
 }: InterviewDetailPanelProps) {
   const router = useRouter()
   const [interview, setInterview] = useState<Interview | null>(null)
@@ -57,6 +63,8 @@ export function InterviewDetailPanel({
   const [notes, setNotes] = useState("")
   const [statusChoice, setStatusChoice] = useState<InterviewStatus>("Scheduled")
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success" as "success" | "error" | "info",
@@ -190,6 +198,33 @@ export function InterviewDetailPanel({
     }
   }
 
+  const handleConfirmDelete = async () => {
+    if (!interview) return
+    setDeleting(true)
+    try {
+      await deleteRecruiterInterview(interview.id)
+      setDeleteConfirmOpen(false)
+      onDeleted?.(interview.id)
+      if (variant === "modal" && onClose) {
+        onClose()
+        return
+      }
+      router.push(listHref)
+    } catch (err: unknown) {
+      const status =
+        typeof err === "object" && err !== null && "status" in err
+          ? (err as { status?: number }).status
+          : 0
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: getInterviewHttpErrorMessage(status ?? 0, err),
+      })
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }))
   }
@@ -256,7 +291,14 @@ export function InterviewDetailPanel({
         </div>
       </div>
 
-      <div className="flex max-w-xl flex-col gap-5 rounded-xl border border-border bg-card p-6">
+      <div
+        className={
+          variant === "modal"
+            ? "flex flex-col gap-6"
+            : "grid gap-6 lg:max-w-none lg:grid-cols-[minmax(0,1fr)_minmax(260px,340px)] lg:items-start"
+        }
+      >
+      <div className="flex max-w-xl flex-col gap-5 rounded-xl border border-border bg-card p-6 lg:max-w-none">
         <div className="flex flex-col gap-1.5">
           <span className="font-inter text-sm font-medium">Estado</span>
           {isEditable ? (
@@ -363,11 +405,11 @@ export function InterviewDetailPanel({
           />
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={handleSave}
-            disabled={saving || !isEditable}
+            disabled={saving || deleting || !isEditable}
             className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
           >
             {saving ? (
@@ -378,12 +420,44 @@ export function InterviewDetailPanel({
           <button
             type="button"
             onClick={() => load()}
-            className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-inter text-sm text-foreground hover:bg-muted"
+            disabled={saving || deleting}
+            className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-inter text-sm text-foreground hover:bg-muted disabled:opacity-50"
           >
             Descartar cambios
           </button>
+          <button
+            type="button"
+            onClick={() => setDeleteConfirmOpen(true)}
+            disabled={saving || deleting || deleteConfirmOpen}
+            className="inline-flex items-center gap-2 rounded-md border border-destructive/60 px-5 py-2.5 font-inter text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
+            aria-label="Eliminar entrevista"
+          >
+            <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
+            Eliminar
+          </button>
         </div>
       </div>
+
+      <InterviewCalendarWidget
+        interviewId={interview.id}
+        scheduledAtUtc={interview.scheduledAtUtc}
+        onSync={() => void load()}
+      />
+      </div>
+
+      <DeleteConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => {
+          if (!deleting) setDeleteConfirmOpen(false)
+        }}
+        onConfirm={() => void handleConfirmDelete()}
+        title="Eliminar entrevista"
+        message="¿Eliminar esta entrevista? Se archivará y dejará de mostrarse en los listados."
+        loading={deleting}
+        overlayZIndexClass={
+          variant === "modal" ? "z-[100]" : undefined
+        }
+      />
 
       <Snackbar
         open={snackbar.open}

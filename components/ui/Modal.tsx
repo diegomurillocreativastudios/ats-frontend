@@ -4,8 +4,9 @@ import { useEffect, useCallback, type ReactNode, type MouseEvent } from "react"
 import { X } from "lucide-react"
 
 const MODAL_STYLES = {
-  overlay:
-    "fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4",
+  /** z-index va en `overlayZIndexClass` para permitir modales anidados. */
+  overlayBase:
+    "fixed inset-0 flex items-center justify-center bg-black/50 p-4",
   getContent: (sizeClass: string) =>
     `relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-white shadow-xl ${sizeClass}`,
   header: "shrink-0 flex items-center justify-between border-b border-border px-6 py-4",
@@ -31,6 +32,8 @@ interface ModalProps {
   bodyClassName?: string
   closeOnOverlayClick?: boolean
   closeOnEscape?: boolean
+  /** Por defecto z-50; use p. ej. z-[100] si este modal se abre encima de otro. */
+  overlayZIndexClass?: string
 }
 
 export default function Modal({
@@ -43,6 +46,7 @@ export default function Modal({
   bodyClassName = "",
   closeOnOverlayClick = true,
   closeOnEscape = true,
+  overlayZIndexClass = "z-50",
 }: ModalProps) {
   const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md
   const handleEscape = useCallback(
@@ -74,7 +78,7 @@ export default function Modal({
 
   return (
     <div
-      className={MODAL_STYLES.overlay}
+      className={`${MODAL_STYLES.overlayBase} ${overlayZIndexClass}`.trim()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"

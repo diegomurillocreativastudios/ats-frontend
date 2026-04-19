@@ -396,6 +396,15 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
         onSaved={() => {
           load().catch(() => {})
         }}
+        onDeleted={(id) => {
+          setItems((prev) => prev.filter((i) => i.id !== id))
+          setDetailInterviewId(null)
+          setSnackbar({
+            open: true,
+            variant: "success",
+            message: "Entrevista eliminada.",
+          })
+        }}
       />
 
       <Snackbar

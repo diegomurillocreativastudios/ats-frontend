@@ -637,6 +637,17 @@ export async function patchInterview(
 }
 
 /**
+ * Soft delete. `DELETE /api/recruiter/interviews/{id}` → 204 sin cuerpo JSON.
+ */
+export async function deleteRecruiterInterview(
+  interviewId: string
+): Promise<void> {
+  await apiClient.delete(
+    `/api/recruiter/interviews/${encodeURIComponent(interviewId)}`
+  )
+}
+
+/**
  * Candidatos vinculados a la vacante (postulantes en pipeline), para el selector de alta.
  * Usa el mismo GET de vacante que el kanban.
  */

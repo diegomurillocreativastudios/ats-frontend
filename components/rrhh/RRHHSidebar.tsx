@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Briefcase, Calendar, Shield } from "lucide-react";
+import { Users, Briefcase, Calendar, Shield, Cog } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getInitials } from "@/lib/getInitials";
 import { isAdminRole } from "@/lib/roles";
@@ -11,6 +11,11 @@ const navItems = [
   { href: "/portal-rrhh/candidatos", label: "Candidatos", icon: Users },
   { href: "/portal-rrhh/vacantes", label: "Vacantes", icon: Briefcase },
   { href: "/portal-rrhh/entrevistas", label: "Entrevistas", icon: Calendar },
+  {
+    href: "/portal-rrhh/configuracion",
+    label: "Configuracion",
+    icon: Cog,
+  },
 ];
 
 const adminNavItem = {
@@ -51,12 +56,15 @@ export default function RRHHSidebar() {
           {items.map((item) => {
             const Icon = item.icon;
             const isEntrevistasItem = item.href === "/portal-rrhh/entrevistas";
+            const isConfigItem = item.href === "/portal-rrhh/configuracion";
             const isAdminItem = item.href === adminNavItem.href;
             const isActive = isAdminItem
               ? pathname.startsWith("/portal-admin")
               : isEntrevistasItem
               ? pathname.startsWith("/portal-rrhh/entrevistas") ||
                 pathname.startsWith("/portal-rrhh/interviews/")
+              : isConfigItem
+              ? pathname.startsWith("/portal-rrhh/configuracion")
               : pathname === item.href || pathname.startsWith(item.href + "/");
             const baseClasses =
               "flex items-center gap-3 rounded-md px-4 py-3 font-inter text-sm transition-colors";

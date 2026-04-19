@@ -164,3 +164,25 @@ export function isQuarterHourTime(hhmm: string): boolean {
   if (Number.isNaN(m)) return false
   return m % 15 === 0
 }
+
+/**
+ * Normaliza texto de hora a `HH:mm`, o `""` si queda vacío tras recortar.
+ * Acepta `H:mm`, `HH:mm` y solo horas (`9` → `09:00`).
+ * Devuelve `null` si el texto no es vacío pero no es una hora válida.
+ */
+export function normalizeClockTimeInput(raw: string): string | null {
+  const t = raw.trim()
+  if (!t) return ""
+  const segments = t.split(":")
+  if (segments.length > 2) return null
+  if (segments.length === 2) {
+    const hh = Number.parseInt(segments[0] ?? "", 10)
+    const mm = Number.parseInt(segments[1] ?? "", 10)
+    if (Number.isNaN(hh) || Number.isNaN(mm)) return null
+    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null
+    return `${pad2(hh)}:${pad2(mm)}`
+  }
+  const hhOnly = Number.parseInt(segments[0] ?? "", 10)
+  if (Number.isNaN(hhOnly) || hhOnly < 0 || hhOnly > 23) return null
+  return `${pad2(hhOnly)}:00`
+}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { Calendar, Loader2 } from "lucide-react"
+import Snackbar from "@/components/ui/Snackbar"
 import {
   getInterviewsByCandidate,
   getInterviewHttpErrorMessage,
@@ -23,6 +24,11 @@ export function CandidateInterviewList({
   const [error, setError] = useState<string | null>(null)
   const [detailInterviewId, setDetailInterviewId] = useState<string | null>(null)
   const [detailVacancyId, setDetailVacancyId] = useState<string | null>(null)
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    variant: "success" as "success" | "error" | "info",
+    message: "",
+  })
 
   const load = useCallback(async () => {
     if (!candidateProfileId) return
@@ -55,6 +61,10 @@ export function CandidateInterviewList({
   const handleCloseDetail = () => {
     setDetailInterviewId(null)
     setDetailVacancyId(null)
+  }
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }))
   }
 
   return (
@@ -139,6 +149,23 @@ export function CandidateInterviewList({
         onSaved={() => {
           load().catch(() => {})
         }}
+        onDeleted={(id) => {
+          setItems((prev) => prev.filter((i) => i.id !== id))
+          setDetailInterviewId(null)
+          setDetailVacancyId(null)
+          setSnackbar({
+            open: true,
+            variant: "success",
+            message: "Entrevista eliminada.",
+          })
+        }}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        onClose={handleCloseSnackbar}
+        variant={snackbar.variant}
+        message={snackbar.message}
       />
     </div>
   )

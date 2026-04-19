@@ -1,6 +1,7 @@
-"use client";
+"use client"
 
-import Modal from "@/components/ui/Modal";
+import type { ReactNode } from "react"
+import Modal from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button";
 import { AlertTriangle } from "lucide-react";
 
@@ -13,6 +14,17 @@ export default function DeleteConfirmModal({
   confirmText = "Eliminar",
   cancelText = "Cancelar",
   loading = false,
+  overlayZIndexClass,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onConfirm?: () => void
+  title: string
+  message: ReactNode
+  confirmText?: string
+  cancelText?: string
+  loading?: boolean
+  overlayZIndexClass?: string
 }) {
   const handleConfirm = () => {
     onConfirm?.();
@@ -51,6 +63,7 @@ export default function DeleteConfirmModal({
       size="sm"
       closeOnOverlayClick={!loading}
       closeOnEscape={!loading}
+      overlayZIndexClass={overlayZIndexClass}
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3">

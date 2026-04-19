@@ -3,6 +3,7 @@ import {
   addMinutesToClockTime,
   combineDatetimeLocal,
   isQuarterHourTime,
+  normalizeClockTimeInput,
   sameDayMinutesFromStartToEnd,
   splitDatetimeLocal,
 } from "@/lib/interview-datetime"
@@ -29,5 +30,15 @@ describe("interview-datetime helpers", () => {
   it("isQuarterHourTime detecta cuartos de hora", () => {
     expect(isQuarterHourTime("10:15")).toBe(true)
     expect(isQuarterHourTime("10:07")).toBe(false)
+  })
+
+  it("normalizeClockTimeInput normaliza o rechaza", () => {
+    expect(normalizeClockTimeInput("  ")).toBe("")
+    expect(normalizeClockTimeInput("9:5")).toBe("09:05")
+    expect(normalizeClockTimeInput("14:30")).toBe("14:30")
+    expect(normalizeClockTimeInput("7")).toBe("07:00")
+    expect(normalizeClockTimeInput("25:00")).toBe(null)
+    expect(normalizeClockTimeInput("12:60")).toBe(null)
+    expect(normalizeClockTimeInput("no")).toBe(null)
   })
 })

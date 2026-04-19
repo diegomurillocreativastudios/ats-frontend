@@ -16,6 +16,7 @@ import { localDatetimeInputToUtcIso } from "@/lib/interview-datetime"
 import { InterviewerRecruiterSelect } from "@/components/rrhh/interviews/interviewer-recruiter-select"
 import { InterviewScheduleRow } from "@/components/rrhh/interviews/interview-schedule-controls"
 import Snackbar from "@/components/ui/Snackbar"
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
 
 export type InterviewFormProps =
   | {
@@ -32,6 +33,7 @@ export type InterviewFormProps =
 
 export function InterviewForm(props: InterviewFormProps) {
   const { vacancyId } = props
+  const { status: calendarStatus } = useGoogleCalendar()
   const isModal = props.mode === "modal"
   const backHref = props.mode === "page" ? props.backHref : ""
   const onCloseModal = props.mode === "modal" ? props.onClose : undefined
@@ -271,6 +273,31 @@ export function InterviewForm(props: InterviewFormProps) {
             </p>
           ) : null}
         </div>
+
+        {scheduledLocal.trim() ? (
+          <div
+            className="rounded-md border border-border bg-muted/50 px-3 py-2 font-inter text-sm text-foreground"
+            role="status"
+          >
+            {calendarStatus.isConnected ? (
+              <span>
+                Esta entrevista se sincronizará con Google Calendar al guardar
+                (si el servidor lo soporta).
+              </span>
+            ) : (
+              <span>
+                Google Calendar no está conectado.{" "}
+                <Link
+                  href="/portal-rrhh/configuracion/calendario"
+                  className="font-medium text-vo-purple underline-offset-2 hover:underline"
+                >
+                  Conectar en configuración
+                </Link>{" "}
+                para invitaciones y eventos automáticos.
+              </span>
+            )}
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="interview-type" className="font-inter text-sm font-medium">

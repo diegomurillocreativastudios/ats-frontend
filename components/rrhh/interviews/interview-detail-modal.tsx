@@ -9,6 +9,7 @@ export interface InterviewDetailModalProps {
   interviewId: string | null
   vacancyIdFromQuery?: string | null
   onSaved?: () => void
+  onDeleted?: (interviewId: string) => void
 }
 
 export function InterviewDetailModal({
@@ -17,6 +18,7 @@ export function InterviewDetailModal({
   interviewId,
   vacancyIdFromQuery = null,
   onSaved,
+  onDeleted,
 }: InterviewDetailModalProps) {
   if (!interviewId) return null
 
@@ -34,6 +36,7 @@ export function InterviewDetailModal({
         variant="modal"
         onClose={onClose}
         onSaved={onSaved}
+        onDeleted={onDeleted}
       />
     </Modal>
   )

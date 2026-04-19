@@ -65,7 +65,11 @@ export const apiClient = {
     }
 
     const res = await fetch(url, config)
-    const data = await res.json().catch(() => ({}))
+    // 204/205 sin cuerpo: no intentar JSON.parse del body vacío.
+    const data =
+      res.status === 204 || res.status === 205
+        ? {}
+        : await res.json().catch(() => ({}))
 
     if (res.status === 401 && !isRetry && typeof window !== "undefined") {
       const refreshed = await tryRefresh()
@@ -73,11 +77,28 @@ export const apiClient = {
         return this.request(endpoint, options, true)
       }
       window.location.href = "/auth/iniciar-sesion"
-      throw { status: 401, message: "Sesión expirada" }
+      const err = new Error("Sesión expirada") as Error & { status: number }
+      err.status = 401
+      throw err
     }
 
     if (!res.ok) {
-      throw { status: res.status, ...data }
+      const payload =
+        data && typeof data === "object" && !Array.isArray(data)
+          ? (data as Record<string, unknown>)
+          : {}
+      const fromBody =
+        (typeof payload.message === "string" && payload.message.trim()) ||
+        (typeof payload.error === "string" && payload.error.trim()) ||
+        (typeof payload.detail === "string" && payload.detail.trim())
+      const message = fromBody || `Solicitud fallida (${res.status})`
+      const err = new Error(message) as Error & {
+        status: number
+        body?: unknown
+      }
+      err.status = res.status
+      err.body = data
+      throw err
     }
     return data
   },

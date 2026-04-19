@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import {
   Calendar,
   ClipboardList,
+  Cog,
   FileText,
   Shield,
   Users,
@@ -18,6 +19,12 @@ const navItems = [
   { href: "/portal-admin/entrevistas", label: "Entrevistas", icon: Calendar },
   { href: "/portal-admin/usuarios", label: "Usuarios", icon: Users },
 ]
+
+const settingsNavItem = {
+  href: "/portal-admin/configuracion",
+  label: "Configuracion",
+  icon: Cog,
+}
 
 export default function AdminSidebar() {
   const pathname = usePathname()
@@ -45,7 +52,7 @@ export default function AdminSidebar() {
           </span>
         </Link>
         <nav className="flex flex-col gap-1 px-3" aria-label="Menú administración">
-          {navItems.map((item) => {
+          {[...navItems, settingsNavItem].map((item) => {
             const Icon = item.icon
             const isActive =
               pathname === item.href || pathname.startsWith(`${item.href}/`)

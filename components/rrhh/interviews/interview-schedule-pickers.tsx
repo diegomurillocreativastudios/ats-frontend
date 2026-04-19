@@ -15,6 +15,7 @@ import {
   getQuarterHourTimeOptions,
   getTodayDateInputValue,
   isQuarterHourTime,
+  normalizeClockTimeInput,
 } from "@/lib/interview-datetime"
 
 const pad2 = (n: number) => String(n).padStart(2, "0")
@@ -42,10 +43,10 @@ function toYmd(y: number, m0: number, d: number): string {
 const WEEKDAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"] as const
 
 const datePillButtonClass =
-  "inline-flex min-h-10 min-w-[min(100%,13.5rem)] max-w-full items-center justify-center rounded-lg bg-zinc-200 px-3 py-2 text-center font-inter text-sm text-zinc-900 transition-colors hover:bg-zinc-300/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60"
+  "inline-flex min-h-10 min-w-[min(100%,13.5rem)] max-w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-center font-inter text-sm text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
 
-const selectPillClass =
-  "h-10 min-w-[7.5rem] cursor-pointer appearance-none rounded-lg border-0 bg-zinc-200 py-2 pl-3 pr-9 font-inter text-sm tabular-nums text-zinc-900 shadow-none outline-none transition-colors hover:bg-zinc-300/90 focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60"
+const timeInputClass =
+  "h-10 w-[4.5rem] shrink-0 cursor-text rounded-md border border-input bg-background px-1.5 py-2 font-inter text-sm tabular-nums text-foreground outline-none transition-colors hover:bg-muted/30 focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
 
 export interface ScheduleDatePickerProps {
   value: string
@@ -262,7 +263,8 @@ export interface QuarterHourTimeSelectProps {
 }
 
 /**
- * Desplegable nativo estilizado con opciones cada 15 minutos.
+ * Campo de hora con sugerencias cada 15 minutos (`datalist`) y texto libre
+ * validado al salir del foco.
  */
 export function QuarterHourTimeSelect({
   value,
@@ -272,12 +274,76 @@ export function QuarterHourTimeSelect({
   allowEmpty = false,
   emptyLabel = "Hora",
 }: QuarterHourTimeSelectProps) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const options = useMemo(() => mergeTimeOptions(value), [value])
+  const [focused, setFocused] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [text, setText] = useState(value)
+
+  useEffect(() => {
+    if (!focused) setText(value)
+  }, [value, focused])
+
+  useEffect(() => {
+    if (!open) return
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("pointerdown", handlePointerDown)
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+    }
+  }, [open])
+
+  const commitFromText = useCallback(() => {
+    const normalized = normalizeClockTimeInput(text)
+    if (normalized === "") {
+      if (allowEmpty) {
+        onChange("")
+        setText("")
+        return
+      }
+      setText(value)
+      return
+    }
+    if (normalized === null) {
+      setText(value)
+      return
+    }
+    onChange(normalized)
+    setText(normalized)
+  }, [allowEmpty, onChange, text, value])
+
+  const handleBlur = useCallback(() => {
+    setFocused(false)
+    commitFromText()
+  }, [commitFromText])
+
+  const handleChevronClick = useCallback(() => {
+    if (disabled) return
+    const input = inputRef.current
+    if (!input) return
+    input.focus()
+    setOpen(true)
+  }, [disabled])
+
+  const handleSelectOption = useCallback(
+    (nextTime: string) => {
+      onChange(nextTime)
+      setText(nextTime)
+      setOpen(false)
+      setFocused(false)
+    },
+    [onChange]
+  )
 
   if (disabled && !value) {
     return (
       <div
-        className={`${selectPillClass} pointer-events-none opacity-60`}
+        className={`${timeInputClass} pointer-events-none flex items-center justify-center text-muted-foreground`}
         aria-label={ariaLabel}
       >
         —
@@ -286,27 +352,90 @@ export function QuarterHourTimeSelect({
   }
 
   return (
-    <div className="relative inline-flex">
-      <select
-        value={value}
+    <div className="relative inline-flex items-center" ref={rootRef}>
+      <input
+        ref={inputRef}
+        type="text"
+        value={focused ? text : value || ""}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
-        className={selectPillClass}
+        placeholder={allowEmpty ? emptyLabel : undefined}
+        onFocus={() => {
+          setFocused(true)
+          setText(value || "")
+          setOpen(true)
+        }}
+        onChange={(e) => {
+          setText(e.target.value)
+          setOpen(true)
+        }}
+        onBlur={handleBlur}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault()
+            ;(e.target as HTMLInputElement).blur()
+            return
+          }
+          if (e.key === "Escape") {
+            setOpen(false)
+          }
+        }}
+        className={`${timeInputClass} pr-6`}
         aria-label={ariaLabel}
-      >
-        {allowEmpty ? (
-          <option value="">{emptyLabel}</option>
-        ) : null}
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600"
-        aria-hidden
+        autoComplete="off"
       />
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={handleChevronClick}
+        disabled={disabled}
+        className="absolute right-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
+        aria-label={`Abrir opciones de ${ariaLabel.toLowerCase()}`}
+      >
+        <ChevronDown className="h-4 w-4" aria-hidden />
+      </button>
+      {open ? (
+        <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-42 overflow-hidden rounded-md border border-border bg-background shadow-lg">
+          <ul
+            role="listbox"
+            aria-label={`Opciones de ${ariaLabel.toLowerCase()}`}
+            className="max-h-56 overflow-y-auto py-1"
+          >
+            {allowEmpty ? (
+              <li>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => handleSelectOption("")}
+                  className="w-full px-3 py-2 text-left font-inter text-sm text-muted-foreground transition-colors hover:bg-muted/70"
+                >
+                  {emptyLabel}
+                </button>
+              </li>
+            ) : null}
+            {options.map((option) => {
+              const selected = option.value === value
+              return (
+                <li key={option.value}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleSelectOption(option.value)}
+                    className={`w-full px-3 py-2 text-left font-inter text-sm tabular-nums transition-colors hover:bg-muted/70 ${
+                      selected
+                        ? "bg-vo-purple/10 font-medium text-vo-purple"
+                        : "text-foreground"
+                    }`}
+                    role="option"
+                    aria-selected={selected}
+                  >
+                    {option.label}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      ) : null}
     </div>
   )
 }
