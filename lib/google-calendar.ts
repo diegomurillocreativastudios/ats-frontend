@@ -1,5 +1,4 @@
 import { apiClient } from "@/lib/api"
-import { getGoogleCalendarFrontendOAuthUrls } from "@/lib/google-calendar-oauth-urls"
 import type {
   CalendarSyncResponse,
   GoogleCalendarStatus,
@@ -13,8 +12,10 @@ import type {
  * Ajustar solo aquí si el contrato del API cambia.
  */
 export const GOOGLE_CALENDAR_API = {
-  authorize: "/api/interviews/auth/google/authorize",
-  callback: "/api/interviews/auth/google/callback",
+  // OAuth endpoints viven en RecruiterInterviewsController (Route: /api/recruiter)
+  authorize: "/api/recruiter/interviews/auth/google/authorize",
+  callback: "/api/recruiter/interviews/auth/google/callback",
+  // Calendar endpoints viven en InterviewsCalendarController (Route: /api/interviews)
   status: "/api/interviews/calendar/status",
   disconnect: "/api/interviews/calendar/disconnect",
   sync: "/api/interviews/calendar/sync",
@@ -114,12 +115,7 @@ export function normalizeInterviewCalendarEvent(
 }
 
 export async function getGoogleAuthUrl(): Promise<string> {
-  const { frontendSuccessUrl, frontendErrorUrl } =
-    getGoogleCalendarFrontendOAuthUrls()
-  const data = (await apiClient.post(GOOGLE_CALENDAR_API.authorize, {
-    frontendSuccessUrl,
-    frontendErrorUrl,
-  })) as {
+  const data = (await apiClient.post(GOOGLE_CALENDAR_API.authorize, {})) as {
     authUrl?: string
     auth_url?: string
   }
@@ -148,11 +144,23 @@ export async function checkCalendarStatus(): Promise<GoogleCalendarStatus> {
 }
 
 export async function disconnectGoogleCalendar(): Promise<GoogleOAuthResponse> {
-  const data = (await apiClient.post(
-    GOOGLE_CALENDAR_API.disconnect,
-    {}
-  )) as GoogleOAuthResponse
-  return data
+  try {
+    const data = (await apiClient.post(
+      GOOGLE_CALENDAR_API.disconnect,
+      {}
+    )) as GoogleOAuthResponse
+    return data
+  } catch (err: unknown) {
+    const status =
+      typeof err === "object" && err !== null && "status" in err
+        ? Number((err as { status?: number }).status)
+        : 0
+    if (status !== 404) throw err
+    return (await apiClient.post(
+      "/api/integrations/google-calendar/disconnect",
+      {}
+    )) as GoogleOAuthResponse
+  }
 }
 
 export async function getInterviewCalendarEvent(
