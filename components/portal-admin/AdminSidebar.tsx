@@ -40,9 +40,9 @@ export default function AdminSidebar() {
     >
       <div className="flex flex-col gap-6">
         <Link
-          href="/portal-admin/usuarios"
+          href="/"
           className="flex items-center gap-3 px-5 transition-opacity hover:opacity-90 focus:outline-none"
-          aria-label="Ir al portal de administración"
+          aria-label="Ir al inicio - ATS App"
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-vo-navy">
             <Shield className="h-5 w-5 text-white" aria-hidden />

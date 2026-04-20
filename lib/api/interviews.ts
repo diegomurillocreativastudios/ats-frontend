@@ -17,6 +17,7 @@ export interface Interview {
   interviewTypeLabel: string | null
   interviewTypeId: string | null
   interviewerName: string | null
+  googleMeetUrl: string | null
   notes: string | null
   outcome: string | null
   status: InterviewStatus
@@ -496,6 +497,7 @@ export function normalizeInterview(raw: unknown): Interview {
       "interviewer_name",
       "interviewer",
     ]),
+    googleMeetUrl: pickString(r, ["googleMeetUrl", "google_meet_url", "meetUrl"]),
     notes: pickString(r, ["notes", "Notes"]),
     outcome: pickString(r, ["outcome", "Outcome"]),
     status: statusMeta.status,

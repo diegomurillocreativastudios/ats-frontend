@@ -63,41 +63,48 @@ export default function MyPostulationsCard({
         </p>
       ) : (
         <div className="flex flex-col gap-3">
-          {applications.map((post) => (
-            <div
-              key={post.id}
-              className="flex flex-col gap-2 rounded-lg bg-muted p-4"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-inter text-sm font-medium text-foreground">
-                  {post.jobTitle}
-                </p>
-                <span
-                  className={`shrink-0 rounded-xl px-2.5 py-1 font-inter text-xs font-medium ${getApplicationStatusStyle(post.statusLabel)}`}
-                >
-                  {post.statusLabel}
-                </span>
+          {applications.map((post) => {
+            const showCompanyLine =
+              post.companyLine.trim().toLowerCase() !== "default company";
+
+            return (
+              <div
+                key={post.id}
+                className="flex flex-col gap-2 rounded-lg bg-muted p-4"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-inter text-sm font-medium text-foreground">
+                    {post.jobTitle}
+                  </p>
+                  <span
+                    className={`shrink-0 rounded-xl px-2.5 py-1 font-inter text-xs font-medium ${getApplicationStatusStyle(post.statusLabel)}`}
+                  >
+                    {post.statusLabel}
+                  </span>
+                </div>
+                {showCompanyLine ? (
+                  <p className="font-inter text-xs text-muted-foreground">
+                    {post.companyLine}
+                  </p>
+                ) : null}
+                <div className="flex gap-1">
+                  {Array.from({ length: post.totalStages }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-1.5 flex-1 rounded-sm ${
+                        i < post.progressCurrent ? "bg-vo-purple" : "bg-border"
+                      }`}
+                      role="progressbar"
+                      aria-valuenow={post.progressCurrent}
+                      aria-valuemin={0}
+                      aria-valuemax={post.totalStages}
+                      aria-label={`Progreso etapa ${post.progressCurrent} de ${post.totalStages}`}
+                    />
+                  ))}
+                </div>
               </div>
-              <p className="font-inter text-xs text-muted-foreground">
-                {post.companyLine}
-              </p>
-              <div className="flex gap-1">
-                {Array.from({ length: post.totalStages }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-1.5 flex-1 rounded-sm ${
-                      i < post.progressCurrent ? "bg-vo-purple" : "bg-border"
-                    }`}
-                    role="progressbar"
-                    aria-valuenow={post.progressCurrent}
-                    aria-valuemin={0}
-                    aria-valuemax={post.totalStages}
-                    aria-label={`Progreso etapa ${post.progressCurrent} de ${post.totalStages}`}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

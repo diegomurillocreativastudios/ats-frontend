@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react"
 import {
   Calendar,
   CalendarClock,
+  ExternalLink,
   History,
   Loader2,
   UserRound,
@@ -105,6 +106,19 @@ function InterviewCandidateCard({ row }: { row: Interview }) {
                     {row.interviewerName.trim()}
                   </span>
                 </span>
+              </p>
+            ) : null}
+            {row.googleMeetUrl?.trim() ? (
+              <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
+                <a
+                  href={row.googleMeetUrl.trim()}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="font-medium text-vo-purple hover:underline"
+                >
+                  Unirse a Google Meet
+                </a>
               </p>
             ) : null}
           </div>

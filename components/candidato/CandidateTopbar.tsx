@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, Bell, Menu, LogOut } from "lucide-react";
+import { ChevronRight, Bell, Menu, LogOut, Shield } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getInitials } from "@/lib/getInitials";
+import { isAdminRole } from "@/lib/roles";
 
 const DESKTOP_PADDING = "px-8";
 const TABLET_PADDING = "px-5";
@@ -19,6 +20,7 @@ export default function CandidateTopbar({
   const isTablet = variant === "tablet";
   const isMobile = variant === "mobile";
   const { user, loading } = useCurrentUser();
+  const showAdminShortcut = isAdminRole(user?.role);
   const initials = getInitials(user?.name, user?.email);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -44,6 +46,11 @@ export default function CandidateTopbar({
     } catch {
       router.push("/auth/iniciar-sesion");
     }
+  };
+
+  const handleGoToAdmin = () => {
+    setMenuOpen(false);
+    router.push("/portal-admin");
   };
 
   const paddingClass =
@@ -129,6 +136,17 @@ export default function CandidateTopbar({
               className="absolute right-0 top-full z-50 mt-2 min-w-[160px] rounded-lg border border-border bg-card py-1 shadow-lg"
               role="menu"
             >
+              {showAdminShortcut && (
+                <button
+                  type="button"
+                  onClick={handleGoToAdmin}
+                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left font-inter text-sm text-foreground hover:bg-muted"
+                  role="menuitem"
+                >
+                  <Shield className="h-4 w-4 shrink-0" aria-hidden />
+                  Administración
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleLogout}
