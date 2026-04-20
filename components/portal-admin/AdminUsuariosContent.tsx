@@ -24,6 +24,7 @@ import {
   patchAdminUser,
   postAdminUserRoles,
   postAdminUserSendPasswordReset,
+  setAdminUserLockout,
   type AdminUserDetail,
   type AdminUserListItem,
 } from "@/lib/api/admin-users"
@@ -177,7 +178,54 @@ export default function AdminUsuariosContent() {
     try {
       const u = await patchAdminUser(detailId, patch)
       setDetail(u)
-      showSnackbar("success", "Usuario actualizado.")
+      setItems((prev) =>
+        prev.map((row) =>
+          row.id === u.id
+            ? {
+                ...row,
+                emailConfirmed: u.emailConfirmed,
+                lockoutActive: u.lockoutActive,
+                roles: u.roles,
+                userName: u.userName,
+              }
+            : row
+        )
+      )
+      if (patch.lockoutEnabled === true) {
+        showSnackbar("success", "Usuario bloqueado.")
+      } else if (patch.lockoutEnabled === false) {
+        showSnackbar("success", "Usuario desbloqueado.")
+      } else {
+        showSnackbar("success", "Usuario actualizado.")
+      }
+      void loadList()
+    } catch (err: unknown) {
+      showSnackbar("error", getApiErrorMessage(err))
+    } finally {
+      setDetailBusy(false)
+    }
+  }
+
+  const handleToggleLockout = async (lockoutEnabled: boolean) => {
+    if (!detailId) return
+    setDetailBusy(true)
+    try {
+      const u = await setAdminUserLockout(detailId, lockoutEnabled)
+      setDetail(u)
+      setItems((prev) =>
+        prev.map((row) =>
+          row.id === u.id
+            ? {
+                ...row,
+                lockoutActive: u.lockoutActive,
+              }
+            : row
+        )
+      )
+      showSnackbar(
+        "success",
+        lockoutEnabled ? "Usuario bloqueado." : "Usuario desbloqueado."
+      )
       void loadList()
     } catch (err: unknown) {
       showSnackbar("error", getApiErrorMessage(err))
@@ -482,9 +530,7 @@ export default function AdminUsuariosContent() {
                   </td>
                   <td className="px-4 py-3 align-middle">
                     {row.lockoutActive ? (
-                      <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
-                        Activo
-                      </span>
+                      <span className="text-emerald-600">Sí</span>
                     ) : (
                       <span className="text-muted-foreground">No</span>
                     )}
@@ -675,13 +721,11 @@ export default function AdminUsuariosContent() {
                 <input
                   type="checkbox"
                   className={checkboxVoClass}
-                  checked={detail.lockoutEnabled}
+                  checked={detail.lockoutActive}
                   disabled={detailBusy}
-                  onChange={(e) =>
-                    void handlePatch({ lockoutEnabled: e.target.checked })
-                  }
+                  onChange={(e) => void handleToggleLockout(e.target.checked)}
                 />
-                Bloqueo de cuenta (lockout)
+                Cuenta bloqueada
               </label>
               <div className="flex items-center gap-2.5 font-inter text-sm text-foreground">
                 <input
@@ -697,6 +741,9 @@ export default function AdminUsuariosContent() {
                 <span className="sr-only">Solo lectura</span>
               </div>
             </div>
+            <p className="font-inter text-xs text-muted-foreground">
+              Activalo para bloquear manualmente al usuario y desactivalo para quitar el bloqueo.
+            </p>
             <p className="font-inter text-xs text-muted-foreground">
               Lockout activo:{" "}
               {detail.lockoutActive ? (

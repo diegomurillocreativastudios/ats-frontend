@@ -175,6 +175,13 @@ export async function patchAdminUser(
   return mapDetail(data)
 }
 
+export async function setAdminUserLockout(
+  id: string,
+  lockoutEnabled: boolean
+): Promise<AdminUserDetail> {
+  return patchAdminUser(id, { lockoutEnabled })
+}
+
 export async function postAdminUserRoles(
   id: string,
   roleNames: string[]
