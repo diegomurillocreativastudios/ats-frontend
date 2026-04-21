@@ -18,6 +18,7 @@ const PORTAL_RRHH = "Portal RRHH"
 const PORTAL_CANDIDATO = "Portal Candidato"
 const PORTAL_ADMIN = "Portal Admin"
 const CUENTA = "Cuenta"
+const OPORTUNIDADES = "Oportunidades"
 
 /** Une partes con " | " (siempre incluye el prefijo ATS). */
 function joinDocumentTitle(...parts) {
@@ -63,6 +64,7 @@ const VACANCY_DETAIL_PATH = /^\/portal-rrhh\/vacantes\/[^/]+$/
 
 /** Detalle de candidato RRHH: `/portal-rrhh/candidatos/<candidateId>` (sin subrutas). */
 const CANDIDATO_DETAIL_PATH = /^\/portal-rrhh\/candidatos\/[^/]+$/
+const OPPORTUNITY_DETAIL_PATH = /^\/oportunidades\/[^/]+$/
 
 export function isEntrevistasByVacancyPath(pathname) {
   const normalized =
@@ -86,6 +88,14 @@ export function isCandidatoDetailPath(pathname) {
       ? pathname.slice(0, -1)
       : pathname
   return CANDIDATO_DETAIL_PATH.test(normalized)
+}
+
+export function isOpportunityDetailPath(pathname) {
+  const normalized =
+    pathname.endsWith("/") && pathname.length > 1
+      ? pathname.slice(0, -1)
+      : pathname
+  return OPPORTUNITY_DETAIL_PATH.test(normalized)
 }
 
 /** Título estable hasta que el cliente cargue el nombre de la vacante. */
@@ -128,6 +138,10 @@ export function formatCandidatoDetailDocumentTitle(displayName) {
   return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Candidatos", name)
 }
 
+export function getOpportunityDetailStaticTitle() {
+  return joinDocumentTitle(BASE_TITLE, OPORTUNIDADES, "Vacante")
+}
+
 /** Sufijo (puede incluir ` | `) que se antepone a `ATS | …` para rutas exactas. */
 const EXACT_PATH_SUFFIX = {
   "/": joinDocumentTitle(PORTAL_CANDIDATO, "Inicio"),
@@ -142,6 +156,7 @@ const EXACT_PATH_SUFFIX = {
     CUENTA,
     "Restablecer contraseña",
   ),
+  "/oportunidades": OPORTUNIDADES,
 }
 
 function titlePortalRrhh(normalizedPath) {
@@ -241,6 +256,10 @@ export const getPageTitle = (pathname) => {
 
   const adm = titlePortalAdmin(normalizedPath)
   if (adm) return adm
+
+  if (isOpportunityDetailPath(normalizedPath)) {
+    return getOpportunityDetailStaticTitle()
+  }
 
   const segments = normalizedPath.split("/").filter(Boolean)
   if (segments.length === 0) {

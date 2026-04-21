@@ -13,6 +13,7 @@ const publicPaths = [
   "/auth/restablecer-contrasena",
   "/restablecer-contrasena",
   "/recuperar-contrasena",
+  "/oportunidades",
 ]
 
 function normalizeRole(rawRole: string | null): "candidate" | "recruiter" | null {
