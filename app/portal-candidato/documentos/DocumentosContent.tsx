@@ -8,6 +8,7 @@ import DocumentsUploadZone, {
   type DocumentsUploadZoneLeftContext,
 } from "@/components/candidato/DocumentsUploadZone"
 import DocumentsList from "@/components/candidato/DocumentsList"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage, createSilentError } from "@/lib/api-error"
@@ -146,14 +147,11 @@ export default function DocumentosContent() {
           <CandidateTopbar variant="desktop" breadcrumbLabel="Documentos" />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col gap-8 p-8">
-              <section aria-label="Título de sección">
-                <h1 className="font-inter text-[28px] font-bold text-foreground">
-                  Documentos
-                </h1>
-                <p className="mt-2 font-inter text-base text-muted-foreground">
-                  Sube y gestiona los documentos de tu proceso de selección
-                </p>
-              </section>
+              <PortalPageHeader
+                title="Documentos"
+                description="Sube y gestiona los documentos de tu proceso de selección"
+                className="pb-0"
+              />
               <DocumentsUploadZone
                 onProcess={handleProcess}
                 onProcessAll={handleProcessAll}
@@ -183,14 +181,12 @@ export default function DocumentosContent() {
         <CandidateTopbar variant="tablet" breadcrumbLabel="Documentos" />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
-            <section aria-label="Título de sección">
-              <h1 className="font-inter text-xl font-bold text-foreground md:text-2xl">
-                Documentos
-              </h1>
-              <p className="mt-1 font-inter text-[13px] text-muted-foreground md:mt-1.5 md:text-sm">
-                Sube y gestiona tus documentos
-              </p>
-            </section>
+            <PortalPageHeader
+              title="Documentos"
+              description="Sube y gestiona tus documentos"
+              className="pb-0"
+              descriptionClassName="text-sm leading-6 md:text-base"
+            />
             <DocumentsUploadZone
               onProcess={handleProcess}
               onProcessAll={handleProcessAll}

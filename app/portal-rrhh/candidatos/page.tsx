@@ -11,6 +11,7 @@ import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay";
 import Modal from "@/components/ui/Modal";
+import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
 
@@ -326,18 +327,11 @@ export default function CandidatosPage() {
           <RRHHTopbar variant="desktop" breadcrumbLabel="Candidatos" />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col">
-              <section
-                className="flex flex-col gap-4 border-b border-border px-8 py-5 sm:flex-row sm:items-center sm:justify-between"
-                aria-label="Encabezado de candidatos"
-              >
-                <div className="flex flex-col gap-1">
-                  <h1 className="font-inter text-2xl font-bold text-foreground">
-                    Candidatos
-                  </h1>
-                  <p className="font-inter text-sm text-muted-foreground">
-                    Revisa y gestiona todos los candidatos
-                  </p>
-                </div>
+              <section className="px-8 py-6" aria-label="Encabezado de candidatos">
+                <PortalPageHeader
+                  title="Candidatos"
+                  description="Revisa y gestiona todos los candidatos"
+                />
               </section>
               <section className="p-8" aria-label="Contenido de candidatos">
                 {mainContent}
@@ -372,19 +366,10 @@ export default function CandidatosPage() {
         <RRHHTopbar variant="tablet" breadcrumbLabel="Candidatos" />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
-            <section
-              className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-              aria-label="Encabezado de candidatos"
-            >
-              <div className="flex flex-col gap-1">
-                <h1 className="font-inter text-xl font-bold text-foreground md:text-2xl">
-                  Candidatos
-                </h1>
-                <p className="font-inter text-sm text-muted-foreground">
-                  Revisa y gestiona todos los candidatos
-                </p>
-              </div>
-            </section>
+            <PortalPageHeader
+              title="Candidatos"
+              description="Revisa y gestiona todos los candidatos"
+            />
             {mainContent}
           </div>
         </main>

@@ -15,6 +15,7 @@ import {
 import { localDatetimeInputToUtcIso } from "@/lib/interview-datetime"
 import { InterviewerRecruiterSelect } from "@/components/rrhh/interviews/interviewer-recruiter-select"
 import { InterviewScheduleRow } from "@/components/rrhh/interviews/interview-schedule-controls"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
 
@@ -196,9 +197,7 @@ export function InterviewForm(props: InterviewFormProps) {
           >
             ← Volver al listado
           </Link>
-          <h1 className="font-inter text-2xl font-bold text-foreground">
-            Nueva entrevista
-          </h1>
+          <PortalPageHeader title="Nueva entrevista" className="pb-0" />
         </div>
       ) : null}
 

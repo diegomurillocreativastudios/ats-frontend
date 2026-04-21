@@ -14,6 +14,7 @@ import {
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import NuevaVacanteModal from "@/components/rrhh/NuevaVacanteModal";
+import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 import RematchButton from "@/components/rrhh/RematchButton";
@@ -297,27 +298,22 @@ export default function VacantesPage() {
           <RRHHTopbar variant="desktop" breadcrumbLabel="Vacantes" />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col">
-              <section
-                className="flex flex-col gap-4 border-b border-border px-8 py-5 sm:flex-row sm:items-center sm:justify-between"
-                aria-label="Encabezado de vacantes"
-              >
-                <div className="flex flex-col gap-1">
-                  <h1 className="font-inter text-2xl font-bold text-foreground">
-                    Vacantes
-                  </h1>
-                  <p className="font-inter text-sm text-muted-foreground">
-                    Gestiona las posiciones abiertas
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsNuevaVacanteOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label="Crear nueva vacante"
-                >
-                  <Plus className="h-4 w-4" aria-hidden />
-                  Nueva Vacante
-                </button>
+              <section className="px-8 py-6" aria-label="Encabezado de vacantes">
+                <PortalPageHeader
+                  title="Vacantes"
+                  description="Gestiona las posiciones abiertas"
+                  actions={
+                    <button
+                      type="button"
+                      onClick={() => setIsNuevaVacanteOpen(true)}
+                      className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                      aria-label="Crear nueva vacante"
+                    >
+                      <Plus className="h-4 w-4" aria-hidden />
+                      Nueva Vacante
+                    </button>
+                  }
+                />
               </section>
               <section className="flex flex-col gap-6 p-8" aria-label="Lista de vacantes">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
@@ -409,29 +405,22 @@ export default function VacantesPage() {
         <RRHHTopbar variant="tablet" breadcrumbLabel="Vacantes" />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
-            <section
-              className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-              aria-label="Encabezado de vacantes"
-            >
-              <div className="flex flex-col gap-1">
-                <h1 className="font-inter text-xl font-bold text-foreground md:text-2xl">
-                  Vacantes
-                </h1>
-                <p className="font-inter text-sm text-muted-foreground">
-                  Gestiona las posiciones abiertas
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsNuevaVacanteOpen(true)}
-                className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                aria-label="Crear nueva vacante"
-              >
-                <Plus className="h-4 w-4" aria-hidden />
-                <span className="hidden sm:inline">Nueva Vacante</span>
-                <span className="sm:hidden" aria-hidden>Nueva</span>
-              </button>
-            </section>
+            <PortalPageHeader
+              title="Vacantes"
+              description="Gestiona las posiciones abiertas"
+              actions={
+                <button
+                  type="button"
+                  onClick={() => setIsNuevaVacanteOpen(true)}
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                  aria-label="Crear nueva vacante"
+                >
+                  <Plus className="h-4 w-4" aria-hidden />
+                  <span className="hidden sm:inline">Nueva Vacante</span>
+                  <span className="sm:hidden" aria-hidden>Nueva</span>
+                </button>
+              }
+            />
             <section className="flex flex-col gap-4" aria-label="Filtros y lista">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="relative w-full max-w-[320px]">

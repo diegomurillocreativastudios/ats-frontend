@@ -13,6 +13,7 @@ import {
 import EtapaModal from "@/components/rrhh/EtapaModal";
 import EstadosModal from "@/components/rrhh/EstadosModal";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
+import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 import { buildRecruiterStagePutPayload } from "@/lib/recruiterStagePayload";
@@ -453,37 +454,32 @@ export default function EtapasPage() {
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background font-inter text-foreground">
       <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
         <div className="min-w-0 flex flex-col">
-              <section
-                className="flex flex-col gap-4 border-b border-border px-8 py-5 sm:flex-row sm:items-center sm:justify-between"
-                aria-label="Encabezado de etapas"
-              >
-                <div className="flex flex-col gap-1">
-                  <h1 className="font-inter text-2xl font-bold text-foreground">
-                    Etapas
-                  </h1>
-                  <p className="font-inter text-sm text-muted-foreground">
-                    Gestiona las etapas del proceso de reclutamiento
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setIsEstadosModalOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 self-start rounded-md border border-border bg-background px-6 py-3 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                    aria-label="Gestionar estados"
-                  >
-                    Estados
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNewStage}
-                    className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                    aria-label="Crear nueva etapa"
-                  >
-                    <Plus className="h-4 w-4" aria-hidden />
-                    Nueva Etapa
-                  </button>
-                </div>
+              <section className="px-8 py-6" aria-label="Encabezado de etapas">
+                <PortalPageHeader
+                  title="Etapas"
+                  description="Gestiona las etapas del proceso de reclutamiento"
+                  actions={
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setIsEstadosModalOpen(true)}
+                        className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-6 py-3 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                        aria-label="Gestionar estados"
+                      >
+                        Estados
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNewStage}
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                        aria-label="Crear nueva etapa"
+                      >
+                        <Plus className="h-4 w-4" aria-hidden />
+                        Nueva Etapa
+                      </button>
+                    </>
+                  }
+                />
               </section>
               <section className="flex flex-col gap-6 p-8" aria-label="Lista de etapas">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">

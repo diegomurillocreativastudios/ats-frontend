@@ -5,6 +5,7 @@ import CandidateTopbar from "@/components/candidato/CandidateTopbar";
 import StatCard from "@/components/candidato/StatCard";
 import NextActivitiesCard from "@/components/candidato/NextActivitiesCard";
 import MyPostulationsCard from "@/components/candidato/MyPostulationsCard";
+import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import { useCandidateDashboard } from "@/hooks/useCandidateDashboard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getCandidateGreetingFirstName } from "@/lib/candidate-portal-greeting";
@@ -39,16 +40,15 @@ export default function CandidatePortalHome() {
                   {error}
                 </div>
               ) : null}
-              <section aria-label="Bienvenida">
-                <h1 className="font-inter text-[28px] font-bold text-foreground">
-                  {userLoading && !data && !error
+              <PortalPageHeader
+                title={
+                  userLoading && !data && !error
                     ? "Cargando…"
-                    : `¡Hola, ${greetingName}! 👋`}
-                </h1>
-                <p className="mt-2 font-inter text-base text-muted-foreground">
-                  Aquí está el resumen de tu proceso de selección
-                </p>
-              </section>
+                    : `¡Hola, ${greetingName}! 👋`
+                }
+                description="Aquí está el resumen de tu proceso de selección"
+                className="pb-0"
+              />
               <section aria-label="Resumen de estadísticas">
                 <StatCard
                   useDesktopLabels
@@ -88,19 +88,23 @@ export default function CandidatePortalHome() {
                 {error}
               </div>
             ) : null}
-            <section aria-label="Bienvenida">
-              <h1 className="font-inter text-xl font-bold text-foreground md:text-2xl">
-                {userLoading && !data && !error
+            <PortalPageHeader
+              title={
+                userLoading && !data && !error
                   ? "Cargando…"
-                  : `¡Hola, ${greetingName}! 👋`}
-              </h1>
-              <p className="mt-1 font-inter text-[13px] text-muted-foreground md:mt-1.5 md:text-sm">
-                <span className="md:hidden">Tu resumen de hoy</span>
-                <span className="hidden md:inline">
-                  Resumen de tu proceso de selección
-                </span>
-              </p>
-            </section>
+                  : `¡Hola, ${greetingName}! 👋`
+              }
+              description={
+                <>
+                  <span className="md:hidden">Tu resumen de hoy</span>
+                  <span className="hidden md:inline">
+                    Resumen de tu proceso de selección
+                  </span>
+                </>
+              }
+              className="pb-0"
+              descriptionClassName="text-sm leading-6 md:text-base"
+            />
             <section aria-label="Resumen de estadísticas">
               <StatCard
                 useDesktopLabels={false}

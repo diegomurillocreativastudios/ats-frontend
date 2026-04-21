@@ -1,10 +1,5 @@
-import { AdminVacancyCatalogContent } from "@/components/portal-admin/AdminVacancyCatalogContent"
+import { redirect } from "next/navigation"
 
-export const metadata = {
-  title: "Modalidades",
-  description: "Gestión del catálogo global de modalidades de vacantes",
-}
-
-export default function PortalAdminModalityCatalogPage() {
-  return <AdminVacancyCatalogContent catalog="modalities" />
+export default function PortalAdminCatalogModalitiesRedirectPage() {
+  redirect("/portal-admin/modalidades")
 }

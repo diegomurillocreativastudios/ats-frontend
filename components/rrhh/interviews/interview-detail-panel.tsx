@@ -24,6 +24,7 @@ import { InterviewScheduleRow } from "@/components/rrhh/interviews/interview-sch
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
 import { InterviewCalendarWidget } from "@/components/rrhh/interviews/interview-calendar-widget"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 
 const STATUS_ACTIONS: { value: InterviewStatus; label: string }[] = [
@@ -281,9 +282,7 @@ export function InterviewDetailPanel({
         ) : null}
         <div className="flex flex-wrap items-center gap-3">
           {variant === "page" ? (
-            <h1 className="font-inter text-2xl font-bold text-foreground">
-              Entrevista
-            </h1>
+            <PortalPageHeader title="Entrevista" className="w-full pb-0" />
           ) : null}
           {isEditable ? (
             <InterviewStatusBadge status={statusChoice} />

@@ -13,6 +13,7 @@ import {
 import CandidateSidebar from "@/components/candidato/CandidateSidebar"
 import CandidateTopbar from "@/components/candidato/CandidateTopbar"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { useCandidateSelfInterviews } from "@/hooks/useCandidateSelfInterviews"
 import type { Interview } from "@/lib/api/interviews"
 import { formatInterviewLocalDateTime } from "@/lib/interview-datetime"
@@ -255,15 +256,11 @@ export default function CandidateInterviewsContent() {
           <CandidateTopbar variant="desktop" breadcrumbLabel="Entrevistas" />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col gap-8 p-8">
-              <section aria-label="Título de sección">
-                <h1 className="font-inter text-[28px] font-bold text-foreground">
-                  Tus entrevistas
-                </h1>
-                <p className="mt-2 max-w-2xl font-inter text-base text-muted-foreground">
-                  Vista pensada para vos: próximas citas, datos del contacto y
-                  el detalle que comparte la empresa, sin pasos de edición.
-                </p>
-              </section>
+              <PortalPageHeader
+                title="Tus entrevistas"
+                description="Vista pensada para vos: próximas citas, datos del contacto y el detalle que comparte la empresa, sin pasos de edición."
+                className="pb-0"
+              />
               {mainSections}
             </div>
           </main>
@@ -274,14 +271,12 @@ export default function CandidateInterviewsContent() {
         <CandidateTopbar variant="tablet" breadcrumbLabel="Entrevistas" />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
-            <section aria-label="Título de sección">
-              <h1 className="font-inter text-xl font-bold text-foreground md:text-2xl">
-                Tus entrevistas
-              </h1>
-              <p className="mt-1 font-inter text-[13px] text-muted-foreground md:text-sm">
-                Próximas citas e historial de tu proceso.
-              </p>
-            </section>
+            <PortalPageHeader
+              title="Tus entrevistas"
+              description="Próximas citas e historial de tu proceso."
+              className="pb-0"
+              descriptionClassName="text-sm leading-6 md:text-base"
+            />
             {mainSections}
           </div>
         </main>

@@ -17,6 +17,7 @@ import {
   Trash2,
 } from "lucide-react"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import Modal from "@/components/ui/Modal"
@@ -432,35 +433,23 @@ export function AdminVacancyCatalogContent({
       className="flex min-h-0 flex-1 flex-col overflow-auto p-6 md:p-8"
       aria-labelledby={`portal-admin-${catalog}-heading`}
     >
-      <header className="mb-6 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-3xl">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-vo-purple/20 bg-vo-purple/5 px-3 py-1 text-xs font-medium text-vo-purple">
-            <CatalogIcon className="h-4 w-4" aria-hidden />
-            Catálogo global
-          </div>
-          <h1
-            id={`portal-admin-${catalog}-heading`}
-            className="font-inter text-2xl font-bold tracking-tight text-foreground"
+      <PortalPageHeader
+        id={`portal-admin-${catalog}-heading`}
+        title={copy.title}
+        description={copy.headingDescription}
+        className="mb-6"
+        contentClassName="max-w-3xl"
+        actions={
+          <Button
+            type="button"
+            variant="primary"
+            onClick={handleOpenCreate}
           >
-            {copy.title}
-          </h1>
-          <p className="mt-2 font-inter text-sm text-muted-foreground">
-            {copy.headingDescription} API:{" "}
-            <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-              {copy.endpoint}
-            </code>
-          </p>
-        </div>
-        <Button
-          type="button"
-          variant="primary"
-          className="self-start"
-          onClick={handleOpenCreate}
-        >
-          <Plus className="h-4 w-4" aria-hidden />
-          {copy.createCta}
-        </Button>
-      </header>
+            <Plus className="h-4 w-4" aria-hidden />
+            {copy.createCta}
+          </Button>
+        }
+      />
 
       <section
         className="mb-5 rounded-xl border border-border bg-card p-4 shadow-sm"

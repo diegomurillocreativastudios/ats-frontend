@@ -21,12 +21,12 @@ const navItems = [
   { href: "/portal-admin/entrevistas", label: "Entrevistas", icon: Calendar },
   { href: "/portal-admin/usuarios", label: "Usuarios", icon: Users },
   {
-    href: "/portal-admin/catalogos/departamentos",
+    href: "/portal-admin/departamentos",
     label: "Departamentos",
     icon: Building2,
   },
   {
-    href: "/portal-admin/catalogos/modalidades",
+    href: "/portal-admin/modalidades",
     label: "Modalidades",
     icon: Briefcase,
   },

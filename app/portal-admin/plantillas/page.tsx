@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import PlantillaModal from "@/components/rrhh/PlantillaModal";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
+import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 
@@ -74,7 +75,7 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
               )}
               {template.body && (
                 <p className="font-inter text-sm text-muted-foreground line-clamp-2 italic">
-                  "{template.body}"
+                  &quot;{template.body}&quot;
                 </p>
               )}
             </>
@@ -231,27 +232,22 @@ export default function PlantillasPage() {
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background font-inter text-foreground">
       <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
         <div className="min-w-0 flex flex-col">
-              <section
-                className="flex flex-col gap-4 border-b border-border px-8 py-5 sm:flex-row sm:items-center sm:justify-between"
-                aria-label="Encabezado de plantillas"
-              >
-                <div className="flex flex-col gap-1">
-                  <h1 className="font-inter text-2xl font-bold text-foreground">
-                    Plantillas
-                  </h1>
-                  <p className="font-inter text-sm text-muted-foreground">
-                    Gestiona las plantillas de notificaciones
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleNewTemplate}
-                  className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label="Crear nueva plantilla"
-                >
-                  <Plus className="h-4 w-4" aria-hidden />
-                  Nueva Plantilla
-                </button>
+              <section className="px-8 py-6" aria-label="Encabezado de plantillas">
+                <PortalPageHeader
+                  title="Plantillas"
+                  description="Gestiona las plantillas de notificaciones"
+                  actions={
+                    <button
+                      type="button"
+                      onClick={handleNewTemplate}
+                      className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                      aria-label="Crear nueva plantilla"
+                    >
+                      <Plus className="h-4 w-4" aria-hidden />
+                      Nueva Plantilla
+                    </button>
+                  }
+                />
               </section>
               <section className="flex flex-col gap-6 p-8" aria-label="Lista de plantillas">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">

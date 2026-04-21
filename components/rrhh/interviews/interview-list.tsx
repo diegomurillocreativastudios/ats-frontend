@@ -16,6 +16,7 @@ import { InterviewCreateModal } from "@/components/rrhh/interviews/interview-cre
 import { InterviewDetailModal } from "@/components/rrhh/interviews/interview-detail-modal"
 import { InterviewSingleDatetimeRow } from "@/components/rrhh/interviews/interview-schedule-controls"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 
 const STATUS_FILTER_OPTIONS: { value: "" | InterviewStatus; label: string }[] =
@@ -164,37 +165,29 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8">
-      <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="font-inter text-2xl font-bold text-foreground">
-            Entrevistas
-          </h1>
-          {vacancySummary.loading ? (
-            <p className="font-inter text-sm text-muted-foreground">
-              Cargando datos de la vacante…
-            </p>
-          ) : vacancyTitle?.trim() ? (
-            <p className="font-inter text-sm text-muted-foreground">
-              Vacante: {vacancyTitle.trim()}
-            </p>
-          ) : (
-            <p className="font-inter text-sm text-muted-foreground">
-              {vacancySummary.error
+      <PortalPageHeader
+        title="Entrevistas"
+        description={
+          vacancySummary.loading
+            ? "Cargando datos de la vacante…"
+            : vacancyTitle?.trim()
+              ? `Vacante: ${vacancyTitle.trim()}`
+              : vacancySummary.error
                 ? "No se pudo cargar el título de la vacante."
-                : "Gestión de entrevistas de la vacante"}
-            </p>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={handleOpenCreate}
-          className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-          data-testid="interviews-new-button"
-        >
-          <Plus className="h-4 w-4 shrink-0" aria-hidden />
-          Nueva entrevista
-        </button>
-      </header>
+                : "Gestión de entrevistas de la vacante"
+        }
+        actions={
+          <button
+            type="button"
+            onClick={handleOpenCreate}
+            className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            data-testid="interviews-new-button"
+          >
+            <Plus className="h-4 w-4 shrink-0" aria-hidden />
+            Nueva entrevista
+          </button>
+        }
+      />
 
       <section
         className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"

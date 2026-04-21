@@ -12,6 +12,7 @@ import {
   UserPlus,
 } from "lucide-react"
 import Modal from "@/components/ui/Modal"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -328,32 +329,23 @@ export default function AdminUsuariosContent() {
       className="flex min-h-0 flex-1 flex-col overflow-auto p-6 md:p-8"
       aria-labelledby="portal-admin-usuarios-heading"
     >
-      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1
-            id="portal-admin-usuarios-heading"
-            className="font-inter text-2xl font-bold tracking-tight text-foreground"
+      <PortalPageHeader
+        id="portal-admin-usuarios-heading"
+        title="Usuarios"
+        description="Listado y administración de cuentas del portal."
+        className="mb-6"
+        contentClassName="max-w-3xl"
+        actions={
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => setCreateOpen(true)}
           >
-            Usuarios
-          </h1>
-          <p className="mt-1 max-w-2xl font-inter text-sm text-muted-foreground">
-            Listado y administración de cuentas (API{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              /api/admin/users
-            </code>
-            ).
-          </p>
-        </div>
-        <Button
-          type="button"
-          variant="primary"
-          className="shrink-0 self-start"
-          onClick={() => setCreateOpen(true)}
-        >
-          <UserPlus className="h-4 w-4" aria-hidden />
-          Nuevo usuario
-        </Button>
-      </header>
+            <UserPlus className="h-4 w-4" aria-hidden />
+            Nuevo usuario
+          </Button>
+        }
+      />
 
       <section
         className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm"

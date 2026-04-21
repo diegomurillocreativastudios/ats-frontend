@@ -8,6 +8,7 @@ import { GoogleCalendarConnect } from "@/components/rrhh/interviews/google-calen
 import { GoogleCalendarDisconnect } from "@/components/rrhh/interviews/google-calendar-disconnect"
 import { Toast } from "@/components/common/toast"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 
 export function CalendarSettingsClient() {
   const searchParams = useSearchParams()
@@ -36,14 +37,13 @@ export function CalendarSettingsClient() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 md:px-8">
-      <h1 className="font-inter text-2xl font-bold text-foreground md:text-3xl">
-        Calendario
-      </h1>
-      <p className="mt-2 font-inter text-sm text-muted-foreground">
-        Conectá Google Calendar para sincronizar entrevistas desde el ATS.
-      </p>
+      <PortalPageHeader
+        title="Calendario"
+        description="Conectá Google Calendar para sincronizar entrevistas desde el ATS."
+        className="mb-8"
+      />
 
-      <div className="mt-8 rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <h2 className="font-inter text-lg font-semibold text-foreground">
           Google Calendar
         </h2>

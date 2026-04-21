@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Briefcase, Calendar, Loader2, MapPin, Users } from "lucide-react"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatCountryCodeLabel } from "@/lib/profile-form-options"
@@ -133,18 +134,11 @@ export default function EntrevistasHubPage() {
 
   const mainContent = (
     <div className="min-w-0 flex flex-col">
-      <section
-        className="flex flex-col gap-4 border-b border-border px-4 py-5 md:px-8"
-        aria-label="Encabezado de entrevistas"
-      >
-        <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="font-inter text-2xl font-bold text-foreground">
-            Entrevistas
-          </h1>
-          <p className="font-inter text-sm text-muted-foreground">
-            Elige una vacante para ver y gestionar sus entrevistas.
-          </p>
-        </div>
+      <section className="px-4 py-6 md:px-8" aria-label="Encabezado de entrevistas">
+        <PortalPageHeader
+          title="Entrevistas"
+          description="Elige una vacante para ver y gestionar sus entrevistas."
+        />
       </section>
       <section className="flex flex-col gap-4 p-4 md:p-8" aria-label="Vacantes">
         {loading ? (

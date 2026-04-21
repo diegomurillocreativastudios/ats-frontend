@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { Calendar, Loader2 } from "lucide-react"
+import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import {
   getInterviewsByCandidate,
@@ -69,14 +70,10 @@ export function CandidateInterviewList({
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8">
-      <header className="border-b border-border pb-6">
-        <h1 className="font-inter text-2xl font-bold text-foreground">
-          Entrevistas del candidato
-        </h1>
-        <p className="mt-1 font-inter text-sm text-muted-foreground">
-          Timeline de entrevistas en todas las vacantes (según el API).
-        </p>
-      </header>
+      <PortalPageHeader
+        title="Entrevistas del candidato"
+        description="Timeline de entrevistas en todas las vacantes."
+      />
 
       <section aria-label="Listado de entrevistas del candidato">
         {loading ? (
