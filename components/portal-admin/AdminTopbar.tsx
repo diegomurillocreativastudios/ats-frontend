@@ -72,13 +72,15 @@ export default function AdminTopbar({
   const handleLogout = async () => {
     setMenuOpen(false)
     try {
-      await fetch("/api/auth/logout", {
+      const response = await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       })
-      router.push("/auth/iniciar-sesion")
+      router.push(
+        `/auth/iniciar-sesion?logout=${response.ok ? "success" : "error"}`
+      )
     } catch {
-      router.push("/auth/iniciar-sesion")
+      router.push("/auth/iniciar-sesion?logout=error")
     }
   }
 

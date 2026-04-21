@@ -821,6 +821,8 @@ export interface InterviewStatusAdmin {
   sortOrder: number
   isTerminal: boolean
   isActive: boolean
+  createdAtUtc?: string | null
+  updatedAtUtc?: string | null
 }
 
 export interface CreateInterviewStatusPayload {
@@ -846,20 +848,26 @@ function normalizeInterviewStatusAdminItem(
   const o = asRecord(raw)
   if (!o) return null
   const id = pickString(o, ["id", "uuid"])
+  if (!id) return null
   const code = pickString(o, ["code", "key"])
-  if (!id || !code) return null
   const displayName =
-    pickString(o, ["displayName", "display_name", "name", "label"]) ?? code
+    pickString(o, ["displayName", "display_name", "name", "label"]) ??
+    code ??
+    id
   const description = pickString(o, ["description", "Description"])
   const sortOrder = pickNumber(o, ["sortOrder", "sort_order"]) ?? 0
+  const normalizedCode =
+    (code && code.trim()) || (displayName && displayName.trim()) || id
   return {
     id,
-    code: code.trim(),
+    code: normalizedCode,
     displayName: displayName.trim(),
     description: description ?? null,
     sortOrder,
     isTerminal: pickBool(o, ["isTerminal", "is_terminal"], false),
     isActive: pickBool(o, ["isActive", "is_active"], true),
+    createdAtUtc: pickString(o, ["createdAtUtc", "created_at_utc"]),
+    updatedAtUtc: pickString(o, ["updatedAtUtc", "updated_at_utc"]),
   }
 }
 
@@ -883,15 +891,35 @@ function normalizeInterviewStatusesAdminList(
     const rec = normalizeInterviewStatusAdminItem(item)
     if (rec) out.push(rec)
   })
-  return out.sort((a, b) => {
-    const na = parseInt(String(a.code).trim(), 10)
-    const nb = parseInt(String(b.code).trim(), 10)
-    if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) {
-      return na - nb
-    }
-    if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder
-    return a.code.localeCompare(b.code)
-  })
+  return out
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      const aCode = String(a.item.code).trim()
+      const bCode = String(b.item.code).trim()
+      const hasNumericCodeA = /^\d+$/.test(aCode)
+      const hasNumericCodeB = /^\d+$/.test(bCode)
+      if (hasNumericCodeA && hasNumericCodeB) {
+        const na = Number.parseInt(aCode, 10)
+        const nb = Number.parseInt(bCode, 10)
+        if (na !== nb) return na - nb
+      }
+      if (a.item.sortOrder !== b.item.sortOrder) {
+        return a.item.sortOrder - b.item.sortOrder
+      }
+      const byName = a.item.displayName.localeCompare(
+        b.item.displayName,
+        "es",
+        { sensitivity: "base" }
+      )
+      if (byName !== 0) return byName
+      const aTimestamp = a.item.updatedAtUtc ?? a.item.createdAtUtc ?? ""
+      const bTimestamp = b.item.updatedAtUtc ?? b.item.createdAtUtc ?? ""
+      if (aTimestamp !== "" && bTimestamp !== "" && aTimestamp !== bTimestamp) {
+        return aTimestamp.localeCompare(bTimestamp)
+      }
+      return a.index - b.index
+    })
+    .map(({ item }) => item)
 }
 
 export async function listInterviewStatusesAdmin(): Promise<

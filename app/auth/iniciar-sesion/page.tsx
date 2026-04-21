@@ -72,13 +72,31 @@ export default function IniciarSesion() {
   useEffect(() => {
     if (typeof window === "undefined") return
     const params = new URLSearchParams(window.location.search)
-    if (params.get("passwordReset") !== "success") return
-    setMessage({
-      type: "success",
-      text: "Tu contraseña se actualizó correctamente. Iniciá sesión con tu nueva clave.",
-    })
+    const passwordReset = params.get("passwordReset")
+    const logout = params.get("logout")
+
+    if (passwordReset === "success") {
+      setMessage({
+        type: "success",
+        text: "Tu contraseña se actualizó correctamente. Iniciá sesión con tu nueva clave.",
+      })
+    } else if (logout === "success") {
+      setMessage({
+        type: "success",
+        text: "Sesión cerrada correctamente.",
+      })
+    } else if (logout === "error") {
+      setMessage({
+        type: "error",
+        text: "No pudimos confirmar el cierre de sesión, pero te redirigimos al acceso.",
+      })
+    } else {
+      return
+    }
+
     const url = new URL(window.location.href)
     url.searchParams.delete("passwordReset")
+    url.searchParams.delete("logout")
     const qs = url.searchParams.toString()
     window.history.replaceState(
       {},

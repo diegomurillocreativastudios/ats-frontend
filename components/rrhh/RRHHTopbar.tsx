@@ -53,10 +53,15 @@ export default function RRHHTopbar({
   const handleLogout = async () => {
     setMenuOpen(false);
     try {
-      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-      router.push("/auth/iniciar-sesion");
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      router.push(
+        `/auth/iniciar-sesion?logout=${response.ok ? "success" : "error"}`
+      );
     } catch {
-      router.push("/auth/iniciar-sesion");
+      router.push("/auth/iniciar-sesion?logout=error");
     }
   };
 

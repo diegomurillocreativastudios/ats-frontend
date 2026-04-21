@@ -5,6 +5,7 @@ import { Loader2, Pencil, Plus, Trash2 } from "lucide-react"
 import Modal from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
+import Snackbar from "@/components/ui/Snackbar"
 import {
   createInterviewStatus,
   deleteInterviewStatus,
@@ -38,6 +39,22 @@ export function InterviewStatusesCrudModal({
     null
   )
   const [deleting, setDeleting] = useState(false)
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean
+    variant: "success" | "error"
+    message: string
+  }>({
+    open: false,
+    variant: "success",
+    message: "",
+  })
+
+  const showSnackbar = useCallback(
+    (variant: "success" | "error", message: string) => {
+      setSnackbar({ open: true, variant, message })
+    },
+    []
+  )
 
   /** Siguiente código = cantidad de filas + 1 (alta coherente con índices 1…n en tabla). */
   const nextSuggestedCode = useMemo(
@@ -94,12 +111,15 @@ export function InterviewStatusesCrudModal({
       setNewIsTerminal(false)
       await loadList()
       onMutate?.()
+      showSnackbar("success", "Estado de entrevista creado correctamente.")
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
           ? (err as { status?: number }).status
           : 0
-      setError(getInterviewHttpErrorMessage(status ?? 0, err))
+      const message = getInterviewHttpErrorMessage(status ?? 0, err)
+      setError(message)
+      showSnackbar("error", message)
     } finally {
       setSaving(false)
     }
@@ -130,12 +150,15 @@ export function InterviewStatusesCrudModal({
       setEditingId(null)
       await loadList()
       onMutate?.()
+      showSnackbar("success", "Estado de entrevista actualizado correctamente.")
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
           ? (err as { status?: number }).status
           : 0
-      setError(getInterviewHttpErrorMessage(status ?? 0, err))
+      const message = getInterviewHttpErrorMessage(status ?? 0, err)
+      setError(message)
+      showSnackbar("error", message)
     } finally {
       setSaving(false)
     }
@@ -150,12 +173,15 @@ export function InterviewStatusesCrudModal({
       setDeleteTarget(null)
       await loadList()
       onMutate?.()
+      showSnackbar("success", "Estado de entrevista eliminado correctamente.")
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
           ? (err as { status?: number }).status
           : 0
-      setError(getInterviewHttpErrorMessage(status ?? 0, err))
+      const message = getInterviewHttpErrorMessage(status ?? 0, err)
+      setError(message)
+      showSnackbar("error", message)
     } finally {
       setDeleting(false)
     }
@@ -404,6 +430,12 @@ export function InterviewStatusesCrudModal({
         }
         confirmText="Eliminar"
         loading={deleting}
+      />
+      <Snackbar
+        open={snackbar.open}
+        onClose={() => setSnackbar((current) => ({ ...current, open: false }))}
+        variant={snackbar.variant}
+        message={snackbar.message}
       />
     </>
   )
