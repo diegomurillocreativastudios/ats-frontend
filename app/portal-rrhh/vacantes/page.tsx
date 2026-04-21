@@ -9,7 +9,6 @@ import {
   Palette,
   Code,
   Briefcase,
-  Tag,
   MapPin,
 } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
@@ -19,6 +18,10 @@ import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
 import RematchButton from "@/components/rrhh/RematchButton";
 import { formatCountryCodeLabel } from "@/lib/profile-form-options";
+import {
+  getVacancyDepartmentLabel,
+  getVacancyModalityLabel,
+} from "@/lib/vacancy-catalogs";
 
 const ICON_BY_DEPARTMENT = {
   diseño: Palette,
@@ -62,8 +65,8 @@ const mapVacancyFromApi = (item, index = 0) => {
   const title = item.title ?? item.name ?? "";
   const company = item.company ?? item.companyName ?? "";
   const jobCategory = item.jobCategory ?? item.job_category ?? "";
-  const department =
-    jobCategory || (item.department ?? item.department_name ?? "—");
+  const department = getVacancyDepartmentLabel(item);
+  const modality = getVacancyModalityLabel(item);
   const location = item.location ?? item.work_arrangement ?? company ?? "—";
   const description = item.description ?? "";
   const requirementsSummary = formatRequirements(item.requirements);
@@ -95,6 +98,7 @@ const mapVacancyFromApi = (item, index = 0) => {
     company: company || "—",
     jobCategory: jobCategory || "—",
     department,
+    modality,
     location,
     requirementsSummary,
     candidates,
@@ -135,10 +139,20 @@ const VacancyCard = ({ vacancy, onRefresh, onSnackbar }) => {
           <h3 className="font-inter text-base font-semibold text-foreground">
             {vacancy.title}
           </h3>
-          <p className="mt-0.5 flex min-w-0 items-center gap-1.5 font-inter text-[13px] text-muted-foreground">
-            <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            <span className="truncate">{vacancy.countryLabel}</span>
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-inter text-[13px] text-muted-foreground">
+            <span className="flex min-w-0 items-center gap-1.5">
+              <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="truncate">{vacancy.department}</span>
+            </span>
+            <span className="flex min-w-0 items-center gap-1.5">
+              <Briefcase className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="truncate">{vacancy.modality}</span>
+            </span>
+            <span className="flex min-w-0 items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="truncate">{vacancy.countryLabel}</span>
+            </span>
+          </div>
           {/* Empresa + categoría — oculto hasta definir UX
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-inter text-[13px] text-muted-foreground">
             <span className="flex min-w-0 items-center gap-1.5">
@@ -262,6 +276,7 @@ export default function VacantesPage() {
       v.company.toLowerCase().includes(q) ||
       v.jobCategory.toLowerCase().includes(q) ||
       v.department.toLowerCase().includes(q) ||
+      v.modality.toLowerCase().includes(q) ||
       (v.description && v.description.toLowerCase().includes(q)) ||
       (v.requirementsSummary && v.requirementsSummary.toLowerCase().includes(q)) ||
       (v.countryLabel && v.countryLabel.toLowerCase().includes(q)) ||

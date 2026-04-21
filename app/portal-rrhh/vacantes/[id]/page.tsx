@@ -30,6 +30,7 @@ import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api"
+import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
 import { getApiErrorMessage } from "@/lib/api-error"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { getAccessToken } from "@/lib/auth";
@@ -40,6 +41,16 @@ import {
   formatCountryCodeLabel,
 } from "@/lib/profile-form-options";
 import { formatVacancyDetailDocumentTitle } from "@/lib/pageTitles";
+import {
+  getVacancyDepartmentId,
+  getVacancyDepartmentLabel,
+  getVacancyDepartmentSummary,
+  getVacancyModalityId,
+  getVacancyModalityLabel,
+  getVacancyModalitySummary,
+  mapActiveCatalogItemsToOptions,
+  mergeCatalogOption,
+} from "@/lib/vacancy-catalogs";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -1141,10 +1152,16 @@ export default function VacanteDetallePage() {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editCountryCode, setEditCountryCode] = useState("");
+  const [editVacancyDepartmentId, setEditVacancyDepartmentId] = useState("");
+  const [editVacancyModalityId, setEditVacancyModalityId] = useState("");
   const [editRequirements, setEditRequirements] = useState(() => [createEmptyRequirement()]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [savingVacancy, setSavingVacancy] = useState(false);
   const [saveVacancyError, setSaveVacancyError] = useState(null);
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [modalityOptions, setModalityOptions] = useState([]);
+  const [loadingVacancyCatalogs, setLoadingVacancyCatalogs] = useState(false);
+  const [vacancyCatalogsError, setVacancyCatalogsError] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success",
@@ -1185,6 +1202,41 @@ export default function VacanteDetallePage() {
     if (raw == null || String(raw).trim() === "") return base;
     return mergeLegacySelectOption(base, String(raw).trim().toUpperCase());
   }, [vacancy?.countryCode, vacancy?.country_code]);
+
+  const vacancyDepartmentSummary = useMemo(
+    () =>
+      getVacancyDepartmentSummary(
+        vacancy && typeof vacancy === "object" ? vacancy : null
+      ),
+    [vacancy]
+  );
+
+  const vacancyModalitySummary = useMemo(
+    () =>
+      getVacancyModalitySummary(
+        vacancy && typeof vacancy === "object" ? vacancy : null
+      ),
+    [vacancy]
+  );
+
+  const mergedDepartmentOptions = useMemo(
+    () => mergeCatalogOption(departmentOptions, vacancyDepartmentSummary),
+    [departmentOptions, vacancyDepartmentSummary]
+  );
+
+  const mergedModalityOptions = useMemo(
+    () => mergeCatalogOption(modalityOptions, vacancyModalitySummary),
+    [modalityOptions, vacancyModalitySummary]
+  );
+
+  const createCatalogSummary = useCallback((option) => {
+    if (!option) return null
+    return {
+      id: option.id,
+      code: option.code,
+      displayName: option.displayName,
+    }
+  }, []);
 
   const scrollToPossibleCandidates = useCallback(() => {
     const run = () => {
@@ -1241,6 +1293,30 @@ export default function VacanteDetallePage() {
     }
   }, []);
 
+  const fetchVacancyCatalogs = useCallback(async () => {
+    setLoadingVacancyCatalogs(true)
+    setVacancyCatalogsError(null)
+
+    try {
+      const [departments, modalities] = await Promise.all([
+        listAdminVacancyCatalog("departments"),
+        listAdminVacancyCatalog("modalities"),
+      ])
+
+      setDepartmentOptions(mapActiveCatalogItemsToOptions(departments))
+      setModalityOptions(mapActiveCatalogItemsToOptions(modalities))
+    } catch (err) {
+      setDepartmentOptions([])
+      setModalityOptions([])
+      setVacancyCatalogsError(
+        getApiErrorMessage(err) ||
+          "No se pudieron cargar departamentos y modalidades."
+      )
+    } finally {
+      setLoadingVacancyCatalogs(false)
+    }
+  }, [])
+
   const fetchVacancy = useCallback(async (silentFlag?: unknown) => {
     const silent = silentFlag === true
     if (!id) {
@@ -1281,6 +1357,8 @@ export default function VacanteDetallePage() {
     );
     setEditTitle(String(v.title ?? "").trim());
     setEditDescription(String(v.description ?? "").trim());
+    setEditVacancyDepartmentId(getVacancyDepartmentId(v))
+    setEditVacancyModalityId(getVacancyModalityId(v))
 
     const rawReqs = v.requirements;
     const reqObj =
@@ -1347,6 +1425,7 @@ export default function VacanteDetallePage() {
     if (!vacancy) return;
     setSaveVacancyError(null);
     setEditErrors({});
+    setVacancyCatalogsError(null)
     hydrateEditFormFromVacancy(vacancy);
     setIsEditing(true);
   }, [vacancy, hydrateEditFormFromVacancy]);
@@ -1426,12 +1505,70 @@ export default function VacanteDetallePage() {
 
     const nextCountry = editCountryCode.trim();
     payload.countryCode = nextCountry === "" ? "" : nextCountry.toUpperCase();
+    payload.vacancyDepartmentId = editVacancyDepartmentId || null
+    payload.vacancyModalityId = editVacancyModalityId || null
 
     setSavingVacancy(true);
     setSaveVacancyError(null);
     try {
       const updated = await apiClient.put(`/api/recruiter/vacancies/${id}`, payload);
-      setVacancy(updated ?? vacancy);
+      const updatedRecord =
+        updated && typeof updated === "object" && !Array.isArray(updated) ? updated : {}
+
+      const selectedDepartment = mergedDepartmentOptions.find(
+        (option) => option.id === editVacancyDepartmentId
+      )
+      const selectedModality = mergedModalityOptions.find(
+        (option) => option.id === editVacancyModalityId
+      )
+
+      const nextDepartmentSummary =
+        updatedRecord.vacancyDepartment ??
+        updatedRecord.vacancy_department ??
+        updatedRecord.department ??
+        createCatalogSummary(selectedDepartment) ??
+        null
+
+      const nextModalitySummary =
+        updatedRecord.vacancyModality ??
+        updatedRecord.vacancy_modality ??
+        updatedRecord.modality ??
+        updatedRecord.workArrangement ??
+        updatedRecord.work_arrangement ??
+        createCatalogSummary(selectedModality) ??
+        null
+
+      setVacancy((prev) => ({
+        ...(prev && typeof prev === "object" ? prev : {}),
+        ...updatedRecord,
+        title: payload.title,
+        description: payload.description,
+        countryCode: payload.countryCode,
+        vacancyDepartmentId: editVacancyDepartmentId || null,
+        vacancy_department_id: editVacancyDepartmentId || null,
+        vacancyDepartment: nextDepartmentSummary,
+        vacancy_department: nextDepartmentSummary,
+        department:
+          nextDepartmentSummary && typeof nextDepartmentSummary === "object"
+            ? nextDepartmentSummary.displayName
+            : nextDepartmentSummary,
+        vacancyModalityId: editVacancyModalityId || null,
+        vacancy_modality_id: editVacancyModalityId || null,
+        vacancyModality: nextModalitySummary,
+        vacancy_modality: nextModalitySummary,
+        modality:
+          nextModalitySummary && typeof nextModalitySummary === "object"
+            ? nextModalitySummary.displayName
+            : nextModalitySummary,
+        workArrangement:
+          nextModalitySummary && typeof nextModalitySummary === "object"
+            ? nextModalitySummary.displayName
+            : nextModalitySummary,
+        work_arrangement:
+          nextModalitySummary && typeof nextModalitySummary === "object"
+            ? nextModalitySummary.displayName
+            : nextModalitySummary,
+      }));
       setIsEditing(false);
       setSnackbar({
         open: true,
@@ -1448,7 +1585,7 @@ export default function VacanteDetallePage() {
     } finally {
       setSavingVacancy(false);
     }
-  }, [id, vacancy, editTitle, editDescription, editCountryCode, editRequirements, validateEditForm, fetchVacancy]);
+  }, [id, editTitle, editDescription, editCountryCode, editVacancyDepartmentId, editVacancyModalityId, editRequirements, validateEditForm, fetchVacancy, mergedDepartmentOptions, mergedModalityOptions, createCatalogSummary]);
 
   useEffect(() => {
     fetchStages();
@@ -1457,6 +1594,11 @@ export default function VacanteDetallePage() {
   useEffect(() => {
     fetchStatuses();
   }, [fetchStatuses]);
+
+  useEffect(() => {
+    if (!isEditing) return
+    void fetchVacancyCatalogs()
+  }, [isEditing, fetchVacancyCatalogs]);
 
   const kanbanStageNames = useMemo(
     () =>
@@ -1883,25 +2025,72 @@ export default function VacanteDetallePage() {
                                   </p>
                                 )}
                               </div>
-                              <div className="flex flex-col gap-2">
-                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-desktop">
-                                  País al que aplica la vacante
-                                </label>
-                                <select
-                                  id="edit-vacancy-country-desktop"
-                                  value={editCountryCode}
-                                  onChange={(e) => setEditCountryCode(e.target.value)}
-                                  className="h-10 w-full max-w-md rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                  aria-label="País al que aplica la vacante"
-                                >
-                                  <option value="">Sin especificar</option>
-                                  {countrySelectOptions.map((opt) => (
-                                    <option key={opt.value} value={opt.value}>
-                                      {opt.label}
-                                    </option>
-                                  ))}
-                                </select>
+                              <div className="grid gap-4 md:grid-cols-3">
+                                <div className="flex flex-col gap-2">
+                                  <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-desktop">
+                                    País al que aplica la vacante
+                                  </label>
+                                  <select
+                                    id="edit-vacancy-country-desktop"
+                                    value={editCountryCode}
+                                    onChange={(e) => setEditCountryCode(e.target.value)}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label="País al que aplica la vacante"
+                                  >
+                                    <option value="">Sin especificar</option>
+                                    {countrySelectOptions.map((opt) => (
+                                      <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-desktop">
+                                    Departamento
+                                  </label>
+                                  <select
+                                    id="edit-vacancy-department-desktop"
+                                    value={editVacancyDepartmentId}
+                                    onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label="Departamento de la vacante"
+                                    disabled={loadingVacancyCatalogs}
+                                  >
+                                    <option value="">Sin especificar</option>
+                                    {mergedDepartmentOptions.map((option) => (
+                                      <option key={option.id} value={option.id}>
+                                        {option.displayName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-desktop">
+                                    Modalidad
+                                  </label>
+                                  <select
+                                    id="edit-vacancy-modality-desktop"
+                                    value={editVacancyModalityId}
+                                    onChange={(e) => setEditVacancyModalityId(e.target.value)}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label="Modalidad de la vacante"
+                                    disabled={loadingVacancyCatalogs}
+                                  >
+                                    <option value="">Sin especificar</option>
+                                    {mergedModalityOptions.map((option) => (
+                                      <option key={option.id} value={option.id}>
+                                        {option.displayName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
                               </div>
+                              {vacancyCatalogsError ? (
+                                <p className="font-inter text-sm text-amber-700" role="status">
+                                  {vacancyCatalogsError}
+                                </p>
+                              ) : null}
                             </div>
                           ) : (
                             <h1 className="font-inter text-2xl font-bold text-foreground">
@@ -1911,7 +2100,11 @@ export default function VacanteDetallePage() {
                           <div className="flex flex-wrap items-center gap-4 font-inter text-sm text-muted-foreground">
                             <span className="flex items-center gap-1.5">
                               <Building2 className="h-4 w-4 shrink-0" aria-hidden />
-                              {emptyToDash(vacancy.department)}
+                              {getVacancyDepartmentLabel(vacancy)}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Briefcase className="h-4 w-4 shrink-0" aria-hidden />
+                              {getVacancyModalityLabel(vacancy)}
                             </span>
                             {!isEditing ? (
                               <span className="flex min-w-0 items-center gap-1.5">
@@ -2475,25 +2668,72 @@ export default function VacanteDetallePage() {
                                 </p>
                               )}
                             </div>
-                            <div className="flex flex-col gap-2">
-                              <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-mobile">
-                                País al que aplica la vacante
-                              </label>
-                              <select
-                                id="edit-vacancy-country-mobile"
-                                value={editCountryCode}
-                                onChange={(e) => setEditCountryCode(e.target.value)}
-                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label="País al que aplica la vacante"
-                              >
-                                <option value="">Sin especificar</option>
-                                {countrySelectOptions.map((opt) => (
-                                  <option key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                  </option>
-                                ))}
-                              </select>
+                            <div className="grid gap-4 md:grid-cols-3">
+                              <div className="flex flex-col gap-2">
+                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-mobile">
+                                  País al que aplica la vacante
+                                </label>
+                                <select
+                                  id="edit-vacancy-country-mobile"
+                                  value={editCountryCode}
+                                  onChange={(e) => setEditCountryCode(e.target.value)}
+                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  aria-label="País al que aplica la vacante"
+                                >
+                                  <option value="">Sin especificar</option>
+                                  {countrySelectOptions.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                      {opt.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-mobile">
+                                  Departamento
+                                </label>
+                                <select
+                                  id="edit-vacancy-department-mobile"
+                                  value={editVacancyDepartmentId}
+                                  onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
+                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  aria-label="Departamento de la vacante"
+                                  disabled={loadingVacancyCatalogs}
+                                >
+                                  <option value="">Sin especificar</option>
+                                  {mergedDepartmentOptions.map((option) => (
+                                    <option key={option.id} value={option.id}>
+                                      {option.displayName}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-mobile">
+                                  Modalidad
+                                </label>
+                                <select
+                                  id="edit-vacancy-modality-mobile"
+                                  value={editVacancyModalityId}
+                                  onChange={(e) => setEditVacancyModalityId(e.target.value)}
+                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  aria-label="Modalidad de la vacante"
+                                  disabled={loadingVacancyCatalogs}
+                                >
+                                  <option value="">Sin especificar</option>
+                                  {mergedModalityOptions.map((option) => (
+                                    <option key={option.id} value={option.id}>
+                                      {option.displayName}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
                             </div>
+                            {vacancyCatalogsError ? (
+                              <p className="font-inter text-sm text-amber-700" role="status">
+                                {vacancyCatalogsError}
+                              </p>
+                            ) : null}
                           </div>
                         ) : (
                           <h1 className="font-inter text-xl font-bold text-foreground">
@@ -2503,7 +2743,11 @@ export default function VacanteDetallePage() {
                         <div className="flex flex-wrap items-center gap-3 font-inter text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                            {emptyToDash(vacancy.department)}
+                            {getVacancyDepartmentLabel(vacancy)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Briefcase className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                            {getVacancyModalityLabel(vacancy)}
                           </span>
                           {!isEditing ? (
                             <span className="flex min-w-0 items-center gap-1">

@@ -50,6 +50,9 @@ const ADMIN_PATH_LABEL = {
   entrevistas: "Entrevistas",
   plantillas: "Plantillas",
   usuarios: "Usuarios",
+  catalogos: "Catálogos",
+  departamentos: "Departamentos",
+  modalidades: "Modalidades",
 }
 
 /** Listado de entrevistas de una vacante: `/portal-rrhh/entrevistas/<vacancyId>`. */

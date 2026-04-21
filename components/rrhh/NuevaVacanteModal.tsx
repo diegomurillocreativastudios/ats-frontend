@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api";
+import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs";
 import { getCountryIso2SelectOptions } from "@/lib/profile-form-options";
+import { mapActiveCatalogItemsToOptions } from "@/lib/vacancy-catalogs";
 
 const toSnakeCase = (str) =>
   str
@@ -30,10 +32,56 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [countryCode, setCountryCode] = useState("");
+  const [vacancyDepartmentId, setVacancyDepartmentId] = useState("");
+  const [vacancyModalityId, setVacancyModalityId] = useState("");
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [modalityOptions, setModalityOptions] = useState([]);
+  const [loadingCatalogs, setLoadingCatalogs] = useState(false);
+  const [catalogLoadError, setCatalogLoadError] = useState(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    let cancelled = false
+
+    const loadCatalogs = async () => {
+      setLoadingCatalogs(true)
+      setCatalogLoadError(null)
+
+      try {
+        const [departments, modalities] = await Promise.all([
+          listAdminVacancyCatalog("departments"),
+          listAdminVacancyCatalog("modalities"),
+        ])
+
+        if (cancelled) return
+
+        setDepartmentOptions(mapActiveCatalogItemsToOptions(departments))
+        setModalityOptions(mapActiveCatalogItemsToOptions(modalities))
+      } catch (error) {
+        if (cancelled) return
+        setDepartmentOptions([])
+        setModalityOptions([])
+        setCatalogLoadError(
+          error?.message ||
+            error?.detail ||
+            "No se pudieron cargar departamentos y modalidades."
+        )
+      } finally {
+        if (!cancelled) setLoadingCatalogs(false)
+      }
+    }
+
+    void loadCatalogs()
+
+    return () => {
+      cancelled = true
+    }
+  }, [isOpen])
 
   const handleAddRequirement = () => {
     setRequerimientos((prev) => [...prev, createEmptyRequirement()]);
@@ -122,6 +170,12 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     if (cc && /^[A-Z]{2}$/.test(cc)) {
       payload.countryCode = cc;
     }
+    if (vacancyDepartmentId) {
+      payload.vacancyDepartmentId = vacancyDepartmentId
+    }
+    if (vacancyModalityId) {
+      payload.vacancyModalityId = vacancyModalityId
+    }
 
     setLoading(true);
     setSubmitError(null);
@@ -144,6 +198,8 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     setNombre("");
     setDescripcion("");
     setCountryCode("");
+    setVacancyDepartmentId("");
+    setVacancyModalityId("");
     setRequerimientos([createEmptyRequirement()]);
     setErrors({});
     setSubmitError(null);
@@ -261,6 +317,65 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             Opcional. Si no eliges país, la vacante quedará sin país asignado.
           </p>
         </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="vacante-department"
+              className="font-inter text-sm font-medium text-foreground"
+            >
+              Departamento
+            </label>
+            <select
+              id="vacante-department"
+              value={vacancyDepartmentId}
+              onChange={(e) => setVacancyDepartmentId(e.target.value)}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Departamento de la vacante"
+              disabled={loading || loadingCatalogs}
+            >
+              <option value="">Sin especificar</option>
+              {departmentOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.displayName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="vacante-modality"
+              className="font-inter text-sm font-medium text-foreground"
+            >
+              Modalidad
+            </label>
+            <select
+              id="vacante-modality"
+              value={vacancyModalityId}
+              onChange={(e) => setVacancyModalityId(e.target.value)}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Modalidad de la vacante"
+              disabled={loading || loadingCatalogs}
+            >
+              <option value="">Sin especificar</option>
+              {modalityOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.displayName}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {catalogLoadError ? (
+          <div
+            className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 font-inter text-sm text-amber-800"
+            role="status"
+          >
+            {catalogLoadError} La vacante se puede crear igualmente sin estos campos.
+          </div>
+        ) : null}
 
         {submitError && (
           <div

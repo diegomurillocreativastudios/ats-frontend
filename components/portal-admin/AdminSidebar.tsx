@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
+  Briefcase,
+  Building2,
   Calendar,
   ClipboardList,
   Cog,
@@ -18,6 +20,16 @@ const navItems = [
   { href: "/portal-admin/plantillas", label: "Plantillas", icon: FileText },
   { href: "/portal-admin/entrevistas", label: "Entrevistas", icon: Calendar },
   { href: "/portal-admin/usuarios", label: "Usuarios", icon: Users },
+  {
+    href: "/portal-admin/catalogos/departamentos",
+    label: "Departamentos",
+    icon: Building2,
+  },
+  {
+    href: "/portal-admin/catalogos/modalidades",
+    label: "Modalidades",
+    icon: Briefcase,
+  },
 ]
 
 const settingsNavItem = {
