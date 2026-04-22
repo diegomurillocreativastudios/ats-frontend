@@ -3,6 +3,7 @@
 import Link from "next/link"
 import {
   useCallback,
+  useEffect,
   useState,
   type ChangeEvent,
   type FormEvent,
@@ -81,6 +82,130 @@ function themeTextareaClass(theme: PublicVacancyApplicationFormTheme): string {
   return "min-h-[120px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-vo-purple"
 }
 
+const APPLY_PROGRESS_STEPS = [
+  { step: 1, label: "Creación" },
+  { step: 2, label: "Análisis" },
+  { step: 3, label: "Postulación" },
+  { step: 4, label: "Guardado" },
+  { step: 5, label: "Éxito" },
+] as const
+
+/** Objetivo ~15–25 s en datos reales: recorrer pasos 1→4 de forma uniforme (~20 s). */
+const APPLY_PROGRESS_STEPS_1_TO_4_TOTAL_MS = 20_000
+/** Tres saltos (1→2, 2→3, 3→4) repartidos en ese tiempo. */
+const APPLY_PROGRESS_MS = Math.round(APPLY_PROGRESS_STEPS_1_TO_4_TOTAL_MS / 3)
+
+function applySubmitProgressPanelClass(
+  theme: PublicVacancyApplicationFormTheme,
+  opts: { absolute?: boolean } = {}
+): string {
+  const position = opts.absolute ? "absolute inset-0 z-20 " : ""
+  if (theme === "dark") {
+    return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-[inherit] border border-white/10 bg-[linear-gradient(180deg,rgba(25,33,58,0.98)_0%,rgba(16,22,40,0.99)_100%)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-md`
+  }
+  return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-lg border border-border bg-background/95 p-6 shadow-lg backdrop-blur-sm`
+}
+
+function PublicApplicationSubmitProgress({
+  currentStep,
+  theme,
+  barTransitionMs = APPLY_PROGRESS_MS,
+}: {
+  currentStep: number
+  theme: PublicVacancyApplicationFormTheme
+  /** Duración de la animación de la barra al cambiar de paso (ms). */
+  barTransitionMs?: number
+}) {
+  const isDark = theme === "dark"
+  const doneCount = Math.min(Math.max(currentStep, 0), 5)
+  const pct = (doneCount / 5) * 100
+  const activeLabel =
+    APPLY_PROGRESS_STEPS.find((s) => s.step === currentStep)?.label ?? ""
+
+  return (
+    <div
+      className="mx-auto w-full max-w-lg space-y-6"
+      role="status"
+      aria-live="polite"
+      aria-relevant="additions text"
+    >
+      <div className="text-center">
+        <p
+          className={
+            isDark
+              ? "text-xs font-medium uppercase tracking-[0.2em] text-white/50"
+              : "text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
+          }
+        >
+          {currentStep === 5 ? "Listo" : "Procesando tu postulación"}
+        </p>
+        <p
+          className={
+            isDark
+              ? "mt-2 text-lg font-semibold text-white"
+              : "mt-2 text-lg font-semibold text-foreground"
+          }
+        >
+          {activeLabel}
+        </p>
+      </div>
+
+      <div
+        className={isDark ? "overflow-hidden rounded-full bg-white/10" : "overflow-hidden rounded-full bg-muted"}
+        aria-hidden
+      >
+        <div
+          className={
+            isDark
+              ? "h-2.5 rounded-full bg-[linear-gradient(90deg,#f0a7ff_0%,#8dd8ff_100%)]"
+              : "h-2.5 rounded-full bg-vo-purple"
+          }
+          style={{
+            width: `${pct}%`,
+            transition: `width ${barTransitionMs}ms cubic-bezier(0.33, 0.86, 0.2, 1)`,
+          }}
+        />
+      </div>
+
+      <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-5 sm:gap-2" aria-label="Estado del envío">
+        {APPLY_PROGRESS_STEPS.map((item) => {
+          const isComplete = currentStep > item.step
+          const isCurrent = currentStep === item.step
+          const isSuccessStep = item.step === 5
+          return (
+            <li
+              key={item.step}
+              className={
+                isDark
+                  ? `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
+                      isCurrent
+                        ? isSuccessStep
+                          ? "border-[#7ee0c0]/60 bg-[#7ee0c0]/12 text-[#7ee0c0]"
+                          : "border-[#f0a7ff]/50 bg-white/8 text-white"
+                        : isComplete
+                          ? "border-white/12 bg-white/4 text-white/60"
+                          : "border-white/8 bg-white/3 text-white/40"
+                    }`
+                  : `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
+                      isCurrent
+                        ? isSuccessStep
+                          ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-800"
+                          : "border-vo-purple/50 bg-vo-purple/8 text-foreground"
+                        : isComplete
+                          ? "border-border bg-muted/50 text-muted-foreground"
+                          : "border-border/60 bg-background text-muted-foreground/60"
+                    }`
+              }
+            >
+              {item.label}
+            </li>
+          )
+        })}
+      </ol>
+    </div>
+  )
+}
+
 export function PublicVacancyApplicationForm({
   vacancyId,
   theme = "dark",
@@ -99,13 +224,22 @@ export function PublicVacancyApplicationForm({
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [submitPhase, setSubmitPhase] = useState<"idle" | "loading" | "success">("idle")
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [progressStep, setProgressStep] = useState(0)
 
   const inputClass = themeFieldClass(theme)
   const selectClass = themeSelectClass(theme)
   const textareaClass = themeTextareaClass(theme)
   const labelClass = themeLabelClass(theme)
   const errClass = themeErrorClass(theme)
+
+  useEffect(() => {
+    if (submitPhase !== "loading") return
+    if (progressStep >= 4) return
+    const id = window.setTimeout(() => {
+      setProgressStep((s) => (s < 4 ? s + 1 : 4))
+    }, APPLY_PROGRESS_MS)
+    return () => window.clearTimeout(id)
+  }, [submitPhase, progressStep])
 
   const handleChange = useCallback(
     (
@@ -162,6 +296,7 @@ export function PublicVacancyApplicationForm({
       if (!cvFile) return
 
       setSubmitPhase("loading")
+      setProgressStep(1)
       setServerError(null)
       setErrors({})
 
@@ -178,12 +313,13 @@ export function PublicVacancyApplicationForm({
       }
 
       try {
-        const result = await submitPublicVacancyApplication(vacancyId, payload)
-        setSuccessMessage(result.message)
+        await submitPublicVacancyApplication(vacancyId, payload)
+        setProgressStep(5)
         setValues(initialState)
         setCvFile(null)
         setSubmitPhase("success")
       } catch (err: unknown) {
+        setProgressStep(0)
         setSubmitPhase("idle")
         const status =
           typeof err === "object" && err !== null && "status" in err
@@ -209,19 +345,20 @@ export function PublicVacancyApplicationForm({
     [cvFile, submitPhase, validateClient, values, vacancyId]
   )
 
-  if (submitPhase === "success" && successMessage) {
+  if (submitPhase === "success") {
     return (
-      <div className="space-y-5">
-        <p
-          className={
-            theme === "dark"
-              ? "text-sm leading-7 text-white/88"
-              : "text-sm leading-7 text-foreground"
-          }
+      <div className="space-y-6">
+        <div
+          className={applySubmitProgressPanelClass(theme)}
           role="status"
+          aria-live="polite"
         >
-          {successMessage}
-        </p>
+          <PublicApplicationSubmitProgress
+            currentStep={5}
+            theme={theme}
+            barTransitionMs={Math.min(1200, APPLY_PROGRESS_MS)}
+          />
+        </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {backToVacancyHref ? (
             <Link
@@ -264,12 +401,24 @@ export function PublicVacancyApplicationForm({
   }
 
   const disabled = submitPhase === "loading"
+  const showProgressOverlay = submitPhase === "loading"
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid grid-cols-2 gap-x-4 gap-y-5"
-    >
+    <div className="relative">
+      {showProgressOverlay ? (
+        <div className={applySubmitProgressPanelClass(theme, { absolute: true })}>
+          <PublicApplicationSubmitProgress
+            currentStep={progressStep}
+            theme={theme}
+            barTransitionMs={APPLY_PROGRESS_MS}
+          />
+        </div>
+      ) : null}
+      <form
+        onSubmit={handleSubmit}
+        aria-busy={showProgressOverlay}
+        className={`grid grid-cols-2 gap-x-4 gap-y-5 ${showProgressOverlay ? "pointer-events-none select-none opacity-[0.22]" : ""}`}
+      >
       {serverError ? (
         <p className={`col-span-2 ${errClass}`} role="alert">
           {serverError}
@@ -506,5 +655,6 @@ export function PublicVacancyApplicationForm({
         </button>
       </div>
     </form>
+    </div>
   )
 }
