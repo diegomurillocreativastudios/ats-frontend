@@ -10,12 +10,12 @@ export function PublicOpportunitiesNavbar({
 }: PublicOpportunitiesNavbarProps) {
   return (
     <nav
-      className={`relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] px-4 py-3 shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur sm:px-5 ${className}`}
+      className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] px-4 py-3 shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur sm:px-5 ${className}`}
       aria-label="Navegacion principal de oportunidades"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(255,255,255,0.12),transparent_22%),radial-gradient(circle_at_right,rgba(199,50,119,0.18),transparent_26%)]" />
 
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative flex items-center">
         <Link
           href="/oportunidades"
           className="inline-flex items-center gap-3 rounded-full focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
@@ -46,21 +46,6 @@ export function PublicOpportunitiesNavbar({
             </span>
           </span>
         </Link>
-
-        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <Link
-            href="/auth/iniciar-sesion"
-            className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/7 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/12 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
-          >
-            Iniciar sesion
-          </Link>
-          <Link
-            href="/auth/registrarse"
-            className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2.5 text-sm font-medium text-[#18213d] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
-          >
-            Crear cuenta
-          </Link>
-        </div>
       </div>
     </nav>
   )

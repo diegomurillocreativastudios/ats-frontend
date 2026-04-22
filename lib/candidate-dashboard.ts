@@ -16,6 +16,8 @@ export interface CandidatePortalApplicationRow {
   statusLabel: string
   progressCurrent: number
   totalStages: number
+  /** 0 = Recruiter, 1 = Personal (postulación propia). */
+  applicationSource?: number
 }
 
 export interface CandidatePortalActivity {

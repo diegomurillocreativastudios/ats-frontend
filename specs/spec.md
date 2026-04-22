@@ -231,6 +231,7 @@ Variables útiles: `PLAYWRIGHT_SKIP_WEBSERVER`, `PLAYWRIGHT_BASE_URL`.
 |---------|-----------|
 | `README.md` | Instalación, scripts, testing, notas de diseño |
 | `spec-fe.md` | Contrato forgot/reset password (frontend vs API) |
+| `specs/spec-oportunidades-ui-frontend.md` | Estructura UI del listado público `/oportunidades` |
 | `docs/TESTING_PLAN.md` | Estrategia de pruebas |
 | `docs/FORGOT_PASSWORD_BACKEND_SPEC.md` | Especificación backend recuperación |
 | `docs/CANDIDATE_PROFILE_PUT_BACKEND_SPEC.md` | Perfil candidato PUT |

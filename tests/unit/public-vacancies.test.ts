@@ -9,12 +9,12 @@ describe("public vacancies API helpers", () => {
   it("builds a stable query string from active filters", () => {
     expect(
       buildPublicVacanciesQuery({
-        search: "react",
+        vacanteName: "react",
         departmentId: "dep-1",
         modalityId: "mod-1",
         page: 2,
       })
-    ).toBe("?search=react&departmentId=dep-1&modalityId=mod-1&page=2")
+    ).toBe("?departmentId=dep-1&modalityId=mod-1&vacanteName=react&page=2")
   })
 
   it("normalizes paginated vacancies and availableFilters", () => {

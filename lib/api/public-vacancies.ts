@@ -18,6 +18,7 @@ export interface OpportunityListFilters {
   departmentCode?: string
   modalityId?: string
   modalityCode?: string
+  vacanteName?: string
   search?: string
   countryCode?: string
   country?: string
@@ -282,8 +283,14 @@ export function normalizeOpportunityDetail(payload: unknown): OpportunityVacancy
 
 export function buildPublicVacanciesQuery(filters: OpportunityListFilters): string {
   const params = new URLSearchParams()
+  const normalizedVacanteName = filters.vacanteName ?? filters.search
+  const normalizedFilters: OpportunityListFilters = {
+    ...filters,
+    search: normalizedVacanteName,
+    vacanteName: normalizedVacanteName,
+  }
 
-  const entries = Object.entries(filters).filter(([, value]) => {
+  const entries = Object.entries(normalizedFilters).filter(([, value]) => {
     if (typeof value === "number") return Number.isFinite(value) && value > 0
     return value != null && String(value).trim() !== ""
   })

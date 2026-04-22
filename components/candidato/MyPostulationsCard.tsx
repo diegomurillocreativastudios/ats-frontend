@@ -76,11 +76,18 @@ export default function MyPostulationsCard({
                   <p className="font-inter text-sm font-medium text-foreground">
                     {post.jobTitle}
                   </p>
-                  <span
-                    className={`shrink-0 rounded-xl px-2.5 py-1 font-inter text-xs font-medium ${getApplicationStatusStyle(post.statusLabel)}`}
-                  >
-                    {post.statusLabel}
-                  </span>
+                  <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+                    {post.applicationSource === 1 ? (
+                      <span className="rounded-md border border-border bg-muted px-2 py-0.5 font-inter text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        Personal
+                      </span>
+                    ) : null}
+                    <span
+                      className={`rounded-xl px-2.5 py-1 font-inter text-xs font-medium ${getApplicationStatusStyle(post.statusLabel)}`}
+                    >
+                      {post.statusLabel}
+                    </span>
+                  </div>
                 </div>
                 {showCompanyLine ? (
                   <p className="font-inter text-xs text-muted-foreground">

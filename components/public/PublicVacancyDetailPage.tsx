@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import {
   ArrowLeft,
-  ArrowRight,
   Briefcase,
   Building2,
   CheckCircle2,
@@ -42,6 +41,12 @@ function getCompanyInitials(companyName: string): string {
     .slice(0, 2)
     .map((segment) => segment[0]?.toUpperCase() ?? "")
     .join("")
+}
+
+function getDisplayCompanyName(companyName?: string): string {
+  const normalizedCompanyName = companyName?.trim() ?? ""
+  if (normalizedCompanyName === "Default Company") return ""
+  return normalizedCompanyName
 }
 
 function DetailPill({ value }: { value: string }) {
@@ -183,11 +188,11 @@ export function PublicVacancyDetailPage({
   const [vacancy, setVacancy] = useState<OpportunityVacancyDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const queryString = searchParams.toString()
 
   const backHref = useMemo(() => {
-    const query = searchParams.toString()
-    return query ? `/oportunidades?${query}` : "/oportunidades"
-  }, [searchParams])
+    return queryString ? `/oportunidades?${queryString}` : "/oportunidades"
+  }, [queryString])
 
   useEffect(() => {
     let isCancelled = false
@@ -235,6 +240,10 @@ export function PublicVacancyDetailPage({
   }, [vacancy?.title])
 
   const publishedLabel = formatPublishedLabel(vacancy?.publishedAt)
+  const companyName = getDisplayCompanyName(vacancy?.company.name)
+  const applyHref = queryString
+    ? `/oportunidades/${vacancyId}/aplicar?${queryString}`
+    : `/oportunidades/${vacancyId}/aplicar`
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0b1224] text-white">
@@ -244,38 +253,39 @@ export function PublicVacancyDetailPage({
         <div className="absolute right-[10%] top-16 h-80 w-80 rounded-full bg-[#71bced]/16 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+      <div className="relative flex w-full flex-col px-4 py-6 sm:px-6 lg:px-8">
         <PublicOpportunitiesNavbar className="mb-5" />
 
-        <div className="mb-5">
-          <Link
-            href={backHref}
-            className="inline-flex items-center gap-2 text-sm font-medium text-white/76 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden />
-            Volver a oportunidades
-          </Link>
-        </div>
-
-        {errorMessage ? (
-          <div className={`rounded-[30px] p-8 ${darkPanelClassName}`}>
-            <p className="text-sm text-[#ffd0e7]" role="alert">
-              {errorMessage}
-            </p>
-            <div className="mt-5">
-              <Link
-                href="/oportunidades"
-                className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-[#ffd0e7]"
-              >
-                Ver todas las oportunidades
-              </Link>
-            </div>
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="mb-5">
+            <Link
+              href={backHref}
+              className="inline-flex items-center gap-2 text-sm font-medium text-white/76 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              Volver a oportunidades
+            </Link>
           </div>
-        ) : isLoading ? (
-          <VacancySkeleton />
-        ) : vacancy ? (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-            <div className="space-y-6">
+
+          {errorMessage ? (
+            <div className={`rounded-[30px] p-8 ${darkPanelClassName}`}>
+              <p className="text-sm text-[#ffd0e7]" role="alert">
+                {errorMessage}
+              </p>
+              <div className="mt-5">
+                <Link
+                  href="/oportunidades"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-[#ffd0e7]"
+                >
+                  Ver todas las oportunidades
+                </Link>
+              </div>
+            </div>
+          ) : isLoading ? (
+            <VacancySkeleton />
+          ) : vacancy ? (
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+              <div className="space-y-6">
               <section className={`relative overflow-hidden rounded-[34px] px-6 py-7 sm:px-8 sm:py-8 ${darkPanelClassName}`}>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(199,50,119,0.35),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(113,188,237,0.16),transparent_24%)]" />
 
@@ -292,10 +302,12 @@ export function PublicVacancyDetailPage({
                           {vacancy.title}
                         </h1>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/68">
-                          <span className="inline-flex items-center gap-2">
-                            <Building2 className="h-4 w-4 text-[#8dd8ff]" aria-hidden />
-                            {vacancy.company.name}
-                          </span>
+                          {companyName ? (
+                            <span className="inline-flex items-center gap-2">
+                              <Building2 className="h-4 w-4 text-[#8dd8ff]" aria-hidden />
+                              {companyName}
+                            </span>
+                          ) : null}
                           <span className="inline-flex items-center gap-2">
                             <MapPin className="h-4 w-4 text-[#f6c482]" aria-hidden />
                             {vacancy.locationLabel ??
@@ -310,16 +322,24 @@ export function PublicVacancyDetailPage({
                       </div>
                     </div>
 
-                    <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-[24px] border border-white/12 bg-white/8 text-base font-semibold text-white/88 sm:flex">
-                      {getCompanyInitials(vacancy.company.name) || "AT"}
-                    </div>
+                    {companyName ? (
+                      <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-[24px] border border-white/12 bg-white/8 text-base font-semibold text-white/88 sm:flex">
+                        {getCompanyInitials(companyName) || "AT"}
+                      </div>
+                    ) : null}
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <DetailPill value={vacancy.department?.displayName ?? "No especificado"} />
                     <DetailPill value={vacancy.modality?.displayName ?? "No especificado"} />
                     <DetailPill value={vacancy.countryLabel ?? "No especificado"} />
                     {publishedLabel ? <DetailPill value={`Publicada ${publishedLabel}`} /> : null}
+                    <Link
+                      href={applyHref}
+                      className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-medium text-[#18213d] shadow-sm transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+                    >
+                      Postularme
+                    </Link>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-3">
@@ -354,80 +374,42 @@ export function PublicVacancyDetailPage({
               <BulletList title="Beneficios" items={vacancy.benefits ?? []} />
             </div>
 
-            <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-              <section className={`rounded-[30px] p-6 ${darkPanelClassName}`}>
-                <h2 className="text-xl font-semibold text-white">Detalles de la vacante</h2>
+              <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+                <section className={`rounded-[30px] p-6 ${darkPanelClassName}`}>
+                  <h2 className="text-xl font-semibold text-white">Detalles de la vacante</h2>
 
-                <dl className="mt-4">
-                  <DetailRow label="Empresa" value={vacancy.company.name} />
-                  <DetailRow
-                    label="Departamento"
-                    value={vacancy.department?.displayName ?? "No especificado"}
-                  />
-                  <DetailRow
-                    label="Modalidad"
-                    value={vacancy.modality?.displayName ?? "No especificado"}
-                  />
-                  <DetailRow
-                    label="País"
-                    value={vacancy.countryLabel ?? "No especificado"}
-                  />
-                  {publishedLabel ? (
-                    <DetailRow label="Publicación" value={publishedLabel} />
-                  ) : null}
-                </dl>
-              </section>
+                  <dl className="mt-4">
+                    {companyName ? <DetailRow label="Empresa" value={companyName} /> : null}
+                    <DetailRow
+                      label="Departamento"
+                      value={vacancy.department?.displayName ?? "No especificado"}
+                    />
+                    <DetailRow
+                      label="Modalidad"
+                      value={vacancy.modality?.displayName ?? "No especificado"}
+                    />
+                    <DetailRow
+                      label="País"
+                      value={vacancy.countryLabel ?? "No especificado"}
+                    />
+                    {publishedLabel ? (
+                      <DetailRow label="Publicación" value={publishedLabel} />
+                    ) : null}
+                  </dl>
 
-              <section className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(199,50,119,0.18)_0%,rgba(35,45,76,0.94)_100%)] p-6 shadow-[0_24px_80px_rgba(7,12,27,0.35)]">
-                <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/74">
-                  Próximo paso
-                </p>
-                <h2 className="mt-4 text-2xl font-semibold text-white">
-                  ¿Listo para postularte?
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-white/70">
-                  Creá tu cuenta o iniciá sesión para continuar con tu proceso dentro del
-                  portal candidato y dar seguimiento a tu aplicación.
-                </p>
-
-                <div className="mt-6 flex flex-col gap-3">
-                  <Link
-                    href="/auth/registrarse"
-                    className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-[#18213d] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
-                  >
-                    Crear cuenta
-                  </Link>
-                  <Link
-                    href="/auth/iniciar-sesion"
-                    className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/7 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-white/12 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
-                  >
-                    Iniciar sesión
-                  </Link>
-                </div>
-              </section>
-
-              <section className={`rounded-[30px] p-6 ${darkPanelClassName}`}>
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/46">
-                  Lo esencial
-                </p>
-                <ul className="mt-4 space-y-3 text-sm text-white/72">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#f0a7ff]" aria-hidden />
-                    El detalle conserva departamento y modalidad como señales principales del rol.
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#8dd8ff]" aria-hidden />
-                    La lectura mejora con bloques editoriales y mejor separación entre contenido y CTA.
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#f6c482]" aria-hidden />
-                    La navegación de regreso preserva el contexto del listado y sus filtros.
-                  </li>
-                </ul>
-              </section>
-            </aside>
-          </div>
-        ) : null}
+                  <div className="mt-6">
+                    <Link
+                      href={applyHref}
+                      className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-[#18213d] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+                    >
+                      Postularme
+                    </Link>
+                  </div>
+                </section>
+              </aside>
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   )

@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
-import type { CandidatePortalDashboard } from "@/lib/candidate-dashboard"
+import { normalizeApplicationSource } from "@/lib/application-source"
+import type {
+  CandidatePortalApplicationRow,
+  CandidatePortalDashboard,
+} from "@/lib/candidate-dashboard"
 
 export function useCandidateDashboard() {
   const [data, setData] = useState<CandidatePortalDashboard | null>(null)
@@ -17,7 +21,21 @@ export function useCandidateDashboard() {
       const raw = (await apiClient.get(
         "/api/candidate/dashboard"
       )) as CandidatePortalDashboard
-      setData(raw)
+      const apps = raw.applications ?? []
+      setData({
+        ...raw,
+        applications: apps.map((row) => {
+          const ext = row as CandidatePortalApplicationRow & {
+            application_source?: unknown
+          }
+          return {
+            ...row,
+            applicationSource: normalizeApplicationSource(
+              row.applicationSource ?? ext.application_source
+            ),
+          }
+        }),
+      })
     } catch (err: unknown) {
       setData(null)
       setError(getApiErrorMessage(err))

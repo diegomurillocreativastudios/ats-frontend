@@ -1,10 +1,13 @@
 "use client";
 
-import { FileText, Download } from "lucide-react";
-import type { CandidateDocument } from "@/lib/candidate-documents"
+import { useState } from "react";
+import { FileText, Download, Loader2 } from "lucide-react";
+import type { CandidateDocument } from "@/lib/candidate-documents";
+import { getAccessToken } from "@/lib/auth";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 interface DocumentsListProps {
-  documents?: CandidateDocument[]
+  documents?: CandidateDocument[];
 }
 
 const resolveDocumentName = (doc: CandidateDocument) => {
@@ -26,11 +29,59 @@ const resolveDocumentName = (doc: CandidateDocument) => {
  * Lista de documentos del candidato.
  */
 export default function DocumentsList({ documents = [] }: DocumentsListProps) {
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const handleDownload = async (doc: CandidateDocument) => {
+    const path = doc.storagePath?.trim();
+    if (!path) return;
+
+    setDownloadingId(doc.id);
+    setDownloadError(null);
+    try {
+      const token = getAccessToken();
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+      const url = `${baseUrl}/api/Storage/files/${encodeURIComponent(path)}`;
+      const res = await fetch(url, {
+        method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("No se pudo descargar el documento.");
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objUrl;
+      const suggestedName = resolveDocumentName(doc);
+      a.download =
+        suggestedName && suggestedName !== `Documento ${doc.id}`
+          ? suggestedName
+          : path.split("/").pop() || "documento";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objUrl);
+    } catch (err: unknown) {
+      setDownloadError(
+        getApiErrorMessage(err) || "No se pudo descargar el documento."
+      );
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-3 md:gap-4">
       <h2 className="font-inter text-sm font-semibold text-foreground md:text-base">
         Mis documentos
       </h2>
+      {downloadError ? (
+        <p
+          className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
+          {downloadError}
+        </p>
+      ) : null}
       {documents.length === 0 ? (
         <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-inter text-sm text-muted-foreground">
           Aún no hay documentos. Los que subas aparecerán aquí.
@@ -52,10 +103,23 @@ export default function DocumentsList({ documents = [] }: DocumentsListProps) {
               </div>
               <button
                 type="button"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md hover:bg-muted"
+                onClick={() => void handleDownload(doc)}
+                disabled={!doc.storagePath?.trim() || downloadingId === doc.id}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label={`Descargar ${resolveDocumentName(doc)}`}
+                aria-busy={downloadingId === doc.id}
               >
-                <Download className="h-4 w-4 text-muted-foreground md:h-5 md:w-5" aria-hidden />
+                {downloadingId === doc.id ? (
+                  <Loader2
+                    className="h-4 w-4 animate-spin text-muted-foreground md:h-5 md:w-5"
+                    aria-hidden
+                  />
+                ) : (
+                  <Download
+                    className="h-4 w-4 text-muted-foreground md:h-5 md:w-5"
+                    aria-hidden
+                  />
+                )}
               </button>
             </li>
           ))}

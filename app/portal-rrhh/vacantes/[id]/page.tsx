@@ -32,6 +32,7 @@ import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
@@ -956,6 +957,9 @@ const KanbanCard = ({
   );
   const rawScore = match.semanticScore ?? match.totalScore;
   const score = typeof rawScore === "number" ? (rawScore * 100).toFixed(0) : "—";
+  const applicationSourceLabel = formatApplicationSourceBadge(
+    match.applicationSource ?? match.application_source
+  );
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData("application/json", JSON.stringify({ candidateId, stage }));
@@ -998,8 +1002,11 @@ const KanbanCard = ({
           <p className="truncate font-inter text-sm font-medium text-foreground">
             {emptyToDash(match.name)}
           </p>
-          <p className="flex items-center gap-1.5 font-inter text-xs text-muted-foreground">
+          <p className="flex flex-wrap items-center gap-1.5 font-inter text-xs text-muted-foreground">
             <span>Puntaje: {score}</span>
+            <span className="inline-flex rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
+              {applicationSourceLabel}
+            </span>
           </p>
         </div>
         {statuses.length > 0 ? (

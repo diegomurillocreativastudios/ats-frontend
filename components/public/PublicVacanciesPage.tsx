@@ -2,21 +2,30 @@
 
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   ArrowRight,
+  BarChart3,
   Briefcase,
   Building2,
-  ChevronDown,
+  Code2,
+  Headset,
+  Megaphone,
+  Palette,
   ChevronLeft,
   ChevronRight,
-  Filter,
   Layers3,
   MapPin,
+  Settings2,
+  ShieldCheck,
+  Stethoscope,
   Search,
   Sparkles,
+  Users,
   X,
+  type LucideIcon,
 } from "lucide-react"
+import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
 import { Button } from "@/components/ui/Button"
 import {
   listPublicVacancies,
@@ -25,14 +34,13 @@ import {
   type OpportunityListResponse,
   type OpportunityVacancySummary,
 } from "@/lib/api/public-vacancies"
-import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
 
 interface QueryState {
   departmentId: string
   departmentCode: string
   modalityId: string
   modalityCode: string
-  search: string
+  vacanteName: string
   countryCode: string
   country: string
   page: number
@@ -45,10 +53,13 @@ interface ActiveFilterChipProps {
 }
 
 const darkPanelClassName =
-  "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
+  "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.97)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
+
+const softPanelClassName =
+  "border border-white/10 bg-[linear-gradient(180deg,rgba(19,27,50,0.88)_0%,rgba(11,18,36,0.96)_100%)] shadow-[0_20px_60px_rgba(7,12,27,0.36)] backdrop-blur"
 
 const cardGlowClassName =
-  "border border-white/10 bg-[linear-gradient(180deg,rgba(46,27,78,0.78)_0%,rgba(18,27,49,0.94)_100%)] shadow-[0_24px_70px_rgba(4,9,21,0.42)]"
+  "border border-white/10 bg-[linear-gradient(180deg,rgba(46,27,78,0.72)_0%,rgba(18,27,49,0.94)_100%)] shadow-[0_24px_70px_rgba(4,9,21,0.42)]"
 
 function getQueryState(searchParams: URLSearchParams): QueryState {
   const pageValue = Number(searchParams.get("page") ?? "1")
@@ -58,7 +69,8 @@ function getQueryState(searchParams: URLSearchParams): QueryState {
     departmentCode: searchParams.get("departmentCode")?.trim() ?? "",
     modalityId: searchParams.get("modalityId")?.trim() ?? "",
     modalityCode: searchParams.get("modalityCode")?.trim() ?? "",
-    search: searchParams.get("search")?.trim() ?? "",
+    vacanteName:
+      searchParams.get("vacanteName")?.trim() ?? searchParams.get("search")?.trim() ?? "",
     countryCode: searchParams.get("countryCode")?.trim() ?? "",
     country: searchParams.get("country")?.trim() ?? "",
     page: Number.isFinite(pageValue) && pageValue > 0 ? pageValue : 1,
@@ -71,7 +83,6 @@ function toRequestFilters(queryState: QueryState): OpportunityListFilters {
     departmentCode: queryState.departmentCode || undefined,
     modalityId: queryState.modalityId || undefined,
     modalityCode: queryState.modalityCode || undefined,
-    search: queryState.search || undefined,
     countryCode: queryState.countryCode || undefined,
     country: queryState.country || undefined,
     page: queryState.page > 1 ? queryState.page : undefined,
@@ -112,6 +123,102 @@ function getCompanyInitials(companyName: string): string {
     .join("")
 }
 
+function normalizeDepartmentKey(value?: string): string {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+}
+
+function getDepartmentIcon(department?: OpportunityVacancySummary["department"]): LucideIcon {
+  const normalizedKey = normalizeDepartmentKey(
+    department?.code ? `${department.code} ${department.displayName}` : department?.displayName
+  )
+
+  if (!normalizedKey) return Briefcase
+  if (
+    normalizedKey.includes("development") ||
+    normalizedKey.includes("developer") ||
+    normalizedKey.includes("software") ||
+    normalizedKey.includes("engineering") ||
+    normalizedKey.includes("ingenieria") ||
+    normalizedKey.includes("tech")
+  ) {
+    return Code2
+  }
+
+  if (
+    normalizedKey.includes("design") ||
+    normalizedKey.includes("ux") ||
+    normalizedKey.includes("ui") ||
+    normalizedKey.includes("creative")
+  ) {
+    return Palette
+  }
+
+  if (
+    normalizedKey.includes("marketing") ||
+    normalizedKey.includes("growth") ||
+    normalizedKey.includes("content") ||
+    normalizedKey.includes("brand") ||
+    normalizedKey.includes("ventas")
+  ) {
+    return Megaphone
+  }
+
+  if (
+    normalizedKey.includes("operations") ||
+    normalizedKey.includes("operaciones") ||
+    normalizedKey.includes("logistics") ||
+    normalizedKey.includes("supply")
+  ) {
+    return Settings2
+  }
+
+  if (
+    normalizedKey.includes("customer") ||
+    normalizedKey.includes("support") ||
+    normalizedKey.includes("success") ||
+    normalizedKey.includes("soporte")
+  ) {
+    return Headset
+  }
+
+  if (
+    normalizedKey.includes("people") ||
+    normalizedKey.includes("talent") ||
+    normalizedKey.includes("human") ||
+    normalizedKey.includes("rrhh") ||
+    normalizedKey.includes("recruit")
+  ) {
+    return Users
+  }
+
+  if (
+    normalizedKey.includes("finance") ||
+    normalizedKey.includes("account") ||
+    normalizedKey.includes("admin") ||
+    normalizedKey.includes("contab")
+  ) {
+    return BarChart3
+  }
+
+  if (
+    normalizedKey.includes("security") ||
+    normalizedKey.includes("compliance") ||
+    normalizedKey.includes("legal")
+  ) {
+    return ShieldCheck
+  }
+
+  if (normalizedKey.includes("health") || normalizedKey.includes("salud")) {
+    return Stethoscope
+  }
+
+  return Briefcase
+}
+
 function formatPublishedLabel(publishedAt?: string): string | null {
   if (!publishedAt) return null
 
@@ -125,6 +232,46 @@ function formatPublishedLabel(publishedAt?: string): string | null {
   }).format(date)
 }
 
+function formatCountLabel(totalCount: number): string {
+  return `${totalCount} oportunidad${totalCount === 1 ? "" : "es"}`
+}
+
+function getCountryFilterLabel(queryState: QueryState): string | null {
+  return queryState.country || queryState.countryCode || null
+}
+
+function buildResultsSummary({
+  totalCount,
+  currentPage,
+  search,
+  department,
+  modality,
+  country,
+  isLoading,
+}: {
+  totalCount: number
+  currentPage: number
+  search: string
+  department: string | null
+  modality: string | null
+  country: string | null
+  isLoading: boolean
+}): string {
+  if (isLoading) return "Preparando el listado con la búsqueda y filtros activos."
+
+  const descriptors = [
+    search ? `para "${search}"` : null,
+    department ? `en el departamento ${department}` : null,
+    modality ? `con modalidad ${modality}` : null,
+    country ? `en ${country}` : null,
+  ].filter(Boolean)
+
+  const suffix = descriptors.length ? ` ${descriptors.join(", ")}` : ""
+  const pageLabel = currentPage > 1 ? ` en la página ${currentPage}` : ""
+
+  return `Mostrando ${formatCountLabel(totalCount)}${suffix}${pageLabel}.`
+}
+
 function OpportunityCard({
   vacancy,
   queryString,
@@ -132,119 +279,76 @@ function OpportunityCard({
   vacancy: OpportunityVacancySummary
   queryString: string
 }) {
-  const metadata = [
-    vacancy.department?.displayName ?? "No especificado",
-    vacancy.modality?.displayName ?? "No especificado",
-    vacancy.countryLabel ?? vacancy.locationLabel ?? "No especificado",
-  ]
-
   const publishedLabel = formatPublishedLabel(vacancy.publishedAt)
   const href = `/oportunidades/${vacancy.id}${queryString ? `?${queryString}` : ""}`
+  const locationLabel =
+    vacancy.locationLabel ?? vacancy.countryLabel ?? "Ubicación no especificada"
+  const departmentLabel = vacancy.department?.displayName ?? "Departamento no especificado"
+  const modalityLabel = vacancy.modality?.displayName ?? "Modalidad no especificada"
+  const companyName =
+    vacancy.company.name.trim() === "Default Company" ? "" : vacancy.company.name.trim()
+  const DepartmentIcon = getDepartmentIcon(vacancy.department)
 
   return (
-    <article className={`group relative overflow-hidden rounded-[30px] p-px ${cardGlowClassName}`}>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(199,50,119,0.35),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(113,188,237,0.2),transparent_30%)] opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="relative rounded-[29px] bg-[linear-gradient(180deg,rgba(24,32,57,0.92)_0%,rgba(15,20,40,0.96)_100%)] p-5 text-white sm:p-6">
-        <div className="flex flex-col gap-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-3">
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-white/78">
-                <Sparkles className="h-3.5 w-3.5 text-[#f0a7ff]" aria-hidden />
-                Oportunidad abierta
-              </p>
-              <div className="space-y-3">
-                <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-[1.75rem]">
-                  <Link
-                    href={href}
-                    className="transition-colors hover:text-[#ffc2fb] focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#161d34]"
-                  >
-                    {vacancy.title}
-                  </Link>
-                </h2>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/72">
-                  <span className="inline-flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-[#8dd8ff]" aria-hidden />
-                    {vacancy.company.name}
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-[#f6c482]" aria-hidden />
-                    {vacancy.locationLabel ??
-                      vacancy.countryLabel ??
-                      "Ubicación no especificada"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-[22px] border border-white/12 bg-white/8 text-sm font-semibold text-white/88 sm:flex">
-              {getCompanyInitials(vacancy.company.name) || "AT"}
-            </div>
+    <article className="group border-b border-white/10 last:border-b-0">
+      <div className="grid gap-4 px-4 py-5 transition-colors duration-200 hover:bg-white/3 sm:px-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(220px,1fr)_auto] lg:items-center lg:gap-6 lg:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/6 text-xs font-semibold text-white/80">
+            <DepartmentIcon className="h-5 w-5 text-[#8dd8ff]" aria-hidden />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {metadata.map((item, index) => (
-                  <span
-                    key={`${vacancy.id}-metadata-${index}-${item}`}
-                    className="inline-flex items-center rounded-full border border-white/10 bg-white/7 px-3 py-1 text-xs font-medium text-white/82"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-
-              <p className="line-clamp-3 text-sm leading-7 text-white/72">
-                {vacancy.summary ??
-                  "Explorá el detalle para conocer responsabilidades, requisitos y el contexto completo de esta vacante."}
-              </p>
-            </div>
-
-            <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">
-                Vista rápida
-              </p>
-              <div className="mt-3 space-y-3 text-sm text-white/78">
-                <div className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2.5">
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-white/45">
-                    Departamento
-                  </p>
-                  <p className="mt-1 font-medium text-white">
-                    {vacancy.department?.displayName ?? "No especificado"}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2.5">
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-white/45">
-                    Modalidad
-                  </p>
-                  <p className="mt-1 font-medium text-white">
-                    {vacancy.modality?.displayName ?? "No especificado"}
-                  </p>
-                </div>
-                {publishedLabel ? (
-                  <div className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2.5">
-                    <p className="text-[11px] uppercase tracking-[0.16em] text-white/45">
-                      Publicada
-                    </p>
-                    <p className="mt-1 font-medium text-white">{publishedLabel}</p>
-                  </div>
-                ) : null}
-              </div>
+          <div className="min-w-0">
+            <h3 className="text-base font-semibold tracking-tight text-white">
+              <Link
+                href={href}
+                className="transition-colors hover:text-[#8dd8ff] focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#161d34]"
+              >
+                {vacancy.title}
+              </Link>
+            </h3>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/56">
+              {companyName ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5 text-[#8dd8ff]" aria-hidden />
+                  {companyName}
+                </span>
+              ) : null}
+              {publishedLabel ? (
+                <span className="inline-flex items-center gap-1.5 text-white/44">
+                  <Sparkles className="h-3.5 w-3.5 text-[#f0a7ff]" aria-hidden />
+                  {publishedLabel}
+                </span>
+              ) : null}
             </div>
           </div>
+        </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/42">
-              Perfil público ATS
+        <div className="space-y-1 lg:space-y-0">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-white/38 lg:hidden">
+            Departamento
+          </p>
+          <p className="text-sm text-white/74">{departmentLabel}</p>
+        </div>
+
+        <div className="space-y-1 lg:space-y-0">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-white/38 lg:hidden">Ubicación</p>
+          <div className="space-y-1">
+            <p className="inline-flex items-center gap-2 text-sm text-white/74">
+              <MapPin className="h-3.5 w-3.5 text-[#f6c482]" aria-hidden />
+              {locationLabel}
             </p>
-            <Link
-              href={href}
-              className="inline-flex items-center gap-2 text-sm font-medium text-[#ffc2fb] transition-transform duration-200 hover:translate-x-1 focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#161d34]"
-            >
-              Ver detalle
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
+            <p className="text-xs text-white/46">{modalityLabel}</p>
           </div>
+        </div>
+
+        <div className="flex items-center justify-start lg:justify-end">
+          <Link
+            href={href}
+            className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm font-medium text-white/82 transition-colors hover:border-[#8dd8ff]/40 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#161d34]"
+          >
+            Ver detalle
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
         </div>
       </div>
     </article>
@@ -253,57 +357,45 @@ function OpportunityCard({
 
 function OpportunityCardSkeleton() {
   return (
-    <div className="animate-pulse rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,42,71,0.9)_0%,rgba(18,25,44,0.94)_100%)] p-6">
-      <div className="space-y-4">
-        <div className="h-6 w-36 rounded-full bg-white/10" />
-        <div className="h-9 w-2/3 rounded-2xl bg-white/10" />
-        <div className="h-5 w-1/2 rounded-xl bg-white/10" />
-        <div className="flex flex-wrap gap-2">
-          <div className="h-8 w-28 rounded-full bg-white/10" />
-          <div className="h-8 w-24 rounded-full bg-white/10" />
-          <div className="h-8 w-20 rounded-full bg-white/10" />
-        </div>
-        <div className="space-y-2">
-          <div className="h-4 w-full rounded bg-white/10" />
-          <div className="h-4 w-[92%] rounded bg-white/10" />
-          <div className="h-4 w-[68%] rounded bg-white/10" />
+    <div className="grid animate-pulse gap-4 px-4 py-5 sm:px-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(220px,1fr)_auto] lg:items-center lg:gap-6 lg:px-6">
+      <div className="flex items-start gap-3">
+        <div className="h-11 w-11 rounded-2xl bg-white/10" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="h-5 w-44 rounded-xl bg-white/10" />
+          <div className="h-4 w-40 rounded-lg bg-white/10" />
         </div>
       </div>
+      <div className="h-4 w-32 rounded-lg bg-white/10" />
+      <div className="space-y-2">
+        <div className="h-4 w-36 rounded-lg bg-white/10" />
+        <div className="h-3 w-24 rounded-lg bg-white/10" />
+      </div>
+      <div className="h-10 w-28 rounded-full bg-white/10" />
     </div>
   )
 }
 
-function FilterOptionButton({
-  option,
-  isActive,
-  onClick,
-}: {
-  option: OpportunityFilterOption
-  isActive: boolean
-  onClick: () => void
-}) {
+function OpportunityTableHeader() {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex w-full items-center justify-between gap-3 rounded-[20px] border px-4 py-3 text-left text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#18213d] ${
-        isActive
-          ? "border-[#f0a7ff]/40 bg-[linear-gradient(180deg,rgba(199,50,119,0.2)_0%,rgba(110,51,133,0.18)_100%)] text-white shadow-[0_18px_40px_rgba(110,51,133,0.22)]"
-          : "border-white/10 bg-white/5 text-white/78 hover:border-white/20 hover:bg-white/8"
-      }`}
-      aria-pressed={isActive}
-    >
-      <span className="min-w-0 truncate font-medium">{option.displayName}</span>
-      {option.count != null ? (
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${
-            isActive ? "bg-white/12 text-white" : "bg-white/8 text-white/56"
-          }`}
-        >
-          {option.count}
-        </span>
-      ) : null}
-    </button>
+    <div className="hidden grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(220px,1fr)_auto] gap-6 border-b border-white/10 px-6 py-4 text-[11px] uppercase tracking-[0.22em] text-white/40 lg:grid">
+      <span>Vacante</span>
+      <span>Departamento</span>
+      <span>Ubicación</span>
+      <span className="text-right">Acción</span>
+    </div>
+  )
+}
+
+function OpportunityTableSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/10">
+      <OpportunityTableHeader />
+      <div className="divide-y divide-white/10">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <OpportunityCardSkeleton key={index} />
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -334,16 +426,11 @@ export function PublicVacanciesPage() {
   )
   const requestFilters = useMemo(() => toRequestFilters(queryState), [queryState])
 
-  const [searchInput, setSearchInput] = useState(queryState.search)
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+  const [searchInput, setSearchInput] = useState(queryState.vacanteName)
   const [response, setResponse] = useState<OpportunityListResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [retryToken, setRetryToken] = useState(0)
-
-  useEffect(() => {
-    setSearchInput(queryState.search)
-  }, [queryState.search])
 
   useEffect(() => {
     let isCancelled = false
@@ -399,51 +486,6 @@ export function PublicVacanciesPage() {
     [currentQueryString, pathname, router]
   )
 
-  const handleSearchSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
-      updateQuery({
-        search: searchInput.trim() || null,
-        page: null,
-      })
-    },
-    [searchInput, updateQuery]
-  )
-
-  const handleToggleDepartment = useCallback(
-    (option: OpportunityFilterOption) => {
-      const isSameOption = matchesSelectedFilter(
-        option,
-        queryState.departmentId,
-        queryState.departmentCode
-      )
-
-      updateQuery({
-        departmentId: isSameOption ? null : option.id,
-        departmentCode: null,
-        page: null,
-      })
-    },
-    [queryState.departmentCode, queryState.departmentId, updateQuery]
-  )
-
-  const handleToggleModality = useCallback(
-    (option: OpportunityFilterOption) => {
-      const isSameOption = matchesSelectedFilter(
-        option,
-        queryState.modalityId,
-        queryState.modalityCode
-      )
-
-      updateQuery({
-        modalityId: isSameOption ? null : option.id,
-        modalityCode: null,
-        page: null,
-      })
-    },
-    [queryState.modalityCode, queryState.modalityId, updateQuery]
-  )
-
   const handleClearAll = useCallback(() => {
     setSearchInput("")
     router.replace(pathname, { scroll: false })
@@ -459,9 +501,22 @@ export function PublicVacanciesPage() {
     queryState.modalityId,
     queryState.modalityCode
   )
+  const selectedCountryLabel = getCountryFilterLabel(queryState)
+  const normalizedVacanteName = searchInput.trim().toLowerCase()
+  const filteredItems = useMemo(() => {
+    const items = response?.items ?? []
+    if (!normalizedVacanteName) return items
+
+    return items.filter((vacancy) =>
+      vacancy.title.trim().toLowerCase().includes(normalizedVacanteName)
+    )
+  }, [normalizedVacanteName, response?.items])
+  const hasVisibleFilterChips = Boolean(
+    selectedDepartmentLabel || selectedModalityLabel || selectedCountryLabel
+  )
 
   const hasActiveFilters = Boolean(
-    queryState.search ||
+    normalizedVacanteName ||
       queryState.departmentId ||
       queryState.departmentCode ||
       queryState.modalityId ||
@@ -470,390 +525,262 @@ export function PublicVacanciesPage() {
       queryState.countryCode
   )
 
-  const totalCount = response?.pagination.totalCount ?? 0
+  const totalCount = normalizedVacanteName
+    ? filteredItems.length
+    : response?.pagination.totalCount ?? 0
   const currentPage = response?.pagination.page ?? queryState.page
   const totalPages = response?.pagination.totalPages ?? 1
-  const totalDepartments = response?.availableFilters.departments.length ?? 0
-  const totalModalities = response?.availableFilters.modalities.length ?? 0
+  const resultsSummary = buildResultsSummary({
+    totalCount,
+    currentPage,
+    search: searchInput.trim(),
+    department: selectedDepartmentLabel,
+    modality: selectedModalityLabel,
+    country: selectedCountryLabel,
+    isLoading,
+  })
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0b1224] text-white">
+    <div
+      id="public-opportunities-top"
+      className="relative min-h-screen overflow-hidden bg-[#0b1224] text-white"
+    >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-[540px] bg-[linear-gradient(180deg,#5b2b86_0%,#25365d_40%,#0b1224_100%)]" />
-        <div className="absolute left-[-8%] top-10 h-72 w-72 rounded-full bg-[#c73277]/28 blur-3xl" />
-        <div className="absolute right-[8%] top-24 h-80 w-80 rounded-full bg-[#71bced]/18 blur-3xl" />
-        <div className="absolute inset-x-0 top-[340px] h-px bg-linear-to-r from-transparent via-white/12 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-[580px] bg-[linear-gradient(180deg,#5b2b86_0%,#25365d_34%,#0b1224_100%)]" />
+        <div className="absolute left-[-10%] top-8 h-72 w-72 rounded-full bg-[#c73277]/28 blur-3xl" />
+        <div className="absolute right-[2%] top-16 h-80 w-80 rounded-full bg-[#71bced]/18 blur-3xl" />
+        <div className="absolute inset-x-0 top-[360px] h-px bg-linear-to-r from-transparent via-white/12 to-transparent" />
+        <div className="absolute bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#6e3385]/12 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+      <div className="relative flex w-full flex-col px-4 py-6 sm:px-6 lg:px-8">
         <PublicOpportunitiesNavbar className="mb-6" />
 
-        <header className={`relative overflow-hidden rounded-[36px] px-6 py-8 text-white sm:px-8 sm:py-10 lg:px-10 ${darkPanelClassName}`}>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(199,50,119,0.35),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(113,188,237,0.18),transparent_24%)]" />
-          <div className="absolute -right-10 top-0 hidden h-44 w-44 rounded-full border border-white/10 bg-white/5 blur-2xl lg:block" />
+        <div className="mx-auto w-full max-w-6xl">
 
-          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_330px] lg:items-end">
-            <div className="max-w-3xl space-y-5">
+        <header className={`relative overflow-hidden rounded-[36px] px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 ${darkPanelClassName}`}>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.14),transparent_26%),radial-gradient(circle_at_top_right,rgba(199,50,119,0.34),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(113,188,237,0.18),transparent_28%)]" />
+          <div className="absolute -right-14 top-0 hidden h-48 w-48 rounded-full border border-white/10 bg-white/5 blur-2xl lg:block" />
+
+          <div className="relative max-w-3xl space-y-6">
               <p className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/7 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.28em] text-white/76">
                 <Sparkles className="h-3.5 w-3.5 text-[#f5b0ff]" aria-hidden />
                 Portal de oportunidades
               </p>
 
               <div className="space-y-4">
-                <h1 className="max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
-                  Encontrá roles con una experiencia visual más clara, directa y memorable
+                <h1 className="max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-[3.45rem]">
+                  Encontrá oportunidades con una lectura clara desde el primer vistazo
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
-                  Rediseñamos el portal para que el contenido clave destaque desde el primer vistazo:
-                  departamento, modalidad, contexto y navegación de postulación en una composición
-                  inspirada en la referencia visual.
+                  Explorá vacantes activas por departamento, modalidad y contexto de trabajo
+                  en una experiencia pública pensada para descubrir rápido y decidir mejor.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
                 <Link
-                  href="/auth/registrarse"
+                  href="#public-opportunities-explorer"
                   className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-[#18213d] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
                 >
-                  Crear cuenta
-                </Link>
-                <Link
-                  href="/auth/iniciar-sesion"
-                  className="inline-flex items-center justify-center rounded-full border border-white/14 bg-white/7 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-white/12 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
-                >
-                  Iniciar sesión
+                  Explorar oportunidades
                 </Link>
               </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-              <div className="rounded-[26px] border border-white/10 bg-black/10 p-4">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-white/48">Resultados</p>
-                <p className="mt-2 text-3xl font-semibold text-white">
-                  {isLoading ? "--" : totalCount}
-                </p>
-                <p className="mt-1 text-sm text-white/62">vacantes activas visibles</p>
-              </div>
-              <div className="rounded-[26px] border border-white/10 bg-black/10 p-4">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-white/48">Departamentos</p>
-                <p className="mt-2 text-3xl font-semibold text-white">
-                  {isLoading ? "--" : totalDepartments}
-                </p>
-                <p className="mt-1 text-sm text-white/62">opciones dinámicas desde backend</p>
-              </div>
-              <div className="rounded-[26px] border border-white/10 bg-black/10 p-4">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-white/48">Modalidades</p>
-                <p className="mt-2 text-3xl font-semibold text-white">
-                  {isLoading ? "--" : totalModalities}
-                </p>
-                <p className="mt-1 text-sm text-white/62">preservadas en URL y detalle</p>
-              </div>
-            </div>
           </div>
         </header>
 
-        <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-start">
-          <aside className="w-full lg:sticky lg:top-6 lg:max-w-xs">
-            <div className={`overflow-hidden rounded-[30px] ${darkPanelClassName}`}>
-              <button
-                type="button"
-                onClick={() => setIsFiltersOpen((current) => !current)}
-                className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left lg:cursor-default"
-                aria-expanded={isFiltersOpen}
-                aria-controls="public-vacancies-filters"
-              >
-                <span className="inline-flex items-center gap-2 text-sm font-medium text-white">
-                  <Filter className="h-4 w-4 text-[#f2adff]" aria-hidden />
-                  Filtros inteligentes
-                </span>
-                <ChevronDown
-                  className={`h-4 w-4 text-white/60 transition-transform lg:hidden ${
-                    isFiltersOpen ? "rotate-180" : ""
-                  }`}
-                  aria-hidden
-                />
-              </button>
+        <section
+          id="public-opportunities-explorer"
+          className={`relative mt-6 overflow-hidden rounded-[36px] p-5 scroll-mt-6 sm:p-6 lg:p-7 ${darkPanelClassName}`}
+          aria-labelledby="public-opportunities-explorer-title"
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(199,50,119,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(113,188,237,0.14),transparent_24%)]" />
 
-              <div
-                id="public-vacancies-filters"
-                className={`${isFiltersOpen ? "block" : "hidden"} border-t border-white/10 px-5 py-5 lg:block`}
-              >
-                <form onSubmit={handleSearchSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="public-vacancies-search"
-                      className="text-sm font-medium text-white"
-                    >
-                      Buscar vacantes
-                    </label>
-                    <div className="relative">
-                      <Search
-                        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/42"
-                        aria-hidden
-                      />
-                      <input
-                        id="public-vacancies-search"
-                        type="search"
-                        value={searchInput}
-                        onChange={(event) => setSearchInput(event.target.value)}
-                        placeholder="Ej. React, diseño, remoto"
-                        className="h-12 w-full rounded-[20px] border border-white/10 bg-white/6 pl-10 pr-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#f0a7ff]"
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full justify-center rounded-full bg-white px-4 py-3 text-[#18213d] hover:bg-white"
-                    >
-                      Aplicar búsqueda
-                    </Button>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <h2 className="text-sm font-medium text-white">Departamentos</h2>
-                      {selectedDepartmentLabel ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateQuery({
-                              departmentId: null,
-                              departmentCode: null,
-                              page: null,
-                            })
-                          }
-                          className="text-xs font-medium text-[#f5b0ff] hover:text-white"
-                        >
-                          Limpiar
-                        </button>
-                      ) : null}
-                    </div>
-
-                    <div className="space-y-2">
-                      {response?.availableFilters.departments.length ? (
-                        response.availableFilters.departments.map((option) => (
-                          <FilterOptionButton
-                            key={option.id}
-                            option={option}
-                            isActive={matchesSelectedFilter(
-                              option,
-                              queryState.departmentId,
-                              queryState.departmentCode
-                            )}
-                            onClick={() => handleToggleDepartment(option)}
-                          />
-                        ))
-                      ) : (
-                        <p className="text-sm text-white/56">No hay departamentos disponibles.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <h2 className="text-sm font-medium text-white">Modalidades</h2>
-                      {selectedModalityLabel ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateQuery({
-                              modalityId: null,
-                              modalityCode: null,
-                              page: null,
-                            })
-                          }
-                          className="text-xs font-medium text-[#f5b0ff] hover:text-white"
-                        >
-                          Limpiar
-                        </button>
-                      ) : null}
-                    </div>
-
-                    <div className="space-y-2">
-                      {response?.availableFilters.modalities.length ? (
-                        response.availableFilters.modalities.map((option) => (
-                          <FilterOptionButton
-                            key={option.id}
-                            option={option}
-                            isActive={matchesSelectedFilter(
-                              option,
-                              queryState.modalityId,
-                              queryState.modalityCode
-                            )}
-                            onClick={() => handleToggleModality(option)}
-                          />
-                        ))
-                      ) : (
-                        <p className="text-sm text-white/56">No hay modalidades disponibles.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {hasActiveFilters ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full justify-center rounded-full border-white/12 bg-white/6 px-4 py-3 text-white hover:bg-white/10"
-                      onClick={handleClearAll}
-                    >
-                      <X className="h-4 w-4" aria-hidden />
-                      Limpiar filtros
-                    </Button>
-                  ) : null}
-                </form>
-              </div>
-            </div>
-          </aside>
-
-          <main className="min-w-0 flex-1">
-            <section className={`relative overflow-hidden rounded-[32px] p-5 sm:p-6 ${darkPanelClassName}`}>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(199,50,119,0.18),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(113,188,237,0.14),transparent_20%)]" />
-
-              <div className="relative flex flex-col gap-5 border-b border-white/10 pb-5 sm:flex-row sm:items-start sm:justify-between">
-                <div className="space-y-2">
+          <div className="relative">
+            <div className={`rounded-[30px] p-5 sm:p-6 ${softPanelClassName}`}>
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-2xl space-y-3">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/60">
                     <Layers3 className="h-3.5 w-3.5 text-[#8dd8ff]" aria-hidden />
-                    Descubrimiento de vacantes
+                    Exploración pública
                   </div>
-                  <h2 className="text-2xl font-semibold tracking-tight text-white">
-                    Vacantes disponibles
-                  </h2>
-                  <p className="text-sm text-white/62">
-                    {isLoading
-                      ? "Cargando oportunidades..."
-                      : `${totalCount} oportunidad${totalCount === 1 ? "" : "es"} encontradas`}
-                  </p>
+                  <div className="space-y-2">
+                    <h2
+                      id="public-opportunities-explorer-title"
+                      className="text-2xl font-semibold tracking-tight text-white sm:text-[2rem]"
+                    >
+                      Oportunidades disponibles
+                    </h2>
+                    <p className="text-sm leading-7 text-white/64">{resultsSummary}</p>
+                  </div>
                 </div>
 
-                {hasActiveFilters ? (
-                  <div className="flex flex-wrap gap-2">
-                    {queryState.search ? (
-                      <ActiveFilterChip
-                        label="Búsqueda"
-                        value={queryState.search}
-                        onRemove={() => updateQuery({ search: null, page: null })}
-                      />
-                    ) : null}
-                    {selectedDepartmentLabel ? (
-                      <ActiveFilterChip
-                        label="Departamento"
-                        value={selectedDepartmentLabel}
-                        onRemove={() =>
-                          updateQuery({
-                            departmentId: null,
-                            departmentCode: null,
-                            page: null,
-                          })
-                        }
-                      />
-                    ) : null}
-                    {selectedModalityLabel ? (
-                      <ActiveFilterChip
-                        label="Modalidad"
-                        value={selectedModalityLabel}
-                        onRemove={() =>
-                          updateQuery({
-                            modalityId: null,
-                            modalityCode: null,
-                            page: null,
-                          })
-                        }
-                      />
-                    ) : null}
+                <div className="w-full lg:max-w-xl">
+                  <label htmlFor="public-vacancies-search" className="sr-only">
+                    Buscar vacantes
+                  </label>
+                  <div className="relative flex-1">
+                    <Search
+                      className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40"
+                      aria-hidden
+                    />
+                    <input
+                      id="public-vacancies-search"
+                      type="search"
+                      value={searchInput}
+                      onChange={(event) => setSearchInput(event.target.value)}
+                      placeholder="Buscar vacantes por nombre"
+                      className="h-12 w-full rounded-full border border-white/10 bg-white/6 pl-11 pr-4 text-sm text-white placeholder:text-white/38 focus:outline-none focus:ring-2 focus:ring-[#f0a7ff]"
+                    />
                   </div>
-                ) : null}
+                </div>
               </div>
+            </div>
 
-              <div className="relative mt-6">
-                {errorMessage ? (
-                  <div
-                    className="rounded-[28px] border border-[#ff93ca]/30 bg-[rgba(199,50,119,0.12)] px-5 py-6 text-sm text-[#ffd0e7]"
-                    role="alert"
-                  >
-                    <p>{errorMessage}</p>
-                    <button
-                      type="button"
-                      onClick={() => setRetryToken((current) => current + 1)}
-                      className="mt-3 font-medium text-white hover:text-[#ffd0e7]"
-                    >
-                      Intentar de nuevo
-                    </button>
-                  </div>
-                ) : isLoading ? (
-                  <div className="grid gap-4">
-                    {Array.from({ length: 4 }).map((_, index) => (
-                      <OpportunityCardSkeleton key={index} />
-                    ))}
-                  </div>
-                ) : response?.items.length ? (
-                  <div className="grid gap-4">
-                    {response.items.map((vacancy) => (
-                      <OpportunityCard
-                        key={vacancy.id}
-                        vacancy={vacancy}
-                        queryString={currentQueryString}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-[30px] border border-dashed border-white/12 bg-white/5 px-6 py-12 text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[24px] border border-white/10 bg-white/8 text-[#f2adff] shadow-[0_24px_60px_rgba(110,51,133,0.18)]">
-                      <Briefcase className="h-7 w-7" aria-hidden />
-                    </div>
-                    <h3 className="mt-5 text-2xl font-semibold text-white">
-                      No encontramos vacantes con esos filtros
-                    </h3>
-                    <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-white/62">
-                      Probá con otro departamento o modalidad, o limpiá la búsqueda para volver
-                      a ver todas las oportunidades disponibles.
-                    </p>
-                    {hasActiveFilters ? (
-                      <div className="mt-6">
-                        <Button
-                          type="button"
-                          className="rounded-full bg-white px-6 py-3 text-[#18213d] hover:bg-white"
-                          onClick={handleClearAll}
-                        >
-                          Ver todas las vacantes
-                        </Button>
+            <div className="mt-5">
+              <main className="min-w-0">
+                <section className={`relative overflow-hidden rounded-[30px] p-5 sm:p-6 ${softPanelClassName}`}>
+                  <div className={hasVisibleFilterChips ? "flex flex-col gap-5 border-b border-white/10 pb-5" : ""}>
+                    {hasVisibleFilterChips ? (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedDepartmentLabel ? (
+                          <ActiveFilterChip
+                            label="Departamento"
+                            value={selectedDepartmentLabel}
+                            onRemove={() =>
+                              updateQuery({
+                                departmentId: null,
+                                departmentCode: null,
+                                page: null,
+                              })
+                            }
+                          />
+                        ) : null}
+                        {selectedModalityLabel ? (
+                          <ActiveFilterChip
+                            label="Modalidad"
+                            value={selectedModalityLabel}
+                            onRemove={() =>
+                              updateQuery({
+                                modalityId: null,
+                                modalityCode: null,
+                                page: null,
+                              })
+                            }
+                          />
+                        ) : null}
+                        {selectedCountryLabel ? (
+                          <ActiveFilterChip
+                            label="País"
+                            value={selectedCountryLabel}
+                            onRemove={() =>
+                              updateQuery({
+                                country: null,
+                                countryCode: null,
+                                page: null,
+                              })
+                            }
+                          />
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
-                )}
-              </div>
 
-              {!isLoading && !errorMessage && totalPages > 1 ? (
-                <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-white/58">
-                    Página {currentPage} de {totalPages}
-                  </p>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="rounded-full border-white/12 bg-white/6 px-4 py-2 text-white hover:bg-white/10"
-                      onClick={() => updateQuery({ page: currentPage - 1 })}
-                      disabled={currentPage <= 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" aria-hidden />
-                      Anterior
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="rounded-full border-white/12 bg-white/6 px-4 py-2 text-white hover:bg-white/10"
-                      onClick={() => updateQuery({ page: currentPage + 1 })}
-                      disabled={currentPage >= totalPages}
-                    >
-                      Siguiente
-                      <ChevronRight className="h-4 w-4" aria-hidden />
-                    </Button>
+                  <div className={hasVisibleFilterChips ? "mt-6" : ""}>
+                    {errorMessage ? (
+                      <div
+                        className="rounded-[28px] border border-[#ff93ca]/30 bg-[rgba(199,50,119,0.12)] px-5 py-6 text-sm text-[#ffd0e7]"
+                        role="alert"
+                      >
+                        <p>{errorMessage}</p>
+                        <button
+                          type="button"
+                          onClick={() => setRetryToken((current) => current + 1)}
+                          className="mt-3 font-medium text-white hover:text-[#ffd0e7]"
+                        >
+                          Intentar de nuevo
+                        </button>
+                      </div>
+                    ) : isLoading ? (
+                      <OpportunityTableSkeleton />
+                    ) : filteredItems.length ? (
+                      <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/10">
+                        <OpportunityTableHeader />
+                        <div>
+                          {filteredItems.map((vacancy) => (
+                            <OpportunityCard
+                              key={vacancy.id}
+                              vacancy={vacancy}
+                              queryString={currentQueryString}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="rounded-[30px] border border-dashed border-white/12 bg-white/5 px-6 py-12 text-center">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[24px] border border-white/10 bg-white/8 text-[#f2adff] shadow-[0_24px_60px_rgba(110,51,133,0.18)]">
+                          <Briefcase className="h-7 w-7" aria-hidden />
+                        </div>
+                        <h3 className="mt-5 text-2xl font-semibold text-white">
+                          No encontramos vacantes con esos filtros.
+                        </h3>
+                        <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-white/62">
+                          Conservamos tu contexto actual para que puedas ajustar la búsqueda,
+                          remover chips o volver a explorar todas las oportunidades disponibles.
+                        </p>
+                        {hasActiveFilters ? (
+                          <div className="mt-6">
+                            <Button
+                              type="button"
+                              className="rounded-full bg-vo-pink px-6 py-3 text-[#18213d]"
+                              onClick={handleClearAll}
+                            >
+                              Ver todas las vacantes
+                            </Button>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ) : null}
-            </section>
-          </main>
+
+                  {!isLoading && !errorMessage && totalPages > 1 ? (
+                    <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm text-white/58">
+                        Página {currentPage} de {totalPages}
+                      </p>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-full border-white/12 bg-white/6 px-4 py-2 text-white hover:bg-white/10"
+                          onClick={() => updateQuery({ page: currentPage - 1 })}
+                          disabled={currentPage <= 1}
+                        >
+                          <ChevronLeft className="h-4 w-4" aria-hidden />
+                          Anterior
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-full border-white/12 bg-white/6 px-4 py-2 text-white hover:bg-white/10"
+                          onClick={() => updateQuery({ page: currentPage + 1 })}
+                          disabled={currentPage >= totalPages}
+                        >
+                          Siguiente
+                          <ChevronRight className="h-4 w-4" aria-hidden />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : null}
+                </section>
+              </main>
+            </div>
+          </div>
+        </section>
+
         </div>
+
       </div>
     </div>
   )
