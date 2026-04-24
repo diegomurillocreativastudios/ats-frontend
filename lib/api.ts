@@ -65,11 +65,16 @@ export const apiClient = {
     }
 
     const res = await fetch(url, config)
-    // 204/205 sin cuerpo: no intentar JSON.parse del body vacío.
-    const data =
-      res.status === 204 || res.status === 205
-        ? {}
-        : await res.json().catch(() => ({}))
+    // 204/205 sin cuerpo: no intentar parsear.
+    let data: unknown = {}
+    if (res.status !== 204 && res.status !== 205) {
+      const contentType = res.headers.get("content-type")?.toLowerCase() ?? ""
+      if (contentType.includes("application/json")) {
+        data = await res.json().catch(() => ({}))
+      } else {
+        data = await res.text().catch(() => "")
+      }
+    }
 
     if (res.status === 401 && !isRetry && typeof window !== "undefined") {
       const refreshed = await tryRefresh()
@@ -87,11 +92,13 @@ export const apiClient = {
         data && typeof data === "object" && !Array.isArray(data)
           ? (data as Record<string, unknown>)
           : {}
+      const fromText =
+        typeof data === "string" && data.trim() !== "" ? data.trim() : null
       const fromBody =
         (typeof payload.message === "string" && payload.message.trim()) ||
         (typeof payload.error === "string" && payload.error.trim()) ||
         (typeof payload.detail === "string" && payload.detail.trim())
-      const message = fromBody || `Solicitud fallida (${res.status})`
+      const message = fromBody || fromText || `Solicitud fallida (${res.status})`
       const err = new Error(message) as Error & {
         status: number
         body?: unknown

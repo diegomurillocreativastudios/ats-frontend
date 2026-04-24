@@ -180,7 +180,7 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
                       </li>
                       <li className="flex items-start gap-3">
                         <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#8dd8ff]" aria-hidden />
-                        No necesitás crear cuenta para postularte.
+                        Usá el mismo correo asociado a tu cuenta de candidato.
                       </li>
                       <li className="flex items-start gap-3">
                         <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#f6c482]" aria-hidden />

@@ -16,6 +16,17 @@ export interface PublicVacancyApplySuccess {
   message: string
 }
 
+interface CandidatePersonalAppliancePayload {
+  firstName: string
+  lastName: string
+  email: string
+  phoneNumber: string
+  linkedinUrl: string
+  websiteUrl: string
+  source: string
+  notes: string
+}
+
 function getRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null
   return value as Record<string, unknown>
@@ -53,8 +64,23 @@ export function parsePublicApplyFieldErrors(body: unknown): Record<string, strin
 }
 
 export function getPublicApplyErrorMessage(status: number, body: unknown): string {
+  if (status === 403) {
+    return "El correo ingresado debe coincidir con tu cuenta de candidato."
+  }
   if (status === 404) return "La vacante ya no está disponible."
-  if (status === 409) return "Ya te has postulado a esta vacante."
+  if (status === 422) {
+    const record = getRecord(body)
+    const fromApi =
+      record &&
+      typeof record.message === "string" &&
+      record.message.trim() !== ""
+        ? record.message.trim()
+        : null
+    return (
+      fromApi ??
+      "No pudimos procesar el CV para esta vacante. Verifica el archivo e intenta nuevamente."
+    )
+  }
   if (status === 415) {
     const record = getRecord(body)
     const fromApi =
@@ -63,7 +89,7 @@ export function getPublicApplyErrorMessage(status: number, body: unknown): strin
       record.message.trim() !== ""
         ? record.message.trim()
         : null
-    return fromApi ?? "El archivo debe estar en formato PDF."
+    return fromApi ?? "El archivo debe estar en formato PDF o DOCX."
   }
   return "No pudimos procesar tu postulación en este momento. Intenta nuevamente."
 }
@@ -74,23 +100,31 @@ export function isValidEmailFormat(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)
 }
 
-export function isPdfFile(file: File): boolean {
+export function isAllowedCvFile(file: File): boolean {
   const name = (file.name ?? "").toLowerCase()
   if (name.endsWith(".pdf")) return true
+  if (name.endsWith(".docx")) return true
   return file.type === "application/pdf"
 }
 
-export function buildPublicApplyFormData(values: PublicVacancyApplyValues): FormData {
+export function buildPublicApplyFormData(
+  vacancyId: string,
+  values: PublicVacancyApplyValues
+): FormData {
   const fd = new FormData()
-  fd.append("firstName", values.firstName.trim())
-  fd.append("lastName", values.lastName.trim())
-  fd.append("email", values.email.trim())
-  fd.append("phone", values.phone?.trim() ?? "")
-  fd.append("linkedinUrl", values.linkedinUrl?.trim() ?? "")
-  fd.append("websiteUrl", values.websiteUrl?.trim() ?? "")
-  fd.append("source", values.source?.trim() ?? "")
-  fd.append("notes", values.notes?.trim() ?? "")
+  const candidate: CandidatePersonalAppliancePayload = {
+    firstName: values.firstName.trim(),
+    lastName: values.lastName.trim(),
+    email: values.email.trim(),
+    phoneNumber: values.phone?.trim() ?? "",
+    linkedinUrl: values.linkedinUrl?.trim() ?? "",
+    websiteUrl: values.websiteUrl?.trim() ?? "",
+    source: values.source?.trim() ?? "",
+    notes: values.notes?.trim() ?? "",
+  }
+  fd.append("vacancyId", vacancyId.trim())
   fd.append("cvFile", values.cvFile)
+  fd.append("candidate", JSON.stringify(candidate))
   return fd
 }
 
@@ -98,14 +132,13 @@ export async function submitPublicVacancyApplication(
   vacancyId: string,
   values: PublicVacancyApplyValues
 ): Promise<PublicVacancyApplySuccess> {
-  const id = encodeURIComponent(vacancyId)
-  const data = (await apiClient.postFormData(
-    `/api/vacantes/${id}/apply`,
-    buildPublicApplyFormData(values)
-  )) as Record<string, unknown>
+  const data = await apiClient.postFormData(
+    "/api/candidate/personal-appliance",
+    buildPublicApplyFormData(vacancyId, values)
+  )
   const message =
-    typeof data.message === "string" && data.message.trim()
-      ? data.message.trim()
-      : "Te has postulado a la vacante exitosamente"
+    typeof data === "string" && data.trim()
+      ? data.trim()
+      : "Application pipeline executed successfully."
   return { message }
 }

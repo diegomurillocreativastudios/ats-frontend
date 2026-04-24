@@ -6,7 +6,7 @@ import {
 import {
   buildPublicApplyFormData,
   getPublicApplyErrorMessage,
-  isPdfFile,
+  isAllowedCvFile,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
 } from "@/lib/public-vacancy-apply"
@@ -41,21 +41,22 @@ describe("public vacancy apply helpers", () => {
     expect(isValidEmailFormat("")).toBe(false)
   })
 
-  it("accepts only pdf by extension or mime", () => {
-    expect(isPdfFile(new File([], "cv.pdf", { type: "application/pdf" }))).toBe(true)
-    expect(isPdfFile(new File([], "cv.PDF", { type: "" }))).toBe(true)
-    expect(isPdfFile(new File([], "cv.doc", { type: "" }))).toBe(false)
+  it("accepts pdf/docx by extension or mime", () => {
+    expect(isAllowedCvFile(new File([], "cv.pdf", { type: "application/pdf" }))).toBe(true)
+    expect(isAllowedCvFile(new File([], "cv.PDF", { type: "" }))).toBe(true)
+    expect(isAllowedCvFile(new File([], "cv.docx", { type: "" }))).toBe(true)
+    expect(isAllowedCvFile(new File([], "cv.doc", { type: "" }))).toBe(false)
   })
 
-  it("returns specific messages for 404, 409 and 415", () => {
+  it("returns specific messages for 403, 404 and 422", () => {
+    expect(getPublicApplyErrorMessage(403, {})).toContain("coincidir")
     expect(getPublicApplyErrorMessage(404, {})).toContain("disponible")
-    expect(getPublicApplyErrorMessage(409, {})).toContain("postulado")
-    expect(getPublicApplyErrorMessage(415, {})).toContain("PDF")
+    expect(getPublicApplyErrorMessage(422, {})).toContain("procesar")
   })
 
-  it("prefers backend message on 415 when present", () => {
+  it("prefers backend message on 422 when present", () => {
     expect(
-      getPublicApplyErrorMessage(415, {
+      getPublicApplyErrorMessage(422, {
         message: "Unsupported CV file format. Allowed format: PDF.",
       })
     ).toBe("Unsupported CV file format. Allowed format: PDF.")
@@ -71,7 +72,7 @@ describe("public vacancy apply helpers", () => {
 
   it("builds FormData with expected keys", () => {
     const file = new File(["%PDF"], "x.pdf", { type: "application/pdf" })
-    const fd = buildPublicApplyFormData({
+    const fd = buildPublicApplyFormData("vacancy-123", {
       firstName: " Ana ",
       lastName: "López",
       email: "a@b.co",
@@ -82,11 +83,16 @@ describe("public vacancy apply helpers", () => {
       notes: "hola",
       cvFile: file,
     })
-    expect(fd.get("firstName")).toBe("Ana")
-    expect(fd.get("lastName")).toBe("López")
-    expect(fd.get("email")).toBe("a@b.co")
-    expect(fd.get("source")).toBe("linkedin")
-    expect(fd.get("notes")).toBe("hola")
+    expect(fd.get("vacancyId")).toBe("vacancy-123")
     expect(fd.get("cvFile")).toBe(file)
+    const candidate = JSON.parse(String(fd.get("candidate") ?? "{}")) as Record<
+      string,
+      string
+    >
+    expect(candidate.firstName).toBe("Ana")
+    expect(candidate.lastName).toBe("López")
+    expect(candidate.email).toBe("a@b.co")
+    expect(candidate.source).toBe("linkedin")
+    expect(candidate.notes).toBe("hola")
   })
 })

@@ -8,10 +8,10 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react"
-import { Mail, Paperclip } from "lucide-react"
+import { LoaderCircle, Mail, Paperclip } from "lucide-react"
 import {
   getPublicApplyErrorMessage,
-  isPdfFile,
+  isAllowedCvFile,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
   submitPublicVacancyApplication,
@@ -258,10 +258,10 @@ export function PublicVacancyApplicationForm({
 
   const handleFileChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null
-    if (file && !isPdfFile(file)) {
+    if (file && !isAllowedCvFile(file)) {
       event.target.value = ""
       setCvFile(null)
-      setErrors((prev) => ({ ...prev, cvFile: "Solo se aceptan archivos PDF." }))
+      setErrors((prev) => ({ ...prev, cvFile: "Solo se aceptan archivos PDF o DOCX." }))
       setServerError(null)
       return
     }
@@ -276,8 +276,9 @@ export function PublicVacancyApplicationForm({
     if (!values.lastName.trim()) next.lastName = "Ingresa tu apellido."
     if (!values.email.trim()) next.email = "Ingresa tu correo."
     else if (!isValidEmailFormat(values.email)) next.email = "Ingresa un correo válido."
-    if (!cvFile) next.cvFile = "Adjunta tu CV en PDF."
-    else if (!isPdfFile(cvFile)) next.cvFile = "Solo se aceptan archivos PDF."
+    if (!cvFile) next.cvFile = "Adjunta tu CV en PDF o DOCX."
+    else if (!isAllowedCvFile(cvFile))
+      next.cvFile = "Solo se aceptan archivos PDF o DOCX."
     return next
   }, [values.firstName, values.lastName, values.email, cvFile])
 
@@ -605,7 +606,7 @@ export function PublicVacancyApplicationForm({
             id="apply-cv"
             name="cvFile"
             type="file"
-            accept="application/pdf,.pdf"
+            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={handleFileChange}
             className="sr-only"
             disabled={disabled}
@@ -617,7 +618,7 @@ export function PublicVacancyApplicationForm({
                 : "mt-3 text-xs text-muted-foreground"
             }
           >
-            Solo se acepta formato PDF.
+            Solo se acepta formato PDF o DOCX.
           </p>
           {cvFile ? (
             <p
@@ -649,10 +650,28 @@ export function PublicVacancyApplicationForm({
               ? "inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-[#18213d] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               : "inline-flex w-full items-center justify-center gap-2 rounded-lg bg-vo-purple px-6 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           }
+          aria-live="polite"
         >
-          <Mail className="h-4 w-4 shrink-0" aria-hidden />
+          {disabled ? (
+            <LoaderCircle className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+          ) : (
+            <Mail className="h-4 w-4 shrink-0" aria-hidden />
+          )}
           {disabled ? "Enviando postulación…" : "Enviar postulación"}
         </button>
+        {disabled ? (
+          <p
+            className={
+              theme === "dark"
+                ? "text-xs text-white/72 sm:ml-1"
+                : "text-xs text-muted-foreground sm:ml-1"
+            }
+            role="status"
+            aria-live="polite"
+          >
+            Estamos validando tu información y subiendo tu CV. Esto puede tardar unos segundos.
+          </p>
+        ) : null}
       </div>
     </form>
     </div>
