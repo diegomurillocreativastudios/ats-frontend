@@ -553,9 +553,9 @@ export function PublicVacanciesPage() {
         <div className="absolute bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#6e3385]/12 blur-3xl" />
       </div>
 
-      <div className="relative flex w-full flex-col px-4 py-6 sm:px-6 lg:px-8">
-        <PublicOpportunitiesNavbar className="mb-6" />
+      <PublicOpportunitiesNavbar className="mb-6" />
 
+      <div className="relative flex w-full flex-col px-4 pb-6 pt-5 sm:px-6 sm:pt-6 lg:px-8">
         <div className="mx-auto w-full max-w-6xl">
 
         <header className={`relative overflow-hidden rounded-[36px] px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 ${darkPanelClassName}`}>

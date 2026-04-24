@@ -10,7 +10,7 @@ export function PublicOpportunitiesNavbar({
 }: PublicOpportunitiesNavbarProps) {
   return (
     <nav
-      className={`relative w-full overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] px-4 py-3 shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur sm:px-5 ${className}`}
+      className={`relative w-full overflow-hidden rounded-none border-0 border-b border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] px-4 py-3 shadow-[0_12px_40px_rgba(7,12,27,0.22)] backdrop-blur sm:px-6 lg:px-8 ${className}`}
       aria-label="Navegacion principal de oportunidades"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(255,255,255,0.12),transparent_22%),radial-gradient(circle_at_right,rgba(199,50,119,0.18),transparent_26%)]" />
@@ -18,7 +18,7 @@ export function PublicOpportunitiesNavbar({
       <div className="relative flex items-center">
         <Link
           href="/oportunidades"
-          className="inline-flex items-center gap-3 rounded-full focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+          className="inline-flex items-center gap-3 rounded-none focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e2744]"
           aria-label="Ir al portal de oportunidades"
         >
           <span className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-white/10 bg-white/95 shadow-[0_10px_30px_rgba(255,255,255,0.08)]">

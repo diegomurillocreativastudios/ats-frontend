@@ -253,9 +253,9 @@ export function PublicVacancyDetailPage({
         <div className="absolute right-[10%] top-16 h-80 w-80 rounded-full bg-[#71bced]/16 blur-3xl" />
       </div>
 
-      <div className="relative flex w-full flex-col px-4 py-6 sm:px-6 lg:px-8">
-        <PublicOpportunitiesNavbar className="mb-5" />
+      <PublicOpportunitiesNavbar className="mb-5" />
 
+      <div className="relative flex w-full flex-col px-4 pb-6 pt-5 sm:px-6 sm:pt-5 lg:px-8">
         <div className="mx-auto w-full max-w-6xl">
           <div className="mb-5">
             <Link
