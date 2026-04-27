@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import ProductBrand from "@/components/branding/ProductBrand"
 import { usePathname } from "next/navigation"
 import {
   Briefcase,
@@ -9,7 +10,6 @@ import {
   ClipboardList,
   Cog,
   FileText,
-  Shield,
   Users,
 } from "lucide-react"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
@@ -53,15 +53,15 @@ export default function AdminSidebar() {
       <div className="flex flex-col gap-6">
         <Link
           href="/"
-          className="flex items-center gap-3 px-5 transition-opacity hover:opacity-90 focus:outline-none"
-          aria-label="Ir al inicio - ATS App"
+          className="flex min-w-0 items-center gap-3 px-5 transition-opacity hover:opacity-90 focus:outline-none"
+          aria-label="Ir al inicio - Visible"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-vo-navy">
-            <Shield className="h-5 w-5 text-white" aria-hidden />
-          </div>
-          <span className="font-inter text-base font-bold text-foreground">
-            Admin
-          </span>
+          <ProductBrand
+            layout="inline"
+            tone="onLight"
+            density="sidebar"
+            className="min-w-0"
+          />
         </Link>
         <nav className="flex flex-col gap-1 px-3" aria-label="Menú administración">
           {[...navItems, settingsNavItem].map((item) => {

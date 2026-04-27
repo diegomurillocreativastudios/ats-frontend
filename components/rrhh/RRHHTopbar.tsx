@@ -4,6 +4,7 @@ import { Fragment, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Bell, Menu, LogOut, Shield } from "lucide-react";
+import ProductBrand from "@/components/branding/ProductBrand";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getInitials } from "@/lib/getInitials";
 import { isAdminRole } from "@/lib/roles";
@@ -157,14 +158,12 @@ export default function RRHHTopbar({
             </>
           )}
           {(isTablet || isMobile) && (
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vo-purple font-inter text-base font-bold text-white md:h-8 md:w-8">
-                {loading ? "..." : initials}
-              </div>
-              <span className="font-inter text-base font-bold text-foreground">
-                ATS App
-              </span>
-            </div>
+            <ProductBrand
+              layout="inline"
+              tone="onLight"
+              density="topbarMobile"
+              className="min-w-0 shrink"
+            />
           )}
           {!isDesktop ? (
             <span className="sr-only">{breadcrumbScreenReaderText}</span>

@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import Input from "@/components/auth/Input"
 import Button from "@/components/auth/Button"
 import AuthBrand from "@/components/auth/AuthBrand"
+import ProductBrand from "@/components/branding/ProductBrand"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
 
@@ -170,14 +171,12 @@ export default function IniciarSesion() {
       {/* Desktop & Tablet: Left Panel */}
       <div className="hidden md:flex md:w-80 lg:flex-1 bg-vo-purple text-white flex-col justify-center md:px-10 lg:px-16 md:gap-6 lg:gap-8">
         <div className="flex flex-col md:gap-6 lg:gap-6">
-          <div className="flex items-center md:gap-3 lg:gap-4">
-            <div className="h-11 w-11 lg:h-14 lg:w-14 rounded-[10px] lg:rounded-xl bg-white/10 flex items-center justify-center text-[22px] lg:text-[32px] font-bold">
-              C
-            </div>
-            <div className="text-xl lg:text-[32px] font-bold leading-none">
-              ATS App
-            </div>
-          </div>
+          <ProductBrand
+            layout="inline"
+            tone="onDark"
+            density="authMarketing"
+            className="min-w-0"
+          />
 
           <div className="hidden lg:block">
             <h1 className="text-[40px] font-bold leading-[1.2]">

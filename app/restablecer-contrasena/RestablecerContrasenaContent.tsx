@@ -13,6 +13,7 @@ import { AlertCircle } from "lucide-react"
 import Input from "@/components/auth/Input"
 import Button from "@/components/auth/Button"
 import AuthBrand from "@/components/auth/AuthBrand"
+import ProductBrand from "@/components/branding/ProductBrand"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
 
@@ -154,14 +155,12 @@ export default function RestablecerContrasenaContent() {
       <div className="flex min-h-screen font-inter">
         <div className="hidden flex-col justify-center bg-vo-navy text-white md:flex md:w-80 md:gap-6 md:px-10 lg:flex-1 lg:gap-8 lg:px-16">
           <div className="flex flex-col md:gap-6 lg:gap-6">
-            <div className="flex items-center md:gap-3 lg:gap-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-white/10 text-[22px] font-bold lg:h-14 lg:w-14 lg:rounded-xl lg:text-[32px]">
-                C
-              </div>
-              <div className="text-xl font-bold leading-none lg:text-[32px]">
-                ATS App
-              </div>
-            </div>
+            <ProductBrand
+              layout="inline"
+              tone="onDark"
+              density="authMarketing"
+              className="min-w-0"
+            />
             <div className="hidden lg:block">
               <h1 className="text-[40px] font-bold leading-[1.2]">
                 Enlace inválido
@@ -225,14 +224,12 @@ export default function RestablecerContrasenaContent() {
     <div className="flex min-h-screen font-inter">
       <div className="hidden flex-col justify-center bg-vo-navy text-white md:flex md:w-80 md:gap-6 md:px-10 lg:flex-1 lg:gap-8 lg:px-16">
         <div className="flex flex-col md:gap-6 lg:gap-6">
-          <div className="flex items-center md:gap-3 lg:gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-white/10 text-[22px] font-bold lg:h-14 lg:w-14 lg:rounded-xl lg:text-[32px]">
-              C
-            </div>
-            <div className="text-xl font-bold leading-none lg:text-[32px]">
-              ATS App
-            </div>
-          </div>
+          <ProductBrand
+            layout="inline"
+            tone="onDark"
+            density="authMarketing"
+            className="min-w-0"
+          />
 
           <div className="hidden lg:block">
             <h1 className="text-[40px] font-bold leading-[1.2]">

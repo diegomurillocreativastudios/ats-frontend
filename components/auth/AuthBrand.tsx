@@ -1,66 +1,40 @@
-export default function AuthBrand({ size = "large", variant = "primary" }) {
-  const sizes = {
-    large: {
-      logo: "h-14 w-14 rounded-xl text-[32px]",
-      text: "text-[32px]",
-      gap: "gap-4"
-    },
-    medium: {
-      logo: "h-11 w-11 rounded-[10px] text-[22px]",
-      text: "text-xl",
-      gap: "gap-3"
-    },
-    // Login mobile: 64x64px, radius 16, gap 12
-    "mobile-login": {
-      logo: "h-16 w-16 rounded-2xl text-[32px]",
-      text: "text-2xl",
-      gap: "gap-3"
-    },
-    // Registro mobile: 48x48px, radius 12, gap 8
-    "mobile-register": {
-      logo: "h-12 w-12 rounded-xl text-2xl",
-      text: "text-xl",
-      gap: "gap-2"
-    }
-  };
+import ProductBrand from "@/components/branding/ProductBrand"
 
-  const variants = {
-    primary: {
-      logo: "bg-white/10",
-      text: "text-white"
-    },
-    secondary: {
-      logo: "bg-white/10",
-      text: "text-white"
-    },
-    "light-primary": {
-      logo: "bg-vo-purple",
-      text: "text-foreground",
-      textLogo: "text-white"
-    },
-    "light-navy": {
-      logo: "bg-vo-navy",
-      text: "text-foreground",
-      textLogo: "text-white"
-    },
-    "light-secondary": {
-      logo: "bg-vo-magenta",
-      text: "text-foreground",
-      textLogo: "text-white"
-    }
-  };
+interface AuthBrandProps {
+  size?: "large" | "medium" | "mobile-login" | "mobile-register"
+  variant?:
+    | "primary"
+    | "secondary"
+    | "light-primary"
+    | "light-navy"
+    | "light-secondary"
+}
 
-  const s = sizes[size];
-  const v = variants[variant];
+const variantToStackedIcon: Record<
+  NonNullable<AuthBrandProps["variant"]>,
+  "purple" | "navy" | "magenta"
+> = {
+  primary: "purple",
+  secondary: "purple",
+  "light-primary": "purple",
+  "light-navy": "navy",
+  "light-secondary": "magenta",
+}
+
+export default function AuthBrand({
+  size = "large",
+  variant = "primary",
+}: AuthBrandProps) {
+  const density =
+    size === "mobile-register" ? "authMobileRegister" : "authMobileLogin"
+  const stackedIconVariant = variantToStackedIcon[variant] ?? "purple"
 
   return (
-    <div className={`flex flex-col items-center ${s.gap}`}>
-      <div className={`${s.logo} ${v.logo} flex items-center justify-center font-bold ${v.textLogo || 'text-white'}`}>
-        C
-      </div>
-      <div className={`${s.text} ${v.text} font-bold`}>
-        ATS App
-      </div>
-    </div>
-  );
+    <ProductBrand
+      layout="stacked"
+      tone="onLight"
+      density={density}
+      stackedIconVariant={stackedIconVariant}
+    />
+  )
 }

@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { ChevronRight, Bell, Menu, LogOut } from "lucide-react"
+import ProductBrand from "@/components/branding/ProductBrand"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { getInitials } from "@/lib/getInitials"
 import { segmentToTitle } from "@/lib/pageTitles"
@@ -177,14 +178,12 @@ export default function AdminTopbar({
             </>
           )}
           {(isTablet || isMobile) && (
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-vo-navy font-inter text-base font-bold text-white md:h-8 md:w-8">
-                {loading ? "..." : initials}
-              </div>
-              <span className="font-inter text-base font-bold text-foreground">
-                Admin
-              </span>
-            </div>
+            <ProductBrand
+              layout="inline"
+              tone="onLight"
+              density="topbarMobile"
+              className="min-w-0 shrink"
+            />
           )}
           {!isDesktop ? (
             <span className="sr-only">{breadcrumbScreenReaderText}</span>

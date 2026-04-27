@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation"
 import Input from "@/components/auth/Input"
 import Button from "@/components/auth/Button"
 import AuthBrand from "@/components/auth/AuthBrand"
+import ProductBrand from "@/components/branding/ProductBrand"
 import Snackbar from "@/components/ui/Snackbar"
 import { apiClient } from "@/lib/api"
 
@@ -112,14 +113,12 @@ export default function Registrarse() {
     <div className="min-h-screen flex font-inter">
       <div className="hidden lg:flex flex-1 bg-vo-magenta text-white flex-col justify-center px-16 gap-8">
         <div className="flex flex-col gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-white/10 flex items-center justify-center text-[32px] font-bold">
-              C
-            </div>
-            <div className="text-[32px] font-bold leading-none">
-              ATS App
-            </div>
-          </div>
+          <ProductBrand
+            layout="inline"
+            tone="onDark"
+            density="authMarketing"
+            className="min-w-0"
+          />
 
           <h1 className="text-[40px] font-bold leading-[1.2]">
             Únete a la plataforma<br />líder en reclutamiento
@@ -154,12 +153,12 @@ export default function Registrarse() {
       </div>
 
       <div className="hidden md:flex lg:hidden fixed top-0 left-0 right-0 bg-vo-magenta text-white h-[120px] items-center justify-between px-8 gap-4 z-10">
-        <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-[10px] bg-white/10 flex items-center justify-center text-[22px] font-bold">
-            C
-          </div>
-          <div className="text-xl font-bold">ATS App</div>
-        </div>
+        <ProductBrand
+          layout="inline"
+          tone="onDark"
+          density="authMarketing"
+          className="min-w-0 shrink"
+        />
         <p className="text-sm text-white/80">Sistema de Reclutamiento Inteligente</p>
       </div>
 
