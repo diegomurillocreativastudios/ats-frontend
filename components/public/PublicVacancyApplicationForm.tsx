@@ -4,11 +4,12 @@ import Link from "next/link"
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
 } from "react"
-import { LoaderCircle, Mail, Paperclip } from "lucide-react"
+import { CheckCircle2, LoaderCircle, Mail, Paperclip } from "lucide-react"
 import {
   getPublicApplyErrorMessage,
   isAllowedCvFile,
@@ -90,10 +91,56 @@ const APPLY_PROGRESS_STEPS = [
   { step: 5, label: "Éxito" },
 ] as const
 
-/** Objetivo ~15–25 s en datos reales: recorrer pasos 1→4 de forma uniforme (~20 s). */
-const APPLY_PROGRESS_STEPS_1_TO_4_TOTAL_MS = 20_000
-/** Tres saltos (1→2, 2→3, 3→4) repartidos en ese tiempo. */
-const APPLY_PROGRESS_MS = Math.round(APPLY_PROGRESS_STEPS_1_TO_4_TOTAL_MS / 3)
+/** Intervalo para recalcular el avance según el tiempo real del request (no un reloj fijo). */
+const APPLY_LOADING_TICK_MS = 160
+/** Máximo % de la barra mientras el servidor no responde (evita prometer “100%” antes de tiempo). */
+const APPLY_LOADING_BAR_CAP = 92
+/**
+ * Tiempo típico del POST + pipeline (observado ~1,06 min). La barra llega ~86% cerca de aquí;
+ * si tarda más, sube lentamente hasta el tope.
+ */
+const APPLY_TYPICAL_SUBMIT_MS = Math.round(1.06 * 60_000)
+/** Si el envío supera esto, mostramos texto orientativo (la mayoría de envíos ~1 min). */
+const APPLY_LONG_WAIT_HINT_MS = 35_000
+
+function interpolateLoadingPercent(
+  elapsedMs: number,
+  points: readonly (readonly [number, number])[]
+): number {
+  if (elapsedMs <= points[0][0]) return points[0][1]
+  for (let i = 1; i < points.length; i++) {
+    const [t0, p0] = points[i - 1]
+    const [t1, p1] = points[i]
+    if (elapsedMs <= t1) {
+      const u = (elapsedMs - t0) / (t1 - t0)
+      return p0 + u * (p1 - p0)
+    }
+  }
+  return points[points.length - 1][1]
+}
+
+function getLoadingBarPercent(elapsedMs: number): number {
+  const cap = APPLY_LOADING_BAR_CAP
+  const typical = APPLY_TYPICAL_SUBMIT_MS
+  const overtimeEnd = typical + 120_000
+  const points: readonly (readonly [number, number])[] = [
+    [0, 4],
+    [9_000, 16],
+    [22_000, 34],
+    [40_000, 52],
+    [52_000, 68],
+    [typical, 86],
+    [overtimeEnd, cap],
+  ] as const
+  return Math.min(cap, interpolateLoadingPercent(elapsedMs, points))
+}
+
+function getLoadingStepFromPercent(percent: number): 1 | 2 | 3 | 4 {
+  if (percent < 24) return 1
+  if (percent < 48) return 2
+  if (percent < 72) return 3
+  return 4
+}
 
 function applySubmitProgressPanelClass(
   theme: PublicVacancyApplicationFormTheme,
@@ -101,24 +148,30 @@ function applySubmitProgressPanelClass(
 ): string {
   const position = opts.absolute ? "absolute inset-0 z-20 " : ""
   if (theme === "dark") {
-    return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-[inherit] border border-white/10 bg-[linear-gradient(180deg,rgba(25,33,58,0.98)_0%,rgba(16,22,40,0.99)_100%)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-md`
+    return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-[inherit] border border-[#f0a7ff]/25 bg-[linear-gradient(180deg,rgba(18,24,44,0.97)_0%,rgba(12,17,32,0.99)_100%)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl ring-1 ring-white/10`
   }
-  return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-lg border border-border bg-background/95 p-6 shadow-lg backdrop-blur-sm`
+  return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-lg border border-border bg-background/97 p-6 shadow-xl backdrop-blur-md ring-1 ring-vo-purple/15`
 }
 
+const BAR_WIDTH_TRANSITION_MS = 320
+const BAR_WIDTH_SUCCESS_MS = 700
+
 function PublicApplicationSubmitProgress({
-  currentStep,
   theme,
-  barTransitionMs = APPLY_PROGRESS_MS,
+  mode,
+  loadingBarPercent = 0,
+  showLongWaitHint = false,
 }: {
-  currentStep: number
   theme: PublicVacancyApplicationFormTheme
-  /** Duración de la animación de la barra al cambiar de paso (ms). */
-  barTransitionMs?: number
+  mode: "loading" | "success"
+  /** 0–`APPLY_LOADING_BAR_CAP` mientras `mode === "loading"`. */
+  loadingBarPercent?: number
+  showLongWaitHint?: boolean
 }) {
   const isDark = theme === "dark"
-  const doneCount = Math.min(Math.max(currentStep, 0), 5)
-  const pct = (doneCount / 5) * 100
+  const isSuccess = mode === "success"
+  const currentStep = isSuccess ? 5 : getLoadingStepFromPercent(loadingBarPercent)
+  const pct = isSuccess ? 100 : Math.max(2, loadingBarPercent)
   const activeLabel =
     APPLY_PROGRESS_STEPS.find((s) => s.step === currentStep)?.label ?? ""
 
@@ -128,16 +181,41 @@ function PublicApplicationSubmitProgress({
       role="status"
       aria-live="polite"
       aria-relevant="additions text"
+      aria-busy={!isSuccess}
     >
-      <div className="text-center">
+      <div className="flex flex-col items-center text-center">
+        <div
+          className={
+            isDark
+              ? "flex h-14 w-14 items-center justify-center rounded-2xl border border-white/14 bg-white/8 shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
+              : "flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-muted/60 shadow-sm"
+          }
+          aria-hidden
+        >
+          {isSuccess ? (
+            <CheckCircle2
+              className={
+                isDark ? "h-8 w-8 text-[#7ee0c0]" : "h-8 w-8 text-emerald-600"
+              }
+            />
+          ) : (
+            <LoaderCircle
+              className={
+                isDark
+                  ? "h-7 w-7 animate-spin text-[#f0a7ff]"
+                  : "h-7 w-7 animate-spin text-vo-purple"
+              }
+            />
+          )}
+        </div>
         <p
           className={
             isDark
-              ? "text-xs font-medium uppercase tracking-[0.2em] text-white/50"
-              : "text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
+              ? "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-white/50"
+              : "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
           }
         >
-          {currentStep === 5 ? "Listo" : "Procesando tu postulación"}
+          {isSuccess ? "Listo" : "Procesando tu postulación"}
         </p>
         <p
           className={
@@ -148,23 +226,48 @@ function PublicApplicationSubmitProgress({
         >
           {activeLabel}
         </p>
+        {!isSuccess && showLongWaitHint ? (
+          <p
+            className={
+              isDark
+                ? "mt-2 max-w-md text-sm leading-relaxed text-white/64"
+                : "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
+            }
+          >
+            El procesamiento de tu CV suele tardar alrededor de un minuto. No cierres esta pestaña;
+            seguimos trabajando en tu postulación.
+          </p>
+        ) : null}
       </div>
 
       <div
-        className={isDark ? "overflow-hidden rounded-full bg-white/10" : "overflow-hidden rounded-full bg-muted"}
+        className={
+          isDark
+            ? "relative overflow-hidden rounded-full bg-white/10"
+            : "relative overflow-hidden rounded-full bg-muted"
+        }
         aria-hidden
       >
         <div
           className={
             isDark
-              ? "h-2.5 rounded-full bg-[linear-gradient(90deg,#f0a7ff_0%,#8dd8ff_100%)]"
-              : "h-2.5 rounded-full bg-vo-purple"
+              ? "relative h-2.5 rounded-full bg-[linear-gradient(90deg,#f0a7ff_0%,#8dd8ff_100%)] shadow-[0_0_24px_rgba(240,167,255,0.35)]"
+              : "relative h-2.5 rounded-full bg-vo-purple"
           }
           style={{
             width: `${pct}%`,
-            transition: `width ${barTransitionMs}ms cubic-bezier(0.33, 0.86, 0.2, 1)`,
+            transition: `width ${
+              isSuccess ? BAR_WIDTH_SUCCESS_MS : BAR_WIDTH_TRANSITION_MS
+            }ms cubic-bezier(0.33, 0.86, 0.2, 1)`,
           }}
-        />
+        >
+          {!isSuccess ? (
+            <span
+              className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.38),transparent)] animate-apply-shimmer"
+              aria-hidden
+            />
+          ) : null}
+        </div>
       </div>
 
       <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-5 sm:gap-2" aria-label="Estado del envío">
@@ -224,7 +327,8 @@ export function PublicVacancyApplicationForm({
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [submitPhase, setSubmitPhase] = useState<"idle" | "loading" | "success">("idle")
-  const [progressStep, setProgressStep] = useState(0)
+  const [loadingOverlay, setLoadingOverlay] = useState({ percent: 0, longWait: false })
+  const loadingStartedAtRef = useRef(0)
 
   const inputClass = themeFieldClass(theme)
   const selectClass = themeSelectClass(theme)
@@ -234,12 +338,18 @@ export function PublicVacancyApplicationForm({
 
   useEffect(() => {
     if (submitPhase !== "loading") return
-    if (progressStep >= 4) return
-    const id = window.setTimeout(() => {
-      setProgressStep((s) => (s < 4 ? s + 1 : 4))
-    }, APPLY_PROGRESS_MS)
-    return () => window.clearTimeout(id)
-  }, [submitPhase, progressStep])
+    loadingStartedAtRef.current = Date.now()
+    const tick = () => {
+      const elapsedMs = Date.now() - loadingStartedAtRef.current
+      setLoadingOverlay({
+        percent: getLoadingBarPercent(elapsedMs),
+        longWait: elapsedMs >= APPLY_LONG_WAIT_HINT_MS,
+      })
+    }
+    tick()
+    const id = window.setInterval(tick, APPLY_LOADING_TICK_MS)
+    return () => window.clearInterval(id)
+  }, [submitPhase])
 
   const handleChange = useCallback(
     (
@@ -297,7 +407,7 @@ export function PublicVacancyApplicationForm({
       if (!cvFile) return
 
       setSubmitPhase("loading")
-      setProgressStep(1)
+      setLoadingOverlay({ percent: 0, longWait: false })
       setServerError(null)
       setErrors({})
 
@@ -315,12 +425,10 @@ export function PublicVacancyApplicationForm({
 
       try {
         await submitPublicVacancyApplication(vacancyId, payload)
-        setProgressStep(5)
         setValues(initialState)
         setCvFile(null)
         setSubmitPhase("success")
       } catch (err: unknown) {
-        setProgressStep(0)
         setSubmitPhase("idle")
         const status =
           typeof err === "object" && err !== null && "status" in err
@@ -354,11 +462,7 @@ export function PublicVacancyApplicationForm({
           role="status"
           aria-live="polite"
         >
-          <PublicApplicationSubmitProgress
-            currentStep={5}
-            theme={theme}
-            barTransitionMs={Math.min(1200, APPLY_PROGRESS_MS)}
-          />
+          <PublicApplicationSubmitProgress mode="success" theme={theme} />
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {backToVacancyHref ? (
@@ -409,16 +513,17 @@ export function PublicVacancyApplicationForm({
       {showProgressOverlay ? (
         <div className={applySubmitProgressPanelClass(theme, { absolute: true })}>
           <PublicApplicationSubmitProgress
-            currentStep={progressStep}
+            mode="loading"
             theme={theme}
-            barTransitionMs={APPLY_PROGRESS_MS}
+            loadingBarPercent={loadingOverlay.percent}
+            showLongWaitHint={loadingOverlay.longWait}
           />
         </div>
       ) : null}
       <form
         onSubmit={handleSubmit}
         aria-busy={showProgressOverlay}
-        className={`grid grid-cols-2 gap-x-4 gap-y-5 ${showProgressOverlay ? "pointer-events-none select-none opacity-[0.22]" : ""}`}
+        className={`grid grid-cols-2 gap-x-4 gap-y-5 transition-opacity duration-200 ${showProgressOverlay ? "pointer-events-none select-none opacity-[0.38] blur-[0.5px]" : ""}`}
       >
       {serverError ? (
         <p className={`col-span-2 ${errClass}`} role="alert">
@@ -669,7 +774,8 @@ export function PublicVacancyApplicationForm({
             role="status"
             aria-live="polite"
           >
-            Estamos validando tu información y subiendo tu CV. Esto puede tardar unos segundos.
+            Estamos validando tu información y procesando tu CV. Suele tardar alrededor de un
+            minuto; no cierres esta pestaña.
           </p>
         ) : null}
       </div>

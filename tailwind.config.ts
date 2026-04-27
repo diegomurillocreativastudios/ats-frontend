@@ -61,6 +61,15 @@ const config: Config = {
       borderRadius: {
         DEFAULT: '6px',
       },
+      keyframes: {
+        'apply-shimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(400%)' },
+        },
+      },
+      animation: {
+        'apply-shimmer': 'apply-shimmer 1.45s ease-in-out infinite',
+      },
     },
   },
   plugins: [],
