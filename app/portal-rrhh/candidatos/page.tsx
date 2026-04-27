@@ -338,26 +338,6 @@ export default function CandidatosPage() {
               </section>
             </div>
           </main>
-          <Modal
-            isOpen={isUploadModalOpen}
-            onClose={handleCloseUploadModal}
-            title="Agregar candidato"
-            size="lg"
-          >
-            <div className="flex flex-col gap-4">
-              <p className="font-inter text-sm text-muted-foreground">
-                Sube el CV del candidato en formato PDF para crear su perfil automáticamente.
-              </p>
-              <DocumentsUploadZone
-                onProcess={handleProcessUpload}
-                acceptedTypes={["application/pdf"]}
-                acceptedExtensions={[".pdf"]}
-                accept="application/pdf,.pdf"
-                helperText="Solo archivos PDF hasta 10 MB"
-                processAllAcceptedFiles
-              />
-            </div>
-          </Modal>
         </div>
       </div>
 
@@ -374,6 +354,27 @@ export default function CandidatosPage() {
           </div>
         </main>
       </div>
+
+      <Modal
+        isOpen={isUploadModalOpen}
+        onClose={handleCloseUploadModal}
+        title="Agregar candidato"
+        size="lg"
+      >
+        <div className="flex flex-col gap-4">
+          <p className="font-inter text-sm text-muted-foreground">
+            Sube el CV del candidato en formato PDF para crear su perfil automáticamente.
+          </p>
+          <DocumentsUploadZone
+            onProcess={handleProcessUpload}
+            acceptedTypes={["application/pdf"]}
+            acceptedExtensions={[".pdf"]}
+            accept="application/pdf,.pdf"
+            helperText="Solo archivos PDF hasta 10 MB"
+            processAllAcceptedFiles
+          />
+        </div>
+      </Modal>
 
       <Snackbar
         open={snackbar.open}
