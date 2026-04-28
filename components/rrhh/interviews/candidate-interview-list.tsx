@@ -11,6 +11,7 @@ import {
 } from "@/lib/api/interviews"
 import { formatInterviewLocalDateTime } from "@/lib/interview-datetime"
 import { InterviewDetailModal } from "@/components/rrhh/interviews/interview-detail-modal"
+import { InterviewNotesModal } from "@/components/rrhh/interviews/interview-notes-modal"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
 
 export interface CandidateInterviewListProps {
@@ -25,6 +26,7 @@ export function CandidateInterviewList({
   const [error, setError] = useState<string | null>(null)
   const [detailInterviewId, setDetailInterviewId] = useState<string | null>(null)
   const [detailVacancyId, setDetailVacancyId] = useState<string | null>(null)
+  const [notesInterviewId, setNotesInterviewId] = useState<string | null>(null)
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success" as "success" | "error" | "info",
@@ -122,13 +124,22 @@ export function CandidateInterviewList({
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenDetail(row.id, row.vacancyId)}
-                        className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
-                      >
-                        Ver / editar
-                      </button>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDetail(row.id, row.vacancyId)}
+                          className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
+                        >
+                          Administrar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNotesInterviewId(row.id)}
+                          className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
+                        >
+                          Notas
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -154,6 +165,35 @@ export function CandidateInterviewList({
             open: true,
             variant: "success",
             message: "Entrevista eliminada.",
+          })
+        }}
+      />
+
+      <InterviewNotesModal
+        isOpen={notesInterviewId != null}
+        onClose={() => setNotesInterviewId(null)}
+        interviewId={notesInterviewId}
+        initialNotes={
+          notesInterviewId
+            ? items.find((i) => i.id === notesInterviewId)?.notes ?? null
+            : null
+        }
+        contextLine={
+          notesInterviewId
+            ? (() => {
+                const r = items.find((i) => i.id === notesInterviewId)
+                if (!r) return null
+                const vac = r.jobTitle?.trim() || r.vacancyId
+                return `${vac} · ${formatInterviewLocalDateTime(r.scheduledAtUtc)}`
+              })()
+            : null
+        }
+        onSaved={() => {
+          load().catch(() => {})
+          setSnackbar({
+            open: true,
+            variant: "success",
+            message: "Notas guardadas.",
           })
         }}
       />

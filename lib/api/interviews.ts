@@ -18,6 +18,9 @@ export interface Interview {
   interviewTypeId: string | null
   interviewerName: string | null
   googleMeetUrl: string | null
+  /** Texto descriptivo de la entrevista (JSON: `descripcion`). */
+  descripcion: string | null
+  /** Apuntes / indicaciones internas o para el candidato (JSON: `notes`). */
   notes: string | null
   outcome: string | null
   status: InterviewStatus
@@ -40,8 +43,10 @@ export interface CreateInterviewPayload {
   candidateProfileId: string
   scheduledAtUtc: string
   durationMinutes?: number | null
+  interviewTypeId?: string | null
   interviewType?: string | null
   interviewerName?: string | null
+  descripcion?: string | null
   notes?: string | null
 }
 
@@ -50,8 +55,11 @@ export interface PatchInterviewPayload {
   durationMinutes?: number | null
   interviewType?: string | null
   interviewerName?: string | null
+  descripcion?: string | null
   notes?: string | null
   status?: InterviewStatus
+  interviewStatusId?: string | null
+  outcome?: string | null
 }
 
 export interface VacancyApplicantOption {
@@ -498,6 +506,12 @@ export function normalizeInterview(raw: unknown): Interview {
       "interviewer",
     ]),
     googleMeetUrl: pickString(r, ["googleMeetUrl", "google_meet_url", "meetUrl"]),
+    descripcion: pickString(r, [
+      "descripcion",
+      "Descripcion",
+      "description",
+      "Description",
+    ]),
     notes: pickString(r, ["notes", "Notes"]),
     outcome: pickString(r, ["outcome", "Outcome"]),
     status: statusMeta.status,
@@ -634,6 +648,21 @@ export async function patchInterview(
   const data = await apiClient.patch(
     `/api/recruiter/interviews/${encodeURIComponent(interviewId)}`,
     payload
+  )
+  return normalizeInterview(data)
+}
+
+/**
+ * Actualiza solo `notes` de la entrevista.
+ * `PATCH /api/recruiter/interviews/{id}/notes` — el cuerpo debe incluir `notes` (usar `""` para vaciar).
+ */
+export async function patchRecruiterInterviewNotes(
+  interviewId: string,
+  notes: string
+): Promise<Interview> {
+  const data = await apiClient.patch(
+    `/api/recruiter/interviews/${encodeURIComponent(interviewId)}/notes`,
+    { notes }
   )
   return normalizeInterview(data)
 }

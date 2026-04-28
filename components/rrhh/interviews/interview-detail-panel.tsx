@@ -61,7 +61,7 @@ export function InterviewDetailPanel({
   const [durationMinutes, setDurationMinutes] = useState("")
   const [interviewType, setInterviewType] = useState("")
   const [interviewerName, setInterviewerName] = useState("")
-  const [notes, setNotes] = useState("")
+  const [descripcion, setDescripcion] = useState("")
   const [statusChoice, setStatusChoice] = useState<InterviewStatus>("Scheduled")
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -94,7 +94,7 @@ export function InterviewDetailPanel({
       )
       setInterviewType(data.interviewType ?? "")
       setInterviewerName(data.interviewerName ?? "")
-      setNotes(data.notes ?? "")
+      setDescripcion(data.descripcion ?? "")
       setStatusChoice(data.status)
     } catch (err: unknown) {
       const status =
@@ -170,7 +170,7 @@ export function InterviewDetailPanel({
         durationMinutes: duration,
         interviewType: interviewType.trim() || null,
         interviewerName: interviewerName.trim() || null,
-        notes: notes.trim() || null,
+        descripcion: descripcion.trim() || null,
         status: statusChoice,
       })
       setInterview(updated)
@@ -391,13 +391,16 @@ export function InterviewDetailPanel({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="detail-notes" className="font-inter text-sm font-medium">
-            Notas
+          <label
+            htmlFor="detail-descripcion"
+            className="font-inter text-sm font-medium"
+          >
+            Descripcion
           </label>
           <textarea
-            id="detail-notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            id="detail-descripcion"
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
             disabled={!isEditable}
             rows={4}
             className="resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm disabled:opacity-60"

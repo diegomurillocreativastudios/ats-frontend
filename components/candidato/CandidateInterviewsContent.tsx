@@ -125,6 +125,16 @@ function InterviewCandidateCard({ row }: { row: Interview }) {
           </div>
         </div>
       </div>
+      {row.descripcion?.trim() ? (
+        <div className="mt-4 rounded-lg border border-border/80 bg-muted/40 px-3 py-2.5">
+          <p className="font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Descripción
+          </p>
+          <p className="mt-1 whitespace-pre-wrap font-inter text-sm text-foreground">
+            {row.descripcion.trim()}
+          </p>
+        </div>
+      ) : null}
       {row.notes?.trim() ? (
         <div className="mt-4 rounded-lg border border-border/80 bg-muted/40 px-3 py-2.5">
           <p className="font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground">

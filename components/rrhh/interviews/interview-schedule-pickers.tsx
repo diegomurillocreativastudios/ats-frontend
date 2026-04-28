@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -12,10 +13,11 @@ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import {
   formatInterviewScheduleDateLabel,
   formatTimePickerLabel,
+  getNearestQuarterHourClockNow,
   getQuarterHourTimeOptions,
   getTodayDateInputValue,
   isQuarterHourTime,
-  normalizeClockTimeInput,
+  parseFlexibleTimeInput,
 } from "@/lib/interview-datetime"
 
 const pad2 = (n: number) => String(n).padStart(2, "0")
@@ -46,7 +48,7 @@ const datePillButtonClass =
   "inline-flex min-h-10 min-w-[min(100%,13.5rem)] max-w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-center font-inter text-sm text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
 
 const timeInputClass =
-  "h-10 w-[4.5rem] shrink-0 cursor-text rounded-md border border-input bg-background px-1.5 py-2 font-inter text-sm tabular-nums text-foreground outline-none transition-colors hover:bg-muted/30 focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
+  "h-10 min-w-[9rem] max-w-[11rem] shrink-0 cursor-text rounded-md border border-input bg-background px-1.5 py-2 font-inter text-sm text-foreground outline-none transition-colors hover:bg-muted/30 focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
 
 export interface ScheduleDatePickerProps {
   value: string
@@ -279,10 +281,15 @@ export function QuarterHourTimeSelect({
   const options = useMemo(() => mergeTimeOptions(value), [value])
   const [focused, setFocused] = useState(false)
   const [open, setOpen] = useState(false)
-  const [text, setText] = useState(value)
+  const [text, setText] = useState(() =>
+    value ? formatTimePickerLabel(value) : ""
+  )
+  const listboxRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
-    if (!focused) setText(value)
+    if (!focused) {
+      setText(value ? formatTimePickerLabel(value) : "")
+    }
   }, [value, focused])
 
   useEffect(() => {
@@ -298,23 +305,35 @@ export function QuarterHourTimeSelect({
     }
   }, [open])
 
+  useLayoutEffect(() => {
+    if (!open || !listboxRef.current) return
+    const anchor =
+      value && options.some((o) => o.value === value)
+        ? value
+        : getNearestQuarterHourClockNow()
+    const node = listboxRef.current.querySelector(
+      `[data-time-value="${anchor}"]`
+    )
+    node?.scrollIntoView({ block: "center" })
+  }, [open, value, options])
+
   const commitFromText = useCallback(() => {
-    const normalized = normalizeClockTimeInput(text)
-    if (normalized === "") {
+    const parsed = parseFlexibleTimeInput(text)
+    if (parsed === "") {
       if (allowEmpty) {
         onChange("")
         setText("")
         return
       }
-      setText(value)
+      setText(value ? formatTimePickerLabel(value) : "")
       return
     }
-    if (normalized === null) {
-      setText(value)
+    if (parsed === null) {
+      setText(value ? formatTimePickerLabel(value) : "")
       return
     }
-    onChange(normalized)
-    setText(normalized)
+    onChange(parsed)
+    setText(formatTimePickerLabel(parsed))
   }, [allowEmpty, onChange, text, value])
 
   const handleBlur = useCallback(() => {
@@ -333,7 +352,7 @@ export function QuarterHourTimeSelect({
   const handleSelectOption = useCallback(
     (nextTime: string) => {
       onChange(nextTime)
-      setText(nextTime)
+      setText(nextTime ? formatTimePickerLabel(nextTime) : "")
       setOpen(false)
       setFocused(false)
     },
@@ -351,17 +370,23 @@ export function QuarterHourTimeSelect({
     )
   }
 
+  const displayValue = focused
+    ? text
+    : value
+      ? formatTimePickerLabel(value)
+      : ""
+
   return (
     <div className="relative inline-flex items-center" ref={rootRef}>
       <input
         ref={inputRef}
         type="text"
-        value={focused ? text : value || ""}
+        value={displayValue}
         disabled={disabled}
         placeholder={allowEmpty ? emptyLabel : undefined}
         onFocus={() => {
           setFocused(true)
-          setText(value || "")
+          setText(value ? formatTimePickerLabel(value) : "")
           setOpen(true)
         }}
         onChange={(e) => {
@@ -396,6 +421,7 @@ export function QuarterHourTimeSelect({
       {open ? (
         <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-42 overflow-hidden rounded-md border border-border bg-background shadow-lg">
           <ul
+            ref={listboxRef}
             role="listbox"
             aria-label={`Opciones de ${ariaLabel.toLowerCase()}`}
             className="max-h-56 overflow-y-auto py-1"
@@ -418,6 +444,7 @@ export function QuarterHourTimeSelect({
                 <li key={option.value}>
                   <button
                     type="button"
+                    data-time-value={option.value}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSelectOption(option.value)}
                     className={`w-full px-3 py-2 text-left font-inter text-sm tabular-nums transition-colors hover:bg-muted/70 ${

@@ -9,6 +9,7 @@ import {
   fetchInterviewTypes,
   fetchVacancyApplicantOptions,
   getInterviewHttpErrorMessage,
+  type CreateInterviewPayload,
   type InterviewTypeOption,
   type VacancyApplicantOption,
 } from "@/lib/api/interviews"
@@ -52,7 +53,7 @@ export function InterviewForm(props: InterviewFormProps) {
   const [durationMinutes, setDurationMinutes] = useState("")
   const [interviewType, setInterviewType] = useState("")
   const [interviewerName, setInterviewerName] = useState("")
-  const [notes, setNotes] = useState("")
+  const [descripcion, setDescripcion] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
@@ -145,14 +146,22 @@ export function InterviewForm(props: InterviewFormProps) {
         durationParsed != null && Number.isFinite(durationParsed)
           ? durationParsed
           : null
-      await createInterview(vacancyId, {
+      const typeTrim = interviewType.trim()
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        typeTrim
+      )
+      const body: CreateInterviewPayload = {
         candidateProfileId: candidateProfileId.trim(),
         scheduledAtUtc,
         durationMinutes: duration,
-        interviewType: interviewType.trim() || null,
         interviewerName: interviewerName.trim() || null,
-        notes: notes.trim() || null,
-      })
+        descripcion: descripcion.trim() || null,
+      }
+      if (typeTrim) {
+        if (isUuid) body.interviewTypeId = typeTrim
+        else body.interviewType = typeTrim
+      }
+      await createInterview(vacancyId, body)
       if (isModal) {
         onCreatedModal?.()
         onCloseModal?.()
@@ -336,13 +345,16 @@ export function InterviewForm(props: InterviewFormProps) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="interview-notes" className="font-inter text-sm font-medium">
-            Notas
+          <label
+            htmlFor="interview-descripcion"
+            className="font-inter text-sm font-medium"
+          >
+            Descripcion
           </label>
           <textarea
-            id="interview-notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            id="interview-descripcion"
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
             rows={4}
             className="resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm"
           />

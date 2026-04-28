@@ -26,7 +26,7 @@ export function InterviewDetailModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Ver / editar entrevista"
+      title="Administrar entrevista"
       size="lg"
       closeOnOverlayClick={false}
     >

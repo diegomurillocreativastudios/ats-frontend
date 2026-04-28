@@ -186,3 +186,51 @@ export function normalizeClockTimeInput(raw: string): string | null {
   if (Number.isNaN(hhOnly) || hhOnly < 0 || hhOnly > 23) return null
   return `${pad2(hhOnly)}:00`
 }
+
+/**
+ * Hora local redondeada al cuarto de hora más cercano (para desplazar la lista al abrir).
+ */
+export function getNearestQuarterHourClockNow(): string {
+  const d = new Date()
+  let totalMin = d.getHours() * 60 + d.getMinutes()
+  totalMin = Math.round(totalMin / 15) * 15
+  const maxIdx = 23 * 60 + 45
+  if (totalMin > maxIdx) totalMin = maxIdx
+  const h = Math.floor(totalMin / 60)
+  const m = totalMin % 60
+  return `${pad2(h)}:${pad2(m)}`
+}
+
+/**
+ * Acepta `HH:mm` / texto libre de {@link normalizeClockTimeInput} o etiqueta 12 h tipo `3:30 p. m.`.
+ */
+export function parseFlexibleTimeInput(raw: string): string | null {
+  const t = raw.trim()
+  if (!t) return ""
+  const as24 = normalizeClockTimeInput(t)
+  if (as24 !== null) return as24
+
+  const m12 = t.match(/^(\d{1,2}):(\d{2})\s*(a\.\s*m\.|p\.\s*m\.)\s*$/i)
+  if (!m12) return null
+  const hh12 = Number.parseInt(m12[1] ?? "", 10)
+  const mm = Number.parseInt(m12[2] ?? "", 10)
+  const periodRaw = (m12[3] ?? "").toLowerCase().replace(/\s+/g, "")
+  if (
+    Number.isNaN(hh12) ||
+    Number.isNaN(mm) ||
+    hh12 < 1 ||
+    hh12 > 12 ||
+    mm < 0 ||
+    mm > 59
+  ) {
+    return null
+  }
+  const isPm = periodRaw.startsWith("p")
+  let h24: number
+  if (isPm) {
+    h24 = hh12 === 12 ? 12 : hh12 + 12
+  } else {
+    h24 = hh12 === 12 ? 0 : hh12
+  }
+  return `${pad2(h24)}:${pad2(mm)}`
+}

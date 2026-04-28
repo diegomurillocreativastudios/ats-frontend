@@ -14,6 +14,7 @@ import type { UseRecruiterVacancySummaryResult } from "@/hooks/use-recruiter-vac
 import { formatInterviewLocalDateTime } from "@/lib/interview-datetime"
 import { InterviewCreateModal } from "@/components/rrhh/interviews/interview-create-modal"
 import { InterviewDetailModal } from "@/components/rrhh/interviews/interview-detail-modal"
+import { InterviewNotesModal } from "@/components/rrhh/interviews/interview-notes-modal"
 import { InterviewSingleDatetimeRow } from "@/components/rrhh/interviews/interview-schedule-controls"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
@@ -55,6 +56,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [detailInterviewId, setDetailInterviewId] = useState<string | null>(null)
+  const [notesInterviewId, setNotesInterviewId] = useState<string | null>(null)
 
   const applicantLabelByProfileId = useMemo(() => {
     const m = new Map<string, string>()
@@ -357,14 +359,24 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => setDetailInterviewId(row.id)}
-                        className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
-                        data-testid={`interview-open-detail-${row.id}`}
-                      >
-                        Ver / editar
-                      </button>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <button
+                          type="button"
+                          onClick={() => setDetailInterviewId(row.id)}
+                          className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+                          data-testid={`interview-open-detail-${row.id}`}
+                        >
+                          Administrar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNotesInterviewId(row.id)}
+                          className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+                          data-testid={`interview-open-notes-${row.id}`}
+                        >
+                          Notas
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -396,6 +408,34 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
             open: true,
             variant: "success",
             message: "Entrevista eliminada.",
+          })
+        }}
+      />
+
+      <InterviewNotesModal
+        isOpen={notesInterviewId != null}
+        onClose={() => setNotesInterviewId(null)}
+        interviewId={notesInterviewId}
+        initialNotes={
+          notesInterviewId
+            ? items.find((i) => i.id === notesInterviewId)?.notes ?? null
+            : null
+        }
+        contextLine={
+          notesInterviewId
+            ? (() => {
+                const r = items.find((i) => i.id === notesInterviewId)
+                if (!r) return null
+                return `${formatCandidateLabel(r.candidateProfileId, applicantLabelByProfileId)} · ${formatInterviewLocalDateTime(r.scheduledAtUtc)}`
+              })()
+            : null
+        }
+        onSaved={() => {
+          load().catch(() => {})
+          setSnackbar({
+            open: true,
+            variant: "success",
+            message: "Notas guardadas.",
           })
         }}
       />
