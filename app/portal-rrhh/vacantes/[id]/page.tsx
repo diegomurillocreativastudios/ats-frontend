@@ -34,6 +34,11 @@ import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
+import {
+  AiDisclosureBadge,
+  AiDisclosureNotice,
+  AiKpiCard,
+} from "@/components/rrhh/AiDisclosure"
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
 import {
@@ -239,6 +244,24 @@ const STATUS_LABELS = {
   closed: { label: "Cerrada", bgClass: "bg-muted", textClass: "text-muted-foreground" },
   paused: { label: "Pausada", bgClass: "bg-amber-100", textClass: "text-amber-800" },
 };
+
+const AI_EFFICIENCY_KPIS = [
+  {
+    label: "Busqueda preliminar",
+    value: "De horas a segundos en la primera exploracion",
+    helper: "Priorizacion inicial asistida por IA",
+  },
+  {
+    label: "Matching preliminar",
+    value: "Precision observada de 75% a 80%",
+    helper: "Objetivo de calibracion: 90%",
+  },
+  {
+    label: "Cobertura de resultados",
+    value: "Shortlist inicial con candidatos sugeridos",
+    helper: "Punto de partida para validacion de RRHH",
+  },
+];
 
 const getStatusConfig = (status) => {
   if (!status) return STATUS_LABELS.activa;
@@ -628,6 +651,20 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
             </div>
           ) : (
             <div className="flex flex-col gap-6">
+              <div className="rounded-xl border border-vo-purple/25 bg-vo-purple/5 p-4 shadow-sm">
+                <h3 className="font-inter text-sm font-semibold text-vo-purple">
+                  Analisis procesado con IA
+                </h3>
+                <p className="mt-2 font-inter text-sm text-slate-700">
+                  Esta evaluacion fue procesada con IA para acelerar la lectura inicial del perfil.
+                </p>
+                <p className="mt-1 font-inter text-sm text-slate-700">
+                  Un analisis manual puede tomar entre <strong>2 horas y 1 dia</strong>, mientras que con IA este resultado se genera en <strong>segundos</strong>.
+                </p>
+                <p className="mt-1 font-inter text-xs text-slate-600">
+                  Usa estos resultados como apoyo y valida la decision final desde RRHH.
+                </p>
+              </div>
               {/* Component Scores */}
               {componentScores.length > 0 && (
                 <div className="flex flex-col gap-5">
@@ -838,7 +875,14 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
   );
 };
 
-const MatchCard = ({ match, candidateId, isSelected, onToggle, showVerPerfil = false }) => {
+const MatchCard = ({
+  match,
+  candidateId,
+  isSelected,
+  onToggle,
+  showVerPerfil = false,
+  aiLabel,
+}) => {
   const [showModal, setShowModal] = useState(false);
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
@@ -881,6 +925,11 @@ const MatchCard = ({ match, candidateId, isSelected, onToggle, showVerPerfil = f
               </div>
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
+              {aiLabel ? (
+                <div className="mb-1">
+                  <AiDisclosureBadge label={aiLabel} />
+                </div>
+              ) : null}
               <h3 className="font-inter text-base font-semibold text-foreground">
                 {emptyToDash(match.name)}
               </h3>
@@ -2335,6 +2384,20 @@ export default function VacanteDetallePage() {
                     className="flex flex-col gap-4"
                     aria-label="Candidatos con match"
                   >
+                  <AiDisclosureNotice
+                    title="Busqueda y analisis preliminar con IA"
+                    description="La IA prioriza coincidencias iniciales y genera analisis preliminar. RRHH valida la decision final."
+                  />
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {AI_EFFICIENCY_KPIS.map((item) => (
+                      <AiKpiCard
+                        key={item.label}
+                        label={item.label}
+                        value={item.value}
+                        helper={item.helper}
+                      />
+                    ))}
+                  </div>
                     <div className="flex flex-wrap items-center gap-3">
                       <button
                         type="button"
@@ -2349,7 +2412,7 @@ export default function VacanteDetallePage() {
                           <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                         )}
                         {loadingSmart
-                          ? "Buscando..."
+                          ? "Actualizando busqueda con IA..."
                           : "Busqueda preliminar"}
                       </button>
                       {displayCandidates.length > 0 && (
@@ -2365,7 +2428,7 @@ export default function VacanteDetallePage() {
                           ) : (
                             <Scale className="h-4 w-4 shrink-0" aria-hidden />
                           )}
-                          {loadingMatch ? "Analizando..." : "Analisis preliminar"}
+                          {loadingMatch ? "Reanalizando con IA..." : "Analisis preliminar"}
                         </button>
                       )}
                     </div>
@@ -2376,7 +2439,7 @@ export default function VacanteDetallePage() {
                     )}
                     {smartError && (
                       <p className="font-inter text-sm text-destructive" role="alert">
-                        {smartError}
+                        {smartError} Puedes continuar con filtros y revision manual.
                       </p>
                     )}
 
@@ -2399,7 +2462,7 @@ export default function VacanteDetallePage() {
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Sparkles className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-inter text-sm text-muted-foreground">
-                              Haz clic en Search para ver candidatos recomendados.
+                              Ejecuta la busqueda preliminar para ver coincidencias asistidas por IA.
                             </p>
                           </div>
                         ) : searchResultsToDisplay.length === 0 ? (
@@ -2446,6 +2509,7 @@ export default function VacanteDetallePage() {
                                       candidateId={candidateId}
                                       isSelected={selectedCandidateIds.has(candidateId)}
                                       onToggle={handleToggleCandidate}
+                                      aiLabel="Coincidencia preliminar IA"
                                     />
                                   </li>
                                 );
@@ -2469,6 +2533,7 @@ export default function VacanteDetallePage() {
                             ({vacancyCandidates.length})
                           </span>
                         </h2>
+                        <AiDisclosureBadge label="Analisis preliminar IA" />
                         <button
                           type="button"
                           disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
@@ -2512,6 +2577,7 @@ export default function VacanteDetallePage() {
                                     isSelected={selectedPossibleCandidateIds.has(candidateId)}
                                     onToggle={handleTogglePossibleCandidate}
                                     showVerPerfil
+                                    aiLabel="Sugerencia IA"
                                   />
                                 </li>
                               );
@@ -2971,13 +3037,27 @@ export default function VacanteDetallePage() {
                   className="flex flex-col gap-4"
                   aria-label="Candidatos con match"
                 >
+                  <AiDisclosureNotice
+                    title="Busqueda y analisis preliminar con IA"
+                    description="La IA prioriza coincidencias iniciales y genera analisis preliminar. RRHH valida la decision final."
+                  />
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {AI_EFFICIENCY_KPIS.map((item) => (
+                      <AiKpiCard
+                        key={item.label}
+                        label={item.label}
+                        value={item.value}
+                        helper={item.helper}
+                      />
+                    ))}
+                  </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <button
                       type="button"
                       onClick={handleSearchSmartRecommendations}
                       disabled={loadingSmart}
                       className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
-                      aria-label="Buscar"
+                      aria-label="Busqueda preliminar"
                     >
                       {loadingSmart ? (
                         <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
@@ -2985,8 +3065,8 @@ export default function VacanteDetallePage() {
                         <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                       )}
                       {loadingSmart
-                        ? "Buscando..."
-                        : "Buscar"}
+                        ? "Actualizando busqueda con IA..."
+                        : "Busqueda preliminar"}
                     </button>
                     {displayCandidates.length > 0 && (
                       <button
@@ -2994,14 +3074,14 @@ export default function VacanteDetallePage() {
                         onClick={handleMatch}
                         disabled={loadingMatch || selectedDocumentIds.length === 0}
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label="Preparar candidatos seleccionados"
+                        aria-label="Analisis preliminar"
                       >
                         {loadingMatch ? (
                           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                         ) : (
                           <Scale className="h-4 w-4 shrink-0" aria-hidden />
                         )}
-                        {loadingMatch ? "Preparando..." : "Preparar"}
+                        {loadingMatch ? "Reanalizando con IA..." : "Analisis preliminar"}
                       </button>
                     )}
                   </div>
@@ -3012,7 +3092,7 @@ export default function VacanteDetallePage() {
                   )}
                   {smartError && (
                     <p className="font-inter text-sm text-destructive" role="alert">
-                      {smartError}
+                      {smartError} Puedes continuar con filtros y revision manual.
                     </p>
                   )}
 
@@ -3035,7 +3115,7 @@ export default function VacanteDetallePage() {
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Sparkles className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-inter text-sm text-muted-foreground">
-                            Haz clic en Search para ver candidatos recomendados.
+                            Ejecuta la busqueda preliminar para ver coincidencias asistidas por IA.
                           </p>
                         </div>
                       ) : searchResultsToDisplay.length === 0 ? (
@@ -3082,6 +3162,7 @@ export default function VacanteDetallePage() {
                                     candidateId={candidateId}
                                     isSelected={selectedCandidateIds.has(candidateId)}
                                     onToggle={handleToggleCandidate}
+                                    aiLabel="Coincidencia preliminar IA"
                                   />
                                 </li>
                               );
@@ -3105,6 +3186,7 @@ export default function VacanteDetallePage() {
                           ({vacancyCandidates.length})
                         </span>
                       </h2>
+                      <AiDisclosureBadge label="Analisis preliminar IA" />
                       <button
                         type="button"
                         disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
@@ -3148,6 +3230,7 @@ export default function VacanteDetallePage() {
                                   isSelected={selectedPossibleCandidateIds.has(candidateId)}
                                   onToggle={handleTogglePossibleCandidate}
                                   showVerPerfil
+                                  aiLabel="Sugerencia IA"
                                 />
                               </li>
                             );

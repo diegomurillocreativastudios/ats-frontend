@@ -14,6 +14,25 @@ import Modal from "@/components/ui/Modal";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
+import { AiDisclosureBadge, AiKpiCard } from "@/components/rrhh/AiDisclosure";
+
+const AI_MODAL_KPIS = [
+  {
+    label: "Desglose de CV",
+    value: "De hasta 15 min a 30s-1min por CV",
+    helper: "Captura estructurada en una sola corrida",
+  },
+  {
+    label: "Insercion de datos",
+    value: "Registro automatico en el mismo flujo",
+    helper: "Sin transcripcion manual a BD o Excel",
+  },
+  {
+    label: "Ahorro estimado",
+    value: "Reduccion operativa del 93.3% al 96.7%",
+    helper: "En extraccion, desglose e insercion de CV",
+  },
+];
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -116,6 +135,7 @@ export default function CandidatosPage() {
   const [fetchError, setFetchError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isProcessingCvWithAi, setIsProcessingCvWithAi] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success",
@@ -138,6 +158,7 @@ export default function CandidatosPage() {
     const formData = new FormData();
     formData.append("File", file);
     formData.append("EntityType", "Candidate");
+    setIsProcessingCvWithAi(true);
     try {
       await apiClient.postFormData("/Ingest/upload", formData);
       await fetchCandidates();
@@ -162,6 +183,8 @@ export default function CandidatosPage() {
       // Importante: re-lanzar el error para que `DocumentsUploadZone` no marque
       // el archivo como "Listo" cuando el backend realmente falló.
       throw createSilentError(message)
+    } finally {
+      setIsProcessingCvWithAi(false);
     }
   };
 
@@ -362,8 +385,32 @@ export default function CandidatosPage() {
         size="lg"
       >
         <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2 rounded-lg border border-vo-purple/20 bg-vo-purple/5 p-3">
+            <AiDisclosureBadge />
+            <p className="font-inter text-sm text-foreground">
+              Los CVs se procesan con IA para extraer informacion preliminar del perfil.
+            </p>
+            <p className="font-inter text-xs text-muted-foreground">
+              Resultado generado por IA. Requiere validacion de RRHH.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3" aria-label="KPIs de eficiencia del ATS">
+            {AI_MODAL_KPIS.map((item) => (
+              <AiKpiCard
+                key={item.label}
+                label={item.label}
+                value={item.value}
+                helper={item.helper}
+              />
+            ))}
+          </div>
           <p className="font-inter text-sm text-muted-foreground">
             Sube el CV del candidato en formato PDF para crear su perfil automáticamente.
+          </p>
+          <p className="font-inter text-xs text-muted-foreground" aria-live="polite">
+            {isProcessingCvWithAi
+              ? "Procesando CV con IA..."
+              : "IA completada cuando termine la carga"}
           </p>
           <DocumentsUploadZone
             onProcess={handleProcessUpload}
