@@ -11,6 +11,9 @@ import Snackbar from "@/components/ui/Snackbar";
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : "";
 
+const getApiBase = () =>
+  (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+
 export default function IniciarSesion() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -63,10 +66,18 @@ export default function IniciarSesion() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${getOrigin()}/api/auth/login`, {
+      const apiBase = getApiBase();
+      if (!apiBase) {
+        setMessage({
+          type: "error",
+          text: "Falta NEXT_PUBLIC_API_URL en el entorno."
+        });
+        return;
+      }
+
+      const res = await fetch(`${apiBase}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           email: formData.email,
           password: formData.password
@@ -80,6 +91,25 @@ export default function IniciarSesion() {
           data.message ||
           data.detail ||
           "Credenciales inválidas. Por favor, verifica tu email y contraseña.";
+        setMessage({
+          type: "error",
+          text: Array.isArray(text) ? text[0] : text
+        });
+        return;
+      }
+
+      const sessionRes = await fetch(`${getOrigin()}/api/auth/session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ ...data, email: formData.email })
+      });
+
+      if (!sessionRes.ok) {
+        const sessionData = await sessionRes.json().catch(() => ({}));
+        const text =
+          sessionData.message ||
+          "No se pudo guardar la sesión. Intenta de nuevo.";
         setMessage({
           type: "error",
           text: Array.isArray(text) ? text[0] : text

@@ -144,6 +144,31 @@ const partitionComponentScores = (entries) => {
   };
 };
 
+const getTrimmedStringOrNull = (value) => {
+  if (value == null) return null
+  const text = String(value).trim()
+  return text !== "" ? text : null
+}
+
+const toSingleParagraph = (value) => {
+  if (value == null) return null
+  return String(value).replace(/\s+/g, " ").trim()
+}
+
+const buildAnalysisText = (match) => {
+  const legacyReasoning = toSingleParagraph(getTrimmedStringOrNull(match?.qualitativeReasoning))
+  if (legacyReasoning != null) return legacyReasoning
+
+  const positiveReasoning = toSingleParagraph(getTrimmedStringOrNull(match?.qualitativeReasoningPositive))
+  const negativeReasoning = toSingleParagraph(getTrimmedStringOrNull(match?.qualitativeReasoningNegative))
+
+  if (positiveReasoning == null && negativeReasoning == null) return null
+  if (positiveReasoning != null && negativeReasoning != null) {
+    return `${positiveReasoning} ${negativeReasoning}`.trim()
+  }
+  return positiveReasoning ?? negativeReasoning
+}
+
 const ScoreBarRow = ({
   scoreKey,
   val,
@@ -493,17 +518,14 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
     ? `/portal-rrhh/candidatos/${encodeURIComponent(idForProfilePage)}`
     : null;
 
-  const qualitativeReasoning =
-    match.qualitativeReasoning != null && String(match.qualitativeReasoning).trim() !== ""
-      ? String(match.qualitativeReasoning).trim()
-      : null;
+  const analysisText = buildAnalysisText(match)
 
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
   );
 
-  const hasContent = componentScores.length > 0 || qualitativeReasoning != null;
+  const hasContent = componentScores.length > 0 || analysisText != null;
 
   return (
     <div
@@ -652,14 +674,14 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 </div>
               )}
 
-              {/* Qualitative Reasoning */}
-              {qualitativeReasoning != null && (
+              {/* Analysis */}
+              {analysisText != null && (
                 <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-border/60 dark:bg-white">
                   <h3 className="mb-3 font-inter text-sm font-semibold text-slate-900">
-                    Razonamiento cualitativo
+                    Analisis
                   </h3>
-                  <p className="font-inter text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
-                    {qualitativeReasoning}
+                  <p className="font-inter text-sm leading-relaxed text-justify text-slate-700 dark:text-slate-700">
+                    {analysisText}
                   </p>
                 </div>
               )}
