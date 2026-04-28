@@ -1,4 +1,4 @@
-# Especificacion: transparencia de uso de IA en flujos RRHH
+# Especificacion: transparencia de uso de IA en flujos rrhh
 
 ## Objetivo
 
@@ -77,24 +77,24 @@ Dejar explicito que al subir CVs, el sistema usa IA para extraer, normalizar o p
 ## Requerimientos UI
 
 1. En el modal de añadir candidato, mostrar de forma visible antes de confirmar:
-   - Badge `Asistido por IA`
-   - Mensaje: `Los CVs se procesaran con IA para extraer informacion preliminar del perfil`
+  - Badge `Asistido por IA`
+  - Mensaje: `Los CVs se procesaran con IA para extraer informacion preliminar del perfil`
 2. Al iniciar carga/procesamiento:
-   - Estado: `Procesando CVs con IA...`
-   - Indicador de progreso visual (spinner o barra)
+  - Estado: `Procesando CVs con IA...`
+  - Indicador de progreso visual (spinner o barra)
 3. Al finalizar:
-   - Exito: `Procesamiento con IA completado. Revisa y valida la informacion antes de continuar`
-   - Error parcial o total: `No se pudo completar el procesamiento con IA para uno o mas CVs`
+  - Exito: `Procesamiento con IA completado. Revisa y valida la informacion antes de continuar`
+  - Error parcial o total: `No se pudo completar el procesamiento con IA para uno o mas CVs`
 4. Debe existir una accion clara posterior al resultado:
-   - revisar candidatos cargados
-   - reintentar procesamiento si aplica
+  - revisar candidatos cargados
+  - reintentar procesamiento si aplica
 
 ## Criterios de aceptacion flujo 1
 
-- [ ] El modal muestra de forma explicita que usa IA antes de enviar CVs
-- [ ] Durante el procesamiento existe feedback visible de estado
-- [ ] El resultado final distingue exito vs error
-- [ ] La UI comunica validacion humana posterior
+- El modal muestra de forma explicita que usa IA antes de enviar CVs
+- Durante el procesamiento existe feedback visible de estado
+- El resultado final distingue exito vs error
+- La UI comunica validacion humana posterior
 
 ## Flujo 2: Busqueda preliminar de candidatos en vacante
 
@@ -105,22 +105,22 @@ Hacer transparente que los resultados preliminares pueden estar priorizados o en
 ## Requerimientos UI
 
 1. En la cabecera de resultados preliminares:
-   - Badge `Busqueda asistida por IA`
-   - Texto corto: `La IA prioriza coincidencias iniciales segun la vacante`
+  - Badge `Busqueda asistida por IA`
+  - Texto corto: `La IA prioriza coincidencias iniciales segun la vacante`
 2. En cada candidato (lista/tabla/card), incluir una marca contextual cuando aplique:
-   - `Coincidencia preliminar IA`
+  - `Coincidencia preliminar IA`
 3. Mostrar estado cuando se recalculan resultados:
-   - `Actualizando busqueda con IA...`
+  - `Actualizando busqueda con IA...`
 4. Si no hay resultados suficientes o falla IA:
-   - Mensaje claro sin bloquear el flujo manual:
-   - `No se pudo completar la priorizacion por IA. Puedes continuar con filtros manuales`
+  - Mensaje claro sin bloquear el flujo manual:
+  - `No se pudo completar la priorizacion por IA. Puedes continuar con filtros manuales`
 
 ## Criterios de aceptacion flujo 2
 
-- [ ] La vista de busqueda preliminar identifica explicitamente uso de IA
-- [ ] Los candidatos priorizados por IA quedan identificados en UI
-- [ ] Existe estado visual de recarga/reproceso IA cuando aplique
-- [ ] Ante error IA, el reclutador puede continuar flujo manual
+- La vista de busqueda preliminar identifica explicitamente uso de IA
+- Los candidatos priorizados por IA quedan identificados en UI
+- Existe estado visual de recarga/reproceso IA cuando aplique
+- Ante error IA, el reclutador puede continuar flujo manual
 
 ## Flujo 3: Analisis preliminar de candidatos en vacante
 
@@ -131,23 +131,23 @@ Mostrar claramente que el analisis mostrado es una evaluacion preliminar generad
 ## Requerimientos UI
 
 1. Encabezado del bloque de analisis:
-   - Badge `Analisis preliminar IA`
-   - Texto: `Este analisis es una sugerencia automatizada y debe ser validada por RRHH`
+  - Badge `Analisis preliminar IA`
+  - Texto: `Este analisis es una sugerencia automatizada y debe ser validada por RRHH`
 2. Si hay score, resumen o fortalezas/debilidades:
-   - Etiquetar cada bloque con contexto IA (por ejemplo: `Resumen IA`, `Score IA preliminar`)
+  - Etiquetar cada bloque con contexto IA (por ejemplo: `Resumen IA`, `Score IA preliminar`)
 3. Mostrar fecha/hora de generacion del analisis IA cuando exista ese dato
 4. Accion de control humano visible:
-   - `Validar analisis`
-   - `Descartar sugerencia IA`
+  - `Validar analisis`
+  - `Descartar sugerencia IA`
 5. Estado de reproceso:
-   - `Reanalizando con IA...`
+  - `Reanalizando con IA...`
 
 ## Criterios de aceptacion flujo 3
 
-- [ ] El bloque de analisis indica explicitamente su origen en IA
-- [ ] El usuario diferencia analisis preliminar vs decision humana
-- [ ] Los subcomponentes de analisis mantienen etiquetado consistente
-- [ ] Hay accion explicita para validar o descartar sugerencia IA
+- El bloque de analisis indica explicitamente su origen en IA
+- El usuario diferencia analisis preliminar vs decision humana
+- Los subcomponentes de analisis mantienen etiquetado consistente
+- Hay accion explicita para validar o descartar sugerencia IA
 
 ## Copy sugerido (base)
 
@@ -328,11 +328,11 @@ Vista consolidada (mensual/semanal) con:
 
 ## Criterios de aceptacion de KPIs en UI
 
-- [ ] Existe bloque visual de KPIs en al menos una vista de RRHH
-- [ ] Cada KPI tiene definicion y unidad clara (segundos, porcentaje, factor x)
-- [ ] Se distingue `valor actual` de `meta`
-- [ ] Se muestra fecha de actualizacion del dato
-- [ ] Los copys no sobreprometen valores no validados
+- Existe bloque visual de KPIs en al menos una vista de RRHH
+- Cada KPI tiene definicion y unidad clara (segundos, porcentaje, factor x)
+- Se distingue `valor actual` de `meta`
+- Se muestra fecha de actualizacion del dato
+- Los copys no sobreprometen valores no validados
 
 ## Nota final
 
