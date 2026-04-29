@@ -37,8 +37,13 @@ import RematchButton from "@/components/rrhh/RematchButton"
 import {
   AiDisclosureBadge,
   AiDisclosureNotice,
+  AiDisclosurePillProgress,
   AiKpiCard,
 } from "@/components/rrhh/AiDisclosure"
+import {
+  VACANCY_PRELIMINARY_MATCH_TYPICAL_MS,
+  VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS,
+} from "@/lib/apply-loading-bar"
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
 import {
@@ -2445,6 +2450,24 @@ export default function VacanteDetallePage() {
 
                     {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                     <div className="flex flex-col gap-3">
+                      {loadingMatch ? (
+                        <div
+                          className="w-full max-w-2xl space-y-2"
+                          role="status"
+                          aria-live="polite"
+                          aria-label="Reanalizando con IA"
+                        >
+                          <AiDisclosurePillProgress
+                            percent={null}
+                            timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
+                            className="mt-0!"
+                            aria-label="Progreso del análisis preliminar con IA"
+                          />
+                          <p className="font-inter text-sm text-muted-foreground">
+                            Reanalizando con IA…
+                          </p>
+                        </div>
+                      ) : null}
                       <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
                         <Sparkles className="h-5 w-5" aria-hidden />
                         Resultados de búsqueda
@@ -2458,7 +2481,24 @@ export default function VacanteDetallePage() {
                         className="rounded-xl border border-border bg-card p-6"
                         aria-label="Resultados de búsqueda"
                       >
-                        {smartCandidates === null ? (
+                        {loadingSmart && smartCandidates === null ? (
+                          <div className="flex flex-col items-center justify-center gap-4 py-10 text-center">
+                            <div className="w-full max-w-md px-1">
+                              <AiDisclosurePillProgress
+                                percent={null}
+                                timeBasedTypicalMs={VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS}
+                                className="mt-0!"
+                                aria-label="Progreso de la búsqueda preliminar con IA"
+                              />
+                            </div>
+                            <p
+                              className="font-inter text-sm text-muted-foreground"
+                              aria-live="polite"
+                            >
+                              Actualizando búsqueda con IA…
+                            </p>
+                          </div>
+                        ) : smartCandidates === null ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Sparkles className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-inter text-sm text-muted-foreground">
@@ -3098,6 +3138,24 @@ export default function VacanteDetallePage() {
 
                   {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                   <div className="flex flex-col gap-3">
+                    {loadingMatch ? (
+                      <div
+                        className="w-full max-w-2xl space-y-2"
+                        role="status"
+                        aria-live="polite"
+                        aria-label="Reanalizando con IA"
+                      >
+                        <AiDisclosurePillProgress
+                          percent={null}
+                          timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
+                          className="mt-0!"
+                          aria-label="Progreso del análisis preliminar con IA"
+                        />
+                        <p className="font-inter text-sm text-muted-foreground">
+                          Reanalizando con IA…
+                        </p>
+                      </div>
+                    ) : null}
                     <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
                       <Sparkles className="h-4 w-4" aria-hidden />
                       Resultados de búsqueda
@@ -3111,7 +3169,24 @@ export default function VacanteDetallePage() {
                       className="rounded-xl border border-border bg-card p-5"
                       aria-label="Resultados de búsqueda"
                     >
-                      {smartCandidates === null ? (
+                      {loadingSmart && smartCandidates === null ? (
+                        <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
+                          <div className="w-full max-w-md px-1">
+                            <AiDisclosurePillProgress
+                              percent={null}
+                              timeBasedTypicalMs={VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS}
+                              className="mt-0!"
+                              aria-label="Progreso de la búsqueda preliminar con IA"
+                            />
+                          </div>
+                          <p
+                            className="font-inter text-sm text-muted-foreground"
+                            aria-live="polite"
+                          >
+                            Actualizando búsqueda con IA…
+                          </p>
+                        </div>
+                      ) : smartCandidates === null ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Sparkles className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-inter text-sm text-muted-foreground">

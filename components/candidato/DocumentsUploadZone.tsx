@@ -46,9 +46,17 @@ export interface DocumentsUploadZoneLeftContext {
   clearStagedFiles: () => void
 }
 
+export interface AiProcessingBarState {
+  active: boolean
+  /** `null` while running a single file (indeterminate bar) */
+  percent: number | null
+}
+
 interface DocumentsUploadZoneProps {
   onProcess?: (file: File, index: number) => void | Promise<void>
   onProcessAll?: (files: File[]) => void | Promise<void>
+  /** Fired when “Procesar” / “Procesar todos” starts and ends so parents (e.g. RRHH modal) can show the IA pill progress bar */
+  onAiProcessingBarChange?: (state: AiProcessingBarState) => void
   acceptedTypes?: string[]
   acceptedExtensions?: string[]
   accept?: string
@@ -62,6 +70,7 @@ interface DocumentsUploadZoneProps {
 export default function DocumentsUploadZone({
   onProcess,
   onProcessAll,
+  onAiProcessingBarChange,
   acceptedTypes,
   acceptedExtensions,
   accept,
@@ -188,6 +197,7 @@ export default function DocumentsUploadZone({
     if (!onProcess || processingIndex !== null || isProcessingAll) return;
     setError(null);
     setProcessingIndex(index);
+    onAiProcessingBarChange?.({ active: true, percent: null });
     try {
       await Promise.resolve(onProcess(file, index));
       setProcessedIndices((prev) => new Set([...prev, index]));
@@ -196,6 +206,7 @@ export default function DocumentsUploadZone({
       setError(getApiErrorMessage(err) || "Error al procesar el documento.")
     } finally {
       setProcessingIndex(null);
+      onAiProcessingBarChange?.({ active: false, percent: null });
     }
   };
 
@@ -203,11 +214,22 @@ export default function DocumentsUploadZone({
     if (!onProcess || processableFiles.length < 2 || isProcessingAll || processingIndex !== null) return;
     setError(null);
     setIsProcessingAll(true);
+    const total = processableFiles.length;
+    onAiProcessingBarChange?.({ active: true, percent: 0 });
     try {
-      for (const { file, index } of processableFiles) {
+      for (let k = 0; k < processableFiles.length; k++) {
+        const { file, index } = processableFiles[k];
+        onAiProcessingBarChange?.({
+          active: true,
+          percent: Math.round((k / total) * 100),
+        });
         setProcessingIndex(index);
         await Promise.resolve(onProcess(file, index));
         setProcessedIndices((prev) => new Set([...prev, index]));
+        onAiProcessingBarChange?.({
+          active: true,
+          percent: Math.round(((k + 1) / total) * 100),
+        });
       }
     } catch (err: unknown) {
       if (isSilentError(err)) return
@@ -215,6 +237,7 @@ export default function DocumentsUploadZone({
     } finally {
       setProcessingIndex(null);
       setIsProcessingAll(false);
+      onAiProcessingBarChange?.({ active: false, percent: null });
     }
   };
 

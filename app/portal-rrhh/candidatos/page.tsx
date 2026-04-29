@@ -14,7 +14,12 @@ import Modal from "@/components/ui/Modal";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
-import { AiDisclosureBadge, AiKpiCard } from "@/components/rrhh/AiDisclosure";
+import {
+  AiDisclosureBadge,
+  AiDisclosurePillProgress,
+  AiKpiCard,
+} from "@/components/rrhh/AiDisclosure";
+import type { AiProcessingBarState } from "@/components/candidato/DocumentsUploadZone";
 
 const AI_MODAL_KPIS = [
   {
@@ -136,6 +141,10 @@ export default function CandidatosPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isProcessingCvWithAi, setIsProcessingCvWithAi] = useState(false);
+  const [aiProcessingBar, setAiProcessingBar] = useState<AiProcessingBarState>({
+    active: false,
+    percent: null,
+  });
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success",
@@ -152,6 +161,7 @@ export default function CandidatosPage() {
 
   const handleCloseUploadModal = () => {
     setIsUploadModalOpen(false);
+    setAiProcessingBar({ active: false, percent: null });
   };
 
   const handleProcessUpload = async (file) => {
@@ -387,6 +397,9 @@ export default function CandidatosPage() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 rounded-lg border border-vo-purple/20 bg-vo-purple/5 p-3">
             <AiDisclosureBadge />
+            {aiProcessingBar.active ? (
+              <AiDisclosurePillProgress percent={aiProcessingBar.percent} />
+            ) : null}
             <p className="font-inter text-sm text-foreground">
               Los CVs se procesan con IA para extraer informacion preliminar del perfil.
             </p>
@@ -414,6 +427,7 @@ export default function CandidatosPage() {
           </p>
           <DocumentsUploadZone
             onProcess={handleProcessUpload}
+            onAiProcessingBarChange={setAiProcessingBar}
             acceptedTypes={["application/pdf"]}
             acceptedExtensions={[".pdf"]}
             accept="application/pdf,.pdf"

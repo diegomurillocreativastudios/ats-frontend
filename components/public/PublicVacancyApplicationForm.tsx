@@ -18,6 +18,12 @@ import {
   submitPublicVacancyApplication,
   type PublicVacancyApplyValues,
 } from "@/lib/public-vacancy-apply"
+import {
+  APPLY_LOADING_TICK_MS,
+  APPLY_LONG_WAIT_HINT_MS,
+  getLoadingBarPercent,
+} from "@/lib/apply-loading-bar"
+import { ApplyStyleProgressBar } from "@/components/public/apply-style-progress-bar"
 
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
 
@@ -91,50 +97,6 @@ const APPLY_PROGRESS_STEPS = [
   { step: 5, label: "Éxito" },
 ] as const
 
-/** Intervalo para recalcular el avance según el tiempo real del request (no un reloj fijo). */
-const APPLY_LOADING_TICK_MS = 160
-/** Máximo % de la barra mientras el servidor no responde (evita prometer “100%” antes de tiempo). */
-const APPLY_LOADING_BAR_CAP = 92
-/**
- * Tiempo típico del POST + pipeline (observado ~1,06 min). La barra llega ~86% cerca de aquí;
- * si tarda más, sube lentamente hasta el tope.
- */
-const APPLY_TYPICAL_SUBMIT_MS = Math.round(1.06 * 60_000)
-/** Si el envío supera esto, mostramos texto orientativo (la mayoría de envíos ~1 min). */
-const APPLY_LONG_WAIT_HINT_MS = 35_000
-
-function interpolateLoadingPercent(
-  elapsedMs: number,
-  points: readonly (readonly [number, number])[]
-): number {
-  if (elapsedMs <= points[0][0]) return points[0][1]
-  for (let i = 1; i < points.length; i++) {
-    const [t0, p0] = points[i - 1]
-    const [t1, p1] = points[i]
-    if (elapsedMs <= t1) {
-      const u = (elapsedMs - t0) / (t1 - t0)
-      return p0 + u * (p1 - p0)
-    }
-  }
-  return points[points.length - 1][1]
-}
-
-function getLoadingBarPercent(elapsedMs: number): number {
-  const cap = APPLY_LOADING_BAR_CAP
-  const typical = APPLY_TYPICAL_SUBMIT_MS
-  const overtimeEnd = typical + 120_000
-  const points: readonly (readonly [number, number])[] = [
-    [0, 4],
-    [9_000, 16],
-    [22_000, 34],
-    [40_000, 52],
-    [52_000, 68],
-    [typical, 86],
-    [overtimeEnd, cap],
-  ] as const
-  return Math.min(cap, interpolateLoadingPercent(elapsedMs, points))
-}
-
 function getLoadingStepFromPercent(percent: number): 1 | 2 | 3 | 4 {
   if (percent < 24) return 1
   if (percent < 48) return 2
@@ -153,9 +115,6 @@ function applySubmitProgressPanelClass(
   return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-lg border border-border bg-background/97 p-6 shadow-xl backdrop-blur-md ring-1 ring-vo-purple/15`
 }
 
-const BAR_WIDTH_TRANSITION_MS = 320
-const BAR_WIDTH_SUCCESS_MS = 700
-
 function PublicApplicationSubmitProgress({
   theme,
   mode,
@@ -164,14 +123,13 @@ function PublicApplicationSubmitProgress({
 }: {
   theme: PublicVacancyApplicationFormTheme
   mode: "loading" | "success"
-  /** 0–`APPLY_LOADING_BAR_CAP` mientras `mode === "loading"`. */
+  /** 0–92 (tope del algoritmo compartido con `getLoadingBarPercent`) mientras `mode === "loading"`. */
   loadingBarPercent?: number
   showLongWaitHint?: boolean
 }) {
   const isDark = theme === "dark"
   const isSuccess = mode === "success"
   const currentStep = isSuccess ? 5 : getLoadingStepFromPercent(loadingBarPercent)
-  const pct = isSuccess ? 100 : Math.max(2, loadingBarPercent)
   const activeLabel =
     APPLY_PROGRESS_STEPS.find((s) => s.step === currentStep)?.label ?? ""
 
@@ -240,35 +198,11 @@ function PublicApplicationSubmitProgress({
         ) : null}
       </div>
 
-      <div
-        className={
-          isDark
-            ? "relative overflow-hidden rounded-full bg-white/10"
-            : "relative overflow-hidden rounded-full bg-muted"
-        }
-        aria-hidden
-      >
-        <div
-          className={
-            isDark
-              ? "relative h-2.5 rounded-full bg-[linear-gradient(90deg,#f0a7ff_0%,#8dd8ff_100%)] shadow-[0_0_24px_rgba(240,167,255,0.35)]"
-              : "relative h-2.5 rounded-full bg-vo-purple"
-          }
-          style={{
-            width: `${pct}%`,
-            transition: `width ${
-              isSuccess ? BAR_WIDTH_SUCCESS_MS : BAR_WIDTH_TRANSITION_MS
-            }ms cubic-bezier(0.33, 0.86, 0.2, 1)`,
-          }}
-        >
-          {!isSuccess ? (
-            <span
-              className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.38),transparent)] animate-apply-shimmer"
-              aria-hidden
-            />
-          ) : null}
-        </div>
-      </div>
+      <ApplyStyleProgressBar
+        theme={isDark ? "dark" : "light"}
+        mode={isSuccess ? "success" : "loading"}
+        percent={isSuccess ? 100 : loadingBarPercent}
+      />
 
       <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-5 sm:gap-2" aria-label="Estado del envío">
         {APPLY_PROGRESS_STEPS.map((item) => {
