@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import {
   ArrowLeft,
@@ -11,6 +11,7 @@ import {
   MapPin,
   Sparkles,
 } from "lucide-react"
+import { ApplyPrivacyNoticeDialog } from "@/components/public/ApplyPrivacyNoticeDialog"
 import { PublicVacancyApplicationForm } from "@/components/public/PublicVacancyApplicationForm"
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
 import {
@@ -47,10 +48,12 @@ function VacancyApplySkeleton() {
 }
 
 export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const [vacancy, setVacancy] = useState<OpportunityVacancyDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [hasAcceptedPrivacy, setHasAcceptedPrivacy] = useState(false)
 
   const queryString = searchParams.toString()
   const backToDetailHref = queryString
@@ -104,18 +107,26 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
 
   const companyName = getDisplayCompanyName(vacancy?.company.name)
 
+  const isPrivacyDialogOpen = Boolean(
+    vacancy && !errorMessage && !isLoading && !hasAcceptedPrivacy
+  )
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0b1224] text-white">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-[linear-gradient(180deg,#5b2b86_0%,#25365d_38%,#0b1224_100%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[42px_42px] mask-[linear-gradient(180deg,transparent,black_18%,black_100%)]" />
-        <div className="absolute left-[-8%] top-6 h-72 w-72 rounded-full bg-[#c73277]/26 blur-3xl" />
-        <div className="absolute right-[10%] top-16 h-80 w-80 rounded-full bg-[#71bced]/16 blur-3xl" />
-      </div>
+      <div
+        inert={isPrivacyDialogOpen ? true : undefined}
+        className="min-h-screen w-full"
+      >
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-x-0 top-0 h-[420px] bg-[linear-gradient(180deg,#5b2b86_0%,#25365d_38%,#0b1224_100%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[42px_42px] mask-[linear-gradient(180deg,transparent,black_18%,black_100%)]" />
+          <div className="absolute left-[-8%] top-6 h-72 w-72 rounded-full bg-[#c73277]/26 blur-3xl" />
+          <div className="absolute right-[10%] top-16 h-80 w-80 rounded-full bg-[#71bced]/16 blur-3xl" />
+        </div>
 
-      <PublicOpportunitiesNavbar className="mb-5" />
+        <PublicOpportunitiesNavbar className="mb-5" />
 
-      <div className="relative flex w-full flex-col px-4 pb-6 pt-5 sm:px-6 sm:pt-5 lg:px-8">
+        <div className="relative flex w-full flex-col px-4 pb-6 pt-5 sm:px-6 sm:pt-5 lg:px-8">
         <div className="mx-auto w-full max-w-6xl">
           <div className="mb-6">
             <Link
@@ -216,7 +227,14 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
             </div>
           )}
         </div>
+        </div>
       </div>
+
+      <ApplyPrivacyNoticeDialog
+        isOpen={isPrivacyDialogOpen}
+        onAccept={() => setHasAcceptedPrivacy(true)}
+        onDecline={() => router.push("/oportunidades")}
+      />
     </div>
   )
 }
