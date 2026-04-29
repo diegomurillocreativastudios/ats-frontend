@@ -156,6 +156,11 @@ export function CandidateInterviewList({
         vacancyIdFromQuery={detailVacancyId}
         onSaved={() => {
           load().catch(() => {})
+          setSnackbar({
+            open: true,
+            variant: "success",
+            message: "Cambios guardados.",
+          })
         }}
         onDeleted={(id) => {
           setItems((prev) => prev.filter((i) => i.id !== id))

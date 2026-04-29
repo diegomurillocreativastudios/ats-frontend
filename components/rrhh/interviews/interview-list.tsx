@@ -400,6 +400,11 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
         vacancyIdFromQuery={vacancyId}
         onSaved={() => {
           load().catch(() => {})
+          setSnackbar({
+            open: true,
+            variant: "success",
+            message: "Cambios guardados.",
+          })
         }}
         onDeleted={(id) => {
           setItems((prev) => prev.filter((i) => i.id !== id))
