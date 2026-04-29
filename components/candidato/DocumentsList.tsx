@@ -71,7 +71,7 @@ export default function DocumentsList({ documents = [] }: DocumentsListProps) {
 
   return (
     <div className="flex flex-col gap-3 md:gap-4">
-      <h2 className="font-inter text-sm font-semibold text-foreground md:text-base">
+      <h2 className="font-sans text-sm font-semibold text-foreground md:text-base">
         Mis documentos
       </h2>
       {downloadError ? (
@@ -83,7 +83,7 @@ export default function DocumentsList({ documents = [] }: DocumentsListProps) {
         </p>
       ) : null}
       {documents.length === 0 ? (
-        <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-inter text-sm text-muted-foreground">
+        <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
           Aún no hay documentos. Los que subas aparecerán aquí.
         </p>
       ) : (
@@ -97,7 +97,7 @@ export default function DocumentsList({ documents = [] }: DocumentsListProps) {
                 <FileText className="h-5 w-5 text-vo-purple md:h-6 md:w-6" aria-hidden />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-inter text-sm font-medium text-foreground md:text-base">
+                <p className="truncate font-sans text-sm font-medium text-foreground md:text-base">
                   {resolveDocumentName(doc)}
                 </p>
               </div>

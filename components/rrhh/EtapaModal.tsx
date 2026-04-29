@@ -150,7 +150,7 @@ export default function EtapaModal({
         <div className="flex flex-col gap-2">
           <label
             htmlFor="etapa-name"
-            className="font-inter text-sm font-medium text-foreground"
+            className="font-sans text-sm font-medium text-foreground"
           >
             Nombre de la etapa <span className="text-vo-pink">*</span>
           </label>
@@ -160,12 +160,12 @@ export default function EtapaModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Ej: Entrevista técnica"
-            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? "name-error" : undefined}
           />
           {errors.name && (
-            <p id="name-error" className="font-inter text-sm text-vo-pink" role="alert">
+            <p id="name-error" className="font-sans text-sm text-vo-pink" role="alert">
               {errors.name}
             </p>
           )}
@@ -173,7 +173,7 @@ export default function EtapaModal({
 
         {submitError && (
           <div
-            className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-inter text-sm text-destructive"
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
             role="alert"
           >
             {submitError}

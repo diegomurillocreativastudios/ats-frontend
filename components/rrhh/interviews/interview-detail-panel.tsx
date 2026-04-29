@@ -237,7 +237,7 @@ export function InterviewDetailPanel({
         data-testid="interview-detail-loading"
       >
         <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className="font-sans text-sm text-muted-foreground">
           Cargando entrevista...
         </p>
       </div>
@@ -247,7 +247,7 @@ export function InterviewDetailPanel({
   if (error || !interview) {
     return (
       <div className="flex flex-col gap-4 p-6">
-        <p className="font-inter text-sm text-destructive" role="alert">
+        <p className="font-sans text-sm text-destructive" role="alert">
           {error ?? "No se pudo cargar la entrevista."}
         </p>
         <button
@@ -256,7 +256,7 @@ export function InterviewDetailPanel({
             if (variant === "modal" && onClose) onClose()
             else router.push(listHref)
           }}
-          className="w-fit rounded-md bg-vo-purple px-4 py-2 font-inter text-sm text-white"
+          className="w-fit rounded-md bg-vo-purple px-4 py-2 font-sans text-sm text-white"
         >
           {variant === "modal" && onClose ? "Cerrar" : "Volver al listado"}
         </button>
@@ -275,7 +275,7 @@ export function InterviewDetailPanel({
         {variant === "page" ? (
           <Link
             href={listHref}
-            className="w-fit font-inter text-sm text-muted-foreground hover:text-foreground"
+            className="w-fit font-sans text-sm text-muted-foreground hover:text-foreground"
           >
             ← Volver a entrevistas
           </Link>
@@ -299,14 +299,14 @@ export function InterviewDetailPanel({
       >
       <div className="flex max-w-xl flex-col gap-5 rounded-xl border border-border bg-card p-6 lg:max-w-none">
         <div className="flex flex-col gap-1.5">
-          <span className="font-inter text-sm font-medium">Estado</span>
+          <span className="font-sans text-sm font-medium">Estado</span>
           {isEditable ? (
             <select
               value={statusChoice}
               onChange={(e) =>
                 setStatusChoice(e.target.value as InterviewStatus)
               }
-              className="h-10 rounded-md border border-input bg-background px-3 font-inter text-sm"
+              className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm"
               aria-label="Estado de la entrevista"
             >
               {STATUS_ACTIONS.map((s) => (
@@ -324,7 +324,7 @@ export function InterviewDetailPanel({
             </div>
           )}
           {!isEditable ? (
-            <p className="font-inter text-xs text-muted-foreground" role="status">
+            <p className="font-sans text-xs text-muted-foreground" role="status">
               Esta entrevista está cerrada (estado terminal). Los datos son solo
               lectura.
             </p>
@@ -332,7 +332,7 @@ export function InterviewDetailPanel({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span id="detail-when-label" className="font-inter text-sm font-medium">
+          <span id="detail-when-label" className="font-sans text-sm font-medium">
             Fecha y hora
           </span>
           <InterviewScheduleRow
@@ -346,11 +346,11 @@ export function InterviewDetailPanel({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="detail-type" className="font-inter text-sm font-medium">
+          <label htmlFor="detail-type" className="font-sans text-sm font-medium">
             Tipo
           </label>
           {loadingInterviewTypes ? (
-            <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-inter text-sm text-muted-foreground">
+            <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
               Cargando tipos de entrevista…
             </div>
@@ -360,7 +360,7 @@ export function InterviewDetailPanel({
               value={interviewType}
               onChange={(e) => setInterviewType(e.target.value)}
               disabled={!isEditable}
-              className="h-10 rounded-md border border-input bg-background px-3 font-inter text-sm disabled:opacity-60"
+              className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
             >
               <option value="">Ej: Técnica, cultural…</option>
               {interviewTypeOptions.map((t) => (
@@ -378,7 +378,7 @@ export function InterviewDetailPanel({
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="detail-interviewer"
-            className="font-inter text-sm font-medium"
+            className="font-sans text-sm font-medium"
           >
             Entrevistador(a)
           </label>
@@ -393,7 +393,7 @@ export function InterviewDetailPanel({
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="detail-descripcion"
-            className="font-inter text-sm font-medium"
+            className="font-sans text-sm font-medium"
           >
             Descripcion
           </label>
@@ -403,7 +403,7 @@ export function InterviewDetailPanel({
             onChange={(e) => setDescripcion(e.target.value)}
             disabled={!isEditable}
             rows={4}
-            className="resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm disabled:opacity-60"
+            className="resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
           />
         </div>
 
@@ -412,7 +412,7 @@ export function InterviewDetailPanel({
             type="button"
             onClick={handleSave}
             disabled={saving || deleting || !isEditable}
-            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -423,7 +423,7 @@ export function InterviewDetailPanel({
             type="button"
             onClick={() => load()}
             disabled={saving || deleting}
-            className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-inter text-sm text-foreground hover:bg-muted disabled:opacity-50"
+            className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
           >
             Descartar cambios
           </button>
@@ -431,7 +431,7 @@ export function InterviewDetailPanel({
             type="button"
             onClick={() => setDeleteConfirmOpen(true)}
             disabled={saving || deleting || deleteConfirmOpen}
-            className="inline-flex items-center gap-2 rounded-md border border-destructive/60 px-5 py-2.5 font-inter text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md border border-destructive/60 px-5 py-2.5 font-sans text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
             aria-label="Eliminar entrevista"
           >
             <Trash2 className="h-4 w-4 shrink-0" aria-hidden />

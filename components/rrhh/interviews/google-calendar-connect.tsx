@@ -40,7 +40,7 @@ export function GoogleCalendarConnect() {
       type="button"
       onClick={() => void handleClick()}
       disabled={disabled}
-      className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground shadow-sm hover:bg-muted disabled:opacity-50"
+      className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground shadow-sm hover:bg-muted disabled:opacity-50"
       aria-label="Conectar Google Calendar"
     >
       {isConnecting ? (

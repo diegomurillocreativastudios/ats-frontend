@@ -103,7 +103,7 @@ const formatCompliancePreview = (value: unknown): { label: string; value: string
 
 const SectionGroupLabel = ({ children }: { children: ReactNode }) => (
   <div className="scroll-mt-28 pt-2 first:pt-0">
-    <p className="mb-3 font-inter text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+    <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
       {children}
     </p>
   </div>
@@ -146,7 +146,7 @@ function ProfileSectionNav({ items }: ProfileSectionNavProps) {
             type="button"
             onClick={() => handleNavClick(item.id)}
             onKeyDown={(e) => handleNavKeyDown(e, item.id)}
-            className="shrink-0 rounded-full border border-transparent bg-muted/60 px-3.5 py-1.5 font-inter text-xs font-medium text-foreground transition-colors hover:border-vo-purple/30 hover:bg-vo-purple/10 hover:text-vo-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 md:text-sm"
+            className="shrink-0 rounded-full border border-transparent bg-muted/60 px-3.5 py-1.5 font-sans text-xs font-medium text-foreground transition-colors hover:border-vo-purple/30 hover:bg-vo-purple/10 hover:text-vo-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 md:text-sm"
           >
             {item.label}
           </button>
@@ -503,7 +503,7 @@ export function CandidateSelfProfileView({
             <div className="min-w-0 space-y-2">
               {validationError ? (
                 <div
-                  className="rounded-xl border border-amber-900/20 bg-amber-50 px-4 py-3 font-inter text-sm leading-snug text-amber-950 shadow-sm selection:bg-amber-200 selection:text-amber-950 dark:border-amber-900/20 dark:bg-amber-50 dark:text-amber-950"
+                  className="rounded-xl border border-amber-900/20 bg-amber-50 px-4 py-3 font-sans text-sm leading-snug text-amber-950 shadow-sm selection:bg-amber-200 selection:text-amber-950 dark:border-amber-900/20 dark:bg-amber-50 dark:text-amber-950"
                   role="status"
                 >
                   {validationError}
@@ -511,13 +511,13 @@ export function CandidateSelfProfileView({
               ) : null}
               {saveProfileError ? (
                 <div
-                  className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 font-inter text-sm text-destructive"
+                  className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 font-sans text-sm text-destructive"
                   role="alert"
                 >
                   {saveProfileError}
                 </div>
               ) : null}
-              <p className="font-inter text-xs text-muted-foreground">
+              <p className="font-sans text-xs text-muted-foreground">
                 Titular, resumen y documento de identidad son obligatorios al guardar.
               </p>
             </div>
@@ -531,7 +531,7 @@ export function CandidateSelfProfileView({
                   type="button"
                   onClick={handleDownloadCv}
                   disabled={downloading}
-                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto"
+                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto"
                   aria-label="Descargar tu último CV subido"
                 >
                   {downloading ? (
@@ -544,7 +544,7 @@ export function CandidateSelfProfileView({
               ) : null}
               <Link
                 href="/portal-candidato/documentos"
-                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
+                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
                 aria-label="Ir a documentos para gestionar archivos"
               >
                 <FileText className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
@@ -555,7 +555,7 @@ export function CandidateSelfProfileView({
                 type="button"
                 onClick={handleCancelEdit}
                 disabled={savingProfile}
-                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-10 sm:w-auto"
+                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-10 sm:w-auto"
                 aria-label="Cancelar edición sin guardar"
               >
                 <X className="h-4 w-4 shrink-0" aria-hidden />
@@ -564,7 +564,7 @@ export function CandidateSelfProfileView({
               <button
                 type="submit"
                 disabled={savingProfile}
-                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto sm:min-w-[140px]"
+                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto sm:min-w-[140px]"
               >
                 {savingProfile ? (
                   <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
@@ -575,14 +575,14 @@ export function CandidateSelfProfileView({
               </button>
             </div>
             {downloadError ? (
-              <p className="font-inter text-xs text-destructive" role="alert">
+              <p className="font-sans text-xs text-destructive" role="alert">
                 {downloadError}
               </p>
             ) : null}
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            <p className="font-inter text-sm leading-relaxed text-muted-foreground">
+            <p className="font-sans text-sm leading-relaxed text-muted-foreground">
               {profileNotFound
                 ? "Aún no registraste tu ficha. Completá los datos y guardá para activar tu perfil."
                 : "Editá tu información en cada sección de la ficha. Descargá tu CV o gestioná documentos cuando lo necesites."}
@@ -597,7 +597,7 @@ export function CandidateSelfProfileView({
                   type="button"
                   onClick={handleDownloadCv}
                   disabled={downloading}
-                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto"
+                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto"
                   aria-label="Descargar tu último CV subido"
                 >
                   {downloading ? (
@@ -611,7 +611,7 @@ export function CandidateSelfProfileView({
               <button
                 type="button"
                 onClick={handleOpenEdit}
-                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
+                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
                 aria-expanded="false"
               >
                 <Pencil className="h-4 w-4 shrink-0" aria-hidden />
@@ -619,7 +619,7 @@ export function CandidateSelfProfileView({
               </button>
               <Link
                 href="/portal-candidato/documentos"
-                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
+                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
                 aria-label="Ir a documentos para gestionar archivos"
               >
                 <FileText className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
@@ -628,7 +628,7 @@ export function CandidateSelfProfileView({
               </Link>
             </div>
             {downloadError ? (
-              <p className="font-inter text-xs text-destructive" role="alert">
+              <p className="font-sans text-xs text-destructive" role="alert">
                 {downloadError}
               </p>
             ) : null}
@@ -644,7 +644,7 @@ export function CandidateSelfProfileView({
         >
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
             <div
-              className="flex h-18 w-18 shrink-0 items-center justify-center rounded-2xl bg-vo-purple font-inter text-xl font-semibold text-white shadow-md shadow-vo-purple/25 md:h-20 md:w-20 md:text-2xl"
+              className="flex h-18 w-18 shrink-0 items-center justify-center rounded-2xl bg-vo-purple font-sans text-xl font-semibold text-white shadow-md shadow-vo-purple/25 md:h-20 md:w-20 md:text-2xl"
               aria-hidden
             >
               {initials}
@@ -654,11 +654,11 @@ export function CandidateSelfProfileView({
                 <>
                   <h2
                     id="perfil-resumen-titulo"
-                    className="font-inter text-xl font-bold leading-tight text-foreground md:text-2xl"
+                    className="font-sans text-xl font-bold leading-tight text-foreground md:text-2xl"
                   >
                     Tu ficha
                   </h2>
-                  <p className="mt-1 font-inter text-sm text-muted-foreground">
+                  <p className="mt-1 font-sans text-sm text-muted-foreground">
                     Editá nombre, titular y resumen en el mismo lugar donde los ves al leer el
                     perfil.
                   </p>
@@ -670,24 +670,24 @@ export function CandidateSelfProfileView({
                 <>
                   <h2
                     id="perfil-resumen-titulo"
-                    className="font-inter text-xl font-bold leading-tight text-foreground md:text-2xl"
+                    className="font-sans text-xl font-bold leading-tight text-foreground md:text-2xl"
                   >
                     {displayName}
                   </h2>
                   {headlineDisplay ? (
-                    <p className="mt-2 font-inter text-base font-medium text-vo-purple md:text-lg">
+                    <p className="mt-2 font-sans text-base font-medium text-vo-purple md:text-lg">
                       {headlineDisplay}
                     </p>
                   ) : null}
-                  <p className="mt-1 font-inter text-sm text-muted-foreground">
+                  <p className="mt-1 font-sans text-sm text-muted-foreground">
                     Así figura tu perfil profesional en el sistema.
                   </p>
                   {summary ? (
-                    <p className="mt-4 max-w-2xl font-inter text-sm leading-relaxed text-foreground/90 md:text-[15px]">
+                    <p className="mt-4 max-w-2xl font-sans text-sm leading-relaxed text-foreground/90 md:text-[15px]">
                       {summary}
                     </p>
                   ) : (
-                    <p className="mt-4 font-inter text-sm italic text-muted-foreground">
+                    <p className="mt-4 font-sans text-sm italic text-muted-foreground">
                       Completá el resumen al editar el perfil o desde la información importada de tus
                       documentos.
                     </p>
@@ -702,7 +702,7 @@ export function CandidateSelfProfileView({
           className="scroll-mt-28 rounded-2xl border border-dashed border-vo-purple/30 bg-vo-purple/[0.04] p-5 md:p-6"
           role="status"
         >
-          <p className="font-inter text-sm leading-relaxed text-foreground">
+          <p className="font-sans text-sm leading-relaxed text-foreground">
             Aún no tenés perfil de candidato en el servidor. Tocá{" "}
             <span className="font-medium text-vo-purple">Completar mi perfil</span>, completá los
             datos obligatorios y guardá para activar tu ficha.
@@ -713,14 +713,14 @@ export function CandidateSelfProfileView({
       <div id="perfil-datos" className="scroll-mt-28">
         <SectionGroupLabel>Cuenta y datos personales</SectionGroupLabel>
         <SectionCard title="Ficha consolidada" icon={User} sectionId="sec-ficha-consolidada">
-          <p className="mb-4 font-inter text-sm leading-relaxed text-muted-foreground">
+          <p className="mb-4 font-sans text-sm leading-relaxed text-muted-foreground">
             Combinamos datos de tu cuenta (sesión), del perfil editable y, si aplica, de documentos
             procesados.
           </p>
           {isEditing ? (
             <div className="flex flex-col gap-8">
               <div className="rounded-xl border border-border/60 bg-muted/15 p-4">
-                <p className="mb-3 font-inter text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Cuenta (solo lectura)
                 </p>
                 <InfoGrid
@@ -849,7 +849,7 @@ export function CandidateSelfProfileView({
                 />
               ) : (
                 <div>
-                  <p className="mb-2 font-inter text-xs font-medium text-muted-foreground">
+                  <p className="mb-2 font-sans text-xs font-medium text-muted-foreground">
                     Redes y sitio web
                   </p>
                   <SocialLinksList links={socialLinks} />
@@ -890,7 +890,7 @@ export function CandidateSelfProfileView({
         </>
       ) : (
         <div
-          className="rounded-2xl border border-border bg-muted/30 p-5 font-inter text-sm text-muted-foreground md:p-6"
+          className="rounded-2xl border border-border bg-muted/30 p-5 font-sans text-sm text-muted-foreground md:p-6"
           role="status"
         >
           Aún no hay trayectoria ni competencias en tu ficha. Podés cargarlas editando el perfil o
@@ -912,7 +912,7 @@ export function CandidateSelfProfileView({
             {formatCompliancePreview(compliance).length > 0 ? (
               <InfoGrid items={formatCompliancePreview(compliance)} />
             ) : (
-              <p className="font-inter text-sm text-muted-foreground">—</p>
+              <p className="font-sans text-sm text-muted-foreground">—</p>
             )}
           </SectionCard>
         </div>
@@ -925,7 +925,7 @@ export function CandidateSelfProfileView({
           sectionId="sec-nd-raw-self"
         >
           <p
-            className="mb-2 font-inter text-xs text-amber-800 dark:text-amber-200"
+            className="mb-2 font-sans text-xs text-amber-800 dark:text-amber-200"
             role="status"
           >
             Parte de tu perfil llegó en un formato que no se pudo interpretar como JSON. Si ves esto,

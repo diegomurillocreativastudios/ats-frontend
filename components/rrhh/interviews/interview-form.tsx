@@ -202,7 +202,7 @@ export function InterviewForm(props: InterviewFormProps) {
         <div className="flex flex-col gap-2">
           <Link
             href={backHref}
-            className="w-fit font-inter text-sm text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
+            className="w-fit font-sans text-sm text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
           >
             ← Volver al listado
           </Link>
@@ -220,13 +220,13 @@ export function InterviewForm(props: InterviewFormProps) {
         aria-label="Formulario nueva entrevista"
       >
         {loadingOptions ? (
-          <div className="flex items-center gap-2 font-inter text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 font-sans text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             Cargando candidatos de la vacante...
           </div>
         ) : options.length === 0 ? (
           <p
-            className="rounded-md border border-yellow-500 bg-yellow-50 px-3 py-2 font-inter text-sm font-medium leading-relaxed text-yellow-500"
+            className="rounded-md border border-yellow-500 bg-yellow-50 px-3 py-2 font-sans text-sm font-medium leading-relaxed text-yellow-500"
             role="status"
           >
             Esta vacante aún no tiene candidatos. Primero añade candidatos a la
@@ -235,7 +235,7 @@ export function InterviewForm(props: InterviewFormProps) {
         ) : null}
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="interview-candidate" className="font-inter text-sm font-medium">
+          <label htmlFor="interview-candidate" className="font-sans text-sm font-medium">
             Candidato <span className="text-vo-pink">*</span>
           </label>
           <select
@@ -243,7 +243,7 @@ export function InterviewForm(props: InterviewFormProps) {
             value={candidateProfileId}
             onChange={(e) => setCandidateProfileId(e.target.value)}
             disabled={loadingOptions || options.length === 0}
-            className="h-10 rounded-md border border-input bg-background px-3 font-inter text-sm disabled:opacity-50"
+            className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-50"
             aria-invalid={!!fieldErrors.candidateProfileId}
             aria-describedby={
               fieldErrors.candidateProfileId ? "err-candidate" : undefined
@@ -264,7 +264,7 @@ export function InterviewForm(props: InterviewFormProps) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span id="interview-when-label" className="font-inter text-sm font-medium">
+          <span id="interview-when-label" className="font-sans text-sm font-medium">
             Fecha y hora <span className="text-vo-pink">*</span>
           </span>
           <InterviewScheduleRow
@@ -284,7 +284,7 @@ export function InterviewForm(props: InterviewFormProps) {
 
         {scheduledLocal.trim() ? (
           <div
-            className="rounded-md border border-border bg-muted/50 px-3 py-2 font-inter text-sm text-foreground"
+            className="rounded-md border border-border bg-muted/50 px-3 py-2 font-sans text-sm text-foreground"
             role="status"
           >
             {calendarStatus.isConnected ? (
@@ -308,11 +308,11 @@ export function InterviewForm(props: InterviewFormProps) {
         ) : null}
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="interview-type" className="font-inter text-sm font-medium">
+          <label htmlFor="interview-type" className="font-sans text-sm font-medium">
             Tipo
           </label>
           {loadingInterviewTypes ? (
-            <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-inter text-sm text-muted-foreground">
+            <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
               Cargando tipos de entrevista…
             </div>
@@ -321,7 +321,7 @@ export function InterviewForm(props: InterviewFormProps) {
               id="interview-type"
               value={interviewType}
               onChange={(e) => setInterviewType(e.target.value)}
-              className="h-10 rounded-md border border-input bg-background px-3 font-inter text-sm"
+              className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm"
             >
               <option value="">Ej: Técnica, cultural…</option>
               {interviewTypeOptions.map((t) => (
@@ -334,7 +334,7 @@ export function InterviewForm(props: InterviewFormProps) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="interview-interviewer" className="font-inter text-sm font-medium">
+          <label htmlFor="interview-interviewer" className="font-sans text-sm font-medium">
             Entrevistador(a)
           </label>
           <InterviewerRecruiterSelect
@@ -347,7 +347,7 @@ export function InterviewForm(props: InterviewFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="interview-descripcion"
-            className="font-inter text-sm font-medium"
+            className="font-sans text-sm font-medium"
           >
             Descripcion
           </label>
@@ -356,12 +356,12 @@ export function InterviewForm(props: InterviewFormProps) {
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
             rows={4}
-            className="resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm"
+            className="resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm"
           />
         </div>
 
         {formError ? (
-          <p className="font-inter text-sm text-destructive" role="alert">
+          <p className="font-sans text-sm text-destructive" role="alert">
             {formError}
           </p>
         ) : null}
@@ -370,7 +370,7 @@ export function InterviewForm(props: InterviewFormProps) {
           <button
             type="submit"
             disabled={submitting || options.length === 0}
-            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
           >
             {submitting ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -382,14 +382,14 @@ export function InterviewForm(props: InterviewFormProps) {
               type="button"
               onClick={onCloseModal}
               disabled={submitting}
-              className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-inter text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+              className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-sans text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
             >
               Cancelar
             </button>
           ) : (
             <Link
               href={backHref}
-              className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-inter text-sm font-medium text-foreground hover:bg-muted"
+              className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-sans text-sm font-medium text-foreground hover:bg-muted"
             >
               Cancelar
             </Link>

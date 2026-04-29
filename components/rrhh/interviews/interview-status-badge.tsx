@@ -45,7 +45,7 @@ export function InterviewStatusBadge({
       : config.label
   return (
     <span
-      className={`inline-flex max-w-full items-center rounded-full px-2.5 py-0.5 font-inter text-xs font-medium ${config.className} ${className}`}
+      className={`inline-flex max-w-full items-center rounded-full px-2.5 py-0.5 font-sans text-xs font-medium ${config.className} ${className}`}
       data-testid="interview-status-badge"
       data-status={status}
     >

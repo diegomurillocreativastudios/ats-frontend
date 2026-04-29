@@ -167,7 +167,7 @@ export default function IniciarSesion() {
   };
 
   return (
-    <div className="min-h-screen flex font-inter">
+    <div className="min-h-screen flex font-sans">
       {/* Desktop & Tablet: Left Panel */}
       <div className="hidden md:flex md:w-80 lg:flex-1 bg-vo-purple text-white flex-col justify-center md:px-10 lg:px-16 md:gap-6 lg:gap-8">
         <div className="flex flex-col md:gap-6 lg:gap-6">

@@ -59,7 +59,7 @@ export const SectionCard = ({ title, icon: Icon, children, sectionId }) => (
   >
     <h2
       id={sectionId}
-      className="mb-4 flex items-center gap-2 font-inter text-sm font-semibold text-foreground"
+      className="mb-4 flex items-center gap-2 font-sans text-sm font-semibold text-foreground"
     >
       {Icon && <Icon className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />}
       {title}
@@ -72,10 +72,10 @@ export const InfoGrid = ({ items }) => (
   <dl className="grid gap-4 sm:grid-cols-2">
     {items.map(({ label, value }) => (
       <div key={label} className="flex flex-col gap-1">
-        <dt className="font-inter text-xs font-medium text-muted-foreground">
+        <dt className="font-sans text-xs font-medium text-muted-foreground">
           {label}
         </dt>
-        <dd className="font-inter text-sm text-foreground">{emptyToDash(value)}</dd>
+        <dd className="font-sans text-sm text-foreground">{emptyToDash(value)}</dd>
       </div>
     ))}
   </dl>
@@ -132,16 +132,16 @@ export const JobPreferencesBlock = ({
     items.some((row) => row.value != null && String(row.value).trim() !== "")
 
   if (!hasAnyObjective) {
-    return <p className="font-inter text-sm text-muted-foreground">—</p>
+    return <p className="font-sans text-sm text-muted-foreground">—</p>
   }
 
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <p className="mb-1 font-inter text-xs font-medium text-muted-foreground">
+        <p className="mb-1 font-sans text-xs font-medium text-muted-foreground">
           Sectores
         </p>
-        <p className="font-inter text-sm text-foreground">
+        <p className="font-sans text-sm text-foreground">
           {sectorsText ?? "—"}
         </p>
       </div>
@@ -154,7 +154,7 @@ export const WorkExperienceList = ({ items }) => {
   const list = normalizeObjectArray(items ?? []);
   if (list.length === 0) {
     return (
-      <p className="font-inter text-sm text-muted-foreground">
+      <p className="font-sans text-sm text-muted-foreground">
         Sin experiencia laboral registrada.
       </p>
     );
@@ -174,14 +174,14 @@ export const WorkExperienceList = ({ items }) => {
             className="border-l-2 border-vo-purple/40 pl-4"
           >
             <div className="flex flex-col gap-1">
-              <p className="font-inter text-sm font-semibold text-foreground">
+              <p className="font-sans text-sm font-semibold text-foreground">
                 {emptyToDash(role)}
               </p>
-              <p className="font-inter text-sm text-vo-purple">{emptyToDash(company)}</p>
-              <p className="font-inter text-xs text-muted-foreground">{emptyToDash(period)}</p>
+              <p className="font-sans text-sm text-vo-purple">{emptyToDash(company)}</p>
+              <p className="font-sans text-xs text-muted-foreground">{emptyToDash(period)}</p>
             </div>
             {desc ? (
-              <p className="mt-2 font-inter text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+              <p className="mt-2 font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
                 {desc}
               </p>
             ) : null}
@@ -196,7 +196,7 @@ export const EducationList = ({ items }) => {
   const list = normalizeObjectArray(items ?? []);
   if (list.length === 0) {
     return (
-      <p className="font-inter text-sm text-muted-foreground">
+      <p className="font-sans text-sm text-muted-foreground">
         Sin educación registrada.
       </p>
     );
@@ -214,14 +214,14 @@ export const EducationList = ({ items }) => {
             key={`${institution}-${degree}-${index}`}
             className="rounded-lg border border-border bg-muted/30 p-4"
           >
-            <p className="font-inter text-sm font-semibold text-foreground">
+            <p className="font-sans text-sm font-semibold text-foreground">
               {emptyToDash(degree)}
             </p>
-            <p className="mt-0.5 font-inter text-sm text-muted-foreground">
+            <p className="mt-0.5 font-sans text-sm text-muted-foreground">
               {emptyToDash(institution)}
             </p>
             {period ? (
-              <p className="mt-2 font-inter text-xs text-muted-foreground">{period}</p>
+              <p className="mt-2 font-sans text-xs text-muted-foreground">{period}</p>
             ) : null}
           </li>
         );
@@ -234,7 +234,7 @@ export const LanguagesList = ({ items }) => {
   const list = normalizeObjectArray(items ?? []);
   if (list.length === 0) {
     return (
-      <p className="font-inter text-sm text-muted-foreground">—</p>
+      <p className="font-sans text-sm text-muted-foreground">—</p>
     );
   }
   return (
@@ -246,7 +246,7 @@ export const LanguagesList = ({ items }) => {
         return (
           <li
             key={`${name}-${index}`}
-            className="rounded-full bg-vo-purple/10 px-3 py-1.5 font-inter text-xs font-medium text-vo-purple"
+            className="rounded-full bg-vo-purple/10 px-3 py-1.5 font-sans text-xs font-medium text-vo-purple"
           >
             {label || "—"}
           </li>
@@ -258,7 +258,7 @@ export const LanguagesList = ({ items }) => {
 
 export const SkillsCloud = ({ skills }) => {
   if (!Array.isArray(skills) || skills.length === 0) {
-    return <p className="font-inter text-sm text-muted-foreground">—</p>;
+    return <p className="font-sans text-sm text-muted-foreground">—</p>;
   }
   const flat = skills
     .map((s) => (typeof s === "string" ? s.trim() : String(s ?? "")))
@@ -268,7 +268,7 @@ export const SkillsCloud = ({ skills }) => {
       {flat.map((skill, index) => (
         <li
           key={`${skill.slice(0, 40)}-${index}`}
-          className="max-w-full rounded-lg bg-muted px-2.5 py-1.5 font-inter text-xs text-foreground whitespace-pre-wrap"
+          className="max-w-full rounded-lg bg-muted px-2.5 py-1.5 font-sans text-xs text-foreground whitespace-pre-wrap"
         >
           {skill}
         </li>
@@ -287,7 +287,7 @@ const normalizeUrl = (url) => {
 
 export const SocialLinksList = ({ links }) => {
   if (!Array.isArray(links) || links.length === 0) {
-    return <p className="font-inter text-sm text-muted-foreground">—</p>;
+    return <p className="font-sans text-sm text-muted-foreground">—</p>;
   }
   return (
     <ul className="flex flex-col gap-2" role="list">
@@ -302,14 +302,14 @@ export const SocialLinksList = ({ links }) => {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 font-inter text-sm text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                className="inline-flex items-center gap-2 font-sans text-sm text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
               >
                 <Link2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 <span>{platform}</span>
                 <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
               </a>
             ) : (
-              <span className="font-inter text-sm text-foreground">
+              <span className="font-sans text-sm text-foreground">
                 {platform}: {emptyToDash(rawUrl)}
               </span>
             )}
@@ -324,7 +324,7 @@ export const ReferencesList = ({ items }) => {
   const list = normalizeObjectArray(items ?? []);
   if (list.length === 0) {
     return (
-      <p className="font-inter text-sm text-muted-foreground">
+      <p className="font-sans text-sm text-muted-foreground">
         Sin referencias registradas.
       </p>
     );
@@ -341,15 +341,15 @@ export const ReferencesList = ({ items }) => {
             key={`${name}-${index}`}
             className="flex flex-col gap-1 rounded-lg border border-border p-4"
           >
-            <p className="font-inter text-sm font-semibold text-foreground">
+            <p className="font-sans text-sm font-semibold text-foreground">
               {emptyToDash(name)}
             </p>
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               {emptyToDash(position)}
               {company && company !== "—" ? ` · ${company}` : ""}
             </p>
             {contact ? (
-              <p className="mt-1 flex items-center gap-1.5 font-inter text-sm text-foreground">
+              <p className="mt-1 flex items-center gap-1.5 font-sans text-sm text-foreground">
                 <Phone className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden />
                 {contact}
               </p>
@@ -364,13 +364,13 @@ export const ReferencesList = ({ items }) => {
 export const RecognitionsList = ({ items }) => {
   if (!Array.isArray(items) || items.length === 0) {
     return (
-      <p className="font-inter text-sm text-muted-foreground">
+      <p className="font-sans text-sm text-muted-foreground">
         Sin reconocimientos registrados.
       </p>
     );
   }
   return (
-    <ul className="list-inside list-disc space-y-1 font-inter text-sm text-foreground" role="list">
+    <ul className="list-inside list-disc space-y-1 font-sans text-sm text-foreground" role="list">
       {items.map((r, i) => (
         <li key={i}>{typeof r === "string" ? r : JSON.stringify(r)}</li>
       ))}

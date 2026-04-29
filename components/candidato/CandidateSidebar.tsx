@@ -50,7 +50,7 @@ export default function CandidateSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-md px-4 py-3 font-inter text-sm transition-colors ${
+                className={`flex items-center gap-3 rounded-md px-4 py-3 font-sans text-sm transition-colors ${
                   isActive
                     ? "bg-[#F3E8FF] text-vo-purple font-medium"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -70,16 +70,16 @@ export default function CandidateSidebar() {
       <div className="mt-4 px-3 pb-3">
         <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
           <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-vo-navy font-inter text-xs font-semibold text-white"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-vo-navy font-sans text-xs font-semibold text-white"
             aria-hidden
           >
             {loading ? "..." : initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-inter text-sm font-medium text-foreground">
+            <p className="truncate font-sans text-sm font-medium text-foreground">
               {loading ? "Cargando..." : displayName}
             </p>
-            <p className="font-inter text-xs text-muted-foreground">
+            <p className="font-sans text-xs text-muted-foreground">
               {roleLabel}
             </p>
           </div>

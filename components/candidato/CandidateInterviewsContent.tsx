@@ -73,7 +73,7 @@ function InterviewCandidateCard({ row }: { row: Interview }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-inter text-base font-semibold text-foreground md:text-lg">
+            <h2 className="font-sans text-base font-semibold text-foreground md:text-lg">
               {vacancyLabel(row)}
             </h2>
             <InterviewStatusBadge
@@ -81,7 +81,7 @@ function InterviewCandidateCard({ row }: { row: Interview }) {
               label={row.statusDisplayName}
             />
           </div>
-          <div className="flex flex-col gap-1.5 font-inter text-sm text-muted-foreground">
+          <div className="flex flex-col gap-1.5 font-sans text-sm text-muted-foreground">
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <CalendarClock
                 className="h-4 w-4 shrink-0 text-vo-purple"
@@ -127,20 +127,20 @@ function InterviewCandidateCard({ row }: { row: Interview }) {
       </div>
       {row.descripcion?.trim() ? (
         <div className="mt-4 rounded-lg border border-border/80 bg-muted/40 px-3 py-2.5">
-          <p className="font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="font-sans text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Descripción
           </p>
-          <p className="mt-1 whitespace-pre-wrap font-inter text-sm text-foreground">
+          <p className="mt-1 whitespace-pre-wrap font-sans text-sm text-foreground">
             {row.descripcion.trim()}
           </p>
         </div>
       ) : null}
       {row.notes?.trim() ? (
         <div className="mt-4 rounded-lg border border-border/80 bg-muted/40 px-3 py-2.5">
-          <p className="font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="font-sans text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Indicaciones
           </p>
-          <p className="mt-1 whitespace-pre-wrap font-inter text-sm text-foreground">
+          <p className="mt-1 whitespace-pre-wrap font-sans text-sm text-foreground">
             {row.notes.trim()}
           </p>
         </div>
@@ -162,11 +162,11 @@ function SectionTitle({
     <div className="mb-4 flex flex-col gap-1">
       <div className="flex items-center gap-2">
         <Icon className="h-5 w-5 text-vo-purple" aria-hidden />
-        <h2 className="font-inter text-lg font-semibold text-foreground">
+        <h2 className="font-sans text-lg font-semibold text-foreground">
           {title}
         </h2>
       </div>
-      <p className="font-inter text-sm text-muted-foreground">{description}</p>
+      <p className="font-sans text-sm text-muted-foreground">{description}</p>
     </div>
   )
 }
@@ -183,7 +183,7 @@ export default function CandidateInterviewsContent() {
       {error ? (
         <div
           role="alert"
-          className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-inter text-sm text-destructive"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
         >
           {error}
         </div>
@@ -198,14 +198,14 @@ export default function CandidateInterviewsContent() {
             className="h-8 w-8 animate-spin text-vo-purple"
             aria-hidden
           />
-          <p className="font-inter text-sm text-muted-foreground">
+          <p className="font-sans text-sm text-muted-foreground">
             Cargando tus entrevistas…
           </p>
         </div>
       ) : !error && items.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center">
           <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
-          <p className="max-w-md font-inter text-sm text-muted-foreground">
+          <p className="max-w-md font-sans text-sm text-muted-foreground">
             Todavía no hay entrevistas agendadas para tu perfil. Cuando RRHH
             programe una cita, la verás aquí con fecha, modalidad e indicaciones.
           </p>
@@ -219,7 +219,7 @@ export default function CandidateInterviewsContent() {
               description="Confirmá fecha y hora; si algo cambia, el equipo de selección te contactará."
             />
             {upcoming.length === 0 ? (
-              <p className="rounded-lg border border-border bg-muted/30 px-4 py-6 text-center font-inter text-sm text-muted-foreground">
+              <p className="rounded-lg border border-border bg-muted/30 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
                 No tenés entrevistas programadas en este momento.
               </p>
             ) : (
@@ -240,7 +240,7 @@ export default function CandidateInterviewsContent() {
               description="Entrevistas ya realizadas, canceladas o reprogramadas."
             />
             {history.length === 0 ? (
-              <p className="rounded-lg border border-border bg-muted/30 px-4 py-6 text-center font-inter text-sm text-muted-foreground">
+              <p className="rounded-lg border border-border bg-muted/30 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
                 Sin entrevistas anteriores registradas.
               </p>
             ) : (

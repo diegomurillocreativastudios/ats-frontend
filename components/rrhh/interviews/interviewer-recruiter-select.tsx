@@ -76,7 +76,7 @@ export function InterviewerRecruiterSelect({
 
   if (loading) {
     return (
-      <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-inter text-sm text-muted-foreground">
+      <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
         Cargando reclutadores…
       </div>
@@ -95,7 +95,7 @@ export function InterviewerRecruiterSelect({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className="h-10 rounded-md border border-input bg-background px-3 font-inter text-sm disabled:opacity-60"
+          className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
         />
       </div>
     )
@@ -107,7 +107,7 @@ export function InterviewerRecruiterSelect({
       value={trimmed}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className="h-10 rounded-md border border-input bg-background px-3 font-inter text-sm disabled:opacity-60"
+      className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
     >
       <option value="">{emptyLabel}</option>
       {sorted.map((u) => {

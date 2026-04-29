@@ -199,7 +199,7 @@ const ScoreBarRow = ({
         <span className="sr-only">{labelText}</span>
       ) : (
         <span
-          className={`w-full shrink-0 font-inter text-xs sm:w-44 ${labelClass} ${isTotalRow ? "font-semibold" : ""}`}
+          className={`w-full shrink-0 font-sans text-xs sm:w-44 ${labelClass} ${isTotalRow ? "font-semibold" : ""}`}
         >
           {labelText}
         </span>
@@ -215,7 +215,7 @@ const ScoreBarRow = ({
         />
       </div>
       <span
-        className={`w-full shrink-0 text-left font-inter text-xs font-semibold tabular-nums sm:w-[3.25rem] sm:text-right ${valueClass}`}
+        className={`w-full shrink-0 text-left font-sans text-xs font-semibold tabular-nums sm:w-[3.25rem] sm:text-right ${valueClass}`}
       >
         {pct != null ? `${pct}%` : safeString(val)}
       </span>
@@ -234,7 +234,7 @@ const ScoreTooltip = ({ text, accentClass = "text-slate-500" }) => (
     </button>
     <span
       role="tooltip"
-      className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-md border border-border bg-white px-3 py-2 text-left font-inter text-xs font-normal leading-relaxed text-slate-700 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+      className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-md border border-border bg-white px-3 py-2 text-left font-sans text-xs font-normal leading-relaxed text-slate-700 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
     >
       {text}
     </span>
@@ -392,7 +392,7 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
         ? attributeWeights
         : {};
     return (
-      <ul className="flex flex-col gap-2 font-inter text-sm text-muted-foreground" role="list">
+      <ul className="flex flex-col gap-2 font-sans text-sm text-muted-foreground" role="list">
         {entries.map(([key, val]) => {
           const levelText =
             typeof val === "object" && val !== null
@@ -432,7 +432,7 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
     const items = value.filter((item) => item != null && String(item).trim() !== "");
     if (items.length === 0) return null;
     return (
-      <ul className="list-inside list-disc space-y-1.5 font-inter text-sm text-muted-foreground" role="list">
+      <ul className="list-inside list-disc space-y-1.5 font-sans text-sm text-muted-foreground" role="list">
         {items.map((item, i) => (
           <li key={i}>{typeof item === "object" ? safeString(item) : String(item)}</li>
         ))}
@@ -450,7 +450,7 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
 
   if (looksLikeList) {
     return (
-      <ul className="list-inside space-y-1.5 font-inter text-sm text-muted-foreground" role="list">
+      <ul className="list-inside space-y-1.5 font-sans text-sm text-muted-foreground" role="list">
         {lines.map((line, i) => (
           <li key={i} className="pl-0">
             {line.replace(/^[-*•]\s/, "").replace(/^\d+[.)]\s/, "")}
@@ -461,7 +461,7 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
   }
 
   return (
-    <div className="space-y-2 font-inter text-sm text-muted-foreground">
+    <div className="space-y-2 font-sans text-sm text-muted-foreground">
       {lines.map((line, i) => (
         <p key={i} className="whitespace-pre-wrap">
           {line}
@@ -604,16 +604,16 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
         <div className="flex items-start justify-between border-b border-border p-6">
           <div className="flex items-center gap-4">
             <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-base font-semibold text-white"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-base font-semibold text-white"
               aria-hidden
             >
               {initials}
             </div>
             <div className="flex flex-col gap-0.5">
-              <h2 className="font-inter text-lg font-semibold text-slate-900">
+              <h2 className="font-sans text-lg font-semibold text-slate-900">
                 {emptyToDash(match.name)}
               </h2>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 font-inter text-sm text-slate-600">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 font-sans text-sm text-slate-600">
                 <span className="flex items-center gap-1.5">
                   <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   {emptyToDash(match.email)}
@@ -625,11 +625,11 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   </span>
                 )}
               </div>
-              <p className="font-inter text-xs text-slate-600">
+              <p className="font-sans text-xs text-slate-600">
                 Subido: {formatDate(match.uploadedAt)}
               </p>
               {totalScorePercent != null && (
-                <p className="font-inter text-xs font-semibold text-vo-purple">
+                <p className="font-sans text-xs font-semibold text-vo-purple">
                   Puntaje total del match: {totalScorePercent}%
                 </p>
               )}
@@ -650,23 +650,23 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
           {!hasContent ? (
             <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
               <User className="h-10 w-10 text-slate-400" aria-hidden />
-              <p className="font-inter text-sm text-slate-600">
+              <p className="font-sans text-sm text-slate-600">
                 No hay información adicional disponible.
               </p>
             </div>
           ) : (
             <div className="flex flex-col gap-6">
               <div className="rounded-xl border border-vo-purple/25 bg-vo-purple/5 p-4 shadow-sm">
-                <h3 className="font-inter text-sm font-semibold text-vo-purple">
+                <h3 className="font-sans text-sm font-semibold text-vo-purple">
                   Analisis procesado con IA
                 </h3>
-                <p className="mt-2 font-inter text-sm text-slate-700">
+                <p className="mt-2 font-sans text-sm text-slate-700">
                   Esta evaluacion fue procesada con IA para acelerar la lectura inicial del perfil.
                 </p>
-                <p className="mt-1 font-inter text-sm text-slate-700">
+                <p className="mt-1 font-sans text-sm text-slate-700">
                   Un analisis manual puede tomar entre <strong>2 horas y 1 dia</strong>, mientras que con IA este resultado se genera en <strong>segundos</strong>.
                 </p>
-                <p className="mt-1 font-inter text-xs text-slate-600">
+                <p className="mt-1 font-sans text-xs text-slate-600">
                   Usa estos resultados como apoyo y valida la decision final desde RRHH.
                 </p>
               </div>
@@ -675,7 +675,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 <div className="flex flex-col gap-5">
                   {hasAttributeBlock && (
                     <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-sky-200/60 dark:bg-white dark:ring-border">
-                      <h3 className="mb-3.5 font-inter text-sm font-semibold text-sky-900 dark:text-sky-900">
+                      <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900 dark:text-sky-900">
                         Atributos
                       </h3>
                       <ul className="flex flex-col gap-3" role="list">
@@ -708,7 +708,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   {qualitativeEntry != null && (
                     <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70 dark:bg-white dark:ring-border">
                       <div className="mb-3.5 flex items-center gap-1.5">
-                        <h3 className="font-inter text-sm font-semibold text-amber-950 dark:text-amber-950">
+                        <h3 className="font-sans text-sm font-semibold text-amber-950 dark:text-amber-950">
                           Puntaje cualitativo
                         </h3>
                         <ScoreTooltip
@@ -733,7 +733,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   {semanticEntry != null && (
                     <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-vo-purple/25 dark:bg-white dark:ring-border">
                       <div className="mb-3.5 flex items-center gap-1.5">
-                        <h3 className="font-inter text-sm font-semibold text-vo-purple">
+                        <h3 className="font-sans text-sm font-semibold text-vo-purple">
                           Similitud semántica
                         </h3>
                         <ScoreTooltip
@@ -760,10 +760,10 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               {/* Coincidencia de atributos (CV vs vacante) */}
               {hasMatchedAttributesBlock && (
                 <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/70 dark:bg-white dark:ring-border">
-                  <h3 className="mb-3 font-inter text-sm font-semibold text-slate-900">
+                  <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
                     Coincidencia de atributos
                   </h3>
-                  <ul className="flex flex-col gap-2.5 font-inter text-sm text-slate-700" role="list">
+                  <ul className="flex flex-col gap-2.5 font-sans text-sm text-slate-700" role="list">
                     {matchedAttributesEntries.map(([attrKey, attrVal]) => {
                       const pathVal =
                         matchedAttributePaths && matchedAttributePaths[attrKey] != null
@@ -776,7 +776,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           </span>
                           <span className="text-slate-700">{emptyToDash(String(attrVal ?? ""))}</span>
                           {pathVal != null && pathVal !== "" && (
-                            <span className="font-inter text-xs text-slate-500">
+                            <span className="font-sans text-xs text-slate-500">
                               Ruta: {pathVal}
                             </span>
                           )}
@@ -792,20 +792,20 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 <div className="flex flex-col gap-4">
                   {qualitativeReasoningPositive != null && (
                     <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/50 dark:bg-white">
-                      <h3 className="mb-3 font-inter text-sm font-semibold text-emerald-900">
+                      <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">
                         Fortalezas
                       </h3>
-                      <p className="font-inter text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                      <p className="font-sans text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
                         {qualitativeReasoningPositive}
                       </p>
                     </div>
                   )}
                   {qualitativeReasoningNegative != null && (
                     <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70 dark:bg-white">
-                      <h3 className="mb-3 font-inter text-sm font-semibold text-amber-950">
+                      <h3 className="mb-3 font-sans text-sm font-semibold text-amber-950">
                         Aspectos a considerar
                       </h3>
-                      <p className="font-inter text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                      <p className="font-sans text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
                         {qualitativeReasoningNegative}
                       </p>
                     </div>
@@ -814,10 +814,10 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               ) : (
                 qualitativeReasoningLegacy != null && (
                   <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-border/60 dark:bg-white">
-                    <h3 className="mb-3 font-inter text-sm font-semibold text-slate-900">
+                    <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
                       Razonamiento cualitativo
                     </h3>
-                    <p className="font-inter text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                    <p className="font-sans text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
                       {qualitativeReasoningLegacy}
                     </p>
                   </div>
@@ -831,7 +831,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
         <div className="flex items-center justify-between border-t border-border p-6">
           <div>
             {downloadError && (
-              <p className="font-inter text-xs text-destructive" role="alert">
+              <p className="font-sans text-xs text-destructive" role="alert">
                 {downloadError}
               </p>
             )}
@@ -842,7 +842,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 type="button"
                 onClick={handleDownloadCV}
                 disabled={downloading}
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-white px-4 py-2.5 font-inter text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-white px-4 py-2.5 font-sans text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Descargar CV del candidato"
               >
                 {downloading ? (
@@ -858,7 +858,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 href={profileHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-md border border-vo-purple/40 bg-white px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                className="inline-flex items-center gap-2 rounded-md border border-vo-purple/40 bg-white px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                 aria-label="Abrir perfil del candidato en una nueva pestaña"
               >
                 <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
@@ -868,7 +868,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
               aria-label="Cerrar perfil"
             >
               Cerrar
@@ -923,7 +923,7 @@ const MatchCard = ({
                 />
               </label>
               <div
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-base font-semibold text-white"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-base font-semibold text-white"
                 aria-hidden
               >
                 {initials}
@@ -935,10 +935,10 @@ const MatchCard = ({
                   <AiDisclosureBadge label={aiLabel} />
                 </div>
               ) : null}
-              <h3 className="font-inter text-base font-semibold text-foreground">
+              <h3 className="font-sans text-base font-semibold text-foreground">
                 {emptyToDash(match.name)}
               </h3>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-inter text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-sans text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   {emptyToDash(match.email)}
@@ -950,19 +950,19 @@ const MatchCard = ({
                   </span>
                 )}
               </div>
-              <p className="font-inter text-xs text-muted-foreground">
+              <p className="font-sans text-xs text-muted-foreground">
                 Subido: {formatDate(match.uploadedAt)}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex flex-col items-center rounded-lg bg-muted/50 px-4 py-2">
-              <span className="font-inter text-lg font-semibold text-foreground">
+              <span className="font-sans text-lg font-semibold text-foreground">
                 {typeof (match.semanticScore ?? match.totalScore) === "number"
                   ? ((match.semanticScore ?? match.totalScore) * 100).toFixed(2)
                   : "—"}
               </span>
-              <span className="font-inter text-xs text-muted-foreground">
+              <span className="font-sans text-xs text-muted-foreground">
                 Puntaje
               </span>
             </div>
@@ -970,7 +970,7 @@ const MatchCard = ({
               <button
                 type="button"
                 onClick={handleOpenModal}
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                 aria-label={`Ver perfil de ${emptyToDash(match.name)}`}
               >
                 <User className="h-4 w-4" aria-hidden />
@@ -1047,16 +1047,16 @@ const KanbanCard = ({
     >
       <div className="flex items-center gap-3">
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-sm font-semibold text-white"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-sm font-semibold text-white"
           aria-hidden
         >
           {initials}
         </div>
         <div className="min-w-0 flex-1" id={`kanban-card-${candidateId}`}>
-          <p className="truncate font-inter text-sm font-medium text-foreground">
+          <p className="truncate font-sans text-sm font-medium text-foreground">
             {emptyToDash(match.name)}
           </p>
-          <p className="flex flex-wrap items-center gap-1.5 font-inter text-xs text-muted-foreground">
+          <p className="flex flex-wrap items-center gap-1.5 font-sans text-xs text-muted-foreground">
             <span>Puntaje: {score}</span>
             <span className="inline-flex rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
               {applicationSourceLabel}
@@ -1070,7 +1070,7 @@ const KanbanCard = ({
             onMouseDown={handleSelectMouseDown}
             onClick={handleSelectClick}
             disabled={statusSelectDisabled}
-            className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 font-inter text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             aria-label={`Estado de ${emptyToDash(match.name)}`}
           >
             {statuses.map((s) => (
@@ -1092,11 +1092,11 @@ const MoveStageErrorBanner = ({ error }) => {
       className="flex flex-col gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2"
       role="alert"
     >
-      <p className="font-inter text-sm text-destructive">{error.text}</p>
+      <p className="font-sans text-sm text-destructive">{error.text}</p>
       {error.showEstadosLink ? (
         <Link
           href="/portal-admin/etapas"
-          className="font-inter text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+          className="font-sans text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
           aria-label="Ir a la sección Etapas para administrar estados de postulación"
         >
           Ir a Etapas y administrar estados
@@ -1168,11 +1168,11 @@ const KanbanColumn = ({
       aria-label={`Columna ${stage}`}
     >
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <h3 className="font-inter text-sm font-semibold text-foreground">
+        <h3 className="font-sans text-sm font-semibold text-foreground">
           {stage}
         </h3>
         <span
-          className="rounded-full bg-muted px-2 py-0.5 font-inter text-xs text-muted-foreground"
+          className="rounded-full bg-muted px-2 py-0.5 font-sans text-xs text-muted-foreground"
           aria-live="polite"
         >
           {candidates.length}
@@ -2008,7 +2008,7 @@ export default function VacanteDetallePage() {
                     className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
                     aria-hidden
                   />
-                  <p className="font-inter text-sm text-muted-foreground">
+                  <p className="font-sans text-sm text-muted-foreground">
                     Cargando vacante...
                   </p>
                 </div>
@@ -2017,12 +2017,12 @@ export default function VacanteDetallePage() {
                   className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
                   role="alert"
                 >
-                  <p className="font-inter text-sm text-destructive">
+                  <p className="font-sans text-sm text-destructive">
                     {fetchError}
                   </p>
                   <Link
                     href="/portal-rrhh/vacantes"
-                    className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                    className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                   >
                     <ArrowLeft className="h-4 w-4" aria-hidden />
                     Volver a vacantes
@@ -2030,7 +2030,7 @@ export default function VacanteDetallePage() {
                   <button
                     type="button"
                     onClick={fetchVacancy}
-                    className="font-inter text-sm text-vo-purple hover:underline"
+                    className="font-sans text-sm text-vo-purple hover:underline"
                   >
                     Reintentar
                   </button>
@@ -2040,7 +2040,7 @@ export default function VacanteDetallePage() {
                   <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <Link
                       href="/portal-rrhh/vacantes"
-                      className="inline-flex w-fit items-center gap-2 font-inter text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                      className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                       aria-label="Volver a vacantes"
                     >
                       <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -2067,7 +2067,7 @@ export default function VacanteDetallePage() {
                           {isEditing ? (
                             <div className="flex flex-col gap-4">
                               <div className="flex flex-col gap-2">
-                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-desktop">
+                                <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-desktop">
                                   Nombre de la vacante <span className="text-vo-pink">*</span>
                                 </label>
                                 <input
@@ -2075,27 +2075,27 @@ export default function VacanteDetallePage() {
                                   type="text"
                                   value={editTitle}
                                   onChange={(e) => setEditTitle(e.target.value)}
-                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                   aria-invalid={!!editErrors.title}
                                   aria-describedby={editErrors.title ? "edit-title-error-desktop" : undefined}
                                   placeholder="Ej: Frontend Developer"
                                 />
                                 {editErrors.title && (
-                                  <p id="edit-title-error-desktop" className="font-inter text-sm text-vo-pink" role="alert">
+                                  <p id="edit-title-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
                                     {editErrors.title}
                                   </p>
                                 )}
                               </div>
                               <div className="grid gap-4 md:grid-cols-3">
                                 <div className="flex flex-col gap-2">
-                                  <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-desktop">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-desktop">
                                     País al que aplica la vacante
                                   </label>
                                   <select
                                     id="edit-vacancy-country-desktop"
                                     value={editCountryCode}
                                     onChange={(e) => setEditCountryCode(e.target.value)}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                     aria-label="País al que aplica la vacante"
                                   >
                                     <option value="">Sin especificar</option>
@@ -2107,14 +2107,14 @@ export default function VacanteDetallePage() {
                                   </select>
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                  <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-desktop">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-desktop">
                                     Departamento
                                   </label>
                                   <select
                                     id="edit-vacancy-department-desktop"
                                     value={editVacancyDepartmentId}
                                     onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                     aria-label="Departamento de la vacante"
                                     disabled={loadingVacancyCatalogs}
                                   >
@@ -2127,14 +2127,14 @@ export default function VacanteDetallePage() {
                                   </select>
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                  <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-desktop">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-desktop">
                                     Modalidad
                                   </label>
                                   <select
                                     id="edit-vacancy-modality-desktop"
                                     value={editVacancyModalityId}
                                     onChange={(e) => setEditVacancyModalityId(e.target.value)}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                     aria-label="Modalidad de la vacante"
                                     disabled={loadingVacancyCatalogs}
                                   >
@@ -2148,17 +2148,17 @@ export default function VacanteDetallePage() {
                                 </div>
                               </div>
                               {vacancyCatalogsError ? (
-                                <p className="font-inter text-sm text-amber-700" role="status">
+                                <p className="font-sans text-sm text-amber-700" role="status">
                                   {vacancyCatalogsError}
                                 </p>
                               ) : null}
                             </div>
                           ) : (
-                            <h1 className="font-inter text-2xl font-bold text-foreground">
+                            <h1 className="font-sans text-2xl font-bold text-foreground">
                               {emptyToDash(vacancy.title)}
                             </h1>
                           )}
-                          <div className="flex flex-wrap items-center gap-4 font-inter text-sm text-muted-foreground">
+                          <div className="flex flex-wrap items-center gap-4 font-sans text-sm text-muted-foreground">
                             <span className="flex items-center gap-1.5">
                               <Building2 className="h-4 w-4 shrink-0" aria-hidden />
                               {getVacancyDepartmentLabel(vacancy)}
@@ -2181,7 +2181,7 @@ export default function VacanteDetallePage() {
                             </span>
                           </div>
                           <span
-                            className={`inline-flex w-fit rounded-xl px-2.5 py-1 font-inter text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
+                            className={`inline-flex w-fit rounded-xl px-2.5 py-1 font-sans text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
                           >
                             {statusConfig.label}
                           </span>
@@ -2201,14 +2201,14 @@ export default function VacanteDetallePage() {
                             <button
                               type="button"
                               onClick={handleEditVacancy}
-                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                               aria-label="Editar vacante"
                             >
                               Editar vacante
                             </button>
                             <Link
                               href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
-                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                               aria-label="Ver entrevistas de esta vacante"
                             >
                               Entrevistas
@@ -2219,7 +2219,7 @@ export default function VacanteDetallePage() {
                             type="button"
                             onClick={handleSaveVacancy}
                             disabled={savingVacancy}
-                            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             aria-label="Guardar vacante"
                           >
                             {savingVacancy ? (
@@ -2231,7 +2231,7 @@ export default function VacanteDetallePage() {
                       </div>
                     </div>
                     {saveVacancyError && (
-                      <p className="mt-4 font-inter text-sm text-destructive" role="alert">
+                      <p className="mt-4 font-sans text-sm text-destructive" role="alert">
                         {saveVacancyError}
                       </p>
                     )}
@@ -2239,7 +2239,7 @@ export default function VacanteDetallePage() {
                       <div className="mt-6 grid gap-6 border-t border-border pt-6 md:grid-cols-2">
                         {(vacancy.description || isEditing) && (
                           <div>
-                            <h2 className="mb-2 flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
+                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
                               <FileText className="h-4 w-4" aria-hidden />
                               Descripción
                             </h2>
@@ -2249,20 +2249,20 @@ export default function VacanteDetallePage() {
                                   value={editDescription}
                                   onChange={(e) => setEditDescription(e.target.value)}
                                   rows={5}
-                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
+                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
                                   aria-label="Editar descripción de la vacante"
                                   aria-invalid={!!editErrors.description}
                                   aria-describedby={editErrors.description ? "edit-description-error-desktop" : undefined}
                                   placeholder="Describe el puesto, responsabilidades y competencias..."
                                 />
                                 {editErrors.description && (
-                                  <p id="edit-description-error-desktop" className="font-inter text-sm text-vo-pink" role="alert">
+                                  <p id="edit-description-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
                                     {editErrors.description}
                                   </p>
                                 )}
                               </div>
                             ) : (
-                              <p className="font-inter text-sm text-muted-foreground whitespace-pre-wrap">
+                              <p className="font-sans text-sm text-muted-foreground whitespace-pre-wrap">
                                 {safeString(vacancy.description)}
                               </p>
                             )}
@@ -2271,7 +2271,7 @@ export default function VacanteDetallePage() {
                         {(vacancy.requirements || isEditing) && (
                           <div>
                             <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-                              <h2 className="flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
+                              <h2 className="flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
                                 <CheckSquare className="h-4 w-4" aria-hidden />
                                 Requisitos
                               </h2>
@@ -2279,7 +2279,7 @@ export default function VacanteDetallePage() {
                                 <button
                                   type="button"
                                   onClick={handleAddRequirement}
-                                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                                   aria-label="Agregar requerimiento"
                                 >
                                   <Plus className="h-4 w-4" aria-hidden />
@@ -2304,12 +2304,12 @@ export default function VacanteDetallePage() {
                                               handleUpdateRequirement(req.id, "requirementName", e.target.value)
                                             }
                                             placeholder="Nombre (ej: Licencia de conducir)"
-                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Nombre`}
                                             aria-invalid={!!editErrors[`req-name-${req.id}`]}
                                           />
                                           {editErrors[`req-name-${req.id}`] && (
-                                            <p className="font-inter text-xs text-vo-pink" role="alert">
+                                            <p className="font-sans text-xs text-vo-pink" role="alert">
                                               {editErrors[`req-name-${req.id}`]}
                                             </p>
                                           )}
@@ -2322,12 +2322,12 @@ export default function VacanteDetallePage() {
                                               handleUpdateRequirement(req.id, "requirementValue", e.target.value)
                                             }
                                             placeholder="Valor (ej: Pesada)"
-                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Valor`}
                                             aria-invalid={!!editErrors[`req-value-${req.id}`]}
                                           />
                                           {editErrors[`req-value-${req.id}`] && (
-                                            <p className="font-inter text-xs text-vo-pink" role="alert">
+                                            <p className="font-sans text-xs text-vo-pink" role="alert">
                                               {editErrors[`req-value-${req.id}`]}
                                             </p>
                                           )}
@@ -2336,11 +2336,11 @@ export default function VacanteDetallePage() {
                                           <div className="flex items-center justify-between">
                                             <label
                                               htmlFor={`edit-scale-desktop-${req.id}`}
-                                              className="font-inter text-xs text-muted-foreground"
+                                              className="font-sans text-xs text-muted-foreground"
                                             >
                                               Importancia (1-10)
                                             </label>
-                                            <span className="font-inter text-xs font-medium text-foreground tabular-nums">
+                                            <span className="font-sans text-xs font-medium text-foreground tabular-nums">
                                               {req.scale}
                                             </span>
                                           </div>
@@ -2369,7 +2369,7 @@ export default function VacanteDetallePage() {
                                     </div>
                                   ))}
                                 </div>
-                                <p className="font-inter text-xs text-muted-foreground">
+                                <p className="font-sans text-xs text-muted-foreground">
                                   Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
                                 </p>
                               </div>
@@ -2408,7 +2408,7 @@ export default function VacanteDetallePage() {
                         type="button"
                         onClick={handleSearchSmartRecommendations}
                         disabled={loadingSmart}
-                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
                         aria-label="Busqueda preliminar"
                       >
                         {loadingSmart ? (
@@ -2425,7 +2425,7 @@ export default function VacanteDetallePage() {
                           type="button"
                           onClick={handleMatch}
                           disabled={loadingMatch || selectedDocumentIds.length === 0}
-                          className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Analisis preliminar"
                         >
                           {loadingMatch ? (
@@ -2438,12 +2438,12 @@ export default function VacanteDetallePage() {
                       )}
                     </div>
                     {matchError && (
-                      <p className="font-inter text-sm text-destructive" role="alert">
+                      <p className="font-sans text-sm text-destructive" role="alert">
                         {matchError}
                       </p>
                     )}
                     {smartError && (
-                      <p className="font-inter text-sm text-destructive" role="alert">
+                      <p className="font-sans text-sm text-destructive" role="alert">
                         {smartError} Puedes continuar con filtros y revision manual.
                       </p>
                     )}
@@ -2463,16 +2463,16 @@ export default function VacanteDetallePage() {
                             className="mt-0!"
                             aria-label="Progreso del análisis preliminar con IA"
                           />
-                          <p className="font-inter text-sm text-muted-foreground">
+                          <p className="font-sans text-sm text-muted-foreground">
                             Reanalizando con IA…
                           </p>
                         </div>
                       ) : null}
-                      <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
+                      <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
                         <Sparkles className="h-5 w-5" aria-hidden />
                         Resultados de búsqueda
                         {smartCandidates !== null && (
-                          <span className="font-inter text-sm font-normal text-muted-foreground">
+                          <span className="font-sans text-sm font-normal text-muted-foreground">
                             ({searchResultsToDisplay.length})
                           </span>
                         )}
@@ -2492,7 +2492,7 @@ export default function VacanteDetallePage() {
                               />
                             </div>
                             <p
-                              className="font-inter text-sm text-muted-foreground"
+                              className="font-sans text-sm text-muted-foreground"
                               aria-live="polite"
                             >
                               Actualizando búsqueda con IA…
@@ -2501,14 +2501,14 @@ export default function VacanteDetallePage() {
                         ) : smartCandidates === null ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Sparkles className="h-12 w-12 text-muted-foreground" aria-hidden />
-                            <p className="font-inter text-sm text-muted-foreground">
+                            <p className="font-sans text-sm text-muted-foreground">
                               Ejecuta la busqueda preliminar para ver coincidencias asistidas por IA.
                             </p>
                           </div>
                         ) : searchResultsToDisplay.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
-                            <p className="font-inter text-sm text-muted-foreground">
+                            <p className="font-sans text-sm text-muted-foreground">
                               {smartCandidates.length === 0
                                 ? "No se encontraron candidatos en la búsqueda."
                                 : "Los candidatos encontrados ya están en Posibles candidatos o en Etapas."}
@@ -2520,7 +2520,7 @@ export default function VacanteDetallePage() {
                               <button
                                 type="button"
                                 onClick={handleSelectAllCandidates}
-                                className="font-inter text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                                className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
                                 aria-label="Seleccionar todos los candidatos"
                               >
                                 Seleccionar todos
@@ -2528,13 +2528,13 @@ export default function VacanteDetallePage() {
                               <button
                                 type="button"
                                 onClick={handleDeselectAllCandidates}
-                                className="font-inter text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                                className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
                                 aria-label="Desmarcar todos los candidatos"
                               >
                                 Desmarcar todos
                               </button>
                               {selectedCount > 0 && (
-                                <span className="font-inter text-sm text-muted-foreground" aria-live="polite">
+                                <span className="font-sans text-sm text-muted-foreground" aria-live="polite">
                                   {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
                                 </span>
                               )}
@@ -2566,10 +2566,10 @@ export default function VacanteDetallePage() {
                       className="flex flex-col gap-3 scroll-mt-4"
                     >
                       <div className="flex flex-wrap items-center gap-3">
-                        <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
+                        <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
                           <Users className="h-5 w-5" aria-hidden />
                           Posibles candidatos
-                          <span className="font-inter text-sm font-normal text-muted-foreground">
+                          <span className="font-sans text-sm font-normal text-muted-foreground">
                             ({vacancyCandidates.length})
                           </span>
                         </h2>
@@ -2577,7 +2577,7 @@ export default function VacanteDetallePage() {
                         <button
                           type="button"
                           disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
-                          className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
+                          className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
                           aria-label="Incluir al proceso con candidatos seleccionados"
                           onClick={handleStartProcess}
                         >
@@ -2590,7 +2590,7 @@ export default function VacanteDetallePage() {
                         </button>
                       </div>
                       {startProcessError && (
-                        <p className="font-inter text-sm text-destructive" role="alert">
+                        <p className="font-sans text-sm text-destructive" role="alert">
                           {startProcessError}
                         </p>
                       )}
@@ -2601,7 +2601,7 @@ export default function VacanteDetallePage() {
                         {vacancyCandidates.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
-                            <p className="font-inter text-sm text-muted-foreground">
+                            <p className="font-sans text-sm text-muted-foreground">
                               No hay sugerencias de match para esta vacante.
                             </p>
                           </div>
@@ -2632,10 +2632,10 @@ export default function VacanteDetallePage() {
                       ref={etapasSectionDesktopRef}
                       className="flex flex-col gap-3 scroll-mt-4"
                     >
-                      <h2 className="flex items-center gap-2 font-inter text-lg font-semibold text-foreground">
+                      <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
                         <Users className="h-5 w-5" aria-hidden />
                         Etapas
-                        <span className="font-inter text-sm font-normal text-muted-foreground">
+                        <span className="font-sans text-sm font-normal text-muted-foreground">
                           ({applicants.length})
                         </span>
                       </h2>
@@ -2648,7 +2648,7 @@ export default function VacanteDetallePage() {
                         {applicants.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
-                            <p className="font-inter text-sm text-muted-foreground">
+                            <p className="font-sans text-sm text-muted-foreground">
                               Aún no hay postulantes en esta vacante.
                             </p>
                           </div>
@@ -2703,7 +2703,7 @@ export default function VacanteDetallePage() {
                   className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
                   aria-hidden
                 />
-                <p className="font-inter text-sm text-muted-foreground">
+                <p className="font-sans text-sm text-muted-foreground">
                   Cargando vacante...
                 </p>
               </div>
@@ -2712,12 +2712,12 @@ export default function VacanteDetallePage() {
                 className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
                 role="alert"
               >
-                <p className="font-inter text-sm text-destructive">
+                <p className="font-sans text-sm text-destructive">
                   {fetchError}
                 </p>
                 <Link
                   href="/portal-rrhh/vacantes"
-                  className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                  className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                 >
                   <ArrowLeft className="h-4 w-4" aria-hidden />
                   Volver a vacantes
@@ -2725,7 +2725,7 @@ export default function VacanteDetallePage() {
                 <button
                   type="button"
                   onClick={fetchVacancy}
-                  className="font-inter text-sm text-vo-purple hover:underline"
+                  className="font-sans text-sm text-vo-purple hover:underline"
                 >
                   Reintentar
                 </button>
@@ -2735,7 +2735,7 @@ export default function VacanteDetallePage() {
                 <div className="mb-4">
                   <Link
                     href="/portal-rrhh/vacantes"
-                    className="inline-flex w-fit items-center gap-2 font-inter text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                    className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                     aria-label="Volver a vacantes"
                   >
                     <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -2762,7 +2762,7 @@ export default function VacanteDetallePage() {
                         {isEditing ? (
                           <div className="flex flex-col gap-4">
                             <div className="flex flex-col gap-2">
-                              <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-mobile">
+                              <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-mobile">
                                 Nombre de la vacante <span className="text-vo-pink">*</span>
                               </label>
                               <input
@@ -2770,27 +2770,27 @@ export default function VacanteDetallePage() {
                                 type="text"
                                 value={editTitle}
                                 onChange={(e) => setEditTitle(e.target.value)}
-                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-invalid={!!editErrors.title}
                                 aria-describedby={editErrors.title ? "edit-title-error-mobile" : undefined}
                                 placeholder="Ej: Frontend Developer"
                               />
                               {editErrors.title && (
-                                <p id="edit-title-error-mobile" className="font-inter text-sm text-vo-pink" role="alert">
+                                <p id="edit-title-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
                                   {editErrors.title}
                                 </p>
                               )}
                             </div>
                             <div className="grid gap-4 md:grid-cols-3">
                               <div className="flex flex-col gap-2">
-                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-mobile">
+                                <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-mobile">
                                   País al que aplica la vacante
                                 </label>
                                 <select
                                   id="edit-vacancy-country-mobile"
                                   value={editCountryCode}
                                   onChange={(e) => setEditCountryCode(e.target.value)}
-                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                   aria-label="País al que aplica la vacante"
                                 >
                                   <option value="">Sin especificar</option>
@@ -2802,14 +2802,14 @@ export default function VacanteDetallePage() {
                                 </select>
                               </div>
                               <div className="flex flex-col gap-2">
-                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-mobile">
+                                <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-mobile">
                                   Departamento
                                 </label>
                                 <select
                                   id="edit-vacancy-department-mobile"
                                   value={editVacancyDepartmentId}
                                   onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
-                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                   aria-label="Departamento de la vacante"
                                   disabled={loadingVacancyCatalogs}
                                 >
@@ -2822,14 +2822,14 @@ export default function VacanteDetallePage() {
                                 </select>
                               </div>
                               <div className="flex flex-col gap-2">
-                                <label className="font-inter text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-mobile">
+                                <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-mobile">
                                   Modalidad
                                 </label>
                                 <select
                                   id="edit-vacancy-modality-mobile"
                                   value={editVacancyModalityId}
                                   onChange={(e) => setEditVacancyModalityId(e.target.value)}
-                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                   aria-label="Modalidad de la vacante"
                                   disabled={loadingVacancyCatalogs}
                                 >
@@ -2843,17 +2843,17 @@ export default function VacanteDetallePage() {
                               </div>
                             </div>
                             {vacancyCatalogsError ? (
-                              <p className="font-inter text-sm text-amber-700" role="status">
+                              <p className="font-sans text-sm text-amber-700" role="status">
                                 {vacancyCatalogsError}
                               </p>
                             ) : null}
                           </div>
                         ) : (
-                          <h1 className="font-inter text-xl font-bold text-foreground">
+                          <h1 className="font-sans text-xl font-bold text-foreground">
                             {emptyToDash(vacancy.title)}
                           </h1>
                         )}
-                        <div className="flex flex-wrap items-center gap-3 font-inter text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-3 font-sans text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
                             {getVacancyDepartmentLabel(vacancy)}
@@ -2876,7 +2876,7 @@ export default function VacanteDetallePage() {
                           </span>
                         </div>
                         <span
-                          className={`inline-flex w-fit rounded-xl px-2.5 py-1 font-inter text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
+                          className={`inline-flex w-fit rounded-xl px-2.5 py-1 font-sans text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
                         >
                           {statusConfig.label}
                         </span>
@@ -2888,14 +2888,14 @@ export default function VacanteDetallePage() {
                           <button
                             type="button"
                             onClick={handleEditVacancy}
-                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                             aria-label="Editar vacante"
                           >
                             Editar vacante
                           </button>
                           <Link
                             href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
-                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                             aria-label="Ver entrevistas de esta vacante"
                           >
                             Entrevistas
@@ -2906,7 +2906,7 @@ export default function VacanteDetallePage() {
                           type="button"
                           onClick={handleSaveVacancy}
                           disabled={savingVacancy}
-                          className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           aria-label="Guardar vacante"
                         >
                           {savingVacancy ? (
@@ -2917,7 +2917,7 @@ export default function VacanteDetallePage() {
                       )}
                     </div>
                     {saveVacancyError && (
-                      <p className="font-inter text-sm text-destructive" role="alert">
+                      <p className="font-sans text-sm text-destructive" role="alert">
                         {saveVacancyError}
                       </p>
                     )}
@@ -2925,7 +2925,7 @@ export default function VacanteDetallePage() {
                       <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
                         {(vacancy.description || isEditing) && (
                           <div>
-                            <h2 className="mb-1.5 flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
+                            <h2 className="mb-1.5 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
                               <FileText className="h-3.5 w-3.5" aria-hidden />
                               Descripción
                             </h2>
@@ -2935,20 +2935,20 @@ export default function VacanteDetallePage() {
                                   value={editDescription}
                                   onChange={(e) => setEditDescription(e.target.value)}
                                   rows={5}
-                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
+                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
                                   aria-label="Editar descripción de la vacante"
                                   aria-invalid={!!editErrors.description}
                                   aria-describedby={editErrors.description ? "edit-description-error-mobile" : undefined}
                                   placeholder="Describe el puesto, responsabilidades y competencias..."
                                 />
                                 {editErrors.description && (
-                                  <p id="edit-description-error-mobile" className="font-inter text-sm text-vo-pink" role="alert">
+                                  <p id="edit-description-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
                                     {editErrors.description}
                                   </p>
                                 )}
                               </div>
                             ) : (
-                              <p className="font-inter text-sm text-muted-foreground whitespace-pre-wrap">
+                              <p className="font-sans text-sm text-muted-foreground whitespace-pre-wrap">
                                 {safeString(vacancy.description)}
                               </p>
                             )}
@@ -2957,7 +2957,7 @@ export default function VacanteDetallePage() {
                         {(vacancy.requirements || isEditing) && (
                           <div>
                             <div className="mb-1.5 flex flex-wrap items-center justify-between gap-3">
-                              <h2 className="flex items-center gap-2 font-inter text-sm font-semibold text-foreground">
+                              <h2 className="flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
                                 <CheckSquare className="h-3.5 w-3.5" aria-hidden />
                                 Requisitos
                               </h2>
@@ -2965,7 +2965,7 @@ export default function VacanteDetallePage() {
                                 <button
                                   type="button"
                                   onClick={handleAddRequirement}
-                                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                                   aria-label="Agregar requerimiento"
                                 >
                                   <Plus className="h-4 w-4" aria-hidden />
@@ -2990,12 +2990,12 @@ export default function VacanteDetallePage() {
                                               handleUpdateRequirement(req.id, "requirementName", e.target.value)
                                             }
                                             placeholder="Nombre (ej: Licencia de conducir)"
-                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Nombre`}
                                             aria-invalid={!!editErrors[`req-name-${req.id}`]}
                                           />
                                           {editErrors[`req-name-${req.id}`] && (
-                                            <p className="font-inter text-xs text-vo-pink" role="alert">
+                                            <p className="font-sans text-xs text-vo-pink" role="alert">
                                               {editErrors[`req-name-${req.id}`]}
                                             </p>
                                           )}
@@ -3008,12 +3008,12 @@ export default function VacanteDetallePage() {
                                               handleUpdateRequirement(req.id, "requirementValue", e.target.value)
                                             }
                                             placeholder="Valor (ej: Pesada)"
-                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                                            className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Valor`}
                                             aria-invalid={!!editErrors[`req-value-${req.id}`]}
                                           />
                                           {editErrors[`req-value-${req.id}`] && (
-                                            <p className="font-inter text-xs text-vo-pink" role="alert">
+                                            <p className="font-sans text-xs text-vo-pink" role="alert">
                                               {editErrors[`req-value-${req.id}`]}
                                             </p>
                                           )}
@@ -3022,11 +3022,11 @@ export default function VacanteDetallePage() {
                                           <div className="flex items-center justify-between">
                                             <label
                                               htmlFor={`edit-scale-mobile-${req.id}`}
-                                              className="font-inter text-xs text-muted-foreground"
+                                              className="font-sans text-xs text-muted-foreground"
                                             >
                                               Importancia (1-10)
                                             </label>
-                                            <span className="font-inter text-xs font-medium text-foreground tabular-nums">
+                                            <span className="font-sans text-xs font-medium text-foreground tabular-nums">
                                               {req.scale}
                                             </span>
                                           </div>
@@ -3046,7 +3046,7 @@ export default function VacanteDetallePage() {
                                         <button
                                           type="button"
                                           onClick={() => handleRemoveRequirement(req.id)}
-                                          className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                                          className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                                           aria-label={`Eliminar requerimiento ${index + 1}`}
                                         >
                                           <Trash2 className="h-4 w-4" aria-hidden />
@@ -3056,7 +3056,7 @@ export default function VacanteDetallePage() {
                                     </div>
                                   ))}
                                 </div>
-                                <p className="font-inter text-xs text-muted-foreground">
+                                <p className="font-sans text-xs text-muted-foreground">
                                   Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
                                 </p>
                               </div>
@@ -3096,7 +3096,7 @@ export default function VacanteDetallePage() {
                       type="button"
                       onClick={handleSearchSmartRecommendations}
                       disabled={loadingSmart}
-                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
                       aria-label="Busqueda preliminar"
                     >
                       {loadingSmart ? (
@@ -3113,7 +3113,7 @@ export default function VacanteDetallePage() {
                         type="button"
                         onClick={handleMatch}
                         disabled={loadingMatch || selectedDocumentIds.length === 0}
-                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Analisis preliminar"
                       >
                         {loadingMatch ? (
@@ -3126,12 +3126,12 @@ export default function VacanteDetallePage() {
                     )}
                   </div>
                   {matchError && (
-                    <p className="font-inter text-sm text-destructive" role="alert">
+                    <p className="font-sans text-sm text-destructive" role="alert">
                       {matchError}
                     </p>
                   )}
                   {smartError && (
-                    <p className="font-inter text-sm text-destructive" role="alert">
+                    <p className="font-sans text-sm text-destructive" role="alert">
                       {smartError} Puedes continuar con filtros y revision manual.
                     </p>
                   )}
@@ -3151,16 +3151,16 @@ export default function VacanteDetallePage() {
                           className="mt-0!"
                           aria-label="Progreso del análisis preliminar con IA"
                         />
-                        <p className="font-inter text-sm text-muted-foreground">
+                        <p className="font-sans text-sm text-muted-foreground">
                           Reanalizando con IA…
                         </p>
                       </div>
                     ) : null}
-                    <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
+                    <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
                       <Sparkles className="h-4 w-4" aria-hidden />
                       Resultados de búsqueda
                       {smartCandidates !== null && (
-                        <span className="font-inter text-sm font-normal text-muted-foreground">
+                        <span className="font-sans text-sm font-normal text-muted-foreground">
                           ({searchResultsToDisplay.length})
                         </span>
                       )}
@@ -3180,7 +3180,7 @@ export default function VacanteDetallePage() {
                             />
                           </div>
                           <p
-                            className="font-inter text-sm text-muted-foreground"
+                            className="font-sans text-sm text-muted-foreground"
                             aria-live="polite"
                           >
                             Actualizando búsqueda con IA…
@@ -3189,14 +3189,14 @@ export default function VacanteDetallePage() {
                       ) : smartCandidates === null ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Sparkles className="h-10 w-10 text-muted-foreground" aria-hidden />
-                          <p className="font-inter text-sm text-muted-foreground">
+                          <p className="font-sans text-sm text-muted-foreground">
                             Ejecuta la busqueda preliminar para ver coincidencias asistidas por IA.
                           </p>
                         </div>
                       ) : searchResultsToDisplay.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
-                          <p className="font-inter text-sm text-muted-foreground">
+                          <p className="font-sans text-sm text-muted-foreground">
                             {smartCandidates.length === 0
                               ? "No se encontraron candidatos en la búsqueda."
                               : "Los candidatos encontrados ya están en Posibles candidatos o en Etapas."}
@@ -3208,7 +3208,7 @@ export default function VacanteDetallePage() {
                             <button
                               type="button"
                               onClick={handleSelectAllCandidates}
-                              className="font-inter text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                              className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
                               aria-label="Seleccionar todos los candidatos"
                             >
                               Seleccionar todos
@@ -3216,13 +3216,13 @@ export default function VacanteDetallePage() {
                             <button
                               type="button"
                               onClick={handleDeselectAllCandidates}
-                              className="font-inter text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                              className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
                               aria-label="Desmarcar todos los candidatos"
                             >
                               Desmarcar todos
                             </button>
                             {selectedCount > 0 && (
-                              <span className="font-inter text-sm text-muted-foreground" aria-live="polite">
+                              <span className="font-sans text-sm text-muted-foreground" aria-live="polite">
                                 {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
                               </span>
                             )}
@@ -3254,10 +3254,10 @@ export default function VacanteDetallePage() {
                     className="flex flex-col gap-3 scroll-mt-4"
                   >
                     <div className="flex flex-wrap items-center gap-3">
-                      <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
+                      <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
                         <Users className="h-4 w-4" aria-hidden />
                         Posibles candidatos
-                        <span className="font-inter text-sm font-normal text-muted-foreground">
+                        <span className="font-sans text-sm font-normal text-muted-foreground">
                           ({vacancyCandidates.length})
                         </span>
                       </h2>
@@ -3265,7 +3265,7 @@ export default function VacanteDetallePage() {
                       <button
                         type="button"
                         disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
-                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
                         aria-label="Iniciar proceso con candidatos seleccionados"
                         onClick={handleStartProcess}
                       >
@@ -3278,7 +3278,7 @@ export default function VacanteDetallePage() {
                       </button>
                     </div>
                     {startProcessError && (
-                      <p className="font-inter text-sm text-destructive" role="alert">
+                      <p className="font-sans text-sm text-destructive" role="alert">
                         {startProcessError}
                       </p>
                     )}
@@ -3289,7 +3289,7 @@ export default function VacanteDetallePage() {
                       {vacancyCandidates.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
-                          <p className="font-inter text-sm text-muted-foreground">
+                          <p className="font-sans text-sm text-muted-foreground">
                             No hay sugerencias de match para esta vacante.
                           </p>
                         </div>
@@ -3320,10 +3320,10 @@ export default function VacanteDetallePage() {
                     ref={etapasSectionMobileRef}
                     className="flex flex-col gap-3 scroll-mt-4"
                   >
-                    <h2 className="flex items-center gap-2 font-inter text-base font-semibold text-foreground">
+                    <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
                       <Users className="h-4 w-4" aria-hidden />
                       Etapas
-                      <span className="font-inter text-sm font-normal text-muted-foreground">
+                      <span className="font-sans text-sm font-normal text-muted-foreground">
                         ({applicants.length})
                       </span>
                     </h2>
@@ -3336,7 +3336,7 @@ export default function VacanteDetallePage() {
                       {applicants.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
-                          <p className="font-inter text-sm text-muted-foreground">
+                          <p className="font-sans text-sm text-muted-foreground">
                             Aún no hay postulantes en esta vacante.
                           </p>
                         </div>

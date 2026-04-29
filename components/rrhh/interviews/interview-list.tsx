@@ -182,7 +182,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
             data-testid="interviews-new-button"
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden />
@@ -199,7 +199,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           <div className="flex min-w-[200px] flex-col gap-1.5">
             <label
               htmlFor="interview-filter-status"
-              className="font-inter text-sm font-medium text-foreground"
+              className="font-sans text-sm font-medium text-foreground"
             >
               Estado
             </label>
@@ -207,7 +207,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               id="interview-filter-status"
               value={draftStatus}
               onChange={handleStatusChange}
-              className="h-10 rounded-md border border-input bg-background px-3 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
+              className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
             >
               {STATUS_FILTER_OPTIONS.map((o) => (
                 <option key={o.label} value={o.value}>
@@ -219,7 +219,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           <div className="flex min-w-[220px] flex-col gap-1.5">
             <span
               id="interview-filter-from-label"
-              className="font-inter text-sm font-medium text-foreground"
+              className="font-sans text-sm font-medium text-foreground"
             >
               Desde (local)
             </span>
@@ -232,7 +232,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           <div className="flex min-w-[220px] flex-col gap-1.5">
             <span
               id="interview-filter-to-label"
-              className="font-inter text-sm font-medium text-foreground"
+              className="font-sans text-sm font-medium text-foreground"
             >
               Hasta (local)
             </span>
@@ -245,12 +245,12 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           <button
             type="button"
             onClick={handleApplyFilters}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 font-inter text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
           >
             Aplicar filtros
           </button>
         </div>
-        <p className="font-inter text-xs text-muted-foreground">
+        <p className="font-sans text-xs text-muted-foreground">
           Los filtros de rango usan la zona horaria del navegador; el API recibe UTC.
         </p>
       </section>
@@ -265,13 +265,13 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               className="h-8 w-8 animate-spin text-vo-purple"
               aria-hidden
             />
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               Cargando entrevistas...
             </p>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
-            <p className="font-inter text-sm text-destructive" role="alert">
+            <p className="font-sans text-sm text-destructive" role="alert">
               {error}
             </p>
             <button
@@ -279,7 +279,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               onClick={() => {
                 load().catch(() => {})
               }}
-              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white hover:bg-vo-purple-hover"
+              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
             >
               Reintentar
             </button>
@@ -287,13 +287,13 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16">
             <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               No hay entrevistas para esta vacante.
             </p>
             <button
               type="button"
               onClick={handleOpenCreate}
-              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white hover:bg-vo-purple-hover"
+              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
               data-testid="interviews-first-create-button"
             >
               <Plus className="h-4 w-4" aria-hidden />
@@ -302,7 +302,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           </div>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-border bg-card">
-            <table className="w-full min-w-[880px] border-collapse text-left font-inter text-sm">
+            <table className="w-full min-w-[880px] border-collapse text-left font-sans text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th scope="col" className="px-4 py-3 font-semibold text-foreground">

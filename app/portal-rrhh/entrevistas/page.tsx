@@ -147,23 +147,23 @@ export default function EntrevistasHubPage() {
               className="h-8 w-8 animate-spin text-vo-purple"
               aria-hidden
             />
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               Cargando vacantes…
             </p>
           </div>
         ) : error ? (
-          <p className="font-inter text-sm text-destructive" role="alert">
+          <p className="font-sans text-sm text-destructive" role="alert">
             {error}
           </p>
         ) : vacancies.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16 text-center">
             <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               No hay vacantes. Crea una vacante primero para agendar entrevistas.
             </p>
             <Link
               href="/portal-rrhh/vacantes"
-              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white hover:bg-vo-purple-hover"
+              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
             >
               Ir a vacantes
             </Link>
@@ -185,16 +185,16 @@ export default function EntrevistasHubPage() {
                       </div>
                       <div className="min-w-0 space-y-2">
                         <div className="flex flex-wrap items-center gap-2 gap-y-1">
-                          <h2 className="font-inter text-base font-semibold text-foreground">
+                          <h2 className="font-sans text-base font-semibold text-foreground">
                             {v.title}
                           </h2>
                           <span
-                            className={`inline-flex shrink-0 rounded-full px-2.5 py-0.5 font-inter text-xs font-medium ${statusCfg.bgClass} ${statusCfg.textClass}`}
+                            className={`inline-flex shrink-0 rounded-full px-2.5 py-0.5 font-sans text-xs font-medium ${statusCfg.bgClass} ${statusCfg.textClass}`}
                           >
                             {statusCfg.label}
                           </span>
                         </div>
-                        <div className="flex flex-col gap-1 font-inter text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-1">
+                        <div className="flex flex-col gap-1 font-sans text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-1">
                           <span className="inline-flex items-center gap-1.5">
                             <MapPin
                               className="h-3.5 w-3.5 shrink-0 opacity-80"
@@ -234,7 +234,7 @@ export default function EntrevistasHubPage() {
                     </div>
                     <Link
                       href={`/portal-rrhh/entrevistas/${encodeURIComponent(v.id)}`}
-                      className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:w-auto"
+                      className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:w-auto"
                       aria-label={`Ver entrevistas de la vacante ${v.title}`}
                     >
                       <Calendar className="h-4 w-4 shrink-0" aria-hidden />

@@ -485,7 +485,7 @@ export function AdminVacancyCatalogContent({
           className="rounded-xl border border-destructive/30 bg-destructive/5 p-6"
           aria-label={`Error al cargar ${copy.plural}`}
         >
-          <p className="font-inter text-sm text-destructive" role="alert">
+          <p className="font-sans text-sm text-destructive" role="alert">
             {listError || "No se pudo cargar el catálogo."}
           </p>
           <div className="mt-4">
@@ -520,10 +520,10 @@ export function AdminVacancyCatalogContent({
                 <CatalogIcon className="h-8 w-8 text-vo-purple" aria-hidden />
               </div>
               <div className="space-y-2">
-                <h2 className="font-inter text-lg font-semibold text-foreground">
+                <h2 className="font-sans text-lg font-semibold text-foreground">
                   {copy.emptyMessage}
                 </h2>
-                <p className="max-w-lg font-inter text-sm text-muted-foreground">
+                <p className="max-w-lg font-sans text-sm text-muted-foreground">
                   Cuando crees un {copy.singular}, quedará disponible para clasificar
                   vacantes desde el resto del ATS.
                 </p>
@@ -536,7 +536,7 @@ export function AdminVacancyCatalogContent({
           ) : (
             <div className="overflow-x-auto">
               <table
-                className={`${tableMinWidthClassName} w-full text-left font-inter text-sm`}
+                className={`${tableMinWidthClassName} w-full text-left font-sans text-sm`}
               >
                 <thead className="border-b border-border bg-muted/50">
                   <tr>

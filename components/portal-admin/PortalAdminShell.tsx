@@ -6,7 +6,7 @@ import AdminTopbar from "@/components/portal-admin/AdminTopbar"
 
 export function PortalAdminShell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background font-inter text-foreground md:flex-row">
+    <div className="flex min-h-screen flex-col bg-background font-sans text-foreground md:flex-row">
       <AdminSidebar />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="hidden md:block">

@@ -54,7 +54,7 @@ export default function EntrevistasByVacancyPage() {
                 className="h-8 w-8 animate-spin text-vo-purple"
                 aria-hidden
               />
-              <p className="font-inter text-sm text-muted-foreground">
+              <p className="font-sans text-sm text-muted-foreground">
                 Cargando…
               </p>
             </div>
@@ -63,7 +63,7 @@ export default function EntrevistasByVacancyPage() {
           <InterviewList vacancyId={vacancyId} vacancySummary={vacancySummary} />
         </Suspense>
       ) : (
-        <p className="p-8 font-inter text-sm text-destructive" role="alert">
+        <p className="p-8 font-sans text-sm text-destructive" role="alert">
           Falta el identificador de la vacante.
         </p>
       )}

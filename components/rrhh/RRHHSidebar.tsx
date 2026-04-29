@@ -56,7 +56,7 @@ export default function RRHHSidebar() {
               ? pathname.startsWith("/portal-rrhh/configuracion")
               : pathname === item.href || pathname.startsWith(item.href + "/");
             const baseClasses =
-              "flex items-center gap-3 rounded-md px-4 py-3 font-inter text-sm transition-colors";
+              "flex items-center gap-3 rounded-md px-4 py-3 font-sans text-sm transition-colors";
             const enabledClasses = isActive
               ? "bg-[#F3E8FF] text-vo-purple font-medium"
               : "text-muted-foreground hover:bg-muted hover:text-foreground";
@@ -81,16 +81,16 @@ export default function RRHHSidebar() {
       <div className="mt-4 px-3 pb-3">
         <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
           <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-vo-navy font-inter text-xs font-semibold text-white"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-vo-navy font-sans text-xs font-semibold text-white"
             aria-hidden
           >
             {loading ? "..." : initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-inter text-sm font-medium text-foreground">
+            <p className="truncate font-sans text-sm font-medium text-foreground">
               {loading ? "Cargando..." : displayName}
             </p>
-            <p className="font-inter text-xs text-muted-foreground">
+            <p className="font-sans text-xs text-muted-foreground">
               {roleLabel}
             </p>
           </div>

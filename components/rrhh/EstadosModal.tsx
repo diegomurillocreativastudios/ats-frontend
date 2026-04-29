@@ -78,11 +78,11 @@ const DefaultStatusSwitch = ({
 const StatusItem = ({ status, onEdit, onDelete, onDefaultActivate, defaultSwitchDisabled }) => {
   return (
     <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1.5 rounded-lg border border-border bg-white px-4 py-3.5">
-      <p className="row-span-2 min-w-0 self-center font-inter text-sm font-medium leading-snug text-foreground">
+      <p className="row-span-2 min-w-0 self-center font-sans text-sm font-medium leading-snug text-foreground">
         <span className="block truncate">{status.name}</span>
       </p>
       <span
-        className="col-start-2 justify-self-end font-inter text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70"
+        className="col-start-2 justify-self-end font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70"
         aria-hidden
       >
         Estado por Defecto
@@ -351,7 +351,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
-            <h2 className="font-inter text-xl font-semibold text-foreground">
+            <h2 className="font-sans text-xl font-semibold text-foreground">
               Gestionar Estados
             </h2>
             <button
@@ -371,7 +371,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                 <div className="flex flex-col gap-2">
                   <label
                     htmlFor="status-name"
-                    className="font-inter text-sm font-medium text-foreground"
+                    className="font-sans text-sm font-medium text-foreground"
                   >
                     Nombre del estado <span className="text-vo-pink">*</span>
                   </label>
@@ -381,12 +381,12 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                     value={formData.name}
                     onChange={(e) => setFormData({ name: e.target.value })}
                     placeholder="Ej: En proceso"
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                     aria-invalid={!!formErrors.name}
                     aria-describedby={formErrors.name ? "name-error" : undefined}
                   />
                   {formErrors.name && (
-                    <p id="name-error" className="font-inter text-sm text-vo-pink" role="alert">
+                    <p id="name-error" className="font-sans text-sm text-vo-pink" role="alert">
                       {formErrors.name}
                     </p>
                   )}
@@ -394,7 +394,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
 
                 {submitError && (
                   <div
-                    className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-inter text-sm text-destructive"
+                    className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
                     role="alert"
                   >
                     {submitError}
@@ -424,26 +424,26 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                 {loading ? (
                   <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                     <div className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
-                    <p className="font-inter text-sm text-muted-foreground">
+                    <p className="font-sans text-sm text-muted-foreground">
                       Cargando estados...
                     </p>
                   </div>
                 ) : fetchError ? (
                   <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 py-12 text-center">
-                    <p className="font-inter text-sm text-destructive" role="alert">
+                    <p className="font-sans text-sm text-destructive" role="alert">
                       {fetchError}
                     </p>
                     <button
                       type="button"
                       onClick={fetchStatuses}
-                      className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                      className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                     >
                       Reintentar
                     </button>
                   </div>
                 ) : statuses.length === 0 ? (
                   <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/30 py-12 text-center">
-                    <p className="font-inter text-sm text-muted-foreground">
+                    <p className="font-sans text-sm text-muted-foreground">
                       No hay estados creados
                     </p>
                   </div>
@@ -455,7 +455,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                   >
                     <p
                       id="estados-default-legend"
-                      className="font-inter text-[12px] leading-snug text-muted-foreground/75"
+                      className="font-sans text-[12px] leading-snug text-muted-foreground/75"
                     >
                       <span className="text-muted-foreground/90">Estado por Defecto</span>
                       {" — "}

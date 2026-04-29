@@ -72,7 +72,7 @@ export default function RematchButton({
 
   if (!onSnackbar && status === "success") {
     return (
-      <div className="flex items-center gap-2 text-green-600 font-inter text-sm animate-in fade-in duration-300">
+      <div className="flex items-center gap-2 text-green-600 font-sans text-sm animate-in fade-in duration-300">
         <CheckCircle2 className="h-4 w-4" />
         <span>¡Éxito!</span>
       </div>
@@ -81,7 +81,7 @@ export default function RematchButton({
 
   if (!onSnackbar && status === "error") {
     return (
-      <div className="flex items-center gap-2 text-destructive font-inter text-xs animate-in fade-in duration-300 max-w-[150px]">
+      <div className="flex items-center gap-2 text-destructive font-sans text-xs animate-in fade-in duration-300 max-w-[150px]">
         <AlertCircle className="h-4 w-4 shrink-0" />
         <span className="truncate" title={errorMessage}>
           {errorMessage || "Error"}

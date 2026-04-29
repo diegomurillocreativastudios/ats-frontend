@@ -28,7 +28,7 @@ export default function CandidateInterviewsPage() {
       {candidateProfileId ? (
         <CandidateInterviewList candidateProfileId={candidateProfileId} />
       ) : (
-        <p className="p-8 font-inter text-sm text-destructive" role="alert">
+        <p className="p-8 font-sans text-sm text-destructive" role="alert">
           Falta el identificador del candidato.
         </p>
       )}

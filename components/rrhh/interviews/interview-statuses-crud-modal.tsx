@@ -217,14 +217,14 @@ export function InterviewStatusesCrudModal({
             className="flex flex-col gap-3 rounded-lg border border-border bg-muted/20 p-4"
             aria-label="Crear estado de entrevista"
           >
-            <p className="font-inter text-sm font-medium text-foreground">
+            <p className="font-sans text-sm font-medium text-foreground">
               Nuevo estado
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                 <label
                   htmlFor="new-interview-status-display"
-                  className="font-inter text-sm font-medium text-foreground"
+                  className="font-sans text-sm font-medium text-foreground"
                 >
                   Nombre visible <span className="text-vo-pink">*</span>
                 </label>
@@ -234,7 +234,7 @@ export function InterviewStatusesCrudModal({
                   value={newDisplayName}
                   onChange={(e) => setNewDisplayName(e.target.value)}
                   placeholder="ej: Programada"
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 font-inter text-sm"
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm"
                   disabled={saving || loading}
                   autoComplete="off"
                 />
@@ -261,10 +261,10 @@ export function InterviewStatusesCrudModal({
               />
               <label
                 htmlFor="new-interview-status-terminal"
-                className="font-inter text-sm leading-snug text-foreground"
+                className="font-sans text-sm leading-snug text-foreground"
               >
                 Estado terminal
-                <span className="mt-0.5 block font-inter text-xs font-normal text-muted-foreground">
+                <span className="mt-0.5 block font-sans text-xs font-normal text-muted-foreground">
                   Marca si este estado cierra el ciclo de la entrevista (p. ej.
                   completada o cancelada).
                 </span>
@@ -273,23 +273,23 @@ export function InterviewStatusesCrudModal({
           </form>
 
           {error ? (
-            <p className="font-inter text-sm text-destructive" role="alert">
+            <p className="font-sans text-sm text-destructive" role="alert">
               {error}
             </p>
           ) : null}
 
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-12 font-inter text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 py-12 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
               Cargando estados…
             </div>
           ) : items.length === 0 ? (
-            <p className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-8 text-center font-inter text-sm text-muted-foreground">
+            <p className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-8 text-center font-sans text-sm text-muted-foreground">
               No hay estados definidos. Añade el primero arriba.
             </p>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full min-w-[420px] border-collapse text-left font-inter text-sm">
+              <table className="w-full min-w-[420px] border-collapse text-left font-sans text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
                     <th scope="col" className="px-3 py-2 font-semibold">
@@ -327,7 +327,7 @@ export function InterviewStatusesCrudModal({
                             type="text"
                             value={editDisplayName}
                             onChange={(e) => setEditDisplayName(e.target.value)}
-                            className="h-9 w-full min-w-40 rounded-md border border-input bg-background px-2 font-inter text-sm"
+                            className="h-9 w-full min-w-40 rounded-md border border-input bg-background px-2 font-sans text-sm"
                             disabled={saving}
                             aria-label="Nombre visible"
                           />
@@ -351,7 +351,7 @@ export function InterviewStatusesCrudModal({
                             />
                             <label
                               htmlFor={`edit-interview-status-terminal-${row.id}`}
-                              className="font-inter text-xs text-muted-foreground"
+                              className="font-sans text-xs text-muted-foreground"
                             >
                               Terminal
                             </label>

@@ -337,7 +337,7 @@ export default function CandidatoDetallePage() {
             className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
             aria-hidden
           />
-          <p className="font-inter text-sm text-muted-foreground">
+          <p className="font-sans text-sm text-muted-foreground">
             Cargando perfil...
           </p>
         </div>
@@ -346,10 +346,10 @@ export default function CandidatoDetallePage() {
           className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
           role="alert"
         >
-          <p className="font-inter text-sm text-destructive">{fetchError}</p>
+          <p className="font-sans text-sm text-destructive">{fetchError}</p>
           <Link
             href="/portal-rrhh/candidatos"
-            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Volver a candidatos
@@ -357,7 +357,7 @@ export default function CandidatoDetallePage() {
           <button
             type="button"
             onClick={fetchCandidate}
-            className="font-inter text-sm text-vo-purple hover:underline"
+            className="font-sans text-sm text-vo-purple hover:underline"
           >
             Reintentar
           </button>
@@ -368,7 +368,7 @@ export default function CandidatoDetallePage() {
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/portal-rrhh/candidatos"
-                className="inline-flex w-fit items-center gap-2 font-inter text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
                 aria-label="Volver a candidatos"
               >
                 <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -377,7 +377,7 @@ export default function CandidatoDetallePage() {
               {candidateId ? (
                 <Link
                   href={`/portal-rrhh/candidatos/${encodeURIComponent(String(candidateId))}/interviews`}
-                  className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                  className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                   aria-label="Ver entrevistas de este candidato"
                 >
                   Entrevistas
@@ -390,7 +390,7 @@ export default function CandidatoDetallePage() {
                   type="button"
                   onClick={handleDownloadCv}
                   disabled={downloading}
-                  className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   aria-label="Descargar CV en PDF"
                 >
                   {downloading ? (
@@ -401,7 +401,7 @@ export default function CandidatoDetallePage() {
                   {downloading ? "Descargando..." : "Descargar CV"}
                 </button>
                 {downloadError ? (
-                  <p className="font-inter text-xs text-destructive" role="alert">
+                  <p className="font-sans text-xs text-destructive" role="alert">
                     {downloadError}
                   </p>
                 ) : null}
@@ -415,21 +415,21 @@ export default function CandidatoDetallePage() {
           >
             <div className="flex flex-col gap-6 md:flex-row md:items-start">
               <div
-                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-lg font-semibold text-white"
+                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-lg font-semibold text-white"
                 aria-hidden
               >
                 {initials}
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="font-inter text-2xl font-bold text-foreground">
+                <h1 className="font-sans text-2xl font-bold text-foreground">
                   {fullName}
                 </h1>
                 {summary ? (
-                  <p className="mt-3 max-w-3xl font-inter text-sm leading-relaxed text-muted-foreground">
+                  <p className="mt-3 max-w-3xl font-sans text-sm leading-relaxed text-muted-foreground">
                     {summary}
                   </p>
                 ) : null}
-                <div className="mt-4 flex flex-col gap-2 font-inter text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
+                <div className="mt-4 flex flex-col gap-2 font-sans text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
                   {email ? (
                     <a
                       href={`mailto:${email}`}
@@ -452,7 +452,7 @@ export default function CandidatoDetallePage() {
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-3 font-inter text-xs text-muted-foreground">
+                <p className="mt-3 font-sans text-xs text-muted-foreground">
                   ID: {emptyToDash(profile?.id ?? candidateId)}
                 </p>
               </div>
@@ -514,7 +514,7 @@ export default function CandidatoDetallePage() {
               sectionId="sec-links"
             >
               <div>
-                <p className="mb-2 font-inter text-xs font-medium text-muted-foreground">
+                <p className="mb-2 font-sans text-xs font-medium text-muted-foreground">
                   Redes y web
                 </p>
                 <SocialLinksList links={socialLinks} />
@@ -543,7 +543,7 @@ export default function CandidatoDetallePage() {
                 icon={FileText}
                 sectionId="sec-nd-raw"
               >
-                <p className="mb-2 font-inter text-xs text-amber-800 dark:text-amber-200" role="status">
+                <p className="mb-2 font-sans text-xs text-amber-800 dark:text-amber-200" role="status">
                   El API devolvió normalizedData como texto que no es JSON válido. Contenido crudo:
                 </p>
                 <pre className="max-h-72 overflow-auto whitespace-pre-wrap wrap-break-word rounded-lg border border-border bg-muted/50 p-4 font-mono text-xs text-foreground">

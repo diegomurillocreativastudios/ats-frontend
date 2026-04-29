@@ -224,7 +224,7 @@ export default function PlantillaModal({
         <div className="flex flex-col gap-2">
           <label
             htmlFor="plantilla-type"
-            className="font-inter text-sm font-medium text-foreground"
+            className="font-sans text-sm font-medium text-foreground"
           >
             Tipo de plantilla <span className="text-vo-pink">*</span>
           </label>
@@ -232,7 +232,7 @@ export default function PlantillaModal({
             id="plantilla-type"
             value={formData.type}
             onChange={(e) => setFormData((prev) => ({ ...prev, type: e.target.value }))}
-            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isEditing}
           >
             <option value="Notification">Notificación (Email/SMS)</option>
@@ -244,7 +244,7 @@ export default function PlantillaModal({
         <div className="flex flex-col gap-2">
           <label
             htmlFor="plantilla-name"
-            className="font-inter text-sm font-medium text-foreground"
+            className="font-sans text-sm font-medium text-foreground"
           >
             Nombre <span className="text-vo-pink">*</span>
           </label>
@@ -254,12 +254,12 @@ export default function PlantillaModal({
             value={formData.name}
             onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
             placeholder="Ej: Notificación de entrevista"
-            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? "name-error" : undefined}
           />
           {errors.name && (
-            <p id="name-error" className="font-inter text-sm text-vo-pink" role="alert">
+            <p id="name-error" className="font-sans text-sm text-vo-pink" role="alert">
               {errors.name}
             </p>
           )}
@@ -270,7 +270,7 @@ export default function PlantillaModal({
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="plantilla-subject"
-                className="font-inter text-sm font-medium text-foreground"
+                className="font-sans text-sm font-medium text-foreground"
               >
                 Asunto <span className="text-vo-pink">*</span>
               </label>
@@ -280,11 +280,11 @@ export default function PlantillaModal({
                 value={formData.subject}
                 onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
                 placeholder="Ej: Tu entrevista ha sido programada"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                 aria-invalid={!!errors.subject}
               />
               {errors.subject && (
-                <p className="font-inter text-sm text-vo-pink" role="alert">
+                <p className="font-sans text-sm text-vo-pink" role="alert">
                   {errors.subject}
                 </p>
               )}
@@ -293,7 +293,7 @@ export default function PlantillaModal({
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="plantilla-body"
-                className="font-inter text-sm font-medium text-foreground"
+                className="font-sans text-sm font-medium text-foreground"
               >
                 Contenido <span className="text-vo-pink">*</span>
               </label>
@@ -303,11 +303,11 @@ export default function PlantillaModal({
                 onChange={(e) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
                 placeholder="Escribe el contenido de la plantilla..."
                 rows={6}
-                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent min-h-[120px]"
+                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent min-h-[120px]"
                 aria-invalid={!!errors.body}
               />
               {errors.body && (
-                <p className="font-inter text-sm text-vo-pink" role="alert">
+                <p className="font-sans text-sm text-vo-pink" role="alert">
                   {errors.body}
                 </p>
               )}
@@ -320,7 +320,7 @@ export default function PlantillaModal({
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="plantilla-content-template"
-                className="font-inter text-sm font-medium text-foreground"
+                className="font-sans text-sm font-medium text-foreground"
               >
                 Plantilla de contenido <span className="text-vo-pink">*</span>
               </label>
@@ -330,11 +330,11 @@ export default function PlantillaModal({
                 onChange={(e) => setFormData((prev) => ({ ...prev, contentTemplate: e.target.value }))}
                 placeholder="Ej: <h1>Contrato</h1>..."
                 rows={8}
-                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent min-h-[150px]"
+                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent min-h-[150px]"
                 aria-invalid={!!errors.contentTemplate}
               />
               {errors.contentTemplate && (
-                <p className="font-inter text-sm text-vo-pink" role="alert">
+                <p className="font-sans text-sm text-vo-pink" role="alert">
                   {errors.contentTemplate}
                 </p>
               )}
@@ -343,7 +343,7 @@ export default function PlantillaModal({
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="plantilla-output-format"
-                className="font-inter text-sm font-medium text-foreground"
+                className="font-sans text-sm font-medium text-foreground"
               >
                 Formato de salida
               </label>
@@ -351,7 +351,7 @@ export default function PlantillaModal({
                 id="plantilla-output-format"
                 value={formData.outputFormat}
                 onChange={(e) => setFormData((prev) => ({ ...prev, outputFormat: e.target.value }))}
-                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
               >
                 <option value="PDF">PDF</option>
                 <option value="DOCX">DOCX</option>
@@ -366,7 +366,7 @@ export default function PlantillaModal({
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="plantilla-description"
-                className="font-inter text-sm font-medium text-foreground"
+                className="font-sans text-sm font-medium text-foreground"
               >
                 Descripción <span className="text-vo-pink">*</span>
               </label>
@@ -376,11 +376,11 @@ export default function PlantillaModal({
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                 placeholder="Ej: Por favor completa esta información técnica..."
                 rows={4}
-                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                 aria-invalid={!!errors.description}
               />
               {errors.description && (
-                <p className="font-inter text-sm text-vo-pink" role="alert">
+                <p className="font-sans text-sm text-vo-pink" role="alert">
                   {errors.description}
                 </p>
               )}
@@ -396,7 +396,7 @@ export default function PlantillaModal({
               />
               <label
                 htmlFor="plantilla-is-mandatory"
-                className="font-inter text-sm font-medium text-foreground cursor-pointer"
+                className="font-sans text-sm font-medium text-foreground cursor-pointer"
               >
                 Es obligatorio
               </label>
@@ -406,7 +406,7 @@ export default function PlantillaModal({
 
         {submitError && (
           <div
-            className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-inter text-sm text-destructive"
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
             role="alert"
           >
             {submitError}

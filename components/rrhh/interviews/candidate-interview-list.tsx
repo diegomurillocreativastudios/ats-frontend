@@ -81,22 +81,22 @@ export function CandidateInterviewList({
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
             <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
-            <p className="font-inter text-sm text-muted-foreground">Cargando…</p>
+            <p className="font-sans text-sm text-muted-foreground">Cargando…</p>
           </div>
         ) : error ? (
-          <p className="font-inter text-sm text-destructive" role="alert">
+          <p className="font-sans text-sm text-destructive" role="alert">
             {error}
           </p>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16">
             <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               No hay entrevistas registradas para este candidato.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-border bg-card">
-            <table className="w-full min-w-[640px] border-collapse text-left font-inter text-sm">
+            <table className="w-full min-w-[640px] border-collapse text-left font-sans text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="px-4 py-3 font-semibold">Fecha y hora</th>

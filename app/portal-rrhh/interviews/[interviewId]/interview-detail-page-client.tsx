@@ -35,7 +35,7 @@ export function InterviewDetailPageClient() {
           vacancyIdFromQuery={vacancyIdFromQuery}
         />
       ) : (
-        <p className="p-8 font-inter text-sm text-destructive" role="alert">
+        <p className="p-8 font-sans text-sm text-destructive" role="alert">
           Falta el identificador de la entrevista.
         </p>
       )}

@@ -273,16 +273,16 @@ export default function DocumentsUploadZone({
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted-foreground/10 md:h-12 md:w-12">
           <Upload className="h-5 w-5 text-muted-foreground md:h-6 md:w-6" aria-hidden />
         </div>
-        <p className="text-center font-inter text-sm font-medium text-muted-foreground md:text-base">
+        <p className="text-center font-sans text-sm font-medium text-muted-foreground md:text-base">
           {isDragging ? "Suelta los archivos aquí" : "Arrastra archivos aquí o haz clic para subir"}
         </p>
-        <p className="text-center font-inter text-xs text-muted-foreground">
+        <p className="text-center font-sans text-xs text-muted-foreground">
           {helperText || "PDF, DOC, DOCX hasta 10 MB"}
         </p>
       </div>
 
       {error && (
-        <p className="font-inter text-sm text-destructive" role="alert">
+        <p className="font-sans text-sm text-destructive" role="alert">
           {error}
         </p>
       )}
@@ -292,7 +292,7 @@ export default function DocumentsUploadZone({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
               {resolvedLeftActions}
-              <span className="font-inter text-sm font-medium text-foreground">
+              <span className="font-sans text-sm font-medium text-foreground">
                 {files.length} archivo{files.length !== 1 ? "s" : ""} seleccionado
                 {files.length !== 1 ? "s" : ""}
               </span>
@@ -303,7 +303,7 @@ export default function DocumentsUploadZone({
                   type="button"
                   onClick={handleProcessAllClick}
                   disabled={isProcessingAll || processingIndex !== null}
-                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-inter text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-sans text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
                   aria-label="Procesar todos los CV/Resume con IA"
                   aria-busy={isProcessingAll}
                 >
@@ -318,7 +318,7 @@ export default function DocumentsUploadZone({
               <button
                 type="button"
                 onClick={clearAll}
-                className="font-inter text-sm font-medium text-vo-purple hover:underline"
+                className="font-sans text-sm font-medium text-vo-purple hover:underline"
               >
                 Quitar todos
               </button>
@@ -337,17 +337,17 @@ export default function DocumentsUploadZone({
                   key={`${file.name}-${index}`}
                   className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3"
                 >
-                  <span className="min-w-0 flex-1 truncate font-inter text-sm text-foreground">
+                  <span className="min-w-0 flex-1 truncate font-sans text-sm text-foreground">
                     {file.name}
                   </span>
-                  <span className="shrink-0 font-inter text-xs text-muted-foreground">
+                  <span className="shrink-0 font-sans text-xs text-muted-foreground">
                     {formatFileSize(file.size)}
                   </span>
                   {showProcessButton && (
                     <>
                       {processedIndices.has(index) ? (
                         <span
-                          className="flex shrink-0 items-center gap-1.5 rounded-md border border-success bg-success/10 px-2.5 py-1.5 font-inter text-xs font-medium text-success"
+                          className="flex shrink-0 items-center gap-1.5 rounded-md border border-success bg-success/10 px-2.5 py-1.5 font-sans text-xs font-medium text-success"
                           aria-label={`Procesado: ${file.name}`}
                         >
                           <Check className="h-3.5 w-3.5 text-success" aria-hidden />
@@ -355,7 +355,7 @@ export default function DocumentsUploadZone({
                         </span>
                       ) : processingIndex === index ? (
                         <span
-                          className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-inter text-xs font-medium text-vo-yellow-foreground"
+                          className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-sans text-xs font-medium text-vo-yellow-foreground"
                           aria-busy
                           aria-label={`Procesando: ${file.name}`}
                         >
@@ -367,7 +367,7 @@ export default function DocumentsUploadZone({
                           type="button"
                           onClick={() => handleProcessClick(file, index)}
                           disabled={processingIndex !== null || isProcessingAll}
-                          className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-inter text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
+                          className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-sans text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
                           aria-label={`Procesar con IA: ${file.name}`}
                         >
                           <Sparkles className="h-3.5 w-3.5 text-vo-yellow-foreground" aria-hidden />

@@ -124,7 +124,7 @@ export default function AdminTopbar({
         <div className="flex min-w-0 flex-1 items-center gap-2">
           {isDesktop && (
             <>
-              <span className="font-inter text-sm text-muted-foreground">
+              <span className="font-sans text-sm text-muted-foreground">
                 Portal Admin
               </span>
               <ChevronRight
@@ -144,13 +144,13 @@ export default function AdminTopbar({
                         {showLink ? (
                           <Link
                             href={segment.href!}
-                            className="rounded font-inter text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            className="rounded font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                           >
                             {segment.label}
                           </Link>
                         ) : (
                           <span
-                            className={`min-w-0 truncate font-inter text-sm ${
+                            className={`min-w-0 truncate font-sans text-sm ${
                               isLast
                                 ? "font-medium text-foreground"
                                 : "text-muted-foreground"
@@ -171,7 +171,7 @@ export default function AdminTopbar({
                   })}
                 </nav>
               ) : (
-                <span className="font-inter text-sm font-medium text-foreground">
+                <span className="font-sans text-sm font-medium text-foreground">
                   {breadcrumbLabel}
                 </span>
               )}
@@ -202,7 +202,7 @@ export default function AdminTopbar({
           <button
             type="button"
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="flex h-8 w-8 items-center justify-center rounded-2xl bg-vo-navy font-inter text-[10px] font-semibold text-white hover:opacity-90 focus:outline-none md:h-8 md:w-8 md:text-[11px]"
+            className="flex h-8 w-8 items-center justify-center rounded-2xl bg-vo-navy font-sans text-[10px] font-semibold text-white hover:opacity-90 focus:outline-none md:h-8 md:w-8 md:text-[11px]"
             aria-label="Menú de usuario"
             aria-expanded={menuOpen}
             aria-haspopup="true"
@@ -217,7 +217,7 @@ export default function AdminTopbar({
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2 px-4 py-2.5 text-left font-inter text-sm text-foreground hover:bg-muted"
+                className="flex w-full items-center gap-2 px-4 py-2.5 text-left font-sans text-sm text-foreground hover:bg-muted"
                 role="menuitem"
               >
                 <LogOut className="h-4 w-4 shrink-0" aria-hidden />

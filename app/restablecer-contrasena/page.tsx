@@ -8,7 +8,7 @@ export const metadata = {
 }
 
 const LoadingFallback = () => (
-  <div className="flex min-h-screen items-center justify-center bg-background font-inter text-muted-foreground">
+  <div className="flex min-h-screen items-center justify-center bg-background font-sans text-muted-foreground">
     <p className="text-sm">Cargando…</p>
   </div>
 )

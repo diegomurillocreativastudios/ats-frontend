@@ -152,7 +152,7 @@ export default function RestablecerContrasenaContent() {
 
   if (!canShowForm) {
     return (
-      <div className="flex min-h-screen font-inter">
+      <div className="flex min-h-screen font-sans">
         <div className="hidden flex-col justify-center bg-vo-navy text-white md:flex md:w-80 md:gap-6 md:px-10 lg:flex-1 lg:gap-8 lg:px-16">
           <div className="flex flex-col md:gap-6 lg:gap-6">
             <ProductBrand
@@ -191,24 +191,24 @@ export default function RestablecerContrasenaContent() {
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
                 <AlertCircle className="h-8 w-8" aria-hidden />
               </div>
-              <h2 className="font-inter text-[22px] font-bold text-foreground md:text-2xl">
+              <h2 className="font-sans text-[22px] font-bold text-foreground md:text-2xl">
                 No pudimos abrir el restablecimiento
               </h2>
-              <p className="font-inter text-sm text-muted-foreground">
+              <p className="font-sans text-sm text-muted-foreground">
                 Falta un correo verificado o un token válido. Volvé a &quot;¿Olvidaste
                 tu contraseña?&quot; y completá el paso anterior.
               </p>
               <div className="flex w-full flex-col gap-3 pt-2 sm:flex-row sm:justify-center">
                 <Link
                   href="/auth/forgot-password"
-                  className="font-inter text-center text-sm font-medium text-vo-navy hover:underline"
+                  className="font-sans text-center text-sm font-medium text-vo-navy hover:underline"
                 >
                   Ir a olvidé mi contraseña
                 </Link>
                 <span className="hidden text-muted-foreground sm:inline">·</span>
                 <Link
                   href="/auth/iniciar-sesion"
-                  className="font-inter text-center text-sm font-medium text-vo-navy hover:underline"
+                  className="font-sans text-center text-sm font-medium text-vo-navy hover:underline"
                 >
                   Volver a iniciar sesión
                 </Link>
@@ -221,7 +221,7 @@ export default function RestablecerContrasenaContent() {
   }
 
   return (
-    <div className="flex min-h-screen font-inter">
+    <div className="flex min-h-screen font-sans">
       <div className="hidden flex-col justify-center bg-vo-navy text-white md:flex md:w-80 md:gap-6 md:px-10 lg:flex-1 lg:gap-8 lg:px-16">
         <div className="flex flex-col md:gap-6 lg:gap-6">
           <ProductBrand

@@ -78,13 +78,13 @@ export default function StatCard({
               />
             </div>
             <span
-              className={`font-inter font-bold text-foreground ${
+              className={`font-sans font-bold text-foreground ${
                 compact ? "text-xl" : "text-2xl lg:text-[28px]"
               }`}
             >
               {value}
             </span>
-            <span className="font-inter text-xs text-muted-foreground md:text-xs lg:text-sm">
+            <span className="font-sans text-xs text-muted-foreground md:text-xs lg:text-sm">
               {label}
             </span>
           </div>

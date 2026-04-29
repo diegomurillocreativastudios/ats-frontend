@@ -70,7 +70,7 @@ export default function DeleteConfirmModal({
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10">
             <AlertTriangle className="h-5 w-5 text-destructive" aria-hidden />
           </div>
-          <p className="flex-1 font-inter text-sm text-foreground">
+          <p className="flex-1 font-sans text-sm text-foreground">
             {message}
           </p>
         </div>

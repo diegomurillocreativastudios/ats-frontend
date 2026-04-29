@@ -137,10 +137,10 @@ const VacancyCard = ({ vacancy, onRefresh, onSnackbar }) => {
           <Icon className="h-6 w-6 text-vo-purple" aria-hidden />
         </div>
         <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="font-inter text-base font-semibold text-foreground">
+          <h3 className="font-sans text-base font-semibold text-foreground">
             {vacancy.title}
           </h3>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-inter text-[13px] text-muted-foreground">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-[13px] text-muted-foreground">
             <span className="flex min-w-0 items-center gap-1.5">
               <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
               <span className="truncate">{vacancy.department}</span>
@@ -155,7 +155,7 @@ const VacancyCard = ({ vacancy, onRefresh, onSnackbar }) => {
             </span>
           </div>
           {/* Empresa + categoría — oculto hasta definir UX
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-inter text-[13px] text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-sans text-[13px] text-muted-foreground">
             <span className="flex min-w-0 items-center gap-1.5">
               <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
               <span className="truncate">{vacancy.company}</span>
@@ -168,7 +168,7 @@ const VacancyCard = ({ vacancy, onRefresh, onSnackbar }) => {
           */}
           {/* Requisitos (requirements) — oculto hasta definir UX
           {vacancy.requirementsSummary ? (
-            <p className="line-clamp-2 font-inter text-[12px] leading-snug text-muted-foreground">
+            <p className="line-clamp-2 font-sans text-[12px] leading-snug text-muted-foreground">
               {vacancy.requirementsSummary}
             </p>
           ) : null}
@@ -178,26 +178,26 @@ const VacancyCard = ({ vacancy, onRefresh, onSnackbar }) => {
       <div className="flex flex-wrap items-center gap-4 sm:gap-6">
         <div className="flex items-center gap-6">
           <div className="flex flex-col items-center gap-0.5">
-            <span className="font-inter text-lg font-semibold text-foreground">
+            <span className="font-sans text-lg font-semibold text-foreground">
               {vacancy.candidates}
             </span>
-            <span className="font-inter text-xs text-muted-foreground">
+            <span className="font-sans text-xs text-muted-foreground">
               Candidatos
             </span>
           </div>
           {vacancy.interviews != null ? (
             <div className="flex flex-col items-center gap-0.5">
-              <span className="font-inter text-lg font-semibold text-foreground">
+              <span className="font-sans text-lg font-semibold text-foreground">
                 {vacancy.interviews}
               </span>
-              <span className="font-inter text-xs text-muted-foreground">
+              <span className="font-sans text-xs text-muted-foreground">
                 Entrevistas
               </span>
             </div>
           ) : null}
         </div>
         <span
-          className={`inline-flex items-center rounded-xl px-2.5 py-1 font-inter text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
+          className={`inline-flex items-center rounded-xl px-2.5 py-1 font-sans text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
         >
           {statusConfig.label}
         </span>
@@ -211,7 +211,7 @@ const VacancyCard = ({ vacancy, onRefresh, onSnackbar }) => {
           />
           <Link
             href={`/portal-rrhh/vacantes/${vacancy.id}`}
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-6 py-3 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-6 py-3 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
             aria-label={`Ver detalles de vacante ${vacancy.title}`}
           >
             Ver detalles
@@ -306,7 +306,7 @@ export default function VacantesPage() {
                     <button
                       type="button"
                       onClick={() => setIsNuevaVacanteOpen(true)}
-                      className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                      className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                       aria-label="Crear nueva vacante"
                     >
                       <Plus className="h-4 w-4" aria-hidden />
@@ -327,12 +327,12 @@ export default function VacantesPage() {
                       value={searchQuery}
                       onChange={handleSearchChange}
                       placeholder="Buscar vacantes..."
-                      className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                      className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                       aria-label="Buscar vacantes"
                     />
                   </div>
                   {/* <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5">
-                    <span className="font-inter text-sm text-foreground">
+                    <span className="font-sans text-sm text-foreground">
                       Todas las vacantes
                     </span>
                     <button
@@ -349,19 +349,19 @@ export default function VacantesPage() {
                   {loading ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
                       <div className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
-                      <p className="font-inter text-sm text-muted-foreground">
+                      <p className="font-sans text-sm text-muted-foreground">
                         Cargando vacantes...
                       </p>
                     </div>
                   ) : fetchError ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
-                      <p className="font-inter text-sm text-destructive" role="alert">
+                      <p className="font-sans text-sm text-destructive" role="alert">
                         {fetchError}
                       </p>
                       <button
                         type="button"
                         onClick={fetchVacancies}
-                        className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                        className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                       >
                         Reintentar
                       </button>
@@ -369,13 +369,13 @@ export default function VacantesPage() {
                   ) : filteredVacancies.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
                       <Briefcase className="h-12 w-12 text-muted-foreground" aria-hidden />
-                      <p className="font-inter text-sm text-muted-foreground">
+                      <p className="font-sans text-sm text-muted-foreground">
                         No se encontraron vacantes
                       </p>
                       <button
                         type="button"
                         onClick={() => setIsNuevaVacanteOpen(true)}
-                        className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                        className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                       >
                         <Plus className="h-4 w-4" aria-hidden />
                         Crear vacante
@@ -412,7 +412,7 @@ export default function VacantesPage() {
                 <button
                   type="button"
                   onClick={() => setIsNuevaVacanteOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                   aria-label="Crear nueva vacante"
                 >
                   <Plus className="h-4 w-4" aria-hidden />
@@ -433,12 +433,12 @@ export default function VacantesPage() {
                     value={searchQuery}
                     onChange={handleSearchChange}
                     placeholder="Buscar vacantes..."
-                    className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                    className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                     aria-label="Buscar vacantes"
                   />
                 </div>
                 {/* <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5">
-                  <span className="font-inter text-sm text-foreground">
+                  <span className="font-sans text-sm text-foreground">
                     Todas las vacantes
                   </span>
                   <button
@@ -455,19 +455,19 @@ export default function VacantesPage() {
                 {loading ? (
                   <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-12 text-center md:py-16">
                     <div className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
-                    <p className="font-inter text-sm text-muted-foreground">
+                    <p className="font-sans text-sm text-muted-foreground">
                       Cargando vacantes...
                     </p>
                   </div>
                 ) : fetchError ? (
                   <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-12 text-center md:py-16">
-                    <p className="font-inter text-sm text-destructive" role="alert">
+                    <p className="font-sans text-sm text-destructive" role="alert">
                       {fetchError}
                     </p>
                     <button
                       type="button"
                       onClick={fetchVacancies}
-                      className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                      className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                     >
                       Reintentar
                     </button>
@@ -475,13 +475,13 @@ export default function VacantesPage() {
                 ) : filteredVacancies.length === 0 ? (
                   <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-12 text-center md:py-16">
                     <Briefcase className="h-12 w-12 text-muted-foreground" aria-hidden />
-                    <p className="font-inter text-sm text-muted-foreground">
+                    <p className="font-sans text-sm text-muted-foreground">
                       No se encontraron vacantes
                     </p>
                     <button
                       type="button"
                       onClick={() => setIsNuevaVacanteOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                      className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                     >
                       <Plus className="h-4 w-4" aria-hidden />
                       Crear vacante

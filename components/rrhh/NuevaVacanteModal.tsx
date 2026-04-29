@@ -247,7 +247,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         <div className="flex flex-col gap-2">
           <label
             htmlFor="vacante-nombre"
-            className="font-inter text-sm font-medium text-foreground"
+            className="font-sans text-sm font-medium text-foreground"
           >
             Nombre de la vacante <span className="text-vo-pink">*</span>
           </label>
@@ -257,12 +257,12 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             placeholder="Ej: Frontend Developer"
-            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
             aria-invalid={!!errors.nombre}
             aria-describedby={errors.nombre ? "nombre-error" : undefined}
           />
           {errors.nombre && (
-            <p id="nombre-error" className="font-inter text-sm text-vo-pink" role="alert">
+            <p id="nombre-error" className="font-sans text-sm text-vo-pink" role="alert">
               {errors.nombre}
             </p>
           )}
@@ -271,7 +271,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         <div className="flex flex-col gap-2">
           <label
             htmlFor="vacante-descripcion"
-            className="font-inter text-sm font-medium text-foreground"
+            className="font-sans text-sm font-medium text-foreground"
           >
             Descripción de la vacante <span className="text-vo-pink">*</span>
           </label>
@@ -281,12 +281,12 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             onChange={(e) => setDescripcion(e.target.value)}
             placeholder="Describe el puesto, responsabilidades y competencias..."
             rows={4}
-            className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+            className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
             aria-invalid={!!errors.descripcion}
             aria-describedby={errors.descripcion ? "descripcion-error" : undefined}
           />
           {errors.descripcion && (
-            <p id="descripcion-error" className="font-inter text-sm text-vo-pink" role="alert">
+            <p id="descripcion-error" className="font-sans text-sm text-vo-pink" role="alert">
               {errors.descripcion}
             </p>
           )}
@@ -295,7 +295,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         <div className="flex flex-col gap-2">
           <label
             htmlFor="vacante-pais"
-            className="font-inter text-sm font-medium text-foreground"
+            className="font-sans text-sm font-medium text-foreground"
           >
             País al que aplica la vacante
           </label>
@@ -303,7 +303,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             id="vacante-pais"
             value={countryCode}
             onChange={(e) => setCountryCode(e.target.value)}
-            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="País al que aplica la vacante"
           >
             <option value="">Sin especificar</option>
@@ -313,7 +313,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
               </option>
             ))}
           </select>
-          <p className="font-inter text-xs text-muted-foreground">
+          <p className="font-sans text-xs text-muted-foreground">
             Opcional. Si no eliges país, la vacante quedará sin país asignado.
           </p>
         </div>
@@ -322,7 +322,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
           <div className="flex flex-col gap-2">
             <label
               htmlFor="vacante-department"
-              className="font-inter text-sm font-medium text-foreground"
+              className="font-sans text-sm font-medium text-foreground"
             >
               Departamento
             </label>
@@ -330,7 +330,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
               id="vacante-department"
               value={vacancyDepartmentId}
               onChange={(e) => setVacancyDepartmentId(e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Departamento de la vacante"
               disabled={loading || loadingCatalogs}
             >
@@ -346,7 +346,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
           <div className="flex flex-col gap-2">
             <label
               htmlFor="vacante-modality"
-              className="font-inter text-sm font-medium text-foreground"
+              className="font-sans text-sm font-medium text-foreground"
             >
               Modalidad
             </label>
@@ -354,7 +354,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
               id="vacante-modality"
               value={vacancyModalityId}
               onChange={(e) => setVacancyModalityId(e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Modalidad de la vacante"
               disabled={loading || loadingCatalogs}
             >
@@ -370,7 +370,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
 
         {catalogLoadError ? (
           <div
-            className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 font-inter text-sm text-amber-800"
+            className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 font-sans text-sm text-amber-800"
             role="status"
           >
             {catalogLoadError} La vacante se puede crear igualmente sin estos campos.
@@ -379,7 +379,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
 
         {submitError && (
           <div
-            className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-inter text-sm text-destructive"
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
             role="alert"
           >
             {submitError}
@@ -388,13 +388,13 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <label className="font-inter text-sm font-medium text-foreground">
+            <label className="font-sans text-sm font-medium text-foreground">
               Requerimientos
             </label>
             <button
               type="button"
               onClick={handleAddRequirement}
-              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
               aria-label="Agregar requerimiento"
             >
               <Plus className="h-4 w-4" aria-hidden />
@@ -424,11 +424,11 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
                           handleUpdateRequirement(req.id, "requirementName", e.target.value)
                         }
                         placeholder="Nombre (ej: Licencia de conducir)"
-                        className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                        className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                         aria-label={`Requerimiento ${index + 1} - Nombre`}
                       />
                       {errors[`req-name-${req.id}`] && (
-                        <p className="font-inter text-xs text-vo-pink" role="alert">
+                        <p className="font-sans text-xs text-vo-pink" role="alert">
                           {errors[`req-name-${req.id}`]}
                         </p>
                       )}
@@ -441,11 +441,11 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
                           handleUpdateRequirement(req.id, "requirementValue", e.target.value)
                         }
                         placeholder="Valor (ej: Pesada)"
-                        className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+                        className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                         aria-label={`Requerimiento ${index + 1} - Valor`}
                       />
                       {errors[`req-value-${req.id}`] && (
-                        <p className="font-inter text-xs text-vo-pink" role="alert">
+                        <p className="font-sans text-xs text-vo-pink" role="alert">
                           {errors[`req-value-${req.id}`]}
                         </p>
                       )}
@@ -454,11 +454,11 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
                       <div className="flex items-center justify-between">
                         <label
                           htmlFor={`scale-${req.id}`}
-                          className="font-inter text-xs text-muted-foreground"
+                          className="font-sans text-xs text-muted-foreground"
                         >
                           Importancia (1-10)
                         </label>
-                        <span className="font-inter text-xs font-medium text-foreground tabular-nums">
+                        <span className="font-sans text-xs font-medium text-foreground tabular-nums">
                           {req.scale}
                         </span>
                       </div>
@@ -488,7 +488,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
               </div>
             ))}
           </div>
-          <p className="font-inter text-xs text-muted-foreground">
+          <p className="font-sans text-xs text-muted-foreground">
             Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
           </p>
         </div>

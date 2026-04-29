@@ -44,7 +44,7 @@ export function CalendarSettingsClient() {
       />
 
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <h2 className="font-inter text-lg font-semibold text-foreground">
+        <h2 className="font-sans text-lg font-semibold text-foreground">
           Google Calendar
         </h2>
 
@@ -59,7 +59,7 @@ export function CalendarSettingsClient() {
               <span className="font-medium">{status.email || "tu cuenta"}</span>
               .
             </p>
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               Las entrevistas con fecha pueden generarse o actualizarse en tu
               calendario según la configuración del servidor.
             </p>
@@ -69,7 +69,7 @@ export function CalendarSettingsClient() {
                 type="button"
                 onClick={() => void handleManualSync()}
                 disabled={isSyncing}
-                className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-inter text-sm font-medium hover:bg-muted disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-sans text-sm font-medium hover:bg-muted disabled:opacity-50"
               >
                 {isSyncing ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -80,7 +80,7 @@ export function CalendarSettingsClient() {
           </div>
         ) : (
           <div className="mt-4 flex flex-col gap-4">
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               Al conectar, podrás autorizar al ATS a crear eventos e invitaciones
               en tu Google Calendar (según lo que implemente el backend).
             </p>
@@ -90,7 +90,7 @@ export function CalendarSettingsClient() {
 
         {error ? (
           <p
-            className="mt-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 font-inter text-sm text-destructive"
+            className="mt-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 font-sans text-sm text-destructive"
             role="alert"
           >
             {error}

@@ -27,7 +27,7 @@ export default function RecentActivityCard() {
       className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6"
       aria-label="Actividad reciente"
     >
-      <h2 className="font-inter text-base font-semibold text-foreground">
+      <h2 className="font-sans text-base font-semibold text-foreground">
         Actividad Reciente
       </h2>
       <ul className="flex flex-col gap-4">
@@ -42,10 +42,10 @@ export default function RecentActivityCard() {
                 <Icon className="h-4 w-4 text-white" aria-hidden />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-inter text-[13px] font-medium text-foreground">
+                <p className="font-sans text-[13px] font-medium text-foreground">
                   {item.text}
                 </p>
-                <p className="font-inter text-[11px] text-muted-foreground">
+                <p className="font-sans text-[11px] text-muted-foreground">
                   {item.time}
                 </p>
               </div>

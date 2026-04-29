@@ -8,7 +8,7 @@ function InterviewDetailFallback() {
         className="h-10 w-10 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
         aria-hidden
       />
-      <p className="font-inter text-sm text-muted-foreground">Cargando entrevista…</p>
+      <p className="font-sans text-sm text-muted-foreground">Cargando entrevista…</p>
     </div>
   )
 }

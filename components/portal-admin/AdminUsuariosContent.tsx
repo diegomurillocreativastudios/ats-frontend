@@ -376,7 +376,7 @@ export default function AdminUsuariosContent() {
               id="filter-role"
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 font-inter text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+              className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
             >
               <option value="">Todos</option>
               {ASSIGNABLE_ROLES.map((r) => (
@@ -386,7 +386,7 @@ export default function AdminUsuariosContent() {
               ))}
             </select>
           </div>
-          <label className="flex cursor-pointer items-center gap-2 pb-2 font-inter text-sm text-foreground">
+          <label className="flex cursor-pointer items-center gap-2 pb-2 font-sans text-sm text-foreground">
             <input
               type="checkbox"
               checked={filterLockedOnly}
@@ -420,7 +420,7 @@ export default function AdminUsuariosContent() {
 
       {listError ? (
         <div
-          className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-inter text-sm text-destructive"
+          className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
           role="alert"
         >
           {listError}
@@ -428,13 +428,13 @@ export default function AdminUsuariosContent() {
       ) : null}
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className="font-sans text-sm text-muted-foreground">
           {loading
             ? "Cargando…"
             : `${totalCount} usuario${totalCount === 1 ? "" : "s"}`}
         </p>
         <div className="flex items-center gap-2">
-          <span className="font-inter text-xs text-muted-foreground">
+          <span className="font-sans text-xs text-muted-foreground">
             Por página
           </span>
           <select
@@ -464,7 +464,7 @@ export default function AdminUsuariosContent() {
       </div>
 
       <div className="min-w-0 flex-1 overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
-        <table className="w-full min-w-[720px] font-inter text-left text-sm">
+        <table className="w-full min-w-[720px] font-sans text-left text-sm">
           <thead className="border-b border-border bg-muted/50">
             <tr>
               <th className="px-4 py-3 font-medium text-foreground">Correo</th>
@@ -548,7 +548,7 @@ export default function AdminUsuariosContent() {
         className="mt-6 flex flex-wrap items-center justify-between gap-3"
         aria-label="Paginación"
       >
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className="font-sans text-sm text-muted-foreground">
           Página {page} de {totalPages}
         </p>
         <div className="flex gap-2">
@@ -636,7 +636,7 @@ export default function AdminUsuariosContent() {
               {ASSIGNABLE_ROLES.map((r) => (
                 <label
                   key={r}
-                  className="flex cursor-pointer items-center gap-2 font-inter text-sm text-foreground"
+                  className="flex cursor-pointer items-center gap-2 font-sans text-sm text-foreground"
                 >
                   <input
                     type="checkbox"
@@ -709,7 +709,7 @@ export default function AdminUsuariosContent() {
             </div>
 
             <div className="flex flex-wrap gap-6 rounded-lg border border-vo-purple/20 bg-vo-purple/5 px-4 py-3">
-              <label className="flex cursor-pointer items-center gap-2.5 font-inter text-sm text-foreground">
+              <label className="flex cursor-pointer items-center gap-2.5 font-sans text-sm text-foreground">
                 <input
                   type="checkbox"
                   className={checkboxVoClass}
@@ -719,7 +719,7 @@ export default function AdminUsuariosContent() {
                 />
                 Cuenta bloqueada
               </label>
-              <div className="flex items-center gap-2.5 font-inter text-sm text-foreground">
+              <div className="flex items-center gap-2.5 font-sans text-sm text-foreground">
                 <input
                   type="checkbox"
                   className={`${checkboxVoClass} cursor-default opacity-100 disabled:cursor-default disabled:opacity-100`}
@@ -733,10 +733,10 @@ export default function AdminUsuariosContent() {
                 <span className="sr-only">Solo lectura</span>
               </div>
             </div>
-            <p className="font-inter text-xs text-muted-foreground">
+            <p className="font-sans text-xs text-muted-foreground">
               Activalo para bloquear manualmente al usuario y desactivalo para quitar el bloqueo.
             </p>
-            <p className="font-inter text-xs text-muted-foreground">
+            <p className="font-sans text-xs text-muted-foreground">
               Lockout activo:{" "}
               {detail.lockoutActive ? (
                 <strong className="text-vo-magenta">Sí</strong>
@@ -749,7 +749,7 @@ export default function AdminUsuariosContent() {
             </p>
 
             <div>
-              <h3 className="mb-3 flex items-center gap-2 font-inter text-sm font-semibold text-vo-purple">
+              <h3 className="mb-3 flex items-center gap-2 font-sans text-sm font-semibold text-vo-purple">
                 <Shield className="h-4 w-4 text-vo-purple" aria-hidden />
                 Roles
               </h3>
@@ -775,7 +775,7 @@ export default function AdminUsuariosContent() {
                   <span className="text-muted-foreground">Sin roles</span>
                 ) : null}
               </div>
-              <p className="mb-2 font-inter text-xs text-muted-foreground">
+              <p className="mb-2 font-sans text-xs text-muted-foreground">
                 Añadir roles (solo los marcados):
               </p>
               <div className="flex flex-wrap items-center gap-3">
@@ -783,7 +783,7 @@ export default function AdminUsuariosContent() {
                   (r) => (
                     <label
                       key={r}
-                      className="flex cursor-pointer items-center gap-2 font-inter text-sm text-foreground"
+                      className="flex cursor-pointer items-center gap-2 font-sans text-sm text-foreground"
                     >
                       <input
                         type="checkbox"
@@ -867,7 +867,7 @@ export default function AdminUsuariosContent() {
           </div>
         }
       >
-        <p className="font-inter text-sm text-foreground">
+        <p className="font-sans text-sm text-foreground">
           ¿Quitar el rol «{removeRoleTarget ?? ""}» de este usuario? La
           operación se aplica de inmediato en el servidor.
         </p>

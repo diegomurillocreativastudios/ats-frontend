@@ -55,10 +55,10 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h3 className="font-inter text-base font-semibold text-foreground">
+            <h3 className="font-sans text-base font-semibold text-foreground">
               {template.name}
             </h3>
-            <span className={`rounded-full px-2 py-0.5 font-inter text-[10px] font-bold uppercase tracking-wider ${template.type === 'Notification' ? 'bg-blue-100 text-blue-700' :
+            <span className={`rounded-full px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider ${template.type === 'Notification' ? 'bg-blue-100 text-blue-700' :
                 template.type === 'Document' ? 'bg-emerald-100 text-emerald-700' :
                   'bg-amber-100 text-amber-700'
               }`}>
@@ -69,24 +69,24 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
           {template.type === 'Notification' && (
             <>
               {template.subject && (
-                <p className="font-inter text-sm text-muted-foreground line-clamp-1">
+                <p className="font-sans text-sm text-muted-foreground line-clamp-1">
                   <span className="font-semibold">Asunto:</span> {template.subject}
                 </p>
               )}
               {template.body && (
-                <p className="font-inter text-sm text-muted-foreground line-clamp-2 italic">
+                <p className="font-sans text-sm text-muted-foreground line-clamp-2 italic">
                   &quot;{template.body}&quot;
                 </p>
               )}
             </>
           )}
           {template.type === 'Document' && (
-            <p className="font-inter text-sm text-muted-foreground line-clamp-2">
+            <p className="font-sans text-sm text-muted-foreground line-clamp-2">
               <span className="font-semibold">Formato:</span> {template.outputFormat}
             </p>
           )}
           {template.type === 'Questionnaire' && (
-            <p className="font-inter text-sm text-muted-foreground line-clamp-2">
+            <p className="font-sans text-sm text-muted-foreground line-clamp-2">
               {template.description} {template.isMandatory && <span className="text-vo-pink">(Obligatorio)</span>}
             </p>
           )}
@@ -96,7 +96,7 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
         <button
           type="button"
           onClick={() => onEdit(template)}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
           aria-label={`Editar plantilla ${template.name}`}
         >
           <Pencil className="h-4 w-4" aria-hidden />
@@ -105,7 +105,7 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
         <button
           type="button"
           onClick={() => onDelete(template)}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-destructive/30 bg-background px-4 py-2.5 font-inter text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-destructive/30 bg-background px-4 py-2.5 font-sans text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2"
           aria-label={`Eliminar plantilla ${template.name}`}
         >
           <Trash2 className="h-4 w-4" aria-hidden />
@@ -229,7 +229,7 @@ export default function PlantillasPage() {
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background font-inter text-foreground">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background font-sans text-foreground">
       <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
         <div className="min-w-0 flex flex-col">
               <section className="px-8 py-6" aria-label="Encabezado de plantillas">
@@ -240,7 +240,7 @@ export default function PlantillasPage() {
                     <button
                       type="button"
                       onClick={handleNewTemplate}
-                      className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                      className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                       aria-label="Crear nueva plantilla"
                     >
                       <Plus className="h-4 w-4" aria-hidden />
@@ -261,7 +261,7 @@ export default function PlantillasPage() {
                       value={searchQuery}
                       onChange={handleSearchChange}
                       placeholder="Buscar plantillas..."
-                      className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                      className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                       aria-label="Buscar plantillas"
                     />
                   </div>
@@ -270,19 +270,19 @@ export default function PlantillasPage() {
                   {loading ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
                       <div className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
-                      <p className="font-inter text-sm text-muted-foreground">
+                      <p className="font-sans text-sm text-muted-foreground">
                         Cargando plantillas...
                       </p>
                     </div>
                   ) : fetchError ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
-                      <p className="font-inter text-sm text-destructive" role="alert">
+                      <p className="font-sans text-sm text-destructive" role="alert">
                         {fetchError}
                       </p>
                       <button
                         type="button"
                         onClick={fetchTemplates}
-                        className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                        className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                       >
                         Reintentar
                       </button>
@@ -290,13 +290,13 @@ export default function PlantillasPage() {
                   ) : filteredTemplates.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
                       <FileText className="h-12 w-12 text-muted-foreground" aria-hidden />
-                      <p className="font-inter text-sm text-muted-foreground">
+                      <p className="font-sans text-sm text-muted-foreground">
                         No se encontraron plantillas
                       </p>
                       <button
                         type="button"
                         onClick={handleNewTemplate}
-                        className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+                        className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                       >
                         <Plus className="h-4 w-4" aria-hidden />
                         Crear plantilla

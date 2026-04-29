@@ -129,7 +129,7 @@ export default function DocumentosContent() {
       type="button"
       onClick={() => void handleSubmitGeneralDocuments(files, clearStagedFiles)}
       disabled={!candidateId || isUploadingGeneralDocument || files.length === 0}
-      className="inline-flex items-center justify-center gap-2 rounded-md border border-vo-pink bg-vo-pink px-3 py-2 font-inter text-xs font-medium text-white hover:bg-vo-pink-hover disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex items-center justify-center gap-2 rounded-md border border-vo-pink bg-vo-pink px-3 py-2 font-sans text-xs font-medium text-white hover:bg-vo-pink-hover disabled:cursor-not-allowed disabled:opacity-60"
       aria-label="Subir documentos generales del candidato"
       aria-busy={isUploadingGeneralDocument}
     >
@@ -158,7 +158,7 @@ export default function DocumentosContent() {
                 leftActions={renderGeneralUploadLeft}
               />
               {loading ? (
-                <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-inter text-sm text-muted-foreground">
+                <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
                   Cargando documentos...
                 </p>
               ) : (
@@ -193,7 +193,7 @@ export default function DocumentosContent() {
               leftActions={renderGeneralUploadLeft}
             />
             {loading ? (
-              <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-inter text-sm text-muted-foreground">
+              <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
                 Cargando documentos...
               </p>
             ) : (

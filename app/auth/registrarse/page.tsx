@@ -110,7 +110,7 @@ export default function Registrarse() {
   };
 
   return (
-    <div className="min-h-screen flex font-inter">
+    <div className="min-h-screen flex font-sans">
       <div className="hidden lg:flex flex-1 bg-vo-magenta text-white flex-col justify-center px-16 gap-8">
         <div className="flex flex-col gap-6">
           <ProductBrand

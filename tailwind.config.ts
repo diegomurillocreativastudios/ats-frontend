@@ -55,8 +55,13 @@ const config: Config = {
         },
       },
       fontFamily: {
-        'grotesk': ['Space Grotesk', 'sans-serif'],
-        'inter': ['Inter', 'sans-serif'],
+        sans: [
+          "var(--font-montserrat)",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
+        montserrat: ["var(--font-montserrat)", "sans-serif"],
       },
       borderRadius: {
         DEFAULT: '6px',

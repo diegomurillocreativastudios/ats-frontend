@@ -73,7 +73,7 @@ export function InterviewNotesModal({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="inline-flex items-center rounded-md border border-border px-4 py-2 font-inter text-sm text-foreground hover:bg-muted disabled:opacity-50"
+            className="inline-flex items-center rounded-md border border-border px-4 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -81,7 +81,7 @@ export function InterviewNotesModal({
             type="button"
             onClick={() => void handleSave()}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2 font-inter text-sm font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -93,14 +93,14 @@ export function InterviewNotesModal({
     >
       <div className="flex flex-col gap-3">
         {contextLine ? (
-          <p className="font-inter text-sm text-muted-foreground">{contextLine}</p>
+          <p className="font-sans text-sm text-muted-foreground">{contextLine}</p>
         ) : null}
         {error ? (
-          <p className="font-inter text-sm text-destructive" role="alert">
+          <p className="font-sans text-sm text-destructive" role="alert">
             {error}
           </p>
         ) : null}
-        <label htmlFor="interview-notes-modal-field" className="font-inter text-sm font-medium">
+        <label htmlFor="interview-notes-modal-field" className="font-sans text-sm font-medium">
           Apuntes
         </label>
         <textarea
@@ -110,7 +110,7 @@ export function InterviewNotesModal({
           rows={8}
           disabled={saving}
           placeholder="Escribí observaciones o seguimiento sobre esta entrevista…"
-          className="resize-y rounded-md border border-input bg-background px-3 py-2 font-inter text-sm disabled:opacity-60"
+          className="resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
         />
       </div>
     </Modal>

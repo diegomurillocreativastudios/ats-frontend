@@ -27,13 +27,13 @@ import {
 } from "@/lib/candidate-profile-structured"
 
 export const profileEditInputClass =
-  "w-full rounded-xl border border-border bg-background px-3 py-2.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+  "w-full rounded-xl border border-border bg-background px-3 py-2.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
 
 export const profileEditLabelClass =
-  "font-inter text-xs font-medium text-muted-foreground md:text-sm"
+  "font-sans text-xs font-medium text-muted-foreground md:text-sm"
 
 export const profileEditSectionTitleClass =
-  "font-inter text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+  "font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
 
 function ProfileEditSelect({
   id,
@@ -93,7 +93,7 @@ export function ProfileEditField({
       </label>
       {children}
       {hint ? (
-        <p className="font-inter text-[11px] text-muted-foreground">{hint}</p>
+        <p className="font-sans text-[11px] text-muted-foreground">{hint}</p>
       ) : null}
     </div>
   )
@@ -317,7 +317,7 @@ function ProfileEditSectorsTags({
       {sectors.map((label, index) => (
         <span
           key={`${label}-${index}`}
-          className="inline-flex max-w-full items-center gap-1 rounded-full border border-vo-purple bg-background px-2.5 py-1 font-inter text-sm font-medium text-vo-purple"
+          className="inline-flex max-w-full items-center gap-1 rounded-full border border-vo-purple bg-background px-2.5 py-1 font-sans text-sm font-medium text-vo-purple"
         >
           <span className="truncate">{label}</span>
           <button
@@ -338,7 +338,7 @@ function ProfileEditSectorsTags({
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        className="min-w-40 flex-1 border-0 bg-transparent py-0.5 font-inter text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-0 disabled:cursor-not-allowed"
+        className="min-w-40 flex-1 border-0 bg-transparent py-0.5 font-sans text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-0 disabled:cursor-not-allowed"
         placeholder={sectors.length === 0 ? "Escribí un sector y presioná Enter" : "Añadir otro…"}
       />
     </div>
@@ -457,7 +457,7 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
           className="rounded-xl border border-border/80 bg-muted/20 p-4"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <span className="font-inter text-xs font-medium text-muted-foreground">
+            <span className="font-sans text-xs font-medium text-muted-foreground">
               Experiencia {index + 1}
             </span>
             {form.workRows.length > 1 ? (
@@ -470,7 +470,7 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
                   }))
                 }
                 disabled={saving}
-                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-inter text-xs text-destructive hover:bg-destructive/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-sans text-xs text-destructive hover:bg-destructive/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
                 aria-label={`Quitar experiencia ${index + 1}`}
               >
                 <Trash2 className="h-3.5 w-3.5" aria-hidden />
@@ -576,7 +576,7 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
           setForm((f) => ({ ...f, workRows: [...f.workRows, emptyWorkRow()] }))
         }
         disabled={saving}
-        className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-inter text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
+        className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
       >
         <Plus className="h-4 w-4" aria-hidden />
         Añadir experiencia
@@ -595,7 +595,7 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
           className="rounded-xl border border-border/80 bg-muted/20 p-4"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <span className="font-inter text-xs font-medium text-muted-foreground">
+            <span className="font-sans text-xs font-medium text-muted-foreground">
               Formación {index + 1}
             </span>
             {form.educationRows.length > 1 ? (
@@ -608,7 +608,7 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
                   }))
                 }
                 disabled={saving}
-                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-inter text-xs text-destructive hover:bg-destructive/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-sans text-xs text-destructive hover:bg-destructive/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
                 aria-label={`Quitar educación ${index + 1}`}
               >
                 <Trash2 className="h-3.5 w-3.5" aria-hidden />
@@ -697,7 +697,7 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
           }))
         }
         disabled={saving}
-        className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-inter text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
+        className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
       >
         <Plus className="h-4 w-4" aria-hidden />
         Añadir educación
@@ -777,7 +777,7 @@ export function ProfileEditLanguagesFields({ form, setForm, saving }: EditorFiel
           }))
         }
         disabled={saving}
-        className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-inter text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
+        className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
       >
         <Plus className="h-4 w-4" aria-hidden />
         Añadir idioma
@@ -860,7 +860,7 @@ export function ProfileEditSocialVideoFields({
       <p className={profileEditSectionTitleClass}>Enlaces</p>
 
       {form.socialRows.length === 0 ? (
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className="font-sans text-sm text-muted-foreground">
           Sumá enlaces a tu portfolio, LinkedIn, GitHub u otras plataformas. Podés añadir varios con el
           botón de abajo.
         </p>
@@ -872,7 +872,7 @@ export function ProfileEditSocialVideoFields({
           className="grid gap-4 rounded-xl border border-border/80 bg-muted/20 p-4 sm:grid-cols-2"
         >
           <div className="flex items-center justify-between gap-2 sm:col-span-2">
-            <span className="font-inter text-xs font-medium text-muted-foreground">
+            <span className="font-sans text-xs font-medium text-muted-foreground">
               Enlace {index + 1}
             </span>
             <button
@@ -884,7 +884,7 @@ export function ProfileEditSocialVideoFields({
                 }))
               }
               disabled={saving}
-              className="font-inter text-xs text-destructive hover:underline"
+              className="font-sans text-xs text-destructive hover:underline"
             >
               Quitar
             </button>
@@ -932,7 +932,7 @@ export function ProfileEditSocialVideoFields({
         >
           <h3
             id="pf-add-link-heading"
-            className="mb-4 font-inter text-base font-semibold text-foreground"
+            className="mb-4 font-sans text-base font-semibold text-foreground"
           >
             Añadir enlace
           </h3>
@@ -963,7 +963,7 @@ export function ProfileEditSocialVideoFields({
               />
             </ProfileEditField>
             {addLinkError ? (
-              <p className="font-inter text-sm text-destructive" role="alert">
+              <p className="font-sans text-sm text-destructive" role="alert">
                 {addLinkError}
               </p>
             ) : null}
@@ -972,7 +972,7 @@ export function ProfileEditSocialVideoFields({
                 type="button"
                 onClick={handleCancelAddPanel}
                 disabled={saving}
-                className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-5 py-2.5 font-inter text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-5 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancelar
               </button>
@@ -980,7 +980,7 @@ export function ProfileEditSocialVideoFields({
                 type="button"
                 onClick={handleConfirmAddLink}
                 disabled={saving}
-                className="inline-flex items-center justify-center rounded-xl bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-xl bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Añadir enlace
               </button>
@@ -992,7 +992,7 @@ export function ProfileEditSocialVideoFields({
           type="button"
           onClick={handleOpenAddPanel}
           disabled={saving}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border px-4 py-3 font-inter text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple sm:w-fit"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border px-4 py-3 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple sm:w-fit"
         >
           <Plus className="h-4 w-4" aria-hidden />
           Añadir enlace
@@ -1012,7 +1012,7 @@ export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFie
           className="rounded-xl border border-border/80 bg-muted/20 p-4"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <span className="font-inter text-xs font-medium text-muted-foreground">
+            <span className="font-sans text-xs font-medium text-muted-foreground">
               Referencia {index + 1}
             </span>
             {form.referenceRows.length > 1 ? (
@@ -1112,7 +1112,7 @@ export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFie
           }))
         }
         disabled={saving}
-        className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-inter text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
+        className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
       >
         <Plus className="h-4 w-4" aria-hidden />
         Añadir referencia

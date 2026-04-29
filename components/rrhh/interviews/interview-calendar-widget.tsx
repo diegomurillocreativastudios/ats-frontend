@@ -64,7 +64,7 @@ export function InterviewCalendarWidget({
   }
 
   const cardClass =
-    "rounded-xl border border-border bg-card p-5 font-inter text-sm shadow-sm"
+    "rounded-xl border border-border bg-card p-5 font-sans text-sm shadow-sm"
 
   if (!status.isConnected) {
     return (

@@ -44,10 +44,10 @@ export default function RRHHConfiguracionPage() {
                     <CalendarClock className="h-5 w-5 text-vo-purple" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-inter text-sm font-semibold text-foreground">
+                    <span className="font-sans text-sm font-semibold text-foreground">
                       Calendario Google
                     </span>
-                    <span className="font-inter text-xs text-muted-foreground">
+                    <span className="font-sans text-xs text-muted-foreground">
                       Conecta y administra la sincronizacion de entrevistas.
                     </span>
                   </div>
@@ -77,7 +77,7 @@ export default function RRHHConfiguracionPage() {
             >
               <div className="flex items-center gap-3">
                 <CalendarClock className="h-5 w-5 text-vo-purple" aria-hidden />
-                <span className="font-inter text-sm font-semibold text-foreground">
+                <span className="font-sans text-sm font-semibold text-foreground">
                   Calendario Google
                 </span>
               </div>

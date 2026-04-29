@@ -26,12 +26,12 @@ export default function MyPostulationsCard({
   return (
     <div className="rounded-lg border border-border bg-card p-4 lg:p-6 lg:min-w-[320px] lg:max-w-[400px]">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-inter text-base font-semibold text-foreground lg:text-lg">
+        <h2 className="font-sans text-base font-semibold text-foreground lg:text-lg">
           Mis Postulaciones
         </h2>
         <Link
           href="/portal-candidato"
-          className="font-inter text-xs font-medium text-vo-purple hover:underline lg:text-sm"
+          className="font-sans text-xs font-medium text-vo-purple hover:underline lg:text-sm"
         >
           Ir al inicio
         </Link>
@@ -57,7 +57,7 @@ export default function MyPostulationsCard({
           ))}
         </div>
       ) : applications.length === 0 ? (
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className="font-sans text-sm text-muted-foreground">
           Todavía no tenés postulaciones activas. Explorá vacantes y aplicá para
           ver tu progreso aquí.
         </p>
@@ -73,24 +73,24 @@ export default function MyPostulationsCard({
                 className="flex flex-col gap-2 rounded-lg bg-muted p-4"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-inter text-sm font-medium text-foreground">
+                  <p className="font-sans text-sm font-medium text-foreground">
                     {post.jobTitle}
                   </p>
                   <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
                     {post.applicationSource === 1 ? (
-                      <span className="rounded-md border border-border bg-muted px-2 py-0.5 font-inter text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <span className="rounded-md border border-border bg-muted px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                         Personal
                       </span>
                     ) : null}
                     <span
-                      className={`rounded-xl px-2.5 py-1 font-inter text-xs font-medium ${getApplicationStatusStyle(post.statusLabel)}`}
+                      className={`rounded-xl px-2.5 py-1 font-sans text-xs font-medium ${getApplicationStatusStyle(post.statusLabel)}`}
                     >
                       {post.statusLabel}
                     </span>
                   </div>
                 </div>
                 {showCompanyLine ? (
-                  <p className="font-inter text-xs text-muted-foreground">
+                  <p className="font-sans text-xs text-muted-foreground">
                     {post.companyLine}
                   </p>
                 ) : null}

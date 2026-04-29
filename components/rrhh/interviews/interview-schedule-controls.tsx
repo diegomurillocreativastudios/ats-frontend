@@ -99,7 +99,7 @@ export function InterviewScheduleRow({
         emptyLabel="Inicio"
       />
       <span
-        className="select-none font-inter text-sm text-muted-foreground"
+        className="select-none font-sans text-sm text-muted-foreground"
         aria-hidden
       >
         —

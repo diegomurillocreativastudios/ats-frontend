@@ -92,7 +92,7 @@ export default function Modal({
         <header className={MODAL_STYLES.header}>
           <h2
             id="modal-title"
-            className="font-inter text-lg font-semibold text-foreground"
+            className="font-sans text-lg font-semibold text-foreground"
           >
             {title}
           </h2>

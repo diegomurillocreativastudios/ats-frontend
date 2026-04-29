@@ -184,7 +184,7 @@ const Snackbar = ({
       <div
         role={config.role}
         aria-live={config.ariaLive}
-        className={`pointer-events-auto flex max-w-md origin-bottom-left items-start gap-3 rounded-xl border px-4 py-3 font-inter text-sm transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none sm:max-w-lg ${config.container} ${
+        className={`pointer-events-auto flex max-w-md origin-bottom-left items-start gap-3 rounded-xl border px-4 py-3 font-sans text-sm transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none sm:max-w-lg ${config.container} ${
           entered
             ? "translate-y-0 opacity-100"
             : "translate-y-2 opacity-0 motion-reduce:translate-y-0"

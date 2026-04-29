@@ -45,10 +45,10 @@ function toYmd(y: number, m0: number, d: number): string {
 const WEEKDAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"] as const
 
 const datePillButtonClass =
-  "inline-flex min-h-10 min-w-[min(100%,13.5rem)] max-w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-center font-inter text-sm text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
+  "inline-flex min-h-10 min-w-[min(100%,13.5rem)] max-w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-center font-sans text-sm text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
 
 const timeInputClass =
-  "h-10 min-w-[9rem] max-w-[11rem] shrink-0 cursor-text rounded-md border border-input bg-background px-1.5 py-2 font-inter text-sm text-foreground outline-none transition-colors hover:bg-muted/30 focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
+  "h-10 min-w-[9rem] max-w-[11rem] shrink-0 cursor-text rounded-md border border-input bg-background px-1.5 py-2 font-sans text-sm text-foreground outline-none transition-colors hover:bg-muted/30 focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
 
 export interface ScheduleDatePickerProps {
   value: string
@@ -185,7 +185,7 @@ export function ScheduleDatePicker({
             >
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </button>
-            <span className="min-w-0 flex-1 text-center font-inter text-sm font-semibold text-foreground">
+            <span className="min-w-0 flex-1 text-center font-sans text-sm font-semibold text-foreground">
               {monthTitle}
             </span>
             <button
@@ -199,7 +199,7 @@ export function ScheduleDatePicker({
           </div>
 
           <div
-            className="mb-1 grid grid-cols-7 gap-0.5 text-center font-inter text-[10px] font-medium uppercase text-muted-foreground"
+            className="mb-1 grid grid-cols-7 gap-0.5 text-center font-sans text-[10px] font-medium uppercase text-muted-foreground"
             aria-hidden
           >
             {WEEKDAY_LABELS.map((l) => (
@@ -221,7 +221,7 @@ export function ScheduleDatePicker({
                   key={ymd}
                   type="button"
                   onClick={() => handlePickDay(ymd)}
-                  className={`flex h-9 w-full items-center justify-center rounded-md font-inter text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple ${
+                  className={`flex h-9 w-full items-center justify-center rounded-md font-sans text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple ${
                     isSelected
                       ? "bg-vo-purple font-medium text-white"
                       : isToday
@@ -432,7 +432,7 @@ export function QuarterHourTimeSelect({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => handleSelectOption("")}
-                  className="w-full px-3 py-2 text-left font-inter text-sm text-muted-foreground transition-colors hover:bg-muted/70"
+                  className="w-full px-3 py-2 text-left font-sans text-sm text-muted-foreground transition-colors hover:bg-muted/70"
                 >
                   {emptyLabel}
                 </button>
@@ -447,7 +447,7 @@ export function QuarterHourTimeSelect({
                     data-time-value={option.value}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSelectOption(option.value)}
-                    className={`w-full px-3 py-2 text-left font-inter text-sm tabular-nums transition-colors hover:bg-muted/70 ${
+                    className={`w-full px-3 py-2 text-left font-sans text-sm tabular-nums transition-colors hover:bg-muted/70 ${
                       selected
                         ? "bg-vo-purple/10 font-medium text-vo-purple"
                         : "text-foreground"

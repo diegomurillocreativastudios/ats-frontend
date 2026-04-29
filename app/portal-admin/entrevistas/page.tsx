@@ -34,7 +34,7 @@ export default function PortalAdminEntrevistasPage() {
               <button
                 type="button"
                 onClick={() => setInterviewTypesModalOpen(true)}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-vo-magenta px-5 py-3 font-inter text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-magenta-hover focus:outline-none focus:ring-2 focus:ring-vo-magenta focus:ring-offset-2"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-vo-magenta px-5 py-3 font-sans text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-magenta-hover focus:outline-none focus:ring-2 focus:ring-vo-magenta focus:ring-offset-2"
               >
                 <Tags className="h-4 w-4 shrink-0" aria-hidden />
                 Tipos de entrevista
@@ -42,7 +42,7 @@ export default function PortalAdminEntrevistasPage() {
               <button
                 type="button"
                 onClick={() => setInterviewStatusesModalOpen(true)}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-vo-pink px-5 py-3 font-inter text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-pink-hover focus:outline-none focus:ring-2 focus:ring-vo-pink focus:ring-offset-2"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-vo-pink px-5 py-3 font-sans text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-pink-hover focus:outline-none focus:ring-2 focus:ring-vo-pink focus:ring-offset-2"
               >
                 <ListChecks className="h-4 w-4 shrink-0" aria-hidden />
                 Estados de entrevista

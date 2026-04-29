@@ -1,17 +1,11 @@
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import PageTitle from "@/components/PageTitle";
 
-const inter = Inter({
-  variable: "--font-inter",
+const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  display: "swap",
+  variable: "--font-montserrat",
 });
 
 export const metadata = {
@@ -21,8 +15,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}>
+    <html lang="en" className={montserrat.variable}>
+      <body className="antialiased">
         <PageTitle />
         {children}
       </body>

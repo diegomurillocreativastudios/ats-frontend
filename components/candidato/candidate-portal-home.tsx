@@ -35,7 +35,7 @@ export default function CandidatePortalHome() {
               {error ? (
                 <div
                   role="alert"
-                  className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-inter text-sm text-destructive"
+                  className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
                 >
                   {error}
                 </div>
@@ -83,7 +83,7 @@ export default function CandidatePortalHome() {
             {error ? (
               <div
                 role="alert"
-                className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 font-inter text-sm text-destructive"
+                className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 font-sans text-sm text-destructive"
               >
                 {error}
               </div>

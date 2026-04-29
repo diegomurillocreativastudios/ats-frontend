@@ -38,12 +38,12 @@ export default function NextActivitiesCard({
   return (
     <div className="rounded-lg border border-border bg-card p-4 md:p-5 lg:p-6">
       <div className="mb-4 flex items-center justify-between md:mb-4 lg:mb-4">
-        <h2 className="font-inter text-base font-semibold text-foreground md:text-base lg:text-lg">
+        <h2 className="font-sans text-base font-semibold text-foreground md:text-base lg:text-lg">
           Próximas Actividades
         </h2>
         <Link
           href="/portal-candidato/entrevistas"
-          className="font-inter text-xs font-medium text-vo-purple hover:underline md:text-sm"
+          className="font-sans text-xs font-medium text-vo-purple hover:underline md:text-sm"
         >
           Ver entrevistas
         </Link>
@@ -65,7 +65,7 @@ export default function NextActivitiesCard({
           ))}
         </div>
       ) : activities.length === 0 ? (
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className="font-sans text-sm text-muted-foreground">
           No hay actividades próximas registradas. Cuando tengas entrevistas u
           otras citas, aparecerán aquí.
         </p>
@@ -97,18 +97,18 @@ export default function NextActivitiesCard({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p
-                    className={`font-inter font-medium text-foreground ${
+                    className={`font-sans font-medium text-foreground ${
                       compact ? "text-xs" : "text-sm md:text-[13px]"
                     }`}
                   >
                     {title}
                   </p>
-                  <p className="font-inter text-[10px] text-muted-foreground md:text-xs">
+                  <p className="font-sans text-[10px] text-muted-foreground md:text-xs">
                     {detail}
                   </p>
                 </div>
                 <span
-                  className={`shrink-0 rounded-xl px-2.5 py-1 font-inter text-[10px] font-medium md:px-2.5 md:py-1 md:text-xs ${activityStatusClass(act.statusTone)}`}
+                  className={`shrink-0 rounded-xl px-2.5 py-1 font-sans text-[10px] font-medium md:px-2.5 md:py-1 md:text-xs ${activityStatusClass(act.statusTone)}`}
                 >
                   {act.statusLabel}
                 </span>

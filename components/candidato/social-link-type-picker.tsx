@@ -11,9 +11,9 @@ import {
 } from "@/lib/social-link-presets"
 
 const inputClass =
-  "w-full rounded-xl border border-border bg-background px-3 py-2.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+  "w-full rounded-xl border border-border bg-background px-3 py-2.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
 
-const labelClass = "font-inter text-xs font-medium text-muted-foreground md:text-sm"
+const labelClass = "font-sans text-xs font-medium text-muted-foreground md:text-sm"
 
 export interface SocialLinkTypePickerProps {
   id: string
@@ -169,7 +169,7 @@ export function SocialLinkTypePicker({
                   type="button"
                   role="option"
                   aria-selected={isSelected}
-                  className={`flex w-full items-center gap-2 px-3 py-2.5 text-left font-inter text-sm transition-colors hover:bg-muted focus:outline-none focus-visible:bg-muted ${
+                  className={`flex w-full items-center gap-2 px-3 py-2.5 text-left font-sans text-sm transition-colors hover:bg-muted focus:outline-none focus-visible:bg-muted ${
                     isSelected ? "bg-vo-purple/10 text-vo-purple" : "text-foreground"
                   }`}
                   onClick={() => handleSelectPreset(p.id)}

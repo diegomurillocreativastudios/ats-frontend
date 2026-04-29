@@ -94,31 +94,31 @@ const CandidateRow = ({ candidate }) => {
       <td className="px-5 py-4 align-middle">
         <div className="flex items-center gap-3">
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-vo-purple font-inter text-sm font-semibold text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-sm font-semibold text-white"
             aria-hidden
           >
             {candidate.initials}
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="font-inter text-sm font-semibold text-foreground">
+            <span className="font-sans text-sm font-semibold text-foreground">
               {candidate.name}
             </span>
-            <span className="font-inter text-xs text-muted-foreground truncate max-w-[200px]">
+            <span className="font-sans text-xs text-muted-foreground truncate max-w-[200px]">
               {candidate.email}
             </span>
           </div>
         </div>
       </td>
-      <td className="px-5 py-4 font-inter text-[13px] text-foreground align-middle">
+      <td className="px-5 py-4 font-sans text-[13px] text-foreground align-middle">
         {candidate.phone}
       </td>
-      <td className="px-5 py-4 font-inter text-[13px] text-foreground align-middle">
+      <td className="px-5 py-4 font-sans text-[13px] text-foreground align-middle">
         {candidate.country}
       </td>
-      <td className="px-5 py-4 font-inter text-[13px] text-foreground align-middle max-w-[200px] truncate" title={candidate.headline !== "—" ? candidate.headline : undefined}>
+      <td className="px-5 py-4 font-sans text-[13px] text-foreground align-middle max-w-[200px] truncate" title={candidate.headline !== "—" ? candidate.headline : undefined}>
         {candidate.headline}
       </td>
-      <td className="px-5 py-4 font-inter text-[13px] text-muted-foreground align-middle">
+      <td className="px-5 py-4 font-sans text-[13px] text-muted-foreground align-middle">
         {candidate.date}
       </td>
       <td className="px-5 py-4 align-middle">
@@ -249,14 +249,14 @@ export default function CandidatosPage() {
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Buscar candidatos..."
-            className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-inter text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
             aria-label="Buscar candidatos"
           />
         </div>
         <button
           type="button"
           onClick={handleOpenUploadModal}
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
         >
           <Plus className="h-4 w-4" aria-hidden />
           <span>Agregar candidato</span>
@@ -269,19 +269,19 @@ export default function CandidatosPage() {
               className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
               aria-hidden
             />
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               Cargando candidatos...
             </p>
           </div>
         ) : fetchError ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-            <p className="font-inter text-sm text-destructive" role="alert">
+            <p className="font-sans text-sm text-destructive" role="alert">
               {fetchError}
             </p>
             <button
               type="button"
               onClick={fetchCandidates}
-              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-inter text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
             >
               Reintentar
             </button>
@@ -289,47 +289,47 @@ export default function CandidatosPage() {
         ) : filteredCandidates.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className="font-sans text-sm text-muted-foreground">
               No hay candidatos
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] font-inter" role="table">
+            <table className="w-full min-w-[720px] font-sans" role="table">
               <thead>
                 <tr className="border-b border-border bg-muted">
                   <th
-                    className="px-5 py-4 text-left font-inter text-[13px] font-semibold text-foreground"
+                    className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
                     Candidato
                   </th>
                   <th
-                    className="px-5 py-4 text-left font-inter text-[13px] font-semibold text-foreground"
+                    className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
                     Teléfono
                   </th>
                   <th
-                    className="px-5 py-4 text-left font-inter text-[13px] font-semibold text-foreground"
+                    className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
                     País
                   </th>
                   <th
-                    className="px-5 py-4 text-left font-inter text-[13px] font-semibold text-foreground"
+                    className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
                     Título
                   </th>
                   <th
-                    className="px-5 py-4 text-left font-inter text-[13px] font-semibold text-foreground"
+                    className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
                     Fecha subida
                   </th>
                   <th
-                    className="px-5 py-4 text-left font-inter text-[13px] font-semibold text-foreground"
+                    className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
                     Acciones
@@ -400,10 +400,10 @@ export default function CandidatosPage() {
             {aiProcessingBar.active ? (
               <AiDisclosurePillProgress percent={aiProcessingBar.percent} />
             ) : null}
-            <p className="font-inter text-sm text-foreground">
+            <p className="font-sans text-sm text-foreground">
               Los CVs se procesan con IA para extraer informacion preliminar del perfil.
             </p>
-            <p className="font-inter text-xs text-muted-foreground">
+            <p className="font-sans text-xs text-muted-foreground">
               Resultado generado por IA. Requiere validacion de RRHH.
             </p>
           </div>
@@ -417,10 +417,10 @@ export default function CandidatosPage() {
               />
             ))}
           </div>
-          <p className="font-inter text-sm text-muted-foreground">
+          <p className="font-sans text-sm text-muted-foreground">
             Sube el CV del candidato en formato PDF para crear su perfil automáticamente.
           </p>
-          <p className="font-inter text-xs text-muted-foreground" aria-live="polite">
+          <p className="font-sans text-xs text-muted-foreground" aria-live="polite">
             {isProcessingCvWithAi
               ? "Procesando CV con IA..."
               : "IA completada cuando termine la carga"}

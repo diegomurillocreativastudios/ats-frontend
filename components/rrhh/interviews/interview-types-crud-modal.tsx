@@ -198,7 +198,7 @@ export function InterviewTypesCrudModal({
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <label
                 htmlFor="new-interview-type-name"
-                className="font-inter text-sm font-medium text-foreground"
+                className="font-sans text-sm font-medium text-foreground"
               >
                 Nuevo tipo
               </label>
@@ -208,7 +208,7 @@ export function InterviewTypesCrudModal({
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Nombre del tipo"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 font-inter text-sm"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm"
                 disabled={saving || loading}
                 autoComplete="off"
               />
@@ -226,23 +226,23 @@ export function InterviewTypesCrudModal({
           </form>
 
           {error ? (
-            <p className="font-inter text-sm text-destructive" role="alert">
+            <p className="font-sans text-sm text-destructive" role="alert">
               {error}
             </p>
           ) : null}
 
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-12 font-inter text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 py-12 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
               Cargando tipos…
             </div>
           ) : items.length === 0 ? (
-            <p className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-8 text-center font-inter text-sm text-muted-foreground">
+            <p className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-8 text-center font-sans text-sm text-muted-foreground">
               No hay tipos definidos. Añade el primero arriba.
             </p>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full min-w-[280px] border-collapse text-left font-inter text-sm">
+              <table className="w-full min-w-[280px] border-collapse text-left font-sans text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
                     <th scope="col" className="px-3 py-2 font-semibold">
@@ -265,7 +265,7 @@ export function InterviewTypesCrudModal({
                             type="text"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            className="h-9 w-full min-w-48 rounded-md border border-input bg-background px-2 font-inter text-sm"
+                            className="h-9 w-full min-w-48 rounded-md border border-input bg-background px-2 font-sans text-sm"
                             disabled={saving}
                             aria-label="Editar nombre del tipo"
                           />

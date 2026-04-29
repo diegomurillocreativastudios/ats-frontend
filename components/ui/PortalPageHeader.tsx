@@ -36,7 +36,7 @@ export default function PortalPageHeader({
         <h1
           id={id}
           className={joinClasses(
-            "font-inter text-xl font-bold leading-tight tracking-tight text-foreground",
+            "font-sans text-xl font-bold leading-tight tracking-tight text-foreground",
             titleClassName
           )}
         >
@@ -45,7 +45,7 @@ export default function PortalPageHeader({
         {description ? (
           <div
             className={joinClasses(
-              "mt-1.5 max-w-4xl font-inter text-base leading-7 text-muted-foreground",
+              "mt-1.5 max-w-4xl font-sans text-base leading-7 text-muted-foreground",
               descriptionClassName
             )}
           >
