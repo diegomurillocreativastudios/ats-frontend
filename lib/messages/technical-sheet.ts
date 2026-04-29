@@ -1,0 +1,53 @@
+/**
+ * Copy keys for the candidate technical sheet (vacancy + candidate).
+ * Wire to next-intl or similar when the app adopts a global i18n provider.
+ */
+export const technicalSheetMessages = {
+  modalTitle: "Ficha técnica",
+  viewSheet: "Ver ficha técnica",
+  downloadHtml: "Descargar HTML",
+  downloadPdf: "Descargar PDF",
+  close: "Cerrar",
+  loading: "Cargando ficha técnica…",
+  sectionPersonal: "Datos personales",
+  sectionVacancy: "Vacante",
+  sectionApplication: "Postulación",
+  sectionMatch: "Match",
+  sectionInterviews: "Entrevistas",
+  rawSection: "Detalle",
+  errorNotPosted:
+    "Este candidato no está postulado a esta vacante o no hay datos de ficha.",
+  errorGeneric: "No se pudo cargar la ficha técnica.",
+  errorForbidden: "No tenés permisos para ver esta ficha.",
+  pdfNotAvailable: "El PDF aún no está disponible en el servidor.",
+  pdfNotFound: "No se encontró el PDF de esta ficha.",
+  downloadingHtml: "Descargando HTML…",
+  downloadingPdf: "Descargando PDF…",
+  doubleSubmitHint: "Esperá a que termine la descarga.",
+  emptyPreview: "No hay secciones para mostrar. Probá descargar el HTML.",
+  generatedAt: "Documento generado",
+  workExperience: "Experiencia laboral",
+  education: "Formación académica",
+  languages: "Idiomas",
+  skills: "Habilidades",
+  resumeMarkdown: "Curriculum (texto completo)",
+  summary: "Resumen profesional",
+  matchTotalScore: "Puntaje total",
+  matchComponents: "Componentes del match",
+  matchStrengths: "Fortalezas (IA)",
+  matchConcerns: "Aspectos a considerar (IA)",
+  company: "Empresa",
+  role: "Puesto",
+  dateFrom: "Desde",
+  dateTo: "Hasta",
+  description: "Descripción",
+  institution: "Institución",
+  degree: "Título / grado",
+  language: "Idioma",
+  level: "Nivel",
+  noStructuredRequirements: "Sin requisitos estructurados",
+  interviewWhen: "Fecha y hora",
+  interviewDuration: "Duración",
+} as const
+
+export type TechnicalSheetMessageKey = keyof typeof technicalSheetMessages

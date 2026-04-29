@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { Calendar, Loader2 } from "lucide-react"
+import { Calendar, FileText, Loader2 } from "lucide-react"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import {
@@ -13,6 +13,8 @@ import { formatInterviewLocalDateTime } from "@/lib/interview-datetime"
 import { InterviewDetailModal } from "@/components/rrhh/interviews/interview-detail-modal"
 import { InterviewNotesModal } from "@/components/rrhh/interviews/interview-notes-modal"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
+import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
+import { technicalSheetMessages } from "@/lib/messages/technical-sheet"
 
 export interface CandidateInterviewListProps {
   candidateProfileId: string
@@ -27,6 +29,10 @@ export function CandidateInterviewList({
   const [detailInterviewId, setDetailInterviewId] = useState<string | null>(null)
   const [detailVacancyId, setDetailVacancyId] = useState<string | null>(null)
   const [notesInterviewId, setNotesInterviewId] = useState<string | null>(null)
+  const [technicalSheetContext, setTechnicalSheetContext] = useState<{
+    vacancyId: string
+    vacancyTitle: string | null
+  } | null>(null)
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success" as "success" | "error" | "info",
@@ -139,6 +145,20 @@ export function CandidateInterviewList({
                         >
                           Notas
                         </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setTechnicalSheetContext({
+                              vacancyId: row.vacancyId,
+                              vacancyTitle: row.jobTitle?.trim() ?? null,
+                            })
+                          }
+                          className="inline-flex items-center gap-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
+                          aria-label={technicalSheetMessages.viewSheet}
+                        >
+                          <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          Ficha técnica
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -148,6 +168,17 @@ export function CandidateInterviewList({
           </div>
         )}
       </section>
+
+      {technicalSheetContext ? (
+        <TechnicalSheetModal
+          isOpen
+          onClose={() => setTechnicalSheetContext(null)}
+          vacancyId={technicalSheetContext.vacancyId}
+          candidateProfileId={candidateProfileId}
+          vacancyTitle={technicalSheetContext.vacancyTitle}
+          candidateLabel={null}
+        />
+      ) : null}
 
       <InterviewDetailModal
         isOpen={detailInterviewId != null}

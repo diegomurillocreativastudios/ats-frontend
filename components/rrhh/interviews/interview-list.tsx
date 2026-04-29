@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Calendar, Loader2, Plus } from "lucide-react"
+import { Calendar, FileText, Loader2, Plus } from "lucide-react"
 import {
   getInterviewsByVacancy,
   getInterviewHttpErrorMessage,
@@ -19,6 +19,8 @@ import { InterviewSingleDatetimeRow } from "@/components/rrhh/interviews/intervi
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
+import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
+import { technicalSheetMessages } from "@/lib/messages/technical-sheet"
 
 const STATUS_FILTER_OPTIONS: { value: "" | InterviewStatus; label: string }[] =
   [
@@ -57,6 +59,9 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [detailInterviewId, setDetailInterviewId] = useState<string | null>(null)
   const [notesInterviewId, setNotesInterviewId] = useState<string | null>(null)
+  const [technicalSheetProfileId, setTechnicalSheetProfileId] = useState<
+    string | null
+  >(null)
 
   const applicantLabelByProfileId = useMemo(() => {
     const m = new Map<string, string>()
@@ -376,6 +381,18 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                         >
                           Notas
                         </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setTechnicalSheetProfileId(row.candidateProfileId)
+                          }
+                          className="inline-flex items-center gap-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+                          aria-label={technicalSheetMessages.viewSheet}
+                          data-testid={`interview-open-technical-sheet-${row.id}`}
+                        >
+                          <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          Ficha técnica
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -416,6 +433,20 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           })
         }}
       />
+
+      {technicalSheetProfileId ? (
+        <TechnicalSheetModal
+          isOpen={technicalSheetProfileId != null}
+          onClose={() => setTechnicalSheetProfileId(null)}
+          vacancyId={vacancyId}
+          candidateProfileId={technicalSheetProfileId}
+          vacancyTitle={vacancyTitle}
+          candidateLabel={formatCandidateLabel(
+            technicalSheetProfileId,
+            applicantLabelByProfileId
+          )}
+        />
+      ) : null}
 
       <InterviewNotesModal
         isOpen={notesInterviewId != null}

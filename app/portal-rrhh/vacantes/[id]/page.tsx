@@ -34,6 +34,8 @@ import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
+import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
+import { technicalSheetMessages } from "@/lib/messages/technical-sheet"
 import {
   AiDisclosureBadge,
   AiDisclosureNotice,
@@ -1004,7 +1006,16 @@ const KanbanCard = ({
   currentStatusId,
   onStatusChange,
   statusSelectDisabled,
+  vacancyId = null,
+  vacancyTitle = null,
 }) => {
+  const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false);
+  const sheetCandidateProfileId =
+    match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
+      ? String(match.candidateProfileId).trim()
+      : null;
+  const candidateLabelForSheet =
+    emptyToDash(match.name) !== "—" ? String(match.name) : sheetCandidateProfileId ?? "";
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
@@ -1035,53 +1046,79 @@ const KanbanCard = ({
   const handleSelectClick = (e) => e.stopPropagation();
 
   return (
-    <div
-      draggable
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      className="cursor-grab rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"
-      role="button"
-      tabIndex={0}
-      aria-label={`Mover ${emptyToDash(match.name)} a otra etapa`}
-      aria-describedby={`kanban-card-${candidateId}`}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-sm font-semibold text-white"
-          aria-hidden
-        >
-          {initials}
-        </div>
-        <div className="min-w-0 flex-1" id={`kanban-card-${candidateId}`}>
-          <p className="truncate font-sans text-sm font-medium text-foreground">
-            {emptyToDash(match.name)}
-          </p>
-          <p className="flex flex-wrap items-center gap-1.5 font-sans text-xs text-muted-foreground">
-            <span>Puntaje: {score}</span>
-            <span className="inline-flex rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
-              {applicationSourceLabel}
-            </span>
-          </p>
-        </div>
-        {statuses.length > 0 ? (
-          <select
-            value={currentStatusId ?? ""}
-            onChange={handleStatusChange}
-            onMouseDown={handleSelectMouseDown}
-            onClick={handleSelectClick}
-            disabled={statusSelectDisabled}
-            className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-            aria-label={`Estado de ${emptyToDash(match.name)}`}
+    <>
+      <div
+        draggable
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        className="cursor-grab rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"
+        role="button"
+        tabIndex={0}
+        aria-label={`Mover ${emptyToDash(match.name)} a otra etapa`}
+        aria-describedby={`kanban-card-${candidateId}`}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-sm font-semibold text-white"
+            aria-hidden
           >
-            {statuses.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name || s.id}
-              </option>
-            ))}
-          </select>
-        ) : null}
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1" id={`kanban-card-${candidateId}`}>
+            <p className="truncate font-sans text-sm font-medium text-foreground">
+              {emptyToDash(match.name)}
+            </p>
+            <p className="flex flex-wrap items-center gap-1.5 font-sans text-xs text-muted-foreground">
+              <span>Puntaje: {score}</span>
+              <span className="inline-flex rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
+                {applicationSourceLabel}
+              </span>
+            </p>
+          </div>
+          {vacancyId && sheetCandidateProfileId ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setTechnicalSheetOpen(true);
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="shrink-0 rounded-md border border-border bg-background p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+              aria-label={technicalSheetMessages.viewSheet}
+            >
+              <FileText className="h-4 w-4" aria-hidden />
+            </button>
+          ) : null}
+          {statuses.length > 0 ? (
+            <select
+              value={currentStatusId ?? ""}
+              onChange={handleStatusChange}
+              onMouseDown={handleSelectMouseDown}
+              onClick={handleSelectClick}
+              disabled={statusSelectDisabled}
+              className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              aria-label={`Estado de ${emptyToDash(match.name)}`}
+            >
+              {statuses.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name || s.id}
+                </option>
+              ))}
+            </select>
+          ) : null}
+        </div>
       </div>
-    </div>
+      {vacancyId && sheetCandidateProfileId && technicalSheetOpen ? (
+        <TechnicalSheetModal
+          isOpen={technicalSheetOpen}
+          onClose={() => setTechnicalSheetOpen(false)}
+          vacancyId={vacancyId}
+          candidateProfileId={sheetCandidateProfileId}
+          vacancyTitle={vacancyTitle}
+          candidateLabel={candidateLabelForSheet}
+        />
+      ) : null}
+    </>
   );
 };
 
@@ -1117,6 +1154,8 @@ const KanbanColumn = ({
   candidateStatusOverrides,
   onStatusChange,
   updatingStatusCandidateId,
+  vacancyId = null,
+  vacancyTitle = null,
 }) => {
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -1196,6 +1235,8 @@ const KanbanColumn = ({
             currentStatusId={getCurrentStatusId(match, candidateId)}
             onStatusChange={onStatusChange}
             statusSelectDisabled={updatingStatusCandidateId === candidateId}
+            vacancyId={vacancyId}
+            vacancyTitle={vacancyTitle}
           />
         ))}
       </div>
@@ -2671,6 +2712,8 @@ export default function VacanteDetallePage() {
                                 candidateStatusOverrides={candidateStatusOverrides}
                                 onStatusChange={handleStatusChange}
                                 updatingStatusCandidateId={updatingStatusCandidateId}
+                                vacancyId={id != null ? String(id) : null}
+                                vacancyTitle={vacancy?.title ?? ""}
                               />
                             ))}
                           </div>
@@ -3359,6 +3402,8 @@ export default function VacanteDetallePage() {
                               candidateStatusOverrides={candidateStatusOverrides}
                               onStatusChange={handleStatusChange}
                               updatingStatusCandidateId={updatingStatusCandidateId}
+                              vacancyId={id != null ? String(id) : null}
+                              vacancyTitle={vacancy?.title ?? ""}
                             />
                           ))}
                         </div>
