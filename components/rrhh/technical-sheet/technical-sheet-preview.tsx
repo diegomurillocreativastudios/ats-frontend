@@ -1,6 +1,8 @@
 "use client"
 
-import { useId, useMemo, useState } from "react"
+import type { LucideIcon } from "lucide-react"
+import type { ReactNode } from "react"
+import { useId, useState } from "react"
 import {
   BarChart2,
   Briefcase,
@@ -19,17 +21,94 @@ interface TechnicalSheetPreviewProps {
   payload: TechnicalSheetPayload
 }
 
+/**
+ * Ignores empty `{}` and objects whose properties are all null, undefined, or blank strings,
+ * so a placeholder `personalData: {}` does not hide a populated `candidate` object.
+ */
+const isMeaningfulObjectRecord = (v: unknown): v is Record<string, unknown> => {
+  if (v == null || typeof v !== "object" || Array.isArray(v)) return false
+  const o = v as Record<string, unknown>
+  const keys = Object.keys(o).filter((k) => !k.toLowerCase().startsWith("additionalprop"))
+  if (keys.length === 0) return false
+  return keys.some((k) => {
+    const val = o[k]
+    if (val == null) return false
+    if (typeof val === "string" && val.trim() === "") return false
+    if (Array.isArray(val)) return val.length > 0
+    if (typeof val === "object" && !Array.isArray(val)) {
+      return Object.keys(val as object).length > 0
+    }
+    return true
+  })
+}
+
 const pickObject = (
   p: TechnicalSheetPayload,
   keys: (keyof TechnicalSheetPayload)[]
 ): Record<string, unknown> | null => {
   for (const k of keys) {
     const v = p[k]
-    if (v != null && typeof v === "object" && !Array.isArray(v)) {
-      return v as Record<string, unknown>
+    if (isMeaningfulObjectRecord(v)) {
+      return v
     }
   }
   return null
+}
+
+const TECHNICAL_SHEET_SIBLING_KEYS = new Set([
+  "generatedAtUtc",
+  "vacancy",
+  "vacancyInfo",
+  "application",
+  "applicationInfo",
+  "postulation",
+  "match",
+  "matching",
+  "interviews",
+  "interviewList",
+])
+
+const stripSheetEnvelopeKeys = (root: Record<string, unknown>): Record<string, unknown> => {
+  const out: Record<string, unknown> = { ...root }
+  for (const k of TECHNICAL_SHEET_SIBLING_KEYS) {
+    delete out[k]
+  }
+  return out
+}
+
+/**
+ * True when the JSON root is a candidate profile (API sin envoltorio `candidate`).
+ */
+const isRootCandidateProfileShape = (root: Record<string, unknown>): boolean => {
+  const nestedCandidate = root.candidate
+  if (nestedCandidate != null && typeof nestedCandidate === "object" && !Array.isArray(nestedCandidate)) {
+    return false
+  }
+  const cpId = root.candidateProfileId
+  const fn = root.firstName
+  const ln = root.lastName
+  const hasProfileId = typeof cpId === "string" && cpId.trim() !== ""
+  const hasFullName =
+    typeof fn === "string" &&
+    fn.trim() !== "" &&
+    typeof ln === "string" &&
+    ln.trim() !== ""
+  if (!hasProfileId && !hasFullName) return false
+  return isMeaningfulObjectRecord(stripSheetEnvelopeKeys(root))
+}
+
+/**
+ * Objeto candidato: anidado (`candidate` / `personal`) o el propio root si ya viene plano.
+ */
+const pickCandidateDisplayRecord = (
+  payload: TechnicalSheetPayload
+): Record<string, unknown> | null => {
+  const nested = pickObject(payload, ["personalData", "personal", "candidate"])
+  if (nested) return nested
+  if (payload == null || typeof payload !== "object" || Array.isArray(payload)) return null
+  const root = payload as Record<string, unknown>
+  if (!isRootCandidateProfileShape(root)) return null
+  return stripSheetEnvelopeKeys(root)
 }
 
 const SPANISH_LABELS: Record<string, string> = {
@@ -38,8 +117,10 @@ const SPANISH_LABELS: Record<string, string> = {
   lastName: "Apellido",
   email: "Correo",
   phoneNumber: "Teléfono",
+  address: "Dirección / ubicación",
   country: "País",
   birthCity: "Ciudad de nacimiento",
+  englishLevel: "Nivel de inglés",
   headline: "Título o headline",
   summary: "Resumen",
   cvStoragePath: "Ruta del CV",
@@ -80,6 +161,10 @@ const SPANISH_LABELS: Record<string, string> = {
   interviewerName: "Entrevistador",
   notes: "Notas",
   resumeMarkdown: "Curriculum (texto completo)",
+  socialLinks: "Enlaces y redes",
+  recognitions: "Cursos y seminarios",
+  profileUpdatedAtUtc: "Perfil actualizado",
+  videoLink: "Video de presentación",
 }
 
 const humanizeKey = (key: string): string => {
@@ -210,7 +295,7 @@ const ExpandableBlock = ({
 
   if (!needsToggle) {
     return (
-      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
+      <p className="whitespace-pre-wrap break-words text-sm leading-[1.65] text-foreground/95">
         {content}
       </p>
     )
@@ -220,8 +305,8 @@ const ExpandableBlock = ({
       <p
         className={
           open
-            ? "whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground"
-            : "line-clamp-5 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground"
+            ? "whitespace-pre-wrap break-words text-sm leading-[1.65] text-foreground/95"
+            : "line-clamp-5 whitespace-pre-wrap break-words text-sm leading-[1.65] text-foreground/95"
         }
       >
         {content}
@@ -229,7 +314,7 @@ const ExpandableBlock = ({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="mt-2 inline-flex items-center gap-0.5 font-sans text-xs font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-1 rounded"
+        className="mt-2.5 inline-flex items-center gap-1 rounded-md font-sans text-xs font-semibold text-vo-purple transition-colors hover:bg-vo-purple/10 hover:text-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 px-1 py-0.5 -mx-1"
       >
         {open ? (
           <>
@@ -251,10 +336,10 @@ const ValuePill = ({ formatted }: { formatted: ReturnType<typeof formatScalar> }
   if (formatted.kind === "bool") {
     return (
       <span
-        className={`inline-flex rounded-md px-2 py-0.5 text-xs font-medium ${
+        className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold tracking-wide ${
           formatted.text === "Sí"
-            ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-200"
-            : "bg-muted text-muted-foreground"
+            ? "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] dark:text-emerald-200"
+            : "border-border/80 bg-muted/60 text-muted-foreground"
         }`}
       >
         {formatted.text}
@@ -263,7 +348,7 @@ const ValuePill = ({ formatted }: { formatted: ReturnType<typeof formatScalar> }
   }
   if (formatted.kind === "percent") {
     return (
-      <span className="inline-flex min-w-14 items-baseline gap-0.5 rounded-md bg-vo-purple/10 px-2.5 py-1 font-sans text-sm font-semibold tabular-nums text-vo-purple">
+      <span className="inline-flex min-w-[3.25rem] items-baseline gap-0.5 rounded-lg border border-vo-purple/20 bg-gradient-to-br from-vo-purple/[0.12] to-vo-magenta/[0.06] px-2.5 py-1 font-sans text-sm font-bold tabular-nums text-vo-purple shadow-sm">
         {formatted.text}
       </span>
     )
@@ -283,14 +368,42 @@ const DataFieldRow = ({
   labelOverride?: string
 }) => {
   const label = labelOverride ?? humanizeKey(fieldKey)
-  if (fieldKey === "appliedAt" && typeof value === "string") {
+  if (
+    (fieldKey === "appliedAt" || fieldKey === "profileUpdatedAtUtc") &&
+    typeof value === "string"
+  ) {
     return (
       <div
-        className="grid grid-cols-1 gap-2 border-b border-border/50 py-2.5 last:border-0 sm:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)] sm:items-start sm:gap-4"
+        className={sheetRowGrid}
         id={rowId}
       >
-        <dt className="font-sans text-xs font-medium text-muted-foreground sm:pt-0.5">{label}</dt>
-        <dd className="min-w-0 text-sm text-foreground">{formatIsoDisplay(value)}</dd>
+        <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:pt-0.5">
+          {label}
+        </dt>
+        <dd className="min-w-0 text-sm font-medium text-foreground/95">{formatIsoDisplay(value)}</dd>
+      </div>
+    )
+  }
+  if (fieldKey === "videoLink" && typeof value === "string" && value.trim() !== "") {
+    const href = value.startsWith("http") ? value : `https://${value}`
+    return (
+      <div
+        className={sheetRowGrid}
+        id={rowId}
+      >
+        <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:pt-0.5">
+          {label}
+        </dt>
+        <dd className="min-w-0 text-sm text-foreground/95">
+          <a
+            href={href}
+            className="break-all font-medium text-vo-purple underline decoration-vo-purple/30 underline-offset-[3px] transition-colors hover:text-vo-purple-hover hover:decoration-vo-purple"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {value}
+          </a>
+        </dd>
       </div>
     )
   }
@@ -300,13 +413,13 @@ const DataFieldRow = ({
   if (isPlainLongString) {
     return (
       <div
-        className="rounded-lg border border-border/70 bg-card/50 px-3.5 py-3 shadow-sm"
+        className="rounded-xl border border-border/60 bg-gradient-to-br from-card/90 to-muted/[0.2] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] ring-1 ring-black/[0.02] dark:ring-white/[0.04]"
         id={rowId}
       >
-        <div className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {label}
         </div>
-        <div className="mt-1.5">
+        <div className="mt-2">
           <ExpandableBlock content={value} isMultilineHeavy={value.includes("\n")} />
         </div>
       </div>
@@ -318,26 +431,31 @@ const DataFieldRow = ({
     if (keys.length === 0) {
       return (
         <div
-          className="grid grid-cols-1 gap-2 border-b border-border/50 py-2.5 last:border-0 sm:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)]"
+          className={sheetRowGrid}
           id={rowId}
         >
-          <dt className="font-sans text-xs font-medium text-muted-foreground">{label}</dt>
+          <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            {label}
+          </dt>
           <dd className="text-sm text-muted-foreground">—</dd>
         </div>
       )
     }
     return (
-      <div className="rounded-lg border border-border/70 bg-card/50 px-3.5 py-3 shadow-sm" id={rowId}>
-        <div className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground">
+      <div
+        className="rounded-xl border border-border/60 bg-gradient-to-br from-card/90 to-muted/[0.15] px-4 py-3.5 shadow-sm ring-1 ring-black/[0.02] dark:ring-white/[0.04]"
+        id={rowId}
+      >
+        <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {label}
         </div>
-        <ul className="mt-2 max-h-48 space-y-1.5 overflow-y-auto" role="list">
+        <ul className="mt-2.5 max-h-48 space-y-2 overflow-y-auto pr-1" role="list">
           {keys.map((k) => (
             <li
               key={k}
-              className="flex flex-col gap-0.5 rounded-md border border-border/40 bg-background/60 px-2.5 py-1.5 text-sm sm:flex-row sm:items-baseline sm:justify-between sm:gap-2"
+              className="flex flex-col gap-1 rounded-lg border border-border/45 bg-background/70 px-3 py-2 text-sm shadow-sm sm:flex-row sm:items-baseline sm:justify-between sm:gap-3"
             >
-              <span className="shrink-0 text-xs font-medium text-muted-foreground">
+              <span className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
                 {humanizeKey(k)}
               </span>
               <span className="min-w-0 break-words text-foreground/95">
@@ -356,22 +474,24 @@ const DataFieldRow = ({
   if (Array.isArray(value) && !fieldKey.toLowerCase().includes("skill")) {
     if (value.length === 0) {
       return (
-        <div
-          className="grid grid-cols-1 gap-2 border-b border-border/50 py-2.5 sm:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)]"
-          id={rowId}
-        >
-          <dt className="font-sans text-xs font-medium text-muted-foreground">{label}</dt>
+        <div className={sheetRowGrid} id={rowId}>
+          <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            {label}
+          </dt>
           <dd className="text-sm text-muted-foreground">—</dd>
         </div>
       )
     }
     return (
-      <div className="rounded-lg border border-border/70 bg-card/50 px-3.5 py-3 shadow-sm" id={rowId}>
-        <div className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground">
+      <div
+        className="rounded-xl border border-border/60 bg-gradient-to-br from-card/90 to-muted/[0.15] px-4 py-3.5 shadow-sm ring-1 ring-black/[0.02] dark:ring-white/[0.04]"
+        id={rowId}
+      >
+        <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {label}
         </div>
         <ol
-          className="mt-2 list-decimal space-y-1.5 pl-4 text-sm text-foreground/95"
+          className="mt-2.5 list-decimal space-y-2 pl-4 text-sm leading-relaxed text-foreground/95 marker:font-semibold marker:text-vo-purple"
           role="list"
         >
           {value.map((v, i) => (
@@ -385,12 +505,11 @@ const DataFieldRow = ({
   }
   const formatted = formatScalar(value, fieldKey)
   return (
-    <div
-      className="grid grid-cols-1 gap-2 border-b border-border/50 py-2.5 last:border-0 sm:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)] sm:items-start sm:gap-4"
-      id={rowId}
-    >
-      <dt className="font-sans text-xs font-medium text-muted-foreground sm:pt-0.5">{label}</dt>
-      <dd className="min-w-0 text-sm text-foreground">
+    <div className={sheetRowGrid} id={rowId}>
+      <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:pt-0.5">
+        {label}
+      </dt>
+      <dd className="min-w-0 text-sm text-foreground/95">
         <ValuePill formatted={formatted} />
       </dd>
     </div>
@@ -398,12 +517,12 @@ const DataFieldRow = ({
 }
 
 const SkillsCloud = ({ skills }: { skills: string[] }) => (
-  <div className="flex flex-wrap gap-1.5" role="list" aria-label={m.skills}>
+  <div className="flex flex-wrap gap-2" role="list" aria-label={m.skills}>
     {skills.map((s) => (
       <span
         key={s}
         role="listitem"
-        className="inline-flex rounded-full border border-border/80 bg-background px-2.5 py-0.5 text-xs font-medium text-foreground"
+        className="inline-flex rounded-full border border-vo-purple/15 bg-gradient-to-br from-background to-vo-purple/[0.04] px-3 py-1 text-xs font-semibold text-foreground/90 shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-vo-purple/25 hover:shadow-md"
       >
         {s}
       </span>
@@ -411,7 +530,13 @@ const SkillsCloud = ({ skills }: { skills: string[] }) => (
   </div>
 )
 
-const JsonArrayCards = ({ items, variant }: { items: unknown[]; variant: "work" | "edu" | "lang" }) => (
+const JsonArrayCards = ({
+  items,
+  variant,
+}: {
+  items: unknown[]
+  variant: "work" | "edu" | "lang" | "social"
+}) => (
   <ul className="flex flex-col gap-3" role="list">
     {items.map((raw, i) => {
       const rec = asRecord(raw)
@@ -419,7 +544,7 @@ const JsonArrayCards = ({ items, variant }: { items: unknown[]; variant: "work" 
         return (
           <li
             key={i}
-            className="rounded-lg border border-dashed border-border/80 bg-muted/20 px-3 py-2 text-sm text-foreground/80"
+            className="rounded-xl border border-dashed border-vo-purple/25 bg-vo-purple/[0.03] px-3.5 py-2.5 text-sm text-foreground/85"
           >
             <span className="text-xs text-muted-foreground">Dato no estructurado. </span>
             {typeof raw === "string" ? (
@@ -442,28 +567,32 @@ const JsonArrayCards = ({ items, variant }: { items: unknown[]; variant: "work" 
         return (
           <li
             key={i}
-            className="rounded-xl border border-border/70 bg-card/80 px-4 py-3 shadow-sm"
+            className="relative overflow-hidden rounded-xl border border-border/55 bg-gradient-to-br from-card to-muted/[0.12] pl-4 pr-4 py-3.5 shadow-sm ring-1 ring-black/[0.02] before:absolute before:left-0 before:top-3 before:h-[calc(100%-1.5rem)] before:w-1 before:rounded-full before:bg-gradient-to-b before:from-vo-purple before:to-vo-magenta/60 dark:ring-white/[0.05]"
           >
             {company ? (
-              <p className="font-sans text-sm font-semibold text-foreground">{company}</p>
+              <p className={`font-sans text-base font-semibold tracking-tight text-foreground`}>
+                {company}
+              </p>
             ) : null}
             {role ? (
-              <p className="mt-0.5 font-sans text-sm text-vo-purple/90 dark:text-vo-purple/80">
+              <p className="mt-1 font-sans text-sm font-medium text-vo-purple">
                 {role}
               </p>
             ) : null}
             {(from || to) && (
-              <p className="mt-1.5 flex items-center gap-1.5 font-sans text-xs text-muted-foreground">
-                <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <p className="mt-2 flex items-center gap-2 font-sans text-xs font-medium text-muted-foreground">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/80 text-vo-purple">
+                  <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                </span>
                 {[from, to].filter(Boolean).join(" – ")}
               </p>
             )}
             {desc ? (
-              <div className="mt-2 border-t border-border/40 pt-2">
-                <p className="text-[0.7rem] font-medium uppercase text-muted-foreground">
+              <div className="mt-3 border-t border-border/40 pt-3">
+                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                   {m.description}
                 </p>
-                <div className="mt-1">
+                <div className="mt-1.5">
                   <ExpandableBlock content={desc} isMultilineHeavy={desc.length > 180} />
                 </div>
               </div>
@@ -479,14 +608,42 @@ const JsonArrayCards = ({ items, variant }: { items: unknown[]; variant: "work" 
         return (
           <li
             key={i}
-            className="rounded-xl border border-border/70 bg-card/80 px-4 py-3 shadow-sm"
+            className="rounded-xl border border-border/55 bg-gradient-to-br from-card to-vo-navy/[0.04] px-4 py-3.5 shadow-sm ring-1 ring-vo-navy/10"
           >
-            {inst ? <p className="font-sans text-sm font-semibold text-foreground">{inst}</p> : null}
-            {deg ? <p className="mt-0.5 text-sm text-foreground/90">{deg}</p> : null}
+            {inst ? (
+              <p className={`font-sans text-base font-semibold tracking-tight text-foreground`}>
+                {inst}
+              </p>
+            ) : null}
+            {deg ? <p className="mt-1 text-sm font-medium text-foreground/90">{deg}</p> : null}
             {(from || to) && (
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {[from, to].filter(Boolean).join(" – ")}
               </p>
+            )}
+          </li>
+        )
+      }
+      if (variant === "social") {
+        const platform = pickFromRecord(rec, ["Platform", "platform", "name", "label"])
+        const url = pickFromRecord(rec, ["Url", "url", "link", "href"])
+        return (
+          <li
+            key={i}
+            className="flex flex-col gap-2 rounded-xl border border-border/55 bg-card/90 px-4 py-3.5 shadow-sm ring-1 ring-black/[0.02] sm:flex-row sm:items-center sm:justify-between dark:ring-white/[0.05]"
+          >
+            <span className="text-sm font-semibold text-foreground">{platform || "Red social"}</span>
+            {url ? (
+              <a
+                href={url.startsWith("http") ? url : `https://${url}`}
+                className="break-all text-sm font-medium text-vo-purple underline decoration-vo-purple/25 underline-offset-[3px] transition-colors hover:decoration-vo-purple"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {url}
+              </a>
+            ) : (
+              <span className="text-sm text-muted-foreground">—</span>
             )}
           </li>
         )
@@ -496,34 +653,106 @@ const JsonArrayCards = ({ items, variant }: { items: unknown[]; variant: "work" 
       return (
         <li
           key={i}
-          className="flex items-center justify-between gap-2 rounded-lg border border-border/70 bg-card/80 px-3 py-2"
+          className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/25 px-3.5 py-2.5"
         >
-          <span className="text-sm font-medium text-foreground">{lang ?? "—"}</span>
-          {level ? <span className="text-xs text-muted-foreground">{level}</span> : null}
+          <span className="text-sm font-semibold text-foreground">{lang ?? "—"}</span>
+          {level ? (
+            <span className="rounded-full border border-border/60 bg-background px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {level}
+            </span>
+          ) : null}
         </li>
       )
     })}
   </ul>
 )
 
-const sectionStyles: Record<string, { icon: typeof User; bar: string; iconWrap: string }> = {
-  personal: { icon: User, bar: "from-vo-purple/80 to-fuchsia-500/40", iconWrap: "bg-vo-purple/15 text-vo-purple" },
-  vacancy: { icon: Briefcase, bar: "from-sky-500/70 to-cyan-400/30", iconWrap: "bg-sky-500/10 text-sky-700 dark:text-sky-300" },
+interface SectionMeta {
+  icon: LucideIcon
+  bar: string
+  iconWrap: string
+}
+
+const sectionStyles: Record<string, SectionMeta> = {
+  personal: {
+    icon: User,
+    bar: "from-vo-purple via-vo-magenta/70 to-vo-navy/50",
+    iconWrap:
+      "border border-vo-purple/25 bg-vo-purple/[0.1] text-vo-purple dark:border-vo-purple/35 dark:bg-vo-purple/20 dark:text-vo-purple",
+  },
+  vacancy: {
+    icon: Briefcase,
+    bar: "from-vo-navy via-vo-sky/80 to-cyan-500/40",
+    iconWrap:
+      "border border-vo-navy/20 bg-vo-navy/[0.08] text-vo-navy dark:border-vo-navy/30 dark:bg-vo-navy/15 dark:text-vo-sky",
+  },
   application: {
     icon: ClipboardList,
-    bar: "from-amber-500/50 to-orange-300/20",
-    iconWrap: "bg-amber-500/10 text-amber-800 dark:text-amber-200",
+    bar: "from-vo-yellow via-amber-500/70 to-orange-400/45",
+    iconWrap:
+      "border border-amber-500/30 bg-amber-500/[0.1] text-amber-900 dark:border-amber-500/35 dark:bg-amber-500/12 dark:text-amber-100",
   },
   match: {
     icon: BarChart2,
-    bar: "from-emerald-500/50 to-teal-400/25",
-    iconWrap: "bg-emerald-500/10 text-emerald-800 dark:text-emerald-200",
+    bar: "from-emerald-600 via-teal-500/70 to-vo-navy/35",
+    iconWrap:
+      "border border-emerald-500/25 bg-emerald-500/[0.1] text-emerald-800 dark:border-emerald-500/35 dark:bg-emerald-500/12 dark:text-emerald-200",
   },
   interviews: {
     icon: MessageCircle,
-    bar: "from-indigo-500/50 to-violet-400/30",
-    iconWrap: "bg-indigo-500/10 text-indigo-800 dark:text-indigo-200",
+    bar: "from-indigo-600 via-vo-purple/60 to-vo-magenta/40",
+    iconWrap:
+      "border border-indigo-400/25 bg-indigo-500/[0.1] text-indigo-800 dark:border-indigo-400/35 dark:bg-indigo-500/12 dark:text-indigo-200",
   },
+}
+
+const sheetRowGrid =
+  "grid grid-cols-1 gap-2 border-b border-border/40 py-3 last:border-0 sm:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)] sm:items-start sm:gap-5 sm:py-3.5 transition-colors hover:bg-muted/[0.25]"
+
+function SheetSectionFrame({
+  titleId,
+  title,
+  meta,
+  subtitle,
+  children,
+}: {
+  titleId: string
+  title: string
+  meta: SectionMeta
+  subtitle?: ReactNode
+  children: ReactNode
+}) {
+  const Icon = meta.icon
+  return (
+    <section
+      className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm ring-1 ring-black/[0.02] transition-[box-shadow,transform] duration-300 hover:shadow-md dark:ring-white/[0.05]"
+      aria-labelledby={titleId}
+    >
+      <div
+        className={`relative z-[2] h-1 w-full bg-gradient-to-r ${meta.bar}`}
+        aria-hidden
+      />
+      <div className="relative z-[2] flex items-center gap-4 border-b border-border/50 bg-muted/25 px-5 py-4 dark:bg-muted/15">
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrap}`}
+        >
+          <Icon className="h-[1.125rem] w-[1.125rem]" strokeWidth={2} aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3
+            id={titleId}
+            className="font-sans text-lg font-semibold leading-snug tracking-tight text-foreground sm:text-xl"
+          >
+            {title}
+          </h3>
+          {subtitle ? (
+            <div className="mt-1 font-sans text-xs font-medium text-muted-foreground">{subtitle}</div>
+          ) : null}
+        </div>
+      </div>
+      <div className="relative z-[2] px-5 py-1 pb-4">{children}</div>
+    </section>
+  )
 }
 
 const CANDIDATE_CORE_ORDER = [
@@ -531,14 +760,18 @@ const CANDIDATE_CORE_ORDER = [
   "lastName",
   "email",
   "phoneNumber",
+  "address",
   "country",
   "birthCity",
+  "englishLevel",
   "headline",
   "candidateProfileId",
   "cvStoragePath",
+  "videoLink",
   "availability",
   "minSalary",
   "jobPreferences",
+  "profileUpdatedAtUtc",
 ]
 
 const CANDIDATE_BLOB_KEYS = new Set([
@@ -546,6 +779,10 @@ const CANDIDATE_BLOB_KEYS = new Set([
   "education",
   "languages",
   "skills",
+  "technicalSkills",
+  "softSkills",
+  "socialLinks",
+  "recognitions",
   "summary",
   "resumeMarkdown",
 ])
@@ -572,6 +809,11 @@ const APPLICATION_ORDER = [
   "applicationSource",
 ]
 
+const collectStringList = (v: unknown): string[] =>
+  Array.isArray(v)
+    ? [...new Set(v.map((s) => String(s).trim()).filter((s) => s !== ""))]
+    : []
+
 function CandidateSectionBlock({
   id,
   data,
@@ -584,9 +826,21 @@ function CandidateSectionBlock({
   const work = Array.isArray(data.workExperience) ? data.workExperience : []
   const education = Array.isArray(data.education) ? data.education : []
   const langs = Array.isArray(data.languages) ? data.languages : []
-  const skills = Array.isArray(data.skills)
-    ? data.skills.map((s) => String(s)).filter((s) => s.trim() !== "")
+  const socialLinks = Array.isArray(data.socialLinks) ? data.socialLinks : []
+  const recognitions = Array.isArray(data.recognitions)
+    ? data.recognitions.map((r) => String(r)).filter((r) => r.trim() !== "")
     : []
+  const skillsLegacy = collectStringList(data.skills)
+  const technicalSkillsList = collectStringList(data.technicalSkills)
+  const softSkillsList = collectStringList(data.softSkills)
+  const hasTechnicalBucket = technicalSkillsList.length > 0
+  const hasSoftBucket = softSkillsList.length > 0
+  const showSplitSkillBuckets = hasTechnicalBucket || hasSoftBucket
+  const combinedTechnicalSkills = hasTechnicalBucket
+    ? [...new Set([...technicalSkillsList, ...skillsLegacy])]
+    : []
+  const legacySkillsWhenOnlySoftTyped =
+    !hasTechnicalBucket && hasSoftBucket ? skillsLegacy : []
 
   const baseData = { ...data }
   for (const k of CANDIDATE_BLOB_KEYS) {
@@ -597,25 +851,9 @@ function CandidateSectionBlock({
   )
 
   const meta = sectionStyles.personal
-  const Icon = meta.icon
 
   return (
-    <section
-      className="overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-b from-card to-card/40 shadow-sm ring-1 ring-border/30"
-      aria-labelledby={`${id}-title`}
-    >
-      <div className={`h-1 w-full bg-gradient-to-r ${meta.bar}`} aria-hidden />
-      <div className="flex items-start gap-3 border-b border-border/50 bg-muted/20 px-4 py-3.5">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrap}`}
-        >
-          <Icon className="h-5 w-5" aria-hidden />
-        </div>
-        <h3 id={`${id}-title`} className="pt-0.5 font-sans text-base font-semibold tracking-tight text-foreground">
-          {m.sectionPersonal}
-        </h3>
-      </div>
-      <div className="px-4 py-1 pb-3">
+    <SheetSectionFrame titleId={`${id}-title`} title={m.sectionPersonal} meta={meta}>
         <dl>
           {restEntries.map(([key, val], idx) => (
             <DataFieldRow
@@ -628,8 +866,8 @@ function CandidateSectionBlock({
         </dl>
 
         {typeof summary === "string" && summary.trim() !== "" && (
-          <div className="mt-4 rounded-xl border border-vo-purple/20 bg-vo-purple/[0.04] p-3.5">
-            <p className="text-[0.7rem] font-medium uppercase tracking-wide text-vo-purple/90">
+          <div className="mt-5 rounded-xl border border-vo-purple/25 bg-gradient-to-br from-vo-purple/[0.06] via-card to-vo-magenta/[0.04] p-4 shadow-inner ring-1 ring-vo-purple/10">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-vo-purple">
               {m.summary}
             </p>
             <div className="mt-2">
@@ -642,39 +880,119 @@ function CandidateSectionBlock({
         )}
 
         {work.length > 0 && (
-          <div className="mt-5">
-            <h4 className="mb-2.5 font-sans text-sm font-semibold text-foreground">{m.workExperience}</h4>
+          <div className="mt-6">
+            <h4
+              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
+            >
+              {m.workExperience}
+            </h4>
             <JsonArrayCards items={work} variant="work" />
           </div>
         )}
 
         {education.length > 0 && (
-          <div className="mt-5">
-            <h4 className="mb-2.5 font-sans text-sm font-semibold text-foreground">{m.education}</h4>
+          <div className="mt-6">
+            <h4
+              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
+            >
+              {m.education}
+            </h4>
             <JsonArrayCards items={education} variant="edu" />
           </div>
         )}
 
         {langs.length > 0 && (
-          <div className="mt-5">
-            <h4 className="mb-2.5 font-sans text-sm font-semibold text-foreground">{m.languages}</h4>
+          <div className="mt-6">
+            <h4
+              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
+            >
+              {m.languages}
+            </h4>
             <JsonArrayCards items={langs} variant="lang" />
           </div>
         )}
 
-        {skills.length > 0 && (
-          <div className="mt-5">
-            <h4 className="mb-2.5 font-sans text-sm font-semibold text-foreground">{m.skills}</h4>
-            <SkillsCloud skills={skills} />
+        {showSplitSkillBuckets ? (
+          <>
+            {combinedTechnicalSkills.length > 0 ? (
+              <div className="mt-6">
+                <h4
+                  className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
+                >
+                  {m.technicalSkills}
+                </h4>
+                <SkillsCloud skills={combinedTechnicalSkills} />
+              </div>
+            ) : null}
+            {softSkillsList.length > 0 ? (
+              <div className="mt-6">
+                <h4
+                  className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
+                >
+                  {m.softSkills}
+                </h4>
+                <SkillsCloud skills={softSkillsList} />
+              </div>
+            ) : null}
+            {legacySkillsWhenOnlySoftTyped.length > 0 ? (
+              <div className="mt-6">
+                <h4
+                  className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
+                >
+                  {m.skills}
+                </h4>
+                <SkillsCloud skills={legacySkillsWhenOnlySoftTyped} />
+              </div>
+            ) : null}
+          </>
+        ) : skillsLegacy.length > 0 ? (
+          <div className="mt-6">
+            <h4
+              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
+            >
+              {m.skills}
+            </h4>
+            <SkillsCloud skills={skillsLegacy} />
+          </div>
+        ) : null}
+
+        {socialLinks.length > 0 && (
+          <div className="mt-6">
+            <h4
+              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
+            >
+              {m.socialLinks}
+            </h4>
+            <JsonArrayCards items={socialLinks} variant="social" />
+          </div>
+        )}
+
+        {recognitions.length > 0 && (
+          <div className="mt-6">
+            <h4
+              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
+            >
+              {m.recognitions}
+            </h4>
+            <ul className="flex flex-col gap-2" role="list">
+              {recognitions.map((line, i) => (
+                <li
+                  key={`${i}-${line.slice(0, 24)}`}
+                  className="rounded-lg border border-border/50 bg-muted/20 px-3.5 py-2.5 text-sm leading-relaxed text-foreground/95"
+                >
+                  {line}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
         {typeof resume === "string" && resume.trim() !== "" && (
-          <div className="mt-5 rounded-xl border border-border/80 bg-muted/15 p-3.5">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <div className="mt-6 rounded-xl border border-border/60 bg-gradient-to-b from-muted/30 to-card/80 p-4 ring-1 ring-black/[0.02] dark:ring-white/[0.05]">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {m.resumeMarkdown}
             </p>
-            <div className="mt-2 max-h-72 overflow-hidden rounded-md border border-border/60">
+            <div className="mt-2 max-h-72 overflow-hidden rounded-lg border border-border/55 bg-background/80">
               <ExpandableBlock
                 content={resume}
                 isMultilineHeavy
@@ -682,8 +1000,7 @@ function CandidateSectionBlock({
             </div>
           </div>
         )}
-      </div>
-    </section>
+    </SheetSectionFrame>
   )
 }
 
@@ -697,25 +1014,9 @@ function VacancySectionBlock({ id, data }: { id: string; data: Record<string, un
   delete rest.weights
   const entries = orderEntries(rest, VACANCY_ORDER)
   const meta = sectionStyles.vacancy
-  const Icon = meta.icon
 
   return (
-    <section
-      className="overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-b from-card to-card/40 shadow-sm ring-1 ring-border/30"
-      aria-labelledby={`${id}-title`}
-    >
-      <div className={`h-1 w-full bg-gradient-to-r ${meta.bar}`} aria-hidden />
-      <div className="flex items-start gap-3 border-b border-border/50 bg-muted/20 px-4 py-3.5">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrap}`}
-        >
-          <Icon className="h-5 w-5" aria-hidden />
-        </div>
-        <h3 id={`${id}-title`} className="pt-0.5 font-sans text-base font-semibold tracking-tight text-foreground">
-          {m.sectionVacancy}
-        </h3>
-      </div>
-      <div className="px-4 py-1 pb-3">
+    <SheetSectionFrame titleId={`${id}-title`} title={m.sectionVacancy} meta={meta}>
         <dl>
           {entries.map(([key, val], idx) => (
             <DataFieldRow key={`${key}-${idx}`} fieldKey={key} value={val} rowId={`${id}-${key}`} />
@@ -800,32 +1101,16 @@ function VacancySectionBlock({ id, data }: { id: string; data: Record<string, un
             })()}
           </div>
         )}
-      </div>
-    </section>
+    </SheetSectionFrame>
   )
 }
 
 function ApplicationSectionBlock({ id, data }: { id: string; data: Record<string, unknown> }) {
   const entries = orderEntries(data, APPLICATION_ORDER)
   const meta = sectionStyles.application
-  const Icon = meta.icon
   return (
-    <section
-      className="overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-b from-card to-card/40 shadow-sm ring-1 ring-border/30"
-      aria-labelledby={`${id}-title`}
-    >
-      <div className={`h-1 w-full bg-gradient-to-r ${meta.bar}`} aria-hidden />
-      <div className="flex items-start gap-3 border-b border-border/50 bg-muted/20 px-4 py-3.5">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrap}`}
-        >
-          <Icon className="h-5 w-5" aria-hidden />
-        </div>
-        <h3 id={`${id}-title`} className="pt-0.5 font-sans text-base font-semibold tracking-tight text-foreground">
-          {m.sectionApplication}
-        </h3>
-      </div>
-      <dl className="px-4 py-1 pb-3">
+    <SheetSectionFrame titleId={`${id}-title`} title={m.sectionApplication} meta={meta}>
+      <dl>
         {entries.map(([key, val], idx) => (
           <DataFieldRow
             key={`${key}-${idx}`}
@@ -835,7 +1120,7 @@ function ApplicationSectionBlock({ id, data }: { id: string; data: Record<string
           />
         ))}
       </dl>
-    </section>
+    </SheetSectionFrame>
   )
 }
 
@@ -862,7 +1147,6 @@ function MatchSectionBlock({ id, data }: { id: string; data: Record<string, unkn
     "totalScore",
   ])
   const meta = sectionStyles.match
-  const Icon = meta.icon
   const scoresRec =
     componentScores != null &&
     typeof componentScores === "object" &&
@@ -871,26 +1155,12 @@ function MatchSectionBlock({ id, data }: { id: string; data: Record<string, unkn
       : null
 
   return (
-    <section
-      className="overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-b from-card to-card/40 shadow-sm ring-1 ring-border/30"
-      aria-labelledby={`${id}-title`}
-    >
-      <div className={`h-1 w-full bg-gradient-to-r ${meta.bar}`} aria-hidden />
-      <div className="flex items-start gap-3 border-b border-border/50 bg-muted/20 px-4 py-3.5">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrap}`}
-        >
-          <Icon className="h-5 w-5" aria-hidden />
-        </div>
-        <h3 id={`${id}-title`} className="pt-0.5 font-sans text-base font-semibold tracking-tight text-foreground">
-          {m.sectionMatch}
-        </h3>
-      </div>
-      <div className="space-y-4 px-4 py-3 pb-4">
+    <SheetSectionFrame titleId={`${id}-title`} title={m.sectionMatch} meta={meta}>
+      <div className="space-y-4 py-2">
         {typeof data.totalScore === "number" && (
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/25 bg-gradient-to-r from-emerald-500/10 to-transparent px-4 py-3">
-            <span className="text-sm font-medium text-foreground">{m.matchTotalScore}</span>
-            <span className="text-xl font-bold tabular-nums text-vo-purple">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/[0.12] via-card to-vo-purple/[0.06] px-4 py-3.5 shadow-sm ring-1 ring-emerald-500/10">
+            <span className="text-sm font-semibold text-foreground">{m.matchTotalScore}</span>
+            <span className={`font-sans text-2xl font-bold tabular-nums text-vo-purple`}>
               {formatScore01(data.totalScore)}
             </span>
           </div>
@@ -911,7 +1181,11 @@ function MatchSectionBlock({ id, data }: { id: string; data: Record<string, unkn
 
         {scoresRec && Object.keys(scoresRec).length > 0 && (
           <div>
-            <h4 className="mb-2 text-sm font-semibold text-foreground">{m.matchComponents}</h4>
+            <h4
+              className={`font-sans mb-2.5 text-lg font-semibold tracking-tight text-foreground`}
+            >
+              {m.matchComponents}
+            </h4>
             <ul className="space-y-2" role="list">
               {Object.entries(scoresRec)
                 .filter(([k]) => !k.toLowerCase().startsWith("additional"))
@@ -993,7 +1267,7 @@ function MatchSectionBlock({ id, data }: { id: string; data: Record<string, unkn
           )}
         </div>
       </div>
-    </section>
+    </SheetSectionFrame>
   )
 }
 
@@ -1050,18 +1324,20 @@ const InterviewItemCard = ({ item, index }: { item: unknown; index: number }) =>
 
   if (!asObj && typeof item === "string") {
     return (
-      <li className="rounded-xl border border-border/80 bg-card p-4 text-sm text-foreground shadow-sm">
+      <li className="rounded-xl border border-border/60 bg-gradient-to-br from-card to-muted/20 p-4 text-sm leading-relaxed text-foreground/95 shadow-sm ring-1 ring-black/[0.02] dark:ring-white/[0.05]">
         {item}
       </li>
     )
   }
 
   return (
-    <li className="rounded-xl border border-border/80 bg-gradient-to-b from-card to-muted/5 p-4 shadow-sm">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
-        <p className="min-w-0 font-sans text-sm font-semibold text-foreground">{title}</p>
+    <li className="rounded-xl border border-border/55 bg-gradient-to-br from-card via-card to-indigo-500/[0.03] p-4 shadow-md ring-1 ring-vo-purple/[0.06] transition-[transform,box-shadow] duration-300 hover:-translate-y-px hover:shadow-lg">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+        <p className={`font-sans min-w-0 text-base font-semibold tracking-tight text-foreground`}>
+          {title}
+        </p>
         {status ? (
-          <span className="w-fit rounded-md bg-muted px-2 py-0.5 font-sans text-[0.65rem] font-medium uppercase text-muted-foreground">
+          <span className="w-fit rounded-full border border-border/60 bg-muted/80 px-2.5 py-1 font-sans text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground">
             {status}
           </span>
         ) : null}
@@ -1122,95 +1398,51 @@ const InterviewsBlock = ({ items }: { items: unknown[] }) => {
   const listId = useId()
   if (items.length === 0) return null
   const meta = sectionStyles.interviews
-  const Icon = meta.icon
+  const countLabel = items.length === 1 ? "1 entrevista" : `${items.length} entrevistas`
   return (
-    <section
-      className="overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-b from-card to-card/40 shadow-sm ring-1 ring-border/30"
-      aria-labelledby={`${listId}-int-title`}
+    <SheetSectionFrame
+      titleId={`${listId}-int-title`}
+      title={m.sectionInterviews}
+      meta={meta}
+      subtitle={countLabel}
     >
-      <div className={`h-1 w-full bg-gradient-to-r ${meta.bar}`} aria-hidden />
-      <div className="flex items-start gap-3 border-b border-border/50 bg-muted/20 px-4 py-3.5">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrap}`}
-        >
-          <Icon className="h-5 w-5" aria-hidden />
-        </div>
-        <div>
-          <h3
-            id={`${listId}-int-title`}
-            className="font-sans text-base font-semibold tracking-tight text-foreground"
-          >
-            {m.sectionInterviews}
-          </h3>
-          <p className="mt-0.5 font-sans text-xs text-muted-foreground">
-            {items.length === 1 ? "1 entrevista" : `${items.length} entrevistas`}
-          </p>
-        </div>
-      </div>
-      <ul className="flex flex-col gap-3 p-4 pt-1" role="list">
+      <ul className="flex flex-col gap-3 pt-1" role="list">
         {items.map((row, i) => (
           <InterviewItemCard key={i} item={row} index={i} />
         ))}
       </ul>
-    </section>
+    </SheetSectionFrame>
   )
 }
 
-const sectionId = (k: string) => `ts-section-${k}`
-
 export function TechnicalSheetPreview({ payload }: TechnicalSheetPreviewProps) {
   const idBase = useId()
-  const personal = pickObject(payload, ["personalData", "personal", "candidate"]) ?? null
-  const vacancy = pickObject(payload, ["vacancy", "vacancyInfo"]) ?? null
-  const application = pickObject(payload, ["application", "applicationInfo", "postulation"]) ?? null
-  const match = pickObject(payload, ["match", "matching"]) ?? null
-  const generatedAt = typeof payload.generatedAtUtc === "string" ? payload.generatedAtUtc : null
-  const interviewsRaw = payload.interviews ?? payload.interviewList
-  const interviews = useMemo(
-    () => (Array.isArray(interviewsRaw) ? interviewsRaw : []),
-    [interviewsRaw]
-  )
+  const personal = pickCandidateDisplayRecord(payload)
 
-  const hasAny =
-    generatedAt != null ||
-    (personal && Object.keys(personal).length > 0) ||
-    (vacancy && Object.keys(vacancy).length > 0) ||
-    (application && Object.keys(application).length > 0) ||
-    (match && Object.keys(match).length > 0) ||
-    interviews.length > 0
+  const hasCandidate = personal != null && Object.keys(personal).length > 0
 
-  if (!hasAny) {
+  if (!hasCandidate) {
     return (
-      <p className="font-sans text-sm text-muted-foreground" role="status">
-        {m.emptyPreview}
-      </p>
+      <div
+        className="rounded-2xl border border-dashed border-vo-purple/25 bg-gradient-to-br from-muted/40 via-card to-vo-purple/[0.04] px-6 py-10 text-center shadow-inner"
+        role="status"
+      >
+        <p className="font-sans text-sm font-medium leading-relaxed text-muted-foreground">{m.emptyPreview}</p>
+      </div>
     )
   }
 
   return (
-    <div className="mx-auto flex max-w-full flex-col gap-5">
-      {generatedAt != null && (
-        <p
-          className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-card/50 px-3 py-2 font-sans text-xs text-muted-foreground"
-          role="status"
-        >
-          <span className="font-medium text-foreground/80">{m.generatedAt}:</span>
-          {formatIsoDisplay(generatedAt)}
-        </p>
-      )}
-      {personal && Object.keys(personal).length > 0 ? (
+    <div
+      className="relative mx-auto flex max-w-full flex-col gap-6 rounded-3xl bg-[radial-gradient(ellipse_120%_80%_at_100%_-20%,rgba(110,51,133,0.08),transparent),radial-gradient(ellipse_90%_60%_at_-10%_60%,rgba(113,188,237,0.07),transparent)] px-1 py-1 sm:px-2"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 rounded-3xl opacity-[0.35] [background-image:radial-gradient(circle_at_center,rgba(13,13,13,0.04)_1px,transparent_1.5px)] [background-size:14px_14px]"
+        aria-hidden
+      />
+      <div className="relative flex flex-col gap-6">
         <CandidateSectionBlock id={`${idBase}-personal`} data={personal} />
-      ) : null}
-      {vacancy && Object.keys(vacancy).length > 0 ? (
-        <VacancySectionBlock id={sectionId("vacancy")} data={vacancy} />
-      ) : null}
-      {application && Object.keys(application).length > 0 ? (
-        <ApplicationSectionBlock id={sectionId("app")} data={application} />
-      ) : null}
-      {match && Object.keys(match).length > 0 ? (
-        <MatchSectionBlock id={sectionId("match")} data={match} />
-      ) : null}
-      {interviews.length > 0 ? <InterviewsBlock items={interviews} /> : null}
+      </div>
     </div>
   )
 }
