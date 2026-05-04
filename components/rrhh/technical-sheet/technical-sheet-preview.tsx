@@ -12,7 +12,6 @@ import {
   ClipboardList,
   Clock,
   MessageCircle,
-  User,
 } from "lucide-react"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
 import type { TechnicalSheetPayload } from "@/lib/api/technical-sheet"
@@ -112,7 +111,6 @@ const pickCandidateDisplayRecord = (
 }
 
 const SPANISH_LABELS: Record<string, string> = {
-  candidateProfileId: "ID de perfil",
   firstName: "Nombre",
   lastName: "Apellido",
   email: "Correo",
@@ -285,32 +283,25 @@ const TEXT_COLLAPSE_AT = 320
 const ExpandableBlock = ({
   content,
   isMultilineHeavy,
+  compact,
 }: {
   content: string
   isMultilineHeavy: boolean
+  compact?: boolean
 }) => {
   const [open, setOpen] = useState(false)
   const needsToggle =
     content.length > TEXT_COLLAPSE_AT || (isMultilineHeavy && content.split("\n").length > 5)
+  const bodyClass = compact
+    ? "whitespace-pre-wrap break-words text-xs leading-snug text-foreground/95"
+    : "whitespace-pre-wrap break-words text-sm leading-[1.65] text-foreground/95"
 
   if (!needsToggle) {
-    return (
-      <p className="whitespace-pre-wrap break-words text-sm leading-[1.65] text-foreground/95">
-        {content}
-      </p>
-    )
+    return <p className={bodyClass}>{content}</p>
   }
   return (
     <div>
-      <p
-        className={
-          open
-            ? "whitespace-pre-wrap break-words text-sm leading-[1.65] text-foreground/95"
-            : "line-clamp-5 whitespace-pre-wrap break-words text-sm leading-[1.65] text-foreground/95"
-        }
-      >
-        {content}
-      </p>
+      <p className={open ? bodyClass : `line-clamp-5 ${bodyClass}`}>{content}</p>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -332,11 +323,19 @@ const ExpandableBlock = ({
   )
 }
 
-const ValuePill = ({ formatted }: { formatted: ReturnType<typeof formatScalar> }) => {
+const ValuePill = ({
+  formatted,
+  compact,
+}: {
+  formatted: ReturnType<typeof formatScalar>
+  compact?: boolean
+}) => {
   if (formatted.kind === "bool") {
     return (
       <span
-        className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold tracking-wide ${
+        className={`inline-flex rounded-full border font-semibold tracking-wide ${
+          compact ? "px-2 py-px text-[0.65rem]" : "px-2.5 py-0.5 text-xs"
+        } ${
           formatted.text === "Sí"
             ? "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] dark:text-emerald-200"
             : "border-border/80 bg-muted/60 text-muted-foreground"
@@ -348,12 +347,20 @@ const ValuePill = ({ formatted }: { formatted: ReturnType<typeof formatScalar> }
   }
   if (formatted.kind === "percent") {
     return (
-      <span className="inline-flex min-w-[3.25rem] items-baseline gap-0.5 rounded-lg border border-vo-purple/20 bg-gradient-to-br from-vo-purple/[0.12] to-vo-magenta/[0.06] px-2.5 py-1 font-sans text-sm font-bold tabular-nums text-vo-purple shadow-sm">
+      <span
+        className={
+          compact
+            ? "inline-flex min-w-[2.75rem] items-baseline gap-0.5 rounded-md border border-vo-purple/20 bg-gradient-to-br from-vo-purple/[0.12] to-vo-magenta/[0.06] px-2 py-0.5 font-sans text-xs font-bold tabular-nums text-vo-purple shadow-sm"
+            : "inline-flex min-w-[3.25rem] items-baseline gap-0.5 rounded-lg border border-vo-purple/20 bg-gradient-to-br from-vo-purple/[0.12] to-vo-magenta/[0.06] px-2.5 py-1 font-sans text-sm font-bold tabular-nums text-vo-purple shadow-sm"
+        }
+      >
         {formatted.text}
       </span>
     )
   }
-  return <ExpandableBlock content={formatted.text} isMultilineHeavy={false} />
+  return (
+    <ExpandableBlock compact={compact} content={formatted.text} isMultilineHeavy={false} />
+  )
 }
 
 const DataFieldRow = ({
@@ -361,26 +368,37 @@ const DataFieldRow = ({
   value,
   rowId,
   labelOverride,
+  compact,
 }: {
   fieldKey: string
   value: unknown
   rowId: string
   labelOverride?: string
+  compact?: boolean
 }) => {
   const label = labelOverride ?? humanizeKey(fieldKey)
+  const rg = compact ? sheetRowGridCompact : sheetRowGrid
+  const dtTight = compact
+    ? "font-sans text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground sm:pt-0"
+    : "font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:pt-0.5"
+  const ddText = compact ? "min-w-0 text-xs text-foreground/95" : "min-w-0 text-sm text-foreground/95"
+  const ddTextMedium = compact
+    ? "min-w-0 text-xs font-medium text-foreground/95"
+    : "min-w-0 text-sm font-medium text-foreground/95"
+  const nestedPad = compact ? "px-3 py-2" : "px-4 py-3.5"
   if (
     (fieldKey === "appliedAt" || fieldKey === "profileUpdatedAtUtc") &&
     typeof value === "string"
   ) {
     return (
       <div
-        className={sheetRowGrid}
+        className={rg}
         id={rowId}
       >
-        <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:pt-0.5">
+        <dt className={dtTight}>
           {label}
         </dt>
-        <dd className="min-w-0 text-sm font-medium text-foreground/95">{formatIsoDisplay(value)}</dd>
+        <dd className={ddTextMedium}>{formatIsoDisplay(value)}</dd>
       </div>
     )
   }
@@ -388,13 +406,13 @@ const DataFieldRow = ({
     const href = value.startsWith("http") ? value : `https://${value}`
     return (
       <div
-        className={sheetRowGrid}
+        className={rg}
         id={rowId}
       >
-        <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:pt-0.5">
+        <dt className={dtTight}>
           {label}
         </dt>
-        <dd className="min-w-0 text-sm text-foreground/95">
+        <dd className={ddText}>
           <a
             href={href}
             className="break-all font-medium text-vo-purple underline decoration-vo-purple/30 underline-offset-[3px] transition-colors hover:text-vo-purple-hover hover:decoration-vo-purple"
@@ -413,13 +431,13 @@ const DataFieldRow = ({
   if (isPlainLongString) {
     return (
       <div
-        className="rounded-xl border border-border/60 bg-gradient-to-br from-card/90 to-muted/[0.2] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] ring-1 ring-black/[0.02] dark:ring-white/[0.04]"
+        className={`rounded-xl border border-border/60 bg-gradient-to-br from-card/90 to-muted/[0.2] shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] ring-1 ring-black/[0.02] dark:ring-white/[0.04] ${nestedPad}`}
         id={rowId}
       >
         <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {label}
         </div>
-        <div className="mt-2">
+        <div className={compact ? "mt-1" : "mt-2"}>
           <ExpandableBlock content={value} isMultilineHeavy={value.includes("\n")} />
         </div>
       </div>
@@ -431,29 +449,35 @@ const DataFieldRow = ({
     if (keys.length === 0) {
       return (
         <div
-          className={sheetRowGrid}
+          className={rg}
           id={rowId}
         >
-          <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+          <dt className={dtTight}>
             {label}
           </dt>
-          <dd className="text-sm text-muted-foreground">—</dd>
+          <dd className={compact ? "text-xs text-muted-foreground" : "text-sm text-muted-foreground"}>
+            —
+          </dd>
         </div>
       )
     }
     return (
       <div
-        className="rounded-xl border border-border/60 bg-gradient-to-br from-card/90 to-muted/[0.15] px-4 py-3.5 shadow-sm ring-1 ring-black/[0.02] dark:ring-white/[0.04]"
+        className={`rounded-xl border border-border/60 bg-gradient-to-br from-card/90 to-muted/[0.15] shadow-sm ring-1 ring-black/[0.02] dark:ring-white/[0.04] ${nestedPad}`}
         id={rowId}
       >
         <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {label}
         </div>
-        <ul className="mt-2.5 max-h-48 space-y-2 overflow-y-auto pr-1" role="list">
+        <ul className={compact ? "mt-1.5 max-h-40 space-y-1 overflow-y-auto pr-1" : "mt-2.5 max-h-48 space-y-2 overflow-y-auto pr-1"} role="list">
           {keys.map((k) => (
             <li
               key={k}
-              className="flex flex-col gap-1 rounded-lg border border-border/45 bg-background/70 px-3 py-2 text-sm shadow-sm sm:flex-row sm:items-baseline sm:justify-between sm:gap-3"
+              className={
+                compact
+                  ? "flex flex-col gap-0.5 rounded-lg border border-border/45 bg-background/70 px-2 py-1.5 text-xs shadow-sm sm:flex-row sm:items-baseline sm:justify-between sm:gap-2"
+                  : "flex flex-col gap-1 rounded-lg border border-border/45 bg-background/70 px-3 py-2 text-sm shadow-sm sm:flex-row sm:items-baseline sm:justify-between sm:gap-3"
+              }
             >
               <span className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
                 {humanizeKey(k)}
@@ -474,24 +498,30 @@ const DataFieldRow = ({
   if (Array.isArray(value) && !fieldKey.toLowerCase().includes("skill")) {
     if (value.length === 0) {
       return (
-        <div className={sheetRowGrid} id={rowId}>
-          <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+        <div className={rg} id={rowId}>
+          <dt className={dtTight}>
             {label}
           </dt>
-          <dd className="text-sm text-muted-foreground">—</dd>
+          <dd className={compact ? "text-xs text-muted-foreground" : "text-sm text-muted-foreground"}>
+            —
+          </dd>
         </div>
       )
     }
     return (
       <div
-        className="rounded-xl border border-border/60 bg-gradient-to-br from-card/90 to-muted/[0.15] px-4 py-3.5 shadow-sm ring-1 ring-black/[0.02] dark:ring-white/[0.04]"
+        className={`rounded-xl border border-border/60 bg-gradient-to-br from-card/90 to-muted/[0.15] shadow-sm ring-1 ring-black/[0.02] dark:ring-white/[0.04] ${nestedPad}`}
         id={rowId}
       >
         <div className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {label}
         </div>
         <ol
-          className="mt-2.5 list-decimal space-y-2 pl-4 text-sm leading-relaxed text-foreground/95 marker:font-semibold marker:text-vo-purple"
+          className={
+            compact
+              ? "mt-1.5 list-decimal space-y-1 pl-3 text-xs leading-relaxed text-foreground/95 marker:font-semibold marker:text-vo-purple"
+              : "mt-2.5 list-decimal space-y-2 pl-4 text-sm leading-relaxed text-foreground/95 marker:font-semibold marker:text-vo-purple"
+          }
           role="list"
         >
           {value.map((v, i) => (
@@ -505,12 +535,12 @@ const DataFieldRow = ({
   }
   const formatted = formatScalar(value, fieldKey)
   return (
-    <div className={sheetRowGrid} id={rowId}>
-      <dt className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground sm:pt-0.5">
+    <div className={rg} id={rowId}>
+      <dt className={dtTight}>
         {label}
       </dt>
-      <dd className="min-w-0 text-sm text-foreground/95">
-        <ValuePill formatted={formatted} />
+      <dd className={ddText}>
+        <ValuePill compact={compact} formatted={formatted} />
       </dd>
     </div>
   )
@@ -674,12 +704,6 @@ interface SectionMeta {
 }
 
 const sectionStyles: Record<string, SectionMeta> = {
-  personal: {
-    icon: User,
-    bar: "from-vo-purple via-vo-magenta/70 to-vo-navy/50",
-    iconWrap:
-      "border border-vo-purple/25 bg-vo-purple/[0.1] text-vo-purple dark:border-vo-purple/35 dark:bg-vo-purple/20 dark:text-vo-purple",
-  },
   vacancy: {
     icon: Briefcase,
     bar: "from-vo-navy via-vo-sky/80 to-cyan-500/40",
@@ -709,70 +733,93 @@ const sectionStyles: Record<string, SectionMeta> = {
 const sheetRowGrid =
   "grid grid-cols-1 gap-2 border-b border-border/40 py-3 last:border-0 sm:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)] sm:items-start sm:gap-5 sm:py-3.5 transition-colors hover:bg-muted/[0.25]"
 
+const sheetRowGridCompact =
+  "grid grid-cols-1 gap-1 border-b border-border/40 py-1.5 last:border-0 sm:grid-cols-[minmax(0,0.36fr)_minmax(0,0.64fr)] sm:items-start sm:gap-3 sm:py-2 transition-colors hover:bg-muted/[0.2]"
+
 function SheetSectionFrame({
   titleId,
   title,
   meta,
   subtitle,
   children,
+  density = "default",
 }: {
   titleId: string
   title: string
   meta: SectionMeta
   subtitle?: ReactNode
   children: ReactNode
+  density?: "default" | "compact"
 }) {
   const Icon = meta.icon
+  const isCompact = density === "compact"
   return (
     <section
-      className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm ring-1 ring-black/[0.02] transition-[box-shadow,transform] duration-300 hover:shadow-md dark:ring-white/[0.05]"
+      className={
+        isCompact
+          ? "group relative overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm ring-1 ring-black/[0.02] transition-[box-shadow,transform] duration-300 hover:shadow-md dark:ring-white/[0.05]"
+          : "group relative overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm ring-1 ring-black/[0.02] transition-[box-shadow,transform] duration-300 hover:shadow-md dark:ring-white/[0.05]"
+      }
       aria-labelledby={titleId}
     >
       <div
         className={`relative z-[2] h-1 w-full bg-gradient-to-r ${meta.bar}`}
         aria-hidden
       />
-      <div className="relative z-[2] flex items-center gap-4 border-b border-border/50 bg-muted/25 px-5 py-4 dark:bg-muted/15">
+      <div
+        className={
+          isCompact
+            ? "relative z-[2] flex items-center gap-2.5 border-b border-border/50 bg-muted/25 px-3 py-2 dark:bg-muted/15"
+            : "relative z-[2] flex items-center gap-4 border-b border-border/50 bg-muted/25 px-5 py-4 dark:bg-muted/15"
+        }
+      >
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrap}`}
+          className={
+            isCompact
+              ? `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${meta.iconWrap}`
+              : `flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconWrap}`
+          }
         >
-          <Icon className="h-[1.125rem] w-[1.125rem]" strokeWidth={2} aria-hidden />
+          <Icon
+            className={isCompact ? "h-4 w-4" : "h-[1.125rem] w-[1.125rem]"}
+            strokeWidth={2}
+            aria-hidden
+          />
         </div>
         <div className="min-w-0 flex-1">
           <h3
             id={titleId}
-            className="font-sans text-lg font-semibold leading-snug tracking-tight text-foreground sm:text-xl"
+            className={
+              isCompact
+                ? "font-sans text-sm font-semibold leading-snug tracking-tight text-foreground sm:text-base"
+                : "font-sans text-lg font-semibold leading-snug tracking-tight text-foreground sm:text-xl"
+            }
           >
             {title}
           </h3>
           {subtitle ? (
-            <div className="mt-1 font-sans text-xs font-medium text-muted-foreground">{subtitle}</div>
+            <div
+              className={
+                isCompact
+                  ? "mt-0.5 font-sans text-[0.65rem] font-medium text-muted-foreground sm:text-xs"
+                  : "mt-1 font-sans text-xs font-medium text-muted-foreground"
+              }
+            >
+              {subtitle}
+            </div>
           ) : null}
         </div>
       </div>
-      <div className="relative z-[2] px-5 py-1 pb-4">{children}</div>
+      <div
+        className={
+          isCompact ? "relative z-[2] px-3 py-0 pb-2.5" : "relative z-[2] px-5 py-1 pb-4"
+        }
+      >
+        {children}
+      </div>
     </section>
   )
 }
-
-const CANDIDATE_CORE_ORDER = [
-  "firstName",
-  "lastName",
-  "email",
-  "phoneNumber",
-  "address",
-  "country",
-  "birthCity",
-  "englishLevel",
-  "headline",
-  "candidateProfileId",
-  "cvStoragePath",
-  "videoLink",
-  "availability",
-  "minSalary",
-  "jobPreferences",
-  "profileUpdatedAtUtc",
-]
 
 const CANDIDATE_BLOB_KEYS = new Set([
   "workExperience",
@@ -814,13 +861,7 @@ const collectStringList = (v: unknown): string[] =>
     ? [...new Set(v.map((s) => String(s).trim()).filter((s) => s !== ""))]
     : []
 
-function CandidateSectionBlock({
-  id,
-  data,
-}: {
-  id: string
-  data: Record<string, unknown>
-}) {
+function CandidateSectionBlock({ data }: { data: Record<string, unknown> }) {
   const summary = data.summary
   const resume = data.resumeMarkdown
   const work = Array.isArray(data.workExperience) ? data.workExperience : []
@@ -842,31 +883,10 @@ function CandidateSectionBlock({
   const legacySkillsWhenOnlySoftTyped =
     !hasTechnicalBucket && hasSoftBucket ? skillsLegacy : []
 
-  const baseData = { ...data }
-  for (const k of CANDIDATE_BLOB_KEYS) {
-    delete baseData[k as keyof typeof baseData]
-  }
-  const restEntries = orderEntries(baseData, CANDIDATE_CORE_ORDER).filter(
-    ([, v]) => v != null && v !== ""
-  )
-
-  const meta = sectionStyles.personal
-
   return (
-    <SheetSectionFrame titleId={`${id}-title`} title={m.sectionPersonal} meta={meta}>
-        <dl>
-          {restEntries.map(([key, val], idx) => (
-            <DataFieldRow
-              key={`${key}-${idx}`}
-              fieldKey={key}
-              value={val}
-              rowId={`${id}-r-${key}`}
-            />
-          ))}
-        </dl>
-
+    <div className="flex flex-col gap-6">
         {typeof summary === "string" && summary.trim() !== "" && (
-          <div className="mt-5 rounded-xl border border-vo-purple/25 bg-gradient-to-br from-vo-purple/[0.06] via-card to-vo-magenta/[0.04] p-4 shadow-inner ring-1 ring-vo-purple/10">
+          <div className="rounded-xl border border-vo-purple/25 bg-gradient-to-br from-vo-purple/[0.06] via-card to-vo-magenta/[0.04] p-4 shadow-inner ring-1 ring-vo-purple/10">
             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-vo-purple">
               {m.summary}
             </p>
@@ -1000,7 +1020,7 @@ function CandidateSectionBlock({
             </div>
           </div>
         )}
-    </SheetSectionFrame>
+    </div>
   )
 }
 
@@ -1415,8 +1435,29 @@ const InterviewsBlock = ({ items }: { items: unknown[] }) => {
   )
 }
 
+function trimUnknownDisplayPart(v: unknown): string {
+  if (v == null) return ""
+  const s = typeof v === "string" ? v : String(v)
+  return s.trim()
+}
+
+/**
+ * Nombre completo, dirección e inglés desde el payload de la ficha (mismo criterio que el preview).
+ */
+export function getTechnicalSheetCandidateHeaderFacts(
+  payload: TechnicalSheetPayload
+): { fullName: string; address: string; englishLevel: string } | null {
+  const personal = pickCandidateDisplayRecord(payload)
+  if (!personal) return null
+  const fullName = [trimUnknownDisplayPart(personal.firstName), trimUnknownDisplayPart(personal.lastName)]
+    .filter(Boolean)
+    .join(" ")
+  const address = trimUnknownDisplayPart(personal.address)
+  const englishLevel = trimUnknownDisplayPart(personal.englishLevel)
+  return { fullName, address, englishLevel }
+}
+
 export function TechnicalSheetPreview({ payload }: TechnicalSheetPreviewProps) {
-  const idBase = useId()
   const personal = pickCandidateDisplayRecord(payload)
 
   const hasCandidate = personal != null && Object.keys(personal).length > 0
@@ -1441,7 +1482,7 @@ export function TechnicalSheetPreview({ payload }: TechnicalSheetPreviewProps) {
         aria-hidden
       />
       <div className="relative flex flex-col gap-6">
-        <CandidateSectionBlock id={`${idBase}-personal`} data={personal} />
+        <CandidateSectionBlock data={personal} />
       </div>
     </div>
   )

@@ -4,6 +4,9 @@
  */
 export const technicalSheetMessages = {
   modalTitle: "Ficha técnica",
+  headerName: "Nombre",
+  headerAddress: "Dirección",
+  headerEnglishLevel: "Nivel de inglés",
   viewSheet: "Ver ficha técnica",
   downloadHtml: "Descargar HTML",
   downloadPdf: "Descargar PDF",

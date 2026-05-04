@@ -11,7 +11,10 @@ import {
   tryDownloadTechnicalSheetPdf,
   type TechnicalSheetPayload,
 } from "@/lib/api/technical-sheet"
-import { TechnicalSheetPreview } from "@/components/rrhh/technical-sheet/technical-sheet-preview"
+import {
+  getTechnicalSheetCandidateHeaderFacts,
+  TechnicalSheetPreview,
+} from "@/components/rrhh/technical-sheet/technical-sheet-preview"
 
 export interface TechnicalSheetPanelProps {
   enabled: boolean
@@ -128,6 +131,10 @@ export function TechnicalSheetPanel({
 
   const busy = loading || downloadingHtml || downloadingPdf
 
+  const headerFacts = payload ? getTechnicalSheetCandidateHeaderFacts(payload) : null
+  const showStructuredHeader = Boolean(payload && headerFacts)
+  const showLegacyCandidateLine = Boolean(!showStructuredHeader && candidateLabel)
+
   const shell =
     variant === "page"
       ? `w-full max-w-4xl flex-col rounded-2xl border border-border bg-background text-foreground shadow-sm ${className}`
@@ -146,10 +153,24 @@ export function TechnicalSheetPanel({
           <h2 id={titleId} className="font-sans text-xl font-semibold tracking-tight text-foreground">
             {m.modalTitle}
           </h2>
-          {candidateLabel ? (
-            <p className="mt-1.5 line-clamp-2 font-sans text-sm text-muted-foreground">
-              {candidateLabel}
-            </p>
+          {showStructuredHeader && headerFacts ? (
+            <dl className="mt-2 space-y-1 font-sans text-sm leading-snug text-foreground">
+              <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-x-2">
+                <dt className="shrink-0 font-medium text-muted-foreground">{m.headerName}:</dt>
+                <dd className="min-w-0 wrap-break-word">{headerFacts.fullName || "—"}</dd>
+              </div>
+              <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-x-2">
+                <dt className="shrink-0 font-medium text-muted-foreground">{m.headerAddress}:</dt>
+                <dd className="min-w-0 wrap-break-word">{headerFacts.address || "—"}</dd>
+              </div>
+              <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-x-2">
+                <dt className="shrink-0 font-medium text-muted-foreground">{m.headerEnglishLevel}:</dt>
+                <dd className="min-w-0 wrap-break-word">{headerFacts.englishLevel || "—"}</dd>
+              </div>
+            </dl>
+          ) : null}
+          {showLegacyCandidateLine ? (
+            <p className="mt-1.5 line-clamp-2 font-sans text-sm text-muted-foreground">{candidateLabel}</p>
           ) : null}
         </div>
         {headerEnd ? <div className="shrink-0">{headerEnd}</div> : null}
