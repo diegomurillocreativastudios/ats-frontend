@@ -2501,6 +2501,7 @@ export default function VacanteDetallePage() {
                           <AiDisclosurePillProgress
                             percent={null}
                             timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
+                            preliminaryMatchStepLabels
                             className="mt-0!"
                             aria-label="Progreso del análisis preliminar con IA"
                           />
@@ -3191,6 +3192,7 @@ export default function VacanteDetallePage() {
                         <AiDisclosurePillProgress
                           percent={null}
                           timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
+                          preliminaryMatchStepLabels
                           className="mt-0!"
                           aria-label="Progreso del análisis preliminar con IA"
                         />

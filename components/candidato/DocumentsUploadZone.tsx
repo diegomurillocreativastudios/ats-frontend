@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, type ReactNode, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
 import { Upload, X, Sparkles, Loader2, Check } from "lucide-react"
 import { getApiErrorMessage, isSilentError } from "@/lib/api-error"
+import { getAiIngestStatusLabelFromPercent } from "@/lib/ai-ingest-progress-status"
 
 const CV_KEYWORDS = ["cv", "curriculum", "curriculum vitae", "resume", "hoja de vida", "hojadevida"]
 
@@ -48,8 +49,12 @@ export interface DocumentsUploadZoneLeftContext {
 
 export interface AiProcessingBarState {
   active: boolean
-  /** `null` while running a single file (indeterminate bar) */
+  /** `null` while running a single file (avance simulado por tiempo en la barra RRHH) */
   percent: number | null
+  /** Etapa visible simulada (opcional; si no se envía, la barra RRHH puede derivarla del %) */
+  statusLabel?: string
+  /** Éxito final: barra al 100% en modo completado antes de cerrar el modal */
+  isCompleted?: boolean
 }
 
 interface DocumentsUploadZoneProps {
@@ -197,7 +202,12 @@ export default function DocumentsUploadZone({
     if (!onProcess || processingIndex !== null || isProcessingAll) return;
     setError(null);
     setProcessingIndex(index);
-    onAiProcessingBarChange?.({ active: true, percent: null });
+    onAiProcessingBarChange?.({
+      active: true,
+      percent: null,
+      isCompleted: false,
+      statusLabel: getAiIngestStatusLabelFromPercent(0),
+    })
     try {
       await Promise.resolve(onProcess(file, index));
       setProcessedIndices((prev) => new Set([...prev, index]));
@@ -206,7 +216,7 @@ export default function DocumentsUploadZone({
       setError(getApiErrorMessage(err) || "Error al procesar el documento.")
     } finally {
       setProcessingIndex(null);
-      onAiProcessingBarChange?.({ active: false, percent: null });
+      onAiProcessingBarChange?.({ active: false, percent: null })
     }
   };
 
@@ -215,21 +225,32 @@ export default function DocumentsUploadZone({
     setError(null);
     setIsProcessingAll(true);
     const total = processableFiles.length;
-    onAiProcessingBarChange?.({ active: true, percent: 0 });
+    onAiProcessingBarChange?.({
+      active: true,
+      percent: 0,
+      isCompleted: false,
+      statusLabel: getAiIngestStatusLabelFromPercent(0),
+    })
     try {
       for (let k = 0; k < processableFiles.length; k++) {
         const { file, index } = processableFiles[k];
+        const pctStart = Math.round((k / total) * 100)
         onAiProcessingBarChange?.({
           active: true,
-          percent: Math.round((k / total) * 100),
-        });
+          percent: pctStart,
+          isCompleted: false,
+          statusLabel: getAiIngestStatusLabelFromPercent(pctStart),
+        })
         setProcessingIndex(index);
         await Promise.resolve(onProcess(file, index));
         setProcessedIndices((prev) => new Set([...prev, index]));
+        const pctDone = Math.round(((k + 1) / total) * 100)
         onAiProcessingBarChange?.({
           active: true,
-          percent: Math.round(((k + 1) / total) * 100),
-        });
+          percent: pctDone,
+          isCompleted: false,
+          statusLabel: getAiIngestStatusLabelFromPercent(pctDone),
+        })
       }
     } catch (err: unknown) {
       if (isSilentError(err)) return
@@ -237,7 +258,7 @@ export default function DocumentsUploadZone({
     } finally {
       setProcessingIndex(null);
       setIsProcessingAll(false);
-      onAiProcessingBarChange?.({ active: false, percent: null });
+      onAiProcessingBarChange?.({ active: false, percent: null })
     }
   };
 

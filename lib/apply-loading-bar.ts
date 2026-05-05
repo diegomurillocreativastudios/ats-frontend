@@ -10,14 +10,14 @@ export const APPLY_LOADING_BAR_CAP = 92
  */
 export const APPLY_TYPICAL_SUBMIT_MS = Math.round(1.06 * 60_000)
 
-/** Ingest al añadir candidato (RRHH): duración observada ~50s — misma curva, factor de tiempo. */
-export const RECRUITER_ADD_CANDIDATE_TYPICAL_MS = 50_000
+/** Ingest al añadir candidato (RRHH): duración objetivo de animación ~25s. */
+export const RECRUITER_ADD_CANDIDATE_TYPICAL_MS = 25_000
 
 /** Búsqueda preliminar con IA (vacante): ajusta la barra al ritmo del POST de búsqueda. */
 export const VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS = 50_000
 
-/** POST `/api/recruiter/vacancies/:id/match` (Análisis preliminar). */
-export const VACANCY_PRELIMINARY_MATCH_TYPICAL_MS = 25_000
+/** POST `/api/recruiter/vacancies/:id/match` (Análisis preliminar): ritmo de animación ~20s. */
+export const VACANCY_PRELIMINARY_MATCH_TYPICAL_MS = 20_000
 
 /** Si el envío supera esto, el formulario público muestra texto orientativo */
 export const APPLY_LONG_WAIT_HINT_MS = 35_000

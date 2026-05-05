@@ -164,6 +164,8 @@ export default function CandidatosPage() {
     setAiProcessingBar({ active: false, percent: null });
   };
 
+  const AI_INGEST_COMPLETED_HOLD_MS = 550;
+
   const handleProcessUpload = async (file) => {
     const formData = new FormData();
     formData.append("File", file);
@@ -172,7 +174,14 @@ export default function CandidatosPage() {
     try {
       await apiClient.postFormData("/Ingest/upload", formData);
       await fetchCandidates();
+      setAiProcessingBar({
+        active: true,
+        percent: 100,
+        isCompleted: true,
+      });
+      await new Promise((resolve) => setTimeout(resolve, AI_INGEST_COMPLETED_HOLD_MS));
       setIsUploadModalOpen(false);
+      setAiProcessingBar({ active: false, percent: null });
       setSnackbar({
         open: true,
         variant: "success",
@@ -398,7 +407,11 @@ export default function CandidatosPage() {
           <div className="flex flex-col gap-2 rounded-lg border border-vo-purple/20 bg-vo-purple/5 p-3">
             <AiDisclosureBadge />
             {aiProcessingBar.active ? (
-              <AiDisclosurePillProgress percent={aiProcessingBar.percent} />
+              <AiDisclosurePillProgress
+                percent={aiProcessingBar.percent}
+                isCompleted={Boolean(aiProcessingBar.isCompleted)}
+                ingestStepLabels
+              />
             ) : null}
             <p className="font-sans text-sm text-foreground">
               Los CVs se procesan con IA para extraer informacion preliminar del perfil.
