@@ -181,20 +181,27 @@ function drawPageDecorations(doc: PdfDoc) {
 function drawRepeatedHeader(
   doc: PdfDoc,
   facts: ReturnType<typeof getTechnicalSheetCandidateHeaderFacts>,
-  logoBuffer: Buffer | undefined
+  wordmarkBuffer: Buffer | undefined,
+  iconBuffer: Buffer | undefined
 ) {
   const { left, right, width } = contentMetrics(doc)
   const headerTop = HEADER_BAND_TOP
   const factsRight = right - HEADER_FACTS_RIGHT_INSET
   const factsColW = Math.min(240, width * 0.42)
   const factsX = factsRight - factsColW
-  const logoW = 108
+  const iconW = 32
+  const iconGap = 8
+  const wordmarkW = 108
+  const wordmarkX = left + iconW + iconGap
 
-  if (logoBuffer && logoBuffer.length > 0) {
+  if (wordmarkBuffer && wordmarkBuffer.length > 0) {
     try {
-      doc.image(logoBuffer, left, headerTop, { width: logoW })
+      if (iconBuffer && iconBuffer.length > 0) {
+        doc.image(iconBuffer, left, headerTop, { width: iconW })
+      }
+      doc.image(wordmarkBuffer, wordmarkX, headerTop, { width: wordmarkW })
       doc.fontSize(8.5).font("Helvetica").fillColor(BRAND.taglineGray)
-      doc.text(m.brandTagline, left, headerTop + 36, { width: logoW + 88, lineGap: 2 })
+      doc.text(m.brandTagline, left, headerTop + 36, { width: wordmarkW + iconW + iconGap + 72, lineGap: 2 })
     } catch {
       drawVisibleFallbackWordmark(doc, left, headerTop)
     }
@@ -433,11 +440,11 @@ function renderTechnicalSheetBody(doc: PdfDoc, payload: TechnicalSheetPayload, r
   }
 }
 
-function loadVisibleLogoBuffer(): Buffer | undefined {
-  const logoPath = join(process.cwd(), "public", "visible-text.png")
-  if (!existsSync(logoPath)) return undefined
+function loadImageBuffer(publicFileName: string): Buffer | undefined {
+  const imagePath = join(process.cwd(), "public", publicFileName)
+  if (!existsSync(imagePath)) return undefined
   try {
-    return readFileSync(logoPath)
+    return readFileSync(imagePath)
   } catch {
     return undefined
   }
@@ -447,7 +454,8 @@ export function buildTechnicalSheetPdfKitBuffer(payload: TechnicalSheetPayload):
   return new Promise((resolve, reject) => {
     const record = pickCandidateDisplayRecord(payload)
     const facts = getTechnicalSheetCandidateHeaderFacts(payload)
-    const logoBuffer = loadVisibleLogoBuffer()
+    const wordmarkBuffer = loadImageBuffer("visible-text.png")
+    const iconBuffer = loadImageBuffer("visible-icon.png")
 
     const doc = new PDFDocument({
       size: "A4",
@@ -465,7 +473,7 @@ export function buildTechnicalSheetPdfKitBuffer(payload: TechnicalSheetPayload):
 
       drawFooterBar(doc)
       drawPageDecorations(doc)
-      drawRepeatedHeader(doc, facts, logoBuffer)
+      drawRepeatedHeader(doc, facts, wordmarkBuffer, iconBuffer)
       resetTextCursorToContentArea(doc)
     }
 
