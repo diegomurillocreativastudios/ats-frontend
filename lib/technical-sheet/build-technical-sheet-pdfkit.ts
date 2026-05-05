@@ -105,6 +105,23 @@ function collectStringList(v: unknown): string[] {
     : []
 }
 
+function formatIsoDisplayPdf(iso: string | null | undefined): string {
+  if (iso == null || String(iso).trim() === "") return "—"
+  const d = new Date(String(iso))
+  if (Number.isNaN(d.getTime())) return String(iso)
+  return new Intl.DateTimeFormat("es", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(d)
+}
+
+function pickInterviewNoteTextPdf(rec: Record<string, unknown>): string | null {
+  const fromNote = pickFromRecord(rec, ["note", "Note"])
+  const fromNotes = pickFromRecord(rec, ["notes", "Notes"])
+  const t = (fromNote ?? fromNotes ?? "").trim()
+  return t !== "" ? t : null
+}
+
 function asRecord(v: unknown): Record<string, unknown> | null {
   if (v != null && typeof v === "object" && !Array.isArray(v)) return v as Record<string, unknown>
   return null
@@ -437,6 +454,28 @@ function renderTechnicalSheetBody(doc: PdfDoc, payload: TechnicalSheetPayload, r
   if (resume !== "") {
     sectionHeading(doc, m.resumeMarkdown)
     paragraph(doc, resume)
+  }
+
+  const interviewNotesRaw = record.interviewNotes ?? record.InterviewNotes
+  const interviewNotes = Array.isArray(interviewNotesRaw) ? interviewNotesRaw : []
+  if (interviewNotes.length > 0) {
+    sectionHeading(doc, m.interviewNotes)
+    for (const raw of interviewNotes) {
+      const rec = asRecord(raw)
+      if (!rec) {
+        paragraph(doc, typeof raw === "string" ? raw : JSON.stringify(raw))
+        doc.moveDown(0.35)
+        continue
+      }
+      const whenRaw = pickFromRecord(rec, ["scheduledAtUtc", "scheduledAt", "date"])
+      labeledLine(doc, m.interviewWhen, formatIsoDisplayPdf(whenRaw))
+      const interviewer =
+        pickFromRecord(rec, ["interviewerName", "interviewer", "InterviewerName"])?.trim() ?? ""
+      labeledLine(doc, m.interviewerLabel, interviewer !== "" ? interviewer : "—")
+      const noteText = pickInterviewNoteTextPdf(rec)
+      labeledLine(doc, m.interviewNoteLabel, noteText ?? "—")
+      doc.moveDown(0.35)
+    }
   }
 }
 

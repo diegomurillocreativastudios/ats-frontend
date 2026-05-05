@@ -72,6 +72,8 @@ const SPANISH_LABELS: Record<string, string> = {
   interviewStatusDisplayName: "Estado",
   interviewerName: "Entrevistador",
   notes: "Notas",
+  note: "Nota",
+  interviewNotes: "Notas de entrevista",
   resumeMarkdown: "Curriculum (texto completo)",
   socialLinks: "Enlaces y redes",
   recognitions: "Cursos y seminarios",
@@ -648,6 +650,63 @@ function DocumentSkillsList({ skills }: { skills: string[] }) {
   )
 }
 
+function pickInterviewNoteText(rec: Record<string, unknown>): string | null {
+  const fromNote = pickFromRecord(rec, ["note", "Note"])
+  const fromNotes = pickFromRecord(rec, ["notes", "Notes"])
+  const t = (fromNote ?? fromNotes ?? "").trim()
+  return t !== "" ? t : null
+}
+
+function InterviewNotesDocumentEntries({ items }: { items: unknown[] }) {
+  const docBody =
+    "whitespace-pre-wrap break-words text-sm leading-[1.65] text-neutral-800"
+  return (
+    <ul className="space-y-8" role="list">
+      {items.map((raw, i) => {
+        const rec = asRecord(raw)
+        if (!rec) {
+          return (
+            <li key={i} className="list-none text-sm text-neutral-800">
+              {typeof raw === "string" ? raw : describeValuePlain(raw)}
+            </li>
+          )
+        }
+        const whenRaw = pickFromRecord(rec, ["scheduledAtUtc", "scheduledAt", "date"])
+        const whenLabel = whenRaw ? formatIsoDisplay(whenRaw) : "—"
+        const interviewer =
+          pickFromRecord(rec, ["interviewerName", "interviewer", "InterviewerName"]) ?? null
+        const noteText = pickInterviewNoteText(rec)
+        return (
+          <li key={i} className="list-none space-y-2 font-sans text-sm leading-relaxed text-neutral-900">
+            <p>
+              <span className="font-bold">{m.interviewWhen}:</span>{" "}
+              <span className="font-normal">{whenLabel}</span>
+            </p>
+            <p>
+              <span className="font-bold">{m.interviewerLabel}:</span>{" "}
+              <span className="font-normal">{interviewer?.trim() ? interviewer : "—"}</span>
+            </p>
+            <div className="pt-0.5">
+              <p className="font-bold">{m.interviewNoteLabel}</p>
+              {noteText ? (
+                <div className="mt-1.5">
+                  <ExpandableBlock
+                    content={noteText}
+                    isMultilineHeavy={noteText.includes("\n") || noteText.length > 200}
+                    bodyClassName={docBody}
+                  />
+                </div>
+              ) : (
+                <p className="mt-1.5 text-neutral-600">—</p>
+              )}
+            </div>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
 function WorkExperienceDocumentEntries({ items }: { items: unknown[] }) {
   return (
     <ul className="space-y-10" role="list">
@@ -841,6 +900,7 @@ const CANDIDATE_BLOB_KEYS = new Set([
   "recognitions",
   "summary",
   "resumeMarkdown",
+  "interviewNotes",
 ])
 
 const VACANCY_ORDER = [
@@ -880,6 +940,8 @@ function CandidateSectionBlock({ data }: { data: Record<string, unknown> }) {
   const recognitions = Array.isArray(data.recognitions)
     ? data.recognitions.map((r) => String(r)).filter((r) => r.trim() !== "")
     : []
+  const interviewNotesRaw = data.interviewNotes ?? data.InterviewNotes
+  const interviewNotes = Array.isArray(interviewNotesRaw) ? interviewNotesRaw : []
   const skillsLegacy = collectStringList(data.skills)
   const technicalSkillsList = collectStringList(data.technicalSkills)
   const softSkillsList = collectStringList(data.softSkills)
@@ -1067,6 +1129,13 @@ function CandidateSectionBlock({ data }: { data: Record<string, unknown> }) {
         <section aria-labelledby="ts-sec-resume">
           <DocumentSectionTitle id="ts-sec-resume">{m.resumeMarkdown}</DocumentSectionTitle>
           <ExpandableBlock content={resume} isMultilineHeavy bodyClassName={docBody} />
+        </section>
+      ) : null}
+
+      {interviewNotes.length > 0 ? (
+        <section aria-labelledby="ts-sec-interview-notes">
+          <DocumentSectionTitle id="ts-sec-interview-notes">{m.interviewNotes}</DocumentSectionTitle>
+          <InterviewNotesDocumentEntries items={interviewNotes} />
         </section>
       ) : null}
     </div>
@@ -1379,8 +1448,7 @@ const InterviewItemCard = ({ item, index }: { item: unknown; index: number }) =>
   const rawDur = asObj?.durationMinutes
   const minutes =
     typeof rawDur === "number" && Number.isFinite(rawDur) ? Math.round(rawDur) : null
-  const noteStr =
-    asObj && typeof asObj.notes === "string" && asObj.notes.trim() !== "" ? asObj.notes : null
+  const noteStr = asObj ? pickInterviewNoteText(asObj) : null
   const description =
     asObj && typeof asObj.description === "string" && asObj.description.trim() !== ""
       ? asObj.description.trim()
