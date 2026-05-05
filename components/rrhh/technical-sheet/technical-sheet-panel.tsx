@@ -2,19 +2,18 @@
 
 import type { ReactNode } from "react"
 import { useCallback, useEffect, useId, useRef, useState } from "react"
-import { Download, FileText, Loader2 } from "lucide-react"
+import { Download, Loader2 } from "lucide-react"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
 import {
-  downloadTechnicalSheetHtml,
+  downloadTechnicalSheetPdfFromNextRoute,
   fetchTechnicalSheetJson,
   slugifyVacancyForFilename,
-  tryDownloadTechnicalSheetPdf,
   type TechnicalSheetPayload,
 } from "@/lib/api/technical-sheet"
 import {
-  getTechnicalSheetCandidateHeaderFacts,
   TechnicalSheetPreview,
 } from "@/components/rrhh/technical-sheet/technical-sheet-preview"
+import { getTechnicalSheetCandidateHeaderFacts } from "@/lib/technical-sheet/candidate-from-payload"
 
 export interface TechnicalSheetPanelProps {
   enabled: boolean
@@ -42,10 +41,10 @@ export function TechnicalSheetPanel({
 }: TechnicalSheetPanelProps) {
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
+  const previewScrollRef = useRef<HTMLDivElement>(null)
   const [payload, setPayload] = useState<TechnicalSheetPayload | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [downloadingHtml, setDownloadingHtml] = useState(false)
   const [downloadingPdf, setDownloadingPdf] = useState(false)
   const [pdfHint, setPdfHint] = useState<string | null>(null)
 
@@ -94,42 +93,27 @@ export function TechnicalSheetPanel({
 
   const baseFilename = `ficha-${slugifyVacancyForFilename(vacancyTitle ?? "vacante")}-${candidateProfileId}`
 
-  const handleDownloadHtml = async () => {
-    if (!vacancyId || !candidateProfileId || downloadingHtml) return
-    setDownloadingHtml(true)
-    setPdfHint(null)
-    try {
-      await downloadTechnicalSheetHtml(vacancyId, candidateProfileId, `${baseFilename}.html`)
-    } catch {
-      setPdfHint(m.errorGeneric)
-    } finally {
-      setDownloadingHtml(false)
-    }
-  }
-
   const handleDownloadPdf = async () => {
     if (!vacancyId || !candidateProfileId || downloadingPdf) return
     setDownloadingPdf(true)
     setPdfHint(null)
     try {
-      const result = await tryDownloadTechnicalSheetPdf(
+      await downloadTechnicalSheetPdfFromNextRoute(
         vacancyId,
         candidateProfileId,
         `${baseFilename}.pdf`
       )
-      if (result.ok === false) {
-        if (result.reason === "not_implemented") setPdfHint(m.pdfNotAvailable)
-        else if (result.reason === "not_found") setPdfHint(m.pdfNotFound)
-        else setPdfHint(m.errorGeneric)
-      }
-    } catch {
-      setPdfHint(m.errorGeneric)
+    } catch (err: unknown) {
+      console.error("[technical-sheet-pdf]", err)
+      const detail =
+        err instanceof Error && err.message.trim() !== "" ? err.message.trim() : null
+      setPdfHint(detail ?? m.pdfExportFailed)
     } finally {
       setDownloadingPdf(false)
     }
   }
 
-  const busy = loading || downloadingHtml || downloadingPdf
+  const busy = loading || downloadingPdf
 
   const headerFacts = payload ? getTechnicalSheetCandidateHeaderFacts(payload) : null
   const showStructuredHeader = Boolean(payload && headerFacts)
@@ -176,7 +160,10 @@ export function TechnicalSheetPanel({
         {headerEnd ? <div className="shrink-0">{headerEnd}</div> : null}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth bg-muted/15 px-5 py-5 md:px-6">
+      <div
+        ref={previewScrollRef}
+        className="min-h-0 flex-1 overflow-y-auto scroll-smooth bg-muted/15 px-5 py-5 md:px-6"
+      >
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16" role="status">
             <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
@@ -187,7 +174,9 @@ export function TechnicalSheetPanel({
             {error}
           </p>
         ) : payload ? (
-          <TechnicalSheetPreview payload={payload} />
+          <div className="flex justify-center">
+            <TechnicalSheetPreview payload={payload} />
+          </div>
         ) : null}
       </div>
 
@@ -202,22 +191,8 @@ export function TechnicalSheetPanel({
         <div className="flex flex-wrap items-center justify-end gap-2 sm:shrink-0">
           <button
             type="button"
-            onClick={handleDownloadHtml}
-            disabled={busy || !vacancyId || !candidateProfileId}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 font-sans text-sm font-medium shadow-sm transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label={m.downloadHtml}
-          >
-            {downloadingHtml ? (
-              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-            ) : (
-              <FileText className="h-4 w-4 shrink-0" aria-hidden />
-            )}
-            {downloadingHtml ? m.downloadingHtml : m.downloadHtml}
-          </button>
-          <button
-            type="button"
             onClick={handleDownloadPdf}
-            disabled={busy || !vacancyId || !candidateProfileId}
+            disabled={busy || !vacancyId || !candidateProfileId || !payload}
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 font-sans text-sm font-medium shadow-sm transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label={m.downloadPdf}
           >

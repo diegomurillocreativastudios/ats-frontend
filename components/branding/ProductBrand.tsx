@@ -73,7 +73,7 @@ export default function ProductBrand({
   const iconMark = (
     <span className={iconShellClass}>
       <Image
-        src="/logo-icon-only.webp"
+        src="/visible-icon.webp"
         alt=""
         width={42}
         height={31}
@@ -85,7 +85,7 @@ export default function ProductBrand({
 
   const wordmark = (
     <Image
-      src="/logo-text.png"
+      src="/visible-text.png"
       alt="Visible"
       width={735}
       height={201}

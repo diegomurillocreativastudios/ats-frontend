@@ -149,13 +149,10 @@ const EXACT_PATH_SUFFIX = {
   "/seleccion-portal": joinDocumentTitle(CUENTA, "Elegí un portal"),
   "/recuperar-contrasena": joinDocumentTitle(CUENTA, "Recuperar contraseña"),
   "/restablecer-contrasena": joinDocumentTitle(CUENTA, "Restablecer contraseña"),
-  "/auth/iniciar-sesion": joinDocumentTitle(CUENTA, "Iniciar sesión"),
-  "/auth/registrarse": joinDocumentTitle(CUENTA, "Registrarse"),
-  "/auth/forgot-password": joinDocumentTitle(CUENTA, "Olvidaste tu contraseña"),
-  "/auth/restablecer-contrasena": joinDocumentTitle(
-    CUENTA,
-    "Restablecer contraseña",
-  ),
+  "/auth/iniciar-sesion": "Iniciar sesión",
+  "/auth/registrarse": "Registrarse",
+  "/auth/forgot-password": "¿Olvidaste tu contraseña?",
+  "/auth/restablecer-contrasena": "Restablecer contraseña",
   "/oportunidades": OPORTUNIDADES,
 }
 
@@ -233,7 +230,8 @@ function titlePortalAdmin(normalizedPath) {
 }
 
 /**
- * Título del documento según la ruta: `ATS | [portal o Cuenta] | [pantalla …]`.
+ * Título del documento según la ruta: `ATS | [portal o Cuenta] | [pantalla …]`;
+ * rutas bajo `/auth/` usan `ATS | <pantalla>` sin segmento «Cuenta».
  * @param {string} pathname - Ruta actual (ej: "/portal-rrhh/entrevistas")
  * @returns {string}
  */

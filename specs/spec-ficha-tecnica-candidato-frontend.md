@@ -2,19 +2,38 @@
 
 ## Referencia base
 
-Este documento depende del contrato y comportamiento definidos en:
+Este documento depende del contrato y comportamiento definidos en el backend como parte **canónica**:
 
-- **`spec-ficha-tecnica-candidato-backend.md`**
+- **`specs/spec-ficha-tecnica-candidato-backend.md`** (repo backend)
 
-No duplica el mapeo de entidades; solo describe **experiencia de usuario**, **integración con la API** y **criterios de aceptación** del lado cliente.
+No duplica el mapeo de entidades; describe **experiencia de usuario**, **integración con la API** y **criterios de aceptación** del lado cliente.
+
+---
+
+## Alineación con el backend (estado actual)
+
+- **`GET .../technical-sheet`** → JSON usable por la preview. En backend puede exponer solo el **subconjunto de candidato** (equivalente a lo necesario para `TechnicalSheetCandidateDto`), no necesariamente el mismo agregado que **`technical-sheet.html`**. La preview del ATS está pensada para renderizar principalmente **datos del candidato** normalizados en ese payload.
+- **`GET .../technical-sheet.pdf`** → Hoy puede responder **`501 Not Implemented`** con cuerpo JSON cuando la ficha existe pero el PDF binario no está generado; **`404`** si no hay ficha (mismo criterio que JSON/HTML). El cliente debe tolerar **`501`** y seguir ofreciendo descarga.
+- **PDF binario**: cuando backend devuelva **`200`** + **`application/pdf`**, el cuerpo debe empezar por la firma **`%PDF`**. El frontend rechaza respuestas `200` que no sean PDF válido y cae al fallback.
+
+---
+
+## Paridad PDF ↔ JSON ↔ HTML (decisión de negocio)
+
+Backend puede armar HTML desde un **`TechnicalSheetDto`** completo y JSON desde un subset de candidato. **Negocio debe aclarar** si el PDF generado en servidor debe:
+
+- coincidir con el **subset** que consume la preview (coherencia con lo que ve el recruiter en pantalla), o
+- coincidir con el **agregado** del HTML u otro informe.
+
+Hasta que exista PDF en servidor, el frontend puede generar PDF **desde el DOM de la preview** (misma información que el JSON ya cargado).
 
 ---
 
 ## Objetivos (MVP) — frontend
 
 1. Permitir al recruiter **ver** la ficha técnica en contexto **vacante + candidato**.
-2. Permitir **descargar** la versión HTML (y PDF cuando el backend lo implemente), respetando autenticación.
-3. Mostrar estados de **carga** y **error** claros (especialmente `404` cuando no hay postulación).
+2. Permitir **descargar PDF**: primero intento **`GET .../technical-sheet.pdf`** autenticado; si no hay PDF válido (**501**, **404**, error o cuerpo sin `%PDF`), **generación en cliente** a partir de la vista previa ya renderizada.
+3. Mostrar estados de **carga** y **error** claros (especialmente **404** cuando no hay postulación).
 
 ---
 
@@ -22,34 +41,31 @@ No duplica el mapeo de entidades; solo describe **experiencia de usuario**, **in
 
 - Editor de plantillas o personalización por empresa.
 - Vista del candidato sin vacante seleccionada (la ficha está definida como **par** vacante–candidato).
-- Impresión avanzada/CSS distinta del preview si no es requisito de negocio.
+- Botón de descarga HTML expuesto en UI (el contrato HTML puede seguir existiendo en backend para otros usos).
 
 ---
 
 ## Endpoints a consumir
 
-Definidos en el spec backend (prefijo `api/recruiter`, roles Recruiter/Admin):
+Definidos en detalle en el spec backend (prefijo `api/recruiter`, roles Recruiter/Admin):
 
 | Uso | Método y ruta |
 |-----|----------------|
-| Preview en pantalla (recomendado) | `GET .../technical-sheet` → JSON |
-| Descarga HTML | `GET .../technical-sheet.html` (opcional `?download=1`) |
-| Descarga PDF | `GET .../technical-sheet.pdf` cuando exista |
+| Preview en pantalla | `GET .../technical-sheet` → JSON |
+| Descarga PDF (servidor) | `GET .../technical-sheet.pdf` → `200` + PDF, o `501` / `404` según backend |
+| Descarga HTML (opcional backend) | `GET .../technical-sheet.html` (p. ej. `?download=1`) — no expuesto en la UI actual |
 
 Parámetros de ruta: `vacancyId`, `candidateProfileId`.
+
+Implementación de rutas en cliente: `lib/api/technical-sheet.ts` (`buildTechnicalSheetBasePath`, `fetchTechnicalSheetJson`, `tryDownloadTechnicalSheetPdf`).
 
 ---
 
 ## Dónde ubicar la funcionalidad (UX)
 
-1. **Detalle de candidato en el contexto de una vacante**  
-   Donde ya se muestran etapa, score y entrevistas: acciones **“Ver ficha técnica”** (primaria o secundaria según diseño) y **“Descargar”**.
-
-2. **Lista / tabla de aplicantes de una vacante**  
-   Acción por fila (menú, icono documento o similar) que abre la misma vista o el mismo modal, sin perder el contexto del pipeline.
-
-3. **Opcional**  
-   Ruta dedicada del tipo `/vacancies/:vacancyId/candidates/:candidateId/technical-sheet` que hidrate desde JSON y reutilice layout del producto (mejor para **tema claro/oscuro** y **i18n**).
+1. **Detalle de candidato en el contexto de una vacante** — acción **“Ver ficha técnica”** y pie con **“Descargar PDF”**.
+2. **Lista / tabla de aplicantes de una vacante** — misma experiencia en modal o página dedicada.
+3. **Ruta dedicada** en app (p. ej. `/portal-rrhh/vacantes/[id]/candidatos/[candidateProfileId]/technical-sheet`) que reutiliza el mismo panel.
 
 ---
 
@@ -57,18 +73,14 @@ Parámetros de ruta: `vacancyId`, `candidateProfileId`.
 
 ### Preview
 
-1. Llamar al endpoint **JSON** (`technical-sheet`).
-2. Renderizar con **componentes propios** del design system (secciones: datos personales, vacante, postulación, match, entrevistas).
+1. `GET .../technical-sheet` → JSON.
+2. Render con componentes propios (`TechnicalSheetPreview` y mensajes en `lib/messages/technical-sheet.ts`).
 
-Ventaja: textos de sección pasan por **i18n**, compatibilidad con temas y accesibilidad del resto del ATS.
+### Descarga PDF
 
-### Descarga
-
-1. **HTML:** `fetch` con credenciales/token igual que otras descargas recruiter → blob → objeto URL → disparar descarga con nombre de archivo coherente (`ficha-{vacancySlug}-{candidateId}.html` o convención del producto).
-
-2. **PDF:** mismo patrón cuando el backend responda `200` con `application/pdf`; si recibe **501** o **404**, mostrar mensaje acorde (“PDF no disponible aún”).
-
-Si la app usa **Bearer**, incluir `Authorization`; si usa **cookies httpOnly**, seguir el mismo patrón que otras descargas binarias para no romper CORS/credenciales.
+1. `fetch` autenticado (Bearer, mismo patrón que otras descargas binarias) a `.../technical-sheet.pdf`.
+2. Si **`200`** y blob válido (`%PDF`): descarga con nombre tipo `ficha-{vacancySlug}-{candidateProfileId}.pdf`.
+3. Si **`501`**, **`404`** u otro fallo / cuerpo inválido: **exportar PDF desde el nodo DOM** de la preview (`html2canvas` + `jspdf`), código en `lib/technical-sheet/export-technical-sheet-pdf.ts`, orquestado desde `TechnicalSheetPanel`.
 
 ---
 
@@ -76,33 +88,34 @@ Si la app usa **Bearer**, incluir `Authorization`; si usa **cookies httpOnly**, 
 
 | Estado | Comportamiento |
 |--------|----------------|
-| Loading | Skeleton o spinner en modal/página; deshabilitar doble submit. |
-| Éxito JSON | Render de secciones; opción “Descargar”. |
-| **404** | Mensaje explícito: p. ej. “Este candidato no está postulado a esta vacante” (ajustar copy con UX). |
-| **401/403** | Redirigir login o mensaje de permisos según patrón actual. |
-| PDF lento | Spinner prolongado o barra de progreso indeterminada. |
+| Loading | Spinner en modal/página; deshabilitar doble submit (`aria-busy` donde aplique). |
+| Éxito JSON | Render de la ficha; botón PDF habilitado cuando hay payload. |
+| **404** (JSON o PDF) | Mensaje explícito de postulación inexistente / sin datos de ficha. |
+| **401/403** | Mismo patrón global de sesión y permisos. |
+| PDF en curso | Spinner en el botón hasta servidor o export cliente termine. |
 
 ---
 
 ## Internacionalización
 
-- Si la preview es **renderizada en frontend desde JSON**, todas las etiquetas de sección (**DATOS PERSONALES**, **ENTREVISTAS**, etc.) deben usar las **claves i18n** existentes.
-- Si en algún momento la preview fuera **solo HTML del backend**, coordinar con backend idioma (`Accept-Language` o query) — ver backlog en spec backend.
+- Textos de la ficha en pantalla deben seguir las claves de `technical-sheet` (o i18n global cuando exista).
+- PDF generado en cliente refleja la UI actual (idioma ya renderizado).
 
 ---
 
 ## Evolución (frontend)
 
 - Botón **“Enviar por correo”** cuando exista API de notificaciones.
-- Vista comparativa entre dos candidatos misma vacante (fuera de alcance inicial).
+- Vista comparativa entre dos candidatos en la misma vacante.
+- Retirar fallback cliente cuando el PDF servidor sea estable y equivalente al alcance acordado por negocio.
 
 ---
 
 ## Checklist — frontend
 
-- [ ] Botón / entrada “Ficha técnica” en vista vacante–candidato aplicable.
-- [ ] Integración `GET` JSON + UI por secciones.
-- [ ] Descarga HTML (y PDF cuando backend esté listo) con manejo de errores.
-- [ ] Estados loading / empty / error / permisos.
-- [ ] i18n de títulos de sección y mensajes de error.
-- [ ] Accesibilidad: foco en modal, `aria-busy` durante carga si aplica.
+- [x] Entrada “Ficha técnica” en contexto vacante–candidato (modal / página).
+- [x] Integración `GET` JSON + preview (`TechnicalSheetPreview`).
+- [x] Descarga PDF: intento servidor + fallback cliente + validación `%PDF`.
+- [x] Estados loading / error / permisos / 404.
+- [x] Mensajes centralizados (`lib/messages/technical-sheet.ts`).
+- [x] Accesibilidad básica: foco en modal, `aria-busy` en panel cuando aplica.

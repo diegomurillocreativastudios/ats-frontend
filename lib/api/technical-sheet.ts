@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import { getApiErrorMessage } from "@/lib/api-error"
 import { getAccessToken } from "@/lib/auth"
 
 export interface TechnicalSheetPayload {
@@ -85,33 +86,38 @@ export const downloadTechnicalSheetHtml = async (
   triggerBlobDownload(blob, filename.endsWith(".html") ? filename : `${filename}.html`)
 }
 
-export type TechnicalSheetPdfResult =
-  | { ok: true }
-  | { ok: false; reason: "not_implemented" | "not_found" | "error"; status: number }
+export const buildTechnicalSheetNextPdfAppPath = (
+  vacancyId: string,
+  candidateProfileId: string
+) =>
+  `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}/candidates/${encodeURIComponent(candidateProfileId)}/technical-sheet/pdf`
 
-export const tryDownloadTechnicalSheetPdf = async (
+/**
+ * Descarga el PDF generado en Next (PDFKit) usando la sesión por cookies.
+ */
+export const downloadTechnicalSheetPdfFromNextRoute = async (
   vacancyId: string,
   candidateProfileId: string,
   filename: string
-): Promise<TechnicalSheetPdfResult> => {
-  const base = getBaseUrl()
-  const path = `${buildTechnicalSheetBasePath(vacancyId, candidateProfileId)}.pdf`
-  const url = `${base}${path}`
-  const res = await fetchBinaryAuthenticated(url)
-  if (res.status === 501 || res.status === 404) {
-    return {
-      ok: false,
-      reason: res.status === 501 ? "not_implemented" : "not_found",
-      status: res.status,
-    }
-  }
+): Promise<void> => {
+  const url = buildTechnicalSheetNextPdfAppPath(vacancyId, candidateProfileId)
+  const res = await fetch(url, { method: "GET", credentials: "same-origin" })
   if (!res.ok) {
-    return { ok: false, reason: "error", status: res.status }
+    let message = `Error ${res.status}`
+    try {
+      const j = await res.json()
+      const parsed = getApiErrorMessage(j)
+      if (parsed) message = parsed
+    } catch {
+      /* ignore */
+    }
+    const err = new Error(message) as Error & { status: number }
+    err.status = res.status
+    throw err
   }
   const blob = await res.blob()
   const name = filename.endsWith(".pdf") ? filename : `${filename}.pdf`
   triggerBlobDownload(blob, name)
-  return { ok: true }
 }
 
 export const slugifyVacancyForFilename = (title: string): string => {

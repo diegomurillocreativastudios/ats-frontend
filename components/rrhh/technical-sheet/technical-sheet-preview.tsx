@@ -15,99 +15,13 @@ import {
 } from "lucide-react"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
 import type { TechnicalSheetPayload } from "@/lib/api/technical-sheet"
+import {
+  getTechnicalSheetCandidateHeaderFacts,
+  pickCandidateDisplayRecord,
+} from "@/lib/technical-sheet/candidate-from-payload"
 
 interface TechnicalSheetPreviewProps {
   payload: TechnicalSheetPayload
-}
-
-/**
- * Ignores empty `{}` and objects whose properties are all null, undefined, or blank strings,
- * so a placeholder `personalData: {}` does not hide a populated `candidate` object.
- */
-const isMeaningfulObjectRecord = (v: unknown): v is Record<string, unknown> => {
-  if (v == null || typeof v !== "object" || Array.isArray(v)) return false
-  const o = v as Record<string, unknown>
-  const keys = Object.keys(o).filter((k) => !k.toLowerCase().startsWith("additionalprop"))
-  if (keys.length === 0) return false
-  return keys.some((k) => {
-    const val = o[k]
-    if (val == null) return false
-    if (typeof val === "string" && val.trim() === "") return false
-    if (Array.isArray(val)) return val.length > 0
-    if (typeof val === "object" && !Array.isArray(val)) {
-      return Object.keys(val as object).length > 0
-    }
-    return true
-  })
-}
-
-const pickObject = (
-  p: TechnicalSheetPayload,
-  keys: (keyof TechnicalSheetPayload)[]
-): Record<string, unknown> | null => {
-  for (const k of keys) {
-    const v = p[k]
-    if (isMeaningfulObjectRecord(v)) {
-      return v
-    }
-  }
-  return null
-}
-
-const TECHNICAL_SHEET_SIBLING_KEYS = new Set([
-  "generatedAtUtc",
-  "vacancy",
-  "vacancyInfo",
-  "application",
-  "applicationInfo",
-  "postulation",
-  "match",
-  "matching",
-  "interviews",
-  "interviewList",
-])
-
-const stripSheetEnvelopeKeys = (root: Record<string, unknown>): Record<string, unknown> => {
-  const out: Record<string, unknown> = { ...root }
-  for (const k of TECHNICAL_SHEET_SIBLING_KEYS) {
-    delete out[k]
-  }
-  return out
-}
-
-/**
- * True when the JSON root is a candidate profile (API sin envoltorio `candidate`).
- */
-const isRootCandidateProfileShape = (root: Record<string, unknown>): boolean => {
-  const nestedCandidate = root.candidate
-  if (nestedCandidate != null && typeof nestedCandidate === "object" && !Array.isArray(nestedCandidate)) {
-    return false
-  }
-  const cpId = root.candidateProfileId
-  const fn = root.firstName
-  const ln = root.lastName
-  const hasProfileId = typeof cpId === "string" && cpId.trim() !== ""
-  const hasFullName =
-    typeof fn === "string" &&
-    fn.trim() !== "" &&
-    typeof ln === "string" &&
-    ln.trim() !== ""
-  if (!hasProfileId && !hasFullName) return false
-  return isMeaningfulObjectRecord(stripSheetEnvelopeKeys(root))
-}
-
-/**
- * Objeto candidato: anidado (`candidate` / `personal`) o el propio root si ya viene plano.
- */
-const pickCandidateDisplayRecord = (
-  payload: TechnicalSheetPayload
-): Record<string, unknown> | null => {
-  const nested = pickObject(payload, ["personalData", "personal", "candidate"])
-  if (nested) return nested
-  if (payload == null || typeof payload !== "object" || Array.isArray(payload)) return null
-  const root = payload as Record<string, unknown>
-  if (!isRootCandidateProfileShape(root)) return null
-  return stripSheetEnvelopeKeys(root)
 }
 
 const SPANISH_LABELS: Record<string, string> = {
@@ -284,17 +198,21 @@ const ExpandableBlock = ({
   content,
   isMultilineHeavy,
   compact,
+  bodyClassName,
 }: {
   content: string
   isMultilineHeavy: boolean
   compact?: boolean
+  bodyClassName?: string
 }) => {
   const [open, setOpen] = useState(false)
   const needsToggle =
     content.length > TEXT_COLLAPSE_AT || (isMultilineHeavy && content.split("\n").length > 5)
-  const bodyClass = compact
-    ? "whitespace-pre-wrap break-words text-xs leading-snug text-foreground/95"
-    : "whitespace-pre-wrap break-words text-sm leading-[1.65] text-foreground/95"
+  const bodyClass =
+    bodyClassName ??
+    (compact
+      ? "whitespace-pre-wrap break-words text-xs leading-snug text-foreground/95"
+      : "whitespace-pre-wrap break-words text-sm leading-[1.65] text-foreground/95")
 
   if (!needsToggle) {
     return <p className={bodyClass}>{content}</p>
@@ -304,6 +222,7 @@ const ExpandableBlock = ({
       <p className={open ? bodyClass : `line-clamp-5 ${bodyClass}`}>{content}</p>
       <button
         type="button"
+        data-technical-sheet-pdf-hide
         onClick={() => setOpen((v) => !v)}
         className="mt-2.5 inline-flex items-center gap-1 rounded-md font-sans text-xs font-semibold text-vo-purple transition-colors hover:bg-vo-purple/10 hover:text-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 px-1 py-0.5 -mx-1"
       >
@@ -546,156 +465,246 @@ const DataFieldRow = ({
   )
 }
 
-const SkillsCloud = ({ skills }: { skills: string[] }) => (
-  <div className="flex flex-wrap gap-2" role="list" aria-label={m.skills}>
-    {skills.map((s) => (
-      <span
-        key={s}
-        role="listitem"
-        className="inline-flex rounded-full border border-vo-purple/15 bg-gradient-to-br from-background to-vo-purple/[0.04] px-3 py-1 text-xs font-semibold text-foreground/90 shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-vo-purple/25 hover:shadow-md"
-      >
-        {s}
-      </span>
-    ))}
-  </div>
-)
+const capitalizeSentence = (s: string) =>
+  s.length === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)
 
-const JsonArrayCards = ({
-  items,
-  variant,
+function formatSpanishMonthYearRaw(raw: string | null | undefined): string {
+  if (raw == null || String(raw).trim() === "") return ""
+  const t = String(raw).trim()
+  const d = new Date(t)
+  if (!Number.isNaN(d.getTime())) {
+    const formatted = new Intl.DateTimeFormat("es", {
+      month: "long",
+      year: "numeric",
+    }).format(d)
+    return capitalizeSentence(formatted)
+  }
+  return t
+}
+
+function formatWorkPeriodDisplay(from: string | null, to: string | null): string {
+  const a = formatSpanishMonthYearRaw(from)
+  const b = formatSpanishMonthYearRaw(to)
+  if (a !== "" && b !== "") return `${a}-${b}`
+  if (a !== "") return a
+  if (b !== "") return b
+  return "—"
+}
+
+function extractWorkFunctions(rec: Record<string, unknown>): string[] {
+  const arrayKeys = [
+    "responsibilities",
+    "Responsibilities",
+    "functions",
+    "Functions",
+    "mainFunctions",
+    "MainFunctions",
+    "bullets",
+    "Bullets",
+    "achievements",
+    "Achievements",
+  ]
+  for (const k of arrayKeys) {
+    const v = rec[k]
+    if (Array.isArray(v)) {
+      const out = v.map((x) => String(x).trim()).filter((x) => x !== "")
+      if (out.length > 0) return out
+    }
+  }
+  const desc = pickFromRecord(rec, ["Description", "description", "summary"])
+  if (!desc) return []
+  const lines = desc
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^[\s\-•*·]+/, "").trim())
+    .filter((line) => line !== "")
+  if (lines.length > 1) return lines
+  if (lines.length === 1) return lines
+  return [desc.trim()]
+}
+
+function TechnicalSheetDecorTopRight() {
+  return (
+    <div
+      className="pointer-events-none absolute right-0 top-0 z-0 h-24 w-28 overflow-hidden"
+      aria-hidden
+    >
+      <div className="absolute -right-7 -top-9 h-17 w-17 rotate-12 rounded-md bg-teal-500/90 shadow-sm" />
+      <div className="absolute -right-1 top-1 h-13 w-13 rotate-[-8deg] rounded-md bg-vo-purple shadow-sm" />
+    </div>
+  )
+}
+
+function TechnicalSheetDecorBottomLeft() {
+  return (
+    <div
+      className="pointer-events-none absolute bottom-0 left-0 z-0 h-11 w-28 overflow-hidden"
+      aria-hidden
+    >
+      <div className="absolute -left-2 -bottom-1 h-10 w-10 rotate-[-10deg] rounded-md bg-vo-purple/95 shadow-sm" />
+      <div className="absolute -bottom-1 left-9 h-6 w-6 rotate-[8deg] rounded-md bg-teal-500/85 shadow-sm" />
+    </div>
+  )
+}
+
+function TechnicalSheetDecorBottomRight() {
+  return (
+    <div
+      className="pointer-events-none absolute bottom-0 right-4 z-0 flex flex-col items-end gap-1"
+      aria-hidden
+    >
+      <div className="h-8 w-8 rounded bg-vo-purple/90 shadow-sm" />
+      <div className="grid grid-cols-4 grid-rows-3 gap-1.5">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span key={i} className="block h-1.5 w-1.5 rounded-full bg-vo-purple/75" />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function TechnicalSheetBrandHeader() {
+  return (
+    <div className="flex max-w-[min(100%,280px)] flex-col gap-2">
+      <div className="flex items-center gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-white shadow-sm">
+          {/* img nativo para consistencia con capturas / marca */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/visible-icon.webp"
+            alt=""
+            width={26}
+            height={20}
+            className="h-auto w-[26px] object-contain"
+            decoding="async"
+          />
+        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/visible-text.png"
+          alt="Visible"
+          width={104}
+          height={28}
+          className="h-auto w-[104px] object-contain"
+          decoding="async"
+        />
+      </div>
+      <p className="font-sans text-[11px] font-medium leading-snug tracking-wide text-neutral-600">
+        {m.brandTagline}
+      </p>
+    </div>
+  )
+}
+
+function TechnicalSheetPersonalFacts({
+  fullName,
+  address,
+  englishLevel,
 }: {
-  items: unknown[]
-  variant: "work" | "edu" | "lang" | "social"
-}) => (
-  <ul className="flex flex-col gap-3" role="list">
-    {items.map((raw, i) => {
-      const rec = asRecord(raw)
-      if (!rec) {
-        return (
-          <li
-            key={i}
-            className="rounded-xl border border-dashed border-vo-purple/25 bg-vo-purple/[0.03] px-3.5 py-2.5 text-sm text-foreground/85"
-          >
-            <span className="text-xs text-muted-foreground">Dato no estructurado. </span>
-            {typeof raw === "string" ? (
-              <ExpandableBlock
-                content={raw}
-                isMultilineHeavy={raw.length > 120 || raw.includes("\n")}
-              />
-            ) : (
-              String(raw)
-            )}
-          </li>
-        )
-      }
-      if (variant === "work") {
-        const company = pickFromRecord(rec, ["Company", "company", "employer"])
-        const role = pickFromRecord(rec, ["Role", "role", "position", "title"])
+  fullName: string
+  address: string
+  englishLevel: string
+}) {
+  const dash = (v: string) => (v.trim() !== "" ? v : "—")
+  return (
+    <div className="relative z-10 max-w-sm space-y-2 pr-1 font-sans text-sm leading-relaxed text-neutral-900 md:max-w-xs md:pr-10 md:text-right">
+      <p>
+        <span className="font-bold">{m.headerName}:</span>{" "}
+        <span className="font-normal">{dash(fullName)}</span>
+      </p>
+      <p>
+        <span className="font-bold">{m.headerAddress}:</span>{" "}
+        <span className="font-normal">{dash(address)}</span>
+      </p>
+      <p>
+        <span className="font-bold">{m.headerEnglishLevel}:</span>{" "}
+        <span className="font-normal">{dash(englishLevel)}</span>
+      </p>
+    </div>
+  )
+}
+
+function DocumentSectionTitle({ id, children }: { id?: string; children: React.ReactNode }) {
+  return (
+    <h3
+      id={id}
+      className="mb-5 border-b-2 border-neutral-900 pb-1 font-sans text-[15px] font-bold uppercase tracking-[0.06em] text-neutral-900"
+    >
+      {children}
+    </h3>
+  )
+}
+
+function DocumentSkillsList({ skills }: { skills: string[] }) {
+  return (
+    <ul
+      className="list-disc space-y-1.5 pl-5 font-sans text-sm leading-relaxed text-neutral-800 marker:text-vo-purple"
+      role="list"
+      aria-label={m.skills}
+    >
+      {skills.map((s) => (
+        <li key={s}>{s}</li>
+      ))}
+    </ul>
+  )
+}
+
+function WorkExperienceDocumentEntries({ items }: { items: unknown[] }) {
+  return (
+    <ul className="space-y-10" role="list">
+      {items.map((raw, i) => {
+        const rec = asRecord(raw)
+        if (!rec) {
+          return (
+            <li key={i} className="list-none text-sm text-neutral-800">
+              {typeof raw === "string" ? raw : describeValuePlain(raw)}
+            </li>
+          )
+        }
+        const company = pickFromRecord(rec, ["Company", "company", "employer"]) ?? "—"
+        const role = pickFromRecord(rec, ["Role", "role", "position", "title"]) ?? "—"
         const from = pickFromRecord(rec, ["StartDate", "startDate", "from"])
         const to = pickFromRecord(rec, ["EndDate", "endDate", "to"])
-        const desc = pickFromRecord(rec, ["Description", "description", "summary"])
+        const period = formatWorkPeriodDisplay(from, to)
+        const functions = extractWorkFunctions(rec)
         return (
-          <li
-            key={i}
-            className="relative overflow-hidden rounded-xl border border-border/55 bg-gradient-to-br from-card to-muted/[0.12] pl-4 pr-4 py-3.5 shadow-sm ring-1 ring-black/[0.02] before:absolute before:left-0 before:top-3 before:h-[calc(100%-1.5rem)] before:w-1 before:rounded-full before:bg-gradient-to-b before:from-vo-purple before:to-vo-magenta/60 dark:ring-white/[0.05]"
-          >
-            {company ? (
-              <p className={`font-sans text-base font-semibold tracking-tight text-foreground`}>
-                {company}
+          <li key={i} className="list-none">
+            <div className="space-y-2.5 font-sans text-sm leading-relaxed text-neutral-900">
+              <p>
+                <span className="font-bold">{m.company}:</span>{" "}
+                <span className="font-normal">{company}</span>
               </p>
-            ) : null}
-            {role ? (
-              <p className="mt-1 font-sans text-sm font-medium text-vo-purple">
-                {role}
+              <p>
+                <span className="font-bold">{m.workRolePerformed}:</span>{" "}
+                <span className="font-normal">{role}</span>
               </p>
-            ) : null}
-            {(from || to) && (
-              <p className="mt-2 flex items-center gap-2 font-sans text-xs font-medium text-muted-foreground">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/80 text-vo-purple">
-                  <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                </span>
-                {[from, to].filter(Boolean).join(" – ")}
+              <p>
+                <span className="font-bold">{m.workPeriod}:</span>{" "}
+                <span className="font-normal">{period}</span>
               </p>
-            )}
-            {desc ? (
-              <div className="mt-3 border-t border-border/40 pt-3">
-                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                  {m.description}
-                </p>
-                <div className="mt-1.5">
-                  <ExpandableBlock content={desc} isMultilineHeavy={desc.length > 180} />
-                </div>
+              <div className="pt-1">
+                <p className="font-bold">{m.workMainFunctions}:</p>
+                {functions.length > 0 ? (
+                  <ul
+                    className="mt-2 list-disc space-y-1.5 pl-5 marker:text-vo-purple"
+                    role="list"
+                  >
+                    {functions.map((line, j) => (
+                      <li key={j} className="pl-0.5 text-neutral-800">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-neutral-600">—</p>
+                )}
               </div>
-            ) : null}
+            </div>
           </li>
         )
-      }
-      if (variant === "edu") {
-        const inst = pickFromRecord(rec, ["Institution", "institution", "school"])
-        const deg = pickFromRecord(rec, ["Degree", "degree", "title"])
-        const from = pickFromRecord(rec, ["StartDate", "startDate"])
-        const to = pickFromRecord(rec, ["EndDate", "endDate"])
-        return (
-          <li
-            key={i}
-            className="rounded-xl border border-border/55 bg-gradient-to-br from-card to-vo-navy/[0.04] px-4 py-3.5 shadow-sm ring-1 ring-vo-navy/10"
-          >
-            {inst ? (
-              <p className={`font-sans text-base font-semibold tracking-tight text-foreground`}>
-                {inst}
-              </p>
-            ) : null}
-            {deg ? <p className="mt-1 text-sm font-medium text-foreground/90">{deg}</p> : null}
-            {(from || to) && (
-              <p className="mt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {[from, to].filter(Boolean).join(" – ")}
-              </p>
-            )}
-          </li>
-        )
-      }
-      if (variant === "social") {
-        const platform = pickFromRecord(rec, ["Platform", "platform", "name", "label"])
-        const url = pickFromRecord(rec, ["Url", "url", "link", "href"])
-        return (
-          <li
-            key={i}
-            className="flex flex-col gap-2 rounded-xl border border-border/55 bg-card/90 px-4 py-3.5 shadow-sm ring-1 ring-black/[0.02] sm:flex-row sm:items-center sm:justify-between dark:ring-white/[0.05]"
-          >
-            <span className="text-sm font-semibold text-foreground">{platform || "Red social"}</span>
-            {url ? (
-              <a
-                href={url.startsWith("http") ? url : `https://${url}`}
-                className="break-all text-sm font-medium text-vo-purple underline decoration-vo-purple/25 underline-offset-[3px] transition-colors hover:decoration-vo-purple"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {url}
-              </a>
-            ) : (
-              <span className="text-sm text-muted-foreground">—</span>
-            )}
-          </li>
-        )
-      }
-      const lang = pickFromRecord(rec, ["Language", "language", "name"])
-      const level = pickFromRecord(rec, ["Level", "level", "proficiency"])
-      return (
-        <li
-          key={i}
-          className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/25 px-3.5 py-2.5"
-        >
-          <span className="text-sm font-semibold text-foreground">{lang ?? "—"}</span>
-          {level ? (
-            <span className="rounded-full border border-border/60 bg-background px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-              {level}
-            </span>
-          ) : null}
-        </li>
-      )
-    })}
-  </ul>
-)
+      })}
+    </ul>
+  )
+}
 
 interface SectionMeta {
   icon: LucideIcon
@@ -883,143 +892,183 @@ function CandidateSectionBlock({ data }: { data: Record<string, unknown> }) {
   const legacySkillsWhenOnlySoftTyped =
     !hasTechnicalBucket && hasSoftBucket ? skillsLegacy : []
 
+  const docBody =
+    "whitespace-pre-wrap break-words text-sm leading-[1.65] text-neutral-800"
+
   return (
-    <div className="flex flex-col gap-6">
-        {typeof summary === "string" && summary.trim() !== "" && (
-          <div className="rounded-xl border border-vo-purple/25 bg-gradient-to-br from-vo-purple/[0.06] via-card to-vo-magenta/[0.04] p-4 shadow-inner ring-1 ring-vo-purple/10">
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-vo-purple">
-              {m.summary}
-            </p>
-            <div className="mt-2">
-              <ExpandableBlock
-                content={summary}
-                isMultilineHeavy={summary.includes("\n") || summary.length > 200}
-              />
-            </div>
-          </div>
-        )}
+    <div className="flex flex-col gap-12 text-neutral-900">
+      {typeof summary === "string" && summary.trim() !== "" ? (
+        <section aria-labelledby="ts-sec-summary">
+          <DocumentSectionTitle id="ts-sec-summary">{m.summary}</DocumentSectionTitle>
+          <ExpandableBlock
+            content={summary}
+            isMultilineHeavy={summary.includes("\n") || summary.length > 200}
+            bodyClassName={docBody}
+          />
+        </section>
+      ) : null}
 
-        {work.length > 0 && (
-          <div className="mt-6">
-            <h4
-              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
-            >
-              {m.workExperience}
-            </h4>
-            <JsonArrayCards items={work} variant="work" />
-          </div>
-        )}
+      {work.length > 0 ? (
+        <section aria-labelledby="ts-sec-work">
+          <DocumentSectionTitle id="ts-sec-work">{m.workExperience}</DocumentSectionTitle>
+          <WorkExperienceDocumentEntries items={work} />
+        </section>
+      ) : null}
 
-        {education.length > 0 && (
-          <div className="mt-6">
-            <h4
-              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
-            >
-              {m.education}
-            </h4>
-            <JsonArrayCards items={education} variant="edu" />
-          </div>
-        )}
-
-        {langs.length > 0 && (
-          <div className="mt-6">
-            <h4
-              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
-            >
-              {m.languages}
-            </h4>
-            <JsonArrayCards items={langs} variant="lang" />
-          </div>
-        )}
-
-        {showSplitSkillBuckets ? (
-          <>
-            {combinedTechnicalSkills.length > 0 ? (
-              <div className="mt-6">
-                <h4
-                  className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
-                >
-                  {m.technicalSkills}
-                </h4>
-                <SkillsCloud skills={combinedTechnicalSkills} />
-              </div>
-            ) : null}
-            {softSkillsList.length > 0 ? (
-              <div className="mt-6">
-                <h4
-                  className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
-                >
-                  {m.softSkills}
-                </h4>
-                <SkillsCloud skills={softSkillsList} />
-              </div>
-            ) : null}
-            {legacySkillsWhenOnlySoftTyped.length > 0 ? (
-              <div className="mt-6">
-                <h4
-                  className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
-                >
-                  {m.skills}
-                </h4>
-                <SkillsCloud skills={legacySkillsWhenOnlySoftTyped} />
-              </div>
-            ) : null}
-          </>
-        ) : skillsLegacy.length > 0 ? (
-          <div className="mt-6">
-            <h4
-              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
-            >
-              {m.skills}
-            </h4>
-            <SkillsCloud skills={skillsLegacy} />
-          </div>
-        ) : null}
-
-        {socialLinks.length > 0 && (
-          <div className="mt-6">
-            <h4
-              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
-            >
-              {m.socialLinks}
-            </h4>
-            <JsonArrayCards items={socialLinks} variant="social" />
-          </div>
-        )}
-
-        {recognitions.length > 0 && (
-          <div className="mt-6">
-            <h4
-              className={`font-sans mb-3 text-lg font-semibold tracking-tight text-foreground`}
-            >
-              {m.recognitions}
-            </h4>
-            <ul className="flex flex-col gap-2" role="list">
-              {recognitions.map((line, i) => (
-                <li
-                  key={`${i}-${line.slice(0, 24)}`}
-                  className="rounded-lg border border-border/50 bg-muted/20 px-3.5 py-2.5 text-sm leading-relaxed text-foreground/95"
-                >
-                  {line}
+      {education.length > 0 ? (
+        <section aria-labelledby="ts-sec-edu">
+          <DocumentSectionTitle id="ts-sec-edu">{m.education}</DocumentSectionTitle>
+          <ul className="space-y-8" role="list">
+            {education.map((raw, i) => {
+              const rec = asRecord(raw)
+              if (!rec) {
+                return (
+                  <li key={i} className="list-none text-sm text-neutral-800">
+                    {typeof raw === "string" ? raw : describeValuePlain(raw)}
+                  </li>
+                )
+              }
+              const inst = pickFromRecord(rec, ["Institution", "institution", "school"]) ?? "—"
+              const deg = pickFromRecord(rec, ["Degree", "degree", "title"])
+              const from = pickFromRecord(rec, ["StartDate", "startDate"])
+              const to = pickFromRecord(rec, ["EndDate", "endDate"])
+              const period =
+                from || to ? formatWorkPeriodDisplay(from, to) : null
+              return (
+                <li key={i} className="list-none space-y-2 font-sans text-sm leading-relaxed">
+                  <p>
+                    <span className="font-bold">{m.institution}:</span>{" "}
+                    <span className="font-normal">{inst}</span>
+                  </p>
+                  {deg ? (
+                    <p>
+                      <span className="font-bold">{m.degree}:</span>{" "}
+                      <span className="font-normal">{deg}</span>
+                    </p>
+                  ) : null}
+                  {period && period !== "—" ? (
+                    <p>
+                      <span className="font-bold">{m.workPeriod}:</span>{" "}
+                      <span className="font-normal">{period}</span>
+                    </p>
+                  ) : null}
                 </li>
-              ))}
-            </ul>
-          </div>
-        )}
+              )
+            })}
+          </ul>
+        </section>
+      ) : null}
 
-        {typeof resume === "string" && resume.trim() !== "" && (
-          <div className="mt-6 rounded-xl border border-border/60 bg-gradient-to-b from-muted/30 to-card/80 p-4 ring-1 ring-black/[0.02] dark:ring-white/[0.05]">
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              {m.resumeMarkdown}
-            </p>
-            <div className="mt-2 max-h-72 overflow-hidden rounded-lg border border-border/55 bg-background/80">
-              <ExpandableBlock
-                content={resume}
-                isMultilineHeavy
-              />
-            </div>
-          </div>
-        )}
+      {langs.length > 0 ? (
+        <section aria-labelledby="ts-sec-lang">
+          <DocumentSectionTitle id="ts-sec-lang">{m.languages}</DocumentSectionTitle>
+          <ul className="space-y-3" role="list">
+            {langs.map((raw, i) => {
+              const rec = asRecord(raw)
+              const lang = rec
+                ? pickFromRecord(rec, ["Language", "language", "name"])
+                : typeof raw === "string"
+                  ? raw
+                  : null
+              const level = rec
+                ? pickFromRecord(rec, ["Level", "level", "proficiency"])
+                : null
+              return (
+                <li
+                  key={i}
+                  className="list-none font-sans text-sm leading-relaxed text-neutral-900"
+                >
+                  <span className="font-bold">{lang ?? "—"}</span>
+                  {level ? (
+                    <span className="font-normal text-neutral-700"> — {level}</span>
+                  ) : null}
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      {showSplitSkillBuckets ? (
+        <>
+          {combinedTechnicalSkills.length > 0 ? (
+            <section aria-labelledby="ts-sec-tech-skills">
+              <DocumentSectionTitle id="ts-sec-tech-skills">{m.technicalSkills}</DocumentSectionTitle>
+              <DocumentSkillsList skills={combinedTechnicalSkills} />
+            </section>
+          ) : null}
+          {softSkillsList.length > 0 ? (
+            <section aria-labelledby="ts-sec-soft-skills">
+              <DocumentSectionTitle id="ts-sec-soft-skills">{m.softSkills}</DocumentSectionTitle>
+              <DocumentSkillsList skills={softSkillsList} />
+            </section>
+          ) : null}
+          {legacySkillsWhenOnlySoftTyped.length > 0 ? (
+            <section aria-labelledby="ts-sec-skills-mixed">
+              <DocumentSectionTitle id="ts-sec-skills-mixed">{m.skills}</DocumentSectionTitle>
+              <DocumentSkillsList skills={legacySkillsWhenOnlySoftTyped} />
+            </section>
+          ) : null}
+        </>
+      ) : skillsLegacy.length > 0 ? (
+        <section aria-labelledby="ts-sec-skills">
+          <DocumentSectionTitle id="ts-sec-skills">{m.skills}</DocumentSectionTitle>
+          <DocumentSkillsList skills={skillsLegacy} />
+        </section>
+      ) : null}
+
+      {socialLinks.length > 0 ? (
+        <section aria-labelledby="ts-sec-social">
+          <DocumentSectionTitle id="ts-sec-social">{m.socialLinks}</DocumentSectionTitle>
+          <ul className="space-y-3 font-sans text-sm" role="list">
+            {socialLinks.map((raw, i) => {
+              const rec = asRecord(raw)
+              const platform = rec
+                ? pickFromRecord(rec, ["Platform", "platform", "name", "label"])
+                : null
+              const url = rec ? pickFromRecord(rec, ["Url", "url", "link", "href"]) : null
+              return (
+                <li key={i} className="list-none">
+                  <span className="font-bold">{platform ?? "—"}:</span>{" "}
+                  {url ? (
+                    <a
+                      href={url.startsWith("http") ? url : `https://${url}`}
+                      className="break-all font-normal text-vo-purple underline decoration-vo-purple/35 underline-offset-[3px] hover:text-vo-purple-hover"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {url}
+                    </a>
+                  ) : (
+                    <span className="text-neutral-600">—</span>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      {recognitions.length > 0 ? (
+        <section aria-labelledby="ts-sec-recog">
+          <DocumentSectionTitle id="ts-sec-recog">{m.recognitions}</DocumentSectionTitle>
+          <ul
+            className="list-disc space-y-1.5 pl-5 font-sans text-sm leading-relaxed text-neutral-800 marker:text-vo-purple"
+            role="list"
+          >
+            {recognitions.map((line, i) => (
+              <li key={`${i}-${line.slice(0, 24)}`}>{line}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {typeof resume === "string" && resume.trim() !== "" ? (
+        <section aria-labelledby="ts-sec-resume">
+          <DocumentSectionTitle id="ts-sec-resume">{m.resumeMarkdown}</DocumentSectionTitle>
+          <ExpandableBlock content={resume} isMultilineHeavy bodyClassName={docBody} />
+        </section>
+      ) : null}
     </div>
   )
 }
@@ -1435,28 +1484,6 @@ const InterviewsBlock = ({ items }: { items: unknown[] }) => {
   )
 }
 
-function trimUnknownDisplayPart(v: unknown): string {
-  if (v == null) return ""
-  const s = typeof v === "string" ? v : String(v)
-  return s.trim()
-}
-
-/**
- * Nombre completo, dirección e inglés desde el payload de la ficha (mismo criterio que el preview).
- */
-export function getTechnicalSheetCandidateHeaderFacts(
-  payload: TechnicalSheetPayload
-): { fullName: string; address: string; englishLevel: string } | null {
-  const personal = pickCandidateDisplayRecord(payload)
-  if (!personal) return null
-  const fullName = [trimUnknownDisplayPart(personal.firstName), trimUnknownDisplayPart(personal.lastName)]
-    .filter(Boolean)
-    .join(" ")
-  const address = trimUnknownDisplayPart(personal.address)
-  const englishLevel = trimUnknownDisplayPart(personal.englishLevel)
-  return { fullName, address, englishLevel }
-}
-
 export function TechnicalSheetPreview({ payload }: TechnicalSheetPreviewProps) {
   const personal = pickCandidateDisplayRecord(payload)
 
@@ -1465,25 +1492,35 @@ export function TechnicalSheetPreview({ payload }: TechnicalSheetPreviewProps) {
   if (!hasCandidate) {
     return (
       <div
-        className="rounded-2xl border border-dashed border-vo-purple/25 bg-gradient-to-br from-muted/40 via-card to-vo-purple/[0.04] px-6 py-10 text-center shadow-inner"
+        className="rounded-2xl border border-dashed border-neutral-300 bg-white px-6 py-10 text-center shadow-sm"
         role="status"
       >
-        <p className="font-sans text-sm font-medium leading-relaxed text-muted-foreground">{m.emptyPreview}</p>
+        <p className="font-sans text-sm font-medium leading-relaxed text-neutral-600">{m.emptyPreview}</p>
       </div>
     )
   }
 
+  const facts = getTechnicalSheetCandidateHeaderFacts(payload)
+
   return (
-    <div
-      className="relative mx-auto flex max-w-full flex-col gap-6 rounded-3xl bg-[radial-gradient(ellipse_120%_80%_at_100%_-20%,rgba(110,51,133,0.08),transparent),radial-gradient(ellipse_90%_60%_at_-10%_60%,rgba(113,188,237,0.07),transparent)] px-1 py-1 sm:px-2"
-    >
-      <div
-        className="pointer-events-none absolute inset-0 rounded-3xl opacity-[0.35] [background-image:radial-gradient(circle_at_center,rgba(13,13,13,0.04)_1px,transparent_1.5px)] [background-size:14px_14px]"
-        aria-hidden
-      />
-      <div className="relative flex flex-col gap-6">
+    <div className="relative isolate mx-auto max-w-[840px] overflow-hidden bg-white text-neutral-900 shadow-sm ring-1 ring-neutral-200/90 [color-scheme:light]">
+      <TechnicalSheetDecorTopRight />
+      <TechnicalSheetDecorBottomLeft />
+      <TechnicalSheetDecorBottomRight />
+      <div className="relative z-10 px-8 pb-36 pt-10 sm:px-12 md:px-16 md:pb-40 md:pt-12">
+        <header className="mb-12 flex flex-col gap-8 md:mb-14 md:flex-row md:items-start md:justify-between md:gap-8">
+          <TechnicalSheetBrandHeader />
+          {facts ? (
+            <TechnicalSheetPersonalFacts
+              fullName={facts.fullName}
+              address={facts.address}
+              englishLevel={facts.englishLevel}
+            />
+          ) : null}
+        </header>
         <CandidateSectionBlock data={personal} />
       </div>
+      <div className="relative z-[2] h-4 w-full shrink-0 bg-[#0f172a]" aria-hidden />
     </div>
   )
 }

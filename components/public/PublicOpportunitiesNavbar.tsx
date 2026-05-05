@@ -23,7 +23,7 @@ export function PublicOpportunitiesNavbar({
         >
           <span className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-white/10 bg-white/95 shadow-[0_10px_30px_rgba(255,255,255,0.08)]">
             <Image
-              src="/logo-icon-only.webp"
+              src="/visible-icon.webp"
               alt="Logo icono ATS"
               width={42}
               height={31}
@@ -34,7 +34,7 @@ export function PublicOpportunitiesNavbar({
 
           <span className="flex min-w-0 flex-col">
             <Image
-              src="/logo-text.png"
+              src="/visible-text.png"
               alt="ATS"
               width={735}
               height={201}
