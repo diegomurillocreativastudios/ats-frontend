@@ -180,7 +180,7 @@ export default function IniciarSesion() {
 
           <div className="hidden lg:block">
             <h1 className="text-[40px] font-bold leading-[1.2]">
-              Sistema de Gestión de<br />Reclutamiento Inteligente
+              Applicant Tracking System<br />for HR Departments
             </h1>
             <p className="text-lg text-white/80 leading-normal mt-6">
               Optimiza tu proceso de selección con IA.<br />
@@ -201,19 +201,19 @@ export default function IniciarSesion() {
 
         <div className="hidden lg:flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-vo-sky" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <span className="text-base">Matching inteligente de candidatos</span>
           </div>
           <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-vo-sky" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <span className="text-base">Integración con Evalart y LinkedIn</span>
           </div>
           <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-vo-sky" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <span className="text-base">Reportes ejecutivos en tiempo real</span>
@@ -310,7 +310,7 @@ export default function IniciarSesion() {
                   {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
                 </Button>
 
-                <div className="flex flex-col gap-3">
+                {/* <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-3 md:gap-4">
                     <div className="flex-1 h-px bg-border"></div>
                     <span className="text-xs text-muted-foreground">o</span>
@@ -320,7 +320,7 @@ export default function IniciarSesion() {
                   <Button variant="outline">
                     Continuar con Google
                   </Button>
-                </div>
+                </div> */}
               </div>
             </form>
 
