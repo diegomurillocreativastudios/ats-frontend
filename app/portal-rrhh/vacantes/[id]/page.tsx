@@ -254,19 +254,19 @@ const STATUS_LABELS = {
 
 const AI_EFFICIENCY_KPIS = [
   {
-    label: "Busqueda preliminar",
+    label: "Búsqueda preliminar",
     value: "De horas a segundos en la primera exploracion",
-    helper: "Priorizacion inicial asistida por IA",
+    helper: "Priorización inicial asistida por IA",
   },
   {
     label: "Matching preliminar",
     value: "Precision observada de 75% a 80%",
-    helper: "Objetivo de calibracion: 90%",
+    helper: "Objetivo de calibración: 90%",
   },
   {
     label: "Cobertura de resultados",
     value: "Shortlist inicial con candidatos sugeridos",
-    helper: "Punto de partida para validacion de RRHH",
+    helper: "Punto de partida para validación de RRHH",
   },
 ];
 
@@ -660,16 +660,16 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
             <div className="flex flex-col gap-6">
               <div className="rounded-xl border border-vo-purple/25 bg-vo-purple/5 p-4 shadow-sm">
                 <h3 className="font-sans text-sm font-semibold text-vo-purple">
-                  Analisis procesado con IA
+                  Análisis procesado con IA
                 </h3>
                 <p className="mt-2 font-sans text-sm text-slate-700">
-                  Esta evaluacion fue procesada con IA para acelerar la lectura inicial del perfil.
+                  Esta evaluación fue procesada con IA para acelerar la lectura inicial del perfil.
                 </p>
                 <p className="mt-1 font-sans text-sm text-slate-700">
-                  Un analisis manual puede tomar entre <strong>2 horas y 1 dia</strong>, mientras que con IA este resultado se genera en <strong>segundos</strong>.
+                  Un análisis manual puede tomar entre <strong>2 horas y 1 día</strong>, mientras que con IA este resultado se genera en <strong>segundos</strong>.
                 </p>
                 <p className="mt-1 font-sans text-xs text-slate-600">
-                  Usa estos resultados como apoyo y valida la decision final desde RRHH.
+                  Usa estos resultados como apoyo y valida la decisión final desde RRHH.
                 </p>
               </div>
               {/* Component Scores */}
@@ -739,7 +739,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           Similitud semántica
                         </h3>
                         <ScoreTooltip
-                          text="Mide que tan alineado esta el contenido del CV con la descripcion de la vacante usando comparacion semantica de texto."
+                          text="Mide qué tan alineado está el contenido del CV con la descripción de la vacante, usando comparación semántica de texto."
                           accentClass="text-vo-purple"
                         />
                       </div>
@@ -2431,8 +2431,8 @@ export default function VacanteDetallePage() {
                     aria-label="Candidatos con match"
                   >
                   <AiDisclosureNotice
-                    title="Busqueda y analisis preliminar con IA"
-                    description="La IA prioriza coincidencias iniciales y genera analisis preliminar. RRHH valida la decision final."
+                    title="Búsqueda y análisis preliminar con IA"
+                    description="La IA prioriza coincidencias iniciales y genera análisis preliminar. RRHH valida la decisión final."
                   />
                   <div className="grid gap-2 sm:grid-cols-3">
                     {AI_EFFICIENCY_KPIS.map((item) => (
@@ -2450,7 +2450,7 @@ export default function VacanteDetallePage() {
                         onClick={handleSearchSmartRecommendations}
                         disabled={loadingSmart}
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
-                        aria-label="Busqueda preliminar"
+                        aria-label="Búsqueda preliminar"
                       >
                         {loadingSmart ? (
                           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
@@ -2459,7 +2459,7 @@ export default function VacanteDetallePage() {
                         )}
                         {loadingSmart
                           ? "Actualizando busqueda con IA..."
-                          : "Busqueda preliminar"}
+                          : "Búsqueda preliminar"}
                       </button>
                       {displayCandidates.length > 0 && (
                         <button
@@ -2467,14 +2467,14 @@ export default function VacanteDetallePage() {
                           onClick={handleMatch}
                           disabled={loadingMatch || selectedDocumentIds.length === 0}
                           className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label="Analisis preliminar"
+                          aria-label="Análisis preliminar"
                         >
                           {loadingMatch ? (
                             <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                           ) : (
                             <Scale className="h-4 w-4 shrink-0" aria-hidden />
                           )}
-                          {loadingMatch ? "Reanalizando con IA..." : "Analisis preliminar"}
+                          {loadingMatch ? "Reanalizando con IA..." : "Análisis preliminar"}
                         </button>
                       )}
                     </div>
@@ -2485,7 +2485,7 @@ export default function VacanteDetallePage() {
                     )}
                     {smartError && (
                       <p className="font-sans text-sm text-destructive" role="alert">
-                        {smartError} Puedes continuar con filtros y revision manual.
+                        {smartError} Puedes continuar con filtros y revisión manual.
                       </p>
                     )}
 
@@ -2615,7 +2615,7 @@ export default function VacanteDetallePage() {
                             ({vacancyCandidates.length})
                           </span>
                         </h2>
-                        <AiDisclosureBadge label="Analisis preliminar IA" />
+                        <AiDisclosureBadge label="Análisis preliminar IA" />
                         <button
                           type="button"
                           disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
@@ -3122,8 +3122,8 @@ export default function VacanteDetallePage() {
                   aria-label="Candidatos con match"
                 >
                   <AiDisclosureNotice
-                    title="Busqueda y analisis preliminar con IA"
-                    description="La IA prioriza coincidencias iniciales y genera analisis preliminar. RRHH valida la decision final."
+                    title="Búsqueda y análisis preliminar con IA"
+                    description="La IA prioriza coincidencias iniciales y genera análisis preliminar. RRHH valida la decisión final."
                   />
                   <div className="grid gap-2 sm:grid-cols-3">
                     {AI_EFFICIENCY_KPIS.map((item) => (
@@ -3141,7 +3141,7 @@ export default function VacanteDetallePage() {
                       onClick={handleSearchSmartRecommendations}
                       disabled={loadingSmart}
                       className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
-                      aria-label="Busqueda preliminar"
+                      aria-label="Búsqueda preliminar"
                     >
                       {loadingSmart ? (
                         <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
@@ -3150,7 +3150,7 @@ export default function VacanteDetallePage() {
                       )}
                       {loadingSmart
                         ? "Actualizando busqueda con IA..."
-                        : "Busqueda preliminar"}
+                        : "Búsqueda preliminar"}
                     </button>
                     {displayCandidates.length > 0 && (
                       <button
@@ -3158,14 +3158,14 @@ export default function VacanteDetallePage() {
                         onClick={handleMatch}
                         disabled={loadingMatch || selectedDocumentIds.length === 0}
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label="Analisis preliminar"
+                        aria-label="Análisis preliminar"
                       >
                         {loadingMatch ? (
                           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                         ) : (
                           <Scale className="h-4 w-4 shrink-0" aria-hidden />
                         )}
-                        {loadingMatch ? "Reanalizando con IA..." : "Analisis preliminar"}
+                        {loadingMatch ? "Reanalizando con IA..." : "Análisis preliminar"}
                       </button>
                     )}
                   </div>
@@ -3176,7 +3176,7 @@ export default function VacanteDetallePage() {
                   )}
                   {smartError && (
                     <p className="font-sans text-sm text-destructive" role="alert">
-                      {smartError} Puedes continuar con filtros y revision manual.
+                      {smartError} Puedes continuar con filtros y revisión manual.
                     </p>
                   )}
 
@@ -3306,7 +3306,7 @@ export default function VacanteDetallePage() {
                           ({vacancyCandidates.length})
                         </span>
                       </h2>
-                      <AiDisclosureBadge label="Analisis preliminar IA" />
+                      <AiDisclosureBadge label="Análisis preliminar IA" />
                       <button
                         type="button"
                         disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}

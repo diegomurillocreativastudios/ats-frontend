@@ -29,7 +29,7 @@ export default function RRHHConfiguracionPage() {
             <section className="flex flex-col gap-6 px-4 py-6 md:px-8">
               <PortalPageHeader
                 title="Configuracion"
-                description="Centraliza aqui las configuraciones funcionales del portal RRHH."
+                description="Centraliza aquí las configuraciones funcionales del portal RRHH."
                 contentClassName="max-w-3xl"
               />
               <Link
@@ -48,7 +48,7 @@ export default function RRHHConfiguracionPage() {
                       Calendario Google
                     </span>
                     <span className="font-sans text-xs text-muted-foreground">
-                      Conecta y administra la sincronizacion de entrevistas.
+                      Conecta y administra la sincronización de entrevistas.
                     </span>
                   </div>
                 </div>
@@ -69,7 +69,7 @@ export default function RRHHConfiguracionPage() {
           <section className="flex flex-col gap-6 px-4 py-6">
             <PortalPageHeader
               title="Configuracion"
-              description="Centraliza aqui las configuraciones funcionales del portal RRHH."
+              description="Centraliza aquí las configuraciones funcionales del portal RRHH."
             />
             <Link
               href="/portal-rrhh/configuracion/calendario"

@@ -28,14 +28,14 @@ const AI_MODAL_KPIS = [
     helper: "Captura estructurada en una sola corrida",
   },
   {
-    label: "Insercion de datos",
-    value: "Registro automatico en el mismo flujo",
-    helper: "Sin transcripcion manual a BD o Excel",
+    label: "Inserción de datos",
+    value: "Registro automático en el mismo flujo",
+    helper: "Sin transcripción manual a BD o Excel",
   },
   {
     label: "Ahorro estimado",
-    value: "Reduccion operativa del 93.3% al 96.7%",
-    helper: "En extraccion, desglose e insercion de CV",
+    value: "Reducción operativa del 93.3% al 96.7%",
+    helper: "En extracción, desglose e inserción de CV",
   },
 ];
 
@@ -414,10 +414,10 @@ export default function CandidatosPage() {
               />
             ) : null}
             <p className="font-sans text-sm text-foreground">
-              Los CVs se procesan con IA para extraer informacion preliminar del perfil.
+              Los CVs se procesan con IA para extraer información preliminar del perfil.
             </p>
             <p className="font-sans text-xs text-muted-foreground">
-              Resultado generado por IA. Requiere validacion de RRHH.
+              Resultado generado por IA. Requiere validación de RRHH.
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-3" aria-label="KPIs de eficiencia del ATS">

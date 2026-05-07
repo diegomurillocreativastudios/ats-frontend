@@ -11,7 +11,7 @@ export function PublicOpportunitiesNavbar({
   return (
     <nav
       className={`relative w-full overflow-hidden rounded-none border-0 border-b border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] px-4 py-3 shadow-[0_12px_40px_rgba(7,12,27,0.22)] backdrop-blur sm:px-6 lg:px-8 ${className}`}
-      aria-label="Navegacion principal de oportunidades"
+      aria-label="Navegación principal de oportunidades"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(255,255,255,0.12),transparent_22%),radial-gradient(circle_at_right,rgba(199,50,119,0.18),transparent_26%)]" />
 
