@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { flushSync } from "react-dom"
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import {
   formatInterviewScheduleDateLabel,
@@ -321,7 +322,9 @@ export function QuarterHourTimeSelect({
     const parsed = parseFlexibleTimeInput(text)
     if (parsed === "") {
       if (allowEmpty) {
-        onChange("")
+        flushSync(() => {
+          onChange("")
+        })
         setText("")
         return
       }
@@ -332,7 +335,9 @@ export function QuarterHourTimeSelect({
       setText(value ? formatTimePickerLabel(value) : "")
       return
     }
-    onChange(parsed)
+    flushSync(() => {
+      onChange(parsed)
+    })
     setText(formatTimePickerLabel(parsed))
   }, [allowEmpty, onChange, text, value])
 
@@ -351,7 +356,9 @@ export function QuarterHourTimeSelect({
 
   const handleSelectOption = useCallback(
     (nextTime: string) => {
-      onChange(nextTime)
+      flushSync(() => {
+        onChange(nextTime)
+      })
       setText(nextTime ? formatTimePickerLabel(nextTime) : "")
       setOpen(false)
       setFocused(false)

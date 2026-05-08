@@ -10,10 +10,13 @@ import {
   getInterviewById,
   getInterviewHttpErrorMessage,
   isInterviewTerminal,
+  listInterviewModalitiesRecruiter,
   patchInterview,
   type Interview,
+  type InterviewModalityCatalogItem,
   type InterviewStatus,
   type InterviewTypeOption,
+  type PatchInterviewPayload,
 } from "@/lib/api/interviews"
 import {
   localDatetimeInputToUtcIso,
@@ -26,6 +29,7 @@ import { InterviewCalendarWidget } from "@/components/rrhh/interviews/interview-
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
 
 const STATUS_ACTIONS: { value: InterviewStatus; label: string }[] = [
   { value: "Scheduled", label: "Programada" },
@@ -54,12 +58,14 @@ export function InterviewDetailPanel({
   onDeleted,
 }: InterviewDetailPanelProps) {
   const router = useRouter()
+  const { status: calendarStatus } = useGoogleCalendar()
   const [interview, setInterview] = useState<Interview | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [scheduledLocal, setScheduledLocal] = useState("")
   const [durationMinutes, setDurationMinutes] = useState("")
   const [interviewType, setInterviewType] = useState("")
+  const [interviewModalityId, setInterviewModalityId] = useState("")
   const [interviewerName, setInterviewerName] = useState("")
   const [descripcion, setDescripcion] = useState("")
   const [statusChoice, setStatusChoice] = useState<InterviewStatus>("Scheduled")
@@ -75,6 +81,10 @@ export function InterviewDetailPanel({
     InterviewTypeOption[]
   >([])
   const [loadingInterviewTypes, setLoadingInterviewTypes] = useState(true)
+  const [modalityOptions, setModalityOptions] = useState<
+    InterviewModalityCatalogItem[]
+  >([])
+  const [loadingModalities, setLoadingModalities] = useState(true)
 
   const vacancyId = interview?.vacancyId ?? vacancyIdFromQuery ?? ""
 
@@ -93,6 +103,7 @@ export function InterviewDetailPanel({
         data.durationMinutes != null ? String(data.durationMinutes) : ""
       )
       setInterviewType(data.interviewType ?? "")
+      setInterviewModalityId(data.interviewModalityId ?? "")
       setInterviewerName(data.interviewerName ?? "")
       setDescripcion(data.descripcion ?? "")
       setStatusChoice(data.status)
@@ -133,9 +144,34 @@ export function InterviewDetailPanel({
     }
   }, [])
 
+  const loadModalities = useCallback(async () => {
+    setLoadingModalities(true)
+    try {
+      const list = await listInterviewModalitiesRecruiter()
+      setModalityOptions(list)
+    } catch (err: unknown) {
+      const status =
+        typeof err === "object" && err !== null && "status" in err
+          ? (err as { status?: number }).status
+          : 0
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: getInterviewHttpErrorMessage(status ?? 0, err),
+      })
+      setModalityOptions([])
+    } finally {
+      setLoadingModalities(false)
+    }
+  }, [])
+
   useEffect(() => {
     loadInterviewTypes()
   }, [loadInterviewTypes])
+
+  useEffect(() => {
+    loadModalities()
+  }, [loadModalities])
 
   const hasTypeOption = useMemo(
     () =>
@@ -144,19 +180,41 @@ export function InterviewDetailPanel({
     [interviewType, interviewTypeOptions]
   )
 
+  const selectedModality = useMemo(() => {
+    if (!interviewModalityId.trim()) return null
+    const fromList = modalityOptions.find((m) => m.id === interviewModalityId)
+    if (fromList) return fromList
+    if (
+      interview?.interviewModality &&
+      interview.interviewModality.id === interviewModalityId
+    ) {
+      return interview.interviewModality
+    }
+    return null
+  }, [interviewModalityId, modalityOptions, interview?.interviewModality])
+
+  const hasModalityOption = useMemo(
+    () => !interviewModalityId.trim() || selectedModality != null,
+    [interviewModalityId, selectedModality]
+  )
+
   const isEditable = useMemo(
     () => interview != null && !isInterviewTerminal(interview),
     [interview]
   )
 
+  const showMeetHint = useMemo(() => {
+    if (!selectedModality?.includeGoogleMeetLink) return false
+    if (interview?.googleMeetUrl?.trim()) return false
+    return true
+  }, [selectedModality, interview?.googleMeetUrl])
+
   const handleSave = async () => {
     if (!interview) return
+    const ae = document.activeElement
+    if (ae instanceof HTMLElement) ae.blur()
     setSaving(true)
     try {
-      let scheduledAtUtc: string | undefined
-      if (scheduledLocal.trim()) {
-        scheduledAtUtc = localDatetimeInputToUtcIso(scheduledLocal)
-      }
       const durationParsed =
         durationMinutes.trim() === ""
           ? null
@@ -165,14 +223,29 @@ export function InterviewDetailPanel({
         durationParsed != null && Number.isFinite(durationParsed)
           ? durationParsed
           : null
-      const updated = await patchInterview(interview.id, {
-        scheduledAtUtc,
+      const patchPayload: PatchInterviewPayload = {
         durationMinutes: duration,
         interviewType: interviewType.trim() || null,
+        interviewModalityId: interviewModalityId.trim() || null,
         interviewerName: interviewerName.trim() || null,
         descripcion: descripcion.trim() || null,
         status: statusChoice,
-      })
+      }
+      const scheduleTrimmed = scheduledLocal.trim()
+      if (scheduleTrimmed) {
+        try {
+          patchPayload.scheduledAtUtc =
+            localDatetimeInputToUtcIso(scheduleTrimmed)
+        } catch {
+          setSnackbar({
+            open: true,
+            variant: "error",
+            message: "La fecha u hora no es válida. Revisa el campo de hora.",
+          })
+          return
+        }
+      }
+      const updated = await patchInterview(interview.id, patchPayload)
       setInterview(updated)
       onSaved?.()
       if (variant === "modal" && onClose) {
@@ -373,6 +446,68 @@ export function InterviewDetailPanel({
               ) : null}
             </select>
           )}
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="detail-modality"
+            className="font-sans text-sm font-medium"
+          >
+            Modalidad
+          </label>
+          {loadingModalities ? (
+            <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+              Cargando modalidades…
+            </div>
+          ) : (
+            <select
+              id="detail-modality"
+              value={interviewModalityId}
+              onChange={(e) => setInterviewModalityId(e.target.value)}
+              disabled={!isEditable}
+              className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
+            >
+              <option value="">Selecciona una modalidad…</option>
+              {modalityOptions.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.displayName}
+                </option>
+              ))}
+              {!hasModalityOption &&
+              interviewModalityId.trim() &&
+              interview?.interviewModality?.id === interviewModalityId ? (
+                <option value={interviewModalityId}>
+                  {interview.interviewModality.displayName}
+                </option>
+              ) : null}
+            </select>
+          )}
+          {showMeetHint ? (
+            <div
+              className="rounded-md border border-border bg-muted/50 px-3 py-2 font-sans text-sm text-foreground"
+              role="status"
+            >
+              {calendarStatus.isConnected ? (
+                <span>
+                  Se generará un enlace de Google Meet al guardar (vía Google
+                  Calendar).
+                </span>
+              ) : (
+                <span>
+                  Esta modalidad genera un enlace de Google Meet, pero Google
+                  Calendar no está conectado.{" "}
+                  <Link
+                    href="/portal-rrhh/configuracion/calendario"
+                    className="font-medium text-vo-purple underline-offset-2 hover:underline"
+                  >
+                    Conectar en configuración
+                  </Link>{" "}
+                  para que se cree automáticamente.
+                </span>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-1.5">

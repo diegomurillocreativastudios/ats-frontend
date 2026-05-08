@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { ListChecks, Tags } from "lucide-react"
+import { ListChecks, Tags, Video } from "lucide-react"
+import { InterviewModalitiesCrudModal } from "@/components/rrhh/interviews/interview-modalities-crud-modal"
 import { InterviewStatusesCrudModal } from "@/components/rrhh/interviews/interview-statuses-crud-modal"
 import { InterviewTypesCrudModal } from "@/components/rrhh/interviews/interview-types-crud-modal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
@@ -9,6 +10,8 @@ import PortalPageHeader from "@/components/ui/PortalPageHeader"
 export default function PortalAdminEntrevistasPage() {
   const [interviewTypesModalOpen, setInterviewTypesModalOpen] = useState(false)
   const [interviewStatusesModalOpen, setInterviewStatusesModalOpen] =
+    useState(false)
+  const [interviewModalitiesModalOpen, setInterviewModalitiesModalOpen] =
     useState(false)
 
   return (
@@ -21,13 +24,17 @@ export default function PortalAdminEntrevistasPage() {
         isOpen={interviewStatusesModalOpen}
         onClose={() => setInterviewStatusesModalOpen(false)}
       />
+      <InterviewModalitiesCrudModal
+        isOpen={interviewModalitiesModalOpen}
+        onClose={() => setInterviewModalitiesModalOpen(false)}
+      />
       <section
         className="px-4 py-6 md:px-8"
         aria-label="Configuración de entrevistas"
       >
         <PortalPageHeader
           title="Entrevistas"
-          description="Definí los tipos y estados de entrevista que usarán los reclutadores al agendar y dar seguimiento en el portal RRHH."
+          description="Definí los tipos, modalidades y estados de entrevista que usarán los reclutadores al agendar y dar seguimiento en el portal RRHH."
           contentClassName="max-w-3xl"
           actions={
             <>
@@ -38,6 +45,14 @@ export default function PortalAdminEntrevistasPage() {
               >
                 <Tags className="h-4 w-4 shrink-0" aria-hidden />
                 Tipos de entrevista
+              </button>
+              <button
+                type="button"
+                onClick={() => setInterviewModalitiesModalOpen(true)}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-vo-purple px-5 py-3 font-sans text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+              >
+                <Video className="h-4 w-4 shrink-0" aria-hidden />
+                Modalidades de entrevista
               </button>
               <button
                 type="button"

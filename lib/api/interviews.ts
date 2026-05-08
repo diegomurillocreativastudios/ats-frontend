@@ -3,6 +3,13 @@ import { getApiErrorMessage } from "@/lib/api-error"
 
 export type InterviewStatus = "Scheduled" | "Completed" | "Cancelled" | "NoShow"
 
+/** Snapshot anidado en respuestas de entrevista (`interviewModality`). */
+export interface InterviewModalitySnapshot {
+  id: string
+  displayName: string
+  includeGoogleMeetLink: boolean
+}
+
 export interface Interview {
   id: string
   vacancyId: string
@@ -16,6 +23,8 @@ export interface Interview {
   /** Nombre legible del tipo (p. ej. displayName del API). */
   interviewTypeLabel: string | null
   interviewTypeId: string | null
+  interviewModalityId: string | null
+  interviewModality: InterviewModalitySnapshot | null
   interviewerName: string | null
   googleMeetUrl: string | null
   /** Texto descriptivo de la entrevista (JSON: `descripcion`). */
@@ -45,6 +54,7 @@ export interface CreateInterviewPayload {
   durationMinutes?: number | null
   interviewTypeId?: string | null
   interviewType?: string | null
+  interviewModalityId?: string | null
   interviewerName?: string | null
   descripcion?: string | null
   notes?: string | null
@@ -54,6 +64,7 @@ export interface PatchInterviewPayload {
   scheduledAtUtc?: string
   durationMinutes?: number | null
   interviewType?: string | null
+  interviewModalityId?: string | null
   interviewerName?: string | null
   descripcion?: string | null
   notes?: string | null
@@ -232,6 +243,42 @@ function pickInterviewTypeMeta(r: Record<string, unknown>): {
     typeId: typeIdRoot,
     typeValue: fromType,
     typeLabel: fromType,
+  }
+}
+
+function pickInterviewModalityMeta(r: Record<string, unknown>): {
+  interviewModalityId: string | null
+  interviewModality: InterviewModalitySnapshot | null
+} {
+  const modalityIdRoot =
+    pickString(r, ["interviewModalityId", "interview_modality_id"]) ?? null
+  const nestedRaw = r.interviewModality ?? r.interview_modality
+  const nested = asRecord(nestedRaw)
+  if (nested) {
+    const id =
+      pickString(nested, ["id", "uuid"]) ?? modalityIdRoot ?? ""
+    if (!id.trim()) {
+      return { interviewModalityId: modalityIdRoot, interviewModality: null }
+    }
+    const displayName =
+      pickString(nested, ["displayName", "display_name", "name"]) ?? ""
+    const includeMeet = pickBool(
+      nested,
+      ["includeGoogleMeetLink", "include_google_meet_link"],
+      false
+    )
+    return {
+      interviewModalityId: id,
+      interviewModality: {
+        id,
+        displayName: displayName.trim() || id,
+        includeGoogleMeetLink: includeMeet,
+      },
+    }
+  }
+  return {
+    interviewModalityId: modalityIdRoot,
+    interviewModality: null,
   }
 }
 
@@ -489,6 +536,7 @@ export function normalizeInterview(raw: unknown): Interview {
       "scheduledAt",
     ]) ?? ""
   const typeMeta = pickInterviewTypeMeta(r)
+  const modalityMeta = pickInterviewModalityMeta(r)
   const statusMeta = normalizeInterviewStatusMeta(r)
   return {
     id,
@@ -500,6 +548,8 @@ export function normalizeInterview(raw: unknown): Interview {
     interviewType: typeMeta.typeValue,
     interviewTypeLabel: typeMeta.typeLabel,
     interviewTypeId: typeMeta.typeId,
+    interviewModalityId: modalityMeta.interviewModalityId,
+    interviewModality: modalityMeta.interviewModality,
     interviewerName: pickString(r, [
       "interviewerName",
       "interviewer_name",
@@ -838,6 +888,169 @@ export async function updateInterviewType(
 export async function deleteInterviewType(id: string): Promise<void> {
   await apiClient.delete(
     `/api/admin/interview-types/${encodeURIComponent(id)}`
+  )
+}
+
+/**
+ * Ítem del catálogo de modalidades de entrevista (admin y recruiter GET).
+ * POST/PATCH admin: `{ displayName, includeGoogleMeetLink }` (camelCase, JWT Bearer).
+ */
+export interface InterviewModalityCatalogItem {
+  id: string
+  displayName: string
+  includeGoogleMeetLink: boolean
+  createdAtUtc?: string | null
+}
+
+/** Alias histórico para el modal admin / CRUD. */
+export type InterviewModalityAdmin = InterviewModalityCatalogItem
+
+export interface CreateInterviewModalityPayload {
+  displayName: string
+  includeGoogleMeetLink: boolean
+}
+
+export interface UpdateInterviewModalityPayload {
+  displayName: string
+  includeGoogleMeetLink: boolean
+}
+
+function normalizeInterviewModalityCatalogItem(
+  raw: unknown
+): InterviewModalityCatalogItem | null {
+  const o = asRecord(raw)
+  if (!o) return null
+  const id = pickString(o, [
+    "id",
+    "uuid",
+    "interviewModalityId",
+    "interview_modality_id",
+  ])
+  const displayName =
+    pickString(o, [
+      "displayName",
+      "display_name",
+      "name",
+      "label",
+      "title",
+    ]) ?? ""
+  if (!id || !displayName.trim()) return null
+  return {
+    id,
+    displayName: displayName.trim(),
+    includeGoogleMeetLink: pickBool(
+      o,
+      ["includeGoogleMeetLink", "include_google_meet_link"],
+      false
+    ),
+    createdAtUtc: pickString(o, ["createdAtUtc", "created_at_utc"]),
+  }
+}
+
+function normalizeInterviewModalitiesCatalogList(
+  data: unknown
+): InterviewModalityCatalogItem[] {
+  const rawList: unknown[] = []
+  if (Array.isArray(data)) rawList.push(...data)
+  else {
+    const r = asRecord(data)
+    const nested =
+      r?.data ??
+      r?.items ??
+      r?.interviewModalities ??
+      r?.modalities ??
+      r?.results
+    if (Array.isArray(nested)) rawList.push(...nested)
+  }
+  const out: InterviewModalityCatalogItem[] = []
+  rawList.forEach((item) => {
+    const rec = normalizeInterviewModalityCatalogItem(item)
+    if (rec) out.push(rec)
+  })
+  return out
+}
+
+function normalizeInterviewModalityCatalogResponse(
+  raw: unknown
+): InterviewModalityCatalogItem | null {
+  return normalizeInterviewModalityCatalogItem(raw)
+}
+
+/** Solo lectura: reclutador u admin. `GET /api/recruiter/interview-modalities`. */
+export async function listInterviewModalitiesRecruiter(): Promise<
+  InterviewModalityCatalogItem[]
+> {
+  const data = await apiClient.get("/api/recruiter/interview-modalities")
+  return normalizeInterviewModalitiesCatalogList(data)
+}
+
+export async function listInterviewModalitiesAdmin(): Promise<
+  InterviewModalityCatalogItem[]
+> {
+  const data = await apiClient.get("/api/admin/interview-modalities")
+  return normalizeInterviewModalitiesCatalogList(data)
+}
+
+export async function getInterviewModalityAdmin(
+  id: string
+): Promise<InterviewModalityCatalogItem> {
+  const data = await apiClient.get(
+    `/api/admin/interview-modalities/${encodeURIComponent(id)}`
+  )
+  const rec = normalizeInterviewModalityCatalogResponse(data)
+  if (!rec) {
+    throw new Error("Respuesta inválida al obtener modalidad de entrevista")
+  }
+  return rec
+}
+
+export async function createInterviewModality(
+  payload: CreateInterviewModalityPayload
+): Promise<InterviewModalityCatalogItem> {
+  const displayName = payload.displayName.trim()
+  const body = {
+    displayName,
+    includeGoogleMeetLink: payload.includeGoogleMeetLink,
+  }
+  const data = await apiClient.post("/api/admin/interview-modalities", body)
+  const rec = normalizeInterviewModalityCatalogResponse(data)
+  if (!rec) {
+    return {
+      id: "",
+      displayName,
+      includeGoogleMeetLink: payload.includeGoogleMeetLink,
+    }
+  }
+  return rec
+}
+
+export async function updateInterviewModality(
+  id: string,
+  payload: UpdateInterviewModalityPayload
+): Promise<InterviewModalityCatalogItem> {
+  const displayName = payload.displayName.trim()
+  const body = {
+    displayName,
+    includeGoogleMeetLink: payload.includeGoogleMeetLink,
+  }
+  const data = await apiClient.patch(
+    `/api/admin/interview-modalities/${encodeURIComponent(id)}`,
+    body
+  )
+  const rec = normalizeInterviewModalityCatalogResponse(data)
+  if (!rec) {
+    return {
+      id,
+      displayName,
+      includeGoogleMeetLink: payload.includeGoogleMeetLink,
+    }
+  }
+  return rec
+}
+
+export async function deleteInterviewModality(id: string): Promise<void> {
+  await apiClient.delete(
+    `/api/admin/interview-modalities/${encodeURIComponent(id)}`
   )
 }
 

@@ -176,8 +176,11 @@ export function normalizeClockTimeInput(raw: string): string | null {
   const segments = t.split(":")
   if (segments.length > 2) return null
   if (segments.length === 2) {
-    const hh = Number.parseInt(segments[0] ?? "", 10)
-    const mm = Number.parseInt(segments[1] ?? "", 10)
+    const hhStr = (segments[0] ?? "").trim()
+    const mmStr = (segments[1] ?? "").trim()
+    if (!/^\d{1,2}$/.test(hhStr) || !/^\d{1,2}$/.test(mmStr)) return null
+    const hh = Number.parseInt(hhStr, 10)
+    const mm = Number.parseInt(mmStr, 10)
     if (Number.isNaN(hh) || Number.isNaN(mm)) return null
     if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null
     return `${pad2(hh)}:${pad2(mm)}`

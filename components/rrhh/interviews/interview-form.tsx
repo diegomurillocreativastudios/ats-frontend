@@ -9,7 +9,9 @@ import {
   fetchInterviewTypes,
   fetchVacancyApplicantOptions,
   getInterviewHttpErrorMessage,
+  listInterviewModalitiesRecruiter,
   type CreateInterviewPayload,
+  type InterviewModalityCatalogItem,
   type InterviewTypeOption,
   type VacancyApplicantOption,
 } from "@/lib/api/interviews"
@@ -48,10 +50,15 @@ export function InterviewForm(props: InterviewFormProps) {
     InterviewTypeOption[]
   >([])
   const [loadingInterviewTypes, setLoadingInterviewTypes] = useState(true)
+  const [modalityOptions, setModalityOptions] = useState<
+    InterviewModalityCatalogItem[]
+  >([])
+  const [loadingModalities, setLoadingModalities] = useState(true)
   const [candidateProfileId, setCandidateProfileId] = useState("")
   const [scheduledLocal, setScheduledLocal] = useState("")
   const [durationMinutes, setDurationMinutes] = useState("")
   const [interviewType, setInterviewType] = useState("")
+  const [interviewModalityId, setInterviewModalityId] = useState("")
   const [interviewerName, setInterviewerName] = useState("")
   const [descripcion, setDescripcion] = useState("")
   const [submitting, setSubmitting] = useState(false)
@@ -105,6 +112,27 @@ export function InterviewForm(props: InterviewFormProps) {
     }
   }, [])
 
+  const loadModalities = useCallback(async () => {
+    setLoadingModalities(true)
+    try {
+      const list = await listInterviewModalitiesRecruiter()
+      setModalityOptions(list)
+    } catch (err: unknown) {
+      const status =
+        typeof err === "object" && err !== null && "status" in err
+          ? (err as { status?: number }).status
+          : 0
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: getInterviewHttpErrorMessage(status ?? 0, err),
+      })
+      setModalityOptions([])
+    } finally {
+      setLoadingModalities(false)
+    }
+  }, [])
+
   useEffect(() => {
     loadOptions()
   }, [loadOptions])
@@ -112,6 +140,15 @@ export function InterviewForm(props: InterviewFormProps) {
   useEffect(() => {
     loadInterviewTypes()
   }, [loadInterviewTypes])
+
+  useEffect(() => {
+    loadModalities()
+  }, [loadModalities])
+
+  const selectedModality = modalityOptions.find(
+    (m) => m.id === interviewModalityId
+  )
+  const showMeetHint = !!selectedModality?.includeGoogleMeetLink
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,6 +197,10 @@ export function InterviewForm(props: InterviewFormProps) {
       if (typeTrim) {
         if (isUuid) body.interviewTypeId = typeTrim
         else body.interviewType = typeTrim
+      }
+      const modalityTrim = interviewModalityId.trim()
+      if (modalityTrim) {
+        body.interviewModalityId = modalityTrim
       }
       await createInterview(vacancyId, body)
       if (isModal) {
@@ -331,6 +372,60 @@ export function InterviewForm(props: InterviewFormProps) {
               ))}
             </select>
           )}
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="interview-modality"
+            className="font-sans text-sm font-medium"
+          >
+            Modalidad
+          </label>
+          {loadingModalities ? (
+            <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+              Cargando modalidades…
+            </div>
+          ) : (
+            <select
+              id="interview-modality"
+              value={interviewModalityId}
+              onChange={(e) => setInterviewModalityId(e.target.value)}
+              className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm"
+            >
+              <option value="">Selecciona una modalidad…</option>
+              {modalityOptions.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.displayName}
+                </option>
+              ))}
+            </select>
+          )}
+          {showMeetHint ? (
+            <div
+              className="rounded-md border border-border bg-muted/50 px-3 py-2 font-sans text-sm text-foreground"
+              role="status"
+            >
+              {calendarStatus.isConnected ? (
+                <span>
+                  Se generará un enlace de Google Meet al guardar (vía Google
+                  Calendar).
+                </span>
+              ) : (
+                <span>
+                  Esta modalidad genera un enlace de Google Meet, pero Google
+                  Calendar no está conectado.{" "}
+                  <Link
+                    href="/portal-rrhh/configuracion/calendario"
+                    className="font-medium text-vo-purple underline-offset-2 hover:underline"
+                  >
+                    Conectar en configuración
+                  </Link>{" "}
+                  para que se cree automáticamente.
+                </span>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-1.5">

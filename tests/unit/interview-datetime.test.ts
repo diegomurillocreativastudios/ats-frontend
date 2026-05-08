@@ -4,6 +4,7 @@ import {
   combineDatetimeLocal,
   isQuarterHourTime,
   normalizeClockTimeInput,
+  parseFlexibleTimeInput,
   sameDayMinutesFromStartToEnd,
   splitDatetimeLocal,
 } from "@/lib/interview-datetime"
@@ -40,5 +41,13 @@ describe("interview-datetime helpers", () => {
     expect(normalizeClockTimeInput("25:00")).toBe(null)
     expect(normalizeClockTimeInput("12:60")).toBe(null)
     expect(normalizeClockTimeInput("no")).toBe(null)
+    expect(normalizeClockTimeInput("2:00 p. m.")).toBe(null)
+  })
+
+  it("parseFlexibleTimeInput no interpreta 12 h como 24 h", () => {
+    expect(parseFlexibleTimeInput("2:00 p. m.")).toBe("14:00")
+    expect(parseFlexibleTimeInput("2:00 a. m.")).toBe("02:00")
+    expect(parseFlexibleTimeInput("12:00 p. m.")).toBe("12:00")
+    expect(parseFlexibleTimeInput("12:00 a. m.")).toBe("00:00")
   })
 })
