@@ -31,8 +31,12 @@ export function InterviewModalitiesCrudModal({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [newDisplayName, setNewDisplayName] = useState("")
+  const [newIncludeGoogleMeetLink, setNewIncludeGoogleMeetLink] =
+    useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editDisplayName, setEditDisplayName] = useState("")
+  const [editIncludeGoogleMeetLink, setEditIncludeGoogleMeetLink] =
+    useState(false)
   const [deleteTarget, setDeleteTarget] =
     useState<InterviewModalityAdmin | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -75,8 +79,10 @@ export function InterviewModalitiesCrudModal({
     if (!isOpen) return
     loadList()
     setNewDisplayName("")
+    setNewIncludeGoogleMeetLink(false)
     setEditingId(null)
     setEditDisplayName("")
+    setEditIncludeGoogleMeetLink(false)
     setDeleteTarget(null)
     setError(null)
   }, [isOpen, loadList])
@@ -90,9 +96,10 @@ export function InterviewModalitiesCrudModal({
     try {
       await createInterviewModality({
         displayName,
-        includeGoogleMeetLink: false,
+        includeGoogleMeetLink: newIncludeGoogleMeetLink,
       })
       setNewDisplayName("")
+      setNewIncludeGoogleMeetLink(false)
       await loadList()
       onMutate?.()
       showSnackbar("success", "Modalidad de entrevista creada correctamente.")
@@ -112,29 +119,30 @@ export function InterviewModalitiesCrudModal({
   const handleStartEdit = (row: InterviewModalityAdmin) => {
     setEditingId(row.id)
     setEditDisplayName(row.displayName)
+    setEditIncludeGoogleMeetLink(row.includeGoogleMeetLink)
     setError(null)
   }
 
   const handleCancelEdit = () => {
     setEditingId(null)
     setEditDisplayName("")
+    setEditIncludeGoogleMeetLink(false)
   }
 
   const handleSaveEdit = async () => {
     if (!editingId) return
     const displayName = editDisplayName.trim()
     if (!displayName) return
-    const existing = items.find((r) => r.id === editingId)
     setSaving(true)
     setError(null)
     try {
       await updateInterviewModality(editingId, {
         displayName,
-        includeGoogleMeetLink:
-          existing?.includeGoogleMeetLink ?? false,
+        includeGoogleMeetLink: editIncludeGoogleMeetLink,
       })
       setEditingId(null)
       setEditDisplayName("")
+      setEditIncludeGoogleMeetLink(false)
       await loadList()
       onMutate?.()
       showSnackbar(
@@ -200,37 +208,40 @@ export function InterviewModalitiesCrudModal({
         <div className="flex flex-col gap-5">
           <form
             onSubmit={handleCreate}
-            className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3"
+            className="flex flex-col gap-3"
             aria-label="Crear modalidad de entrevista"
           >
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <label
-                htmlFor="new-interview-modality-display-name"
-                className="font-sans text-sm font-medium text-foreground"
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                <label
+                  htmlFor="new-interview-modality-display-name"
+                  className="font-sans text-sm font-medium text-foreground"
+                >
+                  Nueva modalidad
+                </label>
+                <input
+                  id="new-interview-modality-display-name"
+                  type="text"
+                  value={newDisplayName}
+                  onChange={(e) => setNewDisplayName(e.target.value)}
+                  placeholder="Nombre visible"
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm"
+                  disabled={saving || loading}
+                  autoComplete="off"
+                />
+              </div>
+              <Button
+                type="submit"
+                variant="primary"
+                loading={saving}
+                disabled={loading || !newDisplayName.trim()}
+                className="shrink-0 px-5 py-2.5"
               >
-                Nueva modalidad
-              </label>
-              <input
-                id="new-interview-modality-display-name"
-                type="text"
-                value={newDisplayName}
-                onChange={(e) => setNewDisplayName(e.target.value)}
-                placeholder="Nombre visible"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm"
-                disabled={saving || loading}
-                autoComplete="off"
-              />
+                <Plus className="h-4 w-4" aria-hidden />
+                Añadir
+              </Button>
             </div>
-            <Button
-              type="submit"
-              variant="primary"
-              loading={saving}
-              disabled={loading || !newDisplayName.trim()}
-              className="shrink-0 px-5 py-2.5"
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              Añadir
-            </Button>
+            
           </form>
 
           {error ? (
@@ -250,11 +261,14 @@ export function InterviewModalitiesCrudModal({
             </p>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full min-w-[280px] border-collapse text-left font-sans text-sm">
+              <table className="w-full min-w-[360px] border-collapse text-left font-sans text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
                     <th scope="col" className="px-3 py-2 font-semibold">
                       Nombre
+                    </th>
+                    <th scope="col" className="px-3 py-2 font-semibold">
+                      Google Meet
                     </th>
                     <th
                       scope="col"
@@ -287,53 +301,78 @@ export function InterviewModalitiesCrudModal({
                         )}
                       </td>
                       <td className="px-3 py-2 align-middle">
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          {editingId === row.id ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={handleSaveEdit}
-                                disabled={
-                                  saving ||
-                                  !editDisplayName.trim() ||
-                                  !editingId
-                                }
-                                className="rounded-md bg-vo-purple px-3 py-1.5 text-xs font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
-                              >
-                                Guardar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleCancelEdit}
-                                disabled={saving}
-                                className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
-                              >
-                                Cancelar
-                              </button>
-                            </>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleStartEdit(row)}
-                                disabled={saving || !!editingId}
-                                className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-foreground hover:bg-muted disabled:opacity-50"
-                                aria-label={`Editar ${row.displayName}`}
-                              >
-                                <Pencil className="h-4 w-4" aria-hidden />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeleteTarget(row)}
-                                disabled={saving || !!editingId}
-                                className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                                aria-label={`Eliminar ${row.displayName}`}
-                              >
-                                <Trash2 className="h-4 w-4" aria-hidden />
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                        {editingId === row.id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              id={`edit-interview-modality-google-meet-${row.id}`}
+                              type="checkbox"
+                              checked={editIncludeGoogleMeetLink}
+                              onChange={(e) =>
+                                setEditIncludeGoogleMeetLink(e.target.checked)
+                              }
+                              disabled={saving}
+                              className="h-4 w-4 shrink-0 rounded border-input text-vo-purple focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              aria-label="Incluir enlace de Google Meet"
+                            />
+                            <label
+                              htmlFor={`edit-interview-modality-google-meet-${row.id}`}
+                              className="font-sans text-xs text-muted-foreground"
+                            >
+                              Meet
+                            </label>
+                          </div>
+                        ) : (
+                          <span className="text-foreground">
+                            {row.includeGoogleMeetLink ? "Sí" : "No"}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 align-middle">
+                        {editingId === row.id ? (
+                          <div className="ml-auto flex min-w-26 max-w-40 flex-col items-stretch gap-2">
+                            <button
+                              type="button"
+                              onClick={handleSaveEdit}
+                              disabled={
+                                saving ||
+                                !editDisplayName.trim() ||
+                                !editingId
+                              }
+                              className="w-full rounded-md bg-vo-purple px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
+                            >
+                              Guardar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelEdit}
+                              disabled={saving}
+                              className="w-full rounded-md border border-border px-3 py-1.5 text-center text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleStartEdit(row)}
+                              disabled={saving || !!editingId}
+                              className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-foreground hover:bg-muted disabled:opacity-50"
+                              aria-label={`Editar ${row.displayName}`}
+                            >
+                              <Pencil className="h-4 w-4" aria-hidden />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(row)}
+                              disabled={saving || !!editingId}
+                              className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                              aria-label={`Eliminar ${row.displayName}`}
+                            >
+                              <Trash2 className="h-4 w-4" aria-hidden />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}

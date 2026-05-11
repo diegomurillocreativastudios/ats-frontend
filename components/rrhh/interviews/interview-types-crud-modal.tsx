@@ -274,51 +274,49 @@ export function InterviewTypesCrudModal({
                         )}
                       </td>
                       <td className="px-3 py-2 align-middle">
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          {editingId === row.id ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={handleSaveEdit}
-                                disabled={
-                                  saving || !editName.trim() || !editingId
-                                }
-                                className="rounded-md bg-vo-purple px-3 py-1.5 text-xs font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
-                              >
-                                Guardar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleCancelEdit}
-                                disabled={saving}
-                                className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
-                              >
-                                Cancelar
-                              </button>
-                            </>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleStartEdit(row)}
-                                disabled={saving || !!editingId}
-                                className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-foreground hover:bg-muted disabled:opacity-50"
-                                aria-label={`Editar ${row.name}`}
-                              >
-                                <Pencil className="h-4 w-4" aria-hidden />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeleteTarget(row)}
-                                disabled={saving || !!editingId}
-                                className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                                aria-label={`Eliminar ${row.name}`}
-                              >
-                                <Trash2 className="h-4 w-4" aria-hidden />
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                        {editingId === row.id ? (
+                          <div className="ml-auto flex min-w-26 max-w-40 flex-col items-stretch gap-2">
+                            <button
+                              type="button"
+                              onClick={handleSaveEdit}
+                              disabled={
+                                saving || !editName.trim() || !editingId
+                              }
+                              className="w-full rounded-md bg-vo-purple px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
+                            >
+                              Guardar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelEdit}
+                              disabled={saving}
+                              className="w-full rounded-md border border-border px-3 py-1.5 text-center text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleStartEdit(row)}
+                              disabled={saving || !!editingId}
+                              className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-foreground hover:bg-muted disabled:opacity-50"
+                              aria-label={`Editar ${row.name}`}
+                            >
+                              <Pencil className="h-4 w-4" aria-hidden />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(row)}
+                              disabled={saving || !!editingId}
+                              className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                              aria-label={`Eliminar ${row.name}`}
+                            >
+                              <Trash2 className="h-4 w-4" aria-hidden />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
