@@ -23,6 +23,7 @@ import {
   getVacancyDepartmentLabel,
   getVacancyModalityLabel,
 } from "@/lib/vacancy-catalogs";
+import { mapDefaultCompanyDisplayLabel } from "@/lib/public-company-display";
 
 const ICON_BY_DEPARTMENT = {
   diseño: Palette,
@@ -64,11 +65,14 @@ const mapStatusKey = (item) => {
 const mapVacancyFromApi = (item, index = 0) => {
   const id = String(item?.id ?? item?.uuid ?? index);
   const title = item.title ?? item.name ?? "";
-  const company = item.company ?? item.companyName ?? "";
+  const companyRaw = item.company ?? item.companyName ?? "";
+  const companyTrim = String(companyRaw).trim();
+  const company =
+    companyTrim === "" ? "—" : mapDefaultCompanyDisplayLabel(companyTrim);
   const jobCategory = item.jobCategory ?? item.job_category ?? "";
   const department = getVacancyDepartmentLabel(item);
   const modality = getVacancyModalityLabel(item);
-  const location = item.location ?? item.work_arrangement ?? company ?? "—";
+  const location = item.location ?? item.work_arrangement ?? companyRaw ?? "—";
   const description = item.description ?? "";
   const requirementsSummary = formatRequirements(item.requirements);
   const candidates =
@@ -96,7 +100,7 @@ const mapVacancyFromApi = (item, index = 0) => {
     id,
     title,
     description,
-    company: company || "—",
+    company,
     jobCategory: jobCategory || "—",
     department,
     modality,

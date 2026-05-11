@@ -3,7 +3,7 @@
 import Link from "next/link";
 import ProductBrand from "@/components/branding/ProductBrand";
 import { usePathname } from "next/navigation";
-import { Users, Briefcase, Calendar, Cog } from "lucide-react";
+import { Users, Briefcase, Calendar, BarChart3, Cog } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getInitials } from "@/lib/getInitials";
 
@@ -11,6 +11,7 @@ const navItems = [
   { href: "/portal-rrhh/candidatos", label: "Candidatos", icon: Users },
   { href: "/portal-rrhh/vacantes", label: "Vacantes", icon: Briefcase },
   { href: "/portal-rrhh/entrevistas", label: "Entrevistas", icon: Calendar },
+  { href: "/portal-rrhh/reportes", label: "Reportes", icon: BarChart3 },
   {
     href: "/portal-rrhh/configuracion",
     label: "Configuracion",
@@ -28,7 +29,7 @@ export default function RRHHSidebar() {
 
   return (
     <aside
-      className="flex w-[260px] shrink-0 flex-col justify-between border-r border-border bg-card py-6 pl-6 pr-0"
+      className="flex h-full min-h-0 w-[260px] shrink-0 flex-col justify-between overflow-y-auto overscroll-y-contain border-r border-border bg-card py-6 pl-6 pr-0"
       aria-label="Navegación Portal RRHH"
     >
       <div className="flex flex-col gap-6">
@@ -48,10 +49,13 @@ export default function RRHHSidebar() {
           {items.map((item) => {
             const Icon = item.icon;
             const isEntrevistasItem = item.href === "/portal-rrhh/entrevistas";
+            const isReportesItem = item.href === "/portal-rrhh/reportes";
             const isConfigItem = item.href === "/portal-rrhh/configuracion";
             const isActive = isEntrevistasItem
               ? pathname.startsWith("/portal-rrhh/entrevistas") ||
                 pathname.startsWith("/portal-rrhh/interviews/")
+              : isReportesItem
+              ? pathname.startsWith("/portal-rrhh/reportes")
               : isConfigItem
               ? pathname.startsWith("/portal-rrhh/configuracion")
               : pathname === item.href || pathname.startsWith(item.href + "/");

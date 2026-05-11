@@ -26,6 +26,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
+import { mapDefaultCompanyDisplayLabel } from "@/lib/public-company-display"
 import { Button } from "@/components/ui/Button"
 import {
   listPublicVacancies,
@@ -285,8 +286,7 @@ function OpportunityCard({
     vacancy.locationLabel ?? vacancy.countryLabel ?? "Ubicación no especificada"
   const departmentLabel = vacancy.department?.displayName ?? "Departamento no especificado"
   const modalityLabel = vacancy.modality?.displayName ?? "Modalidad no especificada"
-  const companyName =
-    vacancy.company.name.trim() === "Default Company" ? "" : vacancy.company.name.trim()
+  const companyName = mapDefaultCompanyDisplayLabel(vacancy.company.name)
   const DepartmentIcon = getDepartmentIcon(vacancy.department)
 
   return (

@@ -114,7 +114,10 @@ export function VacancyPipelineCharts({
         <p className="mb-4 font-sans text-sm text-muted-foreground">
           Conteo según la etapa actual de cada postulación.
         </p>
-        <div className="h-[min(360px,50vh)] w-full min-h-[260px]">
+        <div
+          className="w-full min-h-[260px] overflow-hidden"
+          style={{ height: "min(360px, 50dvh)" }}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={byStage}
@@ -177,7 +180,10 @@ export function VacancyPipelineCharts({
             <code className="rounded bg-muted px-1">totalScore</code>.
           </p>
         ) : (
-          <div className="h-[min(320px,45vh)] w-full min-h-[220px]">
+          <div
+            className="w-full min-h-[220px] overflow-hidden"
+            style={{ height: "min(320px, 45dvh)" }}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={scoreBuckets}

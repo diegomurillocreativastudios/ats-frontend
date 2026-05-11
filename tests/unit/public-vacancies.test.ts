@@ -4,6 +4,10 @@ import {
   normalizeOpportunityDetail,
   normalizeOpportunityListResponse,
 } from "@/lib/api/public-vacancies"
+import {
+  DEFAULT_COMPANY_DISPLAY_LABEL,
+  LEGACY_PLACEHOLDER_COMPANY_NAME,
+} from "@/lib/public-company-display"
 
 describe("public vacancies API helpers", () => {
   it("builds a stable query string from active filters", () => {
@@ -71,6 +75,24 @@ describe("public vacancies API helpers", () => {
     expect(response.pagination.totalPages).toBe(2)
   })
 
+  it("maps legacy placeholder company to Visible Outsource on list normalization", () => {
+    const response = normalizeOpportunityListResponse({
+      data: [
+        {
+          id: "vac-placeholder",
+          title: "Analista",
+          company: { name: LEGACY_PLACEHOLDER_COMPANY_NAME },
+        },
+      ],
+      page: 1,
+      pageSize: 10,
+      totalCount: 1,
+      totalPages: 1,
+    })
+
+    expect(response.items[0].company.name).toBe(DEFAULT_COMPANY_DISPLAY_LABEL)
+  })
+
   it("normalizes detail arrays and falls back to description blocks", () => {
     const detail = normalizeOpportunityDetail({
       id: "vac-1",
@@ -101,5 +123,15 @@ describe("public vacancies API helpers", () => {
     ])
     expect(detail?.requirements).toEqual(["Figma", "Research"])
     expect(detail?.benefits).toEqual(["Horario flexible"])
+  })
+
+  it("maps legacy placeholder company on vacancy detail normalization", () => {
+    const detail = normalizeOpportunityDetail({
+      id: "vac-2",
+      title: "Backend",
+      companyName: LEGACY_PLACEHOLDER_COMPANY_NAME,
+    })
+
+    expect(detail?.company.name).toBe(DEFAULT_COMPANY_DISPLAY_LABEL)
   })
 })

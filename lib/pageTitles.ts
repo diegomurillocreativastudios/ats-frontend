@@ -39,6 +39,11 @@ const RRHH_PATH_LABEL = {
   etapas: "Etapas",
   plantillas: "Plantillas",
   interviews: "Entrevistas",
+  reportes: "Reportes",
+  "avance-vacantes-por-cliente": "Avance vacantes por cliente",
+  "estatus-candidatos-por-etapa": "Estatus candidatos por etapa",
+  "evaluaciones-tecnicas": "Evaluaciones técnicas",
+  "fuentes-reclutamiento": "Fuentes de reclutamiento",
 }
 
 const CANDIDATO_PATH_LABEL = {

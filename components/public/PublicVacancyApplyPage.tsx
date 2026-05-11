@@ -18,15 +18,10 @@ import {
   getPublicVacancyDetail,
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
+import { mapDefaultCompanyDisplayLabel } from "@/lib/public-company-display"
 
 const darkPanelClassName =
   "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
-
-function getDisplayCompanyName(companyName?: string): string {
-  const normalizedCompanyName = companyName?.trim() ?? ""
-  if (normalizedCompanyName === "Default Company") return ""
-  return normalizedCompanyName
-}
 
 function VacancyApplySkeleton() {
   return (
@@ -105,7 +100,7 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
     document.title = `ATS | Oportunidades | Aplicar a ${vacancy.title}`
   }, [vacancy?.title])
 
-  const companyName = getDisplayCompanyName(vacancy?.company.name)
+  const companyName = mapDefaultCompanyDisplayLabel(vacancy?.company.name)
 
   const isPrivacyDialogOpen = Boolean(
     vacancy && !errorMessage && !isLoading && !hasAcceptedPrivacy
