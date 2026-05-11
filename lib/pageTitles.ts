@@ -126,6 +126,15 @@ export function formatVacancyDetailDocumentTitle(vacancyDisplayName) {
   return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Vacantes", name)
 }
 
+/** Resultados / pipeline de una vacante con nombre legible. */
+export function formatVacancyResultadosDocumentTitle(vacancyDisplayName) {
+  const name =
+    vacancyDisplayName != null && String(vacancyDisplayName).trim() !== ""
+      ? String(vacancyDisplayName).trim()
+      : "Vacante"
+  return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Vacantes", name, "Resultados")
+}
+
 /** Hasta que el cliente cargue el nombre del candidato. */
 export function getCandidatoDetailStaticTitle() {
   return joinDocumentTitle(BASE_TITLE, PORTAL_RRHH, "Candidatos")

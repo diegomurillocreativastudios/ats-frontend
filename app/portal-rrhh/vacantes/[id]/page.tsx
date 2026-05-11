@@ -46,6 +46,11 @@ import {
   VACANCY_PRELIMINARY_MATCH_TYPICAL_MS,
   VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS,
 } from "@/lib/apply-loading-bar"
+import {
+  FALLBACK_KANBAN_STAGES,
+  getCandidateId,
+  normalizeKanbanStage,
+} from "@/lib/rrhh/vacancy-pipeline-stats"
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
 import {
@@ -293,22 +298,6 @@ const createEmptyRequirement = () => ({
   requirementValue: "",
   scale: 5,
 });
-
-const FALLBACK_KANBAN_STAGES = [
-  "Applied",
-  "Screening",
-  "Interview",
-  "Offer",
-  "Hired",
-];
-
-const normalizeKanbanStage = (value, stageNames = FALLBACK_KANBAN_STAGES) => {
-  if (!stageNames?.length) return FALLBACK_KANBAN_STAGES[0];
-  if (value == null || String(value).trim() === "") return stageNames[0];
-  const key = String(value).trim().toLowerCase();
-  const found = stageNames.find((s) => s.toLowerCase() === key);
-  return found ?? stageNames[0];
-};
 
 /** Converts a raw score/attribute key into a natural human-readable label. */
 const formatScoreKey = (key) => {
@@ -994,9 +983,6 @@ const mapStatusFromApi = (item, index = 0) => {
   const name = item?.name ?? item?.status_name ?? "";
   return { id, name };
 };
-
-const getCandidateId = (match, index) =>
-  match.candidateDocumentId ?? match.candidateProfileId ?? match?.id ?? `candidate-${index}`;
 
 const KanbanCard = ({
   match,
@@ -2254,6 +2240,13 @@ export default function VacanteDetallePage() {
                             >
                               Entrevistas
                             </Link>
+                            <Link
+                              href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              aria-label="Ver resultados y métricas de esta vacante"
+                            >
+                              Resultados
+                            </Link>
                           </>
                         ) : (
                           <button
@@ -2943,6 +2936,13 @@ export default function VacanteDetallePage() {
                             aria-label="Ver entrevistas de esta vacante"
                           >
                             Entrevistas
+                          </Link>
+                          <Link
+                            href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            aria-label="Ver resultados y métricas de esta vacante"
+                          >
+                            Resultados
                           </Link>
                         </>
                       ) : (
