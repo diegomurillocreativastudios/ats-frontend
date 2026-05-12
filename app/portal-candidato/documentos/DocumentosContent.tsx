@@ -33,7 +33,23 @@ const isResumeLikeDocument = (fileName: string) => {
 export default function DocumentosContent() {
   const [isUploadingGeneralDocument, setIsUploadingGeneralDocument] = useState(false)
   const { showSnackbar } = useCandidateSnackbar()
-  const { candidateId, documents, loading, error, refetch } = useCandidateDocuments()
+  const { candidateId, documents, loading, error, refetch, deleteDocument } =
+    useCandidateDocuments()
+
+  const handleDeleteDocument = useCallback(
+    async (documentId: string) => {
+      try {
+        await deleteDocument(documentId)
+        showSnackbar("Documento eliminado correctamente.", "success")
+      } catch (err: unknown) {
+        showSnackbar(
+          getApiErrorMessage(err) || "No se pudo eliminar el documento.",
+          "error"
+        )
+      }
+    },
+    [deleteDocument, showSnackbar]
+  )
 
   const handleProcess = async (file: File, _index: number) => {
     const formData = new FormData();
@@ -168,7 +184,10 @@ export default function DocumentosContent() {
                       {error}
                     </p>
                   ) : null}
-                  <DocumentsList documents={documents} />
+                  <DocumentsList
+                    documents={documents}
+                    onDeleteDocument={handleDeleteDocument}
+                  />
                 </>
               )}
             </div>
@@ -203,7 +222,10 @@ export default function DocumentosContent() {
                     {error}
                   </p>
                 ) : null}
-                <DocumentsList documents={documents} />
+                <DocumentsList
+                  documents={documents}
+                  onDeleteDocument={handleDeleteDocument}
+                />
               </>
             )}
           </div>

@@ -54,11 +54,29 @@ export function useCandidateDocuments() {
     void load()
   }, [load])
 
+  const deleteDocument = useCallback(
+    async (documentId: string) => {
+      if (!candidateId) {
+        throw new Error("No se pudo identificar el perfil del candidato")
+      }
+      const trimmedId = String(documentId ?? "").trim()
+      if (!trimmedId) {
+        throw new Error("Id de documento inválido")
+      }
+      await apiClient.delete(
+        `/api/candidate/${encodeURIComponent(candidateId)}/documents/${encodeURIComponent(trimmedId)}`
+      )
+      setDocuments((prev) => prev.filter((d) => d.id !== trimmedId))
+    },
+    [candidateId]
+  )
+
   return {
     candidateId,
     documents,
     loading,
     error,
     refetch: load,
+    deleteDocument,
   }
 }

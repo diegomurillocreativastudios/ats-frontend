@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Download, Loader2 } from "lucide-react";
+import { FileText, Download, Loader2, Trash2 } from "lucide-react";
 import type { CandidateDocument } from "@/lib/candidate-documents";
 import { getAccessToken } from "@/lib/auth";
 import { getApiErrorMessage } from "@/lib/api-error";
+import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
 
 interface DocumentsListProps {
   documents?: CandidateDocument[];
+  /** Si se define, se muestra el botón Eliminar por documento */
+  onDeleteDocument?: (documentId: string) => void | Promise<void>;
 }
 
 const resolveDocumentName = (doc: CandidateDocument) => {
@@ -28,9 +31,15 @@ const resolveDocumentName = (doc: CandidateDocument) => {
 /**
  * Lista de documentos del candidato.
  */
-export default function DocumentsList({ documents = [] }: DocumentsListProps) {
+export default function DocumentsList({
+  documents = [],
+  onDeleteDocument,
+}: DocumentsListProps) {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [documentPendingDelete, setDocumentPendingDelete] =
+    useState<CandidateDocument | null>(null);
 
   const handleDownload = async (doc: CandidateDocument) => {
     const path = doc.storagePath?.trim();
@@ -69,6 +78,34 @@ export default function DocumentsList({ documents = [] }: DocumentsListProps) {
     }
   };
 
+  const handleOpenDeleteModal = (doc: CandidateDocument) => {
+    if (!onDeleteDocument) return;
+    setDocumentPendingDelete(doc);
+  };
+
+  const handleCloseDeleteModal = () => {
+    if (deletingId !== null) return;
+    setDocumentPendingDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    const doc = documentPendingDelete;
+    if (!doc || !onDeleteDocument) return;
+    void (async () => {
+      setDeletingId(doc.id);
+      try {
+        await onDeleteDocument(doc.id);
+        setDocumentPendingDelete(null);
+      } finally {
+        setDeletingId(null);
+      }
+    })();
+  };
+
+  const deleteModalLoading =
+    Boolean(documentPendingDelete) &&
+    deletingId === documentPendingDelete?.id;
+
   return (
     <div className="flex flex-col gap-3 md:gap-4">
       <h2 className="font-sans text-sm font-semibold text-foreground md:text-base">
@@ -101,30 +138,76 @@ export default function DocumentsList({ documents = [] }: DocumentsListProps) {
                   {resolveDocumentName(doc)}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => void handleDownload(doc)}
-                disabled={!doc.storagePath?.trim() || downloadingId === doc.id}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label={`Descargar ${resolveDocumentName(doc)}`}
-                aria-busy={downloadingId === doc.id}
-              >
-                {downloadingId === doc.id ? (
-                  <Loader2
-                    className="h-4 w-4 animate-spin text-muted-foreground md:h-5 md:w-5"
-                    aria-hidden
-                  />
-                ) : (
-                  <Download
-                    className="h-4 w-4 text-muted-foreground md:h-5 md:w-5"
-                    aria-hidden
-                  />
-                )}
-              </button>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => void handleDownload(doc)}
+                  disabled={!doc.storagePath?.trim() || downloadingId === doc.id}
+                  className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label={`Descargar ${resolveDocumentName(doc)}`}
+                  aria-busy={downloadingId === doc.id}
+                >
+                  {downloadingId === doc.id ? (
+                    <Loader2
+                      className="h-4 w-4 animate-spin text-muted-foreground md:h-5 md:w-5"
+                      aria-hidden
+                    />
+                  ) : (
+                    <Download
+                      className="h-4 w-4 text-muted-foreground md:h-5 md:w-5"
+                      aria-hidden
+                    />
+                  )}
+                </button>
+                {onDeleteDocument ? (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenDeleteModal(doc)}
+                    disabled={deletingId === doc.id}
+                    className="flex h-9 w-9 items-center justify-center rounded-md text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label={`Eliminar ${resolveDocumentName(doc)}`}
+                    aria-busy={deletingId === doc.id}
+                  >
+                    {deletingId === doc.id ? (
+                      <Loader2
+                        className="h-4 w-4 animate-spin text-destructive md:h-5 md:w-5"
+                        aria-hidden
+                      />
+                    ) : (
+                      <Trash2
+                        className="h-4 w-4 text-destructive md:h-5 md:w-5"
+                        aria-hidden
+                      />
+                    )}
+                  </button>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>
       )}
+      {onDeleteDocument ? (
+        <DeleteConfirmModal
+          isOpen={documentPendingDelete !== null}
+          onClose={handleCloseDeleteModal}
+          onConfirm={handleConfirmDelete}
+          title="Eliminar documento"
+          message={
+            documentPendingDelete ? (
+              <>
+                ¿Eliminar{" "}
+                <span className="font-medium text-foreground">
+                  &ldquo;{resolveDocumentName(documentPendingDelete)}&rdquo;
+                </span>
+                ? Dejará de aparecer en tu listado.
+              </>
+            ) : null
+          }
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          loading={deleteModalLoading}
+        />
+      ) : null}
     </div>
   );
 }

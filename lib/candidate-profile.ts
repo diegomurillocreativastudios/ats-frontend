@@ -216,13 +216,85 @@ export interface CandidateProfileSaveBody {
   recognitions?: unknown
 }
 
+/**
+ * Partes de calendario (año-mes-día) sin corrimiento por zona horaria del navegador.
+ * Los cumpleaños son fechas civiles; un ISO `…T00:00:00.000Z` no debe mostrarse como el día anterior en UTC-3/4.
+ */
+export function birthDateCalendarPartsFromUnknown(
+  value: unknown
+): { year: number; month: number; day: number } | null {
+  if (value == null) return null
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return null
+    return {
+      year: value.getUTCFullYear(),
+      month: value.getUTCMonth() + 1,
+      day: value.getUTCDate(),
+    }
+  }
+  if (typeof value !== "string") return null
+  const s = value.trim()
+  if (!s) return null
+
+  const datePrefix = s.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (datePrefix) {
+    const year = Number(datePrefix[1])
+    const month = Number(datePrefix[2])
+    const day = Number(datePrefix[3])
+    const t = Date.UTC(year, month - 1, day)
+    const check = new Date(t)
+    if (
+      check.getUTCFullYear() !== year ||
+      check.getUTCMonth() + 1 !== month ||
+      check.getUTCDate() !== day
+    ) {
+      return null
+    }
+    return { year, month, day }
+  }
+
+  const d = new Date(s)
+  if (Number.isNaN(d.getTime())) return null
+  return {
+    year: d.getUTCFullYear(),
+    month: d.getUTCMonth() + 1,
+    day: d.getUTCDate(),
+  }
+}
+
+const birthDateInvalidFallbackDisplay = (value: unknown): string => {
+  if (value == null) return "—"
+  const t = String(value).trim()
+  return t !== "" ? t : "—"
+}
+
+/** Formato legible de cumpleaños alineado al día civil guardado (locale por defecto Chile). */
+export function formatBirthDateForDisplay(
+  value: unknown,
+  locale = "es-CL"
+): string | null {
+  if (value == null) return null
+  if (typeof value === "string" && value.trim() === "") return null
+
+  const parts = birthDateCalendarPartsFromUnknown(value)
+  if (!parts) return birthDateInvalidFallbackDisplay(value)
+
+  const utcDate = new Date(Date.UTC(parts.year, parts.month - 1, parts.day))
+  return utcDate.toLocaleDateString(locale, {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
+}
+
 export const isoDateToDateInputValue = (iso: string | null | undefined): string => {
   if (!iso || typeof iso !== "string") return ""
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ""
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
+  const parts = birthDateCalendarPartsFromUnknown(iso)
+  if (!parts) return ""
+  const y = parts.year
+  const m = String(parts.month).padStart(2, "0")
+  const day = String(parts.day).padStart(2, "0")
   return `${y}-${m}-${day}`
 }
 

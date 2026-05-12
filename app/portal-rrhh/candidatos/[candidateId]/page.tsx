@@ -46,6 +46,7 @@ import {
   mergeRecruiterNormalizedWithCanonicalProfile,
   pickEmbeddedCanonicalProfile,
 } from "@/lib/recruiter-canonical-profile-merge"
+import { formatBirthDateForDisplay } from "@/lib/candidate-profile"
 
 interface CandidateProfileState {
   id: string | number | null
@@ -161,22 +162,6 @@ const extractProfile = (raw: unknown): CandidateProfileState => {
     normalizedDataParseFailed: parseFailed,
   };
 };
-
-const formatBirthDate = (value: unknown) => {
-  if (!value) return null
-  const d =
-    value instanceof Date
-      ? value
-      : typeof value === "string"
-        ? new Date(value)
-        : null
-  if (!d || Number.isNaN(d.getTime())) return emptyToDash(value)
-  return d.toLocaleDateString("es-CL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
-}
 
 export default function CandidatoDetallePage() {
   const params = useParams();
@@ -318,7 +303,7 @@ export default function CandidatoDetallePage() {
       { label: "Ciudad de nacimiento", value: birthCity },
       {
         label: "Fecha de nacimiento",
-        value: birthDateRaw ? formatBirthDate(birthDateRaw) : null,
+        value: birthDateRaw ? formatBirthDateForDisplay(birthDateRaw) : null,
       },
       { label: "Estado civil", value: marital },
       { label: "Género", value: gender },

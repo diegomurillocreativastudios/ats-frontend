@@ -61,31 +61,16 @@ import {
 } from "@/lib/candidate-self-profile"
 import {
   candidateProfileHasEnrichedDisplayData,
+  formatBirthDateForDisplay,
   type CandidateProfile,
+  type CandidateProfileSaveBody,
 } from "@/lib/candidate-profile"
 import { resolveHeadlineForDisplay } from "@/lib/candidate-profile-hydrate"
-import type { CandidateProfileSaveBody } from "@/lib/candidate-profile"
 import { getAccessToken } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv"
 import { getInitials } from "@/lib/getInitials"
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay"
-
-const formatBirthDate = (value: unknown) => {
-  if (!value) return null
-  const d =
-    value instanceof Date
-      ? value
-      : typeof value === "string"
-        ? new Date(value)
-        : null
-  if (!d || Number.isNaN(d.getTime())) return emptyToDash(value)
-  return d.toLocaleDateString("es-CL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
-}
 
 const formatCompliancePreview = (value: unknown): { label: string; value: string }[] => {
   if (value == null) return []
@@ -354,7 +339,7 @@ export function CandidateSelfProfileView({
       { label: "Ciudad de nacimiento", value: birthCity },
       {
         label: "Fecha de nacimiento",
-        value: birthDateRaw ? formatBirthDate(birthDateRaw) : null,
+        value: birthDateRaw ? formatBirthDateForDisplay(birthDateRaw) : null,
       },
       { label: "Estado civil", value: marital },
       { label: "Género", value: gender },
