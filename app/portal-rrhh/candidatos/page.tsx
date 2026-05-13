@@ -13,13 +13,15 @@ import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay";
 import Modal from "@/components/ui/Modal";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
-import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
+import DocumentsUploadZone, {
+  type AiIngestProcessBatchMeta,
+  type AiProcessingBarState,
+} from "@/components/candidato/DocumentsUploadZone";
 import {
   AiDisclosureBadge,
   AiDisclosurePillProgress,
   AiKpiCard,
 } from "@/components/rrhh/AiDisclosure";
-import type { AiProcessingBarState } from "@/components/candidato/DocumentsUploadZone";
 
 const AI_MODAL_KPIS = [
   {
@@ -166,42 +168,63 @@ export default function CandidatosPage() {
 
   const AI_INGEST_COMPLETED_HOLD_MS = 550;
 
-  const handleProcessUpload = async (file) => {
+  const handleProcessUpload = async (
+    file: File,
+    _index: number,
+    meta?: AiIngestProcessBatchMeta
+  ) => {
+    const isLastInBatch = meta?.isLastInBatch ?? true;
+    const batchTotal = meta?.batchTotal ?? 1;
+    const fileLabel = meta?.currentFileName ?? file.name;
+
     const formData = new FormData();
     formData.append("File", file);
     formData.append("EntityType", "Candidate");
     setIsProcessingCvWithAi(true);
     try {
       await apiClient.postFormData("/Ingest/upload", formData);
-      await fetchCandidates();
-      setAiProcessingBar({
-        active: true,
-        percent: 100,
-        isCompleted: true,
-      });
-      await new Promise((resolve) => setTimeout(resolve, AI_INGEST_COMPLETED_HOLD_MS));
-      setIsUploadModalOpen(false);
-      setAiProcessingBar({ active: false, percent: null });
-      setSnackbar({
-        open: true,
-        variant: "success",
-        message: "CV cargado y procesado correctamente.",
-      });
-    } catch (err) {
+      if (isLastInBatch) {
+        await fetchCandidates();
+      }
+      if (isLastInBatch) {
+        setAiProcessingBar({
+          active: true,
+          percent: 100,
+          isCompleted: true,
+          cycleKey: meta?.cycleKey,
+          batchIndex: meta?.batchIndex,
+          batchTotal: meta?.batchTotal,
+          currentFileName: meta?.currentFileName,
+        });
+        await new Promise((resolve) =>
+          setTimeout(resolve, AI_INGEST_COMPLETED_HOLD_MS)
+        );
+        setIsUploadModalOpen(false);
+        setAiProcessingBar({ active: false, percent: null });
+        setSnackbar({
+          open: true,
+          variant: "success",
+          message:
+            batchTotal === 1
+              ? "CV cargado y procesado correctamente."
+              : `${batchTotal} CVs cargados y procesados correctamente.`,
+        });
+      }
+    } catch (err: unknown) {
       const message =
-        err?.detail ||
-        err?.message ||
+        (err as { detail?: string })?.detail ||
+        (err as { message?: string })?.message ||
         "Error al procesar el CV.";
 
       setSnackbar({
         open: true,
         variant: "error",
-        message,
+        message: `Error al procesar «${fileLabel}»: ${message}`,
       });
 
       // Importante: re-lanzar el error para que `DocumentsUploadZone` no marque
       // el archivo como "Listo" cuando el backend realmente falló.
-      throw createSilentError(message)
+      throw createSilentError(message);
     } finally {
       setIsProcessingCvWithAi(false);
     }
@@ -406,12 +429,26 @@ export default function CandidatosPage() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 rounded-lg border border-vo-purple/20 bg-vo-purple/5 p-3">
             <AiDisclosureBadge />
-            {aiProcessingBar.active ? (
-              <AiDisclosurePillProgress
-                percent={aiProcessingBar.percent}
-                isCompleted={Boolean(aiProcessingBar.isCompleted)}
-                ingestStepLabels
-              />
+            {aiProcessingBar.active && aiProcessingBar.cycleKey ? (
+              <>
+                <AiDisclosurePillProgress
+                  key={aiProcessingBar.cycleKey}
+                  percent={aiProcessingBar.percent}
+                  isCompleted={Boolean(aiProcessingBar.isCompleted)}
+                  ingestStepLabels
+                />
+                {typeof aiProcessingBar.batchIndex === "number" &&
+                typeof aiProcessingBar.batchTotal === "number" &&
+                aiProcessingBar.currentFileName &&
+                !aiProcessingBar.isCompleted ? (
+                  <p
+                    className="font-sans text-xs text-muted-foreground"
+                    aria-live="polite"
+                  >
+                    {`Procesando CV ${aiProcessingBar.batchIndex} de ${aiProcessingBar.batchTotal} · ${aiProcessingBar.currentFileName}`}
+                  </p>
+                ) : null}
+              </>
             ) : null}
             <p className="font-sans text-sm text-foreground">
               Los CVs se procesan con IA para extraer información preliminar del perfil.

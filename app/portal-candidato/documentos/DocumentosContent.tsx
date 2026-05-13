@@ -5,6 +5,7 @@ import { Upload } from "lucide-react"
 import CandidateSidebar from "@/components/candidato/CandidateSidebar"
 import CandidateTopbar from "@/components/candidato/CandidateTopbar"
 import DocumentsUploadZone, {
+  type AiIngestProcessBatchMeta,
   type DocumentsUploadZoneLeftContext,
 } from "@/components/candidato/DocumentsUploadZone"
 import DocumentsList from "@/components/candidato/DocumentsList"
@@ -51,7 +52,11 @@ export default function DocumentosContent() {
     [deleteDocument, showSnackbar]
   )
 
-  const handleProcess = async (file: File, _index: number) => {
+  const handleProcess = async (
+    file: File,
+    _index: number,
+    _meta?: AiIngestProcessBatchMeta
+  ) => {
     const formData = new FormData();
     formData.append("File", file);
     formData.append("EntityType", ENTITY_TYPE);

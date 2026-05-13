@@ -3,7 +3,6 @@
 import { useRef, useState, useCallback, type ReactNode, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
 import { Upload, X, Sparkles, Loader2, Check } from "lucide-react"
 import { getApiErrorMessage, isSilentError } from "@/lib/api-error"
-import { getAiIngestStatusLabelFromPercent } from "@/lib/ai-ingest-progress-status"
 
 const CV_KEYWORDS = ["cv", "curriculum", "curriculum vitae", "resume", "hoja de vida", "hojadevida"]
 
@@ -42,9 +41,25 @@ const validateFile = (
   return { valid: true };
 };
 
+function createIngestCycleKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID()
+  }
+  return `ingest-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+}
+
 export interface DocumentsUploadZoneLeftContext {
   files: File[]
   clearStagedFiles: () => void
+}
+
+/** Metadatos por archivo al procesar con IA (modal RRHH y otros consumidores de `onProcess`). */
+export interface AiIngestProcessBatchMeta {
+  batchIndex: number
+  batchTotal: number
+  isLastInBatch: boolean
+  currentFileName: string
+  cycleKey: string
 }
 
 export interface AiProcessingBarState {
@@ -55,10 +70,15 @@ export interface AiProcessingBarState {
   statusLabel?: string
   /** Éxito final: barra al 100% en modo completado antes de cerrar el modal */
   isCompleted?: boolean
+  batchIndex?: number
+  batchTotal?: number
+  currentFileName?: string
+  /** Clave única por archivo para remount del stepper (`key={cycleKey}` en el padre). */
+  cycleKey?: string
 }
 
 interface DocumentsUploadZoneProps {
-  onProcess?: (file: File, index: number) => void | Promise<void>
+  onProcess?: (file: File, index: number, meta?: AiIngestProcessBatchMeta) => void | Promise<void>
   onProcessAll?: (files: File[]) => void | Promise<void>
   /** Fired when “Procesar” / “Procesar todos” starts and ends so parents (e.g. RRHH modal) can show the IA pill progress bar */
   onAiProcessingBarChange?: (state: AiProcessingBarState) => void
@@ -202,18 +222,30 @@ export default function DocumentsUploadZone({
     if (!onProcess || processingIndex !== null || isProcessingAll) return;
     setError(null);
     setProcessingIndex(index);
+    const cycleKey = createIngestCycleKey()
+    const meta: AiIngestProcessBatchMeta = {
+      batchIndex: 1,
+      batchTotal: 1,
+      isLastInBatch: true,
+      currentFileName: file.name,
+      cycleKey,
+    }
     onAiProcessingBarChange?.({
       active: true,
       percent: null,
       isCompleted: false,
-      statusLabel: getAiIngestStatusLabelFromPercent(0),
+      batchIndex: meta.batchIndex,
+      batchTotal: meta.batchTotal,
+      currentFileName: meta.currentFileName,
+      cycleKey: meta.cycleKey,
     })
     try {
-      await Promise.resolve(onProcess(file, index));
+      await Promise.resolve(onProcess(file, index, meta));
       setProcessedIndices((prev) => new Set([...prev, index]));
     } catch (err: unknown) {
       if (isSilentError(err)) return
-      setError(getApiErrorMessage(err) || "Error al procesar el documento.")
+      const detail = getApiErrorMessage(err) || "Error al procesar el documento."
+      setError(`No se pudo procesar «${file.name}». ${detail}`)
     } finally {
       setProcessingIndex(null);
       onAiProcessingBarChange?.({ active: false, percent: null })
@@ -225,36 +257,38 @@ export default function DocumentsUploadZone({
     setError(null);
     setIsProcessingAll(true);
     const total = processableFiles.length;
-    onAiProcessingBarChange?.({
-      active: true,
-      percent: 0,
-      isCompleted: false,
-      statusLabel: getAiIngestStatusLabelFromPercent(0),
-    })
+    let lastTriedFile: File | null = null
     try {
       for (let k = 0; k < processableFiles.length; k++) {
         const { file, index } = processableFiles[k];
-        const pctStart = Math.round((k / total) * 100)
+        lastTriedFile = file
+        const cycleKey = createIngestCycleKey()
+        const batchIndex = k + 1
+        const meta: AiIngestProcessBatchMeta = {
+          batchIndex,
+          batchTotal: total,
+          isLastInBatch: k === total - 1,
+          currentFileName: file.name,
+          cycleKey,
+        }
         onAiProcessingBarChange?.({
           active: true,
-          percent: pctStart,
+          percent: null,
           isCompleted: false,
-          statusLabel: getAiIngestStatusLabelFromPercent(pctStart),
+          batchIndex: meta.batchIndex,
+          batchTotal: meta.batchTotal,
+          currentFileName: meta.currentFileName,
+          cycleKey: meta.cycleKey,
         })
         setProcessingIndex(index);
-        await Promise.resolve(onProcess(file, index));
+        await Promise.resolve(onProcess(file, index, meta));
         setProcessedIndices((prev) => new Set([...prev, index]));
-        const pctDone = Math.round(((k + 1) / total) * 100)
-        onAiProcessingBarChange?.({
-          active: true,
-          percent: pctDone,
-          isCompleted: false,
-          statusLabel: getAiIngestStatusLabelFromPercent(pctDone),
-        })
       }
     } catch (err: unknown) {
       if (isSilentError(err)) return
-      setError(getApiErrorMessage(err) || "Error al procesar los documentos.")
+      const detail = getApiErrorMessage(err) || "Error al procesar los documentos."
+      const label = lastTriedFile?.name ?? "el archivo"
+      setError(`No se pudo procesar «${label}». ${detail}`)
     } finally {
       setProcessingIndex(null);
       setIsProcessingAll(false);

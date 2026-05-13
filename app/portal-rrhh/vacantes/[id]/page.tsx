@@ -43,7 +43,7 @@ import {
   AiKpiCard,
 } from "@/components/rrhh/AiDisclosure"
 import {
-  VACANCY_PRELIMINARY_MATCH_TYPICAL_MS,
+  getVacancyPreliminaryMatchTypicalMsForDocCount,
   VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS,
 } from "@/lib/apply-loading-bar"
 import {
@@ -2493,7 +2493,9 @@ export default function VacanteDetallePage() {
                         >
                           <AiDisclosurePillProgress
                             percent={null}
-                            timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
+                            timeBasedTypicalMs={getVacancyPreliminaryMatchTypicalMsForDocCount(
+                              Math.max(1, selectedDocumentIds.length)
+                            )}
                             preliminaryMatchStepLabels
                             className="mt-0!"
                             aria-label="Progreso del análisis preliminar con IA"
@@ -3191,7 +3193,9 @@ export default function VacanteDetallePage() {
                       >
                         <AiDisclosurePillProgress
                           percent={null}
-                          timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
+                          timeBasedTypicalMs={getVacancyPreliminaryMatchTypicalMsForDocCount(
+                            Math.max(1, selectedDocumentIds.length)
+                          )}
                           preliminaryMatchStepLabels
                           className="mt-0!"
                           aria-label="Progreso del análisis preliminar con IA"
