@@ -1,3 +1,4 @@
+/** PDF from structured technical-sheet JSON; the RRHH modal no longer calls this route (template-based sheet). Kept for future HTML→PDF or API reuse. */
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"

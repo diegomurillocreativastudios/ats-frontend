@@ -20,6 +20,8 @@ export const technicalSheetMessages = {
   rawSection: "Detalle",
   errorNotPosted:
     "Este candidato no está postulado a esta vacante o no hay datos de ficha.",
+  errorNoTechnicalSheetTemplate:
+    "No hay una plantilla de tipo documento marcada como ficha técnica. Configurala en Administración → Plantillas.",
   errorGeneric: "No se pudo cargar la ficha técnica.",
   errorForbidden: "No tenés permisos para ver esta ficha.",
   pdfNotAvailable: "El PDF aún no está disponible en el servidor.",

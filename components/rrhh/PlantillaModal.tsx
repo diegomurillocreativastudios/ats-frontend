@@ -37,6 +37,9 @@ const buildPayload = (formData, isEditing, editingTemplate) => {
     payload.isMandatory = !!formData.isMandatory;
   }
 
+  payload.isTechnicalSheet =
+    type === "Document" ? !!formData.isTechnicalSheet : false;
+
   return payload;
 };
 
@@ -62,6 +65,7 @@ export default function PlantillaModal({
     channels: [],
     contentTemplate: "",
     outputFormat: "PDF",
+    isTechnicalSheet: false,
     description: "",
     isMandatory: false,
   });
@@ -86,6 +90,7 @@ export default function PlantillaModal({
         ),
         contentTemplate: String(t["contentTemplate"] ?? ""),
         outputFormat: String(t["outputFormat"] ?? "PDF"),
+        isTechnicalSheet: Boolean(t["isTechnicalSheet"]),
         description: String(t["description"] ?? ""),
         isMandatory: Boolean(t["isMandatory"]),
         channels: Array.isArray(t["channels"]) ? t["channels"] : [],
@@ -99,6 +104,7 @@ export default function PlantillaModal({
         body: "",
         contentTemplate: "",
         outputFormat: "PDF",
+        isTechnicalSheet: false,
         description: "",
         isMandatory: false,
         channels: [],
@@ -174,6 +180,7 @@ export default function PlantillaModal({
       body: "",
       contentTemplate: "",
       outputFormat: "PDF",
+      isTechnicalSheet: false,
       description: "",
       isMandatory: false,
       channels: [],
@@ -357,6 +364,36 @@ export default function PlantillaModal({
                 <option value="DOCX">DOCX</option>
                 <option value="HTML">HTML Only</option>
               </select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <input
+                  id="plantilla-is-technical-sheet"
+                  type="checkbox"
+                  checked={formData.isTechnicalSheet}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isTechnicalSheet: e.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-vo-purple focus:ring-vo-purple"
+                  aria-describedby="plantilla-is-technical-sheet-hint"
+                />
+                <label
+                  htmlFor="plantilla-is-technical-sheet"
+                  className="font-sans text-sm font-medium text-foreground cursor-pointer"
+                >
+                  Es plantilla de ficha técnica
+                </label>
+              </div>
+              <p
+                id="plantilla-is-technical-sheet-hint"
+                className="pl-6 font-sans text-xs text-muted-foreground"
+              >
+                Marca esta opción si el documento corresponde al diseño de una ficha técnica.
+              </p>
             </div>
           </>
         )}
