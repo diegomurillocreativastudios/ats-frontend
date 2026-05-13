@@ -8,6 +8,10 @@ import {
   pickCandidateDisplayRecord,
 } from "@/lib/technical-sheet/candidate-from-payload"
 
+/**
+ * PDF estructurado con PDFKit. La ruta Next lo usa solo como rollback temporal (`?engine=pdfkit` / `TECHNICAL_SHEET_PDF_ENGINE=pdfkit`); el flujo principal es HTML → Chromium.
+ */
+
 /** Alineado con marca Visible (`app/globals.css` --vo-purple) */
 const BRAND = {
   purple: "#6E3385",
@@ -497,7 +501,7 @@ export function buildTechnicalSheetPdfKitBuffer(payload: TechnicalSheetPayload):
     const iconBuffer = loadImageBuffer("visible-icon.png")
 
     const doc = new PDFDocument({
-      size: "A4",
+      size: "LETTER",
       autoFirstPage: false,
       margins: { top: CONTENT_MARGIN_TOP, bottom: 56, left: 48, right: 48 },
     })

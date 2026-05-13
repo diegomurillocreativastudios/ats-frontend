@@ -348,6 +348,12 @@ export function interpolateTechnicalSheetTemplate(
     if (trimmed.startsWith("#")) return _full
     const raw = getByPath(context, trimmed)
     const text = formatLeafValue(raw)
+    if (trimmed === "logoUrl") {
+      const s = text.trim()
+      if (/^data:image\/[a-z0-9+.-]+;base64,/i.test(s) || /^https?:\/\//i.test(s)) {
+        return s.replace(/"/g, "")
+      }
+    }
     return escapeHtmlForTechnicalSheet(text)
   })
 }

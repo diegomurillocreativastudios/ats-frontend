@@ -19,9 +19,11 @@
     "migrate:interview-status-codes": "node scripts/migrate-interview-status-codes.mjs"
   },
   "dependencies": {
+    "@sparticuz/chromium": "^131.0.1",
     "lucide-react": "^0.564.0",
     "next": "16.1.6",
     "pdfkit": "^0.18.0",
+    "puppeteer-core": "^24.43.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-nestable": "^3.0.2",

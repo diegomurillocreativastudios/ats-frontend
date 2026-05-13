@@ -1,4 +1,8 @@
-/** PDF from structured technical-sheet JSON; the RRHH modal no longer calls this route (template-based sheet). Kept for future HTML→PDF or API reuse. */
+/**
+ * PDF de ficha técnica: por defecto Chromium (`page.pdf`) sobre el mismo HTML que el modal.
+ * Rollback temporal PDFKit: `?engine=pdfkit` o `TECHNICAL_SHEET_PDF_ENGINE=pdfkit`.
+ * No se acepta HTML arbitrario del cliente; solo datos del backend + plantilla.
+ */
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
@@ -9,11 +13,23 @@ import {
   normalizeTechnicalSheetPayload,
 } from "@/lib/api/technical-sheet"
 import { buildTechnicalSheetPdfKitBuffer } from "@/lib/technical-sheet/build-technical-sheet-pdfkit"
+import { renderPaginatedTechnicalSheetPdfFromInterpolated } from "@/lib/technical-sheet/technical-sheet-pdf-render-paginated"
+import { buildVisibleLogoUrlForTechnicalSheet } from "@/lib/technical-sheet/server-public-app-url"
+import { tryLoadVisibleLogoDataUriForTechnicalSheetPdf } from "@/lib/technical-sheet/technical-sheet-pdf-logo"
+import { resolveTechnicalSheetPdfEngine } from "@/lib/technical-sheet/technical-sheet-pdf-engine"
+import {
+  buildTechnicalSheetTemplateContext,
+  renderTechnicalSheetHtml,
+} from "@/lib/technical-sheet/template-interpolate"
+import { findTechnicalSheetDocumentTemplate } from "@/lib/templates/technical-sheet-template"
+import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for-server"
+import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
 
 export const runtime = "nodejs"
+export const maxDuration = 60
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ vacancyId: string; candidateProfileId: string }> }
 ) {
   try {
@@ -42,14 +58,19 @@ export async function GET(
     }
 
     const path = buildTechnicalSheetBasePath(vid, cid)
-    const backendResponse = await fetch(`${baseUrl}${path}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    })
+    const engine = resolveTechnicalSheetPdfEngine(request)
+
+    const [backendResponse, templates] = await Promise.all([
+      fetch(`${baseUrl}${path}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }),
+      fetchTemplatesListForServer(baseUrl, accessToken),
+    ])
 
     const raw = await backendResponse.json().catch(() => null)
 
@@ -62,9 +83,54 @@ export async function GET(
     }
 
     const payload = normalizeTechnicalSheetPayload(raw)
-    const buffer = await buildTechnicalSheetPdfKitBuffer(payload)
-
     const filenameAscii = `ficha-tecnica-${cid.slice(0, 8)}.pdf`
+
+    if (engine === "pdfkit") {
+      const buffer = await buildTechnicalSheetPdfKitBuffer(payload)
+      return new NextResponse(new Uint8Array(buffer), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${filenameAscii}"`,
+          "Cache-Control": "no-store",
+        },
+      })
+    }
+
+    const picked = findTechnicalSheetDocumentTemplate(templates)
+    const rawTemplate = picked?.contentTemplate?.trim() ?? ""
+    if (!picked || rawTemplate === "") {
+      return NextResponse.json({ message: m.errorNoTechnicalSheetTemplate }, { status: 400 })
+    }
+
+    let vacancyTitleFallback: string | null = null
+    try {
+      const url = new URL(request.url)
+      const q = url.searchParams.get("vacancyTitle")?.trim()
+      if (q) vacancyTitleFallback = q
+    } catch {
+      /* ignore */
+    }
+
+    const logoDataUri = tryLoadVisibleLogoDataUriForTechnicalSheetPdf()
+    const logoFallbackUrl = buildVisibleLogoUrlForTechnicalSheet()
+    const logoUrl = logoDataUri ?? (logoFallbackUrl.trim() !== "" ? logoFallbackUrl : null)
+    const ctx = buildTechnicalSheetTemplateContext(payload, {
+      vacancyTitleFallback,
+      logoUrl,
+    })
+    const innerHtml = renderTechnicalSheetHtml(rawTemplate, ctx)
+    const headerRecord = ctx.header as Record<string, unknown> | undefined
+    const header = {
+      fullName: String(headerRecord?.fullName ?? ""),
+      address: String(headerRecord?.address ?? ""),
+      englishLevel: String(headerRecord?.englishLevel ?? ""),
+    }
+    const buffer = await renderPaginatedTechnicalSheetPdfFromInterpolated(
+      innerHtml,
+      header,
+      String(ctx.logoUrl ?? "")
+    )
 
     return new NextResponse(new Uint8Array(buffer), {
       status: 200,
@@ -75,7 +141,7 @@ export async function GET(
       },
     })
   } catch (e: unknown) {
-    console.error("[technical-sheet-pdf]", e)
+    console.error("[technical-sheet-pdf]", e instanceof Error ? e.stack ?? e.message : e)
     return NextResponse.json({ message: "Error al generar el PDF" }, { status: 500 })
   }
 }

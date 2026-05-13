@@ -1,292 +1,134 @@
-<main
-  style="min-height: 100vh; background: #f5f5f5; display: flex; justify-content: center; padding: 24px; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;">
-  <section
-    style="position: relative; width: 816px; min-height: 1056px; background: #ffffff; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.16); overflow: visible; box-sizing: border-box;">
+<style data-technical-sheet-template-base>
+  html { box-sizing: border-box; }
+  *, *::before, *::after { box-sizing: inherit; }
 
-    <!-- Decoración visual -->
-    <div style="position: absolute; inset: 0; pointer-events: none; z-index: 1; overflow: hidden;">
-      <!-- barra superior pequeña -->
-      <div style="position: absolute; top: 0; left: 365px; width: 76px; height: 28px; background: #6F12FF;"></div>
+  main.technical-sheet-source {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f5f5f5;
+  }
 
-      <!-- bloque superior derecho -->
-      <div style="position: absolute; top: 0; right: 0; width: 86px; height: 152px; background: #6F12FF;"></div>
+  article.ts-article {
+    margin: 0;
+    padding: 0;
+    font-size: 13.5px;
+    line-height: 1.42;
+    color: #111827;
+  }
 
-      <!-- bloque celeste superior derecho -->
-      <div style="position: absolute; top: 0; right: 0; width: 54px; height: 45px; background: #67DFFC;"></div>
+  article.ts-article > section {
+    margin-bottom: 28px;
+  }
 
-      <!-- línea celeste derecha -->
-      <div style="position: absolute; top: 139px; right: 0; width: 15px; height: 47px; background: #67DFFC;"></div>
-
-      <!-- bloque pequeño derecho medio -->
-      <div style="position: absolute; top: 762px; right: 0; width: 28px; height: 78px; background: #6F12FF;"></div>
-
-      <!-- bloque morado inferior izquierdo -->
-      <div style="position: absolute; bottom: 58px; left: 0; width: 78px; height: 126px; background: #6F12FF;"></div>
-
-      <!-- bloque celeste inferior izquierdo -->
-      <div style="position: absolute; bottom: 58px; left: 0; width: 50px; height: 46px; background: #67DFFC;"></div>
-
-      <!-- puntos inferiores derechos -->
-      <div
-        style="position: absolute; bottom: 76px; right: 12px; display: grid; grid-template-columns: repeat(4, 10px); gap: 18px 16px;">
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #6F12FF; display: block;"></span>
-      </div>
-
-      <!-- barra inferior -->
-      <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 58px; background: #2C1240;"></div>
-    </div>
-
-    <!-- Header -->
-    <header
-      style="position: relative; z-index: 5; display: grid; grid-template-columns: 430px 1fr; column-gap: 35px; align-items: start; padding: 62px 72px 0 20px; box-sizing: border-box;">
-      <!-- Logo estilo imagen 2 -->
-      <div style="display: flex; align-items: center; gap: 14px;">
-        <img src="{{logoUrl}}" alt="Visible Icon"
-          style="width: 105px; height: auto; display: block; object-fit: contain;" />
-
-        <div style="line-height: 1;">
-          <div
-            style="font-size: 40px; font-weight: 800; letter-spacing: -2px; color: #4C4C4C; font-family: Arial, Helvetica, sans-serif;">
-            visible
-          </div>
-
-          <div
-            style="font-size: 12px; color: #7A7A7A; margin-top: 2px; letter-spacing: -0.2px; font-family: Arial, Helvetica, sans-serif;">
-            transforming businesses with talent
-          </div>
-        </div>
-      </div>
-
-      <!-- Datos principales -->
-      <div style="font-size: 12px; line-height: 1.45; color: #111827; white-space: nowrap; padding-top: 13px;">
-        <div>
-          <strong>Nombre:</strong>
-          {{header.fullName}}
-        </div>
-
-        <div>
-          <strong>Dirección:</strong>
-          {{header.address}}
-        </div>
-
-        <div>
-          <strong>Nivel de inglés:</strong>
-          {{header.englishLevel}}
-        </div>
-      </div>
-    </header>
-
-    <!-- Contenido dinámico -->
-    <article
-      style="position: relative; z-index: 5; margin: 16px 82px 0 125px; padding-bottom: 90px; font-size: 13.5px; line-height: 1.42; color: #111827; box-sizing: border-box;">
-
-      <!-- Experiencia laboral -->
-      <section style="margin-bottom: 28px;">
-        <h2
-          style="margin: 0 0 12px; font-size: 15px; line-height: 1; font-weight: 800; text-transform: uppercase; text-decoration: underline;">
-          Experiencia laboral
-        </h2>
-
-        {{#each candidate.workExperience}}
-        <div style="margin-bottom: 24px; break-inside: avoid; page-break-inside: avoid;">
-          <p style="margin: 0 0 2px;">
-            <strong>Empresa:</strong>
-            {{company}}
-          </p>
-
-          <p style="margin: 0 0 2px;">
-            <strong>Cargo desempeñado:</strong>
-            {{role}}
-          </p>
-
-          <p style="margin: 0 0 2px;">
-            <strong>Periodo:</strong>
-            {{startDate}} — {{endDate}}
-          </p>
-
-          <p style="margin: 16px 0 4px; font-weight: 800;">
-            Funciones principales:
-          </p>
-
-          <ul style="margin: 0; padding-left: 32px;">
-            {{#each responsibilities}}
-            <li style="margin: 4px 0; padding-left: 3px; text-align: justify;">
-              {{this}}
-            </li>
-            {{/each}}
-          </ul>
-        </div>
-        {{/each}}
-      </section>
-
-      <!-- Educación -->
-      <section style="margin-bottom: 28px;">
-        <h2
-          style="margin: 0 0 12px; font-size: 15px; line-height: 1; font-weight: 800; text-transform: uppercase; text-decoration: underline;">
-          Educación
-        </h2>
-
-        {{#each candidate.education}}
-        <div style="margin-bottom: 20px; break-inside: avoid; page-break-inside: avoid;">
-          <p style="margin: 0 0 2px;">
-            <strong>Institución:</strong>
-            {{institution}}
-          </p>
-
-          <p style="margin: 0 0 2px;">
-            <strong>Título / estudio:</strong>
-            {{degree}}
-          </p>
-
-          <p style="margin: 0 0 2px;">
-            <strong>Periodo:</strong>
-            {{startDate}} — {{endDate}}
-          </p>
-        </div>
-        {{/each}}
-      </section>
-
-      <!-- Cursos y certificaciones -->
-      <section style="margin-bottom: 28px;">
-        <h2
-          style="margin: 0 0 12px; font-size: 15px; line-height: 1; font-weight: 800; text-transform: uppercase; text-decoration: underline;">
-          Cursos y certificaciones
-        </h2>
-
-        <ul style="margin: 0; padding-left: 32px;">
-          {{#each candidate.certifications}}
-          <li style="margin: 4px 0; padding-left: 3px; break-inside: avoid; page-break-inside: avoid;">
-            <strong>{{name}}</strong>
-            <span> {{institution}} </span>
-            <span>{{year}}</span>
-          </li>
-          {{/each}}
-        </ul>
-      </section>
-
-      <!-- Habilidades técnicas -->
-      <section style="margin-bottom: 28px;">
-        <h2
-          style="margin: 0 0 12px; font-size: 15px; line-height: 1; font-weight: 800; text-transform: uppercase; text-decoration: underline;">
-          Habilidades técnicas
-        </h2>
-
-        <ul style="margin: 0; padding-left: 32px;">
-          {{#each candidate.technicalSkills}}
-          <li style="margin: 4px 0; padding-left: 3px;">
-            {{.}}
-          </li>
-          {{/each}}
-        </ul>
-      </section>
-
-      <!-- Habilidades blandas -->
-      <section style="margin-bottom: 28px;">
-        <h2
-          style="margin: 0 0 12px; font-size: 15px; line-height: 1; font-weight: 800; text-transform: uppercase; text-decoration: underline;">
-          Habilidades blandas
-        </h2>
-
-        <ul style="margin: 0; padding-left: 32px;">
-          {{#each candidate.softSkills}}
-          <li style="margin: 4px 0; padding-left: 3px;">
-            {{.}}
-          </li>
-          {{/each}}
-        </ul>
-      </section>
-
-      <!-- Idiomas -->
-      <section style="margin-bottom: 28px;">
-        <h2
-          style="margin: 0 0 12px; font-size: 15px; line-height: 1; font-weight: 800; text-transform: uppercase; text-decoration: underline;">
-          Idiomas
-        </h2>
-
-        <ul style="margin: 0; padding-left: 32px;">
-          {{#each candidate.languages}}
-          <li style="margin: 4px 0; padding-left: 3px;">
-            {{language}} — {{level}}
-          </li>
-          {{/each}}
-        </ul>
-      </section>
-
-      <!-- Notas de entrevista -->
-      <section style="margin-bottom: 28px;">
-        <h2
-          style="margin: 0 0 12px; font-size: 15px; line-height: 1; font-weight: 800; text-transform: uppercase; text-decoration: underline;">
-          Notas de entrevista
-        </h2>
-
-        {{#each candidate.interviewNotes}}
-        <div
-          style="margin-bottom: 14px; break-inside: avoid; page-break-inside: avoid; white-space: pre-wrap; text-align: justify;">
-          {{noteText}}
-        </div>
-        {{/each}}
-      </section>
-
-      <!-- Información adicional -->
-      <section style="margin-bottom: 28px;">
-        <h2
-          style="margin: 0 0 12px; font-size: 15px; line-height: 1; font-weight: 800; text-transform: uppercase; text-decoration: underline;">
-          Información adicional
-        </h2>
-
-        <div>
-          <p style="margin: 0 0 4px;">
-            <strong>Disponibilidad:</strong>
-            {{candidate.availability}}
-          </p>
-
-          <p style="margin: 0 0 4px;">
-            <strong>Modalidad:</strong>
-            {{candidate.workMode}}
-          </p>
-
-          <p style="margin: 0 0 4px;">
-            <strong>País:</strong>
-            {{candidate.country}}
-          </p>
-
-          <p style="margin: 0 0 4px;">
-            <strong>Expectativa salarial:</strong>
-            {{candidate.salaryExpectation}}
-          </p>
-        </div>
-      </section>
-
-      <!-- Resumen del perfil -->
-      <section style="margin-bottom: 28px;">
-        <h2
-          style="margin: 0 0 12px; font-size: 15px; line-height: 1; font-weight: 800; text-transform: uppercase; text-decoration: underline;">
-          Resumen del perfil
-        </h2>
-
-        <p style="margin: 0; text-align: justify;">
-          {{candidate.profileSummary}}
+  article.ts-article > section > h2 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-decoration: underline;
+  }
+</style>
+<main class="technical-sheet-source">
+  <article class="ts-article">
+    <section>
+      <h2>Experiencia laboral</h2>
+      {{#each candidate.workExperience}}
+      <div style="margin-bottom: 24px;">
+        <p style="margin: 0 0 2px;">
+          <strong>Empresa:</strong>
+          {{company}}
         </p>
-      </section>
+        <p style="margin: 0 0 2px;">
+          <strong>Cargo desempeñado:</strong>
+          {{role}}
+        </p>
+        <p style="margin: 0 0 2px;">
+          <strong>Periodo:</strong>
+          {{startDate}} — {{endDate}}
+        </p>
+        <p style="margin: 16px 0 4px; font-weight: 800;">Funciones principales:</p>
+        <ul style="margin: 0; padding-left: 32px;">
+          {{#each responsibilities}}
+          <li style="margin: 4px 0; padding-left: 3px; text-align: justify;">{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      {{/each}}
+    </section>
 
-    </article>
-  </section>
+    <section>
+      <h2>Educación</h2>
+      {{#each candidate.education}}
+      <div style="margin-bottom: 20px;">
+        <p style="margin: 0 0 2px;"><strong>Institución:</strong> {{institution}}</p>
+        <p style="margin: 0 0 2px;"><strong>Título / estudio:</strong> {{degree}}</p>
+        <p style="margin: 0 0 2px;"><strong>Periodo:</strong> {{startDate}} — {{endDate}}</p>
+      </div>
+      {{/each}}
+    </section>
+
+    <section>
+      <h2>Cursos y certificaciones</h2>
+      <ul style="margin: 0; padding-left: 32px;">
+        {{#each candidate.certifications}}
+        <li style="margin: 4px 0; padding-left: 3px;">
+          <strong>{{name}}</strong>
+          <span> {{institution}} </span>
+          <span>{{year}}</span>
+        </li>
+        {{/each}}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Habilidades técnicas</h2>
+      <ul style="margin: 0; padding-left: 32px;">
+        {{#each candidate.technicalSkills}}
+        <li style="margin: 4px 0; padding-left: 3px;">{{.}}</li>
+        {{/each}}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Habilidades blandas</h2>
+      <ul style="margin: 0; padding-left: 32px;">
+        {{#each candidate.softSkills}}
+        <li style="margin: 4px 0; padding-left: 3px;">{{.}}</li>
+        {{/each}}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Idiomas</h2>
+      <ul style="margin: 0; padding-left: 32px;">
+        {{#each candidate.languages}}
+        <li style="margin: 4px 0; padding-left: 3px;">{{language}} — {{level}}</li>
+        {{/each}}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Notas de entrevista</h2>
+      {{#each candidate.interviewNotes}}
+      <div style="margin-bottom: 14px; white-space: pre-wrap; text-align: justify;">{{noteText}}</div>
+      {{/each}}
+    </section>
+
+    <section>
+      <h2>Información adicional</h2>
+      <div>
+        <p style="margin: 0 0 4px;"><strong>Disponibilidad:</strong> {{candidate.availability}}</p>
+        <p style="margin: 0 0 4px;"><strong>Modalidad:</strong> {{candidate.workMode}}</p>
+        <p style="margin: 0 0 4px;"><strong>País:</strong> {{candidate.country}}</p>
+        <p style="margin: 0 0 4px;"><strong>Expectativa salarial:</strong> {{candidate.salaryExpectation}}</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Resumen del perfil</h2>
+      <p style="margin: 0; text-align: justify;">{{candidate.profileSummary}}</p>
+    </section>
+  </article>
 </main>

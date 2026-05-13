@@ -92,15 +92,26 @@ export const buildTechnicalSheetNextPdfAppPath = (
 ) =>
   `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}/candidates/${encodeURIComponent(candidateProfileId)}/technical-sheet/pdf`
 
+export interface DownloadTechnicalSheetPdfFromNextOptions {
+  /** Se envía como query `vacancyTitle` para el contexto de plantilla en el PDF (misma ficha que el modal). */
+  vacancyTitle?: string | null
+}
+
 /**
- * Descarga el PDF generado en Next (PDFKit) usando la sesión por cookies.
+ * Descarga el PDF de ficha técnica (Chromium por defecto; rollback `?engine=pdfkit` en servidor) con cookies.
  */
 export const downloadTechnicalSheetPdfFromNextRoute = async (
   vacancyId: string,
   candidateProfileId: string,
-  filename: string
+  filename: string,
+  options?: DownloadTechnicalSheetPdfFromNextOptions
 ): Promise<void> => {
-  const url = buildTechnicalSheetNextPdfAppPath(vacancyId, candidateProfileId)
+  const path = buildTechnicalSheetNextPdfAppPath(vacancyId, candidateProfileId)
+  const params = new URLSearchParams()
+  const title = options?.vacancyTitle?.trim()
+  if (title) params.set("vacancyTitle", title)
+  const qs = params.toString()
+  const url = qs ? `${path}?${qs}` : path
   const res = await fetch(url, { method: "GET", credentials: "same-origin" })
   if (!res.ok) {
     let message = `Error ${res.status}`

@@ -53,6 +53,26 @@ describe("interpolateTechnicalSheetTemplate", () => {
       })
     ).toBe("&lt;b&gt;X&lt;/b&gt;")
   })
+
+  it("preserves data:image and https logoUrl for img src without escaping", () => {
+    const data = "data:image/png;base64,abc+/="
+    expect(interpolateTechnicalSheetTemplate(`<img src="{{logoUrl}}">`, { logoUrl: data })).toBe(
+      `<img src="${data}">`
+    )
+    expect(
+      interpolateTechnicalSheetTemplate(`<img src="{{logoUrl}}">`, {
+        logoUrl: "https://app.example.com/visible-icon.png",
+      })
+    ).toBe(`<img src="https://app.example.com/visible-icon.png">`)
+  })
+
+  it("escapes logoUrl when it is not a safe URL scheme", () => {
+    expect(
+      interpolateTechnicalSheetTemplate(`<img src="{{logoUrl}}">`, {
+        logoUrl: '"><script>x</script>',
+      })
+    ).toContain("&quot;")
+  })
 })
 
 describe("buildTechnicalSheetTemplateContext", () => {
