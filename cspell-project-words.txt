@@ -149,3 +149,9 @@ seleccion
 tecnicas
 Tecnicas
 tipado
+tipadas
+graficar
+groupby
+Precarga
+subpuntajes
+unscored
