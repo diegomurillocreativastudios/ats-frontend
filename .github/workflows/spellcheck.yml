@@ -15,7 +15,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # cspell 10.x requires Node >= 22.18 (see cspell package engines)
+          node-version: "22"
           cache: npm
           cache-dependency-path: package-lock.json
 
