@@ -1,12 +1,11 @@
 "use client"
 
 import type {
-  ApplicantsByStageSection,
+  ComponentScoreAverages,
   ScoreBucketRow,
   ScoreSummary,
   StageCountRow,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
-import { VacancyResultadosByStageTables } from "@/components/rrhh/vacancy-resultados/vacancy-resultados-by-stage-tables"
 import {
   Bar,
   BarChart,
@@ -19,189 +18,113 @@ import {
 
 const COLOR_STAGE = "#6E3385"
 const COLOR_SCORE = "#496FB3"
+const COLOR_COMPONENT = "#0D9488"
 
 export interface VacancyPipelineChartsProps {
-  applicantsByStage: ApplicantsByStageSection[]
+  componentAverages: ComponentScoreAverages
   byStage: StageCountRow[]
   scoreBuckets: ScoreBucketRow[]
   scoreSummary: ScoreSummary
   totalApplicants: number
 }
 
-function formatPercent(value: number | null): string {
-  if (value == null || !Number.isFinite(value)) return "—"
-  return `${value.toFixed(1)} %`
+function buildComponentAverageRows(
+  averages: ComponentScoreAverages
+): { name: string; pct: number }[] {
+  const rows: { name: string; pct: number }[] = []
+  if (averages.qualitativeMean01 != null && Number.isFinite(averages.qualitativeMean01)) {
+    rows.push({
+      name: "Cualitativo (prom.)",
+      pct: Math.round(averages.qualitativeMean01 * 1000) / 10,
+    })
+  }
+  if (averages.vectorMean01 != null && Number.isFinite(averages.vectorMean01)) {
+    rows.push({
+      name: "Similitud vectorial (prom.)",
+      pct: Math.round(averages.vectorMean01 * 1000) / 10,
+    })
+  }
+  if (averages.attributeMean01 != null && Number.isFinite(averages.attributeMean01)) {
+    rows.push({
+      name: "Atributos (prom.)",
+      pct: Math.round(averages.attributeMean01 * 1000) / 10,
+    })
+  }
+  return rows
 }
 
 export function VacancyPipelineCharts({
-  applicantsByStage,
+  componentAverages,
   byStage,
   scoreBuckets,
   scoreSummary,
   totalApplicants,
 }: VacancyPipelineChartsProps) {
+  const componentAvgRows = buildComponentAverageRows(componentAverages)
   if (totalApplicants === 0) {
     return (
       <p
         className="rounded-lg border border-border bg-muted/40 px-4 py-8 text-center font-sans text-sm text-muted-foreground"
         role="status"
       >
-        No hay postulantes en esta vacante todavía. Cuando haya candidatos en el tablero,
-        aquí verás la distribución por etapa y puntaje.
+        No hay postulantes en esta vacante todavía. Cuando haya candidatos en el tablero, aquí
+        verás la distribución por etapa y puntaje.
       </p>
     )
   }
 
   return (
-    <div className="flex flex-col gap-10">
-      <section
-        className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6"
-        aria-labelledby="vacancy-resultados-kpis-heading"
+    <section
+      className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+      aria-labelledby="vacancy-resultados-charts-heading"
+    >
+      <h2
+        id="vacancy-resultados-charts-heading"
+        className="mb-1 font-sans text-sm font-semibold text-foreground"
       >
-        <h2
-          id="vacancy-resultados-kpis-heading"
-          className="mb-4 font-sans text-base font-semibold text-foreground"
-        >
-          Resumen
-        </h2>
-        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg bg-muted/50 px-4 py-3">
-            <dt className="font-sans text-xs text-muted-foreground">Postulantes</dt>
-            <dd className="font-sans text-2xl font-semibold tabular-nums text-foreground">
-              {totalApplicants}
-            </dd>
-          </div>
-          <div className="rounded-lg bg-muted/50 px-4 py-3">
-            <dt className="font-sans text-xs text-muted-foreground">
-              Con puntaje (mismo criterio que el tablero)
-            </dt>
-            <dd className="font-sans text-2xl font-semibold tabular-nums text-foreground">
-              {scoreSummary.count}
-            </dd>
-          </div>
-          <div className="rounded-lg bg-muted/50 px-4 py-3">
-            <dt className="font-sans text-xs text-muted-foreground">Puntaje medio</dt>
-            <dd className="font-sans text-2xl font-semibold tabular-nums text-foreground">
-              {formatPercent(scoreSummary.meanPercent)}
-            </dd>
-          </div>
-          <div className="rounded-lg bg-muted/50 px-4 py-3">
-            <dt className="font-sans text-xs text-muted-foreground">Rango (min – max)</dt>
-            <dd className="font-sans text-lg font-semibold tabular-nums text-foreground">
-              {scoreSummary.minPercent != null && scoreSummary.maxPercent != null
-                ? `${scoreSummary.minPercent.toFixed(0)} – ${scoreSummary.maxPercent.toFixed(0)} %`
-                : "—"}
-            </dd>
-          </div>
-        </dl>
-        <p className="mt-3 font-sans text-xs text-muted-foreground">
-          El puntaje usa <span className="font-medium text-foreground">similitud semántica</span> o{" "}
-          <span className="font-medium text-foreground">puntaje total</span> del postulante, igual
-          que en las tarjetas del Kanban.
-        </p>
-      </section>
+        Indicadores gráficos
+      </h2>
+      <p className="mb-4 font-sans text-xs text-muted-foreground">
+        Vista compacta de la tubería y del match; el listado operativo está debajo.
+      </p>
 
-      <section
-        className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6"
-        aria-labelledby="vacancy-resultados-stages-heading"
-      >
-        <h2
-          id="vacancy-resultados-stages-heading"
-          className="mb-1 font-sans text-base font-semibold text-foreground"
-        >
-          Postulantes por etapa
-        </h2>
-        <p className="mb-4 font-sans text-sm text-muted-foreground">
-          Conteo según la etapa actual de cada postulación.
-        </p>
+      <div className="grid gap-4 lg:grid-cols-2">
         <div
-          className="w-full min-h-[260px] overflow-hidden"
-          style={{ height: "min(360px, 50dvh)" }}
+          className="rounded-lg border border-border/60 bg-muted/10 p-3"
+          aria-labelledby="vacancy-resultados-stages-heading"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={byStage}
-              margin={{ top: 8, right: 8, left: 0, bottom: 48 }}
-              barCategoryGap="18%"
-            >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
-              <XAxis
-                dataKey="stageName"
-                tick={{ fontSize: 11, fill: "var(--muted-foreground, #6B7280)" }}
-                interval={0}
-                angle={-28}
-                textAnchor="end"
-                height={56}
-              />
-              <YAxis
-                allowDecimals={false}
-                tick={{ fontSize: 11, fill: "var(--muted-foreground, #6B7280)" }}
-                width={36}
-              />
-              <Tooltip
-                cursor={{ fill: "rgba(110, 51, 133, 0.06)" }}
-                contentStyle={{
-                  borderRadius: "8px",
-                  border: "1px solid #E5E7EB",
-                  fontSize: "12px",
-                }}
-                formatter={(value) => [
-                  typeof value === "number" ? value : Number(value) || 0,
-                  "Postulantes",
-                ]}
-                labelFormatter={(label) => String(label)}
-              />
-              <Bar dataKey="count" name="Postulantes" fill={COLOR_STAGE} radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
-
-      <VacancyResultadosByStageTables applicantsByStage={applicantsByStage} />
-
-      <section
-        className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6"
-        aria-labelledby="vacancy-resultados-scores-heading"
-      >
-        <h2
-          id="vacancy-resultados-scores-heading"
-          className="mb-1 font-sans text-base font-semibold text-foreground"
-        >
-          Distribución de puntaje (%)
-        </h2>
-        <p className="mb-4 font-sans text-sm text-muted-foreground">
-          Solo se incluyen postulantes con puntaje numérico ({scoreSummary.count} de{" "}
-          {totalApplicants}).
-        </p>
-        {scoreSummary.count === 0 ? (
-          <p className="font-sans text-sm text-muted-foreground" role="status">
-            Ningún postulante tiene puntaje en el formato esperado; el histograma aparecerá cuando
-            el API envíe <code className="rounded bg-muted px-1">semanticScore</code> o{" "}
-            <code className="rounded bg-muted px-1">totalScore</code>.
-          </p>
-        ) : (
-          <div
-            className="w-full min-h-[220px] overflow-hidden"
-            style={{ height: "min(320px, 45dvh)" }}
+          <h3
+            id="vacancy-resultados-stages-heading"
+            className="mb-1 font-sans text-xs font-semibold text-foreground"
           >
+            Postulantes por etapa
+          </h3>
+          <p className="mb-2 font-sans text-[11px] text-muted-foreground">
+            Conteo según la etapa actual de cada postulación.
+          </p>
+          <div className="h-[220px] w-full min-h-[200px] sm:h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={scoreBuckets}
-                margin={{ top: 8, right: 8, left: 0, bottom: 8 }}
-                barCategoryGap="12%"
+                data={byStage}
+                margin={{ top: 4, right: 4, left: 0, bottom: 40 }}
+                barCategoryGap="16%"
               >
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
                 <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 11, fill: "var(--muted-foreground, #6B7280)" }}
+                  dataKey="stageName"
+                  tick={{ fontSize: 10, fill: "var(--muted-foreground, #6B7280)" }}
+                  interval={0}
+                  angle={-22}
+                  textAnchor="end"
+                  height={48}
                 />
                 <YAxis
                   allowDecimals={false}
-                  tick={{ fontSize: 11, fill: "var(--muted-foreground, #6B7280)" }}
-                  width={36}
+                  tick={{ fontSize: 10, fill: "var(--muted-foreground, #6B7280)" }}
+                  width={28}
                 />
                 <Tooltip
-                  cursor={{ fill: "rgba(73, 111, 179, 0.08)" }}
+                  cursor={{ fill: "rgba(110, 51, 133, 0.06)" }}
                   contentStyle={{
                     borderRadius: "8px",
                     border: "1px solid #E5E7EB",
@@ -211,14 +134,124 @@ export function VacancyPipelineCharts({
                     typeof value === "number" ? value : Number(value) || 0,
                     "Postulantes",
                   ]}
-                  labelFormatter={(label) => `Rango ${label} %`}
+                  labelFormatter={(label) => String(label)}
                 />
-                <Bar dataKey="count" name="Postulantes" fill={COLOR_SCORE} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" name="Postulantes" fill={COLOR_STAGE} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        )}
-      </section>
-    </div>
+        </div>
+
+        <div
+          className="rounded-lg border border-border/60 bg-muted/10 p-3"
+          aria-labelledby="vacancy-resultados-scores-heading"
+        >
+          <h3
+            id="vacancy-resultados-scores-heading"
+            className="mb-1 font-sans text-xs font-semibold text-foreground"
+          >
+            Distribución de puntaje
+          </h3>
+          <p className="mb-2 font-sans text-[11px] text-muted-foreground">
+            Postulantes con puntaje numérico ({scoreSummary.count} de {totalApplicants}).
+          </p>
+          {scoreSummary.count === 0 ? (
+            <p className="py-8 text-center font-sans text-xs text-muted-foreground" role="status">
+              Aún no hay puntajes numéricos para graficar.
+            </p>
+          ) : (
+            <div className="h-[220px] w-full min-h-[200px] sm:h-[240px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={scoreBuckets}
+                  margin={{ top: 4, right: 4, left: 0, bottom: 4 }}
+                  barCategoryGap="12%"
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 10, fill: "var(--muted-foreground, #6B7280)" }}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 10, fill: "var(--muted-foreground, #6B7280)" }}
+                    width={28}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "rgba(73, 111, 179, 0.08)" }}
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "1px solid #E5E7EB",
+                      fontSize: "12px",
+                    }}
+                    formatter={(value) => [
+                      typeof value === "number" ? value : Number(value) || 0,
+                      "Postulantes",
+                    ]}
+                    labelFormatter={(label) => `Rango ${label} %`}
+                  />
+                  <Bar dataKey="count" name="Postulantes" fill={COLOR_SCORE} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {componentAvgRows.length > 0 ? (
+        <div
+          className="mt-4 rounded-lg border border-border/60 bg-muted/10 p-3"
+          aria-labelledby="vacancy-resultados-components-heading"
+        >
+          <h3
+            id="vacancy-resultados-components-heading"
+            className="mb-1 font-sans text-xs font-semibold text-foreground"
+          >
+            Promedio de subpuntajes (match)
+          </h3>
+          <p className="mb-2 font-sans text-[11px] text-muted-foreground">
+            Media por componente ({componentAverages.samplesWithAnyComponent} postulantes con datos
+            de desglose).
+          </p>
+          <div className="h-[200px] w-full min-h-[180px] sm:h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={componentAvgRows}
+                layout="vertical"
+                margin={{ top: 4, right: 12, left: 4, bottom: 4 }}
+                barCategoryGap="16%"
+              >
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" horizontal={false} />
+                <XAxis
+                  type="number"
+                  domain={[0, 100]}
+                  tick={{ fontSize: 10, fill: "var(--muted-foreground, #6B7280)" }}
+                  unit="%"
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={148}
+                  tick={{ fontSize: 10, fill: "var(--muted-foreground, #6B7280)" }}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(13, 148, 136, 0.08)" }}
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "1px solid #E5E7EB",
+                    fontSize: "12px",
+                  }}
+                  formatter={(value) => {
+                    const n = typeof value === "number" ? value : Number(value)
+                    return [`${Number.isFinite(n) ? n.toFixed(1) : "—"} %`, "Promedio"]
+                  }}
+                />
+                <Bar dataKey="pct" name="Promedio" fill={COLOR_COMPONENT} radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      ) : null}
+    </section>
   )
 }

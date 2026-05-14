@@ -4,6 +4,11 @@ export interface VacancyApplicantLike {
   stage?: string | null
   semanticScore?: number | null
   totalScore?: number | null
+  componentScores?: Record<string, unknown> | null
+  qualitativeReasoningPositive?: string | null
+  qualitative_reasoning_positive?: string | null
+  qualitativeReasoningNegative?: string | null
+  qualitative_reasoning_negative?: string | null
   candidateDocumentId?: string | null
   candidateProfileId?: string | null
   id?: string | null
@@ -11,6 +16,12 @@ export interface VacancyApplicantLike {
   fullName?: string | null
   full_name?: string | null
   email?: string | null
+  phone?: string | null
+  uploadedAt?: string | null
+  applicationId?: string | null
+  applicationStageId?: string | null
+  applicationSource?: number | null
+  storagePath?: string | null
   applicationStatusId?: string | null
   application_status_id?: string | null
   statusId?: string | null
@@ -39,6 +50,11 @@ export interface ApplicantsByStageSection {
   applicants: ApplicantResultadosRow[]
 }
 
+export interface ApplicantsByStageFullSection {
+  stageName: string
+  applicants: VacancyApplicantLike[]
+}
+
 export const FALLBACK_KANBAN_STAGES = [
   "Applied",
   "Screening",
@@ -47,15 +63,48 @@ export const FALLBACK_KANBAN_STAGES = [
   "Hired",
 ] as const
 
+/**
+ * Orden de etapas del tablero + etapas que aparecen en postulantes pero no estaban en el catálogo (al final).
+ */
+export function resolveOrderedStageNames(
+  kanbanStageNames: string[],
+  applicants: VacancyApplicantLike[]
+): string[] {
+  const base: string[] = []
+  const seen = new Set<string>()
+  const source =
+    kanbanStageNames.length > 0
+      ? kanbanStageNames.map((s) => String(s).trim()).filter(Boolean)
+      : [...FALLBACK_KANBAN_STAGES]
+  for (const raw of source) {
+    const key = raw.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    base.push(raw)
+  }
+  for (const m of applicants) {
+    const raw = String(m.applicationStage ?? m.stage ?? "").trim()
+    if (!raw) continue
+    const key = raw.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    base.push(raw)
+  }
+  return base
+}
+
 export function normalizeKanbanStage(
   value: unknown,
   stageNames: readonly string[] = FALLBACK_KANBAN_STAGES
 ): string {
-  if (!stageNames?.length) return FALLBACK_KANBAN_STAGES[0]
-  if (value == null || String(value).trim() === "") return stageNames[0]
-  const key = String(value).trim().toLowerCase()
-  const found = stageNames.find((s) => s.toLowerCase() === key)
-  return found ?? stageNames[0]
+  const names =
+    stageNames.length > 0 ? [...stageNames] : [...FALLBACK_KANBAN_STAGES]
+  if (!names.length) return FALLBACK_KANBAN_STAGES[0]
+  if (value == null || String(value).trim() === "") return names[0]
+  const trimmed = String(value).trim()
+  const key = trimmed.toLowerCase()
+  const found = names.find((s) => s.toLowerCase() === key)
+  return found ?? trimmed
 }
 
 export function getCandidateId(match: VacancyApplicantLike, index: number): string {
@@ -174,7 +223,7 @@ export function buildScoreSummary(scores01: number[]): ScoreSummary {
   }
 }
 
-function pickApplicantDisplayName(match: VacancyApplicantLike, index: number): string {
+export function pickApplicantDisplayName(match: VacancyApplicantLike, index: number): string {
   const n =
     match.name ??
     match.fullName ??
@@ -227,6 +276,50 @@ export function resolveApplicationStatusLabel(
 }
 
 /**
+ * Agrupa postulantes por etapa conservando el objeto original (para UI detallada).
+ * `stageNamesOrdered` debe incluir todas las etapas posibles (p. ej. `resolveOrderedStageNames`).
+ */
+export function buildApplicantsGroupedByStageFull(
+  applicants: VacancyApplicantLike[],
+  stageNamesOrdered: string[]
+): ApplicantsByStageFullSection[] {
+  const names =
+    stageNamesOrdered.length > 0 ? stageNamesOrdered : [...FALLBACK_KANBAN_STAGES]
+  const sections: ApplicantsByStageFullSection[] = names.map((stageName) => ({
+    stageName,
+    applicants: [],
+  }))
+  const indexByStage = new Map(names.map((n, i) => [n, i]))
+
+  applicants.forEach((match) => {
+    const stage = normalizeKanbanStage(
+      match.applicationStage ?? match.stage,
+      names
+    )
+    const idx = indexByStage.get(stage) ?? 0
+    sections[idx].applicants.push(match)
+  })
+
+  for (const sec of sections) {
+    sec.applicants.sort((a, b) => {
+      const sa = getApplicantPrimaryScore01(a)
+      const sb = getApplicantPrimaryScore01(b)
+      const pa = sa != null ? sa * 100 : null
+      const pb = sb != null ? sb * 100 : null
+      if (pa != null && pb != null && pa !== pb) return pb - pa
+      if (pa != null && pb == null) return -1
+      if (pa == null && pb != null) return 1
+      return pickApplicantDisplayName(a, 0).localeCompare(
+        pickApplicantDisplayName(b, 0),
+        "es",
+        { sensitivity: "base" }
+      )
+    })
+  }
+  return sections
+}
+
+/**
  * Agrupa postulantes por etapa normalizada con nombre, % puntaje y estado.
  */
 export function buildApplicantsGroupedByStage(
@@ -234,41 +327,95 @@ export function buildApplicantsGroupedByStage(
   kanbanStageNames: string[],
   statuses: CompanyStatusOption[]
 ): ApplicantsByStageSection[] {
-  const names =
-    kanbanStageNames.length > 0 ? kanbanStageNames : [...FALLBACK_KANBAN_STAGES]
-  const sections: ApplicantsByStageSection[] = names.map((stageName) => ({
-    stageName,
-    applicants: [],
+  const ordered = resolveOrderedStageNames(kanbanStageNames, applicants)
+  const full = buildApplicantsGroupedByStageFull(applicants, ordered)
+  return full.map((sec) => ({
+    stageName: sec.stageName,
+    applicants: sec.applicants.map((match, index) => {
+      const stage = normalizeKanbanStage(
+        match.applicationStage ?? match.stage,
+        ordered
+      )
+      const s01 = getApplicantPrimaryScore01(match)
+      const scorePercent = s01 != null ? s01 * 100 : null
+      return {
+        candidateId: getCandidateId(match, index),
+        displayName: pickApplicantDisplayName(match, index),
+        scorePercent,
+        statusLabel: resolveApplicationStatusLabel(match, statuses, stage),
+      }
+    }),
   }))
-  const indexByStage = new Map(names.map((n, i) => [n, i]))
+}
 
-  applicants.forEach((match, index) => {
-    const stage = normalizeKanbanStage(
-      match.applicationStage ?? match.stage,
-      names
-    )
-    const idx = indexByStage.get(stage) ?? 0
-    const s01 = getApplicantPrimaryScore01(match)
-    const scorePercent = s01 != null ? s01 * 100 : null
-    sections[idx].applicants.push({
-      candidateId: getCandidateId(match, index),
-      displayName: pickApplicantDisplayName(match, index),
-      scorePercent,
-      statusLabel: resolveApplicationStatusLabel(match, statuses, stage),
-    })
-  })
+function pickNumeric01(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null
+  return value
+}
 
-  for (const sec of sections) {
-    sec.applicants.sort((a, b) => {
-      const sa = a.scorePercent
-      const sb = b.scorePercent
-      if (sa != null && sb != null && sa !== sb) return sb - sa
-      if (sa != null && sb == null) return -1
-      if (sa == null && sb != null) return 1
-      return a.displayName.localeCompare(b.displayName, "es", {
-        sensitivity: "base",
-      })
-    })
+export interface ApplicantComponentScores01 {
+  qualitative: number | null
+  vector: number | null
+  attributeAggregate: number | null
+}
+
+export function extractApplicantComponentScores01(
+  match: VacancyApplicantLike
+): ApplicantComponentScores01 {
+  const raw = match.componentScores
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return { qualitative: null, vector: null, attributeAggregate: null }
   }
-  return sections
+  const o = raw as Record<string, unknown>
+  return {
+    qualitative: pickNumeric01(o.QualitativeScore ?? o.qualitativeScore),
+    vector: pickNumeric01(o.VectorSimilarity ?? o.vectorSimilarity),
+    attributeAggregate: pickNumeric01(
+      o.attribute_aggregate ?? o.attributeAggregate
+    ),
+  }
+}
+
+export interface ComponentScoreAverages {
+  qualitativeMean01: number | null
+  vectorMean01: number | null
+  attributeMean01: number | null
+  samplesWithAnyComponent: number
+}
+
+export function buildApplicantComponentScoreAverages(
+  applicants: VacancyApplicantLike[]
+): ComponentScoreAverages {
+  let nq = 0
+  let nv = 0
+  let na = 0
+  let sq = 0
+  let sv = 0
+  let sa = 0
+  let samplesWithAnyComponent = 0
+  for (const m of applicants) {
+    const c = extractApplicantComponentScores01(m)
+    const any =
+      c.qualitative != null || c.vector != null || c.attributeAggregate != null
+    if (!any) continue
+    samplesWithAnyComponent += 1
+    if (c.qualitative != null) {
+      nq += 1
+      sq += c.qualitative
+    }
+    if (c.vector != null) {
+      nv += 1
+      sv += c.vector
+    }
+    if (c.attributeAggregate != null) {
+      na += 1
+      sa += c.attributeAggregate
+    }
+  }
+  return {
+    qualitativeMean01: nq > 0 ? sq / nq : null,
+    vectorMean01: nv > 0 ? sv / nv : null,
+    attributeMean01: na > 0 ? sa / na : null,
+    samplesWithAnyComponent,
+  }
 }

@@ -1,5 +1,6 @@
 import type {
   CandidateStatusByStageRow,
+  PreliminaryMatchScoreRow,
   RecruitmentSourceRow,
   TechnicalEvaluationRow,
   VacancyProgressByClientRow,
@@ -89,17 +90,21 @@ export function vacancyTrafficLight(
 }
 
 export interface VacancyKpiStripModel {
+  /** Total de vacantes bajo filtros (totalCount API) cuando se informa; si no, coincide con la página. */
   totalVacancies: number
+  vacanciesOnPage: number
   openCount: number
   closedCount: number
   pausedCount: number
   draftCount: number
   totalCandidates: number
   avgProgressPercent: number | null
+  avgPreliminaryMatchOnPage: number | null
 }
 
 export function computeVacancyProgressKpis(
-  rows: readonly VacancyProgressByClientRow[]
+  rows: readonly VacancyProgressByClientRow[],
+  filteredTotalVacancies?: number
 ): VacancyKpiStripModel {
   let openCount = 0
   let closedCount = 0
@@ -107,6 +112,7 @@ export function computeVacancyProgressKpis(
   let draftCount = 0
   let totalCandidates = 0
   const progressValues: number[] = []
+  const preliminaryValues: number[] = []
   for (const r of rows) {
     const s = normalizeVacancyStatusSlug(r.vacancyStatus)
     if (s === "open") openCount += 1
@@ -117,19 +123,31 @@ export function computeVacancyProgressKpis(
     if (typeof tc === "number" && !Number.isNaN(tc)) totalCandidates += tc
     const p = vacancyProgressPercentValue(r)
     if (p != null) progressValues.push(p)
+    const pm = r.averagePreliminaryMatchScore
+    if (typeof pm === "number" && !Number.isNaN(pm)) preliminaryValues.push(pm)
   }
   const avgProgressPercent =
     progressValues.length > 0
       ? progressValues.reduce((a, b) => a + b, 0) / progressValues.length
       : null
+  const avgPreliminaryMatchOnPage =
+    preliminaryValues.length > 0
+      ? preliminaryValues.reduce((a, b) => a + b, 0) / preliminaryValues.length
+      : null
   return {
-    totalVacancies: rows.length,
+    totalVacancies:
+      typeof filteredTotalVacancies === "number" &&
+      !Number.isNaN(filteredTotalVacancies)
+        ? filteredTotalVacancies
+        : rows.length,
+    vacanciesOnPage: rows.length,
     openCount,
     closedCount,
     pausedCount,
     draftCount,
     totalCandidates,
     avgProgressPercent,
+    avgPreliminaryMatchOnPage,
   }
 }
 
@@ -218,7 +236,9 @@ export function technicalEvaluationBucket(row: TechnicalEvaluationRow): Technica
 }
 
 export interface TechnicalEvalKpis {
-  total: number
+  /** totalCount del API si hay paginación; si no, filas en página. */
+  totalUnderFilter: number
+  rowsOnPage: number
   approved: number
   review: number
   failed: number
@@ -228,7 +248,8 @@ export interface TechnicalEvalKpis {
 }
 
 export function computeTechnicalEvaluationKpis(
-  rows: readonly TechnicalEvaluationRow[]
+  rows: readonly TechnicalEvaluationRow[],
+  filteredTotal?: number
 ): TechnicalEvalKpis {
   let approved = 0
   let review = 0
@@ -244,8 +265,13 @@ export function computeTechnicalEvaluationKpis(
     const sc = parseTechnicalScorePercent(r)
     if (sc != null) scores.push(sc)
   }
+  const totalUnderFilter =
+    typeof filteredTotal === "number" && !Number.isNaN(filteredTotal)
+      ? filteredTotal
+      : rows.length
   return {
-    total: rows.length,
+    totalUnderFilter,
+    rowsOnPage: rows.length,
     approved,
     review,
     failed,
@@ -256,6 +282,17 @@ export function computeTechnicalEvaluationKpis(
         : null,
     withNumericScore: scores.length,
   }
+}
+
+/** Score preliminar 0–100 en fila de detalle. */
+export function preliminaryMatchScoreValue(
+  row: PreliminaryMatchScoreRow
+): number | null {
+  const v = row.score ?? row.preliminaryMatchScore
+  if (v == null || Number.isNaN(Number(v))) return null
+  const n = Number(v)
+  if (n < 0 || n > 100) return null
+  return n
 }
 
 export interface RecruitmentSourcesKpis {

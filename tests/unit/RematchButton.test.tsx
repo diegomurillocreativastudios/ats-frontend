@@ -22,6 +22,7 @@ describe('RematchButton', () => {
             <RematchButton
                 vacancyId="vacancy-1"
                 needsRematch={true}
+                onSuccess={vi.fn()}
                 onSnackbar={onSnackbar}
             />
         )
@@ -48,6 +49,7 @@ describe('RematchButton', () => {
             <RematchButton
                 vacancyId="vacancy-2"
                 needsRematch={true}
+                onSuccess={vi.fn()}
                 onSnackbar={onSnackbar}
             />
         )

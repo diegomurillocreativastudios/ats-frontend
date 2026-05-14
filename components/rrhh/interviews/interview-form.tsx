@@ -33,6 +33,8 @@ export type InterviewFormProps =
       mode: "modal"
       onClose: () => void
       onCreated?: () => void
+      /** Si está en `applicantOptions`, se selecciona al cargar el formulario. */
+      initialCandidateProfileId?: string
     }
 
 export function InterviewForm(props: InterviewFormProps) {
@@ -42,6 +44,8 @@ export function InterviewForm(props: InterviewFormProps) {
   const backHref = props.mode === "page" ? props.backHref : ""
   const onCloseModal = props.mode === "modal" ? props.onClose : undefined
   const onCreatedModal = props.mode === "modal" ? props.onCreated : undefined
+  const initialCandidateProfileId =
+    props.mode === "modal" ? props.initialCandidateProfileId : undefined
 
   const router = useRouter()
   const [options, setOptions] = useState<VacancyApplicantOption[]>([])
@@ -144,6 +148,14 @@ export function InterviewForm(props: InterviewFormProps) {
   useEffect(() => {
     loadModalities()
   }, [loadModalities])
+
+  useEffect(() => {
+    const raw = initialCandidateProfileId?.trim()
+    if (!raw) return
+    if (loadingOptions) return
+    const exists = options.some((o) => o.candidateProfileId === raw)
+    if (exists) setCandidateProfileId(raw)
+  }, [initialCandidateProfileId, loadingOptions, options])
 
   const selectedModality = modalityOptions.find(
     (m) => m.id === interviewModalityId

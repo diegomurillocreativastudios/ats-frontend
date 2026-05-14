@@ -13,8 +13,12 @@ export const vacancyProgressByClientContract = {
   suggestedPath: `${RECRUITER_REPORTS_API_PREFIX}/vacancy-progress-by-client`,
   queryParams: [
     "clientId (opcional)",
+    "vacancyId (opcional)",
     "dateFrom, dateTo (ISO date)",
     "vacancyStatus (opcional: open|closed|draft|paused)",
+    "page, pageSize (paginación; defaults típicos en backend)",
+    "sortBy: openedAt|vacancyTitle|clientName|vacancyStatus|totalCandidates|…",
+    "sortDirection: asc|desc",
   ],
   rowFields: [
     "clientId",
@@ -26,10 +30,12 @@ export const vacancyProgressByClientContract = {
     "openedAt",
     "closedAt",
     "totalCandidates",
-    "candidatesByStage (opcional, mapa etapa → número; el UI infiere entrevista/final/contratación por nombre de clave)",
-    "candidatesInInterview, candidatesFinalist, candidatesHired (opcional; preferible a inferencia)",
+    "candidatesByStage (opcional)",
+    "candidatesInInterview, candidatesFinalist, candidatesHired (opcional)",
     "averageApplicationProgressPercent | progressPercent",
-    "averageDaysToFill (opcional, días promedio de cobertura)",
+    "averageDaysToFill (opcional)",
+    "averagePreliminaryMatchScore, maxPreliminaryMatchScore, minPreliminaryMatchScore (0–100)",
+    "candidatesWithPreliminaryAnalysis (conteo)",
   ],
 }
 
@@ -73,9 +79,10 @@ export const candidateStatusByStageSummaryContract = {
   ],
   responseFields: [
     "totalCandidates (number)",
-    "byStage: [{ stageId, stageName, count }] o mapa etapa→count",
+    "byStage: [{ stageId, stageName, count, percent? }] o mapa etapa→count",
   ],
   notes: [
+    "percent opcional: 0–100 del total de aplicaciones.",
     "Si no existe, el frontend arma el embudo solo con la página actual y muestra aviso.",
   ],
 }
@@ -86,15 +93,19 @@ export const technicalEvaluationsContract = {
   suggestedPath: `${RECRUITER_REPORTS_API_PREFIX}/technical-evaluations`,
   queryParams: [
     "vacancyId (opcional)",
+    "clientId, candidateId (UUID opcionales)",
     "outcome (opcional; filtro Contains sobre estado)",
     "dateFrom, dateTo (opcional)",
+    "page, pageSize",
   ],
   notes: ["evaluatorUserId no aplica en MVP backend"],
   rowFields: [
     "candidateProfileId",
+    "candidateId",
     "candidateName",
     "vacancyId",
     "vacancyTitle",
+    "clientId",
     "companyName | clientName (opcional)",
     "evaluationTitle",
     "testName",
@@ -105,9 +116,40 @@ export const technicalEvaluationsContract = {
     "evaluatedAt",
     "sentAt (opcional)",
     "completedAt (opcional)",
-    "difficultyLevel (opcional: básico|intermedio|avanzado)",
-    "aiRecommendation (opcional: apto|revisar|no recomendado)",
-    "skillBreakdown (opcional: objeto o JSON con puntajes por habilidad)",
+    "difficultyLevel (opcional)",
+    "aiRecommendation (opcional)",
+    "skillBreakdown (opcional)",
+  ],
+}
+
+/** Scores matching preliminar por candidato/postulación */
+export const preliminaryMatchScoresContract = {
+  method: "GET" as const,
+  suggestedPath: `${RECRUITER_REPORTS_API_PREFIX}/preliminary-match-scores`,
+  queryParams: [
+    "clientId, vacancyId, candidateId, stageId (opcionales)",
+    "scoreMin, scoreMax (0–100)",
+    "dateFrom, dateTo",
+    "page, pageSize",
+    "sortBy, sortDirection",
+  ],
+}
+
+/** Resumen dashboard reportes */
+export const reportsSummaryContract = {
+  method: "GET" as const,
+  suggestedPath: `${RECRUITER_REPORTS_API_PREFIX}/summary`,
+  queryParams: ["clientId (opcional)", "dateFrom, dateTo (opcionales según validación backend)"],
+  notes: ["Respuesta: un solo objeto JSON, no rows/totalCount"],
+}
+
+/** Filtros agregados para selects */
+export const reportsFiltersContract = {
+  method: "GET" as const,
+  suggestedPath: `${RECRUITER_REPORTS_API_PREFIX}/filters`,
+  queryParams: ["clientId (opcional)", "dateFrom, dateTo"],
+  notes: [
+    "Estructura flexible: clients, vacancies, stages, technicalEvaluationOutcomes, recruitmentSourceKeys (nombres pueden variar; ver coerceReportsFilters).",
   ],
 }
 
@@ -119,10 +161,12 @@ export const recruitmentSourcesContract = {
     "dateFrom, dateTo (obligatorios)",
     "vacancyId (opcional)",
     "clientId (opcional)",
+    "source (clave, ej. linkedin)",
+    "groupBy=source|vacancy (default tipo solo fuente)",
+    "page, pageSize",
   ],
   notes: [
-    "MVP histórico: agregación por ApplicationSource (recruiter | personal).",
-    "Ideal: claves extendidas (linkedin, referral, jobboard, …) y conteos por etapa.",
+    "groupBy=vacancy: filas con vacancyId, vacancyTitle, clientId, clientName además de métricas por fuente.",
   ],
   rowFields: [
     "sourceKey",
@@ -130,7 +174,8 @@ export const recruitmentSourcesContract = {
     "candidatesCount",
     "hiresCount",
     "conversionPercent (opcional)",
-    "preselectedCount, interviewedCount, finalistsCount (opcional, para tabla tipo embudo por fuente)",
+    "preselectedCount, interviewedCount, finalistsCount (opcional)",
+    "vacancyId, vacancyTitle, clientId, clientName (modo groupBy=vacancy)",
   ],
 }
 

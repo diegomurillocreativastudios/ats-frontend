@@ -47,25 +47,39 @@ export interface VacancyProgressByClientRow {
   averageApplicationProgressPercent?: number
   progressPercent?: number
   candidatesByStage?: Record<string, number>
-  /** Si el backend envía totales por categoría (alternativa al mapa por etapa). */
   candidatesInInterview?: number
   candidatesFinalist?: number
   candidatesHired?: number
   averageDaysToFill?: number | null
+  /** Métricas IA agregadas (0–100). */
+  averagePreliminaryMatchScore?: number | null
+  maxPreliminaryMatchScore?: number | null
+  minPreliminaryMatchScore?: number | null
+  candidatesWithPreliminaryAnalysis?: number | null
 }
 
 export async function fetchVacancyProgressByClient(query: {
   clientId?: string
   vacancyStatus?: string
+  vacancyId?: string
   dateFrom?: string
   dateTo?: string
+  page?: number
+  pageSize?: number
+  sortBy?: string
+  sortDirection?: "asc" | "desc"
 }): Promise<ReportsPagedResponse<VacancyProgressByClientRow>> {
   const raw = await apiClient.get(
     `${REPORTS_PREFIX}/vacancy-progress-by-client${buildQuery({
       clientId: query.clientId,
       vacancyStatus: query.vacancyStatus,
+      vacancyId: query.vacancyId,
       dateFrom: query.dateFrom,
       dateTo: query.dateTo,
+      page: query.page != null ? String(query.page) : undefined,
+      pageSize: query.pageSize != null ? String(query.pageSize) : undefined,
+      sortBy: query.sortBy,
+      sortDirection: query.sortDirection,
     })}`
   )
   return coerceReportsPayload<VacancyProgressByClientRow>(raw)
@@ -114,10 +128,18 @@ export async function fetchCandidateStatusByStage(query: {
   return coerceReportsPayload<CandidateStatusByStageRow>(raw)
 }
 
+export interface CandidatePipelineStageSummary {
+  stageId: string
+  stageName: string
+  count: number
+  /** 0–100 respecto del total de aplicaciones (backend). */
+  percent?: number | null
+}
+
 /** Respuesta opcional del endpoint de agregación (si el backend la expone). */
 export interface CandidatePipelineSummary {
   totalCandidates: number
-  byStage: { stageId: string; stageName: string; count: number }[]
+  byStage: CandidatePipelineStageSummary[]
 }
 
 function coercePipelineSummary(raw: unknown): CandidatePipelineSummary | null {
@@ -131,11 +153,18 @@ function coercePipelineSummary(raw: unknown): CandidatePipelineSummary | null {
       : Number.parseInt(String(totalRaw ?? "0"), 10) || 0
 
   const byStageRaw = rec.byStage ?? rec.ByStage ?? rec.stages
-  let byStage: { stageId: string; stageName: string; count: number }[] = []
+  let byStage: CandidatePipelineStageSummary[] = []
 
   if (Array.isArray(byStageRaw)) {
     byStage = byStageRaw.map((item: unknown, i: number) => {
       const o = (item ?? {}) as Record<string, unknown>
+      const pctRaw = o.percent ?? o.Percent
+      const percent =
+        typeof pctRaw === "number" && !Number.isNaN(pctRaw)
+          ? pctRaw
+          : pctRaw != null
+            ? Number.parseFloat(String(pctRaw))
+            : null
       return {
         stageId: String(o.stageId ?? o.id ?? o.StageId ?? i),
         stageName: String(o.stageName ?? o.name ?? o.StageName ?? "—"),
@@ -143,6 +172,8 @@ function coercePipelineSummary(raw: unknown): CandidatePipelineSummary | null {
           typeof o.count === "number" && !Number.isNaN(o.count)
             ? o.count
             : Number.parseInt(String(o.count ?? o.Count ?? 0), 10) || 0,
+        percent:
+          percent != null && !Number.isNaN(percent) ? percent : undefined,
       }
     })
   } else if (byStageRaw && typeof byStageRaw === "object") {
@@ -189,6 +220,7 @@ export async function tryFetchCandidatePipelineSummary(query: {
 
 export interface TechnicalEvaluationRow {
   candidateProfileId?: string
+  candidateId?: string
   candidateName?: string
   vacancyId?: string
   vacancyTitle?: string
@@ -200,27 +232,35 @@ export interface TechnicalEvaluationRow {
   evaluatorName?: string
   evaluatedAt?: string | null
   companyName?: string
+  clientId?: string
   clientName?: string
   sentAt?: string | null
   completedAt?: string | null
   difficultyLevel?: string
   aiRecommendation?: string
-  /** JSON string o objeto con puntajes por habilidad (según backend). */
   skillBreakdown?: unknown
 }
 
 export async function fetchTechnicalEvaluations(query: {
   vacancyId?: string
+  clientId?: string
+  candidateId?: string
   outcome?: string
   dateFrom?: string
   dateTo?: string
+  page?: number
+  pageSize?: number
 }): Promise<ReportsPagedResponse<TechnicalEvaluationRow>> {
   const raw = await apiClient.get(
     `${REPORTS_PREFIX}/technical-evaluations${buildQuery({
       vacancyId: query.vacancyId,
+      clientId: query.clientId,
+      candidateId: query.candidateId,
       outcome: query.outcome,
       dateFrom: query.dateFrom,
       dateTo: query.dateTo,
+      page: query.page != null ? String(query.page) : undefined,
+      pageSize: query.pageSize != null ? String(query.pageSize) : undefined,
     })}`
   )
   return coerceReportsPayload<TechnicalEvaluationRow>(raw)
@@ -237,6 +277,10 @@ export interface RecruitmentSourceRow {
   preselectedCount?: number
   interviewedCount?: number
   finalistsCount?: number
+  vacancyId?: string
+  vacancyTitle?: string
+  clientId?: string
+  clientName?: string
 }
 
 export async function fetchRecruitmentSources(query: {
@@ -244,6 +288,10 @@ export async function fetchRecruitmentSources(query: {
   dateTo: string
   clientId?: string
   vacancyId?: string
+  source?: string
+  groupBy?: "source" | "vacancy"
+  page?: number
+  pageSize?: number
 }): Promise<ReportsPagedResponse<RecruitmentSourceRow>> {
   const raw = await apiClient.get(
     `${REPORTS_PREFIX}/recruitment-sources${buildQuery({
@@ -251,9 +299,262 @@ export async function fetchRecruitmentSources(query: {
       dateTo: query.dateTo,
       clientId: query.clientId,
       vacancyId: query.vacancyId,
+      source: query.source,
+      groupBy: query.groupBy,
+      page: query.page != null ? String(query.page) : undefined,
+      pageSize: query.pageSize != null ? String(query.pageSize) : undefined,
     })}`
   )
   return coerceReportsPayload<RecruitmentSourceRow>(raw)
+}
+
+/** Detalle score preliminar por candidato/postulación (0–100). */
+export interface PreliminaryMatchScoreRow {
+  candidateId?: string
+  candidateProfileId?: string
+  candidateName?: string
+  applicationId?: string
+  vacancyId?: string
+  vacancyTitle?: string
+  clientId?: string
+  clientName?: string
+  companyName?: string
+  stageId?: string
+  stageName?: string
+  score?: number | null
+  preliminaryMatchScore?: number | null
+  matchLevel?: string
+  level?: string
+  status?: string
+  analysisStatus?: string
+  analyzedAt?: string | null
+  createdAt?: string | null
+  evaluatedAt?: string | null
+}
+
+export async function fetchPreliminaryMatchScores(query: {
+  clientId?: string
+  vacancyId?: string
+  candidateId?: string
+  stageId?: string
+  scoreMin?: number
+  scoreMax?: number
+  dateFrom?: string
+  dateTo?: string
+  page?: number
+  pageSize?: number
+  sortBy?: string
+  sortDirection?: "asc" | "desc"
+}): Promise<ReportsPagedResponse<PreliminaryMatchScoreRow>> {
+  const raw = await apiClient.get(
+    `${REPORTS_PREFIX}/preliminary-match-scores${buildQuery({
+      clientId: query.clientId,
+      vacancyId: query.vacancyId,
+      candidateId: query.candidateId,
+      stageId: query.stageId,
+      scoreMin:
+        query.scoreMin != null ? String(query.scoreMin) : undefined,
+      scoreMax:
+        query.scoreMax != null ? String(query.scoreMax) : undefined,
+      dateFrom: query.dateFrom,
+      dateTo: query.dateTo,
+      page: query.page != null ? String(query.page) : undefined,
+      pageSize: query.pageSize != null ? String(query.pageSize) : undefined,
+      sortBy: query.sortBy,
+      sortDirection: query.sortDirection,
+    })}`
+  )
+  return coerceReportsPayload<PreliminaryMatchScoreRow>(raw)
+}
+
+/**
+ * Dashboard de reportes: un objeto JSON (sin rows/totalCount).
+ * Campos alineados con el backend; el resto queda accesible vía índice si hace falta.
+ */
+export interface ReportsRecruiterSummary {
+  totalVacancies?: number
+  totalCandidates?: number
+  totalHires?: number
+  hiredCount?: number
+  averagePreliminaryMatchScore?: number
+  technicalEvaluationsCount?: number
+  technicalEvaluationApprovalRate?: number
+  approvalRate?: number
+  mainRecruitmentSourceKey?: string
+  mainRecruitmentSource?: string
+  mainSourceLabel?: string
+  [key: string]: unknown
+}
+
+function pickNum(
+  rec: Record<string, unknown>,
+  keys: string[]
+): number | undefined {
+  for (const k of keys) {
+    const v = rec[k]
+    if (typeof v === "number" && !Number.isNaN(v)) return v
+    if (v != null && v !== "") {
+      const n = Number.parseFloat(String(v))
+      if (!Number.isNaN(n)) return n
+    }
+  }
+  return undefined
+}
+
+function pickStr(
+  rec: Record<string, unknown>,
+  keys: string[]
+): string | undefined {
+  for (const k of keys) {
+    const v = rec[k]
+    if (v != null && String(v).trim() !== "") return String(v).trim()
+  }
+  return undefined
+}
+
+export function coerceReportsSummary(raw: unknown): ReportsRecruiterSummary {
+  if (!raw || typeof raw !== "object") return {}
+  const rec = raw as Record<string, unknown>
+  const out: ReportsRecruiterSummary = { ...rec }
+  out.totalVacancies = pickNum(rec, ["totalVacancies", "TotalVacancies"])
+  out.totalCandidates = pickNum(rec, ["totalCandidates", "TotalCandidates"])
+  out.totalHires = pickNum(rec, ["totalHires", "TotalHires", "hiresCount"])
+  out.hiredCount = pickNum(rec, ["hiredCount", "HiredCount", "totalHired"])
+  out.averagePreliminaryMatchScore = pickNum(rec, [
+    "averagePreliminaryMatchScore",
+    "AveragePreliminaryMatchScore",
+    "avgPreliminaryMatchScore",
+  ])
+  out.technicalEvaluationsCount = pickNum(rec, [
+    "technicalEvaluationsCount",
+    "TechnicalEvaluationsCount",
+  ])
+  out.technicalEvaluationApprovalRate = pickNum(rec, [
+    "technicalEvaluationApprovalRate",
+    "TechnicalEvaluationApprovalRate",
+  ])
+  out.approvalRate = pickNum(rec, ["approvalRate", "ApprovalRate"])
+  out.mainRecruitmentSourceKey = pickStr(rec, [
+    "mainRecruitmentSourceKey",
+    "MainRecruitmentSourceKey",
+    "mainSourceKey",
+  ])
+  out.mainRecruitmentSource = pickStr(rec, [
+    "mainRecruitmentSource",
+    "MainRecruitmentSource",
+    "mainSource",
+  ])
+  out.mainSourceLabel = pickStr(rec, [
+    "mainSourceLabel",
+    "MainSourceLabel",
+    "primarySourceLabel",
+  ])
+  return out
+}
+
+export async function fetchReportsSummary(query: {
+  clientId?: string
+  dateFrom?: string
+  dateTo?: string
+}): Promise<ReportsRecruiterSummary> {
+  const raw = await apiClient.get(
+    `${REPORTS_PREFIX}/summary${buildQuery({
+      clientId: query.clientId,
+      dateFrom: query.dateFrom,
+      dateTo: query.dateTo,
+    })}`
+  )
+  return coerceReportsSummary(raw)
+}
+
+export interface ReportsFilterOption {
+  id: string
+  name: string
+}
+
+export interface ReportsFiltersPayload {
+  clients?: ReportsFilterOption[]
+  vacancies?: ReportsFilterOption[]
+  stages?: ReportsFilterOption[]
+  technicalEvaluationOutcomes?: string[]
+  recruitmentSourceKeys?: string[]
+}
+
+function mapIdNameList(raw: unknown): ReportsFilterOption[] {
+  if (!Array.isArray(raw)) return []
+  return raw.map((item: unknown, i: number) => {
+    const o = (item ?? {}) as Record<string, unknown>
+    return {
+      id: String(o.id ?? o.uuid ?? o.key ?? i),
+      name: mapDefaultCompanyDisplayLabel(
+        String(o.name ?? o.title ?? o.label ?? "—")
+      ),
+    }
+  })
+}
+
+export function coerceReportsFilters(raw: unknown): ReportsFiltersPayload {
+  if (!raw || typeof raw !== "object") return {}
+  const rec = raw as Record<string, unknown>
+  const clients =
+    rec.clients ??
+    rec.Clients ??
+    rec.companies ??
+    rec.Companies ??
+    rec.companyOptions
+  const vacancies =
+    rec.vacancies ??
+    rec.Vacancies ??
+    rec.vacancyOptions ??
+    rec.vacancySummaries
+  const stages = rec.stages ?? rec.Stages ?? rec.stageOptions
+  const outcomes =
+    rec.technicalEvaluationOutcomes ??
+    rec.TechnicalEvaluationOutcomes ??
+    rec.evaluationOutcomes ??
+    rec.outcomes
+  const sourceKeys =
+    rec.recruitmentSourceKeys ??
+    rec.RecruitmentSourceKeys ??
+    rec.sourceKeys ??
+    rec.sources
+
+  let technicalEvaluationOutcomes: string[] | undefined
+  if (Array.isArray(outcomes)) {
+    technicalEvaluationOutcomes = outcomes.map((x) => String(x))
+  }
+
+  let recruitmentSourceKeys: string[] | undefined
+  if (Array.isArray(sourceKeys)) {
+    recruitmentSourceKeys = sourceKeys.map((item: unknown) => {
+      if (typeof item === "string") return item
+      const o = (item ?? {}) as Record<string, unknown>
+      return String(o.key ?? o.sourceKey ?? o.id ?? "")
+    }).filter(Boolean)
+  }
+
+  return {
+    clients: mapIdNameList(clients),
+    vacancies: mapIdNameList(vacancies),
+    stages: mapIdNameList(stages),
+    technicalEvaluationOutcomes,
+    recruitmentSourceKeys,
+  }
+}
+
+export async function fetchReportsFilters(query: {
+  clientId?: string
+  dateFrom?: string
+  dateTo?: string
+}): Promise<ReportsFiltersPayload> {
+  const raw = await apiClient.get(
+    `${REPORTS_PREFIX}/filters${buildQuery({
+      clientId: query.clientId,
+      dateFrom: query.dateFrom,
+      dateTo: query.dateTo,
+    })}`
+  )
+  return coerceReportsFilters(raw)
 }
 
 export interface RecruiterCompanyOption {

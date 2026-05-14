@@ -1,12 +1,15 @@
 import { apiClient } from "@/lib/api"
 import {
-  buildApplicantsGroupedByStage,
+  buildApplicantComponentScoreAverages,
+  buildApplicantsGroupedByStageFull,
   buildScorePercentBuckets,
   buildScoreSummary,
   buildStageCounts,
   extractApplicantScores01,
-  type ApplicantsByStageSection,
+  resolveOrderedStageNames,
+  type ApplicantsByStageFullSection,
   type CompanyStatusOption,
+  type ComponentScoreAverages,
   type ScoreBucketRow,
   type ScoreSummary,
   type StageCountRow,
@@ -71,16 +74,77 @@ function titleFromVacancyPayload(data: unknown): string | null {
   return s !== "" ? s : null
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    return value as Record<string, unknown>
+  }
+  return null
+}
+
+function labelFromMaybeObject(value: unknown): string | null {
+  if (value == null) return null
+  if (typeof value === "string") {
+    const t = value.trim()
+    return t !== "" ? t : null
+  }
+  const o = asRecord(value)
+  if (!o) return null
+  const name = o.name ?? o.label ?? o.title
+  if (name != null && String(name).trim() !== "") return String(name).trim()
+  return null
+}
+
+export interface VacancyResultadosVacancyMeta {
+  description: string | null
+  status: string | null
+  createdAt: string | null
+  jobCategory: string | null
+  company: string | null
+  countryCode: string | null
+  vacancyDepartmentLabel: string | null
+  vacancyModalityLabel: string | null
+  requirements: unknown
+  weights: unknown
+  aiMatchSuggestions: unknown[]
+  needsRematch: boolean
+}
+
+function vacancyMetaFromPayload(data: unknown): VacancyResultadosVacancyMeta {
+  const root = asRecord(data) ?? {}
+  const aiRaw = root.aiMatchSuggestions
+  const aiMatchSuggestions = Array.isArray(aiRaw) ? aiRaw : []
+  return {
+    description:
+      root.description != null ? String(root.description).trim() || null : null,
+    status: root.status != null ? String(root.status).trim() || null : null,
+    createdAt: root.createdAt != null ? String(root.createdAt) : null,
+    jobCategory:
+      root.jobCategory != null ? String(root.jobCategory).trim() || null : null,
+    company: root.company != null ? String(root.company).trim() || null : null,
+    countryCode:
+      root.countryCode != null ? String(root.countryCode).trim() || null : null,
+    vacancyDepartmentLabel: labelFromMaybeObject(root.vacancyDepartment),
+    vacancyModalityLabel: labelFromMaybeObject(root.vacancyModality),
+    requirements: root.requirements,
+    weights: root.weights ?? null,
+    aiMatchSuggestions,
+    needsRematch: Boolean(root.needsRematch),
+  }
+}
+
 export interface VacancyResultadosViewModel {
   vacancyId: string
   title: string | null
+  meta: VacancyResultadosVacancyMeta
   applicants: VacancyApplicantLike[]
   kanbanStageNames: string[]
+  orderedStageNames: string[]
   companyStatuses: CompanyStatusOption[]
-  applicantsByStage: ApplicantsByStageSection[]
+  applicantsByStageFull: ApplicantsByStageFullSection[]
   byStage: StageCountRow[]
   scoreBuckets: ScoreBucketRow[]
   scoreSummary: ScoreSummary
+  componentAverages: ComponentScoreAverages
 }
 
 /**
@@ -105,26 +169,31 @@ export async function fetchVacancyResultadosPayload(
   const companyStatuses = parseStatusesResponse(statusesData)
   const applicants = applicantsFromVacancyPayload(vacancyData)
   const title = titleFromVacancyPayload(vacancyData)
+  const meta = vacancyMetaFromPayload(vacancyData)
+  const orderedStageNames = resolveOrderedStageNames(kanbanStageNames, applicants)
 
-  const byStage = buildStageCounts(applicants, kanbanStageNames)
-  const applicantsByStage = buildApplicantsGroupedByStage(
+  const byStage = buildStageCounts(applicants, orderedStageNames)
+  const applicantsByStageFull = buildApplicantsGroupedByStageFull(
     applicants,
-    kanbanStageNames,
-    companyStatuses
+    orderedStageNames
   )
   const scores01 = extractApplicantScores01(applicants)
   const scoreBuckets = buildScorePercentBuckets(scores01)
   const scoreSummary = buildScoreSummary(scores01)
+  const componentAverages = buildApplicantComponentScoreAverages(applicants)
 
   return {
     vacancyId,
     title,
+    meta,
     applicants,
     kanbanStageNames,
+    orderedStageNames,
     companyStatuses,
-    applicantsByStage,
+    applicantsByStageFull,
     byStage,
     scoreBuckets,
     scoreSummary,
+    componentAverages,
   }
 }

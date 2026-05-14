@@ -30,8 +30,11 @@ import { ReportesQueryActions } from "@/components/rrhh/reportes/reportes-query-
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
+  fetchReportsFilters,
   fetchTechnicalEvaluations,
+  listRecruiterCompanies,
   listRecruiterVacancies,
+  type RecruiterCompanyOption,
   type RecruiterVacancyOption,
   type TechnicalEvaluationRow,
 } from "@/lib/api/recruiter-reports"
@@ -45,6 +48,8 @@ import {
 
 const controlClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground disabled:opacity-60"
+
+const PAGE_SIZE = 20
 
 const DIST_COLORS = {
   approved: "#059669",
@@ -89,35 +94,68 @@ export default function ReporteEvaluacionesTecnicasPage() {
     { label: "Evaluaciones técnicas" },
   ]
 
+  const [companies, setCompanies] = useState<RecruiterCompanyOption[]>([])
   const [vacancies, setVacancies] = useState<RecruiterVacancyOption[]>([])
 
+  const [draftClientId, setDraftClientId] = useState("")
+  const [draftCandidateId, setDraftCandidateId] = useState("")
   const [draftVacancyId, setDraftVacancyId] = useState("")
   const [draftOutcome, setDraftOutcome] = useState("")
   const [draftDateFrom, setDraftDateFrom] = useState("")
   const [draftDateTo, setDraftDateTo] = useState("")
 
+  const [appliedClientId, setAppliedClientId] = useState("")
+  const [appliedCandidateId, setAppliedCandidateId] = useState("")
   const [appliedVacancyId, setAppliedVacancyId] = useState("")
   const [appliedOutcome, setAppliedOutcome] = useState("")
   const [appliedDateFrom, setAppliedDateFrom] = useState("")
   const [appliedDateTo, setAppliedDateTo] = useState("")
 
+  const [page, setPage] = useState(1)
+
   const [rows, setRows] = useState<TechnicalEvaluationRow[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [outcomeHints, setOutcomeHints] = useState<string[]>([])
 
-  const loadVacancies = useCallback(async () => {
+  const loadCatalogs = useCallback(async () => {
     try {
-      const list = await listRecruiterVacancies()
-      setVacancies(list)
+      const [co, va] = await Promise.all([
+        listRecruiterCompanies(),
+        listRecruiterVacancies(),
+      ])
+      setCompanies(co)
+      setVacancies(va)
     } catch {
+      setCompanies([])
       setVacancies([])
     }
   }, [])
 
   useEffect(() => {
-    loadVacancies()
-  }, [loadVacancies])
+    loadCatalogs()
+  }, [loadCatalogs])
+
+  useEffect(() => {
+    let cancelled = false
+    const run = async () => {
+      try {
+        const f = await fetchReportsFilters({
+          clientId: draftClientId || undefined,
+          dateFrom: draftDateFrom || undefined,
+          dateTo: draftDateTo || undefined,
+        })
+        if (!cancelled) setOutcomeHints(f.technicalEvaluationOutcomes ?? [])
+      } catch {
+        if (!cancelled) setOutcomeHints([])
+      }
+    }
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [draftClientId, draftDateFrom, draftDateTo])
 
   const loadReport = useCallback(async () => {
     setLoading(true)
@@ -125,9 +163,13 @@ export default function ReporteEvaluacionesTecnicasPage() {
     try {
       const res = await fetchTechnicalEvaluations({
         vacancyId: appliedVacancyId || undefined,
+        clientId: appliedClientId || undefined,
+        candidateId: appliedCandidateId.trim() || undefined,
         outcome: appliedOutcome.trim() || undefined,
         dateFrom: appliedDateFrom || undefined,
         dateTo: appliedDateTo || undefined,
+        page,
+        pageSize: PAGE_SIZE,
       })
       setRows(res.rows)
       setTotalCount(res.totalCount)
@@ -138,20 +180,38 @@ export default function ReporteEvaluacionesTecnicasPage() {
     } finally {
       setLoading(false)
     }
-  }, [appliedVacancyId, appliedOutcome, appliedDateFrom, appliedDateTo])
+  }, [
+    appliedVacancyId,
+    appliedClientId,
+    appliedCandidateId,
+    appliedOutcome,
+    appliedDateFrom,
+    appliedDateTo,
+    page,
+  ])
 
   useEffect(() => {
     loadReport()
   }, [loadReport])
 
   const handleApplyFilters = () => {
+    setAppliedClientId(draftClientId)
+    setAppliedCandidateId(draftCandidateId)
     setAppliedVacancyId(draftVacancyId)
     setAppliedOutcome(draftOutcome)
     setAppliedDateFrom(draftDateFrom)
     setAppliedDateTo(draftDateTo)
+    setPage(1)
   }
 
-  const kpis = useMemo(() => computeTechnicalEvaluationKpis(rows), [rows])
+  const kpis = useMemo(
+    () => computeTechnicalEvaluationKpis(rows, totalCount),
+    [rows, totalCount]
+  )
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+  const showingFrom = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
+  const showingTo = Math.min(page * PAGE_SIZE, totalCount)
 
   const sortedByScore = useMemo(() => {
     return [...rows].sort((a, b) => {
@@ -300,11 +360,21 @@ export default function ReporteEvaluacionesTecnicasPage() {
   }, [rows])
 
   const kpiItems = [
-    { label: "Evaluaciones", value: loading ? "—" : kpis.total },
-    { label: "Aprobadas", value: loading ? "—" : kpis.approved },
-    { label: "En revisión", value: loading ? "—" : kpis.review },
-    { label: "Reprobadas", value: loading ? "—" : kpis.failed },
-    { label: "Pendientes", value: loading ? "—" : kpis.pending },
+    {
+      label: "Evaluaciones (total filtros)",
+      value: loading ? "—" : kpis.totalUnderFilter,
+      helper:
+        !loading && kpis.rowsOnPage < kpis.totalUnderFilter
+          ? `En esta página: ${kpis.rowsOnPage}`
+          : undefined,
+    },
+    {
+      label: "Aprobadas (pág.)",
+      value: loading ? "—" : kpis.approved,
+    },
+    { label: "En revisión (pág.)", value: loading ? "—" : kpis.review },
+    { label: "Reprobadas (pág.)", value: loading ? "—" : kpis.failed },
+    { label: "Pendientes (pág.)", value: loading ? "—" : kpis.pending },
     {
       label: "Puntaje medio",
       value:
@@ -313,15 +383,17 @@ export default function ReporteEvaluacionesTecnicasPage() {
           : `${kpis.avgScore.toFixed(1)}%`,
       helper:
         kpis.withNumericScore > 0
-          ? `${kpis.withNumericScore} con puntaje parseado`
+          ? `${kpis.withNumericScore} con puntaje parseado (pág.)`
           : undefined,
     },
   ] as const
 
   const statusLine =
-    !loading && !error
-      ? `${totalCount} ${totalCount === 1 ? "fila" : "filas"}`
-      : ""
+    !loading && !error && totalCount > 0
+      ? `Mostrando ${showingFrom}–${showingTo} de ${totalCount}`
+      : !loading && !error
+        ? `${totalCount} ${totalCount === 1 ? "fila" : "filas"}`
+        : ""
 
   const mainContent = (
     <div className="min-w-0 flex flex-col gap-6 pb-10">
@@ -333,6 +405,32 @@ export default function ReporteEvaluacionesTecnicasPage() {
       </section>
       <section className="space-y-4 px-4 md:px-8" aria-label="Filtros y tabla del reporte">
         <ReportesFiltersPlaceholder>
+          <ReportesFilterControl label="Cliente" controlId="filtro-cliente-ev">
+            <select
+              id="filtro-cliente-ev"
+              className={controlClass}
+              value={draftClientId}
+              onChange={(e) => setDraftClientId(e.target.value)}
+            >
+              <option value="">Todos</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </ReportesFilterControl>
+          <ReportesFilterControl label="Candidato (UUID)" controlId="filtro-candidato-ev">
+            <input
+              id="filtro-candidato-ev"
+              type="text"
+              placeholder="UUID opcional"
+              className={controlClass}
+              value={draftCandidateId}
+              onChange={(e) => setDraftCandidateId(e.target.value)}
+              autoComplete="off"
+            />
+          </ReportesFilterControl>
           <ReportesFilterControl label="Vacante" controlId="filtro-vacante-ev">
             <select
               id="filtro-vacante-ev"
@@ -348,17 +446,25 @@ export default function ReporteEvaluacionesTecnicasPage() {
               ))}
             </select>
           </ReportesFilterControl>
-          <ReportesFilterControl label="Resultado (contiene)" controlId="filtro-resultado-ev">
-            <input
-              id="filtro-resultado-ev"
-              type="text"
-              placeholder="Texto en estado / resultado"
-              className={controlClass}
-              value={draftOutcome}
-              onChange={(e) => setDraftOutcome(e.target.value)}
-              autoComplete="off"
-            />
-          </ReportesFilterControl>
+          <>
+            <ReportesFilterControl label="Resultado (contiene)" controlId="filtro-resultado-ev">
+              <input
+                id="filtro-resultado-ev"
+                type="text"
+                placeholder="Texto en estado / resultado"
+                className={controlClass}
+                value={draftOutcome}
+                onChange={(e) => setDraftOutcome(e.target.value)}
+                autoComplete="off"
+                list="reportes-ev-outcome-hints"
+              />
+            </ReportesFilterControl>
+            <datalist id="reportes-ev-outcome-hints">
+              {outcomeHints.map((o) => (
+                <option key={o} value={o} />
+              ))}
+            </datalist>
+          </>
           <ReportesFilterControl label="Desde" controlId="filtro-desde-ev">
             <input
               id="filtro-desde-ev"
@@ -380,8 +486,10 @@ export default function ReporteEvaluacionesTecnicasPage() {
         </ReportesFiltersPlaceholder>
         <p className="font-sans text-xs text-muted-foreground">
           El filtro de resultado se envía como{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-[11px]">outcome</code> al API. Los KPIs
-          de estado usan heurística sobre texto si el backend no normaliza enums.
+          <code className="rounded bg-muted px-1 py-0.5 text-[11px]">outcome</code>;{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-[11px]">clientId</code> y{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-[11px]">candidateId</code> filtran en servidor.
+          Los KPIs de estado por fila son de la página actual; el total de filas viene del API.
         </p>
         <ReportesQueryActions
           statusText={statusLine}
@@ -400,14 +508,14 @@ export default function ReporteEvaluacionesTecnicasPage() {
             headingId="reporte-ev-kpis"
             title="Indicadores"
             items={[...kpiItems]}
-            columnsClassName="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+            columnsClassName="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7"
           />
         ) : null}
         {!loading && !error && distributionPie.length > 0 ? (
           <div className="grid gap-4 lg:grid-cols-2">
             <ReportesChartCard
               title="Distribución de resultados"
-              description="Aprobados, revisión, reprobados y pendientes (heurística)."
+              description="Aprobados, revisión, reprobados y pendientes (heurística sobre esta página)."
               headingId="reporte-ev-pie"
             >
               <ResponsiveContainer width="100%" height="100%">
@@ -478,6 +586,27 @@ export default function ReporteEvaluacionesTecnicasPage() {
         {!loading && !error ? (
           <ReportesAlertsPanel headingId="reporte-ev-alertas" alerts={alerts} />
         ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className="rounded-md border border-border bg-background px-3 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
+            disabled={loading || page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Anterior
+          </button>
+          <button
+            type="button"
+            className="rounded-md border border-border bg-background px-3 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
+            disabled={loading || page >= totalPages || totalCount === 0}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Siguiente
+          </button>
+          <span className="font-sans text-xs text-muted-foreground">
+            Página {page} de {totalPages}
+          </span>
+        </div>
         <ReportesDataTable<TechnicalEvaluationRow>
           columns={columns}
           rows={sortedByScore}

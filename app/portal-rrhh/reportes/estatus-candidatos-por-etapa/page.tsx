@@ -216,11 +216,13 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
         .map((s) => ({
           name: s.stageName,
           count: s.count,
+          stagePercent: s.percent,
         }))
     }
     return countCandidatesByStageOnPage(rows).map((s) => ({
       name: s.stageName,
       count: s.count,
+      stagePercent: undefined as number | undefined,
     }))
   }, [pipelineSummary, rows])
 
@@ -511,6 +513,17 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
                     tick={{ fontSize: 10 }}
                   />
                   <Tooltip
+                    formatter={(value, _name, item) => {
+                      const payload = item?.payload as
+                        | { stagePercent?: number }
+                        | undefined
+                      const pct = payload?.stagePercent
+                      const suffix =
+                        pct != null && !Number.isNaN(pct)
+                          ? ` · ${pct.toFixed(1)}% del total`
+                          : ""
+                      return [`${value} candidatos${suffix}`, "Candidatos"]
+                    }}
                     contentStyle={{
                       borderRadius: "8px",
                       border: "1px solid #E5E7EB",

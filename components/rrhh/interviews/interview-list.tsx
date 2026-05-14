@@ -1,8 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Calendar, FileText, Loader2, Plus } from "lucide-react"
+import { Calendar, FileText, Loader2, Plus, Users } from "lucide-react"
 import {
   getInterviewsByVacancy,
   getInterviewHttpErrorMessage,
@@ -57,6 +58,8 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
   const searchParams = useSearchParams()
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [createInitialCandidateProfileId, setCreateInitialCandidateProfileId] =
+    useState<string | null>(null)
   const [detailInterviewId, setDetailInterviewId] = useState<string | null>(null)
   const [notesInterviewId, setNotesInterviewId] = useState<string | null>(null)
   const [technicalSheetProfileId, setTechnicalSheetProfileId] = useState<
@@ -128,16 +131,20 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
 
   useEffect(() => {
     if (searchParams.get("nueva") !== "1") return
+    const cand = searchParams.get("candidato")?.trim()
+    setCreateInitialCandidateProfileId(cand && cand !== "" ? cand : null)
     setIsCreateOpen(true)
     router.replace(pathname, { scroll: false })
   }, [searchParams, router, pathname])
 
   const handleOpenCreate = () => {
+    setCreateInitialCandidateProfileId(null)
     setIsCreateOpen(true)
   }
 
   const handleCloseCreate = () => {
     setIsCreateOpen(false)
+    setCreateInitialCandidateProfileId(null)
   }
 
   const handleCloseDetail = () => {
@@ -184,15 +191,26 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                 : "Gestión de entrevistas de la vacante"
         }
         actions={
-          <button
-            type="button"
-            onClick={handleOpenCreate}
-            className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            data-testid="interviews-new-button"
-          >
-            <Plus className="h-4 w-4 shrink-0" aria-hidden />
-            Nueva entrevista
-          </button>
+          <>
+            <Link
+              href={`/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}/resultados`}
+              className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-5 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+              data-testid="interviews-prep-drawer-open"
+              aria-label="Ir a resultados de la vacante para revisar candidatos antes de agendar una entrevista"
+            >
+              <Users className="h-4 w-4 shrink-0" aria-hidden />
+              Revisar candidatos
+            </Link>
+            <button
+              type="button"
+              onClick={handleOpenCreate}
+              className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+              data-testid="interviews-new-button"
+            >
+              <Plus className="h-4 w-4 shrink-0" aria-hidden />
+              Nueva entrevista
+            </button>
+          </>
         }
       />
 
@@ -408,6 +426,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
         onClose={handleCloseCreate}
         vacancyId={vacancyId}
         onCreated={handleCreatedInterview}
+        initialCandidateProfileId={createInitialCandidateProfileId}
       />
 
       <InterviewDetailModal

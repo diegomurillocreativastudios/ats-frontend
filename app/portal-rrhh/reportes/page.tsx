@@ -6,12 +6,22 @@ import {
   Building2,
   ClipboardCheck,
   GitBranch,
+  LayoutDashboard,
   Share2,
+  Sparkles,
 } from "lucide-react"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 
 const REPORT_LINKS = [
+  {
+    href: "/portal-rrhh/reportes/resumen",
+    title: "Resumen",
+    description:
+      "Totales y ratios agregados (vacantes, match preliminar, evaluaciones, fuente principal) en una sola vista.",
+    Icon: LayoutDashboard,
+    demoOrder: 0,
+  },
   {
     href: "/portal-rrhh/reportes/avance-vacantes-por-cliente",
     title: "Avance vacantes por cliente",
@@ -37,12 +47,20 @@ const REPORT_LINKS = [
     demoOrder: 3,
   },
   {
+    href: "/portal-rrhh/reportes/preliminary-match-scores",
+    title: "Scores matching preliminar",
+    description:
+      "Detalle por candidato: score 0–100, nivel, estado y fechas del análisis preliminar.",
+    Icon: Sparkles,
+    demoOrder: 4,
+  },
+  {
     href: "/portal-rrhh/reportes/fuentes-reclutamiento",
     title: "Fuentes de reclutamiento",
     description:
       "Pastel por volumen, barras por contrataciones y conversión por canal.",
     Icon: Share2,
-    demoOrder: 4,
+    demoOrder: 5,
   },
 ] as const
 
@@ -52,7 +70,7 @@ export default function ReportesHubPage() {
       <section className="px-4 py-6 md:px-8" aria-label="Encabezado de reportes">
         <PortalPageHeader
           title="Reportes"
-          description="Acá ves cómo van las vacantes, los candidatos, las evaluaciones y de dónde llega la gente. Podés filtrar, revisar gráficos y avisos, y bajar los datos si necesitás compartirlos. Para mostrar el sistema en una reunión, conviene recorrer los cuatro reportes del primero al cuarto."
+          description="Elegí un reporte o el resumen agregado. Podés filtrar, revisar gráficos y bajar datos cuando aplique."
         />
       </section>
       <section
@@ -75,7 +93,9 @@ export default function ReportesHubPage() {
               </div>
               <div className="min-w-0 space-y-1">
                 <p className="font-sans text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  Paso {demoOrder} · Demo
+                  {demoOrder === 0
+                    ? "Resumen"
+                    : `Paso ${demoOrder} · Demo`}
                 </p>
                 <h2 className="font-sans text-base font-semibold text-foreground">
                   {title}

@@ -8,6 +8,8 @@ export interface InterviewCreateModalProps {
   onClose: () => void
   vacancyId: string
   onCreated?: () => void
+  /** Precarga el candidato al abrir (p. ej. desde “Revisar candidatos”). */
+  initialCandidateProfileId?: string | null
 }
 
 export function InterviewCreateModal({
@@ -15,7 +17,9 @@ export function InterviewCreateModal({
   onClose,
   vacancyId,
   onCreated,
+  initialCandidateProfileId = null,
 }: InterviewCreateModalProps) {
+  const presetKey = initialCandidateProfileId?.trim() || "none"
   return (
     <Modal
       isOpen={isOpen}
@@ -25,10 +29,14 @@ export function InterviewCreateModal({
       closeOnOverlayClick={false}
     >
       <InterviewForm
+        key={`${vacancyId}-${presetKey}`}
         mode="modal"
         vacancyId={vacancyId}
         onClose={onClose}
         onCreated={onCreated}
+        initialCandidateProfileId={
+          initialCandidateProfileId?.trim() || undefined
+        }
       />
     </Modal>
   )

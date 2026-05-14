@@ -25,7 +25,9 @@ import { getApiErrorMessage } from "@/lib/api-error"
 import {
   fetchVacancyProgressByClient,
   listRecruiterCompanies,
+  listRecruiterVacancies,
   type RecruiterCompanyOption,
+  type RecruiterVacancyOption,
   type VacancyProgressByClientRow,
 } from "@/lib/api/recruiter-reports"
 import {
@@ -46,6 +48,8 @@ import {
 const controlClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground disabled:opacity-60"
 
+const PAGE_SIZE = 20
+
 const VACANCY_STATUS_OPTIONS = [
   { value: "", label: "Todos" },
   { value: "open", label: "Abierta" },
@@ -54,10 +58,28 @@ const VACANCY_STATUS_OPTIONS = [
   { value: "paused", label: "Pausada" },
 ] as const
 
+const SORT_BY_OPTIONS = [
+  { value: "openedAt", label: "Fecha apertura" },
+  { value: "vacancyTitle", label: "Vacante" },
+  { value: "clientName", label: "Cliente" },
+  { value: "vacancyStatus", label: "Estado" },
+  { value: "totalCandidates", label: "Candidatos" },
+] as const
+
 const COLOR_OPEN = "#6E3385"
 const COLOR_CLOSED = "#496FB3"
 const COLOR_PAUSED = "#CA8A04"
 const COLOR_DRAFT = "#94A3B8"
+
+function formatScore0to100(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(Number(n))) return "—"
+  return `${Number(n).toFixed(0)}%`
+}
+
+function formatCount(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(Number(n))) return "—"
+  return String(Math.round(Number(n)))
+}
 
 function TrafficLightBadge({ light }: { light: VacancyTrafficLight }) {
   const cfg: Record<
@@ -136,27 +158,42 @@ export default function ReporteAvanceVacantesPorClientePage() {
   ]
 
   const [companies, setCompanies] = useState<RecruiterCompanyOption[]>([])
+  const [vacancies, setVacancies] = useState<RecruiterVacancyOption[]>([])
+
   const [draftClientId, setDraftClientId] = useState("")
+  const [draftVacancyId, setDraftVacancyId] = useState("")
   const [draftVacancyStatus, setDraftVacancyStatus] = useState("")
   const [draftDateFrom, setDraftDateFrom] = useState("")
   const [draftDateTo, setDraftDateTo] = useState("")
+  const [draftSortBy, setDraftSortBy] = useState("openedAt")
+  const [draftSortDirection, setDraftSortDirection] = useState<"asc" | "desc">("desc")
 
   const [appliedClientId, setAppliedClientId] = useState("")
+  const [appliedVacancyId, setAppliedVacancyId] = useState("")
   const [appliedVacancyStatus, setAppliedVacancyStatus] = useState("")
   const [appliedDateFrom, setAppliedDateFrom] = useState("")
   const [appliedDateTo, setAppliedDateTo] = useState("")
+  const [appliedSortBy, setAppliedSortBy] = useState("openedAt")
+  const [appliedSortDirection, setAppliedSortDirection] = useState<"asc" | "desc">("desc")
+
+  const [page, setPage] = useState(1)
 
   const [rows, setRows] = useState<VacancyProgressByClientRow[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const loadCompanies = useCallback(async () => {
+  const loadCatalogs = useCallback(async () => {
     try {
-      const list = await listRecruiterCompanies()
-      setCompanies(list)
+      const [co, va] = await Promise.all([
+        listRecruiterCompanies(),
+        listRecruiterVacancies(),
+      ])
+      setCompanies(co)
+      setVacancies(va)
     } catch {
       setCompanies([])
+      setVacancies([])
     }
   }, [])
 
@@ -167,8 +204,13 @@ export default function ReporteAvanceVacantesPorClientePage() {
       const res = await fetchVacancyProgressByClient({
         clientId: appliedClientId || undefined,
         vacancyStatus: appliedVacancyStatus || undefined,
+        vacancyId: appliedVacancyId || undefined,
         dateFrom: appliedDateFrom || undefined,
         dateTo: appliedDateTo || undefined,
+        page,
+        pageSize: PAGE_SIZE,
+        sortBy: appliedSortBy || undefined,
+        sortDirection: appliedSortDirection,
       })
       setRows(res.rows)
       setTotalCount(res.totalCount)
@@ -179,11 +221,20 @@ export default function ReporteAvanceVacantesPorClientePage() {
     } finally {
       setLoading(false)
     }
-  }, [appliedClientId, appliedVacancyStatus, appliedDateFrom, appliedDateTo])
+  }, [
+    appliedClientId,
+    appliedVacancyStatus,
+    appliedVacancyId,
+    appliedDateFrom,
+    appliedDateTo,
+    appliedSortBy,
+    appliedSortDirection,
+    page,
+  ])
 
   useEffect(() => {
-    loadCompanies()
-  }, [loadCompanies])
+    loadCatalogs()
+  }, [loadCatalogs])
 
   useEffect(() => {
     loadReport()
@@ -191,13 +242,25 @@ export default function ReporteAvanceVacantesPorClientePage() {
 
   const handleApplyFilters = () => {
     setAppliedClientId(draftClientId)
+    setAppliedVacancyId(draftVacancyId)
     setAppliedVacancyStatus(draftVacancyStatus)
     setAppliedDateFrom(draftDateFrom)
     setAppliedDateTo(draftDateTo)
+    setAppliedSortBy(draftSortBy)
+    setAppliedSortDirection(draftSortDirection)
+    setPage(1)
   }
 
-  const kpis = useMemo(() => computeVacancyProgressKpis(rows), [rows])
+  const kpis = useMemo(
+    () => computeVacancyProgressKpis(rows, totalCount),
+    [rows, totalCount]
+  )
   const chartData = useMemo(() => aggregateVacancyStatusByClient(rows), [rows])
+  const chartIsPageScoped = totalCount > rows.length
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+  const showingFrom = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
+  const showingTo = Math.min(page * PAGE_SIZE, totalCount)
 
   const csvMatrix = useMemo(() => {
     const header = [
@@ -213,6 +276,10 @@ export default function ReporteAvanceVacantesPorClientePage() {
       "Cierre",
       "Días abierta",
       "% Avance",
+      "Match IA promedio",
+      "Match IA máx",
+      "Match IA mín",
+      "Con análisis preliminar",
     ]
     const body = rows.map((r) => {
       const sc = stageCountsForRow(r)
@@ -236,6 +303,10 @@ export default function ReporteAvanceVacantesPorClientePage() {
         formatPercent(
           r.averageApplicationProgressPercent ?? r.progressPercent
         ),
+        formatScore0to100(r.averagePreliminaryMatchScore ?? undefined),
+        formatScore0to100(r.maxPreliminaryMatchScore ?? undefined),
+        formatScore0to100(r.minPreliminaryMatchScore ?? undefined),
+        formatCount(r.candidatesWithPreliminaryAnalysis ?? undefined),
       ]
     })
     return [header, ...body]
@@ -317,52 +388,86 @@ export default function ReporteAvanceVacantesPorClientePage() {
           r.averageApplicationProgressPercent ?? r.progressPercent
         ),
     },
+    {
+      header: "Match IA Ø",
+      numeric: true,
+      render: (r: VacancyProgressByClientRow) =>
+        formatScore0to100(r.averagePreliminaryMatchScore ?? undefined),
+    },
+    {
+      header: "Match IA máx",
+      numeric: true,
+      render: (r: VacancyProgressByClientRow) =>
+        formatScore0to100(r.maxPreliminaryMatchScore ?? undefined),
+    },
+    {
+      header: "Match IA mín",
+      numeric: true,
+      render: (r: VacancyProgressByClientRow) =>
+        formatScore0to100(r.minPreliminaryMatchScore ?? undefined),
+    },
+    {
+      header: "Con análisis IA",
+      numeric: true,
+      render: (r: VacancyProgressByClientRow) =>
+        formatCount(r.candidatesWithPreliminaryAnalysis ?? undefined),
+    },
   ] as const
 
   const kpiItems = [
     {
-      label: "Vacantes (filas)",
+      label: "Vacantes (total filtros)",
       value: loading ? "—" : kpis.totalVacancies,
-      helper: !loading && totalCount !== kpis.totalVacancies
-        ? `Total API: ${totalCount}`
-        : undefined,
+      helper:
+        !loading && kpis.vacanciesOnPage < kpis.totalVacancies
+          ? `Página: ${kpis.vacanciesOnPage} de ${kpis.totalVacancies}`
+          : undefined,
     },
     {
-      label: "Abiertas",
+      label: "Abiertas (pág.)",
       value: loading ? "—" : kpis.openCount,
     },
     {
-      label: "Cerradas",
+      label: "Cerradas (pág.)",
       value: loading ? "—" : kpis.closedCount,
     },
     {
-      label: "En pausa",
+      label: "En pausa (pág.)",
       value: loading ? "—" : kpis.pausedCount,
     },
     {
-      label: "Candidatos (suma)",
+      label: "Candidatos (suma pág.)",
       value: loading ? "—" : kpis.totalCandidates,
     },
     {
-      label: "% avance medio",
+      label: "% avance medio (pág.)",
       value:
         loading || kpis.avgProgressPercent == null
           ? "—"
           : `${kpis.avgProgressPercent.toFixed(1)}%`,
     },
+    {
+      label: "Match IA medio (pág.)",
+      value:
+        loading || kpis.avgPreliminaryMatchOnPage == null
+          ? "—"
+          : `${kpis.avgPreliminaryMatchOnPage.toFixed(0)}%`,
+    },
   ] as const
 
   const statusLine =
-    !loading && !error
-      ? `${totalCount} ${totalCount === 1 ? "fila" : "filas"} en el conjunto`
-      : ""
+    !loading && !error && totalCount > 0
+      ? `Mostrando ${showingFrom}–${showingTo} de ${totalCount}`
+      : !loading && !error
+        ? `${totalCount} ${totalCount === 1 ? "fila" : "filas"}`
+        : ""
 
   const mainContent = (
     <div className="min-w-0 flex flex-col gap-6 pb-6">
       <section className="px-4 pt-6 md:px-8" aria-label="Encabezado del reporte">
         <PortalPageHeader
           title="Avance vacantes por cliente"
-          description="Control general de procesos activos: vacantes por cliente, volumen de candidatos, semáforo heurístico y tendencia por estado."
+          description="Control general de procesos activos: vacantes por cliente, volumen de candidatos, semáforo heurístico y métricas de matching preliminar (0–100) cuando el API las envíe."
         />
       </section>
       <section className="space-y-4 px-4 md:px-8" aria-label="Filtros y tabla del reporte">
@@ -382,6 +487,21 @@ export default function ReporteAvanceVacantesPorClientePage() {
               ))}
             </select>
           </ReportesFilterControl>
+          <ReportesFilterControl label="Vacante" controlId="filtro-vacante-av">
+            <select
+              id="filtro-vacante-av"
+              className={controlClass}
+              value={draftVacancyId}
+              onChange={(e) => setDraftVacancyId(e.target.value)}
+            >
+              <option value="">Todas</option>
+              {vacancies.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.title}
+                </option>
+              ))}
+            </select>
+          </ReportesFilterControl>
           <ReportesFilterControl label="Estado de vacante" controlId="filtro-estado">
             <select
               id="filtro-estado"
@@ -394,6 +514,33 @@ export default function ReporteAvanceVacantesPorClientePage() {
                   {o.label}
                 </option>
               ))}
+            </select>
+          </ReportesFilterControl>
+          <ReportesFilterControl label="Ordenar por" controlId="filtro-sort-by">
+            <select
+              id="filtro-sort-by"
+              className={controlClass}
+              value={draftSortBy}
+              onChange={(e) => setDraftSortBy(e.target.value)}
+            >
+              {SORT_BY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </ReportesFilterControl>
+          <ReportesFilterControl label="Dirección" controlId="filtro-sort-dir">
+            <select
+              id="filtro-sort-dir"
+              className={controlClass}
+              value={draftSortDirection}
+              onChange={(e) =>
+                setDraftSortDirection(e.target.value === "asc" ? "asc" : "desc")
+              }
+            >
+              <option value="desc">Descendente</option>
+              <option value="asc">Ascendente</option>
             </select>
           </ReportesFilterControl>
           <ReportesFilterControl label="Desde" controlId="filtro-desde">
@@ -418,6 +565,7 @@ export default function ReporteAvanceVacantesPorClientePage() {
         <p className="font-sans text-xs text-muted-foreground">
           Las columnas de entrevista / finalistas / contratados usan totales del API o, si viene{" "}
           <code className="rounded bg-muted px-1 py-0.5 text-[11px]">candidatesByStage</code>, heurística por nombre de etapa.
+          Los KPIs de estado y candidatos refieren a la página actual; el total de vacantes viene del API.
         </p>
         <ReportesQueryActions
           statusText={statusLine}
@@ -434,15 +582,19 @@ export default function ReporteAvanceVacantesPorClientePage() {
         {!loading && !error ? (
           <ReportesKpiStrip
             headingId="reporte-av-vac-kpis"
-            title="Indicadores (conjunto actual)"
+            title="Indicadores"
             items={[...kpiItems]}
-            columnsClassName="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+            columnsClassName="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7"
           />
         ) : null}
         {!loading && !error && chartData.length > 0 ? (
           <ReportesChartCard
             title="Vacantes por cliente y estado"
-            description="Barras agrupadas: abiertas, cerradas, en pausa y borrador."
+            description={
+              chartIsPageScoped
+                ? "Barras según vacantes en esta página (la paginación no agrega todo el conjunto)."
+                : "Barras agrupadas: abiertas, cerradas, en pausa y borrador."
+            }
             headingId="reporte-av-vac-chart"
           >
             <ResponsiveContainer width="100%" height="100%">
@@ -481,6 +633,27 @@ export default function ReporteAvanceVacantesPorClientePage() {
             </ResponsiveContainer>
           </ReportesChartCard>
         ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className="rounded-md border border-border bg-background px-3 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
+            disabled={loading || page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Anterior
+          </button>
+          <button
+            type="button"
+            className="rounded-md border border-border bg-background px-3 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
+            disabled={loading || page >= totalPages || totalCount === 0}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Siguiente
+          </button>
+          <span className="font-sans text-xs text-muted-foreground">
+            Página {page} de {totalPages}
+          </span>
+        </div>
         <ReportesDataTable<VacancyProgressByClientRow>
           columns={columns}
           rows={rows}
