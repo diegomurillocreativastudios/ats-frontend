@@ -209,7 +209,7 @@ export function TechnicalSheetPanel({
   const shell =
     variant === "page"
       ? `w-full max-w-4xl flex-col rounded-2xl border border-border bg-background text-foreground shadow-sm ${className}`
-      : `relative flex h-[90vh] w-[90vw] max-h-[90vh] max-w-[90vw] flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl ring-1 ring-black/5 dark:ring-white/10 ${className}`
+      : `relative flex h-[90vh] w-[90vw] max-h-[90vh] max-w-[90vw] flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl ring-1 ring-black/5 ${className}`
 
   const candidateLine =
     candidateLabel != null && String(candidateLabel).trim() !== ""

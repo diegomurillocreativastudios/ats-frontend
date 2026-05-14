@@ -1,26 +1,18 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts"
+import { GitBranch, Users } from "lucide-react"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import ReportesFiltersPlaceholder, {
   ReportesFilterControl,
 } from "@/components/rrhh/reportes/reportes-filters-placeholder"
 import ReportesDataTable from "@/components/rrhh/reportes/reportes-data-table"
-import { ReportesKpiStrip } from "@/components/rrhh/reportes/reportes-kpi-strip"
-import { ReportesChartCard } from "@/components/rrhh/reportes/reportes-chart-card"
+import {
+  EstatusCandidatosPorEtapaDashboard,
+  DaysInStageCell,
+  resolveDashboardStages,
+  StagePill,
+} from "@/components/rrhh/reportes/estatus-candidatos-por-etapa-dashboard"
 import {
   ReportesAlertsPanel,
   type ReportesAlertItem,
@@ -47,15 +39,12 @@ import {
   REPORTES_STALE_CANDIDATE_DAYS,
   candidateDaysSinceLastMove,
   candidateStageLabel,
-  countCandidatesByStageOnPage,
 } from "@/lib/reportes-metrics"
 
 const controlClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground disabled:opacity-60"
 
 const PAGE_SIZE = 20
-const FUNNEL_COLOR = "#6E3385"
-const PIE_COLORS = ["#6E3385", "#496FB3", "#CA8A04", "#059669", "#7C3AED", "#DB2777", "#0EA5E9"]
 
 export default function ReporteEstatusCandidatosPorEtapaPage() {
   const trail = [
@@ -209,39 +198,20 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
   const showingFrom = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
   const showingTo = Math.min(page * PAGE_SIZE, totalCount)
 
-  const funnelChartRows = useMemo(() => {
-    if (pipelineSummary && pipelineSummary.byStage.length > 0) {
-      return pipelineSummary.byStage
-        .filter((s) => s.count > 0)
-        .map((s) => ({
-          name: s.stageName,
-          count: s.count,
-          stagePercent: s.percent,
-        }))
-    }
-    return countCandidatesByStageOnPage(rows).map((s) => ({
-      name: s.stageName,
-      count: s.count,
-      stagePercent: undefined as number | undefined,
-    }))
-  }, [pipelineSummary, rows])
-
-  const pieDistribution = useMemo(
-    () =>
-      funnelChartRows.map((r, i) => ({
-        name: r.name,
-        value: r.count,
-        fill: PIE_COLORS[i % PIE_COLORS.length],
-      })),
-    [funnelChartRows]
+  const dashboardModel = useMemo(
+    () => resolveDashboardStages(pipelineSummary, rows, totalCount),
+    [pipelineSummary, rows, totalCount]
   )
 
-  const staleCount = useMemo(() => {
-    return rows.filter((r) => {
-      const d = candidateDaysSinceLastMove(r)
-      return d != null && d >= REPORTES_STALE_CANDIDATE_DAYS
-    }).length
-  }, [rows])
+  const effectiveListTotal =
+    pipelineSummary != null && pipelineSummary.totalCandidates > 0
+      ? pipelineSummary.totalCandidates
+      : totalCount
+
+  const dominantHeaderStage =
+    dashboardModel.stages.length > 0 ? dashboardModel.stages[0] : null
+
+  const headerLoading = loading || summaryLoading
 
   const alerts = useMemo((): ReportesAlertItem[] => {
     const out: ReportesAlertItem[] = []
@@ -279,23 +249,20 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
     },
     {
       header: "Etapa actual",
-      render: (r: CandidateStatusByStageRow) => candidateStageLabel(r),
+      render: (r: CandidateStatusByStageRow) => (
+        <StagePill text={candidateStageLabel(r)} />
+      ),
     },
     {
       header: "Días en etapa",
       numeric: true,
-      render: (r: CandidateStatusByStageRow) =>
-        r.daysInStage != null && !Number.isNaN(Number(r.daysInStage))
-          ? String(r.daysInStage)
-          : (() => {
-              const d = candidateDaysSinceLastMove(r)
-              return d == null ? "—" : String(d)
-            })(),
+      render: (r: CandidateStatusByStageRow) => <DaysInStageCell row={r} />,
     },
     {
       header: "Estatus",
-      render: (r: CandidateStatusByStageRow) =>
-        r.pipelineStatus ?? r.applicationStatus ?? "—",
+      render: (r: CandidateStatusByStageRow) => (
+        <StagePill text={r.pipelineStatus ?? r.applicationStatus ?? "—"} />
+      ),
     },
     {
       header: "Última actualización",
@@ -341,35 +308,6 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
     return [header, ...body]
   }, [rows])
 
-  const globalTotal =
-    pipelineSummary && pipelineSummary.totalCandidates > 0
-      ? pipelineSummary.totalCandidates
-      : totalCount
-
-  const kpiItems = [
-    {
-      label: "Candidatos (total bajo filtros)",
-      value: loading ? "—" : globalTotal,
-      helper:
-        pipelineSummary && pipelineSummary.totalCandidates > 0
-          ? "Incluye agregado del API summary"
-          : "Basado en totalCount del listado paginado",
-    },
-    {
-      label: "En esta página",
-      value: loading ? "—" : rows.length,
-    },
-    {
-      label: "Etapas en vista embudo",
-      value: loading ? "—" : funnelChartRows.length,
-    },
-    {
-      label: "Posibles estancados (pág.)",
-      value: loading ? "—" : staleCount,
-      helper: `≥ ${REPORTES_STALE_CANDIDATE_DAYS} días sin movimiento`,
-    },
-  ] as const
-
   const statusLine =
     !loading && !error && totalCount > 0
       ? `Mostrando ${showingFrom}–${showingTo} de ${totalCount}${summaryLoading ? " · cargando agregados…" : ""}`
@@ -377,18 +315,68 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
         ? `${totalCount} ${totalCount === 1 ? "fila" : "filas"}`
         : ""
 
-  const funnelDescription =
-    pipelineSummary && pipelineSummary.byStage.length > 0
-      ? "Distribución global por etapa (endpoint summary). Embudo visual aproximado con barras horizontales."
-      : "Distribución calculada solo con la página actual. Para totales reales, el backend puede exponer GET …/candidate-status-by-stage/summary."
+  const summaryRibbon = (
+    <aside
+      className="w-full shrink-0 rounded-2xl border border-border/80 bg-white p-4 shadow-sm lg:max-w-[300px]"
+      aria-label="Resumen del embudo"
+    >
+      <p className="font-sans text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        Resumen del embudo
+      </p>
+      {headerLoading ? (
+        <div className="mt-4 space-y-3" aria-hidden>
+          <div className="h-8 animate-pulse rounded-lg bg-muted/70" />
+          <div className="h-8 animate-pulse rounded-lg bg-muted/70" />
+          <div className="h-8 animate-pulse rounded-lg bg-muted/70" />
+        </div>
+      ) : (
+        <dl className="mt-4 space-y-4">
+          <div className="flex items-start gap-2">
+            <Users className="mt-0.5 h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
+            <div>
+              <dt className="font-sans text-xs text-muted-foreground">Total aplicaciones</dt>
+              <dd className="font-sans text-2xl font-bold tabular-nums text-foreground">
+                {effectiveListTotal}
+              </dd>
+            </div>
+          </div>
+          <div>
+            <dt className="font-sans text-xs text-muted-foreground">Etapas con candidatos</dt>
+            <dd className="font-sans text-lg font-semibold tabular-nums text-foreground">
+              {dashboardModel.stages.length}
+            </dd>
+          </div>
+          <div className="flex items-start gap-2">
+            <GitBranch className="mt-0.5 h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
+            <div className="min-w-0">
+              <dt className="font-sans text-xs text-muted-foreground">Mayor concentración</dt>
+              <dd className="truncate font-sans text-sm font-semibold text-foreground">
+                {dominantHeaderStage?.name ?? "—"}
+              </dd>
+              {dominantHeaderStage ? (
+                <p className="mt-0.5 font-sans text-[11px] text-muted-foreground">
+                  {dominantHeaderStage.percent.toFixed(1)}% del total
+                </p>
+              ) : null}
+            </div>
+          </div>
+        </dl>
+      )}
+    </aside>
+  )
 
   const mainContent = (
     <div className="min-w-0 flex flex-col gap-6 pb-10">
       <section className="px-4 pt-6 md:px-8" aria-label="Encabezado del reporte">
-        <PortalPageHeader
-          title="Estatus candidatos por etapa"
-          description="Embudo del proceso: dónde está cada candidato, alertas por estancamiento y vista agregada cuando el API lo permita."
-        />
+        <div className="flex flex-col gap-6 border-b border-border pb-6 lg:flex-row lg:items-start lg:justify-between">
+          <PortalPageHeader
+            className="border-0 pb-0"
+            title="Estatus candidatos por etapa"
+            description="Distribución actual de candidatos dentro del proceso de reclutamiento."
+            contentClassName="max-w-3xl"
+          />
+          {summaryRibbon}
+        </div>
       </section>
       <section className="space-y-4 px-4 md:px-8" aria-label="Filtros y tabla del reporte">
         <ReportesFiltersPlaceholder>
@@ -482,87 +470,14 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
             />
           }
         />
-        {!loading && !error ? (
-          <ReportesKpiStrip
-            headingId="reporte-ec-kpis"
-            title="Indicadores"
-            items={[...kpiItems]}
-            columnsClassName="sm:grid-cols-2 lg:grid-cols-4"
+        {!error ? (
+          <EstatusCandidatosPorEtapaDashboard
+            pipelineSummary={pipelineSummary}
+            summaryLoading={summaryLoading}
+            reportLoading={loading}
+            pageRows={rows}
+            listTotalCount={totalCount}
           />
-        ) : null}
-        {!loading && !error && funnelChartRows.length > 0 ? (
-          <div className="grid gap-4 lg:grid-cols-2">
-            <ReportesChartCard
-              title="Embudo por etapa (barras)"
-              description={funnelDescription}
-              headingId="reporte-ec-funnel"
-              minHeightClassName="min-h-[280px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  layout="vertical"
-                  data={funnelChartRows}
-                  margin={{ top: 8, right: 16, left: 8, bottom: 8 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" horizontal />
-                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={120}
-                    tick={{ fontSize: 10 }}
-                  />
-                  <Tooltip
-                    formatter={(value, _name, item) => {
-                      const payload = item?.payload as
-                        | { stagePercent?: number }
-                        | undefined
-                      const pct = payload?.stagePercent
-                      const suffix =
-                        pct != null && !Number.isNaN(pct)
-                          ? ` · ${pct.toFixed(1)}% del total`
-                          : ""
-                      return [`${value} candidatos${suffix}`, "Candidatos"]
-                    }}
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "1px solid #E5E7EB",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Bar dataKey="count" name="Candidatos" fill={FUNNEL_COLOR} radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </ReportesChartCard>
-            <ReportesChartCard
-              title="Distribución por etapa"
-              description="Proporción de candidatos en las etapas mostradas arriba."
-              headingId="reporte-ec-pie"
-              minHeightClassName="min-h-[280px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieDistribution}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    label={({ name, percent }) =>
-                      `${String(name).slice(0, 14)}${String(name).length > 14 ? "…" : ""} ${((percent ?? 0) * 100).toFixed(0)}%`
-                    }
-                  >
-                    {pieDistribution.map((entry, index) => (
-                      <Cell key={entry.name} fill={entry.fill ?? PIE_COLORS[index % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: "11px" }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </ReportesChartCard>
-          </div>
         ) : null}
         {!loading && !error ? (
           <ReportesAlertsPanel headingId="reporte-ec-alertas" alerts={alerts} />
@@ -594,6 +509,8 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
           loading={loading}
           error={error}
           tableAriaLabel="Tabla del reporte estatus candidatos por etapa"
+          emptyDescription="No hay candidatos para los filtros seleccionados."
+          onRetry={loadReport}
           getRowKey={(r, i) =>
             String(
               r.candidateProfileId ??

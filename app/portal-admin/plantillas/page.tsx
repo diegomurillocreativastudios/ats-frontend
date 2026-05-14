@@ -67,7 +67,7 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
                 template.type === 'Document' ? 'Documento' : 'Cuestionario'}
             </span>
             {template.type === 'Document' && template.isTechnicalSheet && (
-              <span className="rounded-full bg-slate-200 px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:bg-slate-700">
+              <span className="rounded-full bg-slate-200 px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider text-slate-700">
                 Ficha técnica
               </span>
             )}

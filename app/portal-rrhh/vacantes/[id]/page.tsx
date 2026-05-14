@@ -187,7 +187,7 @@ const ScoreBarRow = ({
   labelClass,
   barClass,
   valueClass,
-  barTrackClass = "bg-slate-200/90 dark:bg-slate-200/90",
+  barTrackClass = "bg-slate-200/90",
   isTotalRow = false,
   hideLabel = false,
 }) => {
@@ -198,7 +198,7 @@ const ScoreBarRow = ({
     <li
       className={
         isTotalRow
-          ? "flex flex-col gap-2.5 rounded-lg border border-sky-200/80 bg-sky-50/70 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 dark:border-sky-200/80 dark:bg-sky-50/70"
+          ? "flex flex-col gap-2.5 rounded-lg border border-sky-200/80 bg-sky-50/70 px-3 py-3 sm:flex-row sm:items-center sm:gap-3"
           : "flex items-center gap-3"
       }
     >
@@ -590,7 +590,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
       aria-label={`Perfil de ${emptyToDash(match.name)}`}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-white text-slate-900 shadow-xl dark:bg-white">
+      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-white text-slate-900 shadow-xl">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-border p-6">
           <div className="flex items-center gap-4">
@@ -665,7 +665,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               {componentScores.length > 0 && (
                 <div className="flex flex-col gap-5">
                   {hasAttributeBlock && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-sky-200/60 dark:bg-white dark:ring-border">
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-sky-200/60">
                       <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900">
                         Atributos
                       </h3>
@@ -676,9 +676,9 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                             scoreKey={key}
                             val={val}
                             labelClass="text-slate-800"
-                            barClass="bg-sky-500 dark:bg-sky-500"
+                            barClass="bg-sky-500"
                             valueClass="text-slate-900"
-                            barTrackClass="bg-slate-200/95 dark:bg-slate-200/95"
+                            barTrackClass="bg-slate-200/95"
                           />
                         ))}
                         {aggregateEntry != null && (
@@ -686,9 +686,9 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                             scoreKey={aggregateEntry[0]}
                             val={aggregateEntry[1]}
                             labelClass="text-slate-800"
-                            barClass="bg-sky-600 dark:bg-sky-600"
+                            barClass="bg-sky-600"
                             valueClass="text-slate-900"
-                            barTrackClass="bg-slate-200/95 dark:bg-slate-200/95"
+                            barTrackClass="bg-slate-200/95"
                             isTotalRow
                           />
                         )}
@@ -697,7 +697,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   )}
 
                   {qualitativeEntry != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70 dark:bg-white dark:ring-border">
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70">
                       <div className="mb-3.5 flex items-center gap-1.5">
                         <h3 className="font-sans text-sm font-semibold text-amber-950">
                           Puntaje cualitativo
@@ -712,9 +712,9 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           scoreKey={qualitativeEntry[0]}
                           val={qualitativeEntry[1]}
                           labelClass="text-amber-900"
-                          barClass="bg-amber-500 dark:bg-amber-500"
+                          barClass="bg-amber-500"
                           valueClass="text-amber-950"
-                          barTrackClass="bg-amber-200/80 dark:bg-amber-200/80"
+                          barTrackClass="bg-amber-200/80"
                           hideLabel
                         />
                       </ul>
@@ -722,7 +722,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   )}
 
                   {semanticEntry != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-vo-purple/25 dark:bg-white dark:ring-border">
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-vo-purple/25">
                       <div className="mb-3.5 flex items-center gap-1.5">
                         <h3 className="font-sans text-sm font-semibold text-vo-purple">
                           Similitud semántica
@@ -739,7 +739,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           labelClass="text-vo-purple"
                           barClass="bg-vo-purple"
                           valueClass="text-violet-900"
-                          barTrackClass="bg-violet-200/80 dark:bg-violet-200/80"
+                          barTrackClass="bg-violet-200/80"
                           hideLabel
                         />
                       </ul>
@@ -750,7 +750,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
 
               {/* Coincidencia de atributos (CV vs vacante) */}
               {hasMatchedAttributesBlock && (
-                <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/70 dark:bg-white dark:ring-border">
+                <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/70">
                   <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
                     Coincidencia de atributos
                   </h3>
@@ -761,7 +761,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           ? String(matchedAttributePaths[attrKey])
                           : null;
                       return (
-                        <li key={attrKey} className="flex flex-col gap-0.5 rounded-lg bg-emerald-50/80 px-3 py-2 dark:bg-emerald-50/80">
+                        <li key={attrKey} className="flex flex-col gap-0.5 rounded-lg bg-emerald-50/80 px-3 py-2">
                           <span className="font-medium text-emerald-950">
                             {formatRequirementKey(attrKey)}
                           </span>
@@ -782,7 +782,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               {hasSplitQualitative ? (
                 <div className="flex flex-col gap-4">
                   {qualitativeReasoningPositive != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/50 dark:bg-white">
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/50">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">
                         Fortalezas
                       </h3>
@@ -792,7 +792,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                     </div>
                   )}
                   {qualitativeReasoningNegative != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70 dark:bg-white">
+                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-amber-950">
                         Aspectos a considerar
                       </h3>
@@ -804,7 +804,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 </div>
               ) : (
                 qualitativeReasoningLegacy != null && (
-                  <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-border/60 dark:bg-white">
+                  <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-border/60">
                     <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
                       Razonamiento cualitativo
                     </h3>

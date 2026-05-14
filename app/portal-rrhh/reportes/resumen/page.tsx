@@ -1,11 +1,15 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import ReportesFiltersPlaceholder, {
   ReportesFilterControl,
 } from "@/components/rrhh/reportes/reportes-filters-placeholder"
-import { ReportesQueryActions } from "@/components/rrhh/reportes/reportes-query-actions"
+import {
+  ReporteResumenDashboard,
+  ReporteResumenDashboardSkeleton,
+  ReporteResumenErrorState,
+} from "@/components/rrhh/reportes/reporte-resumen-dashboard"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
@@ -14,67 +18,16 @@ import {
   type RecruiterCompanyOption,
   type ReportsRecruiterSummary,
 } from "@/lib/api/recruiter-reports"
-import { defaultMonthDateRange, formatPercent } from "@/lib/reportes-display"
+import { defaultMonthDateRange } from "@/lib/reportes-display"
 
 const controlClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground disabled:opacity-60"
 
-const KNOWN_CARD_KEYS: {
-  field: keyof ReportsRecruiterSummary
-  label: string
-  format: "int" | "percent" | "text"
-}[] = [
-  { field: "totalVacancies", label: "Vacantes", format: "int" },
-  { field: "totalCandidates", label: "Candidatos", format: "int" },
-  { field: "totalHires", label: "Contrataciones", format: "int" },
-  { field: "hiredCount", label: "Contratados (alt.)", format: "int" },
-  {
-    field: "averagePreliminaryMatchScore",
-    label: "Match preliminar medio",
-    format: "percent",
-  },
-  {
-    field: "technicalEvaluationsCount",
-    label: "Evaluaciones técnicas",
-    format: "int",
-  },
-  {
-    field: "technicalEvaluationApprovalRate",
-    label: "Tasa aprobación eval.",
-    format: "percent",
-  },
-  { field: "approvalRate", label: "Tasa aprobación", format: "percent" },
-  {
-    field: "mainRecruitmentSourceKey",
-    label: "Fuente principal (clave)",
-    format: "text",
-  },
-  {
-    field: "mainRecruitmentSource",
-    label: "Fuente principal",
-    format: "text",
-  },
-  { field: "mainSourceLabel", label: "Fuente (etiqueta)", format: "text" },
-]
+const applyButtonClass =
+  "inline-flex w-full items-center justify-center rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-60 lg:w-auto lg:shrink-0"
 
-function formatSummaryValue(
-  format: "int" | "percent" | "text",
-  value: unknown
-): string {
-  if (value == null || value === "") return "—"
-  if (format === "text") return String(value)
-  if (format === "percent") {
-    if (typeof value === "number" && !Number.isNaN(value))
-      return formatPercent(value)
-    const n = Number.parseFloat(String(value))
-    if (!Number.isNaN(n)) return formatPercent(n)
-    return "—"
-  }
-  if (typeof value === "number" && !Number.isNaN(value)) return String(Math.round(value))
-  const n = Number.parseInt(String(value), 10)
-  if (!Number.isNaN(n)) return String(n)
-  return "—"
-}
+const filterGridClass =
+  "mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end"
 
 export default function ReporteResumenPage() {
   const trail = [
@@ -137,29 +90,21 @@ export default function ReporteResumenPage() {
     setAppliedDateTo(draftDateTo)
   }
 
-  const extraEntries = useMemo(() => {
-    if (!summary || typeof summary !== "object") return []
-    const skip = new Set<string>(
-      KNOWN_CARD_KEYS.map((k) => k.field as string)
-    )
-    return Object.entries(summary).filter(([key, val]) => {
-      if (skip.has(key)) return false
-      if (val == null || val === "") return false
-      if (typeof val === "object") return false
-      return true
-    })
-  }, [summary])
+  const statusText = loading ? "Cargando indicadores…" : error ? "" : "Datos actualizados"
 
   const mainContent = (
     <div className="min-w-0 flex flex-col gap-6 pb-10">
       <section className="px-4 pt-6 md:px-8" aria-label="Encabezado del reporte">
         <PortalPageHeader
-          title="Resumen de reportes"
-          description="Indicadores agregados desde GET /api/recruiter/reports/summary. Las claves visibles dependen de lo que devuelva el backend."
+          title="Resumen ejecutivo de reportes"
+          description="Vista general del estado de clientes, vacantes, candidatos, entrevistas, evaluaciones y fuentes de reclutamiento."
         />
       </section>
-      <section className="space-y-4 px-4 md:px-8" aria-label="Filtros y tarjetas">
-        <ReportesFiltersPlaceholder>
+      <section className="space-y-4 px-4 md:px-8" aria-label="Filtros y panel ejecutivo">
+        <ReportesFiltersPlaceholder
+          hintText="Filtra los indicadores por cliente y rango de fechas."
+          controlsClassName={filterGridClass}
+        >
           <ReportesFilterControl label="Cliente" controlId="filtro-cliente-sum">
             <select
               id="filtro-cliente-sum"
@@ -193,60 +138,24 @@ export default function ReporteResumenPage() {
               onChange={(e) => setDraftDateTo(e.target.value)}
             />
           </ReportesFilterControl>
-        </ReportesFiltersPlaceholder>
-        <ReportesQueryActions
-          statusText={loading ? "Cargando…" : error ? "" : "Datos actualizados"}
-          loading={loading}
-          onApply={handleApplyFilters}
-        />
-        {error ? (
-          <div
-            className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-4 font-sans text-sm text-destructive"
-            role="alert"
-          >
-            {error}
-          </div>
-        ) : null}
-        {!loading && !error && summary ? (
-          <>
-            <div
-              className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              aria-label="Indicadores del resumen"
+          <div className="flex w-full min-w-0 flex-col justify-end gap-1 sm:col-span-2 lg:col-span-1">
+            <button
+              type="button"
+              onClick={handleApplyFilters}
+              className={applyButtonClass}
+              disabled={loading}
             >
-              {KNOWN_CARD_KEYS.map(({ field, label, format }) => {
-                const raw = summary[field]
-                const display = formatSummaryValue(format, raw)
-                if (display === "—" && (raw == null || raw === "")) return null
-                return (
-                  <div
-                    key={field}
-                    className="rounded-xl border border-border bg-card p-4 shadow-sm"
-                  >
-                    <p className="font-sans text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {label}
-                    </p>
-                    <p className="mt-1 font-sans text-2xl font-semibold tabular-nums text-foreground">
-                      {display}
-                    </p>
-                  </div>
-                )
-              })}
-            </div>
-            {extraEntries.length > 0 ? (
-              <div className="rounded-xl border border-border bg-muted/20 p-4">
-                <p className="mb-2 font-sans text-sm font-medium text-foreground">
-                  Otros campos
-                </p>
-                <ul className="grid gap-2 font-mono text-xs text-muted-foreground sm:grid-cols-2">
-                  {extraEntries.map(([k, v]) => (
-                    <li key={k}>
-                      <span className="text-foreground">{k}</span>: {String(v)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-          </>
+              Aplicar filtros
+            </button>
+          </div>
+        </ReportesFiltersPlaceholder>
+        <p className="font-sans text-xs text-muted-foreground" aria-live="polite">
+          {statusText}
+        </p>
+        {error ? <ReporteResumenErrorState message={error} /> : null}
+        {loading ? <ReporteResumenDashboardSkeleton /> : null}
+        {!loading && !error && summary ? (
+          <ReporteResumenDashboard summary={summary} />
         ) : null}
       </section>
     </div>

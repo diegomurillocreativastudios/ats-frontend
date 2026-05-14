@@ -17,6 +17,11 @@ interface ReportesDataTableProps<T> {
   tableAriaLabel: string
   emptyDescription?: string
   getRowKey: (row: T, index: number) => string
+  /** Si es false y hay error, no se renderiza el bloque de error (p. ej. el padre ya lo mostró). */
+  showEmbeddedError?: boolean
+  onRetry?: () => void
+  /** Clases Tailwind extra para cada fila del cuerpo (p. ej. hover). */
+  bodyRowClassName?: string
 }
 
 export default function ReportesDataTable<T>({
@@ -27,14 +32,26 @@ export default function ReportesDataTable<T>({
   tableAriaLabel,
   emptyDescription,
   getRowKey,
+  showEmbeddedError = true,
+  onRetry,
+  bodyRowClassName = "",
 }: ReportesDataTableProps<T>) {
-  if (error) {
+  if (error && showEmbeddedError) {
     return (
       <div
-        className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-6 text-center"
+        className="flex flex-col items-center gap-4 rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-8 text-center"
         role="alert"
       >
         <p className="font-sans text-sm text-destructive">{error}</p>
+        {onRetry ? (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="inline-flex items-center justify-center rounded-md bg-vo-purple px-4 py-2 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+          >
+            Reintentar
+          </button>
+        ) : null}
       </div>
     )
   }
@@ -90,7 +107,12 @@ export default function ReportesDataTable<T>({
             rows.map((row, rowIndex) => (
               <tr
                 key={getRowKey(row, rowIndex)}
-                className="border-b border-border last:border-b-0"
+                className={[
+                  "border-b border-border transition-colors last:border-b-0",
+                  bodyRowClassName,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
               >
                 {columns.map((col) => (
                   <td

@@ -35,7 +35,7 @@ export function GoogleCalendarDisconnect({
   return (
     <>
       {showConfirm ? (
-        <div className="rounded-lg border border-amber-700 bg-amber-50 p-4 text-sm text-amber-700 dark:bg-amber-700">
+        <div className="rounded-lg border border-amber-700 bg-amber-50 p-4 text-sm text-amber-700">
           <p className="font-sans font-medium">
             ¿Desconectar Google Calendar?
           </p>

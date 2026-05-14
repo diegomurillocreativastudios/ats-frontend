@@ -8,6 +8,10 @@ interface ReportesQueryActionsProps {
   onApply: () => void
   applyLabel?: string
   extra?: ReactNode
+  /** Si se define, muestra un botón secundario "Limpiar filtros". */
+  onClear?: () => void
+  clearLabel?: string
+  clearDisabled?: boolean
 }
 
 export function ReportesQueryActions({
@@ -16,6 +20,9 @@ export function ReportesQueryActions({
   onApply,
   applyLabel = "Aplicar filtros",
   extra = null,
+  onClear,
+  clearLabel = "Limpiar filtros",
+  clearDisabled = false,
 }: ReportesQueryActionsProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -24,6 +31,16 @@ export function ReportesQueryActions({
       </p>
       <div className="flex flex-wrap items-center gap-2">
         {extra}
+        {onClear ? (
+          <button
+            type="button"
+            onClick={onClear}
+            disabled={clearDisabled || loading}
+            className="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-60"
+          >
+            {clearLabel}
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={onApply}

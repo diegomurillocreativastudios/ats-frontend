@@ -136,7 +136,7 @@ export interface CandidatePipelineStageSummary {
   percent?: number | null
 }
 
-/** Respuesta opcional del endpoint de agregación (si el backend la expone). */
+/** Respuesta opcional del endpoint de agregación (si el backend la expone). Acepta totalApplications o totalCandidates. */
 export interface CandidatePipelineSummary {
   totalCandidates: number
   byStage: CandidatePipelineStageSummary[]
@@ -146,7 +146,12 @@ function coercePipelineSummary(raw: unknown): CandidatePipelineSummary | null {
   if (!raw || typeof raw !== "object") return null
   const rec = raw as Record<string, unknown>
   const totalRaw =
-    rec.totalCandidates ?? rec.TotalCandidates ?? rec.total ?? rec.count
+    rec.totalApplications ??
+    rec.TotalApplications ??
+    rec.totalCandidates ??
+    rec.TotalCandidates ??
+    rec.total ??
+    rec.count
   const totalCandidates =
     typeof totalRaw === "number" && !Number.isNaN(totalRaw)
       ? totalRaw
@@ -187,6 +192,17 @@ function coercePipelineSummary(raw: unknown): CandidatePipelineSummary | null {
             : Number.parseInt(String(val), 10) || 0,
       })
     )
+  }
+
+  const denom = totalCandidates > 0 ? totalCandidates : 0
+  if (denom > 0) {
+    byStage = byStage.map((s) => {
+      let pct = s.percent
+      if (pct == null || Number.isNaN(Number(pct))) {
+        pct = (s.count / denom) * 100
+      }
+      return { ...s, percent: pct }
+    })
   }
 
   return { totalCandidates, byStage }
@@ -313,6 +329,9 @@ export interface PreliminaryMatchScoreRow {
   candidateId?: string
   candidateProfileId?: string
   candidateName?: string
+  /** Alias usado por algunos payloads del API. */
+  candidateFullName?: string
+  candidateEmail?: string
   applicationId?: string
   vacancyId?: string
   vacancyTitle?: string
@@ -321,6 +340,8 @@ export interface PreliminaryMatchScoreRow {
   companyName?: string
   stageId?: string
   stageName?: string
+  currentStageId?: string
+  currentStageName?: string
   score?: number | null
   preliminaryMatchScore?: number | null
   matchLevel?: string
@@ -372,17 +393,26 @@ export async function fetchPreliminaryMatchScores(query: {
  * Campos alineados con el backend; el resto queda accesible vía índice si hace falta.
  */
 export interface ReportsRecruiterSummary {
+  totalClients?: number
   totalVacancies?: number
+  openVacancies?: number
+  closedVacancies?: number
   totalCandidates?: number
+  candidatesInInterview?: number
+  candidatesHired?: number
+  averageVacancyProgressPercent?: number
   totalHires?: number
   hiredCount?: number
   averagePreliminaryMatchScore?: number
   technicalEvaluationsCount?: number
+  technicalEvaluationsCompleted?: number
   technicalEvaluationApprovalRate?: number
+  technicalEvaluationPassRate?: number | null
   approvalRate?: number
   mainRecruitmentSourceKey?: string
   mainRecruitmentSource?: string
   mainSourceLabel?: string
+  topRecruitmentSource?: string
   [key: string]: unknown
 }
 
@@ -416,8 +446,29 @@ export function coerceReportsSummary(raw: unknown): ReportsRecruiterSummary {
   if (!raw || typeof raw !== "object") return {}
   const rec = raw as Record<string, unknown>
   const out: ReportsRecruiterSummary = { ...rec }
+  out.totalClients = pickNum(rec, ["totalClients", "TotalClients"])
   out.totalVacancies = pickNum(rec, ["totalVacancies", "TotalVacancies"])
+  out.openVacancies = pickNum(rec, ["openVacancies", "OpenVacancies"])
+  out.closedVacancies = pickNum(rec, ["closedVacancies", "ClosedVacancies"])
   out.totalCandidates = pickNum(rec, ["totalCandidates", "TotalCandidates"])
+  out.candidatesInInterview = pickNum(rec, [
+    "candidatesInInterview",
+    "CandidatesInInterview",
+  ])
+  out.candidatesHired = pickNum(rec, [
+    "candidatesHired",
+    "CandidatesHired",
+    "hiredCount",
+    "HiredCount",
+    "totalHired",
+    "totalHires",
+    "TotalHires",
+    "hiresCount",
+  ])
+  out.averageVacancyProgressPercent = pickNum(rec, [
+    "averageVacancyProgressPercent",
+    "AverageVacancyProgressPercent",
+  ])
   out.totalHires = pickNum(rec, ["totalHires", "TotalHires", "hiresCount"])
   out.hiredCount = pickNum(rec, ["hiredCount", "HiredCount", "totalHired"])
   out.averagePreliminaryMatchScore = pickNum(rec, [
@@ -429,6 +480,29 @@ export function coerceReportsSummary(raw: unknown): ReportsRecruiterSummary {
     "technicalEvaluationsCount",
     "TechnicalEvaluationsCount",
   ])
+  out.technicalEvaluationsCompleted = pickNum(rec, [
+    "technicalEvaluationsCompleted",
+    "TechnicalEvaluationsCompleted",
+  ])
+  if (
+    out.technicalEvaluationsCount == null &&
+    out.technicalEvaluationsCompleted != null
+  ) {
+    out.technicalEvaluationsCount = out.technicalEvaluationsCompleted
+  }
+  const passRateRaw =
+    rec.technicalEvaluationPassRate ??
+    rec.TechnicalEvaluationPassRate ??
+    rec.technicalEvaluationApprovalRate ??
+    rec.TechnicalEvaluationApprovalRate
+  if (passRateRaw == null || passRateRaw === "") {
+    out.technicalEvaluationPassRate = null
+  } else if (typeof passRateRaw === "number" && !Number.isNaN(passRateRaw)) {
+    out.technicalEvaluationPassRate = passRateRaw
+  } else {
+    const n = Number.parseFloat(String(passRateRaw))
+    out.technicalEvaluationPassRate = Number.isNaN(n) ? null : n
+  }
   out.technicalEvaluationApprovalRate = pickNum(rec, [
     "technicalEvaluationApprovalRate",
     "TechnicalEvaluationApprovalRate",
@@ -448,6 +522,10 @@ export function coerceReportsSummary(raw: unknown): ReportsRecruiterSummary {
     "mainSourceLabel",
     "MainSourceLabel",
     "primarySourceLabel",
+  ])
+  out.topRecruitmentSource = pickStr(rec, [
+    "topRecruitmentSource",
+    "TopRecruitmentSource",
   ])
   return out
 }

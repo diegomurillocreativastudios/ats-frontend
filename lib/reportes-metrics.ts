@@ -65,6 +65,53 @@ export function vacancyDaysOpen(row: VacancyProgressByClientRow, now = new Date(
   return diffDaysUtc(opened, now)
 }
 
+/**
+ * Días entre apertura y cierre (cerradas) o apertura y hoy (resto), para tableros y semáforo ejecutivo.
+ */
+export function vacancyDaysOpenForDisplay(
+  row: VacancyProgressByClientRow,
+  now = new Date()
+): number | null {
+  const opened = parseIsoDate(row.openedAt ?? undefined)
+  if (!opened) return null
+  const status = normalizeVacancyStatusSlug(row.vacancyStatus)
+  if (status === "closed") {
+    const closed = parseIsoDate(row.closedAt ?? undefined)
+    if (!closed) return null
+    return diffDaysUtc(opened, closed)
+  }
+  return diffDaysUtc(opened, now)
+}
+
+export function vacancyStageCounts(row: VacancyProgressByClientRow): {
+  interview: number | null
+  finalist: number | null
+  hired: number | null
+} {
+  const explicitI = row.candidatesInInterview
+  const explicitF = row.candidatesFinalist
+  const explicitH = row.candidatesHired
+  if (
+    typeof explicitI === "number" ||
+    typeof explicitF === "number" ||
+    typeof explicitH === "number"
+  ) {
+    return {
+      interview: typeof explicitI === "number" ? explicitI : null,
+      finalist: typeof explicitF === "number" ? explicitF : null,
+      hired: typeof explicitH === "number" ? explicitH : null,
+    }
+  }
+  const hints = sumCandidatesByStageHints(row.candidatesByStage)
+  const hasMap = row.candidatesByStage && Object.keys(row.candidatesByStage).length > 0
+  if (!hasMap) return { interview: null, finalist: null, hired: null }
+  return {
+    interview: hints.interview,
+    finalist: hints.finalist,
+    hired: hints.hired,
+  }
+}
+
 export type VacancyTrafficLight = "green" | "amber" | "red" | "neutral"
 
 /**
