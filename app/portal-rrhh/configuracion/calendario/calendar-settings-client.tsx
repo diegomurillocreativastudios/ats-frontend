@@ -54,7 +54,7 @@ export function CalendarSettingsClient() {
           </div>
         ) : status.isConnected ? (
           <div className="mt-4 flex flex-col gap-4">
-            <p className="rounded-md border border-emerald-700 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-700 dark:text-emerald-50">
+            <p className="rounded-md border border-emerald-700 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-700">
               Conectado como{" "}
               <span className="font-medium">{status.email || "tu cuenta"}</span>
               .

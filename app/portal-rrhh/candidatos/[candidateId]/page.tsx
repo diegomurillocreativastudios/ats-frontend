@@ -528,7 +528,7 @@ export default function CandidatoDetallePage() {
                 icon={FileText}
                 sectionId="sec-nd-raw"
               >
-                <p className="mb-2 font-sans text-xs text-amber-800 dark:text-amber-200" role="status">
+                <p className="mb-2 font-sans text-xs text-amber-800" role="status">
                   El API devolvió normalizedData como texto que no es JSON válido. Contenido crudo:
                 </p>
                 <pre className="max-h-72 overflow-auto whitespace-pre-wrap wrap-break-word rounded-lg border border-border bg-muted/50 p-4 font-mono text-xs text-foreground">

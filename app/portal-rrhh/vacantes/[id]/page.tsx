@@ -666,7 +666,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 <div className="flex flex-col gap-5">
                   {hasAttributeBlock && (
                     <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-sky-200/60 dark:bg-white dark:ring-border">
-                      <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900 dark:text-sky-900">
+                      <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900">
                         Atributos
                       </h3>
                       <ul className="flex flex-col gap-3" role="list">
@@ -675,9 +675,9 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                             key={key}
                             scoreKey={key}
                             val={val}
-                            labelClass="text-slate-800 dark:text-slate-800"
+                            labelClass="text-slate-800"
                             barClass="bg-sky-500 dark:bg-sky-500"
-                            valueClass="text-slate-900 dark:text-slate-900"
+                            valueClass="text-slate-900"
                             barTrackClass="bg-slate-200/95 dark:bg-slate-200/95"
                           />
                         ))}
@@ -685,9 +685,9 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           <ScoreBarRow
                             scoreKey={aggregateEntry[0]}
                             val={aggregateEntry[1]}
-                            labelClass="text-slate-800 dark:text-slate-800"
+                            labelClass="text-slate-800"
                             barClass="bg-sky-600 dark:bg-sky-600"
-                            valueClass="text-slate-900 dark:text-slate-900"
+                            valueClass="text-slate-900"
                             barTrackClass="bg-slate-200/95 dark:bg-slate-200/95"
                             isTotalRow
                           />
@@ -699,7 +699,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   {qualitativeEntry != null && (
                     <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70 dark:bg-white dark:ring-border">
                       <div className="mb-3.5 flex items-center gap-1.5">
-                        <h3 className="font-sans text-sm font-semibold text-amber-950 dark:text-amber-950">
+                        <h3 className="font-sans text-sm font-semibold text-amber-950">
                           Puntaje cualitativo
                         </h3>
                         <ScoreTooltip
@@ -713,7 +713,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           val={qualitativeEntry[1]}
                           labelClass="text-amber-900"
                           barClass="bg-amber-500 dark:bg-amber-500"
-                          valueClass="text-amber-950 dark:text-amber-950"
+                          valueClass="text-amber-950"
                           barTrackClass="bg-amber-200/80 dark:bg-amber-200/80"
                           hideLabel
                         />
@@ -738,7 +738,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           val={semanticEntry[1]}
                           labelClass="text-vo-purple"
                           barClass="bg-vo-purple"
-                          valueClass="text-violet-900 dark:text-violet-900"
+                          valueClass="text-violet-900"
                           barTrackClass="bg-violet-200/80 dark:bg-violet-200/80"
                           hideLabel
                         />
@@ -786,7 +786,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                       <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">
                         Fortalezas
                       </h3>
-                      <p className="font-sans text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                      <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
                         {qualitativeReasoningPositive}
                       </p>
                     </div>
@@ -796,7 +796,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                       <h3 className="mb-3 font-sans text-sm font-semibold text-amber-950">
                         Aspectos a considerar
                       </h3>
-                      <p className="font-sans text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                      <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
                         {qualitativeReasoningNegative}
                       </p>
                     </div>
@@ -808,7 +808,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                     <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
                       Razonamiento cualitativo
                     </h3>
-                    <p className="font-sans text-sm leading-relaxed text-slate-700 dark:text-slate-700 whitespace-pre-wrap">
+                    <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
                       {qualitativeReasoningLegacy}
                     </p>
                   </div>

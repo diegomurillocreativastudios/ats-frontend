@@ -172,7 +172,7 @@ export default function VacancyResultadosPage() {
                 </h1>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {model.meta.status ? (
-                    <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-sans text-xs font-semibold text-emerald-800 dark:text-emerald-200">
+                    <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-sans text-xs font-semibold text-emerald-800">
                       {model.meta.status}
                     </span>
                   ) : null}
@@ -183,7 +183,7 @@ export default function VacancyResultadosPage() {
                     </span>
                   ) : null}
                   {model.meta.needsRematch ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 font-sans text-xs font-medium text-amber-900 dark:text-amber-100">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 font-sans text-xs font-medium text-amber-900">
                       <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
                       Requiere re-match
                     </span>

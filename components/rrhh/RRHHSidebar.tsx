@@ -29,7 +29,7 @@ export default function RRHHSidebar() {
 
   return (
     <aside
-      className="flex h-full min-h-0 w-[260px] shrink-0 flex-col justify-between overflow-y-auto overscroll-y-contain border-r border-border bg-card py-6 pl-6 pr-0"
+      className="flex h-full min-h-0 w-[260px] shrink-0 flex-col justify-between self-stretch overflow-y-auto overscroll-y-contain border-r border-border bg-card py-6 pl-6 pr-0"
       aria-label="Navegación Portal RRHH"
     >
       <div className="flex flex-col gap-6">

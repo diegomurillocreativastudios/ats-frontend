@@ -24,7 +24,7 @@ const severityStyles: Record<
   warning: {
     border: "border-amber-500/40",
     bg: "bg-amber-500/5",
-    text: "text-amber-800 dark:text-amber-200",
+    text: "text-amber-800",
     label: "Atención",
   },
   info: {

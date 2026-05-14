@@ -335,7 +335,7 @@ function VacancyResultadosCandidateCard({
         <div className="mt-3 grid gap-2">
           {pos ? (
             <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-2">
-              <p className="font-sans text-[10px] font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">
+              <p className="font-sans text-[10px] font-semibold uppercase tracking-wide text-emerald-800">
                 Fortalezas
               </p>
               <p className="mt-1 line-clamp-3 font-sans text-xs leading-relaxed text-foreground">
@@ -345,7 +345,7 @@ function VacancyResultadosCandidateCard({
           ) : null}
           {neg ? (
             <div className="rounded-lg border border-rose-500/20 bg-rose-500/5 px-2.5 py-2">
-              <p className="font-sans text-[10px] font-semibold uppercase tracking-wide text-rose-800 dark:text-rose-200">
+              <p className="font-sans text-[10px] font-semibold uppercase tracking-wide text-rose-800">
                 Aspectos a considerar
               </p>
               <p className="mt-1 line-clamp-3 font-sans text-xs leading-relaxed text-foreground">
@@ -579,7 +579,7 @@ export function VacancyResultadosCandidatesBlock({
               detail.match.qualitativeReasoningPositive ??
               detail.match.qualitative_reasoning_positive) ? (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
                   Fortalezas
                 </p>
                 <p className="mt-1 whitespace-pre-wrap leading-relaxed">
@@ -593,7 +593,7 @@ export function VacancyResultadosCandidatesBlock({
               detail.match.qualitativeReasoningNegative ??
               detail.match.qualitative_reasoning_negative) ? (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-rose-800 dark:text-rose-200">
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-800">
                   Aspectos a considerar
                 </p>
                 <p className="mt-1 whitespace-pre-wrap leading-relaxed">

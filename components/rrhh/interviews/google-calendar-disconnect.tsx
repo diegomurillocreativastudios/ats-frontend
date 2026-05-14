@@ -35,11 +35,11 @@ export function GoogleCalendarDisconnect({
   return (
     <>
       {showConfirm ? (
-        <div className="rounded-lg border border-amber-700 bg-amber-50 p-4 text-sm text-amber-700 dark:bg-amber-700 dark:text-amber-50">
+        <div className="rounded-lg border border-amber-700 bg-amber-50 p-4 text-sm text-amber-700 dark:bg-amber-700">
           <p className="font-sans font-medium">
             ¿Desconectar Google Calendar?
           </p>
-          <p className="mt-2 font-sans text-muted-foreground dark:text-amber-100/90">
+          <p className="mt-2 font-sans text-muted-foreground">
             Los eventos ya creados en tu calendario no se eliminan.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
