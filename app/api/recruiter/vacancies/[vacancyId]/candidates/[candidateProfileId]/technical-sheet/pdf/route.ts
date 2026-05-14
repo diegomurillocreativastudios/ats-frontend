@@ -126,11 +126,24 @@ export async function GET(
       address: String(headerRecord?.address ?? ""),
       englishLevel: String(headerRecord?.englishLevel ?? ""),
     }
-    const buffer = await renderPaginatedTechnicalSheetPdfFromInterpolated(
-      innerHtml,
-      header,
-      String(ctx.logoUrl ?? "")
-    )
+    let buffer: Buffer
+    try {
+      buffer = await renderPaginatedTechnicalSheetPdfFromInterpolated(
+        innerHtml,
+        header,
+        String(ctx.logoUrl ?? "")
+      )
+    } catch (chromiumErr) {
+      const onVercel = Boolean(process.env.VERCEL || process.env.VERCEL_ENV)
+      const disablePdfKitFallback =
+        process.env.TECHNICAL_SHEET_PDF_DISABLE_VERCEL_PDFKIT_FALLBACK === "1"
+      if (!onVercel || disablePdfKitFallback) throw chromiumErr
+      console.error(
+        "[technical-sheet-pdf] Chromium PDF failed on Vercel; using PDFKit fallback",
+        chromiumErr instanceof Error ? chromiumErr.stack ?? chromiumErr.message : chromiumErr
+      )
+      buffer = await buildTechnicalSheetPdfKitBuffer(payload)
+    }
 
     return new NextResponse(new Uint8Array(buffer), {
       status: 200,
