@@ -128,10 +128,13 @@ export async function renderHtmlToPdfBuffer(html: string): Promise<Buffer> {
   let browser: Browser | undefined
   try {
     browser = await puppeteer.launch({
-      headless: true,
+      // `chromium.args` already includes `--headless='shell'`; `headless: true` adds the new
+      // headless stack and breaks launch on Vercel (see @sparticuz/chromium + puppeteer docs).
+      headless: isVercel ? chromium.headless : true,
       executablePath,
       args,
-      defaultViewport: { width: 1280, height: 1600 },
+      defaultViewport: isVercel ? chromium.defaultViewport : { width: 1280, height: 1600 },
+      timeout: isVercel ? 120_000 : 30_000,
     })
     const page = await browser.newPage()
     try {

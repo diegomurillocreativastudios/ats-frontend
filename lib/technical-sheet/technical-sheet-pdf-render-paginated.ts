@@ -49,10 +49,11 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
   let browser: import("puppeteer-core").Browser | undefined
   try {
     browser = await puppeteer.launch({
-      headless: true,
+      headless: isVercel ? chromium.headless : true,
       executablePath,
       args,
-      defaultViewport: { width: 1280, height: 1600 },
+      defaultViewport: isVercel ? chromium.defaultViewport : { width: 1280, height: 1600 },
+      timeout: isVercel ? 120_000 : 30_000,
     })
     const page = await browser.newPage()
     try {

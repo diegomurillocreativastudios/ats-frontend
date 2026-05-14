@@ -142,6 +142,17 @@ export async function GET(
     })
   } catch (e: unknown) {
     console.error("[technical-sheet-pdf]", e instanceof Error ? e.stack ?? e.message : e)
-    return NextResponse.json({ message: "Error al generar el PDF" }, { status: 500 })
+    const errWithStatus = e as Error & { status?: number }
+    const status =
+      typeof errWithStatus.status === "number" &&
+      errWithStatus.status >= 400 &&
+      errWithStatus.status < 600
+        ? errWithStatus.status
+        : 500
+    const message =
+      status !== 500 && errWithStatus.message
+        ? errWithStatus.message
+        : "Error al generar el PDF"
+    return NextResponse.json({ message }, { status })
   }
 }
