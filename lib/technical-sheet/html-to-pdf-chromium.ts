@@ -113,23 +113,32 @@ export interface PdfSetContentOptions {
   timeoutMs?: number
 }
 
+export type PdfPipelinePhaseName = "setContent" | "waitAssets" | "pagePdf"
+
 export async function applyTechnicalSheetPdfPipeline(
   page: Page,
   html: string,
   mediaType: "screen" | "print",
   pdfOverrides?: PDFOptions,
-  setContentOptions?: PdfSetContentOptions
+  setContentOptions?: PdfSetContentOptions,
+  onPdfPipelinePhase?: (phase: PdfPipelinePhaseName, durationMs: number) => void
 ): Promise<Buffer> {
   await page.emulateMediaType(mediaType)
+  let stepStart = performance.now()
   await page.setContent(html, {
     waitUntil: setContentOptions?.waitUntil ?? "load",
     timeout: setContentOptions?.timeoutMs ?? 60_000,
   })
+  onPdfPipelinePhase?.("setContent", performance.now() - stepStart)
+  stepStart = performance.now()
   await waitForTechnicalSheetPdfDocumentAssets(page)
+  onPdfPipelinePhase?.("waitAssets", performance.now() - stepStart)
+  stepStart = performance.now()
   const buf = await page.pdf({
     ...getTechnicalSheetPdfPageOptions(),
     ...pdfOverrides,
   })
+  onPdfPipelinePhase?.("pagePdf", performance.now() - stepStart)
   return Buffer.from(buf)
 }
 
@@ -138,6 +147,7 @@ export interface RenderHtmlToPdfBufferOptions {
   pdf?: PDFOptions
   viewport?: { width: number; height: number }
   setContent?: PdfSetContentOptions
+  onPdfPipelinePhase?: (phase: PdfPipelinePhaseName, durationMs: number) => void
 }
 
 export async function renderHtmlToPdfBuffer(
@@ -169,7 +179,8 @@ export async function renderHtmlToPdfBuffer(
         html,
         options?.mediaType ?? "print",
         options?.pdf,
-        options?.setContent
+        options?.setContent,
+        options?.onPdfPipelinePhase
       )
     } finally {
       await page.close().catch(() => {})
