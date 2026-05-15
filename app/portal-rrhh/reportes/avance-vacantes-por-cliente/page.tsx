@@ -286,7 +286,7 @@ export default function ReporteAvanceVacantesPorClientePage() {
               desempeño del análisis preliminar con IA.
             </p>
           </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-2" data-report-pdf-exclude>
             <ReportesExportToolbar
               reportSlug="avance-vacantes-por-cliente"
               disabled={loading || !!error}
@@ -314,8 +314,12 @@ export default function ReporteAvanceVacantesPorClientePage() {
         </div>
       </section>
 
-      <section className="space-y-4 px-4 md:px-8" aria-label="Filtros del reporte">
-        <div className="rounded-2xl border border-border/80 bg-card/95 p-5 shadow-sm sm:p-6">
+      <section className="space-y-4 px-4 md:px-8" aria-label="Contenido del reporte">
+        <div
+          className="rounded-2xl border border-border/80 bg-card/95 p-5 shadow-sm sm:p-6"
+          data-report-pdf-exclude
+          aria-label="Filtros del reporte"
+        >
           <h2 className="font-sans text-base font-semibold text-foreground">Filtros del reporte</h2>
           <p className="mt-1 max-w-3xl font-sans text-xs text-muted-foreground">
             Los valores se envían como parámetros al API de reportes. Las columnas de entrevista /
@@ -441,7 +445,7 @@ export default function ReporteAvanceVacantesPorClientePage() {
           chartIsPageScoped={chartIsPageScoped}
         />
 
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-card/80 px-4 py-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border/70 bg-card/80 px-4 py-3 shadow-sm" data-report-pdf-exclude>
           <button
             type="button"
             className="rounded-lg border border-border bg-background px-3 py-2 font-sans text-sm text-foreground transition-colors hover:bg-muted disabled:opacity-50"

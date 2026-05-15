@@ -455,7 +455,7 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
             />
           </ReportesFilterControl>
         </ReportesFiltersPlaceholder>
-        <p className="font-sans text-xs text-muted-foreground">
+        <p className="font-sans text-xs text-muted-foreground" data-report-pdf-exclude>
           Las etapas del filtro se cargan según el cliente seleccionado (compañía).
         </p>
         <ReportesQueryActions
@@ -482,7 +482,7 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
         {!loading && !error ? (
           <ReportesAlertsPanel headingId="reporte-ec-alertas" alerts={alerts} />
         ) : null}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2" data-report-pdf-exclude>
           <button
             type="button"
             className="rounded-md border border-border bg-background px-3 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"

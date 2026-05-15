@@ -11,6 +11,7 @@ import {
   ReporteResumenErrorState,
 } from "@/components/rrhh/reportes/reporte-resumen-dashboard"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import { ReportesViewPdfButton } from "@/components/rrhh/reportes/reportes-view-pdf-button"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
   fetchReportsSummary,
@@ -98,6 +99,9 @@ export default function ReporteResumenPage() {
         <PortalPageHeader
           title="Resumen ejecutivo de reportes"
           description="Vista general del estado de clientes, vacantes, candidatos, entrevistas, evaluaciones y fuentes de reclutamiento."
+          actions={
+            <ReportesViewPdfButton disabled={loading} filenameBase="reporte-resumen-ejecutivo" />
+          }
         />
       </section>
       <section className="space-y-4 px-4 md:px-8" aria-label="Filtros y panel ejecutivo">
@@ -149,7 +153,11 @@ export default function ReporteResumenPage() {
             </button>
           </div>
         </ReportesFiltersPlaceholder>
-        <p className="font-sans text-xs text-muted-foreground" aria-live="polite">
+        <p
+          className="font-sans text-xs text-muted-foreground"
+          aria-live="polite"
+          data-report-pdf-exclude
+        >
           {statusText}
         </p>
         {error ? <ReporteResumenErrorState message={error} /> : null}

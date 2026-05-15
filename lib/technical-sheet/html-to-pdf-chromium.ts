@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs"
-import type { Browser, Page } from "puppeteer-core"
+import type { Browser, Page, PDFOptions } from "puppeteer-core"
 import puppeteer from "puppeteer-core"
 import chromium from "@sparticuz/chromium"
 
@@ -8,7 +8,7 @@ import chromium from "@sparticuz/chromium"
  * - `VERCEL` / `VERCEL_ENV`: Chromium binary from `@sparticuz/chromium`.
  * - `PUPPETEER_EXECUTABLE_PATH`: Chrome/Chromium locally o en Docker (GCP).
  * - `TECHNICAL_SHEET_PDF_MEDIA_TYPE`: solo afecta pruebas o llamadas directas a `applyTechnicalSheetPdfPipeline`;
- *   `renderHtmlToPdfBuffer` usa siempre `print` para aplicar `@media print` de la plantilla.
+ *   por defecto `renderHtmlToPdfBuffer` usa `print` para aplicar `@media print` de la plantilla de ficha técnica.
  */
 
 const LOCAL_CHROME_CANDIDATES = [
@@ -111,16 +111,29 @@ export function getTechnicalSheetPdfPageOptions(): typeof TECHNICAL_SHEET_PDF_OP
 export async function applyTechnicalSheetPdfPipeline(
   page: Page,
   html: string,
-  mediaType: "screen" | "print"
+  mediaType: "screen" | "print",
+  pdfOverrides?: PDFOptions
 ): Promise<Buffer> {
   await page.emulateMediaType(mediaType)
   await page.setContent(html, { waitUntil: "load", timeout: 60_000 })
   await waitForTechnicalSheetPdfDocumentAssets(page)
-  const buf = await page.pdf(getTechnicalSheetPdfPageOptions())
+  const buf = await page.pdf({
+    ...getTechnicalSheetPdfPageOptions(),
+    ...pdfOverrides,
+  })
   return Buffer.from(buf)
 }
 
-export async function renderHtmlToPdfBuffer(html: string): Promise<Buffer> {
+export interface RenderHtmlToPdfBufferOptions {
+  mediaType?: "screen" | "print"
+  pdf?: PDFOptions
+  viewport?: { width: number; height: number }
+}
+
+export async function renderHtmlToPdfBuffer(
+  html: string,
+  options?: RenderHtmlToPdfBufferOptions
+): Promise<Buffer> {
   const executablePath = await resolveChromiumExecutablePathForPdf()
   const isVercel = isVercelRuntime()
   const args = isVercel ? chromium.args : ["--no-sandbox", "--disable-setuid-sandbox"]
@@ -138,7 +151,15 @@ export async function renderHtmlToPdfBuffer(html: string): Promise<Buffer> {
     })
     const page = await browser.newPage()
     try {
-      return await applyTechnicalSheetPdfPipeline(page, html, "print")
+      if (options?.viewport) {
+        await page.setViewport(options.viewport)
+      }
+      return await applyTechnicalSheetPdfPipeline(
+        page,
+        html,
+        options?.mediaType ?? "print",
+        options?.pdf
+      )
     } finally {
       await page.close().catch(() => {})
     }

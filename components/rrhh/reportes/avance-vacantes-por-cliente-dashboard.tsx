@@ -673,7 +673,7 @@ export function AvanceVacantesPorClienteDashboard({
         {rows.length === 0 ? (
           <ChartEmptyInsight message="No hay vacantes para evaluar en esta página." />
         ) : (
-          <ul className="max-h-[min(520px,55dvh)] space-y-3 overflow-y-auto pr-1">
+          <ul className="max-h-[520px] space-y-3 overflow-y-auto pr-1">
             {traffic.map(({ row, health }) => {
               const days = getDaysOpen(row)
               const pct = vacancyProgressPercentValue(row)

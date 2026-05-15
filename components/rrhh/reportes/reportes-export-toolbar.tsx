@@ -3,6 +3,7 @@
 import { useCallback } from "react"
 import { Download } from "lucide-react"
 import { buildCsvFromMatrix, downloadCsvFile } from "@/lib/reportes-csv"
+import { ReportesViewPdfButton } from "@/components/rrhh/reportes/reportes-view-pdf-button"
 
 interface ReportesExportToolbarProps {
   reportSlug: string
@@ -24,9 +25,11 @@ export function ReportesExportToolbar({
   }, [matrix, reportSlug])
 
   const canExport = matrix.length > 1 && !disabled
+  const safeSlug = reportSlug.replace(/[^a-z0-9-_]+/gi, "-").toLowerCase() || "reporte"
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2" data-report-pdf-exclude>
+      <ReportesViewPdfButton disabled={disabled} filenameBase={`reporte-${safeSlug}`} />
       <button
         type="button"
         onClick={handleDownloadCsv}

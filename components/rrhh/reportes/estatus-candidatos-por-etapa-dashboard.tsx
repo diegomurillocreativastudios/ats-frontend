@@ -186,7 +186,7 @@ function KpiShell({
   badge?: ReactNode
 }) {
   return (
-    <div className="flex h-full flex-col gap-2 rounded-2xl border border-border/80 bg-white p-4 shadow-sm">
+    <div className="flex min-h-0 flex-col gap-2 rounded-2xl border border-border/80 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <span className="font-sans text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {label}
@@ -433,7 +433,7 @@ export function EstatusCandidatosPorEtapaDashboard({
             </span>
           </div>
           <p className="mb-3 font-sans text-xs text-muted-foreground">{chartFootnote}</p>
-          <div className="min-h-[240px] w-full flex-1" style={{ height: "min(420px, 55dvh)" }}>
+          <div className="min-h-[240px] w-full shrink-0" style={{ height: 420 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 layout="vertical"
@@ -488,7 +488,7 @@ export function EstatusCandidatosPorEtapaDashboard({
           <p className="mb-2 font-sans text-xs text-muted-foreground">
             Dona de distribución porcentual; pasá el cursor para ver cantidad y %.
           </p>
-          <div className="relative w-full flex-1" style={{ height: "min(280px, 42dvh)" }}>
+          <div className="relative w-full shrink-0" style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

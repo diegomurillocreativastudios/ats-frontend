@@ -25,7 +25,7 @@ export function ReportesQueryActions({
   clearDisabled = false,
 }: ReportesQueryActionsProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex flex-wrap items-center justify-between gap-3" data-report-pdf-exclude>
       <p className="font-sans text-xs text-muted-foreground" aria-live="polite">
         {statusText}
       </p>

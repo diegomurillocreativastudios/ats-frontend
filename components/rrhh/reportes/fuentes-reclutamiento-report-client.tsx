@@ -628,7 +628,7 @@ export default function FuentesReclutamientoReportClient() {
               </div>
             }
             actions={
-              <div className="flex w-full flex-wrap justify-end gap-2">
+              <div className="flex w-full flex-wrap justify-end gap-2" data-report-pdf-exclude>
                 <ReportesExportToolbar
                   reportSlug="fuentes-reclutamiento"
                   disabled={loading || !!error}
@@ -640,7 +640,7 @@ export default function FuentesReclutamientoReportClient() {
           />
         </section>
 
-        <section className="space-y-6 px-4 md:px-8" aria-label="Filtros del reporte">
+        <section className="space-y-6 px-4 md:px-8" aria-label="Filtros del reporte" data-report-pdf-exclude>
           <ReportesFiltersPlaceholder
             legendLabel="Filtros del reporte"
             hintText="Ajustá el periodo, cliente, vacante o agrupación para analizar el rendimiento de las fuentes."
@@ -725,7 +725,7 @@ export default function FuentesReclutamientoReportClient() {
               />
             </ReportesFilterControl>
           </ReportesFiltersPlaceholder>
-          <p className="font-sans text-xs text-muted-foreground">
+          <p className="font-sans text-xs text-muted-foreground" data-report-pdf-exclude>
             Las claves de fuente del desplegable se cargan con{" "}
             <code className="rounded bg-muted px-1 py-0.5 text-[11px]">GET …/reports/filters</code>{" "}
             según las fechas y el cliente seleccionados en el formulario.
@@ -1105,7 +1105,7 @@ export default function FuentesReclutamientoReportClient() {
           </section>
         ) : null}
 
-        <section className="space-y-3 px-4 md:px-8" aria-label="Paginación">
+        <section className="space-y-3 px-4 md:px-8" aria-label="Paginación" data-report-pdf-exclude>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"

@@ -38,7 +38,7 @@ export function ReportesChartCard({
       ) : (
         <div className="mb-4" />
       )}
-      <div className={chartSlotClass} style={{ height: "min(360px, 50dvh)" }}>
+      <div className={chartSlotClass} style={{ height: 360 }}>
         {children}
       </div>
     </section>

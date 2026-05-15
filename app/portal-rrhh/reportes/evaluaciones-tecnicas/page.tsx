@@ -484,7 +484,7 @@ export default function ReporteEvaluacionesTecnicasPage() {
             />
           </ReportesFilterControl>
         </ReportesFiltersPlaceholder>
-        <p className="font-sans text-xs text-muted-foreground">
+        <p className="font-sans text-xs text-muted-foreground" data-report-pdf-exclude>
           El filtro de resultado se envía como{" "}
           <code className="rounded bg-muted px-1 py-0.5 text-[11px]">outcome</code>;{" "}
           <code className="rounded bg-muted px-1 py-0.5 text-[11px]">clientId</code> y{" "}
@@ -586,7 +586,7 @@ export default function ReporteEvaluacionesTecnicasPage() {
         {!loading && !error ? (
           <ReportesAlertsPanel headingId="reporte-ev-alertas" alerts={alerts} />
         ) : null}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2" data-report-pdf-exclude>
           <button
             type="button"
             className="rounded-md border border-border bg-background px-3 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"

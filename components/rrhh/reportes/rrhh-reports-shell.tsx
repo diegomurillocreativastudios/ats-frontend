@@ -32,7 +32,10 @@ export default function RrhhReportsShell({
   }, [])
 
   return (
-    <div className="h-dvh max-h-dvh overflow-hidden bg-background font-sans text-foreground">
+    <div
+      data-rrhh-reports-shell
+      className="h-dvh max-h-dvh overflow-hidden bg-background font-sans text-foreground"
+    >
       <div className="hidden h-full min-h-0 min-w-0 lg:flex">
         <RRHHSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">

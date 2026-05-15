@@ -32,6 +32,7 @@ export default function ReportesFiltersPlaceholder({
   return (
     <fieldset
       disabled={disabled}
+      data-report-pdf-exclude
       className={surfaceClassName}
       aria-describedby={helpId}
     >
