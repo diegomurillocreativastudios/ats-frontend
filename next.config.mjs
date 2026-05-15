@@ -10,6 +10,9 @@ const nextConfig = {
     "/api/recruiter/**/technical-sheet/pdf": [
       "./node_modules/@sparticuz/chromium/**/*",
     ],
+    "/api/recruiter/reportes/pdf": [
+      "./node_modules/@sparticuz/chromium/**/*",
+    ],
   },
 }
 
