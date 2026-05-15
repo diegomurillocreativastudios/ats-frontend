@@ -111,9 +111,16 @@ export async function POST(request: Request) {
       },
     })
   } catch (e: unknown) {
-    console.error("[reportes-view-pdf]", e instanceof Error ? e.stack ?? e.message : e)
+    const err = e instanceof Error ? e : new Error(String(e))
+    console.error("[reportes-view-pdf]", err.stack ?? err.message)
+    const exposeDetail =
+      process.env.NODE_ENV === "development" ||
+      process.env.REPORT_PDF_EXPOSE_ERROR_DETAIL === "1"
     return NextResponse.json(
-      { message: "Error al generar el PDF del reporte." },
+      {
+        message: "Error al generar el PDF del reporte.",
+        ...(exposeDetail ? { detail: err.message } : {}),
+      },
       { status: 500 }
     )
   }

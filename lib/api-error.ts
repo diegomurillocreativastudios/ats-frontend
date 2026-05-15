@@ -4,8 +4,11 @@ export function getApiErrorMessage(payload: unknown): string {
   if (payload instanceof Error) return payload.message
   if (typeof payload !== "object" || payload === null) return "Error desconocido"
   const rec = payload as Record<string, unknown>
-  if (typeof rec.message === "string") return rec.message
-  if (typeof rec.detail === "string") return rec.detail
+  const msg = typeof rec.message === "string" ? rec.message : ""
+  const detail = typeof rec.detail === "string" ? rec.detail : ""
+  if (msg && detail) return `${msg} — ${detail}`
+  if (msg) return msg
+  if (detail) return detail
   return "Error desconocido"
 }
 
