@@ -15,11 +15,26 @@ const MAX_FRAGMENT_CHARS = 2_500_000
 const MAX_INLINE_CSS_CHARS = 400_000
 const MAX_STYLESHEETS = 60
 
+function withHttpsOrigin(raw: string): string {
+  const trimmed = raw.replace(/\/$/, "")
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  return `https://${trimmed.replace(/^\/\//, "")}`
+}
+
+/**
+ * Origen público para `<base href>` en el HTML del PDF.
+ * En Vercel (preview/producción) prioriza la URL del deployment (`VERCEL_*`) para que
+ * rutas relativas del fragmento no apunten a otro host si `NEXT_PUBLIC_APP_URL` es fijo (p. ej. prod).
+ */
 function resolvePublicOrigin(): string {
+  if (process.env.VERCEL) {
+    const branch = process.env.VERCEL_BRANCH_URL?.trim()
+    const deployment = process.env.VERCEL_URL?.trim()
+    const fromVercel = branch || deployment
+    if (fromVercel) return withHttpsOrigin(fromVercel)
+  }
   const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.trim()
-  if (fromEnv) return fromEnv.replace(/\/$/, "")
-  const vercel = process.env.VERCEL_URL?.trim()
-  if (vercel) return `https://${vercel.replace(/^https?:\/\//i, "")}`
+  if (fromEnv) return withHttpsOrigin(fromEnv)
   return "http://localhost:3000"
 }
 
@@ -92,6 +107,7 @@ export async function POST(request: Request) {
     const buffer = await renderHtmlToPdfBuffer(fullHtml, {
       mediaType: "screen",
       viewport: { width: 1440, height: 900 },
+      setContent: { waitUntil: "load", timeoutMs: 120_000 },
       pdf: {
         printBackground: true,
         preferCSSPageSize: true,
@@ -115,7 +131,8 @@ export async function POST(request: Request) {
     console.error("[reportes-view-pdf]", err.stack ?? err.message)
     const exposeDetail =
       process.env.NODE_ENV === "development" ||
-      process.env.REPORT_PDF_EXPOSE_ERROR_DETAIL === "1"
+      process.env.REPORT_PDF_EXPOSE_ERROR_DETAIL === "1" ||
+      process.env.VERCEL_ENV === "preview"
     return NextResponse.json(
       {
         message: "Error al generar el PDF del reporte.",

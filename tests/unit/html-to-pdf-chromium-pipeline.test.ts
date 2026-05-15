@@ -36,6 +36,25 @@ describe("applyTechnicalSheetPdfPipeline", () => {
     expect(page.pdf).toHaveBeenCalledWith(getTechnicalSheetPdfPageOptions())
     expect(buf.subarray(0, 4).toString("utf8")).toBe("%PDF")
   })
+
+  it("honors optional setContent waitUntil and timeout", async () => {
+    const page = {
+      emulateMediaType: vi.fn(async () => {}),
+      setContent: vi.fn(async () => {}),
+      evaluate: vi.fn(async () => {}),
+      pdf: vi.fn(async () => new Uint8Array([37, 80, 68, 70])),
+    } as unknown as Page
+
+    await applyTechnicalSheetPdfPipeline(page, "<html></html>", "screen", undefined, {
+      waitUntil: "domcontentloaded",
+      timeoutMs: 42_000,
+    })
+
+    expect(page.setContent).toHaveBeenCalledWith("<html></html>", {
+      waitUntil: "domcontentloaded",
+      timeout: 42_000,
+    })
+  })
 })
 
 describe("waitForTechnicalSheetPdfDocumentAssets", () => {

@@ -108,14 +108,23 @@ export function getTechnicalSheetPdfPageOptions(): typeof TECHNICAL_SHEET_PDF_OP
  * Fidelity: `print` media para `@media print` de la plantilla, fuentes, imágenes, `page.pdf` Letter.
  * Exported for unit tests with a mocked `Page`.
  */
+export interface PdfSetContentOptions {
+  waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2"
+  timeoutMs?: number
+}
+
 export async function applyTechnicalSheetPdfPipeline(
   page: Page,
   html: string,
   mediaType: "screen" | "print",
-  pdfOverrides?: PDFOptions
+  pdfOverrides?: PDFOptions,
+  setContentOptions?: PdfSetContentOptions
 ): Promise<Buffer> {
   await page.emulateMediaType(mediaType)
-  await page.setContent(html, { waitUntil: "load", timeout: 60_000 })
+  await page.setContent(html, {
+    waitUntil: setContentOptions?.waitUntil ?? "load",
+    timeout: setContentOptions?.timeoutMs ?? 60_000,
+  })
   await waitForTechnicalSheetPdfDocumentAssets(page)
   const buf = await page.pdf({
     ...getTechnicalSheetPdfPageOptions(),
@@ -128,6 +137,7 @@ export interface RenderHtmlToPdfBufferOptions {
   mediaType?: "screen" | "print"
   pdf?: PDFOptions
   viewport?: { width: number; height: number }
+  setContent?: PdfSetContentOptions
 }
 
 export async function renderHtmlToPdfBuffer(
@@ -158,7 +168,8 @@ export async function renderHtmlToPdfBuffer(
         page,
         html,
         options?.mediaType ?? "print",
-        options?.pdf
+        options?.pdf,
+        options?.setContent
       )
     } finally {
       await page.close().catch(() => {})
