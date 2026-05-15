@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs"
-import type { Browser, Page, PDFOptions } from "puppeteer-core"
+import type { Browser, Page, PDFOptions, SetContentWaitForOptions } from "puppeteer-core"
 import puppeteer from "puppeteer-core"
 import chromium from "@sparticuz/chromium"
 
@@ -109,7 +109,7 @@ export function getTechnicalSheetPdfPageOptions(): typeof TECHNICAL_SHEET_PDF_OP
  * Exported for unit tests with a mocked `Page`.
  */
 export interface PdfSetContentOptions {
-  waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2"
+  waitUntil?: SetContentWaitForOptions["waitUntil"]
   timeoutMs?: number
 }
 

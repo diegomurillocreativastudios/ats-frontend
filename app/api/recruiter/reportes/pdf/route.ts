@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
+import { fetchStylesheetsTextForPdf } from "@/lib/reportes/fetch-report-stylesheets-for-pdf"
 import { renderHtmlToPdfBuffer } from "@/lib/technical-sheet/html-to-pdf-chromium"
 import { buildReportViewPdfHtmlDocument } from "@/lib/reportes/build-report-view-pdf-html"
 
@@ -14,6 +15,41 @@ export const maxDuration = 60
 const MAX_FRAGMENT_CHARS = 2_500_000
 const MAX_INLINE_CSS_CHARS = 400_000
 const MAX_STYLESHEETS = 60
+const RESERVE_FOR_TAIL_CSS = 6_000
+
+/**
+ * Igual que la ficha técnica en Vercel: evitar depender de subrecursos frágiles en headless.
+ * Aquí no hay PDFKit para HTML arbitrario; en su lugar se inyecta el CSS descargado en el servidor
+ * (sin `<link>`), y si falla el primer intento se reintenta con `domcontentloaded`.
+ */
+async function renderReportViewPdfBuffer(fullHtml: string): Promise<Buffer> {
+  const pdf = {
+    printBackground: true,
+    preferCSSPageSize: true,
+    margin: { top: "0", right: "0", bottom: "0", left: "0" },
+  }
+  const base = {
+    mediaType: "screen" as const,
+    viewport: { width: 1440, height: 900 },
+    pdf,
+  }
+  try {
+    return await renderHtmlToPdfBuffer(fullHtml, {
+      ...base,
+      setContent: { waitUntil: "load", timeoutMs: 55_000 },
+    })
+  } catch (first) {
+    if (!process.env.VERCEL) throw first
+    console.error(
+      "[reportes-view-pdf] Chromium load failed; retry with domcontentloaded",
+      first instanceof Error ? first.message : first
+    )
+    return await renderHtmlToPdfBuffer(fullHtml, {
+      ...base,
+      setContent: { waitUntil: "domcontentloaded", timeoutMs: 55_000 },
+    })
+  }
+}
 
 function withHttpsOrigin(raw: string): string {
   const trimmed = raw.replace(/\/$/, "")
@@ -91,29 +127,32 @@ export async function POST(request: Request) {
           .slice(0, MAX_STYLESHEETS)
       : []
 
-    const inlineHeadCss =
+    const inlineHeadCssRaw =
       typeof record.inlineHeadCss === "string"
         ? record.inlineHeadCss.slice(0, MAX_INLINE_CSS_CHARS)
         : ""
 
     const origin = resolvePublicOrigin()
+
+    const keepLinkedSheets = process.env.REPORT_PDF_KEEP_STYLESHEET_LINKS === "1"
+    let inlineHeadCss = inlineHeadCssRaw
+    let stylesheetHrefsForDocument = stylesheetHrefs
+
+    if (!keepLinkedSheets && stylesheetHrefs.length > 0) {
+      const budget = Math.max(0, MAX_INLINE_CSS_CHARS - inlineHeadCssRaw.length - RESERVE_FOR_TAIL_CSS)
+      const fetched = await fetchStylesheetsTextForPdf(stylesheetHrefs, budget)
+      inlineHeadCss = `${inlineHeadCssRaw}\n${fetched}`.slice(0, MAX_INLINE_CSS_CHARS)
+      stylesheetHrefsForDocument = []
+    }
+
     const fullHtml = buildReportViewPdfHtmlDocument({
       baseOrigin: origin,
       fragmentHtml,
-      stylesheetHrefs,
+      stylesheetHrefs: stylesheetHrefsForDocument,
       inlineHeadCss,
     })
 
-    const buffer = await renderHtmlToPdfBuffer(fullHtml, {
-      mediaType: "screen",
-      viewport: { width: 1440, height: 900 },
-      setContent: { waitUntil: "load", timeoutMs: 120_000 },
-      pdf: {
-        printBackground: true,
-        preferCSSPageSize: true,
-        margin: { top: "0", right: "0", bottom: "0", left: "0" },
-      },
-    })
+    const buffer = await renderReportViewPdfBuffer(fullHtml)
 
     const stem = sanitizePdfStem(record.filename)
     const filenameAscii = `${stem}.pdf`
