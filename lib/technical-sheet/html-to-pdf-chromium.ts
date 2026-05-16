@@ -1,64 +1,13 @@
-import { existsSync } from "node:fs"
 import type { Browser, Page, PDFOptions, SetContentWaitForOptions } from "puppeteer-core"
-import puppeteer from "puppeteer-core"
-import chromium from "@sparticuz/chromium"
-
-/**
- * Entorno PDF headless:
- * - `VERCEL` / `VERCEL_ENV`: Chromium binary from `@sparticuz/chromium`.
- * - `PUPPETEER_EXECUTABLE_PATH`: Chrome/Chromium locally o en Docker (GCP).
- * - `TECHNICAL_SHEET_PDF_MEDIA_TYPE`: solo afecta pruebas o llamadas directas a `applyTechnicalSheetPdfPipeline`;
- *   por defecto `renderHtmlToPdfBuffer` usa `print` para aplicar `@media print` de la plantilla de ficha técnica.
- */
-
-const LOCAL_CHROME_CANDIDATES = [
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  "/Applications/Chromium.app/Contents/MacOS/Chromium",
-  "/usr/bin/google-chrome-stable",
-  "/usr/bin/chromium-browser",
-  "/usr/bin/chromium",
-] as const
+import { isVercelPdfRuntime, launchPdfBrowser } from "@/lib/pdf/launch-pdf-browser"
 
 const PDF_IMAGE_WAIT_MS = 15_000
-
-function resolveLocalChromeExecutable(): string | null {
-  const fromEnv = process.env.PUPPETEER_EXECUTABLE_PATH?.trim()
-  if (fromEnv && existsSync(fromEnv)) return fromEnv
-  for (const p of LOCAL_CHROME_CANDIDATES) {
-    if (existsSync(p)) return p
-  }
-  return null
-}
-
-function isVercelRuntime(): boolean {
-  return Boolean(process.env.VERCEL || process.env.VERCEL_ENV)
-}
-
-/**
- * Resolves the Chromium/Chrome binary for PDF generation.
- * - Vercel: `@sparticuz/chromium`.
- * - Local/GCP: `PUPPETEER_EXECUTABLE_PATH` or a standard Chrome install path.
- */
-export async function resolveChromiumExecutablePathForPdf(): Promise<string> {
-  if (isVercelRuntime()) {
-    return chromium.executablePath()
-  }
-  const local = resolveLocalChromeExecutable()
-  if (local) return local
-  throw new Error(
-    "No browser found for PDF generation. Set PUPPETEER_EXECUTABLE_PATH to Chrome/Chromium, or install Google Chrome."
-  )
-}
 
 export function getTechnicalSheetPdfMediaType(): "screen" | "print" {
   const v = process.env.TECHNICAL_SHEET_PDF_MEDIA_TYPE?.trim().toLowerCase()
   return v === "print" ? "print" : "screen"
 }
 
-/**
- * Espera fuentes del documento y carga de imágenes antes de rasterizar a PDF.
- * Exportada para pruebas unitarias con `Page` mockeado.
- */
 export async function waitForTechnicalSheetPdfDocumentAssets(
   page: Page,
   imageWaitMs: number = PDF_IMAGE_WAIT_MS
@@ -107,10 +56,6 @@ export function getTechnicalSheetPdfPageOptions(): typeof TECHNICAL_SHEET_PDF_OP
   return { ...TECHNICAL_SHEET_PDF_OPTIONS }
 }
 
-/**
- * Fidelity: `print` media para `@media print` de la plantilla, fuentes, imágenes, `page.pdf` Letter.
- * Exported for unit tests with a mocked `Page`.
- */
 export interface PdfSetContentOptions {
   waitUntil?: SetContentWaitForOptions["waitUntil"]
   timeoutMs?: number
@@ -146,7 +91,6 @@ export async function applyTechnicalSheetPdfPipeline(
   return Buffer.from(buf)
 }
 
-/** En Vercel, el CSS del reporte ya va inyectado; abortar red evita cuelgues en `load`/imágenes. */
 export async function enablePdfPageBlockExternalResources(page: Page): Promise<void> {
   await page.setRequestInterception(true)
   page.on("request", (request) => {
@@ -170,9 +114,7 @@ export interface RenderHtmlToPdfBufferOptions {
   viewport?: { width: number; height: number }
   setContent?: PdfSetContentOptions
   onPdfPipelinePhase?: (phase: PdfPipelinePhaseName, durationMs: number) => void
-  /** Tiempo máximo por imagen en `waitForTechnicalSheetPdfDocumentAssets` (ms). */
   imageWaitMs?: number
-  /** Aborta imágenes/fuentes/hojas por red (útil con CSS inline en reportes). */
   blockExternalResources?: boolean
 }
 
@@ -180,20 +122,11 @@ export async function renderHtmlToPdfBuffer(
   html: string,
   options?: RenderHtmlToPdfBufferOptions
 ): Promise<Buffer> {
-  const executablePath = await resolveChromiumExecutablePathForPdf()
-  const isVercel = isVercelRuntime()
-  const args = isVercel ? chromium.args : ["--no-sandbox", "--disable-setuid-sandbox"]
-
   let browser: Browser | undefined
   try {
-    browser = await puppeteer.launch({
-      // `chromium.args` already includes `--headless='shell'`; `headless: true` adds the new
-      // headless stack and breaks launch on Vercel (see @sparticuz/chromium + puppeteer docs).
-      headless: isVercel ? chromium.headless : true,
-      executablePath,
-      args,
-      defaultViewport: isVercel ? chromium.defaultViewport : { width: 1280, height: 1600 },
-      timeout: isVercel ? 120_000 : 30_000,
+    browser = await launchPdfBrowser({
+      defaultViewport: isVercelPdfRuntime() ? undefined : { width: 1280, height: 1600 },
+      timeout: isVercelPdfRuntime() ? 120_000 : 30_000,
     })
     const page = await browser.newPage()
     try {
@@ -216,6 +149,8 @@ export async function renderHtmlToPdfBuffer(
       await page.close().catch(() => {})
     }
   } finally {
-    await browser?.close().catch(() => {})
+    if (browser) {
+      await browser.close().catch(() => {})
+    }
   }
 }

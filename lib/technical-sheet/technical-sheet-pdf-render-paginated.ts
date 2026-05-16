@@ -1,11 +1,9 @@
-import chromium from "@sparticuz/chromium"
-import puppeteer from "puppeteer-core"
 import {
   getTechnicalSheetPdfPageOptions,
   renderHtmlToPdfBuffer,
-  resolveChromiumExecutablePathForPdf,
   waitForTechnicalSheetPdfDocumentAssets,
 } from "@/lib/technical-sheet/html-to-pdf-chromium"
+import { launchPdfBrowser } from "@/lib/pdf/launch-pdf-browser"
 import {
   TECHNICAL_SHEET_CONTENT_AVAILABLE_HEIGHT_PX,
   TECHNICAL_SHEET_CONTENT_INNER_WIDTH_PX,
@@ -16,10 +14,6 @@ import {
   type TechnicalSheetPageHeaderFields,
 } from "@/lib/technical-sheet/technical-sheet-page-shell"
 import { ensureTechnicalSheetPdfDocument } from "@/lib/technical-sheet/wrap-technical-sheet-html-for-pdf"
-
-function isVercelRuntime(): boolean {
-  return Boolean(process.env.VERCEL || process.env.VERCEL_ENV)
-}
 
 /**
  * PDF con hojas Letter reales: mide `<article>` en Chromium, parte en `.technical-sheet-page`
@@ -42,18 +36,11 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
     `${TECHNICAL_SHEET_MULTI_PAGE_STYLES}<div class="technical-sheet-measure-root" style="width:816px;margin:0 auto;background:#fff">${interpolatedFragment}</div>`
   )
 
-  const executablePath = await resolveChromiumExecutablePathForPdf()
-  const isVercel = isVercelRuntime()
-  const args = isVercel ? chromium.args : ["--no-sandbox", "--disable-setuid-sandbox"]
-
   let browser: import("puppeteer-core").Browser | undefined
   try {
-    browser = await puppeteer.launch({
-      headless: isVercel ? chromium.headless : true,
-      executablePath,
-      args,
-      defaultViewport: isVercel ? chromium.defaultViewport : { width: 1280, height: 1600 },
-      timeout: isVercel ? 120_000 : 30_000,
+    browser = await launchPdfBrowser({
+      defaultViewport: { width: 1280, height: 1600 },
+      timeout: 120_000,
     })
     const page = await browser.newPage()
     try {
@@ -194,6 +181,8 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
       await page.close().catch(() => {})
     }
   } finally {
-    await browser?.close().catch(() => {})
+    if (browser) {
+      await browser.close().catch(() => {})
+    }
   }
 }

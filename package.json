@@ -2,9 +2,13 @@
   "name": "ats-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "node --max-http-header-size=65536 ./node_modules/next/dist/bin/next dev",
-    "build": "next build --webpack",
+    "postinstall": "node scripts/create-chromium-pack.mjs",
+    "build": "node scripts/create-chromium-pack.mjs && next build --webpack",
     "start": "node --max-http-header-size=65536 ./node_modules/next/dist/bin/next start",
     "lint": "eslint",
     "spellcheck": "cspell lint \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" --no-progress",
@@ -19,7 +23,7 @@
     "migrate:interview-status-codes": "node scripts/migrate-interview-status-codes.mjs"
   },
   "dependencies": {
-    "@sparticuz/chromium": "^131.0.1",
+    "@sparticuz/chromium-min": "^131.0.1",
     "lucide-react": "^0.564.0",
     "next": "16.1.6",
     "pdfkit": "^0.18.0",
@@ -30,6 +34,7 @@
     "recharts": "^3.8.1"
   },
   "devDependencies": {
+    "@sparticuz/chromium": "^131.0.1",
     "@cspell/dict-es-es": "^3.0.8",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
@@ -45,6 +50,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "jsdom": "^29.0.0",
+    "puppeteer": "^24.43.1",
     "tailwindcss": "^4",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
