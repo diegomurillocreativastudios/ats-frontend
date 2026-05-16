@@ -1,4 +1,6 @@
 import type { Browser, LaunchOptions } from "puppeteer-core"
+import { createPdfDebugLogger, timedStep } from "@/lib/pdf/pdf-debug-log"
+import { validateChromiumPackUrl } from "@/lib/pdf/validate-chromium-pack"
 
 /**
  * Chromium empaquetado para Vercel serverless (@sparticuz/chromium-min + chromium-pack.tar).
@@ -8,8 +10,12 @@ import type { Browser, LaunchOptions } from "puppeteer-core"
  * en el proyecto Vercel (hay reportes de incompatibilidad con binarios de Chromium).
  */
 
+const EXECUTABLE_PATH_TIMEOUT_MS = 45_000
+const LAUNCH_TIMEOUT_MS = 20_000
+
 let cachedExecutablePath: string | null = null
-let downloadPromise: Promise<string> | null = null
+let executablePathPromise: Promise<string> | null = null
+let packValidated = false
 
 export function isVercelPdfRuntime(): boolean {
   return process.env.VERCEL === "1" || Boolean(process.env.VERCEL)
@@ -45,28 +51,53 @@ export function resolveChromiumPackUrl(): string {
   )
 }
 
-async function getVercelChromiumExecutablePath(): Promise<string> {
-  if (cachedExecutablePath) return cachedExecutablePath
-
-  if (!downloadPromise) {
-    const chromium = await import("@sparticuz/chromium-min")
-    const packUrl = resolveChromiumPackUrl()
-    chromium.default.setGraphicsMode = false
-
-    downloadPromise = chromium.default
-      .executablePath(packUrl)
-      .then((path) => {
-        cachedExecutablePath = path
-        console.log("[pdf-chromium] executablePath", path)
-        return path
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label} excedió ${ms}ms`))
+    }, ms)
+    promise
+      .then((value) => {
+        clearTimeout(timer)
+        resolve(value)
       })
       .catch((error: unknown) => {
-        downloadPromise = null
-        throw error
+        clearTimeout(timer)
+        reject(error)
       })
+  })
+}
+
+async function getCachedExecutablePath(
+  chromiumPackUrl: string,
+  log: ReturnType<typeof createPdfDebugLogger>
+): Promise<string> {
+  if (cachedExecutablePath) {
+    log("chromium.executablePath: cache hit (memoria)")
+    return cachedExecutablePath
   }
 
-  return downloadPromise
+  if (!executablePathPromise) {
+    executablePathPromise = timedStep("chromium.executablePath", async () => {
+      log("chromium.executablePath: inicio (descarga/extracción del .tar)")
+      const chromium = await import("@sparticuz/chromium-min")
+      chromium.default.setGraphicsMode = false
+
+      const path = await withTimeout(
+        chromium.default.executablePath(chromiumPackUrl),
+        EXECUTABLE_PATH_TIMEOUT_MS,
+        "chromium.executablePath"
+      )
+      cachedExecutablePath = path
+      log("chromium.executablePath: listo", { path })
+      return path
+    }).catch((error: unknown) => {
+      executablePathPromise = null
+      throw error
+    })
+  }
+
+  return executablePathPromise
 }
 
 export async function getPdfChromiumLaunchArgs(): Promise<string[]> {
@@ -80,30 +111,46 @@ export async function getPdfChromiumLaunchArgs(): Promise<string[]> {
 export async function launchPdfBrowser(
   options?: Pick<LaunchOptions, "defaultViewport" | "timeout">
 ): Promise<Browser> {
+  const log = createPdfDebugLogger("chromium")
   const isVercel = isVercelPdfRuntime()
-  console.log("[pdf-chromium] isVercel", isVercel)
+  log("launchPdfBrowser: inicio", { isVercel })
 
   if (!isVercel) {
-    const puppeteer = await import(/* webpackIgnore: true */ "puppeteer")
-    return puppeteer.default.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      ...options,
+    return timedStep("puppeteer.launch (local)", async () => {
+      const puppeteer = await import(/* webpackIgnore: true */ "puppeteer")
+      return puppeteer.default.launch({
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        ...options,
+      })
     })
   }
 
-  const packUrl = resolveChromiumPackUrl()
-  console.log("[pdf-chromium] chromiumPackUrl", packUrl)
+  const chromiumPackUrl = resolveChromiumPackUrl()
+  log("resolveChromiumPackUrl", { chromiumPackUrl })
+
+  if (!packValidated) {
+    await validateChromiumPackUrl(chromiumPackUrl, (step, extra) => log(step, extra))
+    packValidated = true
+  } else {
+    log("validateChromiumPack: skip (instancia caliente)")
+  }
+
+  const executablePath = await getCachedExecutablePath(chromiumPackUrl, log)
 
   const puppeteerCore = await import("puppeteer-core")
   const chromium = await import("@sparticuz/chromium-min")
-  const executablePath = await getVercelChromiumExecutablePath()
 
-  return puppeteerCore.default.launch({
-    args: chromium.default.args,
-    executablePath,
-    headless: true,
-    defaultViewport: options?.defaultViewport ?? chromium.default.defaultViewport,
-    timeout: options?.timeout ?? 120_000,
+  return timedStep("puppeteer.launch", async () => {
+    log("puppeteer.launch: antes")
+    const browser = await puppeteerCore.default.launch({
+      args: chromium.default.args,
+      executablePath,
+      headless: true,
+      defaultViewport: options?.defaultViewport ?? chromium.default.defaultViewport,
+      timeout: options?.timeout ?? LAUNCH_TIMEOUT_MS,
+    })
+    log("puppeteer.launch: después")
+    return browser
   })
 }
