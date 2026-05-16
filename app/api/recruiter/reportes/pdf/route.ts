@@ -1,18 +1,16 @@
 /**
  * PDF del contenido visible del reporte RRHH: Chromium (`page.pdf`) sobre HTML armado en servidor
- * (fragmento del `<main>` del cliente + mismas hojas de estilo que la app).
+ * (fragmento del `<main>` del cliente + CSS inline / hojas de estilo).
  */
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { fetchStylesheetsTextForPdf } from "@/lib/reportes/fetch-report-stylesheets-for-pdf"
-import {
-  renderHtmlToPdfBuffer,
-  type PdfPipelinePhaseName,
-} from "@/lib/technical-sheet/html-to-pdf-chromium"
 import { buildReportViewPdfHtmlDocument } from "@/lib/reportes/build-report-view-pdf-html"
+import { renderReportViewPdfBuffer } from "@/lib/reportes/render-report-view-pdf-buffer"
 
 export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 export const maxDuration = 60
 
 const MAX_FRAGMENT_CHARS = 2_500_000
@@ -20,108 +18,12 @@ const MAX_INLINE_CSS_CHARS = 400_000
 const MAX_STYLESHEETS = 60
 const RESERVE_FOR_TAIL_CSS = 6_000
 
-const FIRST_SET_CONTENT_TIMEOUT_MS = 25_000
-/** Un solo intento en Vercel: evita 2× launch + 60s de `maxDuration`. CSS ya va inline; sin red de assets. */
-const VERCEL_SET_CONTENT_TIMEOUT_MS = 42_000
-const VERCEL_IMAGE_WAIT_MS = 3_000
-
-function logReportPdfPhase(name: string, durationMs: number, extra?: Record<string, unknown>) {
-  const rounded = Math.round(durationMs)
-  if (extra && Object.keys(extra).length > 0) {
-    console.log(`[reportes-view-pdf] phase ${name}=${rounded}ms`, extra)
-    return
-  }
-  console.log(`[reportes-view-pdf] phase ${name}=${rounded}ms`)
-}
-
-/**
- * Igual que la ficha técnica en Vercel: evitar depender de subrecursos frágiles en headless.
- * Aquí no hay PDFKit para HTML arbitrario; en su lugar se inyecta el CSS descargado en el servidor
- * (sin `<link>`), y si falla el primer intento se reintenta con otra política de navegación.
- * En **Vercel**: `domcontentloaded`, CSS inline, sin subrecursos por red (`blockExternalResources`).
- * En local: `load` con Chrome del sistema.
- */
-async function renderReportViewPdfBuffer(fullHtml: string): Promise<Buffer> {
-  const isVercelDeploy = Boolean(process.env.VERCEL)
-  const pdf = {
-    printBackground: true,
-    preferCSSPageSize: true,
-    margin: { top: "0", right: "0", bottom: "0", left: "0" },
-  }
-  const base = {
-    mediaType: "screen" as const,
-    viewport: { width: 1440, height: 900 },
-    pdf,
-    ...(isVercelDeploy
-      ? {
-          blockExternalResources: true as const,
-          imageWaitMs: VERCEL_IMAGE_WAIT_MS,
-        }
-      : {}),
-  }
-
-  const runChromiumAttempt = async (params: {
-    waitUntil: "load" | "domcontentloaded"
-    timeoutMs: number
-    attemptWallLabel: string
-    renderLabel: string
-    pdfLogSuffix: string
-  }) => {
-    let setContentMs = 0
-    let waitAssetsMs = 0
-    let pagePdfMs = 0
-    const wallStart = performance.now()
-    const buf = await renderHtmlToPdfBuffer(fullHtml, {
-      ...base,
-      setContent: { waitUntil: params.waitUntil, timeoutMs: params.timeoutMs },
-      onPdfPipelinePhase: (phase: PdfPipelinePhaseName, durationMs: number) => {
-        if (phase === "setContent") setContentMs = durationMs
-        if (phase === "waitAssets") waitAssetsMs = durationMs
-        if (phase === "pagePdf") pagePdfMs = durationMs
-      },
-    })
-    const wallMs = performance.now() - wallStart
-    logReportPdfPhase(params.attemptWallLabel, wallMs, {
-      includesBrowserLaunch: true,
-    })
-    logReportPdfPhase(params.renderLabel, setContentMs + waitAssetsMs, {
-      setContentMs: Math.round(setContentMs),
-      waitAssetsMs: Math.round(waitAssetsMs),
-    })
-    logReportPdfPhase(`page.pdf ${params.pdfLogSuffix}`, pagePdfMs)
-    return buf
-  }
-
-  if (isVercelDeploy) {
-    return await runChromiumAttempt({
-      waitUntil: "domcontentloaded",
-      timeoutMs: VERCEL_SET_CONTENT_TIMEOUT_MS,
-      attemptWallLabel: "firstChromiumWall",
-      renderLabel: "primerRenderChromium",
-      pdfLogSuffix: "(vercel attempt)",
-    })
-  }
-
-  return await runChromiumAttempt({
-    waitUntil: "load",
-    timeoutMs: FIRST_SET_CONTENT_TIMEOUT_MS,
-    attemptWallLabel: "firstChromiumWall",
-    renderLabel: "primerRenderChromium",
-    pdfLogSuffix: "(first attempt)",
-  })
-}
-
 function withHttpsOrigin(raw: string): string {
   const trimmed = raw.replace(/\/$/, "")
   if (/^https?:\/\//i.test(trimmed)) return trimmed
   return `https://${trimmed.replace(/^\/\//, "")}`
 }
 
-/**
- * Origen público para `<base href>` en el HTML del PDF.
- * En Vercel (preview/producción) prioriza la URL del deployment (`VERCEL_*`) para que
- * rutas relativas del fragmento no apunten a otro host si `NEXT_PUBLIC_APP_URL` es fijo (p. ej. prod).
- */
 function resolvePublicOrigin(): string {
   if (process.env.VERCEL) {
     const branch = process.env.VERCEL_BRANCH_URL?.trim()
@@ -161,27 +63,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "No autorizado" }, { status: 401 })
     }
 
-    const keepLinkedSheetsEnv = process.env.REPORT_PDF_KEEP_STYLESHEET_LINKS === "1"
-    const exposeErrorDetailEnv = process.env.REPORT_PDF_EXPOSE_ERROR_DETAIL === "1"
-    console.log("[reportes-view-pdf] pdfDebugEnv", {
-      REPORT_PDF_KEEP_STYLESHEET_LINKS: process.env.REPORT_PDF_KEEP_STYLESHEET_LINKS ?? "(unset)",
-      REPORT_PDF_EXPOSE_ERROR_DETAIL: process.env.REPORT_PDF_EXPOSE_ERROR_DETAIL ?? "(unset)",
-      VERCEL_ENV: process.env.VERCEL_ENV ?? "(unset)",
-      keepLinkedSheetsEffective: keepLinkedSheetsEnv,
-      exposeErrorDetailEffective:
-        process.env.NODE_ENV === "development" ||
-        exposeErrorDetailEnv ||
-        process.env.VERCEL_ENV === "preview",
-    })
-
     let body: unknown
-    const parseJsonStarted = performance.now()
     try {
       body = await request.json()
     } catch {
       return NextResponse.json({ message: "JSON inválido" }, { status: 400 })
     }
-    logReportPdfPhase("parseJson", performance.now() - parseJsonStarted)
 
     const record = body as Record<string, unknown>
     const fragmentHtml = typeof record.fragmentHtml === "string" ? record.fragmentHtml : ""
@@ -208,63 +95,44 @@ export async function POST(request: Request) {
         : ""
 
     const origin = resolvePublicOrigin()
+    const keepLinkedSheets = process.env.REPORT_PDF_KEEP_STYLESHEET_LINKS === "1"
 
-    const keepLinkedSheets = keepLinkedSheetsEnv
     let inlineHeadCss = inlineHeadCssRaw
     let stylesheetHrefsForDocument = stylesheetHrefs
 
-    const fetchCssStarted = performance.now()
     if (!keepLinkedSheets && stylesheetHrefs.length > 0) {
       const budget = Math.max(0, MAX_INLINE_CSS_CHARS - inlineHeadCssRaw.length - RESERVE_FOR_TAIL_CSS)
       const fetched = await fetchStylesheetsTextForPdf(stylesheetHrefs, budget)
       inlineHeadCss = `${inlineHeadCssRaw}\n${fetched}`.slice(0, MAX_INLINE_CSS_CHARS)
       stylesheetHrefsForDocument = []
     }
-    const fetchCssMs = performance.now() - fetchCssStarted
-    logReportPdfPhase("fetchStylesheetsTextForPdf", fetchCssMs, {
-      skipped: keepLinkedSheets || stylesheetHrefs.length === 0,
-    })
 
-    const buildHtmlStarted = performance.now()
     const fullHtml = buildReportViewPdfHtmlDocument({
       baseOrigin: origin,
       fragmentHtml,
       stylesheetHrefs: stylesheetHrefsForDocument,
       inlineHeadCss,
     })
-    logReportPdfPhase("buildReportViewPdfHtmlDocument", performance.now() - buildHtmlStarted)
 
-    console.log("[reportes-view-pdf] sizes", {
-      fragmentHtmlLength: fragmentHtml.length,
-      inlineHeadCssLength: inlineHeadCss.length,
-      stylesheetHrefsLength: stylesheetHrefs.length,
-      fullHtmlLength: fullHtml.length,
-    })
+    const pdfBuffer = await renderReportViewPdfBuffer(fullHtml)
+    const safeFilename = sanitizePdfStem(record.filename)
 
-    const buffer = await renderReportViewPdfBuffer(fullHtml)
-
-    const stem = sanitizePdfStem(record.filename)
-    const filenameAscii = `${stem}.pdf`
-
-    return new NextResponse(new Uint8Array(buffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filenameAscii}"`,
+        "Content-Disposition": `attachment; filename="${safeFilename}.pdf"`,
         "Cache-Control": "no-store",
       },
     })
   } catch (e: unknown) {
     const err = e instanceof Error ? e : new Error(String(e))
-    console.error("[reportes-view-pdf]", err.stack ?? err.message)
-    const exposeDetail =
-      process.env.NODE_ENV === "development" ||
-      process.env.REPORT_PDF_EXPOSE_ERROR_DETAIL === "1" ||
-      process.env.VERCEL_ENV === "preview"
+    console.error("PDF_GENERATION_ERROR", err)
+    const hideDetail = process.env.REPORT_PDF_HIDE_ERROR_DETAIL === "1"
     return NextResponse.json(
       {
         message: "Error al generar el PDF del reporte.",
-        ...(exposeDetail ? { detail: err.message } : {}),
+        ...(hideDetail ? {} : { detail: err.message }),
       },
       { status: 500 }
     )
