@@ -21,7 +21,9 @@ const MAX_STYLESHEETS = 60
 const RESERVE_FOR_TAIL_CSS = 6_000
 
 const FIRST_SET_CONTENT_TIMEOUT_MS = 25_000
-const FALLBACK_SET_CONTENT_TIMEOUT_MS = 20_000
+/** Un solo intento en Vercel: evita 2× launch + 60s de `maxDuration`. CSS ya va inline; sin red de assets. */
+const VERCEL_SET_CONTENT_TIMEOUT_MS = 42_000
+const VERCEL_IMAGE_WAIT_MS = 3_000
 
 function logReportPdfPhase(name: string, durationMs: number, extra?: Record<string, unknown>) {
   const rounded = Math.round(durationMs)
@@ -35,10 +37,12 @@ function logReportPdfPhase(name: string, durationMs: number, extra?: Record<stri
 /**
  * Igual que la ficha técnica en Vercel: evitar depender de subrecursos frágiles en headless.
  * Aquí no hay PDFKit para HTML arbitrario; en su lugar se inyecta el CSS descargado en el servidor
- * (sin `<link>`), y si falla el primer intento se reintenta con `domcontentloaded`.
- * Timeouts acotados respecto a `maxDuration` (60s) para dejar margen al fallback.
+ * (sin `<link>`), y si falla el primer intento se reintenta con otra política de navegación.
+ * En **Vercel**: `domcontentloaded`, CSS inline, sin subrecursos por red (`blockExternalResources`).
+ * En local: `load` con Chrome del sistema.
  */
 async function renderReportViewPdfBuffer(fullHtml: string): Promise<Buffer> {
+  const isVercelDeploy = Boolean(process.env.VERCEL)
   const pdf = {
     printBackground: true,
     preferCSSPageSize: true,
@@ -48,6 +52,12 @@ async function renderReportViewPdfBuffer(fullHtml: string): Promise<Buffer> {
     mediaType: "screen" as const,
     viewport: { width: 1440, height: 900 },
     pdf,
+    ...(isVercelDeploy
+      ? {
+          blockExternalResources: true as const,
+          imageWaitMs: VERCEL_IMAGE_WAIT_MS,
+        }
+      : {}),
   }
 
   const runChromiumAttempt = async (params: {
@@ -82,28 +92,23 @@ async function renderReportViewPdfBuffer(fullHtml: string): Promise<Buffer> {
     return buf
   }
 
-  try {
-    return await runChromiumAttempt({
-      waitUntil: "load",
-      timeoutMs: FIRST_SET_CONTENT_TIMEOUT_MS,
-      attemptWallLabel: "firstChromiumWall",
-      renderLabel: "primerRenderChromium",
-      pdfLogSuffix: "(first attempt)",
-    })
-  } catch (first) {
-    if (!process.env.VERCEL) throw first
-    console.error(
-      "[reportes-view-pdf] Chromium load failed; retry with domcontentloaded",
-      first instanceof Error ? first.message : first
-    )
+  if (isVercelDeploy) {
     return await runChromiumAttempt({
       waitUntil: "domcontentloaded",
-      timeoutMs: FALLBACK_SET_CONTENT_TIMEOUT_MS,
-      attemptWallLabel: "fallbackChromiumWall",
-      renderLabel: "fallbackRenderChromium",
-      pdfLogSuffix: "(fallback attempt)",
+      timeoutMs: VERCEL_SET_CONTENT_TIMEOUT_MS,
+      attemptWallLabel: "firstChromiumWall",
+      renderLabel: "primerRenderChromium",
+      pdfLogSuffix: "(vercel attempt)",
     })
   }
+
+  return await runChromiumAttempt({
+    waitUntil: "load",
+    timeoutMs: FIRST_SET_CONTENT_TIMEOUT_MS,
+    attemptWallLabel: "firstChromiumWall",
+    renderLabel: "primerRenderChromium",
+    pdfLogSuffix: "(first attempt)",
+  })
 }
 
 function withHttpsOrigin(raw: string): string {
@@ -215,7 +220,8 @@ export async function POST(request: Request) {
       inlineHeadCss = `${inlineHeadCssRaw}\n${fetched}`.slice(0, MAX_INLINE_CSS_CHARS)
       stylesheetHrefsForDocument = []
     }
-    logReportPdfPhase("fetchStylesheetsTextForPdf", performance.now() - fetchCssStarted, {
+    const fetchCssMs = performance.now() - fetchCssStarted
+    logReportPdfPhase("fetchStylesheetsTextForPdf", fetchCssMs, {
       skipped: keepLinkedSheets || stylesheetHrefs.length === 0,
     })
 

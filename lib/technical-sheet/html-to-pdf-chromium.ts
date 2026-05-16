@@ -59,8 +59,11 @@ export function getTechnicalSheetPdfMediaType(): "screen" | "print" {
  * Espera fuentes del documento y carga de imágenes antes de rasterizar a PDF.
  * Exportada para pruebas unitarias con `Page` mockeado.
  */
-export async function waitForTechnicalSheetPdfDocumentAssets(page: Page): Promise<void> {
-  await page.evaluate(async (imageWaitMs: number) => {
+export async function waitForTechnicalSheetPdfDocumentAssets(
+  page: Page,
+  imageWaitMs: number = PDF_IMAGE_WAIT_MS
+): Promise<void> {
+  await page.evaluate(async (waitMs: number) => {
     if (document.fonts?.ready) await document.fonts.ready
 
     const imgs = Array.from(document.images)
@@ -74,7 +77,7 @@ export async function waitForTechnicalSheetPdfDocumentAssets(page: Page): Promis
           window.clearTimeout(tid)
           resolve()
         }
-        const tid = window.setTimeout(done, imageWaitMs)
+        const tid = window.setTimeout(done, waitMs)
         img.addEventListener("load", done, { once: true })
         img.addEventListener("error", done, { once: true })
       })
@@ -90,7 +93,7 @@ export async function waitForTechnicalSheetPdfDocumentAssets(page: Page): Promis
         }
       })
     )
-  }, PDF_IMAGE_WAIT_MS)
+  }, imageWaitMs)
 }
 
 const TECHNICAL_SHEET_PDF_OPTIONS = {
@@ -121,7 +124,8 @@ export async function applyTechnicalSheetPdfPipeline(
   mediaType: "screen" | "print",
   pdfOverrides?: PDFOptions,
   setContentOptions?: PdfSetContentOptions,
-  onPdfPipelinePhase?: (phase: PdfPipelinePhaseName, durationMs: number) => void
+  onPdfPipelinePhase?: (phase: PdfPipelinePhaseName, durationMs: number) => void,
+  imageWaitMs?: number
 ): Promise<Buffer> {
   await page.emulateMediaType(mediaType)
   let stepStart = performance.now()
@@ -131,7 +135,7 @@ export async function applyTechnicalSheetPdfPipeline(
   })
   onPdfPipelinePhase?.("setContent", performance.now() - stepStart)
   stepStart = performance.now()
-  await waitForTechnicalSheetPdfDocumentAssets(page)
+  await waitForTechnicalSheetPdfDocumentAssets(page, imageWaitMs)
   onPdfPipelinePhase?.("waitAssets", performance.now() - stepStart)
   stepStart = performance.now()
   const buf = await page.pdf({
@@ -142,12 +146,34 @@ export async function applyTechnicalSheetPdfPipeline(
   return Buffer.from(buf)
 }
 
+/** En Vercel, el CSS del reporte ya va inyectado; abortar red evita cuelgues en `load`/imágenes. */
+export async function enablePdfPageBlockExternalResources(page: Page): Promise<void> {
+  await page.setRequestInterception(true)
+  page.on("request", (request) => {
+    const url = request.url()
+    if (url === "about:blank" || url.startsWith("data:")) {
+      void request.continue()
+      return
+    }
+    const type = request.resourceType()
+    if (type === "document" || type === "script") {
+      void request.continue()
+      return
+    }
+    void request.abort()
+  })
+}
+
 export interface RenderHtmlToPdfBufferOptions {
   mediaType?: "screen" | "print"
   pdf?: PDFOptions
   viewport?: { width: number; height: number }
   setContent?: PdfSetContentOptions
   onPdfPipelinePhase?: (phase: PdfPipelinePhaseName, durationMs: number) => void
+  /** Tiempo máximo por imagen en `waitForTechnicalSheetPdfDocumentAssets` (ms). */
+  imageWaitMs?: number
+  /** Aborta imágenes/fuentes/hojas por red (útil con CSS inline en reportes). */
+  blockExternalResources?: boolean
 }
 
 export async function renderHtmlToPdfBuffer(
@@ -174,13 +200,17 @@ export async function renderHtmlToPdfBuffer(
       if (options?.viewport) {
         await page.setViewport(options.viewport)
       }
+      if (options?.blockExternalResources) {
+        await enablePdfPageBlockExternalResources(page)
+      }
       return await applyTechnicalSheetPdfPipeline(
         page,
         html,
         options?.mediaType ?? "print",
         options?.pdf,
         options?.setContent,
-        options?.onPdfPipelinePhase
+        options?.onPdfPipelinePhase,
+        options?.imageWaitMs
       )
     } finally {
       await page.close().catch(() => {})
