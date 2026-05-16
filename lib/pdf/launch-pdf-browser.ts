@@ -57,7 +57,7 @@ async function getVercelChromiumExecutablePath(): Promise<string> {
       .executablePath(packUrl)
       .then((path) => {
         cachedExecutablePath = path
-        console.log("[pdf-chromium] executablePath", path, "pack", packUrl)
+        console.log("[pdf-chromium] executablePath", path)
         return path
       })
       .catch((error: unknown) => {
@@ -80,14 +80,20 @@ export async function getPdfChromiumLaunchArgs(): Promise<string[]> {
 export async function launchPdfBrowser(
   options?: Pick<LaunchOptions, "defaultViewport" | "timeout">
 ): Promise<Browser> {
-  if (!isVercelPdfRuntime()) {
-    const puppeteer = await import("puppeteer")
+  const isVercel = isVercelPdfRuntime()
+  console.log("[pdf-chromium] isVercel", isVercel)
+
+  if (!isVercel) {
+    const puppeteer = await import(/* webpackIgnore: true */ "puppeteer")
     return puppeteer.default.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
       ...options,
     })
   }
+
+  const packUrl = resolveChromiumPackUrl()
+  console.log("[pdf-chromium] chromiumPackUrl", packUrl)
 
   const puppeteerCore = await import("puppeteer-core")
   const chromium = await import("@sparticuz/chromium-min")
