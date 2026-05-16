@@ -1,6 +1,9 @@
 import type { Browser, LaunchOptions } from "puppeteer-core"
 import { createPdfDebugLogger, timedStep } from "@/lib/pdf/pdf-debug-log"
-import { validateChromiumPackUrl } from "@/lib/pdf/validate-chromium-pack"
+import {
+  redactChromiumPackUrl,
+  validateChromiumPackUrl,
+} from "@/lib/pdf/validate-chromium-pack"
 
 /**
  * Chromium empaquetado para Vercel serverless (@sparticuz/chromium-min + chromium-pack.tar).
@@ -127,7 +130,7 @@ export async function launchPdfBrowser(
   }
 
   const chromiumPackUrl = resolveChromiumPackUrl()
-  log("resolveChromiumPackUrl", { chromiumPackUrl })
+  log("resolveChromiumPackUrl", { chromiumPackUrl: redactChromiumPackUrl(chromiumPackUrl) })
 
   if (!packValidated) {
     await validateChromiumPackUrl(chromiumPackUrl, (step, extra) => log(step, extra))

@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server"
 import { createPdfDebugLogger } from "@/lib/pdf/pdf-debug-log"
 import { resolveChromiumPackUrl } from "@/lib/pdf/launch-pdf-browser"
+import { redactChromiumPackUrl } from "@/lib/pdf/validate-chromium-pack"
 import { PdfTimingCollector, setActivePdfTiming } from "@/lib/pdf/pdf-timing"
 import { renderReportViewPdfBuffer } from "@/lib/reportes/render-report-view-pdf-buffer"
 
@@ -36,7 +37,7 @@ export async function GET(request: Request) {
     let packUrl: string
     try {
       packUrl = resolveChromiumPackUrl()
-      log("CHROMIUM_PACK_URL", { packUrl })
+      log("CHROMIUM_PACK_URL", { packUrl: redactChromiumPackUrl(packUrl) })
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error)
       return NextResponse.json(
@@ -60,7 +61,7 @@ export async function GET(request: Request) {
     if (jsonFormat) {
       return NextResponse.json({
         ok: true,
-        packUrl,
+        packUrl: redactChromiumPackUrl(packUrl),
         pdfBytes: pdfBuffer.length,
         totalMs,
         maxDurationConfigured: 60,
