@@ -56,11 +56,7 @@ function getRoleHomePath(role: "candidate" | "recruiter" | null): string {
   return PORTAL_SELECTOR
 }
 
-/** Chromium PDF pack (Vercel): debe ser público sin cookie de sesión. */
-const CHROMIUM_PACK_PATH = "/chromium-pack.tar"
-
 const isPublicPath = (pathname: string) => {
-  if (pathname === CHROMIUM_PACK_PATH) return true
   if (pathname.startsWith("/api/")) return true
   if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) return true
   return publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))
@@ -151,6 +147,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|chromium-pack\\.tar|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|tar)$).*)",
+    "/((?!_next/static|_next/image|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)$).*)",
   ],
 }

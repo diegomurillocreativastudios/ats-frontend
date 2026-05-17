@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react"
 import { FileDown, Loader2 } from "lucide-react"
 import { getApiErrorMessage } from "@/lib/api-error"
-import { downloadRecruiterReportViewPdf } from "@/lib/api/reportes-view-pdf"
+import { downloadReportViewAsPdf } from "@/lib/pdf/download-report-view-as-pdf"
 
 export interface ReportesViewPdfButtonProps {
   disabled?: boolean
@@ -28,7 +28,7 @@ export function ReportesViewPdfButton({
     setBusy(true)
     setError(null)
     try {
-      await downloadRecruiterReportViewPdf(filenameBase)
+      await downloadReportViewAsPdf(filenameBase)
     } catch (err: unknown) {
       setError(getApiErrorMessage(err) || "No se pudo generar el PDF.")
     } finally {
@@ -47,7 +47,7 @@ export function ReportesViewPdfButton({
         className={[baseButtonClass, className].filter(Boolean).join(" ")}
         aria-busy={busy || undefined}
         aria-label="Descargar PDF del reporte"
-        title="Genera un PDF en el servidor con el mismo HTML que ves en pantalla."
+        title="Captura el reporte visible en pantalla y lo descarga como PDF en tu navegador."
       >
         {busy ? (
           <Loader2 className="h-4 w-4 shrink-0 animate-spin text-vo-purple" aria-hidden />

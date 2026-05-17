@@ -92,9 +92,8 @@ function packBlocks(blocks: TechnicalSheetBlock[], maxPx: number): string[][] {
 
 /**
  * Parte el contenido de `<article>` en varios HTML de artículo (uno por hoja),
- * midiendo en el DOM real (iframe o Puppeteer).
+ * midiendo en el DOM real (iframe de vista previa).
  *
- * SYNC: misma lógica inlinada en `technical-sheet-pdf-render-paginated.ts` dentro de `page.evaluate`.
  * `maxContentPx` debe coincidir con TECHNICAL_SHEET_CONTENT_AVAILABLE_HEIGHT_PX (altura útil CSS).
  */
 export const paginateTechnicalSheetArticleToPageBodies = function (

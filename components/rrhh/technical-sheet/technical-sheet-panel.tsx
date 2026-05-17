@@ -4,11 +4,9 @@ import type { ReactNode } from "react"
 import { useCallback, useEffect, useId, useRef, useState } from "react"
 import { FileDown, Loader2 } from "lucide-react"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
-import {
-  downloadTechnicalSheetPdfFromNextRoute,
-  fetchTechnicalSheetJson,
-  slugifyVacancyForFilename,
-} from "@/lib/api/technical-sheet"
+import { fetchTechnicalSheetJson, slugifyVacancyForFilename } from "@/lib/api/technical-sheet"
+import { downloadElementAsPdf } from "@/lib/pdf/download-element-as-pdf"
+import { resolveTechnicalSheetPdfElement } from "@/lib/pdf/resolve-technical-sheet-pdf-element"
 import { paginateTechnicalSheetArticleToPageBodies } from "@/lib/technical-sheet/paginate-technical-sheet-article-dom"
 import {
   buildTechnicalSheetPageHtml,
@@ -185,23 +183,32 @@ export function TechnicalSheetPanel({
   }, [enabled, variant, loading, error, paginatedSrcDoc])
 
   const handleDownloadPdf = useCallback(async () => {
-    const vid = vacancyId?.trim()
-    const cid = candidateProfileId?.trim()
-    if (!vid || !cid || !templateHtml) return
+    if (!templateHtml || !panelRef.current) return
+    const captureTarget = resolveTechnicalSheetPdfElement(panelRef.current)
+    if (!captureTarget) {
+      setPdfActionError(m.pdfExportFailed)
+      return
+    }
     setPdfActionError(null)
     setPdfBusy(true)
     try {
       const slug = slugifyVacancyForFilename(vacancyTitle ?? "vacante")
+      const cid = candidateProfileId?.trim() ?? ""
       const name = `ficha-tecnica-${slug}-${cid.slice(0, 8)}.pdf`
-      await downloadTechnicalSheetPdfFromNextRoute(vid, cid, name, {
-        vacancyTitle: vacancyTitle ?? null,
+      await downloadElementAsPdf({
+        element: captureTarget,
+        fileName: name,
+        orientation: "portrait",
+        format: "a4",
+        scale: 2,
+        marginMm: 0,
       })
     } catch {
       setPdfActionError(m.pdfExportFailed)
     } finally {
       setPdfBusy(false)
     }
-  }, [vacancyId, candidateProfileId, templateHtml, vacancyTitle])
+  }, [templateHtml, vacancyTitle, candidateProfileId])
 
   const busy = loading
   const iframeDoc = paginatedSrcDoc ?? templateHtml
@@ -242,6 +249,7 @@ export function TechnicalSheetPanel({
                   void handleDownloadPdf()
                 }}
                 disabled={pdfBusy}
+                data-html2canvas-ignore="true"
                 className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 font-sans text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                 aria-busy={pdfBusy || undefined}
               >
