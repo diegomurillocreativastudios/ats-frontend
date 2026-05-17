@@ -13,9 +13,22 @@ import {
  * en el proyecto Vercel (hay reportes de incompatibilidad con binarios de Chromium).
  */
 
-const EXECUTABLE_PATH_TIMEOUT_MS = 45_000
+const EXECUTABLE_PATH_TIMEOUT_MS_LOCAL = 45_000
+const EXECUTABLE_PATH_TIMEOUT_MS_VERCEL = 120_000
 const LAUNCH_TIMEOUT_MS_LOCAL = 20_000
 const LAUNCH_TIMEOUT_MS_VERCEL = 120_000
+
+/** Tiempo máximo para descargar/extraer chromium-pack.tar (cold start en Vercel suele >45s). */
+export function getChromiumExecutablePathTimeoutMs(): number {
+  const raw = process.env.CHROMIUM_EXECUTABLE_PATH_TIMEOUT_MS?.trim()
+  if (raw) {
+    const n = Number.parseInt(raw, 10)
+    if (Number.isFinite(n) && n > 0) return n
+  }
+  return isVercelPdfRuntime()
+    ? EXECUTABLE_PATH_TIMEOUT_MS_VERCEL
+    : EXECUTABLE_PATH_TIMEOUT_MS_LOCAL
+}
 
 let cachedExecutablePath: string | null = null
 let executablePathPromise: Promise<string> | null = null
@@ -32,22 +45,22 @@ function withHttpsOrigin(raw: string): string {
 }
 
 /**
- * URL pública del tar generado en `public/chromium-pack.tar`.
- * Prioridad: CHROMIUM_PACK_URL → VERCEL_URL → NEXT_PUBLIC_APP_URL.
+ * URL pública del tar en `public/chromium-pack.tar`.
+ * Prioridad: CHROMIUM_PACK_URL → NEXT_PUBLIC_APP_URL (estable) → VERCEL_URL (preview).
  */
 export function resolveChromiumPackUrl(): string {
   const explicit = process.env.CHROMIUM_PACK_URL?.trim()
   if (explicit) return explicit
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim()
+  if (appUrl) {
+    return `${withHttpsOrigin(appUrl)}/chromium-pack.tar`
+  }
+
   const vercelUrl = process.env.VERCEL_URL?.trim()
   if (vercelUrl) {
     const host = vercelUrl.replace(/^https?:\/\//, "")
     return `https://${host}/chromium-pack.tar`
-  }
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim()
-  if (appUrl) {
-    return `${withHttpsOrigin(appUrl)}/chromium-pack.tar`
   }
 
   throw new Error(
@@ -83,13 +96,17 @@ async function getCachedExecutablePath(
 
   if (!executablePathPromise) {
     executablePathPromise = timedStep("chromium.executablePath", async () => {
-      log("chromium.executablePath: inicio (descarga/extracción del .tar)")
+      const timeoutMs = getChromiumExecutablePathTimeoutMs()
+      log("chromium.executablePath: inicio (descarga/extracción del .tar)", {
+        timeoutMs,
+        chromiumPackUrl: redactChromiumPackUrl(chromiumPackUrl),
+      })
       const chromium = await import("@sparticuz/chromium-min")
       chromium.default.setGraphicsMode = false
 
       const path = await withTimeout(
         chromium.default.executablePath(chromiumPackUrl),
-        EXECUTABLE_PATH_TIMEOUT_MS,
+        timeoutMs,
         "chromium.executablePath"
       )
       cachedExecutablePath = path

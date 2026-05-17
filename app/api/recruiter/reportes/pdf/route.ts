@@ -14,7 +14,7 @@ import { renderReportViewPdfBuffer } from "@/lib/reportes/render-report-view-pdf
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
-export const maxDuration = 60
+export const maxDuration = 180
 
 const MAX_FRAGMENT_CHARS = 2_500_000
 const MAX_INLINE_CSS_CHARS = 400_000
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
 
   try {
     log("POST: inicio", {
-      maxDuration: 60,
+      maxDuration: 180,
       runtime: "nodejs",
       vercel: Boolean(process.env.VERCEL),
     })

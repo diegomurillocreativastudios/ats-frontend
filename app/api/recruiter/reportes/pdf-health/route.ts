@@ -11,7 +11,7 @@ import { renderReportViewPdfBuffer } from "@/lib/reportes/render-report-view-pdf
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
-export const maxDuration = 60
+export const maxDuration = 180
 
 const MINIMAL_HTML = `<!DOCTYPE html>
 <html lang="es">
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
   try {
     log("GET: inicio", {
-      maxDuration: 60,
+      maxDuration: 180,
       vercel: Boolean(process.env.VERCEL),
       jsonFormat,
     })
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
         packUrl: redactChromiumPackUrl(packUrl),
         pdfBytes: pdfBuffer.length,
         totalMs,
-        maxDurationConfigured: 60,
+        maxDurationConfigured: 180,
         vercel: Boolean(process.env.VERCEL),
         timings: entries,
       })
