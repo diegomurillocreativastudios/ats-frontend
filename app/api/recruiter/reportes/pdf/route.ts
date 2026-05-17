@@ -7,6 +7,7 @@ import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { createPdfDebugLogger } from "@/lib/pdf/pdf-debug-log"
 import { resolveChromiumPackUrl } from "@/lib/pdf/launch-pdf-browser"
+import { redactChromiumPackUrl } from "@/lib/pdf/validate-chromium-pack"
 import { fetchStylesheetsTextForPdf } from "@/lib/reportes/fetch-report-stylesheets-for-pdf"
 import { buildReportViewPdfHtmlDocument } from "@/lib/reportes/build-report-view-pdf-html"
 import { renderReportViewPdfBuffer } from "@/lib/reportes/render-report-view-pdf-buffer"
@@ -150,7 +151,7 @@ export async function POST(request: Request) {
 
     try {
       const packUrl = resolveChromiumPackUrl()
-      log("CHROMIUM_PACK_URL resuelta", { packUrl })
+      log("CHROMIUM_PACK_URL resuelta", { packUrl: redactChromiumPackUrl(packUrl) })
     } catch (packError: unknown) {
       const message = packError instanceof Error ? packError.message : String(packError)
       log("CHROMIUM_PACK_URL: error", { message })

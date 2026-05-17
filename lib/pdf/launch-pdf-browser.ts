@@ -14,7 +14,8 @@ import {
  */
 
 const EXECUTABLE_PATH_TIMEOUT_MS = 45_000
-const LAUNCH_TIMEOUT_MS = 20_000
+const LAUNCH_TIMEOUT_MS_LOCAL = 20_000
+const LAUNCH_TIMEOUT_MS_VERCEL = 120_000
 
 let cachedExecutablePath: string | null = null
 let executablePathPromise: Promise<string> | null = null
@@ -124,6 +125,7 @@ export async function launchPdfBrowser(
       return puppeteer.default.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        timeout: options?.timeout ?? LAUNCH_TIMEOUT_MS_LOCAL,
         ...options,
       })
     })
@@ -151,7 +153,7 @@ export async function launchPdfBrowser(
       executablePath,
       headless: true,
       defaultViewport: options?.defaultViewport ?? chromium.default.defaultViewport,
-      timeout: options?.timeout ?? LAUNCH_TIMEOUT_MS,
+      timeout: options?.timeout ?? LAUNCH_TIMEOUT_MS_VERCEL,
     })
     log("puppeteer.launch: después")
     return browser

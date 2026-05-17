@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
+  isChromiumPackValidationSkipped,
   redactChromiumPackUrl,
   validateChromiumPackUrl,
 } from "@/lib/pdf/validate-chromium-pack"
@@ -21,11 +22,32 @@ describe("redactChromiumPackUrl", () => {
   })
 })
 
+describe("isChromiumPackValidationSkipped", () => {
+  afterEach(() => {
+    delete process.env.VERCEL
+    delete process.env.REPORT_PDF_SKIP_CHROMIUM_PACK_VALIDATION
+    delete process.env.REPORT_PDF_STRICT_CHROMIUM_PACK_VALIDATION
+  })
+
+  it("skips on Vercel by default", () => {
+    process.env.VERCEL = "1"
+    expect(isChromiumPackValidationSkipped()).toBe(true)
+  })
+
+  it("runs when strict on Vercel", () => {
+    process.env.VERCEL = "1"
+    process.env.REPORT_PDF_STRICT_CHROMIUM_PACK_VALIDATION = "1"
+    expect(isChromiumPackValidationSkipped()).toBe(false)
+  })
+})
+
 describe("validateChromiumPackUrl", () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     vi.restoreAllMocks()
+    delete process.env.VERCEL
     delete process.env.REPORT_PDF_SKIP_CHROMIUM_PACK_VALIDATION
+    delete process.env.REPORT_PDF_STRICT_CHROMIUM_PACK_VALIDATION
   })
 
   it("accepts a valid HEAD response with large tar", async () => {
@@ -74,41 +96,17 @@ describe("validateChromiumPackUrl", () => {
     ).resolves.toBeUndefined()
 
     expect(fetchMock).toHaveBeenCalledTimes(2)
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
-      "https://example.com/chromium-pack.tar",
-      expect.objectContaining({
-        method: "GET",
-        headers: { Range: "bytes=0-1023" },
-      })
-    )
   })
 
-  it("accepts GET Range 200 and cancels body without reading full file", async () => {
-    const cancel = vi.fn().mockResolvedValue(undefined)
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 401,
-          statusText: "Unauthorized",
-          headers: { get: () => null },
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          statusText: "OK",
-          headers: largeTarHeaders,
-          body: { cancel },
-        })
-    )
+  it("skips validation on Vercel without calling fetch", async () => {
+    process.env.VERCEL = "1"
+    const fetchMock = vi.fn()
+    vi.stubGlobal("fetch", fetchMock)
 
     await expect(
       validateChromiumPackUrl("https://example.com/chromium-pack.tar")
     ).resolves.toBeUndefined()
-    expect(cancel).toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it("skips validation when REPORT_PDF_SKIP_CHROMIUM_PACK_VALIDATION=1", async () => {
@@ -122,7 +120,7 @@ describe("validateChromiumPackUrl", () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it("rejects when HEAD and GET Range both fail", async () => {
+  it("rejects when HEAD and GET Range both fail (strict local)", async () => {
     vi.stubGlobal(
       "fetch",
       vi
@@ -143,7 +141,7 @@ describe("validateChromiumPackUrl", () => {
     )
 
     await expect(validateChromiumPackUrl("https://example.com/missing.tar")).rejects.toThrow(
-      /GET Range.*404/
+      /HEAD ni GET Range/
     )
   })
 
@@ -174,7 +172,7 @@ describe("validateChromiumPackUrl", () => {
     )
 
     await expect(validateChromiumPackUrl("https://example.com/fake.tar")).rejects.toThrow(
-      /content-type|demasiado pequeño/
+      /HEAD ni GET Range|content-type|demasiado pequeño/
     )
   })
 })

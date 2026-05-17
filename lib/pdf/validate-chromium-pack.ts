@@ -1,5 +1,12 @@
 import { timedStep } from "@/lib/pdf/pdf-debug-log"
 
+/** Vercel: la ficha técnica sigue vía `executablePath` aunque HEAD devuelva 401; no bloquear reportes. */
+export function isChromiumPackValidationSkipped(): boolean {
+  if (process.env.REPORT_PDF_SKIP_CHROMIUM_PACK_VALIDATION === "1") return true
+  if (process.env.REPORT_PDF_STRICT_CHROMIUM_PACK_VALIDATION === "1") return false
+  return process.env.VERCEL === "1" || Boolean(process.env.VERCEL)
+}
+
 const HEAD_TIMEOUT_MS = 5_000
 const RANGE_TIMEOUT_MS = 5_000
 const MIN_PACK_BYTES = 50 * 1024 * 1024
@@ -142,7 +149,7 @@ async function tryHeadValidation(
 async function tryGetRangeValidation(
   chromiumPackUrl: string,
   log?: (step: string, extra?: Record<string, unknown>) => void
-): Promise<void> {
+): Promise<boolean> {
   const redacted = redactChromiumPackUrl(chromiumPackUrl)
   log?.("validateChromiumPack: GET Range start", { chromiumPackUrl: redacted })
 
@@ -158,7 +165,8 @@ async function tryGetRangeValidation(
     )
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error)
-    throw new Error(`Chromium pack no accesible (GET Range timeout o red): ${message}`)
+    log?.("validateChromiumPack: GET Range failed", { chromiumPackUrl: redacted, error: message })
+    return false
   }
 
   log?.("validateChromiumPack: GET Range response", {
@@ -169,9 +177,11 @@ async function tryGetRangeValidation(
 
   if (res.status !== 200 && res.status !== 206) {
     await cancelResponseBody(res)
-    throw new Error(
-      `Chromium pack no accesible por GET Range: ${res.status} ${res.statusText}`
-    )
+    log?.("validateChromiumPack: GET Range non-ok status", {
+      chromiumPackUrl: redacted,
+      getRangeStatus: res.status,
+    })
+    return false
   }
 
   try {
@@ -182,6 +192,14 @@ async function tryGetRangeValidation(
       contentType: (res.headers.get("content-type") ?? "").split(";")[0]?.trim() || "(missing)",
       contentLength: getPackByteSize(res) ?? "(missing)",
     })
+    return true
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    log?.("validateChromiumPack: GET Range headers invalid", {
+      chromiumPackUrl: redacted,
+      error: message,
+    })
+    return false
   } finally {
     await cancelResponseBody(res)
   }
@@ -195,9 +213,11 @@ export async function validateChromiumPackUrl(
   chromiumPackUrl: string,
   log?: (step: string, extra?: Record<string, unknown>) => void
 ): Promise<void> {
-  if (process.env.REPORT_PDF_SKIP_CHROMIUM_PACK_VALIDATION === "1") {
-    log?.("validateChromiumPack: skipped (REPORT_PDF_SKIP_CHROMIUM_PACK_VALIDATION=1)", {
-      chromiumPackUrl: redactChromiumPackUrl(chromiumPackUrl),
+  const redacted = redactChromiumPackUrl(chromiumPackUrl)
+
+  if (isChromiumPackValidationSkipped()) {
+    log?.("validateChromiumPack: skipped (Vercel o REPORT_PDF_SKIP_CHROMIUM_PACK_VALIDATION)", {
+      chromiumPackUrl: redacted,
     })
     return
   }
@@ -205,6 +225,13 @@ export async function validateChromiumPackUrl(
   await timedStep("validate chromium-pack.tar", async () => {
     const headOk = await tryHeadValidation(chromiumPackUrl, log)
     if (headOk) return
-    await tryGetRangeValidation(chromiumPackUrl, log)
+
+    const rangeOk = await tryGetRangeValidation(chromiumPackUrl, log)
+    if (rangeOk) return
+
+    const message =
+      "Chromium pack no accesible por HEAD ni GET Range (configurá REPORT_PDF_STRICT_CHROMIUM_PACK_VALIDATION=1 en local para forzar error)"
+    log?.("validateChromiumPack: failed", { chromiumPackUrl: redacted, message })
+    throw new Error(message)
   })
 }
