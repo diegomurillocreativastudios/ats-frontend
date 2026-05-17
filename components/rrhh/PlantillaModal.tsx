@@ -38,7 +38,8 @@ const buildPayload = (formData, isEditing, editingTemplate) => {
   }
 
   payload.isTechnicalSheet =
-    type === "Document" ? !!formData.isTechnicalSheet : false;
+    type === "Document" ? !!formData.isTechnicalSheet : false
+  payload.isReport = type === "Document" ? !!formData.isReport : false
 
   return payload;
 };
@@ -66,6 +67,7 @@ export default function PlantillaModal({
     contentTemplate: "",
     outputFormat: "PDF",
     isTechnicalSheet: false,
+    isReport: false,
     description: "",
     isMandatory: false,
   });
@@ -91,6 +93,7 @@ export default function PlantillaModal({
         contentTemplate: String(t["contentTemplate"] ?? ""),
         outputFormat: String(t["outputFormat"] ?? "PDF"),
         isTechnicalSheet: Boolean(t["isTechnicalSheet"]),
+        isReport: Boolean(t["isReport"]),
         description: String(t["description"] ?? ""),
         isMandatory: Boolean(t["isMandatory"]),
         channels: Array.isArray(t["channels"]) ? t["channels"] : [],
@@ -105,6 +108,7 @@ export default function PlantillaModal({
         contentTemplate: "",
         outputFormat: "PDF",
         isTechnicalSheet: false,
+        isReport: false,
         description: "",
         isMandatory: false,
         channels: [],
@@ -181,6 +185,7 @@ export default function PlantillaModal({
       contentTemplate: "",
       outputFormat: "PDF",
       isTechnicalSheet: false,
+      isReport: false,
       description: "",
       isMandatory: false,
       channels: [],
@@ -393,6 +398,36 @@ export default function PlantillaModal({
                 className="pl-6 font-sans text-xs text-muted-foreground"
               >
                 Marca esta opción si el documento corresponde al diseño de una ficha técnica.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <input
+                  id="plantilla-is-report"
+                  type="checkbox"
+                  checked={formData.isReport}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isReport: e.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-vo-purple focus:ring-vo-purple"
+                  aria-describedby="plantilla-is-report-hint"
+                />
+                <label
+                  htmlFor="plantilla-is-report"
+                  className="cursor-pointer font-sans text-sm font-medium text-foreground"
+                >
+                  Es plantilla de reporte
+                </label>
+              </div>
+              <p
+                id="plantilla-is-report-hint"
+                className="pl-6 font-sans text-xs text-muted-foreground"
+              >
+                Marca esta opción si el documento se usa como plantilla de reportes.
               </p>
             </div>
           </>

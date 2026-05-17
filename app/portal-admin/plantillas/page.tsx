@@ -28,6 +28,7 @@ const mapTemplateFromApi = (item, index = 0) => {
   const contentTemplate = item.contentTemplate ?? "";
   const outputFormat = item.outputFormat ?? "PDF";
   const isTechnicalSheet = Boolean(item?.isTechnicalSheet);
+  const isReport = Boolean(item?.isReport);
 
   // Questionnaire fields
   const description = item.description ?? "";
@@ -36,7 +37,7 @@ const mapTemplateFromApi = (item, index = 0) => {
   return {
     id, name, type,
     subject, body, channels,
-    contentTemplate, outputFormat, isTechnicalSheet,
+    contentTemplate, outputFormat, isTechnicalSheet, isReport,
     description, isMandatory
   };
 };
@@ -69,6 +70,11 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
             {template.type === 'Document' && template.isTechnicalSheet && (
               <span className="rounded-full bg-slate-200 px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider text-slate-700">
                 Ficha técnica
+              </span>
+            )}
+            {template.type === 'Document' && template.isReport && (
+              <span className="rounded-full bg-violet-100 px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider text-violet-800">
+                Reporte
               </span>
             )}
           </div>

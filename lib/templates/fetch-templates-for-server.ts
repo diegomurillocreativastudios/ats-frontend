@@ -13,7 +13,7 @@ export async function fetchTemplatesListForServer(
   accessToken: string
 ): Promise<TemplateListItem[]> {
   const root = baseUrl.replace(/\/$/, "")
-  const res = await fetch(`${root}/api/Templates`, {
+  const res = await fetch(`${root}/api/Templates?type=Document`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,

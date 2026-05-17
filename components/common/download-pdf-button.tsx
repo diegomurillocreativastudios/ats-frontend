@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { downloadElementAsPdf } from "@/lib/pdf/download-element-as-pdf"
+import { downloadElementAsPdf, type DownloadElementAsPdfOptions } from "@/lib/pdf/download-element-as-pdf"
 
 export interface DownloadPdfButtonProps {
   targetRef: React.RefObject<HTMLElement | null>
@@ -9,6 +9,10 @@ export interface DownloadPdfButtonProps {
   label?: string
   className?: string
   disabled?: boolean
+  orientation?: DownloadElementAsPdfOptions["orientation"]
+  format?: DownloadElementAsPdfOptions["format"]
+  scale?: number
+  marginMm?: number
 }
 
 export function DownloadPdfButton({
@@ -17,6 +21,10 @@ export function DownloadPdfButton({
   label = "Descargar PDF",
   className,
   disabled = false,
+  orientation = "portrait",
+  format = "a4",
+  scale = 2,
+  marginMm = 0,
 }: DownloadPdfButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false)
 
@@ -33,10 +41,10 @@ export function DownloadPdfButton({
       await downloadElementAsPdf({
         element,
         fileName,
-        orientation: "portrait",
-        format: "a4",
-        scale: 2,
-        marginMm: 0,
+        orientation,
+        format,
+        scale,
+        marginMm,
       })
     } catch (error) {
       console.error("Error al generar PDF:", error)

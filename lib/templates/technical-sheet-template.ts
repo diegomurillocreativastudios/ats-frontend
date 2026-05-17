@@ -7,6 +7,7 @@ export interface TemplateListItem {
   name: string
   contentTemplate: string
   isTechnicalSheet: boolean
+  isReport: boolean
 }
 
 /**
@@ -30,6 +31,7 @@ function mapTemplateListItem(item: unknown, index: number): TemplateListItem {
       name: "",
       contentTemplate: "",
       isTechnicalSheet: false,
+      isReport: false,
     }
   }
   const o = item as Record<string, unknown>
@@ -40,6 +42,7 @@ function mapTemplateListItem(item: unknown, index: number): TemplateListItem {
     name: String(o.name ?? ""),
     contentTemplate: String(o.contentTemplate ?? ""),
     isTechnicalSheet: Boolean(o.isTechnicalSheet),
+    isReport: Boolean(o.isReport),
   }
 }
 
@@ -59,27 +62,25 @@ function sortKeyId(id: string | number): string {
   return String(id)
 }
 
-/**
- * Picks the technical-sheet document template when several exist:
- * 1. Prefer name containing "ficha" (case-insensitive).
- * 2. Then stable order by id, then name.
- */
-export function findTechnicalSheetDocumentTemplate(
-  items: readonly TemplateListItem[]
+function pickPreferredDocumentTemplate(
+  items: readonly TemplateListItem[],
+  matches: (t: TemplateListItem) => boolean,
+  nameKeyword: string
 ): TemplateListItem | null {
   const candidates = items.filter(
-    (t) => normalizeTemplateType(t.type) === "document" && t.isTechnicalSheet
+    (t) => normalizeTemplateType(t.type) === "document" && matches(t)
   )
   if (candidates.length === 0) return null
 
+  const keyword = nameKeyword.trim().toLowerCase()
   const withScore = candidates.map((t) => {
     const nameLower = t.name.trim().toLowerCase()
-    const prefersFicha = nameLower.includes("ficha") ? 1 : 0
-    return { t, prefersFicha }
+    const prefersKeyword = keyword.length > 0 && nameLower.includes(keyword) ? 1 : 0
+    return { t, prefersKeyword }
   })
 
   withScore.sort((a, b) => {
-    if (b.prefersFicha !== a.prefersFicha) return b.prefersFicha - a.prefersFicha
+    if (b.prefersKeyword !== a.prefersKeyword) return b.prefersKeyword - a.prefersKeyword
     const idCmp = sortKeyId(a.t.id).localeCompare(sortKeyId(b.t.id))
     if (idCmp !== 0) return idCmp
     return a.t.name.localeCompare(b.t.name, "es")
@@ -89,9 +90,45 @@ export function findTechnicalSheetDocumentTemplate(
 }
 
 /**
- * Loads all templates from the backend (recruiter/admin contract).
+ * Picks the technical-sheet document template when several exist:
+ * 1. Prefer name containing "ficha" (case-insensitive).
+ * 2. Then stable order by id, then name.
  */
-export async function fetchTemplatesList(): Promise<TemplateListItem[]> {
-  const data = await apiClient.get("/api/Templates")
+export function findTechnicalSheetDocumentTemplate(
+  items: readonly TemplateListItem[]
+): TemplateListItem | null {
+  return pickPreferredDocumentTemplate(items, (t) => t.isTechnicalSheet, "ficha")
+}
+
+/** Document templates flagged as report layouts (`isReport`). */
+export function filterReportDocumentTemplates(
+  items: readonly TemplateListItem[]
+): TemplateListItem[] {
+  return items.filter(
+    (t) => normalizeTemplateType(t.type) === "document" && t.isReport
+  )
+}
+
+/**
+ * Picks the report document template when several exist:
+ * 1. Prefer name containing "reporte" (case-insensitive).
+ * 2. Then stable order by id, then name.
+ */
+export function findReportDocumentTemplate(
+  items: readonly TemplateListItem[]
+): TemplateListItem | null {
+  return pickPreferredDocumentTemplate(items, (t) => t.isReport, "reporte")
+}
+
+/**
+ * Loads templates from the backend. Pass `documentOnly` to use GET ?type=Document.
+ */
+export async function fetchTemplatesList(options?: {
+  documentOnly?: boolean
+}): Promise<TemplateListItem[]> {
+  const path = options?.documentOnly
+    ? "/api/Templates?type=Document"
+    : "/api/Templates"
+  const data = await apiClient.get(path)
   return mapTemplatesList(unwrapTemplatesResponse(data))
 }

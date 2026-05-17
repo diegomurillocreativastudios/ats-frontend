@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import ReportesFiltersPlaceholder, {
   ReportesFilterControl,
@@ -11,8 +11,14 @@ import {
   ReporteResumenErrorState,
 } from "@/components/rrhh/reportes/reporte-resumen-dashboard"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
-import { ReportesViewPdfButton } from "@/components/rrhh/reportes/reportes-view-pdf-button"
+import { DownloadPdfButton } from "@/components/common/download-pdf-button"
+import { ExecutiveSummaryReportPdfTemplate } from "@/components/recruiter/reports/executive-summary-report-pdf-template"
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  formatGeneratedAtForPdf,
+  formatIsoDateForPdf,
+  mapSummaryToExecutiveReportPdfData,
+} from "@/lib/reportes/executive-summary-metrics"
 import {
   fetchReportsSummary,
   listRecruiterCompanies,
@@ -30,7 +36,11 @@ const applyButtonClass =
 const filterGridClass =
   "mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end"
 
+const pdfDownloadButtonClass =
+  "inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+
 export default function ReporteResumenPage() {
+  const pdfRef = useRef<HTMLElement | null>(null)
   const trail = [
     { label: "Reportes", href: "/portal-rrhh/reportes" },
     { label: "Resumen" },
@@ -93,6 +103,22 @@ export default function ReporteResumenPage() {
 
   const statusText = loading ? "Cargando indicadores…" : error ? "" : "Datos actualizados"
 
+  const pdfFilters = useMemo(() => {
+    const clientName = appliedClientId
+      ? companies.find((c) => c.id === appliedClientId)?.name?.trim() || "Cliente"
+      : "Todos"
+    return {
+      clientName,
+      from: formatIsoDateForPdf(appliedDateFrom),
+      to: formatIsoDateForPdf(appliedDateTo),
+    }
+  }, [appliedClientId, appliedDateFrom, appliedDateTo, companies])
+
+  const pdfData = useMemo(
+    () => (summary ? mapSummaryToExecutiveReportPdfData(summary) : null),
+    [summary]
+  )
+
   const mainContent = (
     <div className="min-w-0 flex flex-col gap-6 pb-10">
       <section className="px-4 pt-6 md:px-8" aria-label="Encabezado del reporte">
@@ -100,7 +126,17 @@ export default function ReporteResumenPage() {
           title="Resumen ejecutivo de reportes"
           description="Vista general del estado de clientes, vacantes, candidatos, entrevistas, evaluaciones y fuentes de reclutamiento."
           actions={
-            <ReportesViewPdfButton disabled={loading} filenameBase="reporte-resumen-ejecutivo" />
+            <DownloadPdfButton
+              targetRef={pdfRef}
+              fileName="reporte-resumen-ejecutivo.pdf"
+              label="Descargar PDF"
+              disabled={loading || !summary}
+              orientation="landscape"
+              format="a4"
+              scale={2}
+              marginMm={5}
+              className={pdfDownloadButtonClass}
+            />
           }
         />
       </section>
@@ -172,6 +208,16 @@ export default function ReporteResumenPage() {
   return (
     <RrhhReportsShell breadcrumbLabel="Reportes" breadcrumbTrail={trail}>
       {mainContent}
+      {pdfData && !loading && !error ? (
+        <div className="fixed left-[-10000px] top-0 z-[-1]" aria-hidden>
+          <ExecutiveSummaryReportPdfTemplate
+            ref={pdfRef}
+            data={pdfData}
+            filters={pdfFilters}
+            generatedAt={formatGeneratedAtForPdf()}
+          />
+        </div>
+      ) : null}
     </RrhhReportsShell>
   )
 }

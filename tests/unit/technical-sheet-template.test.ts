@@ -32,15 +32,15 @@ describe("findTechnicalSheetDocumentTemplate", () => {
 
   it("returns null when no Document with isTechnicalSheet", () => {
     const items: TemplateListItem[] = [
-      { id: 1, type: "Notification", name: "A", contentTemplate: "", isTechnicalSheet: false },
-      { id: 2, type: "Document", name: "B", contentTemplate: "<p>x</p>", isTechnicalSheet: false },
+      { id: 1, type: "Notification", name: "A", contentTemplate: "", isTechnicalSheet: false, isReport: false },
+      { id: 2, type: "Document", name: "B", contentTemplate: "<p>x</p>", isTechnicalSheet: false, isReport: false },
     ]
     expect(findTechnicalSheetDocumentTemplate(items)).toBeNull()
   })
 
   it("returns the only matching Document", () => {
     const items: TemplateListItem[] = [
-      { id: 1, type: "Document", name: "FT", contentTemplate: "<h1>Hi</h1>", isTechnicalSheet: true },
+      { id: 1, type: "Document", name: "FT", contentTemplate: "<h1>Hi</h1>", isTechnicalSheet: true, isReport: false },
     ]
     const found = findTechnicalSheetDocumentTemplate(items)
     expect(found?.id).toBe(1)
@@ -49,23 +49,23 @@ describe("findTechnicalSheetDocumentTemplate", () => {
 
   it("matches document type case-insensitively", () => {
     const items: TemplateListItem[] = [
-      { id: 1, type: "document", name: "FT", contentTemplate: "<p>a</p>", isTechnicalSheet: true },
+      { id: 1, type: "document", name: "FT", contentTemplate: "<p>a</p>", isTechnicalSheet: true, isReport: false },
     ]
     expect(findTechnicalSheetDocumentTemplate(items)?.id).toBe(1)
   })
 
   it("prefers name containing ficha when multiple matches", () => {
     const items: TemplateListItem[] = [
-      { id: 1, type: "Document", name: "Otro doc", contentTemplate: "<p>1</p>", isTechnicalSheet: true },
-      { id: 2, type: "Document", name: "Ficha técnica CV", contentTemplate: "<p>2</p>", isTechnicalSheet: true },
+      { id: 1, type: "Document", name: "Otro doc", contentTemplate: "<p>1</p>", isTechnicalSheet: true, isReport: false },
+      { id: 2, type: "Document", name: "Ficha técnica CV", contentTemplate: "<p>2</p>", isTechnicalSheet: true, isReport: false },
     ]
     expect(findTechnicalSheetDocumentTemplate(items)?.id).toBe(2)
   })
 
   it("uses id then name when ficha preference ties", () => {
     const items: TemplateListItem[] = [
-      { id: 10, type: "Document", name: "B", contentTemplate: "<p>b</p>", isTechnicalSheet: true },
-      { id: 2, type: "Document", name: "A", contentTemplate: "<p>a</p>", isTechnicalSheet: true },
+      { id: 10, type: "Document", name: "B", contentTemplate: "<p>b</p>", isTechnicalSheet: true, isReport: false },
+      { id: 2, type: "Document", name: "A", contentTemplate: "<p>a</p>", isTechnicalSheet: true, isReport: false },
     ]
     expect(findTechnicalSheetDocumentTemplate(items)?.id).toBe(2)
   })
@@ -80,6 +80,7 @@ describe("mapTemplatesList", () => {
         name: "N",
         contentTemplate: "<p>z</p>",
         isTechnicalSheet: true,
+        isReport: false,
       },
     ]
     expect(mapTemplatesList(raw)).toEqual([
@@ -89,6 +90,7 @@ describe("mapTemplatesList", () => {
         name: "N",
         contentTemplate: "<p>z</p>",
         isTechnicalSheet: true,
+        isReport: false,
       },
     ])
   })

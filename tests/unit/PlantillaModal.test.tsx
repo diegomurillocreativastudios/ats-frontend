@@ -83,7 +83,42 @@ describe('PlantillaModal', () => {
                     contentTemplate: '<h1>Contrato</h1>',
                     outputFormat: 'PDF',
                     slug: 'contrato-de-empleo',
-                    isTechnicalSheet: false
+                    isTechnicalSheet: false,
+                    isReport: false
+                })
+            )
+        })
+    })
+
+    it('should send isReport true when the report checkbox is checked for a document template', async () => {
+        const onSubmit = vi.fn()
+        const onClose = vi.fn()
+
+        render(
+            <PlantillaModal
+                isOpen={true}
+                onClose={onClose}
+                onSubmit={onSubmit}
+            />
+        )
+
+        fireEvent.change(screen.getByLabelText(/Tipo de plantilla/i), { target: { value: 'Document' } })
+        fireEvent.change(screen.getByLabelText(/Nombre/i), { target: { value: 'Reporte mensual' } })
+        fireEvent.change(screen.getByLabelText(/Plantilla de contenido/i), { target: { value: '<h1>R</h1>' } })
+        fireEvent.click(screen.getByLabelText(/Es plantilla de reporte/i))
+
+        fireEvent.click(screen.getByRole('button', { name: /Crear plantilla/i }))
+
+        await waitFor(() => {
+            expect(apiClient.post).toHaveBeenCalledWith(
+                '/api/Templates',
+                expect.objectContaining({
+                    $type: 'Document',
+                    name: 'Reporte mensual',
+                    contentTemplate: '<h1>R</h1>',
+                    isReport: true,
+                    isTechnicalSheet: false,
+                    slug: 'reporte-mensual'
                 })
             )
         })

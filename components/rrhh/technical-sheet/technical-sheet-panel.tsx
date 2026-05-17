@@ -72,7 +72,7 @@ export function TechnicalSheetPanel({
     setPaginatedSrcDoc(null)
     try {
       const [list, payload] = await Promise.all([
-        fetchTemplatesList(),
+        fetchTemplatesList({ documentOnly: true }),
         fetchTechnicalSheetJson(vacancyId.trim(), candidateProfileId.trim()),
       ])
       const picked = findTechnicalSheetDocumentTemplate(list)
