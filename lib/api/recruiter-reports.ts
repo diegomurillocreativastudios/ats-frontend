@@ -1,5 +1,4 @@
 import { apiClient } from "@/lib/api"
-import { mapDefaultCompanyDisplayLabel } from "@/lib/public-company-display"
 
 export const REPORTS_PREFIX = "/api/recruiter/reports"
 
@@ -564,9 +563,7 @@ function mapIdNameList(raw: unknown): ReportsFilterOption[] {
     const o = (item ?? {}) as Record<string, unknown>
     return {
       id: String(o.id ?? o.uuid ?? o.key ?? i),
-      name: mapDefaultCompanyDisplayLabel(
-        String(o.name ?? o.title ?? o.label ?? "—")
-      ),
+      name: String(o.name ?? o.title ?? o.label ?? "—"),
     }
   })
 }
@@ -635,29 +632,8 @@ export async function fetchReportsFilters(query: {
   return coerceReportsFilters(raw)
 }
 
-export interface RecruiterCompanyOption {
-  id: string
-  name: string
-}
-
-export async function listRecruiterCompanies(): Promise<
-  RecruiterCompanyOption[]
-> {
-  const raw = await apiClient.get("/api/recruiter/companies")
-  const list = Array.isArray(raw)
-    ? raw
-    : (raw as { companies?: unknown })?.companies ??
-      (raw as { items?: unknown })?.items ??
-      (raw as { data?: unknown })?.data ??
-      []
-  if (!Array.isArray(list)) return []
-  return list.map((item: Record<string, unknown>, i: number) => ({
-    id: String(item?.id ?? item?.uuid ?? i),
-    name: mapDefaultCompanyDisplayLabel(
-      String(item?.name ?? item?.companyName ?? "—")
-    ),
-  }))
-}
+export type { RecruiterCompanyOption, RecruiterStageOption } from "@/lib/api/recruiter-companies"
+export { listRecruiterCompanies, listRecruiterStages } from "@/lib/api/recruiter-companies"
 
 export interface RecruiterVacancyOption {
   id: string
@@ -681,36 +657,3 @@ export async function listRecruiterVacancies(): Promise<
   }))
 }
 
-export interface RecruiterStageOption {
-  id: string
-  name: string
-}
-
-export async function listRecruiterStages(
-  companyId: string
-): Promise<RecruiterStageOption[]> {
-  if (!companyId.trim()) return []
-  const raw = await apiClient.get(
-    `/api/recruiter/companies/${encodeURIComponent(companyId)}/stages`
-  )
-  const list = Array.isArray(raw)
-    ? raw
-    : (raw as { stages?: unknown })?.stages ??
-      (raw as { items?: unknown })?.items ??
-      (raw as { data?: unknown })?.data ??
-      []
-  if (!Array.isArray(list)) return []
-  return list
-    .map((item: Record<string, unknown>, i: number) => ({
-      id: String(item?.id ?? item?.uuid ?? i),
-      name: String(item?.name ?? item?.stageName ?? "—"),
-      order:
-        typeof item?.orderIndex === "number"
-          ? item.orderIndex
-          : typeof item?.order === "number"
-            ? item.order
-            : i,
-    }))
-    .sort((a, b) => a.order - b.order)
-    .map(({ id, name }) => ({ id, name }))
-}

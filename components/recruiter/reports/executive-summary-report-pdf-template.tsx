@@ -54,23 +54,6 @@ function clampPercent(value: number | null | undefined) {
   return Math.max(0, Math.min(100, safeNumber(value)))
 }
 
-function StaticFilterBox({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div>
-      <p className="mb-1 text-[11px] font-medium text-slate-500">{label}</p>
-      <div className="flex h-9 items-center rounded-md border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-800">
-        {value}
-      </div>
-    </div>
-  )
-}
-
 function KpiCard({
   label,
   value,
@@ -216,38 +199,14 @@ export const ExecutiveSummaryReportPdfTemplate = forwardRef<
           Vista general del estado de clientes, vacantes, candidatos, entrevistas,
           evaluaciones y fuentes de reclutamiento.
         </p>
+        <p className="mt-2 text-[12px] leading-normal text-slate-600">
+          Cliente: {filters.clientName || 'Todos'} · Período: {filters.from || '—'} –{' '}
+          {filters.to || '—'}
+        </p>
       </header>
 
       <div className="mt-8 border-t border-slate-100 pt-5">
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-[14px] font-bold text-slate-950">Filtros</h2>
-
-          <p className="mt-2 text-[12px] leading-normal text-slate-500">
-            Filtra los indicadores por cliente y rango de fechas.
-          </p>
-
-          <div className="mt-4 grid grid-cols-[1fr_1fr_1fr_140px] items-end gap-3">
-            <StaticFilterBox label="Cliente" value={filters.clientName || 'Todos'} />
-            <StaticFilterBox label="Desde" value={filters.from || '01/05/2026'} />
-            <StaticFilterBox label="Hasta" value={filters.to || '16/05/2026'} />
-
-            <div>
-              <p className="mb-1 text-[11px] font-medium text-transparent">
-                Acción
-              </p>
-
-              <div className="flex h-9 items-center justify-center rounded-md bg-[#7b2f8f] px-4 text-[12px] font-semibold text-white">
-                Aplicar filtros
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <p className="mt-4 text-[12px] leading-normal text-slate-400">
-          Datos actualizados
-        </p>
-
-        <section className="mt-3 grid grid-cols-5 gap-3">
+        <section className="grid grid-cols-5 gap-3">
           <KpiCard
             label="Clientes"
             value={totalClients}

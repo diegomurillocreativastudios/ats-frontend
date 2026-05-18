@@ -45,7 +45,7 @@ import {
   type RecruiterVacancyOption,
   type RecruitmentSourceRow,
 } from "@/lib/api/recruiter-reports"
-import { displayCompanyOrClientLabel } from "@/lib/public-company-display"
+import { displayCompanyOrClientLabel } from "@/lib/reportes-metrics"
 import {
   allConversionsZero,
   featuredSourceMessage,

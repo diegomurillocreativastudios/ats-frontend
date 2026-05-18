@@ -5,7 +5,9 @@ export interface TemplateListItem {
   id: string | number
   type: string
   name: string
+  slug?: string
   contentTemplate: string
+  outputFormat?: string
   isTechnicalSheet: boolean
   isReport: boolean
 }
@@ -23,7 +25,17 @@ export function unwrapTemplatesResponse(data: unknown): unknown[] {
   return []
 }
 
-function mapTemplateListItem(item: unknown, index: number): TemplateListItem {
+/** Unwraps a single template payload from GET /api/Templates/{id}. */
+export function unwrapTemplateItem(data: unknown): unknown {
+  if (data == null || typeof data !== "object" || Array.isArray(data)) return data
+  const root = data as Record<string, unknown>
+  const nested = root.template ?? root.data
+  if (nested != null && typeof nested === "object" && !Array.isArray(nested)) return nested
+  if ("id" in root || "name" in root || "type" in root) return data
+  return data
+}
+
+export function mapTemplateListItem(item: unknown, index = 0): TemplateListItem {
   if (item == null || typeof item !== "object") {
     return {
       id: index,
@@ -36,11 +48,18 @@ function mapTemplateListItem(item: unknown, index: number): TemplateListItem {
   }
   const o = item as Record<string, unknown>
   const id = o.id ?? o.uuid ?? index
+  const slugRaw = o.slug
+  const outputFormatRaw = o.outputFormat
   return {
     id: id as string | number,
     type: String(o.type ?? "Notification"),
     name: String(o.name ?? ""),
+    slug: slugRaw != null && String(slugRaw).trim() !== "" ? String(slugRaw) : undefined,
     contentTemplate: String(o.contentTemplate ?? ""),
+    outputFormat:
+      outputFormatRaw != null && String(outputFormatRaw).trim() !== ""
+        ? String(outputFormatRaw)
+        : undefined,
     isTechnicalSheet: Boolean(o.isTechnicalSheet),
     isReport: Boolean(o.isReport),
   }
@@ -53,13 +72,18 @@ export function mapTemplatesList(items: readonly unknown[]): TemplateListItem[] 
   return items.map((row, i) => mapTemplateListItem(row, i))
 }
 
-function normalizeTemplateType(type: string): string {
+export function normalizeTemplateType(type: string): string {
   return String(type ?? "").trim().toLowerCase()
 }
 
 function sortKeyId(id: string | number): string {
   if (typeof id === "number" && Number.isFinite(id)) return id.toString().padStart(20, "0")
   return String(id)
+}
+
+/** True when the row is a Document template flagged as report. */
+export function isReportDocumentTemplate(t: TemplateListItem): boolean {
+  return normalizeTemplateType(t.type) === "document" && t.isReport
 }
 
 function pickPreferredDocumentTemplate(
@@ -104,9 +128,31 @@ export function findTechnicalSheetDocumentTemplate(
 export function filterReportDocumentTemplates(
   items: readonly TemplateListItem[]
 ): TemplateListItem[] {
-  return items.filter(
-    (t) => normalizeTemplateType(t.type) === "document" && t.isReport
-  )
+  return items.filter(isReportDocumentTemplate)
+}
+
+/** Stable sort for report document templates (name, then id). */
+export function sortReportDocumentTemplates(
+  items: readonly TemplateListItem[]
+): TemplateListItem[] {
+  return [...items].sort((a, b) => {
+    const nameCmp = a.name.localeCompare(b.name, "es")
+    if (nameCmp !== 0) return nameCmp
+    return sortKeyId(a.id).localeCompare(sortKeyId(b.id))
+  })
+}
+
+/**
+ * Finds a report document template by id with strict validation.
+ */
+export function findReportDocumentTemplateById(
+  items: readonly TemplateListItem[],
+  id: string | number
+): TemplateListItem | null {
+  const target = String(id)
+  const match = items.find((t) => String(t.id) === target)
+  if (!match || !isReportDocumentTemplate(match)) return null
+  return match
 }
 
 /**
@@ -118,6 +164,24 @@ export function findReportDocumentTemplate(
   items: readonly TemplateListItem[]
 ): TemplateListItem | null {
   return pickPreferredDocumentTemplate(items, (t) => t.isReport, "reporte")
+}
+
+/**
+ * Loads a single template by id. Prefers GET /api/Templates/{id}; on failure,
+ * falls back to the document list + findReportDocumentTemplateById.
+ */
+export async function fetchTemplateById(id: string | number): Promise<TemplateListItem | null> {
+  const idStr = String(id).trim()
+  if (!idStr) return null
+
+  try {
+    const data = await apiClient.get(`/api/Templates/${encodeURIComponent(idStr)}`)
+    const mapped = mapTemplateListItem(unwrapTemplateItem(data), 0)
+    return isReportDocumentTemplate(mapped) ? mapped : null
+  } catch {
+    const list = await fetchTemplatesList({ documentOnly: true })
+    return findReportDocumentTemplateById(list, id)
+  }
 }
 
 /**

@@ -6,6 +6,12 @@ import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api";
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs";
+import {
+  DEFAULT_RECRUITER_COMPANY_ID,
+  listRecruiterCompanies,
+  persistVacancyCompanyId,
+  type RecruiterCompanyOption,
+} from "@/lib/api/recruiter-companies";
 import { getCountryIso2SelectOptions } from "@/lib/profile-form-options";
 import { mapActiveCatalogItemsToOptions } from "@/lib/vacancy-catalogs";
 
@@ -18,7 +24,6 @@ const toSnakeCase = (str) =>
 
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
-const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
 
 export const createEmptyRequirement = () => ({
   id: crypto.randomUUID?.() ?? `req-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -35,6 +40,10 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [vacancyDepartmentId, setVacancyDepartmentId] = useState("");
   const [vacancyModalityId, setVacancyModalityId] = useState("");
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
+  const [companyOptions, setCompanyOptions] = useState<RecruiterCompanyOption[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
+  const [loadingCompanies, setLoadingCompanies] = useState(false);
+  const [companyLoadError, setCompanyLoadError] = useState<string | null>(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [modalityOptions, setModalityOptions] = useState([]);
   const [loadingCatalogs, setLoadingCatalogs] = useState(false);
@@ -47,6 +56,34 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     if (!isOpen) return
 
     let cancelled = false
+
+    const loadCompanies = async () => {
+      setLoadingCompanies(true)
+      setCompanyLoadError(null)
+
+      try {
+        const companies = await listRecruiterCompanies()
+        if (cancelled) return
+
+        setCompanyOptions(companies)
+        const defaultId =
+          companies.find((c) => c.id === DEFAULT_RECRUITER_COMPANY_ID)?.id ??
+          companies[0]?.id ??
+          DEFAULT_RECRUITER_COMPANY_ID
+        setSelectedCompanyId(defaultId)
+      } catch (error) {
+        if (cancelled) return
+        setCompanyOptions([])
+        setSelectedCompanyId(DEFAULT_RECRUITER_COMPANY_ID)
+        setCompanyLoadError(
+          (error as { message?: string })?.message ||
+            (error as { detail?: string })?.detail ||
+            "No se pudieron cargar los clientes."
+        )
+      } finally {
+        if (!cancelled) setLoadingCompanies(false)
+      }
+    }
 
     const loadCatalogs = async () => {
       setLoadingCatalogs(true)
@@ -76,6 +113,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
       }
     }
 
+    void loadCompanies()
     void loadCatalogs()
 
     return () => {
@@ -123,6 +161,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     if (!descripcion.trim()) {
       nextErrors.descripcion = "La descripción es requerida";
     }
+    if (!selectedCompanyId.trim()) {
+      nextErrors.empresa = "Selecciona una empresa cliente";
+    }
     requerimientos.forEach((req) => {
       const hasName = !!req.requirementName.trim();
       const hasValue = !!req.requirementValue.trim();
@@ -159,7 +200,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     const payload: Record<string, unknown> = {
       title: nombre.trim(),
       description: descripcion.trim(),
-      companyId: COMPANY_ID,
+      companyId: selectedCompanyId || DEFAULT_RECRUITER_COMPANY_ID,
       requirements,
       weights: {
         semantic: 0.5,
@@ -182,6 +223,16 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
 
     try {
       const data = await apiClient.post("/api/recruiter/vacancies", payload);
+      const created =
+        data && typeof data === "object" && !Array.isArray(data)
+          ? (data as Record<string, unknown>)
+          : null
+      const createdId = created?.id ?? created?.uuid
+      const createdCompanyId =
+        created?.companyId ?? created?.company_id ?? payload.companyId
+      if (createdId != null && createdCompanyId != null) {
+        persistVacancyCompanyId(String(createdId), String(createdCompanyId))
+      }
       handleClose();
       onSubmit?.(data);
     } catch (err) {
@@ -200,6 +251,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     setCountryCode("");
     setVacancyDepartmentId("");
     setVacancyModalityId("");
+    setSelectedCompanyId(DEFAULT_RECRUITER_COMPANY_ID);
     setRequerimientos([createEmptyRequirement()]);
     setErrors({});
     setSubmitError(null);
@@ -291,6 +343,49 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             </p>
           )}
         </div>
+
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="vacante-cliente"
+            className="font-sans text-sm font-medium text-foreground"
+          >
+            Cliente / compañía <span className="text-vo-pink">*</span>
+          </label>
+          <select
+            id="vacante-cliente"
+            value={selectedCompanyId}
+            onChange={(e) => setSelectedCompanyId(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Cliente o compañía de la vacante"
+            aria-invalid={!!errors.empresa}
+            aria-describedby={errors.empresa ? "empresa-error" : undefined}
+            disabled={loading || loadingCompanies}
+          >
+            {companyOptions.length === 0 ? (
+              <option value={DEFAULT_RECRUITER_COMPANY_ID}>Visible Outsource</option>
+            ) : (
+              companyOptions.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))
+            )}
+          </select>
+          {errors.empresa ? (
+            <p id="empresa-error" className="font-sans text-sm text-vo-pink" role="alert">
+              {errors.empresa}
+            </p>
+          ) : null}
+        </div>
+
+        {companyLoadError ? (
+          <div
+            className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 font-sans text-sm text-amber-800"
+            role="status"
+          >
+            {companyLoadError} Se usará la compañía predeterminada.
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-2">
           <label

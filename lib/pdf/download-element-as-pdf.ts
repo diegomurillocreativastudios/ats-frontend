@@ -1,31 +1,32 @@
 import { prepareHtml2CanvasClone } from "@/lib/pdf/html2canvas-prepare-clone"
 
-export interface DownloadElementAsPdfOptions {
+export interface CaptureElementAsPdfOptions {
   element: HTMLElement
-  fileName?: string
   orientation?: "portrait" | "landscape"
   format?: "a4" | "letter"
   scale?: number
   marginMm?: number
 }
 
-export async function downloadElementAsPdf({
+export interface DownloadElementAsPdfOptions extends CaptureElementAsPdfOptions {
+  fileName?: string
+}
+
+async function buildPdfFromElement({
   element,
-  fileName = `documento-${new Date().toISOString().slice(0, 10)}.pdf`,
   orientation = "portrait",
   format = "a4",
   scale = 2,
   marginMm = 0,
-}: DownloadElementAsPdfOptions): Promise<void> {
+}: CaptureElementAsPdfOptions) {
   if (typeof window === "undefined") {
-    throw new Error("downloadElementAsPdf solo puede ejecutarse en el cliente.")
+    throw new Error("buildPdfFromElement solo puede ejecutarse en el cliente.")
   }
 
   if (!element) {
     throw new Error("No se recibió un elemento HTML válido para generar el PDF.")
   }
 
-  // html2canvas-pro: fork compatible con oklab/oklch (Tailwind CSS v4)
   const html2canvas = (await import("html2canvas-pro")).default
   const { jsPDF } = await import("jspdf")
 
@@ -105,5 +106,30 @@ export async function downloadElementAsPdf({
     pageIndex += 1
   }
 
+  return pdf
+}
+
+export async function captureElementAsPdfBlob(
+  options: CaptureElementAsPdfOptions
+): Promise<Blob> {
+  const pdf = await buildPdfFromElement(options)
+  return pdf.output("blob")
+}
+
+export async function downloadElementAsPdf({
+  element,
+  fileName = `documento-${new Date().toISOString().slice(0, 10)}.pdf`,
+  orientation = "portrait",
+  format = "a4",
+  scale = 2,
+  marginMm = 0,
+}: DownloadElementAsPdfOptions): Promise<void> {
+  const pdf = await buildPdfFromElement({
+    element,
+    orientation,
+    format,
+    scale,
+    marginMm,
+  })
   pdf.save(fileName)
 }

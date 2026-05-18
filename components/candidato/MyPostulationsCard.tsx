@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import type { CandidatePortalApplicationRow } from "@/lib/candidate-dashboard";
-import { mapDefaultCompanyDisplayLabel } from "@/lib/public-company-display";
 
 function getApplicationStatusStyle(statusLabel: string) {
   const t = statusLabel.toLowerCase();
@@ -65,7 +64,7 @@ export default function MyPostulationsCard({
       ) : (
         <div className="flex flex-col gap-3">
           {applications.map((post) => {
-            const companyDisplay = mapDefaultCompanyDisplayLabel(post.companyLine);
+            const companyDisplay = post.companyLine.trim();
             const showCompanyLine = companyDisplay.trim() !== "";
 
             return (

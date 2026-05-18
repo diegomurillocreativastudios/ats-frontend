@@ -10,6 +10,7 @@ import {
   ClipboardList,
   Cog,
   FileText,
+  Landmark,
   Users,
 } from "lucide-react"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/portal-admin/plantillas", label: "Plantillas", icon: FileText },
   { href: "/portal-admin/entrevistas", label: "Entrevistas", icon: Calendar },
   { href: "/portal-admin/usuarios", label: "Usuarios", icon: Users },
+  { href: "/portal-admin/empresas", label: "Empresas", icon: Landmark },
   {
     href: "/portal-admin/departamentos",
     label: "Departamentos",

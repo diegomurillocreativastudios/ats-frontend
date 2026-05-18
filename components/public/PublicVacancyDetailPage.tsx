@@ -17,7 +17,6 @@ import {
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
-import { mapDefaultCompanyDisplayLabel } from "@/lib/public-company-display"
 
 const darkPanelClassName =
   "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
@@ -235,7 +234,7 @@ export function PublicVacancyDetailPage({
   }, [vacancy?.title])
 
   const publishedLabel = formatPublishedLabel(vacancy?.publishedAt)
-  const companyName = mapDefaultCompanyDisplayLabel(vacancy?.company.name)
+  const companyName = vacancy?.company.name?.trim() ?? ""
   const applyHref = queryString
     ? `/oportunidades/${vacancyId}/aplicar?${queryString}`
     : `/oportunidades/${vacancyId}/aplicar`

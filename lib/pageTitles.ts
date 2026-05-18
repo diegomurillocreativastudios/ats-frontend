@@ -56,6 +56,7 @@ const ADMIN_PATH_LABEL = {
   entrevistas: "Entrevistas",
   plantillas: "Plantillas",
   usuarios: "Usuarios",
+  empresas: "Empresas",
   catalogos: "Catálogos",
   departamentos: "Departamentos",
   modalidades: "Modalidades",

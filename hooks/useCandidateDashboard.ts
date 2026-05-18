@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { normalizeApplicationSource } from "@/lib/application-source"
-import { mapDefaultCompanyDisplayLabel } from "@/lib/public-company-display"
 import type {
   CandidatePortalApplicationRow,
   CandidatePortalDashboard,
@@ -31,7 +30,7 @@ export function useCandidateDashboard() {
           }
           return {
             ...row,
-            companyLine: mapDefaultCompanyDisplayLabel(row.companyLine ?? ""),
+            companyLine: (row.companyLine ?? "").trim(),
             applicationSource: normalizeApplicationSource(
               row.applicationSource ?? ext.application_source
             ),

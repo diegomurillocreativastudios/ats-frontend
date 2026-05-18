@@ -31,6 +31,18 @@ import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
+import {
+  DEFAULT_RECRUITER_COMPANY_ID,
+  listCompanyApplicantStatuses,
+  listRecruiterCompanies,
+  listRecruiterStages,
+  persistVacancyCompanyId,
+  resolveVacancyCompanyId,
+} from "@/lib/api/recruiter-companies"
+import {
+  mapVacancyCompanyPatchError,
+  patchVacancyClientCompany,
+} from "@/lib/api/recruiter-vacancies"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
@@ -281,7 +293,6 @@ const getStatusConfig = (status) => {
   return STATUS_LABELS[key] ?? STATUS_LABELS.activa;
 };
 
-const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
 
@@ -1242,6 +1253,7 @@ export default function VacanteDetallePage() {
   const [editCountryCode, setEditCountryCode] = useState("");
   const [editVacancyDepartmentId, setEditVacancyDepartmentId] = useState("");
   const [editVacancyModalityId, setEditVacancyModalityId] = useState("");
+  const [editCompanyId, setEditCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
   const [editRequirements, setEditRequirements] = useState(() => [createEmptyRequirement()]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [savingVacancy, setSavingVacancy] = useState(false);
@@ -1274,6 +1286,8 @@ export default function VacanteDetallePage() {
   const [dragOverStage, setDragOverStage] = useState(null);
   const [stages, setStages] = useState([]);
   const [statuses, setStatuses] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [moveStageError, setMoveStageError] = useState(null);
   const [loadingMoveStage, setLoadingMoveStage] = useState(false);
   const [applicationStatusError, setApplicationStatusError] = useState(null);
@@ -1283,6 +1297,9 @@ export default function VacanteDetallePage() {
   const possibleCandidatesSectionMobileRef = useRef(null);
   const etapasSectionDesktopRef = useRef(null);
   const etapasSectionMobileRef = useRef(null);
+  const originalCompanyIdAtEditRef = useRef(DEFAULT_RECRUITER_COMPANY_ID);
+  const pipelineCompanyCapturedForVacancyRef = useRef<string | null>(null);
+  const [pipelineCompanyId, setPipelineCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
 
   const countrySelectOptions = useMemo(() => {
     const base = getCountryIso2SelectOptions();
@@ -1352,34 +1369,77 @@ export default function VacanteDetallePage() {
     });
   }, []);
 
+  const vacancyRouteId = Array.isArray(id) ? id[0] : id;
+
+  useEffect(() => {
+    pipelineCompanyCapturedForVacancyRef.current = null;
+  }, [vacancyRouteId]);
+
+  useEffect(() => {
+    if (!vacancy || !vacancyRouteId) return;
+    const routeKey = String(vacancyRouteId);
+    if (pipelineCompanyCapturedForVacancyRef.current === routeKey) return;
+    pipelineCompanyCapturedForVacancyRef.current = routeKey;
+    setPipelineCompanyId(
+      resolveVacancyCompanyId(
+        vacancy && typeof vacancy === "object" ? vacancy : null,
+        companies,
+        vacancyRouteId
+      )
+    );
+  }, [vacancy, companies, vacancyRouteId]);
+
+  const savedCompanyId = useMemo(
+    () =>
+      resolveVacancyCompanyId(
+        vacancy && typeof vacancy === "object" ? vacancy : null,
+        companies,
+        vacancyRouteId
+      ),
+    [vacancy, companies, vacancyRouteId]
+  );
+
+  const companySelectOptions = useMemo(() => {
+    if (companies.length > 0) return companies;
+    const fallbackName = String(vacancy?.company ?? vacancy?.companyName ?? "").trim();
+    return [
+      {
+        id: savedCompanyId,
+        name: fallbackName || "—",
+      },
+    ];
+  }, [companies, vacancy, savedCompanyId]);
+
+  const vacancyCompanyDisplayName = useMemo(() => {
+    const match = companySelectOptions.find((c) => c.id === savedCompanyId);
+    if (match?.name && match.name !== "—") return match.name;
+    const fromVacancy = String(vacancy?.company ?? vacancy?.companyName ?? "").trim();
+    return fromVacancy || "—";
+  }, [companySelectOptions, savedCompanyId, vacancy]);
+
   const fetchStages = useCallback(async () => {
     try {
-      const data = await apiClient.get(
-        `/api/recruiter/companies/${COMPANY_ID}/stages`
+      const list = await listRecruiterStages(pipelineCompanyId);
+      setStages(
+        list.map((item) => ({
+          id: item.id,
+          name: item.name,
+          order: item.order,
+        }))
       );
-      const list = Array.isArray(data) ? data : data?.stages ?? data?.items ?? data?.data ?? [];
-      const mapped = list.map((item, i) => ({
-        id: String(item?.id ?? item?.uuid ?? i),
-        name: item.name ?? item.stage_name ?? "",
-        order: item.orderIndex ?? item.order ?? i,
-      }));
-      setStages(mapped.sort((a, b) => a.order - b.order));
     } catch {
       setStages([]);
     }
-  }, []);
+  }, [pipelineCompanyId]);
 
   const fetchStatuses = useCallback(async () => {
     try {
-      const data = await apiClient.get(
-        `/api/recruiter/companies/${COMPANY_ID}/statuses`
-      );
-      const list = Array.isArray(data) ? data : data?.statuses ?? data?.items ?? data?.data ?? [];
+      const list = await listCompanyApplicantStatuses(pipelineCompanyId);
       setStatuses(list.map((item, i) => mapStatusFromApi(item, i)));
     } catch {
       setStatuses([]);
     }
-  }, []);
+  }, [pipelineCompanyId]);
 
   const fetchVacancyCatalogs = useCallback(async () => {
     setLoadingVacancyCatalogs(true)
@@ -1419,6 +1479,14 @@ export default function VacanteDetallePage() {
     try {
       const data = await apiClient.get(`/api/recruiter/vacancies/${id}`);
       setVacancy(data);
+      const record =
+        data && typeof data === "object" && !Array.isArray(data)
+          ? (data as Record<string, unknown>)
+          : null;
+      const companyIdFromApi = record?.companyId ?? record?.company_id;
+      if (companyIdFromApi != null && String(companyIdFromApi).trim() !== "") {
+        persistVacancyCompanyId(String(id), String(companyIdFromApi).trim());
+      }
     } catch (err: unknown) {
       if (!silent) {
         setFetchError(
@@ -1434,6 +1502,25 @@ export default function VacanteDetallePage() {
   useEffect(() => {
     fetchVacancy();
   }, [fetchVacancy]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadCompanies = async () => {
+      setLoadingCompanies(true);
+      try {
+        const list = await listRecruiterCompanies();
+        if (!cancelled) setCompanies(list);
+      } catch {
+        if (!cancelled) setCompanies([]);
+      } finally {
+        if (!cancelled) setLoadingCompanies(false);
+      }
+    };
+    void loadCompanies();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const hydrateEditFormFromVacancy = useCallback((v) => {
     if (!v) return;
@@ -1513,10 +1600,17 @@ export default function VacanteDetallePage() {
     if (!vacancy) return;
     setSaveVacancyError(null);
     setEditErrors({});
-    setVacancyCatalogsError(null)
+    setVacancyCatalogsError(null);
+    const resolvedCompanyId = resolveVacancyCompanyId(
+      vacancy && typeof vacancy === "object" ? vacancy : null,
+      companies,
+      vacancyRouteId
+    );
+    originalCompanyIdAtEditRef.current = resolvedCompanyId;
+    setEditCompanyId(resolvedCompanyId);
     hydrateEditFormFromVacancy(vacancy);
     setIsEditing(true);
-  }, [vacancy, hydrateEditFormFromVacancy]);
+  }, [vacancy, hydrateEditFormFromVacancy, companies, vacancyRouteId]);
 
   const handleAddRequirement = useCallback(() => {
     setEditRequirements((prev) => [...prev, createEmptyRequirement()]);
@@ -1549,8 +1643,15 @@ export default function VacanteDetallePage() {
   }, []);
 
   const handleSaveVacancy = useCallback(async () => {
-    if (!id || !vacancy) return;
+    const vacancyId = Array.isArray(id) ? id[0] : id;
+    if (!vacancyId || !vacancy) return;
     if (!validateEditForm()) return;
+    if (!editCompanyId.trim()) {
+      setSaveVacancyError("Selecciona una empresa cliente.");
+      return;
+    }
+
+    const companyChanged = editCompanyId !== originalCompanyIdAtEditRef.current;
 
     const validReqs = editRequirements.filter(
       (r) => String(r.requirementName ?? "").trim() && String(r.requirementValue ?? "").trim()
@@ -1573,107 +1674,164 @@ export default function VacanteDetallePage() {
         ? vacancy.weights.semantic
         : 0.5;
 
-    const payload: Record<string, unknown> = {
-      title: String(editTitle ?? "").trim(),
-      description: String(editDescription ?? "").trim(),
-      companyId: vacancy.companyId ?? COMPANY_ID,
-      requirements,
-      weights: {
-        semantic: semanticWeight,
-        attributes,
-      },
-    };
-
-    const vacancyStatusId =
-      vacancy?.vacancyStatusId ??
-      vacancy?.statusId ??
-      vacancy?.vacancy_status_id ??
-      vacancy?.status_id;
-    if (vacancyStatusId) payload.vacancyStatusId = vacancyStatusId;
-
+    const nextTitle = String(editTitle ?? "").trim();
+    const nextDescription = String(editDescription ?? "").trim();
     const nextCountry = editCountryCode.trim();
-    payload.countryCode = nextCountry === "" ? "" : nextCountry.toUpperCase();
-    payload.vacancyDepartmentId = editVacancyDepartmentId || null
-    payload.vacancyModalityId = editVacancyModalityId || null
+    const nextCountryCode = nextCountry === "" ? "" : nextCountry.toUpperCase();
+    const nextDepartmentId = editVacancyDepartmentId || null;
+    const nextModalityId = editVacancyModalityId || null;
+
+    const hasOtherFormChanges =
+      nextTitle !== String(vacancy?.title ?? "").trim() ||
+      nextDescription !== String(vacancy?.description ?? "").trim() ||
+      nextCountryCode !==
+        String(vacancy?.countryCode ?? vacancy?.country_code ?? "")
+          .trim()
+          .toUpperCase() ||
+      nextDepartmentId !== (getVacancyDepartmentId(vacancy) || null) ||
+      nextModalityId !== (getVacancyModalityId(vacancy) || null) ||
+      JSON.stringify(requirements) !==
+        JSON.stringify(
+          vacancy?.requirements &&
+            typeof vacancy.requirements === "object" &&
+            !Array.isArray(vacancy.requirements)
+            ? vacancy.requirements
+            : {}
+        );
 
     setSavingVacancy(true);
     setSaveVacancyError(null);
     try {
-      const updated = await apiClient.put(`/api/recruiter/vacancies/${id}`, payload);
-      const updatedRecord =
-        updated && typeof updated === "object" && !Array.isArray(updated) ? updated : {}
+      if (companyChanged && !hasOtherFormChanges) {
+        await patchVacancyClientCompany(vacancyId, editCompanyId);
+        persistVacancyCompanyId(vacancyId, editCompanyId);
+        await fetchVacancy(true);
+      } else if (hasOtherFormChanges) {
+        const payload: Record<string, unknown> = {
+          title: nextTitle,
+          description: nextDescription,
+          requirements,
+          weights: {
+            semantic: semanticWeight,
+            attributes,
+          },
+          countryCode: nextCountryCode,
+          vacancyDepartmentId: nextDepartmentId,
+          vacancyModalityId: nextModalityId,
+        };
+        if (companyChanged) {
+          payload.companyId = editCompanyId;
+        }
 
-      const selectedDepartment = mergedDepartmentOptions.find(
-        (option) => option.id === editVacancyDepartmentId
-      )
-      const selectedModality = mergedModalityOptions.find(
-        (option) => option.id === editVacancyModalityId
-      )
+        const updated = await apiClient.put(
+          `/api/recruiter/vacancies/${vacancyId}`,
+          payload
+        );
+        const updatedRecord =
+          updated && typeof updated === "object" && !Array.isArray(updated) ? updated : {};
 
-      const nextDepartmentSummary =
-        updatedRecord.vacancyDepartment ??
-        updatedRecord.vacancy_department ??
-        updatedRecord.department ??
-        createCatalogSummary(selectedDepartment) ??
-        null
+        const selectedDepartment = mergedDepartmentOptions.find(
+          (option) => option.id === editVacancyDepartmentId
+        );
+        const selectedModality = mergedModalityOptions.find(
+          (option) => option.id === editVacancyModalityId
+        );
 
-      const nextModalitySummary =
-        updatedRecord.vacancyModality ??
-        updatedRecord.vacancy_modality ??
-        updatedRecord.modality ??
-        updatedRecord.workArrangement ??
-        updatedRecord.work_arrangement ??
-        createCatalogSummary(selectedModality) ??
-        null
+        const nextDepartmentSummary =
+          updatedRecord.vacancyDepartment ??
+          updatedRecord.vacancy_department ??
+          updatedRecord.department ??
+          createCatalogSummary(selectedDepartment) ??
+          null;
 
-      setVacancy((prev) => ({
-        ...(prev && typeof prev === "object" ? prev : {}),
-        ...updatedRecord,
-        title: payload.title,
-        description: payload.description,
-        countryCode: payload.countryCode,
-        vacancyDepartmentId: editVacancyDepartmentId || null,
-        vacancy_department_id: editVacancyDepartmentId || null,
-        vacancyDepartment: nextDepartmentSummary,
-        vacancy_department: nextDepartmentSummary,
-        department:
-          nextDepartmentSummary && typeof nextDepartmentSummary === "object"
-            ? nextDepartmentSummary.displayName
-            : nextDepartmentSummary,
-        vacancyModalityId: editVacancyModalityId || null,
-        vacancy_modality_id: editVacancyModalityId || null,
-        vacancyModality: nextModalitySummary,
-        vacancy_modality: nextModalitySummary,
-        modality:
-          nextModalitySummary && typeof nextModalitySummary === "object"
-            ? nextModalitySummary.displayName
-            : nextModalitySummary,
-        workArrangement:
-          nextModalitySummary && typeof nextModalitySummary === "object"
-            ? nextModalitySummary.displayName
-            : nextModalitySummary,
-        work_arrangement:
-          nextModalitySummary && typeof nextModalitySummary === "object"
-            ? nextModalitySummary.displayName
-            : nextModalitySummary,
-      }));
+        const nextModalitySummary =
+          updatedRecord.vacancyModality ??
+          updatedRecord.vacancy_modality ??
+          updatedRecord.modality ??
+          updatedRecord.workArrangement ??
+          updatedRecord.work_arrangement ??
+          createCatalogSummary(selectedModality) ??
+          null;
+
+        const nextCompanyName =
+          companySelectOptions.find((c) => c.id === editCompanyId)?.name ??
+          String(updatedRecord.company ?? vacancy?.company ?? "").trim();
+
+        if (companyChanged) {
+          persistVacancyCompanyId(vacancyId, editCompanyId);
+        }
+
+        setVacancy((prev) => ({
+          ...(prev && typeof prev === "object" ? prev : {}),
+          ...updatedRecord,
+          title: payload.title,
+          description: payload.description,
+          countryCode: payload.countryCode,
+          companyId: companyChanged ? editCompanyId : prev?.companyId,
+          company: companyChanged ? nextCompanyName : prev?.company,
+          vacancyDepartmentId: editVacancyDepartmentId || null,
+          vacancy_department_id: editVacancyDepartmentId || null,
+          vacancyDepartment: nextDepartmentSummary,
+          vacancy_department: nextDepartmentSummary,
+          department:
+            nextDepartmentSummary && typeof nextDepartmentSummary === "object"
+              ? nextDepartmentSummary.displayName
+              : nextDepartmentSummary,
+          vacancyModalityId: editVacancyModalityId || null,
+          vacancy_modality_id: editVacancyModalityId || null,
+          vacancyModality: nextModalitySummary,
+          vacancy_modality: nextModalitySummary,
+          modality:
+            nextModalitySummary && typeof nextModalitySummary === "object"
+              ? nextModalitySummary.displayName
+              : nextModalitySummary,
+          workArrangement:
+            nextModalitySummary && typeof nextModalitySummary === "object"
+              ? nextModalitySummary.displayName
+              : nextModalitySummary,
+          work_arrangement:
+            nextModalitySummary && typeof nextModalitySummary === "object"
+              ? nextModalitySummary.displayName
+              : nextModalitySummary,
+        }));
+
+        if (companyChanged) {
+          await fetchVacancy(true);
+        }
+      }
+
       setIsEditing(false);
       setSnackbar({
         open: true,
         variant: "success",
         message: "Cambios guardados correctamente.",
       });
-      if (!updated) {
-        await fetchVacancy(true);
-      }
     } catch (err) {
-      const msg = err?.message ?? err?.detail ?? "No se pudo guardar la vacante."
+      const msg = companyChanged
+        ? mapVacancyCompanyPatchError(err)
+        : getApiErrorMessage(err) || "No se pudo guardar la vacante.";
       setSaveVacancyError(msg);
       setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
       setSavingVacancy(false);
     }
-  }, [id, editTitle, editDescription, editCountryCode, editVacancyDepartmentId, editVacancyModalityId, editRequirements, validateEditForm, fetchVacancy, mergedDepartmentOptions, mergedModalityOptions, createCatalogSummary]);
+  }, [
+    id,
+    vacancy,
+    editCompanyId,
+    editTitle,
+    editDescription,
+    editCountryCode,
+    editVacancyDepartmentId,
+    editVacancyModalityId,
+    editRequirements,
+    validateEditForm,
+    fetchVacancy,
+    mergedDepartmentOptions,
+    mergedModalityOptions,
+    createCatalogSummary,
+    companySelectOptions,
+  ]);
 
   useEffect(() => {
     fetchStages();
@@ -2113,6 +2271,31 @@ export default function VacanteDetallePage() {
                                   </p>
                                 )}
                               </div>
+                              <div className="flex flex-col gap-2">
+                                <label
+                                  className="font-sans text-sm font-medium text-foreground"
+                                  htmlFor="edit-vacancy-company-desktop"
+                                >
+                                  Cliente / compañía
+                                </label>
+                                <select
+                                  id="edit-vacancy-company-desktop"
+                                  value={editCompanyId}
+                                  onChange={(e) => setEditCompanyId(e.target.value)}
+                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                  aria-label="Cliente o compañía de la vacante"
+                                  disabled={loadingCompanies || companySelectOptions.length === 0}
+                                >
+                                  {companySelectOptions.map((company) => (
+                                    <option key={company.id} value={company.id}>
+                                      {company.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                <p className="font-sans text-xs text-muted-foreground">
+                                  Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes.
+                                </p>
+                              </div>
                               <div className="grid gap-4 md:grid-cols-3">
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-desktop">
@@ -2186,12 +2369,20 @@ export default function VacanteDetallePage() {
                             </h1>
                           )}
                           <div className="flex flex-wrap items-center gap-4 font-sans text-sm text-muted-foreground">
+                            {!isEditing ? (
+                              <span className="flex min-w-0 items-center gap-1.5">
+                                <Building2 className="h-4 w-4 shrink-0" aria-hidden />
+                                <span className="min-w-0 font-medium text-foreground">
+                                  {vacancyCompanyDisplayName}
+                                </span>
+                              </span>
+                            ) : null}
                             <span className="flex items-center gap-1.5">
-                              <Building2 className="h-4 w-4 shrink-0" aria-hidden />
+                              <Briefcase className="h-4 w-4 shrink-0" aria-hidden />
                               {getVacancyDepartmentLabel(vacancy)}
                             </span>
                             <span className="flex items-center gap-1.5">
-                              <Briefcase className="h-4 w-4 shrink-0" aria-hidden />
+                              <Users className="h-4 w-4 shrink-0" aria-hidden />
                               {getVacancyModalityLabel(vacancy)}
                             </span>
                             {!isEditing ? (
@@ -2217,8 +2408,8 @@ export default function VacanteDetallePage() {
                       <div className="flex flex-wrap items-center gap-3">
                         {!isEditing ? (
                           <>
-                            <RematchButton 
-                              vacancyId={id} 
+                            <RematchButton
+                              vacancyId={id}
                               needsRematch={vacancy.needsRematch} 
                               onSuccess={() => fetchVacancy(true)}
                               onSnackbar={(message, variant = "success") =>
@@ -2820,6 +3011,31 @@ export default function VacanteDetallePage() {
                                 </p>
                               )}
                             </div>
+                            <div className="flex flex-col gap-2">
+                              <label
+                                className="font-sans text-sm font-medium text-foreground"
+                                htmlFor="edit-vacancy-company-mobile"
+                              >
+                                Cliente / compañía
+                              </label>
+                              <select
+                                id="edit-vacancy-company-mobile"
+                                value={editCompanyId}
+                                onChange={(e) => setEditCompanyId(e.target.value)}
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label="Cliente o compañía de la vacante"
+                                disabled={loadingCompanies || companySelectOptions.length === 0}
+                              >
+                                {companySelectOptions.map((company) => (
+                                  <option key={company.id} value={company.id}>
+                                    {company.name}
+                                  </option>
+                                ))}
+                              </select>
+                              <p className="font-sans text-xs text-muted-foreground">
+                                Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes.
+                              </p>
+                            </div>
                             <div className="grid gap-4 md:grid-cols-3">
                               <div className="flex flex-col gap-2">
                                 <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-mobile">
@@ -2893,12 +3109,20 @@ export default function VacanteDetallePage() {
                           </h1>
                         )}
                         <div className="flex flex-wrap items-center gap-3 font-sans text-sm text-muted-foreground">
+                          {!isEditing ? (
+                            <span className="flex min-w-0 items-center gap-1">
+                              <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                              <span className="min-w-0 font-medium text-foreground">
+                                {vacancyCompanyDisplayName}
+                              </span>
+                            </span>
+                          ) : null}
                           <span className="flex items-center gap-1">
-                            <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                            <Briefcase className="h-3.5 w-3.5 shrink-0" aria-hidden />
                             {getVacancyDepartmentLabel(vacancy)}
                           </span>
                           <span className="flex items-center gap-1">
-                            <Briefcase className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                            <Users className="h-3.5 w-3.5 shrink-0" aria-hidden />
                             {getVacancyModalityLabel(vacancy)}
                           </span>
                           {!isEditing ? (

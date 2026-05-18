@@ -5,8 +5,6 @@ import type {
   TechnicalEvaluationRow,
   VacancyProgressByClientRow,
 } from "@/lib/api/recruiter-reports"
-import { mapDefaultCompanyDisplayLabel } from "@/lib/public-company-display"
-
 /** Días sin movimiento para alertar candidatos (heurística demo). */
 export const REPORTES_STALE_CANDIDATE_DAYS = 14
 
@@ -42,10 +40,20 @@ export function normalizeVacancyStatusSlug(
   return "unknown"
 }
 
+export function displayCompanyOrClientLabel(
+  clientName?: string | null,
+  companyName?: string | null,
+  whenEmpty = "—"
+): string {
+  const raw = String(clientName ?? companyName ?? "").trim()
+  if (raw === "") return whenEmpty
+  return raw
+}
+
 export function vacancyClientLabel(row: VacancyProgressByClientRow): string {
   const raw = (row.clientName ?? row.companyName ?? "").trim()
   if (raw === "") return "Sin cliente"
-  return mapDefaultCompanyDisplayLabel(raw)
+  return raw
 }
 
 export function vacancyProgressPercentValue(

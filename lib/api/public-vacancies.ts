@@ -1,5 +1,4 @@
 import { apiClient } from "@/lib/api"
-import { mapDefaultCompanyDisplayLabel } from "@/lib/public-company-display"
 import { formatCountryCodeLabel } from "@/lib/profile-form-options"
 import {
   getVacancyDepartmentSummary,
@@ -155,7 +154,7 @@ function normalizeCompany(raw: Record<string, unknown>): OpportunityCompanySumma
     id:
       toOptionalString(nestedCompany?.id ?? nestedCompany?.uuid ?? raw.companyId) ??
       companyName,
-    name: mapDefaultCompanyDisplayLabel(companyName),
+    name: companyName,
   }
 }
 

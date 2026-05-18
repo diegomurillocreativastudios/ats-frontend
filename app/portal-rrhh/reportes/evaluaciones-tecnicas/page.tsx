@@ -39,7 +39,7 @@ import {
   type TechnicalEvaluationRow,
 } from "@/lib/api/recruiter-reports"
 import { formatReportDate } from "@/lib/reportes-display"
-import { displayCompanyOrClientLabel } from "@/lib/public-company-display"
+import { displayCompanyOrClientLabel } from "@/lib/reportes-metrics"
 import {
   computeTechnicalEvaluationKpis,
   parseTechnicalScorePercent,
