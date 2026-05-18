@@ -17,6 +17,7 @@ describe("mapVacancyFromApi", () => {
       companyId: "co-1",
       company: "Creativa Studios",
       countryCode: "SV",
+      stateCode: "SS",
       requirements: { experience: "2+ years", language: "English" },
       needsRematch: false,
       candidatesAmount: 2,
@@ -42,6 +43,7 @@ describe("mapVacancyFromApi", () => {
     expect(item.modality).toBe("Presencial")
     expect(item.modalityId).toBe("22222222-2222-2222-2222-222222222222")
     expect(item.countryCode).toBe("SV")
+    expect(item.stateCode).toBe("SS")
     expect(item.candidates).toBe(2)
     expect(item.status).toBe("activa")
     expect(item.statusRaw).toBe("Open")

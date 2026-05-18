@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
   ArrowLeft,
   Briefcase,
@@ -17,6 +17,7 @@ import {
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
+import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 
 const darkPanelClassName =
   "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
@@ -43,7 +44,7 @@ function getCompanyInitials(companyName: string): string {
     .join("")
 }
 
-function DetailPill({ value }: { value: string }) {
+function DetailPill({ value }: { value: ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-full border border-white/10 bg-white/7 px-3 py-1.5 text-xs font-medium text-white/82">
       {value}
@@ -56,7 +57,7 @@ function DetailRow({
   value,
 }: {
   label: string
-  value: string
+  value: ReactNode
 }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-white/10 py-3 last:border-b-0 last:pb-0">
@@ -304,9 +305,11 @@ export function PublicVacancyDetailPage({
                           ) : null}
                           <span className="inline-flex items-center gap-2">
                             <MapPin className="h-4 w-4 text-[#f6c482]" aria-hidden />
-                            {vacancy.locationLabel ??
-                              vacancy.countryLabel ??
-                              "Ubicación no especificada"}
+                            <VacancyLocationLabel
+                              countryCode={vacancy.countryCode}
+                              stateCode={vacancy.stateCode}
+                              emptyLabel="Ubicación no especificada"
+                            />
                           </span>
                           <span className="inline-flex items-center gap-2">
                             <Briefcase className="h-4 w-4 text-[#f5b0ff]" aria-hidden />
@@ -326,7 +329,15 @@ export function PublicVacancyDetailPage({
                   <div className="flex flex-wrap items-center gap-2">
                     <DetailPill value={vacancy.department?.displayName ?? "No especificado"} />
                     <DetailPill value={vacancy.modality?.displayName ?? "No especificado"} />
-                    <DetailPill value={vacancy.countryLabel ?? "No especificado"} />
+                    <DetailPill
+                      value={
+                        <VacancyLocationLabel
+                          countryCode={vacancy.countryCode}
+                          stateCode={vacancy.stateCode}
+                          emptyLabel="No especificado"
+                        />
+                      }
+                    />
                     {publishedLabel ? <DetailPill value={`Publicada ${publishedLabel}`} /> : null}
                     <Link
                       href={applyHref}
@@ -352,9 +363,11 @@ export function PublicVacancyDetailPage({
                     <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
                       <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">Ubicación</p>
                       <p className="mt-2 text-lg font-semibold text-white">
-                        {vacancy.countryLabel ??
-                          vacancy.locationLabel ??
-                          "No especificado"}
+                        <VacancyLocationLabel
+                          countryCode={vacancy.countryCode}
+                          stateCode={vacancy.stateCode}
+                          emptyLabel="No especificado"
+                        />
                       </p>
                     </div>
                   </div>
@@ -383,8 +396,14 @@ export function PublicVacancyDetailPage({
                       value={vacancy.modality?.displayName ?? "No especificado"}
                     />
                     <DetailRow
-                      label="País"
-                      value={vacancy.countryLabel ?? "No especificado"}
+                      label="Ubicación"
+                      value={
+                        <VacancyLocationLabel
+                          countryCode={vacancy.countryCode}
+                          stateCode={vacancy.stateCode}
+                          emptyLabel="No especificado"
+                        />
+                      }
                     />
                     {publishedLabel ? (
                       <DetailRow label="Publicación" value={publishedLabel} />

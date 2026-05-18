@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api"
 import { formatCountryCodeLabel } from "@/lib/profile-form-options"
+import { normalizeCountryCode, readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
 import {
   getVacancyDepartmentSummary,
   getVacancyModalitySummary,
@@ -35,6 +36,7 @@ export interface OpportunityVacancySummary {
   title: string
   company: OpportunityCompanySummary
   countryCode?: string
+  stateCode?: string | null
   countryLabel?: string
   department?: VacancyCatalogSummary
   modality?: VacancyCatalogSummary
@@ -158,9 +160,12 @@ function normalizeCompany(raw: Record<string, unknown>): OpportunityCompanySumma
   }
 }
 
-function normalizeCountryCode(raw: Record<string, unknown>): string | undefined {
-  const value = toOptionalString(raw.countryCode ?? raw.country_code)
-  return value ? value.toUpperCase() : undefined
+function normalizeCountryCodeField(raw: Record<string, unknown>): string | undefined {
+  return normalizeCountryCode(raw.countryCode ?? raw.country_code) ?? undefined
+}
+
+function normalizeStateCodeField(raw: Record<string, unknown>): string | null {
+  return readVacancyStateCode(raw)
 }
 
 function normalizeLocationLabel(
@@ -185,13 +190,15 @@ function normalizeOpportunitySummary(raw: unknown): OpportunityVacancySummary | 
 
   if (!id || !title) return null
 
-  const countryCode = normalizeCountryCode(record)
+  const countryCode = normalizeCountryCodeField(record)
+  const stateCode = normalizeStateCodeField(record)
 
   return {
     id,
     title,
     company: normalizeCompany(record),
     countryCode,
+    stateCode,
     countryLabel: countryCode ? formatCountryCodeLabel(countryCode) : undefined,
     department: getVacancyDepartmentSummary(record) ?? undefined,
     modality: getVacancyModalitySummary(record) ?? undefined,

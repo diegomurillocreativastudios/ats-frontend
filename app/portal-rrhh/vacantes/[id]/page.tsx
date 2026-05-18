@@ -46,6 +46,8 @@ import {
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
+import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
+import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
 import { technicalSheetMessages } from "@/lib/messages/technical-sheet"
 import {
@@ -66,10 +68,10 @@ import {
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
 import {
-  getCountryIso2SelectOptions,
-  mergeLegacySelectOption,
-  formatCountryCodeLabel,
-} from "@/lib/profile-form-options";
+  appendVacancyLocationToPayload,
+  normalizeStateCode,
+  readVacancyStateCode,
+} from "@/lib/vacancies/vacancy-location";
 import { formatVacancyDetailDocumentTitle } from "@/lib/pageTitles";
 import {
   getVacancyDepartmentId,
@@ -1251,6 +1253,7 @@ export default function VacanteDetallePage() {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editCountryCode, setEditCountryCode] = useState("");
+  const [editStateCode, setEditStateCode] = useState("");
   const [editVacancyDepartmentId, setEditVacancyDepartmentId] = useState("");
   const [editVacancyModalityId, setEditVacancyModalityId] = useState("");
   const [editCompanyId, setEditCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
@@ -1300,13 +1303,6 @@ export default function VacanteDetallePage() {
   const originalCompanyIdAtEditRef = useRef(DEFAULT_RECRUITER_COMPANY_ID);
   const pipelineCompanyCapturedForVacancyRef = useRef<string | null>(null);
   const [pipelineCompanyId, setPipelineCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
-
-  const countrySelectOptions = useMemo(() => {
-    const base = getCountryIso2SelectOptions();
-    const raw = vacancy?.countryCode ?? vacancy?.country_code;
-    if (raw == null || String(raw).trim() === "") return base;
-    return mergeLegacySelectOption(base, String(raw).trim().toUpperCase());
-  }, [vacancy?.countryCode, vacancy?.country_code]);
 
   const vacancyDepartmentSummary = useMemo(
     () =>
@@ -1530,6 +1526,7 @@ export default function VacanteDetallePage() {
         ? String(ccRaw).trim().toUpperCase()
         : ""
     );
+    setEditStateCode(readVacancyStateCode(v) ?? "");
     setEditTitle(String(v.title ?? "").trim());
     setEditDescription(String(v.description ?? "").trim());
     setEditVacancyDepartmentId(getVacancyDepartmentId(v))
@@ -1678,6 +1675,10 @@ export default function VacanteDetallePage() {
     const nextDescription = String(editDescription ?? "").trim();
     const nextCountry = editCountryCode.trim();
     const nextCountryCode = nextCountry === "" ? "" : nextCountry.toUpperCase();
+    const nextStateCode = normalizeStateCode(editStateCode);
+    const currentStateCode = readVacancyStateCode(
+      vacancy && typeof vacancy === "object" ? vacancy : null
+    );
     const nextDepartmentId = editVacancyDepartmentId || null;
     const nextModalityId = editVacancyModalityId || null;
 
@@ -1688,6 +1689,7 @@ export default function VacanteDetallePage() {
         String(vacancy?.countryCode ?? vacancy?.country_code ?? "")
           .trim()
           .toUpperCase() ||
+      nextStateCode !== currentStateCode ||
       nextDepartmentId !== (getVacancyDepartmentId(vacancy) || null) ||
       nextModalityId !== (getVacancyModalityId(vacancy) || null) ||
       JSON.stringify(requirements) !==
@@ -1715,10 +1717,13 @@ export default function VacanteDetallePage() {
             semantic: semanticWeight,
             attributes,
           },
-          countryCode: nextCountryCode,
           vacancyDepartmentId: nextDepartmentId,
           vacancyModalityId: nextModalityId,
         };
+        appendVacancyLocationToPayload(payload, {
+          countryCode: editCountryCode,
+          stateCode: editStateCode,
+        });
         if (companyChanged) {
           payload.companyId = editCompanyId;
         }
@@ -1767,6 +1772,8 @@ export default function VacanteDetallePage() {
           title: payload.title,
           description: payload.description,
           countryCode: payload.countryCode,
+          stateCode: payload.stateCode,
+          state_code: payload.stateCode,
           companyId: companyChanged ? editCompanyId : prev?.companyId,
           company: companyChanged ? nextCompanyName : prev?.company,
           vacancyDepartmentId: editVacancyDepartmentId || null,
@@ -1822,6 +1829,7 @@ export default function VacanteDetallePage() {
     editTitle,
     editDescription,
     editCountryCode,
+    editStateCode,
     editVacancyDepartmentId,
     editVacancyModalityId,
     editRequirements,
@@ -2296,36 +2304,30 @@ export default function VacanteDetallePage() {
                                   Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes.
                                 </p>
                               </div>
-                              <div className="grid gap-4 md:grid-cols-3">
-                                <div className="flex flex-col gap-2">
-                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-desktop">
-                                    País al que aplica la vacante
-                                  </label>
-                                  <select
-                                    id="edit-vacancy-country-desktop"
-                                    value={editCountryCode}
-                                    onChange={(e) => setEditCountryCode(e.target.value)}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="País al que aplica la vacante"
-                                  >
-                                    <option value="">Sin especificar</option>
-                                    {countrySelectOptions.map((opt) => (
-                                      <option key={opt.value} value={opt.value}>
-                                        {opt.label}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
+                              <VacancyLocationFields
+                                countryCode={editCountryCode}
+                                stateCode={editStateCode}
+                                onChange={({ countryCode, stateCode }) => {
+                                  setEditCountryCode(countryCode)
+                                  setEditStateCode(stateCode)
+                                }}
+                                countrySelectId="edit-vacancy-country-desktop"
+                                stateSelectId="edit-vacancy-state-desktop"
+                                countryLabel="País al que aplica la vacante"
+                                stateLabel="Estado / provincia"
+                                disabled={savingVacancy}
+                              />
+                              <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-desktop">
-                                    Departamento
+                                    Área (catálogo)
                                   </label>
                                   <select
                                     id="edit-vacancy-department-desktop"
                                     value={editVacancyDepartmentId}
                                     onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Departamento de la vacante"
+                                    aria-label="Área de la vacante en catálogo"
                                     disabled={loadingVacancyCatalogs}
                                   >
                                     <option value="">Sin especificar</option>
@@ -2389,7 +2391,7 @@ export default function VacanteDetallePage() {
                               <span className="flex min-w-0 items-center gap-1.5">
                                 <MapPin className="h-4 w-4 shrink-0" aria-hidden />
                                 <span className="min-w-0">
-                                  {formatCountryCodeLabel(vacancy.countryCode ?? vacancy.country_code)}
+                                  <VacancyLocationLabel countryCode={vacancy.countryCode ?? vacancy.country_code} stateCode={vacancy.stateCode ?? vacancy.state_code} />
                                 </span>
                               </span>
                             ) : null}
@@ -3036,67 +3038,61 @@ export default function VacanteDetallePage() {
                                 Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes.
                               </p>
                             </div>
-                            <div className="grid gap-4 md:grid-cols-3">
-                              <div className="flex flex-col gap-2">
-                                <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-country-mobile">
-                                  País al que aplica la vacante
-                                </label>
-                                <select
-                                  id="edit-vacancy-country-mobile"
-                                  value={editCountryCode}
-                                  onChange={(e) => setEditCountryCode(e.target.value)}
-                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                  aria-label="País al que aplica la vacante"
-                                >
-                                  <option value="">Sin especificar</option>
-                                  {countrySelectOptions.map((opt) => (
-                                    <option key={opt.value} value={opt.value}>
-                                      {opt.label}
-                                    </option>
-                                  ))}
-                                </select>
+                            <VacancyLocationFields
+                                countryCode={editCountryCode}
+                                stateCode={editStateCode}
+                                onChange={({ countryCode, stateCode }) => {
+                                  setEditCountryCode(countryCode)
+                                  setEditStateCode(stateCode)
+                                }}
+                                countrySelectId="edit-vacancy-country-mobile"
+                                stateSelectId="edit-vacancy-state-mobile"
+                                countryLabel="País al que aplica la vacante"
+                                stateLabel="Estado / provincia"
+                                disabled={savingVacancy}
+                              />
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-mobile">
+                                    Área (catálogo)
+                                  </label>
+                                  <select
+                                    id="edit-vacancy-department-mobile"
+                                    value={editVacancyDepartmentId}
+                                    onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label="Área de la vacante en catálogo"
+                                    disabled={loadingVacancyCatalogs}
+                                  >
+                                    <option value="">Sin especificar</option>
+                                    {mergedDepartmentOptions.map((option) => (
+                                      <option key={option.id} value={option.id}>
+                                        {option.displayName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-mobile">
+                                    Modalidad
+                                  </label>
+                                  <select
+                                    id="edit-vacancy-modality-mobile"
+                                    value={editVacancyModalityId}
+                                    onChange={(e) => setEditVacancyModalityId(e.target.value)}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label="Modalidad de la vacante"
+                                    disabled={loadingVacancyCatalogs}
+                                  >
+                                    <option value="">Sin especificar</option>
+                                    {mergedModalityOptions.map((option) => (
+                                      <option key={option.id} value={option.id}>
+                                        {option.displayName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
                               </div>
-                              <div className="flex flex-col gap-2">
-                                <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-mobile">
-                                  Departamento
-                                </label>
-                                <select
-                                  id="edit-vacancy-department-mobile"
-                                  value={editVacancyDepartmentId}
-                                  onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
-                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                  aria-label="Departamento de la vacante"
-                                  disabled={loadingVacancyCatalogs}
-                                >
-                                  <option value="">Sin especificar</option>
-                                  {mergedDepartmentOptions.map((option) => (
-                                    <option key={option.id} value={option.id}>
-                                      {option.displayName}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-mobile">
-                                  Modalidad
-                                </label>
-                                <select
-                                  id="edit-vacancy-modality-mobile"
-                                  value={editVacancyModalityId}
-                                  onChange={(e) => setEditVacancyModalityId(e.target.value)}
-                                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                  aria-label="Modalidad de la vacante"
-                                  disabled={loadingVacancyCatalogs}
-                                >
-                                  <option value="">Sin especificar</option>
-                                  {mergedModalityOptions.map((option) => (
-                                    <option key={option.id} value={option.id}>
-                                      {option.displayName}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
                             {vacancyCatalogsError ? (
                               <p className="font-sans text-sm text-amber-700" role="status">
                                 {vacancyCatalogsError}
@@ -3129,7 +3125,7 @@ export default function VacanteDetallePage() {
                             <span className="flex min-w-0 items-center gap-1">
                               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
                               <span className="min-w-0">
-                                {formatCountryCodeLabel(vacancy.countryCode ?? vacancy.country_code)}
+                                <VacancyLocationLabel countryCode={vacancy.countryCode ?? vacancy.country_code} stateCode={vacancy.stateCode ?? vacancy.state_code} />
                               </span>
                             </span>
                           ) : null}

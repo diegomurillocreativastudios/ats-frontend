@@ -24,6 +24,7 @@ describe("public vacancies API helpers", () => {
           title: "Senior React Developer",
           company: { id: "comp-1", name: "Creativa Studios" },
           countryCode: "sv",
+          stateCode: "ss",
           department: {
             id: "dep-1",
             code: "development",
@@ -65,6 +66,7 @@ describe("public vacancies API helpers", () => {
     expect(response.items[0].department?.displayName).toBe("Development")
     expect(response.items[0].modality?.displayName).toBe("Remoto")
     expect(response.items[0].countryCode).toBe("SV")
+    expect(response.items[0].stateCode).toBe("SS")
     expect(response.availableFilters.departments[0].count).toBe(12)
     expect(response.pagination.page).toBe(2)
     expect(response.pagination.totalPages).toBe(2)

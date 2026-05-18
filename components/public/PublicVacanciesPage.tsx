@@ -34,6 +34,7 @@ import {
   type OpportunityListResponse,
   type OpportunityVacancySummary,
 } from "@/lib/api/public-vacancies"
+import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 
 interface QueryState {
   departmentId: string
@@ -281,8 +282,6 @@ function OpportunityCard({
 }) {
   const publishedLabel = formatPublishedLabel(vacancy.publishedAt)
   const href = `/oportunidades/${vacancy.id}${queryString ? `?${queryString}` : ""}`
-  const locationLabel =
-    vacancy.locationLabel ?? vacancy.countryLabel ?? "Ubicación no especificada"
   const departmentLabel = vacancy.department?.displayName ?? "Departamento no especificado"
   const modalityLabel = vacancy.modality?.displayName ?? "Modalidad no especificada"
   const companyName = vacancy.company.name?.trim() ?? ""
@@ -334,7 +333,11 @@ function OpportunityCard({
           <div className="space-y-1">
             <p className="inline-flex items-center gap-2 text-sm text-white/74">
               <MapPin className="h-3.5 w-3.5 text-[#f6c482]" aria-hidden />
-              {locationLabel}
+              <VacancyLocationLabel
+                countryCode={vacancy.countryCode}
+                stateCode={vacancy.stateCode}
+                emptyLabel="Ubicación no especificada"
+              />
             </p>
             <p className="text-xs text-white/46">{modalityLabel}</p>
           </div>

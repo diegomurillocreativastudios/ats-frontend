@@ -1,4 +1,5 @@
-import { formatCountryCodeLabel } from "@/lib/profile-form-options"
+import { formatVacancyCountryLabel } from "@/lib/vacancies/vacancy-location-display"
+import { normalizeCountryCode, readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
 import {
   getVacancyDepartmentId,
   getVacancyDepartmentLabel,
@@ -32,6 +33,7 @@ export interface VacancyListItem {
   createdAtLabel: string | null
   countryCode: string | null
   countryLabel: string
+  stateCode: string | null
 }
 
 export const formatRequirementsSummary = (req: unknown): string => {
@@ -138,12 +140,9 @@ export const mapVacancyFromApi = (
       : null
   const status = mapStatusKey(item)
   const statusRaw = String(item?.status ?? item?.state ?? "—")
-  const countryCodeRaw = item?.countryCode ?? item?.country_code
-  const countryCode =
-    countryCodeRaw != null && String(countryCodeRaw).trim() !== ""
-      ? String(countryCodeRaw).trim().toUpperCase()
-      : null
-  const countryLabel = formatCountryCodeLabel(countryCode)
+  const countryCode = normalizeCountryCode(item?.countryCode ?? item?.country_code)
+  const countryLabel = formatVacancyCountryLabel(countryCode) || "—"
+  const stateCode = readVacancyStateCode(item)
   const createdAtRaw = item?.createdAt ?? item?.created_at
   const createdAt =
     createdAtRaw != null && String(createdAtRaw).trim() !== ""
@@ -174,5 +173,6 @@ export const mapVacancyFromApi = (
     createdAtLabel: formatCreatedAtLabel(createdAt),
     countryCode,
     countryLabel,
+    stateCode,
   }
 }

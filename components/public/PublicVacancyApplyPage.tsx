@@ -18,6 +18,7 @@ import {
   getPublicVacancyDetail,
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
+import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 
 const darkPanelClassName =
   "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
@@ -163,9 +164,11 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
                     <div className="flex items-start gap-3">
                       <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#f6c482]" aria-hidden />
                       <span>
-                        {vacancy.locationLabel ??
-                          vacancy.countryLabel ??
-                          "Ubicación no especificada"}
+                        <VacancyLocationLabel
+                          countryCode={vacancy.countryCode}
+                          stateCode={vacancy.stateCode}
+                          emptyLabel="Ubicación no especificada"
+                        />
                       </span>
                     </div>
                     <div className="flex items-start gap-3">

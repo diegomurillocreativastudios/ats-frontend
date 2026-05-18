@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +12,8 @@ import {
   persistVacancyCompanyId,
   type RecruiterCompanyOption,
 } from "@/lib/api/recruiter-companies";
-import { getCountryIso2SelectOptions } from "@/lib/profile-form-options";
+import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields";
+import { appendVacancyLocationToPayload } from "@/lib/vacancies/vacancy-location";
 import { mapActiveCatalogItemsToOptions } from "@/lib/vacancy-catalogs";
 
 const toSnakeCase = (str) =>
@@ -33,10 +34,10 @@ export const createEmptyRequirement = () => ({
 });
 
 export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackbar }) {
-  const countryOptions = useMemo(() => getCountryIso2SelectOptions(), []);
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [countryCode, setCountryCode] = useState("");
+  const [stateCode, setStateCode] = useState("");
   const [vacancyDepartmentId, setVacancyDepartmentId] = useState("");
   const [vacancyModalityId, setVacancyModalityId] = useState("");
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
@@ -207,10 +208,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         attributes,
       },
     };
-    const cc = countryCode.trim().toUpperCase();
-    if (cc && /^[A-Z]{2}$/.test(cc)) {
-      payload.countryCode = cc;
-    }
+    appendVacancyLocationToPayload(payload, { countryCode, stateCode });
     if (vacancyDepartmentId) {
       payload.vacancyDepartmentId = vacancyDepartmentId
     }
@@ -249,6 +247,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     setNombre("");
     setDescripcion("");
     setCountryCode("");
+    setStateCode("");
     setVacancyDepartmentId("");
     setVacancyModalityId("");
     setSelectedCompanyId(DEFAULT_RECRUITER_COMPANY_ID);
@@ -387,31 +386,19 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-2">
-          <label
-            htmlFor="vacante-pais"
-            className="font-sans text-sm font-medium text-foreground"
-          >
-            País al que aplica la vacante
-          </label>
-          <select
-            id="vacante-pais"
-            value={countryCode}
-            onChange={(e) => setCountryCode(e.target.value)}
-            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="País al que aplica la vacante"
-          >
-            <option value="">Sin especificar</option>
-            {countryOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          <p className="font-sans text-xs text-muted-foreground">
-            Opcional. Si no eliges país, la vacante quedará sin país asignado.
-          </p>
-        </div>
+        <VacancyLocationFields
+          countryCode={countryCode}
+          stateCode={stateCode}
+          onChange={({ countryCode: nextCountryCode, stateCode: nextStateCode }) => {
+            setCountryCode(nextCountryCode)
+            setStateCode(nextStateCode)
+          }}
+          countrySelectId="vacante-pais"
+          stateSelectId="vacante-estado"
+          countryLabel="País al que aplica la vacante"
+          stateLabel="Estado / provincia"
+          disabled={loading}
+        />
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-2">
@@ -419,14 +406,14 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
               htmlFor="vacante-department"
               className="font-sans text-sm font-medium text-foreground"
             >
-              Departamento
+              Área (catálogo)
             </label>
             <select
               id="vacante-department"
               value={vacancyDepartmentId}
               onChange={(e) => setVacancyDepartmentId(e.target.value)}
               className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Departamento de la vacante"
+              aria-label="Área de la vacante en catálogo"
               disabled={loading || loadingCatalogs}
             >
               <option value="">Sin especificar</option>

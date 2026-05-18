@@ -11,6 +11,7 @@ import {
   Palette,
 } from "lucide-react"
 import RematchButton from "@/components/rrhh/RematchButton"
+import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import type { VacancyListItem, VacancyListStatusKey } from "@/lib/vacancies/map-vacancy-list-item"
 
 const ICON_BY_KEY = {
@@ -78,7 +79,14 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
             <span className="hidden text-muted-foreground/60 sm:inline" aria-hidden>
               ·
             </span>
-            <VacancyMetaItem icon={MapPin} value={vacancy.countryLabel} />
+            <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
+              <VacancyLocationLabel
+                countryCode={vacancy.countryCode}
+                stateCode={vacancy.stateCode}
+                className="truncate"
+              />
+            </span>
             <span className="hidden text-muted-foreground/60 sm:inline" aria-hidden>
               ·
             </span>
