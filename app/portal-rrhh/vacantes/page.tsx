@@ -274,9 +274,7 @@ export default function VacantesPage() {
         isOpen={isNuevaVacanteOpen}
         onClose={() => setIsNuevaVacanteOpen(false)}
         onSubmit={handleNuevaVacanteSubmit}
-        onSnackbar={(message, variant = "error") =>
-          setSnackbar({ open: true, message, variant })
-        }
+        onSnackbar={handleSnackbar}
       />
 
       <Snackbar
