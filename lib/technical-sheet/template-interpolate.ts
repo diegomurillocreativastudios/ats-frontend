@@ -224,30 +224,8 @@ function splitWorkDescriptionToBullets(desc: string): string[] {
   return [desc]
 }
 
-function firstNonEmptyStringFromRecord(o: Record<string, unknown>, keys: readonly string[]): string {
-  for (const k of keys) {
-    const v = o[k] ?? o[k.charAt(0).toUpperCase() + k.slice(1)]
-    if (v != null && String(v).trim() !== "") return String(v).trim()
-  }
-  return ""
-}
-
-function interviewNoteDisplayText(item: unknown): string {
-  if (typeof item === "string") return item.trim()
-  if (item == null || typeof item !== "object" || Array.isArray(item)) return ""
-  const o = item as Record<string, unknown>
-  const parts: string[] = []
-  const when = firstNonEmptyStringFromRecord(o, ["scheduledAtUtc", "scheduledAt", "date", "Date"])
-  const who = firstNonEmptyStringFromRecord(o, ["interviewerName", "interviewer", "InterviewerName"])
-  const note = firstNonEmptyStringFromRecord(o, ["note", "Note", "notes", "Notes"])
-  if (when) parts.push(`Fecha: ${when}`)
-  if (who) parts.push(`Entrevistador/a: ${who}`)
-  if (note) parts.push(`Nota: ${note}`)
-  return parts.join("\n").trim()
-}
-
 /**
- * Ajusta el objeto candidato para plantillas HTML: `Description` → `responsibilities`, notas de entrevista en filas uniformes.
+ * Ajusta el objeto candidato para plantillas HTML: `Description` → `responsibilities`.
  */
 function normalizeCandidateRecordForTemplateHtml(candidate: Record<string, unknown>): void {
   const wx =
@@ -264,17 +242,6 @@ function normalizeCandidateRecordForTemplateHtml(candidate: Record<string, unkno
       }
       return o
     })
-  }
-
-  const rawNotes = candidate.interviewNotes ?? candidate.InterviewNotes
-  if (Array.isArray(rawNotes)) {
-    const rows = rawNotes
-      .map((item) => {
-        const text = interviewNoteDisplayText(item)
-        return text === "" ? null : { noteText: text }
-      })
-      .filter((x): x is { noteText: string } => x != null)
-    candidate.interviewNotes = rows
   }
 }
 

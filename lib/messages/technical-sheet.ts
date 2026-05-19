@@ -61,9 +61,7 @@ export const technicalSheetMessages = {
   noStructuredRequirements: "Sin requisitos estructurados",
   interviewWhen: "Fecha y hora",
   interviewDuration: "Duración",
-  interviewNotes: "Notas de entrevista",
   interviewerLabel: "Entrevistador",
-  interviewNoteLabel: "Nota",
 } as const
 
 export type TechnicalSheetMessageKey = keyof typeof technicalSheetMessages

@@ -23,4 +23,10 @@ describe("ficha-tecnica-visible-template.html (article-only / paginated shell)",
     expect(html).toContain("{{#each candidate.workExperience}}")
     expect(html).toContain("{{/each}}")
   })
+
+  it("does not include interview notes section", () => {
+    const html = readFileSync(pathToTemplate, "utf8")
+    expect(html).not.toContain("Notas de entrevista")
+    expect(html).not.toContain("candidate.interviewNotes")
+  })
 })
