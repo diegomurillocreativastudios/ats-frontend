@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import { getApiErrorMessage } from "@/lib/api-error"
 import { getAccessToken } from "@/lib/auth"
 
 export interface TechnicalSheetPayload {
@@ -83,6 +84,50 @@ export const downloadTechnicalSheetHtml = async (
   }
   const blob = await res.blob()
   triggerBlobDownload(blob, filename.endsWith(".html") ? filename : `${filename}.html`)
+}
+
+export const buildTechnicalSheetNextPdfAppPath = (
+  vacancyId: string,
+  candidateProfileId: string
+) =>
+  `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}/candidates/${encodeURIComponent(candidateProfileId)}/technical-sheet/pdf`
+
+export interface DownloadTechnicalSheetPdfFromNextOptions {
+  vacancyTitle?: string | null
+}
+
+/**
+ * Descarga el PDF de ficha técnica generado en el servidor (Chromium).
+ */
+export const downloadTechnicalSheetPdfFromNextRoute = async (
+  vacancyId: string,
+  candidateProfileId: string,
+  filename: string,
+  options?: DownloadTechnicalSheetPdfFromNextOptions
+): Promise<void> => {
+  const path = buildTechnicalSheetNextPdfAppPath(vacancyId, candidateProfileId)
+  const params = new URLSearchParams()
+  const title = options?.vacancyTitle?.trim()
+  if (title) params.set("vacancyTitle", title)
+  const qs = params.toString()
+  const url = qs ? `${path}?${qs}` : path
+  const res = await fetch(url, { method: "GET", credentials: "same-origin" })
+  if (!res.ok) {
+    let message = `Error ${res.status}`
+    try {
+      const j = await res.json()
+      const parsed = getApiErrorMessage(j)
+      if (parsed) message = parsed
+    } catch {
+      /* ignore */
+    }
+    const err = new Error(message) as Error & { status: number }
+    err.status = res.status
+    throw err
+  }
+  const blob = await res.blob()
+  const name = filename.endsWith(".pdf") ? filename : `${filename}.pdf`
+  triggerBlobDownload(blob, name)
 }
 
 export const slugifyVacancyForFilename = (title: string): string => {

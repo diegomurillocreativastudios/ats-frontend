@@ -1,5 +1,5 @@
 /**
- * Elemento dentro del iframe de vista previa de ficha técnica listo para html2canvas.
+ * Elemento dentro del iframe de vista previa de ficha técnica (legacy html2canvas).
  */
 export function resolveTechnicalSheetPdfElement(panelRoot: HTMLElement): HTMLElement | null {
   const iframe = panelRoot.querySelector("iframe")
