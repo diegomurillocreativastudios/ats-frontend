@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api"
 import {
   listCompanyApplicantStatuses,
   listRecruiterCompanies,
@@ -128,10 +129,7 @@ export async function fetchVacancyResultadosPayload(
   const vacancyData = await apiClient.get(
     `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}`
   )
-  const vacancyRecord =
-    vacancyData && typeof vacancyData === "object" && !Array.isArray(vacancyData)
-      ? (vacancyData as Record<string, unknown>)
-      : null
+  const vacancyRecord = normalizeVacancyDetailFromApi(vacancyData)
   const directCompanyId = vacancyRecord?.companyId ?? vacancyRecord?.company_id
   if (directCompanyId != null && String(directCompanyId).trim() !== "") {
     persistVacancyCompanyId(vacancyId, String(directCompanyId).trim())

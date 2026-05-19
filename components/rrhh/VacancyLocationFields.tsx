@@ -7,9 +7,9 @@ import {
   type IState,
 } from "@countrystatecity/countries-browser"
 import {
+  fetchAllLocationCountries,
+  fetchAllLocationDivisions,
   getLocationCatalogStatus,
-  searchLocationCountries,
-  searchLocationDivisions,
 } from "@/lib/api/locations"
 import type { VacancyLocationSelection } from "@/lib/vacancies/vacancy-location"
 import { normalizeCountryCode, normalizeStateCode } from "@/lib/vacancies/vacancy-location"
@@ -77,9 +77,9 @@ export function VacancyLocationFields({
 
         if (status.hasData) {
           setUseGeoNamesApi(true)
-          const result = await searchLocationCountries({ page: 1, pageSize: 100 })
+          const countries = await fetchAllLocationCountries()
           if (cancelled) return
-          const mapped = result.items.map((country) => ({
+          const mapped = countries.map((country) => ({
             iso2: country.iso2.toUpperCase(),
             label: country.names.display,
           }))
@@ -138,14 +138,12 @@ export function VacancyLocationFields({
       setLoadError(null)
       try {
         if (useGeoNamesApi) {
-          const result = await searchLocationDivisions({
+          const divisions = await fetchAllLocationDivisions({
             countryIso2: normalizedCountryCode,
             level: 1,
-            page: 1,
-            pageSize: 100,
           })
           if (cancelled) return
-          const mapped = result.items.map((division) => ({
+          const mapped = divisions.map((division) => ({
             code: division.shortCode.toUpperCase(),
             label: division.names.display,
           }))

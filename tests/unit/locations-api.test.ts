@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import {
+  fetchAllLocationCountries,
   getLocationCatalogStatus,
   searchLocationCountries,
   searchLocationDivisions,
@@ -39,6 +40,38 @@ describe("locations API client", () => {
 
     expect(apiClient.get).toHaveBeenCalledWith(
       "/api/locations/countries?search=m%C3%A9x&page=2&pageSize=25"
+    )
+  })
+
+  it("fetchAllLocationCountries loads every page", async () => {
+    vi.mocked(apiClient.get)
+      .mockResolvedValueOnce({
+        items: [{ iso2: "SV", geonameId: 1, iso3: "SLV", names: { display: "El Salvador" } }],
+        page: 1,
+        pageSize: 100,
+        total: 2,
+        totalPages: 2,
+      })
+      .mockResolvedValueOnce({
+        items: [{ iso2: "MX", geonameId: 2, iso3: "MEX", names: { display: "México" } }],
+        page: 2,
+        pageSize: 100,
+        total: 2,
+        totalPages: 2,
+      })
+
+    const countries = await fetchAllLocationCountries()
+
+    expect(countries).toHaveLength(2)
+    expect(countries.map((c) => c.iso2)).toEqual(["SV", "MX"])
+    expect(apiClient.get).toHaveBeenCalledTimes(2)
+    expect(apiClient.get).toHaveBeenNthCalledWith(
+      1,
+      "/api/locations/countries?page=1&pageSize=100"
+    )
+    expect(apiClient.get).toHaveBeenNthCalledWith(
+      2,
+      "/api/locations/countries?page=2&pageSize=100"
     )
   })
 

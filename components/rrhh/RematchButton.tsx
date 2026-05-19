@@ -14,6 +14,7 @@ export default function RematchButton({
   onSuccess,
   onSnackbar,
   variant = "default",
+  disabled = false,
 }) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
@@ -29,6 +30,7 @@ export default function RematchButton({
   const handleRematch = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled) return;
 
     setLoading(true);
     setStatus("loading");
@@ -104,7 +106,7 @@ export default function RematchButton({
     <button
       type="button"
       onClick={handleRematch}
-      disabled={loading}
+      disabled={loading || disabled}
       className={isListVariant ? listClasses : detailClasses}
       aria-label="Re-ajustar matches"
       title={needsRematch ? "Requisitos actualizados. Se recomienda re-ajustar matches." : "Re-ajustar matches"}

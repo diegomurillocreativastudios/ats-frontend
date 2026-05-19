@@ -1,3 +1,5 @@
+import { readCompanyIsActiveForVacancy } from "@/lib/vacancies/read-company-is-active"
+import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active"
 import { formatVacancyCountryLabel } from "@/lib/vacancies/vacancy-location-display"
 import { normalizeCountryCode, readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
 import {
@@ -34,6 +36,7 @@ export interface VacancyListItem {
   countryCode: string | null
   countryLabel: string
   stateCode: string | null
+  isActive: boolean
 }
 
 export const formatRequirementsSummary = (req: unknown): string => {
@@ -174,5 +177,7 @@ export const mapVacancyFromApi = (
     countryCode,
     countryLabel,
     stateCode,
+    isActive:
+      readVacancyIsActive(item) && readCompanyIsActiveForVacancy(item),
   }
 }

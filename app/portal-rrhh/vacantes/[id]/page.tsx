@@ -46,6 +46,7 @@ import {
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
+import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
@@ -64,9 +65,17 @@ import {
   FALLBACK_KANBAN_STAGES,
   getCandidateId,
   normalizeKanbanStage,
+  resolveOrderedStageNames,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
+import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api";
+import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active";
+import {
+  getVacancyRecruiterReadOnlyReason,
+  isVacancyRecruiterReadOnly,
+  vacancyRecruiterReadOnlyTitle,
+} from "@/lib/vacancies/read-vacancy-recruiter-read-only";
 import {
   appendVacancyLocationToPayload,
   normalizeStateCode,
@@ -891,6 +900,7 @@ const MatchCard = ({
   onToggle,
   showVerPerfil = false,
   aiLabel,
+  readOnly = false,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const initials = getInitials(
@@ -915,14 +925,15 @@ const MatchCard = ({
           <div className="flex min-w-0 flex-1 items-start gap-4">
             <div className="flex shrink-0 items-start gap-3">
               <label
-                className="flex cursor-pointer items-center justify-center focus-within:ring-2 focus-within:ring-vo-purple focus-within:ring-offset-2 rounded"
+                className={`flex items-center justify-center rounded ${readOnly ? "cursor-not-allowed opacity-60" : "cursor-pointer focus-within:ring-2 focus-within:ring-vo-purple focus-within:ring-offset-2"}`}
                 aria-label={`Seleccionar ${emptyToDash(match.name)}`}
               >
                 <input
                   type="checkbox"
                   checked={isSelected ?? false}
                   onChange={handleCheckboxChange}
-                  className="h-4 w-4 rounded border-border text-vo-purple focus:ring-vo-purple focus:ring-offset-0 cursor-pointer"
+                  disabled={readOnly}
+                  className="h-4 w-4 rounded border-border text-vo-purple focus:ring-vo-purple focus:ring-offset-0 disabled:cursor-not-allowed"
                   aria-label={`Seleccionar candidato ${emptyToDash(match.name)}`}
                 />
               </label>
@@ -1007,6 +1018,7 @@ const KanbanCard = ({
   statusSelectDisabled,
   vacancyId = null,
   vacancyTitle = null,
+  readOnly = false,
 }) => {
   const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false);
   const sheetCandidateProfileId =
@@ -1026,6 +1038,10 @@ const KanbanCard = ({
   );
 
   const handleDragStart = (e) => {
+    if (readOnly) {
+      e.preventDefault();
+      return;
+    }
     e.dataTransfer.setData("application/json", JSON.stringify({ candidateId, stage }));
     e.dataTransfer.effectAllowed = "move";
     e.currentTarget.setAttribute("data-dragging", "true");
@@ -1047,13 +1063,13 @@ const KanbanCard = ({
   return (
     <>
       <div
-        draggable
+        draggable={!readOnly}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        className="cursor-grab rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"
-        role="button"
-        tabIndex={0}
-        aria-label={`Mover ${emptyToDash(match.name)} a otra etapa`}
+        className={`rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow ${readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"}`}
+        role={readOnly ? undefined : "button"}
+        tabIndex={readOnly ? undefined : 0}
+        aria-label={readOnly ? undefined : `Mover ${emptyToDash(match.name)} a otra etapa`}
         aria-describedby={`kanban-card-${candidateId}`}
       >
         <div className="flex items-center gap-3">
@@ -1094,7 +1110,7 @@ const KanbanCard = ({
               onChange={handleStatusChange}
               onMouseDown={handleSelectMouseDown}
               onClick={handleSelectClick}
-              disabled={statusSelectDisabled}
+              disabled={statusSelectDisabled || readOnly}
               className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
               aria-label={`Estado de ${emptyToDash(match.name)}`}
             >
@@ -1155,13 +1171,16 @@ const KanbanColumn = ({
   updatingStatusCandidateId,
   vacancyId = null,
   vacancyTitle = null,
+  readOnly = false,
 }) => {
   const handleDragOver = (e) => {
+    if (readOnly) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
 
   const handleDrop = (e) => {
+    if (readOnly) return;
     e.preventDefault();
     onDragLeave?.();
     try {
@@ -1176,12 +1195,14 @@ const KanbanColumn = ({
   };
 
   const handleDragEnter = (e) => {
+    if (readOnly) return;
     e.preventDefault();
     if (e.currentTarget.contains(e.relatedTarget)) return;
     onDragEnter?.(stage);
   };
 
   const handleDragLeave = (e) => {
+    if (readOnly) return;
     if (e.currentTarget.contains(e.relatedTarget)) return;
     onDragLeave?.();
   };
@@ -1236,6 +1257,7 @@ const KanbanColumn = ({
             statusSelectDisabled={updatingStatusCandidateId === candidateId}
             vacancyId={vacancyId}
             vacancyTitle={vacancyTitle}
+            readOnly={readOnly}
           />
         ))}
       </div>
@@ -1402,6 +1424,7 @@ export default function VacanteDetallePage() {
       {
         id: savedCompanyId,
         name: fallbackName || "—",
+        isActive: true,
       },
     ];
   }, [companies, vacancy, savedCompanyId]);
@@ -1474,7 +1497,7 @@ export default function VacanteDetallePage() {
     }
     try {
       const data = await apiClient.get(`/api/recruiter/vacancies/${id}`);
-      setVacancy(data);
+      setVacancy(normalizeVacancyDetailFromApi(data) ?? data);
       const record =
         data && typeof data === "object" && !Array.isArray(data)
           ? (data as Record<string, unknown>)
@@ -1594,7 +1617,7 @@ export default function VacanteDetallePage() {
   }, [editTitle, editDescription, editRequirements]);
 
   const handleEditVacancy = useCallback(() => {
-    if (!vacancy) return;
+    if (!vacancy || !readVacancyIsActive(vacancy)) return;
     setSaveVacancyError(null);
     setEditErrors({});
     setVacancyCatalogsError(null);
@@ -1641,7 +1664,7 @@ export default function VacanteDetallePage() {
 
   const handleSaveVacancy = useCallback(async () => {
     const vacancyId = Array.isArray(id) ? id[0] : id;
-    if (!vacancyId || !vacancy) return;
+    if (!vacancyId || !vacancy || !readVacancyIsActive(vacancy)) return;
     if (!validateEditForm()) return;
     if (!editCompanyId.trim()) {
       setSaveVacancyError("Selecciona una empresa cliente.");
@@ -1862,34 +1885,74 @@ export default function VacanteDetallePage() {
     [stages]
   );
 
-  const handleSearchSmartRecommendations = useCallback(async () => {
-    if (!id) return;
-    setLoadingSmart(true);
-    setSmartError(null);
-    setSmartCandidates(null);
-    try {
-      const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=20&minScore=0.7`;
-      const data = await apiClient.post(url, {});
-      const list = Array.isArray(data) ? data : data?.candidates ?? data?.results ?? [];
-      setSmartCandidates(list);
-      const count = list.length;
-      setSnackbar({
-        open: true,
-        variant: count > 0 ? "success" : "info",
-        message:
-          count > 0
-            ? `Se encontraron ${count} candidato${count === 1 ? "" : "s"}.`
-            : "No se encontraron candidatos con ese criterio.",
-      });
-    } catch (err) {
-      const msg = err?.message ?? err?.detail ?? "No se pudo cargar el match.";
-      setSmartError(msg);
-      setSmartCandidates([]);
-      setSnackbar({ open: true, variant: "error", message: msg });
-    } finally {
-      setLoadingSmart(false);
-    }
-  }, [id]);
+  const vacancyReadOnlyReason = useMemo(
+    () => getVacancyRecruiterReadOnlyReason(vacancy, companies),
+    [vacancy, companies]
+  );
+
+  const isVacancyReadOnly = useMemo(
+    () => isVacancyRecruiterReadOnly(vacancy, companies),
+    [vacancy, companies]
+  );
+
+  const vacancyReadOnlyTitle = vacancyRecruiterReadOnlyTitle(vacancyReadOnlyReason);
+
+  useEffect(() => {
+    if (!isVacancyReadOnly) return;
+    setIsEditing(false);
+    setSaveVacancyError(null);
+  }, [isVacancyReadOnly]);
+
+  const loadSmartCandidates = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!id) return;
+      if (isVacancyReadOnly && !options?.silent) return;
+
+      setLoadingSmart(true);
+      setSmartError(null);
+      if (!options?.silent) {
+        setSmartCandidates(null);
+      }
+
+      try {
+        const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=20&minScore=0.7`;
+        const data = await apiClient.post(url, {});
+        const list = Array.isArray(data) ? data : data?.candidates ?? data?.results ?? [];
+        setSmartCandidates(list);
+
+        if (!options?.silent) {
+          const count = list.length;
+          setSnackbar({
+            open: true,
+            variant: count > 0 ? "success" : "info",
+            message:
+              count > 0
+                ? `Se encontraron ${count} candidato${count === 1 ? "" : "s"}.`
+                : "No se encontraron candidatos con ese criterio.",
+          });
+        }
+      } catch (err) {
+        const msg = err?.message ?? err?.detail ?? "No se pudo cargar el match.";
+        setSmartError(msg);
+        setSmartCandidates([]);
+        if (!options?.silent) {
+          setSnackbar({ open: true, variant: "error", message: msg });
+        }
+      } finally {
+        setLoadingSmart(false);
+      }
+    },
+    [id, isVacancyReadOnly]
+  );
+
+  const handleSearchSmartRecommendations = useCallback(() => {
+    void loadSmartCandidates();
+  }, [loadSmartCandidates]);
+
+  useEffect(() => {
+    if (!id || loading || !isVacancyReadOnly || smartCandidates !== null) return;
+    void loadSmartCandidates({ silent: true });
+  }, [id, loading, isVacancyReadOnly, smartCandidates, loadSmartCandidates]);
 
   useEffect(() => {
     if (!id) return;
@@ -1928,27 +1991,45 @@ export default function VacanteDetallePage() {
   /** Candidates from Search only (for selection and Match button in Search container). */
   const displayCandidates = searchResultsToDisplay;
 
+  const orderedKanbanStageNames = useMemo(
+    () => resolveOrderedStageNames(kanbanStageNames, applicants),
+    [kanbanStageNames, applicants]
+  );
+
   const candidatesByStage = useMemo(() => {
+    const columnStages =
+      orderedKanbanStageNames.length > 0
+        ? orderedKanbanStageNames
+        : kanbanStageNames;
     if (applicants.length === 0) {
-      return kanbanStageNames.map((stage) => ({ stage, candidates: [] }));
+      return columnStages.map((stage) => ({ stage, candidates: [] }));
     }
     const withMeta = applicants.map((match, i) => {
       const candidateId = getCandidateId(match, i);
       const stage =
         candidateStageOverrides[candidateId] ??
-        normalizeKanbanStage(match.applicationStage ?? match.stage, kanbanStageNames);
+        normalizeKanbanStage(
+          match.applicationStage ?? match.stage,
+          columnStages
+        );
       return { match, candidateId, stage };
     });
-    return kanbanStageNames.map((stage) => ({
+    return columnStages.map((stage) => ({
       stage,
       candidates: withMeta
         .filter((c) => c.stage === stage)
         .map((c) => ({ match: c.match, candidateId: c.candidateId })),
     }));
-  }, [applicants, candidateStageOverrides, kanbanStageNames]);
+  }, [
+    applicants,
+    candidateStageOverrides,
+    kanbanStageNames,
+    orderedKanbanStageNames,
+  ]);
 
   const handleKanbanStageDrop = useCallback(
     async (candidateId, newStage) => {
+      if (isVacancyReadOnly) return;
       setMoveStageError(null);
       setApplicationStatusError(null);
       const applicant = applicants.find(
@@ -2008,7 +2089,7 @@ export default function VacanteDetallePage() {
         }
       }
     },
-    [applicants, stages, fetchVacancy]
+    [applicants, stages, fetchVacancy, isVacancyReadOnly]
   );
 
   const handleKanbanDragEnter = useCallback((stage) => {
@@ -2021,6 +2102,7 @@ export default function VacanteDetallePage() {
 
   const handleStatusChange = useCallback(
     async (candidateId, statusId) => {
+      if (isVacancyReadOnly) return;
       setApplicationStatusError(null);
       setMoveStageError(null);
       const applicant = applicants.find(
@@ -2074,7 +2156,7 @@ export default function VacanteDetallePage() {
         setUpdatingStatusCandidateId(null);
       }
     },
-    [applicants, fetchVacancy]
+    [applicants, fetchVacancy, isVacancyReadOnly]
   );
 
   const handleToggleCandidate = useCallback((id, checked) => {
@@ -2107,7 +2189,7 @@ export default function VacanteDetallePage() {
   }, []);
 
   const handleStartProcess = useCallback(async () => {
-    if (!id) return;
+    if (!id || isVacancyReadOnly) return;
     const candidateProfileIds = vacancyCandidates
       .map((match, index) => (selectedPossibleCandidateIds.has(getCandidateId(match, index)) ? match.candidateProfileId : null))
       .filter((pid) => pid != null && String(pid).trim() !== "");
@@ -2134,7 +2216,7 @@ export default function VacanteDetallePage() {
     } finally {
       setLoadingStartProcess(false);
     }
-  }, [id, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas]);
+  }, [id, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas, isVacancyReadOnly]);
 
   /** Selected candidate document IDs to send to the match API. */
   const selectedDocumentIds = displayCandidates
@@ -2142,7 +2224,7 @@ export default function VacanteDetallePage() {
     .filter((docId) => docId != null && String(docId).trim() !== "");
 
   const handleMatch = useCallback(async () => {
-    if (!id) return;
+    if (!id || isVacancyReadOnly) return;
     const docIds = displayCandidates
       .map((m, i) => (selectedCandidateIds.has(getCandidateId(m, i)) ? m.candidateDocumentId : null))
       .filter((docId) => docId != null && String(docId).trim() !== "");
@@ -2165,7 +2247,7 @@ export default function VacanteDetallePage() {
     } finally {
       setLoadingMatch(false);
     }
-  }, [id, displayCandidates, selectedCandidateIds, fetchVacancy, scrollToPossibleCandidates]);
+  }, [id, displayCandidates, selectedCandidateIds, fetchVacancy, scrollToPossibleCandidates, isVacancyReadOnly]);
 
   const selectedCount = selectedCandidateIds.size;
 
@@ -2240,6 +2322,12 @@ export default function VacanteDetallePage() {
                       Volver a vacantes
                     </Link>
                   </div>
+
+                  {isVacancyReadOnly ? (
+                    <div className="mb-6">
+                      <VacancyReadOnlyBanner reason={vacancyReadOnlyReason ?? "vacancy"} />
+                    </div>
+                  ) : null}
 
                   <section
                     className="mb-8 rounded-xl border border-border bg-card p-6"
@@ -2410,22 +2498,26 @@ export default function VacanteDetallePage() {
                       <div className="flex flex-wrap items-center gap-3">
                         {!isEditing ? (
                           <>
-                            <RematchButton
-                              vacancyId={id}
-                              needsRematch={vacancy.needsRematch} 
-                              onSuccess={() => fetchVacancy(true)}
-                              onSnackbar={(message, variant = "success") =>
-                                setSnackbar({ open: true, message, variant })
-                              }
-                            />
-                            <button
-                              type="button"
-                              onClick={handleEditVacancy}
-                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                              aria-label="Editar vacante"
-                            >
-                              Editar vacante
-                            </button>
+                            {!isVacancyReadOnly ? (
+                              <RematchButton
+                                vacancyId={id}
+                                needsRematch={vacancy.needsRematch}
+                                onSuccess={() => fetchVacancy(true)}
+                                onSnackbar={(message, variant = "success") =>
+                                  setSnackbar({ open: true, message, variant })
+                                }
+                              />
+                            ) : null}
+                            {!isVacancyReadOnly ? (
+                              <button
+                                type="button"
+                                onClick={handleEditVacancy}
+                                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                                aria-label="Editar vacante"
+                              >
+                                Editar vacante
+                              </button>
+                            ) : null}
                             <Link
                               href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
@@ -2634,9 +2726,10 @@ export default function VacanteDetallePage() {
                       <button
                         type="button"
                         onClick={handleSearchSmartRecommendations}
-                        disabled={loadingSmart}
-                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+                        disabled={loadingSmart || isVacancyReadOnly}
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label="Búsqueda preliminar"
+                        title={vacancyReadOnlyTitle}
                       >
                         {loadingSmart ? (
                           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
@@ -2651,9 +2744,10 @@ export default function VacanteDetallePage() {
                         <button
                           type="button"
                           onClick={handleMatch}
-                          disabled={loadingMatch || selectedDocumentIds.length === 0}
-                          className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={loadingMatch || selectedDocumentIds.length === 0 || isVacancyReadOnly}
+                          className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           aria-label="Análisis preliminar"
+                          title={vacancyReadOnlyTitle}
                         >
                           {loadingMatch ? (
                             <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
@@ -2750,7 +2844,8 @@ export default function VacanteDetallePage() {
                               <button
                                 type="button"
                                 onClick={handleSelectAllCandidates}
-                                className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                                disabled={isVacancyReadOnly}
+                                className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
                                 aria-label="Seleccionar todos los candidatos"
                               >
                                 Seleccionar todos
@@ -2758,7 +2853,8 @@ export default function VacanteDetallePage() {
                               <button
                                 type="button"
                                 onClick={handleDeselectAllCandidates}
-                                className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                                disabled={isVacancyReadOnly}
+                                className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
                                 aria-label="Desmarcar todos los candidatos"
                               >
                                 Desmarcar todos
@@ -2780,6 +2876,7 @@ export default function VacanteDetallePage() {
                                       isSelected={selectedCandidateIds.has(candidateId)}
                                       onToggle={handleToggleCandidate}
                                       aiLabel="Coincidencia preliminar IA"
+                                      readOnly={isVacancyReadOnly}
                                     />
                                   </li>
                                 );
@@ -2806,7 +2903,11 @@ export default function VacanteDetallePage() {
                         <AiDisclosureBadge label="Análisis preliminar IA" />
                         <button
                           type="button"
-                          disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
+                          disabled={
+                            isVacancyReadOnly ||
+                            selectedPossibleCandidateIds.size === 0 ||
+                            loadingStartProcess
+                          }
                           className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
                           aria-label="Incluir al proceso con candidatos seleccionados"
                           onClick={handleStartProcess}
@@ -2848,6 +2949,7 @@ export default function VacanteDetallePage() {
                                     onToggle={handleTogglePossibleCandidate}
                                     showVerPerfil
                                     aiLabel="Sugerencia IA"
+                                    readOnly={isVacancyReadOnly}
                                   />
                                 </li>
                               );
@@ -2903,6 +3005,7 @@ export default function VacanteDetallePage() {
                                 updatingStatusCandidateId={updatingStatusCandidateId}
                                 vacancyId={id != null ? String(id) : null}
                                 vacancyTitle={vacancy?.title ?? ""}
+                                readOnly={isVacancyReadOnly}
                               />
                             ))}
                           </div>
@@ -2974,6 +3077,12 @@ export default function VacanteDetallePage() {
                     Volver a vacantes
                   </Link>
                 </div>
+
+                {isVacancyReadOnly ? (
+                  <div className="mb-4">
+                    <VacancyReadOnlyBanner reason={vacancyReadOnlyReason ?? "vacancy"} />
+                  </div>
+                ) : null}
 
                 <section
                   className="mb-6 rounded-xl border border-border bg-card p-5"
@@ -3144,6 +3253,7 @@ export default function VacanteDetallePage() {
                     <div className="flex flex-wrap items-center gap-3">
                       {!isEditing ? (
                         <>
+                          {!isVacancyReadOnly ? (
                           <button
                             type="button"
                             onClick={handleEditVacancy}
@@ -3152,6 +3262,7 @@ export default function VacanteDetallePage() {
                           >
                             Editar vacante
                           </button>
+                          ) : null}
                           <Link
                             href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
@@ -3361,9 +3472,10 @@ export default function VacanteDetallePage() {
                     <button
                       type="button"
                       onClick={handleSearchSmartRecommendations}
-                      disabled={loadingSmart}
-                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+                      disabled={loadingSmart || isVacancyReadOnly}
+                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label="Búsqueda preliminar"
+                      title={vacancyReadOnlyTitle}
                     >
                       {loadingSmart ? (
                         <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
@@ -3378,9 +3490,14 @@ export default function VacanteDetallePage() {
                       <button
                         type="button"
                         onClick={handleMatch}
-                        disabled={loadingMatch || selectedDocumentIds.length === 0}
-                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={
+                          isVacancyReadOnly ||
+                          loadingMatch ||
+                          selectedDocumentIds.length === 0
+                        }
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label="Análisis preliminar"
+                        title={vacancyReadOnlyTitle}
                       >
                         {loadingMatch ? (
                           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
@@ -3477,7 +3594,8 @@ export default function VacanteDetallePage() {
                             <button
                               type="button"
                               onClick={handleSelectAllCandidates}
-                              className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                              disabled={isVacancyReadOnly}
+                              className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
                               aria-label="Seleccionar todos los candidatos"
                             >
                               Seleccionar todos
@@ -3485,7 +3603,8 @@ export default function VacanteDetallePage() {
                             <button
                               type="button"
                               onClick={handleDeselectAllCandidates}
-                              className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                              disabled={isVacancyReadOnly}
+                              className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
                               aria-label="Desmarcar todos los candidatos"
                             >
                               Desmarcar todos
@@ -3507,6 +3626,7 @@ export default function VacanteDetallePage() {
                                     isSelected={selectedCandidateIds.has(candidateId)}
                                     onToggle={handleToggleCandidate}
                                     aiLabel="Coincidencia preliminar IA"
+                                    readOnly={isVacancyReadOnly}
                                   />
                                 </li>
                               );
@@ -3533,7 +3653,11 @@ export default function VacanteDetallePage() {
                       <AiDisclosureBadge label="Análisis preliminar IA" />
                       <button
                         type="button"
-                        disabled={selectedPossibleCandidateIds.size === 0 || loadingStartProcess}
+                        disabled={
+                          isVacancyReadOnly ||
+                          selectedPossibleCandidateIds.size === 0 ||
+                          loadingStartProcess
+                        }
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
                         aria-label="Iniciar proceso con candidatos seleccionados"
                         onClick={handleStartProcess}
@@ -3575,6 +3699,7 @@ export default function VacanteDetallePage() {
                                   onToggle={handleTogglePossibleCandidate}
                                   showVerPerfil
                                   aiLabel="Sugerencia IA"
+                                  readOnly={isVacancyReadOnly}
                                 />
                               </li>
                             );
@@ -3630,6 +3755,7 @@ export default function VacanteDetallePage() {
                               updatingStatusCandidateId={updatingStatusCandidateId}
                               vacancyId={id != null ? String(id) : null}
                               vacancyTitle={vacancy?.title ?? ""}
+                              readOnly={isVacancyReadOnly}
                             />
                           ))}
                         </div>

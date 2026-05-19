@@ -143,6 +143,25 @@ export const getLocationCatalogStatus = async (): Promise<LocationCatalogStatus>
   }
 }
 
+const LOCATION_FETCH_PAGE_SIZE = 100
+
+const fetchAllLocationPages = async <T>(
+  fetchPage: (page: number, pageSize: number) => Promise<LocationPagedResult<T>>,
+  pageSize = LOCATION_FETCH_PAGE_SIZE
+): Promise<T[]> => {
+  const first = await fetchPage(1, pageSize)
+  const items = [...first.items]
+  const totalPages = first.totalPages > 0 ? first.totalPages : 1
+
+  for (let page = 2; page <= totalPages; page++) {
+    const result = await fetchPage(page, pageSize)
+    items.push(...result.items)
+    if (result.items.length === 0) break
+  }
+
+  return items
+}
+
 export const searchLocationCountries = async (params: SearchCountriesParams = {}) => {
   const query = buildQuery({
     search: params.search,
@@ -152,6 +171,14 @@ export const searchLocationCountries = async (params: SearchCountriesParams = {}
   const data = await apiClient.get(`/api/locations/countries${query}`)
   return normalizePage(data, normalizeCountry)
 }
+
+/** Loads every country from the catalog (paginates until all pages are fetched). */
+export const fetchAllLocationCountries = async (
+  params: Omit<SearchCountriesParams, "page" | "pageSize"> = {}
+) =>
+  fetchAllLocationPages((page, pageSize) =>
+    searchLocationCountries({ ...params, page, pageSize })
+  )
 
 export const searchLocationDivisions = async (params: SearchDivisionsParams) => {
   const { countryIso2, level = 1, parentGeonameId, search, page, pageSize } = params
@@ -167,6 +194,14 @@ export const searchLocationDivisions = async (params: SearchDivisionsParams) => 
   )
   return normalizePage(data, normalizeDivision)
 }
+
+/** Loads every division for a country/level (paginates until all pages are fetched). */
+export const fetchAllLocationDivisions = async (
+  params: Omit<SearchDivisionsParams, "page" | "pageSize">
+) =>
+  fetchAllLocationPages((page, pageSize) =>
+    searchLocationDivisions({ ...params, page, pageSize })
+  )
 
 export const searchLocationCities = async (params: SearchCitiesParams) => {
   const { countryIso2, adminDivisionGeonameId, adminLevel, search, page, pageSize } = params

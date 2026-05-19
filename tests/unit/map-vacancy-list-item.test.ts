@@ -49,6 +49,28 @@ describe("mapVacancyFromApi", () => {
     expect(item.statusRaw).toBe("Open")
     expect(item.requirementsSummary).toContain("experience: 2+ years")
     expect(item.createdAtLabel).toBeTruthy()
+    expect(item.isActive).toBe(true)
+  })
+
+  it("maps inactive vacancies for read-only list display", () => {
+    const item = mapVacancyFromApi({
+      id: "vac-inactive",
+      title: "Legacy role",
+      isActive: false,
+    })
+
+    expect(item.isActive).toBe(false)
+  })
+
+  it("marks vacancy read-only when company is inactive", () => {
+    const item = mapVacancyFromApi({
+      id: "vac-co-inactive",
+      title: "Sales Agent",
+      isActive: true,
+      companyIsActive: false,
+    })
+
+    expect(item.isActive).toBe(false)
   })
 })
 

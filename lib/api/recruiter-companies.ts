@@ -9,6 +9,7 @@ const VACANCY_COMPANY_STORAGE_PREFIX = "ats:vacancy-company:"
 export interface RecruiterCompanyOption {
   id: string
   name: string
+  isActive: boolean
 }
 
 export interface RecruiterVacancyStatusOption {
@@ -105,6 +106,7 @@ export async function listRecruiterCompanies(): Promise<RecruiterCompanyOption[]
   return (list as Record<string, unknown>[]).map((item, i) => ({
     id: String(item?.id ?? item?.uuid ?? item?.companyId ?? i),
     name: String(item?.name ?? item?.companyName ?? "—"),
+    isActive: Boolean(item?.isActive ?? item?.is_active ?? true),
   }))
 }
 
