@@ -120,7 +120,15 @@ export async function applyTechnicalSheetPdfPipeline(
   return Buffer.from(buf)
 }
 
-export async function renderHtmlToPdfBuffer(html: string): Promise<Buffer> {
+export interface RenderHtmlToPdfBufferOptions {
+  /** Vista previa del panel usa estilos `screen`; GET servidor usa `print`. */
+  mediaType?: "screen" | "print"
+}
+
+export async function renderHtmlToPdfBuffer(
+  html: string,
+  options?: RenderHtmlToPdfBufferOptions
+): Promise<Buffer> {
   const executablePath = await resolveChromiumExecutablePathForPdf()
   const isVercel = isVercelRuntime()
   const args = isVercel ? chromium.args : ["--no-sandbox", "--disable-setuid-sandbox"]
@@ -138,7 +146,7 @@ export async function renderHtmlToPdfBuffer(html: string): Promise<Buffer> {
     })
     const page = await browser.newPage()
     try {
-      return await applyTechnicalSheetPdfPipeline(page, html, "print")
+      return await applyTechnicalSheetPdfPipeline(page, html, options?.mediaType ?? "print")
     } finally {
       await page.close().catch(() => {})
     }

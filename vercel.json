@@ -3,7 +3,7 @@
   "functions": {
     "app/api/recruiter/vacancies/[vacancyId]/candidates/[candidateProfileId]/technical-sheet/pdf/route.ts": {
       "memory": 2048,
-      "maxDuration": 60
+      "maxDuration": 180
     }
   }
 }

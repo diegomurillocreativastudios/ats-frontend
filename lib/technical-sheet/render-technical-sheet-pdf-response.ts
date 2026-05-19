@@ -1,7 +1,9 @@
 import type { TechnicalSheetPayload } from "@/lib/api/technical-sheet"
 import { buildTechnicalSheetPdfKitBuffer } from "@/lib/technical-sheet/build-technical-sheet-pdfkit"
 import { renderHtmlToPdfBuffer } from "@/lib/technical-sheet/html-to-pdf-chromium"
+import { inlineVisibleLogoInPreviewHtml } from "@/lib/technical-sheet/inline-preview-html-images-for-pdf"
 import { renderPaginatedTechnicalSheetPdfFromInterpolated } from "@/lib/technical-sheet/technical-sheet-pdf-render-paginated"
+import { sanitizeTechnicalSheetPreviewHtml } from "@/lib/technical-sheet/sanitize-technical-sheet-preview-html"
 import { buildVisibleLogoUrlForTechnicalSheet } from "@/lib/technical-sheet/server-public-app-url"
 import { tryLoadVisibleLogoDataUriForTechnicalSheetPdf } from "@/lib/technical-sheet/technical-sheet-pdf-logo"
 import {
@@ -32,18 +34,7 @@ export class TechnicalSheetPdfError extends Error {
   }
 }
 
-export async function renderTechnicalSheetPdfBuffer(
-  input: RenderTechnicalSheetPdfInput
-): Promise<Buffer> {
-  if (input.preferPdfKit) {
-    return buildTechnicalSheetPdfKitBuffer(input.payload)
-  }
-
-  const previewHtml = input.previewHtml?.trim() ?? ""
-  if (previewHtml !== "" && isValidTechnicalSheetPreviewHtml(previewHtml)) {
-    return renderHtmlToPdfBuffer(ensureTechnicalSheetPdfDocument(previewHtml))
-  }
-
+async function renderFromServerTemplate(input: RenderTechnicalSheetPdfInput): Promise<Buffer> {
   const picked = findTechnicalSheetDocumentTemplate(input.templates)
   const rawTemplate = picked?.contentTemplate?.trim() ?? ""
   if (!picked || rawTemplate === "") {
@@ -82,6 +73,39 @@ export async function renderTechnicalSheetPdfBuffer(
     )
     return buildTechnicalSheetPdfKitBuffer(input.payload)
   }
+}
+
+async function renderFromPreviewHtml(previewHtml: string): Promise<Buffer> {
+  const sanitized = sanitizeTechnicalSheetPreviewHtml(previewHtml)
+  const withInlineLogo = inlineVisibleLogoInPreviewHtml(sanitized)
+  const documentHtml = ensureTechnicalSheetPdfDocument(withInlineLogo)
+  return renderHtmlToPdfBuffer(documentHtml, { mediaType: "screen" })
+}
+
+export async function renderTechnicalSheetPdfBuffer(
+  input: RenderTechnicalSheetPdfInput
+): Promise<Buffer> {
+  if (input.preferPdfKit) {
+    return buildTechnicalSheetPdfKitBuffer(input.payload)
+  }
+
+  const previewHtml = input.previewHtml?.trim() ?? ""
+  if (previewHtml !== "" && isValidTechnicalSheetPreviewHtml(sanitizeTechnicalSheetPreviewHtml(previewHtml))) {
+    try {
+      return await renderFromPreviewHtml(previewHtml)
+    } catch (previewErr) {
+      console.error(
+        "[technical-sheet-pdf] Preview HTML PDF failed; using server template pipeline",
+        previewErr instanceof Error ? previewErr.stack ?? previewErr.message : previewErr
+      )
+    }
+  } else if (previewHtml !== "") {
+    console.warn(
+      "[technical-sheet-pdf] Preview HTML rejected after sanitize; using server template pipeline"
+    )
+  }
+
+  return renderFromServerTemplate(input)
 }
 
 export function buildTechnicalSheetPdfFilename(candidateProfileId: string): string {

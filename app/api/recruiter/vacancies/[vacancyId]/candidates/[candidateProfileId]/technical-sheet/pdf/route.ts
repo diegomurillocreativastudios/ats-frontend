@@ -20,7 +20,7 @@ import { resolveTechnicalSheetPdfEngine } from "@/lib/technical-sheet/technical-
 import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for-server"
 
 export const runtime = "nodejs"
-export const maxDuration = 60
+export const maxDuration = 180
 
 interface PdfRouteContext {
   params: Promise<{ vacancyId: string; candidateProfileId: string }>

@@ -1,16 +1,7 @@
-const MAX_PREVIEW_HTML_CHARS = 2_000_000
-
-const BLOCKED_PATTERNS = [
-  /<script\b/i,
-  /javascript:/i,
-  /\bon\w+\s*=/i,
-  /<iframe\b/i,
-  /<object\b/i,
-  /<embed\b/i,
-] as const
+const MAX_PREVIEW_HTML_CHARS = 4_500_000
 
 /**
- * Vista previa ya paginada del panel RRHH; se valida antes de rasterizar a PDF en el servidor.
+ * Vista previa ya paginada del panel RRHH (tras `sanitizeTechnicalSheetPreviewHtml`).
  */
 export function isValidTechnicalSheetPreviewHtml(html: string): boolean {
   const trimmed = html.trim()
@@ -18,5 +9,5 @@ export function isValidTechnicalSheetPreviewHtml(html: string): boolean {
   if (!/^<!DOCTYPE/i.test(trimmed) && !/<html[\s>]/i.test(trimmed)) return false
   if (!trimmed.includes("technical-sheet-doc")) return false
   if (!trimmed.includes("technical-sheet-page")) return false
-  return !BLOCKED_PATTERNS.some((re) => re.test(trimmed))
+  return true
 }
