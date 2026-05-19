@@ -46,21 +46,21 @@ function withHttpsOrigin(raw: string): string {
 
 /**
  * URL pública del tar en `public/chromium-pack.tar`.
- * Prioridad: CHROMIUM_PACK_URL → NEXT_PUBLIC_APP_URL (estable) → VERCEL_URL (preview).
+ * Prioridad: CHROMIUM_PACK_URL → VERCEL_URL (mismo deploy) → NEXT_PUBLIC_APP_URL.
  */
 export function resolveChromiumPackUrl(): string {
   const explicit = process.env.CHROMIUM_PACK_URL?.trim()
   if (explicit) return explicit
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim()
-  if (appUrl) {
-    return `${withHttpsOrigin(appUrl)}/chromium-pack.tar`
-  }
-
   const vercelUrl = process.env.VERCEL_URL?.trim()
   if (vercelUrl) {
     const host = vercelUrl.replace(/^https?:\/\//, "")
     return `https://${host}/chromium-pack.tar`
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim()
+  if (appUrl) {
+    return `${withHttpsOrigin(appUrl)}/chromium-pack.tar`
   }
 
   throw new Error(

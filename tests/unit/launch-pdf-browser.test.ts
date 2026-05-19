@@ -18,14 +18,21 @@ describe("resolveChromiumPackUrl", () => {
     expect(resolveChromiumPackUrl()).toBe("https://cdn.example.com/chromium-pack.tar")
   })
 
-  it("prefers NEXT_PUBLIC_APP_URL over VERCEL_URL", () => {
+  it("prefers VERCEL_URL over NEXT_PUBLIC_APP_URL", () => {
     delete process.env.CHROMIUM_PACK_URL
     process.env.NEXT_PUBLIC_APP_URL = "https://prod.example.com"
     process.env.VERCEL_URL = "preview-abc.vercel.app"
+    expect(resolveChromiumPackUrl()).toBe("https://preview-abc.vercel.app/chromium-pack.tar")
+  })
+
+  it("falls back to NEXT_PUBLIC_APP_URL when VERCEL_URL is missing", () => {
+    delete process.env.CHROMIUM_PACK_URL
+    delete process.env.VERCEL_URL
+    process.env.NEXT_PUBLIC_APP_URL = "https://prod.example.com"
     expect(resolveChromiumPackUrl()).toBe("https://prod.example.com/chromium-pack.tar")
   })
 
-  it("falls back to VERCEL_URL when app URL is missing", () => {
+  it("uses VERCEL_URL when only VERCEL_URL is set", () => {
     delete process.env.CHROMIUM_PACK_URL
     process.env.VERCEL_URL = "my-app.vercel.app"
     delete process.env.NEXT_PUBLIC_APP_URL

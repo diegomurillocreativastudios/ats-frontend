@@ -4,9 +4,11 @@ import type { ReactNode } from "react"
 import { useCallback, useEffect, useId, useRef, useState } from "react"
 import { FileDown, Loader2 } from "lucide-react"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
-import { fetchTechnicalSheetJson, slugifyVacancyForFilename } from "@/lib/api/technical-sheet"
-import { downloadElementAsPdf } from "@/lib/pdf/download-element-as-pdf"
-import { resolveTechnicalSheetPdfElement } from "@/lib/pdf/resolve-technical-sheet-pdf-element"
+import {
+  downloadTechnicalSheetPdfFromNextRoute,
+  fetchTechnicalSheetJson,
+  slugifyVacancyForFilename,
+} from "@/lib/api/technical-sheet"
 import { paginateTechnicalSheetArticleToPageBodies } from "@/lib/technical-sheet/paginate-technical-sheet-article-dom"
 import {
   buildTechnicalSheetPageHtml,
@@ -183,32 +185,23 @@ export function TechnicalSheetPanel({
   }, [enabled, variant, loading, error, paginatedSrcDoc])
 
   const handleDownloadPdf = useCallback(async () => {
-    if (!templateHtml || !panelRef.current) return
-    const captureTarget = resolveTechnicalSheetPdfElement(panelRef.current)
-    if (!captureTarget) {
-      setPdfActionError(m.pdfExportFailed)
-      return
-    }
+    const vid = vacancyId?.trim()
+    const cid = candidateProfileId?.trim()
+    if (!vid || !cid || !templateHtml) return
     setPdfActionError(null)
     setPdfBusy(true)
     try {
       const slug = slugifyVacancyForFilename(vacancyTitle ?? "vacante")
-      const cid = candidateProfileId?.trim() ?? ""
       const name = `ficha-tecnica-${slug}-${cid.slice(0, 8)}.pdf`
-      await downloadElementAsPdf({
-        element: captureTarget,
-        fileName: name,
-        orientation: "portrait",
-        format: "a4",
-        scale: 2,
-        marginMm: 0,
+      await downloadTechnicalSheetPdfFromNextRoute(vid, cid, name, {
+        vacancyTitle: vacancyTitle ?? null,
       })
     } catch {
       setPdfActionError(m.pdfExportFailed)
     } finally {
       setPdfBusy(false)
     }
-  }, [templateHtml, vacancyTitle, candidateProfileId])
+  }, [vacancyId, candidateProfileId, templateHtml, vacancyTitle])
 
   const busy = loading
   const iframeDoc = paginatedSrcDoc ?? templateHtml
