@@ -9,8 +9,7 @@ import {
   fetchTechnicalSheetJson,
   slugifyVacancyForFilename,
 } from "@/lib/api/technical-sheet"
-import { downloadElementAsPdf } from "@/lib/pdf/download-element-as-pdf"
-import { resolveTechnicalSheetPdfElement } from "@/lib/pdf/resolve-technical-sheet-pdf-element"
+import { downloadTechnicalSheetPreviewAsPdf } from "@/lib/pdf/download-technical-sheet-preview-as-pdf"
 import { paginateTechnicalSheetArticleToPageBodies } from "@/lib/technical-sheet/paginate-technical-sheet-article-dom"
 import { buildPaginatedTechnicalSheetSrcDoc } from "@/lib/technical-sheet/build-paginated-technical-sheet-src-doc"
 import { fetchVisibleLogoDataUriClient } from "@/lib/technical-sheet/fetch-visible-logo-data-uri-client"
@@ -193,24 +192,16 @@ export function TechnicalSheetPanel({
     const slug = slugifyVacancyForFilename(vacancyTitle ?? "vacante")
     const name = `ficha-tecnica-${slug}-${cid.slice(0, 8)}.pdf`
     try {
-      await downloadTechnicalSheetPdfFromNextRoute(vid, cid, name, {
-        vacancyTitle: vacancyTitle ?? null,
-        previewHtml: paginatedSrcDoc,
+      await downloadTechnicalSheetPreviewAsPdf({
+        panelRoot: panelRef.current,
+        fileName: name,
+        scale: 2,
       })
     } catch {
-      const captureTarget = resolveTechnicalSheetPdfElement(panelRef.current)
-      if (!captureTarget) {
-        setPdfActionError(m.pdfExportFailed)
-        return
-      }
       try {
-        await downloadElementAsPdf({
-          element: captureTarget,
-          fileName: name,
-          orientation: "portrait",
-          format: "a4",
-          scale: 2,
-          marginMm: 0,
+        await downloadTechnicalSheetPdfFromNextRoute(vid, cid, name, {
+          vacancyTitle: vacancyTitle ?? null,
+          previewHtml: paginatedSrcDoc,
         })
       } catch {
         setPdfActionError(m.pdfExportFailed)

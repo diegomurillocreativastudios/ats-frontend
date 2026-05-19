@@ -105,9 +105,10 @@ export async function renderTechnicalSheetPdfBuffer(
       return await renderFromPreviewHtml(previewHtml)
     } catch (previewErr) {
       console.error(
-        "[technical-sheet-pdf] Preview HTML PDF failed; using server template pipeline",
+        "[technical-sheet-pdf] Preview HTML PDF failed",
         previewErr instanceof Error ? previewErr.stack ?? previewErr.message : previewErr
       )
+      throw previewErr
     }
   } else if (previewHtml !== "") {
     console.warn(

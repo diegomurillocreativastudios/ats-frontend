@@ -60,7 +60,7 @@ describe("renderTechnicalSheetPdfBuffer", () => {
     delete process.env.VERCEL_ENV
   })
 
-  it("falls back to server template when preview Chromium fails", async () => {
+  it("throws when preview Chromium fails instead of falling back to server template", async () => {
     renderHtmlToPdfBuffer.mockRejectedValue(new Error("chromium preview failed"))
     renderPaginatedTechnicalSheetPdfFromInterpolated.mockResolvedValue(Buffer.from("%PDF-server"))
 
@@ -68,14 +68,15 @@ describe("renderTechnicalSheetPdfBuffer", () => {
       "@/lib/technical-sheet/render-technical-sheet-pdf-response"
     )
 
-    const buf = await renderTechnicalSheetPdfBuffer({
-      ...baseInput,
-      previewHtml: previewDoc,
-    })
+    await expect(
+      renderTechnicalSheetPdfBuffer({
+        ...baseInput,
+        previewHtml: previewDoc,
+      })
+    ).rejects.toThrow("chromium preview failed")
 
     expect(renderHtmlToPdfBuffer).toHaveBeenCalled()
-    expect(renderPaginatedTechnicalSheetPdfFromInterpolated).toHaveBeenCalled()
-    expect(buf.toString("utf8")).toBe("%PDF-server")
+    expect(renderPaginatedTechnicalSheetPdfFromInterpolated).not.toHaveBeenCalled()
   })
 
   it("uses preview HTML when Chromium succeeds", async () => {
