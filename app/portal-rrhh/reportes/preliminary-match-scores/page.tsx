@@ -35,6 +35,7 @@ import { ReportesExportToolbar } from "@/components/rrhh/reportes/reportes-expor
 import { ReportesQueryActions } from "@/components/rrhh/reportes/reportes-query-actions"
 import ReportesEmptyState from "@/components/rrhh/reportes/reportes-empty-state"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import { DatePicker, datePickerFilterButtonClass } from "@/components/ui/date-picker"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
   fetchPreliminaryMatchScores,
@@ -695,21 +696,23 @@ export default function ReportePreliminaryMatchScoresPage() {
                   />
                 </ReportesFilterControl>
                 <ReportesFilterControl label="Desde" controlId="filtro-desde-pm">
-                  <input
+                  <DatePicker
                     id="filtro-desde-pm"
-                    type="date"
-                    className={controlClass}
                     value={draftDateFrom}
-                    onChange={(e) => setDraftDateFrom(e.target.value)}
+                    onChange={setDraftDateFrom}
+                    ariaLabel="Desde"
+                    buttonClassName={datePickerFilterButtonClass}
+                    wrapperClassName="relative w-full"
                   />
                 </ReportesFilterControl>
                 <ReportesFilterControl label="Hasta" controlId="filtro-hasta-pm">
-                  <input
+                  <DatePicker
                     id="filtro-hasta-pm"
-                    type="date"
-                    className={controlClass}
                     value={draftDateTo}
-                    onChange={(e) => setDraftDateTo(e.target.value)}
+                    onChange={setDraftDateTo}
+                    ariaLabel="Hasta"
+                    buttonClassName={datePickerFilterButtonClass}
+                    wrapperClassName="relative w-full"
                   />
                 </ReportesFilterControl>
                 <ReportesFilterControl label="Ordenar por" controlId="filtro-sort-pm">

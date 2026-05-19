@@ -10,6 +10,7 @@ import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import ReportesDataTable from "@/components/rrhh/reportes/reportes-data-table"
 import { ReportesExportToolbar } from "@/components/rrhh/reportes/reportes-export-toolbar"
 import { ReportesFilterControl } from "@/components/rrhh/reportes/reportes-filters-placeholder"
+import { DatePicker, datePickerFilterButtonClass } from "@/components/ui/date-picker"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
   fetchVacancyProgressByClient,
@@ -400,21 +401,23 @@ export default function ReporteAvanceVacantesPorClientePage() {
               </select>
             </ReportesFilterControl>
             <ReportesFilterControl label="Desde" controlId="filtro-desde">
-              <input
+              <DatePicker
                 id="filtro-desde"
-                type="date"
-                className={controlClass}
                 value={draftDateFrom}
-                onChange={(e) => setDraftDateFrom(e.target.value)}
+                onChange={setDraftDateFrom}
+                ariaLabel="Desde"
+                buttonClassName={datePickerFilterButtonClass}
+                wrapperClassName="relative w-full"
               />
             </ReportesFilterControl>
             <ReportesFilterControl label="Hasta" controlId="filtro-hasta">
-              <input
+              <DatePicker
                 id="filtro-hasta"
-                type="date"
-                className={controlClass}
                 value={draftDateTo}
-                onChange={(e) => setDraftDateTo(e.target.value)}
+                onChange={setDraftDateTo}
+                ariaLabel="Hasta"
+                buttonClassName={datePickerFilterButtonClass}
+                wrapperClassName="relative w-full"
               />
             </ReportesFilterControl>
           </div>

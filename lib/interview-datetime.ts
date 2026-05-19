@@ -77,20 +77,25 @@ export function combineDatetimeLocal(date: string, time: string): string {
   return `${date}T${hh}:${mm}`
 }
 
+const capitalizeEsLabel = (text: string): string => {
+  if (!text) return ""
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
 /**
- * Etiqueta legible tipo calendario: "Jueves, 16 de abril".
+ * Etiqueta legible tipo calendario: "Jueves, 16 de abril del 2026".
  */
 export function formatInterviewScheduleDateLabel(dateStr: string): string {
   if (!dateStr) return ""
   const d = new Date(`${dateStr}T12:00:00`)
   if (Number.isNaN(d.getTime())) return ""
-  const raw = d.toLocaleDateString("es-CL", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  })
-  if (!raw) return ""
-  return raw.charAt(0).toUpperCase() + raw.slice(1)
+  const weekday = capitalizeEsLabel(
+    d.toLocaleDateString("es-CL", { weekday: "long" })
+  )
+  const month = d.toLocaleDateString("es-CL", { month: "long" })
+  const day = d.getDate()
+  const year = d.getFullYear()
+  return `${weekday}, ${day} de ${month} del ${year}`
 }
 
 /**

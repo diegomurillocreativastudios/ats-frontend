@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { ReportesFilterControl } from "@/components/rrhh/reportes/reportes-filters-placeholder"
+import { DatePicker, datePickerFilterButtonClass } from "@/components/ui/date-picker"
 import { fetchAdminUsersAllByRole, type AdminUserListItem } from "@/lib/api/admin-users"
 import {
   listRecruiterCompanies,
@@ -188,13 +189,14 @@ function FilterFieldControl({
   if (field.type === "date") {
     return (
       <ReportesFilterControl label={field.label} controlId={controlId}>
-        <input
+        <DatePicker
           id={controlId}
-          type="date"
-          className={controlClass}
           value={readString(value[field.key])}
           disabled={disabled}
-          onChange={(e) => patch({ [field.key]: e.target.value })}
+          onChange={(next) => patch({ [field.key]: next })}
+          ariaLabel={field.label}
+          buttonClassName={datePickerFilterButtonClass}
+          wrapperClassName="relative w-full"
         />
       </ReportesFilterControl>
     )
@@ -210,35 +212,37 @@ function FilterFieldControl({
     return (
       <>
         <ReportesFilterControl label={`${field.label} (desde)`} controlId={fromId}>
-          <input
+          <DatePicker
             id={fromId}
-            type="date"
-            className={controlClass}
             value={range.from}
             disabled={disabled}
-            onChange={(e) =>
+            onChange={(from) =>
               patch({
-                [field.key]: { from: e.target.value, to: range.to },
-                [fromKey]: e.target.value,
+                [field.key]: { from, to: range.to },
+                [fromKey]: from,
                 [toKey]: range.to,
               })
             }
+            ariaLabel={`${field.label} desde`}
+            buttonClassName={datePickerFilterButtonClass}
+            wrapperClassName="relative w-full"
           />
         </ReportesFilterControl>
         <ReportesFilterControl label={`${field.label} (hasta)`} controlId={toId}>
-          <input
+          <DatePicker
             id={toId}
-            type="date"
-            className={controlClass}
             value={range.to}
             disabled={disabled}
-            onChange={(e) =>
+            onChange={(to) =>
               patch({
-                [field.key]: { from: range.from, to: e.target.value },
+                [field.key]: { from: range.from, to },
                 [fromKey]: range.from,
-                [toKey]: e.target.value,
+                [toKey]: to,
               })
             }
+            ariaLabel={`${field.label} hasta`}
+            buttonClassName={datePickerFilterButtonClass}
+            wrapperClassName="relative w-full"
           />
         </ReportesFilterControl>
       </>

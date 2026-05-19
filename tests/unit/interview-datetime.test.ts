@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest"
 import {
   addMinutesToClockTime,
   combineDatetimeLocal,
+  formatInterviewScheduleDateLabel,
   isQuarterHourTime,
   normalizeClockTimeInput,
   parseFlexibleTimeInput,
@@ -42,6 +43,12 @@ describe("interview-datetime helpers", () => {
     expect(normalizeClockTimeInput("12:60")).toBe(null)
     expect(normalizeClockTimeInput("no")).toBe(null)
     expect(normalizeClockTimeInput("2:00 p. m.")).toBe(null)
+  })
+
+  it("formatInterviewScheduleDateLabel incluye día, mes y año", () => {
+    expect(formatInterviewScheduleDateLabel("2026-05-19")).toBe(
+      "Martes, 19 de mayo del 2026"
+    )
   })
 
   it("parseFlexibleTimeInput no interpreta 12 h como 24 h", () => {

@@ -10,7 +10,11 @@ import {
 } from "react"
 import { Plus, Trash2, X } from "lucide-react"
 import { SocialLinkTypePicker } from "@/components/candidato/social-link-type-picker"
-import type { FullProfileFormInput } from "@/lib/candidate-profile"
+import { DatePicker } from "@/components/ui/date-picker"
+import {
+  getBirthDateInputValidationError,
+  type FullProfileFormInput,
+} from "@/lib/candidate-profile"
 import {
   AVAILABILITY_OPTIONS,
   GENDER_OPTIONS,
@@ -77,6 +81,7 @@ export function ProfileEditField({
   children,
   className = "",
   hint,
+  error,
 }: {
   label: string
   required?: boolean
@@ -84,6 +89,7 @@ export function ProfileEditField({
   children: ReactNode
   className?: string
   hint?: string
+  error?: string | null
 }) {
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
@@ -92,7 +98,11 @@ export function ProfileEditField({
         {required ? <span className="text-destructive"> *</span> : null}
       </label>
       {children}
-      {hint ? (
+      {error ? (
+        <p className="font-sans text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : hint ? (
         <p className="font-sans text-[11px] text-muted-foreground">{hint}</p>
       ) : null}
     </div>
@@ -212,6 +222,10 @@ export function ProfileEditLocationAndPersonalFields({ form, patch, saving }: Ed
     () => getCountrySelectOptions().map((c) => ({ value: c.value, label: c.label })),
     []
   )
+  const birthDateError = useMemo(
+    () => getBirthDateInputValidationError(form.birthDateInput),
+    [form.birthDateInput]
+  )
 
   return (
     <div className="flex flex-col gap-4">
@@ -227,14 +241,20 @@ export function ProfileEditLocationAndPersonalFields({ form, patch, saving }: Ed
             emptyLabel="Seleccioná un país"
           />
         </ProfileEditField>
-        <ProfileEditField label="Fecha de nacimiento" htmlFor="pf-birth">
-          <input
+        <ProfileEditField
+          label="Fecha de nacimiento"
+          htmlFor="pf-birth"
+          error={birthDateError}
+        >
+          <DatePicker
             id="pf-birth"
-            type="date"
             value={form.birthDateInput}
-            onChange={(e) => patch({ birthDateInput: e.target.value })}
-            className={profileEditInputClass}
+            onChange={(birthDateInput) => patch({ birthDateInput })}
             disabled={saving}
+            ariaLabel="Fecha de nacimiento"
+            errorMessage={birthDateError}
+            buttonClassName={`${profileEditInputClass} justify-center text-center`}
+            wrapperClassName="relative w-full"
           />
         </ProfileEditField>
         <ProfileEditField label="Ciudad de nacimiento" htmlFor="pf-birth-city">

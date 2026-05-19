@@ -35,6 +35,7 @@ import { ReportesChartCard } from "@/components/rrhh/reportes/reportes-chart-car
 import { ReportesExportToolbar } from "@/components/rrhh/reportes/reportes-export-toolbar"
 import { ReportesQueryActions } from "@/components/rrhh/reportes/reportes-query-actions"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import { DatePicker, datePickerFilterButtonClass } from "@/components/ui/date-picker"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
   fetchRecruitmentSources,
@@ -705,23 +706,23 @@ export default function FuentesReclutamientoReportClient() {
               </select>
             </ReportesFilterControl>
             <ReportesFilterControl label="Desde (obligatorio)" controlId="filtro-desde-fr">
-              <input
+              <DatePicker
                 id="filtro-desde-fr"
-                type="date"
-                required
-                className={controlClass}
                 value={draftDateFrom}
-                onChange={(e) => setDraftDateFrom(e.target.value)}
+                onChange={setDraftDateFrom}
+                ariaLabel="Desde"
+                buttonClassName={datePickerFilterButtonClass}
+                wrapperClassName="relative w-full"
               />
             </ReportesFilterControl>
             <ReportesFilterControl label="Hasta (obligatorio)" controlId="filtro-hasta-fr">
-              <input
+              <DatePicker
                 id="filtro-hasta-fr"
-                type="date"
-                required
-                className={controlClass}
                 value={draftDateTo}
-                onChange={(e) => setDraftDateTo(e.target.value)}
+                onChange={setDraftDateTo}
+                ariaLabel="Hasta"
+                buttonClassName={datePickerFilterButtonClass}
+                wrapperClassName="relative w-full"
               />
             </ReportesFilterControl>
           </ReportesFiltersPlaceholder>

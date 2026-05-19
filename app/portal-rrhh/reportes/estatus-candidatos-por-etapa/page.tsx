@@ -20,6 +20,7 @@ import {
 import { ReportesExportToolbar } from "@/components/rrhh/reportes/reportes-export-toolbar"
 import { ReportesQueryActions } from "@/components/rrhh/reportes/reportes-query-actions"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import { DatePicker, datePickerFilterButtonClass } from "@/components/ui/date-picker"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
   fetchCandidateStatusByStage,
@@ -437,21 +438,23 @@ export default function ReporteEstatusCandidatosPorEtapaPage() {
             </select>
           </ReportesFilterControl>
           <ReportesFilterControl label="Desde" controlId="filtro-desde-ec">
-            <input
+            <DatePicker
               id="filtro-desde-ec"
-              type="date"
-              className={controlClass}
               value={draftDateFrom}
-              onChange={(e) => setDraftDateFrom(e.target.value)}
+              onChange={setDraftDateFrom}
+              ariaLabel="Desde"
+              buttonClassName={datePickerFilterButtonClass}
+              wrapperClassName="relative w-full"
             />
           </ReportesFilterControl>
           <ReportesFilterControl label="Hasta" controlId="filtro-hasta-ec">
-            <input
+            <DatePicker
               id="filtro-hasta-ec"
-              type="date"
-              className={controlClass}
               value={draftDateTo}
-              onChange={(e) => setDraftDateTo(e.target.value)}
+              onChange={setDraftDateTo}
+              ariaLabel="Hasta"
+              buttonClassName={datePickerFilterButtonClass}
+              wrapperClassName="relative w-full"
             />
           </ReportesFilterControl>
         </ReportesFiltersPlaceholder>

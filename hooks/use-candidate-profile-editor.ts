@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react"
 import {
   buildCandidateProfileSaveBody,
+  getBirthDateInputValidationError,
   type CandidateProfile,
   type CandidateProfileSaveBody,
   type FullProfileFormInput,
@@ -83,6 +84,11 @@ export function useCandidateProfileEditor({
         setValidationError(
           "Tu perfil debe tener currículum en texto registrado. Cargá un CV en Documentos o contactá soporte."
         )
+        return
+      }
+      const birthDateError = getBirthDateInputValidationError(form.birthDateInput)
+      if (birthDateError) {
+        setValidationError(birthDateError)
         return
       }
       try {

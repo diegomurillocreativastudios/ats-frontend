@@ -306,6 +306,54 @@ export const dateInputValueToIso = (yyyyMmDd: string): string | null => {
   return d.toISOString()
 }
 
+export const BIRTH_DATE_INPUT_INVALID_MESSAGE = "Fecha inválida"
+
+const getLocalCalendarToday = (): { year: number; month: number; day: number } => {
+  const now = new Date()
+  return {
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+    day: now.getDate(),
+  }
+}
+
+const compareCalendarParts = (
+  a: { year: number; month: number; day: number },
+  b: { year: number; month: number; day: number }
+): number => {
+  if (a.year !== b.year) return a.year - b.year
+  if (a.month !== b.month) return a.month - b.month
+  return a.day - b.day
+}
+
+/**
+ * Valida el valor `YYYY-MM-DD` del DatePicker para fecha de nacimiento:
+ * calendario válido, no futura y al menos 18 años cumplidos (día civil local).
+ */
+export function getBirthDateInputValidationError(yyyyMmDd: string): string | null {
+  const trimmed = yyyyMmDd.trim()
+  if (!trimmed) return null
+
+  const parts = birthDateCalendarPartsFromUnknown(trimmed)
+  if (!parts) return BIRTH_DATE_INPUT_INVALID_MESSAGE
+
+  const today = getLocalCalendarToday()
+  if (compareCalendarParts(parts, today) > 0) {
+    return BIRTH_DATE_INPUT_INVALID_MESSAGE
+  }
+
+  const eighteenthBirthday = {
+    year: today.year - 18,
+    month: today.month,
+    day: today.day,
+  }
+  if (compareCalendarParts(parts, eighteenthBirthday) > 0) {
+    return BIRTH_DATE_INPUT_INVALID_MESSAGE
+  }
+
+  return null
+}
+
 const optStr = (s: string) => {
   const v = s.trim()
   return v === "" ? undefined : v

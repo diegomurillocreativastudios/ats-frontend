@@ -11,6 +11,7 @@ import {
   ReporteResumenErrorState,
 } from "@/components/rrhh/reportes/reporte-resumen-dashboard"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import { DatePicker, datePickerFilterButtonClass } from "@/components/ui/date-picker"
 import { DownloadPdfButton } from "@/components/common/download-pdf-button"
 import { ExecutiveSummaryReportPdfTemplate } from "@/components/recruiter/reports/executive-summary-report-pdf-template"
 import { getApiErrorMessage } from "@/lib/api-error"
@@ -161,21 +162,23 @@ export default function ReporteResumenPage() {
             </select>
           </ReportesFilterControl>
           <ReportesFilterControl label="Desde" controlId="filtro-desde-sum">
-            <input
+            <DatePicker
               id="filtro-desde-sum"
-              type="date"
-              className={controlClass}
               value={draftDateFrom}
-              onChange={(e) => setDraftDateFrom(e.target.value)}
+              onChange={setDraftDateFrom}
+              ariaLabel="Desde"
+              buttonClassName={datePickerFilterButtonClass}
+              wrapperClassName="relative w-full"
             />
           </ReportesFilterControl>
           <ReportesFilterControl label="Hasta" controlId="filtro-hasta-sum">
-            <input
+            <DatePicker
               id="filtro-hasta-sum"
-              type="date"
-              className={controlClass}
               value={draftDateTo}
-              onChange={(e) => setDraftDateTo(e.target.value)}
+              onChange={setDraftDateTo}
+              ariaLabel="Hasta"
+              buttonClassName={datePickerFilterButtonClass}
+              wrapperClassName="relative w-full"
             />
           </ReportesFilterControl>
           <div className="flex w-full min-w-0 flex-col justify-end gap-1 sm:col-span-2 lg:col-span-1">
