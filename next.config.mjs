@@ -1,15 +1,20 @@
 /** @type {import('next').NextConfig} */
+const pdfRouteTraceAssets = [
+  "./node_modules/@sparticuz/chromium/**",
+  "./public/visible-icon.png",
+  "./public/visible-text.png",
+]
+
 const nextConfig = {
   serverExternalPackages: ["pdfkit", "puppeteer-core", "@sparticuz/chromium"],
   /**
-   * @sparticuz/chromium loads brotli binaries from `node_modules/.../bin` at runtime.
-   * Ensures those files are copied into the serverless trace for this route (Webpack
-   * build runs the include pass; `next build --webpack` is set in package.json for Vercel).
+   * @sparticuz/chromium brotli binaries + logos must ship inside the PDF serverless trace on Vercel.
+   * Keys are App Router route paths (sin `/route`).
    */
   outputFileTracingIncludes: {
-    "/api/recruiter/**/technical-sheet/pdf": [
-      "./node_modules/@sparticuz/chromium/**/*",
-    ],
+    "/api/recruiter/vacancies/[vacancyId]/candidates/[candidateProfileId]/technical-sheet/pdf":
+      pdfRouteTraceAssets,
+    "/api/recruiter/**/technical-sheet/pdf": pdfRouteTraceAssets,
   },
 }
 

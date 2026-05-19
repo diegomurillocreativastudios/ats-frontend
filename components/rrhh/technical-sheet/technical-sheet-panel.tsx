@@ -11,6 +11,7 @@ import {
 } from "@/lib/api/technical-sheet"
 import { paginateTechnicalSheetArticleToPageBodies } from "@/lib/technical-sheet/paginate-technical-sheet-article-dom"
 import { buildPaginatedTechnicalSheetSrcDoc } from "@/lib/technical-sheet/build-paginated-technical-sheet-src-doc"
+import { fetchVisibleLogoDataUriClient } from "@/lib/technical-sheet/fetch-visible-logo-data-uri-client"
 import { buildTechnicalSheetPageHtml } from "@/lib/technical-sheet/technical-sheet-page-shell"
 import { TECHNICAL_SHEET_CONTENT_AVAILABLE_HEIGHT_PX } from "@/lib/technical-sheet/technical-sheet-page-constants"
 import {
@@ -81,11 +82,11 @@ export function TechnicalSheetPanel({
         setError(m.errorNoTechnicalSheetTemplate)
         return
       }
-      const publicBase = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "")
       const windowOrigin =
         typeof window !== "undefined" ? window.location.origin.replace(/\/$/, "") : ""
-      const origin = publicBase || windowOrigin
-      const logoUrl = origin ? `${origin}/visible-icon.png` : ""
+      const publicBase = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "")
+      const origin = windowOrigin || publicBase
+      const logoUrl = origin ? await fetchVisibleLogoDataUriClient(origin) : ""
       const ctx = buildTechnicalSheetTemplateContext(payload, {
         vacancyTitleFallback: vacancyTitle ?? null,
         logoUrl,

@@ -5,7 +5,7 @@ import { inlineVisibleLogoInPreviewHtml } from "@/lib/technical-sheet/inline-pre
 import { renderPaginatedTechnicalSheetPdfFromInterpolated } from "@/lib/technical-sheet/technical-sheet-pdf-render-paginated"
 import { sanitizeTechnicalSheetPreviewHtml } from "@/lib/technical-sheet/sanitize-technical-sheet-preview-html"
 import { buildVisibleLogoUrlForTechnicalSheet } from "@/lib/technical-sheet/server-public-app-url"
-import { tryLoadVisibleLogoDataUriForTechnicalSheetPdf } from "@/lib/technical-sheet/technical-sheet-pdf-logo"
+import { resolveVisibleLogoDataUriForPdf } from "@/lib/technical-sheet/resolve-visible-logo-data-uri"
 import {
   buildTechnicalSheetTemplateContext,
   renderTechnicalSheetHtml,
@@ -34,14 +34,17 @@ export class TechnicalSheetPdfError extends Error {
   }
 }
 
-async function renderFromServerTemplate(input: RenderTechnicalSheetPdfInput): Promise<Buffer> {
+async function renderFromServerTemplate(
+  input: RenderTechnicalSheetPdfInput,
+  options: { allowPdfKitFallback: boolean }
+): Promise<Buffer> {
   const picked = findTechnicalSheetDocumentTemplate(input.templates)
   const rawTemplate = picked?.contentTemplate?.trim() ?? ""
   if (!picked || rawTemplate === "") {
     throw new TechnicalSheetPdfError(m.errorNoTechnicalSheetTemplate, 400)
   }
 
-  const logoDataUri = tryLoadVisibleLogoDataUriForTechnicalSheetPdf()
+  const logoDataUri = await resolveVisibleLogoDataUriForPdf()
   const logoFallbackUrl = buildVisibleLogoUrlForTechnicalSheet()
   const logoUrl = logoDataUri ?? (logoFallbackUrl.trim() !== "" ? logoFallbackUrl : null)
   const ctx = buildTechnicalSheetTemplateContext(input.payload, {
@@ -66,7 +69,9 @@ async function renderFromServerTemplate(input: RenderTechnicalSheetPdfInput): Pr
     const onVercel = Boolean(process.env.VERCEL || process.env.VERCEL_ENV)
     const disablePdfKitFallback =
       process.env.TECHNICAL_SHEET_PDF_DISABLE_VERCEL_PDFKIT_FALLBACK === "1"
-    if (!onVercel || disablePdfKitFallback) throw chromiumErr
+    if (!options.allowPdfKitFallback || !onVercel || disablePdfKitFallback) {
+      throw chromiumErr
+    }
     console.error(
       "[technical-sheet-pdf] Chromium PDF failed on Vercel; using PDFKit fallback",
       chromiumErr instanceof Error ? chromiumErr.stack ?? chromiumErr.message : chromiumErr
@@ -77,7 +82,7 @@ async function renderFromServerTemplate(input: RenderTechnicalSheetPdfInput): Pr
 
 async function renderFromPreviewHtml(previewHtml: string): Promise<Buffer> {
   const sanitized = sanitizeTechnicalSheetPreviewHtml(previewHtml)
-  const withInlineLogo = inlineVisibleLogoInPreviewHtml(sanitized)
+  const withInlineLogo = await inlineVisibleLogoInPreviewHtml(sanitized)
   const documentHtml = ensureTechnicalSheetPdfDocument(withInlineLogo)
   return renderHtmlToPdfBuffer(documentHtml, { mediaType: "screen" })
 }
@@ -90,22 +95,22 @@ export async function renderTechnicalSheetPdfBuffer(
   }
 
   const previewHtml = input.previewHtml?.trim() ?? ""
-  if (previewHtml !== "" && isValidTechnicalSheetPreviewHtml(sanitizeTechnicalSheetPreviewHtml(previewHtml))) {
-    try {
-      return await renderFromPreviewHtml(previewHtml)
-    } catch (previewErr) {
-      console.error(
-        "[technical-sheet-pdf] Preview HTML PDF failed; using server template pipeline",
-        previewErr instanceof Error ? previewErr.stack ?? previewErr.message : previewErr
-      )
-    }
-  } else if (previewHtml !== "") {
+  const sanitizedPreview =
+    previewHtml !== "" ? sanitizeTechnicalSheetPreviewHtml(previewHtml) : ""
+  const hasValidPreview =
+    sanitizedPreview !== "" && isValidTechnicalSheetPreviewHtml(sanitizedPreview)
+
+  if (hasValidPreview) {
+    return renderFromPreviewHtml(previewHtml)
+  }
+
+  if (previewHtml !== "") {
     console.warn(
       "[technical-sheet-pdf] Preview HTML rejected after sanitize; using server template pipeline"
     )
   }
 
-  return renderFromServerTemplate(input)
+  return renderFromServerTemplate(input, { allowPdfKitFallback: true })
 }
 
 export function buildTechnicalSheetPdfFilename(candidateProfileId: string): string {
