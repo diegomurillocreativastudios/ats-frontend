@@ -1,20 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
+import { isPublicPath } from "@/lib/auth/public-paths"
 
 const AUTH_ROUTE = "/auth/iniciar-sesion"
 const CANDIDATE_HOME = "/portal-candidato"
 const RECRUITER_HOME = "/portal-rrhh"
 const PORTAL_SELECTOR = "/seleccion-portal"
-
-const publicPaths = [
-  "/auth/iniciar-sesion",
-  "/auth/registrarse",
-  "/auth/forgot-password",
-  "/auth/restablecer-contrasena",
-  "/restablecer-contrasena",
-  "/recuperar-contrasena",
-  "/oportunidades",
-]
 
 function normalizeRole(rawRole: string | null): "candidate" | "recruiter" | null {
   if (!rawRole) return null
@@ -54,12 +45,6 @@ function getRoleHomePath(role: "candidate" | "recruiter" | null): string {
   if (role === "candidate") return CANDIDATE_HOME
   if (role === "recruiter") return RECRUITER_HOME
   return PORTAL_SELECTOR
-}
-
-const isPublicPath = (pathname: string) => {
-  if (pathname.startsWith("/api/")) return true
-  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) return true
-  return publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))
 }
 
 export function proxy(request: NextRequest) {
@@ -147,6 +132,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)$).*)",
+    "/((?!_next/static|_next/image|chromium-pack\\.tar|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)$).*)",
   ],
 }
