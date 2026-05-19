@@ -94,6 +94,8 @@ export const buildTechnicalSheetNextPdfAppPath = (
 
 export interface DownloadTechnicalSheetPdfFromNextOptions {
   vacancyTitle?: string | null
+  /** HTML paginado de la vista previa; el PDF coincide con lo mostrado en pantalla. */
+  previewHtml?: string | null
 }
 
 /**
@@ -111,7 +113,14 @@ export const downloadTechnicalSheetPdfFromNextRoute = async (
   if (title) params.set("vacancyTitle", title)
   const qs = params.toString()
   const url = qs ? `${path}?${qs}` : path
-  const res = await fetch(url, { method: "GET", credentials: "same-origin" })
+  const previewHtml = options?.previewHtml?.trim() ?? ""
+  const usePreview = previewHtml.length > 0
+  const res = await fetch(url, {
+    method: usePreview ? "POST" : "GET",
+    credentials: "same-origin",
+    headers: usePreview ? { "Content-Type": "application/json" } : undefined,
+    body: usePreview ? JSON.stringify({ previewHtml }) : undefined,
+  })
   if (!res.ok) {
     let message = `Error ${res.status}`
     try {

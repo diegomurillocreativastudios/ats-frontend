@@ -10,10 +10,8 @@ import {
   slugifyVacancyForFilename,
 } from "@/lib/api/technical-sheet"
 import { paginateTechnicalSheetArticleToPageBodies } from "@/lib/technical-sheet/paginate-technical-sheet-article-dom"
-import {
-  buildTechnicalSheetPageHtml,
-  TECHNICAL_SHEET_MULTI_PAGE_STYLES,
-} from "@/lib/technical-sheet/technical-sheet-page-shell"
+import { buildPaginatedTechnicalSheetSrcDoc } from "@/lib/technical-sheet/build-paginated-technical-sheet-src-doc"
+import { buildTechnicalSheetPageHtml } from "@/lib/technical-sheet/technical-sheet-page-shell"
 import { TECHNICAL_SHEET_CONTENT_AVAILABLE_HEIGHT_PX } from "@/lib/technical-sheet/technical-sheet-page-constants"
 import {
   buildTechnicalSheetTemplateContext,
@@ -159,8 +157,7 @@ export function TechnicalSheetPanel({
             logoUrl: safeLogo,
           })
         )
-        const out = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/>${TECHNICAL_SHEET_MULTI_PAGE_STYLES}</head><body><main class="technical-sheet-doc">${pages.join("")}</main></body></html>`
-        setPaginatedSrcDoc(out)
+        setPaginatedSrcDoc(buildPaginatedTechnicalSheetSrcDoc(pages))
       } finally {
         iframe.remove()
       }
@@ -187,7 +184,7 @@ export function TechnicalSheetPanel({
   const handleDownloadPdf = useCallback(async () => {
     const vid = vacancyId?.trim()
     const cid = candidateProfileId?.trim()
-    if (!vid || !cid || !templateHtml) return
+    if (!vid || !cid || !paginatedSrcDoc) return
     setPdfActionError(null)
     setPdfBusy(true)
     try {
@@ -195,13 +192,14 @@ export function TechnicalSheetPanel({
       const name = `ficha-tecnica-${slug}-${cid.slice(0, 8)}.pdf`
       await downloadTechnicalSheetPdfFromNextRoute(vid, cid, name, {
         vacancyTitle: vacancyTitle ?? null,
+        previewHtml: paginatedSrcDoc,
       })
     } catch {
       setPdfActionError(m.pdfExportFailed)
     } finally {
       setPdfBusy(false)
     }
-  }, [vacancyId, candidateProfileId, templateHtml, vacancyTitle])
+  }, [vacancyId, candidateProfileId, paginatedSrcDoc, vacancyTitle])
 
   const busy = loading
   const iframeDoc = paginatedSrcDoc ?? templateHtml
@@ -235,7 +233,7 @@ export function TechnicalSheetPanel({
             ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {templateHtml && !loading ? (
+            {paginatedSrcDoc && !loading ? (
               <button
                 type="button"
                 onClick={() => {
