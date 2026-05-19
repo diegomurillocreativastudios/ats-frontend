@@ -26,6 +26,7 @@ import {
   Users,
   X,
 } from "lucide-react"
+import { CandidateSalaryExpectationCard } from "@/components/candidato/candidate-salary-expectation-card"
 import {
   ProfileEditContactFields,
   ProfileEditEducationFields,
@@ -456,7 +457,8 @@ export function RecruiterCandidateProfileView({
         className="scroll-mt-28 rounded-xl border border-border bg-card p-6"
         aria-label="Resumen del candidato"
       >
-        <div className="flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+          <div className="flex min-w-0 flex-1 flex-col gap-6 md:flex-row md:items-start">
           <div
             className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-lg font-semibold text-white"
             aria-hidden
@@ -516,6 +518,15 @@ export function RecruiterCandidateProfileView({
               </>
             )}
           </div>
+          </div>
+          <CandidateSalaryExpectationCard
+            jobPrefs={jobPrefs}
+            fallbackMinSalary={canonicalProfile?.minSalary}
+            isEditing={isEditing}
+            editValue={form.jobMinSalary}
+            onEditChange={(jobMinSalary) => patch({ jobMinSalary })}
+            saving={savingProfile}
+          />
         </div>
       </section>
 
