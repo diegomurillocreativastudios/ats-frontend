@@ -67,7 +67,7 @@ export const FALLBACK_KANBAN_STAGES = [
  * Orden de etapas del tablero + etapas que aparecen en postulantes pero no estaban en el catálogo (al final).
  */
 export function resolveOrderedStageNames(
-  kanbanStageNames: string[],
+  kanbanStageNames: readonly string[],
   applicants: VacancyApplicantLike[]
 ): string[] {
   const base: string[] = []
@@ -133,7 +133,7 @@ export interface StageCountRow {
  */
 export function buildStageCounts(
   applicants: VacancyApplicantLike[],
-  kanbanStageNames: string[]
+  kanbanStageNames: readonly string[]
 ): StageCountRow[] {
   const names =
     kanbanStageNames.length > 0 ? kanbanStageNames : [...FALLBACK_KANBAN_STAGES]
@@ -281,7 +281,7 @@ export function resolveApplicationStatusLabel(
  */
 export function buildApplicantsGroupedByStageFull(
   applicants: VacancyApplicantLike[],
-  stageNamesOrdered: string[]
+  stageNamesOrdered: readonly string[]
 ): ApplicantsByStageFullSection[] {
   const names =
     stageNamesOrdered.length > 0 ? stageNamesOrdered : [...FALLBACK_KANBAN_STAGES]
@@ -324,7 +324,7 @@ export function buildApplicantsGroupedByStageFull(
  */
 export function buildApplicantsGroupedByStage(
   applicants: VacancyApplicantLike[],
-  kanbanStageNames: string[],
+  kanbanStageNames: readonly string[],
   statuses: CompanyStatusOption[]
 ): ApplicantsByStageSection[] {
   const ordered = resolveOrderedStageNames(kanbanStageNames, applicants)
