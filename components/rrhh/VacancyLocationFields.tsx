@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/locations"
 import type { VacancyLocationSelection } from "@/lib/vacancies/vacancy-location"
 import { normalizeCountryCode, normalizeStateCode } from "@/lib/vacancies/vacancy-location"
+import { resolveCountryDisplayLabel } from "@/lib/profile-form-options"
 import {
   formatVacancyCountryLabel,
   formatVacancyStateLabel,
@@ -81,7 +82,7 @@ export function VacancyLocationFields({
           if (cancelled) return
           const mapped = countries.map((country) => ({
             iso2: country.iso2.toUpperCase(),
-            label: country.names.display,
+            label: resolveCountryDisplayLabel(country.iso2, country.names.display),
           }))
           setCountryOptions(mapped.sort((a, b) => a.label.localeCompare(b.label, "es")))
           return

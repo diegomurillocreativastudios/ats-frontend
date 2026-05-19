@@ -143,6 +143,34 @@ function sortOptionsByRegionThenNameEs(
   })
 }
 
+/** Nombres preferidos en UI (ISO 3166-1 alpha-2 → etiqueta). */
+const COUNTRY_LABEL_OVERRIDES: Record<string, string> = {
+  QA: "Qatar",
+}
+
+/**
+ * Etiqueta de país para selects y vistas (Intl es-ES + overrides de producto).
+ */
+export function resolveCountryDisplayLabel(
+  iso2: string,
+  intlOrApiLabel?: string | null
+): string {
+  const upper = iso2.trim().toUpperCase()
+  const override = COUNTRY_LABEL_OVERRIDES[upper]
+  if (override) return override
+
+  if (intlOrApiLabel != null && String(intlOrApiLabel).trim() !== "") {
+    return String(intlOrApiLabel).trim()
+  }
+
+  const display = new Intl.DisplayNames(["es"], { type: "region" })
+  try {
+    return display.of(upper) ?? upper
+  } catch {
+    return upper
+  }
+}
+
 let countryOptionsCache: SelectOption[] | null = null
 
 /**
@@ -211,6 +239,7 @@ export function getCountrySelectOptions(): SelectOption[] {
     } catch {
       name = upper
     }
+    name = resolveCountryDisplayLabel(upper, name)
     if (!name || name === upper || seen.has(name)) continue
     seen.add(name)
     rows.push({ sortKey: upper, value: name, label: name })
@@ -294,6 +323,7 @@ export function getCountryIso2SelectOptions(): SelectOption[] {
     } catch {
       name = upper
     }
+    name = resolveCountryDisplayLabel(upper, name)
     rows.push({ sortKey: upper, value: upper, label: name })
   }
 
@@ -312,14 +342,7 @@ export function formatCountryCodeLabel(code: string | null | undefined): string 
   if (code == null || String(code).trim() === "") return "—"
   const upper = String(code).trim().toUpperCase()
   if (!/^[A-Z]{2}$/.test(upper)) return upper
-  const display = new Intl.DisplayNames(["es"], { type: "region" })
-  let name: string
-  try {
-    name = display.of(upper) ?? upper
-  } catch {
-    name = upper
-  }
-  return name
+  return resolveCountryDisplayLabel(upper)
 }
 
 /** Estado civil (valores en español para persistir en API). */

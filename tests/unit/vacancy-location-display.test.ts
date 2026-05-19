@@ -54,6 +54,7 @@ describe("vacancy-location-display", () => {
   it("formats country labels in Spanish via Intl", () => {
     expect(formatVacancyCountryLabel("US")).toBe("Estados Unidos")
     expect(formatVacancyCountryLabel("SV")).toBe("El Salvador")
+    expect(formatVacancyCountryLabel("QA")).toBe("Qatar")
   })
 
   it("prefers native Spanish state names when the API name is English", () => {
