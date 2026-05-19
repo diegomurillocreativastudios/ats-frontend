@@ -101,10 +101,15 @@ export async function renderTechnicalSheetPdfBuffer(
     sanitizedPreview !== "" && isValidTechnicalSheetPreviewHtml(sanitizedPreview)
 
   if (hasValidPreview) {
-    return renderFromPreviewHtml(previewHtml)
-  }
-
-  if (previewHtml !== "") {
+    try {
+      return await renderFromPreviewHtml(previewHtml)
+    } catch (previewErr) {
+      console.error(
+        "[technical-sheet-pdf] Preview HTML PDF failed; using server template pipeline",
+        previewErr instanceof Error ? previewErr.stack ?? previewErr.message : previewErr
+      )
+    }
+  } else if (previewHtml !== "") {
     console.warn(
       "[technical-sheet-pdf] Preview HTML rejected after sanitize; using server template pipeline"
     )
