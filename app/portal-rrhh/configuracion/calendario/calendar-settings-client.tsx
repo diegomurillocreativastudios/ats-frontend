@@ -1,12 +1,12 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
 import { GoogleCalendarConnect } from "@/components/rrhh/interviews/google-calendar-connect"
 import { GoogleCalendarDisconnect } from "@/components/rrhh/interviews/google-calendar-disconnect"
-import { Toast } from "@/components/common/toast"
+import Snackbar from "@/components/ui/Snackbar"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 
@@ -14,23 +14,54 @@ export function CalendarSettingsClient() {
   const searchParams = useSearchParams()
   const { status, isLoading, error, refresh, sync, isSyncing } =
     useGoogleCalendar()
-  const [syncToast, setSyncToast] = useState<{
-    type: "success" | "error"
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean
+    variant: "success" | "error" | "info"
     message: string
-  } | null>(null)
+  }>({ open: false, variant: "success", message: "" })
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }))
+  }
 
   const successParam = searchParams.get("success")
   const errorParam = searchParams.get("error")
 
+  useEffect(() => {
+    if (successParam === "true") {
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: "Google Calendar conectado correctamente.",
+      })
+      return
+    }
+    if (errorParam) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: decodeURIComponent(errorParam),
+      })
+    }
+  }, [successParam, errorParam])
+
   const handleManualSync = async () => {
     const result = await sync()
-    if (!result) return
+    if (!result) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: error ?? "No se pudo sincronizar el calendario.",
+      })
+      return
+    }
     const msg =
       result.failedCount > 0
         ? `Sincronizado: ${result.syncedCount} ok, ${result.failedCount} con error.`
         : `Sincronizado: ${result.syncedCount} entrevista(s).`
-    setSyncToast({
-      type: result.failedCount > 0 ? "error" : "success",
+    setSnackbar({
+      open: true,
+      variant: result.failedCount > 0 ? "error" : "success",
       message: msg,
     })
   }
@@ -98,22 +129,12 @@ export function CalendarSettingsClient() {
         ) : null}
       </div>
 
-      {successParam === "true" ? (
-        <Toast
-          type="success"
-          message="Google Calendar conectado correctamente."
-        />
-      ) : null}
-      {errorParam ? (
-        <Toast type="error" message={decodeURIComponent(errorParam)} />
-      ) : null}
-      {syncToast ? (
-        <Toast
-          type={syncToast.type}
-          message={syncToast.message}
-          duration={5000}
-        />
-      ) : null}
+      <Snackbar
+        open={snackbar.open}
+        onClose={handleCloseSnackbar}
+        variant={snackbar.variant}
+        message={snackbar.message}
+      />
     </div>
   )
 }

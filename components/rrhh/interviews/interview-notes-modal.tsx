@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 import Modal from "@/components/ui/Modal"
+import Snackbar from "@/components/ui/Snackbar"
 import {
   getInterviewHttpErrorMessage,
   patchRecruiterInterviewNotes,
@@ -29,6 +30,11 @@ export function InterviewNotesModal({
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean
+    variant: "success" | "error"
+    message: string
+  }>({ open: false, variant: "success", message: "" })
 
   useEffect(() => {
     if (!isOpen || !interviewId) return
@@ -42,14 +48,24 @@ export function InterviewNotesModal({
     setError(null)
     try {
       await patchRecruiterInterviewNotes(interviewId, notes.trim())
-      onSaved?.()
+      if (onSaved) {
+        onSaved()
+      } else {
+        setSnackbar({
+          open: true,
+          variant: "success",
+          message: "Notas guardadas.",
+        })
+      }
       onClose()
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
           ? (err as { status?: number }).status
           : 0
-      setError(getInterviewHttpErrorMessage(status ?? 0, err))
+      const msg = getInterviewHttpErrorMessage(status ?? 0, err)
+      setError(msg)
+      setSnackbar({ open: true, variant: "error", message: msg })
     } finally {
       setSaving(false)
     }
@@ -58,6 +74,7 @@ export function InterviewNotesModal({
   if (!interviewId) return null
 
   return (
+    <>
     <Modal
       isOpen={isOpen}
       onClose={() => {
@@ -114,5 +131,12 @@ export function InterviewNotesModal({
         />
       </div>
     </Modal>
+    <Snackbar
+      open={snackbar.open}
+      onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      variant={snackbar.variant}
+      message={snackbar.message}
+    />
+    </>
   )
 }

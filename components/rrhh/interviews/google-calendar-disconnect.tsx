@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
-import { Toast } from "@/components/common/toast"
+import Snackbar from "@/components/ui/Snackbar"
 
 export interface GoogleCalendarDisconnectProps {
   onDisconnected?: () => void
@@ -14,21 +14,26 @@ export function GoogleCalendarDisconnect({
 }: GoogleCalendarDisconnectProps) {
   const { disconnect, isLoading } = useGoogleCalendar()
   const [showConfirm, setShowConfirm] = useState(false)
-  const [toast, setToast] = useState<{
-    type: "success" | "error"
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean
+    variant: "success" | "error"
     message: string
-  } | null>(null)
+  }>({ open: false, variant: "success", message: "" })
 
   const handleDisconnect = async () => {
     try {
       await disconnect()
-      setToast({ type: "success", message: "Google Calendar desconectado." })
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: "Google Calendar desconectado.",
+      })
       setShowConfirm(false)
       onDisconnected?.()
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo desconectar"
-      setToast({ type: "error", message })
+      setSnackbar({ open: true, variant: "error", message })
     }
   }
 
@@ -72,9 +77,12 @@ export function GoogleCalendarDisconnect({
           Desconectar Google Calendar
         </button>
       )}
-      {toast ? (
-        <Toast type={toast.type} message={toast.message} duration={4000} />
-      ) : null}
+      <Snackbar
+        open={snackbar.open}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        variant={snackbar.variant}
+        message={snackbar.message}
+      />
     </>
   )
 }

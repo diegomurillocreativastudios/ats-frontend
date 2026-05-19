@@ -8,6 +8,7 @@ import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import { ReportFilterRenderer } from "@/components/rrhh/reportes/report-filter-renderer"
 import ReportesFiltersPlaceholder from "@/components/rrhh/reportes/reportes-filters-placeholder"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
   fetchReportTemplateConfig,
@@ -110,6 +111,22 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   const [savingPdf, setSavingPdf] = useState(false)
   const [pdfActionError, setPdfActionError] = useState<string | null>(null)
   const [pdfWarning, setPdfWarning] = useState<string | null>(null)
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean
+    variant: "success" | "error" | "warning" | "info"
+    message: string
+  }>({ open: false, variant: "success", message: "" })
+
+  const showSnackbar = useCallback(
+    (variant: "success" | "error" | "warning" | "info", message: string) => {
+      setSnackbar({ open: true, variant, message })
+    },
+    []
+  )
+
+  const handleCloseSnackbar = useCallback(() => {
+    setSnackbar((prev) => ({ ...prev, open: false }))
+  }, [])
 
   const resolveClientName = useCallback(
     (clientId: string) => {
@@ -213,7 +230,11 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   }, [])
 
   const generatePreview = useCallback(
-    async (signal: AbortSignal, filters: Record<string, unknown>) => {
+    async (
+      signal: AbortSignal,
+      filters: Record<string, unknown>,
+      options?: { notifyOnSuccess?: boolean }
+    ) => {
       if (!template || !reportConfig) return
 
       setGeneratingPreview(true)
@@ -252,6 +273,9 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             generatedAt: formatGeneratedAtForPdf(),
           })
           setPreviewContext(ctx)
+          if (options?.notifyOnSuccess) {
+            showSnackbar("success", "Vista previa generada correctamente.")
+          }
           return
         }
 
@@ -270,14 +294,21 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
         if (preview.filtersApplied) {
           setAppliedFilters(cloneFilters(preview.filtersApplied))
         }
+        if (options?.notifyOnSuccess) {
+          showSnackbar("success", "Vista previa generada correctamente.")
+        }
       } catch (err: unknown) {
         if (signal.aborted) return
-        setPreviewError(getApiErrorMessage(err) || m.errorPreview)
+        const msg = getApiErrorMessage(err) || m.errorPreview
+        setPreviewError(msg)
+        if (options?.notifyOnSuccess) {
+          showSnackbar("error", msg)
+        }
       } finally {
         if (!signal.aborted) setGeneratingPreview(false)
       }
     },
-    [isLegacyConfig, reportConfig, resolveClientName, template, templateId]
+    [isLegacyConfig, reportConfig, resolveClientName, showSnackbar, template, templateId]
   )
 
   useEffect(() => {
@@ -347,7 +378,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
     const next = cloneFilters(draftFilters)
     setAppliedFilters(next)
     const controller = new AbortController()
-    void generatePreview(controller.signal, next)
+    void generatePreview(controller.signal, next, { notifyOnSuccess: true })
   }
 
   const waitForCaptureReady = async (captureTarget: HTMLElement) => {
@@ -419,14 +450,17 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             file: blob,
             fileName,
           })
+          showSnackbar("success", "PDF guardado en el historial correctamente.")
         } catch {
           setPdfWarning(m.pdfHistoryWarning)
+          showSnackbar("warning", m.pdfHistoryWarning)
         } finally {
           setSavingPdf(false)
         }
       }
     } catch {
       setPdfActionError(m.pdfExportFailed)
+      showSnackbar("error", m.pdfExportFailed)
     } finally {
       setDownloadingPdf(false)
     }
@@ -434,6 +468,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
     previewHistoryId,
     reportConfig?.pdfFormat,
     reportConfig?.pdfOrientation,
+    showSnackbar,
     template?.name,
     templateId,
   ])
@@ -460,6 +495,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   const pdfBusy = downloadingPdf || savingPdf
 
   return (
+    <>
     <RrhhReportsShell breadcrumbLabel={breadcrumbLabel} breadcrumbTrail={trail}>
       <div className="min-w-0 flex flex-col gap-6 px-4 py-6 pb-10 md:px-8">
         {loadingTemplate ? (
@@ -675,5 +711,12 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
         </div>
       ) : null}
     </RrhhReportsShell>
+    <Snackbar
+      open={snackbar.open}
+      onClose={handleCloseSnackbar}
+      variant={snackbar.variant}
+      message={snackbar.message}
+    />
+    </>
   )
 }
