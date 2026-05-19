@@ -1,18 +1,66 @@
-import type { Browser, Page, PDFOptions, SetContentWaitForOptions } from "puppeteer-core"
-import { isVercelPdfRuntime, launchPdfBrowser } from "@/lib/pdf/launch-pdf-browser"
+import { existsSync } from "node:fs"
+import type { Browser, Page } from "puppeteer-core"
+import puppeteer from "puppeteer-core"
+import chromium from "@sparticuz/chromium"
+
+/**
+ * Entorno PDF headless:
+ * - `VERCEL` / `VERCEL_ENV`: Chromium binary from `@sparticuz/chromium`.
+ * - `PUPPETEER_EXECUTABLE_PATH`: Chrome/Chromium locally o en Docker (GCP).
+ * - `TECHNICAL_SHEET_PDF_MEDIA_TYPE`: solo afecta pruebas o llamadas directas a `applyTechnicalSheetPdfPipeline`;
+ *   `renderHtmlToPdfBuffer` usa siempre `print` para aplicar `@media print` de la plantilla.
+ */
+
+const LOCAL_CHROME_CANDIDATES = [
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "/Applications/Chromium.app/Contents/MacOS/Chromium",
+  "/usr/bin/google-chrome-stable",
+  "/usr/bin/chromium-browser",
+  "/usr/bin/chromium",
+] as const
 
 const PDF_IMAGE_WAIT_MS = 15_000
+
+function resolveLocalChromeExecutable(): string | null {
+  const fromEnv = process.env.PUPPETEER_EXECUTABLE_PATH?.trim()
+  if (fromEnv && existsSync(fromEnv)) return fromEnv
+  for (const p of LOCAL_CHROME_CANDIDATES) {
+    if (existsSync(p)) return p
+  }
+  return null
+}
+
+function isVercelRuntime(): boolean {
+  return Boolean(process.env.VERCEL || process.env.VERCEL_ENV)
+}
+
+/**
+ * Resolves the Chromium/Chrome binary for PDF generation.
+ * - Vercel: `@sparticuz/chromium`.
+ * - Local/GCP: `PUPPETEER_EXECUTABLE_PATH` or a standard Chrome install path.
+ */
+export async function resolveChromiumExecutablePathForPdf(): Promise<string> {
+  if (isVercelRuntime()) {
+    return chromium.executablePath()
+  }
+  const local = resolveLocalChromeExecutable()
+  if (local) return local
+  throw new Error(
+    "No browser found for PDF generation. Set PUPPETEER_EXECUTABLE_PATH to Chrome/Chromium, or install Google Chrome."
+  )
+}
 
 export function getTechnicalSheetPdfMediaType(): "screen" | "print" {
   const v = process.env.TECHNICAL_SHEET_PDF_MEDIA_TYPE?.trim().toLowerCase()
   return v === "print" ? "print" : "screen"
 }
 
-export async function waitForTechnicalSheetPdfDocumentAssets(
-  page: Page,
-  imageWaitMs: number = PDF_IMAGE_WAIT_MS
-): Promise<void> {
-  await page.evaluate(async (waitMs: number) => {
+/**
+ * Espera fuentes del documento y carga de imágenes antes de rasterizar a PDF.
+ * Exportada para pruebas unitarias con `Page` mockeado.
+ */
+export async function waitForTechnicalSheetPdfDocumentAssets(page: Page): Promise<void> {
+  await page.evaluate(async (imageWaitMs: number) => {
     if (document.fonts?.ready) await document.fonts.ready
 
     const imgs = Array.from(document.images)
@@ -26,7 +74,7 @@ export async function waitForTechnicalSheetPdfDocumentAssets(
           window.clearTimeout(tid)
           resolve()
         }
-        const tid = window.setTimeout(done, waitMs)
+        const tid = window.setTimeout(done, imageWaitMs)
         img.addEventListener("load", done, { once: true })
         img.addEventListener("error", done, { once: true })
       })
@@ -42,7 +90,7 @@ export async function waitForTechnicalSheetPdfDocumentAssets(
         }
       })
     )
-  }, imageWaitMs)
+  }, PDF_IMAGE_WAIT_MS)
 }
 
 const TECHNICAL_SHEET_PDF_OPTIONS = {
@@ -56,101 +104,45 @@ export function getTechnicalSheetPdfPageOptions(): typeof TECHNICAL_SHEET_PDF_OP
   return { ...TECHNICAL_SHEET_PDF_OPTIONS }
 }
 
-export interface PdfSetContentOptions {
-  waitUntil?: SetContentWaitForOptions["waitUntil"]
-  timeoutMs?: number
-}
-
-export type PdfPipelinePhaseName = "setContent" | "waitAssets" | "pagePdf"
-
+/**
+ * Fidelity: `print` media para `@media print` de la plantilla, fuentes, imágenes, `page.pdf` Letter.
+ * Exported for unit tests with a mocked `Page`.
+ */
 export async function applyTechnicalSheetPdfPipeline(
   page: Page,
   html: string,
-  mediaType: "screen" | "print",
-  pdfOverrides?: PDFOptions,
-  setContentOptions?: PdfSetContentOptions,
-  onPdfPipelinePhase?: (phase: PdfPipelinePhaseName, durationMs: number) => void,
-  imageWaitMs?: number
+  mediaType: "screen" | "print"
 ): Promise<Buffer> {
   await page.emulateMediaType(mediaType)
-  let stepStart = performance.now()
-  await page.setContent(html, {
-    waitUntil: setContentOptions?.waitUntil ?? "load",
-    timeout: setContentOptions?.timeoutMs ?? 60_000,
-  })
-  onPdfPipelinePhase?.("setContent", performance.now() - stepStart)
-  stepStart = performance.now()
-  await waitForTechnicalSheetPdfDocumentAssets(page, imageWaitMs)
-  onPdfPipelinePhase?.("waitAssets", performance.now() - stepStart)
-  stepStart = performance.now()
-  const buf = await page.pdf({
-    ...getTechnicalSheetPdfPageOptions(),
-    ...pdfOverrides,
-  })
-  onPdfPipelinePhase?.("pagePdf", performance.now() - stepStart)
+  await page.setContent(html, { waitUntil: "load", timeout: 60_000 })
+  await waitForTechnicalSheetPdfDocumentAssets(page)
+  const buf = await page.pdf(getTechnicalSheetPdfPageOptions())
   return Buffer.from(buf)
 }
 
-export async function enablePdfPageBlockExternalResources(page: Page): Promise<void> {
-  await page.setRequestInterception(true)
-  page.on("request", (request) => {
-    const url = request.url()
-    if (url === "about:blank" || url.startsWith("data:")) {
-      void request.continue()
-      return
-    }
-    const type = request.resourceType()
-    if (type === "document" || type === "script") {
-      void request.continue()
-      return
-    }
-    void request.abort()
-  })
-}
+export async function renderHtmlToPdfBuffer(html: string): Promise<Buffer> {
+  const executablePath = await resolveChromiumExecutablePathForPdf()
+  const isVercel = isVercelRuntime()
+  const args = isVercel ? chromium.args : ["--no-sandbox", "--disable-setuid-sandbox"]
 
-export interface RenderHtmlToPdfBufferOptions {
-  mediaType?: "screen" | "print"
-  pdf?: PDFOptions
-  viewport?: { width: number; height: number }
-  setContent?: PdfSetContentOptions
-  onPdfPipelinePhase?: (phase: PdfPipelinePhaseName, durationMs: number) => void
-  imageWaitMs?: number
-  blockExternalResources?: boolean
-}
-
-export async function renderHtmlToPdfBuffer(
-  html: string,
-  options?: RenderHtmlToPdfBufferOptions
-): Promise<Buffer> {
   let browser: Browser | undefined
   try {
-    browser = await launchPdfBrowser({
-      defaultViewport: isVercelPdfRuntime() ? undefined : { width: 1280, height: 1600 },
-      timeout: isVercelPdfRuntime() ? 120_000 : 30_000,
+    browser = await puppeteer.launch({
+      // `chromium.args` already includes `--headless='shell'`; `headless: true` adds the new
+      // headless stack and breaks launch on Vercel (see @sparticuz/chromium + puppeteer docs).
+      headless: isVercel ? chromium.headless : true,
+      executablePath,
+      args,
+      defaultViewport: isVercel ? chromium.defaultViewport : { width: 1280, height: 1600 },
+      timeout: isVercel ? 120_000 : 30_000,
     })
     const page = await browser.newPage()
     try {
-      if (options?.viewport) {
-        await page.setViewport(options.viewport)
-      }
-      if (options?.blockExternalResources) {
-        await enablePdfPageBlockExternalResources(page)
-      }
-      return await applyTechnicalSheetPdfPipeline(
-        page,
-        html,
-        options?.mediaType ?? "print",
-        options?.pdf,
-        options?.setContent,
-        options?.onPdfPipelinePhase,
-        options?.imageWaitMs
-      )
+      return await applyTechnicalSheetPdfPipeline(page, html, "print")
     } finally {
       await page.close().catch(() => {})
     }
   } finally {
-    if (browser) {
-      await browser.close().catch(() => {})
-    }
+    await browser?.close().catch(() => {})
   }
 }

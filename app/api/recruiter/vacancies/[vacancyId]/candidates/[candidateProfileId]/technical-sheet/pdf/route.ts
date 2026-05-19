@@ -26,7 +26,7 @@ import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
 
 export const runtime = "nodejs"
-export const maxDuration = 180
+export const maxDuration = 60
 
 export async function GET(
   request: Request,
