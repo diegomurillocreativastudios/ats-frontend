@@ -1060,37 +1060,36 @@ const KanbanCard = ({
   const handleSelectMouseDown = (e) => e.stopPropagation();
   const handleSelectClick = (e) => e.stopPropagation();
 
+  const displayName = emptyToDash(match.name);
+  const showTechnicalSheetButton = Boolean(vacancyId && sheetCandidateProfileId);
+  const hasStatuses = statuses.length > 0;
+
   return (
     <>
       <div
         draggable={!readOnly}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        className={`rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow ${readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"}`}
+        className={`flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md ${readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"}`}
         role={readOnly ? undefined : "button"}
         tabIndex={readOnly ? undefined : 0}
-        aria-label={readOnly ? undefined : `Mover ${emptyToDash(match.name)} a otra etapa`}
+        aria-label={readOnly ? undefined : `Mover ${displayName} a otra etapa`}
         aria-describedby={`kanban-card-${candidateId}`}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5" id={`kanban-card-${candidateId}`}>
           <div
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-sm font-semibold text-white"
             aria-hidden
           >
             {initials}
           </div>
-          <div className="min-w-0 flex-1" id={`kanban-card-${candidateId}`}>
-            <p className="truncate font-sans text-sm font-medium text-foreground">
-              {emptyToDash(match.name)}
-            </p>
-            <p className="flex flex-wrap items-center gap-1.5 font-sans text-xs text-muted-foreground">
-              <span>Puntaje: {score}</span>
-              <span className="inline-flex rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
-                {applicationSourceLabel}
-              </span>
-            </p>
-          </div>
-          {vacancyId && sheetCandidateProfileId ? (
+          <p
+            className="min-w-0 flex-1 truncate font-sans text-sm font-semibold text-foreground"
+            title={displayName}
+          >
+            {displayName}
+          </p>
+          {showTechnicalSheetButton ? (
             <button
               type="button"
               onClick={(e) => {
@@ -1104,24 +1103,35 @@ const KanbanCard = ({
               <FileText className="h-4 w-4" aria-hidden />
             </button>
           ) : null}
-          {statuses.length > 0 ? (
-            <select
-              value={currentStatusId ?? ""}
-              onChange={handleStatusChange}
-              onMouseDown={handleSelectMouseDown}
-              onClick={handleSelectClick}
-              disabled={statusSelectDisabled || readOnly}
-              className="shrink-0 rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-              aria-label={`Estado de ${emptyToDash(match.name)}`}
-            >
-              {statuses.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name || s.id}
-                </option>
-              ))}
-            </select>
-          ) : null}
         </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <div className="inline-flex items-center gap-1 font-sans text-xs">
+            <span className="text-muted-foreground">Puntaje</span>
+            <span className="font-semibold tabular-nums text-foreground">{score}</span>
+          </div>
+          <span className="inline-flex shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-foreground">
+            {applicationSourceLabel}
+          </span>
+        </div>
+
+        {hasStatuses ? (
+          <select
+            value={currentStatusId ?? ""}
+            onChange={handleStatusChange}
+            onMouseDown={handleSelectMouseDown}
+            onClick={handleSelectClick}
+            disabled={statusSelectDisabled || readOnly}
+            className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            aria-label={`Estado de ${displayName}`}
+          >
+            {statuses.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name || s.id}
+              </option>
+            ))}
+          </select>
+        ) : null}
       </div>
       {vacancyId && sheetCandidateProfileId && technicalSheetOpen ? (
         <TechnicalSheetModal
@@ -1221,9 +1231,14 @@ const KanbanColumn = ({
     return fromMatch ?? statuses[0]?.id ?? "";
   };
 
+  const hasCandidates = candidates.length > 0;
+  const widthClasses = hasCandidates
+    ? "min-w-[320px] max-w-[420px] flex-1"
+    : "min-w-[140px] max-w-[180px] flex-none";
+
   return (
     <div
-      className="flex min-h-[320px] min-w-[400px] max-w-[520px] flex-1 flex-col rounded-xl border border-border bg-muted/30"
+      className={`flex min-h-[320px] flex-col rounded-xl border border-border bg-muted/30 ${widthClasses}`}
       aria-label={`Columna ${stage}`}
     >
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
