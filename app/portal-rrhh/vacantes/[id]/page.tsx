@@ -1451,6 +1451,17 @@ export default function VacanteDetallePage() {
     return fromVacancy || "—";
   }, [companySelectOptions, savedCompanyId, vacancy]);
 
+  const companyLogoSrc = useMemo(() => {
+    const logo = vacancy?.logo;
+    const hasLogo = Boolean(vacancy?.hasLogo ?? vacancy?.has_logo);
+    if (!hasLogo || !logo || typeof logo !== "object") return null;
+    const base64 = String(logo.base64 ?? "").trim();
+    if (!base64) return null;
+    if (base64.startsWith("data:")) return base64;
+    const contentType = String(logo.contentType ?? logo.content_type ?? "image/png").trim() || "image/png";
+    return `data:${contentType};base64,${base64}`;
+  }, [vacancy?.hasLogo, vacancy?.has_logo, vacancy?.logo]);
+
   const fetchStages = useCallback(async () => {
     try {
       const list = await listRecruiterStages(pipelineCompanyId);
@@ -2350,15 +2361,26 @@ export default function VacanteDetallePage() {
                   >
                     <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                       <div className="flex min-w-0 flex-1 items-start gap-4">
-                        <div
-                          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] bg-vo-purple/10"
-                          aria-hidden
-                        >
-                          <Briefcase
-                            className="h-7 w-7 text-vo-purple"
+                        {companyLogoSrc ? (
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background">
+                            <img
+                              src={companyLogoSrc}
+                              alt={`Logo de ${vacancyCompanyDisplayName}`}
+                              className="h-full w-full object-contain"
+                              loading="lazy"
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] bg-vo-purple/10"
                             aria-hidden
-                          />
-                        </div>
+                          >
+                            <Briefcase
+                              className="h-7 w-7 text-vo-purple"
+                              aria-hidden
+                            />
+                          </div>
+                        )}
                         <div className="flex min-w-0 flex-1 flex-col gap-2">
                           {isEditing ? (
                             <div className="flex flex-col gap-4">
@@ -3105,15 +3127,26 @@ export default function VacanteDetallePage() {
                 >
                   <div className="flex flex-col gap-4">
                     <div className="flex items-start gap-3">
-                      <div
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-vo-purple/10"
-                        aria-hidden
-                      >
-                        <Briefcase
-                          className="h-6 w-6 text-vo-purple"
+                      {companyLogoSrc ? (
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background">
+                          <img
+                            src={companyLogoSrc}
+                            alt={`Logo de ${vacancyCompanyDisplayName}`}
+                            className="h-full w-full object-contain"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-vo-purple/10"
                           aria-hidden
-                        />
-                      </div>
+                        >
+                          <Briefcase
+                            className="h-6 w-6 text-vo-purple"
+                            aria-hidden
+                          />
+                        </div>
+                      )}
                       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                         {isEditing ? (
                           <div className="flex flex-col gap-4">

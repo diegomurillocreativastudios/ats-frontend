@@ -80,16 +80,37 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
       ) : null}
 
       <div className="relative flex min-w-0 flex-1 items-center gap-4">
-        <div
-          className={
-            isReadOnly
-              ? "flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-slate-100"
-              : "flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-vo-purple/10"
-          }
-          aria-hidden
-        >
-          <Icon className={isReadOnly ? "h-6 w-6 text-slate-400" : "h-6 w-6 text-vo-purple"} />
-        </div>
+        {vacancy.logoSrc ? (
+          <div
+            className={
+              isReadOnly
+                ? "flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-slate-200 bg-white"
+                : "flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background"
+            }
+          >
+            <img
+              src={vacancy.logoSrc}
+              alt={`Logo de ${vacancy.company}`}
+              className={
+                isReadOnly
+                  ? "h-full w-full object-contain opacity-70"
+                  : "h-full w-full object-contain"
+              }
+              loading="lazy"
+            />
+          </div>
+        ) : (
+          <div
+            className={
+              isReadOnly
+                ? "flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-slate-100"
+                : "flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-vo-purple/10"
+            }
+            aria-hidden
+          >
+            <Icon className={isReadOnly ? "h-6 w-6 text-slate-400" : "h-6 w-6 text-vo-purple"} />
+          </div>
+        )}
         <div className="min-w-0 flex-1 space-y-2">
           <h3
             className={

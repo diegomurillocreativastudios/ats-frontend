@@ -37,6 +37,22 @@ export interface VacancyListItem {
   countryLabel: string
   stateCode: string | null
   isActive: boolean
+  logoSrc: string | null
+}
+
+const resolveLogoSrc = (item: Record<string, unknown>): string | null => {
+  const hasLogo = Boolean(item?.hasLogo ?? item?.has_logo)
+  if (!hasLogo) return null
+  const logo = item?.logo
+  if (logo == null || typeof logo !== "object" || Array.isArray(logo)) return null
+  const logoRecord = logo as Record<string, unknown>
+  const base64 = String(logoRecord.base64 ?? "").trim()
+  if (!base64) return null
+  if (base64.startsWith("data:")) return base64
+  const contentType =
+    String(logoRecord.contentType ?? logoRecord.content_type ?? "image/png").trim() ||
+    "image/png"
+  return `data:${contentType};base64,${base64}`
 }
 
 export const formatRequirementsSummary = (req: unknown): string => {
@@ -179,5 +195,6 @@ export const mapVacancyFromApi = (
     stateCode,
     isActive:
       readVacancyIsActive(item) && readCompanyIsActiveForVacancy(item),
+    logoSrc: resolveLogoSrc(item),
   }
 }
