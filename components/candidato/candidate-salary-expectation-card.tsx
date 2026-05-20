@@ -1,7 +1,12 @@
 "use client"
 
 import { DollarSign } from "lucide-react"
-import { profileEditInputClass, profileEditLabelClass } from "@/components/candidato/candidate-profile-edit-field-groups"
+import {
+  blockNegativeNumberKeys,
+  profileEditInputClass,
+  profileEditLabelClass,
+  sanitizeNonNegativeSalaryInput,
+} from "@/components/candidato/candidate-profile-edit-field-groups"
 
 const parseJsonObjectIfString = (value: unknown): Record<string, unknown> | null => {
   if (value == null) return null
@@ -107,7 +112,16 @@ export function CandidateSalaryExpectationCard({
             step="1"
             inputMode="numeric"
             value={editValue ?? ""}
-            onChange={(e) => onEditChange?.(e.target.value)}
+            onChange={(e) => onEditChange?.(sanitizeNonNegativeSalaryInput(e.target.value))}
+            onKeyDown={blockNegativeNumberKeys}
+            onPaste={(e) => {
+              const pasted = e.clipboardData.getData("text")
+              const sanitized = sanitizeNonNegativeSalaryInput(pasted)
+              if (sanitized !== pasted) {
+                e.preventDefault()
+                onEditChange?.(sanitized)
+              }
+            }}
             className={`${profileEditInputClass} mt-1.5`}
             disabled={saving}
             placeholder="Ej. 2500"

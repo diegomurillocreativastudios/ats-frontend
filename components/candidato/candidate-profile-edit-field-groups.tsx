@@ -33,6 +33,21 @@ import {
 export const profileEditInputClass =
   "w-full rounded-xl border border-border bg-background px-3 py-2.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
 
+export const sanitizeNonNegativeSalaryInput = (value: string): string => {
+  if (!value) return ""
+  const stripped = value.replace(/-/g, "")
+  if (stripped === "") return ""
+  const parsed = Number(stripped)
+  if (Number.isNaN(parsed)) return stripped
+  return parsed < 0 ? "" : stripped
+}
+
+export const blockNegativeNumberKeys = (e: KeyboardEvent<HTMLInputElement>): void => {
+  if (e.key === "-" || e.key === "+" || e.key === "e" || e.key === "E") {
+    e.preventDefault()
+  }
+}
+
 export const profileEditLabelClass =
   "font-sans text-xs font-medium text-muted-foreground md:text-sm"
 
@@ -393,8 +408,18 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
             type="number"
             min={0}
             step="1"
+            inputMode="numeric"
             value={form.jobMinSalary}
-            onChange={(e) => patch({ jobMinSalary: e.target.value })}
+            onChange={(e) => patch({ jobMinSalary: sanitizeNonNegativeSalaryInput(e.target.value) })}
+            onKeyDown={blockNegativeNumberKeys}
+            onPaste={(e) => {
+              const pasted = e.clipboardData.getData("text")
+              const sanitized = sanitizeNonNegativeSalaryInput(pasted)
+              if (sanitized !== pasted) {
+                e.preventDefault()
+                patch({ jobMinSalary: sanitized })
+              }
+            }}
             className={profileEditInputClass}
             disabled={saving}
           />
