@@ -26,9 +26,19 @@ export interface OpportunityListFilters {
   page?: number
 }
 
+export interface OpportunityCompanyLogo {
+  logoFileId?: string
+  contentType: string
+  fileName?: string
+  sizeBytes?: number
+  base64: string
+}
+
 export interface OpportunityCompanySummary {
   id: string
   name: string
+  hasLogo: boolean
+  logo: OpportunityCompanyLogo | null
 }
 
 export interface OpportunityVacancySummary {
@@ -141,6 +151,31 @@ function normalizeFilterList(value: unknown): OpportunityFilterOption[] {
     .filter((item): item is OpportunityFilterOption => item != null)
 }
 
+function normalizeCompanyLogo(raw: unknown): OpportunityCompanyLogo | null {
+  const record = getRecord(raw)
+  if (!record) return null
+
+  const base64 = toOptionalString(record.base64 ?? record.Base64)
+  if (!base64) return null
+
+  const contentType =
+    toOptionalString(record.contentType ?? record.content_type ?? record.ContentType) ??
+    "image/png"
+  const sizeBytesValue = record.sizeBytes ?? record.size_bytes ?? record.SizeBytes
+  const sizeBytes =
+    sizeBytesValue != null && Number.isFinite(Number(sizeBytesValue))
+      ? Number(sizeBytesValue)
+      : undefined
+
+  return {
+    logoFileId: toOptionalString(record.logoFileId ?? record.logo_file_id ?? record.LogoFileId),
+    contentType,
+    fileName: toOptionalString(record.fileName ?? record.file_name ?? record.FileName),
+    sizeBytes,
+    base64,
+  }
+}
+
 function normalizeCompany(raw: Record<string, unknown>): OpportunityCompanySummary {
   const nestedCompany = getRecord(raw.company)
   const companyName =
@@ -152,12 +187,33 @@ function normalizeCompany(raw: Record<string, unknown>): OpportunityCompanySumma
         raw.company
     ) ?? "Empresa no especificada"
 
+  const logo = normalizeCompanyLogo(
+    nestedCompany?.logo ?? nestedCompany?.Logo ?? raw.logo ?? raw.Logo
+  )
+  const hasLogoRaw =
+    nestedCompany?.hasLogo ??
+    nestedCompany?.has_logo ??
+    nestedCompany?.HasLogo ??
+    raw.hasLogo ??
+    raw.has_logo ??
+    raw.HasLogo
+
   return {
     id:
       toOptionalString(nestedCompany?.id ?? nestedCompany?.uuid ?? raw.companyId) ??
       companyName,
     name: companyName,
+    hasLogo: hasLogoRaw != null ? Boolean(hasLogoRaw) : logo != null,
+    logo,
   }
+}
+
+export function buildOpportunityCompanyLogoDataUri(
+  logo: OpportunityCompanyLogo | null
+): string | null {
+  if (!logo || !logo.base64) return null
+  const contentType = logo.contentType || "image/png"
+  return `data:${contentType};base64,${logo.base64}`
 }
 
 function normalizeCountryCodeField(raw: Record<string, unknown>): string | undefined {

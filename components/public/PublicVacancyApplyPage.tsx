@@ -15,6 +15,7 @@ import { ApplyPrivacyNoticeDialog } from "@/components/public/ApplyPrivacyNotice
 import { PublicVacancyApplicationForm } from "@/components/public/PublicVacancyApplicationForm"
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
 import {
+  buildOpportunityCompanyLogoDataUri,
   getPublicVacancyDetail,
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
@@ -101,6 +102,8 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
   }, [vacancy?.title])
 
   const companyName = vacancy?.company.name?.trim() ?? ""
+  const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy?.company.logo ?? null)
+  const companyLogoAlt = companyName ? `Logo de ${companyName}` : "Logo de la empresa"
 
   const isPrivacyDialogOpen = Boolean(
     vacancy && !errorMessage && !isLoading && !hasAcceptedPrivacy
@@ -145,10 +148,26 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
             <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
               <aside className="space-y-6">
                 <section className={`rounded-[32px] p-6 text-white ${darkPanelClassName}`}>
-                  <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/72">
-                    <Sparkles className="h-3.5 w-3.5 text-[#f5b0ff]" aria-hidden />
-                    Postularme
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/72">
+                      <Sparkles className="h-3.5 w-3.5 text-[#f5b0ff]" aria-hidden />
+                      Postularme
+                    </p>
+
+                    {companyLogoSrc ? (
+                      <div
+                        className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-white/12 bg-white/8"
+                        aria-label={companyLogoAlt}
+                      >
+                        <img
+                          src={companyLogoSrc}
+                          alt={companyLogoAlt}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : null}
+                  </div>
 
                   <h1 className="mt-5 text-3xl font-semibold tracking-tight text-white">
                     {vacancy.title}

@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import {
+  buildOpportunityCompanyLogoDataUri,
   getPublicVacancyDetail,
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
@@ -236,6 +237,8 @@ export function PublicVacancyDetailPage({
 
   const publishedLabel = formatPublishedLabel(vacancy?.publishedAt)
   const companyName = vacancy?.company.name?.trim() ?? ""
+  const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy?.company.logo ?? null)
+  const companyLogoAlt = companyName ? `Logo de ${companyName}` : "Logo de la empresa"
   const applyHref = queryString
     ? `/oportunidades/${vacancyId}/aplicar?${queryString}`
     : `/oportunidades/${vacancyId}/aplicar`
@@ -319,7 +322,19 @@ export function PublicVacancyDetailPage({
                       </div>
                     </div>
 
-                    {companyName ? (
+                    {companyLogoSrc ? (
+                      <div
+                        className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-white/12 bg-white/8"
+                        aria-label={companyLogoAlt}
+                      >
+                        <img
+                          src={companyLogoSrc}
+                          alt={companyLogoAlt}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : companyName ? (
                       <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-[24px] border border-white/12 bg-white/8 text-base font-semibold text-white/88 sm:flex">
                         {getCompanyInitials(companyName) || "AT"}
                       </div>
@@ -386,7 +401,29 @@ export function PublicVacancyDetailPage({
                   <h2 className="text-xl font-semibold text-white">Detalles de la vacante</h2>
 
                   <dl className="mt-4">
-                    {companyName ? <DetailRow label="Empresa" value={companyName} /> : null}
+                    {companyName ? (
+                      <DetailRow
+                        label="Empresa"
+                        value={
+                          <span className="inline-flex items-center justify-end gap-2">
+                            {companyLogoSrc ? (
+                              <span
+                                className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/6"
+                                aria-hidden
+                              >
+                                <img
+                                  src={companyLogoSrc}
+                                  alt=""
+                                  loading="lazy"
+                                  className="h-full w-full object-cover"
+                                />
+                              </span>
+                            ) : null}
+                            <span className="truncate">{companyName}</span>
+                          </span>
+                        }
+                      />
+                    ) : null}
                     <DetailRow
                       label="Departamento"
                       value={vacancy.department?.displayName ?? "No especificado"}

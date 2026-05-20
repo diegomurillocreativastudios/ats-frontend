@@ -28,6 +28,7 @@ import {
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
 import { Button } from "@/components/ui/Button"
 import {
+  buildOpportunityCompanyLogoDataUri,
   listPublicVacancies,
   type OpportunityFilterOption,
   type OpportunityListFilters,
@@ -286,13 +287,27 @@ function OpportunityCard({
   const modalityLabel = vacancy.modality?.displayName ?? "Modalidad no especificada"
   const companyName = vacancy.company.name?.trim() ?? ""
   const DepartmentIcon = getDepartmentIcon(vacancy.department)
+  const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy.company.logo)
+  const companyLogoAlt = companyName ? `Logo de ${companyName}` : "Logo de la empresa"
 
   return (
     <article className="group border-b border-white/10 last:border-b-0">
       <div className="grid gap-4 px-4 py-5 transition-colors duration-200 hover:bg-white/3 sm:px-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(220px,1fr)_auto] lg:items-center lg:gap-6 lg:px-6">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/6 text-xs font-semibold text-white/80">
-            <DepartmentIcon className="h-5 w-5 text-[#8dd8ff]" aria-hidden />
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/6 text-xs font-semibold text-white/80"
+            aria-label={companyLogoSrc ? companyLogoAlt : undefined}
+          >
+            {companyLogoSrc ? (
+              <img
+                src={companyLogoSrc}
+                alt={companyLogoAlt}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <DepartmentIcon className="h-5 w-5 text-[#8dd8ff]" aria-hidden />
+            )}
           </div>
 
           <div className="min-w-0">
