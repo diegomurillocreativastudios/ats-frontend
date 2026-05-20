@@ -7,6 +7,7 @@ import {
   Briefcase,
   Building2,
   Calendar,
+  CalendarDays,
   ClipboardList,
   Cog,
   FileText,
@@ -19,7 +20,12 @@ import { getInitials } from "@/lib/getInitials"
 const navItems = [
   { href: "/portal-admin/etapas", label: "Etapas", icon: ClipboardList },
   { href: "/portal-admin/plantillas", label: "Plantillas", icon: FileText },
-  { href: "/portal-admin/entrevistas", label: "Entrevistas", icon: Calendar },
+  { href: "/portal-admin/entrevistas", label: "Entrevistas — Catálogos", icon: Calendar },
+  {
+    href: "/portal-admin/entrevistas/general",
+    label: "Entrevistas — Calendario",
+    icon: CalendarDays,
+  },
   { href: "/portal-admin/usuarios", label: "Usuarios", icon: Users },
   { href: "/portal-admin/empresas", label: "Empresas", icon: Landmark },
   {
@@ -69,7 +75,10 @@ export default function AdminSidebar() {
           {[...navItems, settingsNavItem].map((item) => {
             const Icon = item.icon
             const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`)
+              item.href === "/portal-admin/entrevistas"
+                ? pathname === item.href
+                : pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`)
             const baseClasses =
               "flex items-center gap-3 rounded-md px-4 py-3 font-sans text-sm transition-colors"
             const enabledClasses = isActive
