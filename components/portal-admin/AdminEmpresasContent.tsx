@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
@@ -10,11 +11,14 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  ImagePlus,
   Landmark,
   Loader2,
   Pencil,
   Plus,
   RefreshCw,
+  Trash2,
+  Upload,
 } from "lucide-react"
 import Modal from "@/components/ui/Modal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
@@ -23,13 +27,21 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
+  buildLogoDataUri,
   createAdminCompany,
+  createAdminCompanyWithLogo,
+  deleteAdminCompanyLogo,
   fetchAdminCompaniesList,
   fetchAdminCompanyById,
   updateAdminCompany,
+  updateAdminCompanyWithLogo,
   type AdminCompany,
   type AdminCompanyFormValues,
+  type AdminCompanyLogo,
 } from "@/lib/api/admin-companies"
+
+const MAX_LOGO_BYTES = 5 * 1024 * 1024
+const ACCEPTED_LOGO_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml"
 
 interface CompanyFormState {
   name: string
@@ -55,6 +67,17 @@ function formatCreatedAt(value: string): string {
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return "—"
   return d.toLocaleString("es", { dateStyle: "medium", timeStyle: "short" })
+}
+
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B"
+  const units = ["B", "KB", "MB", "GB"]
+  const i = Math.min(
+    units.length - 1,
+    Math.floor(Math.log(bytes) / Math.log(1024))
+  )
+  const value = bytes / 1024 ** i
+  return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`
 }
 
 function companyToFormState(company: AdminCompany): CompanyFormState {
@@ -86,8 +109,6 @@ export default function AdminEmpresasContent() {
   const [totalCount, setTotalCount] = useState(0)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
-  const [filterIncludeInactive, setFilterIncludeInactive] = useState(false)
-  const [appliedIncludeInactive, setAppliedIncludeInactive] = useState(false)
 
   const [loading, setLoading] = useState(true)
   const [listError, setListError] = useState<string | null>(null)
@@ -100,10 +121,13 @@ export default function AdminEmpresasContent() {
   const [formSubmitting, setFormSubmitting] = useState(false)
   const [formLoading, setFormLoading] = useState(false)
   const [formLoadError, setFormLoadError] = useState<string | null>(null)
-  const [editMeta, setEditMeta] = useState<{
-    companyId: string
-    createdAt: string
-  } | null>(null)
+
+  const [currentLogo, setCurrentLogo] = useState<AdminCompanyLogo | null>(null)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null)
+  const [logoRemoved, setLogoRemoved] = useState(false)
+  const [logoError, setLogoError] = useState<string | null>(null)
+  const logoInputRef = useRef<HTMLInputElement | null>(null)
 
   const [togglingCompanyIds, setTogglingCompanyIds] = useState<Set<string>>(
     () => new Set()
@@ -126,7 +150,7 @@ export default function AdminEmpresasContent() {
       const res = await fetchAdminCompaniesList({
         page,
         pageSize,
-        includeInactive: appliedIncludeInactive,
+        includeInactive: true,
       })
       setItems(res.items)
       setTotalCount(res.totalCount)
@@ -144,21 +168,70 @@ export default function AdminEmpresasContent() {
     } finally {
       setLoading(false)
     }
-  }, [page, pageSize, appliedIncludeInactive])
+  }, [page, pageSize])
 
   useEffect(() => {
     void loadList()
   }, [loadList])
 
-  const applyFilters = () => {
-    setAppliedIncludeInactive(filterIncludeInactive)
-    setPage(1)
+  useEffect(() => {
+    if (!logoFile) {
+      setLogoPreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(logoFile)
+    setLogoPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [logoFile])
+
+  const resetLogoState = () => {
+    setCurrentLogo(null)
+    setLogoFile(null)
+    setLogoRemoved(false)
+    setLogoError(null)
+    if (logoInputRef.current) logoInputRef.current.value = ""
   }
 
-  const clearFilters = () => {
-    setFilterIncludeInactive(false)
-    setAppliedIncludeInactive(false)
-    setPage(1)
+  const handleLogoFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null
+    if (!file) {
+      setLogoFile(null)
+      return
+    }
+    if (!file.type.startsWith("image/")) {
+      setLogoError("Solo se permiten archivos de imagen.")
+      event.target.value = ""
+      return
+    }
+    if (file.size > MAX_LOGO_BYTES) {
+      setLogoError("El logo no puede superar los 5 MB.")
+      event.target.value = ""
+      return
+    }
+    setLogoError(null)
+    setLogoRemoved(false)
+    setLogoFile(file)
+  }
+
+  const handleOpenLogoPicker = () => {
+    logoInputRef.current?.click()
+  }
+
+  const handleCancelLogoChange = () => {
+    setLogoFile(null)
+    setLogoError(null)
+    if (logoInputRef.current) logoInputRef.current.value = ""
+  }
+
+  const handleRemoveLogo = () => {
+    setLogoFile(null)
+    setLogoRemoved(true)
+    setLogoError(null)
+    if (logoInputRef.current) logoInputRef.current.value = ""
+  }
+
+  const handleUndoRemoveLogo = () => {
+    setLogoRemoved(false)
   }
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1)
@@ -166,11 +239,11 @@ export default function AdminEmpresasContent() {
   const handleOpenCreate = () => {
     setFormMode("create")
     setEditingCompanyId(null)
-    setEditMeta(null)
     setFormState(emptyFormState())
     setFormErrors({})
     setFormLoadError(null)
     setFormLoading(false)
+    resetLogoState()
     setFormOpen(true)
   }
 
@@ -181,15 +254,12 @@ export default function AdminEmpresasContent() {
     setFormLoading(true)
     setFormLoadError(null)
     setFormErrors({})
-    setEditMeta(null)
+    resetLogoState()
 
     try {
       const company = await fetchAdminCompanyById(companyId)
       setFormState(companyToFormState(company))
-      setEditMeta({
-        companyId: company.companyId,
-        createdAt: company.createdAt,
-      })
+      setCurrentLogo(company.logo)
     } catch (err: unknown) {
       setFormLoadError(getApiErrorMessage(err) || "No se pudo cargar la empresa.")
     } finally {
@@ -201,8 +271,8 @@ export default function AdminEmpresasContent() {
     if (formSubmitting || formLoading) return
     setFormOpen(false)
     setEditingCompanyId(null)
-    setEditMeta(null)
     setFormLoadError(null)
+    resetLogoState()
   }
 
   const handleSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
@@ -220,14 +290,24 @@ export default function AdminEmpresasContent() {
 
     try {
       if (formMode === "create") {
-        const created = await createAdminCompany(payload)
+        const created = logoFile
+          ? await createAdminCompanyWithLogo(payload, logoFile)
+          : await createAdminCompany(payload)
         showSnackbar("success", `Empresa creada. ID: ${created.companyId}`)
       } else if (editingCompanyId) {
-        await updateAdminCompany(editingCompanyId, payload)
+        if (logoFile) {
+          await updateAdminCompanyWithLogo(editingCompanyId, payload, logoFile)
+        } else {
+          await updateAdminCompany(editingCompanyId, payload)
+          if (logoRemoved && currentLogo) {
+            await deleteAdminCompanyLogo(editingCompanyId)
+          }
+        }
         showSnackbar("success", "Empresa actualizada.")
       }
 
       setFormOpen(false)
+      resetLogoState()
       await loadList()
     } catch (err: unknown) {
       showSnackbar(
@@ -277,6 +357,14 @@ export default function AdminEmpresasContent() {
 
   const isEmpty = !loading && !listError && items.length === 0
 
+  const currentLogoDataUri = buildLogoDataUri(currentLogo)
+  const logoPreviewSrc = logoFile
+    ? logoPreviewUrl
+    : logoRemoved
+      ? null
+      : currentLogoDataUri
+  const hasExistingLogoVisible = Boolean(logoPreviewSrc)
+
   return (
     <main
       className="flex min-h-0 flex-1 flex-col overflow-auto p-6 md:p-8"
@@ -295,31 +383,6 @@ export default function AdminEmpresasContent() {
           </Button>
         }
       />
-
-      <section
-        className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm"
-        aria-label="Filtros"
-      >
-        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-          <label className="flex cursor-pointer items-center gap-2 font-sans text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={filterIncludeInactive}
-              onChange={(e) => setFilterIncludeInactive(e.target.checked)}
-              className={checkboxVoClass}
-            />
-            Incluir inactivas
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="primary" onClick={applyFilters}>
-              Aplicar filtros
-            </Button>
-            <Button type="button" variant="outline" onClick={clearFilters}>
-              Limpiar
-            </Button>
-          </div>
-        </div>
-      </section>
 
       {listError ? (
         <div
@@ -389,9 +452,8 @@ export default function AdminEmpresasContent() {
                 Aún no hay empresas
               </h2>
               <p className="max-w-lg font-sans text-sm text-muted-foreground">
-                {appliedIncludeInactive
-                  ? "No hay empresas registradas con los filtros actuales."
-                  : "No hay empresas activas. Marcá «Incluir inactivas» o creá una nueva."}
+                Todavía no se registró ninguna empresa. Creá la primera para
+                comenzar.
               </p>
             </div>
             <Button type="button" variant="primary" onClick={handleOpenCreate}>
@@ -400,9 +462,10 @@ export default function AdminEmpresasContent() {
             </Button>
           </div>
         ) : (
-          <table className="w-full min-w-[800px] font-sans text-left text-sm">
+          <table className="w-full min-w-[880px] font-sans text-left text-sm">
             <thead className="border-b border-border bg-muted/50">
               <tr>
+                <th className="w-20 px-4 py-3 font-medium text-foreground">Logo</th>
                 <th className="px-4 py-3 font-medium text-foreground">Nombre</th>
                 <th className="px-4 py-3 font-medium text-foreground">Industria</th>
                 <th className="px-4 py-3 font-medium text-foreground">Estado</th>
@@ -413,15 +476,38 @@ export default function AdminEmpresasContent() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-16 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-4 py-16 text-center text-muted-foreground">
                     <Loader2 className="mx-auto h-8 w-8 animate-spin text-vo-purple" aria-hidden />
                   </td>
                 </tr>
               ) : (
                 items.map((row) => {
                   const isRowToggling = togglingCompanyIds.has(row.companyId)
+                  const rowLogoSrc = buildLogoDataUri(row.logo)
                   return (
                     <tr key={row.companyId} className="border-b border-border last:border-0">
+                      <td className="px-4 py-3 align-middle">
+                        <div
+                          className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border border-border bg-background"
+                          aria-label={
+                            rowLogoSrc ? `Logo de ${row.name}` : "Sin logo"
+                          }
+                        >
+                          {rowLogoSrc ? (
+                            <img
+                              src={rowLogoSrc}
+                              alt={`Logo de ${row.name}`}
+                              className="h-full w-full object-contain"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <Landmark
+                              className="h-5 w-5 text-muted-foreground"
+                              aria-hidden
+                            />
+                          )}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 align-middle font-medium text-foreground">
                         {row.name}
                       </td>
@@ -544,18 +630,6 @@ export default function AdminEmpresasContent() {
           </div>
         ) : (
           <form id="admin-company-form" className="space-y-5" onSubmit={handleSubmitForm}>
-            {formMode === "edit" && editMeta ? (
-              <div className="grid gap-3 rounded-lg border border-border bg-muted/30 p-4 text-sm">
-                <div>
-                  <span className="font-medium text-foreground">ID empresa</span>
-                  <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{editMeta.companyId}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-foreground">Fecha de creación</span>
-                  <p className="mt-1 text-muted-foreground">{formatCreatedAt(editMeta.createdAt)}</p>
-                </div>
-              </div>
-            ) : null}
             <Input
               id="company-name"
               name="name"
@@ -582,6 +656,119 @@ export default function AdminEmpresasContent() {
               placeholder="ej. Tecnología, Retail"
               disabled={formSubmitting}
             />
+            <fieldset className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
+              <legend className="px-1 font-sans text-sm font-medium text-foreground">
+                Logo
+              </legend>
+              <p className="text-xs text-muted-foreground">
+                PNG, JPG, WEBP o SVG. Máximo 5 MB. El logo se sube como blob al
+                guardar.
+              </p>
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div
+                  className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-background"
+                  aria-hidden={logoPreviewSrc ? undefined : true}
+                  aria-label={
+                    logoPreviewSrc
+                      ? "Vista previa del logo"
+                      : "Sin logo"
+                  }
+                >
+                  {logoPreviewSrc ? (
+                    <img
+                      src={logoPreviewSrc}
+                      alt="Logo de la empresa"
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <ImagePlus
+                      className="h-7 w-7 text-muted-foreground"
+                      aria-hidden
+                    />
+                  )}
+                </div>
+
+                <div className="flex flex-1 flex-col gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-9 px-3 text-xs"
+                      onClick={handleOpenLogoPicker}
+                      disabled={formSubmitting}
+                    >
+                      <Upload className="h-3.5 w-3.5" aria-hidden />
+                      {hasExistingLogoVisible ? "Cambiar logo" : "Subir logo"}
+                    </Button>
+
+                    {logoFile ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-9 px-3 text-xs"
+                        onClick={handleCancelLogoChange}
+                        disabled={formSubmitting}
+                      >
+                        Cancelar selección
+                      </Button>
+                    ) : null}
+
+                    {formMode === "edit" && currentLogo && !logoRemoved ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-9 px-3 text-xs text-destructive hover:text-destructive"
+                        onClick={handleRemoveLogo}
+                        disabled={formSubmitting}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                        Quitar logo
+                      </Button>
+                    ) : null}
+
+                    {logoRemoved ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-9 px-3 text-xs"
+                        onClick={handleUndoRemoveLogo}
+                        disabled={formSubmitting}
+                      >
+                        Deshacer
+                      </Button>
+                    ) : null}
+                  </div>
+
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept={ACCEPTED_LOGO_TYPES}
+                    className="hidden"
+                    onChange={handleLogoFileChange}
+                    disabled={formSubmitting}
+                  />
+
+                  {logoFile ? (
+                    <p className="break-all text-xs text-muted-foreground">
+                      {logoFile.name} · {formatBytes(logoFile.size)}
+                    </p>
+                  ) : null}
+
+                  {logoRemoved ? (
+                    <p className="text-xs text-destructive">
+                      Se eliminará el logo actual al guardar.
+                    </p>
+                  ) : null}
+
+                  {logoError ? (
+                    <p className="text-xs text-destructive" role="alert">
+                      {logoError}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </fieldset>
             <label className="flex cursor-pointer items-center gap-2 font-sans text-sm text-foreground">
               <input
                 type="checkbox"

@@ -140,4 +140,11 @@ export const apiClient = {
   postFormData(endpoint: string, formData: FormData) {
     return this.request(endpoint, { method: "POST", body: formData })
   },
+  /**
+   * PUT con multipart/form-data (p. ej. actualizar entidad + reemplazar archivo).
+   * No se debe enviar Content-Type; el navegador lo fija con boundary.
+   */
+  putFormData(endpoint: string, formData: FormData) {
+    return this.request(endpoint, { method: "PUT", body: formData })
+  },
 }

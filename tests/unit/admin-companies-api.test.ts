@@ -31,6 +31,8 @@ describe("mapAdminCompany", () => {
       industry: "Tech",
       isActive: true,
       createdAt: "2024-01-01T00:00:00Z",
+      hasLogo: false,
+      logo: null,
     } satisfies AdminCompany)
   })
 
