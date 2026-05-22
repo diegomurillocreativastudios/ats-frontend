@@ -3,6 +3,7 @@ import type { Page } from "puppeteer-core"
 import {
   applyTechnicalSheetPdfPipeline,
   getTechnicalSheetPdfPageOptions,
+  resolveSetContentTimeoutMs,
   waitForTechnicalSheetPdfDocumentAssets,
 } from "@/lib/technical-sheet/html-to-pdf-chromium"
 
@@ -47,6 +48,14 @@ describe("waitForTechnicalSheetPdfDocumentAssets", () => {
     await waitForTechnicalSheetPdfDocumentAssets(page)
 
     expect(page.evaluate).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe("resolveSetContentTimeoutMs", () => {
+  it("extends timeout for large HTML payloads", () => {
+    expect(resolveSetContentTimeoutMs("x".repeat(50_000))).toBe(60_000)
+    expect(resolveSetContentTimeoutMs("x".repeat(200_000))).toBe(120_000)
+    expect(resolveSetContentTimeoutMs("x".repeat(500_000))).toBe(180_000)
   })
 })
 

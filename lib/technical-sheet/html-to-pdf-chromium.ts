@@ -108,13 +108,23 @@ export function getTechnicalSheetPdfPageOptions(): typeof TECHNICAL_SHEET_PDF_OP
  * Fidelity: `print` media para `@media print` de la plantilla, fuentes, imágenes, `page.pdf` Letter.
  * Exported for unit tests with a mocked `Page`.
  */
+export function resolveSetContentTimeoutMs(html: string): number {
+  const len = html.length
+  if (len > 400_000) return 180_000
+  if (len > 150_000) return 120_000
+  return 60_000
+}
+
 export async function applyTechnicalSheetPdfPipeline(
   page: Page,
   html: string,
   mediaType: "screen" | "print"
 ): Promise<Buffer> {
   await page.emulateMediaType(mediaType)
-  await page.setContent(html, { waitUntil: "load", timeout: 60_000 })
+  await page.setContent(html, {
+    waitUntil: "load",
+    timeout: resolveSetContentTimeoutMs(html),
+  })
   await waitForTechnicalSheetPdfDocumentAssets(page)
   const buf = await page.pdf(getTechnicalSheetPdfPageOptions())
   return Buffer.from(buf)
@@ -131,6 +141,9 @@ export async function renderHtmlToPdfBuffer(
 ): Promise<Buffer> {
   const executablePath = await resolveChromiumExecutablePathForPdf()
   const isVercel = isVercelRuntime()
+  if (isVercel) {
+    chromium.setGraphicsMode = false
+  }
   const args = isVercel ? chromium.args : ["--no-sandbox", "--disable-setuid-sandbox"]
 
   let browser: Browser | undefined

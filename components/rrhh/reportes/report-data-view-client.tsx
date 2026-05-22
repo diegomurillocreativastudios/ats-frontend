@@ -609,13 +609,52 @@ export function ReportDataViewClient({
     return resolveReportPdfCaptureElement(pdfCaptureRef.current)
   }, [])
 
+  const triggerPdfBlobDownload = useCallback((blob: Blob, fileName: string) => {
+    const objectUrl = URL.createObjectURL(blob)
+    const anchor = document.createElement("a")
+    anchor.href = objectUrl
+    anchor.download = fileName
+    anchor.rel = "noopener"
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(objectUrl)
+  }, [])
+
   const handleDownloadPdf = useCallback(async () => {
     setPdfActionError(null)
     setDownloadingPdf(true)
     const baseName = slugifyReportFileName(catalogItem.name || catalogItem.reportKey)
     const fileName = `${baseName}.pdf`
+    const isVacancyProgress = isVacancyProgressReportKey(catalogItem.reportKey)
     try {
-      if (isVacancyProgressReportKey(catalogItem.reportKey)) {
+      const captureTarget = resolvePdfCaptureTarget()
+      if (captureTarget) {
+        try {
+          await waitForCaptureReady(captureTarget)
+          const blob = await captureElementAsPdfBlob({
+            element: captureTarget,
+            orientation: isVacancyProgress ? "portrait" : "landscape",
+            format: isVacancyProgress ? "letter" : "a4",
+            scale: 2,
+            marginMm: isVacancyProgress ? 0 : 5,
+          })
+          triggerPdfBlobDownload(blob, fileName)
+          return
+        } catch (clientErr: unknown) {
+          if (!isVacancyProgress) {
+            throw clientErr
+          }
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(
+              "[report-pdf] Client capture failed; trying server Chromium PDF",
+              clientErr
+            )
+          }
+        }
+      }
+
+      if (isVacancyProgress) {
         const html = renderedHtml?.trim() ?? ""
         if (html === "") {
           setPdfActionError(
@@ -630,28 +669,9 @@ export function ReportDataViewClient({
         return
       }
 
-      const captureTarget = resolvePdfCaptureTarget()
-      if (!captureTarget) {
-        setPdfActionError(
-          "No se encontró la vista previa del reporte. Esperá a que cargue e intentá de nuevo."
-        )
-        return
-      }
-      await waitForCaptureReady(captureTarget)
-      const blob = await captureElementAsPdfBlob({
-        element: captureTarget,
-        orientation: "landscape",
-        format: "a4",
-        scale: 2,
-        marginMm: 5,
-      })
-      const objectUrl = URL.createObjectURL(blob)
-      const anchor = document.createElement("a")
-      anchor.href = objectUrl
-      anchor.download = fileName
-      anchor.rel = "noopener"
-      anchor.click()
-      URL.revokeObjectURL(objectUrl)
+      setPdfActionError(
+        "No se encontró la vista previa del reporte. Esperá a que cargue e intentá de nuevo."
+      )
     } catch (err: unknown) {
       if (process.env.NODE_ENV !== "production") {
         console.error("[report-pdf]", err)
@@ -665,6 +685,7 @@ export function ReportDataViewClient({
     catalogItem.reportKey,
     renderedHtml,
     resolvePdfCaptureTarget,
+    triggerPdfBlobDownload,
   ])
 
   const hasPreviewSource =
@@ -878,7 +899,7 @@ export function ReportDataViewClient({
         ) : null}
       </div>
 
-      {renderedHtml && !isVacancyProgressReportKey(catalogItem.reportKey) ? (
+      {renderedHtml ? (
         <ShadowHtmlCaptureHost
           ref={pdfCaptureRef}
           html={renderedHtml}
