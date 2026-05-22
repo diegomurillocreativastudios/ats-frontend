@@ -27,6 +27,7 @@
 # misc
 .DS_Store
 *.pem
+/avance-de-vacantes-*.pdf
 
 # Legacy Chromium pack (removed server PDF pipeline; do not commit if regenerated locally)
 /public/chromium-pack.tar

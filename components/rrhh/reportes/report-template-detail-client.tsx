@@ -537,6 +537,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             <section aria-label="Encabezado del reporte">
               <PortalPageHeader
                 title={template.name}
+                titleClassName="text-2xl font-bold tracking-tight text-foreground md:text-3xl"
                 description="Vista previa del reporte con los datos del periodo seleccionado."
                 actions={
                   <div className="flex flex-wrap items-center gap-2">

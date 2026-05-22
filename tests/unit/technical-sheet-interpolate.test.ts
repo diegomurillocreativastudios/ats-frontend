@@ -46,6 +46,12 @@ describe("interpolateTechnicalSheetTemplate", () => {
     expect(interpolateTechnicalSheetTemplate("{{candidate.missing}}", { candidate: {} })).toBe("")
   })
 
+  it("does not escape placeholders ending with Html", () => {
+    const html = "<ul>{{insightsHtml}}</ul>"
+    const ctx = { insightsHtml: "<li>OK</li>" }
+    expect(interpolateTechnicalSheetTemplate(html, ctx)).toBe("<ul><li>OK</li></ul>")
+  })
+
   it("escapes substituted values", () => {
     expect(
       interpolateTechnicalSheetTemplate("{{header.fullName}}", {

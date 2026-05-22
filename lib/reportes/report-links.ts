@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react"
 import {
   Building2,
   ClipboardCheck,
+  FileText,
   GitBranch,
   LayoutDashboard,
   Share2,
@@ -70,4 +71,32 @@ export const REPORT_LINKS: readonly ReportHubLinkItem[] = [
 
 export function buildReportTemplateHubHref(templateId: string | number): string {
   return `/portal-rrhh/reportes/${encodeURIComponent(String(templateId))}`
+}
+
+/**
+ * Builds the hub URL that opens a report by its catalog `reportKey`.
+ * The dynamic `[reportKey]` route resolves the key against the catalog and
+ * delegates to the template detail view when a linked template exists.
+ */
+export function buildReportKeyHubHref(reportKey: string | number): string {
+  return `/portal-rrhh/reportes/${encodeURIComponent(String(reportKey))}`
+}
+
+/**
+ * Icon map for catalog reports keyed by `reportKey`. Falls back to a neutral
+ * document icon for unknown keys so the catalog stays renderable even when the
+ * backend introduces new entries.
+ */
+const REPORT_CATALOG_ICONS: Record<string, LucideIcon> = {
+  "vacancy-progress-by-client": Building2,
+  "candidate-status-by-stage": GitBranch,
+  "technical-evaluations": ClipboardCheck,
+  "preliminary-match-scores": Sparkles,
+  "recruitment-sources": Share2,
+  summary: LayoutDashboard,
+  "executive-summary": LayoutDashboard,
+}
+
+export function getReportCatalogIcon(reportKey: string): LucideIcon {
+  return REPORT_CATALOG_ICONS[reportKey.trim()] ?? FileText
 }

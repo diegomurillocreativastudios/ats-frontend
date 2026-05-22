@@ -1,48 +1,101 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api";
+import {
+  fetchReportsCatalog,
+  findReportForTemplate,
+  isCatalogReportKey,
+  type ReportCatalogItem,
+} from "@/lib/api/recruiter-reports-catalog";
+import {
+  describeReportBindingError,
+  saveReportBinding,
+} from "@/lib/api/recruiter-report-bindings";
 
-const slugify = (text) => {
-  return text
+const slugify = (text: string) =>
+  text
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')     // Replace spaces with -
-    .replace(/[^\w-]+/g, '')  // Remove all non-word chars
-    .replace(/--+/g, '-');    // Replace multiple - with single -
-};
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-");
 
-const buildPayload = (formData, isEditing, editingTemplate) => {
-  const type = formData.type || "Notification";
+interface PlantillaFormData {
+  type: string
+  name: string
+  slug: string
+  subject: string
+  body: string
+  channels: unknown[]
+  contentTemplate: string
+  outputFormat: string
+  isTechnicalSheet: boolean
+  isReport: boolean
+  reportKey: string
+  description: string
+  isMandatory: boolean
+}
+
+const INITIAL_FORM: PlantillaFormData = {
+  type: "Notification",
+  name: "",
+  slug: "",
+  subject: "",
+  body: "",
+  channels: [],
+  contentTemplate: "",
+  outputFormat: "PDF",
+  isTechnicalSheet: false,
+  isReport: false,
+  reportKey: "",
+  description: "",
+  isMandatory: false,
+}
+
+const buildPayload = (
+  formData: PlantillaFormData,
+  isEditing: boolean,
+  editingTemplate: Record<string, unknown> | null | undefined
+) => {
+  const type = formData.type || "Notification"
   const payload: Record<string, unknown> = {
     $type: type,
     id: isEditing && editingTemplate ? editingTemplate.id : 0,
-    type: type,
+    type,
     name: formData.name.trim(),
     slug: formData.slug || slugify(formData.name),
-  };
+  }
 
   if (type === "Notification") {
-    payload.subjectTemplate = formData.subject.trim();
-    payload.bodyTemplate = formData.body.trim();
-    payload.channels = Array.isArray(formData.channels) ? formData.channels : [];
+    payload.subjectTemplate = formData.subject.trim()
+    payload.bodyTemplate = formData.body.trim()
+    payload.channels = Array.isArray(formData.channels) ? formData.channels : []
   } else if (type === "Document") {
-    payload.contentTemplate = formData.contentTemplate.trim();
-    payload.outputFormat = formData.outputFormat || "PDF";
+    payload.contentTemplate = formData.contentTemplate.trim()
+    payload.outputFormat = formData.outputFormat || "PDF"
   } else if (type === "Questionnaire") {
-    payload.description = formData.description.trim();
-    payload.isMandatory = !!formData.isMandatory;
+    payload.description = formData.description.trim()
+    payload.isMandatory = !!formData.isMandatory
   }
 
   payload.isTechnicalSheet =
     type === "Document" ? !!formData.isTechnicalSheet : false
   payload.isReport = type === "Document" ? !!formData.isReport : false
 
-  return payload;
-};
+  return payload
+}
+
+interface PlantillaModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSubmit?: () => void
+  editingTemplate?: Record<string, unknown> | null
+  onSnackbar?: (message: string, variant?: string) => void
+}
 
 export default function PlantillaModal({
   isOpen,
@@ -50,150 +103,257 @@ export default function PlantillaModal({
   onSubmit,
   editingTemplate,
   onSnackbar,
-}: {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit?: () => void
-  editingTemplate?: Record<string, unknown> | null
-  onSnackbar?: (message: string, variant?: string) => void
-}) {
-  const [formData, setFormData] = useState({
-    type: "Notification",
-    name: "",
-    slug: "",
-    subject: "",
-    body: "",
-    channels: [],
-    contentTemplate: "",
-    outputFormat: "PDF",
-    isTechnicalSheet: false,
-    isReport: false,
-    description: "",
-    isMandatory: false,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+}: PlantillaModalProps) {
+  const [formData, setFormData] = useState<PlantillaFormData>(INITIAL_FORM)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const isEditing = !!editingTemplate;
+  // The reportKey we believe the template is linked to right now (server truth).
+  const [initialReportKey, setInitialReportKey] = useState("")
+
+  const [reportsCatalog, setReportsCatalog] = useState<ReportCatalogItem[]>([])
+  const [catalogLoading, setCatalogLoading] = useState(false)
+  const [catalogError, setCatalogError] = useState<string | null>(null)
+  const [catalogReloadCounter, setCatalogReloadCounter] = useState(0)
+  const catalogLoadedRef = useRef(false)
+  const catalogFetchInFlightRef = useRef(false)
+
+  const isEditing = !!editingTemplate
+  const editingTemplateId =
+    editingTemplate?.id != null ? String(editingTemplate.id) : null
 
   useEffect(() => {
-    if (isOpen && editingTemplate) {
+    if (!isOpen) return
+
+    if (editingTemplate) {
       const t = editingTemplate
       setFormData({
         type: String(t["type"] ?? "Notification"),
         name: String(t["name"] ?? ""),
         slug: String(t["slug"] ?? ""),
-        subject: String(
-          t["subject"] ?? t["subjectTemplate"] ?? ""
-        ),
-        body: String(
-          t["body"] ?? t["bodyTemplate"] ?? t["content"] ?? ""
-        ),
+        subject: String(t["subject"] ?? t["subjectTemplate"] ?? ""),
+        body: String(t["body"] ?? t["bodyTemplate"] ?? t["content"] ?? ""),
         contentTemplate: String(t["contentTemplate"] ?? ""),
         outputFormat: String(t["outputFormat"] ?? "PDF"),
         isTechnicalSheet: Boolean(t["isTechnicalSheet"]),
         isReport: Boolean(t["isReport"]),
+        reportKey: "",
         description: String(t["description"] ?? ""),
         isMandatory: Boolean(t["isMandatory"]),
         channels: Array.isArray(t["channels"]) ? t["channels"] : [],
-      });
-    } else if (isOpen && !editingTemplate) {
-      setFormData({
-        type: "Notification",
-        name: "",
-        slug: "",
-        subject: "",
-        body: "",
-        contentTemplate: "",
-        outputFormat: "PDF",
-        isTechnicalSheet: false,
-        isReport: false,
-        description: "",
-        isMandatory: false,
-        channels: [],
-      });
+      })
+    } else {
+      setFormData(INITIAL_FORM)
     }
-  }, [isOpen, editingTemplate]);
+    setInitialReportKey("")
+    setErrors({})
+    setSubmitError(null)
+  }, [isOpen, editingTemplateId])
+
+  useEffect(() => {
+    if (!isOpen) {
+      catalogLoadedRef.current = false
+      catalogFetchInFlightRef.current = false
+      setReportsCatalog([])
+      setCatalogError(null)
+      setCatalogLoading(false)
+    }
+  }, [isOpen])
+
+  const shouldLoadCatalog =
+    isOpen && formData.type === "Document" && formData.isReport
+
+  useEffect(() => {
+    if (!shouldLoadCatalog) return
+    if (catalogLoadedRef.current || catalogFetchInFlightRef.current) return
+
+    catalogFetchInFlightRef.current = true
+    setCatalogLoading(true)
+    setCatalogError(null)
+    fetchReportsCatalog()
+      .then((items) => {
+        setReportsCatalog(items)
+        catalogLoadedRef.current = true
+
+        // Catalog is the source of truth: if we're editing a template that is
+        // already linked to a report, preselect it.
+        if (editingTemplateId) {
+          const linked = findReportForTemplate(items, editingTemplateId)
+          if (linked) {
+            setInitialReportKey(linked.reportKey)
+            setFormData((prev) =>
+              prev.reportKey === linked.reportKey
+                ? prev
+                : { ...prev, reportKey: linked.reportKey }
+            )
+          }
+        }
+      })
+      .catch((err: unknown) => {
+        const msg =
+          (err as { message?: string } | null)?.message ||
+          "No se pudo cargar el catálogo de reportes."
+        setCatalogError(msg)
+      })
+      .finally(() => {
+        catalogFetchInFlightRef.current = false
+        setCatalogLoading(false)
+      })
+  }, [shouldLoadCatalog, catalogReloadCounter, editingTemplateId])
+
+  const handleRetryCatalog = () => {
+    catalogLoadedRef.current = false
+    setCatalogError(null)
+    setReportsCatalog([])
+    setCatalogReloadCounter((n) => n + 1)
+  }
+
+  /**
+   * Reports already linked to a *different* template should not be selectable
+   * (the backend would return 409). We still allow selecting the currently
+   * linked report to keep the user's existing binding.
+   */
+  const lockedReportKeys = useMemo(() => {
+    const locked = new Set<string>()
+    if (!editingTemplateId) {
+      for (const item of reportsCatalog) {
+        if (item.linkedTemplate) locked.add(item.reportKey)
+      }
+      return locked
+    }
+    const ownLinked = findReportForTemplate(reportsCatalog, editingTemplateId)
+    for (const item of reportsCatalog) {
+      if (!item.linkedTemplate) continue
+      if (ownLinked && ownLinked.reportKey === item.reportKey) continue
+      locked.add(item.reportKey)
+    }
+    return locked
+  }, [reportsCatalog, editingTemplateId])
 
   const validate = () => {
-    const nextErrors: Record<string, string> = {};
-    if (!formData.name.trim()) {
-      nextErrors.name = "El nombre es requerido";
-    }
+    const nextErrors: Record<string, string> = {}
+    if (!formData.name.trim()) nextErrors.name = "El nombre es requerido"
 
     if (formData.type === "Notification") {
-      if (!formData.subject.trim()) {
-        nextErrors.subject = "El asunto es requerido";
-      }
-      if (!formData.body.trim()) {
-        nextErrors.body = "El contenido es requerido";
-      }
+      if (!formData.subject.trim()) nextErrors.subject = "El asunto es requerido"
+      if (!formData.body.trim()) nextErrors.body = "El contenido es requerido"
     } else if (formData.type === "Document") {
       if (!formData.contentTemplate.trim()) {
-        nextErrors.contentTemplate = "La plantilla de contenido es requerida";
+        nextErrors.contentTemplate = "La plantilla de contenido es requerida"
+      }
+      const selectedReportKey = formData.reportKey.trim()
+      if (
+        formData.isReport &&
+        selectedReportKey &&
+        reportsCatalog.length > 0 &&
+        !isCatalogReportKey(selectedReportKey, reportsCatalog)
+      ) {
+        nextErrors.reportKey =
+          "Selecciona un tipo de reporte válido del catálogo."
       }
     } else if (formData.type === "Questionnaire") {
       if (!formData.description.trim()) {
-        nextErrors.description = "La descripción es requerida";
+        nextErrors.description = "La descripción es requerida"
       }
     }
 
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  };
+    setErrors(nextErrors)
+    return Object.keys(nextErrors).length === 0
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  const syncReportBinding = async (
+    templateId: number | string | undefined
+  ): Promise<string | null> => {
+    if (templateId == null || templateId === "") return null
 
-    const payload = buildPayload(formData, isEditing, editingTemplate);
+    const rawWantKey =
+      formData.type === "Document" && formData.isReport && formData.reportKey
+        ? formData.reportKey.trim()
+        : ""
+    const wantReportKey =
+      !rawWantKey
+        ? ""
+        : reportsCatalog.length === 0 ||
+            isCatalogReportKey(rawWantKey, reportsCatalog)
+          ? rawWantKey
+          : ""
+    const hadReportKey = initialReportKey.trim()
 
-    setLoading(true);
-    setSubmitError(null);
+    if (wantReportKey === hadReportKey) return null
 
     try {
-      if (isEditing) {
-        await apiClient.put(
-          `/api/Templates/${editingTemplate.id}`,
-          payload
-        );
-        onSnackbar?.("Plantilla actualizada correctamente.", "success");
-      } else {
-        await apiClient.post("/api/Templates", payload);
-        onSnackbar?.("Plantilla creada correctamente.", "success");
-      }
-      handleClose();
-      onSubmit?.();
+      await saveReportBinding(
+        { templateId, reportKey: wantReportKey },
+        { hadReportKey }
+      )
+      return null
     } catch (err) {
-      const msg =
-        err?.message || err?.detail || `No se pudo ${isEditing ? "actualizar" : "crear"} la plantilla. Intenta de nuevo.`
-      setSubmitError(msg);
-      onSnackbar?.(msg, "error");
-    } finally {
-      setLoading(false);
+      return describeReportBindingError(err)
     }
-  };
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!validate()) return
+
+    const payload = buildPayload(formData, isEditing, editingTemplate)
+
+    setLoading(true)
+    setSubmitError(null)
+
+    try {
+      let templateId: number | string | undefined
+      if (isEditing && editingTemplate) {
+        await apiClient.put(`/api/Templates/${editingTemplate.id}`, payload)
+        templateId = editingTemplate.id as number | string | undefined
+      } else {
+        const created = await apiClient.post("/api/Templates", payload)
+        const createdRec =
+          created && typeof created === "object"
+            ? (created as Record<string, unknown>)
+            : null
+        const newId = createdRec?.id ?? createdRec?.Id
+        templateId =
+          typeof newId === "number" || typeof newId === "string"
+            ? newId
+            : undefined
+      }
+
+      const bindingWarning = await syncReportBinding(templateId)
+
+      if (bindingWarning) {
+        onSnackbar?.(bindingWarning, "warning")
+      } else {
+        onSnackbar?.(
+          isEditing
+            ? "Plantilla actualizada correctamente."
+            : "Plantilla creada correctamente.",
+          "success"
+        )
+      }
+      handleClose()
+      onSubmit?.()
+    } catch (err) {
+      const e = err as { message?: string; detail?: string } | null
+      const msg =
+        e?.message ||
+        e?.detail ||
+        `No se pudo ${isEditing ? "actualizar" : "crear"} la plantilla. Intenta de nuevo.`
+      setSubmitError(msg)
+      onSnackbar?.(msg, "error")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleClose = () => {
-    setFormData({
-      type: "Notification",
-      name: "",
-      slug: "",
-      subject: "",
-      body: "",
-      contentTemplate: "",
-      outputFormat: "PDF",
-      isTechnicalSheet: false,
-      isReport: false,
-      description: "",
-      isMandatory: false,
-      channels: [],
-    });
-    setErrors({});
-    setSubmitError(null);
-    onClose?.();
-  };
+    setFormData(INITIAL_FORM)
+    setErrors({})
+    setSubmitError(null)
+    setInitialReportKey("")
+    onClose?.()
+  }
 
   const footer = (
     <>
@@ -216,7 +376,7 @@ export default function PlantillaModal({
         {isEditing ? "Actualizar plantilla" : "Crear plantilla"}
       </Button>
     </>
-  );
+  )
 
   return (
     <Modal
@@ -407,12 +567,14 @@ export default function PlantillaModal({
                   id="plantilla-is-report"
                   type="checkbox"
                   checked={formData.isReport}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const checked = e.target.checked
                     setFormData((prev) => ({
                       ...prev,
-                      isReport: e.target.checked,
+                      isReport: checked,
+                      reportKey: checked ? prev.reportKey : "",
                     }))
-                  }
+                  }}
                   className="h-4 w-4 rounded border-gray-300 text-vo-purple focus:ring-vo-purple"
                   aria-describedby="plantilla-is-report-hint"
                 />
@@ -430,6 +592,91 @@ export default function PlantillaModal({
                 Marca esta opción si el documento se usa como plantilla de reportes.
               </p>
             </div>
+
+            {formData.isReport && (
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="plantilla-report-key"
+                  className="font-sans text-sm font-medium text-foreground"
+                >
+                  Tipo de reporte
+                </label>
+                {catalogError ? (
+                  <div className="flex flex-col gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5">
+                    <p
+                      className="font-sans text-sm text-destructive"
+                      role="alert"
+                    >
+                      {catalogError}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleRetryCatalog}
+                      className="self-start font-sans text-xs font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    id="plantilla-report-key"
+                    value={formData.reportKey}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        reportKey: e.target.value,
+                      }))
+                    }
+                    disabled={catalogLoading}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-invalid={!!errors.reportKey}
+                    aria-describedby={
+                      errors.reportKey
+                        ? "plantilla-report-key-error"
+                        : "plantilla-report-key-hint"
+                    }
+                  >
+                    <option value="">
+                      {catalogLoading
+                        ? "Cargando reportes…"
+                        : "Selecciona un reporte (opcional)"}
+                    </option>
+                    {reportsCatalog.map((item) => {
+                      const isLocked = lockedReportKeys.has(item.reportKey)
+                      const linkedName = item.linkedTemplate?.name
+                      const label = isLocked
+                        ? `${item.name} — ya vinculado${linkedName ? ` a "${linkedName}"` : ""}`
+                        : item.name
+                      return (
+                        <option
+                          key={item.reportKey}
+                          value={item.reportKey}
+                          disabled={isLocked}
+                        >
+                          {label}
+                        </option>
+                      )
+                    })}
+                  </select>
+                )}
+                {errors.reportKey && (
+                  <p
+                    id="plantilla-report-key-error"
+                    className="font-sans text-sm text-vo-pink"
+                    role="alert"
+                  >
+                    {errors.reportKey}
+                  </p>
+                )}
+                <p
+                  id="plantilla-report-key-hint"
+                  className="font-sans text-xs text-muted-foreground"
+                >
+                  Vincula esta plantilla con un reporte del catálogo. Puedes
+                  dejarlo vacío para configurarlo más adelante.
+                </p>
+              </div>
+            )}
           </>
         )}
 
@@ -486,5 +733,5 @@ export default function PlantillaModal({
         )}
       </form>
     </Modal>
-  );
+  )
 }

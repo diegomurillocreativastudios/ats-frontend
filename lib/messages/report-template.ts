@@ -23,4 +23,9 @@ export const reportTemplateMessages = {
   legacyModeHint:
     "Modo temporal: usando resumen ejecutivo hasta que el backend publique la configuración dinámica.",
   reportKeyBadge: "Tipo de reporte",
+  resolverLoading: "Buscando el reporte en el catálogo…",
+  resolverNotFound:
+    "No encontramos un reporte con ese identificador en el catálogo.",
+  resolverUnlinked:
+    "Este reporte no tiene una plantilla vinculada todavía. Pedile al administrador que vincule una plantilla desde el módulo de reportes.",
 }

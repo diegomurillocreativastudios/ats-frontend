@@ -1,4 +1,5 @@
 import { prepareHtml2CanvasClone } from "@/lib/pdf/html2canvas-prepare-clone"
+import { resolveHtml2CanvasScale } from "@/lib/pdf/resolve-html2canvas-scale"
 
 export interface CaptureElementAsPdfOptions {
   element: HTMLElement
@@ -34,14 +35,18 @@ async function buildPdfFromElement({
     await document.fonts.ready
   }
 
+  const scrollWidth = Math.max(1, element.scrollWidth)
+  const scrollHeight = Math.max(1, element.scrollHeight)
+  const safeScale = resolveHtml2CanvasScale(scrollWidth, scrollHeight, scale)
+
   const canvas = await html2canvas(element, {
-    scale,
+    scale: safeScale,
     useCORS: true,
     allowTaint: false,
     logging: false,
     backgroundColor: "#ffffff",
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
+    windowWidth: scrollWidth,
+    windowHeight: scrollHeight,
     onclone: (clonedDoc, clonedElement) => {
       if (clonedElement instanceof HTMLElement) {
         prepareHtml2CanvasClone(clonedDoc, element, clonedElement)
@@ -63,13 +68,19 @@ async function buildPdfFromElement({
   const contentHeightMm = pageHeightMm - marginMm * 2
 
   const pxPerMm = canvas.width / contentWidthMm
-  const pageHeightPx = Math.floor(contentHeightMm * pxPerMm)
+  if (!Number.isFinite(pxPerMm) || pxPerMm <= 0) {
+    throw new Error("No se pudo calcular la escala del PDF.")
+  }
+
+  let pageHeightPx = Math.floor(contentHeightMm * pxPerMm)
+  if (pageHeightPx <= 0) pageHeightPx = canvas.height
 
   let renderedHeightPx = 0
   let pageIndex = 0
 
   while (renderedHeightPx < canvas.height) {
-    const sliceHeightPx = Math.min(pageHeightPx, canvas.height - renderedHeightPx)
+    const remaining = canvas.height - renderedHeightPx
+    const sliceHeightPx = Math.max(1, Math.min(pageHeightPx, remaining))
 
     const pageCanvas = document.createElement("canvas")
     pageCanvas.width = canvas.width

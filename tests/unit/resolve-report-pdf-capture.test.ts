@@ -16,4 +16,15 @@ describe("resolveReportPdfCaptureElement", () => {
     root.appendChild(article)
     expect(resolveReportPdfCaptureElement(root)).toBe(article)
   })
+
+  it("looks inside an attached shadow root before the light DOM", () => {
+    const root = document.createElement("div")
+    document.body.appendChild(root)
+    const shadow = root.attachShadow({ mode: "open" })
+    const inner = document.createElement("div")
+    inner.className = "report-preview-doc"
+    shadow.appendChild(inner)
+    expect(resolveReportPdfCaptureElement(root)).toBe(inner)
+    root.remove()
+  })
 })
