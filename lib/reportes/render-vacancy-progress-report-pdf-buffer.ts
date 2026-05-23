@@ -32,6 +32,23 @@ export interface RenderVacancyProgressReportPdfResult {
 }
 
 /**
+ * Detects unresolved `{{...}}` template placeholders or unsupported control blocks
+ * in the interpolated HTML. We strip the embedded `<style>` block first so that
+ * CSS `{}` characters never trigger false positives, then look for any
+ * `{{anything}}` token in the remaining body.
+ */
+function assertNoUnresolvedPlaceholders(html: string): void {
+  const withoutStyles = html.replace(/<style[\s\S]*?<\/style>/gi, "")
+  if (/\{\{[\s\S]+?\}\}/.test(withoutStyles)) {
+    const offender = withoutStyles.match(/\{\{[\s\S]{0,80}?\}\}/)?.[0] ?? "{{?}}"
+    throw new VacancyProgressReportPdfError(
+      `La plantilla contiene placeholders sin interpolar: ${offender}`,
+      400
+    )
+  }
+}
+
+/**
  * Genera el PDF del reporte "Avance de vacantes por cliente" con Chromium
  * (`page.pdf` + `preferCSSPageSize`). Si Chromium falla, reconstruye un PDF
  * formal con PDFKit a partir de `rows` y `summary`, de manera que el cliente
@@ -47,6 +64,8 @@ export async function renderVacancyProgressReportPdfBuffer(
       400
     )
   }
+
+  assertNoUnresolvedPlaceholders(fragment)
 
   const documentHtml = wrapVacancyProgressReportHtmlForPdf(fragment)
   console.info("[Report PDF] Chromium generation started", {

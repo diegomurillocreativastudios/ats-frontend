@@ -35,6 +35,36 @@ describe("renderVacancyProgressReportPdfBuffer", () => {
     ).rejects.toBeInstanceOf(VacancyProgressReportPdfError)
   })
 
+  it("throws a 400 when the HTML contains unresolved {{...}} placeholders", async () => {
+    const buf = Buffer.from("PDF")
+    renderReportHtmlToPdfBufferMock.mockResolvedValue(buf)
+
+    await expect(
+      renderVacancyProgressReportPdfBuffer({
+        previewHtml:
+          "<style>@page{size:Letter;}</style><main>{{#if hasCandidatesByStage}}x{{/if}}</main>",
+      })
+    ).rejects.toMatchObject({
+      status: 400,
+      message: expect.stringContaining(
+        "La plantilla contiene placeholders sin interpolar"
+      ),
+    })
+    expect(renderReportHtmlToPdfBufferMock).not.toHaveBeenCalled()
+  })
+
+  it("ignores CSS braces inside <style> when validating placeholders", async () => {
+    const buf = Buffer.from("PDF")
+    renderReportHtmlToPdfBufferMock.mockResolvedValue(buf)
+
+    const fragment =
+      "<style>.foo { color: red } .bar:before { content: '{{x}}'; }</style><main>ok</main>"
+    const out = await renderVacancyProgressReportPdfBuffer({
+      previewHtml: fragment,
+    })
+    expect(out.engine).toBe("chromium")
+  })
+
   it("renders the wrapped HTML with the report Chromium pipeline", async () => {
     const buf = Buffer.from("PDF")
     renderReportHtmlToPdfBufferMock.mockResolvedValue(buf)

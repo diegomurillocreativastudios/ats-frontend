@@ -496,12 +496,15 @@ export function ReportDataViewClient({
   ])
 
   const reportTemplateHtml = useMemo(() => {
-    const fromDb = template?.contentTemplate?.trim() ?? ""
-    if (fromDb) return fromDb
     if (isVacancyProgressReportKey(catalogItem.reportKey)) {
+      const fromDb = template?.contentTemplate?.trim() ?? ""
+      const usesUnsupportedHandlebars =
+        fromDb !== "" && /\{\{\s*#(?:if|each|unless|with)\b/.test(fromDb)
+      if (fromDb && !usesUnsupportedHandlebars) return fromDb
       return VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE
     }
-    return ""
+    const fromDb = template?.contentTemplate?.trim() ?? ""
+    return fromDb
   }, [template?.contentTemplate, catalogItem.reportKey])
 
   const renderedHtml = useMemo(() => {

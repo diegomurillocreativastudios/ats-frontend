@@ -1,8 +1,14 @@
 /**
  * Default HTML template for `vacancy-progress-by-client`.
- * Placeholders ending in `Html` are injected as raw HTML (see template-interpolate).
  *
- * Layout strategy
+ * Interpolation rules:
+ * - The template engine only supports `{{path}}` (HTML-escaped) and
+ *   `{{{path}}}` (raw HTML). It does NOT process `{{#if}}` or `{{#each}}`.
+ * - All dynamic rows/cards/highlights are pre-rendered to HTML in
+ *   `buildVacancyProgressReportTemplateContext` and injected here as raw
+ *   strings via `{{{...}}}`.
+ *
+ * Layout strategy:
  * - The PDF is rendered server-side with Chromium (`page.pdf` + `preferCSSPageSize`).
  * - `@page` defines real print margins on every page (header + continuations).
  * - Sections 5 (Detalle por vacante) and 6 (Tabla técnica) start on a new page via
@@ -205,6 +211,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     background: #f9fafb;
     break-inside: avoid;
     page-break-inside: avoid;
+    margin-bottom: 12px;
   }
 
   .insights-box ul {
@@ -218,6 +225,51 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     line-height: 1.5;
     color: #374151;
     text-align: justify;
+  }
+
+  .top-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .top-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    padding: 10px 12px;
+    background: #ffffff;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .top-card-title {
+    font-size: 7.4pt;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 5px;
+  }
+
+  .top-vacancy-label {
+    display: block;
+    font-size: 9pt;
+    line-height: 1.3;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
+  }
+
+  .top-vacancy-metric {
+    display: inline-block;
+    font-size: 9.5pt;
+    font-weight: 800;
+    color: #111827;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 2px 10px;
   }
 
   /* ─────────── Tables ─────────── */
@@ -416,6 +468,38 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     color: #111827;
   }
 
+  .ai-score-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 11px;
+  }
+
+  .ai-score-cell {
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    padding: 7px 9px;
+    background: #f9fafb;
+  }
+
+  .ai-score-label {
+    display: block;
+    font-size: 6.6pt;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 3px;
+  }
+
+  .ai-score-value {
+    display: block;
+    font-size: 10.5pt;
+    line-height: 1.1;
+    font-weight: 800;
+    color: #111827;
+  }
+
   .progress-row {
     margin-bottom: 10px;
   }
@@ -448,43 +532,49 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     border-radius: 999px;
   }
 
-  .pipeline-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 10px;
+  .pipeline-stages {
+    margin-top: 6px;
   }
 
-  .pipeline-box {
-    border: 1px solid #e5e7eb;
-    border-radius: 7px;
-    overflow: hidden;
-    background: #ffffff;
-  }
-
-  .pipeline-title {
-    padding: 7px 10px;
-    background: #f3f4f6;
-    font-size: 7.6pt;
+  .pipeline-stages-title {
+    font-size: 7.2pt;
     font-weight: 800;
     letter-spacing: 0.06em;
-    color: #374151;
     text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 6px;
   }
 
-  .pipeline-row {
+  .pipeline-stages-wrap {
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 6px 10px;
-    border-top: 1px solid #e5e7eb;
-    font-size: 8.1pt;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .stage-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    padding: 3px 9px;
+    background: #ffffff;
+    font-size: 7.8pt;
     color: #374151;
   }
 
-  .pipeline-row span:last-child {
-    font-weight: 700;
+  .stage-pill-name {
+    font-weight: 600;
+  }
+
+  .stage-pill-count {
+    font-weight: 800;
     color: #111827;
+  }
+
+  .stage-empty {
+    font-size: 8pt;
+    color: #6b7280;
   }
 
   /* ─────────── Section 6: Technical table ─────────── */
@@ -519,7 +609,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
       </div>
       <div class="report-meta-row">
         <span class="report-meta-label">Periodo</span>
-        <span class="report-meta-value">{{periodStart}} — {{periodEnd}}</span>
+        <span class="report-meta-value">{{periodLabel}}</span>
       </div>
       <div class="report-meta-row">
         <span class="report-meta-label">Total de registros</span>
@@ -552,23 +642,23 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
 
       <div class="summary-card">
         <div class="summary-label">Score IA promedio</div>
-        <div class="summary-value">{{averagePreliminaryMatchScore}}</div>
-        <div class="summary-help">{{candidatesWithPreliminaryAnalysis}} con análisis IA</div>
+        <div class="summary-value">{{averageAiScore}}</div>
+        <div class="summary-help">{{candidatesWithAiAnalysis}} con análisis IA</div>
       </div>
 
       <div class="summary-card secondary">
         <div class="summary-label">En entrevista</div>
-        <div class="summary-value">{{candidatesInInterview}}</div>
+        <div class="summary-value">{{totalInInterview}}</div>
       </div>
 
       <div class="summary-card secondary">
         <div class="summary-label">Finalistas</div>
-        <div class="summary-value">{{candidatesFinalist}}</div>
+        <div class="summary-value">{{totalFinalists}}</div>
       </div>
 
       <div class="summary-card secondary">
         <div class="summary-label">Contratados</div>
-        <div class="summary-value">{{candidatesHired}}</div>
+        <div class="summary-value">{{totalHired}}</div>
       </div>
 
       <div class="summary-card secondary">
@@ -580,10 +670,26 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
 
   <section class="section">
     <h2 class="section-title">2. Hallazgos principales</h2>
+
     <div class="insights-box">
       <ul>
-        {{insightsHtml}}
+        {{{insightsHtml}}}
       </ul>
+    </div>
+
+    <div class="top-grid">
+      <div class="top-card">
+        <div class="top-card-title">Vacante con mayor avance</div>
+        {{{topProgressVacancy}}}
+      </div>
+      <div class="top-card">
+        <div class="top-card-title">Mejor match IA</div>
+        {{{topAiScoreVacancy}}}
+      </div>
+      <div class="top-card">
+        <div class="top-card-title">Más candidatos</div>
+        {{{topCandidatesVacancy}}}
+      </div>
     </div>
   </section>
 
@@ -602,7 +708,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
           </tr>
         </thead>
         <tbody>
-          {{clientsRowsHtml}}
+          {{{clientDistributionRows}}}
         </tbody>
       </table>
     </div>
@@ -615,17 +721,17 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
       <table class="report-table">
         <thead>
           <tr>
-            <th style="width: 22%;">Cliente</th>
-            <th style="width: 24%;">Vacante</th>
+            <th style="width: 20%;">Cliente</th>
+            <th style="width: 22%;">Vacante</th>
             <th style="width: 10%;" class="center">Estado</th>
             <th style="width: 12%;" class="center">Apertura</th>
-            <th style="width: 10%;" class="center">Candidatos</th>
-            <th style="width: 11%;" class="center">Avance</th>
-            <th style="width: 11%;" class="center">Score IA</th>
+            <th style="width: 12%;" class="center">Avance</th>
+            <th style="width: 12%;" class="center">Score IA</th>
+            <th style="width: 12%;" class="center">Candidatos</th>
           </tr>
         </thead>
         <tbody>
-          {{vacancyIndexRowsHtml}}
+          {{{vacancyIndexRows}}}
         </tbody>
       </table>
     </div>
@@ -633,7 +739,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
 
   <section class="section vacancy-details-section">
     <h2 class="section-title">5. Detalle completo por vacante</h2>
-    {{vacancyDetailCardsHtml}}
+    {{{vacancyDetailCards}}}
   </section>
 
   <section class="section technical-table-section">
@@ -662,7 +768,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
           </tr>
         </thead>
         <tbody>
-          {{technicalRowsHtml}}
+          {{{technicalRows}}}
         </tbody>
       </table>
     </div>
