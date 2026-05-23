@@ -9,7 +9,7 @@
  *   strings via `{{{...}}}`.
  *
  * Layout strategy:
- * - The PDF is rendered server-side with Chromium (`page.pdf` + `preferCSSPageSize`).
+ * - The PDF is rendered server-side with PDFKit v2 (`vacancy-progress-full-v2`).
  * - `@page` defines real print margins on every page (header + continuations).
  * - Sections 5 (Detalle por vacante) and 6 (Tabla técnica) start on a new page via
  *   `break-before: page`. Vacancy cards keep together with `break-inside: avoid`.

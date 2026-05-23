@@ -1,12 +1,8 @@
 /**
  * PDF del reporte "Avance de vacantes por cliente".
  *
- * Pipeline:
- *  1. Chromium (Puppeteer) renderiza el HTML real recibido como `previewHtml`.
- *  2. Si Chromium falla, PDFKit reconstruye un PDF formal con `rows + summary`.
- *  3. NUNCA respondemos 500 si podemos devolver un PDF fallback.
- *
- * Sólo cuando ambos motores fallan respondemos error JSON.
+ * Pipeline único: PDFKit v2 completo a partir de `rows`, `summary` y `metadata`.
+ * No usa Chromium, Puppeteer, previewHtml ni fallback legacy.
  */
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
@@ -16,6 +12,7 @@ import type { VacancyProgressReportPdfKitSummary } from "@/lib/reportes/build-va
 import {
   buildVacancyProgressReportPdfFilename,
   renderVacancyProgressReportPdfBuffer,
+  VACANCY_PROGRESS_PDF_TEMPLATE_VERSION,
   VacancyProgressReportPdfError,
 } from "@/lib/reportes/render-vacancy-progress-report-pdf-buffer"
 
@@ -29,6 +26,8 @@ interface VacancyProgressReportPdfRequestBody {
   reportType?: unknown
   rows?: unknown
   summary?: unknown
+  metadata?: unknown
+  totalCount?: unknown
 }
 
 function jsonError(message: string, status: number): NextResponse {
@@ -53,7 +52,7 @@ function coerceString(raw: unknown): string {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  console.info("[Report PDF] Starting server PDF generation")
+  console.info("[Report PDF] Starting server PDF generation (pdfkit-v2)")
 
   try {
     const cookieStore = await cookies()
@@ -70,39 +69,40 @@ export async function POST(request: Request): Promise<NextResponse> {
       return jsonError("Body inválido para generar el PDF del reporte.", 400)
     }
 
-    const previewHtml = coerceString(body.previewHtml)
     const fileBaseName = coerceString(body.fileBaseName) || null
     const rows = coerceRows(body.rows)
-    const summary = coerceSummary(body.summary)
+    const summaryFromBody = coerceSummary(body.summary)
+    const metadata = coerceSummary(body.metadata)
+    const summary = summaryFromBody ?? metadata
 
-    console.info("[Report PDF] previewHtml length", previewHtml.length)
-    console.info("[Report PDF] rows count", rows.length)
-
-    if (previewHtml.trim() === "") {
-      return jsonError(
-        "Falta el HTML del reporte para generar el PDF.",
-        400
-      )
+    if (summary && body.totalCount != null && summary.totalCount == null) {
+      summary.totalCount = body.totalCount as VacancyProgressReportPdfKitSummary["totalCount"]
     }
 
-    if (rows.length === 0 && summary == null) {
-      console.warn(
-        "[Report PDF] No rows nor summary received; fallback PDFKit would be empty if Chromium fails."
-      )
-    }
-
-    const { buffer, engine } = await renderVacancyProgressReportPdfBuffer({
-      previewHtml,
-      rows,
+    console.info("[Report PDF] server received", {
+      rowsCount: rows.length,
+      totalCount: body.totalCount,
       summary,
-      fileBaseName,
+      engine: "pdfkit-v2",
+      templateVersion: VACANCY_PROGRESS_PDF_TEMPLATE_VERSION,
     })
 
+    const { buffer, engine, templateVersion } =
+      await renderVacancyProgressReportPdfBuffer({
+        rows,
+        summary,
+        metadata,
+        fileBaseName,
+      })
+
     const filename = buildVacancyProgressReportPdfFilename(fileBaseName)
-    console.info(
-      "[Report PDF] Returning application/pdf",
-      `(engine=${engine}, bytes=${buffer.length}, file=${filename})`
-    )
+    console.info("[Report PDF] Returning application/pdf", {
+      engine,
+      templateVersion,
+      bytes: buffer.length,
+      file: filename,
+      rowsCount: rows.length,
+    })
 
     return new NextResponse(new Uint8Array(buffer), {
       status: 200,
@@ -111,6 +111,8 @@ export async function POST(request: Request): Promise<NextResponse> {
         "Content-Disposition": `attachment; filename="${filename}"`,
         "Cache-Control": "no-store",
         "X-Report-Pdf-Engine": engine,
+        "X-Report-Pdf-Template-Version": templateVersion,
+        "X-Report-Rows-Count": String(rows.length),
       },
     })
   } catch (e: unknown) {

@@ -1,9 +1,13 @@
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  VACANCY_PROGRESS_PDF_ENGINE,
+  VACANCY_PROGRESS_PDF_TEMPLATE_VERSION,
+} from "@/lib/reportes/vacancy-progress-pdf-constants"
 
 /**
  * Mapa estable `reportType -> endpoint del servidor`. Cada endpoint debe
- * aceptar un POST con `{ previewHtml, fileBaseName, reportType, rows, summary }`
- * y responder `application/pdf` (o un JSON con `message` en caso de error).
+ * aceptar un POST con `{ rows, summary, metadata, totalCount, fileBaseName }`
+ * y responder `application/pdf` con headers de validación PDFKit v2.
  */
 export const REPORT_PDF_SERVER_ENDPOINTS: Record<string, string> = {
   "vacancy-progress-by-client":
@@ -13,12 +17,14 @@ export const REPORT_PDF_SERVER_ENDPOINTS: Record<string, string> = {
 export interface DownloadReportPdfFromServerInput {
   /** Identificador del reporte; debe existir en `REPORT_PDF_SERVER_ENDPOINTS`. */
   reportType: string
-  /** Fragmento HTML interpolado del reporte (vista previa real). */
-  previewHtml: string
-  /** Filas crudas del reporte (para que el servidor pueda reconstruir si Chromium falla). */
+  /** Filas crudas del reporte renderizado en pantalla. */
   rows: unknown[]
   /** Resumen estructurado (totales, periodo, cliente, etc.). */
   summary?: Record<string, unknown> | null
+  /** Alias opcional de summary para compatibilidad con el endpoint. */
+  metadata?: Record<string, unknown> | null
+  /** Total de registros según la vista previa actual. */
+  totalCount?: number | null
   /** Nombre base sin extensión; el servidor agrega `.pdf` si no lo trae. */
   fileBaseName?: string | null
 }
@@ -67,12 +73,40 @@ async function extractJsonErrorMessage(
   }
 }
 
+function assertPdfKitV2Headers(response: Response, expectedRowsCount: number): void {
+  const engine = response.headers.get("X-Report-Pdf-Engine") ?? ""
+  const templateVersion =
+    response.headers.get("X-Report-Pdf-Template-Version") ?? ""
+  const rowsCountHeader = response.headers.get("X-Report-Rows-Count") ?? ""
+
+  console.info("[Report PDF] response headers", {
+    engine,
+    templateVersion,
+    rowsCount: rowsCountHeader,
+  })
+
+  if (engine !== VACANCY_PROGRESS_PDF_ENGINE) {
+    throw new Error(
+      `Motor PDF inesperado: "${engine}". Se esperaba "${VACANCY_PROGRESS_PDF_ENGINE}".`
+    )
+  }
+
+  if (templateVersion !== VACANCY_PROGRESS_PDF_TEMPLATE_VERSION) {
+    throw new Error(
+      `Versión de plantilla inesperada: "${templateVersion}". Se esperaba "${VACANCY_PROGRESS_PDF_TEMPLATE_VERSION}".`
+    )
+  }
+
+  if (rowsCountHeader !== String(expectedRowsCount)) {
+    throw new Error(
+      `Cantidad de filas inconsistente: servidor=${rowsCountHeader}, cliente=${expectedRowsCount}.`
+    )
+  }
+}
+
 /**
  * Descarga el PDF de un reporte llamando al endpoint server-side correspondiente.
- *
- * El servidor renderiza el HTML real con Chromium/Puppeteer y, si Chromium falla,
- * reconstruye un PDF formal con PDFKit a partir de `rows` y `summary`. El cliente
- * NUNCA convierte la vista previa en imagen (no html2canvas, no jsPDF).
+ * Valida que la respuesta provenga del pipeline PDFKit v2 completo.
  */
 export async function downloadReportPdfFromServer(
   input: DownloadReportPdfFromServerInput
@@ -89,26 +123,25 @@ export async function downloadReportPdfFromServer(
     throw new Error(`Reporte sin endpoint PDF configurado: ${reportType}`)
   }
 
-  const previewHtml = input.previewHtml?.trim() ?? ""
-  if (previewHtml === "") {
-    throw new Error("No hay HTML de vista previa para generar el PDF.")
-  }
+  const rows = Array.isArray(input.rows) ? input.rows : []
+  const summary = input.summary ?? input.metadata ?? null
 
   const payload = {
-    previewHtml,
     fileBaseName: input.fileBaseName ?? null,
     reportType,
-    rows: Array.isArray(input.rows) ? input.rows : [],
-    summary: input.summary ?? null,
+    rows,
+    summary,
+    metadata: input.metadata ?? summary,
+    totalCount: input.totalCount ?? rows.length,
   }
 
-  if (process.env.NODE_ENV !== "production") {
-    console.info(
-      "[Report PDF] Calling server endpoint",
-      endpoint,
-      `(previewHtml=${previewHtml.length} bytes, rows=${payload.rows.length})`
-    )
-  }
+  console.info("[Report PDF] client payload", {
+    reportType,
+    rowsCount: rows.length,
+    totalCount: payload.totalCount,
+    summary,
+    endpoint,
+  })
 
   const response = await fetch(endpoint, {
     method: "POST",
@@ -123,9 +156,7 @@ export async function downloadReportPdfFromServer(
     const message = await extractJsonErrorMessage(response)
     const err = new Error(message) as DownloadReportPdfServerError
     err.status = response.status
-    if (process.env.NODE_ENV !== "production") {
-      console.error("[Report PDF] Server error", response.status, message)
-    }
+    console.error("[Report PDF] Server error", response.status, message)
     throw err
   }
 
@@ -135,11 +166,11 @@ export async function downloadReportPdfFromServer(
       message || `Respuesta inesperada del servidor (${contentType}).`
     ) as DownloadReportPdfServerError
     err.status = response.status
-    if (process.env.NODE_ENV !== "production") {
-      console.error("[Report PDF] Unexpected content-type", contentType, message)
-    }
+    console.error("[Report PDF] Unexpected content-type", contentType, message)
     throw err
   }
+
+  assertPdfKitV2Headers(response, rows.length)
 
   const blob = await response.blob()
   triggerBlobDownload(blob, buildFileName(input.fileBaseName))

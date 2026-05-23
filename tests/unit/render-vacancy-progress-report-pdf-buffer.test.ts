@@ -1,16 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-const renderReportHtmlToPdfBufferMock = vi.fn()
 const buildVacancyProgressReportPdfKitBufferMock = vi.fn()
-
-vi.mock("@/lib/reportes/render-report-pdf-with-chromium", () => ({
-  renderReportHtmlToPdfBuffer: (...args: unknown[]) =>
-    renderReportHtmlToPdfBufferMock(...args),
-}))
 
 vi.mock("@/lib/reportes/build-vacancy-progress-report-pdfkit-buffer", () => ({
   buildVacancyProgressReportPdfKitBuffer: (...args: unknown[]) =>
     buildVacancyProgressReportPdfKitBufferMock(...args),
+  VACANCY_PROGRESS_PDF_TEMPLATE_VERSION: "vacancy-progress-full-v2",
 }))
 
 import {
@@ -21,7 +16,6 @@ import {
 
 describe("renderVacancyProgressReportPdfBuffer", () => {
   beforeEach(() => {
-    renderReportHtmlToPdfBufferMock.mockReset()
     buildVacancyProgressReportPdfKitBufferMock.mockReset()
   })
 
@@ -29,65 +23,19 @@ describe("renderVacancyProgressReportPdfBuffer", () => {
     vi.clearAllMocks()
   })
 
-  it("throws a 400 when previewHtml is empty", async () => {
+  it("throws a 400 when rows and summary are both empty", async () => {
     await expect(
-      renderVacancyProgressReportPdfBuffer({ previewHtml: "   " })
-    ).rejects.toBeInstanceOf(VacancyProgressReportPdfError)
-  })
-
-  it("throws a 400 when the HTML contains unresolved {{...}} placeholders", async () => {
-    const buf = Buffer.from("PDF")
-    renderReportHtmlToPdfBufferMock.mockResolvedValue(buf)
-
-    await expect(
-      renderVacancyProgressReportPdfBuffer({
-        previewHtml:
-          "<style>@page{size:Letter;}</style><main>{{#if hasCandidatesByStage}}x{{/if}}</main>",
-      })
+      renderVacancyProgressReportPdfBuffer({ rows: [], summary: null })
     ).rejects.toMatchObject({
       status: 400,
-      message: expect.stringContaining(
-        "La plantilla contiene placeholders sin interpolar"
-      ),
+      message: expect.stringContaining("No se recibieron filas"),
     })
-    expect(renderReportHtmlToPdfBufferMock).not.toHaveBeenCalled()
+    expect(buildVacancyProgressReportPdfKitBufferMock).not.toHaveBeenCalled()
   })
 
-  it("ignores CSS braces inside <style> when validating placeholders", async () => {
-    const buf = Buffer.from("PDF")
-    renderReportHtmlToPdfBufferMock.mockResolvedValue(buf)
-
-    const fragment =
-      "<style>.foo { color: red } .bar:before { content: '{{x}}'; }</style><main>ok</main>"
-    const out = await renderVacancyProgressReportPdfBuffer({
-      previewHtml: fragment,
-    })
-    expect(out.engine).toBe("chromium")
-  })
-
-  it("renders the wrapped HTML with the report Chromium pipeline", async () => {
-    const buf = Buffer.from("PDF")
-    renderReportHtmlToPdfBufferMock.mockResolvedValue(buf)
-
-    const fragment = `<style>@page { size: Letter; margin: 14mm; }</style><main>ok</main>`
-    const out = await renderVacancyProgressReportPdfBuffer({
-      previewHtml: fragment,
-    })
-
-    expect(out.buffer).toBe(buf)
-    expect(out.engine).toBe("chromium")
-    expect(renderReportHtmlToPdfBufferMock).toHaveBeenCalledTimes(1)
-    const [html] = renderReportHtmlToPdfBufferMock.mock.calls[0] as [string]
-    expect(html.startsWith("<!DOCTYPE html>")).toBe(true)
-    expect(html).toContain('<meta charset="utf-8" />')
-    expect(html).toContain("<main>ok</main>")
-    expect(html).toContain("data-report-pdf-wrapper")
-  })
-
-  it("falls back to PDFKit when Chromium throws", async () => {
-    renderReportHtmlToPdfBufferMock.mockRejectedValue(new Error("chromium boom"))
-    const fallbackBuf = Buffer.from("PDFKIT")
-    buildVacancyProgressReportPdfKitBufferMock.mockResolvedValue(fallbackBuf)
+  it("calls buildVacancyProgressReportPdfKitBuffer and returns pdfkit-v2", async () => {
+    const buf = Buffer.from("PDFKIT-V2")
+    buildVacancyProgressReportPdfKitBufferMock.mockResolvedValue(buf)
 
     const rows = [
       { vacancyTitle: "Backend", totalCandidates: 5, candidatesHired: 1 },
@@ -96,14 +44,14 @@ describe("renderVacancyProgressReportPdfBuffer", () => {
     const summary = { generatedAt: "2026-01-01", totalVacancies: 2 }
 
     const out = await renderVacancyProgressReportPdfBuffer({
-      previewHtml: "<main>x</main>",
       rows,
       summary,
       fileBaseName: "demo",
     })
 
-    expect(out.buffer).toBe(fallbackBuf)
-    expect(out.engine).toBe("pdfkit")
+    expect(out.buffer).toBe(buf)
+    expect(out.engine).toBe("pdfkit-v2")
+    expect(out.templateVersion).toBe("vacancy-progress-full-v2")
     expect(buildVacancyProgressReportPdfKitBufferMock).toHaveBeenCalledTimes(1)
     const [args] = buildVacancyProgressReportPdfKitBufferMock.mock.calls[0] as [
       { rows: unknown[]; summary: unknown; fileBaseName: string },
@@ -113,19 +61,36 @@ describe("renderVacancyProgressReportPdfBuffer", () => {
     expect(args.fileBaseName).toBe("demo")
   })
 
-  it("throws a 500 only when both Chromium and PDFKit fail", async () => {
-    renderReportHtmlToPdfBufferMock.mockRejectedValue(new Error("chromium boom"))
+  it("accepts metadata as an alias for summary", async () => {
+    const buf = Buffer.from("PDF")
+    buildVacancyProgressReportPdfKitBufferMock.mockResolvedValue(buf)
+    const metadata = { generatedAt: "2026-05-22", totalCount: 12 }
+
+    await renderVacancyProgressReportPdfBuffer({
+      rows: [{ vacancyTitle: "QA" }],
+      metadata,
+    })
+
+    const [args] = buildVacancyProgressReportPdfKitBufferMock.mock.calls[0] as [
+      { summary: unknown },
+    ]
+    expect(args.summary).toEqual(metadata)
+  })
+
+  it("throws a 500 when PDFKit v2 fails", async () => {
     buildVacancyProgressReportPdfKitBufferMock.mockRejectedValue(
       new Error("pdfkit boom")
     )
 
     await expect(
       renderVacancyProgressReportPdfBuffer({
-        previewHtml: "<main>x</main>",
-        rows: [],
-        summary: null,
+        rows: [{ vacancyTitle: "x" }],
+        summary: { totalCount: 1 },
       })
-    ).rejects.toMatchObject({ status: 500 })
+    ).rejects.toMatchObject({
+      status: 500,
+      message: expect.stringContaining("PDFKit v2"),
+    })
   })
 })
 

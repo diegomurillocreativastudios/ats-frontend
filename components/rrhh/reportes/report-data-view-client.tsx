@@ -520,10 +520,7 @@ export function ReportDataViewClient({
     return wrapReportPreviewHtml(renderedHtml, { screenZoom })
   }, [catalogItem.reportKey, renderedHtml])
 
-  /**
-   * Construye el `summary` estructurado que el endpoint usa como fuente para el
-   * fallback PDFKit cuando Chromium falla. Sólo expone campos serializables.
-   */
+  /** Resumen estructurado enviado al endpoint PDFKit v2 (campos serializables). */
   const buildSummaryPayload = useCallback((): Record<string, unknown> | null => {
     if (!previewContext) return null
     const summaryKeys: Array<string> = [
@@ -559,17 +556,12 @@ export function ReportDataViewClient({
     setDownloadingPdf(true)
 
     const baseName = slugifyReportFileName(catalogItem.name || catalogItem.reportKey)
-    const html = renderedHtml?.trim() ?? ""
+    const rows = response?.rows ?? []
+    const summary = buildSummaryPayload()
 
-    if (process.env.NODE_ENV !== "production") {
-      console.info("[Report PDF] Starting server PDF generation")
-      console.info("[Report PDF] previewHtml length", html.length)
-      console.info("[Report PDF] rows count", response?.rows?.length ?? 0)
-    }
-
-    if (html === "") {
+    if (rows.length === 0) {
       setPdfActionError(
-        "No se encontró el contenido del reporte. Esperá a que cargue e intentá de nuevo."
+        "No hay datos del reporte para generar el PDF. Aplicá filtros con resultados e intentá de nuevo."
       )
       setDownloadingPdf(false)
       return
@@ -578,9 +570,10 @@ export function ReportDataViewClient({
     try {
       await downloadReportPdfFromServer({
         reportType: catalogItem.reportKey,
-        previewHtml: html,
-        rows: response?.rows ?? [],
-        summary: buildSummaryPayload(),
+        rows,
+        summary,
+        metadata: summary,
+        totalCount: response?.totalCount ?? rows.length,
         fileBaseName: baseName,
       })
     } catch (err: unknown) {
@@ -596,20 +589,12 @@ export function ReportDataViewClient({
     buildSummaryPayload,
     catalogItem.name,
     catalogItem.reportKey,
-    renderedHtml,
     response?.rows,
+    response?.totalCount,
   ])
 
-  const hasPreviewSource =
-    !!renderedHtml && renderedHtml.trim() !== "" && !!previewContext
-  const hasTemplateSource =
-    !!reportTemplateHtml ||
-    (isVacancyProgressReportKey(catalogItem.reportKey) && !!response?.rows?.length)
   const canDownloadPdf =
-    hasPreviewSource &&
-    hasTemplateSource &&
     !loading &&
-    !templateLoading &&
     !downloadingPdf &&
     (response?.rows?.length ?? 0) > 0
 
