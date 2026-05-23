@@ -1,4 +1,9 @@
-import { renderHtmlToPdfBuffer } from "@/lib/technical-sheet/html-to-pdf-chromium"
+import type { VacancyProgressByClientRow } from "@/lib/api/recruiter-reports"
+import {
+  buildVacancyProgressReportPdfKitBuffer,
+  type VacancyProgressReportPdfKitSummary,
+} from "@/lib/reportes/build-vacancy-progress-report-pdfkit-buffer"
+import { renderReportHtmlToPdfBuffer } from "@/lib/reportes/render-report-pdf-with-chromium"
 import { wrapVacancyProgressReportHtmlForPdf } from "@/lib/reportes/wrap-vacancy-progress-report-html-for-pdf"
 
 export class VacancyProgressReportPdfError extends Error {
@@ -13,15 +18,28 @@ export class VacancyProgressReportPdfError extends Error {
 export interface RenderVacancyProgressReportPdfInput {
   /** HTML interpolado del reporte (fragmento `<style>...</style><main>...</main>`). */
   previewHtml: string
+  /** Filas crudas para reconstruir el fallback PDFKit cuando Chromium falla. */
+  rows?: VacancyProgressByClientRow[]
+  /** Resumen estructurado para el fallback PDFKit (totales, periodo, cliente). */
+  summary?: VacancyProgressReportPdfKitSummary | null
+  /** Nombre base para personalizar el documento de fallback. */
+  fileBaseName?: string | null
+}
+
+export interface RenderVacancyProgressReportPdfResult {
+  buffer: Buffer
+  engine: "chromium" | "pdfkit"
 }
 
 /**
- * Renders the vacancy-progress report PDF using Chromium (`page.pdf`).
- * The template's own `@page` rule controls page size and margins via `preferCSSPageSize`.
+ * Genera el PDF del reporte "Avance de vacantes por cliente" con Chromium
+ * (`page.pdf` + `preferCSSPageSize`). Si Chromium falla, reconstruye un PDF
+ * formal con PDFKit a partir de `rows` y `summary`, de manera que el cliente
+ * siempre reciba un `application/pdf` descargable.
  */
 export async function renderVacancyProgressReportPdfBuffer(
   input: RenderVacancyProgressReportPdfInput
-): Promise<Buffer> {
+): Promise<RenderVacancyProgressReportPdfResult> {
   const fragment = input.previewHtml?.trim() ?? ""
   if (fragment === "") {
     throw new VacancyProgressReportPdfError(
@@ -31,7 +49,49 @@ export async function renderVacancyProgressReportPdfBuffer(
   }
 
   const documentHtml = wrapVacancyProgressReportHtmlForPdf(fragment)
-  return renderHtmlToPdfBuffer(documentHtml, { mediaType: "print" })
+  console.info("[Report PDF] Chromium generation started", {
+    htmlBytes: documentHtml.length,
+    rows: Array.isArray(input.rows) ? input.rows.length : 0,
+  })
+
+  try {
+    const buffer = await renderReportHtmlToPdfBuffer(documentHtml)
+    console.info("[Report PDF] Chromium generation success", {
+      pdfBytes: buffer.length,
+    })
+    return { buffer, engine: "chromium" }
+  } catch (chromiumError: unknown) {
+    console.warn(
+      "[Report PDF] Chromium failed, using PDFKit fallback",
+      chromiumError instanceof Error
+        ? chromiumError.stack ?? chromiumError.message
+        : chromiumError
+    )
+
+    try {
+      const fallback = await buildVacancyProgressReportPdfKitBuffer({
+        rows: Array.isArray(input.rows) ? input.rows : [],
+        summary: input.summary ?? null,
+        fileBaseName: input.fileBaseName ?? null,
+        reportTitle: "Avance de vacantes por cliente",
+      })
+      console.info("[Report PDF] PDFKit fallback success", {
+        pdfBytes: fallback.length,
+      })
+      return { buffer: fallback, engine: "pdfkit" }
+    } catch (pdfkitError: unknown) {
+      console.error(
+        "[Report PDF] PDFKit fallback failed",
+        pdfkitError instanceof Error
+          ? pdfkitError.stack ?? pdfkitError.message
+          : pdfkitError
+      )
+      throw new VacancyProgressReportPdfError(
+        "No se pudo generar el PDF del reporte (Chromium y PDFKit fallaron).",
+        500
+      )
+    }
+  }
 }
 
 export function buildVacancyProgressReportPdfFilename(

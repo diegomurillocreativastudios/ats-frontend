@@ -1,10 +1,8 @@
 "use client"
 
 import {
-  forwardRef,
   useCallback,
   useEffect,
-  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -27,7 +25,6 @@ import type {
 import {
   fetchRecruiterReportForCatalogItem,
   type ReportRuntimeResponse,
-  type ReportRuntimeRow,
 } from "@/lib/api/recruiter-report-runtime"
 import {
   listRecruiterCompanies,
@@ -35,12 +32,7 @@ import {
   type RecruiterCompanyOption,
   type RecruiterVacancyOption,
 } from "@/lib/api/recruiter-reports"
-import { captureElementAsPdfBlob } from "@/lib/pdf/download-element-as-pdf"
-import { downloadVacancyProgressReportPdf } from "@/lib/pdf/download-vacancy-progress-report-pdf"
-import {
-  resolveReportPdfCaptureElement,
-  resolveReportPreviewPdfElement,
-} from "@/lib/pdf/resolve-report-preview-pdf-element"
+import { downloadReportPdfFromServer } from "@/lib/pdf/download-report-pdf-from-server"
 import { formatGeneratedAtForPdf } from "@/lib/reportes/executive-summary-metrics"
 import {
   REPORT_PRINT_PREVIEW_SCREEN_ZOOM,
@@ -77,57 +69,6 @@ const pdfButtonClass =
 
 const filterGridClass =
   "mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] lg:items-end"
-
-interface ShadowHtmlCaptureHostProps {
-  html: string
-  wrapperClassName: string
-}
-
-/**
- * Off-screen capture target for html2canvas-based report PDFs.
- *
- * The injected report HTML embeds a `<style>` block with **global** selectors
- * (`*`, `html`, `body`, …). Rendering that HTML with `dangerouslySetInnerHTML`
- * directly into the main document would leak those rules into the host page —
- * dropping `html { font-size }` to `9.5pt` and shrinking every `rem`-based
- * Tailwind size to ~79% (the “page looks zoomed at 90%” bug).
- *
- * Mounting the HTML inside a closed Shadow DOM fully isolates the template's
- * styles while keeping a real DOM tree that html2canvas (v1.4+) can traverse.
- * The forwarded ref still resolves to the host element so existing helpers
- * such as `resolveReportPdfCaptureElement` keep working.
- */
-const ShadowHtmlCaptureHost = forwardRef<HTMLDivElement, ShadowHtmlCaptureHostProps>(
-  function ShadowHtmlCaptureHost({ html, wrapperClassName }, forwardedRef) {
-    const hostRef = useRef<HTMLDivElement | null>(null)
-    const shadowRef = useRef<ShadowRoot | null>(null)
-
-    useImperativeHandle(forwardedRef, () => hostRef.current as HTMLDivElement)
-
-    useEffect(() => {
-      const host = hostRef.current
-      if (!host) return
-      if (!shadowRef.current) {
-        shadowRef.current = host.attachShadow({ mode: "open" })
-      }
-      const root = shadowRef.current
-      root.innerHTML = ""
-      const wrapper = document.createElement("div")
-      wrapper.className = wrapperClassName
-      wrapper.style.fontFamily = "Arial, Helvetica, sans-serif"
-      wrapper.innerHTML = html
-      root.appendChild(wrapper)
-    }, [html, wrapperClassName])
-
-    return (
-      <div
-        ref={hostRef}
-        className="pointer-events-none fixed top-0 left-0 z-[-1] overflow-visible bg-white opacity-[0.01]"
-        aria-hidden
-      />
-    )
-  }
-)
 
 function slugifyReportFileName(name: string): string {
   return (
@@ -366,8 +307,6 @@ export function ReportDataViewClient({
 
   const [downloadingPdf, setDownloadingPdf] = useState(false)
   const [pdfActionError, setPdfActionError] = useState<string | null>(null)
-  const pdfCaptureRef = useRef<HTMLDivElement>(null)
-  const previewPanelRef = useRef<HTMLDivElement>(null)
 
   const hasCompanyFilter = catalogFilters.some(isSelectCompanyFilter)
   const hasVacancyFilter = catalogFilters.some(isSelectVacancyFilter)
@@ -502,6 +441,7 @@ export function ReportDataViewClient({
       generatedAt: formatGeneratedAtForPdf(),
       logoUrl: origin ? `${origin}/visible-icon.png` : "",
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response])
 
   const previewContext = useMemo<Record<string, unknown> | null>(() => {
@@ -577,115 +517,84 @@ export function ReportDataViewClient({
     return wrapReportPreviewHtml(renderedHtml, { screenZoom })
   }, [catalogItem.reportKey, renderedHtml])
 
-  const waitForCaptureReady = async (captureTarget: HTMLElement) => {
-    await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-    })
-    if (document.fonts?.ready) {
-      await document.fonts.ready
+  /**
+   * Construye el `summary` estructurado que el endpoint usa como fuente para el
+   * fallback PDFKit cuando Chromium falla. Sólo expone campos serializables.
+   */
+  const buildSummaryPayload = useCallback((): Record<string, unknown> | null => {
+    if (!previewContext) return null
+    const summaryKeys: Array<string> = [
+      "generatedAt",
+      "periodStart",
+      "periodEnd",
+      "clientName",
+      "totalCount",
+      "totalVacancies",
+      "openVacancies",
+      "totalClients",
+      "totalCandidates",
+      "vacanciesWithCandidates",
+      "vacanciesWithoutCandidates",
+      "candidatesInInterview",
+      "candidatesFinalist",
+      "candidatesHired",
+      "averagePreliminaryMatchScore",
+      "candidatesWithPreliminaryAnalysis",
+    ]
+    const out: Record<string, unknown> = {}
+    for (const key of summaryKeys) {
+      const value = (previewContext as Record<string, unknown>)[key]
+      if (value == null) continue
+      const t = typeof value
+      if (t === "string" || t === "number" || t === "boolean") out[key] = value
     }
-    const images = captureTarget.querySelectorAll("img")
-    await Promise.all(
-      Array.from(images).map(
-        (img) =>
-          new Promise<void>((resolve) => {
-            if (img.complete) {
-              resolve()
-              return
-            }
-            const done = () => resolve()
-            img.addEventListener("load", done, { once: true })
-            img.addEventListener("error", done, { once: true })
-          })
-      )
-    )
-  }
-
-  const resolvePdfCaptureTarget = useCallback((): HTMLElement | null => {
-    const fromPreview = previewPanelRef.current
-      ? resolveReportPreviewPdfElement(previewPanelRef.current)
-      : null
-    if (fromPreview) return fromPreview
-    return resolveReportPdfCaptureElement(pdfCaptureRef.current)
-  }, [])
-
-  const triggerPdfBlobDownload = useCallback((blob: Blob, fileName: string) => {
-    const objectUrl = URL.createObjectURL(blob)
-    const anchor = document.createElement("a")
-    anchor.href = objectUrl
-    anchor.download = fileName
-    anchor.rel = "noopener"
-    document.body.appendChild(anchor)
-    anchor.click()
-    anchor.remove()
-    URL.revokeObjectURL(objectUrl)
-  }, [])
+    return Object.keys(out).length === 0 ? null : out
+  }, [previewContext])
 
   const handleDownloadPdf = useCallback(async () => {
     setPdfActionError(null)
     setDownloadingPdf(true)
+
     const baseName = slugifyReportFileName(catalogItem.name || catalogItem.reportKey)
-    const fileName = `${baseName}.pdf`
-    const isVacancyProgress = isVacancyProgressReportKey(catalogItem.reportKey)
-    try {
-      const captureTarget = resolvePdfCaptureTarget()
-      if (captureTarget) {
-        try {
-          await waitForCaptureReady(captureTarget)
-          const blob = await captureElementAsPdfBlob({
-            element: captureTarget,
-            orientation: isVacancyProgress ? "portrait" : "landscape",
-            format: isVacancyProgress ? "letter" : "a4",
-            scale: 2,
-            marginMm: isVacancyProgress ? 0 : 5,
-          })
-          triggerPdfBlobDownload(blob, fileName)
-          return
-        } catch (clientErr: unknown) {
-          if (!isVacancyProgress) {
-            throw clientErr
-          }
-          if (process.env.NODE_ENV !== "production") {
-            console.warn(
-              "[report-pdf] Client capture failed; trying server Chromium PDF",
-              clientErr
-            )
-          }
-        }
-      }
+    const html = renderedHtml?.trim() ?? ""
 
-      if (isVacancyProgress) {
-        const html = renderedHtml?.trim() ?? ""
-        if (html === "") {
-          setPdfActionError(
-            "No se encontró el contenido del reporte. Esperá a que cargue e intentá de nuevo."
-          )
-          return
-        }
-        await downloadVacancyProgressReportPdf({
-          previewHtml: html,
-          fileBaseName: baseName,
-        })
-        return
-      }
+    if (process.env.NODE_ENV !== "production") {
+      console.info("[Report PDF] Starting server PDF generation")
+      console.info("[Report PDF] previewHtml length", html.length)
+      console.info("[Report PDF] rows count", response?.rows?.length ?? 0)
+    }
 
+    if (html === "") {
       setPdfActionError(
-        "No se encontró la vista previa del reporte. Esperá a que cargue e intentá de nuevo."
+        "No se encontró el contenido del reporte. Esperá a que cargue e intentá de nuevo."
       )
+      setDownloadingPdf(false)
+      return
+    }
+
+    try {
+      await downloadReportPdfFromServer({
+        reportType: catalogItem.reportKey,
+        previewHtml: html,
+        rows: response?.rows ?? [],
+        summary: buildSummaryPayload(),
+        fileBaseName: baseName,
+      })
     } catch (err: unknown) {
-      if (process.env.NODE_ENV !== "production") {
-        console.error("[report-pdf]", err)
-      }
-      setPdfActionError("No se pudo generar el PDF. Intentá de nuevo.")
+      console.error("[Report PDF] Download failed", err)
+      setPdfActionError(
+        getApiErrorMessage(err) ||
+          "No se pudo generar el PDF. Intentá de nuevo."
+      )
     } finally {
       setDownloadingPdf(false)
     }
   }, [
+    buildSummaryPayload,
     catalogItem.name,
     catalogItem.reportKey,
     renderedHtml,
-    resolvePdfCaptureTarget,
-    triggerPdfBlobDownload,
+    response?.rows,
   ])
 
   const hasPreviewSource =
@@ -743,7 +652,6 @@ export function ReportDataViewClient({
                       void handleDownloadPdf()
                     }}
                     disabled={!canDownloadPdf}
-                    data-html2canvas-ignore="true"
                     className={pdfButtonClass}
                     aria-busy={downloadingPdf || undefined}
                   >
@@ -879,15 +787,12 @@ export function ReportDataViewClient({
         {previewSrcDoc ? (
           <section
             aria-label="Vista previa del reporte"
-            className="flex min-h-0 flex-col gap-3"
+            className="report-preview-wrapper flex min-h-0 flex-col gap-3"
           >
             <h2 className="font-sans text-sm font-semibold text-foreground">
               Vista previa
             </h2>
-            <div
-              ref={previewPanelRef}
-              className="flex min-h-[480px] w-full flex-col overflow-hidden rounded-lg border border-border bg-muted/15"
-            >
+            <div className="flex min-h-[480px] w-full flex-col overflow-hidden rounded-lg border border-border bg-muted/15">
               <iframe
                 title="Vista previa del reporte"
                 sandbox="allow-same-origin"
@@ -898,14 +803,6 @@ export function ReportDataViewClient({
           </section>
         ) : null}
       </div>
-
-      {renderedHtml ? (
-        <ShadowHtmlCaptureHost
-          ref={pdfCaptureRef}
-          html={renderedHtml}
-          wrapperClassName="report-preview-doc w-[1600px] bg-white px-8 py-7 text-slate-950"
-        />
-      ) : null}
     </RrhhReportsShell>
   )
 }
