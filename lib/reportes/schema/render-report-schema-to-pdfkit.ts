@@ -1,4 +1,3 @@
-import type PDFDocument from "pdfkit"
 import type {
   FindingsSection,
   HeroHeaderSection,
@@ -398,12 +397,11 @@ function renderSection(doc: PdfDoc, section: ReportSection, ctx: Record<string, 
 }
 
 export function renderReportSchemaToPdfKit(
-  doc: PDFDocument,
+  doc: PdfDoc,
   schema: ReportSchema,
   ctx: Record<string, unknown>
 ): void {
-  const pdfDoc = doc as PdfDoc
   for (const section of schema.sections) {
-    renderSection(pdfDoc, section, ctx)
+    renderSection(doc, section, ctx)
   }
 }
