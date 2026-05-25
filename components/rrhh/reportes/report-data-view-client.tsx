@@ -39,7 +39,8 @@ import {
   wrapReportPreviewHtml,
 } from "@/lib/reportes/report-preview-html"
 import { resolveReportEmptyMessage } from "@/lib/reportes/report-data-registry"
-import { VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE } from "@/lib/reportes/vacancy-progress-report-default-template"
+import { safeParseReportSchema } from "@/lib/reportes/schema/report-schema"
+import { renderReportSchemaToHtml } from "@/lib/reportes/schema/render-report-schema-to-html"
 import {
   buildVacancyProgressReportTemplateContext,
   isVacancyProgressReportKey,
@@ -88,6 +89,21 @@ function resolveBrowserOrigin(): string {
     return window.location.origin.replace(/\/$/, "") || publicBase
   }
   return publicBase
+}
+
+function escapePreviewHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+function renderSchemaErrorHtml(message: string): string {
+  return `<section class="report-template-error"><h2>Plantilla de reporte inválida</h2><p>${escapePreviewHtml(
+    message
+  )}</p><p>Revisá el JSON guardado en Administración → Plantillas.</p></section>`
 }
 
 interface ReportPreviewMeta {
@@ -496,21 +512,29 @@ export function ReportDataViewClient({
   ])
 
   const reportTemplateHtml = useMemo(() => {
-    if (isVacancyProgressReportKey(catalogItem.reportKey)) {
-      const fromDb = template?.contentTemplate?.trim() ?? ""
-      const usesUnsupportedHandlebars =
-        fromDb !== "" && /\{\{\s*#(?:if|each|unless|with)\b/.test(fromDb)
-      if (fromDb && !usesUnsupportedHandlebars) return fromDb
-      return VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE
+    if (isVacancyProgressReportKey(catalogItem.reportKey)) return ""
+    return template?.contentTemplate?.trim() ?? ""
+  }, [template?.contentTemplate, catalogItem.reportKey])
+
+  const parsedSchema = useMemo(() => {
+    if (!isVacancyProgressReportKey(catalogItem.reportKey)) return null
+    const content = template?.contentTemplate?.trim() ?? ""
+    if (!content) {
+      return { success: false as const, error: "No se encontró una plantilla JSON." }
     }
-    const fromDb = template?.contentTemplate?.trim() ?? ""
-    return fromDb
+    return safeParseReportSchema(content)
   }, [template?.contentTemplate, catalogItem.reportKey])
 
   const renderedHtml = useMemo(() => {
-    if (!reportTemplateHtml || !previewContext) return null
+    if (!previewContext) return null
+    if (isVacancyProgressReportKey(catalogItem.reportKey)) {
+      if (!parsedSchema) return null
+      if (!parsedSchema.success) return renderSchemaErrorHtml(parsedSchema.error)
+      return renderReportSchemaToHtml(parsedSchema.data, previewContext)
+    }
+    if (!reportTemplateHtml) return null
     return renderTechnicalSheetHtml(reportTemplateHtml, previewContext)
-  }, [reportTemplateHtml, previewContext])
+  }, [catalogItem.reportKey, parsedSchema, previewContext, reportTemplateHtml])
 
   const previewSrcDoc = useMemo(() => {
     if (!renderedHtml) return null
@@ -575,6 +599,7 @@ export function ReportDataViewClient({
         metadata: summary,
         totalCount: response?.totalCount ?? rows.length,
         fileBaseName: baseName,
+        templateId: linkedTemplateId || null,
       })
     } catch (err: unknown) {
       console.error("[Report PDF] Download failed", err)
@@ -589,6 +614,7 @@ export function ReportDataViewClient({
     buildSummaryPayload,
     catalogItem.name,
     catalogItem.reportKey,
+    linkedTemplateId,
     response?.rows,
     response?.totalCount,
   ])
@@ -596,7 +622,9 @@ export function ReportDataViewClient({
   const canDownloadPdf =
     !loading &&
     !downloadingPdf &&
-    (response?.rows?.length ?? 0) > 0
+    (response?.rows?.length ?? 0) > 0 &&
+    (!isVacancyProgressReportKey(catalogItem.reportKey) ||
+      Boolean(parsedSchema && parsedSchema.success))
 
   const trail = useMemo(
     () => [

@@ -1,5 +1,8 @@
 import PDFDocument from "pdfkit"
 import type { VacancyProgressByClientRow } from "@/lib/api/recruiter-reports"
+import type { ReportSchema } from "@/lib/reportes/schema/report-schema-types"
+import { renderReportSchemaToPdfKit } from "@/lib/reportes/schema/render-report-schema-to-pdfkit"
+import { buildVacancyProgressReportTemplateContext } from "@/lib/reportes/vacancy-progress-report-template-context"
 import { VACANCY_PROGRESS_PDF_TEMPLATE_VERSION } from "@/lib/reportes/vacancy-progress-pdf-constants"
 import {
   buildExecutiveInsights,
@@ -52,6 +55,7 @@ export interface VacancyProgressReportPdfKitInput {
   summary?: VacancyProgressReportPdfKitSummary | null
   fileBaseName?: string | null
   reportTitle?: string | null
+  schema: ReportSchema
 }
 
 export interface VacancyProgressReportPdfKitSummary {
@@ -1407,33 +1411,20 @@ export function buildVacancyProgressReportPdfKitBuffer(
 
     try {
       const rows = Array.isArray(input.rows) ? input.rows : []
-      const formatted = rows.map(buildFormattedRow)
-      const aggregates = aggregateByClient(rows)
-      const metrics = resolveReportMetrics(rows, input.summary)
+      const summary = input.summary ?? null
+      const totalCount =
+        summary?.totalCount != null ? Number(summary.totalCount) : rows.length
 
-      drawReportHeader(doc, {
-        generatedAt: metrics.generatedAt,
-        periodLabel: metrics.periodLabel,
-        totalCount: metrics.totalCount,
+      const ctx = buildVacancyProgressReportTemplateContext({
+        rows,
+        totalCount: Number.isFinite(totalCount) ? totalCount : rows.length,
+        generatedAt: summary?.generatedAt ?? EM_DASH,
+        periodStart: summary?.periodStart ?? EM_DASH,
+        periodEnd: summary?.periodEnd ?? EM_DASH,
+        clientName: summary?.clientName ?? "Todos",
       })
 
-      if (rows.length === 0) {
-        doc.moveDown(1)
-        doc.font("Helvetica").fontSize(11).fillColor(COLOR_MUTED)
-        doc.text("No hay vacantes registradas para los filtros seleccionados.", {
-          align: "left",
-        })
-        applyBufferedPageFooters(doc)
-        doc.end()
-        return
-      }
-
-      drawExecutiveSummary(doc, metrics)
-      drawInsightsSection(doc, rows)
-      drawClientDistributionSection(doc, aggregates)
-      drawVacancyIndexSection(doc, formatted)
-      drawVacancyDetailsSection(doc, formatted)
-      drawTechnicalTableSection(doc, formatted)
+      renderReportSchemaToPdfKit(doc, input.schema, ctx)
 
       applyBufferedPageFooters(doc)
       doc.end()

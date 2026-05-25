@@ -3,6 +3,7 @@ import {
   buildVacancyProgressReportPdfKitBuffer,
   type VacancyProgressReportPdfKitSummary,
 } from "@/lib/reportes/build-vacancy-progress-report-pdfkit-buffer"
+import type { ReportSchema } from "@/lib/reportes/schema/report-schema-types"
 import {
   VACANCY_PROGRESS_PDF_ENGINE,
   VACANCY_PROGRESS_PDF_TEMPLATE_VERSION,
@@ -22,6 +23,7 @@ export interface RenderVacancyProgressReportPdfInput {
   summary?: VacancyProgressReportPdfKitSummary | null
   metadata?: VacancyProgressReportPdfKitSummary | null
   fileBaseName?: string | null
+  schema: ReportSchema
 }
 
 export interface RenderVacancyProgressReportPdfResult {
@@ -52,6 +54,7 @@ export async function renderVacancyProgressReportPdfBuffer(
       rows,
       summary,
       fileBaseName: input.fileBaseName ?? null,
+      schema: input.schema,
     })
 
     console.info("[Report PDF] PDFKit v2 generation success", {

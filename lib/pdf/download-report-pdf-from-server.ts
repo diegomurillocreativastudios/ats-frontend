@@ -27,6 +27,8 @@ export interface DownloadReportPdfFromServerInput {
   totalCount?: number | null
   /** Nombre base sin extensión; el servidor agrega `.pdf` si no lo trae. */
   fileBaseName?: string | null
+  /** Id de la plantilla del reporte (Document template en backend). */
+  templateId?: string | number | null
 }
 
 export interface DownloadReportPdfServerError extends Error {
@@ -133,6 +135,7 @@ export async function downloadReportPdfFromServer(
     summary,
     metadata: input.metadata ?? summary,
     totalCount: input.totalCount ?? rows.length,
+    templateId: input.templateId ?? null,
   }
 
   console.info("[Report PDF] client payload", {

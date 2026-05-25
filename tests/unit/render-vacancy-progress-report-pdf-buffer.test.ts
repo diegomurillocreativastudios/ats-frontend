@@ -8,11 +8,24 @@ vi.mock("@/lib/reportes/build-vacancy-progress-report-pdfkit-buffer", () => ({
   VACANCY_PROGRESS_PDF_TEMPLATE_VERSION: "vacancy-progress-full-v2",
 }))
 
+import type { ReportSchema } from "@/lib/reportes/schema/report-schema-types"
 import {
   buildVacancyProgressReportPdfFilename,
   renderVacancyProgressReportPdfBuffer,
   VacancyProgressReportPdfError,
 } from "@/lib/reportes/render-vacancy-progress-report-pdf-buffer"
+
+const sampleSchema: ReportSchema = {
+  version: 1,
+  reportKey: "vacancy-progress-by-client",
+  title: "Reporte",
+  sections: [
+    {
+      type: "heroHeader",
+      title: "Reporte",
+    },
+  ],
+}
 
 describe("renderVacancyProgressReportPdfBuffer", () => {
   beforeEach(() => {
@@ -25,7 +38,7 @@ describe("renderVacancyProgressReportPdfBuffer", () => {
 
   it("throws a 400 when rows and summary are both empty", async () => {
     await expect(
-      renderVacancyProgressReportPdfBuffer({ rows: [], summary: null })
+      renderVacancyProgressReportPdfBuffer({ rows: [], summary: null, schema: sampleSchema })
     ).rejects.toMatchObject({
       status: 400,
       message: expect.stringContaining("No se recibieron filas"),
@@ -47,6 +60,7 @@ describe("renderVacancyProgressReportPdfBuffer", () => {
       rows,
       summary,
       fileBaseName: "demo",
+      schema: sampleSchema,
     })
 
     expect(out.buffer).toBe(buf)
@@ -54,11 +68,12 @@ describe("renderVacancyProgressReportPdfBuffer", () => {
     expect(out.templateVersion).toBe("vacancy-progress-full-v2")
     expect(buildVacancyProgressReportPdfKitBufferMock).toHaveBeenCalledTimes(1)
     const [args] = buildVacancyProgressReportPdfKitBufferMock.mock.calls[0] as [
-      { rows: unknown[]; summary: unknown; fileBaseName: string },
+      { rows: unknown[]; summary: unknown; fileBaseName: string; schema: ReportSchema },
     ]
     expect(args.rows).toEqual(rows)
     expect(args.summary).toEqual(summary)
     expect(args.fileBaseName).toBe("demo")
+    expect(args.schema).toEqual(sampleSchema)
   })
 
   it("accepts metadata as an alias for summary", async () => {
@@ -69,6 +84,7 @@ describe("renderVacancyProgressReportPdfBuffer", () => {
     await renderVacancyProgressReportPdfBuffer({
       rows: [{ vacancyTitle: "QA" }],
       metadata,
+      schema: sampleSchema,
     })
 
     const [args] = buildVacancyProgressReportPdfKitBufferMock.mock.calls[0] as [
@@ -86,6 +102,7 @@ describe("renderVacancyProgressReportPdfBuffer", () => {
       renderVacancyProgressReportPdfBuffer({
         rows: [{ vacancyTitle: "x" }],
         summary: { totalCount: 1 },
+        schema: sampleSchema,
       })
     ).rejects.toMatchObject({
       status: 500,

@@ -15,12 +15,11 @@ import {
   vacancyProgressPercentValue,
   vacancyStageCounts,
 } from "@/lib/reportes-metrics"
-import { escapeHtmlForTechnicalSheet } from "@/lib/technical-sheet/template-interpolate"
 
 export const VACANCY_PROGRESS_REPORT_KEY = "vacancy-progress-by-client"
 
 export interface BuildVacancyProgressReportContextInput {
-  rows: ReportRuntimeRow[]
+  rows: Array<ReportRuntimeRow | VacancyProgressByClientRow>
   totalCount: number
   generatedAt: string
   periodStart: string
@@ -30,12 +29,10 @@ export interface BuildVacancyProgressReportContextInput {
 
 const EM_DASH = "—"
 
-function coerceVacancyRows(rows: ReportRuntimeRow[]): VacancyProgressByClientRow[] {
+function coerceVacancyRows(
+  rows: Array<ReportRuntimeRow | VacancyProgressByClientRow>
+): VacancyProgressByClientRow[] {
   return rows.filter((r) => r != null && typeof r === "object") as VacancyProgressByClientRow[]
-}
-
-function escapeCell(value: string): string {
-  return escapeHtmlForTechnicalSheet(value)
 }
 
 /**
@@ -81,8 +78,7 @@ function formatCount(value: number | null | undefined): string {
  * leaking the raw row schema into HTML templates and prevents `—` placeholders
  * from being missed when a value is `null`/`undefined`.
  */
-interface FormattedVacancyRow {
-  row: VacancyProgressByClientRow
+interface FormattedVacancyRow extends VacancyProgressByClientRow {
   clientLabel: string
   vacancyTitleLabel: string
   vacancyStatusLabel: string
@@ -98,27 +94,21 @@ interface FormattedVacancyRow {
   minPreliminaryMatchScoreLabel: string
   maxPreliminaryMatchScoreLabel: string
   averageDaysToFillLabel: string
-  candidatesByStageHtml: string
+  candidatesByStageEntries: Array<{ stageName: string; stageCount: string }>
+  hasCandidatesByStage: boolean
 }
 
-function renderStagePillsHtml(
+function buildStageEntries(
   map: Record<string, number> | null | undefined
-): string {
-  if (!map || typeof map !== "object") {
-    return `<span class="stage-empty">Sin etapas registradas ${EM_DASH}</span>`
-  }
-  const entries = Object.entries(map)
+): Array<{ stageName: string; stageCount: string }> {
+  if (!map || typeof map !== "object") return []
+  return Object.entries(map)
     .filter(([, n]) => typeof n === "number" && n > 0)
     .sort((a, b) => b[1] - a[1])
-  if (entries.length === 0) {
-    return `<span class="stage-empty">Sin etapas registradas ${EM_DASH}</span>`
-  }
-  return entries
-    .map(
-      ([name, count]) =>
-        `<span class="stage-pill"><span class="stage-pill-name">${escapeCell(name)}</span><span class="stage-pill-count">${formatCount(count)}</span></span>`
-    )
-    .join("")
+    .map(([name, count]) => ({
+      stageName: name,
+      stageCount: formatCount(count),
+    }))
 }
 
 function buildFormattedRow(row: VacancyProgressByClientRow): FormattedVacancyRow {
@@ -127,9 +117,10 @@ function buildFormattedRow(row: VacancyProgressByClientRow): FormattedVacancyRow
   const interview = stageCounts.interview ?? row.candidatesInInterview ?? 0
   const finalist = stageCounts.finalist ?? row.candidatesFinalist ?? 0
   const hired = stageCounts.hired ?? row.candidatesHired ?? 0
+  const stageEntries = buildStageEntries(row.candidatesByStage)
 
   return {
-    row,
+    ...row,
     clientLabel: vacancyClientLabel(row),
     vacancyTitleLabel: String(row.vacancyTitle ?? EM_DASH).trim() || EM_DASH,
     vacancyStatusLabel: formatVacancyStatusSlug(row.vacancyStatus),
@@ -151,7 +142,8 @@ function buildFormattedRow(row: VacancyProgressByClientRow): FormattedVacancyRow
       row.maxPreliminaryMatchScore
     ),
     averageDaysToFillLabel: formatDaysLabel(row.averageDaysToFill),
-    candidatesByStageHtml: renderStagePillsHtml(row.candidatesByStage),
+    candidatesByStageEntries: stageEntries,
+    hasCandidatesByStage: stageEntries.length > 0,
   }
 }
 
@@ -194,173 +186,77 @@ function aggregateByClient(rows: VacancyProgressByClientRow[]): ClientAggregate[
   )
 }
 
-function renderClientDistributionRows(rows: VacancyProgressByClientRow[]): string {
+interface ClientDistributionRow {
+  clientName: string
+  vacancies: string
+  candidates: string
+  candidatesWithAi: string
+  hired: string
+}
+
+function buildClientDistribution(rows: VacancyProgressByClientRow[]): ClientDistributionRow[] {
   const aggregates = aggregateByClient(rows)
-  if (aggregates.length === 0) {
-    return `<tr><td colspan="5" class="center muted">Sin datos para los filtros aplicados.</td></tr>`
-  }
-  return aggregates
-    .map(
-      (c) => `<tr>
-  <td><strong>${escapeCell(c.clientLabel)}</strong></td>
-  <td class="center">${formatCount(c.vacancies)}</td>
-  <td class="center">${formatCount(c.candidates)}</td>
-  <td class="center">${formatCount(c.withAi)}</td>
-  <td class="center">${formatCount(c.hired)}</td>
-</tr>`
-    )
-    .join("")
+  return aggregates.map((c) => ({
+    clientName: c.clientLabel,
+    vacancies: formatCount(c.vacancies),
+    candidates: formatCount(c.candidates),
+    candidatesWithAi: formatCount(c.withAi),
+    hired: formatCount(c.hired),
+  }))
 }
 
-function renderVacancyIndexRows(formatted: FormattedVacancyRow[]): string {
-  if (formatted.length === 0) {
-    return `<tr><td colspan="7" class="center muted">Sin vacantes en el periodo.</td></tr>`
-  }
-  return formatted
-    .map(
-      (f) => `<tr>
-  <td>${escapeCell(f.clientLabel)}</td>
-  <td>${escapeCell(f.vacancyTitleLabel)}</td>
-  <td class="center">${escapeCell(f.vacancyStatusLabel)}</td>
-  <td class="center">${escapeCell(f.openedAtLabel)}</td>
-  <td class="center">${escapeCell(f.progressPercentLabel)}</td>
-  <td class="center">${escapeCell(f.averagePreliminaryMatchScoreLabel)}</td>
-  <td class="center">${escapeCell(f.totalCandidatesLabel)}</td>
-</tr>`
-    )
-    .join("")
+interface VacancyIndexRow {
+  clientName: string
+  vacancyTitle: string
+  vacancyStatusLabel: string
+  openedAtLabel: string
+  progressPercentLabel: string
+  averagePreliminaryMatchScoreLabel: string
+  totalCandidatesLabel: string
 }
 
-function renderVacancyDetailCards(formatted: FormattedVacancyRow[]): string {
-  if (formatted.length === 0) {
-    return `<p class="muted">No hay vacantes para mostrar con los filtros actuales.</p>`
-  }
-  return formatted
-    .map(
-      (f) => `<article class="vacancy-card">
-  <header class="vacancy-card-header">
-    <div>
-      <h3 class="vacancy-title">${escapeCell(f.vacancyTitleLabel)}</h3>
-      <p class="vacancy-subtitle">${escapeCell(f.clientLabel)}</p>
-    </div>
-    <div class="vacancy-status">
-      <strong>Estado:</strong> ${escapeCell(f.vacancyStatusLabel)}
-    </div>
-  </header>
-
-  <div class="vacancy-info-grid">
-    <div class="vacancy-info-item">
-      <span class="info-label">Apertura</span>
-      <span class="info-value">${escapeCell(f.openedAtLabel)}</span>
-    </div>
-    <div class="vacancy-info-item">
-      <span class="info-label">Cierre</span>
-      <span class="info-value">${escapeCell(f.closedAtLabel)}</span>
-    </div>
-    <div class="vacancy-info-item">
-      <span class="info-label">Candidatos</span>
-      <span class="info-value">${escapeCell(f.totalCandidatesLabel)}</span>
-    </div>
-    <div class="vacancy-info-item">
-      <span class="info-label">Días para cierre</span>
-      <span class="info-value">${escapeCell(f.averageDaysToFillLabel)}</span>
-    </div>
-  </div>
-
-  <div class="vacancy-metrics-grid">
-    <div class="metric-mini-card">
-      <div class="metric-mini-label">Candidatos</div>
-      <div class="metric-mini-value">${escapeCell(f.totalCandidatesLabel)}</div>
-    </div>
-    <div class="metric-mini-card">
-      <div class="metric-mini-label">Entrevista</div>
-      <div class="metric-mini-value">${escapeCell(f.interviewLabel)}</div>
-    </div>
-    <div class="metric-mini-card">
-      <div class="metric-mini-label">Finalistas</div>
-      <div class="metric-mini-value">${escapeCell(f.finalistLabel)}</div>
-    </div>
-    <div class="metric-mini-card">
-      <div class="metric-mini-label">Contratados</div>
-      <div class="metric-mini-value">${escapeCell(f.hiredLabel)}</div>
-    </div>
-    <div class="metric-mini-card">
-      <div class="metric-mini-label">Score IA</div>
-      <div class="metric-mini-value">${escapeCell(f.averagePreliminaryMatchScoreLabel)}</div>
-    </div>
-  </div>
-
-  <div class="ai-score-row">
-    <div class="ai-score-cell">
-      <span class="ai-score-label">Score IA mínimo</span>
-      <span class="ai-score-value">${escapeCell(f.minPreliminaryMatchScoreLabel)}</span>
-    </div>
-    <div class="ai-score-cell">
-      <span class="ai-score-label">Score IA promedio</span>
-      <span class="ai-score-value">${escapeCell(f.averagePreliminaryMatchScoreLabel)}</span>
-    </div>
-    <div class="ai-score-cell">
-      <span class="ai-score-label">Score IA máximo</span>
-      <span class="ai-score-value">${escapeCell(f.maxPreliminaryMatchScoreLabel)}</span>
-    </div>
-  </div>
-
-  <div class="progress-row">
-    <div class="progress-label">
-      <span>Avance del proceso</span>
-      <span>${escapeCell(f.progressPercentLabel)}</span>
-    </div>
-    <div class="progress-track">
-      <div class="progress-fill" style="width:${f.progressPercentSafe}%"></div>
-    </div>
-  </div>
-
-  <div class="pipeline-stages">
-    <div class="pipeline-stages-title">Pipeline por etapa</div>
-    <div class="pipeline-stages-wrap">${f.candidatesByStageHtml}</div>
-  </div>
-</article>`
-    )
-    .join("")
+function buildVacancyIndexRows(
+  formatted: FormattedVacancyRow[]
+): VacancyIndexRow[] {
+  return formatted.map((f) => ({
+    clientName: f.clientLabel,
+    vacancyTitle: f.vacancyTitleLabel,
+    vacancyStatusLabel: f.vacancyStatusLabel,
+    openedAtLabel: f.openedAtLabel,
+    progressPercentLabel: f.progressPercentLabel,
+    averagePreliminaryMatchScoreLabel: f.averagePreliminaryMatchScoreLabel,
+    totalCandidatesLabel: f.totalCandidatesLabel,
+  }))
 }
 
-function renderTechnicalRows(formatted: FormattedVacancyRow[]): string {
-  if (formatted.length === 0) {
-    return `<tr><td colspan="11" class="center muted">Sin filas técnicas.</td></tr>`
-  }
-  return formatted
-    .map(
-      (f) => `<tr>
-  <td>${escapeCell(f.clientLabel)}</td>
-  <td>${escapeCell(f.vacancyTitleLabel)}</td>
-  <td class="center">${escapeCell(f.vacancyStatusLabel)}</td>
-  <td class="center">${escapeCell(f.openedAtLabel)}</td>
-  <td class="center">${escapeCell(f.closedAtLabel)}</td>
-  <td class="center">${escapeCell(f.totalCandidatesLabel)}</td>
-  <td class="center">${escapeCell(f.interviewLabel)}</td>
-  <td class="center">${escapeCell(f.finalistLabel)}</td>
-  <td class="center">${escapeCell(f.hiredLabel)}</td>
-  <td class="center">${escapeCell(f.progressPercentLabel)}</td>
-  <td class="center">${escapeCell(f.averagePreliminaryMatchScoreLabel)}</td>
-</tr>`
-    )
-    .join("")
+interface TechnicalRow {
+  clientName: string
+  vacancyTitle: string
+  vacancyStatusLabel: string
+  openedAtLabel: string
+  closedAtLabel: string
+  totalCandidatesLabel: string
+  interviewLabel: string
+  finalistLabel: string
+  hiredLabel: string
+  progressPercentLabel: string
+  averagePreliminaryMatchScoreLabel: string
 }
 
-function renderInsightsHtml(rows: VacancyProgressByClientRow[]): string {
-  const insights = buildExecutiveInsights(rows)
-  const bullets = insights
-    .filter((item) => !item.isEmpty || item.id === "zero-candidates")
-    .slice(0, 4)
-    .map(
-      (item) =>
-        `<li><strong>${escapeCell(item.title)}:</strong> ${escapeCell(item.description)} (${escapeCell(item.metric)})</li>`
-    )
-
-  if (bullets.length === 0) {
-    return "<li>No hay hallazgos destacados para los filtros actuales.</li>"
-  }
-  return bullets.join("")
+function buildTechnicalRows(formatted: FormattedVacancyRow[]): TechnicalRow[] {
+  return formatted.map((f) => ({
+    clientName: f.clientLabel,
+    vacancyTitle: f.vacancyTitleLabel,
+    vacancyStatusLabel: f.vacancyStatusLabel,
+    openedAtLabel: f.openedAtLabel,
+    closedAtLabel: f.closedAtLabel,
+    totalCandidatesLabel: f.totalCandidatesLabel,
+    interviewLabel: f.interviewLabel,
+    finalistLabel: f.finalistLabel,
+    hiredLabel: f.hiredLabel,
+    progressPercentLabel: f.progressPercentLabel,
+    averagePreliminaryMatchScoreLabel: f.averagePreliminaryMatchScoreLabel,
+  }))
 }
 
 interface InsightSummary {
@@ -381,8 +277,9 @@ function pickInsight(
 /**
  * Returns a compact HTML snippet describing a "top" vacancy (label + metric badge).
  */
-function renderTopVacancyHtml(summary: InsightSummary): string {
-  return `<span class="top-vacancy-label">${escapeCell(summary.label)}</span><span class="top-vacancy-metric">${escapeCell(summary.metric)}</span>`
+function formatInsightSummary(summary: InsightSummary): string {
+  if (!summary.label || summary.label === EM_DASH) return EM_DASH
+  return `${summary.label} (${summary.metric})`
 }
 
 function resolvePeriodLabel(periodStart: string, periodEnd: string): string {
@@ -417,11 +314,9 @@ export function buildVacancyProgressReportTemplateContext(
       ? formatScoreLabel(kpis.avgPreliminaryMatchOnPage)
       : EM_DASH
 
-  const clientDistributionRows = renderClientDistributionRows(rows)
-  const vacancyIndexRows = renderVacancyIndexRows(formattedRows)
-  const vacancyDetailCards = renderVacancyDetailCards(formattedRows)
-  const technicalRows = renderTechnicalRows(formattedRows)
-  const insightsHtml = renderInsightsHtml(rows)
+  const clientDistribution = buildClientDistribution(rows)
+  const vacancyIndexRows = buildVacancyIndexRows(formattedRows)
+  const technicalRows = buildTechnicalRows(formattedRows)
 
   const topProgress = pickInsight(rows, "max-progress")
   const topAiScore = pickInsight(rows, "best-match")
@@ -462,9 +357,9 @@ export function buildVacancyProgressReportTemplateContext(
     candidatesFinalist: totalFinalists,
     candidatesHired: totalHired,
 
-    topProgressVacancy: renderTopVacancyHtml(topProgress),
-    topAiScoreVacancy: renderTopVacancyHtml(topAiScore),
-    topCandidatesVacancy: renderTopVacancyHtml(topCandidates),
+    topProgressVacancy: formatInsightSummary(topProgress),
+    topAiScoreVacancy: formatInsightSummary(topAiScore),
+    topCandidatesVacancy: formatInsightSummary(topCandidates),
     topProgressVacancyLabel: topProgress.label,
     topProgressVacancyMetric: topProgress.metric,
     topAiScoreVacancyLabel: topAiScore.label,
@@ -472,21 +367,14 @@ export function buildVacancyProgressReportTemplateContext(
     topCandidatesVacancyLabel: topCandidates.label,
     topCandidatesVacancyMetric: topCandidates.metric,
 
-    clientDistributionRows,
+    clientDistribution,
     vacancyIndexRows,
-    vacancyDetailCards,
     technicalRows,
-    insightsHtml,
-
-    clientsRowsHtml: clientDistributionRows,
-    vacancyIndexRowsHtml: vacancyIndexRows,
-    vacancyDetailCardsHtml: vacancyDetailCards,
-    technicalRowsHtml: technicalRows,
 
     clientName: input.clientName,
     dateFrom: input.periodStart,
     dateTo: input.periodEnd,
-    rows,
+    rows: formattedRows,
     rowCount: input.totalCount,
   }
 }

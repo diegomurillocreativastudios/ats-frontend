@@ -15,6 +15,10 @@
  *   `break-before: page`. Vacancy cards keep together with `break-inside: avoid`.
  * - Table headers repeat across pages via `<thead>` + `display: table-header-group`.
  */
+/**
+ * @deprecated Temporary fallback only.
+ * Main source of truth must be the JSON schema stored in DB.
+ */
 export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   @page {
     size: Letter;

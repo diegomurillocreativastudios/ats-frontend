@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
 import { buildVacancyProgressReportTemplateContext } from "@/lib/reportes/vacancy-progress-report-template-context"
-import { renderTechnicalSheetHtml } from "@/lib/technical-sheet/template-interpolate"
-import { VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE } from "@/lib/reportes/vacancy-progress-report-default-template"
 
 const sampleRows = [
   {
@@ -72,7 +70,7 @@ describe("buildVacancyProgressReportTemplateContext", () => {
     expect(ctx.periodLabel).toBe("01/05/2026 — 21/05/2026")
   })
 
-  it("renders non-empty HTML fragments for tables, insights and highlights", () => {
+  it("builds structured collections for tables and cards", () => {
     const ctx = buildVacancyProgressReportTemplateContext({
       rows: sampleRows,
       totalCount: 3,
@@ -82,23 +80,33 @@ describe("buildVacancyProgressReportTemplateContext", () => {
       clientName: "Todos",
     })
 
-    expect(ctx.insightsHtml).toContain("<li>")
-    expect(ctx.clientDistributionRows).toContain("<tr>")
-    expect(ctx.clientDistributionRows).toContain("Acme Corp")
-    expect(ctx.vacancyIndexRows).toContain("Backend Developer")
-    expect(ctx.vacancyDetailCards).toContain("vacancy-card")
-    expect(ctx.technicalRows).toContain("Beta LLC")
-
-    expect(String(ctx.topProgressVacancy)).toContain("top-vacancy-label")
-    expect(String(ctx.topAiScoreVacancy)).toContain("top-vacancy-metric")
-    expect(String(ctx.topCandidatesVacancy)).toContain("top-vacancy-metric")
-
-    expect(ctx.vacancyIndexRows).toContain("Abierta")
-    expect(ctx.vacancyDetailCards).toContain("Score IA mínimo")
-    expect(ctx.vacancyDetailCards).toContain("stage-pill")
+    expect(ctx.clientDistribution).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ clientName: "Acme Corp", vacancies: "2" }),
+      ])
+    )
+    expect(ctx.vacancyIndexRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ vacancyTitle: "Backend Developer" }),
+      ])
+    )
+    expect(ctx.technicalRows).toEqual(
+      expect.arrayContaining([expect.objectContaining({ clientName: "Beta LLC" })])
+    )
+    expect(ctx.rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ vacancyStatusLabel: "Abierta" }),
+      ])
+    )
+    expect(ctx.rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ minPreliminaryMatchScoreLabel: "55.0" }),
+      ])
+    )
+    expect(ctx.rows[0]?.candidatesByStageEntries.length).toBeGreaterThanOrEqual(1)
   })
 
-  it("fills the default template without leaving raw {{ placeholders", () => {
+  it("summarizes top vacancies with label + metric", () => {
     const ctx = buildVacancyProgressReportTemplateContext({
       rows: sampleRows,
       totalCount: 3,
@@ -108,24 +116,12 @@ describe("buildVacancyProgressReportTemplateContext", () => {
       clientName: "Todos",
     })
 
-    const html = renderTechnicalSheetHtml(
-      VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE,
-      ctx
-    )
-
-    const stripped = html.replace(/<style[\s\S]*?<\/style>/gi, "")
-    expect(stripped).not.toMatch(/\{\{[\s\S]+?\}\}/)
-    expect(html).toContain("Estado de vacantes y candidatos")
-    expect(html).toContain("Backend Developer")
-    expect(html).toContain("Resumen ejecutivo")
-    expect(html).toContain("Vacante con mayor avance")
-    expect(html).toContain("Mejor match IA")
-    expect(html).toContain("Más candidatos")
-    expect(html).toContain("Score IA mínimo")
-    expect(html).toContain("stage-pill")
+    expect(ctx.topProgressVacancy).toContain("(")
+    expect(ctx.topAiScoreVacancy).toContain("(")
+    expect(ctx.topCandidatesVacancy).toContain("(")
   })
 
-  it("falls back to '—' for missing per-row metrics in the default template", () => {
+  it("falls back to '—' for missing per-row metrics", () => {
     const ctx = buildVacancyProgressReportTemplateContext({
       rows: [
         {
@@ -142,13 +138,8 @@ describe("buildVacancyProgressReportTemplateContext", () => {
       clientName: "Empty Corp",
     })
 
-    const html = renderTechnicalSheetHtml(
-      VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE,
-      ctx
-    )
-
-    expect(html).toContain("Lonely Vacancy")
-    expect(html).toContain("Sin etapas registradas")
     expect(ctx.periodLabel).toBe("—")
+    expect(ctx.rows[0]?.progressPercentLabel).toBe("—")
+    expect(ctx.rows[0]?.candidatesByStageEntries.length).toBe(0)
   })
 })
