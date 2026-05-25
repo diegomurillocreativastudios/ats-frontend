@@ -121,7 +121,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const parsedSchema = safeParseReportSchema(template.contentTemplate)
-    if (!parsedSchema.success) {
+    if (parsedSchema.success === false) {
       return NextResponse.json(
         {
           message: "La plantilla del reporte no es un JSON válido",

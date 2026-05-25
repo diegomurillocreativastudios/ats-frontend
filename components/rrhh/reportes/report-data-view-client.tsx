@@ -529,7 +529,7 @@ export function ReportDataViewClient({
     if (!previewContext) return null
     if (isVacancyProgressReportKey(catalogItem.reportKey)) {
       if (!parsedSchema) return null
-      if (!parsedSchema.success) return renderSchemaErrorHtml(parsedSchema.error)
+      if (parsedSchema.success === false) return renderSchemaErrorHtml(parsedSchema.error)
       return renderReportSchemaToHtml(parsedSchema.data, previewContext)
     }
     if (!reportTemplateHtml) return null
