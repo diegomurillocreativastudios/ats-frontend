@@ -237,6 +237,214 @@ export const REPORT_DATA_REGISTRY: Record<string, ReportColumnConfig> = {
     emptyMessage:
       "No hay datos de fuentes para el rango seleccionado.",
   },
+  "time-to-hire-kpi": {
+    columns: [
+      { key: "clientName", header: "Cliente" },
+      { key: "vacancyTitle", header: "Vacante" },
+      { key: "vacancyStatus", header: "Estatus" },
+      {
+        key: "openedAt",
+        header: "Apertura",
+        format: (v) => formatDate(v),
+      },
+      {
+        key: "firstHireAt",
+        header: "Primera contratación",
+        format: (v) => formatDate(v),
+      },
+      {
+        key: "timeToFillDays",
+        header: "TTF (días)",
+        align: "right",
+        format: (v) => formatNullableInteger(v),
+      },
+      {
+        key: "timeToHireDays",
+        header: "TTH (días)",
+        align: "right",
+        format: (v) => formatNullableInteger(v),
+      },
+      {
+        key: "daysOpen",
+        header: "Días abierta",
+        align: "right",
+        format: (v) => formatNullableInteger(v),
+      },
+      {
+        key: "isSlaBreached",
+        header: "SLA roto",
+        align: "center",
+        format: (v) => {
+          if (v === true) return "Sí"
+          if (v === false) return "No"
+          return "—"
+        },
+      },
+      {
+        key: "totalCandidates",
+        header: "Candidatos",
+        align: "right",
+        format: (v) => formatInteger(v),
+      },
+      {
+        key: "candidatesHired",
+        header: "Contratados",
+        align: "right",
+        format: (v) => formatInteger(v),
+      },
+    ],
+    emptyMessage:
+      "No hay datos de time-to-hire para los filtros seleccionados.",
+  },
+  "salary-expectations": {
+    columns: [
+      { key: "candidateName", header: "Candidato" },
+      { key: "vacancyTitle", header: "Vacante" },
+      { key: "clientName", header: "Cliente" },
+      {
+        key: "currentStageName",
+        header: "Etapa",
+        format: (v) => String(v ?? "—"),
+      },
+      { key: "pipelineStatus", header: "Estado" },
+      {
+        key: "expectedSalaryUsd",
+        header: "Pretensión (USD)",
+        align: "right",
+        format: (v) => {
+          if (v == null || v === "") return "—"
+          const n = Number(v)
+          if (!Number.isFinite(n)) return "—"
+          return n.toLocaleString("es-MX", { maximumFractionDigits: 0 })
+        },
+      },
+      {
+        key: "vacancyMinSalaryUsd",
+        header: "Rango mín. (USD)",
+        align: "right",
+        format: (v) => {
+          if (v == null || v === "") return "—"
+          const n = Number(v)
+          if (!Number.isFinite(n)) return "—"
+          return n.toLocaleString("es-MX", { maximumFractionDigits: 0 })
+        },
+      },
+      {
+        key: "vacancyMaxSalaryUsd",
+        header: "Rango máx. (USD)",
+        align: "right",
+        format: (v) => {
+          if (v == null || v === "") return "—"
+          const n = Number(v)
+          if (!Number.isFinite(n)) return "—"
+          return n.toLocaleString("es-MX", { maximumFractionDigits: 0 })
+        },
+      },
+      {
+        key: "withinRange",
+        header: "En rango",
+        align: "center",
+        format: (v) => {
+          if (v === true) return "Sí"
+          if (v === false) return "No"
+          return "—"
+        },
+      },
+      {
+        key: "gapAmountUsd",
+        header: "Brecha (USD)",
+        align: "right",
+        format: (v) => {
+          if (v == null || v === "") return "—"
+          const n = Number(v)
+          if (!Number.isFinite(n)) return "—"
+          if (n === 0) return "0"
+          const sign = n > 0 ? "+" : "-"
+          return `${sign}${Math.abs(n).toLocaleString("es-MX", { maximumFractionDigits: 0 })}`
+        },
+      },
+      {
+        key: "appliedAt",
+        header: "Aplicado",
+        format: (v) => formatDate(v),
+      },
+    ],
+    emptyMessage:
+      "No hay aplicaciones con pretensión salarial para los filtros seleccionados.",
+  },
+  "recruiter-productivity": {
+    columns: [
+      { key: "displayName", header: "Reclutador" },
+      { key: "email", header: "Correo" },
+      {
+        key: "isAdmin",
+        header: "Rol",
+        format: (_v, row) => {
+          const r = row as { isAdmin?: boolean; isRecruiter?: boolean }
+          if (r.isAdmin && r.isRecruiter) return "Admin / Reclutador"
+          if (r.isAdmin) return "Admin"
+          if (r.isRecruiter) return "Reclutador"
+          return "—"
+        },
+      },
+      {
+        key: "applicationsManaged",
+        header: "Aplicaciones",
+        align: "right",
+        format: (v) => formatInteger(v),
+      },
+      {
+        key: "openVacancies",
+        header: "Vacantes abiertas",
+        align: "right",
+        format: (v) => formatInteger(v),
+      },
+      {
+        key: "interviewsScheduled",
+        header: "Entrevistas prog.",
+        align: "right",
+        format: (v) => formatInteger(v),
+      },
+      {
+        key: "interviewsCompleted",
+        header: "Entrevistas compl.",
+        align: "right",
+        format: (v) => formatInteger(v),
+      },
+      {
+        key: "stageMoves",
+        header: "Mov. de etapa",
+        align: "right",
+        format: (v) => formatInteger(v),
+      },
+      {
+        key: "hires",
+        header: "Contrataciones",
+        align: "right",
+        format: (v) => formatInteger(v),
+      },
+      {
+        key: "conversionPercent",
+        header: "% Conversión",
+        align: "right",
+        format: (v) => formatPercent(v),
+      },
+      {
+        key: "averageTimeToHireDays",
+        header: "TTH prom. (días)",
+        align: "right",
+        format: (v) => formatNullableInteger(v),
+      },
+      {
+        key: "averagePreliminaryMatchScore",
+        header: "Score IA prom.",
+        align: "right",
+        format: (v) => formatScore(v),
+      },
+    ],
+    emptyMessage:
+      "No hay reclutadores que coincidan con los filtros seleccionados.",
+  },
   "preliminary-match-scores": {
     columns: [
       {

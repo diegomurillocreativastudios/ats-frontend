@@ -1,21 +1,20 @@
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
-  VACANCY_PROGRESS_PDF_ENGINE,
-  VACANCY_PROGRESS_PDF_TEMPLATE_VERSION,
-} from "@/lib/reportes/vacancy-progress-pdf-constants"
+  REPORT_PDF_ENGINE,
+  reportPdfTemplateVersion,
+} from "@/lib/reportes/report-pdf-constants"
+import { supportsSchemaReportPipeline } from "@/lib/reportes/report-template-context-registry"
 
 /**
- * Mapa estable `reportType -> endpoint del servidor`. Cada endpoint debe
- * aceptar un POST con `{ rows, summary, metadata, totalCount, fileBaseName }`
- * y responder `application/pdf` con headers de validación PDFKit v2.
+ * Endpoint POST del servidor para generar PDF de un reporte del catálogo.
  */
-export const REPORT_PDF_SERVER_ENDPOINTS: Record<string, string> = {
-  "vacancy-progress-by-client":
-    "/api/recruiter/reportes/vacancy-progress-by-client/pdf",
+export function getReportPdfServerEndpoint(reportType: string): string {
+  const key = reportType.trim()
+  return `/api/recruiter/reportes/${encodeURIComponent(key)}/pdf`
 }
 
 export interface DownloadReportPdfFromServerInput {
-  /** Identificador del reporte; debe existir en `REPORT_PDF_SERVER_ENDPOINTS`. */
+  /** Identificador del reporte (`reportKey` del catálogo). */
   reportType: string
   /** Filas crudas del reporte renderizado en pantalla. */
   rows: unknown[]
@@ -23,12 +22,28 @@ export interface DownloadReportPdfFromServerInput {
   summary?: Record<string, unknown> | null
   /** Alias opcional de summary para compatibilidad con el endpoint. */
   metadata?: Record<string, unknown> | null
+  /**
+   * Campos adicionales del payload del endpoint de datos (por ejemplo
+   * `summary`/`aiComparison`) que el builder server-side puede necesitar para
+   * hidratar el contexto del schema.
+   */
+  extras?: Record<string, unknown> | null
   /** Total de registros según la vista previa actual. */
   totalCount?: number | null
   /** Nombre base sin extensión; el servidor agrega `.pdf` si no lo trae. */
   fileBaseName?: string | null
   /** Id de la plantilla del reporte (Document template en backend). */
   templateId?: string | number | null
+  /** Nombre visible del reporte (catálogo). */
+  reportName?: string | null
+  /** Descripción del reporte. */
+  reportDescription?: string | null
+  /** Filtros aplicados en la vista (para contexto PDF). */
+  appliedFilters?: Record<string, string> | null
+  /** Etiqueta de cliente resuelta en UI. */
+  clientName?: string | null
+  /** Fecha de generación mostrada en el PDF. */
+  generatedAt?: string | null
 }
 
 export interface DownloadReportPdfServerError extends Error {
@@ -75,27 +90,41 @@ async function extractJsonErrorMessage(
   }
 }
 
-function assertPdfKitV2Headers(response: Response, expectedRowsCount: number): void {
+function assertReportPdfHeaders(
+  response: Response,
+  expectedRowsCount: number,
+  reportType: string
+): void {
   const engine = response.headers.get("X-Report-Pdf-Engine") ?? ""
   const templateVersion =
     response.headers.get("X-Report-Pdf-Template-Version") ?? ""
   const rowsCountHeader = response.headers.get("X-Report-Rows-Count") ?? ""
+  const reportKeyHeader = response.headers.get("X-Report-Key") ?? ""
+
+  const expectedVersion = reportPdfTemplateVersion(reportType)
 
   console.info("[Report PDF] response headers", {
     engine,
     templateVersion,
     rowsCount: rowsCountHeader,
+    reportKey: reportKeyHeader,
   })
 
-  if (engine !== VACANCY_PROGRESS_PDF_ENGINE) {
+  if (engine !== REPORT_PDF_ENGINE) {
     throw new Error(
-      `Motor PDF inesperado: "${engine}". Se esperaba "${VACANCY_PROGRESS_PDF_ENGINE}".`
+      `Motor PDF inesperado: "${engine}". Se esperaba "${REPORT_PDF_ENGINE}".`
     )
   }
 
-  if (templateVersion !== VACANCY_PROGRESS_PDF_TEMPLATE_VERSION) {
+  if (templateVersion !== expectedVersion) {
     throw new Error(
-      `Versión de plantilla inesperada: "${templateVersion}". Se esperaba "${VACANCY_PROGRESS_PDF_TEMPLATE_VERSION}".`
+      `Versión de plantilla inesperada: "${templateVersion}". Se esperaba "${expectedVersion}".`
+    )
+  }
+
+  if (reportKeyHeader && reportKeyHeader !== reportType.trim()) {
+    throw new Error(
+      `ReportKey inconsistente: servidor=${reportKeyHeader}, cliente=${reportType}.`
     )
   }
 
@@ -108,7 +137,6 @@ function assertPdfKitV2Headers(response: Response, expectedRowsCount: number): v
 
 /**
  * Descarga el PDF de un reporte llamando al endpoint server-side correspondiente.
- * Valida que la respuesta provenga del pipeline PDFKit v2 completo.
  */
 export async function downloadReportPdfFromServer(
   input: DownloadReportPdfFromServerInput
@@ -120,11 +148,11 @@ export async function downloadReportPdfFromServer(
   }
 
   const reportType = input.reportType.trim()
-  const endpoint = REPORT_PDF_SERVER_ENDPOINTS[reportType]
-  if (!endpoint) {
-    throw new Error(`Reporte sin endpoint PDF configurado: ${reportType}`)
+  if (!supportsSchemaReportPipeline(reportType)) {
+    throw new Error(`Reporte sin pipeline PDF configurado: ${reportType}`)
   }
 
+  const endpoint = getReportPdfServerEndpoint(reportType)
   const rows = Array.isArray(input.rows) ? input.rows : []
   const summary = input.summary ?? input.metadata ?? null
 
@@ -134,15 +162,20 @@ export async function downloadReportPdfFromServer(
     rows,
     summary,
     metadata: input.metadata ?? summary,
+    extras: input.extras ?? null,
     totalCount: input.totalCount ?? rows.length,
     templateId: input.templateId ?? null,
+    reportName: input.reportName ?? null,
+    reportDescription: input.reportDescription ?? null,
+    appliedFilters: input.appliedFilters ?? null,
+    clientName: input.clientName ?? null,
+    generatedAt: input.generatedAt ?? null,
   }
 
   console.info("[Report PDF] client payload", {
     reportType,
     rowsCount: rows.length,
     totalCount: payload.totalCount,
-    summary,
     endpoint,
   })
 
@@ -173,8 +206,25 @@ export async function downloadReportPdfFromServer(
     throw err
   }
 
-  assertPdfKitV2Headers(response, rows.length)
+  assertReportPdfHeaders(response, rows.length, reportType)
 
   const blob = await response.blob()
   triggerBlobDownload(blob, buildFileName(input.fileBaseName))
+}
+
+/** @deprecated Usar `getReportPdfServerEndpoint`. */
+export const REPORT_PDF_SERVER_ENDPOINTS: Record<string, string> = {
+  "vacancy-progress-by-client": getReportPdfServerEndpoint(
+    "vacancy-progress-by-client"
+  ),
+  "candidate-status-by-stage": getReportPdfServerEndpoint(
+    "candidate-status-by-stage"
+  ),
+  "technical-evaluations": getReportPdfServerEndpoint("technical-evaluations"),
+  "recruitment-sources": getReportPdfServerEndpoint("recruitment-sources"),
+  "preliminary-match-scores": getReportPdfServerEndpoint(
+    "preliminary-match-scores"
+  ),
+  "recruiter-productivity": getReportPdfServerEndpoint("recruiter-productivity"),
+  "salary-expectations": getReportPdfServerEndpoint("salary-expectations"),
 }

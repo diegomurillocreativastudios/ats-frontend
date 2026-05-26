@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { NextRequest } from "next/server"
 
-const renderVacancyProgressReportPdfBufferMock = vi.fn()
+const renderReportPdfBufferMock = vi.fn()
 const fetchTemplatesListForServerMock = vi.fn()
 const findReportDocumentTemplateMock = vi.fn()
 const findReportDocumentTemplateByIdMock = vi.fn()
@@ -33,12 +33,11 @@ vi.mock("@/lib/templates/technical-sheet-template", () => ({
     findReportDocumentTemplateByIdMock(...args),
 }))
 
-vi.mock("@/lib/reportes/render-vacancy-progress-report-pdf-buffer", () => ({
-  renderVacancyProgressReportPdfBuffer: (...args: unknown[]) =>
-    renderVacancyProgressReportPdfBufferMock(...args),
-  buildVacancyProgressReportPdfFilename: () => "avance-de-vacantes-por-cliente.pdf",
-  VACANCY_PROGRESS_PDF_TEMPLATE_VERSION: "vacancy-progress-full-v2",
-  VacancyProgressReportPdfError: class VacancyProgressReportPdfError extends Error {
+vi.mock("@/lib/reportes/render-report-pdf-buffer", () => ({
+  renderReportPdfBuffer: (...args: unknown[]) =>
+    renderReportPdfBufferMock(...args),
+  buildReportPdfFilename: () => "avance-de-vacantes-por-cliente.pdf",
+  ReportPdfError: class ReportPdfError extends Error {
     status: number
     constructor(message: string, status: number) {
       super(message)
@@ -76,11 +75,12 @@ function buildRows(count: number) {
 
 describe("POST /api/recruiter/reportes/vacancy-progress-by-client/pdf", () => {
   beforeEach(() => {
-    renderVacancyProgressReportPdfBufferMock.mockReset()
-    renderVacancyProgressReportPdfBufferMock.mockResolvedValue({
+    renderReportPdfBufferMock.mockReset()
+    renderReportPdfBufferMock.mockResolvedValue({
       buffer: Buffer.from("%PDF-1.4 mock"),
       engine: "pdfkit-v2",
       templateVersion: "vacancy-progress-full-v2",
+      reportKey: "vacancy-progress-by-client",
     })
     fetchTemplatesListForServerMock.mockResolvedValue([sampleTemplate])
     findReportDocumentTemplateMock.mockReturnValue(sampleTemplate)
@@ -117,10 +117,16 @@ describe("POST /api/recruiter/reportes/vacancy-progress-by-client/pdf", () => {
       "vacancy-progress-full-v2"
     )
     expect(response.headers.get("X-Report-Rows-Count")).toBe("12")
+    expect(response.headers.get("X-Report-Key")).toBe(
+      "vacancy-progress-by-client"
+    )
 
-    expect(renderVacancyProgressReportPdfBufferMock).toHaveBeenCalledWith(
+    expect(renderReportPdfBufferMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        rows: expect.arrayContaining([expect.objectContaining({ vacancyTitle: "Vacante 1" })]),
+        reportKey: "vacancy-progress-by-client",
+        rows: expect.arrayContaining([
+          expect.objectContaining({ vacancyTitle: "Vacante 1" }),
+        ]),
         schema: sampleSchema,
       })
     )

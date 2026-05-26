@@ -323,6 +323,130 @@ export async function fetchRecruitmentSources(query: {
   return coerceReportsPayload<RecruitmentSourceRow>(raw)
 }
 
+/** Fila por aplicación del reporte salary-expectations (USD). */
+export interface SalaryExpectationRow {
+  applicationId?: string
+  candidateProfileId?: string
+  candidateName?: string
+  clientId?: string
+  clientName?: string
+  vacancyId?: string
+  vacancyTitle?: string
+  currentStageId?: string
+  currentStageName?: string
+  pipelineStatus?: string
+  appliedAt?: string | null
+  expectedSalaryUsd?: number | null
+  vacancyMinSalaryUsd?: number | null
+  vacancyMaxSalaryUsd?: number | null
+  withinRange?: boolean | null
+  gapAmountUsd?: number | null
+}
+
+/** Bucket de la distribución salarial calculada por el backend. */
+export interface SalaryDistributionBucket {
+  lowerBoundUsd?: number | null
+  upperBoundUsd?: number | null
+  count?: number | null
+  label?: string
+}
+
+/** Resumen agregado en USD calculado por el backend para salary-expectations. */
+export interface SalaryExpectationsSummary {
+  totalApplicationsAnalyzed?: number | null
+  applicationsWithSalary?: number | null
+  averageUsd?: number | null
+  medianUsd?: number | null
+  minUsd?: number | null
+  maxUsd?: number | null
+  percentile25Usd?: number | null
+  percentile75Usd?: number | null
+  distribution?: SalaryDistributionBucket[] | null
+  withinRangeCount?: number | null
+  aboveRangeCount?: number | null
+  belowRangeCount?: number | null
+}
+
+/** Fila por usuario (Reclutador/Admin) del reporte recruiter-productivity. */
+export interface RecruiterProductivityRow {
+  userId?: string
+  displayName?: string
+  email?: string | null
+  isAdmin?: boolean
+  isRecruiter?: boolean
+  candidatesAdded?: number | null
+  applicationsManaged?: number | null
+  openVacancies?: number | null
+  interviewsScheduled?: number | null
+  interviewsCompleted?: number | null
+  stageMoves?: number | null
+  hires?: number | null
+  averageTimeToHireDays?: number | null
+  conversionPercent?: number | null
+  averagePreliminaryMatchScore?: number | null
+}
+
+/** Fila por vacante del reporte time-to-hire-kpi. */
+export interface TimeToHireKpiRow {
+  clientId?: string
+  clientName?: string
+  vacancyId?: string
+  vacancyTitle?: string
+  vacancyStatus?: string
+  openedAt?: string | null
+  firstHireAt?: string | null
+  isFilled?: boolean | null
+  timeToFillDays?: number | null
+  timeToHireDays?: number | null
+  daysOpen?: number | null
+  isSlaBreached?: boolean | null
+  averageDaysByStage?: Record<string, number | null> | null
+  totalCandidates?: number | null
+  candidatesHired?: number | null
+}
+
+/** Resumen agregado calculado por el backend para time-to-hire-kpi. */
+export interface TimeToHireKpiSummary {
+  totalVacancies?: number | null
+  filledVacancies?: number | null
+  openVacancies?: number | null
+  averageTimeToFillDays?: number | null
+  medianTimeToFillDays?: number | null
+  minTimeToFillDays?: number | null
+  maxTimeToFillDays?: number | null
+  averageTimeToHireDays?: number | null
+  medianTimeToHireDays?: number | null
+  averageDaysOpenUnfilled?: number | null
+  fillRatePercent?: number | null
+  slaBreachedCount?: number | null
+  slaThresholdDays?: number | null
+}
+
+export interface TimeToHireKpiAiMetric {
+  metric?: string
+  label?: string
+  unit?: "days" | "percent" | string
+  actual?: number | null
+  benchmark?: number | null
+  deltaAbsolute?: number | null
+  deltaPercent?: number | null
+  improvedVsBenchmark?: boolean | null
+}
+
+export interface TimeToHireKpiAiProcess {
+  processKey?: string
+  processLabel?: string
+  aiMinutes?: number | null
+  manualMinutes?: number | null
+  deltaMinutes?: number | null
+  savingsPercent?: number | null
+}
+
+export interface TimeToHireKpiAiComparison {
+  metrics?: TimeToHireKpiAiMetric[]
+  processes?: TimeToHireKpiAiProcess[]
+}
+
 /** Detalle score preliminar por candidato/postulación (0–100). */
 export interface PreliminaryMatchScoreRow {
   candidateId?: string

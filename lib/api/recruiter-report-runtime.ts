@@ -20,7 +20,30 @@ export type ReportRuntimeRow = Record<string, unknown>
 export interface ReportRuntimeResponse {
   rows: ReportRuntimeRow[]
   totalCount: number
+  /**
+   * Campos adicionales del payload distintos de `rows`/`totalCount` (por ejemplo
+   * `summary`, `aiComparison`, agregados precomputados por el backend). Se
+   * preservan para que los builders de contexto puedan leerlos sin que cada
+   * endpoint requiera un fetcher dedicado.
+   */
+  extras: Record<string, unknown> | null
 }
+
+const ROWS_KEYS = new Set([
+  "rows",
+  "Rows",
+  "items",
+  "Items",
+  "data",
+  "Data",
+])
+
+const TOTAL_KEYS = new Set([
+  "totalCount",
+  "TotalCount",
+  "total",
+  "Total",
+])
 
 function buildEndpoint(input: {
   reportKey: string
@@ -72,10 +95,21 @@ function coerceRows(raw: unknown): ReportRuntimeRow[] {
   )
 }
 
+function extractExtras(rec: Record<string, unknown>): Record<string, unknown> | null {
+  const out: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(rec)) {
+    if (ROWS_KEYS.has(key) || TOTAL_KEYS.has(key)) continue
+    out[key] = value
+  }
+  return Object.keys(out).length === 0 ? null : out
+}
+
 export function coerceRecruiterReportResponse(
   raw: unknown
 ): ReportRuntimeResponse {
-  if (!raw || typeof raw !== "object") return { rows: [], totalCount: 0 }
+  if (!raw || typeof raw !== "object") {
+    return { rows: [], totalCount: 0, extras: null }
+  }
   const rec = raw as Record<string, unknown>
   const rowsRaw =
     rec.rows ?? rec.Rows ?? rec.items ?? rec.Items ?? rec.data ?? rec.Data
@@ -89,6 +123,7 @@ export function coerceRecruiterReportResponse(
   return {
     rows,
     totalCount: Number.isFinite(totalCount) ? totalCount : rows.length,
+    extras: extractExtras(rec),
   }
 }
 

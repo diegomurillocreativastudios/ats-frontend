@@ -1,5 +1,5 @@
-import FuentesReclutamientoReportClient from "@/components/rrhh/reportes/fuentes-reclutamiento-report-client"
+import { ReportByKeyResolverClient } from "@/components/rrhh/reportes/report-by-key-resolver-client"
 
 export default function ReporteFuentesReclutamientoPage() {
-  return <FuentesReclutamientoReportClient />
+  return <ReportByKeyResolverClient reportKey="recruitment-sources" />
 }

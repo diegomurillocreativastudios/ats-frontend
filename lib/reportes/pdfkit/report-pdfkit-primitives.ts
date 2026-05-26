@@ -149,6 +149,26 @@ export function addPageFooter(doc: PdfDoc, options: PageFooterOptions): void {
   doc.page.margins.bottom = savedBottomMargin
 }
 
+/** Applies footers to every buffered page (call before `doc.end()`). */
+export function applyBufferedPageFooters(
+  doc: PdfDoc,
+  templateVersion: string
+): void {
+  const range = doc.bufferedPageRange()
+  const totalPages = range.count
+  const showDebugMarker = process.env.NODE_ENV !== "production"
+
+  for (let pageIndex = range.start; pageIndex < range.start + totalPages; pageIndex++) {
+    doc.switchToPage(pageIndex)
+    addPageFooter(doc, {
+      pageNumber: pageIndex - range.start + 1,
+      totalPages,
+      templateVersion,
+      showDebugMarker,
+    })
+  }
+}
+
 export function drawReportHeader(doc: PdfDoc, input: ReportHeaderInput): void {
   const { left, width } = contentMetrics(doc)
   const headerTop = doc.y

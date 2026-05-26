@@ -42,10 +42,10 @@ import { resolveReportEmptyMessage } from "@/lib/reportes/report-data-registry"
 import { safeParseReportSchema } from "@/lib/reportes/schema/report-schema"
 import { renderReportSchemaToHtml } from "@/lib/reportes/schema/render-report-schema-to-html"
 import {
-  buildVacancyProgressReportTemplateContext,
-  isVacancyProgressReportKey,
-  resolveVacancyProgressPeriodLabel,
-} from "@/lib/reportes/vacancy-progress-report-template-context"
+  buildReportTemplateContext,
+  extractReportSummaryPayload,
+  supportsSchemaReportPipeline,
+} from "@/lib/reportes/report-template-context-registry"
 import { renderTechnicalSheetHtml } from "@/lib/technical-sheet/template-interpolate"
 import {
   fetchTemplateById,
@@ -460,120 +460,80 @@ export function ReportDataViewClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response])
 
+  const usesSchemaPipeline = supportsSchemaReportPipeline(catalogItem.reportKey)
+
+  const resolvedClientName = useMemo(() => {
+    const clientId = String(appliedFilters.clientId ?? appliedFilters.companyId ?? "").trim()
+    if (!clientId) return "Todos"
+    return companies.find((c) => c.id === clientId)?.name?.trim() || "Cliente"
+  }, [appliedFilters, companies])
+
   const previewContext = useMemo<Record<string, unknown> | null>(() => {
     if (!response) return null
-    const clientId = String(appliedFilters.clientId ?? "").trim()
-    const clientName =
-      clientId === ""
-        ? "Todos"
-        : companies.find((c) => c.id === clientId)?.name?.trim() || "Cliente"
-    const dateFrom = String(appliedFilters.dateFrom ?? "")
-    const dateTo = String(appliedFilters.dateTo ?? "")
-    const period = resolveVacancyProgressPeriodLabel(dateFrom, dateTo)
-    const base: Record<string, unknown> = {
-      report: {
-        name: catalogItem.name,
-        reportKey: catalogItem.reportKey,
-        description: catalogItem.description ?? "",
-      },
-      filters: { ...appliedFilters, clientName },
+    const ctx = buildReportTemplateContext({
+      reportKey: catalogItem.reportKey,
+      reportName: catalogItem.name,
+      reportDescription: catalogItem.description,
       rows: response.rows,
       totalCount: response.totalCount,
-      rowCount: response.totalCount,
+      appliedFilters,
+      clientName: resolvedClientName,
+      generatedAt: previewMeta.generatedAt,
+      extras: response.extras,
+    })
+    return {
+      ...ctx,
       meta: previewMeta,
       logoUrl: previewMeta.logoUrl,
-      generatedAt: previewMeta.generatedAt,
-      clientName,
-      dateFrom,
-      dateTo,
-      periodStart: period.periodStart,
-      periodEnd: period.periodEnd,
-    }
-    if (!isVacancyProgressReportKey(catalogItem.reportKey)) return base
-    return {
-      ...base,
-      ...buildVacancyProgressReportTemplateContext({
-        rows: response.rows,
-        totalCount: response.totalCount,
-        generatedAt: previewMeta.generatedAt,
-        periodStart: period.periodStart,
-        periodEnd: period.periodEnd,
-        clientName,
-      }),
     }
   }, [
     appliedFilters,
     catalogItem.description,
     catalogItem.name,
     catalogItem.reportKey,
-    companies,
     previewMeta,
+    resolvedClientName,
     response,
   ])
 
   const reportTemplateHtml = useMemo(() => {
-    if (isVacancyProgressReportKey(catalogItem.reportKey)) return ""
+    if (usesSchemaPipeline) return ""
     return template?.contentTemplate?.trim() ?? ""
-  }, [template?.contentTemplate, catalogItem.reportKey])
+  }, [template?.contentTemplate, usesSchemaPipeline])
 
   const parsedSchema = useMemo(() => {
-    if (!isVacancyProgressReportKey(catalogItem.reportKey)) return null
+    if (!usesSchemaPipeline) return null
     const content = template?.contentTemplate?.trim() ?? ""
     if (!content) {
       return { success: false as const, error: "No se encontró una plantilla JSON." }
     }
     return safeParseReportSchema(content)
-  }, [template?.contentTemplate, catalogItem.reportKey])
+  }, [template?.contentTemplate, usesSchemaPipeline])
 
   const renderedHtml = useMemo(() => {
     if (!previewContext) return null
-    if (isVacancyProgressReportKey(catalogItem.reportKey)) {
+    if (usesSchemaPipeline) {
       if (!parsedSchema) return null
       if (parsedSchema.success === false) return renderSchemaErrorHtml(parsedSchema.error)
       return renderReportSchemaToHtml(parsedSchema.data, previewContext)
     }
     if (!reportTemplateHtml) return null
     return renderTechnicalSheetHtml(reportTemplateHtml, previewContext)
-  }, [catalogItem.reportKey, parsedSchema, previewContext, reportTemplateHtml])
+  }, [parsedSchema, previewContext, reportTemplateHtml, usesSchemaPipeline])
 
   const previewSrcDoc = useMemo(() => {
     if (!renderedHtml) return null
-    const screenZoom = isVacancyProgressReportKey(catalogItem.reportKey)
+    const screenZoom = usesSchemaPipeline
       ? REPORT_PRINT_PREVIEW_SCREEN_ZOOM
       : undefined
     return wrapReportPreviewHtml(renderedHtml, { screenZoom })
-  }, [catalogItem.reportKey, renderedHtml])
+  }, [renderedHtml, usesSchemaPipeline])
 
-  /** Resumen estructurado enviado al endpoint PDFKit v2 (campos serializables). */
-  const buildSummaryPayload = useCallback((): Record<string, unknown> | null => {
-    if (!previewContext) return null
-    const summaryKeys: Array<string> = [
-      "generatedAt",
-      "periodStart",
-      "periodEnd",
-      "clientName",
-      "totalCount",
-      "totalVacancies",
-      "openVacancies",
-      "totalClients",
-      "totalCandidates",
-      "vacanciesWithCandidates",
-      "vacanciesWithoutCandidates",
-      "candidatesInInterview",
-      "candidatesFinalist",
-      "candidatesHired",
-      "averagePreliminaryMatchScore",
-      "candidatesWithPreliminaryAnalysis",
-    ]
-    const out: Record<string, unknown> = {}
-    for (const key of summaryKeys) {
-      const value = (previewContext as Record<string, unknown>)[key]
-      if (value == null) continue
-      const t = typeof value
-      if (t === "string" || t === "number" || t === "boolean") out[key] = value
-    }
-    return Object.keys(out).length === 0 ? null : out
-  }, [previewContext])
+  const buildSummaryPayload = useCallback(
+    (): Record<string, unknown> | null =>
+      extractReportSummaryPayload(previewContext),
+    [previewContext]
+  )
 
   const handleDownloadPdf = useCallback(async () => {
     setPdfActionError(null)
@@ -597,9 +557,15 @@ export function ReportDataViewClient({
         rows,
         summary,
         metadata: summary,
+        extras: response?.extras ?? null,
         totalCount: response?.totalCount ?? rows.length,
         fileBaseName: baseName,
         templateId: linkedTemplateId || null,
+        reportName: catalogItem.name,
+        reportDescription: catalogItem.description ?? null,
+        appliedFilters,
+        clientName: resolvedClientName,
+        generatedAt: previewMeta.generatedAt,
       })
     } catch (err: unknown) {
       console.error("[Report PDF] Download failed", err)
@@ -611,20 +577,26 @@ export function ReportDataViewClient({
       setDownloadingPdf(false)
     }
   }, [
+    appliedFilters,
     buildSummaryPayload,
+    catalogItem.description,
     catalogItem.name,
     catalogItem.reportKey,
     linkedTemplateId,
+    previewMeta.generatedAt,
+    resolvedClientName,
+    response?.extras,
     response?.rows,
     response?.totalCount,
   ])
 
   const canDownloadPdf =
+    usesSchemaPipeline &&
     !loading &&
     !downloadingPdf &&
     (response?.rows?.length ?? 0) > 0 &&
-    (!isVacancyProgressReportKey(catalogItem.reportKey) ||
-      Boolean(parsedSchema && parsedSchema.success))
+    Boolean(linkedTemplateId || template) &&
+    Boolean(parsedSchema && parsedSchema.success)
 
   const trail = useMemo(
     () => [
@@ -661,7 +633,7 @@ export function ReportDataViewClient({
                 <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2.5 py-0.5 font-sans text-xs font-medium text-muted-foreground">
                   Filas: {totalCountLabel}
                 </span>
-                {linkedTemplateId || isVacancyProgressReportKey(catalogItem.reportKey) ? (
+                {usesSchemaPipeline && (linkedTemplateId || template) ? (
                   <button
                     type="button"
                     onClick={() => {
@@ -788,8 +760,7 @@ export function ReportDataViewClient({
           </p>
         ) : null}
 
-        {(linkedTemplateId || isVacancyProgressReportKey(catalogItem.reportKey)) &&
-        templateLoading ? (
+        {usesSchemaPipeline && (linkedTemplateId || template) && templateLoading ? (
           <div
             className="flex items-center gap-2 font-sans text-sm text-muted-foreground"
             role="status"

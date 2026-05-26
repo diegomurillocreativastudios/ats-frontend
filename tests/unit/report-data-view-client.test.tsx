@@ -77,6 +77,7 @@ describe("ReportDataViewClient", () => {
         vi.mocked(fetchRecruiterReportForCatalogItem).mockResolvedValueOnce({
             rows: [{ vacancyTitle: "Senior Developer" }],
             totalCount: 1,
+            extras: null,
         })
 
         render(<ReportDataViewClient catalogItem={baseItem} />)
@@ -95,6 +96,7 @@ describe("ReportDataViewClient", () => {
         vi.mocked(fetchRecruiterReportForCatalogItem).mockResolvedValue({
             rows: [],
             totalCount: 0,
+            extras: null,
         })
 
         render(<ReportDataViewClient catalogItem={baseItem} />)
@@ -123,6 +125,7 @@ describe("ReportDataViewClient", () => {
         vi.mocked(fetchRecruiterReportForCatalogItem).mockResolvedValueOnce({
             rows: [],
             totalCount: 0,
+            extras: null,
         })
 
         render(<ReportDataViewClient catalogItem={baseItem} />)

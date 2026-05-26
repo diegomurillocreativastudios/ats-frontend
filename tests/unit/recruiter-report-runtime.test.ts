@@ -59,10 +59,12 @@ describe("recruiter-report-runtime", () => {
             expect(coerceRecruiterReportResponse(null)).toEqual({
                 rows: [],
                 totalCount: 0,
+                extras: null,
             })
             expect(coerceRecruiterReportResponse("nope")).toEqual({
                 rows: [],
                 totalCount: 0,
+                extras: null,
             })
         })
 
@@ -91,6 +93,37 @@ describe("recruiter-report-runtime", () => {
             })
             expect(out.rows).toHaveLength(1)
             expect(out.totalCount).toBe(1)
+        })
+
+        it("preserves non-rows/non-totalCount payload fields under `extras`", () => {
+            const out = coerceRecruiterReportResponse({
+                rows: [{ vacancyId: "v1" }],
+                totalCount: 1,
+                summary: { totalVacancies: 12, slaBreachedCount: 7 },
+                aiComparison: {
+                    metrics: [
+                        { metric: "time-to-fill", benchmark: 45 },
+                    ],
+                    processes: [],
+                },
+            })
+            expect(out.rows).toHaveLength(1)
+            expect(out.totalCount).toBe(1)
+            expect(out.extras).not.toBeNull()
+            expect(
+                (out.extras as Record<string, unknown>).summary
+            ).toEqual({ totalVacancies: 12, slaBreachedCount: 7 })
+            expect(
+                (out.extras as Record<string, unknown>).aiComparison
+            ).toBeTypeOf("object")
+        })
+
+        it("returns extras as null when the response has no additional fields", () => {
+            const out = coerceRecruiterReportResponse({
+                rows: [],
+                totalCount: 0,
+            })
+            expect(out.extras).toBeNull()
         })
     })
 
