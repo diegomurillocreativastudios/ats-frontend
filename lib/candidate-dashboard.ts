@@ -9,6 +9,13 @@ export interface CandidatePortalStats {
   unreadMessages: number
 }
 
+export interface ApplicationStage {
+  id: string
+  name: string
+  order: number
+  status: "current" | "pending" | "completed"
+}
+
 export interface CandidatePortalApplicationRow {
   id: string
   jobTitle: string
@@ -16,6 +23,9 @@ export interface CandidatePortalApplicationRow {
   statusLabel: string
   progressCurrent: number
   totalStages: number
+  currentStageId?: string
+  currentStageName?: string
+  stages?: ApplicationStage[]
   /** 0 = Recruiter, 1 = Personal (postulación propia). */
   applicationSource?: number
 }

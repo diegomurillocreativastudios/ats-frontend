@@ -130,4 +130,13 @@ button {
   .apply-privacy-panel.apply-privacy-panel--exit {
     animation: apply-privacy-panel-slide-exit 0.48s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }

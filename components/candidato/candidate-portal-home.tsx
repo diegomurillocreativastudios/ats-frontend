@@ -1,14 +1,17 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import CandidateSidebar from "@/components/candidato/CandidateSidebar";
 import CandidateTopbar from "@/components/candidato/CandidateTopbar";
 import StatCard from "@/components/candidato/StatCard";
 import NextActivitiesCard from "@/components/candidato/NextActivitiesCard";
 import MyPostulationsCard from "@/components/candidato/MyPostulationsCard";
+import ProcessTrackingCard from "@/components/candidato/ProcessTrackingCard";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import { useCandidateDashboard } from "@/hooks/useCandidateDashboard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getCandidateGreetingFirstName } from "@/lib/candidate-portal-greeting";
+import type { CandidatePortalApplicationRow } from "@/lib/candidate-dashboard";
 
 export default function CandidatePortalHome() {
   const { data, loading, error } = useCandidateDashboard();
@@ -23,6 +26,20 @@ export default function CandidatePortalHome() {
   const stats = data?.stats ?? null;
   const activities = data?.activities ?? [];
   const applications = data?.applications ?? [];
+  
+  const [selectedApplication, setSelectedApplication] = useState<
+    CandidatePortalApplicationRow | null
+  >(null);
+
+  useEffect(() => {
+    if (applications.length > 0 && !selectedApplication) {
+      setSelectedApplication(applications[0]);
+    }
+  }, [applications, selectedApplication]);
+
+  const handleSelectApplication = (application: CandidatePortalApplicationRow) => {
+    setSelectedApplication(application);
+  };
 
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
@@ -46,29 +63,29 @@ export default function CandidatePortalHome() {
                     ? "Cargando…"
                     : `¡Hola, ${greetingName}! 👋`
                 }
-                description="Aquí está el resumen de tu proceso de selección"
+                description="Aquí puedes consultar el avance de tus postulaciones y próximas actividades."
                 className="pb-0"
               />
               <section aria-label="Resumen de estadísticas">
-                <StatCard
-                  useDesktopLabels
-                  stats={stats}
-                  loading={loading && !data}
-                />
+                <StatCard stats={stats} loading={loading && !data} />
               </section>
+              
+              <section aria-label="Seguimiento del proceso">
+                <ProcessTrackingCard application={selectedApplication} />
+              </section>
+              
               <section
-                className="flex flex-col gap-6 lg:flex-row lg:items-start"
+                className="grid gap-6 lg:grid-cols-2"
                 aria-label="Actividades y postulaciones"
               >
-                <div className="min-w-0 flex-1">
-                  <NextActivitiesCard
-                    activities={activities}
-                    loading={loading && !data}
-                  />
-                </div>
+                <NextActivitiesCard
+                  activities={activities}
+                  loading={loading && !data}
+                />
                 <MyPostulationsCard
                   applications={applications}
                   loading={loading && !data}
+                  onSelectApplication={handleSelectApplication}
                 />
               </section>
             </div>
@@ -94,31 +111,30 @@ export default function CandidatePortalHome() {
                   ? "Cargando…"
                   : `¡Hola, ${greetingName}! 👋`
               }
-              description={
-                <>
-                  <span className="md:hidden">Tu resumen de hoy</span>
-                  <span className="hidden md:inline">
-                    Resumen de tu proceso de selección
-                  </span>
-                </>
-              }
+              description="Aquí puedes consultar el avance de tus postulaciones y próximas actividades."
               className="pb-0"
               descriptionClassName="text-sm leading-6 md:text-base"
             />
             <section aria-label="Resumen de estadísticas">
-              <StatCard
-                useDesktopLabels={false}
-                compact
-                responsiveGrid
-                stats={stats}
+              <StatCard stats={stats} loading={loading && !data} />
+            </section>
+            
+            <section aria-label="Seguimiento del proceso">
+              <ProcessTrackingCard application={selectedApplication} />
+            </section>
+            
+            <section aria-label="Próximas actividades">
+              <NextActivitiesCard
+                activities={activities}
                 loading={loading && !data}
               />
             </section>
-            <section aria-label="Próximas actividades">
-              <NextActivitiesCard
-                compact
-                activities={activities}
+            
+            <section aria-label="Mis postulaciones">
+              <MyPostulationsCard
+                applications={applications}
                 loading={loading && !data}
+                onSelectApplication={handleSelectApplication}
               />
             </section>
           </div>
