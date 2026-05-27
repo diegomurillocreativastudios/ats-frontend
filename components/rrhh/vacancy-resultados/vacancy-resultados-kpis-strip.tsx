@@ -45,10 +45,10 @@ export function VacancyResultadosKpisStrip({
     {
       label: "Con puntaje",
       value: String(scoreSummary.count),
-      hint: "Match numérico disponible",
+      hint: "Emparejamiento numérico disponible",
     },
-    { label: "Match promedio", value: formatPercent(scoreSummary.meanPercent) },
-    { label: "Mejor match", value: formatPercent(scoreSummary.maxPercent) },
+    { label: "Emparejamiento promedio", value: formatPercent(scoreSummary.meanPercent) },
+    { label: "Mejor emparejamiento", value: formatPercent(scoreSummary.maxPercent) },
     { label: "En entrevista (aprox.)", value: String(signals.inInterview) },
   ]
   if (signals.hired > 0 || signals.rejected > 0) {

@@ -294,7 +294,7 @@ export function buildExecutiveInsights(
       },
       {
         id: "best-match",
-        title: "Vacante con mejor match IA",
+        title: "Vacante con mejor emparejamiento IA",
         description: "Sin datos en esta página.",
         metric: "—",
         isEmpty: true,
@@ -355,10 +355,10 @@ export function buildExecutiveInsights(
     },
     {
       id: "best-match",
-      title: "Vacante con mejor match IA",
+      title: "Vacante con mejor emparejamiento IA",
       description: bestMatch
         ? `${vacancyClientLabel(bestMatch.r)} · ${bestMatch.r.vacancyTitle ?? "—"}`
-        : "Ninguna vacante tiene match IA promedio.",
+        : "Ninguna vacante tiene emparejamiento IA promedio.",
       metric: bestMatch ? `${Math.round(bestMatch.m)}%` : "—",
       isEmpty: !bestMatch,
     },

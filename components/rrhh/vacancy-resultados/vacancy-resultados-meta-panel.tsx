@@ -40,7 +40,7 @@ function WeightsVisual({ weights }: { weights: unknown }) {
   if (semantic == null && attrEntries.length === 0) {
     return (
       <p className="font-sans text-sm text-muted-foreground">
-        No hay pesos de matching estructurados en la respuesta del API.
+        No hay pesos de emparejamiento estructurados en la respuesta del API.
       </p>
     )
   }
@@ -111,7 +111,7 @@ function RequirementsBlock({ requirements }: { requirements: unknown }) {
     if (keys.length === 0) {
       return (
         <p className="font-sans text-sm text-muted-foreground">
-          Requisitos vacíos (objeto sin claves). El match puede basarse solo en texto libre de la
+          Requisitos vacíos (objeto sin claves). El emparejamiento puede basarse solo en texto libre de la
           descripción.
         </p>
       )

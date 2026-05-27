@@ -313,7 +313,7 @@ function VacancyResultadosCandidateCard({
         </div>
         <div className="shrink-0 text-right">
           <p className="font-sans text-[10px] uppercase tracking-wide text-muted-foreground">
-            Match
+            Emparejamiento
           </p>
           <p className="font-sans text-2xl font-bold tabular-nums leading-none text-vo-purple">
             {formatScorePercent(total01)}

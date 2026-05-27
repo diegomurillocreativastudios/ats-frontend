@@ -27,7 +27,7 @@ describe('RematchButton', () => {
             />
         )
 
-        const rematchButton = screen.getByRole('button', { name: /re-ajustar matches/i })
+        const rematchButton = screen.getByRole('button', { name: /reajustar emparejamientos/i })
         fireEvent.click(rematchButton)
 
         await waitFor(() => {
@@ -37,7 +37,7 @@ describe('RematchButton', () => {
         })
 
         await waitFor(() => {
-            expect(screen.queryByRole('button', { name: /re-ajustar matches/i })).not.toBeInTheDocument()
+            expect(screen.queryByRole('button', { name: /reajustar emparejamientos/i })).not.toBeInTheDocument()
         })
     })
 
@@ -54,7 +54,7 @@ describe('RematchButton', () => {
             />
         )
 
-        const rematchButton = screen.getByRole('button', { name: /re-ajustar matches/i })
+        const rematchButton = screen.getByRole('button', { name: /reajustar emparejamientos/i })
         fireEvent.click(rematchButton)
 
         await waitFor(() => {
@@ -62,7 +62,7 @@ describe('RematchButton', () => {
         })
 
         await waitFor(() => {
-            expect(screen.getByRole('button', { name: /re-ajustar matches/i })).toBeVisible()
+            expect(screen.getByRole('button', { name: /reajustar emparejamientos/i })).toBeVisible()
         })
     })
 })

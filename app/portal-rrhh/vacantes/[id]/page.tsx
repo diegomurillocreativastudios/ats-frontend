@@ -289,7 +289,7 @@ const AI_EFFICIENCY_KPIS = [
     helper: "Priorización inicial asistida por IA",
   },
   {
-    label: "Matching preliminar",
+    label: "Emparejamiento preliminar",
     value: "Precision observada de 75% a 80%",
     helper: "Objetivo de calibración: 90%",
   },
@@ -665,7 +665,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               </p>
               {totalScorePercent != null && (
                 <p className="font-sans text-xs font-semibold text-vo-purple">
-                  Puntaje total del match: {totalScorePercent}%
+                  Puntaje total del emparejamiento: {totalScorePercent}%
                 </p>
               )}
             </div>
@@ -2005,7 +2005,7 @@ export default function VacanteDetallePage() {
           });
         }
       } catch (err) {
-        const msg = err?.message ?? err?.detail ?? "No se pudo cargar el match.";
+        const msg = err?.message ?? err?.detail ?? "No se pudo cargar el emparejamiento.";
         setSmartError(msg);
         setSmartCandidates([]);
         if (!options?.silent) {
@@ -2310,11 +2310,11 @@ export default function VacanteDetallePage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Match ejecutado correctamente.",
+        message: "Emparejamiento ejecutado correctamente.",
       });
       scrollToPossibleCandidates();
     } catch (err) {
-      const msg = err?.message ?? err?.detail ?? "No se pudo ejecutar el match.";
+      const msg = err?.message ?? err?.detail ?? "No se pudo ejecutar el emparejamiento.";
       setMatchError(msg);
       setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
@@ -2911,7 +2911,7 @@ export default function VacanteDetallePage() {
 
                   <section
                     className="flex flex-col gap-4"
-                    aria-label="Candidatos con match"
+                    aria-label="Candidatos con emparejamiento"
                   >
                   <AiDisclosureNotice
                     title="Búsqueda y análisis preliminar con IA"
@@ -3138,7 +3138,7 @@ export default function VacanteDetallePage() {
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
-                              No hay sugerencias de match para esta vacante.
+                              No hay sugerencias de emparejamiento para esta vacante.
                             </p>
                           </div>
                         ) : (
@@ -3782,7 +3782,7 @@ export default function VacanteDetallePage() {
 
                 <section
                   className="flex flex-col gap-4"
-                  aria-label="Candidatos con match"
+                  aria-label="Candidatos con emparejamiento"
                 >
                   <AiDisclosureNotice
                     title="Búsqueda y análisis preliminar con IA"
@@ -4013,7 +4013,7 @@ export default function VacanteDetallePage() {
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
-                            No hay sugerencias de match para esta vacante.
+                            No hay sugerencias de emparejamiento para esta vacante.
                           </p>
                         </div>
                       ) : (

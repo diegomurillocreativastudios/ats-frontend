@@ -24,6 +24,7 @@ import {
   getLoadingBarPercent,
 } from "@/lib/apply-loading-bar"
 import { ApplyStyleProgressBar } from "@/components/public/apply-style-progress-bar"
+import { ApplyEmailConfirmationModal } from "@/components/public/ApplyEmailConfirmationModal"
 
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
 
@@ -262,6 +263,7 @@ export function PublicVacancyApplicationForm({
   const [serverError, setServerError] = useState<string | null>(null)
   const [submitPhase, setSubmitPhase] = useState<"idle" | "loading" | "success">("idle")
   const [loadingOverlay, setLoadingOverlay] = useState({ percent: 0, longWait: false })
+  const [isConfirmEmailModalOpen, setIsConfirmEmailModalOpen] = useState(false)
   const loadingStartedAtRef = useRef(0)
 
   const inputClass = themeFieldClass(theme)
@@ -326,6 +328,56 @@ export function PublicVacancyApplicationForm({
     return next
   }, [values.firstName, values.lastName, values.email, cvFile])
 
+  const executeSubmit = useCallback(async () => {
+    if (!cvFile) return
+
+    setSubmitPhase("loading")
+    setLoadingOverlay({ percent: 0, longWait: false })
+    setServerError(null)
+    setErrors({})
+    setIsConfirmEmailModalOpen(false)
+
+    const payload: PublicVacancyApplyValues = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      phone: values.phone,
+      linkedinUrl: values.linkedinUrl,
+      websiteUrl: values.websiteUrl,
+      source: values.source,
+      notes: values.notes,
+      cvFile,
+    }
+
+    try {
+      await submitPublicVacancyApplication(vacancyId, payload)
+      setValues(initialState)
+      setCvFile(null)
+      setSubmitPhase("success")
+    } catch (err: unknown) {
+      setSubmitPhase("idle")
+      const status =
+        typeof err === "object" && err !== null && "status" in err
+          ? Number((err as { status?: number }).status)
+          : 0
+      const body =
+        typeof err === "object" && err !== null && "body" in err
+          ? (err as { body?: unknown }).body
+          : undefined
+
+      if (status === 400) {
+        const fieldMap = parsePublicApplyFieldErrors(body)
+        if (Object.keys(fieldMap).length > 0) {
+          setErrors(fieldMap as Partial<Record<FieldKey, string>>)
+          setServerError("Revisa los datos indicados.")
+          return
+        }
+      }
+
+      setServerError(getPublicApplyErrorMessage(status, body))
+    }
+  }, [cvFile, values, vacancyId])
+
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault()
@@ -338,54 +390,9 @@ export function PublicVacancyApplicationForm({
         return
       }
 
-      if (!cvFile) return
-
-      setSubmitPhase("loading")
-      setLoadingOverlay({ percent: 0, longWait: false })
-      setServerError(null)
-      setErrors({})
-
-      const payload: PublicVacancyApplyValues = {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
-        phone: values.phone,
-        linkedinUrl: values.linkedinUrl,
-        websiteUrl: values.websiteUrl,
-        source: values.source,
-        notes: values.notes,
-        cvFile,
-      }
-
-      try {
-        await submitPublicVacancyApplication(vacancyId, payload)
-        setValues(initialState)
-        setCvFile(null)
-        setSubmitPhase("success")
-      } catch (err: unknown) {
-        setSubmitPhase("idle")
-        const status =
-          typeof err === "object" && err !== null && "status" in err
-            ? Number((err as { status?: number }).status)
-            : 0
-        const body =
-          typeof err === "object" && err !== null && "body" in err
-            ? (err as { body?: unknown }).body
-            : undefined
-
-        if (status === 400) {
-          const fieldMap = parsePublicApplyFieldErrors(body)
-          if (Object.keys(fieldMap).length > 0) {
-            setErrors(fieldMap as Partial<Record<FieldKey, string>>)
-            setServerError("Revisa los datos indicados.")
-            return
-          }
-        }
-
-        setServerError(getPublicApplyErrorMessage(status, body))
-      }
+      setIsConfirmEmailModalOpen(true)
     },
-    [cvFile, submitPhase, validateClient, values, vacancyId]
+    [submitPhase, validateClient]
   )
 
   if (submitPhase === "success") {
@@ -714,6 +721,15 @@ export function PublicVacancyApplicationForm({
         ) : null}
       </div>
     </form>
+    
+    <ApplyEmailConfirmationModal
+      isOpen={isConfirmEmailModalOpen}
+      onConfirm={executeSubmit}
+      onCancel={() => setIsConfirmEmailModalOpen(false)}
+      email={values.email}
+      theme={theme}
+      isSubmitting={submitPhase === "loading"}
+    />
     </div>
   )
 }

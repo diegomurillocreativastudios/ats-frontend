@@ -66,7 +66,7 @@ function buildInsights(s: ReportsRecruiterSummary): string[] {
 
   if (match != null && !Number.isNaN(match) && match >= 75) {
     items.push(
-      `El match preliminar promedio es alto: ${formatPercentOneDecimal(match).replace("—", "")}.`
+      `El emparejamiento preliminar promedio es alto: ${formatPercentOneDecimal(match).replace("—", "")}.`
     )
   }
 
@@ -556,7 +556,7 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
       <div className="grid gap-4 lg:grid-cols-2">
         <SectionCard
           headingId="resumen-match"
-          title="Match preliminar medio"
+          title="Emparejamiento preliminar medio"
           description="Score promedio de coincidencia preliminar entre candidatos y vacantes."
           className={
             matchValue != null && matchValue >= 75
@@ -712,7 +712,7 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
         <div className="mb-4 flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-vo-purple" aria-hidden />
           <h2 id="resumen-insights" className="font-sans text-base font-semibold text-foreground">
-            Insights del periodo
+            Hallazgos del período
           </h2>
         </div>
         <ul className="grid gap-3 md:grid-cols-3" role="list">

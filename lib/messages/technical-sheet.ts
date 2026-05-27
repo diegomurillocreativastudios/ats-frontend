@@ -4,7 +4,7 @@
  */
 export const technicalSheetMessages = {
   modalTitle: "Ficha técnica",
-  brandTagline: "Transforming businesses with talent",
+  brandTagline: "Transformando negocios con talento",
   headerName: "Nombre",
   headerAddress: "Dirección",
   headerEnglishLevel: "Nivel de inglés",
@@ -15,7 +15,7 @@ export const technicalSheetMessages = {
   sectionPersonal: "Datos personales",
   sectionVacancy: "Vacante",
   sectionApplication: "Postulación",
-  sectionMatch: "Match",
+  sectionMatch: "Emparejamiento",
   sectionInterviews: "Entrevistas",
   rawSection: "Detalle",
   errorNotPosted:

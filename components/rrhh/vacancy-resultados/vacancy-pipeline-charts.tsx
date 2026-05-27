@@ -85,7 +85,7 @@ export function VacancyPipelineCharts({
         Indicadores gráficos
       </h2>
       <p className="mb-4 font-sans text-xs text-muted-foreground">
-        Vista compacta de la tubería y del match; el listado operativo está debajo.
+        Vista compacta de la tubería y del emparejamiento; el listado operativo está debajo.
       </p>
 
       <div className="grid gap-4 lg:grid-cols-2">

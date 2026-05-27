@@ -577,7 +577,7 @@ function drawInsightsSection(
   const topCandidates = pickInsight(rows, "most-candidates")
   const topCards = [
     { title: "Vacante con mayor avance", ...topProgress },
-    { title: "Mejor match IA", ...topAiScore },
+    { title: "Mejor emparejamiento IA", ...topAiScore },
     { title: "Más candidatos", ...topCandidates },
   ]
 

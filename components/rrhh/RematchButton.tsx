@@ -43,7 +43,7 @@ export default function RematchButton({
       setIsDismissedAfterSuccess(true);
       if (onSnackbar) {
         setStatus("idle");
-        onSnackbar("Match reajustado correctamente.", "success");
+        onSnackbar("Emparejamiento reajustado correctamente.", "success");
       } else {
         setStatus("success");
         setTimeout(() => setStatus("idle"), 3000);
@@ -52,7 +52,7 @@ export default function RematchButton({
     } catch (err) {
       console.error("Rematch failed:", err);
       setIsDismissedAfterSuccess(false);
-      const msg = err?.message || "Error al re-ajustar match";
+      const msg = err?.message || "Error al reajustar emparejamiento";
       if (onSnackbar) {
         setStatus("idle");
         onSnackbar(msg, "error");
@@ -86,7 +86,7 @@ export default function RematchButton({
       <div className="flex items-center gap-2 text-destructive font-sans text-xs animate-in fade-in duration-300 max-w-[150px]">
         <AlertCircle className="h-4 w-4 shrink-0" />
         <span className="truncate" title={errorMessage}>
-          {errorMessage || "Error"}
+          {errorMessage || "Error al procesar"}
         </span>
       </div>
     );
@@ -108,15 +108,15 @@ export default function RematchButton({
       onClick={handleRematch}
       disabled={loading || disabled}
       className={isListVariant ? listClasses : detailClasses}
-      aria-label="Re-ajustar matches"
-      title={needsRematch ? "Requisitos actualizados. Se recomienda re-ajustar matches." : "Re-ajustar matches"}
+      aria-label="Reajustar emparejamientos"
+      title={needsRematch ? "Requisitos actualizados. Se recomienda reajustar emparejamientos." : "Reajustar emparejamientos"}
     >
       {loading ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <Sparkles className={`h-4 w-4 ${needsRematch ? "animate-pulse text-amber-600" : "text-vo-purple"}`} />
       )}
-      <span>{loading ? "Ajustando..." : isListVariant && !needsRematch ? "Rematch" : "Re-ajustar match"}</span>
+      <span>{loading ? "Ajustando..." : isListVariant && !needsRematch ? "Reajustar" : "Reajustar emparejamiento"}</span>
       {needsRematch && !isListVariant && (
         <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-amber-500 animate-ping" />
       )}

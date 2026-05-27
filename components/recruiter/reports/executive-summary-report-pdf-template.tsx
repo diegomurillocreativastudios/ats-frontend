@@ -293,7 +293,7 @@ export const ExecutiveSummaryReportPdfTemplate = forwardRef<
           </SectionCard>
 
           <SectionCard
-            title="Match preliminar medio"
+            title="Emparejamiento preliminar medio"
             subtitle="Score promedio de coincidencia preliminar entre candidatos y vacantes."
             className="bg-emerald-50/40"
           >
@@ -399,7 +399,7 @@ export const ExecutiveSummaryReportPdfTemplate = forwardRef<
           <div className="flex items-center gap-2">
             <TrendingUp size={16} className="text-[#7b2f8f]" />
             <h3 className="text-[15px] font-bold text-slate-950">
-              Insights del período
+              Hallazgos del período
             </h3>
           </div>
 
@@ -409,7 +409,7 @@ export const ExecutiveSummaryReportPdfTemplate = forwardRef<
             </div>
 
             <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-[12px] leading-normal text-slate-700">
-              El match preliminar promedio es alto: {formatPercent(matchScore)}.
+              El emparejamiento preliminar promedio es alto: {formatPercent(matchScore)}.
             </div>
 
             <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-[12px] leading-normal text-slate-700">

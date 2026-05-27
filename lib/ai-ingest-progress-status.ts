@@ -9,7 +9,7 @@ export const AI_INGEST_PROGRESS_STEPS = [
   "Extrayendo datos",
   "Analizando con IA",
   "Validando perfil",
-  "Generando match-data",
+  "Generando datos de emparejamiento",
   "Guardando",
   AI_INGEST_PROGRESS_COMPLETED_LABEL,
 ] as const

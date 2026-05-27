@@ -76,7 +76,7 @@ async function extractJsonErrorMessage(
 ): Promise<string> {
   try {
     const text = await response.text()
-    if (text.trim() === "") return `Error ${response.status}`
+    if (text.trim() === "") return `Error del servidor ${response.status}`
     try {
       const parsed = JSON.parse(text) as unknown
       const fromJson = getApiErrorMessage(parsed)
@@ -84,9 +84,9 @@ async function extractJsonErrorMessage(
     } catch {
       return text.slice(0, 500)
     }
-    return `Error ${response.status}`
+    return `Error del servidor ${response.status}`
   } catch {
-    return `Error ${response.status}`
+    return `Error del servidor ${response.status}`
   }
 }
 

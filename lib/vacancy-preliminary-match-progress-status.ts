@@ -6,7 +6,7 @@ export const VACANCY_PRELIMINARY_MATCH_PROGRESS_STEPS = [
   "La IA está midiendo el encaje",
   "Alineando perfil con tu vacante",
   "Validando requisitos críticos",
-  "Generando insight de match",
+  "Generando análisis del emparejamiento",
   "Sincronizando resultados",
 ] as const
 

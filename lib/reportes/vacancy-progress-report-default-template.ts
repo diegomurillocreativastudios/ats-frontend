@@ -687,7 +687,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
         {{{topProgressVacancy}}}
       </div>
       <div class="top-card">
-        <div class="top-card-title">Mejor match IA</div>
+        <div class="top-card-title">Mejor emparejamiento IA</div>
         {{{topAiScoreVacancy}}}
       </div>
       <div class="top-card">
