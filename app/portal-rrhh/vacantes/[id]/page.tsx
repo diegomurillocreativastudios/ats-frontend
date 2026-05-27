@@ -10,8 +10,10 @@ import {
   Building2,
   Calendar,
   CheckSquare,
+  DollarSign,
   Download,
   FileText,
+  Gift,
   Info,
   Loader2,
   Mail,
@@ -389,6 +391,26 @@ const formatRequirementKey = (key) => {
     dotnet: ".NET",
   };
   return map[k] ?? k.charAt(0).toUpperCase() + k.slice(1);
+};
+
+/** Parses lines like "Clave: Valor" into structured pairs. Returns null if any line lacks the pattern. */
+const parseKeyValueLines = (text) => {
+  if (!text || typeof text !== "string") return null;
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0) return null;
+  const pairs = [];
+  for (const line of lines) {
+    const colonIndex = line.indexOf(":");
+    if (colonIndex <= 0 || colonIndex >= line.length - 1) return null;
+    const key = line.slice(0, colonIndex).trim();
+    const value = line.slice(colonIndex + 1).trim();
+    if (!key || !value) return null;
+    pairs.push({ key, value });
+  }
+  return pairs;
 };
 
 /** Renders requirements as string (list/paragraphs), object (key -> level), or array (bullet list). attributeWeights optional: key -> weight to show next to each requirement value. */
@@ -1289,6 +1311,9 @@ export default function VacanteDetallePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [editDetails, setEditDetails] = useState("");
+  const [editSalary, setEditSalary] = useState("");
+  const [editAdvantages, setEditAdvantages] = useState("");
   const [editCountryCode, setEditCountryCode] = useState("");
   const [editStateCode, setEditStateCode] = useState("");
   const [editVacancyDepartmentId, setEditVacancyDepartmentId] = useState("");
@@ -1578,6 +1603,9 @@ export default function VacanteDetallePage() {
     setEditStateCode(readVacancyStateCode(v) ?? "");
     setEditTitle(String(v.title ?? "").trim());
     setEditDescription(String(v.description ?? "").trim());
+    setEditDetails(v.details == null ? "" : String(v.details));
+    setEditSalary(v.salary == null ? "" : String(v.salary));
+    setEditAdvantages(v.advantages == null ? "" : String(v.advantages));
     setEditVacancyDepartmentId(getVacancyDepartmentId(v))
     setEditVacancyModalityId(getVacancyModalityId(v))
 
@@ -1722,6 +1750,13 @@ export default function VacanteDetallePage() {
 
     const nextTitle = String(editTitle ?? "").trim();
     const nextDescription = String(editDescription ?? "").trim();
+    const nextDetails = String(editDetails ?? "").trim();
+    const nextSalary = String(editSalary ?? "").trim();
+    const nextAdvantages = String(editAdvantages ?? "").trim();
+    const currentDetails = vacancy?.details == null ? "" : String(vacancy.details).trim();
+    const currentSalary = vacancy?.salary == null ? "" : String(vacancy.salary).trim();
+    const currentAdvantages =
+      vacancy?.advantages == null ? "" : String(vacancy.advantages).trim();
     const nextCountry = editCountryCode.trim();
     const nextCountryCode = nextCountry === "" ? "" : nextCountry.toUpperCase();
     const nextStateCode = normalizeStateCode(editStateCode);
@@ -1734,6 +1769,9 @@ export default function VacanteDetallePage() {
     const hasOtherFormChanges =
       nextTitle !== String(vacancy?.title ?? "").trim() ||
       nextDescription !== String(vacancy?.description ?? "").trim() ||
+      nextDetails !== currentDetails ||
+      nextSalary !== currentSalary ||
+      nextAdvantages !== currentAdvantages ||
       nextCountryCode !==
         String(vacancy?.countryCode ?? vacancy?.country_code ?? "")
           .trim()
@@ -1761,6 +1799,9 @@ export default function VacanteDetallePage() {
         const payload: Record<string, unknown> = {
           title: nextTitle,
           description: nextDescription,
+          details: nextDetails === "" ? null : nextDetails,
+          salary: nextSalary === "" ? null : nextSalary,
+          advantages: nextAdvantages === "" ? null : nextAdvantages,
           requirements,
           weights: {
             semantic: semanticWeight,
@@ -1820,6 +1861,9 @@ export default function VacanteDetallePage() {
           ...updatedRecord,
           title: payload.title,
           description: payload.description,
+          details: payload.details,
+          salary: payload.salary,
+          advantages: payload.advantages,
           countryCode: payload.countryCode,
           stateCode: payload.stateCode,
           state_code: payload.stateCode,
@@ -1877,6 +1921,9 @@ export default function VacanteDetallePage() {
     editCompanyId,
     editTitle,
     editDescription,
+    editDetails,
+    editSalary,
+    editAdvantages,
     editCountryCode,
     editStateCode,
     editVacancyDepartmentId,
@@ -2591,13 +2638,16 @@ export default function VacanteDetallePage() {
                         {saveVacancyError}
                       </p>
                     )}
-                    {(vacancy.description || vacancy.requirements) && (
-                      <div className="mt-6 grid gap-6 border-t border-border pt-6 md:grid-cols-2">
+                    {(vacancy.description || vacancy.requirements || vacancy.details || vacancy.salary || vacancy.advantages || isEditing) && (
+                      <div className="mt-6 flex flex-col gap-4 border-t border-border pt-6">
+                        <div className="grid gap-4 md:grid-cols-2">
                         {(vacancy.description || isEditing) && (
-                          <div>
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <FileText className="h-4 w-4" aria-hidden />
-                              Descripción
+                          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                            <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-sky/10 text-vo-sky">
+                                <FileText className="h-4 w-4" aria-hidden />
+                              </span>
+                              Descripción de la vacante
                             </h2>
                             {isEditing ? (
                               <div className="flex flex-col gap-2">
@@ -2609,7 +2659,7 @@ export default function VacanteDetallePage() {
                                   aria-label="Editar descripción de la vacante"
                                   aria-invalid={!!editErrors.description}
                                   aria-describedby={editErrors.description ? "edit-description-error-desktop" : undefined}
-                                  placeholder="Describe el puesto, responsabilidades y competencias..."
+                                  placeholder="Explicacion del rol de la vacante"
                                 />
                                 {editErrors.description && (
                                   <p id="edit-description-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
@@ -2618,17 +2668,19 @@ export default function VacanteDetallePage() {
                                 )}
                               </div>
                             ) : (
-                              <p className="font-sans text-sm text-muted-foreground whitespace-pre-wrap">
+                              <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
                                 {safeString(vacancy.description)}
                               </p>
                             )}
                           </div>
                         )}
                         {(vacancy.requirements || isEditing) && (
-                          <div>
-                            <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-                              <h2 className="flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                                <CheckSquare className="h-4 w-4" aria-hidden />
+                          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                              <h2 className="flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-purple/10 text-vo-purple">
+                                  <CheckSquare className="h-4 w-4" aria-hidden />
+                                </span>
                                 Requisitos
                               </h2>
                               {isEditing && (
@@ -2734,6 +2786,122 @@ export default function VacanteDetallePage() {
                                 value={vacancy.requirements}
                                 attributeWeights={vacancy.weights?.attributes}
                               />
+                            )}
+                          </div>
+                        )}
+                        </div>
+
+                        {(vacancy.details || isEditing) && (
+                          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                            <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+                                <Info className="h-4 w-4" aria-hidden />
+                              </span>
+                              Detalles de la vacante
+                            </h2>
+                            {isEditing ? (
+                              <textarea
+                                value={editDetails}
+                                onChange={(e) => setEditDetails(e.target.value)}
+                                rows={4}
+                                placeholder="Datos especificos de la vacante"
+                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                aria-label="Editar detalles de la vacante"
+                              />
+                            ) : vacancy.details ? (
+                              (() => {
+                                const pairs = parseKeyValueLines(vacancy.details);
+                                if (pairs && pairs.length > 0) {
+                                  return (
+                                    <dl className="grid gap-x-8 gap-y-2.5 sm:grid-cols-2">
+                                      {pairs.map(({ key, value }) => (
+                                        <div
+                                          key={`${key}-${value}`}
+                                          className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0 sm:last:border-b sm:nth-last-[-n+2]:border-b-0"
+                                        >
+                                          <dt className="font-sans text-xs font-medium uppercase tracking-wide text-muted-foreground/80">
+                                            {key}
+                                          </dt>
+                                          <dd className="font-sans text-sm text-foreground">
+                                            {value}
+                                          </dd>
+                                        </div>
+                                      ))}
+                                    </dl>
+                                  );
+                                }
+                                return (
+                                  <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                                    {safeString(vacancy.details)}
+                                  </p>
+                                );
+                              })()
+                            ) : (
+                              <p className="font-sans text-sm italic text-muted-foreground/70">
+                                No especificado
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {(vacancy.salary || vacancy.advantages || isEditing) && (
+                          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+                            {(vacancy.salary || isEditing) && (
+                              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+                                    <DollarSign className="h-4 w-4" aria-hidden />
+                                  </span>
+                                  Salario
+                                </h2>
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editSalary}
+                                    onChange={(e) => setEditSalary(e.target.value)}
+                                    placeholder="Ej: US$1,200 - US$1,800 / mes"
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label="Editar salario de la vacante"
+                                  />
+                                ) : vacancy.salary ? (
+                                  <p className="font-sans text-lg font-semibold text-foreground">
+                                    {safeString(vacancy.salary)}
+                                  </p>
+                                ) : (
+                                  <p className="font-sans text-sm italic text-muted-foreground/70">
+                                    No especificado
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
+                            {(vacancy.advantages || isEditing) && (
+                              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-pink/10 text-vo-pink">
+                                    <Gift className="h-4 w-4" aria-hidden />
+                                  </span>
+                                  Ventajas y beneficios de la vacante
+                                </h2>
+                                {isEditing ? (
+                                  <textarea
+                                    value={editAdvantages}
+                                    onChange={(e) => setEditAdvantages(e.target.value)}
+                                    rows={4}
+                                    placeholder="Ej: Seguro médico, bono anual, home office, capacitación..."
+                                    className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                    aria-label="Editar ventajas y beneficios de la vacante"
+                                  />
+                                ) : vacancy.advantages ? (
+                                  <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                                    {safeString(vacancy.advantages)}
+                                  </p>
+                                ) : (
+                                  <p className="font-sans text-sm italic text-muted-foreground/70">
+                                    No especificado
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
@@ -3346,13 +3514,15 @@ export default function VacanteDetallePage() {
                         {saveVacancyError}
                       </p>
                     )}
-                    {(vacancy.description || vacancy.requirements) && (
-                      <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
+                    {(vacancy.description || vacancy.requirements || vacancy.details || vacancy.salary || vacancy.advantages || isEditing) && (
+                      <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
                         {(vacancy.description || isEditing) && (
-                          <div>
-                            <h2 className="mb-1.5 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <FileText className="h-3.5 w-3.5" aria-hidden />
-                              Descripción
+                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-sky/10 text-vo-sky">
+                                <FileText className="h-3.5 w-3.5" aria-hidden />
+                              </span>
+                              Descripción de la vacante
                             </h2>
                             {isEditing ? (
                               <div className="flex flex-col gap-2">
@@ -3364,7 +3534,7 @@ export default function VacanteDetallePage() {
                                   aria-label="Editar descripción de la vacante"
                                   aria-invalid={!!editErrors.description}
                                   aria-describedby={editErrors.description ? "edit-description-error-mobile" : undefined}
-                                  placeholder="Describe el puesto, responsabilidades y competencias..."
+                                  placeholder="Explicacion del rol de la vacante"
                                 />
                                 {editErrors.description && (
                                   <p id="edit-description-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
@@ -3373,17 +3543,19 @@ export default function VacanteDetallePage() {
                                 )}
                               </div>
                             ) : (
-                              <p className="font-sans text-sm text-muted-foreground whitespace-pre-wrap">
+                              <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
                                 {safeString(vacancy.description)}
                               </p>
                             )}
                           </div>
                         )}
                         {(vacancy.requirements || isEditing) && (
-                          <div>
-                            <div className="mb-1.5 flex flex-wrap items-center justify-between gap-3">
+                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                            <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
                               <h2 className="flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                                <CheckSquare className="h-3.5 w-3.5" aria-hidden />
+                                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-purple/10 text-vo-purple">
+                                  <CheckSquare className="h-3.5 w-3.5" aria-hidden />
+                                </span>
                                 Requisitos
                               </h2>
                               {isEditing && (
@@ -3490,6 +3662,116 @@ export default function VacanteDetallePage() {
                                 value={vacancy.requirements}
                                 attributeWeights={vacancy.weights?.attributes}
                               />
+                            )}
+                          </div>
+                        )}
+                        {(vacancy.details || isEditing) && (
+                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 text-amber-600">
+                                <Info className="h-3.5 w-3.5" aria-hidden />
+                              </span>
+                              Detalles de la vacante
+                            </h2>
+                            {isEditing ? (
+                              <textarea
+                                value={editDetails}
+                                onChange={(e) => setEditDetails(e.target.value)}
+                                rows={4}
+                                placeholder="Datos especificos de la vacante"
+                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                aria-label="Editar detalles de la vacante"
+                              />
+                            ) : vacancy.details ? (
+                              (() => {
+                                const pairs = parseKeyValueLines(vacancy.details);
+                                if (pairs && pairs.length > 0) {
+                                  return (
+                                    <dl className="flex flex-col gap-2">
+                                      {pairs.map(({ key, value }) => (
+                                        <div
+                                          key={`${key}-${value}`}
+                                          className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0"
+                                        >
+                                          <dt className="font-sans text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">
+                                            {key}
+                                          </dt>
+                                          <dd className="font-sans text-sm text-foreground">
+                                            {value}
+                                          </dd>
+                                        </div>
+                                      ))}
+                                    </dl>
+                                  );
+                                }
+                                return (
+                                  <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                                    {safeString(vacancy.details)}
+                                  </p>
+                                );
+                              })()
+                            ) : (
+                              <p className="font-sans text-sm italic text-muted-foreground/70">
+                                No especificado
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {(vacancy.salary || isEditing) && (
+                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600">
+                                <DollarSign className="h-3.5 w-3.5" aria-hidden />
+                              </span>
+                              Salario
+                            </h2>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editSalary}
+                                onChange={(e) => setEditSalary(e.target.value)}
+                                placeholder="Ej: US$1,200 - US$1,800 / mes"
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label="Editar salario de la vacante"
+                              />
+                            ) : vacancy.salary ? (
+                              <p className="font-sans text-lg font-semibold text-foreground">
+                                {safeString(vacancy.salary)}
+                              </p>
+                            ) : (
+                              <p className="font-sans text-sm italic text-muted-foreground/70">
+                                No especificado
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {(vacancy.advantages || isEditing) && (
+                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-pink/10 text-vo-pink">
+                                <Gift className="h-3.5 w-3.5" aria-hidden />
+                              </span>
+                              Ventajas y beneficios de la vacante
+                            </h2>
+                            {isEditing ? (
+                              <textarea
+                                value={editAdvantages}
+                                onChange={(e) => setEditAdvantages(e.target.value)}
+                                rows={4}
+                                placeholder="Ej: Seguro médico, bono anual, home office, capacitación..."
+                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                aria-label="Editar ventajas y beneficios de la vacante"
+                              />
+                            ) : vacancy.advantages ? (
+                              <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                                {safeString(vacancy.advantages)}
+                              </p>
+                            ) : (
+                              <p className="font-sans text-sm italic text-muted-foreground/70">
+                                No especificado
+                              </p>
                             )}
                           </div>
                         )}

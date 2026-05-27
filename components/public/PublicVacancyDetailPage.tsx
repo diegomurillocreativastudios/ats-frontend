@@ -9,6 +9,9 @@ import {
   Building2,
   CheckCircle2,
   Compass,
+  DollarSign,
+  Gift,
+  Info,
   MapPin,
   Sparkles,
 } from "lucide-react"
@@ -105,9 +108,23 @@ function BulletList({
   )
 }
 
-function VacancyDescription({ description }: { description?: string }) {
-  const paragraphs = description
-    ? description
+function VacancyTextSection({
+  icon,
+  iconColorClassName,
+  eyebrow,
+  title,
+  content,
+  emptyLabel = "No especificado",
+}: {
+  icon: ReactNode
+  iconColorClassName: string
+  eyebrow: string
+  title: string
+  content?: string
+  emptyLabel?: string
+}) {
+  const paragraphs = content
+    ? content
         .split(/\r?\n/)
         .map((paragraph) => paragraph.trim())
         .filter(Boolean)
@@ -116,14 +133,14 @@ function VacancyDescription({ description }: { description?: string }) {
   return (
     <section className={`rounded-[30px] p-6 sm:p-7 ${darkPanelClassName}`}>
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/6 text-[#8dd8ff]">
-          <Compass className="h-5 w-5" aria-hidden />
+        <div
+          className={`flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/6 ${iconColorClassName}`}
+        >
+          {icon}
         </div>
         <div>
-          <p className="text-[11px] uppercase tracking-[0.24em] text-white/46">Contexto del rol</p>
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
-            Descripción del puesto
-          </h2>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-white/46">{eyebrow}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
         </div>
       </div>
 
@@ -133,10 +150,22 @@ function VacancyDescription({ description }: { description?: string }) {
             <p key={`${index}-${paragraph}`}>{paragraph}</p>
           ))
         ) : (
-          <p>No especificado</p>
+          <p>{emptyLabel}</p>
         )}
       </div>
     </section>
+  )
+}
+
+function VacancyDescription({ description }: { description?: string }) {
+  return (
+    <VacancyTextSection
+      icon={<Compass className="h-5 w-5" aria-hidden />}
+      iconColorClassName="text-[#8dd8ff]"
+      eyebrow="Contexto del rol"
+      title="Descripción del puesto"
+      content={description}
+    />
   )
 }
 
@@ -392,6 +421,26 @@ export function PublicVacancyDetailPage({
 
               <VacancyDescription description={vacancy.description} />
 
+              {vacancy.details ? (
+                <VacancyTextSection
+                  icon={<Info className="h-5 w-5" aria-hidden />}
+                  iconColorClassName="text-[#f6c482]"
+                  eyebrow="Más sobre el puesto"
+                  title="Detalles adicionales"
+                  content={vacancy.details}
+                />
+              ) : null}
+
+              {vacancy.advantages ? (
+                <VacancyTextSection
+                  icon={<Gift className="h-5 w-5" aria-hidden />}
+                  iconColorClassName="text-[#f0a7ff]"
+                  eyebrow="Lo que ofrecemos"
+                  title="Ventajas y beneficios"
+                  content={vacancy.advantages}
+                />
+              ) : null}
+
               <BulletList title="Responsabilidades" items={vacancy.responsibilities ?? []} />
               <BulletList title="Requisitos" items={vacancy.requirements ?? []} />
               <BulletList title="Beneficios" items={vacancy.benefits ?? []} />
@@ -443,6 +492,17 @@ export function PublicVacancyDetailPage({
                         />
                       }
                     />
+                    {vacancy.salary ? (
+                      <DetailRow
+                        label="Salario"
+                        value={
+                          <span className="inline-flex items-center justify-end gap-2">
+                            <DollarSign className="h-3.5 w-3.5 text-[#8dd8ff]" aria-hidden />
+                            <span className="whitespace-pre-wrap">{vacancy.salary}</span>
+                          </span>
+                        }
+                      />
+                    ) : null}
                     {publishedLabel ? (
                       <DetailRow label="Publicación" value={publishedLabel} />
                     ) : null}
@@ -463,7 +523,7 @@ export function PublicVacancyDetailPage({
         </div>
       </div>
 
-      {vacancy && !errorMessage ? <ApplicationTipsWidget /> : null}
+      {vacancy && !errorMessage ? <ApplicationTipsWidget position="right" /> : null}
     </div>
   )
 }

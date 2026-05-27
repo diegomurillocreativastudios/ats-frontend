@@ -57,6 +57,9 @@ export interface OpportunityVacancySummary {
 
 export interface OpportunityVacancyDetail extends OpportunityVacancySummary {
   description?: string
+  details?: string
+  salary?: string
+  advantages?: string
   responsibilities?: string[]
   requirements?: string[]
   benefits?: string[]
@@ -336,6 +339,9 @@ export function normalizeOpportunityDetail(payload: unknown): OpportunityVacancy
     description: toOptionalString(
       record.description ?? record.jobDescription ?? record.job_description ?? record.summary
     ),
+    details: toOptionalString(record.details ?? record.additionalDetails ?? record.additional_details),
+    salary: toOptionalString(record.salary ?? record.salaryRange ?? record.salary_range),
+    advantages: toOptionalString(record.advantages ?? record.perks ?? record.benefitsText),
     responsibilities: toStringArray(
       record.responsibilities ?? record.duties ?? record.tasks
     ),

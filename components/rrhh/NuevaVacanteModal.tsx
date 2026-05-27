@@ -36,6 +36,9 @@ export const createEmptyRequirement = () => ({
 export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackbar }) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [detalles, setDetalles] = useState("");
+  const [salario, setSalario] = useState("");
+  const [ventajas, setVentajas] = useState("");
   const [countryCode, setCountryCode] = useState("");
   const [stateCode, setStateCode] = useState("");
   const [vacancyDepartmentId, setVacancyDepartmentId] = useState("");
@@ -198,9 +201,16 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
       }
     });
 
+    const trimmedDetalles = detalles.trim()
+    const trimmedSalario = salario.trim()
+    const trimmedVentajas = ventajas.trim()
+
     const payload: Record<string, unknown> = {
       title: nombre.trim(),
       description: descripcion.trim(),
+      details: trimmedDetalles || null,
+      salary: trimmedSalario || null,
+      advantages: trimmedVentajas || null,
       companyId: selectedCompanyId || DEFAULT_RECRUITER_COMPANY_ID,
       requirements,
       weights: {
@@ -246,6 +256,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const handleClose = () => {
     setNombre("");
     setDescripcion("");
+    setDetalles("");
+    setSalario("");
+    setVentajas("");
     setCountryCode("");
     setStateCode("");
     setVacancyDepartmentId("");
@@ -330,7 +343,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             id="vacante-descripcion"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            placeholder="Describe el puesto, responsabilidades y competencias..."
+            placeholder="Explicacion del rol de la vacante"
             rows={4}
             className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
             aria-invalid={!!errors.descripcion}
@@ -341,6 +354,60 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
               {errors.descripcion}
             </p>
           )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="vacante-detalles"
+            className="font-sans text-sm font-medium text-foreground"
+          >
+            Detalles de la vacante
+          </label>
+          <textarea
+            id="vacante-detalles"
+            value={detalles}
+            onChange={(e) => setDetalles(e.target.value)}
+            placeholder="Datos especificos de la vacante"
+            rows={3}
+            className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]"
+            aria-label="Detalles de la vacante"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="vacante-salario"
+            className="font-sans text-sm font-medium text-foreground"
+          >
+            Salario
+          </label>
+          <input
+            id="vacante-salario"
+            type="text"
+            value={salario}
+            onChange={(e) => setSalario(e.target.value)}
+            placeholder="Ej: US$1,200 - US$1,800 / mes"
+            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Salario de la vacante"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="vacante-ventajas"
+            className="font-sans text-sm font-medium text-foreground"
+          >
+            Ventajas y beneficios de la vacante
+          </label>
+          <textarea
+            id="vacante-ventajas"
+            value={ventajas}
+            onChange={(e) => setVentajas(e.target.value)}
+            placeholder="Ej: Seguro médico, bono anual, home office, capacitación..."
+            rows={3}
+            className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]"
+            aria-label="Ventajas y beneficios de la vacante"
+          />
         </div>
 
         <div className="flex flex-col gap-2">

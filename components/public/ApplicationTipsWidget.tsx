@@ -30,7 +30,13 @@ function getRandomTip(excludeIndex?: number): { tip: string; index: number } {
   }
 }
 
-export function ApplicationTipsWidget() {
+interface ApplicationTipsWidgetProps {
+  position?: "left" | "right"
+}
+
+export function ApplicationTipsWidget({
+  position = "left",
+}: ApplicationTipsWidgetProps = {}) {
   const [currentTipData, setCurrentTipData] = useState(() => getRandomTip())
   const [isVisible, setIsVisible] = useState(true)
 
@@ -47,9 +53,12 @@ export function ApplicationTipsWidget() {
     return () => clearInterval(intervalId)
   }, [])
 
+  const positionClassName =
+    position === "right" ? "right-6" : "left-6"
+
   return (
     <aside
-      className="fixed bottom-6 left-6 z-40 w-[320px] max-w-[calc(100vw-3rem)] sm:w-[380px]"
+      className={`fixed bottom-6 ${positionClassName} z-40 w-[320px] max-w-[calc(100vw-3rem)] sm:w-[380px]`}
       aria-live="polite"
       aria-atomic="true"
     >
