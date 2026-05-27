@@ -14,6 +14,7 @@ import {
 import { ApplyPrivacyNoticeDialog } from "@/components/public/ApplyPrivacyNoticeDialog"
 import { PublicVacancyApplicationForm } from "@/components/public/PublicVacancyApplicationForm"
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
+import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
 import {
   buildOpportunityCompanyLogoDataUri,
   getPublicVacancyDetail,
@@ -251,6 +252,8 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
         onAccept={() => setHasAcceptedPrivacy(true)}
         onDecline={() => router.push("/oportunidades")}
       />
+
+      {vacancy && !errorMessage && hasAcceptedPrivacy ? <ApplicationTipsWidget /> : null}
     </div>
   )
 }

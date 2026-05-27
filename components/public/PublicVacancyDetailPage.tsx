@@ -19,6 +19,7 @@ import {
 } from "@/lib/api/public-vacancies"
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
+import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
 
 const darkPanelClassName =
   "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
@@ -461,6 +462,8 @@ export function PublicVacancyDetailPage({
           ) : null}
         </div>
       </div>
+
+      {vacancy && !errorMessage ? <ApplicationTipsWidget /> : null}
     </div>
   )
 }
