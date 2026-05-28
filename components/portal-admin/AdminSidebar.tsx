@@ -11,6 +11,7 @@ import {
   ClipboardList,
   Cog,
   FileText,
+  IdCard,
   Landmark,
   Users,
 } from "lucide-react"
@@ -37,6 +38,11 @@ const navItems = [
     href: "/portal-admin/modalidades",
     label: "Modalidades",
     icon: Briefcase,
+  },
+  {
+    href: "/portal-admin/tipos-de-documento",
+    label: "Tipos de Documento",
+    icon: IdCard,
   },
 ]
 
