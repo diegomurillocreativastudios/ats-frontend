@@ -180,7 +180,7 @@ export default function IniciarSesion() {
 
           <div className="hidden lg:block">
             <h1 className="text-[40px] font-bold leading-[1.2]">
-              Applicant Tracking System<br />for HR Departments
+              Sistema de Gestión de Candidatos<br />para departamentos de RRHH
             </h1>
             <p className="text-lg text-white/80 leading-normal mt-6">
               Optimiza tu proceso de selección con IA.<br />

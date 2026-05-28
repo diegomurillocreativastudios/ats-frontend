@@ -1,78 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Search, Eye, Users, Plus, Loader2, Sparkles } from "lucide-react";
+import { Search, Eye, Users, Plus } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
-import { apiClient } from "@/lib/api"
-import { getApiErrorMessage } from "@/lib/api-error"
+import PortalPageHeader from "@/components/ui/PortalPageHeader";
+import Snackbar from "@/components/ui/Snackbar";
+import AgregarCandidatoModal from "@/components/candidato/AgregarCandidatoModal";
+import { apiClient } from "@/lib/api";
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay";
-import Modal from "@/components/ui/Modal";
-import PortalPageHeader from "@/components/ui/PortalPageHeader";
-import Snackbar from "@/components/ui/Snackbar";
-import SingleFileUploadZone from "@/components/candidato/SingleFileUploadZone";
-import {
-  AiDisclosureBadge,
-  AiDisclosurePillProgress,
-  AiKpiCard,
-} from "@/components/rrhh/AiDisclosure";
-import {
-  listIdentityDocumentTypes,
-  type IdentityDocumentTypeOptionDto,
-} from "@/lib/api/identity-document-types";
-
-const AI_MODAL_KPIS = [
-  {
-    label: "Desglose de CV",
-    value: "De hasta 15 min a 30s-1min por CV",
-    helper: "Captura estructurada en una sola corrida",
-  },
-  {
-    label: "Inserción de datos",
-    value: "Registro automático en el mismo flujo",
-    helper: "Sin transcripción manual a BD o Excel",
-  },
-  {
-    label: "Ahorro estimado",
-    value: "Reducción operativa del 93.3% al 96.7%",
-    helper: "En extracción, desglose e inserción de CV",
-  },
-];
-
-const CV_ACCEPTED_TYPES = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/plain",
-];
-const CV_ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".doc", ".txt"];
-const CV_ACCEPT_ATTR =
-  ".pdf,.docx,.doc,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain";
-
-const IDENTITY_DOC_ACCEPTED_TYPES = ["application/pdf"];
-const IDENTITY_DOC_ACCEPTED_EXTENSIONS = [".pdf"];
-const IDENTITY_DOC_ACCEPT_ATTR = "application/pdf,.pdf";
-
-const AI_INGEST_COMPLETED_HOLD_MS = 550;
-
-interface AiBarState {
-  active: boolean;
-  cycleKey: string | null;
-  isCompleted: boolean;
-}
-
-const createIngestCycleKey = (): string => {
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
-    return crypto.randomUUID();
-  }
-  return `ingest-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-};
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -175,23 +114,6 @@ export default function CandidatosPage() {
   const [fetchError, setFetchError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [cvFile, setCvFile] = useState<File | null>(null);
-  const [identityFile, setIdentityFile] = useState<File | null>(null);
-  const [identityDocumentTypeId, setIdentityDocumentTypeId] = useState("");
-  const [identityDocumentTypes, setIdentityDocumentTypes] = useState<
-    IdentityDocumentTypeOptionDto[]
-  >([]);
-  const [isLoadingDocumentTypes, setIsLoadingDocumentTypes] = useState(false);
-  const [documentTypesError, setDocumentTypesError] = useState<string | null>(
-    null
-  );
-  const [isSubmittingCandidate, setIsSubmittingCandidate] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [aiProcessingBar, setAiProcessingBar] = useState<AiBarState>({
-    active: false,
-    cycleKey: null,
-    isCompleted: false,
-  });
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success",
@@ -202,115 +124,9 @@ export default function CandidatosPage() {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  const resetUploadForm = useCallback(() => {
-    setCvFile(null);
-    setIdentityFile(null);
-    setIdentityDocumentTypeId("");
-    setSubmitError(null);
-    setAiProcessingBar({ active: false, cycleKey: null, isCompleted: false });
-  }, []);
-
-  const handleOpenUploadModal = () => {
-    resetUploadForm();
-    setIsUploadModalOpen(true);
+  const handleSnackbar = (message: string, variant: "success" | "error" = "success") => {
+    setSnackbar({ open: true, message, variant });
   };
-
-  const handleCloseUploadModal = () => {
-    if (isSubmittingCandidate) return;
-    setIsUploadModalOpen(false);
-    resetUploadForm();
-  };
-
-  const fetchIdentityDocumentTypes = useCallback(async () => {
-    setIsLoadingDocumentTypes(true);
-    setDocumentTypesError(null);
-    try {
-      const options = await listIdentityDocumentTypes();
-      setIdentityDocumentTypes(options);
-    } catch (err: unknown) {
-      const message =
-        getApiErrorMessage(err) ||
-        "No se pudieron cargar los tipos de documento.";
-      setIdentityDocumentTypes([]);
-      setDocumentTypesError(message);
-    } finally {
-      setIsLoadingDocumentTypes(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isUploadModalOpen) return;
-    void fetchIdentityDocumentTypes();
-  }, [isUploadModalOpen, fetchIdentityDocumentTypes]);
-
-  const isSubmitDisabled =
-    isSubmittingCandidate ||
-    !cvFile ||
-    !identityFile ||
-    !identityDocumentTypeId.trim();
-
-  const handleCreateCandidate = async () => {
-    if (isSubmittingCandidate) return;
-
-    if (!cvFile) {
-      setSubmitError("Debes subir el CV del candidato.");
-      return;
-    }
-    if (!identityDocumentTypeId.trim()) {
-      setSubmitError("Debes seleccionar el tipo de documento.");
-      return;
-    }
-    if (!identityFile) {
-      setSubmitError("Debes subir el documento de identidad.");
-      return;
-    }
-
-    setSubmitError(null);
-    const cycleKey = createIngestCycleKey();
-    setAiProcessingBar({ active: true, cycleKey, isCompleted: false });
-    setIsSubmittingCandidate(true);
-
-    const formData = new FormData();
-    formData.append("CvFile", cvFile);
-    formData.append("IdentityDocumentFile", identityFile);
-    formData.append("IdentityDocumentTypeId", identityDocumentTypeId.trim());
-    formData.append("EntityType", "Candidate");
-
-    try {
-      await apiClient.postFormData("/Ingest/upload", formData);
-      await fetchCandidates();
-
-      setAiProcessingBar({ active: true, cycleKey, isCompleted: true });
-      await new Promise((resolve) =>
-        setTimeout(resolve, AI_INGEST_COMPLETED_HOLD_MS)
-      );
-
-      setIsUploadModalOpen(false);
-      resetUploadForm();
-      setSnackbar({
-        open: true,
-        variant: "success",
-        message: "Candidato creado y procesado correctamente.",
-      });
-    } catch (err: unknown) {
-      const message =
-        getApiErrorMessage(err) || "Error al procesar el candidato.";
-      setSubmitError(message);
-      setAiProcessingBar({ active: false, cycleKey: null, isCompleted: false });
-      setSnackbar({
-        open: true,
-        variant: "error",
-        message: `Error al crear el candidato: ${message}`,
-      });
-    } finally {
-      setIsSubmittingCandidate(false);
-    }
-  };
-
-  const documentTypeSelectOptions = useMemo(
-    () => identityDocumentTypes,
-    [identityDocumentTypes]
-  );
 
   const fetchCandidates = useCallback(async () => {
     setLoading(true);
@@ -369,7 +185,7 @@ export default function CandidatosPage() {
         </div>
         <button
           type="button"
-          onClick={handleOpenUploadModal}
+          onClick={() => setIsUploadModalOpen(true)}
           className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
         >
           <Plus className="h-4 w-4" aria-hidden />
@@ -502,240 +318,12 @@ export default function CandidatosPage() {
         </main>
       </div>
 
-      <Modal
+      <AgregarCandidatoModal
         isOpen={isUploadModalOpen}
-        onClose={handleCloseUploadModal}
-        title="Agregar candidato"
-        size="lg"
-        closeOnEscape={!isSubmittingCandidate}
-        closeOnOverlayClick={!isSubmittingCandidate}
-        footer={
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-            {submitError ? (
-              <p
-                className="font-sans text-sm text-destructive sm:mr-auto"
-                role="alert"
-              >
-                {submitError}
-              </p>
-            ) : null}
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={handleCloseUploadModal}
-                disabled={isSubmittingCandidate}
-                className="inline-flex items-center justify-center rounded-md border border-border bg-white px-4 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateCandidate}
-                disabled={isSubmitDisabled}
-                aria-busy={isSubmittingCandidate}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-4 py-2 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSubmittingCandidate ? (
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                ) : (
-                  <Sparkles className="h-4 w-4" aria-hidden />
-                )}
-                {isSubmittingCandidate
-                  ? "Procesando..."
-                  : "Crear candidato"}
-              </button>
-            </div>
-          </div>
-        }
-      >
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2 rounded-lg border border-vo-purple/20 bg-vo-purple/5 p-3">
-            <AiDisclosureBadge />
-            {aiProcessingBar.active && aiProcessingBar.cycleKey ? (
-              <AiDisclosurePillProgress
-                key={aiProcessingBar.cycleKey}
-                percent={null}
-                isCompleted={aiProcessingBar.isCompleted}
-                ingestStepLabels
-              />
-            ) : null}
-            <p className="font-sans text-sm text-foreground">
-              Los CVs y documentos de identidad se procesan con IA para extraer
-              información preliminar del perfil.
-            </p>
-            <p className="font-sans text-xs text-muted-foreground">
-              Resultado generado por IA. Requiere validación de RRHH.
-            </p>
-          </div>
-
-          <div
-            className="grid gap-2 sm:grid-cols-3"
-            aria-label="KPIs de eficiencia del ATS"
-          >
-            {AI_MODAL_KPIS.map((item) => (
-              <AiKpiCard
-                key={item.label}
-                label={item.label}
-                value={item.value}
-                helper={item.helper}
-              />
-            ))}
-          </div>
-
-          <section
-            className="flex flex-col gap-2"
-            aria-labelledby="candidato-cv-heading"
-          >
-            <div className="flex flex-col gap-1">
-              <h3
-                id="candidato-cv-heading"
-                className="font-sans text-sm font-semibold text-foreground"
-              >
-                CV del candidato
-                <span className="text-vo-pink ml-1" aria-hidden>
-                  *
-                </span>
-              </h3>
-              <p className="font-sans text-xs text-muted-foreground">
-                Sube el CV del candidato para crear su perfil automáticamente.
-              </p>
-            </div>
-            <SingleFileUploadZone
-              file={cvFile}
-              onFileChange={setCvFile}
-              acceptedTypes={CV_ACCEPTED_TYPES}
-              acceptedExtensions={CV_ACCEPTED_EXTENSIONS}
-              accept={CV_ACCEPT_ATTR}
-              primaryText="Arrastra el CV aquí o haz clic para subir"
-              helperText="PDF, DOCX o TXT hasta 10 MB"
-              ariaLabel="Arrastra el CV o haz clic para subir"
-              typeErrorMessage="Tipo no permitido. Solo PDF, DOCX o TXT."
-              disabled={isSubmittingCandidate}
-              inputId="candidato-cv-input"
-            />
-          </section>
-
-          <section
-            className="flex flex-col gap-2"
-            aria-labelledby="candidato-document-type-heading"
-          >
-            <div className="flex flex-col gap-1">
-              <h3
-                id="candidato-document-type-heading"
-                className="font-sans text-sm font-semibold text-foreground"
-              >
-                Tipo de documento de identidad
-                <span className="text-vo-pink ml-1" aria-hidden>
-                  *
-                </span>
-              </h3>
-              <p className="font-sans text-xs text-muted-foreground">
-                Selecciona el tipo de documento que corresponde al PDF que se
-                cargará.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <select
-                id="candidato-document-type-select"
-                aria-label="Tipo de documento de identidad"
-                value={identityDocumentTypeId}
-                onChange={(event) =>
-                  setIdentityDocumentTypeId(event.target.value)
-                }
-                disabled={
-                  isSubmittingCandidate ||
-                  isLoadingDocumentTypes ||
-                  Boolean(documentTypesError) ||
-                  documentTypeSelectOptions.length === 0
-                }
-                className="h-10 w-full rounded-md border border-input bg-white px-3 py-2 font-sans text-sm text-black focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <option value="">
-                  {isLoadingDocumentTypes
-                    ? "Cargando tipos de documento..."
-                    : documentTypesError
-                      ? "No se pudieron cargar los tipos de documento"
-                      : documentTypeSelectOptions.length === 0
-                        ? "No hay tipos de documento disponibles"
-                        : "Selecciona el tipo de documento"}
-                </option>
-                {documentTypeSelectOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-              {isLoadingDocumentTypes ? (
-                <p
-                  className="flex items-center gap-2 font-sans text-xs text-muted-foreground"
-                  aria-live="polite"
-                >
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                  Cargando tipos de documento...
-                </p>
-              ) : null}
-              {documentTypesError ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <p
-                    className="font-sans text-xs text-destructive"
-                    role="alert"
-                  >
-                    {documentTypesError}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => void fetchIdentityDocumentTypes()}
-                    className="font-sans text-xs font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  >
-                    Reintentar
-                  </button>
-                </div>
-              ) : null}
-              {!isLoadingDocumentTypes &&
-              !documentTypesError &&
-              documentTypeSelectOptions.length === 0 ? (
-                <p className="font-sans text-xs text-muted-foreground">
-                  Aún no hay tipos de documento configurados. Pídele a un
-                  administrador que cree los catálogos.
-                </p>
-              ) : null}
-            </div>
-          </section>
-
-          <section
-            className="flex flex-col gap-2"
-            aria-labelledby="candidato-identity-heading"
-          >
-            <div className="flex flex-col gap-1">
-              <h3
-                id="candidato-identity-heading"
-                className="font-sans text-sm font-semibold text-foreground"
-              >
-                Documento de identidad
-                <span className="text-vo-pink ml-1" aria-hidden>
-                  *
-                </span>
-              </h3>
-              <p className="font-sans text-xs text-muted-foreground">
-                Sube el documento de identidad del candidato en formato PDF.
-              </p>
-            </div>
-            <SingleFileUploadZone
-              file={identityFile}
-              onFileChange={setIdentityFile}
-              acceptedTypes={IDENTITY_DOC_ACCEPTED_TYPES}
-              acceptedExtensions={IDENTITY_DOC_ACCEPTED_EXTENSIONS}
-              accept={IDENTITY_DOC_ACCEPT_ATTR}
-              primaryText="Arrastra el documento aquí o haz clic para subir"
-              helperText="Solo archivos PDF hasta 10 MB"
-              ariaLabel="Arrastra el documento de identidad o haz clic para subir"
-              typeErrorMessage="Tipo no permitido. Solo archivos PDF."
-              disabled={isSubmittingCandidate}
-              inputId="candidato-identity-input"
-            />
-          </section>
-        </div>
-      </Modal>
+        onClose={() => setIsUploadModalOpen(false)}
+        onSuccess={fetchCandidates}
+        onSnackbar={handleSnackbar}
+      />
 
       <Snackbar
         open={snackbar.open}
