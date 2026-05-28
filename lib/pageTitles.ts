@@ -70,7 +70,7 @@ const VACANCY_DETAIL_PATH = /^\/portal-rrhh\/vacantes\/[^/]+$/
 
 /** Detalle de candidato RRHH: `/portal-rrhh/candidatos/<candidateId>` (sin subrutas). */
 const CANDIDATO_DETAIL_PATH = /^\/portal-rrhh\/candidatos\/[^/]+$/
-const OPPORTUNITY_DETAIL_PATH = /^\/oportunidades\/[^/]+$/
+const OPPORTUNITY_DETAIL_PATH = /^\/portal-oportunidades\/[^/]+$/
 
 export function isEntrevistasByVacancyPath(pathname) {
   const normalized =
@@ -168,7 +168,7 @@ const EXACT_PATH_SUFFIX = {
   "/auth/registrarse": "Registrarse",
   "/auth/forgot-password": "¿Olvidaste tu contraseña?",
   "/auth/restablecer-contrasena": "Restablecer contraseña",
-  "/oportunidades": OPORTUNIDADES,
+  "/portal-oportunidades": OPORTUNIDADES,
 }
 
 function titlePortalRrhh(normalizedPath) {

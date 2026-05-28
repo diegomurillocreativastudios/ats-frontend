@@ -1,4 +1,4 @@
-/** Intervalo para recalcular el avance según el tiempo (misma curva que `/oportunidades/.../aplicar`). */
+/** Intervalo para recalcular el avance según el tiempo (misma curva que `/portal-oportunidades/.../aplicar`). */
 export const APPLY_LOADING_TICK_MS = 160
 
 /** Máximo % de la barra mientras el servidor no responde */

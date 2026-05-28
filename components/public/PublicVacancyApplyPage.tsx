@@ -54,8 +54,8 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
 
   const queryString = searchParams.toString()
   const backToDetailHref = queryString
-    ? `/oportunidades/${vacancyId}?${queryString}`
-    : `/oportunidades/${vacancyId}`
+    ? `/portal-oportunidades/${vacancyId}?${queryString}`
+    : `/portal-oportunidades/${vacancyId}`
 
   useEffect(() => {
     let isCancelled = false
@@ -250,7 +250,7 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
       <ApplyPrivacyNoticeDialog
         isOpen={isPrivacyDialogOpen}
         onAccept={() => setHasAcceptedPrivacy(true)}
-        onDecline={() => router.push("/oportunidades")}
+        onDecline={() => router.push("/portal-oportunidades")}
       />
 
       {vacancy && !errorMessage && hasAcceptedPrivacy ? <ApplicationTipsWidget /> : null}

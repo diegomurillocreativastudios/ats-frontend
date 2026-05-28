@@ -5,6 +5,8 @@ export interface PublicVacancyApplyValues {
   lastName: string
   email: string
   phone?: string
+  documentTypeId?: string
+  nationalId?: string
   linkedinUrl?: string
   websiteUrl?: string
   source?: string
@@ -21,6 +23,8 @@ interface CandidatePersonalAppliancePayload {
   lastName: string
   email: string
   phoneNumber: string
+  documentTypeId?: string
+  nationalId?: string
   linkedinUrl: string
   websiteUrl: string
   source: string
@@ -122,6 +126,15 @@ export function buildPublicApplyFormData(
     source: values.source?.trim() ?? "",
     notes: values.notes?.trim() ?? "",
   }
+
+  if (values.documentTypeId?.trim()) {
+    candidate.documentTypeId = values.documentTypeId.trim()
+  }
+  
+  if (values.nationalId?.trim()) {
+    candidate.nationalId = values.nationalId.trim()
+  }
+
   fd.append("vacancyId", vacancyId.trim())
   fd.append("cvFile", values.cvFile)
   fd.append("candidate", JSON.stringify(candidate))

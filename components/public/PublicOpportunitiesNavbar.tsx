@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { Grid3x3 } from "lucide-react"
 
 interface PublicOpportunitiesNavbarProps {
   className?: string
@@ -15,9 +16,9 @@ export function PublicOpportunitiesNavbar({
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(255,255,255,0.12),transparent_22%),radial-gradient(circle_at_right,rgba(199,50,119,0.18),transparent_26%)]" />
 
-      <div className="relative flex items-center">
+      <div className="relative flex items-center justify-between">
         <Link
-          href="/oportunidades"
+          href="/portal-oportunidades"
           className="inline-flex items-center gap-3 rounded-none focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e2744]"
           aria-label="Ir al portal de oportunidades"
         >
@@ -45,6 +46,16 @@ export function PublicOpportunitiesNavbar({
               Portal de oportunidades
             </span>
           </span>
+        </Link>
+
+        <Link
+          href="/seleccion-portal"
+          className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm font-medium text-white/88 transition-colors hover:border-white/20 hover:bg-white/12 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e2744]"
+          aria-label="Ir a selección de portal"
+        >
+          <Grid3x3 className="h-4 w-4" aria-hidden />
+          <span className="hidden sm:inline">Cambiar portal</span>
+          <span className="sm:hidden">Portales</span>
         </Link>
       </div>
     </nav>

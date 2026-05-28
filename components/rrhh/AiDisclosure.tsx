@@ -21,7 +21,7 @@ import {
 } from "@/lib/vacancy-preliminary-match-progress-status";
 
 export interface AiDisclosurePillProgressProps {
-  /** 0–100 misma barra que en `/oportunidades/.../aplicar`; `null` = avance por tiempo (una sola petición) */
+  /** 0–100 misma barra que en `/portal-oportunidades/.../aplicar`; `null` = avance por tiempo (una sola petición) */
   percent: number | null
   "aria-label"?: string
   /** Con `percent === null`: referencia (ms) para alinear el ~86% con la duración típica. Por defecto: ingest de candidato. */

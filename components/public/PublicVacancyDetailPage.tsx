@@ -217,7 +217,7 @@ export function PublicVacancyDetailPage({
   const queryString = searchParams.toString()
 
   const backHref = useMemo(() => {
-    return queryString ? `/oportunidades?${queryString}` : "/oportunidades"
+    return queryString ? `/portal-oportunidades?${queryString}` : "/portal-oportunidades"
   }, [queryString])
 
   useEffect(() => {
@@ -270,8 +270,8 @@ export function PublicVacancyDetailPage({
   const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy?.company.logo ?? null)
   const companyLogoAlt = companyName ? `Logo de ${companyName}` : "Logo de la empresa"
   const applyHref = queryString
-    ? `/oportunidades/${vacancyId}/aplicar?${queryString}`
-    : `/oportunidades/${vacancyId}/aplicar`
+    ? `/portal-oportunidades/${vacancyId}/aplicar?${queryString}`
+    : `/portal-oportunidades/${vacancyId}/aplicar`
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0b1224] text-white">
@@ -302,7 +302,7 @@ export function PublicVacancyDetailPage({
               </p>
               <div className="mt-5">
                 <Link
-                  href="/oportunidades"
+                  href="/portal-oportunidades"
                   className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-[#ffd0e7]"
                 >
                   Ver todas las oportunidades

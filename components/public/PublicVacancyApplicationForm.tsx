@@ -25,6 +25,10 @@ import {
 } from "@/lib/apply-loading-bar"
 import { ApplyStyleProgressBar } from "@/components/public/apply-style-progress-bar"
 import { ApplyEmailConfirmationModal } from "@/components/public/ApplyEmailConfirmationModal"
+import {
+  listIdentityDocumentTypes,
+  type IdentityDocumentTypeOptionDto,
+} from "@/lib/api/identity-document-types"
 
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
 
@@ -40,6 +44,8 @@ interface PublicVacancyApplicationFormState {
   lastName: string
   email: string
   phone: string
+  documentTypeId: string
+  nationalId: string
   linkedinUrl: string
   websiteUrl: string
   source: string
@@ -53,6 +59,8 @@ const initialState: PublicVacancyApplicationFormState = {
   lastName: "",
   email: "",
   phone: "",
+  documentTypeId: "",
+  nationalId: "",
   linkedinUrl: "",
   websiteUrl: "",
   source: "",
@@ -265,12 +273,42 @@ export function PublicVacancyApplicationForm({
   const [loadingOverlay, setLoadingOverlay] = useState({ percent: 0, longWait: false })
   const [isConfirmEmailModalOpen, setIsConfirmEmailModalOpen] = useState(false)
   const loadingStartedAtRef = useRef(0)
+  const [documentTypes, setDocumentTypes] = useState<IdentityDocumentTypeOptionDto[]>([])
+  const [isLoadingDocumentTypes, setIsLoadingDocumentTypes] = useState(true)
 
   const inputClass = themeFieldClass(theme)
   const selectClass = themeSelectClass(theme)
   const textareaClass = themeTextareaClass(theme)
   const labelClass = themeLabelClass(theme)
   const errClass = themeErrorClass(theme)
+
+  useEffect(() => {
+    let isCancelled = false
+
+    async function loadDocumentTypes() {
+      setIsLoadingDocumentTypes(true)
+      try {
+        const types = await listIdentityDocumentTypes()
+        if (!isCancelled) {
+          setDocumentTypes(types)
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setDocumentTypes([])
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingDocumentTypes(false)
+        }
+      }
+    }
+
+    void loadDocumentTypes()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (submitPhase !== "loading") return
@@ -325,8 +363,19 @@ export function PublicVacancyApplicationForm({
     if (!cvFile) next.cvFile = "Adjunta tu CV en PDF o DOCX."
     else if (!isAllowedCvFile(cvFile))
       next.cvFile = "Solo se aceptan archivos PDF o DOCX."
+    
+    const hasDocumentType = values.documentTypeId.trim() !== ""
+    const hasNationalId = values.nationalId.trim() !== ""
+    
+    if (hasDocumentType && !hasNationalId) {
+      next.nationalId = "Si seleccionas un tipo de documento, debes ingresar el número."
+    }
+    if (hasNationalId && !hasDocumentType) {
+      next.documentTypeId = "Si ingresas un número de documento, debes seleccionar el tipo."
+    }
+    
     return next
-  }, [values.firstName, values.lastName, values.email, cvFile])
+  }, [values.firstName, values.lastName, values.email, values.documentTypeId, values.nationalId, cvFile])
 
   const executeSubmit = useCallback(async () => {
     if (!cvFile) return
@@ -342,6 +391,8 @@ export function PublicVacancyApplicationForm({
       lastName: values.lastName,
       email: values.email,
       phone: values.phone,
+      documentTypeId: values.documentTypeId,
+      nationalId: values.nationalId,
       linkedinUrl: values.linkedinUrl,
       websiteUrl: values.websiteUrl,
       source: values.source,
@@ -419,7 +470,7 @@ export function PublicVacancyApplicationForm({
             </Link>
           ) : null}
           <Link
-            href="/oportunidades"
+            href="/portal-oportunidades"
             className={
               theme === "dark"
                 ? "inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-medium text-[#18213d] transition hover:opacity-95"
@@ -550,6 +601,60 @@ export function PublicVacancyApplicationForm({
             disabled={disabled}
             autoComplete="tel"
           />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="apply-documentTypeId" className={labelClass}>
+            Tipo de documento
+          </label>
+          <select
+            id="apply-documentTypeId"
+            name="documentTypeId"
+            value={values.documentTypeId}
+            onChange={handleChange}
+            className={selectClass}
+            disabled={disabled || isLoadingDocumentTypes}
+            aria-invalid={Boolean(errors.documentTypeId)}
+            aria-describedby={errors.documentTypeId ? "apply-documentTypeId-err" : undefined}
+          >
+            <option value="">
+              {isLoadingDocumentTypes
+                ? "Cargando tipos de documento..."
+                : documentTypes.length === 0
+                  ? "No hay tipos disponibles"
+                  : "Seleccioná un tipo"}
+            </option>
+            {documentTypes.map((docType) => (
+              <option key={docType.id} value={docType.id}>
+                {docType.name}
+              </option>
+            ))}
+          </select>
+          {errors.documentTypeId ? (
+            <p id="apply-documentTypeId-err" className={errClass} role="alert">
+              {errors.documentTypeId}
+            </p>
+          ) : null}
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="apply-nationalId" className={labelClass}>
+            Número de documento
+          </label>
+          <input
+            id="apply-nationalId"
+            name="nationalId"
+            value={values.nationalId}
+            onChange={handleChange}
+            className={inputClass}
+            disabled={disabled}
+            placeholder="Ingresá tu número de documento"
+            aria-invalid={Boolean(errors.nationalId)}
+            aria-describedby={errors.nationalId ? "apply-nationalId-err" : undefined}
+          />
+          {errors.nationalId ? (
+            <p id="apply-nationalId-err" className={errClass} role="alert">
+              {errors.nationalId}
+            </p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-source" className={labelClass}>

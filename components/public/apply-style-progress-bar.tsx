@@ -16,7 +16,7 @@ export interface ApplyStyleProgressBarProps {
 }
 
 /**
- * Barra alineada con `/oportunidades/.../aplicar`: tema `light` = `bg-vo-purple` sobre `bg-muted`;
+ * Barra alineada con `/portal-oportunidades/.../aplicar`: tema `light` = `bg-vo-purple` sobre `bg-muted`;
  * `dark` y `onLight` = gradiente fucsia-cian (#f0a7ff → #8dd8ff) y resplandor, como el overlay oscuro del formulario.
  */
 export function ApplyStyleProgressBar({

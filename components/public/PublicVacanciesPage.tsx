@@ -282,7 +282,7 @@ function OpportunityCard({
   queryString: string
 }) {
   const publishedLabel = formatPublishedLabel(vacancy.publishedAt)
-  const href = `/oportunidades/${vacancy.id}${queryString ? `?${queryString}` : ""}`
+  const href = `/portal-oportunidades/${vacancy.id}${queryString ? `?${queryString}` : ""}`
   const departmentLabel = vacancy.department?.displayName ?? "Departamento no especificado"
   const modalityLabel = vacancy.modality?.displayName ?? "Modalidad no especificada"
   const companyName = vacancy.company.name?.trim() ?? ""
