@@ -41,6 +41,7 @@ const mapStageFromApi = (item, index = 0) => {
     isDefault: Boolean(
       item.isDefault ?? item.is_default ?? item.IsDefault
     ),
+    final: Boolean(item.final ?? item.Final),
     triggersNotification: Boolean(item.triggersNotification),
     notificationTemplateId: item.notificationTemplateId ?? null,
   };
@@ -62,15 +63,15 @@ const persistStageOrdersSequential = async (orderedStages) => {
   }
 };
 
-const DefaultStageSwitch = ({ stage, onActivate, disabled }) => {
+const DefaultStageSwitch = ({ stage, onActivate, disabled, isUpdating }) => {
   const isOn = Boolean(stage.isDefault);
   const handleClick = () => {
-    if (disabled) return;
+    if (disabled || isUpdating) return;
     if (isOn) return;
     onActivate(stage);
   };
   const handleKeyDown = (e) => {
-    if (disabled) return;
+    if (disabled || isUpdating) return;
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     if (isOn) return;
@@ -78,33 +79,101 @@ const DefaultStageSwitch = ({ stage, onActivate, disabled }) => {
   };
 
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={isOn}
-      aria-label={
-        isOn
-          ? `${stage.name}: Etapa por defecto activa`
-          : `Marcar ${stage.name} como etapa por defecto`
-      }
-      disabled={disabled}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-pink/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45 ${
-        isOn
-          ? "bg-vo-pink shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
-          : "border border-slate-300/80 bg-slate-100 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)]"
-      }`}
-    >
-      <span
-        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+    <div className="relative">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isOn}
+        aria-label={
           isOn
-            ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
-            : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
+            ? `${stage.name}: Etapa por defecto activa`
+            : `Marcar ${stage.name} como etapa por defecto`
+        }
+        disabled={disabled || isUpdating}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-pink/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
+          isUpdating ? "opacity-60" : "opacity-100"
+        } ${
+          isOn
+            ? "bg-vo-pink shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
+            : "border border-slate-300/80 bg-slate-100 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)]"
         }`}
-        aria-hidden
-      />
-    </button>
+      >
+        <span
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+            isOn
+              ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
+              : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
+          }`}
+          aria-hidden
+        />
+      </button>
+      {isUpdating && (
+        <div className="absolute -right-6 top-1/2 -translate-y-1/2">
+          <div
+            className="h-3 w-3 animate-spin rounded-full border-2 border-vo-pink border-t-transparent"
+            aria-hidden
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FinalStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
+  const isOn = Boolean(stage.final);
+  const handleClick = () => {
+    if (disabled || isUpdating) return;
+    onToggle(stage, !isOn);
+  };
+  const handleKeyDown = (e) => {
+    if (disabled || isUpdating) return;
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    onToggle(stage, !isOn);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isOn}
+        aria-label={
+          isOn
+            ? `${stage.name}: Etapa final activa`
+            : `Marcar ${stage.name} como etapa final`
+        }
+        disabled={disabled || isUpdating}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
+          isUpdating ? "opacity-60" : "opacity-100"
+        } ${
+          isOn
+            ? "bg-emerald-600 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
+            : "border border-slate-300/80 bg-slate-100 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)]"
+        }`}
+      >
+        <span
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+            isOn
+              ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
+              : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
+          }`}
+          aria-hidden
+        />
+      </button>
+      {isUpdating && (
+        <div className="absolute -right-6 top-1/2 -translate-y-1/2">
+          <div
+            className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"
+            aria-hidden
+          />
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -139,6 +208,18 @@ const renderStageItem = ({ item, collapseIcon, handler }) => {
             stage={item}
             onActivate={item.onDefaultActivate}
             disabled={item.defaultSwitchDisabled}
+            isUpdating={item.defaultSwitchUpdating}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
+            Etapa final
+          </span>
+          <FinalStageSwitch
+            stage={item}
+            onToggle={item.onFinalToggle}
+            disabled={item.finalSwitchDisabled}
+            isUpdating={item.finalSwitchUpdating}
           />
         </div>
         <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
@@ -185,6 +266,9 @@ export default function EtapasPage() {
   const [reorderLoading, setReorderLoading] = useState(false);
   const [isEstadosModalOpen, setIsEstadosModalOpen] = useState(false);
   const [defaultStageSwitchLoading, setDefaultStageSwitchLoading] = useState(false);
+  const [finalStageSwitchLoading, setFinalStageSwitchLoading] = useState(false);
+  const [updatingDefaultStageId, setUpdatingDefaultStageId] = useState(null);
+  const [updatingFinalStageId, setUpdatingFinalStageId] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success",
@@ -267,29 +351,51 @@ export default function EtapasPage() {
     if (defaultStageSwitchLoading) return;
     if (targetStage.isDefault) return;
 
+    const stageId = String(targetStage.id);
+    
+    // Actualización optimista: actualizar el estado local inmediatamente
+    setStages((prevStages) =>
+      prevStages.map((s) =>
+        String(s.id) === stageId
+          ? { ...s, isDefault: true }
+          : { ...s, isDefault: false }
+      )
+    );
+    
+    setUpdatingDefaultStageId(stageId);
     setDefaultStageSwitchLoading(true);
+
     try {
       const target =
-        stages.find((s) => String(s.id) === String(targetStage.id)) ??
-        targetStage;
+        stages.find((s) => String(s.id) === stageId) ?? targetStage;
+      
       await apiClient.put(
-        `/api/recruiter/companies/${COMPANY_ID}/stages/${target.id}`,
+        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageId}`,
         buildRecruiterStagePutPayload({ ...target, isDefault: true })
       );
+      
+      // Desactivar las demás etapas
       for (const s of stages) {
-        if (String(s.id) === String(target.id)) continue;
+        if (String(s.id) === stageId) continue;
         await apiClient.put(
           `/api/recruiter/companies/${COMPANY_ID}/stages/${s.id}`,
           buildRecruiterStagePutPayload({ ...s, isDefault: false })
         );
       }
-      await fetchStages();
+
+      // Pequeño delay para una transición más suave
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       setSnackbar({
         open: true,
         variant: "success",
         message: "Etapa por defecto actualizada.",
       });
     } catch (err) {
+      // Revertir el cambio optimista en caso de error
+      // Intentar restaurar el estado anterior o refrescar desde el servidor
+      await fetchStages();
+      
       setSnackbar({
         open: true,
         variant: "error",
@@ -299,7 +405,62 @@ export default function EtapasPage() {
           "No se pudo actualizar la etapa por defecto. Intenta de nuevo.",
       });
     } finally {
+      setUpdatingDefaultStageId(null);
       setDefaultStageSwitchLoading(false);
+    }
+  };
+
+  const handleFinalStageToggle = async (targetStage, newValue) => {
+    if (finalStageSwitchLoading) return;
+
+    const stageId = String(targetStage.id);
+    
+    // Actualización optimista: actualizar el estado local inmediatamente
+    setStages((prevStages) =>
+      prevStages.map((s) =>
+        String(s.id) === stageId ? { ...s, final: newValue } : s
+      )
+    );
+    
+    setUpdatingFinalStageId(stageId);
+    setFinalStageSwitchLoading(true);
+
+    try {
+      const target =
+        stages.find((s) => String(s.id) === stageId) ?? targetStage;
+      
+      await apiClient.put(
+        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageId}`,
+        buildRecruiterStagePutPayload({ ...target, final: newValue })
+      );
+
+      // Pequeño delay para una transición más suave
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: `Etapa ${newValue ? "marcada" : "desmarcada"} como final.`,
+      });
+    } catch (err) {
+      // Revertir el cambio optimista en caso de error
+      setStages((prevStages) =>
+        prevStages.map((s) =>
+          String(s.id) === stageId ? { ...s, final: !newValue } : s
+        )
+      );
+      
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message:
+          err?.message ||
+          err?.detail ||
+          "No se pudo actualizar la etapa. Intenta de nuevo.",
+      });
+    } finally {
+      setUpdatingFinalStageId(null);
+      setFinalStageSwitchLoading(false);
     }
   };
 
@@ -444,8 +605,11 @@ export default function EtapasPage() {
     onEdit: handleEdit,
     onDelete: handleDelete,
     onDefaultActivate: handleDefaultStageActivate,
-    defaultSwitchDisabled:
-      defaultStageSwitchLoading || reorderLoading || deleteLoading,
+    onFinalToggle: handleFinalStageToggle,
+    defaultSwitchDisabled: reorderLoading || deleteLoading,
+    defaultSwitchUpdating: updatingDefaultStageId === String(stage.id),
+    finalSwitchDisabled: reorderLoading || deleteLoading,
+    finalSwitchUpdating: updatingFinalStageId === String(stage.id),
   }));
 
   const handleSearchChange = (e) => setSearchQuery(e.target.value);

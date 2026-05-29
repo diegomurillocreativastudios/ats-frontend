@@ -45,10 +45,13 @@ import {
   mapVacancyCompanyPatchError,
   patchVacancyClientCompany,
 } from "@/lib/api/recruiter-vacancies"
+import { finishVacancyProcess } from "@/lib/api/recruiter-vacancy-finish"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
+import { VacancyFinishedSummary } from "@/components/rrhh/VacancyFinishedSummary"
+import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProcessModal"
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
@@ -1357,6 +1360,8 @@ export default function VacanteDetallePage() {
   const [loadingMoveStage, setLoadingMoveStage] = useState(false);
   const [applicationStatusError, setApplicationStatusError] = useState(null);
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
+  const [finishProcessModalOpen, setFinishProcessModalOpen] = useState(false);
+  const [finishingProcess, setFinishingProcess] = useState(false);
 
   const possibleCandidatesSectionDesktopRef = useRef(null);
   const possibleCandidatesSectionMobileRef = useRef(null);
@@ -1495,6 +1500,7 @@ export default function VacanteDetallePage() {
           id: item.id,
           name: item.name,
           order: item.order,
+          final: item.final ?? false,
         }))
       );
     } catch {
@@ -1937,6 +1943,56 @@ export default function VacanteDetallePage() {
     companySelectOptions,
   ]);
 
+  const handleFinishProcess = useCallback(
+    async (data: { calification: number; comments: string }) => {
+      const vacancyId = Array.isArray(id) ? id[0] : id
+      if (!vacancyId) {
+        throw new Error("Falta el ID de la vacante.")
+      }
+
+      setFinishingProcess(true)
+
+      try {
+        const result = await finishVacancyProcess(vacancyId, data)
+        await fetchVacancy(true)
+        setVacancy((prev) => ({
+          ...(prev && typeof prev === "object" ? prev : {}),
+          status: "Closed",
+          state: "Closed",
+          isVacancyDone: true,
+          is_vacancy_done: true,
+          isCompanyActive: false,
+          is_company_active: false,
+          companyIsActive: false,
+          company_is_active: false,
+          isActive: false,
+          is_active: false,
+          readOnly: true,
+          read_only: true,
+          canFinishProcess: true,
+          can_finish_process: true,
+          calification: result.calification,
+          comments: result.comments,
+        }))
+        setFinishProcessModalOpen(false)
+        setSnackbar({
+          open: true,
+          variant: "success",
+          message: "Proceso finalizado correctamente.",
+        })
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "No se pudo finalizar el proceso."
+        throw new Error(message)
+      } finally {
+        setFinishingProcess(false)
+      }
+    },
+    [id, fetchVacancy]
+  )
+
   useEffect(() => {
     fetchStages();
   }, [fetchStages]);
@@ -1969,6 +2025,30 @@ export default function VacanteDetallePage() {
   );
 
   const vacancyReadOnlyTitle = vacancyRecruiterReadOnlyTitle(vacancyReadOnlyReason);
+
+  const isVacancyDone = useMemo(() => {
+    if (!vacancy || typeof vacancy !== "object") return false
+    const record = vacancy as Record<string, unknown>
+    return record.isVacancyDone === true || record.is_vacancy_done === true
+  }, [vacancy])
+
+  const vacancyCalification = useMemo(() => {
+    if (!vacancy || typeof vacancy !== "object") return null
+    const record = vacancy as Record<string, unknown>
+    const cal = record.calification ?? record.Calification
+    if (typeof cal === "number" && cal >= 1 && cal <= 5) return cal
+    return null
+  }, [vacancy])
+
+  const vacancyComments = useMemo(() => {
+    if (!vacancy || typeof vacancy !== "object") return null
+    const record = vacancy as Record<string, unknown>
+    const comments = record.comments ?? record.Comments
+    if (typeof comments === "string" && comments.trim() !== "") {
+      return comments.trim()
+    }
+    return null
+  }, [vacancy])
 
   useEffect(() => {
     if (!isVacancyReadOnly) return;
@@ -2047,6 +2127,43 @@ export default function VacanteDetallePage() {
 
   /** Applicants for Kanban board. */
   const applicants = Array.isArray(vacancy?.applicants) ? vacancy.applicants : [];
+
+  /** Calculate if process can be finished based on the current kanban state. */
+  const canFinishProcess = useMemo(() => {
+    if (!vacancy || typeof vacancy !== "object") return false
+
+    const record = vacancy as Record<string, unknown>
+    const backendValue =
+      record.canFinishProcess === true || record.can_finish_process === true
+
+    const finalStageNames = new Set(
+      stages
+        .filter((stage) => stage?.final === true)
+        .map((stage) => String(stage?.name ?? "").trim().toLowerCase())
+        .filter(Boolean)
+    )
+
+    if (applicants.length > 0 && finalStageNames.size > 0) {
+      return applicants.some((applicant, index) => {
+        const candidateId = getCandidateId(applicant, index)
+        const rawStageName =
+          candidateStageOverrides[candidateId] ??
+          applicant?.applicationStage ??
+          applicant?.stage ??
+          applicant?.stageName ??
+          applicant?.stage_name
+
+        const stageName = String(rawStageName ?? "").trim().toLowerCase()
+        return stageName !== "" && finalStageNames.has(stageName)
+      })
+    }
+
+    return backendValue
+  }, [vacancy, applicants, stages, candidateStageOverrides])
+
+  const showFinishProcessButton = useMemo(() => {
+    return canFinishProcess && !isVacancyDone && !isVacancyReadOnly
+  }, [canFinishProcess, isVacancyDone, isVacancyReadOnly])
 
   /** Stable key for matching (same person in search vs aiMatchSuggestions). */
   const getMatchKey = (m) => m?.candidateDocumentId ?? m?.candidateProfileId ?? null;
@@ -2402,6 +2519,15 @@ export default function VacanteDetallePage() {
                     </div>
                   ) : null}
 
+                  {isVacancyDone && (vacancyCalification != null || vacancyComments != null) ? (
+                    <div className="mb-6">
+                      <VacancyFinishedSummary
+                        calification={vacancyCalification}
+                        comments={vacancyComments}
+                      />
+                    </div>
+                  ) : null}
+
                   <section
                     className="mb-8 rounded-xl border border-border bg-card p-6"
                     aria-label="Información de la vacante"
@@ -2591,6 +2717,16 @@ export default function VacanteDetallePage() {
                                   setSnackbar({ open: true, message, variant })
                                 }
                               />
+                            ) : null}
+                            {showFinishProcessButton ? (
+                              <button
+                                type="button"
+                                onClick={() => setFinishProcessModalOpen(true)}
+                                className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
+                                aria-label="Finalizar proceso de la vacante"
+                              >
+                                Finalizar proceso
+                              </button>
                             ) : null}
                             {!isVacancyReadOnly ? (
                               <button
@@ -4104,6 +4240,13 @@ export default function VacanteDetallePage() {
         onClose={handleCloseSnackbar}
         variant={snackbar.variant}
         message={snackbar.message}
+      />
+
+      <FinishVacancyProcessModal
+        isOpen={finishProcessModalOpen}
+        onClose={() => setFinishProcessModalOpen(false)}
+        onConfirm={handleFinishProcess}
+        loading={finishingProcess}
       />
     </div>
   );

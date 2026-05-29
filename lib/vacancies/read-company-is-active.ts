@@ -20,7 +20,7 @@ export function readCompanyIsActiveForVacancy(
   if (vacancy == null || typeof vacancy !== "object") return true
   const record = vacancy as Record<string, unknown>
 
-  const direct = record.companyIsActive ?? record.company_is_active
+  const direct = record.isCompanyActive ?? record.is_company_active ?? record.companyIsActive ?? record.company_is_active
   if (direct !== undefined) return Boolean(direct)
 
   const companyRaw = record.company

@@ -21,6 +21,7 @@ export interface RecruiterStageOption {
   id: string
   name: string
   order: number
+  final?: boolean
 }
 
 export interface RecruiterApplicantStatusOption {
@@ -147,6 +148,7 @@ export async function listRecruiterStages(
           : typeof item?.order === "number"
             ? item.order
             : i,
+      final: Boolean(item?.final ?? item?.isFinal ?? item?.is_final ?? false),
     }))
     .sort((a, b) => a.order - b.order)
 }
