@@ -42,6 +42,7 @@ const mapStageFromApi = (item, index = 0) => {
       item.isDefault ?? item.is_default ?? item.IsDefault
     ),
     final: Boolean(item.final ?? item.Final),
+    isHiredStage: Boolean(item.isHiredStage ?? item.is_hired_stage),
     triggersNotification: Boolean(item.triggersNotification),
     notificationTemplateId: item.notificationTemplateId ?? null,
   };
@@ -177,6 +178,62 @@ const FinalStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
   );
 };
 
+const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
+  const isOn = Boolean(stage.isHiredStage);
+  const handleClick = () => {
+    if (disabled || isUpdating) return;
+    onToggle(stage, !isOn);
+  };
+  const handleKeyDown = (e) => {
+    if (disabled || isUpdating) return;
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    onToggle(stage, !isOn);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isOn}
+        aria-label={
+          isOn
+            ? `${stage.name}: Etapa de contratación activa`
+            : `Marcar ${stage.name} como etapa de contratación`
+        }
+        disabled={disabled || isUpdating}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
+          isUpdating ? "opacity-60" : "opacity-100"
+        } ${
+          isOn
+            ? "bg-blue-600 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
+            : "border border-slate-300/80 bg-slate-100 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)]"
+        }`}
+      >
+        <span
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+            isOn
+              ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
+              : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
+          }`}
+          aria-hidden
+        />
+      </button>
+      {isUpdating && (
+        <div className="absolute -right-6 top-1/2 -translate-y-1/2">
+          <div
+            className="h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"
+            aria-hidden
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 const renderStageItem = ({ item, collapseIcon, handler }) => {
   return (
     <div className="flex w-full flex-col gap-4 rounded-xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -220,6 +277,17 @@ const renderStageItem = ({ item, collapseIcon, handler }) => {
             onToggle={item.onFinalToggle}
             disabled={item.finalSwitchDisabled}
             isUpdating={item.finalSwitchUpdating}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
+            Etapa de contratación
+          </span>
+          <HiredStageSwitch
+            stage={item}
+            onToggle={item.onHiredToggle}
+            disabled={item.hiredSwitchDisabled}
+            isUpdating={item.hiredSwitchUpdating}
           />
         </div>
         <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
@@ -267,8 +335,10 @@ export default function EtapasPage() {
   const [isEstadosModalOpen, setIsEstadosModalOpen] = useState(false);
   const [defaultStageSwitchLoading, setDefaultStageSwitchLoading] = useState(false);
   const [finalStageSwitchLoading, setFinalStageSwitchLoading] = useState(false);
+  const [hiredStageSwitchLoading, setHiredStageSwitchLoading] = useState(false);
   const [updatingDefaultStageId, setUpdatingDefaultStageId] = useState(null);
   const [updatingFinalStageId, setUpdatingFinalStageId] = useState(null);
+  const [updatingHiredStageId, setUpdatingHiredStageId] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success",
@@ -464,6 +534,77 @@ export default function EtapasPage() {
     }
   };
 
+  const handleHiredStageToggle = async (targetStage, newValue) => {
+    if (hiredStageSwitchLoading) return;
+
+    const stageId = String(targetStage.id);
+    
+    // Actualización optimista: actualizar el estado local inmediatamente
+    setStages((prevStages) =>
+      prevStages.map((s) =>
+        String(s.id) === stageId ? { ...s, isHiredStage: newValue } : s
+      )
+    );
+    
+    setUpdatingHiredStageId(stageId);
+    setHiredStageSwitchLoading(true);
+
+    try {
+      // Usar el endpoint PATCH específico para isHiredStage
+      const updatedStage = await apiClient.patch(
+        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageId}/hired-stage`,
+        { isHiredStage: newValue }
+      );
+
+      // Actualizar con la respuesta del backend
+      setStages((prevStages) =>
+        prevStages.map((s) =>
+          String(s.id) === stageId ? mapStageFromApi(updatedStage) : s
+        )
+      );
+
+      // Pequeño delay para una transición más suave
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: `Etapa ${newValue ? "marcada" : "desmarcada"} como etapa de contratación.`,
+      });
+    } catch (err) {
+      // Revertir el cambio optimista en caso de error
+      setStages((prevStages) =>
+        prevStages.map((s) =>
+          String(s.id) === stageId ? { ...s, isHiredStage: !newValue } : s
+        )
+      );
+      
+      // Manejar errores específicos
+      let errorMessage = "No se pudo actualizar la etapa de contratación. Intenta de nuevo.";
+      
+      if (err?.status === 403 || err?.response?.status === 403) {
+        errorMessage = "No tienes permisos para cambiar esta etapa.";
+      } else if (err?.status === 404 || err?.response?.status === 404) {
+        errorMessage = "La etapa ya no existe. Recargando lista...";
+        // Recargar la lista si la etapa no existe
+        setTimeout(() => fetchStages(), 1000);
+      } else if (err?.message) {
+        errorMessage = err.message;
+      } else if (err?.detail) {
+        errorMessage = err.detail;
+      }
+      
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: errorMessage,
+      });
+    } finally {
+      setUpdatingHiredStageId(null);
+      setHiredStageSwitchLoading(false);
+    }
+  };
+
   const handleEdit = (stage) => {
     setEditingStage(stage);
     setIsModalOpen(true);
@@ -606,10 +747,13 @@ export default function EtapasPage() {
     onDelete: handleDelete,
     onDefaultActivate: handleDefaultStageActivate,
     onFinalToggle: handleFinalStageToggle,
+    onHiredToggle: handleHiredStageToggle,
     defaultSwitchDisabled: reorderLoading || deleteLoading,
     defaultSwitchUpdating: updatingDefaultStageId === String(stage.id),
     finalSwitchDisabled: reorderLoading || deleteLoading,
     finalSwitchUpdating: updatingFinalStageId === String(stage.id),
+    hiredSwitchDisabled: reorderLoading || deleteLoading,
+    hiredSwitchUpdating: updatingHiredStageId === String(stage.id),
   }));
 
   const handleSearchChange = (e) => setSearchQuery(e.target.value);

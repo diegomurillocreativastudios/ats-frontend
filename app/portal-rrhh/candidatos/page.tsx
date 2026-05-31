@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Search, Eye, Users, Plus } from "lucide-react";
+import { Search, Eye, Users, Plus, ClipboardList } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import AgregarCandidatoModal from "@/components/candidato/AgregarCandidatoModal";
+import CandidateFollowUpModal, {
+  type CandidateProfile,
+} from "@/components/candidato/CandidateFollowUpModal";
 import { apiClient } from "@/lib/api";
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
@@ -28,24 +31,45 @@ const emptyToDash = (value) => (value && String(value).trim() ? String(value).tr
 
 /**
  * Maps API candidate document to table row shape.
- * API shape: documentId, profileId, name, email, phone, country, headline, uploadedAt, summary
- * Rutas y GET /api/recruiter/candidates/{id} usan profileId (no documentId).
+ * New API shape: { id, document: { id, uploadedAt }, personalInfo: { name, email, phone, country }, profile: { headline, summary }, recruitment: { hired, evaluations } }
  */
 const mapCandidateFromApi = (item, index = 0) => {
+  // Handle both old and new format
   const id = String(
-    item?.profileId ?? item?.documentId ?? item?.id ?? item?.uuid ?? index
+    item?.id ?? item?.profileId ?? item?.documentId ?? item?.uuid ?? index
   );
-  const name = emptyToDash(item?.name) === "—" ? "Sin nombre" : (item?.name ?? "Sin nombre").trim();
-  const email = emptyToDash(item?.email);
-  const phone = formatPhoneSvDisplay(item?.phone);
-  const country = resolveCountryDisplay(item?.country, phone);
-  const headline = emptyToDash(item?.headline);
-  const summary = emptyToDash(item?.summary);
-  const date = formatDate(item?.uploadedAt ?? item?.createdAt ?? item?.created_at ?? null);
+  
+  // Extract data from nested structure or fallback to old flat structure
+  const personalInfo = item?.personalInfo ?? {};
+  const profile = item?.profile ?? {};
+  const document = item?.document ?? {};
+  const recruitment = item?.recruitment ?? {};
+  
+  const name = emptyToDash(personalInfo?.name ?? item?.name) === "—" ? "Sin nombre" : (personalInfo?.name ?? item?.name ?? "Sin nombre").trim();
+  const email = emptyToDash(personalInfo?.email ?? item?.email);
+  const phone = formatPhoneSvDisplay(personalInfo?.phone ?? item?.phone);
+  const country = resolveCountryDisplay(personalInfo?.country ?? item?.country, phone);
+  const headline = emptyToDash(profile?.headline ?? item?.headline);
+  const summary = emptyToDash(profile?.summary ?? item?.summary);
+  
+  // Date from document.uploadedAt or fallback to old fields
+  const date = formatDate(
+    document?.uploadedAt ?? 
+    item?.uploadedAt ?? 
+    item?.createdAt ?? 
+    item?.created_at ?? 
+    null
+  );
+  
   const initials = getInitials(name, email !== "—" ? email : "");
+  
+  // Handle evaluations from new nested structure
+  const evaluations = recruitment?.evaluations ?? item?.evaluations ?? [];
+  const latestEval = evaluations.length > 0 ? evaluations[evaluations.length - 1] : null;
 
   return {
     id,
+    profileId: id, // Use the main id as profileId
     name,
     email,
     phone,
@@ -54,11 +78,18 @@ const mapCandidateFromApi = (item, index = 0) => {
     summary,
     date,
     initials,
+    evalMonth: latestEval?.evalMonth ?? item?.evalMonth ?? null,
+    evalComments: latestEval?.evalComments ?? item?.evalComments ?? null,
+    evaluations,
+    hired: recruitment?.hired ?? false,
   };
 };
 
-const CandidateRow = ({ candidate }) => {
+const CandidateRow = ({ candidate, onFollowUpClick }) => {
   const detailHref = `/portal-rrhh/candidatos/${candidate.id}`;
+  const isHired = candidate.hired === true;
+  const followUpDisabled = !isHired; // Invertido: solo contratados pueden tener seguimiento
+  const tooltipText = isHired ? "Contratado" : "No Contratado";
 
   return (
     <tr
@@ -96,13 +127,37 @@ const CandidateRow = ({ candidate }) => {
         {candidate.date}
       </td>
       <td className="px-5 py-4 align-middle">
-        <Link
-          href={detailHref}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-          aria-label={`Ver detalle de ${candidate.name}`}
-        >
-          <Eye className="h-4 w-4" aria-hidden />
-        </Link>
+        <div className="flex items-center gap-2">
+          <div className="relative group">
+            <button
+              type="button"
+              onClick={followUpDisabled ? undefined : () => onFollowUpClick(candidate)}
+              disabled={followUpDisabled}
+              className={`inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 ${
+                followUpDisabled
+                  ? "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+              }`}
+              aria-label={followUpDisabled ? tooltipText : `Seguimiento de ${candidate.name}`}
+            >
+              <ClipboardList className="h-4 w-4" aria-hidden />
+            </button>
+            {/* Tooltip */}
+            <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                {tooltipText}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+              </div>
+            </div>
+          </div>
+          <Link
+            href={detailHref}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={`Ver detalle de ${candidate.name}`}
+          >
+            <Eye className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
       </td>
     </tr>
   );
@@ -114,6 +169,8 @@ export default function CandidatosPage() {
   const [fetchError, setFetchError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<CandidateProfile | null>(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success",
@@ -126,6 +183,27 @@ export default function CandidatosPage() {
 
   const handleSnackbar = (message: string, variant: "success" | "error" = "success") => {
     setSnackbar({ open: true, message, variant });
+  };
+
+  const handleFollowUpClick = (candidate: CandidateProfile) => {
+    setSelectedCandidate(candidate);
+    setIsFollowUpModalOpen(true);
+  };
+
+  const handleFollowUpClose = () => {
+    setIsFollowUpModalOpen(false);
+    setSelectedCandidate(null);
+  };
+
+  const handleCandidateUpdated = (updatedCandidate: CandidateProfile) => {
+    setCandidates((prev) =>
+      prev.map((c) =>
+        c.id === updatedCandidate.id || c.profileId === updatedCandidate.id
+          ? { ...c, ...updatedCandidate }
+          : c
+      )
+    );
+    handleSnackbar("Seguimiento guardado exitosamente", "success");
   };
 
   const fetchCandidates = useCallback(async () => {
@@ -271,6 +349,7 @@ export default function CandidatosPage() {
                   <CandidateRow
                     key={`${candidate.id}-${index}`}
                     candidate={candidate}
+                    onFollowUpClick={handleFollowUpClick}
                   />
                 ))}
               </tbody>
@@ -323,6 +402,13 @@ export default function CandidatosPage() {
         onClose={() => setIsUploadModalOpen(false)}
         onSuccess={fetchCandidates}
         onSnackbar={handleSnackbar}
+      />
+
+      <CandidateFollowUpModal
+        open={isFollowUpModalOpen}
+        candidate={selectedCandidate}
+        onClose={handleFollowUpClose}
+        onUpdated={handleCandidateUpdated}
       />
 
       <Snackbar
