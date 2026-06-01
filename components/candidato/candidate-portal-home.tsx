@@ -1,0 +1,145 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import CandidateSidebar from "@/components/candidato/CandidateSidebar";
+import CandidateTopbar from "@/components/candidato/CandidateTopbar";
+import StatCard from "@/components/candidato/StatCard";
+import NextActivitiesCard from "@/components/candidato/NextActivitiesCard";
+import MyPostulationsCard from "@/components/candidato/MyPostulationsCard";
+import ProcessTrackingCard from "@/components/candidato/ProcessTrackingCard";
+import PortalPageHeader from "@/components/ui/PortalPageHeader";
+import { useCandidateDashboard } from "@/hooks/useCandidateDashboard";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getCandidateGreetingFirstName } from "@/lib/candidate-portal-greeting";
+import type { CandidatePortalApplicationRow } from "@/lib/candidate-dashboard";
+
+export default function CandidatePortalHome() {
+  const { data, loading, error } = useCandidateDashboard();
+  const { user, loading: userLoading } = useCurrentUser();
+
+  const greetingName = getCandidateGreetingFirstName(
+    data?.greetingName ?? null,
+    user?.name ?? null,
+    user?.email ?? null
+  );
+
+  const stats = data?.stats ?? null;
+  const activities = data?.activities ?? [];
+  const applications = data?.applications ?? [];
+  
+  const [selectedApplication, setSelectedApplication] = useState<
+    CandidatePortalApplicationRow | null
+  >(null);
+
+  useEffect(() => {
+    if (applications.length > 0 && !selectedApplication) {
+      setSelectedApplication(applications[0]);
+    }
+  }, [applications, selectedApplication]);
+
+  const handleSelectApplication = (application: CandidatePortalApplicationRow) => {
+    setSelectedApplication(application);
+  };
+
+  return (
+    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
+      <div className="hidden h-full lg:flex">
+        <CandidateSidebar />
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <CandidateTopbar variant="desktop" />
+          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="min-w-0 flex flex-col gap-8 p-8">
+              {error ? (
+                <div
+                  role="alert"
+                  className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
+                >
+                  {error}
+                </div>
+              ) : null}
+              <PortalPageHeader
+                title={
+                  userLoading && !data && !error
+                    ? "Cargando…"
+                    : `¡Hola, ${greetingName}! 👋`
+                }
+                description="Aquí puedes consultar el avance de tus postulaciones y próximas actividades."
+                className="pb-0"
+              />
+              <section aria-label="Resumen de estadísticas">
+                <StatCard stats={stats} loading={loading && !data} />
+              </section>
+              
+              <section aria-label="Seguimiento del proceso">
+                <ProcessTrackingCard application={selectedApplication} />
+              </section>
+              
+              <section
+                className="grid gap-6 lg:grid-cols-2"
+                aria-label="Actividades y postulaciones"
+              >
+                <NextActivitiesCard
+                  activities={activities}
+                  loading={loading && !data}
+                />
+                <MyPostulationsCard
+                  applications={applications}
+                  loading={loading && !data}
+                  onSelectApplication={handleSelectApplication}
+                />
+              </section>
+            </div>
+          </main>
+        </div>
+      </div>
+
+      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
+        <CandidateTopbar variant="tablet" />
+        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
+            {error ? (
+              <div
+                role="alert"
+                className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 font-sans text-sm text-destructive"
+              >
+                {error}
+              </div>
+            ) : null}
+            <PortalPageHeader
+              title={
+                userLoading && !data && !error
+                  ? "Cargando…"
+                  : `¡Hola, ${greetingName}! 👋`
+              }
+              description="Aquí puedes consultar el avance de tus postulaciones y próximas actividades."
+              className="pb-0"
+              descriptionClassName="text-sm leading-6 md:text-base"
+            />
+            <section aria-label="Resumen de estadísticas">
+              <StatCard stats={stats} loading={loading && !data} />
+            </section>
+            
+            <section aria-label="Seguimiento del proceso">
+              <ProcessTrackingCard application={selectedApplication} />
+            </section>
+            
+            <section aria-label="Próximas actividades">
+              <NextActivitiesCard
+                activities={activities}
+                loading={loading && !data}
+              />
+            </section>
+            
+            <section aria-label="Mis postulaciones">
+              <MyPostulationsCard
+                applications={applications}
+                loading={loading && !data}
+                onSelectApplication={handleSelectApplication}
+              />
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}

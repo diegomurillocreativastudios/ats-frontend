@@ -1,0 +1,32 @@
+{
+  "version": "0.2",
+  "language": "en,es",
+  "import": ["@cspell/dict-es-es/cspell-ext.json"],
+  "dictionaries": ["typescript", "node", "npm", "html", "css", "project-words"],
+  "dictionaryDefinitions": [
+    {
+      "name": "project-words",
+      "path": "./cspell-project-words.txt",
+      "addWords": true
+    }
+  ],
+  "ignoreRegExpList": [
+    "/iniciar-sesion/g",
+    "/seleccion-portal/g",
+    "/restablecer-contrasena/g",
+    "/auth\\/registrarse/g"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    ".next",
+    "dist",
+    "coverage",
+    "design.pen",
+    "*.lock",
+    "package-lock.json",
+    "tests/**",
+    "scripts/**",
+    "*.md"
+  ],
+  "words": []
+}

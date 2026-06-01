@@ -1,0 +1,127 @@
+<style data-technical-sheet-template-base>
+  html { box-sizing: border-box; }
+  *, *::before, *::after { box-sizing: inherit; }
+
+  main.technical-sheet-source {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f5f5f5;
+  }
+
+  article.ts-article {
+    margin: 0;
+    padding: 0;
+    font-size: 13.5px;
+    line-height: 1.42;
+    color: #111827;
+  }
+
+  article.ts-article > section {
+    margin-bottom: 28px;
+  }
+
+  article.ts-article > section > h2 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-decoration: underline;
+  }
+</style>
+<main class="technical-sheet-source">
+  <article class="ts-article">
+    <section>
+      <h2>Experiencia laboral</h2>
+      {{#each candidate.workExperience}}
+      <div style="margin-bottom: 24px;">
+        <p style="margin: 0 0 2px;">
+          <strong>Empresa:</strong>
+          {{company}}
+        </p>
+        <p style="margin: 0 0 2px;">
+          <strong>Cargo desempeñado:</strong>
+          {{role}}
+        </p>
+        <p style="margin: 0 0 2px;">
+          <strong>Periodo:</strong>
+          {{startDate}} — {{endDate}}
+        </p>
+        <p style="margin: 16px 0 4px; font-weight: 800;">Funciones principales:</p>
+        <ul style="margin: 0; padding-left: 32px;">
+          {{#each responsibilities}}
+          <li style="margin: 4px 0; padding-left: 3px; text-align: justify;">{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      {{/each}}
+    </section>
+
+    <section>
+      <h2>Educación</h2>
+      {{#each candidate.education}}
+      <div style="margin-bottom: 20px;">
+        <p style="margin: 0 0 2px;"><strong>Institución:</strong> {{institution}}</p>
+        <p style="margin: 0 0 2px;"><strong>Título / estudio:</strong> {{degree}}</p>
+        <p style="margin: 0 0 2px;"><strong>Periodo:</strong> {{startDate}} — {{endDate}}</p>
+      </div>
+      {{/each}}
+    </section>
+
+    <section>
+      <h2>Cursos y certificaciones</h2>
+      <ul style="margin: 0; padding-left: 32px;">
+        {{#each candidate.certifications}}
+        <li style="margin: 4px 0; padding-left: 3px;">
+          <strong>{{name}}</strong>
+          <span> {{institution}} </span>
+          <span>{{year}}</span>
+        </li>
+        {{/each}}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Habilidades técnicas</h2>
+      <ul style="margin: 0; padding-left: 32px;">
+        {{#each candidate.technicalSkills}}
+        <li style="margin: 4px 0; padding-left: 3px;">{{.}}</li>
+        {{/each}}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Habilidades blandas</h2>
+      <ul style="margin: 0; padding-left: 32px;">
+        {{#each candidate.softSkills}}
+        <li style="margin: 4px 0; padding-left: 3px;">{{.}}</li>
+        {{/each}}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Idiomas</h2>
+      <ul style="margin: 0; padding-left: 32px;">
+        {{#each candidate.languages}}
+        <li style="margin: 4px 0; padding-left: 3px;">{{language}} — {{level}}</li>
+        {{/each}}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Información adicional</h2>
+      <div>
+        <p style="margin: 0 0 4px;"><strong>Disponibilidad:</strong> {{candidate.availability}}</p>
+        <p style="margin: 0 0 4px;"><strong>Modalidad:</strong> {{candidate.workMode}}</p>
+        <p style="margin: 0 0 4px;"><strong>País:</strong> {{candidate.country}}</p>
+        <p style="margin: 0 0 4px;"><strong>Expectativa salarial:</strong> {{candidate.salaryExpectation}}</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Resumen del perfil</h2>
+      <p style="margin: 0; text-align: justify;">{{candidate.profileSummary}}</p>
+    </section>
+  </article>
+</main>

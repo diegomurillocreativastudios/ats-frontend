@@ -1,0 +1,1302 @@
+import { apiClient } from "@/lib/api"
+import { getApiErrorMessage } from "@/lib/api-error"
+
+export type InterviewStatus = "Scheduled" | "Completed" | "Cancelled" | "NoShow"
+
+/** Snapshot anidado en respuestas de entrevista (`interviewModality`). */
+export interface InterviewModalitySnapshot {
+  id: string
+  displayName: string
+  includeGoogleMeetLink: boolean
+}
+
+export interface Interview {
+  id: string
+  vacancyId: string
+  /** Título de la vacante u oferta si el API lo envía (p. ej. portal candidato). */
+  jobTitle: string | null
+  candidateProfileId: string
+  scheduledAtUtc: string
+  durationMinutes: number | null
+  /** Valor para PATCH / select (código, id o string legacy). */
+  interviewType: string | null
+  /** Nombre legible del tipo (p. ej. displayName del API). */
+  interviewTypeLabel: string | null
+  interviewTypeId: string | null
+  interviewModalityId: string | null
+  interviewModality: InterviewModalitySnapshot | null
+  interviewerName: string | null
+  googleMeetUrl: string | null
+  /** Texto descriptivo de la entrevista (JSON: `descripcion`). */
+  descripcion: string | null
+  /** Apuntes / indicaciones internas o para el candidato (JSON: `notes`). */
+  notes: string | null
+  outcome: string | null
+  status: InterviewStatus
+  /** displayName del estado cuando el API lo envía anidado. */
+  statusDisplayName: string | null
+  interviewStatusId: string | null
+  /** Si el API lo indica, tiene prioridad sobre el enum al decidir si es editable. */
+  isStatusTerminal: boolean | null
+  createdAtUtc: string | null
+  updatedAtUtc: string | null
+}
+
+export interface ListInterviewsQuery {
+  status?: InterviewStatus
+  fromUtc?: string
+  toUtc?: string
+}
+
+export interface CreateInterviewPayload {
+  candidateProfileId: string
+  scheduledAtUtc: string
+  durationMinutes?: number | null
+  interviewTypeId?: string | null
+  interviewType?: string | null
+  interviewModalityId?: string | null
+  interviewerName?: string | null
+  descripcion?: string | null
+  notes?: string | null
+}
+
+export interface PatchInterviewPayload {
+  scheduledAtUtc?: string
+  durationMinutes?: number | null
+  interviewType?: string | null
+  interviewModalityId?: string | null
+  interviewerName?: string | null
+  descripcion?: string | null
+  notes?: string | null
+  status?: InterviewStatus
+  interviewStatusId?: string | null
+  outcome?: string | null
+}
+
+export interface VacancyApplicantOption {
+  candidateProfileId: string
+  label: string
+}
+
+/** Opción para el selector de tipo de entrevista (GET /api/admin/interview-types). */
+export interface InterviewTypeOption {
+  value: string
+  label: string
+}
+
+/** Tipo de entrevista con id (admin / CRUD). */
+export interface InterviewTypeAdmin {
+  id: string
+  name: string
+  /** Código estable (slug); requerido por el API en POST/PUT. */
+  code: string
+}
+
+export interface CreateInterviewTypePayload {
+  name: string
+}
+
+export interface UpdateInterviewTypePayload {
+  name: string
+  code: string
+}
+
+/**
+ * Genera un `code` estable a partir del nombre visible (requerido por el API admin).
+ */
+export function slugifyInterviewTypeCode(displayName: string): string {
+  const s = displayName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80)
+  return s || "tipo"
+}
+
+const STATUS_SET = new Set<string>(["Scheduled", "Completed", "Cancelled", "NoShow"])
+
+function pickString(
+  raw: Record<string, unknown>,
+  keys: string[]
+): string | null {
+  for (const k of keys) {
+    const v = raw[k]
+    if (v != null && String(v).trim() !== "") return String(v).trim()
+  }
+  return null
+}
+
+function pickNumber(
+  raw: Record<string, unknown>,
+  keys: string[]
+): number | null {
+  for (const k of keys) {
+    const v = raw[k]
+    if (typeof v === "number" && Number.isFinite(v)) return v
+    if (typeof v === "string" && v.trim() !== "") {
+      const n = parseInt(v, 10)
+      if (Number.isFinite(n)) return n
+    }
+  }
+  return null
+}
+
+function pickBool(
+  raw: Record<string, unknown>,
+  keys: string[],
+  defaultValue = false
+): boolean {
+  for (const k of keys) {
+    if (!(k in raw)) continue
+    const v = raw[k]
+    if (typeof v === "boolean") return v
+    if (v === "true" || v === 1 || v === "1") return true
+    if (v === "false" || v === 0 || v === "0") return false
+  }
+  return defaultValue
+}
+
+/**
+ * Enum C# típico sin valores explícitos (mismo orden que `InterviewStatus` en specs).
+ * Solo se usa cuando el JSON trae número (p. ej. sin `JsonStringEnumConverter`).
+ */
+function mapInterviewStatusFromNumericOrdinal(n: number): InterviewStatus {
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0 || n > 3) {
+    return "Scheduled"
+  }
+  const map: InterviewStatus[] = [
+    "Scheduled",
+    "Completed",
+    "Cancelled",
+    "NoShow",
+  ]
+  return map[n] ?? "Scheduled"
+}
+
+function normalizeStatus(value: unknown): InterviewStatus {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return mapInterviewStatusFromNumericOrdinal(value)
+  }
+  const s = value != null ? String(value).trim() : ""
+  if (!s) return "Scheduled"
+  if (STATUS_SET.has(s)) return s as InterviewStatus
+  const lower = s.toLowerCase()
+  if (lower === "scheduled") return "Scheduled"
+  if (lower === "completed") return "Completed"
+  if (lower === "cancelled" || lower === "canceled") return "Cancelled"
+  if (lower === "noshow" || lower === "no_show" || lower === "no-show") return "NoShow"
+  if (/^\d$/.test(s)) {
+    return mapInterviewStatusFromNumericOrdinal(Number.parseInt(s, 10))
+  }
+  return mapInterviewStatusFromCodeOrLabel(s)
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    return value as Record<string, unknown>
+  }
+  return null
+}
+
+function pickInterviewTypeMeta(r: Record<string, unknown>): {
+  typeValue: string | null
+  typeLabel: string | null
+  typeId: string | null
+} {
+  const typeIdRoot =
+    pickString(r, ["interviewTypeId", "interview_type_id"]) ?? null
+  const direct = r.interviewType ?? r.interview_type
+  if (typeof direct === "string" && direct.trim()) {
+    const s = direct.trim()
+    return {
+      typeId: typeIdRoot,
+      typeValue: s,
+      typeLabel: s,
+    }
+  }
+  const nested = asRecord(direct)
+  if (nested) {
+    const nestedId = pickString(nested, ["id", "uuid"])
+    const code = pickString(nested, ["code", "key"])
+    const display =
+      pickString(nested, [
+        "displayName",
+        "display_name",
+        "name",
+        "label",
+        "title",
+      ]) ?? null
+    const id = nestedId ?? typeIdRoot
+    const label = display ?? code ?? nestedId ?? typeIdRoot
+    const value = code ?? typeIdRoot ?? nestedId ?? display
+    return {
+      typeId: id,
+      typeValue: value,
+      typeLabel: label,
+    }
+  }
+  const fromType = pickString(r, ["type"])
+  return {
+    typeId: typeIdRoot,
+    typeValue: fromType,
+    typeLabel: fromType,
+  }
+}
+
+function pickInterviewModalityMeta(r: Record<string, unknown>): {
+  interviewModalityId: string | null
+  interviewModality: InterviewModalitySnapshot | null
+} {
+  const modalityIdRoot =
+    pickString(r, ["interviewModalityId", "interview_modality_id"]) ?? null
+  const nestedRaw = r.interviewModality ?? r.interview_modality
+  const nested = asRecord(nestedRaw)
+  if (nested) {
+    const id =
+      pickString(nested, ["id", "uuid"]) ?? modalityIdRoot ?? ""
+    if (!id.trim()) {
+      return { interviewModalityId: modalityIdRoot, interviewModality: null }
+    }
+    const displayName =
+      pickString(nested, ["displayName", "display_name", "name"]) ?? ""
+    const includeMeet = pickBool(
+      nested,
+      ["includeGoogleMeetLink", "include_google_meet_link"],
+      false
+    )
+    return {
+      interviewModalityId: id,
+      interviewModality: {
+        id,
+        displayName: displayName.trim() || id,
+        includeGoogleMeetLink: includeMeet,
+      },
+    }
+  }
+  return {
+    interviewModalityId: modalityIdRoot,
+    interviewModality: null,
+  }
+}
+
+function mapInterviewStatusFromCodeOrLabel(raw: string): InterviewStatus {
+  const trimmed = raw.trim()
+  if (!trimmed) return "Scheduled"
+  if (STATUS_SET.has(trimmed)) return trimmed as InterviewStatus
+  const normalized = trimmed
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_")
+  if (
+    normalized === "scheduled" ||
+    normalized === "programada" ||
+    normalized === "programado"
+  ) {
+    return "Scheduled"
+  }
+  if (
+    normalized === "completed" ||
+    normalized === "completada" ||
+    normalized === "completado"
+  ) {
+    return "Completed"
+  }
+  if (
+    normalized === "cancelled" ||
+    normalized === "canceled" ||
+    normalized === "cancelada" ||
+    normalized === "cancelado"
+  ) {
+    return "Cancelled"
+  }
+  if (
+    normalized === "noshow" ||
+    normalized === "no_show" ||
+    normalized === "no_asistio" ||
+    normalized === "no_asistió"
+  ) {
+    return "NoShow"
+  }
+  const compact = normalized.replace(/_/g, "")
+  if (
+    compact.includes("noshow") ||
+    compact.includes("noasist") ||
+    compact.includes("ausente")
+  ) {
+    return "NoShow"
+  }
+  if (compact.includes("cancel")) return "Cancelled"
+  if (
+    (compact.includes("complet") && !compact.includes("incomplet")) ||
+    compact.includes("finaliz") ||
+    compact.includes("cerrad")
+  ) {
+    return "Completed"
+  }
+  if (
+    compact.includes("schedul") ||
+    compact.includes("program") ||
+    compact.includes("agendad") ||
+    compact.includes("pendient")
+  ) {
+    return "Scheduled"
+  }
+  return "Scheduled"
+}
+
+function nestedInterviewStatusRecord(
+  raw: unknown
+): Record<string, unknown> | null {
+  const o = asRecord(raw)
+  if (!o) return null
+  const code = pickString(o, [
+    "code",
+    "Code",
+    "key",
+    "Key",
+    "value",
+    "Value",
+  ])
+  const displayName = pickString(o, [
+    "displayName",
+    "display_name",
+    "DisplayName",
+    "name",
+    "Name",
+    "label",
+    "Label",
+    "title",
+    "Title",
+  ])
+  const innerStatus = o.status ?? o.Status
+  const innerNum =
+    typeof innerStatus === "number" && Number.isFinite(innerStatus)
+      ? innerStatus
+      : null
+  const innerStr =
+    typeof innerStatus === "string" && innerStatus.trim() !== ""
+      ? innerStatus.trim()
+      : null
+  if (code || displayName || innerNum != null || innerStr) return o
+  return null
+}
+
+function extractInterviewStatusPayload(r: Record<string, unknown>): unknown {
+  for (const key of [
+    "interviewStatus",
+    "InterviewStatus",
+    "interview_status",
+  ]) {
+    const v = r[key]
+    if (nestedInterviewStatusRecord(v)) return v
+  }
+  for (const key of ["status", "Status", "state", "State"]) {
+    const v = r[key]
+    if (v == null) continue
+    if (typeof v === "string" && v.trim() === "") continue
+    if (typeof v === "object" && !Array.isArray(v)) {
+      if (nestedInterviewStatusRecord(v)) return v
+      continue
+    }
+    return v
+  }
+  const flat = pickString(r, [
+    "statusName",
+    "status_name",
+    "StatusName",
+    "interviewStatusName",
+    "interview_status_name",
+    "InterviewStatusName",
+    "statusLabel",
+    "status_label",
+    "StatusLabel",
+    "statusDisplayName",
+    "status_display_name",
+    "StatusDisplayName",
+  ])
+  return flat ?? null
+}
+
+function normalizeInterviewStatusMeta(r: Record<string, unknown>): {
+  status: InterviewStatus
+  statusDisplayName: string | null
+  interviewStatusId: string | null
+  isStatusTerminal: boolean | null
+} {
+  const rootStatusId =
+    pickString(r, [
+      "interviewStatusId",
+      "interview_status_id",
+      "InterviewStatusId",
+    ]) ?? null
+  const s = extractInterviewStatusPayload(r)
+  if (s == null) {
+    return {
+      status: "Scheduled",
+      statusDisplayName: null,
+      interviewStatusId: rootStatusId,
+      isStatusTerminal: null,
+    }
+  }
+
+  const nestedKnown = nestedInterviewStatusRecord(s)
+  if (nestedKnown) {
+    const code =
+      pickString(nestedKnown, [
+        "code",
+        "Code",
+        "key",
+        "Key",
+        "value",
+        "Value",
+      ]) ?? ""
+    const displayName =
+      pickString(nestedKnown, [
+        "displayName",
+        "display_name",
+        "DisplayName",
+        "name",
+        "Name",
+        "label",
+        "Label",
+        "title",
+        "Title",
+      ]) ?? null
+    const id = pickString(nestedKnown, ["id", "uuid"]) ?? rootStatusId
+    let isTerminal: boolean | null = null
+    if (typeof nestedKnown.isTerminal === "boolean") {
+      isTerminal = nestedKnown.isTerminal
+    } else if (typeof nestedKnown.is_terminal === "boolean") {
+      isTerminal = nestedKnown.is_terminal as boolean
+    }
+    const inner = nestedKnown.status ?? nestedKnown.Status
+    let mapped: InterviewStatus
+    if (typeof inner === "number" && Number.isFinite(inner)) {
+      mapped = mapInterviewStatusFromNumericOrdinal(Number(inner))
+    } else if (typeof inner === "string" && inner.trim() !== "") {
+      mapped = normalizeStatus(inner)
+    } else {
+      mapped = mapInterviewStatusFromCodeOrLabel(code || displayName || "")
+    }
+    return {
+      status: mapped,
+      statusDisplayName: displayName,
+      interviewStatusId: id,
+      isStatusTerminal: isTerminal,
+    }
+  }
+  const rootDisplayName =
+    pickString(r, [
+      "statusDisplayName",
+      "status_display_name",
+      "StatusDisplayName",
+    ]) ?? null
+  return {
+    status: normalizeStatus(s),
+    statusDisplayName: rootDisplayName,
+    interviewStatusId: rootStatusId,
+    isStatusTerminal: null,
+  }
+}
+
+export function normalizeInterview(raw: unknown): Interview {
+  const r = asRecord(raw) ?? {}
+  const id =
+    pickString(r, ["id", "uuid", "interviewId", "interview_id"]) ?? ""
+  const vacancyId =
+    pickString(r, ["vacancyId", "vacancy_id", "VacancyId"]) ?? ""
+  const jobTitle =
+    pickString(r, [
+      "jobTitle",
+      "job_title",
+      "JobTitle",
+      "vacancyTitle",
+      "vacancy_title",
+      "VacancyTitle",
+      "vacancyName",
+      "vacancy_name",
+      "positionTitle",
+      "position_title",
+    ]) ?? null
+  const candidateProfileId =
+    pickString(r, [
+      "candidateProfileId",
+      "candidate_profile_id",
+      "CandidateProfileId",
+    ]) ?? ""
+  const scheduledAtUtc =
+    pickString(r, [
+      "scheduledAtUtc",
+      "scheduled_at_utc",
+      "ScheduledAtUtc",
+      "scheduledAt",
+    ]) ?? ""
+  const typeMeta = pickInterviewTypeMeta(r)
+  const modalityMeta = pickInterviewModalityMeta(r)
+  const statusMeta = normalizeInterviewStatusMeta(r)
+  return {
+    id,
+    vacancyId,
+    jobTitle,
+    candidateProfileId,
+    scheduledAtUtc,
+    durationMinutes: pickNumber(r, ["durationMinutes", "duration_minutes"]),
+    interviewType: typeMeta.typeValue,
+    interviewTypeLabel: typeMeta.typeLabel,
+    interviewTypeId: typeMeta.typeId,
+    interviewModalityId: modalityMeta.interviewModalityId,
+    interviewModality: modalityMeta.interviewModality,
+    interviewerName: pickString(r, [
+      "interviewerName",
+      "interviewer_name",
+      "interviewer",
+    ]),
+    googleMeetUrl: pickString(r, ["googleMeetUrl", "google_meet_url", "meetUrl"]),
+    descripcion: pickString(r, [
+      "descripcion",
+      "Descripcion",
+      "description",
+      "Description",
+    ]),
+    notes: pickString(r, ["notes", "Notes"]),
+    outcome: pickString(r, ["outcome", "Outcome"]),
+    status: statusMeta.status,
+    statusDisplayName: statusMeta.statusDisplayName,
+    interviewStatusId: statusMeta.interviewStatusId,
+    isStatusTerminal: statusMeta.isStatusTerminal,
+    createdAtUtc: pickString(r, ["createdAtUtc", "created_at_utc"]),
+    updatedAtUtc: pickString(r, ["updatedAtUtc", "updated_at_utc"]),
+  }
+}
+
+function normalizeInterviewList(data: unknown): Interview[] {
+  if (Array.isArray(data)) return data.map((item) => normalizeInterview(item))
+  const r = asRecord(data)
+  const arr = r?.items ?? r?.interviews ?? r?.data
+  if (Array.isArray(arr)) return arr.map((item) => normalizeInterview(item))
+  return []
+}
+
+function buildQueryString(q: ListInterviewsQuery): string {
+  const params = new URLSearchParams()
+  if (q.status) params.set("status", q.status)
+  if (q.fromUtc) params.set("fromUtc", q.fromUtc)
+  if (q.toUtc) params.set("toUtc", q.toUtc)
+  const s = params.toString()
+  return s ? `?${s}` : ""
+}
+
+/** Mensaje UX según código HTTP y cuerpo de error del API. */
+export function getInterviewHttpErrorMessage(
+  status: number,
+  err: unknown
+): string {
+  const detail = getApiErrorMessage(err)
+  if (status === 400) {
+    return detail !== "Error desconocido"
+      ? detail
+      : "Los datos enviados no son válidos. Revisa fechas y campos obligatorios."
+  }
+  if (status === 403) {
+    return "No tienes permiso para realizar esta acción."
+  }
+  if (status === 404) {
+    return detail !== "Error desconocido"
+      ? detail
+      : "No se encontró el recurso solicitado."
+  }
+  if (status === 409) {
+    return detail !== "Error desconocido"
+      ? detail
+      : "Conflicto con el estado actual. Vuelve a cargar e inténtalo de nuevo."
+  }
+  return detail
+}
+
+export async function getInterviewsByVacancy(
+  vacancyId: string,
+  query: ListInterviewsQuery = {}
+): Promise<Interview[]> {
+  const qs = buildQueryString(query)
+  const data = await apiClient.get(
+    `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}/interviews${qs}`
+  )
+  return normalizeInterviewList(data)
+}
+
+export async function getInterviewsByCandidate(
+  candidateProfileId: string,
+  query: ListInterviewsQuery = {}
+): Promise<Interview[]> {
+  const qs = buildQueryString(query)
+  const data = await apiClient.get(
+    `/api/recruiter/candidates/${encodeURIComponent(candidateProfileId)}/interviews${qs}`
+  )
+  return normalizeInterviewList(data)
+}
+
+/**
+ * Entrevistas del candidato autenticado (portal).
+ * Contrato: `GET /api/candidate/interviews` — ver `specs/spec-portal-candidato-entrevistas.md`.
+ */
+export async function getCandidateSelfInterviews(
+  query: ListInterviewsQuery = {}
+): Promise<Interview[]> {
+  const qs = buildQueryString(query)
+  const data = await apiClient.get(`/api/candidate/interviews${qs}`)
+  return normalizeInterviewList(data)
+}
+
+export async function getInterviewById(interviewId: string): Promise<Interview> {
+  const data = await apiClient.get(
+    `/api/recruiter/interviews/${encodeURIComponent(interviewId)}`
+  )
+  return normalizeInterview(data)
+}
+
+/**
+ * Si el backend no expone GET por id, busca en el listado de la vacante (requiere vacancyId).
+ */
+export async function getInterviewResolved(
+  interviewId: string,
+  vacancyId: string | null
+): Promise<Interview> {
+  try {
+    return await getInterviewById(interviewId)
+  } catch (err: unknown) {
+    const status = typeof err === "object" && err !== null && "status" in err
+      ? (err as { status?: number }).status
+      : undefined
+    if (status === 404 && vacancyId) {
+      const list = await getInterviewsByVacancy(vacancyId)
+      const found = list.find((i) => i.id === interviewId)
+      if (found) return found
+    }
+    throw err
+  }
+}
+
+export async function createInterview(
+  vacancyId: string,
+  payload: CreateInterviewPayload
+): Promise<Interview> {
+  const data = await apiClient.post(
+    `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}/interviews`,
+    payload
+  )
+  return normalizeInterview(data)
+}
+
+export async function patchInterview(
+  interviewId: string,
+  payload: PatchInterviewPayload
+): Promise<Interview> {
+  const data = await apiClient.patch(
+    `/api/recruiter/interviews/${encodeURIComponent(interviewId)}`,
+    payload
+  )
+  return normalizeInterview(data)
+}
+
+/**
+ * Actualiza solo `notes` de la entrevista.
+ * `PATCH /api/recruiter/interviews/{id}/notes` — el cuerpo debe incluir `notes` (usar `""` para vaciar).
+ */
+export async function patchRecruiterInterviewNotes(
+  interviewId: string,
+  notes: string
+): Promise<Interview> {
+  const data = await apiClient.patch(
+    `/api/recruiter/interviews/${encodeURIComponent(interviewId)}/notes`,
+    { notes }
+  )
+  return normalizeInterview(data)
+}
+
+/**
+ * Soft delete. `DELETE /api/recruiter/interviews/{id}` → 204 sin cuerpo JSON.
+ */
+export async function deleteRecruiterInterview(
+  interviewId: string
+): Promise<void> {
+  await apiClient.delete(
+    `/api/recruiter/interviews/${encodeURIComponent(interviewId)}`
+  )
+}
+
+/**
+ * Candidatos vinculados a la vacante (postulantes en pipeline), para el selector de alta.
+ * Usa el mismo GET de vacante que el kanban.
+ */
+function normalizeInterviewTypes(data: unknown): InterviewTypeOption[] {
+  const rawList: unknown[] = []
+  if (Array.isArray(data)) rawList.push(...data)
+  else {
+    const r = asRecord(data)
+    const nested =
+      r?.data ?? r?.items ?? r?.interviewTypes ?? r?.types ?? r?.results
+    if (Array.isArray(nested)) rawList.push(...nested)
+  }
+  const options: InterviewTypeOption[] = []
+  const seen = new Set<string>()
+  rawList.forEach((item) => {
+    if (typeof item === "string") {
+      const v = item.trim()
+      if (!v || seen.has(v)) return
+      seen.add(v)
+      options.push({ value: v, label: v })
+      return
+    }
+    const o = asRecord(item)
+    if (!o) return
+    const value =
+      pickString(o, [
+        "value",
+        "code",
+        "id",
+        "name",
+        "label",
+        "key",
+        "interviewType",
+        "interview_type",
+      ]) ?? ""
+    if (!value || seen.has(value)) return
+    seen.add(value)
+    const label =
+      pickString(o, [
+        "label",
+        "name",
+        "displayName",
+        "display_name",
+        "title",
+      ]) ?? value
+    options.push({ value, label })
+  })
+  return options
+}
+
+function normalizeInterviewTypeAdminItem(
+  raw: unknown
+): InterviewTypeAdmin | null {
+  if (typeof raw === "string") {
+    const s = raw.trim()
+    if (!s) return null
+    return { id: s, name: s, code: slugifyInterviewTypeCode(s) }
+  }
+  const o = asRecord(raw)
+  if (!o) return null
+  const id = pickString(o, [
+    "id",
+    "uuid",
+    "interviewTypeId",
+    "interview_type_id",
+  ])
+  const name =
+    pickString(o, [
+      "displayName",
+      "display_name",
+      "name",
+      "label",
+      "title",
+    ]) ?? ""
+  const rawCode = pickString(o, ["code", "key", "slug", "value"])
+  const code =
+    (rawCode && rawCode.trim()) || slugifyInterviewTypeCode(name)
+  if (!id || !name.trim()) return null
+  return { id, name: name.trim(), code }
+}
+
+function normalizeInterviewTypesAdminList(data: unknown): InterviewTypeAdmin[] {
+  const rawList: unknown[] = []
+  if (Array.isArray(data)) rawList.push(...data)
+  else {
+    const r = asRecord(data)
+    const nested =
+      r?.data ?? r?.items ?? r?.interviewTypes ?? r?.types ?? r?.results
+    if (Array.isArray(nested)) rawList.push(...nested)
+  }
+  const out: InterviewTypeAdmin[] = []
+  rawList.forEach((item) => {
+    const rec = normalizeInterviewTypeAdminItem(item)
+    if (rec) out.push(rec)
+  })
+  return out
+}
+
+function normalizeInterviewTypeAdminResponse(
+  raw: unknown
+): InterviewTypeAdmin | null {
+  return normalizeInterviewTypeAdminItem(raw)
+}
+
+/**
+ * Catálogo de tipos de entrevista (admin).
+ * Respuesta flexible: array de strings u objetos con name/label/value.
+ */
+export async function fetchInterviewTypes(): Promise<InterviewTypeOption[]> {
+  const data = await apiClient.get("/api/admin/interview-types")
+  return normalizeInterviewTypes(data)
+}
+
+/** Listado para CRUD (mismo GET; objetos con id y nombre). */
+export async function listInterviewTypesAdmin(): Promise<InterviewTypeAdmin[]> {
+  const data = await apiClient.get("/api/admin/interview-types")
+  return normalizeInterviewTypesAdminList(data)
+}
+
+export async function createInterviewType(
+  payload: CreateInterviewTypePayload
+): Promise<InterviewTypeAdmin> {
+  const displayName = payload.name.trim()
+  const code = slugifyInterviewTypeCode(displayName)
+  const data = await apiClient.post("/api/admin/interview-types", {
+    code,
+    displayName,
+  })
+  const rec = normalizeInterviewTypeAdminResponse(data)
+  if (!rec) {
+    return {
+      id: "",
+      name: displayName,
+      code,
+    }
+  }
+  return rec
+}
+
+export async function updateInterviewType(
+  id: string,
+  payload: UpdateInterviewTypePayload
+): Promise<InterviewTypeAdmin> {
+  const displayName = payload.name.trim()
+  const code = payload.code.trim()
+  const data = await apiClient.put(
+    `/api/admin/interview-types/${encodeURIComponent(id)}`,
+    { code, displayName }
+  )
+  const rec = normalizeInterviewTypeAdminResponse(data)
+  if (!rec) {
+    return { id, name: displayName, code }
+  }
+  return rec
+}
+
+export async function deleteInterviewType(id: string): Promise<void> {
+  await apiClient.delete(
+    `/api/admin/interview-types/${encodeURIComponent(id)}`
+  )
+}
+
+/**
+ * Ítem del catálogo de modalidades de entrevista (admin y recruiter GET).
+ * POST/PATCH admin: `{ displayName, includeGoogleMeetLink }` (camelCase, JWT Bearer).
+ */
+export interface InterviewModalityCatalogItem {
+  id: string
+  displayName: string
+  includeGoogleMeetLink: boolean
+  createdAtUtc?: string | null
+}
+
+/** Alias histórico para el modal admin / CRUD. */
+export type InterviewModalityAdmin = InterviewModalityCatalogItem
+
+export interface CreateInterviewModalityPayload {
+  displayName: string
+  includeGoogleMeetLink: boolean
+}
+
+export interface UpdateInterviewModalityPayload {
+  displayName: string
+  includeGoogleMeetLink: boolean
+}
+
+function normalizeInterviewModalityCatalogItem(
+  raw: unknown
+): InterviewModalityCatalogItem | null {
+  const o = asRecord(raw)
+  if (!o) return null
+  const id = pickString(o, [
+    "id",
+    "uuid",
+    "interviewModalityId",
+    "interview_modality_id",
+  ])
+  const displayName =
+    pickString(o, [
+      "displayName",
+      "display_name",
+      "name",
+      "label",
+      "title",
+    ]) ?? ""
+  if (!id || !displayName.trim()) return null
+  return {
+    id,
+    displayName: displayName.trim(),
+    includeGoogleMeetLink: pickBool(
+      o,
+      ["includeGoogleMeetLink", "include_google_meet_link"],
+      false
+    ),
+    createdAtUtc: pickString(o, ["createdAtUtc", "created_at_utc"]),
+  }
+}
+
+function normalizeInterviewModalitiesCatalogList(
+  data: unknown
+): InterviewModalityCatalogItem[] {
+  const rawList: unknown[] = []
+  if (Array.isArray(data)) rawList.push(...data)
+  else {
+    const r = asRecord(data)
+    const nested =
+      r?.data ??
+      r?.items ??
+      r?.interviewModalities ??
+      r?.modalities ??
+      r?.results
+    if (Array.isArray(nested)) rawList.push(...nested)
+  }
+  const out: InterviewModalityCatalogItem[] = []
+  rawList.forEach((item) => {
+    const rec = normalizeInterviewModalityCatalogItem(item)
+    if (rec) out.push(rec)
+  })
+  return out
+}
+
+function normalizeInterviewModalityCatalogResponse(
+  raw: unknown
+): InterviewModalityCatalogItem | null {
+  return normalizeInterviewModalityCatalogItem(raw)
+}
+
+/** Solo lectura: reclutador u admin. `GET /api/recruiter/interview-modalities`. */
+export async function listInterviewModalitiesRecruiter(): Promise<
+  InterviewModalityCatalogItem[]
+> {
+  const data = await apiClient.get("/api/recruiter/interview-modalities")
+  return normalizeInterviewModalitiesCatalogList(data)
+}
+
+export async function listInterviewModalitiesAdmin(): Promise<
+  InterviewModalityCatalogItem[]
+> {
+  const data = await apiClient.get("/api/admin/interview-modalities")
+  return normalizeInterviewModalitiesCatalogList(data)
+}
+
+export async function getInterviewModalityAdmin(
+  id: string
+): Promise<InterviewModalityCatalogItem> {
+  const data = await apiClient.get(
+    `/api/admin/interview-modalities/${encodeURIComponent(id)}`
+  )
+  const rec = normalizeInterviewModalityCatalogResponse(data)
+  if (!rec) {
+    throw new Error("Respuesta inválida al obtener modalidad de entrevista")
+  }
+  return rec
+}
+
+export async function createInterviewModality(
+  payload: CreateInterviewModalityPayload
+): Promise<InterviewModalityCatalogItem> {
+  const displayName = payload.displayName.trim()
+  const body = {
+    displayName,
+    includeGoogleMeetLink: payload.includeGoogleMeetLink,
+  }
+  const data = await apiClient.post("/api/admin/interview-modalities", body)
+  const rec = normalizeInterviewModalityCatalogResponse(data)
+  if (!rec) {
+    return {
+      id: "",
+      displayName,
+      includeGoogleMeetLink: payload.includeGoogleMeetLink,
+    }
+  }
+  return rec
+}
+
+export async function updateInterviewModality(
+  id: string,
+  payload: UpdateInterviewModalityPayload
+): Promise<InterviewModalityCatalogItem> {
+  const displayName = payload.displayName.trim()
+  const body = {
+    displayName,
+    includeGoogleMeetLink: payload.includeGoogleMeetLink,
+  }
+  const data = await apiClient.patch(
+    `/api/admin/interview-modalities/${encodeURIComponent(id)}`,
+    body
+  )
+  const rec = normalizeInterviewModalityCatalogResponse(data)
+  if (!rec) {
+    return {
+      id,
+      displayName,
+      includeGoogleMeetLink: payload.includeGoogleMeetLink,
+    }
+  }
+  return rec
+}
+
+export async function deleteInterviewModality(id: string): Promise<void> {
+  await apiClient.delete(
+    `/api/admin/interview-modalities/${encodeURIComponent(id)}`
+  )
+}
+
+/** Catálogo admin de estados de entrevista (GET /api/admin/interview-statuses). */
+export interface InterviewStatusAdmin {
+  id: string
+  code: string
+  displayName: string
+  description: string | null
+  sortOrder: number
+  isTerminal: boolean
+  isActive: boolean
+  createdAtUtc?: string | null
+  updatedAtUtc?: string | null
+}
+
+export interface CreateInterviewStatusPayload {
+  code: string
+  displayName: string
+  description?: string | null
+  isTerminal: boolean
+  isActive: boolean
+}
+
+export interface UpdateInterviewStatusPayload {
+  code?: string
+  displayName?: string
+  description?: string | null
+  sortOrder?: number
+  isTerminal?: boolean
+  isActive?: boolean
+}
+
+function normalizeInterviewStatusAdminItem(
+  raw: unknown
+): InterviewStatusAdmin | null {
+  const o = asRecord(raw)
+  if (!o) return null
+  const id = pickString(o, ["id", "uuid"])
+  if (!id) return null
+  const code = pickString(o, ["code", "key"])
+  const displayName =
+    pickString(o, ["displayName", "display_name", "name", "label"]) ??
+    code ??
+    id
+  const description = pickString(o, ["description", "Description"])
+  const sortOrder = pickNumber(o, ["sortOrder", "sort_order"]) ?? 0
+  const normalizedCode =
+    (code && code.trim()) || (displayName && displayName.trim()) || id
+  return {
+    id,
+    code: normalizedCode,
+    displayName: displayName.trim(),
+    description: description ?? null,
+    sortOrder,
+    isTerminal: pickBool(o, ["isTerminal", "is_terminal"], false),
+    isActive: pickBool(o, ["isActive", "is_active"], true),
+    createdAtUtc: pickString(o, ["createdAtUtc", "created_at_utc"]),
+    updatedAtUtc: pickString(o, ["updatedAtUtc", "updated_at_utc"]),
+  }
+}
+
+function normalizeInterviewStatusesAdminList(
+  data: unknown
+): InterviewStatusAdmin[] {
+  const rawList: unknown[] = []
+  if (Array.isArray(data)) rawList.push(...data)
+  else {
+    const r = asRecord(data)
+    const nested =
+      r?.data ??
+      r?.items ??
+      r?.interviewStatuses ??
+      r?.statuses ??
+      r?.results
+    if (Array.isArray(nested)) rawList.push(...nested)
+  }
+  const out: InterviewStatusAdmin[] = []
+  rawList.forEach((item) => {
+    const rec = normalizeInterviewStatusAdminItem(item)
+    if (rec) out.push(rec)
+  })
+  return out
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      const aCode = String(a.item.code).trim()
+      const bCode = String(b.item.code).trim()
+      const hasNumericCodeA = /^\d+$/.test(aCode)
+      const hasNumericCodeB = /^\d+$/.test(bCode)
+      if (hasNumericCodeA && hasNumericCodeB) {
+        const na = Number.parseInt(aCode, 10)
+        const nb = Number.parseInt(bCode, 10)
+        if (na !== nb) return na - nb
+      }
+      if (a.item.sortOrder !== b.item.sortOrder) {
+        return a.item.sortOrder - b.item.sortOrder
+      }
+      const byName = a.item.displayName.localeCompare(
+        b.item.displayName,
+        "es",
+        { sensitivity: "base" }
+      )
+      if (byName !== 0) return byName
+      const aTimestamp = a.item.updatedAtUtc ?? a.item.createdAtUtc ?? ""
+      const bTimestamp = b.item.updatedAtUtc ?? b.item.createdAtUtc ?? ""
+      if (aTimestamp !== "" && bTimestamp !== "" && aTimestamp !== bTimestamp) {
+        return aTimestamp.localeCompare(bTimestamp)
+      }
+      return a.index - b.index
+    })
+    .map(({ item }) => item)
+}
+
+export async function listInterviewStatusesAdmin(): Promise<
+  InterviewStatusAdmin[]
+> {
+  const data = await apiClient.get("/api/admin/interview-statuses")
+  return normalizeInterviewStatusesAdminList(data)
+}
+
+export async function getInterviewStatusAdmin(
+  id: string
+): Promise<InterviewStatusAdmin> {
+  const data = await apiClient.get(
+    `/api/admin/interview-statuses/${encodeURIComponent(id)}`
+  )
+  const rec = normalizeInterviewStatusAdminItem(data)
+  if (!rec) {
+    throw new Error("Respuesta inválida al obtener estado de entrevista")
+  }
+  return rec
+}
+
+export async function createInterviewStatus(
+  payload: CreateInterviewStatusPayload
+): Promise<InterviewStatusAdmin> {
+  const codeTrim = payload.code.trim()
+  const codeNum = parseInt(codeTrim, 10)
+  const sortOrder =
+    Number.isFinite(codeNum) && codeNum >= 1 ? codeNum : 1
+  const body = {
+    code: codeTrim,
+    displayName: payload.displayName.trim(),
+    description:
+      payload.description != null && String(payload.description).trim() !== ""
+        ? String(payload.description).trim()
+        : null,
+    sortOrder,
+    isTerminal: payload.isTerminal,
+    isActive: payload.isActive,
+  }
+  const data = await apiClient.post("/api/admin/interview-statuses", body)
+  const rec = normalizeInterviewStatusAdminItem(data)
+  if (!rec) {
+    return {
+      id: "",
+      code: body.code,
+      displayName: body.displayName,
+      description: body.description,
+      sortOrder: body.sortOrder,
+      isTerminal: body.isTerminal,
+      isActive: body.isActive,
+    }
+  }
+  return rec
+}
+
+export async function updateInterviewStatus(
+  id: string,
+  payload: UpdateInterviewStatusPayload
+): Promise<InterviewStatusAdmin> {
+  const data = await apiClient.patch(
+    `/api/admin/interview-statuses/${encodeURIComponent(id)}`,
+    payload
+  )
+  const rec = normalizeInterviewStatusAdminItem(data)
+  if (!rec) {
+    throw new Error("Respuesta inválida al actualizar estado de entrevista")
+  }
+  return rec
+}
+
+export async function deleteInterviewStatus(id: string): Promise<void> {
+  await apiClient.delete(
+    `/api/admin/interview-statuses/${encodeURIComponent(id)}`
+  )
+}
+
+export interface RecruiterVacancySummary {
+  title: string | null
+  applicantOptions: VacancyApplicantOption[]
+}
+
+function parseRecruiterVacancyPayload(data: unknown): RecruiterVacancySummary {
+  const r = asRecord(data)
+  const title =
+    pickString(r, ["title", "name", "jobTitle", "job_title"]) ?? null
+  const applicants = Array.isArray(r?.applicants) ? r.applicants : []
+  const options: VacancyApplicantOption[] = []
+  applicants.forEach((item, index) => {
+    const a = asRecord(item)
+    if (!a) return
+    const profileId = pickString(a, [
+      "candidateProfileId",
+      "candidate_profile_id",
+    ])
+    if (!profileId) return
+    const name =
+      pickString(a, ["name", "fullName", "full_name"]) ?? `Candidato ${index + 1}`
+    const email = pickString(a, ["email", "Email"]) ?? ""
+    const label = email ? `${name} · ${email}` : name
+    options.push({ candidateProfileId: profileId, label })
+  })
+  const seen = new Set<string>()
+  const applicantOptions = options.filter((o) => {
+    if (seen.has(o.candidateProfileId)) return false
+    seen.add(o.candidateProfileId)
+    return true
+  })
+  return { title, applicantOptions }
+}
+
+export async function fetchRecruiterVacancySummary(
+  vacancyId: string
+): Promise<RecruiterVacancySummary> {
+  const data = await apiClient.get(
+    `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}`
+  )
+  return parseRecruiterVacancyPayload(data)
+}
+
+export async function fetchVacancyApplicantOptions(
+  vacancyId: string
+): Promise<VacancyApplicantOption[]> {
+  const s = await fetchRecruiterVacancySummary(vacancyId)
+  return s.applicantOptions
+}
+
+export function isTerminalInterviewStatus(status: InterviewStatus): boolean {
+  return status === "Completed" || status === "Cancelled" || status === "NoShow"
+}
+
+/** Cierra edición si el API marcó estado terminal o el enum lo indica. */
+export function isInterviewTerminal(
+  i: Pick<Interview, "status" | "isStatusTerminal">
+): boolean {
+  if (typeof i.isStatusTerminal === "boolean") return i.isStatusTerminal
+  return isTerminalInterviewStatus(i.status)
+}

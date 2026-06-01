@@ -1,0 +1,213 @@
+"use client";
+
+import { useState } from "react";
+import { FileText, Download, Loader2, Trash2 } from "lucide-react";
+import type { CandidateDocument } from "@/lib/candidate-documents";
+import { getAccessToken } from "@/lib/auth";
+import { getApiErrorMessage } from "@/lib/api-error";
+import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
+
+interface DocumentsListProps {
+  documents?: CandidateDocument[];
+  /** Si se define, se muestra el botón Eliminar por documento */
+  onDeleteDocument?: (documentId: string) => void | Promise<void>;
+}
+
+const resolveDocumentName = (doc: CandidateDocument) => {
+  if (!doc.storagePath) return `Documento ${doc.id}`
+  const segment = doc.storagePath.split("/").filter(Boolean).pop()
+  if (!segment) return `Documento ${doc.id}`
+
+  const rawName = segment.trim()
+  const nameWithoutUuidPrefix = rawName.replace(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_/i,
+    ""
+  )
+  const nameWithoutNumericPrefix = nameWithoutUuidPrefix.replace(/^\d+_/, "")
+
+  return nameWithoutNumericPrefix || rawName
+}
+
+/**
+ * Lista de documentos del candidato.
+ */
+export default function DocumentsList({
+  documents = [],
+  onDeleteDocument,
+}: DocumentsListProps) {
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [documentPendingDelete, setDocumentPendingDelete] =
+    useState<CandidateDocument | null>(null);
+
+  const handleDownload = async (doc: CandidateDocument) => {
+    const path = doc.storagePath?.trim();
+    if (!path) return;
+
+    setDownloadingId(doc.id);
+    setDownloadError(null);
+    try {
+      const token = getAccessToken();
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+      const url = `${baseUrl}/api/Storage/files/${encodeURIComponent(path)}`;
+      const res = await fetch(url, {
+        method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("No se pudo descargar el documento.");
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objUrl;
+      const suggestedName = resolveDocumentName(doc);
+      a.download =
+        suggestedName && suggestedName !== `Documento ${doc.id}`
+          ? suggestedName
+          : path.split("/").pop() || "documento";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objUrl);
+    } catch (err: unknown) {
+      setDownloadError(
+        getApiErrorMessage(err) || "No se pudo descargar el documento."
+      );
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const handleOpenDeleteModal = (doc: CandidateDocument) => {
+    if (!onDeleteDocument) return;
+    setDocumentPendingDelete(doc);
+  };
+
+  const handleCloseDeleteModal = () => {
+    if (deletingId !== null) return;
+    setDocumentPendingDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    const doc = documentPendingDelete;
+    if (!doc || !onDeleteDocument) return;
+    void (async () => {
+      setDeletingId(doc.id);
+      try {
+        await onDeleteDocument(doc.id);
+        setDocumentPendingDelete(null);
+      } finally {
+        setDeletingId(null);
+      }
+    })();
+  };
+
+  const deleteModalLoading =
+    Boolean(documentPendingDelete) &&
+    deletingId === documentPendingDelete?.id;
+
+  return (
+    <div className="flex flex-col gap-3 md:gap-4">
+      <h2 className="font-sans text-sm font-semibold text-foreground md:text-base">
+        Mis documentos
+      </h2>
+      {downloadError ? (
+        <p
+          className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
+          {downloadError}
+        </p>
+      ) : null}
+      {documents.length === 0 ? (
+        <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
+          Aún no hay documentos. Los que subas aparecerán aquí.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-3" aria-label="Lista de documentos">
+          {documents.map((doc) => (
+            <li
+              key={doc.id}
+              className="flex items-center gap-4 rounded-lg border border-border bg-card p-4 md:gap-5 md:p-5"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#F3E8FF] md:h-12 md:w-12">
+                <FileText className="h-5 w-5 text-vo-purple md:h-6 md:w-6" aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-sans text-sm font-medium text-foreground md:text-base">
+                  {resolveDocumentName(doc)}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => void handleDownload(doc)}
+                  disabled={!doc.storagePath?.trim() || downloadingId === doc.id}
+                  className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label={`Descargar ${resolveDocumentName(doc)}`}
+                  aria-busy={downloadingId === doc.id}
+                >
+                  {downloadingId === doc.id ? (
+                    <Loader2
+                      className="h-4 w-4 animate-spin text-muted-foreground md:h-5 md:w-5"
+                      aria-hidden
+                    />
+                  ) : (
+                    <Download
+                      className="h-4 w-4 text-muted-foreground md:h-5 md:w-5"
+                      aria-hidden
+                    />
+                  )}
+                </button>
+                {onDeleteDocument ? (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenDeleteModal(doc)}
+                    disabled={deletingId === doc.id}
+                    className="flex h-9 w-9 items-center justify-center rounded-md text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label={`Eliminar ${resolveDocumentName(doc)}`}
+                    aria-busy={deletingId === doc.id}
+                  >
+                    {deletingId === doc.id ? (
+                      <Loader2
+                        className="h-4 w-4 animate-spin text-destructive md:h-5 md:w-5"
+                        aria-hidden
+                      />
+                    ) : (
+                      <Trash2
+                        className="h-4 w-4 text-destructive md:h-5 md:w-5"
+                        aria-hidden
+                      />
+                    )}
+                  </button>
+                ) : null}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {onDeleteDocument ? (
+        <DeleteConfirmModal
+          isOpen={documentPendingDelete !== null}
+          onClose={handleCloseDeleteModal}
+          onConfirm={handleConfirmDelete}
+          title="Eliminar documento"
+          message={
+            documentPendingDelete ? (
+              <>
+                ¿Eliminar{" "}
+                <span className="font-medium text-foreground">
+                  &ldquo;{resolveDocumentName(documentPendingDelete)}&rdquo;
+                </span>
+                ? Dejará de aparecer en tu listado.
+              </>
+            ) : null
+          }
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          loading={deleteModalLoading}
+        />
+      ) : null}
+    </div>
+  );
+}

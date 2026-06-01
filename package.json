@@ -2,34 +2,58 @@
   "name": "ats-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node --max-http-header-size=65536 ./node_modules/next/dist/bin/next dev",
+    "build": "next build --webpack",
+    "start": "node --max-http-header-size=65536 ./node_modules/next/dist/bin/next start",
     "lint": "eslint",
+    "spellcheck": "cspell lint \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" --no-progress",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:full": "powershell -ExecutionPolicy Bypass -File tests/e2e/run-e2e-full.ps1"
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:full": "powershell -ExecutionPolicy Bypass -File tests/e2e/run-e2e-full.ps1",
+    "test:e2e:full:unix": "bash tests/e2e/run-e2e-full.sh",
+    "migrate:interview-status-codes": "node scripts/migrate-interview-status-codes.mjs"
   },
   "dependencies": {
+    "@countrystatecity/countries-browser": "^1.0.0",
+    "@sparticuz/chromium": "^131.0.1",
+    "html2canvas-pro": "^2.0.2",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.564.0",
     "next": "16.1.6",
+    "pdfkit": "^0.18.0",
+    "puppeteer-core": "^24.43.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-nestable": "^3.0.2"
+    "react-nestable": "^3.0.2",
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
+    "@cspell/dict-es-es": "^3.0.8",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.6.0",
+    "@types/pdfkit": "^0.17.6",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "cspell": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "jsdom": "^29.0.0",
+    "puppeteer": "^24.43.1",
     "tailwindcss": "^4",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.0"
   }
 }

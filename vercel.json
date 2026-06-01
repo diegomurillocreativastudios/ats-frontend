@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app/api/recruiter/vacancies/[vacancyId]/candidates/[candidateProfileId]/technical-sheet/pdf/route.ts": {
+      "memory": 2048,
+      "maxDuration": 180
+    },
+    "app/api/recruiter/reportes/vacancy-progress-by-client/pdf/route.ts": {
+      "memory": 2048,
+      "maxDuration": 180
+    }
+  }
+}

@@ -1,0 +1,83 @@
+import type { Config } from "tailwindcss"
+
+const config: Config = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        'vo-purple': {
+          DEFAULT: '#6E3385',
+          hover: '#5A2A6D',
+          foreground: '#FFFFFF',
+        },
+        'vo-magenta': {
+          DEFAULT: '#9C2B82',
+          hover: '#7D2168',
+          foreground: '#FFFFFF',
+        },
+        'vo-navy': {
+          DEFAULT: '#496FB3',
+          foreground: '#FFFFFF',
+        },
+        'vo-sky': {
+          DEFAULT: '#71BCED',
+          foreground: '#FFFFFF',
+        },
+        'vo-pink': {
+          DEFAULT: '#C73277',
+          hover: '#A02961',
+          foreground: '#FFFFFF',
+        },
+        'vo-yellow': {
+          DEFAULT: '#E6AC4B',
+          foreground: '#1F2937',
+        },
+        border: '#E5E7EB',
+        input: '#E5E7EB',
+        ring: '#6E3385',
+        background: '#FFFFFF',
+        foreground: '#0D0D0D',
+        muted: {
+          DEFAULT: '#F9FAFB',
+          foreground: '#6B7280',
+        },
+        destructive: {
+          DEFAULT: '#C73277',
+          foreground: '#FFFFFF',
+        },
+        success: {
+          DEFAULT: '#22C55E',
+          foreground: '#FFFFFF',
+        },
+      },
+      fontFamily: {
+        sans: [
+          "var(--font-montserrat)",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
+        montserrat: ["var(--font-montserrat)", "sans-serif"],
+      },
+      borderRadius: {
+        DEFAULT: '6px',
+      },
+      keyframes: {
+        'apply-shimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(400%)' },
+        },
+      },
+      animation: {
+        'apply-shimmer': 'apply-shimmer 1.45s ease-in-out infinite',
+      },
+    },
+  },
+  plugins: [],
+}
+
+export default config
