@@ -714,7 +714,126 @@ Validaciones de archivo: `validateFile`/`validateSingleFile` devuelven ahora un
 La suite i18n previa (`messages-structure`, `candidate-portal-i18n`, topbars,
 auth, language-switcher, etc.) sigue pasando.
 
-## 16. Pendientes para la siguiente etapa
+## 16. Etapa 5D — i18n del Perfil del Candidato
+
+Migración acotada y segura de los textos estáticos del **Perfil del Candidato**
+al namespace `CandidatePortal.profile`. El ruteo sigue siendo cookie-based
+(`NEXT_LOCALE`), sin prefijos ni `app/[locale]`.
+
+### 16.1 Componentes / rutas migrados
+
+- `app/mi-perfil/MiPerfilContent.tsx` — vista de página (título, descripción,
+  estados de carga/error, tarjeta de sesión, breadcrumb del topbar) y los toasts
+  de guardado (`toasts.saveSuccess` / `toasts.saveError`).
+- `components/candidato/candidate-self-profile-view.tsx` — navegación de
+  secciones, títulos de grupos/secciones, labels de la ficha en modo lectura,
+  acciones (descargar CV, gestionar documentos, guardar, cancelar), hero,
+  empty states y fallbacks de descarga (`download.cvError` / `download.genericError`).
+- `components/candidato/candidate-profile-edit-field-groups.tsx` — labels,
+  placeholders, hints, botones, títulos de sección y aria-labels del **formulario
+  de edición** (identidad, contacto, ubicación, preferencias, experiencia,
+  educación, idiomas, habilidades, enlaces, referencias, reconocimientos).
+- `components/candidato/candidate-salary-expectation-card.tsx` — título, moneda,
+  label, placeholder, hint y estado «sin registrar».
+- `components/candidato/social-link-type-picker.tsx` — label de tipo, placeholder
+  de selección, prompt «Otro», label/placeholder de nombre de plataforma. Los
+  nombres de plataformas preset (LinkedIn, GitHub, etc.) **no** se traducen.
+
+> Nota de componentes compartidos: `candidate-profile-edit-field-groups.tsx`,
+> `candidate-salary-expectation-card.tsx`, `social-link-type-picker.tsx` y el hook
+> `use-candidate-profile-editor.ts` también son **reutilizados por la vista
+> recruiter de RRHH** (`components/rrhh/recruiter-candidate-profile-view.tsx`).
+> Como viven en `components/candidato/` y son parte del Perfil del Candidato, se
+> migraron; **ningún archivo de `components/rrhh/` fue modificado**. En `es`
+> (default) el render de RRHH es idéntico; en otros locales esos campos también
+> se traducirán (efecto colateral deseado, sin regresión funcional).
+
+### 16.2 Namespace `CandidatePortal.profile`
+
+Estructura agregada (idéntica en `es/en/it/de/fr`):
+
+```txt
+page, session, toasts, nav, groups, actions, download, intro, hero,
+notFound, sections, fields, values, emptyStates,
+form (labels, placeholders, hints, selects, buttons, items, aria, addLink),
+salary, socialLink, options (gender, maritalStatus, availability)
+```
+
+### 16.3 Decisión sobre `lib/profile-form-options.ts`
+
+- **Migrado (seguro):** `getGenderOptions(t)`, `getMaritalStatusOptions(t)` y
+  `getAvailabilityOptions(t)` devuelven opciones con **label traducible** vía
+  `options.gender|maritalStatus|availability.*` y **`value` canónico en español
+  preservado** (lo que persiste/espera el backend). Ejemplo:
+
+```ts
+{ value: "Inmediata", label: t("options.availability.immediate") }
+```
+
+  Las constantes `GENDER_OPTIONS` / `MARITAL_STATUS_OPTIONS` /
+  `AVAILABILITY_OPTIONS` se conservan como fuente de los values canónicos.
+  Único consumidor en el portal: `candidate-profile-edit-field-groups.tsx`.
+- **Pendiente (no migrado):** `getCountrySelectOptions` /
+  `getCountryIso2SelectOptions` generan los nombres de país con
+  `Intl.DisplayNames(["es"])` y, además, **son consumidos por módulos RRHH**
+  (`VacancyListFilters`, `VacancyLocationFields`, `public-vacancies`,
+  `vacancy-location-display`). Localizarlos toca RRHH y la generación dinámica de
+  nombres → fuera del scope de 5D.
+- `mergeLegacySelectOption` sigue añadiendo el sufijo `(valor actual)` en español
+  para valores legacy fuera de catálogo (caso borde, sin migrar).
+
+### 16.4 Regla crítica: NO traducir data dinámica / IA / backend
+
+No se tradujo ninguna data dinámica. Se conservan tal cual:
+
+```tsx
+{displayName} {headlineDisplay} {summary}      // datos de perfil (API/CV)
+{email} {phoneDisplay} {countryDisplay}        // datos del usuario/API
+{apiError.message} {saveProfileError}          // mensajes del backend
+{validationError} {triggerLabel}               // provienen del hook compartido
+formatCompliancePreview(compliance, …)         // keys/valores de compliance (API)
+getApiErrorMessage(err) || t("download.…")     // fallback solo si no hay backend msg
+```
+
+Los `value` enviados al backend (género, estado civil, disponibilidad, país,
+documento, etc.) **no cambian**: solo se traduce el label visible.
+
+### 16.5 Qué NO se tocó
+
+- **No** se modificaron llamadas a API ni payloads/nombres de campos; **no** se
+  envía `locale` al backend; **no** se cambió lógica de perfil/guardado/edición,
+  validaciones de negocio ni autenticación.
+- **No** se tocó `use-candidate-profile-editor.ts` (hook compartido con RRHH): sus
+  mensajes de validación y `triggerLabel` quedan **pendientes** para una etapa que
+  trate el hook sin afectar RRHH.
+- **No** se tocó `getBirthDateInputValidationError` (`lib/candidate-profile.ts`,
+  validación compartida).
+- **No** se migró la metadata estática de `app/mi-perfil/page.tsx` (export
+  `metadata`; requiere `generateMetadata` + `getTranslations`) — pendiente.
+- **No** se tocó `lib/pageTitles.ts` ni `lib/candidate-portal-translations.ts`.
+- **No** se tocaron módulos RRHH/Admin, resultados/salida de Vertex AI, ni se
+  implementaron rutas con prefijo.
+- Las secciones compartidas de solo-lectura de `components/rrhh/CandidateProfileSections`
+  (listas de experiencia/educación/idiomas, etc.) **no** se tocaron: renderizan
+  data dinámica y son componentes RRHH.
+
+### 16.6 Tests de la etapa
+
+`tests/unit/candidate-portal-profile-i18n.test.tsx` valida:
+
+- La vista de perfil renderiza textos estáticos desde `next-intl` en `es` y `en`.
+- El formulario de edición renderiza labels/placeholders desde `next-intl` en
+  `es` y `en`.
+- Las opciones migradas traducen el **label** pero conservan el **`value`
+  canónico** (`Masculino`, `Inmediata`, etc.) tanto en las funciones
+  `get*Options(t)` como en el `<select>` renderizado.
+- Presencia y paridad del namespace `CandidatePortal.profile` (18 subsecciones) y
+  de `options.{gender,maritalStatus,availability}` en los 5 idiomas.
+
+`tests/unit/messages-structure.test.ts` sigue garantizando la paridad exacta de
+keys entre los 5 diccionarios. La suite i18n previa sigue pasando.
+
+## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
 - Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7 y §13.4.
@@ -722,9 +841,10 @@ auth, language-switcher, etc.) sigue pasando.
   server wrapper + client content (o cuando se migre a ruteo por prefijo).
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
   namespaces reservados (`Errors`, `EmptyStates`, etc.).
-- Completar el Portal Candidato: **perfil** (`app/mi-perfil`,
-  `candidate-self-profile-view.tsx`, `candidate-profile-edit-field-groups.tsx`).
-  Los sub-componentes de subida de documentos ya se migraron en Etapa 5C (§15).
+- El **Perfil del Candidato** se migró en Etapa 5D (§16). Quedan pendientes los
+  mensajes de validación y `triggerLabel` del hook compartido
+  `use-candidate-profile-editor.ts`, las opciones de país
+  (`getCountrySelectOptions`) y la metadata de `app/mi-perfil/page.tsx`.
 - Migrar el mapper de enums `lib/candidate-portal-translations.ts` con keys por
   enum y fallback al valor crudo de la API — ver §14.5.
 - Migrar registro (`app/auth/registrarse`) y páginas públicas de oportunidades.

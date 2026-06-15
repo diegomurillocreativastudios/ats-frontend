@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { DollarSign } from "lucide-react"
 import {
   blockNegativeNumberKeys,
@@ -70,6 +71,7 @@ export function CandidateSalaryExpectationCard({
   onEditChange,
   saving = false,
 }: CandidateSalaryExpectationCardProps) {
+  const t = useTranslations("CandidatePortal.profile")
   const amount = resolveCandidateMinSalary(
     jobPrefs,
     fallbackMinSalary,
@@ -94,16 +96,16 @@ export function CandidateSalaryExpectationCard({
             id="pretension-salarial-titulo"
             className="font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground"
           >
-            Pretensión salarial
+            {t("salary.title")}
           </p>
-          <p className="mt-0.5 font-sans text-xs text-muted-foreground">En dólares (USD)</p>
+          <p className="mt-0.5 font-sans text-xs text-muted-foreground">{t("salary.currency")}</p>
         </div>
       </div>
 
       {isEditing ? (
         <div className="mt-4">
           <label htmlFor="pf-hero-salary" className={profileEditLabelClass}>
-            Monto mensual esperado
+            {t("salary.monthlyLabel")}
           </label>
           <input
             id="pf-hero-salary"
@@ -124,11 +126,11 @@ export function CandidateSalaryExpectationCard({
             }}
             className={`${profileEditInputClass} mt-1.5`}
             disabled={saving}
-            placeholder="Ej. 2500"
+            placeholder={t("salary.placeholder")}
             aria-describedby="pretension-salarial-ayuda"
           />
           <p id="pretension-salarial-ayuda" className="mt-2 font-sans text-xs leading-relaxed text-muted-foreground">
-            También podés ajustarlo en Objetivos laborales.
+            {t("salary.hint")}
           </p>
         </div>
       ) : (
@@ -137,7 +139,7 @@ export function CandidateSalaryExpectationCard({
             hasAmount ? "text-foreground" : "text-muted-foreground"
           }`}
         >
-          {hasAmount ? formatSalaryUsd(amount) : "Sin registrar"}
+          {hasAmount ? formatSalaryUsd(amount) : t("salary.unset")}
         </p>
       )}
     </aside>

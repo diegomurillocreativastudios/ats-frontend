@@ -382,6 +382,262 @@
           "aiNote": "Résultat généré par l'IA. Nécessite la validation des RH."
         }
       }
+    },
+    "profile": {
+      "breadcrumb": "Mon profil",
+      "page": {
+        "title": "Mon profil",
+        "description": "Modifiez votre fiche avec les données obligatoires et vérifiez comment elle se combine avec les informations de vos documents.",
+        "refreshingCv": "Mise à jour des données étendues du CV…",
+        "loadingTitle": "Chargement de votre profil…",
+        "loadingDescription": "Récupération des données depuis le serveur.",
+        "errorTitle": "Nous n'avons pas pu charger votre profil",
+        "retry": "Réessayer"
+      },
+      "session": {
+        "title": "Votre session",
+        "description": "Données d'accès de base. Le reste de la fiche est chargé depuis le serveur.",
+        "name": "Nom",
+        "email": "E-mail",
+        "role": "Rôle"
+      },
+      "toasts": {
+        "saveSuccess": "Modifications enregistrées avec succès.",
+        "saveError": "Les modifications n'ont pas pu être enregistrées. Veuillez réessayer."
+      },
+      "nav": {
+        "aria": "Aller à la section du profil",
+        "edit": "Modifier",
+        "summary": "Résumé",
+        "accountContact": "Compte et contact",
+        "jobGoals": "Objectifs professionnels",
+        "career": "Parcours",
+        "competencies": "Compétences",
+        "links": "Liens",
+        "references": "Références",
+        "compliance": "Conformité"
+      },
+      "groups": {
+        "accountPersonal": "Compte et données personnelles",
+        "goals": "Objectifs",
+        "career": "Parcours professionnel",
+        "competencies": "Compétences",
+        "onlinePresence": "Présence en ligne",
+        "referencesAchievements": "Références et distinctions",
+        "requirementsCompliance": "Exigences et conformité"
+      },
+      "actions": {
+        "aria": "Actions du profil",
+        "toolbarEditingAria": "Télécharger le CV, documents ou terminer la modification",
+        "toolbarViewingAria": "Télécharger le CV, modifier le profil ou gérer les documents",
+        "downloadCv": "Télécharger le CV",
+        "downloadingCv": "Téléchargement…",
+        "downloadCvAria": "Télécharger votre dernier CV téléversé",
+        "manageDocuments": "Gérer les documents",
+        "manageDocumentsAria": "Aller aux documents pour gérer les fichiers",
+        "cancel": "Annuler",
+        "cancelAria": "Annuler la modification sans enregistrer",
+        "save": "Enregistrer les modifications",
+        "saving": "Enregistrement…",
+        "requiredHint": "Le titre, le résumé et la pièce d'identité sont obligatoires lors de l'enregistrement."
+      },
+      "download": {
+        "genericError": "Erreur de téléchargement.",
+        "cvError": "Le CV n'a pas pu être téléchargé."
+      },
+      "intro": {
+        "notRegistered": "Vous n'avez pas encore enregistré votre fiche. Remplissez les données et enregistrez pour activer votre profil.",
+        "editHint": "Modifiez vos informations dans chaque section de la fiche. Téléchargez votre CV ou gérez vos documents quand vous le souhaitez."
+      },
+      "hero": {
+        "editTitle": "Votre fiche",
+        "editDescription": "Modifiez le nom, le titre et le résumé au même endroit où vous les voyez en lisant le profil.",
+        "profileSubtitle": "Voici comment votre profil professionnel apparaît dans le système.",
+        "summaryEmpty": "Complétez le résumé en modifiant le profil ou à partir des informations importées de vos documents.",
+        "defaultName": "Candidat"
+      },
+      "notFound": {
+        "intro": "Vous n'avez pas encore de profil candidat sur le serveur. Touchez ",
+        "cta": "Compléter mon profil",
+        "outro": ", remplissez les données obligatoires et enregistrez pour activer votre fiche."
+      },
+      "sections": {
+        "consolidated": "Fiche consolidée",
+        "consolidatedDescription": "Nous combinons les données de votre compte (session), du profil modifiable et, le cas échéant, des documents traités.",
+        "accountReadOnly": "Compte (lecture seule)",
+        "jobPreferences": "Préférences professionnelles",
+        "workExperience": "Expérience professionnelle",
+        "education": "Formation",
+        "languages": "Langues",
+        "skills": "Compétences",
+        "links": "Liens",
+        "linksSubtitle": "Réseaux sociaux et site web",
+        "references": "Références",
+        "recognitions": "Distinctions",
+        "compliance": "Conformité",
+        "technicalData": "Données techniques (révision)"
+      },
+      "fields": {
+        "user": "Utilisateur",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "sessionRole": "Rôle dans la session",
+        "nationalId": "Pièce d'identité",
+        "country": "Pays",
+        "birthCity": "Ville de naissance",
+        "birthDate": "Date de naissance",
+        "maritalStatus": "État civil",
+        "gender": "Genre",
+        "minExpectedSalary": "Salaire minimum attendu",
+        "availability": "Disponibilité",
+        "disabilityRegistered": "Handicap (enregistré)"
+      },
+      "values": {
+        "yes": "Oui",
+        "no": "Non",
+        "complianceValueLabel": "Valeur"
+      },
+      "emptyStates": {
+        "enrichedEmptyPrefix": "Il n'y a encore aucun parcours ni compétence dans votre fiche. Vous pouvez les ajouter en modifiant le profil ou en téléversant un CV dans ",
+        "documentsLink": "Documents",
+        "enrichedEmptySuffix": ".",
+        "technicalDataWarning": "Une partie de votre profil est arrivée dans un format qui n'a pas pu être interprété comme du JSON. Si vous voyez ceci, prévenez le support.",
+        "complianceDash": "—"
+      },
+      "form": {
+        "identitySummary": "Identité et résumé",
+        "contact": "Contact",
+        "locationPersonal": "Localisation et données personnelles",
+        "jobPreferences": "Préférences professionnelles (objectif)",
+        "workExperience": "Expérience professionnelle",
+        "education": "Formation",
+        "languages": "Langues",
+        "skills": "Compétences",
+        "links": "Liens",
+        "references": "Références",
+        "recognitions": "Distinctions",
+        "labels": {
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "headline": "Titre / headline",
+          "summary": "Résumé professionnel",
+          "nationalId": "Pièce d'identité",
+          "email": "E-mail",
+          "phone": "Téléphone",
+          "country": "Pays",
+          "birthDate": "Date de naissance",
+          "birthCity": "Ville de naissance",
+          "maritalStatus": "État civil",
+          "gender": "Genre",
+          "sectors": "Secteurs",
+          "desiredRole": "Rôle souhaité",
+          "minSalary": "Salaire minimum",
+          "educationLevel": "Niveau d'études",
+          "desiredCity": "Ville souhaitée",
+          "availability": "Disponibilité",
+          "disability": "Handicap",
+          "resumeMarkdown": "CV en texte (markdown)",
+          "company": "Entreprise",
+          "role": "Rôle / poste",
+          "start": "Début",
+          "end": "Fin",
+          "description": "Description",
+          "institution": "Établissement",
+          "degree": "Diplôme / grade",
+          "language": "Langue {index}",
+          "level": "Niveau",
+          "skillsOnePerLine": "Une par ligne",
+          "url": "URL",
+          "referenceName": "Nom",
+          "position": "Poste",
+          "contact": "Contact",
+          "recognitionsOnePerLine": "Une par ligne"
+        },
+        "placeholders": {
+          "workStart": "Ex. 2020-01",
+          "workEnd": "Ex. 2023-12 ou actuel",
+          "url": "https://exemple.com",
+          "sectorsEmpty": "Saisissez un secteur et appuyez sur Entrée",
+          "sectorsMore": "Ajouter un autre…"
+        },
+        "hints": {
+          "resumeMarkdown": "Obligatoire à chaque enregistrement.",
+          "skills": "Elles sont enregistrées sous forme de liste dans votre profil.",
+          "recognitions": "Prix, certifications indiqués sous forme de texte."
+        },
+        "selects": {
+          "unspecified": "Non spécifié",
+          "selectCountry": "Sélectionnez un pays",
+          "disabilityUnset": "Non indiqué",
+          "yes": "Oui",
+          "no": "Non"
+        },
+        "buttons": {
+          "addExperience": "Ajouter une expérience",
+          "addEducation": "Ajouter une formation",
+          "addLanguage": "Ajouter une langue",
+          "addReference": "Ajouter une référence",
+          "addLink": "Ajouter un lien",
+          "remove": "Retirer",
+          "cancel": "Annuler"
+        },
+        "items": {
+          "experience": "Expérience {index}",
+          "education": "Formation {index}",
+          "reference": "Référence {index}",
+          "link": "Lien {index}"
+        },
+        "aria": {
+          "sectorsGroup": "Secteurs",
+          "removeSector": "Retirer le secteur {label}",
+          "removeExperience": "Retirer l'expérience {index}",
+          "removeEducation": "Retirer la formation {index}",
+          "removeLanguage": "Retirer la langue {index}"
+        },
+        "addLink": {
+          "heading": "Ajouter un lien",
+          "emptyHint": "Ajoutez des liens vers votre portfolio, LinkedIn, GitHub ou d'autres plateformes. Vous pouvez en ajouter plusieurs avec le bouton ci-dessous.",
+          "errorSelectType": "Sélectionnez le type de lien. Si vous choisissez «Autre», saisissez le nom.",
+          "errorUrl": "Saisissez l'URL du lien."
+        }
+      },
+      "salary": {
+        "title": "Prétention salariale",
+        "currency": "En dollars (USD)",
+        "monthlyLabel": "Montant mensuel attendu",
+        "placeholder": "Ex. 2500",
+        "hint": "Vous pouvez aussi l'ajuster dans Objectifs professionnels.",
+        "unset": "Non renseigné"
+      },
+      "socialLink": {
+        "typeLabel": "Type de lien",
+        "selectPlaceholder": "Sélectionner le type de lien",
+        "otherPrompt": "Autre — indiquez le nom",
+        "otherNameLabel": "Nom de la plateforme",
+        "otherNamePlaceholder": "Ex. Portfolio, Behance…"
+      },
+      "options": {
+        "gender": {
+          "male": "Masculin",
+          "female": "Féminin"
+        },
+        "maritalStatus": {
+          "single": "Célibataire",
+          "married": "Marié(e)",
+          "freeUnion": "Union libre",
+          "divorced": "Divorcé(e)",
+          "widowed": "Veuf/Veuve",
+          "separated": "Séparé(e)"
+        },
+        "availability": {
+          "immediate": "Immédiate",
+          "within15Days": "Sous 15 jours ou moins",
+          "within1Month": "Sous 1 mois",
+          "within2MonthsOrMore": "Sous 2 mois ou plus",
+          "toBeAgreed": "À convenir",
+          "perProposal": "Selon proposition"
+        }
+      }
     }
   },
   "LanguageSwitcher": {

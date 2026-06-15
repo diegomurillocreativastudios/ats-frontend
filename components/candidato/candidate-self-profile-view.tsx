@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import {
   Award,
   Briefcase,
@@ -73,7 +74,10 @@ import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv"
 import { getInitials } from "@/lib/getInitials"
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay"
 
-const formatCompliancePreview = (value: unknown): { label: string; value: string }[] => {
+const formatCompliancePreview = (
+  value: unknown,
+  fallbackLabel: string
+): { label: string; value: string }[] => {
   if (value == null) return []
   if (typeof value === "object" && !Array.isArray(value)) {
     return Object.entries(value as Record<string, unknown>).map(([k, v]) => ({
@@ -84,7 +88,7 @@ const formatCompliancePreview = (value: unknown): { label: string; value: string
           : JSON.stringify(v),
     }))
   }
-  return [{ label: "Valor", value: String(value) }]
+  return [{ label: fallbackLabel, value: String(value) }]
 }
 
 const SectionGroupLabel = ({ children }: { children: ReactNode }) => (
@@ -105,6 +109,7 @@ interface ProfileSectionNavProps {
 }
 
 function ProfileSectionNav({ items }: ProfileSectionNavProps) {
+  const t = useTranslations("CandidatePortal.profile")
   const handleNavClick = useCallback((targetId: string) => {
     const el = document.getElementById(targetId)
     if (!el) return
@@ -123,7 +128,7 @@ function ProfileSectionNav({ items }: ProfileSectionNavProps) {
   return (
     <nav
       className="sticky top-0 z-10 -mx-1 mb-2 border-b border-border/80 bg-background/90 pb-3 pt-1 backdrop-blur-md supports-backdrop-filter:bg-background/75 md:mb-4"
-      aria-label="Ir a sección del perfil"
+      aria-label={t("nav.aria")}
     >
       <div className="flex gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:flex-wrap md:gap-2 md:overflow-visible [&::-webkit-scrollbar]:hidden">
         {items.map((item) => (
@@ -163,6 +168,7 @@ export function CandidateSelfProfileView({
   saveProfileError,
   clearSaveProfileError,
 }: CandidateSelfProfileViewProps) {
+  const t = useTranslations("CandidatePortal.profile")
   const raw = useMemo(
     () => (selfProfile ?? {}) as Record<string, unknown>,
     [selfProfile]
@@ -222,7 +228,7 @@ export function CandidateSelfProfileView({
     (typeof selfProfile?.userName === "string" && selfProfile.userName.trim() !== ""
       ? selfProfile.userName
       : fullNameFromNd) ||
-    "Candidato"
+    t("hero.defaultName")
 
   const emailNd = nd.Email ?? nd.email ?? ""
   const emailAccount = selfProfile?.email ?? ""
@@ -306,9 +312,9 @@ export function CandidateSelfProfileView({
 
   const disabilityLabel =
     candidateProfile?.hasDisability === true
-      ? "Sí"
+      ? t("values.yes")
       : candidateProfile?.hasDisability === false
-        ? "No"
+        ? t("values.no")
         : "—"
 
   const displayNameWhileEditing = [form.firstName, form.lastName]
@@ -331,36 +337,37 @@ export function CandidateSelfProfileView({
 
   const accountAndPersonalItems = useMemo(() => {
     const items = [
-      { label: "Usuario", value: emptyToDash(accountDisplayUser) },
-      { label: "Correo electrónico", value: email || "—" },
-      { label: "Teléfono", value: phoneDisplay },
-      { label: "Rol en la sesión", value: emptyToDash(sessionRole) },
-      { label: "Documento de identidad", value: emptyToDash(candidateProfile?.nationalId) },
-      { label: "País", value: countryDisplay },
-      { label: "Ciudad de nacimiento", value: birthCity },
+      { label: t("fields.user"), value: emptyToDash(accountDisplayUser) },
+      { label: t("fields.email"), value: email || "—" },
+      { label: t("fields.phone"), value: phoneDisplay },
+      { label: t("fields.sessionRole"), value: emptyToDash(sessionRole) },
+      { label: t("fields.nationalId"), value: emptyToDash(candidateProfile?.nationalId) },
+      { label: t("fields.country"), value: countryDisplay },
+      { label: t("fields.birthCity"), value: birthCity },
       {
-        label: "Fecha de nacimiento",
+        label: t("fields.birthDate"),
         value: birthDateRaw ? formatBirthDateForDisplay(birthDateRaw) : null,
       },
-      { label: "Estado civil", value: marital },
-      { label: "Género", value: gender },
+      { label: t("fields.maritalStatus"), value: marital },
+      { label: t("fields.gender"), value: gender },
     ]
     if (!showEnrichedSections) {
       items.push(
         {
-          label: "Salario mínimo esperado",
+          label: t("fields.minExpectedSalary"),
           value:
             candidateProfile?.minSalary != null &&
             !Number.isNaN(Number(candidateProfile.minSalary))
               ? String(candidateProfile.minSalary)
               : "—",
         },
-        { label: "Disponibilidad", value: emptyToDash(candidateProfile?.availability) },
-        { label: "Discapacidad (registrado)", value: disabilityLabel }
+        { label: t("fields.availability"), value: emptyToDash(candidateProfile?.availability) },
+        { label: t("fields.disabilityRegistered"), value: disabilityLabel }
       )
     }
     return items
   }, [
+    t,
     accountDisplayUser,
     email,
     phoneDisplay,
@@ -379,22 +386,22 @@ export function CandidateSelfProfileView({
 
   const navItems = useMemo(() => {
     const base: NavItem[] = [
-      { id: "perfil-editar", label: "Editar" },
-      { id: "perfil-resumen", label: "Resumen" },
-      { id: "perfil-datos", label: "Cuenta y contacto" },
+      { id: "perfil-editar", label: t("nav.edit") },
+      { id: "perfil-resumen", label: t("nav.summary") },
+      { id: "perfil-datos", label: t("nav.accountContact") },
     ]
     base.push(
-      { id: "perfil-objetivos", label: "Objetivos laborales" },
-      { id: "perfil-trayectoria", label: "Trayectoria" },
-      { id: "perfil-competencias", label: "Competencias" },
-      { id: "perfil-presencia", label: "Enlaces" },
-      { id: "perfil-referencias", label: "Referencias" }
+      { id: "perfil-objetivos", label: t("nav.jobGoals") },
+      { id: "perfil-trayectoria", label: t("nav.career") },
+      { id: "perfil-competencias", label: t("nav.competencies") },
+      { id: "perfil-presencia", label: t("nav.links") },
+      { id: "perfil-referencias", label: t("nav.references") }
     )
     if (compliance != null) {
-      base.push({ id: "perfil-compliance", label: "Cumplimiento" })
+      base.push({ id: "perfil-compliance", label: t("nav.compliance") })
     }
     return base
-  }, [compliance, isEditing])
+  }, [t, compliance])
 
   const handleDownloadCv = async () => {
     const path = cvStoragePath
@@ -413,7 +420,7 @@ export function CandidateSelfProfileView({
           method: "GET",
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         })
-        if (!res.ok) throw new Error("No se pudo descargar el CV.")
+        if (!res.ok) throw new Error(t("download.cvError"))
         const blob = await res.blob()
         const objUrl = URL.createObjectURL(blob)
         const a = document.createElement("a")
@@ -457,7 +464,7 @@ export function CandidateSelfProfileView({
       }
       window.open(directUrl, "_blank", "noopener,noreferrer")
     } catch (err: unknown) {
-      setDownloadError(getApiErrorMessage(err) || "Error al descargar.")
+      setDownloadError(getApiErrorMessage(err) || t("download.genericError"))
     } finally {
       setDownloading(false)
     }
@@ -482,7 +489,7 @@ export function CandidateSelfProfileView({
       <section
         id="perfil-editar"
         className="scroll-mt-28 rounded-2xl border border-border bg-card p-4 shadow-sm md:p-5"
-        aria-label="Acciones del perfil"
+        aria-label={t("actions.aria")}
       >
         {isEditing ? (
           <div className="flex flex-col gap-4">
@@ -504,12 +511,12 @@ export function CandidateSelfProfileView({
                 </div>
               ) : null}
               <p className="font-sans text-xs text-muted-foreground">
-                Titular, resumen y documento de identidad son obligatorios al guardar.
+                {t("actions.requiredHint")}
               </p>
             </div>
             <div
               role="toolbar"
-              aria-label="Descargar CV, documentos o finalizar edición"
+              aria-label={t("actions.toolbarEditingAria")}
               className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3"
             >
               {cvStoragePath || candidateProfile?.cvDownloadUrl?.trim() ? (
@@ -518,23 +525,23 @@ export function CandidateSelfProfileView({
                   onClick={handleDownloadCv}
                   disabled={downloading}
                   className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto"
-                  aria-label="Descargar tu último CV subido"
+                  aria-label={t("actions.downloadCvAria")}
                 >
                   {downloading ? (
                     <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                   ) : (
                     <Download className="h-4 w-4 shrink-0" aria-hidden />
                   )}
-                  {downloading ? "Descargando…" : "Descargar CV"}
+                  {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
                 </button>
               ) : null}
               <Link
                 href="/portal-candidato/documentos"
                 className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
-                aria-label="Ir a documentos para gestionar archivos"
+                aria-label={t("actions.manageDocumentsAria")}
               >
                 <FileText className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
-                Gestionar documentos
+                {t("actions.manageDocuments")}
                 <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
               </Link>
               <button
@@ -542,10 +549,10 @@ export function CandidateSelfProfileView({
                 onClick={handleCancelEdit}
                 disabled={savingProfile}
                 className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-10 sm:w-auto"
-                aria-label="Cancelar edición sin guardar"
+                aria-label={t("actions.cancelAria")}
               >
                 <X className="h-4 w-4 shrink-0" aria-hidden />
-                Cancelar
+                {t("actions.cancel")}
               </button>
               <button
                 type="submit"
@@ -557,7 +564,7 @@ export function CandidateSelfProfileView({
                 ) : (
                   <Save className="h-4 w-4 shrink-0" aria-hidden />
                 )}
-                {savingProfile ? "Guardando…" : "Guardar cambios"}
+                {savingProfile ? t("actions.saving") : t("actions.save")}
               </button>
             </div>
             {downloadError ? (
@@ -569,13 +576,11 @@ export function CandidateSelfProfileView({
         ) : (
           <div className="flex flex-col gap-4">
             <p className="font-sans text-sm leading-relaxed text-muted-foreground">
-              {profileNotFound
-                ? "Aún no registraste tu ficha. Completá los datos y guardá para activar tu perfil."
-                : "Editá tu información en cada sección de la ficha. Descargá tu CV o gestioná documentos cuando lo necesites."}
+              {profileNotFound ? t("intro.notRegistered") : t("intro.editHint")}
             </p>
             <div
               role="toolbar"
-              aria-label="Descargar CV, editar perfil o gestionar documentos"
+              aria-label={t("actions.toolbarViewingAria")}
               className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3"
             >
               {cvStoragePath || candidateProfile?.cvDownloadUrl?.trim() ? (
@@ -584,14 +589,14 @@ export function CandidateSelfProfileView({
                   onClick={handleDownloadCv}
                   disabled={downloading}
                   className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto"
-                  aria-label="Descargar tu último CV subido"
+                  aria-label={t("actions.downloadCvAria")}
                 >
                   {downloading ? (
                     <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                   ) : (
                     <Download className="h-4 w-4 shrink-0" aria-hidden />
                   )}
-                  {downloading ? "Descargando…" : "Descargar CV"}
+                  {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
                 </button>
               ) : null}
               <button
@@ -606,10 +611,10 @@ export function CandidateSelfProfileView({
               <Link
                 href="/portal-candidato/documentos"
                 className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
-                aria-label="Ir a documentos para gestionar archivos"
+                aria-label={t("actions.manageDocumentsAria")}
               >
                 <FileText className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
-                Gestionar documentos
+                {t("actions.manageDocuments")}
                 <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
               </Link>
             </div>
@@ -643,11 +648,10 @@ export function CandidateSelfProfileView({
                     id="perfil-resumen-titulo"
                     className="font-sans text-xl font-bold leading-tight text-foreground md:text-2xl"
                   >
-                    Tu ficha
+                    {t("hero.editTitle")}
                   </h2>
                   <p className="mt-1 font-sans text-sm text-muted-foreground">
-                    Editá nombre, titular y resumen en el mismo lugar donde los ves al leer el
-                    perfil.
+                    {t("hero.editDescription")}
                   </p>
                   <div className="mt-4">
                     <ProfileEditHeroFields form={form} patch={patch} saving={savingProfile} />
@@ -667,7 +671,7 @@ export function CandidateSelfProfileView({
                     </p>
                   ) : null}
                   <p className="mt-1 font-sans text-sm text-muted-foreground">
-                    Así figura tu perfil profesional en el sistema.
+                    {t("hero.profileSubtitle")}
                   </p>
                   {summary ? (
                     <p className="mt-4 max-w-2xl font-sans text-sm leading-relaxed text-foreground/90 md:text-[15px]">
@@ -675,8 +679,7 @@ export function CandidateSelfProfileView({
                     </p>
                   ) : (
                     <p className="mt-4 font-sans text-sm italic text-muted-foreground">
-                      Completá el resumen al editar el perfil o desde la información importada de tus
-                      documentos.
+                      {t("hero.summaryEmpty")}
                     </p>
                   )}
                 </>
@@ -699,30 +702,29 @@ export function CandidateSelfProfileView({
           role="status"
         >
           <p className="font-sans text-sm leading-relaxed text-foreground">
-            Aún no tenés perfil de candidato en el servidor. Tocá{" "}
-            <span className="font-medium text-vo-purple">Completar mi perfil</span>, completá los
-            datos obligatorios y guardá para activar tu ficha.
+            {t("notFound.intro")}
+            <span className="font-medium text-vo-purple">{t("notFound.cta")}</span>
+            {t("notFound.outro")}
           </p>
         </div>
       ) : null}
 
       <div id="perfil-datos" className="scroll-mt-28">
-        <SectionGroupLabel>Cuenta y datos personales</SectionGroupLabel>
-        <SectionCard title="Ficha consolidada" icon={User} sectionId="sec-ficha-consolidada">
+        <SectionGroupLabel>{t("groups.accountPersonal")}</SectionGroupLabel>
+        <SectionCard title={t("sections.consolidated")} icon={User} sectionId="sec-ficha-consolidada">
           <p className="mb-4 font-sans text-sm leading-relaxed text-muted-foreground">
-            Combinamos datos de tu cuenta (sesión), del perfil editable y, si aplica, de documentos
-            procesados.
+            {t("sections.consolidatedDescription")}
           </p>
           {isEditing ? (
             <div className="flex flex-col gap-8">
               <div className="rounded-xl border border-border/60 bg-muted/15 p-4">
                 <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Cuenta (solo lectura)
+                  {t("sections.accountReadOnly")}
                 </p>
                 <InfoGrid
                   items={[
-                    { label: "Usuario", value: emptyToDash(accountDisplayUser) },
-                    { label: "Rol en la sesión", value: emptyToDash(sessionRole) },
+                    { label: t("fields.user"), value: emptyToDash(accountDisplayUser) },
+                    { label: t("fields.sessionRole"), value: emptyToDash(sessionRole) },
                   ]}
                 />
               </div>
@@ -754,8 +756,8 @@ export function CandidateSelfProfileView({
       {showEnrichedSections ? (
         <>
           <div id="perfil-objetivos" className="scroll-mt-28">
-            <SectionGroupLabel>Objetivos</SectionGroupLabel>
-            <SectionCard title="Preferencias laborales" icon={Briefcase} sectionId="sec-job-prefs-self">
+            <SectionGroupLabel>{t("groups.goals")}</SectionGroupLabel>
+            <SectionCard title={t("sections.jobPreferences")} icon={Briefcase} sectionId="sec-job-prefs-self">
               {isEditing ? (
                 <ProfileEditJobPreferencesFields
                   form={form}
@@ -775,9 +777,9 @@ export function CandidateSelfProfileView({
           </div>
 
           <div id="perfil-trayectoria" className="scroll-mt-28">
-            <SectionGroupLabel>Trayectoria profesional</SectionGroupLabel>
+            <SectionGroupLabel>{t("groups.career")}</SectionGroupLabel>
             <div className="flex flex-col gap-4 md:gap-5">
-              <SectionCard title="Experiencia laboral" icon={Building2} sectionId="sec-work-self">
+              <SectionCard title={t("sections.workExperience")} icon={Building2} sectionId="sec-work-self">
                 {isEditing ? (
                   <ProfileEditWorkFields
                     form={form}
@@ -789,7 +791,7 @@ export function CandidateSelfProfileView({
                   <WorkExperienceList items={workExperience} />
                 )}
               </SectionCard>
-              <SectionCard title="Educación" icon={GraduationCap} sectionId="sec-edu-self">
+              <SectionCard title={t("sections.education")} icon={GraduationCap} sectionId="sec-edu-self">
                 {isEditing ? (
                   <ProfileEditEducationFields
                     form={form}
@@ -805,9 +807,9 @@ export function CandidateSelfProfileView({
           </div>
 
           <div id="perfil-competencias" className="scroll-mt-28">
-            <SectionGroupLabel>Competencias</SectionGroupLabel>
+            <SectionGroupLabel>{t("groups.competencies")}</SectionGroupLabel>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
-              <SectionCard title="Idiomas" icon={Languages} sectionId="sec-lang-self">
+              <SectionCard title={t("sections.languages")} icon={Languages} sectionId="sec-lang-self">
                 {isEditing ? (
                   <ProfileEditLanguagesFields
                     form={form}
@@ -819,7 +821,7 @@ export function CandidateSelfProfileView({
                   <LanguagesList items={languages} />
                 )}
               </SectionCard>
-              <SectionCard title="Habilidades" icon={Sparkles} sectionId="sec-skills-self">
+              <SectionCard title={t("sections.skills")} icon={Sparkles} sectionId="sec-skills-self">
                 {isEditing ? (
                   <ProfileEditSkillsField
                     form={form}
@@ -835,8 +837,8 @@ export function CandidateSelfProfileView({
           </div>
 
           <div id="perfil-presencia" className="scroll-mt-28">
-            <SectionGroupLabel>Presencia en línea</SectionGroupLabel>
-            <SectionCard title="Enlaces" icon={FileText} sectionId="sec-links-self">
+            <SectionGroupLabel>{t("groups.onlinePresence")}</SectionGroupLabel>
+            <SectionCard title={t("sections.links")} icon={FileText} sectionId="sec-links-self">
               {isEditing ? (
                 <ProfileEditSocialVideoFields
                   form={form}
@@ -846,7 +848,7 @@ export function CandidateSelfProfileView({
               ) : (
                 <div>
                   <p className="mb-2 font-sans text-xs font-medium text-muted-foreground">
-                    Redes y sitio web
+                    {t("sections.linksSubtitle")}
                   </p>
                   <SocialLinksList links={socialLinks} />
                 </div>
@@ -855,9 +857,9 @@ export function CandidateSelfProfileView({
           </div>
 
           <div id="perfil-referencias" className="scroll-mt-28">
-            <SectionGroupLabel>Referencias y logros</SectionGroupLabel>
+            <SectionGroupLabel>{t("groups.referencesAchievements")}</SectionGroupLabel>
             <div className="flex flex-col gap-4 md:gap-5">
-              <SectionCard title="Referencias" icon={Users} sectionId="sec-refs-self">
+              <SectionCard title={t("sections.references")} icon={Users} sectionId="sec-refs-self">
                 {isEditing ? (
                   <ProfileEditReferencesFields
                     form={form}
@@ -869,7 +871,7 @@ export function CandidateSelfProfileView({
                   <ReferencesList items={references} />
                 )}
               </SectionCard>
-              <SectionCard title="Reconocimientos" icon={Award} sectionId="sec-awards-self">
+              <SectionCard title={t("sections.recognitions")} icon={Award} sectionId="sec-awards-self">
                 {isEditing ? (
                   <ProfileEditRecognitionsField
                     form={form}
@@ -889,24 +891,23 @@ export function CandidateSelfProfileView({
           className="rounded-2xl border border-border bg-muted/30 p-5 font-sans text-sm text-muted-foreground md:p-6"
           role="status"
         >
-          Aún no hay trayectoria ni competencias en tu ficha. Podés cargarlas editando el perfil o
-          subiendo un CV en{" "}
+          {t("emptyStates.enrichedEmptyPrefix")}
           <Link
             href="/portal-candidato/documentos"
             className="rounded font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
           >
-            Documentos
+            {t("emptyStates.documentsLink")}
           </Link>
-          .
+          {t("emptyStates.enrichedEmptySuffix")}
         </div>
       )}
 
       {compliance != null ? (
         <div id="perfil-compliance" className="scroll-mt-28">
-          <SectionGroupLabel>Requisitos y cumplimiento</SectionGroupLabel>
-          <SectionCard title="Cumplimiento" icon={Award} sectionId="sec-compliance">
-            {formatCompliancePreview(compliance).length > 0 ? (
-              <InfoGrid items={formatCompliancePreview(compliance)} />
+          <SectionGroupLabel>{t("groups.requirementsCompliance")}</SectionGroupLabel>
+          <SectionCard title={t("sections.compliance")} icon={Award} sectionId="sec-compliance">
+            {formatCompliancePreview(compliance, t("values.complianceValueLabel")).length > 0 ? (
+              <InfoGrid items={formatCompliancePreview(compliance, t("values.complianceValueLabel"))} />
             ) : (
               <p className="font-sans text-sm text-muted-foreground">—</p>
             )}
@@ -916,7 +917,7 @@ export function CandidateSelfProfileView({
 
       {parseState.normalizedDataParseFailed && parseState.normalizedDataRaw ? (
         <SectionCard
-          title="Datos técnicos (revisión)"
+          title={t("sections.technicalData")}
           icon={FileText}
           sectionId="sec-nd-raw-self"
         >
@@ -924,8 +925,7 @@ export function CandidateSelfProfileView({
             className="mb-2 font-sans text-xs text-amber-800"
             role="status"
           >
-            Parte de tu perfil llegó en un formato que no se pudo interpretar como JSON. Si ves esto,
-            avisá a soporte.
+            {t("emptyStates.technicalDataWarning")}
           </p>
           <pre className="max-h-72 overflow-auto whitespace-pre-wrap wrap-break-word rounded-lg border border-border bg-muted/50 p-4 font-mono text-xs text-foreground">
             {parseState.normalizedDataRaw}

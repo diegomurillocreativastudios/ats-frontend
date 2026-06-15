@@ -8,6 +8,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react"
+import { useTranslations } from "next-intl"
 import { Plus, Trash2, X } from "lucide-react"
 import { SocialLinkTypePicker } from "@/components/candidato/social-link-type-picker"
 import { DatePicker } from "@/components/ui/date-picker"
@@ -16,10 +17,10 @@ import {
   type FullProfileFormInput,
 } from "@/lib/candidate-profile"
 import {
-  AVAILABILITY_OPTIONS,
-  GENDER_OPTIONS,
+  getAvailabilityOptions,
   getCountrySelectOptions,
-  MARITAL_STATUS_OPTIONS,
+  getGenderOptions,
+  getMaritalStatusOptions,
   mergeLegacySelectOption,
   type SelectOption,
 } from "@/lib/profile-form-options"
@@ -136,11 +137,12 @@ export function ProfileEditHeroFields({
   patch,
   saving,
 }: Pick<EditorFieldsBase, "form" | "patch" | "saving">) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Identidad y resumen</p>
+      <p className={profileEditSectionTitleClass}>{t("form.identitySummary")}</p>
       <div className="grid gap-4 sm:grid-cols-2">
-        <ProfileEditField label="Nombre" htmlFor="pf-first">
+        <ProfileEditField label={t("form.labels.firstName")} htmlFor="pf-first">
           <input
             id="pf-first"
             autoComplete="given-name"
@@ -150,7 +152,7 @@ export function ProfileEditHeroFields({
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label="Apellido" htmlFor="pf-last">
+        <ProfileEditField label={t("form.labels.lastName")} htmlFor="pf-last">
           <input
             id="pf-last"
             autoComplete="family-name"
@@ -160,7 +162,7 @@ export function ProfileEditHeroFields({
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label="Titular / headline" required htmlFor="pf-headline" className="sm:col-span-2">
+        <ProfileEditField label={t("form.labels.headline")} required htmlFor="pf-headline" className="sm:col-span-2">
           <input
             id="pf-headline"
             value={form.headline}
@@ -170,7 +172,7 @@ export function ProfileEditHeroFields({
             autoComplete="off"
           />
         </ProfileEditField>
-        <ProfileEditField label="Resumen profesional" required htmlFor="pf-summary" className="sm:col-span-2">
+        <ProfileEditField label={t("form.labels.summary")} required htmlFor="pf-summary" className="sm:col-span-2">
           <textarea
             id="pf-summary"
             rows={4}
@@ -186,8 +188,9 @@ export function ProfileEditHeroFields({
 }
 
 export function ProfileEditNationalIdField({ form, patch, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
-    <ProfileEditField label="Documento de identidad" required htmlFor="pf-national-id">
+    <ProfileEditField label={t("form.labels.nationalId")} required htmlFor="pf-national-id">
       <input
         id="pf-national-id"
         value={form.nationalId}
@@ -201,11 +204,12 @@ export function ProfileEditNationalIdField({ form, patch, saving }: EditorFields
 }
 
 export function ProfileEditContactFields({ form, patch, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Contacto</p>
+      <p className={profileEditSectionTitleClass}>{t("form.contact")}</p>
       <div className="grid gap-4 sm:grid-cols-2">
-        <ProfileEditField label="Correo electrónico" htmlFor="pf-email">
+        <ProfileEditField label={t("form.labels.email")} htmlFor="pf-email">
           <input
             id="pf-email"
             type="email"
@@ -216,7 +220,7 @@ export function ProfileEditContactFields({ form, patch, saving }: EditorFieldsBa
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label="Teléfono" htmlFor="pf-phone">
+        <ProfileEditField label={t("form.labels.phone")} htmlFor="pf-phone">
           <input
             id="pf-phone"
             type="tel"
@@ -233,6 +237,7 @@ export function ProfileEditContactFields({ form, patch, saving }: EditorFieldsBa
 }
 
 export function ProfileEditLocationAndPersonalFields({ form, patch, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   const countryOptions = useMemo(
     () => getCountrySelectOptions().map((c) => ({ value: c.value, label: c.label })),
     []
@@ -244,20 +249,20 @@ export function ProfileEditLocationAndPersonalFields({ form, patch, saving }: Ed
 
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Ubicación y datos personales</p>
+      <p className={profileEditSectionTitleClass}>{t("form.locationPersonal")}</p>
       <div className="grid gap-4 sm:grid-cols-2">
-        <ProfileEditField label="País" htmlFor="pf-country" className="sm:col-span-2">
+        <ProfileEditField label={t("form.labels.country")} htmlFor="pf-country" className="sm:col-span-2">
           <ProfileEditSelect
             id="pf-country"
             value={form.country}
             onChange={(country) => patch({ country })}
             disabled={saving}
             options={countryOptions}
-            emptyLabel="Seleccioná un país"
+            emptyLabel={t("form.selects.selectCountry")}
           />
         </ProfileEditField>
         <ProfileEditField
-          label="Fecha de nacimiento"
+          label={t("form.labels.birthDate")}
           htmlFor="pf-birth"
           error={birthDateError}
         >
@@ -266,13 +271,13 @@ export function ProfileEditLocationAndPersonalFields({ form, patch, saving }: Ed
             value={form.birthDateInput}
             onChange={(birthDateInput) => patch({ birthDateInput })}
             disabled={saving}
-            ariaLabel="Fecha de nacimiento"
+            ariaLabel={t("form.labels.birthDate")}
             errorMessage={birthDateError}
             buttonClassName={`${profileEditInputClass} justify-center text-center`}
             wrapperClassName="relative w-full"
           />
         </ProfileEditField>
-        <ProfileEditField label="Ciudad de nacimiento" htmlFor="pf-birth-city">
+        <ProfileEditField label={t("form.labels.birthCity")} htmlFor="pf-birth-city">
           <input
             id="pf-birth-city"
             value={form.birthCity}
@@ -281,24 +286,24 @@ export function ProfileEditLocationAndPersonalFields({ form, patch, saving }: Ed
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label="Estado civil" htmlFor="pf-marital">
+        <ProfileEditField label={t("form.labels.maritalStatus")} htmlFor="pf-marital">
           <ProfileEditSelect
             id="pf-marital"
             value={form.maritalStatus}
             onChange={(maritalStatus) => patch({ maritalStatus })}
             disabled={saving}
-            options={MARITAL_STATUS_OPTIONS}
-            emptyLabel="Sin especificar"
+            options={getMaritalStatusOptions(t)}
+            emptyLabel={t("form.selects.unspecified")}
           />
         </ProfileEditField>
-        <ProfileEditField label="Género" htmlFor="pf-gender">
+        <ProfileEditField label={t("form.labels.gender")} htmlFor="pf-gender">
           <ProfileEditSelect
             id="pf-gender"
             value={form.gender}
             onChange={(gender) => patch({ gender })}
             disabled={saving}
-            options={GENDER_OPTIONS}
-            emptyLabel="Sin especificar"
+            options={getGenderOptions(t)}
+            emptyLabel={t("form.selects.unspecified")}
           />
         </ProfileEditField>
       </div>
@@ -317,6 +322,7 @@ function ProfileEditSectorsTags({
   onSectorsChange: (next: string[]) => void
   disabled: boolean
 }) {
+  const t = useTranslations("CandidatePortal.profile")
   const [draft, setDraft] = useState("")
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -346,7 +352,7 @@ function ProfileEditSectorsTags({
   return (
     <div
       role="group"
-      aria-label="Sectores"
+      aria-label={t("form.aria.sectorsGroup")}
       className={`${profileEditInputClass} flex min-h-11 flex-wrap items-center gap-2 py-2`}
     >
       {sectors.map((label, index) => (
@@ -360,7 +366,7 @@ function ProfileEditSectorsTags({
             disabled={disabled}
             onClick={() => handleRemoveAt(index)}
             className="shrink-0 rounded-full p-0.5 text-vo-purple hover:bg-vo-purple/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60"
-            aria-label={`Quitar sector ${label}`}
+            aria-label={t("form.aria.removeSector", { label })}
           >
             <X className="h-3.5 w-3.5" aria-hidden />
           </button>
@@ -374,18 +380,23 @@ function ProfileEditSectorsTags({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         className="min-w-40 flex-1 border-0 bg-transparent py-0.5 font-sans text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-0 disabled:cursor-not-allowed"
-        placeholder={sectors.length === 0 ? "Escribí un sector y presioná Enter" : "Añadir otro…"}
+        placeholder={
+          sectors.length === 0
+            ? t("form.placeholders.sectorsEmpty")
+            : t("form.placeholders.sectorsMore")
+        }
       />
     </div>
   )
 }
 
 export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Preferencias laborales (objetivo)</p>
+      <p className={profileEditSectionTitleClass}>{t("form.jobPreferences")}</p>
       <div className="grid gap-4 sm:grid-cols-2">
-        <ProfileEditField label="Sectores" htmlFor="pf-sectors" className="sm:col-span-2">
+        <ProfileEditField label={t("form.labels.sectors")} htmlFor="pf-sectors" className="sm:col-span-2">
           <ProfileEditSectorsTags
             id="pf-sectors"
             sectors={form.sectors}
@@ -393,7 +404,7 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label="Rol deseado" htmlFor="pf-job-role">
+        <ProfileEditField label={t("form.labels.desiredRole")} htmlFor="pf-job-role">
           <input
             id="pf-job-role"
             value={form.jobDesiredRole}
@@ -402,7 +413,7 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label="Salario mínimo" htmlFor="pf-job-min">
+        <ProfileEditField label={t("form.labels.minSalary")} htmlFor="pf-job-min">
           <input
             id="pf-job-min"
             type="number"
@@ -424,7 +435,7 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label="Nivel educativo" htmlFor="pf-job-edu">
+        <ProfileEditField label={t("form.labels.educationLevel")} htmlFor="pf-job-edu">
           <input
             id="pf-job-edu"
             value={form.jobEducationLevel}
@@ -433,7 +444,7 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label="Ciudad deseada" htmlFor="pf-job-city">
+        <ProfileEditField label={t("form.labels.desiredCity")} htmlFor="pf-job-city">
           <input
             id="pf-job-city"
             value={form.jobDesiredCity}
@@ -442,17 +453,17 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label="Disponibilidad" htmlFor="pf-job-avail">
+        <ProfileEditField label={t("form.labels.availability")} htmlFor="pf-job-avail">
           <ProfileEditSelect
             id="pf-job-avail"
             value={form.jobAvailability}
             onChange={(jobAvailability) => patch({ jobAvailability })}
             disabled={saving}
-            options={AVAILABILITY_OPTIONS}
-            emptyLabel="Sin especificar"
+            options={getAvailabilityOptions(t)}
+            emptyLabel={t("form.selects.unspecified")}
           />
         </ProfileEditField>
-        <ProfileEditField label="Discapacidad" htmlFor="pf-job-dis">
+        <ProfileEditField label={t("form.labels.disability")} htmlFor="pf-job-dis">
           <select
             id="pf-job-dis"
             value={form.jobDisability}
@@ -462,9 +473,9 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
             className={profileEditInputClass}
             disabled={saving}
           >
-            <option value="">Sin indicar</option>
-            <option value="yes">Sí</option>
-            <option value="no">No</option>
+            <option value="">{t("form.selects.disabilityUnset")}</option>
+            <option value="yes">{t("form.selects.yes")}</option>
+            <option value="no">{t("form.selects.no")}</option>
           </select>
         </ProfileEditField>
       </div>
@@ -473,12 +484,13 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
 }
 
 export function ProfileEditResumeMarkdownField({ form, patch, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <ProfileEditField
-      label="Currículum en texto (markdown)"
+      label={t("form.labels.resumeMarkdown")}
       required
       htmlFor="pf-resume-md"
-      hint="Obligatorio en cada guardado."
+      hint={t("form.hints.resumeMarkdown")}
     >
       <textarea
         id="pf-resume-md"
@@ -493,9 +505,10 @@ export function ProfileEditResumeMarkdownField({ form, patch, saving }: EditorFi
 }
 
 export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Experiencia laboral</p>
+      <p className={profileEditSectionTitleClass}>{t("form.workExperience")}</p>
       {form.workRows.map((row, index) => (
         <div
           key={`work-${index}`}
@@ -503,7 +516,7 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
         >
           <div className="mb-3 flex items-center justify-between gap-2">
             <span className="font-sans text-xs font-medium text-muted-foreground">
-              Experiencia {index + 1}
+              {t("form.items.experience", { index: index + 1 })}
             </span>
             {form.workRows.length > 1 ? (
               <button
@@ -516,15 +529,15 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
                 }
                 disabled={saving}
                 className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-sans text-xs text-destructive hover:bg-destructive/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
-                aria-label={`Quitar experiencia ${index + 1}`}
+                aria-label={t("form.aria.removeExperience", { index: index + 1 })}
               >
                 <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                Quitar
+                {t("form.buttons.remove")}
               </button>
             ) : null}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <ProfileEditField label="Empresa" htmlFor={`pf-wc-${index}`}>
+            <ProfileEditField label={t("form.labels.company")} htmlFor={`pf-wc-${index}`}>
               <input
                 id={`pf-wc-${index}`}
                 value={row.company}
@@ -541,7 +554,7 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
                 disabled={saving}
               />
             </ProfileEditField>
-            <ProfileEditField label="Rol / puesto" htmlFor={`pf-wr-${index}`}>
+            <ProfileEditField label={t("form.labels.role")} htmlFor={`pf-wr-${index}`}>
               <input
                 id={`pf-wr-${index}`}
                 value={row.role}
@@ -558,7 +571,7 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
                 disabled={saving}
               />
             </ProfileEditField>
-            <ProfileEditField label="Inicio" htmlFor={`pf-ws-${index}`}>
+            <ProfileEditField label={t("form.labels.start")} htmlFor={`pf-ws-${index}`}>
               <input
                 id={`pf-ws-${index}`}
                 value={row.startDate}
@@ -573,10 +586,10 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
                 }}
                 className={profileEditInputClass}
                 disabled={saving}
-                placeholder="Ej. 2020-01"
+                placeholder={t("form.placeholders.workStart")}
               />
             </ProfileEditField>
-            <ProfileEditField label="Fin" htmlFor={`pf-we-${index}`}>
+            <ProfileEditField label={t("form.labels.end")} htmlFor={`pf-we-${index}`}>
               <input
                 id={`pf-we-${index}`}
                 value={row.endDate}
@@ -591,10 +604,10 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
                 }}
                 className={profileEditInputClass}
                 disabled={saving}
-                placeholder="Ej. 2023-12 o actual"
+                placeholder={t("form.placeholders.workEnd")}
               />
             </ProfileEditField>
-            <ProfileEditField label="Descripción" htmlFor={`pf-wd-${index}`} className="sm:col-span-2">
+            <ProfileEditField label={t("form.labels.description")} htmlFor={`pf-wd-${index}`} className="sm:col-span-2">
               <textarea
                 id={`pf-wd-${index}`}
                 rows={3}
@@ -624,16 +637,17 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
         className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
       >
         <Plus className="h-4 w-4" aria-hidden />
-        Añadir experiencia
+        {t("form.buttons.addExperience")}
       </button>
     </div>
   )
 }
 
 export function ProfileEditEducationFields({ form, setForm, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Educación</p>
+      <p className={profileEditSectionTitleClass}>{t("form.education")}</p>
       {form.educationRows.map((row, index) => (
         <div
           key={`edu-${index}`}
@@ -641,7 +655,7 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
         >
           <div className="mb-3 flex items-center justify-between gap-2">
             <span className="font-sans text-xs font-medium text-muted-foreground">
-              Formación {index + 1}
+              {t("form.items.education", { index: index + 1 })}
             </span>
             {form.educationRows.length > 1 ? (
               <button
@@ -654,15 +668,15 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
                 }
                 disabled={saving}
                 className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-sans text-xs text-destructive hover:bg-destructive/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
-                aria-label={`Quitar educación ${index + 1}`}
+                aria-label={t("form.aria.removeEducation", { index: index + 1 })}
               >
                 <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                Quitar
+                {t("form.buttons.remove")}
               </button>
             ) : null}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <ProfileEditField label="Institución" htmlFor={`pf-ei-${index}`} className="sm:col-span-2">
+            <ProfileEditField label={t("form.labels.institution")} htmlFor={`pf-ei-${index}`} className="sm:col-span-2">
               <input
                 id={`pf-ei-${index}`}
                 value={row.institution}
@@ -679,7 +693,7 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
                 disabled={saving}
               />
             </ProfileEditField>
-            <ProfileEditField label="Título / grado" htmlFor={`pf-ed-${index}`} className="sm:col-span-2">
+            <ProfileEditField label={t("form.labels.degree")} htmlFor={`pf-ed-${index}`} className="sm:col-span-2">
               <input
                 id={`pf-ed-${index}`}
                 value={row.degree}
@@ -696,7 +710,7 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
                 disabled={saving}
               />
             </ProfileEditField>
-            <ProfileEditField label="Inicio" htmlFor={`pf-es-${index}`}>
+            <ProfileEditField label={t("form.labels.start")} htmlFor={`pf-es-${index}`}>
               <input
                 id={`pf-es-${index}`}
                 value={row.startDate}
@@ -713,7 +727,7 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
                 disabled={saving}
               />
             </ProfileEditField>
-            <ProfileEditField label="Fin" htmlFor={`pf-ee-${index}`}>
+            <ProfileEditField label={t("form.labels.end")} htmlFor={`pf-ee-${index}`}>
               <input
                 id={`pf-ee-${index}`}
                 value={row.endDate}
@@ -745,19 +759,20 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
         className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
       >
         <Plus className="h-4 w-4" aria-hidden />
-        Añadir educación
+        {t("form.buttons.addEducation")}
       </button>
     </div>
   )
 }
 
 export function ProfileEditLanguagesFields({ form, setForm, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Idiomas</p>
+      <p className={profileEditSectionTitleClass}>{t("form.languages")}</p>
       {form.languageRows.map((row, index) => (
         <div key={`lang-${index}`} className="grid gap-3 sm:grid-cols-2">
-          <ProfileEditField label={`Idioma ${index + 1}`} htmlFor={`pf-ln-${index}`}>
+          <ProfileEditField label={t("form.labels.language", { index: index + 1 })} htmlFor={`pf-ln-${index}`}>
             <input
               id={`pf-ln-${index}`}
               value={row.language}
@@ -776,7 +791,7 @@ export function ProfileEditLanguagesFields({ form, setForm, saving }: EditorFiel
           </ProfileEditField>
           <div className="flex flex-col gap-1.5 sm:flex-row sm:items-end">
             <div className="min-w-0 flex-1">
-              <ProfileEditField label="Nivel" htmlFor={`pf-ll-${index}`}>
+              <ProfileEditField label={t("form.labels.level")} htmlFor={`pf-ll-${index}`}>
                 <input
                   id={`pf-ll-${index}`}
                   value={row.level}
@@ -805,7 +820,7 @@ export function ProfileEditLanguagesFields({ form, setForm, saving }: EditorFiel
                 }
                 disabled={saving}
                 className="mb-0.5 shrink-0 rounded-lg p-2 text-destructive hover:bg-destructive/10"
-                aria-label={`Quitar idioma ${index + 1}`}
+                aria-label={t("form.aria.removeLanguage", { index: index + 1 })}
               >
                 <Trash2 className="h-4 w-4" aria-hidden />
               </button>
@@ -825,20 +840,21 @@ export function ProfileEditLanguagesFields({ form, setForm, saving }: EditorFiel
         className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
       >
         <Plus className="h-4 w-4" aria-hidden />
-        Añadir idioma
+        {t("form.buttons.addLanguage")}
       </button>
     </div>
   )
 }
 
 export function ProfileEditSkillsField({ form, patch, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Habilidades</p>
+      <p className={profileEditSectionTitleClass}>{t("form.skills")}</p>
       <ProfileEditField
-        label="Una por línea"
+        label={t("form.labels.skillsOnePerLine")}
         htmlFor="pf-skills"
-        hint="Se guardan como lista en tu perfil."
+        hint={t("form.hints.skills")}
       >
         <textarea
           id="pf-skills"
@@ -858,6 +874,7 @@ export function ProfileEditSocialVideoFields({
   setForm,
   saving,
 }: Pick<EditorFieldsBase, "form" | "setForm" | "saving">) {
+  const t = useTranslations("CandidatePortal.profile")
   const [isAddingLinkOpen, setIsAddingLinkOpen] = useState(false)
   const [addDraftKey, setAddDraftKey] = useState(0)
   const [draftPlatform, setDraftPlatform] = useState("")
@@ -885,11 +902,11 @@ export function ProfileEditSocialVideoFields({
     const urlTrim = draftUrl.trim()
     const platformTrim = draftPlatform.trim()
     if (!platformTrim) {
-      setAddLinkError("Seleccioná el tipo de enlace. Si elegís «Otro», completá el nombre.")
+      setAddLinkError(t("form.addLink.errorSelectType"))
       return
     }
     if (!urlTrim) {
-      setAddLinkError("Ingresá la URL del enlace.")
+      setAddLinkError(t("form.addLink.errorUrl"))
       return
     }
     setForm((f) => ({
@@ -902,12 +919,11 @@ export function ProfileEditSocialVideoFields({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Enlaces</p>
+      <p className={profileEditSectionTitleClass}>{t("form.links")}</p>
 
       {form.socialRows.length === 0 ? (
         <p className="font-sans text-sm text-muted-foreground">
-          Sumá enlaces a tu portfolio, LinkedIn, GitHub u otras plataformas. Podés añadir varios con el
-          botón de abajo.
+          {t("form.addLink.emptyHint")}
         </p>
       ) : null}
 
@@ -918,7 +934,7 @@ export function ProfileEditSocialVideoFields({
         >
           <div className="flex items-center justify-between gap-2 sm:col-span-2">
             <span className="font-sans text-xs font-medium text-muted-foreground">
-              Enlace {index + 1}
+              {t("form.items.link", { index: index + 1 })}
             </span>
             <button
               type="button"
@@ -931,7 +947,7 @@ export function ProfileEditSocialVideoFields({
               disabled={saving}
               className="font-sans text-xs text-destructive hover:underline"
             >
-              Quitar
+              {t("form.buttons.remove")}
             </button>
           </div>
           <div className="sm:col-span-2">
@@ -949,7 +965,7 @@ export function ProfileEditSocialVideoFields({
               disabled={saving}
             />
           </div>
-          <ProfileEditField label="URL" required htmlFor={`pf-su-${index}`} className="sm:col-span-2">
+          <ProfileEditField label={t("form.labels.url")} required htmlFor={`pf-su-${index}`} className="sm:col-span-2">
             <input
               id={`pf-su-${index}`}
               type="url"
@@ -965,7 +981,7 @@ export function ProfileEditSocialVideoFields({
               }}
               className={profileEditInputClass}
               disabled={saving}
-              placeholder="https://ejemplo.com"
+              placeholder={t("form.placeholders.url")}
             />
           </ProfileEditField>
         </div>
@@ -979,7 +995,7 @@ export function ProfileEditSocialVideoFields({
             id="pf-add-link-heading"
             className="mb-4 font-sans text-base font-semibold text-foreground"
           >
-            Añadir enlace
+            {t("form.addLink.heading")}
           </h3>
           <div className="flex flex-col gap-4">
             <SocialLinkTypePicker
@@ -993,7 +1009,7 @@ export function ProfileEditSocialVideoFields({
               disabled={saving}
               required
             />
-            <ProfileEditField label="URL" required htmlFor="pf-add-social-url">
+            <ProfileEditField label={t("form.labels.url")} required htmlFor="pf-add-social-url">
               <input
                 id="pf-add-social-url"
                 type="url"
@@ -1004,7 +1020,7 @@ export function ProfileEditSocialVideoFields({
                 }}
                 className={profileEditInputClass}
                 disabled={saving}
-                placeholder="https://ejemplo.com"
+                placeholder={t("form.placeholders.url")}
               />
             </ProfileEditField>
             {addLinkError ? (
@@ -1019,7 +1035,7 @@ export function ProfileEditSocialVideoFields({
                 disabled={saving}
                 className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-5 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Cancelar
+                {t("form.buttons.cancel")}
               </button>
               <button
                 type="button"
@@ -1027,7 +1043,7 @@ export function ProfileEditSocialVideoFields({
                 disabled={saving}
                 className="inline-flex items-center justify-center rounded-xl bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Añadir enlace
+                {t("form.buttons.addLink")}
               </button>
             </div>
           </div>
@@ -1040,7 +1056,7 @@ export function ProfileEditSocialVideoFields({
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border px-4 py-3 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple sm:w-fit"
         >
           <Plus className="h-4 w-4" aria-hidden />
-          Añadir enlace
+          {t("form.buttons.addLink")}
         </button>
       )}
     </div>
@@ -1048,9 +1064,10 @@ export function ProfileEditSocialVideoFields({
 }
 
 export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Referencias</p>
+      <p className={profileEditSectionTitleClass}>{t("form.references")}</p>
       {form.referenceRows.map((row, index) => (
         <div
           key={`ref-${index}`}
@@ -1058,7 +1075,7 @@ export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFie
         >
           <div className="mb-3 flex items-center justify-between gap-2">
             <span className="font-sans text-xs font-medium text-muted-foreground">
-              Referencia {index + 1}
+              {t("form.items.reference", { index: index + 1 })}
             </span>
             {form.referenceRows.length > 1 ? (
               <button
@@ -1072,12 +1089,12 @@ export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFie
                 disabled={saving}
                 className="text-xs text-destructive hover:underline"
               >
-                Quitar
+                {t("form.buttons.remove")}
               </button>
             ) : null}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <ProfileEditField label="Nombre" htmlFor={`pf-rn-${index}`}>
+            <ProfileEditField label={t("form.labels.referenceName")} htmlFor={`pf-rn-${index}`}>
               <input
                 id={`pf-rn-${index}`}
                 value={row.name}
@@ -1094,7 +1111,7 @@ export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFie
                 disabled={saving}
               />
             </ProfileEditField>
-            <ProfileEditField label="Cargo" htmlFor={`pf-rp-${index}`}>
+            <ProfileEditField label={t("form.labels.position")} htmlFor={`pf-rp-${index}`}>
               <input
                 id={`pf-rp-${index}`}
                 value={row.position}
@@ -1111,7 +1128,7 @@ export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFie
                 disabled={saving}
               />
             </ProfileEditField>
-            <ProfileEditField label="Empresa" htmlFor={`pf-rc-${index}`}>
+            <ProfileEditField label={t("form.labels.company")} htmlFor={`pf-rc-${index}`}>
               <input
                 id={`pf-rc-${index}`}
                 value={row.company}
@@ -1128,7 +1145,7 @@ export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFie
                 disabled={saving}
               />
             </ProfileEditField>
-            <ProfileEditField label="Contacto" htmlFor={`pf-rx-${index}`}>
+            <ProfileEditField label={t("form.labels.contact")} htmlFor={`pf-rx-${index}`}>
               <input
                 id={`pf-rx-${index}`}
                 value={row.contact}
@@ -1160,20 +1177,21 @@ export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFie
         className="inline-flex w-fit items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-sans text-sm font-medium text-vo-purple hover:bg-vo-purple/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
       >
         <Plus className="h-4 w-4" aria-hidden />
-        Añadir referencia
+        {t("form.buttons.addReference")}
       </button>
     </div>
   )
 }
 
 export function ProfileEditRecognitionsField({ form, patch, saving }: EditorFieldsBase) {
+  const t = useTranslations("CandidatePortal.profile")
   return (
     <div className="flex flex-col gap-4">
-      <p className={profileEditSectionTitleClass}>Reconocimientos</p>
+      <p className={profileEditSectionTitleClass}>{t("form.recognitions")}</p>
       <ProfileEditField
-        label="Uno por línea"
+        label={t("form.labels.recognitionsOnePerLine")}
         htmlFor="pf-recog"
-        hint="Premios, certificaciones nombradas como texto."
+        hint={t("form.hints.recognitions")}
       >
         <textarea
           id="pf-recog"

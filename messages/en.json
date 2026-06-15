@@ -382,6 +382,262 @@
           "aiNote": "AI-generated result. Requires HR validation."
         }
       }
+    },
+    "profile": {
+      "breadcrumb": "My profile",
+      "page": {
+        "title": "My profile",
+        "description": "Edit your record with the required data and check how it combines with the information from your documents.",
+        "refreshingCv": "Updating extended CV data…",
+        "loadingTitle": "Loading your profile…",
+        "loadingDescription": "Fetching data from the server.",
+        "errorTitle": "We couldn't load your profile",
+        "retry": "Retry"
+      },
+      "session": {
+        "title": "Your session",
+        "description": "Basic access data. The rest of the record is loaded from the server.",
+        "name": "Name",
+        "email": "Email",
+        "role": "Role"
+      },
+      "toasts": {
+        "saveSuccess": "Changes saved successfully.",
+        "saveError": "Changes could not be saved. Please try again."
+      },
+      "nav": {
+        "aria": "Go to profile section",
+        "edit": "Edit",
+        "summary": "Summary",
+        "accountContact": "Account and contact",
+        "jobGoals": "Job goals",
+        "career": "Background",
+        "competencies": "Skills",
+        "links": "Links",
+        "references": "References",
+        "compliance": "Compliance"
+      },
+      "groups": {
+        "accountPersonal": "Account and personal data",
+        "goals": "Goals",
+        "career": "Professional background",
+        "competencies": "Skills",
+        "onlinePresence": "Online presence",
+        "referencesAchievements": "References and achievements",
+        "requirementsCompliance": "Requirements and compliance"
+      },
+      "actions": {
+        "aria": "Profile actions",
+        "toolbarEditingAria": "Download CV, documents or finish editing",
+        "toolbarViewingAria": "Download CV, edit profile or manage documents",
+        "downloadCv": "Download CV",
+        "downloadingCv": "Downloading…",
+        "downloadCvAria": "Download your latest uploaded CV",
+        "manageDocuments": "Manage documents",
+        "manageDocumentsAria": "Go to documents to manage files",
+        "cancel": "Cancel",
+        "cancelAria": "Cancel editing without saving",
+        "save": "Save changes",
+        "saving": "Saving…",
+        "requiredHint": "Headline, summary and ID document are required when saving."
+      },
+      "download": {
+        "genericError": "Download error.",
+        "cvError": "The CV could not be downloaded."
+      },
+      "intro": {
+        "notRegistered": "You haven't registered your record yet. Fill in the data and save to activate your profile.",
+        "editHint": "Edit your information in each section of the record. Download your CV or manage documents whenever you need."
+      },
+      "hero": {
+        "editTitle": "Your record",
+        "editDescription": "Edit your name, headline and summary in the same place where you see them when reading the profile.",
+        "profileSubtitle": "This is how your professional profile appears in the system.",
+        "summaryEmpty": "Complete the summary by editing the profile or from the information imported from your documents.",
+        "defaultName": "Candidate"
+      },
+      "notFound": {
+        "intro": "You don't have a candidate profile on the server yet. Tap ",
+        "cta": "Complete my profile",
+        "outro": ", fill in the required data and save to activate your record."
+      },
+      "sections": {
+        "consolidated": "Consolidated record",
+        "consolidatedDescription": "We combine data from your account (session), the editable profile and, if applicable, from processed documents.",
+        "accountReadOnly": "Account (read-only)",
+        "jobPreferences": "Job preferences",
+        "workExperience": "Work experience",
+        "education": "Education",
+        "languages": "Languages",
+        "skills": "Skills",
+        "links": "Links",
+        "linksSubtitle": "Social networks and website",
+        "references": "References",
+        "recognitions": "Recognitions",
+        "compliance": "Compliance",
+        "technicalData": "Technical data (review)"
+      },
+      "fields": {
+        "user": "User",
+        "email": "Email",
+        "phone": "Phone",
+        "sessionRole": "Session role",
+        "nationalId": "ID document",
+        "country": "Country",
+        "birthCity": "City of birth",
+        "birthDate": "Date of birth",
+        "maritalStatus": "Marital status",
+        "gender": "Gender",
+        "minExpectedSalary": "Minimum expected salary",
+        "availability": "Availability",
+        "disabilityRegistered": "Disability (registered)"
+      },
+      "values": {
+        "yes": "Yes",
+        "no": "No",
+        "complianceValueLabel": "Value"
+      },
+      "emptyStates": {
+        "enrichedEmptyPrefix": "There is no background or skills in your record yet. You can add them by editing the profile or uploading a CV in ",
+        "documentsLink": "Documents",
+        "enrichedEmptySuffix": ".",
+        "technicalDataWarning": "Part of your profile arrived in a format that could not be interpreted as JSON. If you see this, let support know.",
+        "complianceDash": "—"
+      },
+      "form": {
+        "identitySummary": "Identity and summary",
+        "contact": "Contact",
+        "locationPersonal": "Location and personal data",
+        "jobPreferences": "Job preferences (goal)",
+        "workExperience": "Work experience",
+        "education": "Education",
+        "languages": "Languages",
+        "skills": "Skills",
+        "links": "Links",
+        "references": "References",
+        "recognitions": "Recognitions",
+        "labels": {
+          "firstName": "First name",
+          "lastName": "Last name",
+          "headline": "Headline",
+          "summary": "Professional summary",
+          "nationalId": "ID document",
+          "email": "Email",
+          "phone": "Phone",
+          "country": "Country",
+          "birthDate": "Date of birth",
+          "birthCity": "City of birth",
+          "maritalStatus": "Marital status",
+          "gender": "Gender",
+          "sectors": "Sectors",
+          "desiredRole": "Desired role",
+          "minSalary": "Minimum salary",
+          "educationLevel": "Education level",
+          "desiredCity": "Desired city",
+          "availability": "Availability",
+          "disability": "Disability",
+          "resumeMarkdown": "Résumé as text (markdown)",
+          "company": "Company",
+          "role": "Role / position",
+          "start": "Start",
+          "end": "End",
+          "description": "Description",
+          "institution": "Institution",
+          "degree": "Degree / title",
+          "language": "Language {index}",
+          "level": "Level",
+          "skillsOnePerLine": "One per line",
+          "url": "URL",
+          "referenceName": "Name",
+          "position": "Position",
+          "contact": "Contact",
+          "recognitionsOnePerLine": "One per line"
+        },
+        "placeholders": {
+          "workStart": "e.g. 2020-01",
+          "workEnd": "e.g. 2023-12 or current",
+          "url": "https://example.com",
+          "sectorsEmpty": "Type a sector and press Enter",
+          "sectorsMore": "Add another…"
+        },
+        "hints": {
+          "resumeMarkdown": "Required on every save.",
+          "skills": "They are saved as a list in your profile.",
+          "recognitions": "Awards, certifications named as text."
+        },
+        "selects": {
+          "unspecified": "Unspecified",
+          "selectCountry": "Select a country",
+          "disabilityUnset": "Not specified",
+          "yes": "Yes",
+          "no": "No"
+        },
+        "buttons": {
+          "addExperience": "Add experience",
+          "addEducation": "Add education",
+          "addLanguage": "Add language",
+          "addReference": "Add reference",
+          "addLink": "Add link",
+          "remove": "Remove",
+          "cancel": "Cancel"
+        },
+        "items": {
+          "experience": "Experience {index}",
+          "education": "Education {index}",
+          "reference": "Reference {index}",
+          "link": "Link {index}"
+        },
+        "aria": {
+          "sectorsGroup": "Sectors",
+          "removeSector": "Remove sector {label}",
+          "removeExperience": "Remove experience {index}",
+          "removeEducation": "Remove education {index}",
+          "removeLanguage": "Remove language {index}"
+        },
+        "addLink": {
+          "heading": "Add link",
+          "emptyHint": "Add links to your portfolio, LinkedIn, GitHub or other platforms. You can add several with the button below.",
+          "errorSelectType": "Select the link type. If you choose «Other», enter the name.",
+          "errorUrl": "Enter the link URL."
+        }
+      },
+      "salary": {
+        "title": "Salary expectation",
+        "currency": "In US dollars (USD)",
+        "monthlyLabel": "Expected monthly amount",
+        "placeholder": "e.g. 2500",
+        "hint": "You can also adjust it in Job goals.",
+        "unset": "Not set"
+      },
+      "socialLink": {
+        "typeLabel": "Link type",
+        "selectPlaceholder": "Select link type",
+        "otherPrompt": "Other — enter the name",
+        "otherNameLabel": "Platform name",
+        "otherNamePlaceholder": "e.g. Portfolio, Behance…"
+      },
+      "options": {
+        "gender": {
+          "male": "Male",
+          "female": "Female"
+        },
+        "maritalStatus": {
+          "single": "Single",
+          "married": "Married",
+          "freeUnion": "Civil union",
+          "divorced": "Divorced",
+          "widowed": "Widowed",
+          "separated": "Separated"
+        },
+        "availability": {
+          "immediate": "Immediate",
+          "within15Days": "Within 15 days or less",
+          "within1Month": "Within 1 month",
+          "within2MonthsOrMore": "Within 2 months or more",
+          "toBeAgreed": "To be agreed",
+          "perProposal": "Per proposal"
+        }
+      }
     }
   },
   "LanguageSwitcher": {
