@@ -13,7 +13,7 @@ import { Plus, Trash2, X } from "lucide-react"
 import { SocialLinkTypePicker } from "@/components/candidato/social-link-type-picker"
 import { DatePicker } from "@/components/ui/date-picker"
 import {
-  getBirthDateInputValidationError,
+  getBirthDateInputValidationErrorCode,
   type FullProfileFormInput,
 } from "@/lib/candidate-profile"
 import {
@@ -70,7 +70,14 @@ function ProfileEditSelect({
   options: SelectOption[]
   emptyLabel?: string
 }) {
-  const merged = useMemo(() => mergeLegacySelectOption(options, value), [options, value])
+  const t = useTranslations("CandidatePortal.profile")
+  const merged = useMemo(
+    () =>
+      mergeLegacySelectOption(options, value, (legacyValue) =>
+        t("form.legacy.currentValue", { value: legacyValue })
+      ),
+    [options, value, t]
+  )
   const hasValue = merged.some((o) => o.value === value)
   return (
     <select
@@ -242,10 +249,13 @@ export function ProfileEditLocationAndPersonalFields({ form, patch, saving }: Ed
     () => getCountrySelectOptions().map((c) => ({ value: c.value, label: c.label })),
     []
   )
-  const birthDateError = useMemo(
-    () => getBirthDateInputValidationError(form.birthDateInput),
+  const birthDateErrorCode = useMemo(
+    () => getBirthDateInputValidationErrorCode(form.birthDateInput),
     [form.birthDateInput]
   )
+  const birthDateError = birthDateErrorCode
+    ? t(`form.validation.birthDate.${birthDateErrorCode}`)
+    : null
 
   return (
     <div className="flex flex-col gap-4">

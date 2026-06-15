@@ -10,6 +10,7 @@ import {
   getAvailabilityOptions,
   getGenderOptions,
   getMaritalStatusOptions,
+  mergeLegacySelectOption,
 } from "@/lib/profile-form-options"
 import { locales, type Locale } from "@/i18n/routing"
 import esMessages from "@/messages/es.json"
@@ -150,6 +151,36 @@ describe("Opciones de profile-form-options (Etapa 5D)", () => {
   it("usa la key traducible para el label, no el value", () => {
     const labelKeys = getAvailabilityOptions((key) => `T:${key}`).map((o) => o.label)
     expect(labelKeys).toContain("T:options.availability.immediate")
+  })
+})
+
+describe("mergeLegacySelectOption (Etapa 5E)", () => {
+  const options = [
+    { value: "Soltero/a", label: "Soltero/a" },
+    { value: "Casado/a", label: "Casado/a" },
+  ]
+
+  it("no agrega opción si el valor ya existe o está vacío", () => {
+    expect(mergeLegacySelectOption(options, "Casado/a")).toBe(options)
+    expect(mergeLegacySelectOption(options, "   ")).toBe(options)
+  })
+
+  it("usa el formateador por defecto en español cuando no se pasa traductor", () => {
+    const merged = mergeLegacySelectOption(options, "Conviviente")
+    expect(merged[0]).toEqual({
+      value: "Conviviente",
+      label: "Conviviente (valor actual)",
+    })
+  })
+
+  it("traduce el label pero conserva el value canónico", () => {
+    const merged = mergeLegacySelectOption(
+      options,
+      "Conviviente",
+      (value) => `legacy:${value}`
+    )
+    expect(merged[0].value).toBe("Conviviente")
+    expect(merged[0].label).toBe("legacy:Conviviente")
   })
 })
 

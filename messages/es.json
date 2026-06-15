@@ -152,6 +152,10 @@
     "portalSelection": {
       "title": "Elegí un portal",
       "description": "Seleccioná el portal de candidato, oportunidades o el de reclutamiento"
+    },
+    "candidateProfile": {
+      "title": "Mi perfil",
+      "description": "Consultá y gestioná los datos de tu cuenta en el portal del candidato"
     }
   },
   "PortalSelection": {
@@ -599,6 +603,16 @@
           "emptyHint": "Sumá enlaces a tu portfolio, LinkedIn, GitHub u otras plataformas. Podés añadir varios con el botón de abajo.",
           "errorSelectType": "Seleccioná el tipo de enlace. Si elegís «Otro», completá el nombre.",
           "errorUrl": "Ingresá la URL del enlace."
+        },
+        "legacy": {
+          "currentValue": "{value} (valor actual)"
+        },
+        "validation": {
+          "birthDate": {
+            "invalid": "Fecha inválida",
+            "futureDate": "La fecha no puede estar en el futuro",
+            "tooYoung": "Debés tener al menos 18 años"
+          }
         }
       },
       "salary": {

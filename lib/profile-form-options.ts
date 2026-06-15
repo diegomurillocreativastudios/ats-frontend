@@ -415,14 +415,27 @@ export function getAvailabilityOptions(t: ProfileOptionTranslator): SelectOption
 }
 
 /**
+ * Formatea el label visible de una opción legacy a partir de su valor crudo.
+ * Etapa 5E (i18n): permite traducir el sufijo «(valor actual)» con `t()` sin
+ * tocar el `value` canónico. Por defecto mantiene el texto en español para
+ * consumers no migrados.
+ */
+export type LegacyOptionLabelFormatter = (value: string) => string
+
+const defaultLegacyOptionLabel: LegacyOptionLabelFormatter = (value) =>
+  `${value} (valor actual)`
+
+/**
  * Si el valor guardado no coincide con ninguna opción (texto libre previo), mostrarlo como opción extra.
+ * El `value` permanece intacto (canónico); solo el `label` es traducible vía `formatLegacyLabel`.
  */
 export function mergeLegacySelectOption(
   options: SelectOption[],
-  currentValue: string
+  currentValue: string,
+  formatLegacyLabel: LegacyOptionLabelFormatter = defaultLegacyOptionLabel
 ): SelectOption[] {
   const t = currentValue.trim()
   if (!t) return options
   if (options.some((o) => o.value === t)) return options
-  return [{ value: t, label: `${t} (valor actual)` }, ...options]
+  return [{ value: t, label: formatLegacyLabel(t) }, ...options]
 }

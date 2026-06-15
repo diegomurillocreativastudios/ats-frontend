@@ -152,6 +152,10 @@
     "portalSelection": {
       "title": "Portal auswählen",
       "description": "Wählen Sie das Kandidaten-, Stellen- oder Recruiting-Portal"
+    },
+    "candidateProfile": {
+      "title": "Mein Profil",
+      "description": "Überprüfe und verwalte deine Kontodaten im Kandidatenportal"
     }
   },
   "PortalSelection": {
@@ -599,6 +603,16 @@
           "emptyHint": "Füge Links zu deinem Portfolio, LinkedIn, GitHub oder anderen Plattformen hinzu. Du kannst mit der Schaltfläche unten mehrere hinzufügen.",
           "errorSelectType": "Wähle den Linktyp. Wenn du «Andere» wählst, gib den Namen ein.",
           "errorUrl": "Gib die Link-URL ein."
+        },
+        "legacy": {
+          "currentValue": "{value} (aktueller Wert)"
+        },
+        "validation": {
+          "birthDate": {
+            "invalid": "Ungültiges Datum",
+            "futureDate": "Das Datum darf nicht in der Zukunft liegen",
+            "tooYoung": "Du musst mindestens 18 Jahre alt sein"
+          }
         }
       },
       "salary": {

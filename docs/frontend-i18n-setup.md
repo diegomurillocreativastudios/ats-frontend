@@ -833,6 +833,120 @@ documento, etc.) **no cambian**: solo se traduce el label visible.
 `tests/unit/messages-structure.test.ts` sigue garantizando la paridad exacta de
 keys entre los 5 diccionarios. La suite i18n previa sigue pasando.
 
+## 16-E. Etapa 5E — cierre seguro de pendientes del Portal Candidato
+
+Etapa de cierre de pendientes **seguros** de Etapa 5D. No entra a mappers de
+enums delicados ni a módulos RRHH/Admin. Regla de negocio vigente: **no se
+traduce data generada por IA** ni data dinámica de API/BD/usuario.
+
+### 16-E.1 Metadata de `/mi-perfil`
+
+`app/mi-perfil/page.tsx` pasó del export estático `metadata` (título absoluto
+`"ATS | Mi perfil"` en español) a `generateMetadata()` con
+`getTranslations("Metadata.candidateProfile")`:
+
+```ts
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.candidateProfile")
+  return { title: t("title"), description: t("description") }
+}
+```
+
+Se usa `title` plano (`"Mi perfil"`), de modo que el template del root layout
+(`{ default: "ATS", template: "ATS | %s" }`) produce el mismo resultado visible
+`"ATS | Mi perfil"`, igual que el resto de páginas ya migradas (auth/acceso).
+
+Namespace agregado en los 5 diccionarios:
+
+```json
+"Metadata": {
+  "candidateProfile": { "title": "...", "description": "..." }
+}
+```
+
+> El `document.title` dinámico (`ATS | <nombre>`) que fija el cliente en
+> `candidate-self-profile-view.tsx` **no** se tocó: depende del nombre del
+> usuario (data dinámica) y queda fuera de alcance.
+
+### 16-E.2 Validación de fecha de nacimiento — migración por códigos
+
+`lib/candidate-profile.ts` ahora expone
+`getBirthDateInputValidationErrorCode()`, que devuelve un código agnóstico al
+idioma (`"invalid" | "futureDate" | "tooYoung" | null`) **sin cambiar la lógica
+de negocio** (calendario válido, no futura, 18+ años).
+
+- `getBirthDateInputValidationError()` (string en español) se **conserva** y se
+  reimplementa sobre el código → cualquier código mapea a
+  `BIRTH_DATE_INPUT_INVALID_MESSAGE`. Esto mantiene intactos sus consumers no
+  migrados (el hook compartido y el test existente).
+- El render en `ProfileEditLocationAndPersonalFields`
+  (`candidate-profile-edit-field-groups.tsx`, componente del Portal Candidato ya
+  migrado en 5D) traduce el código cerca del componente:
+  `t(\`form.validation.birthDate.${code}\`)`.
+
+Keys agregadas: `CandidatePortal.profile.form.validation.birthDate.{invalid,futureDate,tooYoung}`.
+
+### 16-E.3 `mergeLegacySelectOption` — sufijo «(valor actual)» traducible
+
+`lib/profile-form-options.ts`: `mergeLegacySelectOption` acepta un tercer
+parámetro **opcional** `formatLegacyLabel(value)` (default en español,
+retrocompatible). El componente del Portal Candidato pasa
+`(value) => t("form.legacy.currentValue", { value })`.
+
+El `value` de la opción legacy permanece **canónico/intacto** (lo que persiste el
+backend); solo cambia el `label` visible. Key agregada:
+`CandidatePortal.profile.form.legacy.currentValue` (`"{value} (valor actual)"`).
+
+### 16-E.4 Decisión sobre `use-candidate-profile-editor.ts` — **PENDIENTE**
+
+El hook es **compartido** con RRHH (`components/rrhh/recruiter-candidate-profile-view.tsx`
+además de `candidate-self-profile-view.tsx`). Inyectar `useTranslations` en el
+hook traduciría también el texto de RRHH (cambiaría su comportamiento) y pasar
+`t()`/mensajes desde ambos consumers exigiría tocar el archivo RRHH. Para
+respetar «no migrar RRHH», sus mensajes de validación (`"Completá titular…"`,
+`"Tu perfil debe tener currículum…"`) y `triggerLabel` quedan **pendientes** para
+una etapa dedicada al hook compartido (p. ej. parámetro opcional de mensajes con
+default en español, sin tocar el consumer RRHH).
+
+### 16-E.5 Decisión sobre opciones de país — **PENDIENTE (Opción B)**
+
+`getCountrySelectOptions` y `getCountryIso2SelectOptions` (`lib/profile-form-options.ts`)
+**no** se migran. Motivos:
+
+- `getCountryIso2SelectOptions` es consumido por RRHH en
+  `components/rrhh/VacancyListFilters.tsx`.
+- Ambas usan `Intl.DisplayNames(["es"])`, orden regional por nombre en español y
+  un **cache de módulo**; localizar requeriría parametrizar el locale y romper el
+  cache global, afectando a consumers RRHH/globales.
+
+Migración localizada (Opción A) descartada por riesgo en RRHH. Queda pendiente
+para una etapa que toque RRHH.
+
+### 16-E.6 Qué NO se tocó en 5E
+
+- `lib/candidate-portal-translations.ts` (mapper de enums) — etapa dedicada.
+- `lib/pageTitles.ts`, breadcrumbs dinámicos, `Metadata.auth.login`.
+- Llamadas a API, payloads, nombres de campos; **no** se envía `locale` al
+  backend; **no** se cambió lógica de perfil/guardado/validación de negocio ni
+  autenticación.
+- Componentes RRHH/Admin, resultados/salida de Vertex AI, texto libre del
+  backend, datos dinámicos de API/BD/usuario, nombres propios ni tecnologías.
+- No se implementaron rutas con prefijo (`/en`, `/it`, …) ni `app/[locale]`.
+
+### 16-E.7 Tests de la etapa
+
+- `tests/unit/metadata-i18n.test.ts`: la metadata de `/mi-perfil` se genera desde
+  `next-intl` en `es`/`en`, y `Metadata.candidateProfile` mantiene paridad de
+  keys en los 5 idiomas.
+- `tests/unit/candidate-profile-birth-date.test.ts`: `getBirthDateInputValidationErrorCode`
+  distingue `invalid`/`futureDate`/`tooYoung`; la variante string conserva el
+  comportamiento previo (compatibilidad).
+- `tests/unit/candidate-portal-profile-i18n.test.tsx`: `mergeLegacySelectOption`
+  traduce el label pero conserva el `value` canónico, y respeta el default en
+  español.
+- `tests/unit/messages-structure.test.ts`: paridad exacta de keys (incluye las
+  nuevas `form.validation`, `form.legacy` y `Metadata.candidateProfile`).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).

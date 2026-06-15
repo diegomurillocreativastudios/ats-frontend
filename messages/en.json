@@ -152,6 +152,10 @@
     "portalSelection": {
       "title": "Choose a portal",
       "description": "Select the candidate, opportunities or recruitment portal"
+    },
+    "candidateProfile": {
+      "title": "My profile",
+      "description": "Review and manage your account information in the candidate portal"
     }
   },
   "PortalSelection": {
@@ -599,6 +603,16 @@
           "emptyHint": "Add links to your portfolio, LinkedIn, GitHub or other platforms. You can add several with the button below.",
           "errorSelectType": "Select the link type. If you choose «Other», enter the name.",
           "errorUrl": "Enter the link URL."
+        },
+        "legacy": {
+          "currentValue": "{value} (current value)"
+        },
+        "validation": {
+          "birthDate": {
+            "invalid": "Invalid date",
+            "futureDate": "The date cannot be in the future",
+            "tooYoung": "You must be at least 18 years old"
+          }
         }
       },
       "salary": {

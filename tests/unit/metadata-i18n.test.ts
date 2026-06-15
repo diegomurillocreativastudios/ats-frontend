@@ -64,6 +64,7 @@ import { generateMetadata as forgotPasswordMetadata } from "@/app/auth/forgot-pa
 import { generateMetadata as resetPasswordMetadata } from "@/app/restablecer-contrasena/page"
 import { generateMetadata as authResetPasswordMetadata } from "@/app/auth/restablecer-contrasena/page"
 import { generateMetadata as portalSelectionMetadata } from "@/app/seleccion-portal/page"
+import { generateMetadata as candidateProfileMetadata } from "@/app/mi-perfil/page"
 
 const allMessages: Record<Locale, Record<string, unknown>> = {
   es: esMessages,
@@ -134,6 +135,18 @@ describe("Metadata auth/acceso (Etapa 5A)", () => {
     expect(en.title).toBe(enMessages.Metadata.portalSelection.title)
     expect(en.description).toBe(enMessages.Metadata.portalSelection.description)
   })
+
+  it("genera la metadata de /mi-perfil desde next-intl en es y en (Etapa 5E)", async () => {
+    hoisted.locale = "es"
+    const es = await candidateProfileMetadata()
+    expect(es.title).toBe(esMessages.Metadata.candidateProfile.title)
+    expect(es.description).toBe(esMessages.Metadata.candidateProfile.description)
+
+    hoisted.locale = "en"
+    const en = await candidateProfileMetadata()
+    expect(en.title).toBe(enMessages.Metadata.candidateProfile.title)
+    expect(en.description).toBe(enMessages.Metadata.candidateProfile.description)
+  })
 })
 
 describe("Diccionarios Metadata (Etapa 5A)", () => {
@@ -156,6 +169,10 @@ describe("Diccionarios Metadata (Etapa 5A)", () => {
         "resetPassword",
       ])
       expect(Object.keys(metadata.portalSelection as object).sort()).toEqual([
+        "description",
+        "title",
+      ])
+      expect(Object.keys(metadata.candidateProfile as object).sort()).toEqual([
         "description",
         "title",
       ])
