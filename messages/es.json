@@ -269,7 +269,119 @@
       "toastNoProfile": "No se pudo identificar tu perfil de candidato.",
       "toastResumeBlocked": "Este endpoint es solo para documentos generales. Quita o reemplaza archivos tipo CV/Resume (por ejemplo: {fileName}).",
       "toastGeneralUploaded": "{count, plural, one {Documento general subido correctamente.} other {# documentos generales subidos correctamente.}}",
-      "toastGeneralUploadError": "No se pudo subir el documento general."
+      "toastGeneralUploadError": "No se pudo subir el documento general.",
+      "upload": {
+        "dropzoneAria": "Arrastra archivos o haz clic para subir documentos",
+        "dropActive": "Suelta los archivos aquí",
+        "dropPrompt": "Arrastra archivos aquí o haz clic para subir",
+        "helperDefault": "PDF, DOC, DOCX hasta 10 MB",
+        "errorTypeNotAllowed": "Tipo no permitido. Solo .PDF",
+        "errorTooLarge": "El archivo supera 10 MB ({size}).",
+        "selectedCount": "{count, plural, one {# archivo seleccionado} other {# archivos seleccionados}}",
+        "selectedListAria": "Lista de archivos seleccionados",
+        "processAll": "Procesar todos",
+        "processAllAria": "Procesar todos los CV/Resume con IA",
+        "processing": "Procesando…",
+        "removeAll": "Quitar todos",
+        "process": "Procesar",
+        "processAria": "Procesar con IA: {fileName}",
+        "processingAria": "Procesando: {fileName}",
+        "processedAria": "Procesado: {fileName}",
+        "done": "Listo",
+        "removeFileAria": "Quitar {fileName}",
+        "processError": "Error al procesar el documento.",
+        "processErrorMany": "Error al procesar los documentos.",
+        "processErrorSingle": "No se pudo procesar «{fileName}». {detail}",
+        "fileFallback": "el archivo"
+      },
+      "list": {
+        "heading": "Mis documentos",
+        "empty": "Aún no hay documentos. Los que subas aparecerán aquí.",
+        "listAria": "Lista de documentos",
+        "downloadAria": "Descargar {name}",
+        "deleteAria": "Eliminar {name}",
+        "downloadError": "No se pudo descargar el documento.",
+        "deleteTitle": "Eliminar documento",
+        "deleteConfirm": "Eliminar",
+        "deleteCancel": "Cancelar",
+        "deleteMessage": "¿Eliminar <name></name>? Dejará de aparecer en tu listado."
+      },
+      "singleUpload": {
+        "dropActive": "Suelta el archivo aquí",
+        "dropPrompt": "Arrastra el archivo aquí o haz clic para subir",
+        "dropzoneAria": "Arrastra un archivo o haz clic para subir",
+        "typeNotAllowed": "Tipo de archivo no permitido.",
+        "invalidFile": "Archivo no válido.",
+        "tooLarge": "El archivo supera {max} ({size}).",
+        "removeFileAria": "Quitar {fileName}"
+      },
+      "modal": {
+        "cancel": "Cancelar",
+        "processing": "Procesando...",
+        "documentTypeRequired": "Debes seleccionar el tipo de documento.",
+        "identityRequired": "Debes subir el documento de identidad.",
+        "documentTypesLoadError": "No se pudieron cargar los tipos de documento.",
+        "processErrorSelf": "Error al procesar tu información.",
+        "processErrorRecruiter": "Error al procesar el candidato.",
+        "aiIntro": "Los CVs y documentos de identidad se procesan con IA para extraer información preliminar del perfil.",
+        "kpisAria": "KPIs de eficiencia del ATS",
+        "documentTypeHeading": "Tipo de documento de identidad",
+        "documentTypeDescription": "Selecciona el tipo de documento que corresponde al PDF que se cargará.",
+        "documentTypeAria": "Tipo de documento de identidad",
+        "selectLoading": "Cargando tipos de documento...",
+        "selectLoadError": "No se pudieron cargar los tipos de documento",
+        "selectEmpty": "No hay tipos de documento disponibles",
+        "selectPlaceholder": "Selecciona el tipo de documento",
+        "retry": "Reintentar",
+        "noTypesConfigured": "Aún no hay tipos de documento configurados. Pídele a un administrador que cree los catálogos.",
+        "identityHeading": "Documento de identidad",
+        "identityDescription": "Sube el documento de identidad del candidato en formato PDF.",
+        "cvPrimaryText": "Arrastra el CV aquí o haz clic para subir",
+        "cvHelperText": "PDF, DOCX o TXT hasta 10 MB",
+        "cvAria": "Arrastra el CV o haz clic para subir",
+        "cvTypeError": "Tipo no permitido. Solo PDF, DOCX o TXT.",
+        "identityPrimaryText": "Arrastra el documento aquí o haz clic para subir",
+        "identityHelperText": "Solo archivos PDF hasta 10 MB",
+        "identityAria": "Arrastra el documento de identidad o haz clic para subir",
+        "identityTypeError": "Tipo no permitido. Solo archivos PDF.",
+        "kpis": {
+          "cv": {
+            "label": "Desglose de CV",
+            "value": "De hasta 15 min a 30s-1min por CV",
+            "helper": "Captura estructurada en una sola corrida"
+          },
+          "insert": {
+            "label": "Inserción de datos",
+            "value": "Registro automático en el mismo flujo",
+            "helper": "Sin transcripción manual a BD o Excel"
+          },
+          "savings": {
+            "label": "Ahorro estimado",
+            "value": "Reducción operativa del 93.3% al 96.7%",
+            "helper": "En extracción, desglose e inserción de CV"
+          }
+        },
+        "self": {
+          "title": "Completar información",
+          "submit": "Guardar información",
+          "success": "Tu información fue actualizada correctamente. Revisá tu perfil para ver los datos.",
+          "errorPrefix": "Error al guardar tu información",
+          "cvRequired": "Debes subir tu CV.",
+          "cvHeading": "Tu CV",
+          "cvDescription": "Sube tu CV para completar automáticamente la información de tu perfil.",
+          "aiNote": "Resultado generado por IA. Revisá los datos en Mi perfil antes de postular."
+        },
+        "recruiter": {
+          "title": "Agregar candidato",
+          "submit": "Crear candidato",
+          "success": "Candidato creado y procesado correctamente.",
+          "errorPrefix": "Error al crear el candidato",
+          "cvRequired": "Debes subir el CV del candidato.",
+          "cvHeading": "CV del candidato",
+          "cvDescription": "Sube el CV del candidato para crear su perfil automáticamente.",
+          "aiNote": "Resultado generado por IA. Requiere validación de RRHH."
+        }
+      }
     }
   },
   "LanguageSwitcher": {

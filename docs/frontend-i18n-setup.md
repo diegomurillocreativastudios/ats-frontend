@@ -501,7 +501,8 @@ La paridad exacta de keys en los 5 diccionarios la validan
   `candidate-profile-edit-field-groups.tsx`): formularios extensos, **pendiente**.
 - **Sub-componentes de subida de documentos** (`DocumentsUploadZone`,
   `DocumentsList`, `SingleFileUploadZone`, `AgregarCandidatoModal`,
-  `candidate-portal-snackbar`): lógica compleja, **pendiente**.
+  `candidate-portal-snackbar`): lógica compleja, **pendiente** en 5B →
+  **completado en Etapa 5C** (ver §15).
 - `lib/pageTitles.ts`, breadcrumbs dinámicos, metadata de login y ruteo por
   prefijo: fuera de scope (igual que etapas previas).
 
@@ -577,7 +578,143 @@ valor crudo de la API como fallback intacto.
 `tests/unit/language-switcher.test.tsx` e `tests/unit/i18n-setup.test.tsx` siguen
 pasando (45 tests i18n en verde) — el selector de idioma sigue funcionando.
 
-## 15. Pendientes para la siguiente etapa
+## 15. Portal Candidato — documentos/subida/snackbars (Etapa 5C)
+
+Etapa 5C completa el i18n de los **sub-componentes de documentos** del Portal
+Candidato que quedaron pendientes en 5B (§14.3): zonas de subida, lista de
+documentos, modal de carga y labels controlados. Sigue siendo **acotada e
+incremental**: no toca el perfil del candidato, ni RRHH/Admin, ni lógica de
+negocio/API, ni traduce data dinámica/IA.
+
+### 15.1 Componentes migrados
+
+| Componente                                            | Tipo   | Namespace usado                          |
+| ----------------------------------------------------- | ------ | ---------------------------------------- |
+| `components/candidato/DocumentsUploadZone.tsx`        | Client | `CandidatePortal.documents.upload`       |
+| `components/candidato/DocumentsList.tsx`              | Client | `CandidatePortal.documents.list`         |
+| `components/candidato/SingleFileUploadZone.tsx`       | Client | `CandidatePortal.documents.singleUpload` |
+| `components/candidato/AgregarCandidatoModal.tsx`      | Client | `CandidatePortal.documents.modal`        |
+
+Todos usan `useTranslations`. Los textos con interpolación (`{fileName}`,
+`{name}`, `{size}`, `{max}`, `{detail}`) y la pluralización de archivos
+seleccionados (`{count, plural, one {…} other {…}}`) usan formato ICU. El mensaje
+de borrado de `DocumentsList` usa `t.rich("deleteMessage", { name })`: el nombre
+del documento se inyecta como **chunk de React** (no se traduce), solo el
+envoltorio estático sale del diccionario.
+
+`SingleFileUploadZone` ahora resuelve sus textos por defecto desde el diccionario
+(`primaryText`/`ariaLabel`/`typeErrorMessage` opcionales → fallback `t()`); los
+callers que pasan props explícitas (p. ej. `AgregarCandidatoModal`) también las
+obtienen de `next-intl`.
+
+> **Nota de componente compartido:** `AgregarCandidatoModal` se usa tanto en el
+> flujo del candidato (`DocumentosContent`, `variant="self"`) como en RRHH
+> (`app/portal-rrhh/candidatos`, `variant="recruiter"`). Se migran **ambas
+> variantes** porque el componente vive en `components/candidato`, su copy es
+> **UI estática controlada por frontend** (no data de API/IA) y el
+> `NextIntlClientProvider` es global (`app/layout.tsx`). Las notas que mencionan
+> "IA"/"RRHH" son texto estático de divulgación, **no** salida de Vertex AI.
+
+`components/candidato/candidate-portal-snackbar.tsx` se auditó: es un **provider
+de contexto** que solo muestra el mensaje que recibe; no contiene texto estático
+propio, así que no requiere migración. Los fallbacks de toasts de documentos ya
+viven en `CandidatePortal.documents` (toast*) desde 5B y conservan el patrón
+`getApiErrorMessage(err) || t("…")`.
+
+### 15.2 Namespace `CandidatePortal.documents` ampliado
+
+Sobre las keys planas de 5B se añadieron **subsecciones anidadas** en los 5
+diccionarios (`es` fuente de verdad):
+
+```jsonc
+"CandidatePortal": {
+  "documents": {
+    /* … keys planas de 5B (breadcrumb, title, toasts…) … */
+    "upload":       { /* dropzone, estados, botones procesar/quitar, errores de validación */ },
+    "list":         { /* heading, empty state, aria descargar/eliminar, modal de borrado */ },
+    "singleUpload": { /* prompts, aria y errores de la zona de un solo archivo */ },
+    "modal": {
+      "kpis":      { "cv": {…}, "insert": {…}, "savings": {…} },
+      "self":      { /* copy de la variante candidato */ },
+      "recruiter": { /* copy de la variante RRHH */ }
+      /* + labels compartidos: cancel, retry, selects, headings… */
+    }
+  }
+}
+```
+
+Paridad exacta validada por `tests/unit/messages-structure.test.ts` y por
+`tests/unit/candidate-portal-documents-i18n.test.tsx`.
+
+### 15.3 Decisión sobre `lib/candidate-portal-translations.ts`
+
+**Se revisó** y **se mantiene la decisión de 5B: NO migrar en esta etapa**
+(queda pendiente). El archivo contiene mappers de enums
+(`translateApplicationStatus`, `translateStageStatus`, `translateStageName`) y
+`getApplicationStatusStyle`. Motivos para diferirlo:
+
+- `translateStageName` mapea **nombres de etapa provenientes del backend/BD**
+  (`Revision`, `Offer`, `Aplicantes`, `Entrevista`, `En espera`): es data
+  dinámica de API, **no** UI estática — traducirla violaría la regla crítica.
+- `getApplicationStatusStyle` deriva el estilo **haciendo match de substrings**
+  del label en español/inglés (`contratado`, `activ`, `pendiente`…); traducir los
+  labels a `it/de/fr` **rompería** el styling.
+- Las funciones son utilidades puras **sin acceso limpio a `t()`** y son
+  consumidas por componentes ya migrados en 5B (`MyPostulationsCard`,
+  `ProcessTrackingCard`), cuyos tests habría que rehacer — fuera del scope
+  acotado de 5C.
+
+Recomendación futura (sin cambios respecto a §14.5): etapa dedicada que separe
+enums controlados por frontend (con key + fallback al valor crudo) de los nombres
+de etapa que llegan del backend, y que refactorice el matching de estilos para no
+depender del texto traducido.
+
+### 15.4 Regla crítica: NO traducir data dinámica/IA
+
+Se mantuvo intacta toda la data dinámica:
+
+```tsx
+// ✅ Traducible (UI estática)
+<Button>{t("upload.process")}</Button>
+{t("upload.selectedCount", { count: files.length })}
+
+// ❌ NO traducible (data dinámica / API / usuario / IA)
+{file.name}                       // nombre de archivo del usuario
+{resolveDocumentName(doc)}        // nombre derivado del storagePath (API)
+{option.name}                     // tipo de documento (catálogo de API)
+{error}                           // mensaje de error de API
+getApiErrorMessage(err)           // mensaje del backend (se respeta tal cual)
+```
+
+Validaciones de archivo: `validateFile`/`validateSingleFile` devuelven ahora un
+**código de razón** (`"type"`/`"size"`) y el componente traduce el mensaje vía
+`t()`, en vez de retornar strings en español. El tamaño se interpola como valor.
+
+### 15.5 Qué NO se tocó
+
+- **No** se modificaron llamadas a API ni contratos; **no** se envía `locale` al
+  backend.
+- **No** se modificó la lógica de subida, descarga, eliminación o validación de
+  documentos, ni la de autenticación (solo se reemplazaron literales por keys y
+  se cambió el formato de retorno de los validadores).
+- **No** se implementaron rutas con prefijo ni se movió nada a `app/[locale]`.
+- **No** se tocó `lib/pageTitles.ts`, ni RRHH/Admin (salvo la variante recruiter
+  del modal compartido, ver §15.1), ni Resultados/salida de Vertex AI.
+
+### 15.6 Tests de la etapa
+
+`tests/unit/candidate-portal-documents-i18n.test.tsx` valida:
+
+- `DocumentsUploadZone`, `DocumentsList` y `SingleFileUploadZone` renderizan sus
+  textos estáticos desde `next-intl` en `es` y `en`.
+- `AgregarCandidatoModal` (variante `self`) traduce título y botón cancelar.
+- Presencia de las subsecciones `upload`/`list`/`singleUpload`/`modal` y de las
+  variantes `self`/`recruiter` del modal en los 5 idiomas.
+
+La suite i18n previa (`messages-structure`, `candidate-portal-i18n`, topbars,
+auth, language-switcher, etc.) sigue pasando.
+
+## 16. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
 - Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7 y §13.4.
@@ -585,10 +722,9 @@ pasando (45 tests i18n en verde) — el selector de idioma sigue funcionando.
   server wrapper + client content (o cuando se migre a ruteo por prefijo).
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
   namespaces reservados (`Errors`, `EmptyStates`, etc.).
-- Completar el Portal Candidato: perfil (`app/mi-perfil`,
-  `candidate-self-profile-view.tsx`, `candidate-profile-edit-field-groups.tsx`) y
-  sub-componentes de subida de documentos (`DocumentsUploadZone`, `DocumentsList`,
-  `SingleFileUploadZone`, `AgregarCandidatoModal`) — ver §14.3.
+- Completar el Portal Candidato: **perfil** (`app/mi-perfil`,
+  `candidate-self-profile-view.tsx`, `candidate-profile-edit-field-groups.tsx`).
+  Los sub-componentes de subida de documentos ya se migraron en Etapa 5C (§15).
 - Migrar el mapper de enums `lib/candidate-portal-translations.ts` con keys por
   enum y fallback al valor crudo de la API — ver §14.5.
 - Migrar registro (`app/auth/registrarse`) y páginas públicas de oportunidades.

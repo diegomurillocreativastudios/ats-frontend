@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2, Sparkles } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import SingleFileUploadZone from "@/components/candidato/SingleFileUploadZone";
@@ -15,24 +16,6 @@ import {
 } from "@/lib/api/identity-document-types";
 import { apiClient } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/api-error";
-
-const AI_MODAL_KPIS = [
-  {
-    label: "Desglose de CV",
-    value: "De hasta 15 min a 30s-1min por CV",
-    helper: "Captura estructurada en una sola corrida",
-  },
-  {
-    label: "Inserción de datos",
-    value: "Registro automático en el mismo flujo",
-    helper: "Sin transcripción manual a BD o Excel",
-  },
-  {
-    label: "Ahorro estimado",
-    value: "Reducción operativa del 93.3% al 96.7%",
-    helper: "En extracción, desglose e inserción de CV",
-  },
-];
 
 const CV_ACCEPTED_TYPES = [
   "application/pdf",
@@ -77,48 +60,6 @@ interface AgregarCandidatoModalProps {
   variant?: AgregarCandidatoModalVariant;
 }
 
-const MODAL_COPY: Record<
-  AgregarCandidatoModalVariant,
-  {
-    title: string;
-    submitLabel: string;
-    processingLabel: string;
-    successMessage: string;
-    errorPrefix: string;
-    cvRequiredError: string;
-    cvHeading: string;
-    cvDescription: string;
-    aiValidationNote: string;
-  }
-> = {
-  recruiter: {
-    title: "Agregar candidato",
-    submitLabel: "Crear candidato",
-    processingLabel: "Procesando...",
-    successMessage: "Candidato creado y procesado correctamente.",
-    errorPrefix: "Error al crear el candidato",
-    cvRequiredError: "Debes subir el CV del candidato.",
-    cvHeading: "CV del candidato",
-    cvDescription:
-      "Sube el CV del candidato para crear su perfil automáticamente.",
-    aiValidationNote: "Resultado generado por IA. Requiere validación de RRHH.",
-  },
-  self: {
-    title: "Completar información",
-    submitLabel: "Guardar información",
-    processingLabel: "Procesando...",
-    successMessage:
-      "Tu información fue actualizada correctamente. Revisá tu perfil para ver los datos.",
-    errorPrefix: "Error al guardar tu información",
-    cvRequiredError: "Debes subir tu CV.",
-    cvHeading: "Tu CV",
-    cvDescription:
-      "Sube tu CV para completar automáticamente la información de tu perfil.",
-    aiValidationNote:
-      "Resultado generado por IA. Revisá los datos en Mi perfil antes de postular.",
-  },
-};
-
 export default function AgregarCandidatoModal({
   isOpen,
   onClose,
@@ -126,7 +67,35 @@ export default function AgregarCandidatoModal({
   onSnackbar,
   variant = "recruiter",
 }: AgregarCandidatoModalProps) {
-  const copy = MODAL_COPY[variant];
+  const t = useTranslations("CandidatePortal.documents.modal");
+  const copy = {
+    title: t(`${variant}.title`),
+    submitLabel: t(`${variant}.submit`),
+    processingLabel: t("processing"),
+    successMessage: t(`${variant}.success`),
+    errorPrefix: t(`${variant}.errorPrefix`),
+    cvRequiredError: t(`${variant}.cvRequired`),
+    cvHeading: t(`${variant}.cvHeading`),
+    cvDescription: t(`${variant}.cvDescription`),
+    aiValidationNote: t(`${variant}.aiNote`),
+  };
+  const aiModalKpis = [
+    {
+      label: t("kpis.cv.label"),
+      value: t("kpis.cv.value"),
+      helper: t("kpis.cv.helper"),
+    },
+    {
+      label: t("kpis.insert.label"),
+      value: t("kpis.insert.value"),
+      helper: t("kpis.insert.helper"),
+    },
+    {
+      label: t("kpis.savings.label"),
+      value: t("kpis.savings.value"),
+      helper: t("kpis.savings.helper"),
+    },
+  ];
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [identityFile, setIdentityFile] = useState<File | null>(null);
   const [identityDocumentTypeId, setIdentityDocumentTypeId] = useState("");
@@ -167,14 +136,13 @@ export default function AgregarCandidatoModal({
       setIdentityDocumentTypes(options);
     } catch (err: unknown) {
       const message =
-        getApiErrorMessage(err) ||
-        "No se pudieron cargar los tipos de documento.";
+        getApiErrorMessage(err) || t("documentTypesLoadError");
       setIdentityDocumentTypes([]);
       setDocumentTypesError(message);
     } finally {
       setIsLoadingDocumentTypes(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -195,11 +163,11 @@ export default function AgregarCandidatoModal({
       return;
     }
     if (!identityDocumentTypeId.trim()) {
-      setSubmitError("Debes seleccionar el tipo de documento.");
+      setSubmitError(t("documentTypeRequired"));
       return;
     }
     if (!identityFile) {
-      setSubmitError("Debes subir el documento de identidad.");
+      setSubmitError(t("identityRequired"));
       return;
     }
 
@@ -230,8 +198,8 @@ export default function AgregarCandidatoModal({
       const message =
         getApiErrorMessage(err) ||
         (variant === "self"
-          ? "Error al procesar tu información."
-          : "Error al procesar el candidato.");
+          ? t("processErrorSelf")
+          : t("processErrorRecruiter"));
       setSubmitError(message);
       setAiProcessingBar({ active: false, cycleKey: null, isCompleted: false });
       onSnackbar?.(`${copy.errorPrefix}: ${message}`, "error");
@@ -270,7 +238,7 @@ export default function AgregarCandidatoModal({
               disabled={isSubmittingCandidate}
               className="inline-flex items-center justify-center rounded-md border border-border bg-white px-4 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Cancelar
+              {t("cancel")}
             </button>
             <button
               type="button"
@@ -302,8 +270,7 @@ export default function AgregarCandidatoModal({
             />
           ) : null}
           <p className="font-sans text-sm text-foreground">
-            Los CVs y documentos de identidad se procesan con IA para extraer
-            información preliminar del perfil.
+            {t("aiIntro")}
           </p>
           <p className="font-sans text-xs text-muted-foreground">
             {copy.aiValidationNote}
@@ -312,9 +279,9 @@ export default function AgregarCandidatoModal({
 
         <div
           className="grid gap-2 sm:grid-cols-3"
-          aria-label="KPIs de eficiencia del ATS"
+          aria-label={t("kpisAria")}
         >
-          {AI_MODAL_KPIS.map((item) => (
+          {aiModalKpis.map((item) => (
             <AiKpiCard
               key={item.label}
               label={item.label}
@@ -348,10 +315,10 @@ export default function AgregarCandidatoModal({
             acceptedTypes={CV_ACCEPTED_TYPES}
             acceptedExtensions={CV_ACCEPTED_EXTENSIONS}
             accept={CV_ACCEPT_ATTR}
-            primaryText="Arrastra el CV aquí o haz clic para subir"
-            helperText="PDF, DOCX o TXT hasta 10 MB"
-            ariaLabel="Arrastra el CV o haz clic para subir"
-            typeErrorMessage="Tipo no permitido. Solo PDF, DOCX o TXT."
+            primaryText={t("cvPrimaryText")}
+            helperText={t("cvHelperText")}
+            ariaLabel={t("cvAria")}
+            typeErrorMessage={t("cvTypeError")}
             disabled={isSubmittingCandidate}
             inputId="candidato-cv-input"
           />
@@ -366,20 +333,19 @@ export default function AgregarCandidatoModal({
               id="candidato-document-type-heading"
               className="font-sans text-sm font-semibold text-foreground"
             >
-              Tipo de documento de identidad
+              {t("documentTypeHeading")}
               <span className="text-vo-pink ml-1" aria-hidden>
                 *
               </span>
             </h3>
             <p className="font-sans text-xs text-muted-foreground">
-              Selecciona el tipo de documento que corresponde al PDF que se
-              cargará.
+              {t("documentTypeDescription")}
             </p>
           </div>
           <div className="flex flex-col gap-2">
             <select
               id="candidato-document-type-select"
-              aria-label="Tipo de documento de identidad"
+              aria-label={t("documentTypeAria")}
               value={identityDocumentTypeId}
               onChange={(event) =>
                 setIdentityDocumentTypeId(event.target.value)
@@ -394,12 +360,12 @@ export default function AgregarCandidatoModal({
             >
               <option value="">
                 {isLoadingDocumentTypes
-                  ? "Cargando tipos de documento..."
+                  ? t("selectLoading")
                   : documentTypesError
-                    ? "No se pudieron cargar los tipos de documento"
+                    ? t("selectLoadError")
                     : documentTypeSelectOptions.length === 0
-                      ? "No hay tipos de documento disponibles"
-                      : "Selecciona el tipo de documento"}
+                      ? t("selectEmpty")
+                      : t("selectPlaceholder")}
               </option>
               {documentTypeSelectOptions.map((option) => (
                 <option key={option.id} value={option.id}>
@@ -413,7 +379,7 @@ export default function AgregarCandidatoModal({
                 aria-live="polite"
               >
                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                Cargando tipos de documento...
+                {t("selectLoading")}
               </p>
             ) : null}
             {documentTypesError ? (
@@ -429,7 +395,7 @@ export default function AgregarCandidatoModal({
                   onClick={() => void fetchIdentityDocumentTypes()}
                   className="font-sans text-xs font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                 >
-                  Reintentar
+                  {t("retry")}
                 </button>
               </div>
             ) : null}
@@ -437,8 +403,7 @@ export default function AgregarCandidatoModal({
             !documentTypesError &&
             documentTypeSelectOptions.length === 0 ? (
               <p className="font-sans text-xs text-muted-foreground">
-                Aún no hay tipos de documento configurados. Pídele a un
-                administrador que cree los catálogos.
+                {t("noTypesConfigured")}
               </p>
             ) : null}
           </div>
@@ -453,13 +418,13 @@ export default function AgregarCandidatoModal({
               id="candidato-identity-heading"
               className="font-sans text-sm font-semibold text-foreground"
             >
-              Documento de identidad
+              {t("identityHeading")}
               <span className="text-vo-pink ml-1" aria-hidden>
                 *
               </span>
             </h3>
             <p className="font-sans text-xs text-muted-foreground">
-              Sube el documento de identidad del candidato en formato PDF.
+              {t("identityDescription")}
             </p>
           </div>
           <SingleFileUploadZone
@@ -468,10 +433,10 @@ export default function AgregarCandidatoModal({
             acceptedTypes={IDENTITY_DOC_ACCEPTED_TYPES}
             acceptedExtensions={IDENTITY_DOC_ACCEPTED_EXTENSIONS}
             accept={IDENTITY_DOC_ACCEPT_ATTR}
-            primaryText="Arrastra el documento aquí o haz clic para subir"
-            helperText="Solo archivos PDF hasta 10 MB"
-            ariaLabel="Arrastra el documento de identidad o haz clic para subir"
-            typeErrorMessage="Tipo no permitido. Solo archivos PDF."
+            primaryText={t("identityPrimaryText")}
+            helperText={t("identityHelperText")}
+            ariaLabel={t("identityAria")}
+            typeErrorMessage={t("identityTypeError")}
             disabled={isSubmittingCandidate}
             inputId="candidato-identity-input"
           />

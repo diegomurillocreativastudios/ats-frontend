@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { FileText, Download, Loader2, Trash2 } from "lucide-react";
 import type { CandidateDocument } from "@/lib/candidate-documents";
 import { getAccessToken } from "@/lib/auth";
@@ -35,6 +36,7 @@ export default function DocumentsList({
   documents = [],
   onDeleteDocument,
 }: DocumentsListProps) {
+  const t = useTranslations("CandidatePortal.documents.list");
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export default function DocumentsList({
         method: "GET",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error("No se pudo descargar el documento.");
+      if (!res.ok) throw new Error(t("downloadError"));
       const blob = await res.blob();
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -70,9 +72,7 @@ export default function DocumentsList({
       document.body.removeChild(a);
       URL.revokeObjectURL(objUrl);
     } catch (err: unknown) {
-      setDownloadError(
-        getApiErrorMessage(err) || "No se pudo descargar el documento."
-      );
+      setDownloadError(getApiErrorMessage(err) || t("downloadError"));
     } finally {
       setDownloadingId(null);
     }
@@ -109,7 +109,7 @@ export default function DocumentsList({
   return (
     <div className="flex flex-col gap-3 md:gap-4">
       <h2 className="font-sans text-sm font-semibold text-foreground md:text-base">
-        Mis documentos
+        {t("heading")}
       </h2>
       {downloadError ? (
         <p
@@ -121,10 +121,10 @@ export default function DocumentsList({
       ) : null}
       {documents.length === 0 ? (
         <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
-          Aún no hay documentos. Los que subas aparecerán aquí.
+          {t("empty")}
         </p>
       ) : (
-        <ul className="flex flex-col gap-3" aria-label="Lista de documentos">
+        <ul className="flex flex-col gap-3" aria-label={t("listAria")}>
           {documents.map((doc) => (
             <li
               key={doc.id}
@@ -144,7 +144,7 @@ export default function DocumentsList({
                   onClick={() => void handleDownload(doc)}
                   disabled={!doc.storagePath?.trim() || downloadingId === doc.id}
                   className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label={`Descargar ${resolveDocumentName(doc)}`}
+                  aria-label={t("downloadAria", { name: resolveDocumentName(doc) })}
                   aria-busy={downloadingId === doc.id}
                 >
                   {downloadingId === doc.id ? (
@@ -165,7 +165,7 @@ export default function DocumentsList({
                     onClick={() => handleOpenDeleteModal(doc)}
                     disabled={deletingId === doc.id}
                     className="flex h-9 w-9 items-center justify-center rounded-md text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
-                    aria-label={`Eliminar ${resolveDocumentName(doc)}`}
+                    aria-label={t("deleteAria", { name: resolveDocumentName(doc) })}
                     aria-busy={deletingId === doc.id}
                   >
                     {deletingId === doc.id ? (
@@ -191,20 +191,20 @@ export default function DocumentsList({
           isOpen={documentPendingDelete !== null}
           onClose={handleCloseDeleteModal}
           onConfirm={handleConfirmDelete}
-          title="Eliminar documento"
+          title={t("deleteTitle")}
           message={
-            documentPendingDelete ? (
-              <>
-                ¿Eliminar{" "}
-                <span className="font-medium text-foreground">
-                  &ldquo;{resolveDocumentName(documentPendingDelete)}&rdquo;
-                </span>
-                ? Dejará de aparecer en tu listado.
-              </>
-            ) : null
+            documentPendingDelete
+              ? t.rich("deleteMessage", {
+                  name: () => (
+                    <span className="font-medium text-foreground">
+                      &ldquo;{resolveDocumentName(documentPendingDelete)}&rdquo;
+                    </span>
+                  ),
+                })
+              : null
           }
-          confirmText="Eliminar"
-          cancelText="Cancelar"
+          confirmText={t("deleteConfirm")}
+          cancelText={t("deleteCancel")}
           loading={deleteModalLoading}
         />
       ) : null}

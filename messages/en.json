@@ -269,7 +269,119 @@
       "toastNoProfile": "We couldn't identify your candidate profile.",
       "toastResumeBlocked": "This endpoint is only for general documents. Remove or replace CV/Resume files (for example: {fileName}).",
       "toastGeneralUploaded": "{count, plural, one {General document uploaded successfully.} other {# general documents uploaded successfully.}}",
-      "toastGeneralUploadError": "The general document could not be uploaded."
+      "toastGeneralUploadError": "The general document could not be uploaded.",
+      "upload": {
+        "dropzoneAria": "Drag files or click to upload documents",
+        "dropActive": "Drop the files here",
+        "dropPrompt": "Drag files here or click to upload",
+        "helperDefault": "PDF, DOC, DOCX up to 10 MB",
+        "errorTypeNotAllowed": "Type not allowed. PDF only.",
+        "errorTooLarge": "The file exceeds 10 MB ({size}).",
+        "selectedCount": "{count, plural, one {# file selected} other {# files selected}}",
+        "selectedListAria": "List of selected files",
+        "processAll": "Process all",
+        "processAllAria": "Process all CV/Resume files with AI",
+        "processing": "Processing…",
+        "removeAll": "Remove all",
+        "process": "Process",
+        "processAria": "Process with AI: {fileName}",
+        "processingAria": "Processing: {fileName}",
+        "processedAria": "Processed: {fileName}",
+        "done": "Done",
+        "removeFileAria": "Remove {fileName}",
+        "processError": "Error processing the document.",
+        "processErrorMany": "Error processing the documents.",
+        "processErrorSingle": "Could not process «{fileName}». {detail}",
+        "fileFallback": "the file"
+      },
+      "list": {
+        "heading": "My documents",
+        "empty": "There are no documents yet. The ones you upload will appear here.",
+        "listAria": "List of documents",
+        "downloadAria": "Download {name}",
+        "deleteAria": "Delete {name}",
+        "downloadError": "The document could not be downloaded.",
+        "deleteTitle": "Delete document",
+        "deleteConfirm": "Delete",
+        "deleteCancel": "Cancel",
+        "deleteMessage": "Delete <name></name>? It will no longer appear in your list."
+      },
+      "singleUpload": {
+        "dropActive": "Drop the file here",
+        "dropPrompt": "Drag the file here or click to upload",
+        "dropzoneAria": "Drag a file or click to upload",
+        "typeNotAllowed": "File type not allowed.",
+        "invalidFile": "Invalid file.",
+        "tooLarge": "The file exceeds {max} ({size}).",
+        "removeFileAria": "Remove {fileName}"
+      },
+      "modal": {
+        "cancel": "Cancel",
+        "processing": "Processing...",
+        "documentTypeRequired": "You must select the document type.",
+        "identityRequired": "You must upload the identity document.",
+        "documentTypesLoadError": "The document types could not be loaded.",
+        "processErrorSelf": "Error processing your information.",
+        "processErrorRecruiter": "Error processing the candidate.",
+        "aiIntro": "CVs and identity documents are processed with AI to extract preliminary profile information.",
+        "kpisAria": "ATS efficiency KPIs",
+        "documentTypeHeading": "Identity document type",
+        "documentTypeDescription": "Select the document type that matches the PDF to be uploaded.",
+        "documentTypeAria": "Identity document type",
+        "selectLoading": "Loading document types...",
+        "selectLoadError": "The document types could not be loaded",
+        "selectEmpty": "No document types available",
+        "selectPlaceholder": "Select the document type",
+        "retry": "Retry",
+        "noTypesConfigured": "There are no document types configured yet. Ask an administrator to create the catalogs.",
+        "identityHeading": "Identity document",
+        "identityDescription": "Upload the candidate's identity document in PDF format.",
+        "cvPrimaryText": "Drag the CV here or click to upload",
+        "cvHelperText": "PDF, DOCX or TXT up to 10 MB",
+        "cvAria": "Drag the CV or click to upload",
+        "cvTypeError": "Type not allowed. Only PDF, DOCX or TXT.",
+        "identityPrimaryText": "Drag the document here or click to upload",
+        "identityHelperText": "PDF files only, up to 10 MB",
+        "identityAria": "Drag the identity document or click to upload",
+        "identityTypeError": "Type not allowed. PDF files only.",
+        "kpis": {
+          "cv": {
+            "label": "CV breakdown",
+            "value": "From up to 15 min to 30s-1min per CV",
+            "helper": "Structured capture in a single run"
+          },
+          "insert": {
+            "label": "Data entry",
+            "value": "Automatic recording in the same flow",
+            "helper": "No manual transcription to DB or Excel"
+          },
+          "savings": {
+            "label": "Estimated savings",
+            "value": "Operational reduction of 93.3% to 96.7%",
+            "helper": "In CV extraction, breakdown and insertion"
+          }
+        },
+        "self": {
+          "title": "Complete information",
+          "submit": "Save information",
+          "success": "Your information was updated successfully. Check your profile to see the data.",
+          "errorPrefix": "Error saving your information",
+          "cvRequired": "You must upload your CV.",
+          "cvHeading": "Your CV",
+          "cvDescription": "Upload your CV to automatically complete your profile information.",
+          "aiNote": "AI-generated result. Review the data in My profile before applying."
+        },
+        "recruiter": {
+          "title": "Add candidate",
+          "submit": "Create candidate",
+          "success": "Candidate created and processed successfully.",
+          "errorPrefix": "Error creating the candidate",
+          "cvRequired": "You must upload the candidate's CV.",
+          "cvHeading": "Candidate's CV",
+          "cvDescription": "Upload the candidate's CV to create their profile automatically.",
+          "aiNote": "AI-generated result. Requires HR validation."
+        }
+      }
     }
   },
   "LanguageSwitcher": {

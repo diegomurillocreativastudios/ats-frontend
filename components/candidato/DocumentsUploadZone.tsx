@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useState, useCallback, type ReactNode, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
+import { useTranslations } from "next-intl"
 import { Upload, X, Sparkles, Loader2, Check } from "lucide-react"
 import { getApiErrorMessage, isSilentError } from "@/lib/api-error"
 
@@ -25,19 +26,24 @@ const formatFileSize = (bytes: number) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
+interface UploadValidationResult {
+  valid: boolean
+  reason?: "type" | "size"
+  size?: string
+}
+
 const validateFile = (
   file: File,
   allowedTypes: string[],
   allowedExtensions: string[]
-) => {
+): UploadValidationResult => {
   const extension = "." + file.name.split(".").pop()?.toLowerCase();
   const typeOk =
     allowedTypes.includes(file.type) || allowedExtensions.includes(extension);
   const sizeOk = file.size <= MAX_SIZE_BYTES;
-  if (!typeOk)
-    return { valid: false, error: `Tipo no permitido. Solo .PDF` };
+  if (!typeOk) return { valid: false, reason: "type" };
   if (!sizeOk)
-    return { valid: false, error: `El archivo supera 10 MB (${formatFileSize(file.size)}).` };
+    return { valid: false, reason: "size", size: formatFileSize(file.size) };
   return { valid: true };
 };
 
@@ -103,6 +109,7 @@ export default function DocumentsUploadZone({
   processAllAcceptedFiles = false,
   leftActions,
 }: DocumentsUploadZoneProps = {}) {
+  const t = useTranslations("CandidatePortal.documents.upload")
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [files, setFiles] = useState<File[]>([])
@@ -127,7 +134,7 @@ export default function DocumentsUploadZone({
     let firstError: string | null = null
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i]
-      const { valid, error: msg } = validateFile(
+      const { valid, reason, size } = validateFile(
         file,
         effectiveAcceptedTypes,
         effectiveAcceptedExtensions
@@ -135,14 +142,17 @@ export default function DocumentsUploadZone({
       if (valid) {
         newFiles.push(file);
       } else if (!firstError) {
-        firstError = msg;
+        firstError =
+          reason === "size"
+            ? t("errorTooLarge", { size: size ?? "" })
+            : t("errorTypeNotAllowed");
       }
     }
     if (firstError) setError(firstError)
     if (newFiles.length > 0) {
       setFiles((prev) => [...prev, ...newFiles])
     }
-  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions])
+  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions, t])
 
   const handleClick = () => {
     setError(null);
@@ -244,8 +254,8 @@ export default function DocumentsUploadZone({
       setProcessedIndices((prev) => new Set([...prev, index]));
     } catch (err: unknown) {
       if (isSilentError(err)) return
-      const detail = getApiErrorMessage(err) || "Error al procesar el documento."
-      setError(`No se pudo procesar «${file.name}». ${detail}`)
+      const detail = getApiErrorMessage(err) || t("processError")
+      setError(t("processErrorSingle", { fileName: file.name, detail }))
     } finally {
       setProcessingIndex(null);
       onAiProcessingBarChange?.({ active: false, percent: null })
@@ -286,9 +296,9 @@ export default function DocumentsUploadZone({
       }
     } catch (err: unknown) {
       if (isSilentError(err)) return
-      const detail = getApiErrorMessage(err) || "Error al procesar los documentos."
-      const label = lastTriedFile?.name ?? "el archivo"
-      setError(`No se pudo procesar «${label}». ${detail}`)
+      const detail = getApiErrorMessage(err) || t("processErrorMany")
+      const label = lastTriedFile?.name ?? t("fileFallback")
+      setError(t("processErrorSingle", { fileName: label, detail }))
     } finally {
       setProcessingIndex(null);
       setIsProcessingAll(false);
@@ -311,7 +321,7 @@ export default function DocumentsUploadZone({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        aria-label="Arrastra archivos o haz clic para subir documentos"
+        aria-label={t("dropzoneAria")}
       >
         <input
           ref={inputRef}
@@ -329,10 +339,10 @@ export default function DocumentsUploadZone({
           <Upload className="h-5 w-5 text-muted-foreground md:h-6 md:w-6" aria-hidden />
         </div>
         <p className="text-center font-sans text-sm font-medium text-muted-foreground md:text-base">
-          {isDragging ? "Suelta los archivos aquí" : "Arrastra archivos aquí o haz clic para subir"}
+          {isDragging ? t("dropActive") : t("dropPrompt")}
         </p>
         <p className="text-center font-sans text-xs text-muted-foreground">
-          {helperText || "PDF, DOC, DOCX hasta 10 MB"}
+          {helperText || t("helperDefault")}
         </p>
       </div>
 
@@ -348,8 +358,7 @@ export default function DocumentsUploadZone({
             <div className="flex flex-wrap items-center gap-2">
               {resolvedLeftActions}
               <span className="font-sans text-sm font-medium text-foreground">
-                {files.length} archivo{files.length !== 1 ? "s" : ""} seleccionado
-                {files.length !== 1 ? "s" : ""}
+                {t("selectedCount", { count: files.length })}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -359,7 +368,7 @@ export default function DocumentsUploadZone({
                   onClick={handleProcessAllClick}
                   disabled={isProcessingAll || processingIndex !== null}
                   className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-sans text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
-                  aria-label="Procesar todos los CV/Resume con IA"
+                  aria-label={t("processAllAria")}
                   aria-busy={isProcessingAll}
                 >
                   {isProcessingAll ? (
@@ -367,7 +376,7 @@ export default function DocumentsUploadZone({
                   ) : (
                     <Sparkles className="h-3.5 w-3.5 text-vo-yellow-foreground" aria-hidden />
                   )}
-                  {isProcessingAll ? "Procesando…" : "Procesar todos"}
+                  {isProcessingAll ? t("processing") : t("processAll")}
                 </button>
               )}
               <button
@@ -375,14 +384,14 @@ export default function DocumentsUploadZone({
                 onClick={clearAll}
                 className="font-sans text-sm font-medium text-vo-purple hover:underline"
               >
-                Quitar todos
+                {t("removeAll")}
               </button>
             </div>
           </div>
           <div
             className="max-h-[min(280px,45vh)] overflow-y-auto overscroll-y-contain pr-1"
             role="region"
-            aria-label="Lista de archivos seleccionados"
+            aria-label={t("selectedListAria")}
           >
             <ul className="flex flex-col gap-2">
             {files.map((file, index) => {
@@ -403,19 +412,19 @@ export default function DocumentsUploadZone({
                       {processedIndices.has(index) ? (
                         <span
                           className="flex shrink-0 items-center gap-1.5 rounded-md border border-success bg-success/10 px-2.5 py-1.5 font-sans text-xs font-medium text-success"
-                          aria-label={`Procesado: ${file.name}`}
+                          aria-label={t("processedAria", { fileName: file.name })}
                         >
                           <Check className="h-3.5 w-3.5 text-success" aria-hidden />
-                          Listo
+                          {t("done")}
                         </span>
                       ) : processingIndex === index ? (
                         <span
                           className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-sans text-xs font-medium text-vo-yellow-foreground"
                           aria-busy
-                          aria-label={`Procesando: ${file.name}`}
+                          aria-label={t("processingAria", { fileName: file.name })}
                         >
                           <Loader2 className="h-3.5 w-3.5 animate-spin text-vo-yellow-foreground" aria-hidden />
-                          Procesando…
+                          {t("processing")}
                         </span>
                       ) : (
                         <button
@@ -423,10 +432,10 @@ export default function DocumentsUploadZone({
                           onClick={() => handleProcessClick(file, index)}
                           disabled={processingIndex !== null || isProcessingAll}
                           className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-yellow bg-vo-yellow px-2.5 py-1.5 font-sans text-xs font-medium text-vo-yellow-foreground hover:bg-vo-yellow/90 disabled:opacity-60 disabled:cursor-not-allowed"
-                          aria-label={`Procesar con IA: ${file.name}`}
+                          aria-label={t("processAria", { fileName: file.name })}
                         >
                           <Sparkles className="h-3.5 w-3.5 text-vo-yellow-foreground" aria-hidden />
-                          Procesar
+                          {t("process")}
                         </button>
                       )}
                     </>
@@ -435,7 +444,7 @@ export default function DocumentsUploadZone({
                     type="button"
                     onClick={() => removeFile(index)}
                     className="shrink-0 rounded-md p-1 hover:bg-muted"
-                    aria-label={`Quitar ${file.name}`}
+                    aria-label={t("removeFileAria", { fileName: file.name })}
                   >
                     <X className="h-4 w-4 text-muted-foreground" aria-hidden />
                   </button>

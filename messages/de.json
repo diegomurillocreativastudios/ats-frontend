@@ -269,7 +269,119 @@
       "toastNoProfile": "Wir konnten dein Kandidatenprofil nicht identifizieren.",
       "toastResumeBlocked": "Dieser Endpunkt ist nur für allgemeine Dokumente. Entferne oder ersetze Dateien vom Typ CV/Lebenslauf (zum Beispiel: {fileName}).",
       "toastGeneralUploaded": "{count, plural, one {Allgemeines Dokument erfolgreich hochgeladen.} other {# allgemeine Dokumente erfolgreich hochgeladen.}}",
-      "toastGeneralUploadError": "Das allgemeine Dokument konnte nicht hochgeladen werden."
+      "toastGeneralUploadError": "Das allgemeine Dokument konnte nicht hochgeladen werden.",
+      "upload": {
+        "dropzoneAria": "Dateien ziehen oder klicken, um Dokumente hochzuladen",
+        "dropActive": "Dateien hier ablegen",
+        "dropPrompt": "Dateien hierher ziehen oder zum Hochladen klicken",
+        "helperDefault": "PDF, DOC, DOCX bis zu 10 MB",
+        "errorTypeNotAllowed": "Typ nicht zulässig. Nur .PDF",
+        "errorTooLarge": "Die Datei überschreitet 10 MB ({size}).",
+        "selectedCount": "{count, plural, one {# Datei ausgewählt} other {# Dateien ausgewählt}}",
+        "selectedListAria": "Liste der ausgewählten Dateien",
+        "processAll": "Alle verarbeiten",
+        "processAllAria": "Alle Lebensläufe/Resumes mit KI verarbeiten",
+        "processing": "Wird verarbeitet…",
+        "removeAll": "Alle entfernen",
+        "process": "Verarbeiten",
+        "processAria": "Mit KI verarbeiten: {fileName}",
+        "processingAria": "Wird verarbeitet: {fileName}",
+        "processedAria": "Verarbeitet: {fileName}",
+        "done": "Fertig",
+        "removeFileAria": "{fileName} entfernen",
+        "processError": "Fehler bei der Verarbeitung des Dokuments.",
+        "processErrorMany": "Fehler bei der Verarbeitung der Dokumente.",
+        "processErrorSingle": "«{fileName}» konnte nicht verarbeitet werden. {detail}",
+        "fileFallback": "die Datei"
+      },
+      "list": {
+        "heading": "Meine Dokumente",
+        "empty": "Es gibt noch keine Dokumente. Die von dir hochgeladenen erscheinen hier.",
+        "listAria": "Liste der Dokumente",
+        "downloadAria": "{name} herunterladen",
+        "deleteAria": "{name} löschen",
+        "downloadError": "Das Dokument konnte nicht heruntergeladen werden.",
+        "deleteTitle": "Dokument löschen",
+        "deleteConfirm": "Löschen",
+        "deleteCancel": "Abbrechen",
+        "deleteMessage": "<name></name> löschen? Es erscheint nicht mehr in deiner Liste."
+      },
+      "singleUpload": {
+        "dropActive": "Datei hier ablegen",
+        "dropPrompt": "Datei hierher ziehen oder zum Hochladen klicken",
+        "dropzoneAria": "Eine Datei ziehen oder zum Hochladen klicken",
+        "typeNotAllowed": "Dateityp nicht zulässig.",
+        "invalidFile": "Ungültige Datei.",
+        "tooLarge": "Die Datei überschreitet {max} ({size}).",
+        "removeFileAria": "{fileName} entfernen"
+      },
+      "modal": {
+        "cancel": "Abbrechen",
+        "processing": "Wird verarbeitet...",
+        "documentTypeRequired": "Du musst den Dokumenttyp auswählen.",
+        "identityRequired": "Du musst das Ausweisdokument hochladen.",
+        "documentTypesLoadError": "Die Dokumenttypen konnten nicht geladen werden.",
+        "processErrorSelf": "Fehler bei der Verarbeitung deiner Informationen.",
+        "processErrorRecruiter": "Fehler bei der Verarbeitung des Kandidaten.",
+        "aiIntro": "Lebensläufe und Ausweisdokumente werden mit KI verarbeitet, um vorläufige Profilinformationen zu extrahieren.",
+        "kpisAria": "ATS-Effizienz-KPIs",
+        "documentTypeHeading": "Art des Ausweisdokuments",
+        "documentTypeDescription": "Wähle den Dokumenttyp, der zur hochzuladenden PDF passt.",
+        "documentTypeAria": "Art des Ausweisdokuments",
+        "selectLoading": "Dokumenttypen werden geladen...",
+        "selectLoadError": "Die Dokumenttypen konnten nicht geladen werden",
+        "selectEmpty": "Keine Dokumenttypen verfügbar",
+        "selectPlaceholder": "Dokumenttyp auswählen",
+        "retry": "Erneut versuchen",
+        "noTypesConfigured": "Es sind noch keine Dokumenttypen konfiguriert. Bitte einen Administrator, die Kataloge zu erstellen.",
+        "identityHeading": "Ausweisdokument",
+        "identityDescription": "Lade das Ausweisdokument des Kandidaten im PDF-Format hoch.",
+        "cvPrimaryText": "Lebenslauf hierher ziehen oder zum Hochladen klicken",
+        "cvHelperText": "PDF, DOCX oder TXT bis zu 10 MB",
+        "cvAria": "Lebenslauf ziehen oder zum Hochladen klicken",
+        "cvTypeError": "Typ nicht zulässig. Nur PDF, DOCX oder TXT.",
+        "identityPrimaryText": "Dokument hierher ziehen oder zum Hochladen klicken",
+        "identityHelperText": "Nur PDF-Dateien bis zu 10 MB",
+        "identityAria": "Ausweisdokument ziehen oder zum Hochladen klicken",
+        "identityTypeError": "Typ nicht zulässig. Nur PDF-Dateien.",
+        "kpis": {
+          "cv": {
+            "label": "Lebenslauf-Analyse",
+            "value": "Von bis zu 15 Min. auf 30 Sek.-1 Min. pro Lebenslauf",
+            "helper": "Strukturierte Erfassung in einem einzigen Durchlauf"
+          },
+          "insert": {
+            "label": "Dateneingabe",
+            "value": "Automatische Erfassung im selben Ablauf",
+            "helper": "Keine manuelle Übertragung in DB oder Excel"
+          },
+          "savings": {
+            "label": "Geschätzte Einsparung",
+            "value": "Betriebliche Reduzierung von 93,3 % auf 96,7 %",
+            "helper": "Bei Extraktion, Analyse und Einfügen des Lebenslaufs"
+          }
+        },
+        "self": {
+          "title": "Informationen vervollständigen",
+          "submit": "Informationen speichern",
+          "success": "Deine Informationen wurden erfolgreich aktualisiert. Sieh in deinem Profil nach, um die Daten zu prüfen.",
+          "errorPrefix": "Fehler beim Speichern deiner Informationen",
+          "cvRequired": "Du musst deinen Lebenslauf hochladen.",
+          "cvHeading": "Dein Lebenslauf",
+          "cvDescription": "Lade deinen Lebenslauf hoch, um deine Profilinformationen automatisch zu vervollständigen.",
+          "aiNote": "Von KI generiertes Ergebnis. Prüfe die Daten in Mein Profil, bevor du dich bewirbst."
+        },
+        "recruiter": {
+          "title": "Kandidat hinzufügen",
+          "submit": "Kandidat erstellen",
+          "success": "Kandidat erfolgreich erstellt und verarbeitet.",
+          "errorPrefix": "Fehler beim Erstellen des Kandidaten",
+          "cvRequired": "Du musst den Lebenslauf des Kandidaten hochladen.",
+          "cvHeading": "Lebenslauf des Kandidaten",
+          "cvDescription": "Lade den Lebenslauf des Kandidaten hoch, um sein Profil automatisch zu erstellen.",
+          "aiNote": "Von KI generiertes Ergebnis. Erfordert die Validierung durch die Personalabteilung."
+        }
+      }
     }
   },
   "LanguageSwitcher": {
