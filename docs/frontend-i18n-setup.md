@@ -94,9 +94,58 @@ estático de UI (`Common.loading/save/cancel`). No se tocó ningún componente q
 renderice salida de Vertex AI, BD o input de usuario, ni se enviaron locales al
 backend.
 
-## 10. Pendientes para la Etapa 2
+## 10. Selector de idioma (Etapa 2)
+
+Etapa 2 añade un **selector de idioma funcional** que cambia el locale de la
+plataforma **sin prefijo de URL**, persistiéndolo en la cookie `NEXT_LOCALE`.
+
+### Componente
+
+`components/language-switcher.tsx` (client component, `"use client"`):
+
+- Lee el locale activo con `useLocale()` de `next-intl`.
+- Itera los locales centralizados de `i18n/routing.ts` (`locales`); **no** duplica
+  la lista. Solo mantiene un mapa de metadatos (endónimo + clave a11y) por locale.
+- Muestra los nombres nativos (endónimos): `Español`, `English`, `Italiano`,
+  `Deutsch`, `Français`. Los endónimos **no se traducen** (son nombres propios).
+- Textos de UI traducidos vía namespace `LanguageSwitcher` (`label`, `spanish`,
+  `english`, `italian`, `german`, `french`) usados para etiquetas accesibles.
+
+### Cómo persiste y refresca
+
+Al elegir un idioma distinto al activo:
+
+1. Escribe la cookie `NEXT_LOCALE` (nombre tomado de `localeCookieName`):
+   `NEXT_LOCALE=<locale>; path=/; max-age=<1 año>; samesite=lax`.
+2. Llama `router.refresh()` (importado desde el seam `@/i18n/navigation`), que
+   re-ejecuta los Server Components. `i18n/request.ts` vuelve a leer la cookie y
+   resuelve el nuevo locale + mensajes (con fallback a `es`).
+
+No se envía el locale al backend ni se modifican llamadas a API.
+
+### Integración en la UI global
+
+El selector se integró en los **tres topbars** transversales (uno por portal),
+en el clúster de acciones derecho, junto al botón de notificaciones:
+
+- `components/candidato/CandidateTopbar.tsx`
+- `components/rrhh/RRHHTopbar.tsx`
+- `components/portal-admin/AdminTopbar.tsx`
+
+### Regla crítica respetada
+
+El selector **solo** cambia la UI estática preparada con `next-intl`. No traduce,
+transforma ni reprocesa data generada por IA (Vertex AI), contenido de BD/API,
+texto extraído de archivos, input de usuario ni nombres propios/tecnologías.
+
+### Pruebas
+
+`tests/unit/language-switcher.test.tsx` valida: render del selector, los 5
+idiomas disponibles, el locale activo marcado, la escritura de la cookie
+`NEXT_LOCALE` al cambiar idioma y la llamada a `router.refresh()`.
+
+## 11. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
-- Añadir un selector de idioma de UI (set de cookie `NEXT_LOCALE`).
 - Migrar componentes transversales (navegación, primitivos UI) a claves i18n.
 - Definir convención de naming de claves y poblar `en/it/de/fr` reales.

@@ -3,5 +3,13 @@
     "loading": "Chargement...",
     "save": "Enregistrer",
     "cancel": "Annuler"
+  },
+  "LanguageSwitcher": {
+    "label": "Langue",
+    "spanish": "Espagnol",
+    "english": "Anglais",
+    "italian": "Italien",
+    "german": "Allemand",
+    "french": "Français"
   }
 }

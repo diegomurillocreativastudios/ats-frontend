@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { ChevronRight, Bell, Menu, LogOut } from "lucide-react"
 import ProductBrand from "@/components/branding/ProductBrand"
+import LanguageSwitcher from "@/components/language-switcher"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { getInitials } from "@/lib/getInitials"
 import { segmentToTitle } from "@/lib/pageTitles"
@@ -191,6 +192,7 @@ export default function AdminTopbar({
         </div>
       </div>
       <div className="flex items-center gap-3">
+        <LanguageSwitcher />
         <button
           type="button"
           className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-muted"
