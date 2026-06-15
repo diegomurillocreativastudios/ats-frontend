@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import type { LucideIcon } from "lucide-react"
 import {
   Briefcase,
@@ -20,6 +21,9 @@ const ICON_BY_KEY = {
   briefcase: Briefcase,
 } as const
 
+// NOTE: Los labels de estado de vacante (Activa/Cerrada/Pausada/Borrador) provienen
+// de un mapper frontend acoplado a `status` derivado del backend. NO se migran en
+// esta etapa (Etapa 7); quedan pendientes para una etapa dedicada de mappers de estado.
 const STATUS_LABELS: Record<
   VacancyListStatusKey,
   { label: string; bgClass: string; textClass: string }
@@ -54,6 +58,7 @@ export interface VacancyListCardProps {
 }
 
 export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListCardProps) {
+  const t = useTranslations("RecruiterPortal.vacancies")
   const Icon = ICON_BY_KEY[vacancy.iconKey] ?? Briefcase
   const statusConfig = STATUS_LABELS[vacancy.status] ?? STATUS_LABELS.activa
   const isReadOnly = !vacancy.isActive
@@ -67,8 +72,8 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
       }
       aria-label={
         isReadOnly
-          ? `Vacante inactiva, solo consulta: ${vacancy.title}`
-          : `Vacante: ${vacancy.title}`
+          ? t("cards.cardReadOnlyAria", { title: vacancy.title })
+          : t("cards.cardAria", { title: vacancy.title })
       }
       data-read-only={isReadOnly ? "true" : undefined}
     >
@@ -90,7 +95,7 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
           >
             <img
               src={vacancy.logoSrc}
-              alt={`Logo de ${vacancy.company}`}
+              alt={t("cards.logoAlt", { company: vacancy.company })}
               className={
                 isReadOnly
                   ? "h-full w-full object-contain opacity-70"
@@ -119,7 +124,7 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
                 : "font-sans text-base font-semibold leading-tight text-foreground"
             }
           >
-            {vacancy.title || "Sin título"}
+            {vacancy.title || t("cards.untitled")}
           </h3>
           <div
             className={`flex flex-col gap-1.5 font-sans text-[13px] sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1 ${isReadOnly ? "text-slate-500" : "text-muted-foreground"}`}
@@ -160,7 +165,7 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
             >
               {vacancy.candidates}
             </span>
-            <span className="font-sans text-xs text-muted-foreground">Candidatos</span>
+            <span className="font-sans text-xs text-muted-foreground">{t("cards.candidates")}</span>
           </div>
           <span
             className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 font-sans text-xs font-medium ${
@@ -187,9 +192,9 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
                 ? "inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white/90 px-5 font-sans text-sm font-medium text-slate-600 transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 sm:flex-none sm:px-6"
                 : "inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:flex-none sm:px-6"
             }
-            aria-label={`Ver detalles de vacante ${vacancy.title}`}
+            aria-label={t("actions.viewDetailsAria", { title: vacancy.title })}
           >
-            Ver detalles
+            {t("actions.viewDetails")}
           </Link>
         </div>
       </div>

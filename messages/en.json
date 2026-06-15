@@ -701,6 +701,58 @@
         "title": "Google Calendar",
         "description": "Connect and manage interview synchronization."
       }
+    },
+    "vacancies": {
+      "breadcrumb": "Vacancies",
+      "page": {
+        "title": "Vacancies",
+        "description": "Manage open positions",
+        "headerRegionLabel": "Vacancies header",
+        "listRegionLabel": "Vacancies list",
+        "filtersAndListRegionLabel": "Filters and list"
+      },
+      "filters": {
+        "regionLabel": "Vacancy filters",
+        "name": "Name",
+        "searchPlaceholder": "Search vacancy...",
+        "company": "Company",
+        "modality": "Modality",
+        "country": "Country",
+        "department": "Department",
+        "allFemale": "All",
+        "allMale": "All",
+        "filterByAria": "Filter by {label}"
+      },
+      "cards": {
+        "untitled": "Untitled",
+        "candidates": "Candidates",
+        "cardAria": "Vacancy: {title}",
+        "cardReadOnlyAria": "Inactive vacancy, read-only: {title}",
+        "logoAlt": "{company} logo"
+      },
+      "actions": {
+        "create": "New Vacancy",
+        "createShort": "New",
+        "createAria": "Create new vacancy",
+        "createVacancy": "Create vacancy",
+        "viewDetails": "View details",
+        "viewDetailsAria": "View details for vacancy {title}",
+        "clearFilters": "Clear filters",
+        "retry": "Retry"
+      },
+      "emptyStates": {
+        "noVacancies": "No vacancies found",
+        "noVacanciesFiltered": "No vacancies found with the applied filters"
+      },
+      "loadingStates": {
+        "loading": "Loading vacancies..."
+      },
+      "errors": {
+        "loadFailed": "Vacancies could not be loaded."
+      },
+      "toasts": {
+        "created": "Vacancy created successfully."
+      }
     }
   }
 }

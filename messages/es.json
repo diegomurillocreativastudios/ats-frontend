@@ -701,6 +701,58 @@
         "title": "Calendario Google",
         "description": "Conecta y administra la sincronización de entrevistas."
       }
+    },
+    "vacancies": {
+      "breadcrumb": "Vacantes",
+      "page": {
+        "title": "Vacantes",
+        "description": "Gestiona las posiciones abiertas",
+        "headerRegionLabel": "Encabezado de vacantes",
+        "listRegionLabel": "Lista de vacantes",
+        "filtersAndListRegionLabel": "Filtros y lista"
+      },
+      "filters": {
+        "regionLabel": "Filtros de vacantes",
+        "name": "Nombre",
+        "searchPlaceholder": "Buscar vacante...",
+        "company": "Empresa",
+        "modality": "Modalidad",
+        "country": "País",
+        "department": "Departamento",
+        "allFemale": "Todas",
+        "allMale": "Todos",
+        "filterByAria": "Filtrar por {label}"
+      },
+      "cards": {
+        "untitled": "Sin título",
+        "candidates": "Candidatos",
+        "cardAria": "Vacante: {title}",
+        "cardReadOnlyAria": "Vacante inactiva, solo consulta: {title}",
+        "logoAlt": "Logo de {company}"
+      },
+      "actions": {
+        "create": "Nueva Vacante",
+        "createShort": "Nueva",
+        "createAria": "Crear nueva vacante",
+        "createVacancy": "Crear vacante",
+        "viewDetails": "Ver detalles",
+        "viewDetailsAria": "Ver detalles de vacante {title}",
+        "clearFilters": "Limpiar filtros",
+        "retry": "Reintentar"
+      },
+      "emptyStates": {
+        "noVacancies": "No se encontraron vacantes",
+        "noVacanciesFiltered": "No se encontraron vacantes con los filtros aplicados"
+      },
+      "loadingStates": {
+        "loading": "Cargando vacantes..."
+      },
+      "errors": {
+        "loadFailed": "No se pudieron cargar las vacantes."
+      },
+      "toasts": {
+        "created": "Vacante creada correctamente."
+      }
     }
   }
 }

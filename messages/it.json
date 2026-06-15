@@ -701,6 +701,58 @@
         "title": "Google Calendar",
         "description": "Connetti e gestisci la sincronizzazione dei colloqui."
       }
+    },
+    "vacancies": {
+      "breadcrumb": "Posizioni",
+      "page": {
+        "title": "Posizioni",
+        "description": "Gestisci le posizioni aperte",
+        "headerRegionLabel": "Intestazione posizioni",
+        "listRegionLabel": "Elenco posizioni",
+        "filtersAndListRegionLabel": "Filtri ed elenco"
+      },
+      "filters": {
+        "regionLabel": "Filtri posizioni",
+        "name": "Nome",
+        "searchPlaceholder": "Cerca posizione...",
+        "company": "Azienda",
+        "modality": "Modalità",
+        "country": "Paese",
+        "department": "Reparto",
+        "allFemale": "Tutte",
+        "allMale": "Tutti",
+        "filterByAria": "Filtra per {label}"
+      },
+      "cards": {
+        "untitled": "Senza titolo",
+        "candidates": "Candidati",
+        "cardAria": "Posizione: {title}",
+        "cardReadOnlyAria": "Posizione inattiva, sola lettura: {title}",
+        "logoAlt": "Logo di {company}"
+      },
+      "actions": {
+        "create": "Nuova posizione",
+        "createShort": "Nuova",
+        "createAria": "Crea nuova posizione",
+        "createVacancy": "Crea posizione",
+        "viewDetails": "Vedi dettagli",
+        "viewDetailsAria": "Vedi i dettagli della posizione {title}",
+        "clearFilters": "Cancella filtri",
+        "retry": "Riprova"
+      },
+      "emptyStates": {
+        "noVacancies": "Nessuna posizione trovata",
+        "noVacanciesFiltered": "Nessuna posizione trovata con i filtri applicati"
+      },
+      "loadingStates": {
+        "loading": "Caricamento posizioni..."
+      },
+      "errors": {
+        "loadFailed": "Impossibile caricare le posizioni."
+      },
+      "toasts": {
+        "created": "Posizione creata con successo."
+      }
     }
   }
 }

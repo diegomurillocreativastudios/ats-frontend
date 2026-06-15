@@ -1062,6 +1062,152 @@ La suite i18n previa (`messages-structure`, `candidate-portal-i18n`,
 `candidate-portal-profile-i18n`, `metadata-i18n`, `auth-i18n`, `topbars-i18n`,
 `language-switcher`, `i18n-setup`) sigue pasando (66 tests i18n en verde).
 
+## 16-G. Vacantes RRHH básico (Etapa 7)
+
+Etapa 7 migra a `next-intl` la **UI estática simple de Vacantes RRHH**: el listado
+de vacantes, su encabezado, los filtros simples, los estados de
+carga/vacío/error controlados por frontend y los labels estáticos de la tarjeta
+de vacante. Es una etapa **acotada e incremental**: no toca Resultados IA, Score
+Breakdown, `VacancyConfig`, configuración avanzada de vacante, detalle profundo
+de candidato, Reportes ni Portal Admin. El ruteo sigue siendo cookie-based
+(`NEXT_LOCALE`), sin prefijos ni `app/[locale]`.
+
+### 16-G.1 Componentes / rutas RRHH migrados
+
+| Ruta / componente                          | Tipo   | Namespace usado                       |
+| ------------------------------------------ | ------ | ------------------------------------- |
+| `app/portal-rrhh/vacantes/page.tsx`        | Client | `RecruiterPortal.vacancies`           |
+| `components/rrhh/VacancyListFilters.tsx`   | Client | `RecruiterPortal.vacancies.filters`   |
+| `components/rrhh/VacancyListCard.tsx`      | Client | `RecruiterPortal.vacancies`           |
+
+Se migró: encabezado de página (título, descripción), breadcrumb del topbar,
+botón **Nueva Vacante** (+ variante corta `Nueva` y su `aria-label`), buscador
+simple (placeholder), filtros simples (labels Nombre/Empresa/Modalidad/País/
+Departamento, opción vacía «Todas»/«Todos», `aria-label` «Filtrar por {label}»,
+**Limpiar filtros**), estados de **carga/vacío/error** controlados por frontend,
+botón **Reintentar**, botón **Crear vacante** del empty state, los `aria-label`s
+de la tarjeta (el título/empresa se inyectan como **valor** del placeholder,
+nunca se traducen), el `alt` del logo, el fallback **Sin título** (solo cuando la
+API no envía título) y los labels **Candidatos** / **Ver detalles**.
+
+> El empty state usa dos keys separadas (`emptyStates.noVacancies` y
+> `emptyStates.noVacanciesFiltered`) en vez de concatenar fragmentos, para no
+> romper el orden gramatical en otros idiomas.
+
+### 16-G.2 Namespace `RecruiterPortal.vacancies` (5 idiomas)
+
+Se añadió la subsección `vacancies` al namespace `RecruiterPortal` en
+`es/en/it/de/fr` (con `es.json` como fuente de verdad), agrupada por concepto
+real de UI:
+
+```jsonc
+"RecruiterPortal": {
+  "vacancies": {
+    "breadcrumb":     "…",
+    "page":          { /* title, description, *RegionLabel (aria) */ },
+    "filters":       { /* regionLabel, name, searchPlaceholder, company,
+                          modality, country, department, allFemale, allMale,
+                          filterByAria */ },
+    "cards":         { /* untitled, candidates, cardAria, cardReadOnlyAria,
+                          logoAlt (todos con {title}/{company} como valor) */ },
+    "actions":       { /* create, createShort, createAria, createVacancy,
+                          viewDetails, viewDetailsAria, clearFilters, retry */ },
+    "emptyStates":   { /* noVacancies, noVacanciesFiltered */ },
+    "loadingStates": { /* loading */ },
+    "errors":        { /* loadFailed (fallback de frontend) */ },
+    "toasts":        { /* created (fallback de frontend) */ }
+  }
+}
+```
+
+La estructura se ajustó a los **componentes reales** (sin `table`, porque
+Vacantes usa **tarjetas**, no tabla). La paridad exacta de keys en los 5
+diccionarios la validan `tests/unit/messages-structure.test.ts` y
+`tests/unit/recruiter-vacancies-i18n.test.tsx`.
+
+### 16-G.3 Qué quedó fuera de scope (no migrado)
+
+- **Resultados IA / salida de Vertex AI**, **Score Breakdown**, `VacancyConfig`,
+  configuración avanzada de vacante, detalle profundo de candidato, **Reportes**
+  y **Portal Admin**: intactos.
+- **Formularios de creación/edición de vacante** (`NuevaVacanteModal`,
+  `VacancyLocationFields`, etc.): formularios grandes/complejos con validaciones
+  y payloads — **pendiente** para una etapa dedicada (no se tocaron en Etapa 7).
+- **Sub-rutas de vacante** (`vacantes/[id]`, `…/resultados`, `…/interviews`,
+  `…/technical-sheet`): detalle profundo / Resultados IA — fuera de scope.
+- `app/portal-rrhh/vacantes/layout.ts` (metadata estática del `<head>`): no
+  migrada (la metadata de rutas de negocio se difiere, ver §17).
+
+### 16-G.4 Labels de estado de vacante — mapper controlado, **PENDIENTE**
+
+`VacancyListCard` usa `STATUS_LABELS` (`Activa`/`Cerrada`/`Pausada`/`Borrador`),
+un **mapper frontend** acoplado a `vacancy.status`, que a su vez deriva de
+`mapStatusKey` sobre el `status`/`state` que envía el **backend**. Siguiendo la
+regla de la etapa («si existe un mapper frontend controlado para estados,
+documentarlo como pendiente»), **NO** se migra en Etapa 7. Se añadió un comentario
+en el componente marcándolo como pendiente.
+
+Recomendación futura: etapa dedicada que mapee cada key de estado conocida
+(`activa`/`cerrada`/`pausada`/`borrador`) a `next-intl`, conservando el `value`
+canónico que usa el styling y dejando intacto el fallback a `activa`.
+
+### 16-G.5 Regla crítica: NO traducir data dinámica / IA / backend
+
+```tsx
+// ✅ Traducible (UI estática controlada por frontend)
+<PortalPageHeader title={t("page.title")} description={t("page.description")} />
+{t("emptyStates.noVacanciesFiltered")}
+<span>{t("cards.candidates")}</span>
+
+// ❌ NO traducible (data dinámica / API / usuario / IA)
+{vacancy.title} {vacancy.company} {vacancy.modality} {vacancy.department}
+{vacancy.candidates}        // conteo de candidatos (API)
+{statusConfig.label}        // estado de vacante (mapper sobre backend, pendiente)
+{fetchError}                // mensaje del backend se respeta tal cual
+```
+
+En la tarjeta, el título y la empresa se inyectan como **valor** del placeholder
+en los `aria-label`/`alt` (`t("cards.cardAria", { title })`): se traduce solo el
+envoltorio estático, nunca el dato. El error de carga conserva el patrón
+`err?.message || err?.detail || t("errors.loadFailed")`: el mensaje del **backend**
+se muestra tal cual; solo el **fallback** de frontend sale del diccionario.
+
+### 16-G.6 Qué NO se tocó
+
+- **No** se modificaron llamadas a API, payloads ni nombres de campos; **no** se
+  envía `locale` al backend (la llamada sigue siendo `GET /api/recruiter/vacancies`).
+- **No** se modificó la lógica de RRHH (filtrado `filterVacancyList`, navegación,
+  mappers de vacante, rematch) ni de autenticación: solo se reemplazaron
+  literales de UI por keys (+ se separó el empty state en dos keys y se añadió un
+  prop `ariaLabel` a `FilterSelect`).
+- **No** se implementaron rutas con prefijo (`/en`, `/it`, …) ni se movió nada a
+  `app/[locale]`. **No** se tocó `proxy.ts`.
+- **No** se tocó `lib/pageTitles.ts` ni `lib/candidate-portal-translations.ts`.
+- **No** se migró Portal Admin, Resultados IA, Score Breakdown ni componentes que
+  renderizan salida de Vertex AI.
+
+### 16-G.7 Tests de la etapa
+
+`tests/unit/recruiter-vacancies-i18n.test.tsx` valida (Vitest + Testing Library):
+
+- `VacantesPage` renderiza su UI estática desde `next-intl` en `es` y `en`
+  (título, descripción, buscador, botón Nueva Vacante, estado vacío) con
+  `apiClient` y los catálogos de filtros mockeados a `[]`.
+- `VacancyListCard` traduce `Candidatos` / `Ver detalles` y el fallback `Sin
+  título` en `es`/`en`, manteniendo **intacta** la data dinámica (título y empresa
+  de la API).
+- Presencia de la subsección `vacancies` y de sus grupos (`page`, `filters`,
+  `cards`, `actions`, `emptyStates`, `loadingStates`, `errors`, `toasts`) en los 5
+  idiomas, y conservación de los placeholders canónicos (`Vacante: {title}`).
+
+La suite i18n previa (`messages-structure`, `recruiter-portal-i18n`,
+`candidate-portal-*`, `metadata-i18n`, `auth-i18n`, `topbars-i18n`,
+`language-switcher`, `i18n-setup`) sigue pasando. Los 7 fallos preexistentes de
+Vitest (`admin-vacancy-catalog-content`, `build-vacancy-progress-report-pdfkit-buffer`,
+`public-vacancies`, `recruiter-companies-api`, `report-filter-renderer`) **no**
+están relacionados con esta etapa (se verificó que fallan también sin estos
+cambios).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
@@ -1069,9 +1215,12 @@ La suite i18n previa (`messages-structure`, `candidate-portal-i18n`,
 - Aplicar `Metadata.auth.login` cuando se decida reestructurar el login a
   server wrapper + client content (o cuando se migre a ruteo por prefijo).
 - El **Portal RRHH básico** se migró en Etapa 6 (§16-F: listado de candidatos +
-  configuración). Quedan pendientes los módulos RRHH pesados: Vacantes complejas,
-  detalle profundo de candidato, Resultados IA / Score Breakdown, Reportes,
-  Entrevistas, Etapas/Estados (mappers de enums) y Configuraciones avanzadas.
+  configuración) y **Vacantes RRHH básico** en Etapa 7 (§16-G: listado, filtros
+  simples y tarjeta). Quedan pendientes los módulos RRHH pesados: formularios de
+  creación/edición de vacante (`NuevaVacanteModal`), detalle profundo de
+  candidato, Resultados IA / Score Breakdown, Reportes, Entrevistas,
+  Etapas/Estados (mappers de enums, incl. `STATUS_LABELS` de la tarjeta de
+  vacante — ver §16-G.4) y Configuraciones avanzadas.
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
   namespaces reservados (`Errors`, `EmptyStates`, etc.).
 - El **Perfil del Candidato** se migró en Etapa 5D (§16). Quedan pendientes los

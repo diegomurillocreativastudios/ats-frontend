@@ -701,6 +701,58 @@
         "title": "Google Agenda",
         "description": "Connectez et gérez la synchronisation des entretiens."
       }
+    },
+    "vacancies": {
+      "breadcrumb": "Postes",
+      "page": {
+        "title": "Postes",
+        "description": "Gérez les postes ouverts",
+        "headerRegionLabel": "En-tête des postes",
+        "listRegionLabel": "Liste des postes",
+        "filtersAndListRegionLabel": "Filtres et liste"
+      },
+      "filters": {
+        "regionLabel": "Filtres des postes",
+        "name": "Nom",
+        "searchPlaceholder": "Rechercher un poste...",
+        "company": "Entreprise",
+        "modality": "Modalité",
+        "country": "Pays",
+        "department": "Département",
+        "allFemale": "Tous",
+        "allMale": "Tous",
+        "filterByAria": "Filtrer par {label}"
+      },
+      "cards": {
+        "untitled": "Sans titre",
+        "candidates": "Candidats",
+        "cardAria": "Poste : {title}",
+        "cardReadOnlyAria": "Poste inactif, lecture seule : {title}",
+        "logoAlt": "Logo de {company}"
+      },
+      "actions": {
+        "create": "Nouveau poste",
+        "createShort": "Nouveau",
+        "createAria": "Créer un nouveau poste",
+        "createVacancy": "Créer un poste",
+        "viewDetails": "Voir les détails",
+        "viewDetailsAria": "Voir les détails du poste {title}",
+        "clearFilters": "Effacer les filtres",
+        "retry": "Réessayer"
+      },
+      "emptyStates": {
+        "noVacancies": "Aucun poste trouvé",
+        "noVacanciesFiltered": "Aucun poste trouvé avec les filtres appliqués"
+      },
+      "loadingStates": {
+        "loading": "Chargement des postes..."
+      },
+      "errors": {
+        "loadFailed": "Impossible de charger les postes."
+      },
+      "toasts": {
+        "created": "Poste créé avec succès."
+      }
     }
   }
 }

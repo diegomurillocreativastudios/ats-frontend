@@ -701,6 +701,58 @@
         "title": "Google Kalender",
         "description": "Synchronisierung der Interviews verbinden und verwalten."
       }
+    },
+    "vacancies": {
+      "breadcrumb": "Stellen",
+      "page": {
+        "title": "Stellen",
+        "description": "Offene Stellen verwalten",
+        "headerRegionLabel": "Stellen-Kopfzeile",
+        "listRegionLabel": "Stellenliste",
+        "filtersAndListRegionLabel": "Filter und Liste"
+      },
+      "filters": {
+        "regionLabel": "Stellenfilter",
+        "name": "Name",
+        "searchPlaceholder": "Stelle suchen...",
+        "company": "Unternehmen",
+        "modality": "Arbeitsmodell",
+        "country": "Land",
+        "department": "Abteilung",
+        "allFemale": "Alle",
+        "allMale": "Alle",
+        "filterByAria": "Filtern nach {label}"
+      },
+      "cards": {
+        "untitled": "Ohne Titel",
+        "candidates": "Kandidaten",
+        "cardAria": "Stelle: {title}",
+        "cardReadOnlyAria": "Inaktive Stelle, nur Ansicht: {title}",
+        "logoAlt": "Logo von {company}"
+      },
+      "actions": {
+        "create": "Neue Stelle",
+        "createShort": "Neu",
+        "createAria": "Neue Stelle erstellen",
+        "createVacancy": "Stelle erstellen",
+        "viewDetails": "Details anzeigen",
+        "viewDetailsAria": "Details der Stelle {title} anzeigen",
+        "clearFilters": "Filter zurücksetzen",
+        "retry": "Erneut versuchen"
+      },
+      "emptyStates": {
+        "noVacancies": "Keine Stellen gefunden",
+        "noVacanciesFiltered": "Keine Stellen mit den angewendeten Filtern gefunden"
+      },
+      "loadingStates": {
+        "loading": "Stellen werden geladen..."
+      },
+      "errors": {
+        "loadFailed": "Stellen konnten nicht geladen werden."
+      },
+      "toasts": {
+        "created": "Stelle erfolgreich erstellt."
+      }
     }
   }
 }
