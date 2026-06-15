@@ -5,9 +5,13 @@ import { getServerSessionUser } from "@/lib/server-session-user"
 import { isAdminRole } from "@/lib/roles"
 import LanguageSwitcher from "@/components/language-switcher"
 
-export const metadata = {
-  title: { absolute: "ATS | Elegí un portal" },
-  description: "Seleccioná el portal de candidato, oportunidades o el de reclutamiento",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.portalSelection")
+
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default async function SeleccionPortalPage() {

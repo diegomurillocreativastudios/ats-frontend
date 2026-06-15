@@ -2,10 +2,13 @@ import { Suspense } from "react"
 import { getTranslations } from "next-intl/server"
 import RestablecerContrasenaContent from "@/app/restablecer-contrasena/RestablecerContrasenaContent"
 
-export const metadata = {
-  title: { absolute: "ATS | Restablecer contraseña" },
-  description:
-    "Definí una nueva contraseña con el enlace del correo o tras verificar tu correo",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.auth.resetPassword")
+
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 const LoadingFallback = ({ label }: { label: string }) => (

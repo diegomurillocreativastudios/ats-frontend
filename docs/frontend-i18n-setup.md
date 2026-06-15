@@ -332,13 +332,131 @@ siendo cookie-based (`NEXT_LOCALE`) + `router.refresh()`, sin prefijo de URL y
 - Estado de enlace inválido del reset traducido.
 - Paridad de namespaces (`Auth`, `Validation`, `Errors`, `PortalSelection`) en los 5 idiomas.
 
-## 13. Pendientes para la siguiente etapa
+## 13. Metadata estática de auth/acceso (Etapa 5A)
+
+Etapa 5A migra a `next-intl` la **metadata estática** (`title`/`description` de
+`<head>`) de las páginas de auth/acceso que ya exponían metadata controlada por
+frontend. Es una etapa **pequeña, incremental y acotada**: no toca módulos de
+negocio, ni lógica de auth, ni APIs, ni envía locale al backend.
+
+### 13.1 Metadata migrada
+
+Las páginas pasaron de `export const metadata = { title: { absolute: "ATS | …" }, … }`
+(español estático) a `export async function generateMetadata()` con
+`getTranslations` de `next-intl/server`:
+
+| Ruta                                   | Archivo                                  | Namespace                       |
+| -------------------------------------- | ---------------------------------------- | ------------------------------- |
+| Recuperar contraseña                   | `app/auth/forgot-password/page.tsx`      | `Metadata.auth.forgotPassword`  |
+| Restablecer contraseña (pública)       | `app/restablecer-contrasena/page.tsx`    | `Metadata.auth.resetPassword`   |
+| Restablecer contraseña (`/auth`)       | `app/auth/restablecer-contrasena/page.tsx` | `Metadata.auth.resetPassword` |
+| Selección de portal                    | `app/seleccion-portal/page.tsx`          | `Metadata.portalSelection`      |
+
+El `title` se devuelve **sin** el prefijo de marca; el `template` global de
+`app/layout.tsx` (`title: { default: "ATS", template: "ATS | %s" }`) antepone
+`ATS | …`, de modo que el resultado visible (`ATS | <título>`) no cambia respecto
+del `{ absolute: "ATS | …" }` anterior, pero ahora **localizado**.
+
+```ts
+// app/auth/forgot-password/page.tsx
+import { getTranslations } from "next-intl/server"
+
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.auth.forgotPassword")
+  return { title: t("title"), description: t("description") }
+}
+```
+
+### 13.2 Namespace `Metadata` agregado (5 idiomas)
+
+Se añadió el namespace `Metadata` a `es/en/it/de/fr` (con `es.json` como fuente de
+verdad):
+
+```jsonc
+"Metadata": {
+  "auth": {
+    "login":          { "title": "…", "description": "…" },
+    "forgotPassword": { "title": "…", "description": "…" },
+    "resetPassword":  { "title": "…", "description": "…" }
+  },
+  "portalSelection":  { "title": "…", "description": "…" }
+}
+```
+
+`Metadata.auth.login` se incluye como **preparación** del namespace (estructura
+coherente y lista para uso futuro). **No** se aplica todavía a `app/auth/iniciar-sesion/page.tsx`
+porque es un **Client Component** (`"use client"`) y no puede exportar
+`generateMetadata`; añadirla exigiría reestructurar la página (server wrapper +
+client content), lo cual queda fuera del scope acotado de esta etapa. El título
+de pestaña del login lo sigue resolviendo `PageTitle` (cliente) vía
+`lib/pageTitles.ts` (ver §13.4).
+
+La paridad exacta de keys en los 5 diccionarios la valida
+`tests/unit/messages-structure.test.ts`.
+
+### 13.3 Reglas críticas respetadas
+
+- **NO se traduce data generada por IA** (Vertex AI), ni texto extraído de
+  archivos, ni input de usuario.
+- **NO se traduce data dinámica de API/BD** (nombres, roles, títulos de
+  vacante/candidato).
+- **NO se traducen breadcrumbs dinámicos** (`candidate.name`, `vacancy.title`,
+  etc.): siguen viniendo por props/data de ruta sin tocar.
+- **NO se modificaron** APIs, contratos, lógica de auth ni redirects.
+- **NO se envía** el locale al backend.
+- **NO se implementaron** rutas con prefijo (`/en`, `/it`, …) ni se movió nada a
+  `app/[locale]`. El ruteo sigue siendo cookie-based (`NEXT_LOCALE`).
+
+### 13.4 Decisión sobre `lib/pageTitles.ts` — Opción B (no migrar todavía)
+
+Se **revisó** `lib/pageTitles.ts` y se decidió **NO migrarlo** en esta etapa
+(Opción B: preparación/documentación, sin migración). Motivos:
+
+- `getPageTitle()` es una función **pura y síncrona sin contexto de locale**,
+  consumida por el Client Component `components/PageTitle.tsx` en **cada ruta**
+  (`useLayoutEffect`/`useEffect`) para fijar `document.title`. Hacerla
+  locale-aware obliga a inyectar `useTranslations`/traducciones y a tocar
+  `PageTitle.tsx`.
+- Sus mapas de labels (`RRHH_PATH_LABEL`, `ADMIN_PATH_LABEL`,
+  `CANDIDATO_PATH_LABEL`, `EXACT_PATH_SUFFIX`) cubren **decenas de etiquetas de
+  módulos de negocio** (Vacantes, Candidatos, Entrevistas, Reportes, Usuarios,
+  Empresas…). Migrarlos es precisamente migrar navegación de negocio, fuera de
+  scope.
+- Las funciones `format*DocumentTitle()` **interpolan data dinámica**
+  (`vacancyDisplayName`, `candidate.name`) usada por páginas RRHH
+  (`app/portal-rrhh/vacantes/[id]`, `…/candidatos/[candidateId]`,
+  `…/entrevistas/[vacancyId]`). Eso es breadcrumb/título **dinámico que NO debe
+  traducirse**.
+
+Por tanto, migrarlo sería un **cambio amplio y transversal a módulos de negocio**
+y se posterga a una etapa dedicada. **No** se creó namespace `PageTitles` para no
+poblar keys sin uso real. Recomendación futura: abordarlo junto con el ruteo por
+prefijo, separando claramente labels estáticos (traducibles) de los segmentos
+dinámicos (nombres de vacante/candidato), que deben permanecer intactos.
+
+### 13.5 Tests de la etapa
+
+`tests/unit/metadata-i18n.test.ts` valida (Vitest):
+- `generateMetadata` de forgot password, reset password (ambas rutas) y selección
+  de portal resuelve `title`/`description` desde `next-intl` en `es` y `en`
+  (mockeando `getTranslations` con los diccionarios reales).
+- Presencia del namespace `Metadata` y paridad de sus sub-keys
+  (`auth.{login,forgotPassword,resetPassword}`, `portalSelection.{title,description}`)
+  en los 5 idiomas.
+
+`tests/unit/messages-structure.test.ts` y `tests/unit/auth-i18n.test.tsx` siguen
+pasando (paridad estructural completa de los 5 diccionarios).
+
+## 14. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
-- Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7.
+- Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7 y §13.4.
+- Aplicar `Metadata.auth.login` cuando se decida reestructurar el login a
+  server wrapper + client content (o cuando se migre a ruteo por prefijo).
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin, Portal candidato) por
   fases, poblando los namespaces reservados (`Errors`, `EmptyStates`, etc.).
 - Migrar registro (`app/auth/registrarse`) y páginas públicas de oportunidades.
 - Internacionalizar errores de backend **solo** si el backend expone códigos de
   error estables (deuda compartida frontend/backend).
-- Traducir `metadata` (títulos de pestaña) de las rutas de auth si se requiere.
+- Migrar la metadata de rutas de negocio (`portal-*`) si se requiere SEO/títulos
+  localizados, una vez migrados sus módulos.

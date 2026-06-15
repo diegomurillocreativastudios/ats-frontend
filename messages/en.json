@@ -134,6 +134,26 @@
   "Errors": {
     "connection": "Connection error. Please try again."
   },
+  "Metadata": {
+    "auth": {
+      "login": {
+        "title": "Sign in",
+        "description": "Access your ATS account"
+      },
+      "forgotPassword": {
+        "title": "Forgot your password?",
+        "description": "Request instructions by email to reset your password in ATS App"
+      },
+      "resetPassword": {
+        "title": "Reset password",
+        "description": "Set a new password after verifying your email or with the recovery link"
+      }
+    },
+    "portalSelection": {
+      "title": "Choose a portal",
+      "description": "Select the candidate, opportunities or recruitment portal"
+    }
+  },
   "PortalSelection": {
     "title": "Where do you want to go?",
     "subtitle": "Choose the portal for your role to continue",

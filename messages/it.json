@@ -134,6 +134,26 @@
   "Errors": {
     "connection": "Errore di connessione. Riprova."
   },
+  "Metadata": {
+    "auth": {
+      "login": {
+        "title": "Accedi",
+        "description": "Accedi al tuo account ATS"
+      },
+      "forgotPassword": {
+        "title": "Hai dimenticato la password?",
+        "description": "Richiedi istruzioni via email per reimpostare la password in ATS App"
+      },
+      "resetPassword": {
+        "title": "Reimposta password",
+        "description": "Imposta una nuova password dopo aver verificato la tua email o con il link di recupero"
+      }
+    },
+    "portalSelection": {
+      "title": "Scegli un portale",
+      "description": "Seleziona il portale candidato, opportunità o reclutamento"
+    }
+  },
   "PortalSelection": {
     "title": "Dove vuoi entrare?",
     "subtitle": "Scegli il portale in base al tuo ruolo per continuare",
