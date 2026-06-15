@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 import { CalendarClock, ChevronRight } from "lucide-react"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
@@ -9,10 +10,11 @@ export const metadata = {
   description: "Configuración del portal RRHH",
 }
 
-export default function RRHHConfiguracionPage() {
+export default async function RRHHConfiguracionPage() {
+  const t = await getTranslations("RecruiterPortal.settings")
   const trail = [
-    { label: "Portal RRHH", href: "/portal-rrhh/entrevistas" },
-    { label: "Configuracion" },
+    { label: t("portalCrumb"), href: "/portal-rrhh/entrevistas" },
+    { label: t("breadcrumb") },
   ]
 
   return (
@@ -22,14 +24,14 @@ export default function RRHHConfiguracionPage() {
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <RRHHTopbar
             variant="desktop"
-            breadcrumbLabel="Configuracion"
+            breadcrumbLabel={t("breadcrumb")}
             breadcrumbTrail={trail}
           />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <section className="flex flex-col gap-6 px-4 py-6 md:px-8">
               <PortalPageHeader
-                title="Configuracion"
-                description="Centraliza aquí las configuraciones funcionales del portal RRHH."
+                title={t("title")}
+                description={t("description")}
                 contentClassName="max-w-3xl"
               />
               <Link
@@ -45,10 +47,10 @@ export default function RRHHConfiguracionPage() {
                   </div>
                   <div className="flex flex-col">
                     <span className="font-sans text-sm font-semibold text-foreground">
-                      Calendario Google
+                      {t("googleCalendar.title")}
                     </span>
                     <span className="font-sans text-xs text-muted-foreground">
-                      Conecta y administra la sincronización de entrevistas.
+                      {t("googleCalendar.description")}
                     </span>
                   </div>
                 </div>
@@ -62,14 +64,14 @@ export default function RRHHConfiguracionPage() {
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
         <RRHHTopbar
           variant="tablet"
-          breadcrumbLabel="Configuracion"
+          breadcrumbLabel={t("breadcrumb")}
           breadcrumbTrail={trail}
         />
         <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
           <section className="flex flex-col gap-6 px-4 py-6">
             <PortalPageHeader
-              title="Configuracion"
-              description="Centraliza aquí las configuraciones funcionales del portal RRHH."
+              title={t("title")}
+              description={t("description")}
             />
             <Link
               href="/portal-rrhh/configuracion/calendario"
@@ -78,7 +80,7 @@ export default function RRHHConfiguracionPage() {
               <div className="flex items-center gap-3">
                 <CalendarClock className="h-5 w-5 text-vo-purple" aria-hidden />
                 <span className="font-sans text-sm font-semibold text-foreground">
-                  Calendario Google
+                  {t("googleCalendar.title")}
                 </span>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />

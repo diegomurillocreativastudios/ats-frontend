@@ -661,5 +661,46 @@
     "italian": "Italiano",
     "german": "Tedesco",
     "french": "Francese"
+  },
+  "RecruiterPortal": {
+    "candidates": {
+      "breadcrumb": "Candidati",
+      "title": "Candidati",
+      "description": "Esamina e gestisci tutti i candidati",
+      "regionLabel": "Elenco dei candidati",
+      "headerRegionLabel": "Intestazione candidati",
+      "contentRegionLabel": "Contenuto candidati",
+      "searchPlaceholder": "Cerca candidati...",
+      "searchAriaLabel": "Cerca candidati",
+      "addCandidate": "Aggiungi candidato",
+      "loading": "Caricamento candidati...",
+      "retry": "Riprova",
+      "empty": "Nessun candidato",
+      "loadError": "Impossibile caricare i candidati.",
+      "followUpSaved": "Follow-up salvato con successo",
+      "hired": "Assunto",
+      "notHired": "Non assunto",
+      "rowAriaLabel": "Candidato {name}",
+      "followUpAriaLabel": "Follow-up di {name}",
+      "viewDetailAriaLabel": "Vedi dettaglio di {name}",
+      "table": {
+        "candidate": "Candidato",
+        "phone": "Telefono",
+        "country": "Paese",
+        "headline": "Titolo",
+        "uploadedAt": "Data di caricamento",
+        "actions": "Azioni"
+      }
+    },
+    "settings": {
+      "breadcrumb": "Impostazioni",
+      "portalCrumb": "Portale RU",
+      "title": "Impostazioni",
+      "description": "Centralizza qui le impostazioni funzionali del portale RU.",
+      "googleCalendar": {
+        "title": "Google Calendar",
+        "description": "Connetti e gestisci la sincronizzazione dei colloqui."
+      }
+    }
   }
 }

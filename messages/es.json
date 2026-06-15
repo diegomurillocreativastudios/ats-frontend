@@ -661,5 +661,46 @@
     "italian": "Italiano",
     "german": "Alemán",
     "french": "Francés"
+  },
+  "RecruiterPortal": {
+    "candidates": {
+      "breadcrumb": "Candidatos",
+      "title": "Candidatos",
+      "description": "Revisa y gestiona todos los candidatos",
+      "regionLabel": "Lista de candidatos",
+      "headerRegionLabel": "Encabezado de candidatos",
+      "contentRegionLabel": "Contenido de candidatos",
+      "searchPlaceholder": "Buscar candidatos...",
+      "searchAriaLabel": "Buscar candidatos",
+      "addCandidate": "Agregar candidato",
+      "loading": "Cargando candidatos...",
+      "retry": "Reintentar",
+      "empty": "No hay candidatos",
+      "loadError": "No se pudieron cargar los candidatos.",
+      "followUpSaved": "Seguimiento guardado exitosamente",
+      "hired": "Contratado",
+      "notHired": "No Contratado",
+      "rowAriaLabel": "Candidato {name}",
+      "followUpAriaLabel": "Seguimiento de {name}",
+      "viewDetailAriaLabel": "Ver detalle de {name}",
+      "table": {
+        "candidate": "Candidato",
+        "phone": "Teléfono",
+        "country": "País",
+        "headline": "Título",
+        "uploadedAt": "Fecha subida",
+        "actions": "Acciones"
+      }
+    },
+    "settings": {
+      "breadcrumb": "Configuracion",
+      "portalCrumb": "Portal RRHH",
+      "title": "Configuracion",
+      "description": "Centraliza aquí las configuraciones funcionales del portal RRHH.",
+      "googleCalendar": {
+        "title": "Calendario Google",
+        "description": "Conecta y administra la sincronización de entrevistas."
+      }
+    }
   }
 }

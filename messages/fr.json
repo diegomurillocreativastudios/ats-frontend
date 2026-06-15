@@ -661,5 +661,46 @@
     "italian": "Italien",
     "german": "Allemand",
     "french": "Français"
+  },
+  "RecruiterPortal": {
+    "candidates": {
+      "breadcrumb": "Candidats",
+      "title": "Candidats",
+      "description": "Consultez et gérez tous les candidats",
+      "regionLabel": "Liste des candidats",
+      "headerRegionLabel": "En-tête des candidats",
+      "contentRegionLabel": "Contenu des candidats",
+      "searchPlaceholder": "Rechercher des candidats...",
+      "searchAriaLabel": "Rechercher des candidats",
+      "addCandidate": "Ajouter un candidat",
+      "loading": "Chargement des candidats...",
+      "retry": "Réessayer",
+      "empty": "Aucun candidat",
+      "loadError": "Impossible de charger les candidats.",
+      "followUpSaved": "Suivi enregistré avec succès",
+      "hired": "Embauché",
+      "notHired": "Non embauché",
+      "rowAriaLabel": "Candidat {name}",
+      "followUpAriaLabel": "Suivi de {name}",
+      "viewDetailAriaLabel": "Voir le détail de {name}",
+      "table": {
+        "candidate": "Candidat",
+        "phone": "Téléphone",
+        "country": "Pays",
+        "headline": "Titre",
+        "uploadedAt": "Date de téléversement",
+        "actions": "Actions"
+      }
+    },
+    "settings": {
+      "breadcrumb": "Configuration",
+      "portalCrumb": "Portail RH",
+      "title": "Configuration",
+      "description": "Centralisez ici les paramètres fonctionnels du portail RH.",
+      "googleCalendar": {
+        "title": "Google Agenda",
+        "description": "Connectez et gérez la synchronisation des entretiens."
+      }
+    }
   }
 }

@@ -947,12 +947,131 @@ para una etapa que toque RRHH.
 - `tests/unit/messages-structure.test.ts`: paridad exacta de keys (incluye las
   nuevas `form.validation`, `form.legacy` y `Metadata.candidateProfile`).
 
+## 16-F. Portal RRHH básico (Etapa 6)
+
+Etapa 6 migra a `next-intl` la **UI estática simple del Portal RRHH básico**. Es
+una etapa **acotada e incremental**: no toca módulos pesados (Resultados IA,
+Score Breakdown, Vacantes complejas, Reportes, Admin), ni lógica de negocio, ni
+APIs, ni traduce data dinámica/IA. El ruteo sigue siendo cookie-based
+(`NEXT_LOCALE`), sin prefijos ni `app/[locale]`.
+
+### 16-F.1 Componentes / rutas RRHH migrados
+
+| Ruta / componente                       | Tipo   | Namespace usado                  |
+| --------------------------------------- | ------ | -------------------------------- |
+| `app/portal-rrhh/candidatos/page.tsx`   | Client | `RecruiterPortal.candidates`     |
+| `app/portal-rrhh/configuracion/page.tsx`| Server | `RecruiterPortal.settings`       |
+
+`/portal-rrhh/candidatos` es el **home real** del Portal RRHH (la raíz
+`/portal-rrhh` redirige ahí). Se migró el listado base: encabezado de página,
+breadcrumb, buscador (placeholder + `aria-label`), botón **Agregar candidato**,
+estados de **carga/vacío/error** controlados por frontend, botón **Reintentar**,
+los **encabezados de tabla** simples (Candidato, Teléfono, País, Título, Fecha
+subida, Acciones), los `aria-label`s de fila/acciones (el nombre se inyecta como
+**valor** del placeholder, nunca se traduce) y la etiqueta `Contratado`/`No
+Contratado` (derivada del booleano `hired` en el frontend, **no** de un enum del
+backend). En `configuracion` se usa `getTranslations` de `next-intl/server`
+(Server Component → la página pasa a `async`).
+
+### 16-F.2 Namespace `RecruiterPortal` (5 idiomas)
+
+Se añadió el namespace `RecruiterPortal` a `es/en/it/de/fr` (con `es.json` como
+fuente de verdad), agrupado por sección real de UI:
+
+```jsonc
+"RecruiterPortal": {
+  "candidates": { /* breadcrumb, title, description, buscador, botones,
+                     loading/empty/error, followUpSaved, hired/notHired,
+                     aria-labels con {name}, table.{candidate,phone,country,
+                     headline,uploadedAt,actions} */ },
+  "settings":   { /* breadcrumb, portalCrumb, title, description,
+                     googleCalendar.{title,description} */ }
+}
+```
+
+La estructura se ajustó a los **componentes reales** (en vez de los grupos
+genéricos sugeridos `home/dashboard/stats/cards/...`). La paridad exacta de keys
+en los 5 diccionarios la validan `tests/unit/messages-structure.test.ts` y
+`tests/unit/recruiter-portal-i18n.test.tsx`.
+
+> Las tarjetas demo `RRHHDashboardStats`, `RecentActivityCard` y
+> `RecentCandidatesCard` **no** se migraron: no están montadas en ninguna ruta
+> (solo se referencian en el doc de scope) y contienen datos mock con nombres
+> propios. Migrarlas no aporta valor real en esta etapa.
+
+### 16-F.3 Qué quedó fuera de scope (no migrado)
+
+- **Resultados IA / salida de Vertex AI**, **Score Breakdown**, detalle profundo
+  de candidato, **Vacantes complejas** y formularios de vacantes, **Reportes**,
+  **Portal Admin** y **Configuraciones avanzadas**: intactos.
+- **Mappers de estados/etapas** que dependen de enums del backend o de mappers
+  compartidos (`lib/candidate-portal-translations.ts`): **pendiente** (data
+  dinámica de API; ver §14.5).
+- `lib/pageTitles.ts`, `lib/candidate-portal-translations.ts`, breadcrumbs
+  dinámicos, `Metadata.auth.login` y rutas con prefijo: fuera de scope.
+- El mapper `mapCandidateFromApi` (fallback `"Sin nombre"` y formato de fecha
+  `es-CL`): es **data-shaping** sobre data de API, **no** UI estática → se dejó
+  intacto y queda como pendiente menor.
+
+### 16-F.4 Regla crítica: NO traducir data dinámica / IA / backend
+
+```tsx
+// ✅ Traducible (UI estática controlada por frontend)
+<PortalPageHeader title={t("title")} description={t("description")} />
+<th>{t("table.candidate")}</th>
+{t("empty")}
+
+// ❌ NO traducible (data dinámica / API / usuario / IA)
+{candidate.name} {candidate.email} {candidate.country} {candidate.headline}
+{candidate.date}            // fecha de subida (API)
+{fetchError}                // se respeta el mensaje del backend tal cual
+```
+
+En el listado, el error de carga conserva el patrón
+`err?.message ?? err?.detail ?? t("loadError")`: el mensaje del **backend** se
+muestra tal cual; solo el **fallback** controlado por frontend sale del
+diccionario. **No** se envía `locale` al backend ni se modificó ninguna llamada
+a API.
+
+### 16-F.5 Qué NO se tocó
+
+- **No** se modificaron llamadas a API, payloads ni nombres de campos; **no** se
+  envía `locale` al backend.
+- **No** se modificó lógica de RRHH (filtros, navegación, vacantes, candidatos,
+  reportes) ni de autenticación: solo se reemplazaron literales de UI por keys.
+- **No** se implementaron rutas con prefijo (`/en`, `/it`, …) ni se movió nada a
+  `app/[locale]`. **No** se tocó `proxy.ts`.
+- **No** se tocó `lib/pageTitles.ts` ni `lib/candidate-portal-translations.ts`.
+- **No** se migró Portal Admin, Resultados IA ni Score Breakdown, ni componentes
+  que renderizan salida de Vertex AI.
+
+### 16-F.6 Tests de la etapa
+
+`tests/unit/recruiter-portal-i18n.test.tsx` valida (Vitest + Testing Library):
+
+- `CandidatosPage` (home RRHH) renderiza su UI estática desde `next-intl` en `es`
+  y `en` (título, descripción, buscador, botón, estado vacío) con `apiClient`
+  mockeado a `[]`.
+- `RRHHConfiguracionPage` (Server Component) renderiza título y la tarjeta de
+  Calendario Google desde `next-intl` en `es` y `en` (mockeando
+  `next-intl/server`).
+- Presencia del namespace `RecruiterPortal` y de sus subsecciones
+  (`candidates`, `settings`) en los 5 idiomas.
+
+La suite i18n previa (`messages-structure`, `candidate-portal-i18n`,
+`candidate-portal-profile-i18n`, `metadata-i18n`, `auth-i18n`, `topbars-i18n`,
+`language-switcher`, `i18n-setup`) sigue pasando (66 tests i18n en verde).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
 - Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7 y §13.4.
 - Aplicar `Metadata.auth.login` cuando se decida reestructurar el login a
   server wrapper + client content (o cuando se migre a ruteo por prefijo).
+- El **Portal RRHH básico** se migró en Etapa 6 (§16-F: listado de candidatos +
+  configuración). Quedan pendientes los módulos RRHH pesados: Vacantes complejas,
+  detalle profundo de candidato, Resultados IA / Score Breakdown, Reportes,
+  Entrevistas, Etapas/Estados (mappers de enums) y Configuraciones avanzadas.
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
   namespaces reservados (`Errors`, `EmptyStates`, etc.).
 - El **Perfil del Candidato** se migró en Etapa 5D (§16). Quedan pendientes los

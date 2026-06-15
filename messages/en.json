@@ -661,5 +661,46 @@
     "italian": "Italian",
     "german": "German",
     "french": "French"
+  },
+  "RecruiterPortal": {
+    "candidates": {
+      "breadcrumb": "Candidates",
+      "title": "Candidates",
+      "description": "Review and manage all candidates",
+      "regionLabel": "Candidate list",
+      "headerRegionLabel": "Candidates header",
+      "contentRegionLabel": "Candidates content",
+      "searchPlaceholder": "Search candidates...",
+      "searchAriaLabel": "Search candidates",
+      "addCandidate": "Add candidate",
+      "loading": "Loading candidates...",
+      "retry": "Retry",
+      "empty": "No candidates",
+      "loadError": "Candidates could not be loaded.",
+      "followUpSaved": "Follow-up saved successfully",
+      "hired": "Hired",
+      "notHired": "Not hired",
+      "rowAriaLabel": "Candidate {name}",
+      "followUpAriaLabel": "Follow-up for {name}",
+      "viewDetailAriaLabel": "View details for {name}",
+      "table": {
+        "candidate": "Candidate",
+        "phone": "Phone",
+        "country": "Country",
+        "headline": "Title",
+        "uploadedAt": "Upload date",
+        "actions": "Actions"
+      }
+    },
+    "settings": {
+      "breadcrumb": "Settings",
+      "portalCrumb": "HR Portal",
+      "title": "Settings",
+      "description": "Centralize the functional settings of the HR portal here.",
+      "googleCalendar": {
+        "title": "Google Calendar",
+        "description": "Connect and manage interview synchronization."
+      }
+    }
   }
 }

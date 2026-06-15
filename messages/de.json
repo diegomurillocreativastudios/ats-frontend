@@ -661,5 +661,46 @@
     "italian": "Italienisch",
     "german": "Deutsch",
     "french": "Französisch"
+  },
+  "RecruiterPortal": {
+    "candidates": {
+      "breadcrumb": "Kandidaten",
+      "title": "Kandidaten",
+      "description": "Alle Kandidaten überprüfen und verwalten",
+      "regionLabel": "Kandidatenliste",
+      "headerRegionLabel": "Kandidaten-Kopfzeile",
+      "contentRegionLabel": "Kandidaten-Inhalt",
+      "searchPlaceholder": "Kandidaten suchen...",
+      "searchAriaLabel": "Kandidaten suchen",
+      "addCandidate": "Kandidat hinzufügen",
+      "loading": "Kandidaten werden geladen...",
+      "retry": "Erneut versuchen",
+      "empty": "Keine Kandidaten",
+      "loadError": "Kandidaten konnten nicht geladen werden.",
+      "followUpSaved": "Nachverfolgung erfolgreich gespeichert",
+      "hired": "Eingestellt",
+      "notHired": "Nicht eingestellt",
+      "rowAriaLabel": "Kandidat {name}",
+      "followUpAriaLabel": "Nachverfolgung für {name}",
+      "viewDetailAriaLabel": "Details von {name} anzeigen",
+      "table": {
+        "candidate": "Kandidat",
+        "phone": "Telefon",
+        "country": "Land",
+        "headline": "Titel",
+        "uploadedAt": "Upload-Datum",
+        "actions": "Aktionen"
+      }
+    },
+    "settings": {
+      "breadcrumb": "Einstellungen",
+      "portalCrumb": "HR-Portal",
+      "title": "Einstellungen",
+      "description": "Zentralisieren Sie hier die funktionalen Einstellungen des HR-Portals.",
+      "googleCalendar": {
+        "title": "Google Kalender",
+        "description": "Synchronisierung der Interviews verbinden und verwalten."
+      }
+    }
   }
 }
