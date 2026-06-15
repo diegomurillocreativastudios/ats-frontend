@@ -1,6 +1,7 @@
 "use client";
 
 import { Briefcase, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { CandidatePortalApplicationRow } from "@/lib/candidate-dashboard";
 import {
   translateApplicationStatus,
@@ -16,11 +17,12 @@ export default function MyPostulationsCard({
   loading?: boolean;
   onSelectApplication?: (application: CandidatePortalApplicationRow) => void;
 }) {
+  const t = useTranslations("CandidatePortal.applications");
   return (
     <div className="rounded-lg border border-border bg-card p-6">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="font-sans text-lg font-semibold text-foreground">
-          Mis postulaciones
+          {t("title")}
         </h2>
       </div>
       {loading ? (
@@ -50,11 +52,10 @@ export default function MyPostulationsCard({
           </div>
           <div className="space-y-1">
             <p className="font-sans text-base font-semibold text-foreground">
-              No tienes postulaciones activas
+              {t("emptyTitle")}
             </p>
             <p className="font-sans text-sm text-muted-foreground">
-              Cuando apliques a una vacante, podrás consultar aquí el avance de tu
-              proceso.
+              {t("emptyDescription")}
             </p>
           </div>
         </div>
@@ -98,7 +99,10 @@ export default function MyPostulationsCard({
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <span className="font-sans text-xs text-muted-foreground">
-                      Etapa {post.progressCurrent} de {post.totalStages}
+                      {t("stageProgress", {
+                        current: post.progressCurrent,
+                        total: post.totalStages,
+                      })}
                     </span>
                     <span className="font-sans text-xs font-semibold text-foreground">
                       {progressPercentage}%
@@ -112,7 +116,7 @@ export default function MyPostulationsCard({
                       aria-valuenow={progressPercentage}
                       aria-valuemin={0}
                       aria-valuemax={100}
-                      aria-label={`Progreso: ${progressPercentage}%`}
+                      aria-label={t("progressAria", { percentage: progressPercentage })}
                     />
                   </div>
                 </div>

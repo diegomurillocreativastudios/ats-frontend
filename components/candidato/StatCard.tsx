@@ -1,40 +1,41 @@
 import { Briefcase, Calendar, ClipboardList, Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { CandidatePortalStats } from "@/lib/candidate-dashboard";
 
 const STAT_CONFIG = [
   {
     key: "activeApplications" as const,
-    label: "Postulaciones activas",
-    description: "Procesos en los que estás participando actualmente.",
+    labelKey: "activeApplications",
+    descriptionKey: "activeApplicationsDesc",
     icon: Briefcase,
     iconBg: "bg-blue-100",
     iconColor: "text-blue-600",
   },
   {
     key: "pendingEvaluations" as const,
-    label: "Evaluaciones pendientes",
-    description: "Pruebas o evaluaciones que debes completar.",
+    labelKey: "pendingEvaluations",
+    descriptionKey: "pendingEvaluationsDesc",
     icon: ClipboardList,
     iconBg: "bg-purple-100",
     iconColor: "text-purple-600",
   },
   {
     key: "upcomingInterviews" as const,
-    label: "Entrevistas próximas",
-    description: "Citas programadas dentro de tu proceso.",
+    labelKey: "upcomingInterviews",
+    descriptionKey: "upcomingInterviewsDesc",
     icon: Calendar,
     iconBg: "bg-emerald-100",
     iconColor: "text-emerald-600",
   },
   {
     key: "unreadMessages" as const,
-    label: "Mensajes sin leer",
-    description: "Comunicaciones pendientes de revisar.",
+    labelKey: "unreadMessages",
+    descriptionKey: "unreadMessagesDesc",
     icon: Mail,
     iconBg: "bg-amber-100",
     iconColor: "text-amber-600",
   },
-];
+] as const;
 
 function formatStatValue(
   stats: CandidatePortalStats | null | undefined,
@@ -54,6 +55,7 @@ export default function StatCard({
   stats?: CandidatePortalStats | null;
   loading?: boolean;
 }) {
+  const t = useTranslations("CandidatePortal.stats");
   return (
     <div className="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {STAT_CONFIG.map((stat) => {
@@ -74,10 +76,10 @@ export default function StatCard({
                 {value}
               </span>
               <span className="font-sans text-sm font-semibold text-foreground">
-                {stat.label}
+                {t(stat.labelKey)}
               </span>
               <span className="font-sans text-xs leading-relaxed text-muted-foreground">
-                {stat.description}
+                {t(stat.descriptionKey)}
               </span>
             </div>
           </div>

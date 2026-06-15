@@ -1,6 +1,7 @@
 "use client";
 
 import { ClipboardList, Calendar, CalendarX } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { CandidatePortalActivity } from "@/lib/candidate-dashboard";
 
 function getActivityIcon(kind: string) {
@@ -27,11 +28,12 @@ export default function NextActivitiesCard({
   activities: CandidatePortalActivity[];
   loading?: boolean;
 }) {
+  const t = useTranslations("CandidatePortal.activities");
   return (
     <div className="rounded-lg border border-border bg-card p-6">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="font-sans text-lg font-semibold text-foreground">
-          Próximas actividades
+          {t("title")}
         </h2>
       </div>
       {loading ? (
@@ -57,11 +59,10 @@ export default function NextActivitiesCard({
           </div>
           <div className="space-y-1">
             <p className="font-sans text-base font-semibold text-foreground">
-              No tienes actividades próximas
+              {t("emptyTitle")}
             </p>
             <p className="font-sans text-sm text-muted-foreground">
-              Cuando tengas entrevistas, evaluaciones o citas programadas, aparecerán
-              aquí.
+              {t("emptyDescription")}
             </p>
           </div>
         </div>

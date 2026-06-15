@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import CandidateSidebar from "@/components/candidato/CandidateSidebar";
 import CandidateTopbar from "@/components/candidato/CandidateTopbar";
 import StatCard from "@/components/candidato/StatCard";
@@ -14,6 +15,7 @@ import { getCandidateGreetingFirstName } from "@/lib/candidate-portal-greeting";
 import type { CandidatePortalApplicationRow } from "@/lib/candidate-dashboard";
 
 export default function CandidatePortalHome() {
+  const t = useTranslations("CandidatePortal.home");
   const { data, loading, error } = useCandidateDashboard();
   const { user, loading: userLoading } = useCurrentUser();
 
@@ -60,23 +62,23 @@ export default function CandidatePortalHome() {
               <PortalPageHeader
                 title={
                   userLoading && !data && !error
-                    ? "Cargando…"
-                    : `¡Hola, ${greetingName}! 👋`
+                    ? t("loading")
+                    : t("greeting", { name: greetingName })
                 }
-                description="Aquí puedes consultar el avance de tus postulaciones y próximas actividades."
+                description={t("description")}
                 className="pb-0"
               />
-              <section aria-label="Resumen de estadísticas">
+              <section aria-label={t("statsAria")}>
                 <StatCard stats={stats} loading={loading && !data} />
               </section>
               
-              <section aria-label="Seguimiento del proceso">
+              <section aria-label={t("processAria")}>
                 <ProcessTrackingCard application={selectedApplication} />
               </section>
               
               <section
                 className="grid gap-6 lg:grid-cols-2"
-                aria-label="Actividades y postulaciones"
+                aria-label={t("activitiesApplicationsAria")}
               >
                 <NextActivitiesCard
                   activities={activities}
@@ -108,29 +110,29 @@ export default function CandidatePortalHome() {
             <PortalPageHeader
               title={
                 userLoading && !data && !error
-                  ? "Cargando…"
-                  : `¡Hola, ${greetingName}! 👋`
+                  ? t("loading")
+                  : t("greeting", { name: greetingName })
               }
-              description="Aquí puedes consultar el avance de tus postulaciones y próximas actividades."
+              description={t("description")}
               className="pb-0"
               descriptionClassName="text-sm leading-6 md:text-base"
             />
-            <section aria-label="Resumen de estadísticas">
+            <section aria-label={t("statsAria")}>
               <StatCard stats={stats} loading={loading && !data} />
             </section>
             
-            <section aria-label="Seguimiento del proceso">
+            <section aria-label={t("processAria")}>
               <ProcessTrackingCard application={selectedApplication} />
             </section>
             
-            <section aria-label="Próximas actividades">
+            <section aria-label={t("upcomingActivitiesAria")}>
               <NextActivitiesCard
                 activities={activities}
                 loading={loading && !data}
               />
             </section>
             
-            <section aria-label="Mis postulaciones">
+            <section aria-label={t("myApplicationsAria")}>
               <MyPostulationsCard
                 applications={applications}
                 loading={loading && !data}

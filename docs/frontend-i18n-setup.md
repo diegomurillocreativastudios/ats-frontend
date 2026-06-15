@@ -447,14 +447,150 @@ dinámicos (nombres de vacante/candidato), que deben permanecer intactos.
 `tests/unit/messages-structure.test.ts` y `tests/unit/auth-i18n.test.tsx` siguen
 pasando (paridad estructural completa de los 5 diccionarios).
 
-## 14. Pendientes para la siguiente etapa
+## 14. Portal Candidato básico (Etapa 5B)
+
+Etapa 5B migra a `next-intl` los **textos estáticos de UI** del **Portal Candidato
+básico** (home/dashboard, documentos y entrevistas). Es una etapa **acotada e
+incremental**: no toca módulos pesados, ni lógica de negocio, ni APIs, ni traduce
+data dinámica/IA.
+
+### 14.1 Componentes/rutas migrados
+
+| Componente / ruta                                            | Tipo   | Namespace usado              |
+| ------------------------------------------------------------ | ------ | ---------------------------- |
+| `components/candidato/candidate-portal-home.tsx`             | Client | `CandidatePortal.home`       |
+| `components/candidato/StatCard.tsx`                          | Server | `CandidatePortal.stats`      |
+| `components/candidato/NextActivitiesCard.tsx`                | Client | `CandidatePortal.activities` |
+| `components/candidato/MyPostulationsCard.tsx`                | Client | `CandidatePortal.applications` |
+| `components/candidato/ProcessTrackingCard.tsx`               | Client | `CandidatePortal.process`    |
+| `components/candidato/CandidateInterviewsContent.tsx`        | Client | `CandidatePortal.interviews` |
+| `app/portal-candidato/documentos/DocumentosContent.tsx`      | Client | `CandidatePortal.documents`  |
+
+Rutas afectadas: `/portal-candidato`, `/portal-candidato/documentos`,
+`/portal-candidato/entrevistas`. Se usa `useTranslations` (todos son
+client/colocados en árbol cliente). Los valores con interpolación
+(`{name}`, `{current}/{total}`, `{percentage}`, `{order}`, `{id}`, `{minutes}`,
+`{hours}`, `{fileName}`) y las pluralizaciones de toasts de documentos usan el
+formato ICU de `next-intl` (`{count, plural, one {…} other {…}}`).
+
+### 14.2 Namespace `CandidatePortal` (5 idiomas)
+
+Se añadió el namespace `CandidatePortal` a `es/en/it/de/fr` (con `es.json` como
+fuente de verdad), agrupado por sección de UI:
+
+```jsonc
+"CandidatePortal": {
+  "home":         { /* greeting, description, aria-labels, loading */ },
+  "stats":        { /* labels + descripciones de las 4 tarjetas de stats */ },
+  "activities":   { /* título + empty state de próximas actividades */ },
+  "applications": { /* título + empty state + "Etapa {current} de {total}" */ },
+  "process":      { /* seguimiento del proceso: títulos, fases, progreso */ },
+  "interviews":   { /* cabeceras, secciones, empties, etiquetas de tarjeta */ },
+  "documents":    { /* cabeceras, botones, loading + toasts (fallback front) */ }
+}
+```
+
+La paridad exacta de keys en los 5 diccionarios la validan
+`tests/unit/messages-structure.test.ts` y `tests/unit/candidate-portal-i18n.test.tsx`.
+
+### 14.3 Qué quedó fuera de scope (no migrado)
+
+- **Portal RRHH y Portal Admin** y sus módulos (Vacantes, Candidatos internos,
+  Resultados IA, Reportes, Catálogos): intactos.
+- **Perfil del candidato** (`app/mi-perfil`, `candidate-self-profile-view.tsx`,
+  `candidate-profile-edit-field-groups.tsx`): formularios extensos, **pendiente**.
+- **Sub-componentes de subida de documentos** (`DocumentsUploadZone`,
+  `DocumentsList`, `SingleFileUploadZone`, `AgregarCandidatoModal`,
+  `candidate-portal-snackbar`): lógica compleja, **pendiente**.
+- `lib/pageTitles.ts`, breadcrumbs dinámicos, metadata de login y ruteo por
+  prefijo: fuera de scope (igual que etapas previas).
+
+### 14.4 Regla crítica: NO traducir data dinámica/IA
+
+Se mantuvo **intacta** toda la data dinámica que llega por props/hooks/API:
+
+```tsx
+// ✅ Traducible (UI estática)
+<h2>{t("title")}</h2>
+{t("stageProgress", { current, total })}
+
+// ❌ NO traducible (data dinámica / API / usuario)
+{candidate.greetingName}      // nombre del usuario
+{post.jobTitle}               // título de vacante (API)
+{post.companyLine}            // empresa (API)
+{row.statusDisplayName}       // estado mostrado por backend
+{row.interviewTypeLabel}      // tipo de entrevista (API)
+{formatInterviewLocalDateTime(row.scheduledAtUtc)} // fecha (formato local)
+{error}                       // mensaje de error de API
+```
+
+En el saludo del home, el nombre se inyecta como **valor** del placeholder
+(`t("greeting", { name })`): se traduce solo el envoltorio estático, nunca el
+nombre. En toasts de documentos se conserva el patrón
+`getApiErrorMessage(err) || t("...fallback")`: el mensaje del **backend** se
+muestra tal cual; solo el **fallback** controlado por frontend sale del diccionario.
+
+### 14.5 Mapper de enums `lib/candidate-portal-translations.ts` — pendiente
+
+`MyPostulationsCard` y `ProcessTrackingCard` usan
+`translateApplicationStatus` / `translateStageName` / `getApplicationStatusStyle`
+de `lib/candidate-portal-translations.ts`. Ese módulo es un **mapper frontend de
+enums** que recibe **valores provenientes de la API** (`Active`, `Pending`,
+`Revision`, `Offer`, nombres de etapa…) y los mapea a español, con **fallback al
+valor crudo** si no hay match.
+
+**Decisión:** **NO** se migra en esta etapa (queda **pendiente**). Motivos:
+
+- Está acoplado a **valores de enum del backend**; internacionalizarlo bien exige
+  un set estable de claves de enum (no texto) y decidir el comportamiento del
+  fallback cuando llega un valor desconocido.
+- Toca la frontera entre UI estática y data dinámica de API, fuera del alcance
+  "básico/seguro" de esta etapa.
+
+Recomendación futura: migrarlo en una etapa dedicada, mapeando cada enum conocido
+a una key de `next-intl` (p. ej. `CandidatePortal.statusEnum.Active`) y dejando el
+valor crudo de la API como fallback intacto.
+
+### 14.6 Qué NO se tocó
+
+- **No** se modificaron llamadas a API ni contratos; **no** se envía `locale` al
+  backend.
+- **No** se modificó la lógica de autenticación, subida de documentos, entrevistas
+  ni perfil (solo se reemplazaron literales de UI por keys).
+- **No** se implementaron rutas con prefijo (`/en`, `/it`, …) ni se movió nada a
+  `app/[locale]`. El ruteo sigue siendo cookie-based (`NEXT_LOCALE`).
+- **No** se tocó `lib/pageTitles.ts` ni se crearon servicios/caches de traducción.
+
+### 14.7 Tests de la etapa
+
+`tests/unit/candidate-portal-i18n.test.tsx` valida (Vitest + Testing Library):
+
+- `StatCard`, `NextActivitiesCard`, `MyPostulationsCard`, `ProcessTrackingCard`,
+  `CandidatePortalHome` y `CandidateInterviewsContent` renderizan textos estáticos
+  desde `next-intl` en `es` y `en`.
+- Presencia del namespace `CandidatePortal` y de sus secciones
+  (`home`, `stats`, `activities`, `applications`, `process`, `interviews`,
+  `documents`) en los 5 idiomas.
+
+`tests/unit/messages-structure.test.ts`, `tests/unit/metadata-i18n.test.ts`,
+`tests/unit/auth-i18n.test.tsx`, `tests/unit/topbars-i18n.test.tsx`,
+`tests/unit/language-switcher.test.tsx` e `tests/unit/i18n-setup.test.tsx` siguen
+pasando (45 tests i18n en verde) — el selector de idioma sigue funcionando.
+
+## 15. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
 - Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7 y §13.4.
 - Aplicar `Metadata.auth.login` cuando se decida reestructurar el login a
   server wrapper + client content (o cuando se migre a ruteo por prefijo).
-- Migrar módulos de negocio (Vacantes, Candidatos, Admin, Portal candidato) por
-  fases, poblando los namespaces reservados (`Errors`, `EmptyStates`, etc.).
+- Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
+  namespaces reservados (`Errors`, `EmptyStates`, etc.).
+- Completar el Portal Candidato: perfil (`app/mi-perfil`,
+  `candidate-self-profile-view.tsx`, `candidate-profile-edit-field-groups.tsx`) y
+  sub-componentes de subida de documentos (`DocumentsUploadZone`, `DocumentsList`,
+  `SingleFileUploadZone`, `AgregarCandidatoModal`) — ver §14.3.
+- Migrar el mapper de enums `lib/candidate-portal-translations.ts` con keys por
+  enum y fallback al valor crudo de la API — ver §14.5.
 - Migrar registro (`app/auth/registrarse`) y páginas públicas de oportunidades.
 - Internacionalizar errores de backend **solo** si el backend expone códigos de
   error estables (deuda compartida frontend/backend).

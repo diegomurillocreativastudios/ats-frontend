@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Upload, FileText } from "lucide-react"
 import CandidateSidebar from "@/components/candidato/CandidateSidebar"
 import CandidateTopbar from "@/components/candidato/CandidateTopbar"
@@ -33,6 +34,7 @@ const isResumeLikeDocument = (fileName: string) => {
 }
 
 export default function DocumentosContent() {
+  const t = useTranslations("CandidatePortal.documents")
   const [isUploadingGeneralDocument, setIsUploadingGeneralDocument] = useState(false)
   const [isCompleteInformationModalOpen, setIsCompleteInformationModalOpen] = useState(false)
   const { showSnackbar } = useCandidateSnackbar()
@@ -50,15 +52,15 @@ export default function DocumentosContent() {
     async (documentId: string) => {
       try {
         await deleteDocument(documentId)
-        showSnackbar("Documento eliminado correctamente.", "success")
+        showSnackbar(t("toastDeleted"), "success")
       } catch (err: unknown) {
         showSnackbar(
-          getApiErrorMessage(err) || "No se pudo eliminar el documento.",
+          getApiErrorMessage(err) || t("toastDeleteError"),
           "error"
         )
       }
     },
-    [deleteDocument, showSnackbar]
+    [deleteDocument, showSnackbar, t]
   )
 
   const handleProcess = async (
@@ -72,10 +74,10 @@ export default function DocumentosContent() {
     try {
       await apiClient.postFormData(PROCESAR_ENDPOINT, formData)
       await refetch()
-      showSnackbar("Documento procesado correctamente.", "success")
+      showSnackbar(t("toastProcessed"), "success")
     } catch (err: unknown) {
       const message =
-        getApiErrorMessage(err) || "Error al procesar el documento."
+        getApiErrorMessage(err) || t("toastProcessError")
       showSnackbar(message, "error")
       throw createSilentError(message)
     }
@@ -92,13 +94,10 @@ export default function DocumentosContent() {
         await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
       }
       await refetch()
-      showSnackbar(
-        `${total} documento${total !== 1 ? "s" : ""} procesado${total !== 1 ? "s" : ""} correctamente.`,
-        "success"
-      )
+      showSnackbar(t("toastProcessedMany", { count: total }), "success")
     } catch (err: unknown) {
       const message =
-        getApiErrorMessage(err) || "Error al procesar los documentos."
+        getApiErrorMessage(err) || t("toastProcessManyError")
       showSnackbar(message, "error")
     }
   }
@@ -106,17 +105,17 @@ export default function DocumentosContent() {
   const handleSubmitGeneralDocuments = useCallback(
     async (files: File[], clearStagedFiles: () => void) => {
       if (!files.length) {
-        showSnackbar("Selecciona al menos un archivo para subir.", "error")
+        showSnackbar(t("toastSelectFile"), "error")
         return
       }
       if (!candidateId) {
-        showSnackbar("No se pudo identificar tu perfil de candidato.", "error")
+        showSnackbar(t("toastNoProfile"), "error")
         return
       }
       const blocked = files.find((file) => isResumeLikeDocument(file.name))
       if (blocked) {
         showSnackbar(
-          `Este endpoint es solo para documentos generales. Quita o reemplaza archivos tipo CV/Resume (por ejemplo: ${blocked.name}).`,
+          t("toastResumeBlocked", { fileName: blocked.name }),
           "error"
         )
         return
@@ -135,20 +134,18 @@ export default function DocumentosContent() {
         await refetch()
         clearStagedFiles()
         showSnackbar(
-          files.length === 1
-            ? "Documento general subido correctamente."
-            : `${files.length} documentos generales subidos correctamente.`,
+          t("toastGeneralUploaded", { count: files.length }),
           "success"
         )
       } catch (err: unknown) {
         const message =
-          getApiErrorMessage(err) || "No se pudo subir el documento general."
+          getApiErrorMessage(err) || t("toastGeneralUploadError")
         showSnackbar(message, "error")
       } finally {
         setIsUploadingGeneralDocument(false)
       }
     },
-    [candidateId, refetch, showSnackbar]
+    [candidateId, refetch, showSnackbar, t]
   )
 
   const renderGeneralUploadLeft = ({
@@ -160,11 +157,11 @@ export default function DocumentosContent() {
       onClick={() => void handleSubmitGeneralDocuments(files, clearStagedFiles)}
       disabled={!candidateId || isUploadingGeneralDocument || files.length === 0}
       className="inline-flex items-center justify-center gap-2 rounded-md border border-vo-pink bg-vo-pink px-3 py-2 font-sans text-xs font-medium text-white hover:bg-vo-pink-hover disabled:cursor-not-allowed disabled:opacity-60"
-      aria-label="Subir documentos generales del candidato"
+      aria-label={t("uploadGeneralAria")}
       aria-busy={isUploadingGeneralDocument}
     >
       <Upload className="h-3.5 w-3.5" aria-hidden />
-      {isUploadingGeneralDocument ? "Subiendo..." : "Subir documento general"}
+      {isUploadingGeneralDocument ? t("uploading") : t("uploadGeneral")}
     </button>
   )
 
@@ -174,22 +171,22 @@ export default function DocumentosContent() {
       <div className="hidden h-full lg:flex">
         <CandidateSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <CandidateTopbar variant="desktop" breadcrumbLabel="Documentos" />
+          <CandidateTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col gap-8 p-8">
               <PortalPageHeader
-                title="Documentos"
-                description="Sube y gestiona los documentos de tu proceso de selección"
+                title={t("title")}
+                description={t("description")}
                 className="pb-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
                 actions={
                   <button
                     type="button"
                     onClick={() => setIsCompleteInformationModalOpen(true)}
                     className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                    aria-label="Completar información del candidato"
+                    aria-label={t("completeInfoAria")}
                   >
                     <FileText className="h-4 w-4" aria-hidden />
-                    Completar información
+                    {t("completeInfo")}
                   </button>
                 }
               />
@@ -200,7 +197,7 @@ export default function DocumentosContent() {
               />
               {loading ? (
                 <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
-                  Cargando documentos...
+                  {t("loading")}
                 </p>
               ) : (
                 <>
@@ -222,12 +219,12 @@ export default function DocumentosContent() {
 
       {/* Tablet & Mobile: topbar + content — fixed height so only main scrolls */}
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <CandidateTopbar variant="tablet" breadcrumbLabel="Documentos" />
+        <CandidateTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
             <PortalPageHeader
-              title="Documentos"
-              description="Sube y gestiona tus documentos"
+              title={t("title")}
+              description={t("descriptionShort")}
               className="pb-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
               descriptionClassName="text-sm leading-6 md:text-base"
               actions={
@@ -235,12 +232,12 @@ export default function DocumentosContent() {
                   type="button"
                   onClick={() => setIsCompleteInformationModalOpen(true)}
                   className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-4 py-2 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label="Completar información del candidato"
+                  aria-label={t("completeInfoAria")}
                 >
                   <FileText className="h-4 w-4" aria-hidden />
-                  <span className="hidden sm:inline">Completar información</span>
+                  <span className="hidden sm:inline">{t("completeInfo")}</span>
                   <span className="sm:hidden" aria-hidden>
-                    Completar info
+                    {t("completeInfoShort")}
                   </span>
                 </button>
               }
@@ -252,7 +249,7 @@ export default function DocumentosContent() {
             />
             {loading ? (
               <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
-                Cargando documentos...
+                {t("loading")}
               </p>
             ) : (
               <>

@@ -1,6 +1,7 @@
 "use client"
 
 import { Check, Circle, Clock } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { CandidatePortalApplicationRow } from "@/lib/candidate-dashboard"
 import {
   translateApplicationStatus,
@@ -39,6 +40,7 @@ function StageCard({
   stage: { id: string; name: string; order: number; status: string }
   order: number
 }) {
+  const t = useTranslations("CandidatePortal.process")
   const isCurrent = stage.status === "current"
   const isCompleted = stage.status === "completed"
   
@@ -62,7 +64,7 @@ function StageCard({
                 : "text-gray-500"
           }`}
         >
-          Etapa {order}
+          {t("stageLabel", { order })}
         </span>
         <StageStatusIcon status={stage.status} />
       </div>
@@ -89,10 +91,10 @@ function StageCard({
           }`}
         >
           {stage.status === "completed"
-            ? "Completada"
+            ? t("stageCompleted")
             : stage.status === "current"
-              ? "En curso"
-              : "Pendiente"}
+              ? t("stageCurrent")
+              : t("stagePending")}
         </p>
       </div>
     </div>
@@ -104,6 +106,7 @@ export default function ProcessTrackingCard({
 }: {
   application: CandidatePortalApplicationRow | null
 }) {
+  const t = useTranslations("CandidatePortal.process")
   if (!application) {
     return (
       <div className="rounded-lg border border-border bg-card p-6">
@@ -113,11 +116,10 @@ export default function ProcessTrackingCard({
           </div>
           <div className="space-y-1">
             <p className="font-sans text-base font-semibold text-foreground">
-              No tienes postulaciones activas
+              {t("emptyTitle")}
             </p>
             <p className="font-sans text-sm text-muted-foreground">
-              Cuando apliques a una vacante, podrás consultar aquí el avance de tu
-              proceso.
+              {t("emptyDescription")}
             </p>
           </div>
         </div>
@@ -134,7 +136,7 @@ export default function ProcessTrackingCard({
   return (
     <div className="rounded-lg border border-border bg-card p-6">
       <h2 className="mb-6 font-sans text-lg font-semibold text-foreground">
-        Seguimiento de mi proceso
+        {t("title")}
       </h2>
 
       <div className="mb-6 flex flex-col gap-4">
@@ -159,7 +161,7 @@ export default function ProcessTrackingCard({
         {application.currentStageName && (
           <div className="rounded-lg bg-muted p-4">
             <p className="font-sans text-sm text-muted-foreground">
-              Actualmente estás en la etapa:{" "}
+              {t("currentStagePrefix")}{" "}
               <span className="font-semibold text-foreground">
                 {translateStageName(application.currentStageName)}
               </span>
@@ -170,10 +172,13 @@ export default function ProcessTrackingCard({
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="font-sans text-sm font-medium text-foreground">
-              Avance general
+              {t("overallProgress")}
             </span>
             <span className="font-sans text-sm font-semibold text-foreground">
-              Etapa {application.progressCurrent} de {application.totalStages}
+              {t("stageProgress", {
+                current: application.progressCurrent,
+                total: application.totalStages,
+              })}
             </span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
@@ -184,7 +189,7 @@ export default function ProcessTrackingCard({
               aria-valuenow={progressPercentage}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label={`Progreso: ${progressPercentage}%`}
+              aria-label={t("progressAria", { percentage: progressPercentage })}
             />
           </div>
         </div>
@@ -193,7 +198,7 @@ export default function ProcessTrackingCard({
       {hasStages ? (
         <div className="space-y-3">
           <h3 className="font-sans text-sm font-semibold text-foreground">
-            Etapas del proceso
+            {t("processStages")}
           </h3>
           <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
             {stages
@@ -206,7 +211,7 @@ export default function ProcessTrackingCard({
       ) : (
         <div className="rounded-lg bg-muted p-4 text-center">
           <p className="font-sans text-sm text-muted-foreground">
-            Las etapas del proceso se mostrarán aquí próximamente.
+            {t("stagesComingSoon")}
           </p>
         </div>
       )}
