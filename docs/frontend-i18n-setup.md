@@ -144,8 +144,119 @@ texto extraído de archivos, input de usuario ni nombres propios/tecnologías.
 idiomas disponibles, el locale activo marcado, la escritura de la cookie
 `NEXT_LOCALE` al cambiar idioma y la llamada a `router.refresh()`.
 
-## 11. Pendientes para la siguiente etapa
+## 11. Estructura de diccionarios y UI transversal (Etapa 3)
+
+Etapa 3 define la **estructura real y escalable de diccionarios** y migra los
+textos **transversales/globales** de UI (topbars + sidebars). **No** migra
+módulos de negocio (Vacantes, Candidatos, Resultados IA, etc.).
+
+### 11.1 Convención de namespaces
+
+Los 5 archivos `messages/*.json` comparten exactamente la misma estructura de
+keys. `es.json` es la **fuente de verdad**. Namespaces actuales:
+
+| Namespace          | Uso                                                                 |
+| ------------------ | ------------------------------------------------------------------- |
+| `Common`           | Textos genéricos reutilizables (`loading`, `save`, `cancel`).       |
+| `Actions`          | Verbos/acciones reutilizables (`logout`).                           |
+| `Navigation`       | Etiquetas de ítems de navegación (sidebars): `home`, `candidates`…  |
+| `Topbar`           | Textos de las barras superiores (portal, notificaciones, menú…).    |
+| `Sidebar`          | `aria-label`s de las barras laterales y navegación.                 |
+| `LanguageSwitcher` | Etiquetas del selector de idioma (Etapa 2).                         |
+
+**Reglas de naming:**
+
+- Namespace en `PascalCase`; keys en `camelCase`.
+- Agrupar por **componente o concepto transversal**, no por pantalla de negocio.
+- Reutilizar `Common`/`Actions` antes de duplicar una key en otro namespace.
+- Mantener las keys **idénticas** en los 5 idiomas (ver §11.4).
+
+Estructura preparada para crecer (se irán poblando en etapas siguientes según se
+migren módulos): `Auth`, `Validation`, `Errors`, `EmptyStates`, `LoadingStates`.
+No se crean vacíos para no añadir ruido; se agregan cuando haya texto real.
+
+### 11.2 Cómo agregar nuevas keys
+
+1. Agregá la key en `messages/es.json` (fuente de verdad), en el namespace correcto.
+2. Replicá la **misma ruta de key** en `en/it/de/fr` con su traducción.
+3. Consumila en el componente con `useTranslations("Namespace")`.
+4. Corré `npx vitest run tests/unit/messages-structure.test.ts` para validar paridad.
+
+### 11.3 Ejemplo de uso correcto (`useTranslations`)
+
+```tsx
+"use client"
+import { useTranslations } from "next-intl"
+
+function Topbar() {
+  const t = useTranslations("Topbar")
+  return <span>{t("notifications")}</span> // ✅ UI estática traducible
+}
+```
+
+Para listas de navegación se guarda una `labelKey` (no el texto) y se resuelve
+en render:
+
+```tsx
+const navItems = [{ href: "/portal-rrhh/candidatos", labelKey: "candidates" }] as const
+const t = useTranslations("Navigation")
+// ...
+;<span>{t(item.labelKey)}</span>
+```
+
+### 11.4 Validación de paridad de keys
+
+`tests/unit/messages-structure.test.ts` aplana cada diccionario y **falla** si
+un idioma omite o agrega una key respecto de `es.json`. También verifica que los
+namespaces transversales existan en los 5 idiomas.
+
+### 11.5 Regla crítica: NO traducir data IA/dinámica
+
+El selector y `next-intl` **solo** traducen UI estática controlada por frontend.
+**Nunca** se traduce:
+
+- Resultados/resúmenes/razones/recomendaciones generados por IA (Vertex AI).
+- Texto extraído de archivos o ingresado por usuarios.
+- Datos dinámicos de API/BD (nombres, roles, títulos de vacante/candidato).
+- Nombres propios y tecnologías (React, Next.js, PostgreSQL, Docker, AWS, .NET…).
+
+```tsx
+// ✅ Traducible (UI estática)
+<h2>{t("Topbar.notifications")}</h2>
+<span>{t("Navigation.candidates")}</span>
+
+// ❌ NO traducible (data dinámica / IA)
+<p>{candidate.name}</p>
+<p>{user.role}</p>
+<p>{detail.match.qualitativeReasoningPositive}</p>
+```
+
+> Nota: en sidebars/topbars, `displayName` (`user.name`) y `roleLabel`
+> (`user.role`) provienen de la API y **se dejan intactos**; solo se tradujo el
+> estado de carga (`Common.loading`) y las etiquetas estáticas.
+
+### 11.6 Componentes migrados en esta etapa
+
+- `components/candidato/CandidateTopbar.tsx`
+- `components/rrhh/RRHHTopbar.tsx`
+- `components/portal-admin/AdminTopbar.tsx`
+- `components/candidato/CandidateSidebar.tsx`
+- `components/rrhh/RRHHSidebar.tsx`
+- `components/portal-admin/AdminSidebar.tsx`
+
+### 11.7 `lib/pageTitles.ts` — pendiente (no forzado)
+
+`lib/pageTitles.ts` genera títulos de documento y labels de breadcrumb a partir
+del `pathname`. Integrarlo con `next-intl` implica que es **server-side puro sin
+contexto de locale** y alimenta breadcrumbs que ya mezclan labels dinámicos
+(nombres de vacante/candidato). Migrarlo es un cambio **amplio y transversal a
+módulos de negocio**, fuera del scope de esta etapa. Se documenta como
+**pendiente** para una etapa dedicada (idealmente junto con el ruteo por prefijo).
+
+## 12. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
-- Migrar componentes transversales (navegación, primitivos UI) a claves i18n.
-- Definir convención de naming de claves y poblar `en/it/de/fr` reales.
+- Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7.
+- Migrar módulos de negocio (Vacantes, Candidatos, Admin, Portal candidato) por
+  fases, poblando los namespaces reservados (`Errors`, `EmptyStates`, etc.).
+- Poblar `Validation`/`Errors` al migrar formularios complejos.
