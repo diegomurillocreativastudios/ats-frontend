@@ -253,10 +253,92 @@ contexto de locale** y alimenta breadcrumbs que ya mezclan labels dinámicos
 módulos de negocio**, fuera del scope de esta etapa. Se documenta como
 **pendiente** para una etapa dedicada (idealmente junto con el ruteo por prefijo).
 
-## 12. Pendientes para la siguiente etapa
+## 12. Pantallas de autenticación/acceso (Etapa 4)
+
+Etapa 4 migra a `next-intl` los **textos estáticos** de las pantallas de
+autenticación y acceso de entrada. **No** toca lógica de auth, APIs, ni módulos
+de negocio pesados, y **no** traduce data dinámica/IA ni errores de backend.
+
+### 12.1 Pantallas migradas
+
+| Pantalla                | Archivo                                                        | Tipo            |
+| ----------------------- | ------------------------------------------------------------- | --------------- |
+| Login                   | `app/auth/iniciar-sesion/page.tsx`                            | Client          |
+| Recuperar contraseña    | `app/auth/forgot-password/ForgotPasswordContent.tsx`         | Client          |
+| Restablecer contraseña  | `app/restablecer-contrasena/RestablecerContrasenaContent.tsx` | Client          |
+| Restablecer (wrappers)  | `app/restablecer-contrasena/page.tsx`, `app/auth/restablecer-contrasena/page.tsx` | Server (fallback) |
+| Selección de portal     | `app/seleccion-portal/page.tsx`                              | Server (RSC)    |
+
+En Server Components se usa `getTranslations` de `next-intl/server`; en Client
+Components, `useTranslations`. Los títulos de marca con saltos de línea usan
+`t.rich("...", { br: () => <br /> })` para preservar el layout exacto.
+
+### 12.2 Namespaces agregados
+
+| Namespace        | Uso                                                                          |
+| ---------------- | ---------------------------------------------------------------------------- |
+| `Auth`           | Textos de login/forgot/reset: marca, títulos, labels, placeholders, botones, enlaces y toasts de UI (`login.*`, `forgot.*`, `reset.*`, `loadingFallback`). |
+| `Validation`     | Validaciones **del frontend** de auth (campo requerido, email inválido, mínimo de caracteres, contraseñas no coinciden). |
+| `Errors`         | Mensajes genéricos de UI reutilizables (`connection`). Fallback cuando el backend no devuelve mensaje. |
+| `PortalSelection`| Pantalla de selección de portal (títulos, tarjetas, `aria-label`s, footer). |
+
+Los 5 diccionarios (`es/en/it/de/fr`) mantienen **exactamente** la misma
+estructura de keys (`es.json` = fuente de verdad). Validado por
+`tests/unit/messages-structure.test.ts` y `tests/unit/auth-i18n.test.tsx`.
+
+### 12.3 Regla: NO traducir errores dinámicos / backend automáticamente
+
+Los handlers conservan el patrón `data.message || data.detail || t("...fallback")`:
+
+- Si el **backend** devuelve un mensaje (`message`/`detail`), se muestra **tal
+  cual** (puede venir en español). **No** se traduce ni se reprocesa.
+- Solo el **fallback** controlado por frontend (cuando el backend no envía
+  texto) se toma del diccionario. Lo mismo aplica al error de conexión local
+  (`Errors.connection`).
+
+Los errores literales del backend en español quedan como **deuda futura**: para
+internacionalizarlos haría falta que el backend devuelva códigos de error
+estables (no texto), lo cual está fuera del scope de i18n de frontend.
+
+### 12.4 Selector de idioma en pantallas no autenticadas
+
+`components/language-switcher.tsx` se integró en la esquina superior derecha
+(`absolute top/right`, sin alterar el layout) de:
+
+- Login, Recuperar contraseña, Restablecer contraseña (estado válido e inválido).
+- Selección de portal.
+
+Esto permite **cambiar de idioma antes de iniciar sesión**. El cambio sigue
+siendo cookie-based (`NEXT_LOCALE`) + `router.refresh()`, sin prefijo de URL y
+**sin enviar el locale al backend**.
+
+### 12.5 Qué NO se tocó en esta etapa
+
+- Lógica de login/recuperación/reset, navegación, cookies de sesión y redirects:
+  intactos.
+- Contratos de API / requests: sin cambios. No se envía `locale` al backend.
+- Registro (`app/auth/registrarse`): **no migrado** (fuera del listado de Etapa 4).
+- Páginas públicas de oportunidades (`components/public/*`): **no migradas**;
+  contienen mayormente data dinámica de vacantes y formularios de postulación.
+- Data generada por IA / Vertex AI, BD/API, input de usuario, nombres propios y
+  tecnologías: **no se traducen**.
+
+### 12.6 Tests de la etapa
+
+`tests/unit/auth-i18n.test.tsx` valida (Vitest + Testing Library):
+- Login renderiza textos desde `next-intl` en `es` y `en`.
+- Recuperar/restablecer contraseña renderizan textos desde `next-intl`.
+- El selector de idioma está disponible en login y recuperar contraseña.
+- Estado de enlace inválido del reset traducido.
+- Paridad de namespaces (`Auth`, `Validation`, `Errors`, `PortalSelection`) en los 5 idiomas.
+
+## 13. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
 - Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7.
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin, Portal candidato) por
   fases, poblando los namespaces reservados (`Errors`, `EmptyStates`, etc.).
-- Poblar `Validation`/`Errors` al migrar formularios complejos.
+- Migrar registro (`app/auth/registrarse`) y páginas públicas de oportunidades.
+- Internacionalizar errores de backend **solo** si el backend expone códigos de
+  error estables (deuda compartida frontend/backend).
+- Traducir `metadata` (títulos de pestaña) de las rutas de auth si se requiere.

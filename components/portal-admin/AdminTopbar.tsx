@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { ChevronRight, Bell, Menu, LogOut } from "lucide-react"
 import ProductBrand from "@/components/branding/ProductBrand"
 import LanguageSwitcher from "@/components/language-switcher"
@@ -43,6 +44,8 @@ export default function AdminTopbar({
   breadcrumbLabel: breadcrumbLabelProp,
   breadcrumbTrail = null,
 }: AdminTopbarProps) {
+  const t = useTranslations("Topbar")
+  const tActions = useTranslations("Actions")
   const pathname = usePathname()
   const isDesktop = variant === "desktop"
   const isTablet = variant === "tablet"
@@ -94,11 +97,12 @@ export default function AdminTopbar({
         : MOBILE_PADDING
 
   const hasTrail = Array.isArray(breadcrumbTrail) && breadcrumbTrail.length > 0
+  const portalLabel = t("portalAdmin")
   const breadcrumbScreenReaderText = hasTrail
-    ? ["Portal Admin", ...breadcrumbTrail.map((s) => s.label)].join(
+    ? [portalLabel, ...breadcrumbTrail.map((s) => s.label)].join(
         " > ",
       )
-    : `Portal Admin > ${breadcrumbLabel}`
+    : `${portalLabel} > ${breadcrumbLabel}`
 
   const heightClass =
     variant === "mobile"
@@ -117,7 +121,7 @@ export default function AdminTopbar({
           <button
             type="button"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-muted md:h-10 md:w-10"
-            aria-label="Abrir menú"
+            aria-label={t("openMenu")}
           >
             <Menu className="h-6 w-6 text-foreground md:h-6" aria-hidden />
           </button>
@@ -126,7 +130,7 @@ export default function AdminTopbar({
           {isDesktop && (
             <>
               <span className="font-sans text-sm text-muted-foreground">
-                Portal Admin
+                {portalLabel}
               </span>
               <ChevronRight
                 className="h-4 w-4 shrink-0 text-muted-foreground"
@@ -135,7 +139,7 @@ export default function AdminTopbar({
               {hasTrail ? (
                 <nav
                   className="flex min-w-0 flex-wrap items-center gap-2"
-                  aria-label="Migas de pan"
+                  aria-label={t("breadcrumb")}
                 >
                   {breadcrumbTrail.map((segment, index) => {
                     const isLast = index === breadcrumbTrail.length - 1
@@ -196,7 +200,7 @@ export default function AdminTopbar({
         <button
           type="button"
           className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-muted"
-          aria-label="Notificaciones"
+          aria-label={t("notifications")}
         >
           <Bell className="h-5 w-5 text-muted-foreground" aria-hidden />
         </button>
@@ -205,7 +209,7 @@ export default function AdminTopbar({
             type="button"
             onClick={() => setMenuOpen((prev) => !prev)}
             className="flex h-8 w-8 items-center justify-center rounded-2xl bg-vo-navy font-sans text-[10px] font-semibold text-white hover:opacity-90 focus:outline-none md:h-8 md:w-8 md:text-[11px]"
-            aria-label="Menú de usuario"
+            aria-label={t("userMenu")}
             aria-expanded={menuOpen}
             aria-haspopup="true"
           >
@@ -223,7 +227,7 @@ export default function AdminTopbar({
                 role="menuitem"
               >
                 <LogOut className="h-4 w-4 shrink-0" aria-hidden />
-                Cerrar sesión
+                {tActions("logout")}
               </button>
             </div>
           )}

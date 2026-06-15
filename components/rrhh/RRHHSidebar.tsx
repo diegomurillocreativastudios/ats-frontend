@@ -3,24 +3,28 @@
 import Link from "next/link";
 import ProductBrand from "@/components/branding/ProductBrand";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Users, Briefcase, Calendar, BarChart3, Cog } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getInitials } from "@/lib/getInitials";
 
 const navItems = [
-  { href: "/portal-rrhh/candidatos", label: "Candidatos", icon: Users },
-  { href: "/portal-rrhh/vacantes", label: "Vacantes", icon: Briefcase },
-  { href: "/portal-rrhh/entrevistas", label: "Entrevistas", icon: Calendar },
-  { href: "/portal-rrhh/reportes", label: "Reportes", icon: BarChart3 },
+  { href: "/portal-rrhh/candidatos", labelKey: "candidates", icon: Users },
+  { href: "/portal-rrhh/vacantes", labelKey: "vacancies", icon: Briefcase },
+  { href: "/portal-rrhh/entrevistas", labelKey: "interviews", icon: Calendar },
+  { href: "/portal-rrhh/reportes", labelKey: "reports", icon: BarChart3 },
   {
     href: "/portal-rrhh/configuracion",
-    label: "Configuracion",
+    labelKey: "settings",
     icon: Cog,
   },
-];
+] as const;
 
 export default function RRHHSidebar() {
   const pathname = usePathname();
+  const t = useTranslations("Navigation");
+  const tSidebar = useTranslations("Sidebar");
+  const tCommon = useTranslations("Common");
   const { user, loading } = useCurrentUser();
   const displayName = user?.name || user?.email || "Usuario";
   const initials = getInitials(user?.name, user?.email);
@@ -30,13 +34,13 @@ export default function RRHHSidebar() {
   return (
     <aside
       className="flex h-full min-h-0 w-[260px] shrink-0 flex-col justify-between self-stretch overflow-y-auto overscroll-y-contain border-r border-border bg-card py-6 pl-6 pr-0"
-      aria-label="Navegación Portal RRHH"
+      aria-label={tSidebar("ariaRRHH")}
     >
       <div className="flex flex-col gap-6">
         <Link
           href="/"
           className="flex min-w-0 items-center gap-3 px-5 transition-opacity hover:opacity-90 focus:outline-none"
-          aria-label="Ir al inicio - Visible"
+          aria-label={tSidebar("goHome")}
         >
           <ProductBrand
             layout="inline"
@@ -45,7 +49,7 @@ export default function RRHHSidebar() {
             className="min-w-0"
           />
         </Link>
-        <nav className="flex flex-col gap-1 px-3" aria-label="Menú RRHH">
+        <nav className="flex flex-col gap-1 px-3" aria-label={tSidebar("menuRRHH")}>
           {items.map((item) => {
             const Icon = item.icon;
             const isEntrevistasItem = item.href === "/portal-rrhh/entrevistas";
@@ -76,7 +80,7 @@ export default function RRHHSidebar() {
                   className="h-5 w-5 shrink-0"
                   aria-hidden
                 />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             );
           })}
@@ -92,7 +96,7 @@ export default function RRHHSidebar() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate font-sans text-sm font-medium text-foreground">
-              {loading ? "Cargando..." : displayName}
+              {loading ? tCommon("loading") : displayName}
             </p>
             <p className="font-sans text-xs text-muted-foreground">
               {roleLabel}

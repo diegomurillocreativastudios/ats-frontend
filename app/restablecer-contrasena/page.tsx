@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { getTranslations } from "next-intl/server"
 import RestablecerContrasenaContent from "./RestablecerContrasenaContent"
 
 export const metadata = {
@@ -7,15 +8,16 @@ export const metadata = {
     "Definí una nueva contraseña tras verificar tu correo o con el enlace de recuperación",
 }
 
-const LoadingFallback = () => (
+const LoadingFallback = ({ label }: { label: string }) => (
   <div className="flex min-h-screen items-center justify-center bg-background font-sans text-muted-foreground">
-    <p className="text-sm">Cargando…</p>
+    <p className="text-sm">{label}</p>
   </div>
 )
 
-export default function RestablecerContrasenaPage() {
+export default async function RestablecerContrasenaPage() {
+  const t = await getTranslations("Auth")
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<LoadingFallback label={t("loadingFallback")} />}>
       <RestablecerContrasenaContent />
     </Suspense>
   )

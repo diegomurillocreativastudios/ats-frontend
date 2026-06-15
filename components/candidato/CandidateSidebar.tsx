@@ -3,19 +3,23 @@
 import Link from "next/link";
 import ProductBrand from "@/components/branding/ProductBrand";
 import { usePathname } from "next/navigation";
-import { Briefcase, Home, User, FileText, Calendar } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Home, User, FileText, Calendar } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getInitials } from "@/lib/getInitials";
 
 const navItems = [
-  { href: "/portal-candidato", label: "Inicio", icon: Home },
-  { href: "/mi-perfil", label: "Mi Perfil", icon: User },
-  { href: "/portal-candidato/documentos", label: "Documentos", icon: FileText },
-  { href: "/portal-candidato/entrevistas", label: "Entrevistas", icon: Calendar },
-];
+  { href: "/portal-candidato", labelKey: "home", icon: Home },
+  { href: "/mi-perfil", labelKey: "myProfile", icon: User },
+  { href: "/portal-candidato/documentos", labelKey: "documents", icon: FileText },
+  { href: "/portal-candidato/entrevistas", labelKey: "interviews", icon: Calendar },
+] as const;
 
 export default function CandidateSidebar() {
   const pathname = usePathname();
+  const t = useTranslations("Navigation");
+  const tSidebar = useTranslations("Sidebar");
+  const tCommon = useTranslations("Common");
   const { user, loading } = useCurrentUser();
   const displayName = user?.name || user?.email || "Usuario";
   const initials = getInitials(user?.name, user?.email);
@@ -24,13 +28,13 @@ export default function CandidateSidebar() {
   return (
     <aside
       className="flex w-[260px] shrink-0 flex-col justify-between border-r border-border bg-card py-6 pl-6 pr-0"
-      aria-label="Navegación principal"
+      aria-label={tSidebar("ariaCandidate")}
     >
       <div className="flex flex-col gap-6">
         <Link
           href="/"
           className="flex min-w-0 items-center gap-3 px-5 transition-opacity hover:opacity-90 focus:outline-none"
-          aria-label="Ir al inicio - Visible"
+          aria-label={tSidebar("goHome")}
         >
           <ProductBrand
             layout="inline"
@@ -39,7 +43,7 @@ export default function CandidateSidebar() {
             className="min-w-0"
           />
         </Link>
-        <nav className="flex flex-col gap-1 px-3" aria-label="Menú candidato">
+        <nav className="flex flex-col gap-1 px-3" aria-label={tSidebar("menuCandidate")}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -61,7 +65,7 @@ export default function CandidateSidebar() {
                   className="h-5 w-5 shrink-0"
                   aria-hidden
                 />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             );
           })}
@@ -77,7 +81,7 @@ export default function CandidateSidebar() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate font-sans text-sm font-medium text-foreground">
-              {loading ? "Cargando..." : displayName}
+              {loading ? tCommon("loading") : displayName}
             </p>
             <p className="font-sans text-xs text-muted-foreground">
               {roleLabel}

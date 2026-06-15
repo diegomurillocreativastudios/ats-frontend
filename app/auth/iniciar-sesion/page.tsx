@@ -9,10 +9,12 @@ import {
 } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import Input from "@/components/auth/Input"
 import Button from "@/components/auth/Button"
 import AuthBrand from "@/components/auth/AuthBrand"
 import ProductBrand from "@/components/branding/ProductBrand"
+import LanguageSwitcher from "@/components/language-switcher"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
 
@@ -31,6 +33,9 @@ interface SnackbarState {
 
 export default function IniciarSesion() {
   const router = useRouter()
+  const t = useTranslations("Auth")
+  const tValidation = useTranslations("Validation")
+  const tErrors = useTranslations("Errors")
   const [formData, setFormData] = useState<LoginFormState>({
     email: "",
     password: "",
@@ -53,14 +58,14 @@ export default function IniciarSesion() {
       rawLogin.toLowerCase() === "admin" && formData.password === "admin"
 
     if (!rawLogin) {
-      newErrors.email = "Ingresá tu usuario o correo electrónico"
+      newErrors.email = tValidation("userOrEmailRequired")
     } else if (looksLikeEmail && !emailRegex.test(rawLogin)) {
-      newErrors.email = "Correo electrónico inválido"
+      newErrors.email = tValidation("invalidEmail")
     }
     if (!formData.password) {
-      newErrors.password = "La contraseña es requerida";
+      newErrors.password = tValidation("passwordRequired");
     } else if (!isAdminDemo && formData.password.length < 8) {
-      newErrors.password = "La contraseña debe tener al menos 8 caracteres";
+      newErrors.password = tValidation("passwordMinLength");
     }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -79,17 +84,17 @@ export default function IniciarSesion() {
     if (passwordReset === "success") {
       setMessage({
         type: "success",
-        text: "Tu contraseña se actualizó correctamente. Iniciá sesión con tu nueva clave.",
+        text: t("login.toastPasswordReset"),
       })
     } else if (logout === "success") {
       setMessage({
         type: "success",
-        text: "Sesión cerrada correctamente.",
+        text: t("login.toastLogoutSuccess"),
       })
     } else if (logout === "error") {
       setMessage({
         type: "error",
-        text: "No pudimos confirmar el cierre de sesión, pero te redirigimos al acceso.",
+        text: t("login.toastLogoutError"),
       })
     } else {
       return
@@ -104,7 +109,7 @@ export default function IniciarSesion() {
       "",
       `${url.pathname}${qs ? `?${qs}` : ""}`
     )
-  }, [])
+  }, [t])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -139,7 +144,7 @@ export default function IniciarSesion() {
         const text =
           data.message ||
           data.detail ||
-          "Credenciales inválidas. Por favor, verifica tu email y contraseña.";
+          t("login.toastInvalidCredentials");
         setMessage({
           type: "error",
           text: Array.isArray(text) ? text[0] : text
@@ -147,7 +152,7 @@ export default function IniciarSesion() {
         return;
       }
 
-      setMessage({ type: "success", text: "Sesión iniciada correctamente" });
+      setMessage({ type: "success", text: t("login.toastSignedIn") });
       const from =
         typeof window !== "undefined"
           ? new URLSearchParams(window.location.search).get("from")
@@ -158,8 +163,7 @@ export default function IniciarSesion() {
     } catch (err: unknown) {
       setMessage({
         type: "error",
-        text:
-          getApiErrorMessage(err) || "Error de conexión. Intenta de nuevo.",
+        text: getApiErrorMessage(err) || tErrors("connection"),
       })
     } finally {
       setLoading(false);
@@ -167,7 +171,10 @@ export default function IniciarSesion() {
   };
 
   return (
-    <div className="min-h-screen flex font-sans">
+    <div className="relative min-h-screen flex font-sans">
+      <div className="absolute right-3 top-3 z-50 md:right-4 md:top-4">
+        <LanguageSwitcher />
+      </div>
       {/* Desktop & Tablet: Left Panel */}
       <div className="hidden md:flex md:w-80 lg:flex-1 bg-vo-purple text-white flex-col justify-center md:px-10 lg:px-16 md:gap-6 lg:gap-8">
         <div className="flex flex-col md:gap-6 lg:gap-6">
@@ -180,21 +187,19 @@ export default function IniciarSesion() {
 
           <div className="hidden lg:block">
             <h1 className="text-[40px] font-bold leading-[1.2]">
-              Sistema de Gestión de Candidatos<br />para departamentos de RRHH
+              {t.rich("login.brandTitle", { br: () => <br /> })}
             </h1>
             <p className="text-lg text-white/80 leading-normal mt-6">
-              Optimiza tu proceso de selección con IA.<br />
-              Gestiona candidatos, vacantes y evaluaciones<br />
-              en un solo lugar.
+              {t.rich("login.brandSubtitle", { br: () => <br /> })}
             </p>
           </div>
 
           <div className="lg:hidden">
             <h1 className="text-2xl font-bold leading-[1.2]">
-              Sistema de Gestión<br />de Reclutamiento
+              {t.rich("login.brandTitleSm", { br: () => <br /> })}
             </h1>
             <p className="text-sm text-white/80 leading-[1.4] mt-6">
-              Optimiza tu proceso de<br />selección con IA.
+              {t.rich("login.brandSubtitleSm", { br: () => <br /> })}
             </p>
           </div>
         </div>
@@ -204,19 +209,19 @@ export default function IniciarSesion() {
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span className="text-base">Emparejamiento inteligente de candidatos</span>
+            <span className="text-base">{t("login.feature1")}</span>
           </div>
           <div className="flex items-center gap-3">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span className="text-base">Procesos de contratación optimizados</span>
+            <span className="text-base">{t("login.feature2")}</span>
           </div>
           <div className="flex items-center gap-3">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span className="text-base">Reportes ejecutivos en tiempo real</span>
+            <span className="text-base">{t("login.feature3")}</span>
           </div>
         </div>
       </div>
@@ -231,11 +236,11 @@ export default function IniciarSesion() {
           <div className="flex flex-col gap-6 md:gap-6 lg:gap-8">
             <div className="flex flex-col items-center md:items-start gap-2 text-center md:text-left">
               <h2 className="text-[22px] md:text-2xl lg:text-[28px] font-bold text-foreground">
-                Iniciar Sesión
+                {t("login.title")}
               </h2>
               <p className="text-sm md:text-sm lg:text-base text-muted-foreground">
-                Ingresa tus credenciales{" "}
-                <span className="hidden lg:inline">para acceder al sistema</span>
+                {t("login.subtitle")}{" "}
+                <span className="hidden lg:inline">{t("login.subtitleExtended")}</span>
               </p>
             </div>
 
@@ -247,10 +252,10 @@ export default function IniciarSesion() {
             >
               <div className="flex flex-col gap-4 md:gap-4 lg:gap-5">
                 <Input
-                  label="Usuario o correo electrónico"
+                  label={t("login.emailLabel")}
                   type="text"
                   name="email"
-                  placeholder="admin o nombre@empresa.com"
+                  placeholder={t("login.emailPlaceholder")}
                   autoComplete="username"
                   required
                   value={formData.email}
@@ -261,7 +266,7 @@ export default function IniciarSesion() {
                 />
 
                 <Input
-                  label="Contraseña"
+                  label={t("login.passwordLabel")}
                   type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="••••••••"
@@ -281,13 +286,13 @@ export default function IniciarSesion() {
                     onChange={(e) => setShowPassword(e.target.checked)}
                     disabled={loading}
                     className="h-4 w-4 rounded border-input accent-vo-purple focus:ring-vo-purple focus:ring-2 focus:ring-offset-0"
-                    aria-label="Mostrar contraseña"
+                    aria-label={t("login.showPassword")}
                   />
                   <label
                     htmlFor="showPassword"
                     className="text-xs md:text-[13px] text-foreground cursor-pointer"
                   >
-                    Mostrar contraseña
+                    {t("login.showPassword")}
                   </label>
                 </div>
 
@@ -296,7 +301,7 @@ export default function IniciarSesion() {
                     href="/auth/forgot-password"
                     className="text-[13px] font-medium text-vo-purple hover:underline"
                   >
-                    ¿Olvidaste tu contraseña?
+                    {t("login.forgotPasswordLink")}
                   </Link>
                 </div>
               </div>
@@ -307,7 +312,7 @@ export default function IniciarSesion() {
                   disabled={loading}
                   data-testid="auth-login-submit"
                 >
-                  {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                  {loading ? t("login.submitting") : t("login.submit")}
                 </Button>
 
                 {/* <div className="flex flex-col gap-3">
@@ -325,13 +330,13 @@ export default function IniciarSesion() {
             </form>
 
             <div className="flex items-center justify-center gap-1 text-[13px] md:text-[13px] lg:text-sm">
-              <span className="text-muted-foreground">¿No tienes cuenta?</span>
+              <span className="text-muted-foreground">{t("login.noAccount")}</span>
               <Link
                 href="/auth/registrarse"
                 className="font-medium text-vo-purple hover:underline"
               >
-                <span className="md:hidden">Regístrate</span>
-                <span className="hidden md:inline">Regístrate aquí</span>
+                <span className="md:hidden">{t("login.registerShort")}</span>
+                <span className="hidden md:inline">{t("login.registerLong")}</span>
               </Link>
             </div>
           </div>

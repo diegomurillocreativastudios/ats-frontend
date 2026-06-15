@@ -9,11 +9,13 @@ import {
 } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { AlertCircle } from "lucide-react"
 import Input from "@/components/auth/Input"
 import Button from "@/components/auth/Button"
 import AuthBrand from "@/components/auth/AuthBrand"
 import ProductBrand from "@/components/branding/ProductBrand"
+import LanguageSwitcher from "@/components/language-switcher"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
 
@@ -35,6 +37,9 @@ interface FormState {
 
 export default function RestablecerContrasenaContent() {
   const router = useRouter()
+  const t = useTranslations("Auth")
+  const tValidation = useTranslations("Validation")
+  const tErrors = useTranslations("Errors")
   const searchParams = useSearchParams()
   const token = searchParams.get("token")?.trim() ?? ""
   const emailFromQuery = searchParams.get("email")?.trim() ?? ""
@@ -86,12 +91,12 @@ export default function RestablecerContrasenaContent() {
   const validate = () => {
     const next: Partial<Record<keyof FormState, string>> = {}
     if (!formData.password) {
-      next.password = "La contraseña es requerida"
+      next.password = tValidation("passwordRequired")
     } else if (formData.password.length < 8) {
-      next.password = "La contraseña debe tener al menos 8 caracteres"
+      next.password = tValidation("passwordMinLength")
     }
     if (formData.password !== formData.confirmPassword) {
-      next.confirmPassword = "Las contraseñas no coinciden"
+      next.confirmPassword = tValidation("passwordsDontMatch")
     }
     setErrors(next)
     return Object.keys(next).length === 0
@@ -128,7 +133,7 @@ export default function RestablecerContrasenaContent() {
         const text =
           data.message ||
           data.detail ||
-          "No se pudo restablecer la contraseña."
+          t("reset.toastResetFailed")
         setMessage({
           type: "error",
           text: Array.isArray(text) ? text[0] : text,
@@ -140,8 +145,7 @@ export default function RestablecerContrasenaContent() {
     } catch (err: unknown) {
       setMessage({
         type: "error",
-        text:
-          getApiErrorMessage(err) || "Error de conexión. Intenta de nuevo.",
+        text: getApiErrorMessage(err) || tErrors("connection"),
       })
     } finally {
       setLoading(false)
@@ -152,7 +156,10 @@ export default function RestablecerContrasenaContent() {
 
   if (!canShowForm) {
     return (
-      <div className="flex min-h-screen font-sans">
+      <div className="relative flex min-h-screen font-sans">
+        <div className="absolute right-3 top-3 z-50 md:right-4 md:top-4">
+          <LanguageSwitcher />
+        </div>
         <div className="hidden flex-col justify-center bg-vo-navy text-white md:flex md:w-80 md:gap-6 md:px-10 lg:flex-1 lg:gap-8 lg:px-16">
           <div className="flex flex-col md:gap-6 lg:gap-6">
             <ProductBrand
@@ -163,16 +170,15 @@ export default function RestablecerContrasenaContent() {
             />
             <div className="hidden lg:block">
               <h1 className="text-[40px] font-bold leading-[1.2]">
-                Enlace inválido
+                {t("reset.invalidBrandTitle")}
               </h1>
               <p className="mt-6 text-lg leading-normal text-white/80">
-                Iniciá el restablecimiento desde &quot;¿Olvidaste tu
-                contraseña?&quot;.
+                {t("reset.invalidBrandSubtitle")}
               </p>
             </div>
             <div className="lg:hidden">
               <h1 className="text-2xl font-bold leading-[1.2]">
-                Enlace inválido
+                {t("reset.invalidBrandTitle")}
               </h1>
             </div>
           </div>
@@ -192,25 +198,24 @@ export default function RestablecerContrasenaContent() {
                 <AlertCircle className="h-8 w-8" aria-hidden />
               </div>
               <h2 className="font-sans text-[22px] font-bold text-foreground md:text-2xl">
-                No pudimos abrir el restablecimiento
+                {t("reset.invalidCardTitle")}
               </h2>
               <p className="font-sans text-sm text-muted-foreground">
-                Falta un correo verificado o un token válido. Volvé a &quot;¿Olvidaste
-                tu contraseña?&quot; y completá el paso anterior.
+                {t("reset.invalidCardBody")}
               </p>
               <div className="flex w-full flex-col gap-3 pt-2 sm:flex-row sm:justify-center">
                 <Link
                   href="/auth/forgot-password"
                   className="font-sans text-center text-sm font-medium text-vo-navy hover:underline"
                 >
-                  Ir a olvidé mi contraseña
+                  {t("reset.invalidGoForgot")}
                 </Link>
                 <span className="hidden text-muted-foreground sm:inline">·</span>
                 <Link
                   href="/auth/iniciar-sesion"
                   className="font-sans text-center text-sm font-medium text-vo-navy hover:underline"
                 >
-                  Volver a iniciar sesión
+                  {t("reset.backToLogin")}
                 </Link>
               </div>
             </div>
@@ -221,7 +226,10 @@ export default function RestablecerContrasenaContent() {
   }
 
   return (
-    <div className="flex min-h-screen font-sans">
+    <div className="relative flex min-h-screen font-sans">
+      <div className="absolute right-3 top-3 z-50 md:right-4 md:top-4">
+        <LanguageSwitcher />
+      </div>
       <div className="hidden flex-col justify-center bg-vo-navy text-white md:flex md:w-80 md:gap-6 md:px-10 lg:flex-1 lg:gap-8 lg:px-16">
         <div className="flex flex-col md:gap-6 lg:gap-6">
           <ProductBrand
@@ -233,23 +241,23 @@ export default function RestablecerContrasenaContent() {
 
           <div className="hidden lg:block">
             <h1 className="text-[40px] font-bold leading-[1.2]">
-              Nueva contraseña
+              {t("reset.brandTitle")}
             </h1>
             <p className="mt-6 text-lg leading-normal text-white/80">
               {isEmailFlow
-                ? "Tu correo ya está verificado. Elegí una contraseña segura."
-                : "Elegí una contraseña segura que no uses en otros sitios."}
+                ? t("reset.brandSubtitleEmailFlow")
+                : t("reset.brandSubtitle")}
             </p>
           </div>
 
           <div className="lg:hidden">
             <h1 className="text-2xl font-bold leading-[1.2]">
-              Nueva contraseña
+              {t("reset.brandTitle")}
             </h1>
             <p className="mt-6 text-sm leading-[1.4] text-white/80">
               {isEmailFlow
-                ? "Correo verificado. Completá tu nueva clave."
-                : "Elegí una contraseña segura."}
+                ? t("reset.brandSubtitleSmEmailFlow")
+                : t("reset.brandSubtitleSm")}
             </p>
           </div>
         </div>
@@ -270,7 +278,7 @@ export default function RestablecerContrasenaContent() {
                 d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span className="text-base">Elegí una contraseña que recuerdes</span>
+            <span className="text-base">{t("reset.feature1")}</span>
           </div>
           {isEmailFlow ? (
             <div className="flex items-center gap-3">
@@ -288,7 +296,7 @@ export default function RestablecerContrasenaContent() {
                   d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span className="text-base">Correo verificado</span>
+              <span className="text-base">{t("reset.featureEmailVerified")}</span>
             </div>
           ) : (
             <div className="flex items-center gap-3">
@@ -306,7 +314,7 @@ export default function RestablecerContrasenaContent() {
                   d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span className="text-base">Enlace de recuperación</span>
+              <span className="text-base">{t("reset.featureRecoveryLink")}</span>
             </div>
           )}
         </div>
@@ -321,12 +329,12 @@ export default function RestablecerContrasenaContent() {
           <div className="flex flex-col gap-6 md:gap-6 lg:gap-8">
             <div className="flex flex-col items-center gap-2 text-center md:items-start md:text-left">
               <h2 className="text-[22px] font-bold text-foreground md:text-2xl lg:text-[28px]">
-                Restablecer contraseña
+                {t("reset.title")}
               </h2>
               <p className="text-sm text-muted-foreground md:text-sm lg:text-base">
                 {isEmailFlow
-                  ? "Tu correo ya fue verificado. Ingresá y confirmá tu nueva contraseña."
-                  : "Ingresá tu nueva contraseña y confirmala."}
+                  ? t("reset.subtitleEmailFlow")
+                  : t("reset.subtitle")}
               </p>
             </div>
 
@@ -339,7 +347,7 @@ export default function RestablecerContrasenaContent() {
               <div className="flex flex-col gap-4">
                 {isEmailFlow ? (
                   <Input
-                    label="Correo electrónico"
+                    label={t("reset.emailLabel")}
                     type="email"
                     name="verifiedEmail"
                     value={emailFromQuery}
@@ -352,10 +360,10 @@ export default function RestablecerContrasenaContent() {
 
                 <div className="flex flex-col gap-1">
                   <Input
-                    label="Nueva contraseña"
+                    label={t("reset.newPasswordLabel")}
                     type={showPasswords ? "text" : "password"}
                     name="password"
-                    placeholder="Tu nueva contraseña"
+                    placeholder={t("reset.newPasswordPlaceholder")}
                     required
                     value={formData.password}
                     onChange={handleChange}
@@ -365,15 +373,15 @@ export default function RestablecerContrasenaContent() {
                     accent="navy"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Mínimo 8 caracteres
+                    {t("reset.minChars")}
                   </p>
                 </div>
 
                 <Input
-                  label="Confirmar contraseña"
+                  label={t("reset.confirmPasswordLabel")}
                   type={showPasswords ? "text" : "password"}
                   name="confirmPassword"
-                  placeholder="Repetir contraseña"
+                  placeholder={t("reset.confirmPasswordPlaceholder")}
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -391,13 +399,13 @@ export default function RestablecerContrasenaContent() {
                     onChange={(e) => setShowPasswords(e.target.checked)}
                     disabled={loading}
                     className="h-4 w-4 rounded border-input accent-vo-navy focus:ring-2 focus:ring-vo-navy focus:ring-offset-0"
-                    aria-label="Mostrar contraseñas"
+                    aria-label={t("reset.showPasswords")}
                   />
                   <label
                     htmlFor="showResetPasswords"
                     className="cursor-pointer text-xs text-foreground md:text-[13px]"
                   >
-                    Mostrar contraseñas
+                    {t("reset.showPasswords")}
                   </label>
                 </div>
               </div>
@@ -409,10 +417,10 @@ export default function RestablecerContrasenaContent() {
                 data-testid="auth-reset-submit"
               >
                 {loading
-                  ? "Guardando..."
+                  ? t("reset.submitting")
                   : rateLimitSecondsLeft > 0
-                    ? `Reintentá en ${rateLimitSecondsLeft}s`
-                    : "Guardar contraseña"}
+                    ? t("reset.retryIn", { seconds: rateLimitSecondsLeft })
+                    : t("reset.submit")}
               </Button>
             </form>
 
@@ -421,7 +429,7 @@ export default function RestablecerContrasenaContent() {
                 href="/auth/iniciar-sesion"
                 className="font-medium text-vo-navy hover:underline"
               >
-                Volver a iniciar sesión
+                {t("reset.backToLogin")}
               </Link>
             </div>
           </div>
