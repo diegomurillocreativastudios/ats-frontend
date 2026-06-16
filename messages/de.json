@@ -164,6 +164,22 @@
     "recruiterReports": {
       "title": "ATS | HR-Portal | Berichte",
       "description": "Rekrutierungskennzahlen und Berichte einsehen"
+    },
+    "adminPortal": {
+      "title": "Admin-Portal",
+      "description": "Verwaltung der ATS-Plattform",
+      "companies": {
+        "title": "Unternehmen",
+        "description": "Verwaltung der Kundenunternehmen (Tenants) der Plattform"
+      },
+      "users": {
+        "title": "Benutzer",
+        "description": "Verwaltung der Benutzer der Plattform"
+      },
+      "configuration": {
+        "title": "Einstellungen",
+        "description": "Allgemeine Einstellungen des Administrationsportals"
+      }
     }
   },
   "PortalSelection": {
@@ -973,6 +989,201 @@
         "deleted": "Vorstellungsgespräch gelöscht.",
         "notesSaved": "Notizen gespeichert."
       }
+    }
+  },
+  "AdminPortal": {
+    "companies": {
+      "page": {
+        "title": "Unternehmen",
+        "description": "Verwaltung der Kunden (Tenants). Beim Erstellen eines Unternehmens werden Pipeline-Status und -Phasen automatisch angelegt."
+      },
+      "table": {
+        "logo": "Logo",
+        "name": "Name",
+        "industry": "Branche",
+        "status": "Status",
+        "createdAt": "Erstellt",
+        "actions": "Aktionen"
+      },
+      "status": {
+        "active": "Aktiv",
+        "inactive": "Inaktiv"
+      },
+      "logoCell": {
+        "withName": "Logo von {name}",
+        "none": "Kein Logo"
+      },
+      "count": {
+        "loading": "Wird geladen…",
+        "summary": "{count, plural, one {# Unternehmen} other {# Unternehmen}}"
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "refreshAria": "Liste aktualisieren",
+        "regionAria": "Seitennummerierung",
+        "summary": "Seite {page} von {total}"
+      },
+      "emptyStates": {
+        "title": "Noch keine Unternehmen",
+        "description": "Es wurde noch kein Unternehmen registriert. Erstelle das erste, um zu beginnen."
+      },
+      "loadingStates": {
+        "company": "Unternehmen wird geladen…"
+      },
+      "actions": {
+        "create": "Unternehmen erstellen",
+        "edit": "Bearbeiten",
+        "activate": "Aktivieren",
+        "deactivate": "Deaktivieren",
+        "retry": "Erneut versuchen",
+        "prev": "Zurück",
+        "next": "Weiter"
+      },
+      "form": {
+        "createTitle": "Neues Unternehmen",
+        "editTitle": "Unternehmen bearbeiten",
+        "nameLabel": "Name",
+        "namePlaceholder": "Name des Unternehmens",
+        "industryLabel": "Branche (optional)",
+        "industryPlaceholder": "z. B. Technologie, Einzelhandel",
+        "logoLegend": "Logo",
+        "logoHelper": "PNG, JPG, WEBP oder SVG. Maximal 5 MB. Das Logo wird beim Speichern als Blob hochgeladen.",
+        "logoPreviewAria": "Logo-Vorschau",
+        "logoNoneAria": "Kein Logo",
+        "logoAlt": "Unternehmenslogo",
+        "changeLogo": "Logo ändern",
+        "uploadLogo": "Logo hochladen",
+        "cancelSelection": "Auswahl abbrechen",
+        "removeLogo": "Logo entfernen",
+        "undo": "Rückgängig",
+        "logoWillBeRemoved": "Das aktuelle Logo wird beim Speichern entfernt.",
+        "activeCheckbox": "Aktives Unternehmen",
+        "deactivateHint": "Um ein Unternehmen im Produkt stillzulegen, deaktiviere es, anstatt es zu löschen.",
+        "cancel": "Abbrechen",
+        "save": "Speichern",
+        "update": "Aktualisieren"
+      },
+      "validation": {
+        "nameRequired": "Der Name ist erforderlich."
+      },
+      "errors": {
+        "listForbidden": "Du hast keine Berechtigung, Unternehmen aufzulisten (Admin-Rolle in der API erforderlich).",
+        "loadFailed": "Das Unternehmen konnte nicht geladen werden.",
+        "saveFailed": "Das Unternehmen konnte nicht gespeichert werden.",
+        "statusUpdateFailed": "Der Status konnte nicht aktualisiert werden.",
+        "logoType": "Es sind nur Bilddateien zulässig.",
+        "logoSize": "Das Logo darf 5 MB nicht überschreiten."
+      },
+      "toasts": {
+        "created": "Unternehmen erstellt. ID: {id}",
+        "updated": "Unternehmen aktualisiert.",
+        "activated": "Unternehmen aktiviert.",
+        "deactivated": "Unternehmen deaktiviert."
+      }
+    },
+    "users": {
+      "page": {
+        "title": "Benutzer",
+        "description": "Auflistung und Verwaltung der Portalkonten."
+      },
+      "filters": {
+        "regionAria": "Filter",
+        "emailLabel": "E-Mail (enthält)",
+        "emailPlaceholder": "z. B. @unternehmen.com",
+        "roleLabel": "Rolle",
+        "allRoles": "Alle",
+        "lockedOnly": "Nur gesperrte",
+        "apply": "Filter anwenden",
+        "clear": "Zurücksetzen"
+      },
+      "table": {
+        "email": "E-Mail",
+        "userName": "Benutzer",
+        "roles": "Rollen",
+        "emailOk": "E-Mail OK",
+        "lockout": "Sperrung",
+        "actions": "Aktionen"
+      },
+      "values": {
+        "yes": "Ja",
+        "no": "Nein"
+      },
+      "count": {
+        "loading": "Wird geladen…",
+        "summary": "{count, plural, one {# Benutzer} other {# Benutzer}}"
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "refreshAria": "Liste aktualisieren",
+        "regionAria": "Seitennummerierung",
+        "summary": "Seite {page} von {total}"
+      },
+      "emptyStates": {
+        "noResults": "Keine Benutzer entsprechen den aktuellen Filtern."
+      },
+      "actions": {
+        "create": "Neuer Benutzer",
+        "manage": "Verwalten",
+        "prev": "Zurück",
+        "next": "Weiter"
+      },
+      "createModal": {
+        "title": "Neuer Benutzer",
+        "emailLabel": "E-Mail",
+        "emailPlaceholder": "benutzer@unternehmen.com",
+        "passwordLabel": "Passwort (optional)",
+        "passwordPlaceholder": "Leer = der Benutzer legt das Passwort per E-Mail fest",
+        "rolesLegend": "Anfangsrollen",
+        "cancel": "Abbrechen",
+        "create": "Erstellen"
+      },
+      "detail": {
+        "title": "Benutzerdetails",
+        "emailLabel": "E-Mail",
+        "userNameLabel": "Benutzername",
+        "lockedCheckbox": "Konto gesperrt",
+        "emailConfirmed": "E-Mail bestätigt",
+        "readOnly": "Schreibgeschützt",
+        "lockoutHint": "Aktiviere es, um den Benutzer manuell zu sperren, und deaktiviere es, um die Sperre aufzuheben.",
+        "lockoutActiveLabel": "Sperrung aktiv:",
+        "lockoutEndPrefix": "Ende:",
+        "rolesHeading": "Rollen",
+        "noRoles": "Keine Rollen",
+        "addRolesPrompt": "Rollen hinzufügen (nur die markierten):",
+        "removeRoleAria": "Rolle {role} entfernen",
+        "allRolesAssigned": "Hat bereits alle zuweisbaren Rollen.",
+        "addRoles": "Rollen hinzufügen",
+        "sendReset": "Passwort-Wiederherstellung senden",
+        "close": "Schließen"
+      },
+      "removeRole": {
+        "title": "Rolle entfernen",
+        "cancel": "Abbrechen",
+        "confirm": "Rolle entfernen",
+        "message": "Die Rolle «{role}» von diesem Benutzer entfernen? Der Vorgang wird sofort auf dem Server angewendet."
+      },
+      "errors": {
+        "listForbidden": "Du hast keine Berechtigung, Benutzer aufzulisten (Admin-Rolle in der API erforderlich)."
+      },
+      "validation": {
+        "emailRequired": "Die E-Mail ist erforderlich.",
+        "selectRole": "Wähle mindestens eine Rolle zum Hinzufügen aus."
+      },
+      "toasts": {
+        "locked": "Benutzer gesperrt.",
+        "unlocked": "Benutzer entsperrt.",
+        "updated": "Benutzer aktualisiert.",
+        "rolesUpdated": "Rollen aktualisiert.",
+        "roleRemoved": "Rolle entfernt.",
+        "resetSent": "Die Anweisungen wurden gesendet, sofern die E-Mail gültig ist.",
+        "created": "Benutzer erstellt."
+      }
+    },
+    "configuration": {
+      "regionAria": "Einstellungen des Admin-Portals",
+      "title": "Einstellungen",
+      "description": "Diese Ansicht ist bereit, die Einstellungen des Admin-Portals zu zentralisieren."
     }
   }
 }

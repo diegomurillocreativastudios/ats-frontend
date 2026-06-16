@@ -164,6 +164,22 @@
     "recruiterReports": {
       "title": "ATS | Portail RH | Rapports",
       "description": "Consultez les indicateurs et rapports de recrutement"
+    },
+    "adminPortal": {
+      "title": "Portail Admin",
+      "description": "Administration de la plateforme ATS",
+      "companies": {
+        "title": "Entreprises",
+        "description": "Gestion des entreprises clientes (tenants) de la plateforme"
+      },
+      "users": {
+        "title": "Utilisateurs",
+        "description": "Gestion des utilisateurs de la plateforme"
+      },
+      "configuration": {
+        "title": "Paramètres",
+        "description": "Paramètres généraux du portail d'administration"
+      }
     }
   },
   "PortalSelection": {
@@ -973,6 +989,201 @@
         "deleted": "Entretien supprimé.",
         "notesSaved": "Notes enregistrées."
       }
+    }
+  },
+  "AdminPortal": {
+    "companies": {
+      "page": {
+        "title": "Entreprises",
+        "description": "Gestion des clients (tenants). La création d'une entreprise génère automatiquement les statuts et étapes du pipeline."
+      },
+      "table": {
+        "logo": "Logo",
+        "name": "Nom",
+        "industry": "Secteur",
+        "status": "Statut",
+        "createdAt": "Créée",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "logoCell": {
+        "withName": "Logo de {name}",
+        "none": "Aucun logo"
+      },
+      "count": {
+        "loading": "Chargement…",
+        "summary": "{count, plural, one {# entreprise} other {# entreprises}}"
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "pageSizeAria": "Taille de page",
+        "refreshAria": "Actualiser la liste",
+        "regionAria": "Pagination",
+        "summary": "Page {page} sur {total}"
+      },
+      "emptyStates": {
+        "title": "Aucune entreprise pour le moment",
+        "description": "Aucune entreprise n'a encore été enregistrée. Créez la première pour commencer."
+      },
+      "loadingStates": {
+        "company": "Chargement de l'entreprise…"
+      },
+      "actions": {
+        "create": "Créer une entreprise",
+        "edit": "Modifier",
+        "activate": "Activer",
+        "deactivate": "Désactiver",
+        "retry": "Réessayer",
+        "prev": "Précédent",
+        "next": "Suivant"
+      },
+      "form": {
+        "createTitle": "Nouvelle entreprise",
+        "editTitle": "Modifier l'entreprise",
+        "nameLabel": "Nom",
+        "namePlaceholder": "Nom de l'entreprise",
+        "industryLabel": "Secteur (facultatif)",
+        "industryPlaceholder": "ex. Technologie, Commerce",
+        "logoLegend": "Logo",
+        "logoHelper": "PNG, JPG, WEBP ou SVG. Maximum 5 Mo. Le logo est téléversé comme blob lors de l'enregistrement.",
+        "logoPreviewAria": "Aperçu du logo",
+        "logoNoneAria": "Aucun logo",
+        "logoAlt": "Logo de l'entreprise",
+        "changeLogo": "Changer le logo",
+        "uploadLogo": "Téléverser un logo",
+        "cancelSelection": "Annuler la sélection",
+        "removeLogo": "Retirer le logo",
+        "undo": "Annuler",
+        "logoWillBeRemoved": "Le logo actuel sera supprimé lors de l'enregistrement.",
+        "activeCheckbox": "Entreprise active",
+        "deactivateHint": "Pour retirer une entreprise du produit, désactivez-la au lieu de la supprimer.",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "update": "Mettre à jour"
+      },
+      "validation": {
+        "nameRequired": "Le nom est obligatoire."
+      },
+      "errors": {
+        "listForbidden": "Vous n'avez pas les autorisations pour lister les entreprises (rôle Admin requis dans l'API).",
+        "loadFailed": "Impossible de charger l'entreprise.",
+        "saveFailed": "Impossible d'enregistrer l'entreprise.",
+        "statusUpdateFailed": "Impossible de mettre à jour le statut.",
+        "logoType": "Seuls les fichiers image sont autorisés.",
+        "logoSize": "Le logo ne peut pas dépasser 5 Mo."
+      },
+      "toasts": {
+        "created": "Entreprise créée. ID : {id}",
+        "updated": "Entreprise mise à jour.",
+        "activated": "Entreprise activée.",
+        "deactivated": "Entreprise désactivée."
+      }
+    },
+    "users": {
+      "page": {
+        "title": "Utilisateurs",
+        "description": "Liste et administration des comptes du portail."
+      },
+      "filters": {
+        "regionAria": "Filtres",
+        "emailLabel": "E-mail (contient)",
+        "emailPlaceholder": "ex. @entreprise.com",
+        "roleLabel": "Rôle",
+        "allRoles": "Tous",
+        "lockedOnly": "Verrouillés uniquement",
+        "apply": "Appliquer les filtres",
+        "clear": "Effacer"
+      },
+      "table": {
+        "email": "E-mail",
+        "userName": "Utilisateur",
+        "roles": "Rôles",
+        "emailOk": "E-mail OK",
+        "lockout": "Verrouillage",
+        "actions": "Actions"
+      },
+      "values": {
+        "yes": "Oui",
+        "no": "Non"
+      },
+      "count": {
+        "loading": "Chargement…",
+        "summary": "{count, plural, one {# utilisateur} other {# utilisateurs}}"
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "refreshAria": "Actualiser la liste",
+        "regionAria": "Pagination",
+        "summary": "Page {page} sur {total}"
+      },
+      "emptyStates": {
+        "noResults": "Aucun utilisateur ne correspond aux filtres actuels."
+      },
+      "actions": {
+        "create": "Nouvel utilisateur",
+        "manage": "Gérer",
+        "prev": "Précédent",
+        "next": "Suivant"
+      },
+      "createModal": {
+        "title": "Nouvel utilisateur",
+        "emailLabel": "E-mail",
+        "emailPlaceholder": "utilisateur@entreprise.com",
+        "passwordLabel": "Mot de passe (facultatif)",
+        "passwordPlaceholder": "Vide = l'utilisateur définit son mot de passe par e-mail",
+        "rolesLegend": "Rôles initiaux",
+        "cancel": "Annuler",
+        "create": "Créer"
+      },
+      "detail": {
+        "title": "Détail de l'utilisateur",
+        "emailLabel": "E-mail",
+        "userNameLabel": "Nom d'utilisateur",
+        "lockedCheckbox": "Compte verrouillé",
+        "emailConfirmed": "E-mail confirmé",
+        "readOnly": "Lecture seule",
+        "lockoutHint": "Activez-le pour verrouiller manuellement l'utilisateur et désactivez-le pour retirer le verrouillage.",
+        "lockoutActiveLabel": "Verrouillage actif :",
+        "lockoutEndPrefix": "Fin :",
+        "rolesHeading": "Rôles",
+        "noRoles": "Aucun rôle",
+        "addRolesPrompt": "Ajouter des rôles (uniquement ceux cochés) :",
+        "removeRoleAria": "Retirer le rôle {role}",
+        "allRolesAssigned": "Possède déjà tous les rôles attribuables.",
+        "addRoles": "Ajouter des rôles",
+        "sendReset": "Envoyer la récupération du mot de passe",
+        "close": "Fermer"
+      },
+      "removeRole": {
+        "title": "Retirer le rôle",
+        "cancel": "Annuler",
+        "confirm": "Retirer le rôle",
+        "message": "Retirer le rôle « {role} » de cet utilisateur ? L'opération est appliquée immédiatement sur le serveur."
+      },
+      "errors": {
+        "listForbidden": "Vous n'avez pas les autorisations pour lister les utilisateurs (rôle Admin requis dans l'API)."
+      },
+      "validation": {
+        "emailRequired": "L'e-mail est obligatoire.",
+        "selectRole": "Sélectionnez au moins un rôle à ajouter."
+      },
+      "toasts": {
+        "locked": "Utilisateur verrouillé.",
+        "unlocked": "Utilisateur déverrouillé.",
+        "updated": "Utilisateur mis à jour.",
+        "rolesUpdated": "Rôles mis à jour.",
+        "roleRemoved": "Rôle retiré.",
+        "resetSent": "Les instructions ont été envoyées si l'e-mail est valide.",
+        "created": "Utilisateur créé."
+      }
+    },
+    "configuration": {
+      "regionAria": "Paramètres du portail admin",
+      "title": "Paramètres",
+      "description": "Cette vue est prête à centraliser les paramètres du portail admin."
     }
   }
 }

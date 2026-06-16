@@ -164,6 +164,22 @@
     "recruiterReports": {
       "title": "ATS | Portal RRHH | Reportes",
       "description": "Consulta métricas y reportes de reclutamiento"
+    },
+    "adminPortal": {
+      "title": "Portal Admin",
+      "description": "Administración de la plataforma ATS",
+      "companies": {
+        "title": "Empresas",
+        "description": "Gestión de empresas cliente (tenants) de la plataforma"
+      },
+      "users": {
+        "title": "Usuarios",
+        "description": "Gestión de usuarios de la plataforma"
+      },
+      "configuration": {
+        "title": "Configuracion",
+        "description": "Configuración general del portal de administración"
+      }
     }
   },
   "PortalSelection": {
@@ -973,6 +989,201 @@
         "deleted": "Entrevista eliminada.",
         "notesSaved": "Notas guardadas."
       }
+    }
+  },
+  "AdminPortal": {
+    "companies": {
+      "page": {
+        "title": "Empresas",
+        "description": "Gestión de clientes (tenants). Al crear una empresa se siembran estados y etapas de pipeline automáticamente."
+      },
+      "table": {
+        "logo": "Logo",
+        "name": "Nombre",
+        "industry": "Industria",
+        "status": "Estado",
+        "createdAt": "Creada",
+        "actions": "Acciones"
+      },
+      "status": {
+        "active": "Activa",
+        "inactive": "Inactiva"
+      },
+      "logoCell": {
+        "withName": "Logo de {name}",
+        "none": "Sin logo"
+      },
+      "count": {
+        "loading": "Cargando…",
+        "summary": "{count, plural, one {# empresa} other {# empresas}}"
+      },
+      "pagination": {
+        "perPage": "Por página",
+        "pageSizeAria": "Tamaño de página",
+        "refreshAria": "Refrescar listado",
+        "regionAria": "Paginación",
+        "summary": "Página {page} de {total}"
+      },
+      "emptyStates": {
+        "title": "Aún no hay empresas",
+        "description": "Todavía no se registró ninguna empresa. Creá la primera para comenzar."
+      },
+      "loadingStates": {
+        "company": "Cargando empresa…"
+      },
+      "actions": {
+        "create": "Crear empresa",
+        "edit": "Editar",
+        "activate": "Activar",
+        "deactivate": "Desactivar",
+        "retry": "Reintentar",
+        "prev": "Anterior",
+        "next": "Siguiente"
+      },
+      "form": {
+        "createTitle": "Nueva empresa",
+        "editTitle": "Editar empresa",
+        "nameLabel": "Nombre",
+        "namePlaceholder": "Nombre de la empresa",
+        "industryLabel": "Industria (opcional)",
+        "industryPlaceholder": "ej. Tecnología, Retail",
+        "logoLegend": "Logo",
+        "logoHelper": "PNG, JPG, WEBP o SVG. Máximo 5 MB. El logo se sube como blob al guardar.",
+        "logoPreviewAria": "Vista previa del logo",
+        "logoNoneAria": "Sin logo",
+        "logoAlt": "Logo de la empresa",
+        "changeLogo": "Cambiar logo",
+        "uploadLogo": "Subir logo",
+        "cancelSelection": "Cancelar selección",
+        "removeLogo": "Quitar logo",
+        "undo": "Deshacer",
+        "logoWillBeRemoved": "Se eliminará el logo actual al guardar.",
+        "activeCheckbox": "Empresa activa",
+        "deactivateHint": "Para dar de baja una empresa en el producto, desactivala en lugar de eliminarla.",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "update": "Actualizar"
+      },
+      "validation": {
+        "nameRequired": "El nombre es obligatorio."
+      },
+      "errors": {
+        "listForbidden": "No tenés permisos para listar empresas (se requiere rol Admin en el API).",
+        "loadFailed": "No se pudo cargar la empresa.",
+        "saveFailed": "No se pudo guardar la empresa.",
+        "statusUpdateFailed": "No se pudo actualizar el estado.",
+        "logoType": "Solo se permiten archivos de imagen.",
+        "logoSize": "El logo no puede superar los 5 MB."
+      },
+      "toasts": {
+        "created": "Empresa creada. ID: {id}",
+        "updated": "Empresa actualizada.",
+        "activated": "Empresa activada.",
+        "deactivated": "Empresa desactivada."
+      }
+    },
+    "users": {
+      "page": {
+        "title": "Usuarios",
+        "description": "Listado y administración de cuentas del portal."
+      },
+      "filters": {
+        "regionAria": "Filtros",
+        "emailLabel": "Correo (contiene)",
+        "emailPlaceholder": "ej. @empresa.com",
+        "roleLabel": "Rol",
+        "allRoles": "Todos",
+        "lockedOnly": "Solo bloqueados",
+        "apply": "Aplicar filtros",
+        "clear": "Limpiar"
+      },
+      "table": {
+        "email": "Correo",
+        "userName": "Usuario",
+        "roles": "Roles",
+        "emailOk": "Email OK",
+        "lockout": "Bloqueo",
+        "actions": "Acciones"
+      },
+      "values": {
+        "yes": "Sí",
+        "no": "No"
+      },
+      "count": {
+        "loading": "Cargando…",
+        "summary": "{count, plural, one {# usuario} other {# usuarios}}"
+      },
+      "pagination": {
+        "perPage": "Por página",
+        "refreshAria": "Refrescar listado",
+        "regionAria": "Paginación",
+        "summary": "Página {page} de {total}"
+      },
+      "emptyStates": {
+        "noResults": "No hay usuarios con los filtros actuales."
+      },
+      "actions": {
+        "create": "Nuevo usuario",
+        "manage": "Gestionar",
+        "prev": "Anterior",
+        "next": "Siguiente"
+      },
+      "createModal": {
+        "title": "Nuevo usuario",
+        "emailLabel": "Correo",
+        "emailPlaceholder": "usuario@empresa.com",
+        "passwordLabel": "Contraseña (opcional)",
+        "passwordPlaceholder": "Vacío = el usuario define clave por correo",
+        "rolesLegend": "Roles iniciales",
+        "cancel": "Cancelar",
+        "create": "Crear"
+      },
+      "detail": {
+        "title": "Detalle del usuario",
+        "emailLabel": "Correo",
+        "userNameLabel": "Nombre de usuario",
+        "lockedCheckbox": "Cuenta bloqueada",
+        "emailConfirmed": "Correo confirmado",
+        "readOnly": "Solo lectura",
+        "lockoutHint": "Activalo para bloquear manualmente al usuario y desactivalo para quitar el bloqueo.",
+        "lockoutActiveLabel": "Lockout activo:",
+        "lockoutEndPrefix": "Fin:",
+        "rolesHeading": "Roles",
+        "noRoles": "Sin roles",
+        "addRolesPrompt": "Añadir roles (solo los marcados):",
+        "removeRoleAria": "Quitar rol {role}",
+        "allRolesAssigned": "Ya tiene todos los roles asignables.",
+        "addRoles": "Añadir roles",
+        "sendReset": "Enviar recuperación de contraseña",
+        "close": "Cerrar"
+      },
+      "removeRole": {
+        "title": "Quitar rol",
+        "cancel": "Cancelar",
+        "confirm": "Quitar rol",
+        "message": "¿Quitar el rol «{role}» de este usuario? La operación se aplica de inmediato en el servidor."
+      },
+      "errors": {
+        "listForbidden": "No tenés permisos para listar usuarios (se requiere rol Admin en el API)."
+      },
+      "validation": {
+        "emailRequired": "El correo es obligatorio.",
+        "selectRole": "Seleccioná al menos un rol para añadir."
+      },
+      "toasts": {
+        "locked": "Usuario bloqueado.",
+        "unlocked": "Usuario desbloqueado.",
+        "updated": "Usuario actualizado.",
+        "rolesUpdated": "Roles actualizados.",
+        "roleRemoved": "Rol quitado.",
+        "resetSent": "Se enviaron las instrucciones si el correo es válido.",
+        "created": "Usuario creado."
+      }
+    },
+    "configuration": {
+      "regionAria": "Configuración del portal admin",
+      "title": "Configuracion",
+      "description": "Esta vista queda lista para centralizar las configuraciones del portal admin."
     }
   }
 }

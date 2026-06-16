@@ -1799,6 +1799,160 @@ tests). Se verificó vía `git stash` que fallan igual sin los cambios de esta e
 y que `report-data-view-client` **sí** pasaba en baseline (de ahí el wrapper de
 contexto en su test).
 
+## 16-M. Portal Admin básico (Etapa 13)
+
+Migración **acotada y segura** de la UI estática básica del **Portal Admin** a
+`next-intl`. **No** se tocó IA/Vertex AI, Score Breakdown, `VacancyConfig`,
+reportes, PDF/export, cálculos, catálogos complejos, configuración avanzada,
+permisos/guards/auth ni mappers delicados de estados/etapas. El ruteo sigue
+siendo cookie-based (`NEXT_LOCALE`), sin prefijos ni `app/[locale]`.
+
+### 16-M.1 Componentes/rutas migradas
+
+| Ruta / componente                                    | Tipo   | Namespace usado                  |
+| ---------------------------------------------------- | ------ | -------------------------------- |
+| `app/portal-admin/layout.tsx`                        | Server | `Metadata.adminPortal` (metadata) |
+| `app/portal-admin/empresas/page.tsx`                 | Server | `Metadata.adminPortal.companies` (metadata) |
+| `app/portal-admin/usuarios/page.tsx`                 | Server | `Metadata.adminPortal.users` (metadata) |
+| `app/portal-admin/configuracion/page.tsx`            | Server | `AdminPortal.configuration` + `Metadata.adminPortal.configuration` |
+| `components/portal-admin/AdminEmpresasContent.tsx`   | Client | `AdminPortal.companies`          |
+| `components/portal-admin/AdminUsuariosContent.tsx`   | Client | `AdminPortal.users`              |
+
+Se migró: encabezados/descripciones de página, encabezados de tabla (Empresas:
+Logo/Nombre/Industria/Estado/Creada/Acciones; Usuarios: Correo/Usuario/Roles/
+Email OK/Bloqueo/Acciones), estados de **carga/vacío/error** controlados por
+frontend, botones básicos (Crear, Editar, Activar/Desactivar, Reintentar,
+Guardar/Actualizar, Cancelar, Gestionar, Anterior/Siguiente), labels y
+placeholders de **filtros simples** de usuarios (Correo, Rol, Solo bloqueados,
+Aplicar/Limpiar), labels estáticos de los modales (Nueva/Editar empresa, Nuevo
+usuario, Detalle del usuario, Quitar rol), validaciones **de frontend** (nombre/
+correo requeridos, tipo/tamaño de logo), `aria-label`s y los **fallbacks** de
+toasts/snackbars controlados por frontend. La conjugación de conteos usa plural
+ICU (`{count, plural, one {# empresa} other {# empresas}}`).
+
+`PortalAdminConfiguracionPage` pasó a `async` y usa `getTranslations` (Server
+Component). La página índice `app/portal-admin/page.tsx` solo redirige a
+`/portal-admin/usuarios` (no hay dashboard/hub propio).
+
+### 16-M.2 Namespace `AdminPortal` (5 idiomas)
+
+Se añadió el namespace `AdminPortal` a `es/en/it/de/fr` (con `es.json` como
+fuente de verdad), agrupado por sección real de UI:
+
+```jsonc
+"AdminPortal": {
+  "companies": {
+    "page": {...}, "table": {...}, "status": {...}, "logoCell": {...},
+    "count": {...}, "pagination": {...}, "emptyStates": {...},
+    "loadingStates": {...}, "actions": {...}, "form": {...},
+    "validation": {...}, "errors": {...}, "toasts": {...}
+  },
+  "users": {
+    "page": {...}, "filters": {...}, "table": {...}, "values": {...},
+    "count": {...}, "pagination": {...}, "emptyStates": {...},
+    "actions": {...}, "createModal": {...}, "detail": {...},
+    "removeRole": {...}, "errors": {...}, "validation": {...}, "toasts": {...}
+  },
+  "configuration": { "regionAria": "...", "title": "...", "description": "..." }
+}
+```
+
+Se eligió `AdminPortal` (no `PortalAdmin`) por consistencia con `RecruiterPortal`
+y `CandidatePortal` de etapas previas. La paridad exacta de keys en los 5
+diccionarios la validan `tests/unit/messages-structure.test.ts` y
+`tests/unit/admin-portal-i18n.test.tsx`.
+
+### 16-M.3 Metadata
+
+Las páginas que exponían `export const metadata` estática (layout, empresas,
+usuarios, configuración) pasaron a `generateMetadata()` con
+`getTranslations("Metadata.adminPortal.*")`. Namespace nuevo
+`Metadata.adminPortal` (con sub-keys `title`/`description`, `companies`, `users`,
+`configuration`) en los 5 idiomas. El `title` se devuelve plano (el template
+global `ATS | %s` antepone la marca).
+
+### 16-M.4 Componentes compartidos detectados
+
+- **`PortalPageHeader`, `Modal`, `Snackbar`, `Button`, `Input`**: componentes UI
+  reutilizables; reciben los textos ya traducidos por props — **no** se tocaron.
+- **`PortalAdminShell`, `AdminTopbar`, `AdminSidebar`**: ya migrados en Etapa 3
+  (topbars/sidebars) — sin cambios.
+
+### 16-M.5 Regla crítica — qué NO se tradujo
+
+```tsx
+// ✅ Traducible (UI estática controlada por frontend)
+<PortalPageHeader title={t("page.title")} description={t("page.description")} />
+<th>{t("table.name")}</th>
+{t("count.summary", { count: totalCount })}
+{t("toasts.created", { id: created.companyId })}  // wrapper estático; {id} dinámico
+
+// ❌ NO traducible (data dinámica / API / usuario)
+{row.name} {row.industry} {row.email} {row.userName}   // nombres de empresa/usuario
+{detail.email} {formatDateUtc(detail.lockoutEnd)}      // datos/fechas de la API
+{r} /* roles Admin/Recruiter/Candidate */              // valores del backend (ver §16-M.6)
+getApiErrorMessage(err) || t("errors.…")               // mensaje del backend tal cual
+res.message || t("toasts.resetSent")                   // mensaje del backend tal cual
+```
+
+- **Nombres de empresas/usuarios** y todo dato de API/BD se renderizan
+  **verbatim**.
+- **Errores del backend** conservan el patrón `getApiErrorMessage(err) ||
+  t("errors.…")`: solo el **fallback** controlado por frontend sale del
+  diccionario. El error 403 («no tenés permisos…») es un fallback **de frontend**
+  y sí se tradujo.
+- **No** se modificaron llamadas a API, payloads, nombres de campos, query params
+  ni filtros (los `value` enviados al backend no cambian); **no** se envía
+  `locale` al backend.
+
+### 16-M.6 Roles (Admin/Recruiter/Candidate) — verbatim, **PENDIENTE**
+
+Los roles `Admin`, `Recruiter`, `Candidate` (`ASSIGNABLE_ROLES`) se usan como
+**valores** del filtro y del payload enviados al API y como **display** de los
+pills. Siguiendo la regla de la etapa, **no** se traducen (no hay mapper
+controlado con fallback crudo). Se dejan como valor dinámico y queda
+**pendiente** un mapper dedicado (key por rol + fallback al valor crudo) si en
+el futuro se quiere localizar su label sin romper el filtrado.
+
+### 16-M.7 Fuera de scope (no migrado en Etapa 13)
+
+- **Catálogos complejos / CRUD avanzado**: `AdminVacancyCatalogContent`
+  (departamentos/modalidades) y `AdminIdentityDocumentTypesContent`
+  (tipos-de-documento) — catálogos con lógica compleja y **fallos preexistentes**
+  (`admin-vacancy-catalog-content`).
+- **Etapas y Plantillas** (`app/portal-admin/etapas`, `app/portal-admin/plantillas`):
+  CRUD con drag-reorder, switches, modales y **nombres de etapa/plantilla
+  configurados por el usuario** (data dinámica) — fuera del alcance "básico".
+- **Entrevistas Admin** (`app/portal-admin/entrevistas`, `.../entrevistas/general`,
+  `components/portal-admin/interviews/*`): catálogos de entrevista + calendario.
+- Sus rutas conservan `export const metadata` estática; **no** se migró su
+  metadata para no tocar módulos fuera de scope.
+
+### 16-M.8 Tests de la etapa
+
+`tests/unit/admin-portal-i18n.test.tsx` (nuevo): `AdminEmpresasContent` y
+`AdminUsuariosContent` renderizan su UI estática (encabezado, botón crear, estado
+vacío) desde `next-intl` en `es`/`en` con las APIs admin mockeadas; verifica que
+los roles `Admin`/`Recruiter` permanecen **verbatim**; `PortalAdminConfiguracionPage`
+(Server Component) resuelve título/descripción en `es`/`en`; paridad del
+namespace `AdminPortal` (companies/users/configuration) y presencia de
+`Metadata.adminPortal` en los 5 idiomas; y conservación de placeholders canónicos
+(`Logo de {name}`, `Empresa creada. ID: {id}`).
+
+`tests/unit/admin-empresas-content.test.tsx` (actualizado): se envuelve el render
+en `NextIntlClientProvider` (`es`) porque el componente ahora requiere el contexto
+de `next-intl`. **No** se tocó su lógica ni sus aserciones (en español, idénticas).
+
+`tests/unit/messages-structure.test.ts` sigue garantizando la paridad exacta de
+keys entre los 5 diccionarios. La suite i18n previa sigue pasando.
+
+Los **7 fallos preexistentes** de Vitest (`admin-vacancy-catalog-content` x2,
+`build-vacancy-progress-report-pdfkit-buffer` x2, `public-vacancies`,
+`recruiter-companies-api`, `report-filter-renderer`) **no** están relacionados con
+esta etapa. `npm run build` pasa (exit 0). `tsc --noEmit` reporta únicamente 6
+errores **preexistentes** en archivos de test fuera de scope; `eslint` de los
+archivos migrados pasa (solo 2 warnings preexistentes de `<img>`).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
@@ -1819,6 +1973,12 @@ contexto en su test).
   vacante (`STATUS_LABELS` de la tarjeta) **se migró en Etapa 10** — ver §16-J.
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
   namespaces reservados (`Errors`, `EmptyStates`, etc.).
+- El **Portal Admin básico** se migró en Etapa 13 (§16-M: empresas, usuarios y
+  configuración). Quedan pendientes los módulos Admin pesados/complejos:
+  catálogos (`AdminVacancyCatalogContent`, `AdminIdentityDocumentTypesContent`),
+  Etapas, Plantillas, Entrevistas Admin (catálogos + calendario) y la metadata de
+  esas rutas. Además, localizar los roles `Admin/Recruiter/Candidate` requiere un
+  mapper dedicado con fallback al valor crudo (ver §16-M.6).
 - El **Perfil del Candidato** se migró en Etapa 5D (§16). Quedan pendientes los
   mensajes de validación y `triggerLabel` del hook compartido
   `use-candidate-profile-editor.ts`, las opciones de país

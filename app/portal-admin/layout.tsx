@@ -1,12 +1,16 @@
 import type { ReactNode } from "react"
+import { getTranslations } from "next-intl/server"
 import { PortalAdminShell } from "@/components/portal-admin/PortalAdminShell"
 import { requirePortalAdminUser } from "@/lib/server-session-user"
 
 export const dynamic = "force-dynamic"
 
-export const metadata = {
-  title: "Portal Admin",
-  description: "Administración de la plataforma ATS",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.adminPortal")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default async function PortalAdminLayout({

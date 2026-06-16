@@ -1,7 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { NextIntlClientProvider } from "next-intl"
 import AdminEmpresasContent from "@/components/portal-admin/AdminEmpresasContent"
 import type { AdminCompany } from "@/lib/api/admin-companies"
+import esMessages from "@/messages/es.json"
+
+// El componente migró a `next-intl` (Etapa 13): requiere el provider de
+// contexto. Las aserciones en español usan el diccionario `es` (fuente de
+// verdad), por lo que el texto visible no cambia.
+function renderWithIntl(ui: React.ReactNode) {
+  return render(
+    <NextIntlClientProvider locale="es" messages={esMessages}>
+      {ui}
+    </NextIntlClientProvider>
+  )
+}
 
 const companiesApiMocks = vi.hoisted(() => ({
   fetchAdminCompaniesList: vi.fn(),
@@ -54,7 +67,7 @@ describe("AdminEmpresasContent", () => {
   })
 
   it("renders empty state when there are no companies", async () => {
-    render(<AdminEmpresasContent />)
+    renderWithIntl(<AdminEmpresasContent />)
 
     expect(await screen.findByText("Aún no hay empresas")).toBeInTheDocument()
     expect(screen.getAllByRole("button", { name: /Crear empresa/i }).length).toBeGreaterThanOrEqual(1)
@@ -68,7 +81,7 @@ describe("AdminEmpresasContent", () => {
       .mockResolvedValueOnce({ page: 1, pageSize: 20, totalCount: 1, items: [created] })
     companiesApiMocks.createAdminCompany.mockResolvedValueOnce(created)
 
-    render(<AdminEmpresasContent />)
+    renderWithIntl(<AdminEmpresasContent />)
     await screen.findByText("Aún no hay empresas")
 
     fireEvent.click(screen.getAllByRole("button", { name: /Crear empresa/i })[0])
@@ -91,7 +104,7 @@ describe("AdminEmpresasContent", () => {
   })
 
   it("always requests inactive companies in the initial list fetch", async () => {
-    render(<AdminEmpresasContent />)
+    renderWithIntl(<AdminEmpresasContent />)
     await screen.findByText("Aún no hay empresas")
 
     expect(companiesApiMocks.fetchAdminCompaniesList).toHaveBeenCalledWith(
@@ -108,7 +121,7 @@ describe("AdminEmpresasContent", () => {
       .mockResolvedValueOnce({ page: 1, pageSize: 20, totalCount: 1, items: [inactive] })
     companiesApiMocks.updateAdminCompany.mockResolvedValueOnce(inactive)
 
-    render(<AdminEmpresasContent />)
+    renderWithIntl(<AdminEmpresasContent />)
     await screen.findByText("Acme Corp")
 
     fireEvent.click(screen.getByRole("button", { name: "Desactivar" }))

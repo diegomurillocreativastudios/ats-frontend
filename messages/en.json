@@ -164,6 +164,22 @@
     "recruiterReports": {
       "title": "ATS | HR Portal | Reports",
       "description": "Review recruiting metrics and reports"
+    },
+    "adminPortal": {
+      "title": "Admin Portal",
+      "description": "ATS platform administration",
+      "companies": {
+        "title": "Companies",
+        "description": "Manage the platform's client companies (tenants)"
+      },
+      "users": {
+        "title": "Users",
+        "description": "Manage the platform's users"
+      },
+      "configuration": {
+        "title": "Settings",
+        "description": "General settings of the administration portal"
+      }
     }
   },
   "PortalSelection": {
@@ -973,6 +989,201 @@
         "deleted": "Interview deleted.",
         "notesSaved": "Notes saved."
       }
+    }
+  },
+  "AdminPortal": {
+    "companies": {
+      "page": {
+        "title": "Companies",
+        "description": "Manage clients (tenants). Creating a company automatically seeds pipeline statuses and stages."
+      },
+      "table": {
+        "logo": "Logo",
+        "name": "Name",
+        "industry": "Industry",
+        "status": "Status",
+        "createdAt": "Created",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "logoCell": {
+        "withName": "{name} logo",
+        "none": "No logo"
+      },
+      "count": {
+        "loading": "Loading…",
+        "summary": "{count, plural, one {# company} other {# companies}}"
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "refreshAria": "Refresh list",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}"
+      },
+      "emptyStates": {
+        "title": "No companies yet",
+        "description": "No company has been registered yet. Create the first one to get started."
+      },
+      "loadingStates": {
+        "company": "Loading company…"
+      },
+      "actions": {
+        "create": "Create company",
+        "edit": "Edit",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "retry": "Retry",
+        "prev": "Previous",
+        "next": "Next"
+      },
+      "form": {
+        "createTitle": "New company",
+        "editTitle": "Edit company",
+        "nameLabel": "Name",
+        "namePlaceholder": "Company name",
+        "industryLabel": "Industry (optional)",
+        "industryPlaceholder": "e.g. Technology, Retail",
+        "logoLegend": "Logo",
+        "logoHelper": "PNG, JPG, WEBP or SVG. Max 5 MB. The logo is uploaded as a blob on save.",
+        "logoPreviewAria": "Logo preview",
+        "logoNoneAria": "No logo",
+        "logoAlt": "Company logo",
+        "changeLogo": "Change logo",
+        "uploadLogo": "Upload logo",
+        "cancelSelection": "Cancel selection",
+        "removeLogo": "Remove logo",
+        "undo": "Undo",
+        "logoWillBeRemoved": "The current logo will be removed on save.",
+        "activeCheckbox": "Active company",
+        "deactivateHint": "To retire a company in the product, deactivate it instead of deleting it.",
+        "cancel": "Cancel",
+        "save": "Save",
+        "update": "Update"
+      },
+      "validation": {
+        "nameRequired": "Name is required."
+      },
+      "errors": {
+        "listForbidden": "You don't have permission to list companies (Admin role is required in the API).",
+        "loadFailed": "Could not load the company.",
+        "saveFailed": "Could not save the company.",
+        "statusUpdateFailed": "Could not update the status.",
+        "logoType": "Only image files are allowed.",
+        "logoSize": "The logo cannot exceed 5 MB."
+      },
+      "toasts": {
+        "created": "Company created. ID: {id}",
+        "updated": "Company updated.",
+        "activated": "Company activated.",
+        "deactivated": "Company deactivated."
+      }
+    },
+    "users": {
+      "page": {
+        "title": "Users",
+        "description": "Listing and management of portal accounts."
+      },
+      "filters": {
+        "regionAria": "Filters",
+        "emailLabel": "Email (contains)",
+        "emailPlaceholder": "e.g. @company.com",
+        "roleLabel": "Role",
+        "allRoles": "All",
+        "lockedOnly": "Locked only",
+        "apply": "Apply filters",
+        "clear": "Clear"
+      },
+      "table": {
+        "email": "Email",
+        "userName": "Username",
+        "roles": "Roles",
+        "emailOk": "Email OK",
+        "lockout": "Lockout",
+        "actions": "Actions"
+      },
+      "values": {
+        "yes": "Yes",
+        "no": "No"
+      },
+      "count": {
+        "loading": "Loading…",
+        "summary": "{count, plural, one {# user} other {# users}}"
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "refreshAria": "Refresh list",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}"
+      },
+      "emptyStates": {
+        "noResults": "No users match the current filters."
+      },
+      "actions": {
+        "create": "New user",
+        "manage": "Manage",
+        "prev": "Previous",
+        "next": "Next"
+      },
+      "createModal": {
+        "title": "New user",
+        "emailLabel": "Email",
+        "emailPlaceholder": "user@company.com",
+        "passwordLabel": "Password (optional)",
+        "passwordPlaceholder": "Empty = the user sets their password by email",
+        "rolesLegend": "Initial roles",
+        "cancel": "Cancel",
+        "create": "Create"
+      },
+      "detail": {
+        "title": "User detail",
+        "emailLabel": "Email",
+        "userNameLabel": "Username",
+        "lockedCheckbox": "Account locked",
+        "emailConfirmed": "Email confirmed",
+        "readOnly": "Read only",
+        "lockoutHint": "Enable it to manually lock the user and disable it to remove the lock.",
+        "lockoutActiveLabel": "Lockout active:",
+        "lockoutEndPrefix": "Ends:",
+        "rolesHeading": "Roles",
+        "noRoles": "No roles",
+        "addRolesPrompt": "Add roles (only the checked ones):",
+        "removeRoleAria": "Remove role {role}",
+        "allRolesAssigned": "Already has all assignable roles.",
+        "addRoles": "Add roles",
+        "sendReset": "Send password recovery",
+        "close": "Close"
+      },
+      "removeRole": {
+        "title": "Remove role",
+        "cancel": "Cancel",
+        "confirm": "Remove role",
+        "message": "Remove the role «{role}» from this user? The operation is applied immediately on the server."
+      },
+      "errors": {
+        "listForbidden": "You don't have permission to list users (Admin role is required in the API)."
+      },
+      "validation": {
+        "emailRequired": "Email is required.",
+        "selectRole": "Select at least one role to add."
+      },
+      "toasts": {
+        "locked": "User locked.",
+        "unlocked": "User unlocked.",
+        "updated": "User updated.",
+        "rolesUpdated": "Roles updated.",
+        "roleRemoved": "Role removed.",
+        "resetSent": "Instructions were sent if the email is valid.",
+        "created": "User created."
+      }
+    },
+    "configuration": {
+      "regionAria": "Admin portal settings",
+      "title": "Settings",
+      "description": "This view is ready to centralize the admin portal settings."
     }
   }
 }
