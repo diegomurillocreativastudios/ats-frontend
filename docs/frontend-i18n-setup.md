@@ -2049,6 +2049,88 @@ namespace `RecruiterPortal.candidateDetail` y presencia de
 `tests/unit/messages-structure.test.ts` sigue garantizando la paridad exacta de
 keys entre los 5 diccionarios.
 
+## 16-O. Perfil candidato compartido: edición segura y provider en Portal Candidato (Etapa 15)
+
+Cierre seguro de la deuda del **perfil candidato compartido** entre Portal
+Candidato y Portal RRHH. **No** se tocó IA/Vertex AI, Score Breakdown,
+matching/scoring, `VacancyConfig`, reportes, PDF/export, Portal Admin ni
+`lib/pageTitles.ts` / `lib/candidate-portal-translations.ts`.
+
+### 16-O.1 Componentes compartidos auditados
+
+| Componente | Consumidores | Decisión Etapa 15 |
+| ---------- | ------------ | ----------------- |
+| `CandidateProfileSections.tsx` | `candidate-self-profile-view.tsx`, `recruiter-candidate-profile-view.tsx` | Provider `CandidateProfileSectionsProvider` + hook `useProfileEditTranslations()` |
+| `candidate-profile-edit-field-groups.tsx` | Portal Candidato + RRHH (edición) | Namespace vía provider (ya no hardcodeado a `CandidatePortal.profile`) |
+| `use-candidate-profile-editor.ts` | Portal Candidato + RRHH | Mensajes inyectados por parámetro `messages`; birth date vía códigos + mapa traducible |
+| `candidate-salary-expectation-card.tsx` | Portal Candidato + RRHH | **Sin cambios** — sigue en `CandidatePortal.profile` |
+| `candidate-salary-expectation-card` / `lib/candidate-profile-structured.ts` | Solo lectura/display | Sin cambios |
+
+### 16-O.2 Provider en Portal Candidato
+
+`CandidateSelfProfileView` envuelve la ficha con:
+
+```tsx
+<CandidateProfileSectionsProvider namespace="CandidatePortal.profile">
+  …
+</CandidateProfileSectionsProvider>
+```
+
+`RecruiterCandidateProfileView` mantiene:
+
+```tsx
+<CandidateProfileSectionsProvider namespace="RecruiterPortal.candidateDetail">
+  …
+</CandidateProfileSectionsProvider>
+```
+
+Los bloques compartidos (`JobPreferencesBlock`, `WorkExperienceList`, etc.) y el
+formulario de edición resuelven textos desde el namespace activo del provider.
+
+### 16-O.3 Estrategia para hooks compartidos
+
+**`use-candidate-profile-editor.ts`**: Opción A — el hook recibe
+`messages?: Partial<CandidateProfileEditorMessages>` desde el padre (que ya tiene
+`t()`). Validación de fecha de nacimiento: reutiliza
+`getBirthDateInputValidationErrorCode` y mapea a `messages.birthDate[code]`.
+Defaults en español se conservan para compatibilidad.
+
+**`candidate-profile-edit-field-groups.tsx`**: Opción B — hook
+`useProfileEditTranslations()` lee el namespace del provider activo; sin provider
+usa `CandidatePortal.profile`.
+
+### 16-O.4 Namespaces ampliados
+
+Se reutilizaron keys existentes en `CandidatePortal.profile` (`form`, `options`,
+`socialLink`, `actions`) y se añadieron:
+
+- `form.validation.requiredFields`, `form.validation.resumeRequired`
+- `actions.triggerComplete`, `actions.triggerEdit`
+
+Se copió la estructura `form` / `options` / `socialLink` a
+`RecruiterPortal.candidateDetail` en los 5 idiomas, con copy de RRHH en
+`resumeRequired` donde aplica.
+
+### 16-O.5 Reglas respetadas
+
+- **Values canónicos** de selects (`Masculino`, `Inmediata`, etc.) sin cambios.
+- **Data dinámica** (nombre, headline, resumen, availability cruda de API) verbatim.
+- **Texto libre backend** vía `getApiErrorMessage(err)` sin traducir.
+- **Sin locale al backend**; payloads y endpoints intactos.
+
+### 16-O.6 Tests de la etapa
+
+`tests/unit/candidate-profile-shared-edit-i18n.test.tsx` (nuevo): provider en
+Portal Candidato, namespaces de edición en Candidato/RRHH, mensajes inyectables
+del hook, paridad `form/options/socialLink` en `RecruiterPortal.candidateDetail`,
+labels de edición RRHH en `en`, availability dinámica verbatim.
+
+### 16-O.7 Pendientes
+
+- `candidate-salary-expectation-card.tsx` sigue acoplado a `CandidatePortal.profile`.
+- `getCountrySelectOptions()` — nombres de país en español vía `Intl` (Etapa futura).
+- `lib/pageTitles.ts`, `lib/candidate-portal-translations.ts`, metadata `app/mi-perfil/page.tsx`.
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
@@ -2062,7 +2144,8 @@ keys entre los 5 diccionarios.
   Vacantes RRHH** se hizo en Etapa 9 (§16-I): textos estáticos de
   `VacancyLocationFields` (vía props) y metadata estática de
   `/portal-rrhh/vacantes`. El **detalle básico de candidato RRHH** se migró en
-  Etapa 14 (§16-N: perfil sin IA). Quedan pendientes los módulos RRHH pesados:
+  Etapa 14 (§16-N: perfil sin IA). El **formulario de edición compartido** del
+  perfil candidato se migró en Etapa 15 (§16-O). Quedan pendientes los módulos RRHH pesados:
   **formulario de edición** del detalle de vacante
   (`app/portal-rrhh/vacantes/[id]/page.tsx`), detalle profundo de vacante con
   postulaciones/documentos, Resultados IA / Score Breakdown, `VacancyConfig`,
@@ -2076,9 +2159,8 @@ keys entre los 5 diccionarios.
   Etapas, Plantillas, Entrevistas Admin (catálogos + calendario) y la metadata de
   esas rutas. Además, localizar los roles `Admin/Recruiter/Candidate` requiere un
   mapper dedicado con fallback al valor crudo (ver §16-M.6).
-- El **Perfil del Candidato** se migró en Etapa 5D (§16). Quedan pendientes los
-  mensajes de validación y `triggerLabel` del hook compartido
-  `use-candidate-profile-editor.ts`, las opciones de país
+- El **Perfil del Candidato** se migró en Etapa 5D (§16) y el **formulario de
+  edición compartido** en Etapa 15 (§16-O). Quedan pendientes las opciones de país
   (`getCountrySelectOptions`) y la metadata de `app/mi-perfil/page.tsx`.
 - Migrar el mapper de enums `lib/candidate-portal-translations.ts` con keys por
   enum y fallback al valor crudo de la API — ver §14.5.

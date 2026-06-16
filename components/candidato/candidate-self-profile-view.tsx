@@ -44,6 +44,7 @@ import {
 } from "@/components/candidato/candidate-profile-edit-field-groups"
 import { useCandidateProfileEditor } from "@/hooks/use-candidate-profile-editor"
 import {
+  CandidateProfileSectionsProvider,
   SectionCard,
   InfoGrid,
   JobPreferencesBlock,
@@ -195,6 +196,17 @@ export function CandidateSelfProfileView({
     saving: savingProfile,
     saveError: saveProfileError,
     onDismissSaveError: clearSaveProfileError,
+    messages: {
+      requiredFields: t("form.validation.requiredFields"),
+      resumeRequired: t("form.validation.resumeRequired"),
+      birthDate: {
+        invalid: t("form.validation.birthDate.invalid"),
+        futureDate: t("form.validation.birthDate.futureDate"),
+        tooYoung: t("form.validation.birthDate.tooYoung"),
+      },
+      triggerComplete: t("actions.triggerComplete"),
+      triggerEdit: t("actions.triggerEdit"),
+    },
   })
   const parseState = getLatestResumeParseState(raw)
   const latest = selfProfile?.latestResume ?? null
@@ -473,6 +485,7 @@ export function CandidateSelfProfileView({
   const showHero = !!(candidateProfile || selfProfile) || isEditing
 
   return (
+    <CandidateProfileSectionsProvider namespace="CandidatePortal.profile">
     <form
       className="flex flex-col gap-8 md:gap-10"
       noValidate
@@ -933,5 +946,6 @@ export function CandidateSelfProfileView({
         </SectionCard>
       ) : null}
     </form>
+    </CandidateProfileSectionsProvider>
   )
 }

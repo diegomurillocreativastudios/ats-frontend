@@ -471,7 +471,9 @@
         "cancelAria": "Cancel editing without saving",
         "save": "Save changes",
         "saving": "Saving…",
-        "requiredHint": "Headline, summary and ID document are required when saving."
+        "requiredHint": "Headline, summary and ID document are required when saving.",
+        "triggerComplete": "Complete my profile",
+        "triggerEdit": "Edit my profile"
       },
       "download": {
         "genericError": "Download error.",
@@ -522,7 +524,13 @@
         "gender": "Gender",
         "minExpectedSalary": "Minimum expected salary",
         "availability": "Availability",
-        "disabilityRegistered": "Disability (registered)"
+        "disabilityRegistered": "Disability (registered)",
+        "sectors": "Sectors",
+        "desiredRole": "Desired role",
+        "minSalary": "Minimum salary",
+        "educationLevel": "Education level",
+        "desiredCity": "Desired city",
+        "disability": "Disability"
       },
       "values": {
         "yes": "Yes",
@@ -534,7 +542,11 @@
         "documentsLink": "Documents",
         "enrichedEmptySuffix": ".",
         "technicalDataWarning": "Part of your profile arrived in a format that could not be interpreted as JSON. If you see this, let support know.",
-        "complianceDash": "—"
+        "complianceDash": "—",
+        "noWorkExperience": "No work experience on record.",
+        "noEducation": "No education on record.",
+        "noReferences": "No references on record.",
+        "noRecognitions": "No awards on record."
       },
       "form": {
         "identitySummary": "Identity and summary",
@@ -640,7 +652,9 @@
             "invalid": "Invalid date",
             "futureDate": "The date cannot be in the future",
             "tooYoung": "You must be at least 18 years old"
-          }
+          },
+          "requiredFields": "Headline, summary and ID document are required.",
+          "resumeRequired": "Your profile must include resume text. Upload a CV in Documents or contact support."
         }
       },
       "salary": {
@@ -679,6 +693,10 @@
           "toBeAgreed": "To be agreed",
           "perProposal": "Per proposal"
         }
+      },
+      "fallbacks": {
+        "dash": "—",
+        "linkPlatform": "Link"
       }
     }
   },
@@ -872,6 +890,144 @@
       "values": {
         "yes": "Yes",
         "no": "No"
+      },
+      "form": {
+        "identitySummary": "Identity and summary",
+        "contact": "Contact",
+        "locationPersonal": "Location and personal data",
+        "jobPreferences": "Job preferences (goal)",
+        "workExperience": "Work experience",
+        "education": "Education",
+        "languages": "Languages",
+        "skills": "Skills",
+        "links": "Links",
+        "references": "References",
+        "recognitions": "Recognitions",
+        "labels": {
+          "firstName": "First name",
+          "lastName": "Last name",
+          "headline": "Headline",
+          "summary": "Professional summary",
+          "nationalId": "ID document",
+          "email": "Email",
+          "phone": "Phone",
+          "country": "Country",
+          "birthDate": "Date of birth",
+          "birthCity": "City of birth",
+          "maritalStatus": "Marital status",
+          "gender": "Gender",
+          "sectors": "Sectors",
+          "desiredRole": "Desired role",
+          "minSalary": "Minimum salary",
+          "educationLevel": "Education level",
+          "desiredCity": "Desired city",
+          "availability": "Availability",
+          "disability": "Disability",
+          "resumeMarkdown": "Résumé as text (markdown)",
+          "company": "Company",
+          "role": "Role / position",
+          "start": "Start",
+          "end": "End",
+          "description": "Description",
+          "institution": "Institution",
+          "degree": "Degree / title",
+          "language": "Language {index}",
+          "level": "Level",
+          "skillsOnePerLine": "One per line",
+          "url": "URL",
+          "referenceName": "Name",
+          "position": "Position",
+          "contact": "Contact",
+          "recognitionsOnePerLine": "One per line"
+        },
+        "placeholders": {
+          "workStart": "e.g. 2020-01",
+          "workEnd": "e.g. 2023-12 or current",
+          "url": "https://example.com",
+          "sectorsEmpty": "Type a sector and press Enter",
+          "sectorsMore": "Add another…"
+        },
+        "hints": {
+          "resumeMarkdown": "Required on every save.",
+          "skills": "They are saved as a list in your profile.",
+          "recognitions": "Awards, certifications named as text."
+        },
+        "selects": {
+          "unspecified": "Unspecified",
+          "selectCountry": "Select a country",
+          "disabilityUnset": "Not specified",
+          "yes": "Yes",
+          "no": "No"
+        },
+        "buttons": {
+          "addExperience": "Add experience",
+          "addEducation": "Add education",
+          "addLanguage": "Add language",
+          "addReference": "Add reference",
+          "addLink": "Add link",
+          "remove": "Remove",
+          "cancel": "Cancel"
+        },
+        "items": {
+          "experience": "Experience {index}",
+          "education": "Education {index}",
+          "reference": "Reference {index}",
+          "link": "Link {index}"
+        },
+        "aria": {
+          "sectorsGroup": "Sectors",
+          "removeSector": "Remove sector {label}",
+          "removeExperience": "Remove experience {index}",
+          "removeEducation": "Remove education {index}",
+          "removeLanguage": "Remove language {index}"
+        },
+        "addLink": {
+          "heading": "Add link",
+          "emptyHint": "Add links to your portfolio, LinkedIn, GitHub or other platforms. You can add several with the button below.",
+          "errorSelectType": "Select the link type. If you choose «Other», enter the name.",
+          "errorUrl": "Enter the link URL."
+        },
+        "legacy": {
+          "currentValue": "{value} (current value)"
+        },
+        "validation": {
+          "birthDate": {
+            "invalid": "Invalid date",
+            "futureDate": "The date cannot be in the future",
+            "tooYoung": "You must be at least 18 years old"
+          },
+          "requiredFields": "Headline, summary and ID document are required.",
+          "resumeRequired": "The profile must include resume text. Upload a CV or contact support."
+        }
+      },
+      "options": {
+        "gender": {
+          "male": "Male",
+          "female": "Female"
+        },
+        "maritalStatus": {
+          "single": "Single",
+          "married": "Married",
+          "freeUnion": "Civil union",
+          "divorced": "Divorced",
+          "widowed": "Widowed",
+          "separated": "Separated"
+        },
+        "availability": {
+          "immediate": "Immediate",
+          "within15Days": "Within 15 days or less",
+          "within1Month": "Within 1 month",
+          "within2MonthsOrMore": "Within 2 months or more",
+          "toBeAgreed": "To be agreed",
+          "perProposal": "Per proposal"
+        }
+      },
+      "socialLink": {
+        "typeLabel": "Link type",
+        "selectPlaceholder": "Select link type",
+        "otherPrompt": "Other — enter the name",
+        "otherNameLabel": "Platform name",
+        "otherNamePlaceholder": "e.g. Portfolio, Behance…"
       }
     },
     "settings": {

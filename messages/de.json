@@ -471,7 +471,9 @@
         "cancelAria": "Bearbeitung abbrechen, ohne zu speichern",
         "save": "Änderungen speichern",
         "saving": "Wird gespeichert…",
-        "requiredHint": "Überschrift, Zusammenfassung und Ausweisdokument sind beim Speichern erforderlich."
+        "requiredHint": "Überschrift, Zusammenfassung und Ausweisdokument sind beim Speichern erforderlich.",
+        "triggerComplete": "Mein Profil vervollständigen",
+        "triggerEdit": "Mein Profil bearbeiten"
       },
       "download": {
         "genericError": "Download-Fehler.",
@@ -522,7 +524,13 @@
         "gender": "Geschlecht",
         "minExpectedSalary": "Erwartetes Mindestgehalt",
         "availability": "Verfügbarkeit",
-        "disabilityRegistered": "Behinderung (registriert)"
+        "disabilityRegistered": "Behinderung (registriert)",
+        "sectors": "Branchen",
+        "desiredRole": "Gewünschte Rolle",
+        "minSalary": "Mindestgehalt",
+        "educationLevel": "Bildungsniveau",
+        "desiredCity": "Gewünschte Stadt",
+        "disability": "Behinderung"
       },
       "values": {
         "yes": "Ja",
@@ -534,7 +542,11 @@
         "documentsLink": "Dokumente",
         "enrichedEmptySuffix": ".",
         "technicalDataWarning": "Ein Teil deines Profils ist in einem Format eingegangen, das nicht als JSON interpretiert werden konnte. Wenn du das siehst, informiere den Support.",
-        "complianceDash": "—"
+        "complianceDash": "—",
+        "noWorkExperience": "Keine Berufserfahrung hinterlegt.",
+        "noEducation": "Keine Ausbildung hinterlegt.",
+        "noReferences": "Keine Referenzen hinterlegt.",
+        "noRecognitions": "Keine Auszeichnungen hinterlegt."
       },
       "form": {
         "identitySummary": "Identität und Zusammenfassung",
@@ -640,7 +652,9 @@
             "invalid": "Ungültiges Datum",
             "futureDate": "Das Datum darf nicht in der Zukunft liegen",
             "tooYoung": "Du musst mindestens 18 Jahre alt sein"
-          }
+          },
+          "requiredFields": "Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
+          "resumeRequired": "Das Profil muss Lebenslauftext enthalten. Lade einen CV unter Dokumente hoch oder kontaktiere den Support."
         }
       },
       "salary": {
@@ -679,6 +693,10 @@
           "toBeAgreed": "Nach Vereinbarung",
           "perProposal": "Laut Vorschlag"
         }
+      },
+      "fallbacks": {
+        "dash": "—",
+        "linkPlatform": "Link"
       }
     }
   },
@@ -872,6 +890,144 @@
       "values": {
         "yes": "Ja",
         "no": "Nein"
+      },
+      "form": {
+        "identitySummary": "Identität und Zusammenfassung",
+        "contact": "Kontakt",
+        "locationPersonal": "Standort und persönliche Daten",
+        "jobPreferences": "Arbeitspräferenzen (Ziel)",
+        "workExperience": "Berufserfahrung",
+        "education": "Ausbildung",
+        "languages": "Sprachen",
+        "skills": "Fähigkeiten",
+        "links": "Links",
+        "references": "Referenzen",
+        "recognitions": "Auszeichnungen",
+        "labels": {
+          "firstName": "Vorname",
+          "lastName": "Nachname",
+          "headline": "Überschrift / Headline",
+          "summary": "Berufliche Zusammenfassung",
+          "nationalId": "Ausweisdokument",
+          "email": "E-Mail",
+          "phone": "Telefon",
+          "country": "Land",
+          "birthDate": "Geburtsdatum",
+          "birthCity": "Geburtsort",
+          "maritalStatus": "Familienstand",
+          "gender": "Geschlecht",
+          "sectors": "Branchen",
+          "desiredRole": "Gewünschte Rolle",
+          "minSalary": "Mindestgehalt",
+          "educationLevel": "Bildungsniveau",
+          "desiredCity": "Gewünschte Stadt",
+          "availability": "Verfügbarkeit",
+          "disability": "Behinderung",
+          "resumeMarkdown": "Lebenslauf als Text (Markdown)",
+          "company": "Unternehmen",
+          "role": "Rolle / Position",
+          "start": "Beginn",
+          "end": "Ende",
+          "description": "Beschreibung",
+          "institution": "Institution",
+          "degree": "Abschluss / Grad",
+          "language": "Sprache {index}",
+          "level": "Niveau",
+          "skillsOnePerLine": "Eine pro Zeile",
+          "url": "URL",
+          "referenceName": "Name",
+          "position": "Position",
+          "contact": "Kontakt",
+          "recognitionsOnePerLine": "Eine pro Zeile"
+        },
+        "placeholders": {
+          "workStart": "z. B. 2020-01",
+          "workEnd": "z. B. 2023-12 oder aktuell",
+          "url": "https://beispiel.com",
+          "sectorsEmpty": "Gib eine Branche ein und drücke Enter",
+          "sectorsMore": "Weitere hinzufügen…"
+        },
+        "hints": {
+          "resumeMarkdown": "Bei jedem Speichern erforderlich.",
+          "skills": "Sie werden als Liste in deinem Profil gespeichert.",
+          "recognitions": "Auszeichnungen, Zertifizierungen als Text angegeben."
+        },
+        "selects": {
+          "unspecified": "Nicht angegeben",
+          "selectCountry": "Wähle ein Land",
+          "disabilityUnset": "Nicht angegeben",
+          "yes": "Ja",
+          "no": "Nein"
+        },
+        "buttons": {
+          "addExperience": "Erfahrung hinzufügen",
+          "addEducation": "Ausbildung hinzufügen",
+          "addLanguage": "Sprache hinzufügen",
+          "addReference": "Referenz hinzufügen",
+          "addLink": "Link hinzufügen",
+          "remove": "Entfernen",
+          "cancel": "Abbrechen"
+        },
+        "items": {
+          "experience": "Erfahrung {index}",
+          "education": "Ausbildung {index}",
+          "reference": "Referenz {index}",
+          "link": "Link {index}"
+        },
+        "aria": {
+          "sectorsGroup": "Branchen",
+          "removeSector": "Branche {label} entfernen",
+          "removeExperience": "Erfahrung {index} entfernen",
+          "removeEducation": "Ausbildung {index} entfernen",
+          "removeLanguage": "Sprache {index} entfernen"
+        },
+        "addLink": {
+          "heading": "Link hinzufügen",
+          "emptyHint": "Füge Links zu deinem Portfolio, LinkedIn, GitHub oder anderen Plattformen hinzu. Du kannst mit der Schaltfläche unten mehrere hinzufügen.",
+          "errorSelectType": "Wähle den Linktyp. Wenn du «Andere» wählst, gib den Namen ein.",
+          "errorUrl": "Gib die Link-URL ein."
+        },
+        "legacy": {
+          "currentValue": "{value} (aktueller Wert)"
+        },
+        "validation": {
+          "birthDate": {
+            "invalid": "Ungültiges Datum",
+            "futureDate": "Das Datum darf nicht in der Zukunft liegen",
+            "tooYoung": "Du musst mindestens 18 Jahre alt sein"
+          },
+          "requiredFields": "Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
+          "resumeRequired": "Das Profil muss Lebenslauftext enthalten. Lade einen CV hoch oder kontaktiere den Support."
+        }
+      },
+      "options": {
+        "gender": {
+          "male": "Männlich",
+          "female": "Weiblich"
+        },
+        "maritalStatus": {
+          "single": "Ledig",
+          "married": "Verheiratet",
+          "freeUnion": "Eheähnliche Gemeinschaft",
+          "divorced": "Geschieden",
+          "widowed": "Verwitwet",
+          "separated": "Getrennt lebend"
+        },
+        "availability": {
+          "immediate": "Sofort",
+          "within15Days": "Innerhalb von 15 Tagen oder weniger",
+          "within1Month": "Innerhalb von 1 Monat",
+          "within2MonthsOrMore": "Innerhalb von 2 Monaten oder mehr",
+          "toBeAgreed": "Nach Vereinbarung",
+          "perProposal": "Laut Vorschlag"
+        }
+      },
+      "socialLink": {
+        "typeLabel": "Linktyp",
+        "selectPlaceholder": "Linktyp auswählen",
+        "otherPrompt": "Andere — Namen angeben",
+        "otherNameLabel": "Name der Plattform",
+        "otherNamePlaceholder": "z. B. Portfolio, Behance…"
       }
     },
     "settings": {

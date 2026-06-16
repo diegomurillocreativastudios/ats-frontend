@@ -29,7 +29,10 @@ const SPANISH_FALLBACKS: Record<string, string> = {
 
 type SectionLabelFn = (key: string) => string
 
+const DEFAULT_PROFILE_NAMESPACE = "CandidatePortal.profile"
+
 const SectionLabelsContext = createContext<SectionLabelFn | null>(null)
+const ProfileNamespaceContext = createContext<string | null>(null)
 
 export function CandidateProfileSectionsProvider({
   namespace,
@@ -41,8 +44,20 @@ export function CandidateProfileSectionsProvider({
   const t = useTranslations(namespace)
   const label = useCallback((key: string) => t(key), [t])
   return (
-    <SectionLabelsContext.Provider value={label}>{children}</SectionLabelsContext.Provider>
+    <ProfileNamespaceContext.Provider value={namespace}>
+      <SectionLabelsContext.Provider value={label}>{children}</SectionLabelsContext.Provider>
+    </ProfileNamespaceContext.Provider>
   )
+}
+
+/**
+ * Resuelve traducciones del formulario de edición compartido según el namespace
+ * del `CandidateProfileSectionsProvider` activo. Sin provider usa
+ * `CandidatePortal.profile` (Portal Candidato).
+ */
+export function useProfileEditTranslations() {
+  const namespace = useContext(ProfileNamespaceContext) ?? DEFAULT_PROFILE_NAMESPACE
+  return useTranslations(namespace)
 }
 
 function useSectionLabels(): SectionLabelFn {

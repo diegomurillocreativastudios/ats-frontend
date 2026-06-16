@@ -8,9 +8,9 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react"
-import { useTranslations } from "next-intl"
 import { Plus, Trash2, X } from "lucide-react"
 import { SocialLinkTypePicker } from "@/components/candidato/social-link-type-picker"
+import { useProfileEditTranslations } from "@/components/rrhh/CandidateProfileSections"
 import { DatePicker } from "@/components/ui/date-picker"
 import {
   getBirthDateInputValidationErrorCode,
@@ -61,16 +61,16 @@ function ProfileEditSelect({
   onChange,
   disabled,
   options,
-  emptyLabel = "Sin especificar",
+  emptyLabel,
 }: {
   id: string
   value: string
   onChange: (next: string) => void
   disabled: boolean
   options: SelectOption[]
-  emptyLabel?: string
+  emptyLabel: string
 }) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   const merged = useMemo(
     () =>
       mergeLegacySelectOption(options, value, (legacyValue) =>
@@ -144,7 +144,7 @@ export function ProfileEditHeroFields({
   patch,
   saving,
 }: Pick<EditorFieldsBase, "form" | "patch" | "saving">) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.identitySummary")}</p>
@@ -195,7 +195,7 @@ export function ProfileEditHeroFields({
 }
 
 export function ProfileEditNationalIdField({ form, patch, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <ProfileEditField label={t("form.labels.nationalId")} required htmlFor="pf-national-id">
       <input
@@ -211,7 +211,7 @@ export function ProfileEditNationalIdField({ form, patch, saving }: EditorFields
 }
 
 export function ProfileEditContactFields({ form, patch, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.contact")}</p>
@@ -244,7 +244,7 @@ export function ProfileEditContactFields({ form, patch, saving }: EditorFieldsBa
 }
 
 export function ProfileEditLocationAndPersonalFields({ form, patch, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   const countryOptions = useMemo(
     () => getCountrySelectOptions().map((c) => ({ value: c.value, label: c.label })),
     []
@@ -332,7 +332,7 @@ function ProfileEditSectorsTags({
   onSectorsChange: (next: string[]) => void
   disabled: boolean
 }) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   const [draft, setDraft] = useState("")
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -401,7 +401,7 @@ function ProfileEditSectorsTags({
 }
 
 export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.jobPreferences")}</p>
@@ -494,7 +494,7 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
 }
 
 export function ProfileEditResumeMarkdownField({ form, patch, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <ProfileEditField
       label={t("form.labels.resumeMarkdown")}
@@ -515,7 +515,7 @@ export function ProfileEditResumeMarkdownField({ form, patch, saving }: EditorFi
 }
 
 export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.workExperience")}</p>
@@ -654,7 +654,7 @@ export function ProfileEditWorkFields({ form, setForm, saving }: EditorFieldsBas
 }
 
 export function ProfileEditEducationFields({ form, setForm, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.education")}</p>
@@ -776,7 +776,7 @@ export function ProfileEditEducationFields({ form, setForm, saving }: EditorFiel
 }
 
 export function ProfileEditLanguagesFields({ form, setForm, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.languages")}</p>
@@ -857,7 +857,7 @@ export function ProfileEditLanguagesFields({ form, setForm, saving }: EditorFiel
 }
 
 export function ProfileEditSkillsField({ form, patch, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.skills")}</p>
@@ -884,7 +884,7 @@ export function ProfileEditSocialVideoFields({
   setForm,
   saving,
 }: Pick<EditorFieldsBase, "form" | "setForm" | "saving">) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   const [isAddingLinkOpen, setIsAddingLinkOpen] = useState(false)
   const [addDraftKey, setAddDraftKey] = useState(0)
   const [draftPlatform, setDraftPlatform] = useState("")
@@ -1074,7 +1074,7 @@ export function ProfileEditSocialVideoFields({
 }
 
 export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.references")}</p>
@@ -1194,7 +1194,7 @@ export function ProfileEditReferencesFields({ form, setForm, saving }: EditorFie
 }
 
 export function ProfileEditRecognitionsField({ form, patch, saving }: EditorFieldsBase) {
-  const t = useTranslations("CandidatePortal.profile")
+  const t = useProfileEditTranslations()
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.recognitions")}</p>

@@ -167,6 +167,17 @@ export function RecruiterCandidateProfileView({
     saving: savingProfile,
     saveError: saveProfileError,
     onDismissSaveError: clearSaveProfileError,
+    messages: {
+      requiredFields: t("form.validation.requiredFields"),
+      resumeRequired: t("form.validation.resumeRequired"),
+      birthDate: {
+        invalid: t("form.validation.birthDate.invalid"),
+        futureDate: t("form.validation.birthDate.futureDate"),
+        tooYoung: t("form.validation.birthDate.tooYoung"),
+      },
+      triggerComplete: t("actions.editProfile"),
+      triggerEdit: t("actions.editProfile"),
+    },
   })
 
   const firstName = String(nd.FirstName ?? nd.firstName ?? "")
