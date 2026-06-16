@@ -160,6 +160,10 @@
     "recruiterVacancies": {
       "title": "ATS | HR Portal | Vacancies",
       "description": "Manage the company's open positions and vacancies"
+    },
+    "recruiterReports": {
+      "title": "ATS | HR Portal | Reports",
+      "description": "Review recruiting metrics and reports"
     }
   },
   "PortalSelection": {
@@ -667,6 +671,48 @@
     "french": "French"
   },
   "RecruiterPortal": {
+    "reports": {
+      "breadcrumb": "Reports",
+      "page": {
+        "title": "Reports",
+        "description": "Choose a report from templates or system views. You can filter, review charts, and download data when available.",
+        "headerRegionLabel": "Reports header"
+      },
+      "catalog": {
+        "heading": "Reports",
+        "description": "Official system reports. Open any of them to apply filters and download the PDF when it has a linked template.",
+        "regionLabel": "Reports available to download",
+        "descriptionFallback": "Report available. Apply filters and download the result.",
+        "unlinkedHint": "Link a Document-type template marked as a report from the administration area."
+      },
+      "cards": {
+        "openAndDownload": "Open and download",
+        "unlinkedBadge": "No linked template",
+        "openReportAria": "Open report: {title}",
+        "unlinkedReportAria": "Report without template: {title}",
+        "templateBadge": "Template: {name}"
+      },
+      "filters": {
+        "legend": "Filters",
+        "hint": "Values are sent as query params to the reports API."
+      },
+      "actions": {
+        "downloadPdf": "Download PDF",
+        "downloadingPdf": "Generating PDF…",
+        "downloadPdfAria": "Download report PDF",
+        "downloadPdfTooltip": "Captures the report visible on screen and downloads it as a PDF in your browser.",
+        "retry": "Retry reports"
+      },
+      "emptyStates": {
+        "noCatalog": "The reports catalog does not return results yet."
+      },
+      "errors": {
+        "catalogLoadTitle": "Could not load the reports catalog",
+        "catalogLoadFailed": "Could not load the reports catalog.",
+        "catalogForbidden": "You do not have permission to view the reports catalog.",
+        "pdfFailed": "The PDF could not be generated."
+      }
+    },
     "candidates": {
       "breadcrumb": "Candidates",
       "title": "Candidates",

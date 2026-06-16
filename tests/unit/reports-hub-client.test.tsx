@@ -1,8 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { render, screen, waitFor, within } from "@testing-library/react"
+import { NextIntlClientProvider } from "next-intl"
 import { ReportsHubClient } from "@/components/rrhh/reportes/reports-hub-client"
 import { fetchReportsCatalog } from "@/lib/api/recruiter-reports-catalog"
 import { fetchTemplatesList } from "@/lib/templates/technical-sheet-template"
+import esMessages from "@/messages/es.json"
+
+function renderHub() {
+    return render(
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+            <ReportsHubClient />
+        </NextIntlClientProvider>
+    )
+}
 
 vi.mock("@/lib/api/recruiter-reports-catalog", async (importOriginal) => {
     const actual = await importOriginal<
@@ -58,7 +68,7 @@ describe("ReportsHubClient", () => {
     })
 
     it("renders the catalog reports section once the catalog resolves", async () => {
-        render(<ReportsHubClient />)
+        renderHub()
 
         const section = await screen.findByRole("region", {
             name: /Reportes disponibles para descargar/i,
@@ -81,7 +91,7 @@ describe("ReportsHubClient", () => {
     })
 
     it("links catalog cards with a bound template to the template detail page", async () => {
-        render(<ReportsHubClient />)
+        renderHub()
 
         const link = await screen.findByRole("link", {
             name: /Abrir reporte: Avance de vacantes por cliente/i,
@@ -94,7 +104,7 @@ describe("ReportsHubClient", () => {
     })
 
     it("renders unbound catalog reports as a disabled card with a guidance message", async () => {
-        render(<ReportsHubClient />)
+        renderHub()
 
         await screen.findByText("Estatus de candidatos por etapa")
 
@@ -114,7 +124,7 @@ describe("ReportsHubClient", () => {
             Object.assign(new Error("boom"), { status: 500 })
         )
 
-        render(<ReportsHubClient />)
+        renderHub()
 
         expect(
             await screen.findByText(

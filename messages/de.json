@@ -160,6 +160,10 @@
     "recruiterVacancies": {
       "title": "ATS | HR-Portal | Stellen",
       "description": "Verwalte die offenen Stellen und Vakanzen des Unternehmens"
+    },
+    "recruiterReports": {
+      "title": "ATS | HR-Portal | Berichte",
+      "description": "Rekrutierungskennzahlen und Berichte einsehen"
     }
   },
   "PortalSelection": {
@@ -667,6 +671,48 @@
     "french": "Französisch"
   },
   "RecruiterPortal": {
+    "reports": {
+      "breadcrumb": "Berichte",
+      "page": {
+        "title": "Berichte",
+        "description": "Wähle einen Bericht aus Vorlagen oder Systemansichten. Du kannst filtern, Diagramme prüfen und Daten herunterladen, sofern verfügbar.",
+        "headerRegionLabel": "Berichtskopf"
+      },
+      "catalog": {
+        "heading": "Berichte",
+        "description": "Offizielle Systemberichte. Öffne einen beliebigen, um Filter anzuwenden und das PDF herunterzuladen, wenn eine Vorlage verknüpft ist.",
+        "regionLabel": "Zum Download verfügbare Berichte",
+        "descriptionFallback": "Bericht verfügbar. Filter anwenden und Ergebnis herunterladen.",
+        "unlinkedHint": "Verknüpfe im Verwaltungsbereich eine als Bericht markierte Vorlage vom Typ Dokument."
+      },
+      "cards": {
+        "openAndDownload": "Öffnen und herunterladen",
+        "unlinkedBadge": "Keine verknüpfte Vorlage",
+        "openReportAria": "Bericht öffnen: {title}",
+        "unlinkedReportAria": "Bericht ohne Vorlage: {title}",
+        "templateBadge": "Vorlage: {name}"
+      },
+      "filters": {
+        "legend": "Filter",
+        "hint": "Die Werte werden als Query-Parameter an die Berichts-API gesendet."
+      },
+      "actions": {
+        "downloadPdf": "PDF herunterladen",
+        "downloadingPdf": "PDF wird erstellt…",
+        "downloadPdfAria": "Bericht-PDF herunterladen",
+        "downloadPdfTooltip": "Erfasst den auf dem Bildschirm sichtbaren Bericht und lädt ihn als PDF in deinem Browser herunter.",
+        "retry": "Berichte erneut laden"
+      },
+      "emptyStates": {
+        "noCatalog": "Der Berichtskatalog liefert noch keine Ergebnisse."
+      },
+      "errors": {
+        "catalogLoadTitle": "Der Berichtskatalog konnte nicht geladen werden",
+        "catalogLoadFailed": "Der Berichtskatalog konnte nicht geladen werden.",
+        "catalogForbidden": "Du hast keine Berechtigung, den Berichtskatalog anzuzeigen.",
+        "pdfFailed": "Das PDF konnte nicht erstellt werden."
+      }
+    },
     "candidates": {
       "breadcrumb": "Kandidaten",
       "title": "Kandidaten",

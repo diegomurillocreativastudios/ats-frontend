@@ -160,6 +160,10 @@
     "recruiterVacancies": {
       "title": "ATS | Portail RH | Postes",
       "description": "Gérez les postes ouverts et les vacances de l'entreprise"
+    },
+    "recruiterReports": {
+      "title": "ATS | Portail RH | Rapports",
+      "description": "Consultez les indicateurs et rapports de recrutement"
     }
   },
   "PortalSelection": {
@@ -667,6 +671,48 @@
     "french": "Français"
   },
   "RecruiterPortal": {
+    "reports": {
+      "breadcrumb": "Rapports",
+      "page": {
+        "title": "Rapports",
+        "description": "Choisissez un rapport parmi les modèles ou les vues du système. Vous pouvez filtrer, consulter les graphiques et télécharger les données lorsque c'est possible.",
+        "headerRegionLabel": "En-tête des rapports"
+      },
+      "catalog": {
+        "heading": "Rapports",
+        "description": "Rapports officiels du système. Ouvrez-en un pour appliquer des filtres et télécharger le PDF lorsqu'un modèle est lié.",
+        "regionLabel": "Rapports disponibles au téléchargement",
+        "descriptionFallback": "Rapport disponible. Appliquez des filtres et téléchargez le résultat.",
+        "unlinkedHint": "Liez un modèle de type Document marqué comme rapport depuis l'espace d'administration."
+      },
+      "cards": {
+        "openAndDownload": "Ouvrir et télécharger",
+        "unlinkedBadge": "Aucun modèle lié",
+        "openReportAria": "Ouvrir le rapport : {title}",
+        "unlinkedReportAria": "Rapport sans modèle : {title}",
+        "templateBadge": "Modèle : {name}"
+      },
+      "filters": {
+        "legend": "Filtres",
+        "hint": "Les valeurs sont envoyées comme query params à l'API des rapports."
+      },
+      "actions": {
+        "downloadPdf": "Télécharger le PDF",
+        "downloadingPdf": "Génération du PDF…",
+        "downloadPdfAria": "Télécharger le PDF du rapport",
+        "downloadPdfTooltip": "Capture le rapport visible à l'écran et le télécharge en PDF dans votre navigateur.",
+        "retry": "Réessayer les rapports"
+      },
+      "emptyStates": {
+        "noCatalog": "Le catalogue des rapports ne renvoie pas encore de résultats."
+      },
+      "errors": {
+        "catalogLoadTitle": "Impossible de charger le catalogue des rapports",
+        "catalogLoadFailed": "Impossible de charger le catalogue des rapports.",
+        "catalogForbidden": "Vous n'avez pas l'autorisation de voir le catalogue des rapports.",
+        "pdfFailed": "Le PDF n'a pas pu être généré."
+      }
+    },
     "candidates": {
       "breadcrumb": "Candidats",
       "title": "Candidats",

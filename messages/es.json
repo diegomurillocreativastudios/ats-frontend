@@ -160,6 +160,10 @@
     "recruiterVacancies": {
       "title": "ATS | Portal RRHH | Vacantes",
       "description": "Gestiona las posiciones abiertas y vacantes de la empresa"
+    },
+    "recruiterReports": {
+      "title": "ATS | Portal RRHH | Reportes",
+      "description": "Consulta métricas y reportes de reclutamiento"
     }
   },
   "PortalSelection": {
@@ -667,6 +671,48 @@
     "french": "Francés"
   },
   "RecruiterPortal": {
+    "reports": {
+      "breadcrumb": "Reportes",
+      "page": {
+        "title": "Reportes",
+        "description": "Elegí un reporte desde plantillas o las vistas del sistema. Podés filtrar, revisar gráficos y bajar datos cuando aplique.",
+        "headerRegionLabel": "Encabezado de reportes"
+      },
+      "catalog": {
+        "heading": "Reportes",
+        "description": "Reportes oficiales del sistema. Abrí cualquiera para aplicar filtros y descargar el PDF cuando tenga una plantilla vinculada.",
+        "regionLabel": "Reportes disponibles para descargar",
+        "descriptionFallback": "Reporte disponible. Aplicá filtros y descargá el resultado.",
+        "unlinkedHint": "Vinculá una plantilla de tipo Documento marcada como reporte desde administración."
+      },
+      "cards": {
+        "openAndDownload": "Abrir y descargar",
+        "unlinkedBadge": "Sin plantilla vinculada",
+        "openReportAria": "Abrir reporte: {title}",
+        "unlinkedReportAria": "Reporte sin plantilla: {title}",
+        "templateBadge": "Plantilla: {name}"
+      },
+      "filters": {
+        "legend": "Filtros",
+        "hint": "Los valores se envían como query params al API de reportes."
+      },
+      "actions": {
+        "downloadPdf": "Descargar PDF",
+        "downloadingPdf": "Generando PDF…",
+        "downloadPdfAria": "Descargar PDF del reporte",
+        "downloadPdfTooltip": "Captura el reporte visible en pantalla y lo descarga como PDF en tu navegador.",
+        "retry": "Reintentar reportes"
+      },
+      "emptyStates": {
+        "noCatalog": "El catálogo de reportes aún no devuelve resultados."
+      },
+      "errors": {
+        "catalogLoadTitle": "No se pudo cargar el catálogo de reportes",
+        "catalogLoadFailed": "No se pudo cargar el catálogo de reportes.",
+        "catalogForbidden": "No tenés permisos para ver el catálogo de reportes.",
+        "pdfFailed": "No se pudo generar el PDF."
+      }
+    },
     "candidates": {
       "breadcrumb": "Candidatos",
       "title": "Candidatos",

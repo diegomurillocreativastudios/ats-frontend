@@ -1700,6 +1700,105 @@ esta etapa: se verificó vía `git stash` que fallan igual sin estos cambios.
 - `getInterviewHttpErrorMessage` se internacionalizaría sólo si se separan códigos
   estables del texto (deuda frontend).
 
+## 16-L. Reportes RRHH (UI estática básica) (Etapa 12)
+
+Migración **acotada y segura** de la UI estática básica del **hub de Reportes
+RRHH** y sus componentes compartidos a `next-intl`. **No** se tocó generación de
+PDF, `pdfkit`, builders de reportes, lógica de exportación, cálculos de métricas,
+data shaping, query params, charts complejos, filtros, IA/Vertex AI ni Score
+Breakdown.
+
+### 16-L.1 Componentes/rutas migradas
+
+- `app/portal-rrhh/reportes/page.tsx` (hub de reportes): título y descripción de
+  página, `aria-label` de la región de encabezado y breadcrumb del topbar (vía
+  `useTranslations("RecruiterPortal.reports")` en server component) +
+  `generateMetadata()` (ver §16-L.3).
+- `components/rrhh/reportes/reports-hub-client.tsx`: encabezado y descripción del
+  bloque de catálogo, `aria-label` de la región, estado vacío
+  (`emptyStates.noCatalog`), título/fallback de error de carga, botón
+  "Reintentar reportes" (texto + `aria-label`), fallback de permiso
+  (`errors.catalogForbidden`), fallback genérico
+  (`getApiErrorMessage(err) || t('errors.catalogLoadFailed')`), fallback de
+  descripción de card (`catalog.descriptionFallback`), prefijo del badge
+  `cards.templateBadge` (`Plantilla: {name}`, el `{name}` sigue siendo dinámico)
+  y `catalog.unlinkedHint`.
+- `components/rrhh/reportes/report-hub-catalog-card.tsx` (ahora `"use client"`):
+  CTA "Abrir y descargar", badge "Sin plantilla vinculada" y `aria-label`s
+  `cards.openReportAria` / `cards.unlinkedReportAria` (el `{title}` es dinámico).
+- `components/rrhh/reportes/reportes-view-pdf-button.tsx`: texto del botón
+  (`Descargar PDF` / `Generando PDF…`), `aria-label`, `title` (tooltip) y fallback
+  de error de PDF (`getApiErrorMessage(err) || t('errors.pdfFailed')`). **El
+  handler `downloadReportViewAsPdf(filenameBase)` se mantuvo intacto.**
+- `components/rrhh/reportes/reportes-filters-placeholder.tsx` (ahora
+  `"use client"`): leyenda por defecto del `fieldset` (`filters.legend`) y texto de
+  ayuda por defecto (`filters.hint`). Los `props` `legendLabel`/`hintText` que pasen
+  los consumidores siguen teniendo prioridad; no se cambió la lógica de filtros.
+
+### 16-L.2 Namespace `RecruiterPortal.reports`
+
+Subsecciones agregadas en los 5 diccionarios: `breadcrumb`, `page`, `catalog`,
+`cards`, `filters`, `actions`, `emptyStates`, `errors`. Solo UI estática
+controlada por frontend.
+
+### 16-L.3 Metadata
+
+- `app/portal-rrhh/reportes/page.tsx` ahora exporta `generateMetadata()` con
+  `getTranslations("Metadata.recruiterReports")` (`title.absolute` + `description`).
+- Se agregó `Metadata.recruiterReports` en los 5 idiomas.
+
+### 16-L.4 Regla crítica — qué NO se tradujo
+
+- **Data dinámica del catálogo**: `item.name`, `item.description` y
+  `item.linkedTemplate.name` se renderizan **verbatim** (texto libre del backend /
+  nombres configurables por usuario).
+- Mensajes literales del backend: se mantiene el patrón
+  `getApiErrorMessage(err) || t('errors.…')`; nunca se traduce el mensaje crudo.
+- **No** se tradujo IA/Vertex AI, Score Breakdown, métricas/conteos/series,
+  datos calculados, nombres de candidatos/vacantes/empresas/etapas/departamentos
+  ni tecnologías.
+- **No** se modificaron llamadas a API, payloads ni nombres de campos; **no** se
+  envía `locale` al backend; **no** se cambiaron query params, defaults de filtros
+  ni lógica de filtrado.
+
+### 16-L.5 Fuera de scope (pendiente)
+
+Quedan **sin migrar** (data shaping / filtros complejos / PDF / fallas
+preexistentes): las páginas de detalle de reporte
+(`app/portal-rrhh/reportes/{resumen,salary-expectations,recruiter-productivity,
+avance-vacantes-por-cliente,estatus-candidatos-por-etapa,evaluaciones-tecnicas,
+preliminary-match-scores,fuentes-reclutamiento}/page.tsx`) y los componentes
+`report-data-view-client.tsx`, `report-filter-renderer.tsx`,
+`report-template-detail-client.tsx`, `report-by-key-resolver-client.tsx`,
+`reporte-resumen-dashboard.tsx`, `lib/messages/report-template.ts`, además de
+todo `*pdf*`/`build-*-report*`/`export*`. `report-hub-link-card.tsx` está **sin
+uso** en el código y no se migró.
+
+### 16-L.6 Tests de la etapa
+
+- `tests/unit/recruiter-reports-i18n.test.tsx` (nuevo): hub de reportes (encabezado
+  de catálogo + estado vacío) en `es`/`en`, cards del catálogo (UI estática
+  traducida + datos del catálogo verbatim), fallback de error desde el diccionario,
+  botón de PDF (texto traducido `es`/`en` + **conservación del handler** de
+  descarga) y paridad del subnamespace `RecruiterPortal.reports` + presencia de
+  `Metadata.recruiterReports` en los 5 idiomas.
+- `tests/unit/messages-structure.test.ts` sigue pasando (paridad estructural).
+- `tests/unit/reports-hub-client.test.tsx` (actualizado): se envuelve el render del
+  hub en `NextIntlClientProvider` (`es`) — el componente ahora requiere el contexto
+  de `next-intl`. Sus aserciones en español no cambian.
+- `tests/unit/report-data-view-client.test.tsx` (actualizado, **solo render**): este
+  test pasaba en baseline y renderiza los componentes compartidos migrados (botón
+  de PDF y contenedor de filtros), por lo que ahora necesita
+  `NextIntlClientProvider`. Solo se envolvió el render; **no** se tocó la lógica del
+  componente ni sus aserciones (data/filtros/PDF siguen fuera de scope).
+
+Las fallas **preexistentes** de reportes/PDF **no** se abordaron y siguen fuera de
+scope: `report-filter-renderer`, `build-vacancy-progress-report-pdfkit-buffer`,
+`admin-vacancy-catalog-content`, `public-vacancies`, `recruiter-companies-api` (7
+tests). Se verificó vía `git stash` que fallan igual sin los cambios de esta etapa
+y que `report-data-view-client` **sí** pasaba en baseline (de ahí el wrapper de
+contexto en su test).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
