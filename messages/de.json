@@ -156,6 +156,10 @@
     "candidateProfile": {
       "title": "Mein Profil",
       "description": "Überprüfe und verwalte deine Kontodaten im Kandidatenportal"
+    },
+    "recruiterVacancies": {
+      "title": "ATS | HR-Portal | Stellen",
+      "description": "Verwalte die offenen Stellen und Vakanzen des Unternehmens"
     }
   },
   "PortalSelection": {
@@ -704,6 +708,11 @@
     },
     "vacancies": {
       "breadcrumb": "Stellen",
+      "location": {
+        "unspecified": "Nicht angegeben",
+        "loadCountriesError": "Länder konnten nicht geladen werden.",
+        "loadStatesError": "Bundesländer oder Provinzen konnten nicht geladen werden."
+      },
       "page": {
         "title": "Stellen",
         "description": "Offene Stellen verwalten",

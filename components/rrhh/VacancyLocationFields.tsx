@@ -42,6 +42,9 @@ export interface VacancyLocationFieldsProps {
   countryLabel?: string
   stateLabel?: string
   helperText?: string
+  unspecifiedLabel?: string
+  loadCountriesErrorLabel?: string
+  loadStatesErrorLabel?: string
 }
 
 export function VacancyLocationFields({
@@ -54,6 +57,9 @@ export function VacancyLocationFields({
   countryLabel = "País",
   stateLabel = "Estado / provincia",
   helperText = "Opcional. Elige país y estado o provincia donde aplica la vacante.",
+  unspecifiedLabel = "Sin especificar",
+  loadCountriesErrorLabel = "No se pudieron cargar los países.",
+  loadStatesErrorLabel = "No se pudieron cargar los estados o provincias.",
 }: VacancyLocationFieldsProps) {
   const [useGeoNamesApi, setUseGeoNamesApi] = useState(false)
   const [countryOptions, setCountryOptions] = useState<CountryOption[]>([])
@@ -61,7 +67,7 @@ export function VacancyLocationFields({
   const [legacyStates, setLegacyStates] = useState<IState[]>([])
   const [loadingCountries, setLoadingCountries] = useState(true)
   const [loadingStates, setLoadingStates] = useState(false)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<"countries" | "states" | null>(null)
 
   const normalizedCountryCode = useMemo(() => normalizeCountryCode(countryCode) ?? "", [countryCode])
   const normalizedStateCode = useMemo(() => normalizeStateCode(stateCode) ?? "", [stateCode])
@@ -110,7 +116,7 @@ export function VacancyLocationFields({
         } catch {
           if (cancelled) return
           setCountryOptions([])
-          setLoadError("No se pudieron cargar los países.")
+          setLoadError("countries")
         }
       } finally {
         if (!cancelled) setLoadingCountries(false)
@@ -165,7 +171,7 @@ export function VacancyLocationFields({
         if (cancelled) return
         setStateOptions([])
         setLegacyStates([])
-        setLoadError("No se pudieron cargar los estados o provincias.")
+        setLoadError("states")
       } finally {
         if (!cancelled) setLoadingStates(false)
       }
@@ -229,6 +235,13 @@ export function VacancyLocationFields({
     return stateOptions
   }, [stateOptions, legacyStates, normalizedCountryCode, normalizedStateCode])
 
+  const loadErrorLabel =
+    loadError === "countries"
+      ? loadCountriesErrorLabel
+      : loadError === "states"
+        ? loadStatesErrorLabel
+        : null
+
   return (
     <div className="flex flex-col gap-2">
       <div className="grid gap-4 md:grid-cols-2">
@@ -244,7 +257,7 @@ export function VacancyLocationFields({
             aria-label={countryLabel}
             disabled={disabled || loadingCountries}
           >
-            <option value="">Sin especificar</option>
+            <option value="">{unspecifiedLabel}</option>
             {countryOptionsWithSelection.map((country) => (
               <option key={country.iso2} value={country.iso2}>
                 {country.label}
@@ -265,7 +278,7 @@ export function VacancyLocationFields({
             aria-label={stateLabel}
             disabled={disabled || !normalizedCountryCode || loadingStates}
           >
-            <option value="">Sin especificar</option>
+            <option value="">{unspecifiedLabel}</option>
             {stateOptionsWithSelection.map((state) => (
               <option key={state.code} value={state.code}>
                 {state.label}
@@ -279,9 +292,9 @@ export function VacancyLocationFields({
         <p className="font-sans text-xs text-muted-foreground">{helperText}</p>
       ) : null}
 
-      {loadError ? (
+      {loadErrorLabel ? (
         <p className="font-sans text-xs text-amber-700" role="status">
-          {loadError}
+          {loadErrorLabel}
         </p>
       ) : null}
     </div>

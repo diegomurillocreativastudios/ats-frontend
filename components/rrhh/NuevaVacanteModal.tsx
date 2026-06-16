@@ -36,6 +36,7 @@ export const createEmptyRequirement = () => ({
 
 export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackbar }) {
   const t = useTranslations("RecruiterPortal.vacancies.form");
+  const tLocation = useTranslations("RecruiterPortal.vacancies.location");
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [detalles, setDetalles] = useState("");
@@ -467,6 +468,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
           countryLabel={t("fields.country.label")}
           stateLabel={t("fields.state.label")}
           helperText={t("fields.locationHelper")}
+          unspecifiedLabel={tLocation("unspecified")}
+          loadCountriesErrorLabel={tLocation("loadCountriesError")}
+          loadStatesErrorLabel={tLocation("loadStatesError")}
           disabled={loading}
         />
 

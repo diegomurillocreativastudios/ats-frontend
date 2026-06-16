@@ -156,6 +156,10 @@
     "candidateProfile": {
       "title": "Il mio profilo",
       "description": "Consulta e gestisci le informazioni del tuo account nel portale dei candidati"
+    },
+    "recruiterVacancies": {
+      "title": "ATS | Portale HR | Posizioni",
+      "description": "Gestisci le posizioni aperte e le vacanze dell'azienda"
     }
   },
   "PortalSelection": {
@@ -704,6 +708,11 @@
     },
     "vacancies": {
       "breadcrumb": "Posizioni",
+      "location": {
+        "unspecified": "Non specificato",
+        "loadCountriesError": "Impossibile caricare i paesi.",
+        "loadStatesError": "Impossibile caricare gli stati o le province."
+      },
       "page": {
         "title": "Posizioni",
         "description": "Gestisci le posizioni aperte",

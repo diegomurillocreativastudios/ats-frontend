@@ -156,6 +156,10 @@
     "candidateProfile": {
       "title": "My profile",
       "description": "Review and manage your account information in the candidate portal"
+    },
+    "recruiterVacancies": {
+      "title": "ATS | HR Portal | Vacancies",
+      "description": "Manage the company's open positions and vacancies"
     }
   },
   "PortalSelection": {
@@ -704,6 +708,11 @@
     },
     "vacancies": {
       "breadcrumb": "Vacancies",
+      "location": {
+        "unspecified": "Unspecified",
+        "loadCountriesError": "Countries could not be loaded.",
+        "loadStatesError": "States or provinces could not be loaded."
+      },
       "page": {
         "title": "Vacancies",
         "description": "Manage open positions",

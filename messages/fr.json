@@ -156,6 +156,10 @@
     "candidateProfile": {
       "title": "Mon profil",
       "description": "Consultez et gérez les informations de votre compte dans le portail des candidats"
+    },
+    "recruiterVacancies": {
+      "title": "ATS | Portail RH | Postes",
+      "description": "Gérez les postes ouverts et les vacances de l'entreprise"
     }
   },
   "PortalSelection": {
@@ -704,6 +708,11 @@
     },
     "vacancies": {
       "breadcrumb": "Postes",
+      "location": {
+        "unspecified": "Non spécifié",
+        "loadCountriesError": "Impossible de charger les pays.",
+        "loadStatesError": "Impossible de charger les états ou provinces."
+      },
       "page": {
         "title": "Postes",
         "description": "Gérez les postes ouverts",

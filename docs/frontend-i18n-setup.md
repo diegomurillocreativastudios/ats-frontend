@@ -1317,6 +1317,139 @@ no cambia al traducir.
 La suite i18n previa (incl. `recruiter-vacancies-i18n` de Etapa 7 y
 `messages-structure`) sigue pasando.
 
+## 16-I. Cierre seguro de Vacantes RRHH (Etapa 9)
+
+La Etapa 9 cierra los **pendientes seguros** de Vacantes RRHH detectados en la
+Etapa 8, sin tocar edición compleja, IA, Score Breakdown ni `VacancyConfig`.
+
+### 16-I.1 Componentes/rutas migrados
+
+```txt
+components/rrhh/VacancyLocationFields.tsx     (textos estáticos vía props)
+components/rrhh/NuevaVacanteModal.tsx         (inyecta los labels traducidos)
+app/portal-rrhh/vacantes/layout.ts           (metadata estática → generateMetadata)
+```
+
+### 16-I.2 Decisión sobre `VacancyLocationFields` (Opción B — props)
+
+`VacancyLocationFields` es un componente **compartido**: lo consumen
+`NuevaVacanteModal` (migrado en Etapa 8) y el **formulario de edición** del
+detalle de vacante (`app/portal-rrhh/vacantes/[id]/page.tsx`), que está **fuera
+de scope** por estar acoplado a IA/Score/`VacancyConfig`.
+
+Para no acoplar el componente compartido directamente a `next-intl` ni alterar al
+consumidor fuera de scope, se eligió la **Opción B (migración por props)**:
+
+- Se añadieron props opcionales con **defaults en español** que preservan el
+  comportamiento actual:
+  - `unspecifiedLabel` (default `"Sin especificar"`)
+  - `loadCountriesErrorLabel` (default `"No se pudieron cargar los países."`)
+  - `loadStatesErrorLabel` (default `"No se pudieron cargar los estados o provincias."`)
+- El estado de error interno pasó de guardar el string a una unión discriminada
+  (`"countries" | "states" | null`); el texto visible se resuelve en render desde
+  las props. Esto evita reejecutar efectos y mantiene la lógica intacta.
+- `NuevaVacanteModal` inyecta los labels traducidos desde
+  `RecruiterPortal.vacancies.location`.
+- El formulario de edición (fuera de scope) **no se tocó**: usa los defaults en
+  español, idéntico al comportamiento previo.
+
+### 16-I.3 Namespace `RecruiterPortal.vacancies.location`
+
+Solo se añadieron las keys que corresponden a textos **estáticos reales** del
+componente (no se inventaron `city`/`selectCountry`/`selectState`, que no existen):
+
+```json
+{
+  "RecruiterPortal": {
+    "vacancies": {
+      "location": {
+        "unspecified": "Sin especificar",
+        "loadCountriesError": "No se pudieron cargar los países.",
+        "loadStatesError": "No se pudieron cargar los estados o provincias."
+      }
+    }
+  }
+}
+```
+
+### 16-I.4 Metadata de vacantes RRHH
+
+`app/portal-rrhh/vacantes/layout.ts` tenía metadata **estática** hardcodeada
+(`title.absolute` + `description`). Se migró a `generateMetadata()` con
+`getTranslations`, preservando el formato `title.absolute` (override del template
+`ATS | %s` del root layout):
+
+```ts
+import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.recruiterVacancies");
+  return {
+    title: { absolute: t("title") },
+    description: t("description"),
+  };
+}
+```
+
+Namespace nuevo `Metadata.recruiterVacancies` (en los 5 diccionarios):
+
+```json
+{
+  "Metadata": {
+    "recruiterVacancies": {
+      "title": "ATS | Portal RRHH | Vacantes",
+      "description": "Gestiona las posiciones abiertas y vacantes de la empresa"
+    }
+  }
+}
+```
+
+### 16-I.5 Regla de no traducir data dinámica/IA (reafirmada)
+
+En esta etapa **solo** se tradujo UI estática controlada por el frontend. **No**
+se tradujo ni alteró:
+
+- Catálogos remotos: nombres de países/estados/provincias provienen de API/BD
+  (`fetchAllLocationCountries`, `getStatesOfCountry`, GeoNames) y se renderizan
+  **sin traducir**. Los `value` canónicos de los `select` (códigos ISO) no cambian.
+- Data generada por IA (resúmenes, razones positivas/negativas, recomendaciones,
+  Score Breakdown, señales usadas), texto extraído de archivos, texto de usuario,
+  nombres propios ni tecnologías.
+- No se modificaron llamadas a API ni se envió `locale` al backend.
+
+### 16-I.6 Qué quedó fuera de scope (pendientes no seguros)
+
+- **Formulario de edición** del detalle de vacante
+  (`app/portal-rrhh/vacantes/[id]/page.tsx`): mezcla edición con IA, Score
+  Breakdown y `VacancyConfig`. Sigue con textos en español hardcodeados (incl. su
+  uso de `VacancyLocationFields` con labels en español por defecto).
+- `STATUS_LABELS` y mappers de estados/etapas: requieren mapper dedicado con
+  fallback al valor crudo del backend — **pendiente** (ver §16-G.4).
+- `VacancyConfig`, Resultados IA, Score Breakdown, Hard gates, pesos de scoring:
+  no se tocan (data IA / configuración delicada).
+- `lib/pageTitles.ts` y `lib/candidate-portal-translations.ts`: intactos.
+
+### 16-I.7 Tests de la etapa
+
+`tests/unit/recruiter-vacancy-location-i18n.test.tsx` valida (Vitest + Testing
+Library):
+
+- `VacancyLocationFields` renderiza la opción «Sin especificar/Unspecified» y el
+  mensaje de error de carga desde los **labels recibidos por props** en `es` y
+  `en` (catálogos remotos mockeados, forzando el camino de error).
+- El componente usa los **defaults en español** cuando no se pasan labels
+  (consumidores legacy / fuera de scope).
+- `generateMetadata` del layout de vacantes resuelve `title`/`description` desde
+  `next-intl` en `es` y `en`.
+- Paridad exacta de keys de `RecruiterPortal.vacancies.location` y
+  `Metadata.recruiterVacancies` en los 5 idiomas.
+
+La suite i18n previa (incl. `recruiter-vacancy-form-i18n` de Etapa 8,
+`metadata-i18n` y `messages-structure`) sigue pasando. Las fallas restantes de la
+suite global (reportes PDF, `recruiter-companies-api`, `public-vacancies`,
+`admin-vacancy-catalog`, `report-filter-renderer`) son **preexistentes** y ajenas
+a esta etapa (verificado con y sin los cambios de Etapa 9).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
@@ -1326,13 +1459,15 @@ La suite i18n previa (incl. `recruiter-vacancies-i18n` de Etapa 7 y
 - El **Portal RRHH básico** se migró en Etapa 6 (§16-F: listado de candidatos +
   configuración) y **Vacantes RRHH básico** en Etapa 7 (§16-G: listado, filtros
   simples y tarjeta). El **formulario de creación de vacante**
-  (`NuevaVacanteModal`) se migró en Etapa 8 (§16-H). Quedan pendientes los módulos
-  RRHH pesados: **formulario de edición** del detalle de vacante
-  (`app/portal-rrhh/vacantes/[id]/page.tsx`) y los textos internos de
-  `VacancyLocationFields`, detalle profundo de
-  candidato, Resultados IA / Score Breakdown, Reportes, Entrevistas,
-  Etapas/Estados (mappers de enums, incl. `STATUS_LABELS` de la tarjeta de
-  vacante — ver §16-G.4) y Configuraciones avanzadas.
+  (`NuevaVacanteModal`) se migró en Etapa 8 (§16-H). El **cierre seguro de
+  Vacantes RRHH** se hizo en Etapa 9 (§16-I): textos estáticos de
+  `VacancyLocationFields` (vía props) y metadata estática de
+  `/portal-rrhh/vacantes`. Quedan pendientes los módulos RRHH pesados:
+  **formulario de edición** del detalle de vacante
+  (`app/portal-rrhh/vacantes/[id]/page.tsx`), detalle profundo de
+  candidato, Resultados IA / Score Breakdown, `VacancyConfig`, Reportes,
+  Entrevistas, Etapas/Estados (mappers de enums, incl. `STATUS_LABELS` de la
+  tarjeta de vacante — ver §16-G.4) y Configuraciones avanzadas.
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
   namespaces reservados (`Errors`, `EmptyStates`, etc.).
 - El **Perfil del Candidato** se migró en Etapa 5D (§16). Quedan pendientes los

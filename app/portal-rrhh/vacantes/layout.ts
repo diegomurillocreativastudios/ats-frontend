@@ -1,7 +1,13 @@
-export const metadata = {
-  title: { absolute: "ATS | Portal RRHH | Vacantes" },
-  description: "Gestiona las posiciones abiertas y vacantes de la empresa",
-};
+import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.recruiterVacancies");
+
+  return {
+    title: { absolute: t("title") },
+    description: t("description"),
+  };
+}
 
 export default function VacantesLayout({ children }) {
   return children;
