@@ -7,6 +7,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react"
+import { useTranslations } from "next-intl"
 import {
   Award,
   Briefcase,
@@ -43,6 +44,7 @@ import {
 } from "@/components/candidato/candidate-profile-edit-field-groups"
 import { useCandidateProfileEditor } from "@/hooks/use-candidate-profile-editor"
 import {
+  CandidateProfileSectionsProvider,
   SectionCard,
   InfoGrid,
   JobPreferencesBlock,
@@ -82,7 +84,13 @@ interface NavItem {
   label: string
 }
 
-function ProfileSectionNav({ items }: { items: NavItem[] }) {
+function ProfileSectionNav({
+  items,
+  ariaLabel,
+}: {
+  items: NavItem[]
+  ariaLabel: string
+}) {
   const handleNavClick = useCallback((targetId: string) => {
     const el = document.getElementById(targetId)
     if (!el) return
@@ -101,7 +109,7 @@ function ProfileSectionNav({ items }: { items: NavItem[] }) {
   return (
     <nav
       className="sticky top-0 z-10 -mx-1 mb-2 border-b border-border/80 bg-background/90 pb-3 pt-1 backdrop-blur-md supports-backdrop-filter:bg-background/75 md:mb-4"
-      aria-label="Ir a sección del perfil"
+      aria-label={ariaLabel}
     >
       <div className="flex gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:flex-wrap md:gap-2 md:overflow-visible [&::-webkit-scrollbar]:hidden">
         {items.map((item) => (
@@ -139,6 +147,7 @@ export function RecruiterCandidateProfileView({
   saveProfileError,
   clearSaveProfileError,
 }: RecruiterCandidateProfileViewProps) {
+  const t = useTranslations("RecruiterPortal.candidateDetail")
   const nd = (profile?.normalizedData ?? {}) as Record<string, unknown>
 
   const {
@@ -171,7 +180,8 @@ export function RecruiterCandidateProfileView({
 
   const headlineDisplay = resolveHeadlineForDisplay(canonicalProfile)
 
-  const displayName = fullNameFromApi || fullNameFromNd || "Candidato"
+  const displayName = fullNameFromApi || fullNameFromNd || t("fallbacks.candidate")
+  const dashFallback = t("fallbacks.dash")
 
   const email = String(
     nd.Email ?? nd.email ?? canonicalProfile?.email ?? ""
@@ -240,19 +250,21 @@ export function RecruiterCandidateProfileView({
 
   const contactItems = useMemo(
     () => [
-      { label: "Correo", value: email || "—" },
-      { label: "Teléfono", value: phoneDisplay },
-      { label: "Documento de identidad", value: emptyToDash(canonicalProfile?.nationalId) },
-      { label: "País", value: countryDisplay },
-      { label: "Ciudad de nacimiento", value: birthCity },
+      { label: t("fields.email"), value: email || dashFallback },
+      { label: t("fields.phone"), value: phoneDisplay },
+      { label: t("fields.nationalId"), value: emptyToDash(canonicalProfile?.nationalId, dashFallback) },
+      { label: t("fields.country"), value: countryDisplay },
+      { label: t("fields.birthCity"), value: birthCity },
       {
-        label: "Fecha de nacimiento",
+        label: t("fields.birthDate"),
         value: birthDateRaw ? formatBirthDateForDisplay(birthDateRaw) : null,
       },
-      { label: "Estado civil", value: marital },
-      { label: "Género", value: gender },
+      { label: t("fields.maritalStatus"), value: marital },
+      { label: t("fields.gender"), value: gender },
     ],
     [
+      t,
+      dashFallback,
       email,
       phoneDisplay,
       canonicalProfile?.nationalId,
@@ -266,16 +278,16 @@ export function RecruiterCandidateProfileView({
 
   const navItems = useMemo<NavItem[]>(
     () => [
-      { id: "rrhh-perfil-editar", label: "Editar" },
-      { id: "rrhh-perfil-resumen", label: "Resumen" },
-      { id: "rrhh-perfil-datos", label: "Contacto" },
-      { id: "rrhh-perfil-objetivos", label: "Objetivos" },
-      { id: "rrhh-perfil-trayectoria", label: "Trayectoria" },
-      { id: "rrhh-perfil-competencias", label: "Competencias" },
-      { id: "rrhh-perfil-presencia", label: "Enlaces" },
-      { id: "rrhh-perfil-referencias", label: "Referencias" },
+      { id: "rrhh-perfil-editar", label: t("nav.edit") },
+      { id: "rrhh-perfil-resumen", label: t("nav.summary") },
+      { id: "rrhh-perfil-datos", label: t("nav.contact") },
+      { id: "rrhh-perfil-objetivos", label: t("nav.goals") },
+      { id: "rrhh-perfil-trayectoria", label: t("nav.career") },
+      { id: "rrhh-perfil-competencias", label: t("nav.competencies") },
+      { id: "rrhh-perfil-presencia", label: t("nav.links") },
+      { id: "rrhh-perfil-referencias", label: t("nav.references") },
     ],
-    []
+    [t]
   )
 
   const handleDownloadCv = async () => {
@@ -291,7 +303,7 @@ export function RecruiterCandidateProfileView({
         method: "GET",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
-      if (!res.ok) throw new Error("No se pudo descargar el CV.")
+      if (!res.ok) throw new Error(t("errors.downloadCvFailed"))
       const blob = await res.blob()
       const objUrl = URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -302,13 +314,14 @@ export function RecruiterCandidateProfileView({
       document.body.removeChild(a)
       URL.revokeObjectURL(objUrl)
     } catch (err: unknown) {
-      setDownloadError(getApiErrorMessage(err) || "Error al descargar.")
+      setDownloadError(getApiErrorMessage(err) || t("errors.downloadFailed"))
     } finally {
       setDownloading(false)
     }
   }
 
   return (
+    <CandidateProfileSectionsProvider namespace="RecruiterPortal.candidateDetail">
     <form
       className="flex flex-col gap-6 md:gap-8"
       noValidate
@@ -325,17 +338,16 @@ export function RecruiterCandidateProfileView({
           className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 font-sans text-sm text-amber-950"
           role="status"
         >
-          Parte de los datos del CV no se interpretó como JSON. Podés editar el perfil
-          canónico; los cambios guardados regenerarán la ficha normalizada.
+          {t("warnings.parseFailed")}
         </div>
       ) : null}
 
-      <ProfileSectionNav items={navItems} />
+      <ProfileSectionNav items={navItems} ariaLabel={t("nav.aria")} />
 
       <section
         id="rrhh-perfil-editar"
         className="scroll-mt-28 rounded-xl border border-border bg-card p-4 md:p-5"
-        aria-label="Acciones del perfil"
+        aria-label={t("sections.profileActions")}
       >
         {isEditing ? (
           <div className="flex flex-col gap-4">
@@ -357,12 +369,12 @@ export function RecruiterCandidateProfileView({
                 </div>
               ) : null}
               <p className="font-sans text-xs text-muted-foreground">
-                Titular, resumen y documento de identidad son obligatorios al guardar.
+                {t("actions.requiredHint")}
               </p>
             </div>
             <div
               role="toolbar"
-              aria-label="Guardar o cancelar edición del perfil"
+              aria-label={t("actions.toolbarEditingAria")}
               className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3"
             >
               {storagePath ? (
@@ -371,14 +383,14 @@ export function RecruiterCandidateProfileView({
                   onClick={handleDownloadCv}
                   disabled={downloading}
                   className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label="Descargar CV en PDF"
+                  aria-label={t("actions.downloadCvAria")}
                 >
                   {downloading ? (
                     <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                   ) : (
                     <Download className="h-4 w-4 shrink-0" aria-hidden />
                   )}
-                  {downloading ? "Descargando…" : "Descargar CV"}
+                  {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
                 </button>
               ) : null}
               <button
@@ -386,10 +398,10 @@ export function RecruiterCandidateProfileView({
                 onClick={handleCancelEdit}
                 disabled={savingProfile}
                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Cancelar edición sin guardar"
+                aria-label={t("actions.cancelAria")}
               >
                 <X className="h-4 w-4 shrink-0" aria-hidden />
-                Cancelar
+                {t("actions.cancel")}
               </button>
               <button
                 type="submit"
@@ -401,7 +413,7 @@ export function RecruiterCandidateProfileView({
                 ) : (
                   <Save className="h-4 w-4 shrink-0" aria-hidden />
                 )}
-                {savingProfile ? "Guardando…" : "Guardar cambios"}
+                {savingProfile ? t("actions.saving") : t("actions.save")}
               </button>
             </div>
             {downloadError ? (
@@ -413,8 +425,7 @@ export function RecruiterCandidateProfileView({
         ) : (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="font-sans text-sm text-muted-foreground">
-              Editá la información del candidato. Los cambios actualizan el perfil canónico y
-              la ficha normalizada.
+              {t("hero.editHint")}
             </p>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               {storagePath ? (
@@ -423,14 +434,14 @@ export function RecruiterCandidateProfileView({
                   onClick={handleDownloadCv}
                   disabled={downloading}
                   className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label="Descargar CV en PDF"
+                  aria-label={t("actions.downloadCvAria")}
                 >
                   {downloading ? (
                     <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                   ) : (
                     <Download className="h-4 w-4 shrink-0" aria-hidden />
                   )}
-                  {downloading ? "Descargando…" : "Descargar CV"}
+                  {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
                 </button>
               ) : null}
               <button
@@ -440,7 +451,7 @@ export function RecruiterCandidateProfileView({
                 aria-expanded="false"
               >
                 <Pencil className="h-4 w-4 shrink-0" aria-hidden />
-                Editar perfil
+                {t("actions.editProfile")}
               </button>
             </div>
             {downloadError ? (
@@ -455,7 +466,7 @@ export function RecruiterCandidateProfileView({
       <section
         id="rrhh-perfil-resumen"
         className="scroll-mt-28 rounded-xl border border-border bg-card p-6"
-        aria-label="Resumen del candidato"
+        aria-label={t("sections.summary")}
       >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
           <div className="flex min-w-0 flex-1 flex-col gap-6 md:flex-row md:items-start">
@@ -468,9 +479,9 @@ export function RecruiterCandidateProfileView({
           <div className="min-w-0 flex-1">
             {isEditing ? (
               <>
-                <h1 className="font-sans text-2xl font-bold text-foreground">Editar candidato</h1>
+                <h1 className="font-sans text-2xl font-bold text-foreground">{t("hero.editTitle")}</h1>
                 <p className="mt-1 font-sans text-sm text-muted-foreground">
-                  Nombre, titular y resumen profesional.
+                  {t("hero.editDescription")}
                 </p>
                 <div className="mt-4">
                   <ProfileEditHeroFields form={form} patch={patch} saving={savingProfile} />
@@ -499,13 +510,13 @@ export function RecruiterCandidateProfileView({
                       {email}
                     </a>
                   ) : null}
-                  {phoneDisplay !== "—" ? (
+                  {phoneDisplay !== dashFallback ? (
                     <span className="inline-flex items-center gap-2">
                       <Phone className="h-4 w-4 shrink-0" aria-hidden />
                       {phoneDisplay}
                     </span>
                   ) : null}
-                  {countryDisplay !== "—" ? (
+                  {countryDisplay !== dashFallback ? (
                     <span className="inline-flex items-center gap-2">
                       <MapPin className="h-4 w-4 shrink-0" aria-hidden />
                       {countryDisplay}
@@ -513,7 +524,7 @@ export function RecruiterCandidateProfileView({
                   ) : null}
                 </div>
                 <p className="mt-3 font-sans text-xs text-muted-foreground">
-                  ID: {emptyToDash(profile?.id ?? candidateId)}
+                  {t("fields.idLabel")}: {emptyToDash(profile?.id ?? candidateId, dashFallback)}
                 </p>
               </>
             )}
@@ -531,8 +542,8 @@ export function RecruiterCandidateProfileView({
       </section>
 
       <div id="rrhh-perfil-datos" className="scroll-mt-28">
-        <SectionGroupLabel>Datos de contacto y personales</SectionGroupLabel>
-        <SectionCard title="Contacto y personales" icon={User} sectionId="sec-contact-rrhh">
+        <SectionGroupLabel>{t("groups.contactPersonal")}</SectionGroupLabel>
+        <SectionCard title={t("sections.contactPersonal")} icon={User} sectionId="sec-contact-rrhh">
           {isEditing ? (
             <div className="flex flex-col gap-8">
               <ProfileEditNationalIdField
@@ -563,8 +574,8 @@ export function RecruiterCandidateProfileView({
       {showEnrichedSections ? (
         <>
           <div id="rrhh-perfil-objetivos" className="scroll-mt-28">
-            <SectionGroupLabel>Preferencias laborales</SectionGroupLabel>
-            <SectionCard title="Preferencias laborales" icon={Briefcase} sectionId="sec-job-prefs-rrhh">
+            <SectionGroupLabel>{t("groups.jobPreferences")}</SectionGroupLabel>
+            <SectionCard title={t("sections.jobPreferences")} icon={Briefcase} sectionId="sec-job-prefs-rrhh">
               {isEditing ? (
                 <ProfileEditJobPreferencesFields
                   form={form}
@@ -584,9 +595,9 @@ export function RecruiterCandidateProfileView({
           </div>
 
           <div id="rrhh-perfil-trayectoria" className="scroll-mt-28">
-            <SectionGroupLabel>Trayectoria profesional</SectionGroupLabel>
+            <SectionGroupLabel>{t("groups.career")}</SectionGroupLabel>
             <div className="flex flex-col gap-6">
-              <SectionCard title="Experiencia laboral" icon={Building2} sectionId="sec-work-rrhh">
+              <SectionCard title={t("sections.workExperience")} icon={Building2} sectionId="sec-work-rrhh">
                 {isEditing ? (
                   <ProfileEditWorkFields
                     form={form}
@@ -598,7 +609,7 @@ export function RecruiterCandidateProfileView({
                   <WorkExperienceList items={workExperience as never[]} />
                 )}
               </SectionCard>
-              <SectionCard title="Educación" icon={GraduationCap} sectionId="sec-edu-rrhh">
+              <SectionCard title={t("sections.education")} icon={GraduationCap} sectionId="sec-edu-rrhh">
                 {isEditing ? (
                   <ProfileEditEducationFields
                     form={form}
@@ -614,9 +625,9 @@ export function RecruiterCandidateProfileView({
           </div>
 
           <div id="rrhh-perfil-competencias" className="scroll-mt-28">
-            <SectionGroupLabel>Competencias</SectionGroupLabel>
+            <SectionGroupLabel>{t("groups.competencies")}</SectionGroupLabel>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <SectionCard title="Idiomas" icon={Languages} sectionId="sec-lang-rrhh">
+              <SectionCard title={t("sections.languages")} icon={Languages} sectionId="sec-lang-rrhh">
                 {isEditing ? (
                   <ProfileEditLanguagesFields
                     form={form}
@@ -628,7 +639,7 @@ export function RecruiterCandidateProfileView({
                   <LanguagesList items={languages as never[]} />
                 )}
               </SectionCard>
-              <SectionCard title="Habilidades" icon={Sparkles} sectionId="sec-skills-rrhh">
+              <SectionCard title={t("sections.skills")} icon={Sparkles} sectionId="sec-skills-rrhh">
                 {isEditing ? (
                   <ProfileEditSkillsField
                     form={form}
@@ -644,8 +655,8 @@ export function RecruiterCandidateProfileView({
           </div>
 
           <div id="rrhh-perfil-presencia" className="scroll-mt-28">
-            <SectionGroupLabel>Enlaces</SectionGroupLabel>
-            <SectionCard title="Enlaces" icon={FileText} sectionId="sec-links-rrhh">
+            <SectionGroupLabel>{t("groups.links")}</SectionGroupLabel>
+            <SectionCard title={t("sections.links")} icon={FileText} sectionId="sec-links-rrhh">
               {isEditing ? (
                 <ProfileEditSocialVideoFields
                   form={form}
@@ -655,7 +666,7 @@ export function RecruiterCandidateProfileView({
               ) : (
                 <div>
                   <p className="mb-2 font-sans text-xs font-medium text-muted-foreground">
-                    Redes y web
+                    {t("sections.linksSubtitle")}
                   </p>
                   <SocialLinksList links={socialLinks as never[]} />
                 </div>
@@ -664,9 +675,9 @@ export function RecruiterCandidateProfileView({
           </div>
 
           <div id="rrhh-perfil-referencias" className="scroll-mt-28">
-            <SectionGroupLabel>Referencias y reconocimientos</SectionGroupLabel>
+            <SectionGroupLabel>{t("groups.referencesAchievements")}</SectionGroupLabel>
             <div className="flex flex-col gap-6">
-              <SectionCard title="Referencias" icon={Users} sectionId="sec-refs-rrhh">
+              <SectionCard title={t("sections.references")} icon={Users} sectionId="sec-refs-rrhh">
                 {isEditing ? (
                   <ProfileEditReferencesFields
                     form={form}
@@ -678,7 +689,7 @@ export function RecruiterCandidateProfileView({
                   <ReferencesList items={references as never[]} />
                 )}
               </SectionCard>
-              <SectionCard title="Reconocimientos" icon={Award} sectionId="sec-awards-rrhh">
+              <SectionCard title={t("sections.recognitions")} icon={Award} sectionId="sec-awards-rrhh">
                 {isEditing ? (
                   <ProfileEditRecognitionsField
                     form={form}
@@ -697,12 +708,12 @@ export function RecruiterCandidateProfileView({
 
       {profile?.normalizedDataParseFailed && profile.normalizedDataRaw ? (
         <SectionCard
-          title="normalizedData (texto sin parsear)"
+          title={t("sections.normalizedDataRaw")}
           icon={FileText}
           sectionId="sec-nd-raw-rrhh"
         >
           <p className="mb-2 font-sans text-xs text-amber-800" role="status">
-            El API devolvió normalizedData como texto que no es JSON válido. Contenido crudo:
+            {t("warnings.normalizedDataRawIntro")}
           </p>
           <pre className="max-h-72 overflow-auto whitespace-pre-wrap wrap-break-word rounded-lg border border-border bg-muted/50 p-4 font-mono text-xs text-foreground">
             {profile.normalizedDataRaw}
@@ -710,5 +721,6 @@ export function RecruiterCandidateProfileView({
         </SectionCard>
       ) : null}
     </form>
+    </CandidateProfileSectionsProvider>
   )
 }

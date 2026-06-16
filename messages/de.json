@@ -165,6 +165,10 @@
       "title": "ATS | HR-Portal | Berichte",
       "description": "Rekrutierungskennzahlen und Berichte einsehen"
     },
+    "recruiterCandidateDetail": {
+      "title": "ATS | HR-Portal | Kandidat",
+      "description": "Detailliertes Kandidatenprofil im HR-Portal"
+    },
     "adminPortal": {
       "title": "Admin-Portal",
       "description": "Verwaltung der ATS-Plattform",
@@ -757,6 +761,117 @@
         "headline": "Titel",
         "uploadedAt": "Upload-Datum",
         "actions": "Aktionen"
+      }
+    },
+    "candidateDetail": {
+      "page": {
+        "loadingProfile": "Profil wird geladen...",
+        "backToCandidates": "Zurück zu Kandidaten",
+        "backToCandidatesAria": "Zurück zu Kandidaten",
+        "interviews": "Interviews",
+        "interviewsAria": "Interviews dieses Kandidaten anzeigen"
+      },
+      "nav": {
+        "aria": "Zum Profilabschnitt springen",
+        "edit": "Bearbeiten",
+        "summary": "Zusammenfassung",
+        "contact": "Kontakt",
+        "goals": "Ziele",
+        "career": "Werdegang",
+        "competencies": "Kompetenzen",
+        "links": "Links",
+        "references": "Referenzen"
+      },
+      "groups": {
+        "contactPersonal": "Kontakt- und persönliche Daten",
+        "jobPreferences": "Berufliche Präferenzen",
+        "career": "Beruflicher Werdegang",
+        "competencies": "Kompetenzen",
+        "links": "Links",
+        "referencesAchievements": "Referenzen und Auszeichnungen"
+      },
+      "sections": {
+        "profileActions": "Profilaktionen",
+        "summary": "Kandidatenzusammenfassung",
+        "contactPersonal": "Kontakt und Persönliches",
+        "jobPreferences": "Berufliche Präferenzen",
+        "workExperience": "Berufserfahrung",
+        "education": "Ausbildung",
+        "languages": "Sprachen",
+        "skills": "Fähigkeiten",
+        "links": "Links",
+        "linksSubtitle": "Soziale Netzwerke und Web",
+        "references": "Referenzen",
+        "recognitions": "Auszeichnungen",
+        "normalizedDataRaw": "normalizedData (unverarbeiteter Text)"
+      },
+      "fields": {
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "nationalId": "Ausweisdokument",
+        "country": "Land",
+        "birthCity": "Geburtsstadt",
+        "birthDate": "Geburtsdatum",
+        "maritalStatus": "Familienstand",
+        "gender": "Geschlecht",
+        "sectors": "Branchen",
+        "desiredRole": "Gewünschte Rolle",
+        "minSalary": "Mindestgehalt",
+        "educationLevel": "Bildungsniveau",
+        "desiredCity": "Gewünschte Stadt",
+        "availability": "Verfügbarkeit",
+        "disability": "Behinderung",
+        "idLabel": "ID"
+      },
+      "actions": {
+        "toolbarEditingAria": "Profilbearbeitung speichern oder abbrechen",
+        "downloadCv": "Lebenslauf herunterladen",
+        "downloadingCv": "Wird heruntergeladen…",
+        "downloadCvAria": "Lebenslauf als PDF herunterladen",
+        "cancel": "Abbrechen",
+        "cancelAria": "Bearbeitung ohne Speichern abbrechen",
+        "save": "Änderungen speichern",
+        "saving": "Wird gespeichert…",
+        "editProfile": "Profil bearbeiten",
+        "requiredHint": "Titel, Zusammenfassung und Ausweisdokument sind beim Speichern erforderlich.",
+        "retry": "Erneut versuchen"
+      },
+      "hero": {
+        "editTitle": "Kandidat bearbeiten",
+        "editDescription": "Name, Titel und berufliche Zusammenfassung.",
+        "editHint": "Bearbeiten Sie die Kandidateninformationen. Änderungen aktualisieren das kanonische Profil und den normalisierten Datensatz."
+      },
+      "warnings": {
+        "parseFailed": "Ein Teil der Lebenslaufdaten konnte nicht als JSON interpretiert werden. Sie können das kanonische Profil bearbeiten; gespeicherte Änderungen generieren den normalisierten Datensatz neu.",
+        "normalizedDataRawIntro": "Die API hat normalizedData als Text zurückgegeben, der kein gültiges JSON ist. Rohinhalt:"
+      },
+      "emptyStates": {
+        "noWorkExperience": "Keine Berufserfahrung hinterlegt.",
+        "noEducation": "Keine Ausbildung hinterlegt.",
+        "noReferences": "Keine Referenzen hinterlegt.",
+        "noRecognitions": "Keine Auszeichnungen hinterlegt."
+      },
+      "errors": {
+        "loadProfileFailed": "Das Kandidatenprofil konnte nicht geladen werden.",
+        "missingCandidateId": "Die Kandidatenkennung fehlt.",
+        "downloadFailed": "Fehler beim Herunterladen.",
+        "downloadCvFailed": "Der Lebenslauf konnte nicht heruntergeladen werden.",
+        "saveInvalidFields": "Bitte prüfen Sie die Daten: einige Felder sind ungültig.",
+        "saveForbidden": "Ihr Konto hat keine Berechtigung, dieses Profil zu bearbeiten.",
+        "saveDuplicateNationalId": "Dieses Ausweisdokument ist bereits mit einem anderen Profil verknüpft."
+      },
+      "toasts": {
+        "saveSuccess": "Änderungen erfolgreich gespeichert.",
+        "saveError": "Änderungen konnten nicht gespeichert werden. Bitte erneut versuchen."
+      },
+      "fallbacks": {
+        "candidate": "Kandidat",
+        "dash": "—",
+        "linkPlatform": "Link"
+      },
+      "values": {
+        "yes": "Ja",
+        "no": "Nein"
       }
     },
     "settings": {

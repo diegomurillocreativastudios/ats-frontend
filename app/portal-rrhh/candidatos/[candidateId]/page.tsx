@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { ArrowLeft } from "lucide-react"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
@@ -13,6 +14,8 @@ import type { CandidateProfileSaveBody } from "@/lib/candidate-profile"
 import { formatCandidatoDetailDocumentTitle } from "@/lib/pageTitles"
 
 export default function CandidatoDetallePage() {
+  const t = useTranslations("RecruiterPortal.candidateDetail")
+  const tCandidates = useTranslations("RecruiterPortal.candidates")
   const params = useParams()
   const candidateId = (params?.candidateId as string | undefined) ?? null
 
@@ -45,17 +48,17 @@ export default function CandidatoDetallePage() {
         setSnackbar({
           open: true,
           variant: "success",
-          message: "Cambios guardados correctamente.",
+          message: t("toasts.saveSuccess"),
         })
       } catch {
         setSnackbar({
           open: true,
           variant: "error",
-          message: "No se pudieron guardar los cambios. Reintentá.",
+          message: t("toasts.saveError"),
         })
       }
     },
-    [save]
+    [save, t]
   )
 
   const nd = (profile?.normalizedData ?? {}) as Record<string, unknown>
@@ -67,15 +70,15 @@ export default function CandidatoDetallePage() {
       .filter((x) => x != null && String(x).trim() !== "")
       .join(" ")
       .trim() ||
-    "Candidato"
+    t("fallbacks.candidate")
 
-  const breadcrumbLabel = loading ? "Candidato" : fullName
+  const breadcrumbLabel = loading ? t("fallbacks.candidate") : fullName
   const breadcrumbTrail = useMemo(
     () => [
-      { label: "Candidatos", href: "/portal-rrhh/candidatos" },
+      { label: tCandidates("breadcrumb"), href: "/portal-rrhh/candidatos" },
       { label: breadcrumbLabel },
     ],
-    [breadcrumbLabel]
+    [breadcrumbLabel, tCandidates]
   )
 
   useEffect(() => {
@@ -97,7 +100,7 @@ export default function CandidatoDetallePage() {
             className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
             aria-hidden
           />
-          <p className="font-sans text-sm text-muted-foreground">Cargando perfil...</p>
+          <p className="font-sans text-sm text-muted-foreground">{t("page.loadingProfile")}</p>
         </div>
       ) : fetchError ? (
         <div
@@ -110,14 +113,14 @@ export default function CandidatoDetallePage() {
             className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
-            Volver a candidatos
+            {t("page.backToCandidates")}
           </Link>
           <button
             type="button"
             onClick={() => void refetch()}
             className="font-sans text-sm text-vo-purple hover:underline"
           >
-            Reintentar
+            {t("actions.retry")}
           </button>
         </div>
       ) : (
@@ -126,18 +129,18 @@ export default function CandidatoDetallePage() {
             <Link
               href="/portal-rrhh/candidatos"
               className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
-              aria-label="Volver a candidatos"
+              aria-label={t("page.backToCandidatesAria")}
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
-              Volver a candidatos
+              {t("page.backToCandidates")}
             </Link>
             {candidateId ? (
               <Link
                 href={`/portal-rrhh/candidatos/${encodeURIComponent(String(candidateId))}/interviews`}
                 className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                aria-label="Ver entrevistas de este candidato"
+                aria-label={t("page.interviewsAria")}
               >
-                Entrevistas
+                {t("page.interviews")}
               </Link>
             ) : null}
           </div>

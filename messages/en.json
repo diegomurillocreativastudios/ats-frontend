@@ -165,6 +165,10 @@
       "title": "ATS | HR Portal | Reports",
       "description": "Review recruiting metrics and reports"
     },
+    "recruiterCandidateDetail": {
+      "title": "ATS | HR Portal | Candidate",
+      "description": "Detailed candidate profile in the HR portal"
+    },
     "adminPortal": {
       "title": "Admin Portal",
       "description": "ATS platform administration",
@@ -757,6 +761,117 @@
         "headline": "Title",
         "uploadedAt": "Upload date",
         "actions": "Actions"
+      }
+    },
+    "candidateDetail": {
+      "page": {
+        "loadingProfile": "Loading profile...",
+        "backToCandidates": "Back to candidates",
+        "backToCandidatesAria": "Back to candidates",
+        "interviews": "Interviews",
+        "interviewsAria": "View this candidate's interviews"
+      },
+      "nav": {
+        "aria": "Go to profile section",
+        "edit": "Edit",
+        "summary": "Summary",
+        "contact": "Contact",
+        "goals": "Goals",
+        "career": "Career",
+        "competencies": "Skills",
+        "links": "Links",
+        "references": "References"
+      },
+      "groups": {
+        "contactPersonal": "Contact and personal details",
+        "jobPreferences": "Job preferences",
+        "career": "Professional background",
+        "competencies": "Skills",
+        "links": "Links",
+        "referencesAchievements": "References and achievements"
+      },
+      "sections": {
+        "profileActions": "Profile actions",
+        "summary": "Candidate summary",
+        "contactPersonal": "Contact and personal",
+        "jobPreferences": "Job preferences",
+        "workExperience": "Work experience",
+        "education": "Education",
+        "languages": "Languages",
+        "skills": "Skills",
+        "links": "Links",
+        "linksSubtitle": "Social and web",
+        "references": "References",
+        "recognitions": "Awards",
+        "normalizedDataRaw": "normalizedData (unparsed text)"
+      },
+      "fields": {
+        "email": "Email",
+        "phone": "Phone",
+        "nationalId": "ID document",
+        "country": "Country",
+        "birthCity": "City of birth",
+        "birthDate": "Date of birth",
+        "maritalStatus": "Marital status",
+        "gender": "Gender",
+        "sectors": "Sectors",
+        "desiredRole": "Desired role",
+        "minSalary": "Minimum salary",
+        "educationLevel": "Education level",
+        "desiredCity": "Desired city",
+        "availability": "Availability",
+        "disability": "Disability",
+        "idLabel": "ID"
+      },
+      "actions": {
+        "toolbarEditingAria": "Save or cancel profile editing",
+        "downloadCv": "Download CV",
+        "downloadingCv": "Downloading…",
+        "downloadCvAria": "Download CV as PDF",
+        "cancel": "Cancel",
+        "cancelAria": "Cancel editing without saving",
+        "save": "Save changes",
+        "saving": "Saving…",
+        "editProfile": "Edit profile",
+        "requiredHint": "Headline, summary and ID document are required when saving.",
+        "retry": "Retry"
+      },
+      "hero": {
+        "editTitle": "Edit candidate",
+        "editDescription": "Name, headline and professional summary.",
+        "editHint": "Edit the candidate information. Changes update the canonical profile and the normalized record."
+      },
+      "warnings": {
+        "parseFailed": "Part of the CV data could not be interpreted as JSON. You can edit the canonical profile; saved changes will regenerate the normalized record.",
+        "normalizedDataRawIntro": "The API returned normalizedData as text that is not valid JSON. Raw content:"
+      },
+      "emptyStates": {
+        "noWorkExperience": "No work experience on record.",
+        "noEducation": "No education on record.",
+        "noReferences": "No references on record.",
+        "noRecognitions": "No awards on record."
+      },
+      "errors": {
+        "loadProfileFailed": "The candidate profile could not be loaded.",
+        "missingCandidateId": "The candidate identifier is missing.",
+        "downloadFailed": "Download failed.",
+        "downloadCvFailed": "The CV could not be downloaded.",
+        "saveInvalidFields": "Please review the data: some fields are invalid.",
+        "saveForbidden": "Your account does not have permission to edit this profile.",
+        "saveDuplicateNationalId": "That ID document is already associated with another profile."
+      },
+      "toasts": {
+        "saveSuccess": "Changes saved successfully.",
+        "saveError": "Changes could not be saved. Please try again."
+      },
+      "fallbacks": {
+        "candidate": "Candidate",
+        "dash": "—",
+        "linkPlatform": "Link"
+      },
+      "values": {
+        "yes": "Yes",
+        "no": "No"
       }
     },
     "settings": {

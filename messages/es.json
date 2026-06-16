@@ -165,6 +165,10 @@
       "title": "ATS | Portal RRHH | Reportes",
       "description": "Consulta métricas y reportes de reclutamiento"
     },
+    "recruiterCandidateDetail": {
+      "title": "ATS | Portal RRHH | Candidato",
+      "description": "Perfil detallado del candidato en el portal RRHH"
+    },
     "adminPortal": {
       "title": "Portal Admin",
       "description": "Administración de la plataforma ATS",
@@ -757,6 +761,117 @@
         "headline": "Título",
         "uploadedAt": "Fecha subida",
         "actions": "Acciones"
+      }
+    },
+    "candidateDetail": {
+      "page": {
+        "loadingProfile": "Cargando perfil...",
+        "backToCandidates": "Volver a candidatos",
+        "backToCandidatesAria": "Volver a candidatos",
+        "interviews": "Entrevistas",
+        "interviewsAria": "Ver entrevistas de este candidato"
+      },
+      "nav": {
+        "aria": "Ir a sección del perfil",
+        "edit": "Editar",
+        "summary": "Resumen",
+        "contact": "Contacto",
+        "goals": "Objetivos",
+        "career": "Trayectoria",
+        "competencies": "Competencias",
+        "links": "Enlaces",
+        "references": "Referencias"
+      },
+      "groups": {
+        "contactPersonal": "Datos de contacto y personales",
+        "jobPreferences": "Preferencias laborales",
+        "career": "Trayectoria profesional",
+        "competencies": "Competencias",
+        "links": "Enlaces",
+        "referencesAchievements": "Referencias y reconocimientos"
+      },
+      "sections": {
+        "profileActions": "Acciones del perfil",
+        "summary": "Resumen del candidato",
+        "contactPersonal": "Contacto y personales",
+        "jobPreferences": "Preferencias laborales",
+        "workExperience": "Experiencia laboral",
+        "education": "Educación",
+        "languages": "Idiomas",
+        "skills": "Habilidades",
+        "links": "Enlaces",
+        "linksSubtitle": "Redes y web",
+        "references": "Referencias",
+        "recognitions": "Reconocimientos",
+        "normalizedDataRaw": "normalizedData (texto sin parsear)"
+      },
+      "fields": {
+        "email": "Correo",
+        "phone": "Teléfono",
+        "nationalId": "Documento de identidad",
+        "country": "País",
+        "birthCity": "Ciudad de nacimiento",
+        "birthDate": "Fecha de nacimiento",
+        "maritalStatus": "Estado civil",
+        "gender": "Género",
+        "sectors": "Sectores",
+        "desiredRole": "Rol deseado",
+        "minSalary": "Salario mínimo",
+        "educationLevel": "Nivel educativo",
+        "desiredCity": "Ciudad deseada",
+        "availability": "Disponibilidad",
+        "disability": "Discapacidad",
+        "idLabel": "ID"
+      },
+      "actions": {
+        "toolbarEditingAria": "Guardar o cancelar edición del perfil",
+        "downloadCv": "Descargar CV",
+        "downloadingCv": "Descargando…",
+        "downloadCvAria": "Descargar CV en PDF",
+        "cancel": "Cancelar",
+        "cancelAria": "Cancelar edición sin guardar",
+        "save": "Guardar cambios",
+        "saving": "Guardando…",
+        "editProfile": "Editar perfil",
+        "requiredHint": "Titular, resumen y documento de identidad son obligatorios al guardar.",
+        "retry": "Reintentar"
+      },
+      "hero": {
+        "editTitle": "Editar candidato",
+        "editDescription": "Nombre, titular y resumen profesional.",
+        "editHint": "Editá la información del candidato. Los cambios actualizan el perfil canónico y la ficha normalizada."
+      },
+      "warnings": {
+        "parseFailed": "Parte de los datos del CV no se interpretó como JSON. Podés editar el perfil canónico; los cambios guardados regenerarán la ficha normalizada.",
+        "normalizedDataRawIntro": "El API devolvió normalizedData como texto que no es JSON válido. Contenido crudo:"
+      },
+      "emptyStates": {
+        "noWorkExperience": "Sin experiencia laboral registrada.",
+        "noEducation": "Sin educación registrada.",
+        "noReferences": "Sin referencias registradas.",
+        "noRecognitions": "Sin reconocimientos registrados."
+      },
+      "errors": {
+        "loadProfileFailed": "No se pudo cargar el perfil del candidato.",
+        "missingCandidateId": "Falta el identificador del candidato.",
+        "downloadFailed": "Error al descargar.",
+        "downloadCvFailed": "No se pudo descargar el CV.",
+        "saveInvalidFields": "Revisá los datos: hay campos inválidos.",
+        "saveForbidden": "Tu cuenta no tiene permiso para editar este perfil.",
+        "saveDuplicateNationalId": "Ese documento de identidad ya está asociado a otro perfil."
+      },
+      "toasts": {
+        "saveSuccess": "Cambios guardados correctamente.",
+        "saveError": "No se pudieron guardar los cambios. Reintentá."
+      },
+      "fallbacks": {
+        "candidate": "Candidato",
+        "dash": "—",
+        "linkPlatform": "Enlace"
+      },
+      "values": {
+        "yes": "Sí",
+        "no": "No"
       }
     },
     "settings": {

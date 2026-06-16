@@ -1953,6 +1953,102 @@ esta etapa. `npm run build` pasa (exit 0). `tsc --noEmit` reporta únicamente 6
 errores **preexistentes** en archivos de test fuera de scope; `eslint` de los
 archivos migrados pasa (solo 2 warnings preexistentes de `<img>`).
 
+## 16-N. Detalle básico de candidato RRHH sin IA (Etapa 14)
+
+Migración **acotada y segura** de la UI estática básica del **detalle de candidato
+en Portal RRHH** a `next-intl`. **No** se tocó IA/Vertex AI, Score Breakdown,
+matching/scoring, `VacancyConfig`, reportes, PDF/export, Portal Admin ni
+`lib/candidate-portal-translations.ts`. El ruteo sigue siendo cookie-based
+(`NEXT_LOCALE`), sin prefijos ni `app/[locale]`.
+
+### 16-N.1 Componentes/rutas migradas
+
+| Ruta / componente | Tipo | Namespace usado |
+| ----------------- | ---- | --------------- |
+| `app/portal-rrhh/candidatos/[candidateId]/layout.ts` | Server | `Metadata.recruiterCandidateDetail` (metadata) |
+| `app/portal-rrhh/candidatos/[candidateId]/page.tsx` | Client | `RecruiterPortal.candidateDetail` + `RecruiterPortal.candidates` (breadcrumb) |
+| `components/rrhh/recruiter-candidate-profile-view.tsx` | Client | `RecruiterPortal.candidateDetail` |
+| `components/rrhh/CandidateProfileSections.tsx` | Client | `RecruiterPortal.candidateDetail` vía `CandidateProfileSectionsProvider` (opcional) |
+| `hooks/use-recruiter-candidate-profile.ts` | Client hook | `RecruiterPortal.candidateDetail` (fallbacks de error frontend) |
+
+Se migró: encabezados y secciones del perfil (resumen, contacto, objetivos,
+trayectoria, competencias, enlaces, referencias), labels estáticos de campos,
+botones (editar, guardar, cancelar, descargar CV, reintentar), empty states
+(sin experiencia/educación/referencias/reconocimientos), loading/error states
+controlados por frontend, toasts de guardado, fallbacks UI (`Candidato`, `—`) y
+metadata estática del layout.
+
+`document.title` en runtime sigue usando `lib/pageTitles.ts` (`formatCandidatoDetailDocumentTitle`) — **fuera de scope** de esta etapa.
+
+### 16-N.2 Namespace `RecruiterPortal.candidateDetail` (5 idiomas)
+
+Se añadió `RecruiterPortal.candidateDetail` a `es/en/it/de/fr` (con `es.json`
+como fuente de verdad), agrupado por sección real de UI:
+
+```jsonc
+{
+  "RecruiterPortal": {
+    "candidateDetail": {
+      "page": {},
+      "nav": {},
+      "groups": {},
+      "sections": {},
+      "fields": {},
+      "actions": {},
+      "hero": {},
+      "warnings": {},
+      "emptyStates": {},
+      "errors": {},
+      "toasts": {},
+      "fallbacks": {},
+      "values": {}
+    }
+  }
+}
+```
+
+También se añadió `Metadata.recruiterCandidateDetail` en los 5 diccionarios.
+
+### 16-N.3 Componentes compartidos detectados
+
+| Componente | Uso compartido | Decisión Etapa 14 |
+| ---------- | -------------- | ----------------- |
+| `CandidateProfileSections.tsx` | RRHH + Portal Candidato (`candidate-self-profile-view.tsx`) | Provider opcional `CandidateProfileSectionsProvider`; sin provider conserva fallbacks en español (comportamiento previo del candidato) |
+| `candidate-salary-expectation-card.tsx` | RRHH + Portal Candidato | Ya usa `CandidatePortal.profile` — **no tocado** |
+| `candidate-profile-edit-field-groups.tsx` | RRHH + Portal Candidato | **Pendiente** — labels del formulario de edición compartido |
+| `use-candidate-profile-editor.ts` | RRHH + Portal Candidato | **Pendiente** — mensajes de validación/`triggerLabel` |
+
+### 16-N.4 Regla crítica respetada
+
+**No se traduce data generada por IA ni dinámica.** Los diccionarios solo
+contienen UI estática. Se muestran verbatim: nombre del candidato, headline,
+resumen, email, teléfono, país, experiencia, educación, habilidades, nombres de
+vacantes/empresas/etapas, `normalizedDataRaw`, mensajes de API vía
+`getApiErrorMessage(err)` y contenido de `validationError`/`saveProfileError`
+del editor compartido.
+
+### 16-N.5 Fuera de scope (no migrado en Etapa 14)
+
+- **Resultados IA**, **Score Breakdown**, matching/ranking/scoring.
+- **`lib/pageTitles.ts`** (título dinámico `document.title` en cliente).
+- **`lib/candidate-portal-translations.ts`** y mappers delicados de estados/etapas.
+- **Formulario de edición compartido** (`candidate-profile-edit-field-groups.tsx`,
+  validaciones de `use-candidate-profile-editor.ts`).
+- **Subruta entrevistas** (`candidatos/[candidateId]/interviews`) — cubierta en Etapa 11.
+- **Portal Admin**, **VacancyConfig**, reportes, PDF/export.
+- Breadcrumbs dinámicos con nombre del candidato (data dinámica).
+
+### 16-N.6 Tests de la etapa
+
+`tests/unit/recruiter-candidate-detail-i18n.test.tsx` (nuevo): `RecruiterCandidateProfileView`
+renderiza UI estática y empty states desde `next-intl` en `es`/`en`; verifica que
+nombre, headline, resumen, email y país permanecen **verbatim**; paridad del
+namespace `RecruiterPortal.candidateDetail` y presencia de
+`Metadata.recruiterCandidateDetail` en los 5 idiomas.
+
+`tests/unit/messages-structure.test.ts` sigue garantizando la paridad exacta de
+keys entre los 5 diccionarios.
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
@@ -1965,11 +2061,12 @@ archivos migrados pasa (solo 2 warnings preexistentes de `<img>`).
   (`NuevaVacanteModal`) se migró en Etapa 8 (§16-H). El **cierre seguro de
   Vacantes RRHH** se hizo en Etapa 9 (§16-I): textos estáticos de
   `VacancyLocationFields` (vía props) y metadata estática de
-  `/portal-rrhh/vacantes`. Quedan pendientes los módulos RRHH pesados:
+  `/portal-rrhh/vacantes`. El **detalle básico de candidato RRHH** se migró en
+  Etapa 14 (§16-N: perfil sin IA). Quedan pendientes los módulos RRHH pesados:
   **formulario de edición** del detalle de vacante
-  (`app/portal-rrhh/vacantes/[id]/page.tsx`), detalle profundo de
-  candidato, Resultados IA / Score Breakdown, `VacancyConfig`, Reportes,
-  Entrevistas, Etapas/Estados y Configuraciones avanzadas. El mapper de estado de
+  (`app/portal-rrhh/vacantes/[id]/page.tsx`), detalle profundo de vacante con
+  postulaciones/documentos, Resultados IA / Score Breakdown, `VacancyConfig`,
+  Entrevistas avanzadas, Etapas/Estados y Configuraciones avanzadas. El mapper de estado de
   vacante (`STATUS_LABELS` de la tarjeta) **se migró en Etapa 10** — ver §16-J.
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
   namespaces reservados (`Errors`, `EmptyStates`, etc.).
