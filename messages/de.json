@@ -161,6 +161,10 @@
       "title": "ATS | HR-Portal | Stellen",
       "description": "Verwalte die offenen Stellen und Vakanzen des Unternehmens"
     },
+    "recruiterVacancyDetail": {
+      "title": "ATS | HR-Portal | Stellendetails",
+      "description": "Stelleninformationen anzeigen"
+    },
     "recruiterReports": {
       "title": "ATS | HR-Portal | Berichte",
       "description": "Rekrutierungskennzahlen und Berichte einsehen"
@@ -1177,6 +1181,96 @@
           "companiesLoadFallbackSuffix": "Es wird das Standardunternehmen verwendet.",
           "catalogsLoadFailed": "Abteilungen und Arbeitsmodelle konnten nicht geladen werden.",
           "catalogsLoadFallbackSuffix": "Die Stelle kann auch ohne diese Felder erstellt werden."
+        }
+      },
+      "detail": {
+        "page": {
+          "fallbackTitle": "Stellendetails",
+          "vacancyInfoAria": "Stelleninformationen",
+          "createdPrefix": "Erstellt:",
+          "logoAlt": "Logo von {company}"
+        },
+        "sections": {
+          "description": "Stellenbeschreibung",
+          "requirements": "Anforderungen",
+          "details": "Stellendetails",
+          "salary": "Gehalt",
+          "advantages": "Vorteile und Benefits der Stelle"
+        },
+        "actions": {
+          "backToVacancies": "Zurück zu Stellen",
+          "backToVacanciesAria": "Zurück zu Stellen",
+          "editVacancy": "Stelle bearbeiten",
+          "editVacancyAria": "Stelle bearbeiten",
+          "save": "Speichern",
+          "saving": "Wird gespeichert...",
+          "saveAria": "Stelle speichern",
+          "finishProcess": "Prozess abschließen",
+          "finishProcessAria": "Stellenprozess abschließen",
+          "interviews": "Vorstellungsgespräche",
+          "interviewsAria": "Vorstellungsgespräche dieser Stelle anzeigen",
+          "results": "Ergebnisse",
+          "resultsAria": "Ergebnisse und Kennzahlen dieser Stelle anzeigen",
+          "addRequirement": "Hinzufügen",
+          "addRequirementAria": "Anforderung hinzufügen",
+          "companyChangeHint": "Das Ändern des Kunden ändert weder den Stellenstatus noch bestehende Bewerbungen."
+        },
+        "loadingStates": {
+          "loading": "Stelle wird geladen..."
+        },
+        "errors": {
+          "missingId": "Stellen-ID fehlt.",
+          "loadFailed": "Die Stelle konnte nicht geladen werden.",
+          "saveFailed": "Die Stelle konnte nicht gespeichert werden.",
+          "companyRequired": "Wähle ein Kundenunternehmen aus.",
+          "finishFailed": "Der Prozess konnte nicht abgeschlossen werden."
+        },
+        "fallbacks": {
+          "unspecified": "Nicht angegeben"
+        },
+        "toasts": {
+          "saved": "Änderungen erfolgreich gespeichert.",
+          "finishSuccess": "Prozess erfolgreich abgeschlossen."
+        },
+        "readOnlyBanner": {
+          "vacancy": {
+            "title": "Inaktive Stelle — nur Lesen",
+            "body": "Du kannst alle Informationen einsehen, aber keine Änderungen oder Aktionen an dieser Stelle vornehmen."
+          },
+          "company": {
+            "title": "Inaktives Unternehmen — nur Lesen",
+            "body": "Das Unternehmen dieser Stelle ist inaktiv. Du kannst Kandidaten und Phasen einsehen, aber keine Suche oder vorläufige KI-Analyse oder andere Bearbeitungsaktionen ausführen."
+          },
+          "done": {
+            "title": "Prozess abgeschlossen — nur Lesen",
+            "body": "Diese Stelle hat ihren Rekrutierungsprozess abgeschlossen. Du kannst alle Informationen und Ergebnisse einsehen, aber keine Änderungen vornehmen."
+          }
+        },
+        "finishedSummary": {
+          "title": "Prozessbewertung",
+          "ratingLabel": "Bewertung",
+          "ratingValue": "{rating} von 5 Sternen",
+          "ratingValueSingular": "{rating} von 5 Stern",
+          "commentsLabel": "Kommentare"
+        },
+        "finishModal": {
+          "title": "Stellenprozess abschließen",
+          "cancelAria": "Abbrechen",
+          "confirmAria": "Abschluss bestätigen",
+          "confirm": "Prozess abschließen",
+          "completedTitle": "Prozess abgeschlossen",
+          "completedBody": "Nach Abschluss des Prozesses wird die Stelle inaktiv und nur lesbar. Du kannst alle Informationen einsehen, aber keine Änderungen vornehmen.",
+          "ratingLabel": "Prozessbewertung",
+          "requiredAria": "erforderlich",
+          "ratingValue": "{rating} von 5 Sternen",
+          "ratingValueSingular": "{rating} von 5 Stern",
+          "ratingHelper": "Wähle zwischen 1 und 5 Sternen, um den Rekrutierungsprozess zu bewerten.",
+          "commentsLabel": "Kommentare (optional)",
+          "commentsPlaceholder": "Füge deine Kommentare zum Rekrutierungsprozess hinzu...",
+          "commentsAria": "Kommentare zum Prozess",
+          "commentsHelper": "Du kannst Beobachtungen oder Notizen zum Verlauf des Prozesses hinzufügen.",
+          "validationRating": "Die Bewertung muss zwischen 1 und 5 Sternen liegen.",
+          "errorFallback": "Fehler beim Abschließen des Prozesses"
         }
       }
     },

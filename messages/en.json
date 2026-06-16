@@ -161,6 +161,10 @@
       "title": "ATS | HR Portal | Vacancies",
       "description": "Manage the company's open positions and vacancies"
     },
+    "recruiterVacancyDetail": {
+      "title": "ATS | HR Portal | Vacancy details",
+      "description": "View vacancy information"
+    },
     "recruiterReports": {
       "title": "ATS | HR Portal | Reports",
       "description": "Review recruiting metrics and reports"
@@ -1177,6 +1181,96 @@
           "companiesLoadFallbackSuffix": "The default company will be used.",
           "catalogsLoadFailed": "Departments and modalities could not be loaded.",
           "catalogsLoadFallbackSuffix": "The vacancy can still be created without these fields."
+        }
+      },
+      "detail": {
+        "page": {
+          "fallbackTitle": "Vacancy details",
+          "vacancyInfoAria": "Vacancy information",
+          "createdPrefix": "Created:",
+          "logoAlt": "Logo of {company}"
+        },
+        "sections": {
+          "description": "Vacancy description",
+          "requirements": "Requirements",
+          "details": "Vacancy details",
+          "salary": "Salary",
+          "advantages": "Vacancy benefits and perks"
+        },
+        "actions": {
+          "backToVacancies": "Back to vacancies",
+          "backToVacanciesAria": "Back to vacancies",
+          "editVacancy": "Edit vacancy",
+          "editVacancyAria": "Edit vacancy",
+          "save": "Save",
+          "saving": "Saving...",
+          "saveAria": "Save vacancy",
+          "finishProcess": "Finish process",
+          "finishProcessAria": "Finish vacancy process",
+          "interviews": "Interviews",
+          "interviewsAria": "View interviews for this vacancy",
+          "results": "Results",
+          "resultsAria": "View results and metrics for this vacancy",
+          "addRequirement": "Add",
+          "addRequirementAria": "Add requirement",
+          "companyChangeHint": "Changing the client does not modify the vacancy status or existing applications."
+        },
+        "loadingStates": {
+          "loading": "Loading vacancy..."
+        },
+        "errors": {
+          "missingId": "Vacancy ID is missing.",
+          "loadFailed": "The vacancy could not be loaded.",
+          "saveFailed": "The vacancy could not be saved.",
+          "companyRequired": "Select a client company.",
+          "finishFailed": "The process could not be finished."
+        },
+        "fallbacks": {
+          "unspecified": "Not specified"
+        },
+        "toasts": {
+          "saved": "Changes saved successfully.",
+          "finishSuccess": "Process finished successfully."
+        },
+        "readOnlyBanner": {
+          "vacancy": {
+            "title": "Inactive vacancy — read only",
+            "body": "You can view all information, but you cannot make changes or take actions on this vacancy."
+          },
+          "company": {
+            "title": "Inactive company — read only",
+            "body": "This vacancy's company is inactive. You can view candidates and stages, but you cannot run search or preliminary AI analysis or other editing actions."
+          },
+          "done": {
+            "title": "Process finished — read only",
+            "body": "This vacancy has completed its recruitment process. You can view all information and results, but you cannot make changes."
+          }
+        },
+        "finishedSummary": {
+          "title": "Process evaluation",
+          "ratingLabel": "Rating",
+          "ratingValue": "{rating} of 5 stars",
+          "ratingValueSingular": "{rating} of 5 star",
+          "commentsLabel": "Comments"
+        },
+        "finishModal": {
+          "title": "Finish vacancy process",
+          "cancelAria": "Cancel",
+          "confirmAria": "Confirm finish",
+          "confirm": "Finish process",
+          "completedTitle": "Process completed",
+          "completedBody": "When you finish the process, the vacancy will become inactive and read only. You can view all information, but you cannot make changes.",
+          "ratingLabel": "Process rating",
+          "requiredAria": "required",
+          "ratingValue": "{rating} of 5 stars",
+          "ratingValueSingular": "{rating} of 5 star",
+          "ratingHelper": "Select between 1 and 5 stars to rate the recruitment process.",
+          "commentsLabel": "Comments (optional)",
+          "commentsPlaceholder": "Add your comments about the recruitment process...",
+          "commentsAria": "Comments about the process",
+          "commentsHelper": "You can add observations or notes about how the process went.",
+          "validationRating": "Rating must be between 1 and 5 stars.",
+          "errorFallback": "Error finishing the process"
         }
       }
     },

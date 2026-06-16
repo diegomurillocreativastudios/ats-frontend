@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
   ArrowRight,
@@ -97,6 +98,7 @@ import {
   mapActiveCatalogItemsToOptions,
   mergeCatalogOption,
 } from "@/lib/vacancy-catalogs";
+import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -276,13 +278,36 @@ const ScoreTooltip = ({ text, accentClass = "text-slate-500" }) => (
   </span>
 );
 
-const STATUS_LABELS = {
-  activa: { label: "Activa", bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
-  cerrada: { label: "Cerrada", bgClass: "bg-muted", textClass: "text-muted-foreground" },
-  pausada: { label: "Pausada", bgClass: "bg-amber-100", textClass: "text-amber-800" },
-  open: { label: "Abierta", bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
-  closed: { label: "Cerrada", bgClass: "bg-muted", textClass: "text-muted-foreground" },
-  paused: { label: "Pausada", bgClass: "bg-amber-100", textClass: "text-amber-800" },
+const STATUS_STYLES = {
+  activa: { bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
+  cerrada: { bgClass: "bg-muted", textClass: "text-muted-foreground" },
+  pausada: { bgClass: "bg-amber-100", textClass: "text-amber-800" },
+  open: { bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
+  closed: { bgClass: "bg-muted", textClass: "text-muted-foreground" },
+  paused: { bgClass: "bg-amber-100", textClass: "text-amber-800" },
+};
+
+const normalizeVacancyStatusKey = (status) => {
+  if (!status) return "activa";
+  const key = String(status).toLowerCase();
+  if (key === "open") return "activa";
+  if (key === "closed") return "cerrada";
+  if (key === "paused") return "pausada";
+  return key;
+};
+
+const getStatusStyleKey = (status) => {
+  if (!status) return "activa";
+  const key = String(status).toLowerCase();
+  return STATUS_STYLES[key] ? key : "activa";
+};
+
+const getStatusConfig = (status, t) => {
+  const styleKey = getStatusStyleKey(status);
+  const styles = STATUS_STYLES[styleKey] ?? STATUS_STYLES.activa;
+  const mapperKey = normalizeVacancyStatusKey(status);
+  const label = getVacancyStatusLabel(mapperKey, t) || String(status ?? "");
+  return { ...styles, label };
 };
 
 const AI_EFFICIENCY_KPIS = [
@@ -302,12 +327,6 @@ const AI_EFFICIENCY_KPIS = [
     helper: "Punto de partida para validación de RRHH",
   },
 ];
-
-const getStatusConfig = (status) => {
-  if (!status) return STATUS_LABELS.activa;
-  const key = String(status).toLowerCase();
-  return STATUS_LABELS[key] ?? STATUS_LABELS.activa;
-};
 
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
@@ -1306,6 +1325,8 @@ const KanbanColumn = ({
 };
 
 export default function VacanteDetallePage() {
+  const t = useTranslations("RecruiterPortal.vacancies");
+  const tDetail = useTranslations("RecruiterPortal.vacancies.detail");
   const params = useParams();
   const id = params?.id ?? null;
   const [vacancy, setVacancy] = useState(null);
@@ -1534,18 +1555,18 @@ export default function VacanteDetallePage() {
       setModalityOptions([])
       setVacancyCatalogsError(
         getApiErrorMessage(err) ||
-          "No se pudieron cargar departamentos y modalidades."
+          t("form.errors.catalogsLoadFailed")
       )
     } finally {
       setLoadingVacancyCatalogs(false)
     }
-  }, [])
+  }, [t])
 
   const fetchVacancy = useCallback(async (silentFlag?: unknown) => {
     const silent = silentFlag === true
     if (!id) {
       if (!silent) setLoading(false);
-      if (!silent) setFetchError("Falta el ID de la vacante.");
+      if (!silent) setFetchError(tDetail("errors.missingId"));
       return;
     }
     if (!silent) {
@@ -1566,14 +1587,14 @@ export default function VacanteDetallePage() {
     } catch (err: unknown) {
       if (!silent) {
         setFetchError(
-          getApiErrorMessage(err) || "No se pudo cargar la vacante."
+          getApiErrorMessage(err) || tDetail("errors.loadFailed")
         );
         setVacancy(null);
       }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [id]);
+  }, [id, tDetail]);
 
   useEffect(() => {
     fetchVacancy();
@@ -1662,19 +1683,19 @@ export default function VacanteDetallePage() {
 
   const validateEditForm = useCallback(() => {
     const nextErrors: Record<string, string> = {};
-    if (!String(editTitle ?? "").trim()) nextErrors.title = "El nombre es requerido";
-    if (!String(editDescription ?? "").trim()) nextErrors.description = "La descripción es requerida";
+    if (!String(editTitle ?? "").trim()) nextErrors.title = t("form.validation.nameRequired");
+    if (!String(editDescription ?? "").trim()) nextErrors.description = t("form.validation.descriptionRequired");
 
     editRequirements.forEach((req) => {
       const hasName = !!String(req.requirementName ?? "").trim();
       const hasValue = !!String(req.requirementValue ?? "").trim();
-      if (hasName && !hasValue) nextErrors[`req-value-${req.id}`] = "Valor requerido";
-      if (!hasName && hasValue) nextErrors[`req-name-${req.id}`] = "Nombre requerido";
+      if (hasName && !hasValue) nextErrors[`req-value-${req.id}`] = t("form.validation.requirementValueRequired");
+      if (!hasName && hasValue) nextErrors[`req-name-${req.id}`] = t("form.validation.requirementNameRequired");
     });
 
     setEditErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
-  }, [editTitle, editDescription, editRequirements]);
+  }, [editTitle, editDescription, editRequirements, t]);
 
   const handleEditVacancy = useCallback(() => {
     if (!vacancy || !readVacancyIsActive(vacancy)) return;
@@ -1727,7 +1748,7 @@ export default function VacanteDetallePage() {
     if (!vacancyId || !vacancy || !readVacancyIsActive(vacancy)) return;
     if (!validateEditForm()) return;
     if (!editCompanyId.trim()) {
-      setSaveVacancyError("Selecciona una empresa cliente.");
+      setSaveVacancyError(tDetail("errors.companyRequired"));
       return;
     }
 
@@ -1910,12 +1931,12 @@ export default function VacanteDetallePage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Cambios guardados correctamente.",
+        message: tDetail("toasts.saved"),
       });
     } catch (err) {
       const msg = companyChanged
         ? mapVacancyCompanyPatchError(err)
-        : getApiErrorMessage(err) || "No se pudo guardar la vacante.";
+        : getApiErrorMessage(err) || tDetail("errors.saveFailed");
       setSaveVacancyError(msg);
       setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
@@ -1941,13 +1962,15 @@ export default function VacanteDetallePage() {
     mergedModalityOptions,
     createCatalogSummary,
     companySelectOptions,
+    t,
+    tDetail,
   ]);
 
   const handleFinishProcess = useCallback(
     async (data: { calification: number; comments: string }) => {
       const vacancyId = Array.isArray(id) ? id[0] : id
       if (!vacancyId) {
-        throw new Error("Falta el ID de la vacante.")
+        throw new Error(tDetail("errors.missingId"))
       }
 
       setFinishingProcess(true)
@@ -1978,19 +2001,19 @@ export default function VacanteDetallePage() {
         setSnackbar({
           open: true,
           variant: "success",
-          message: "Proceso finalizado correctamente.",
+          message: tDetail("toasts.finishSuccess"),
         })
       } catch (error) {
         const message =
           error instanceof Error
             ? error.message
-            : "No se pudo finalizar el proceso."
+            : tDetail("errors.finishFailed")
         throw new Error(message)
       } finally {
         setFinishingProcess(false)
       }
     },
-    [id, fetchVacancy]
+    [id, fetchVacancy, tDetail]
   )
 
   useEffect(() => {
@@ -2117,7 +2140,7 @@ export default function VacanteDetallePage() {
     );
   }, [id, loading, vacancy?.title]);
 
-  const statusConfig = vacancy ? getStatusConfig(vacancy.status) : STATUS_LABELS.activa;
+  const statusConfig = vacancy ? getStatusConfig(vacancy.status, t) : getStatusConfig("activa", t);
   /** AI match suggestions from vacancy (for "Posibles candidatos" container). */
   const vacancyCandidates = Array.isArray(vacancy?.aiMatchSuggestions)
     ? vacancy.aiMatchSuggestions
@@ -2441,14 +2464,14 @@ export default function VacanteDetallePage() {
 
   const selectedCount = selectedCandidateIds.size;
 
-  const breadcrumbLabel = vacancy?.title ? vacancy.title : "Detalle de vacante";
+  const breadcrumbLabel = vacancy?.title ? vacancy.title : tDetail("page.fallbackTitle");
 
   const breadcrumbTrail = useMemo(
     () => [
-      { label: "Vacantes", href: "/portal-rrhh/vacantes" },
+      { label: t("breadcrumb"), href: "/portal-rrhh/vacantes" },
       { label: breadcrumbLabel },
     ],
-    [breadcrumbLabel]
+    [breadcrumbLabel, t]
   );
 
   return (
@@ -2474,7 +2497,7 @@ export default function VacanteDetallePage() {
                     aria-hidden
                   />
                   <p className="font-sans text-sm text-muted-foreground">
-                    Cargando vacante...
+                    {tDetail("loadingStates.loading")}
                   </p>
                 </div>
               ) : fetchError ? (
@@ -2490,14 +2513,14 @@ export default function VacanteDetallePage() {
                     className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                   >
                     <ArrowLeft className="h-4 w-4" aria-hidden />
-                    Volver a vacantes
+                    {tDetail("actions.backToVacancies")}
                   </Link>
                   <button
                     type="button"
                     onClick={fetchVacancy}
                     className="font-sans text-sm text-vo-purple hover:underline"
                   >
-                    Reintentar
+                    {t("actions.retry")}
                   </button>
                 </div>
               ) : vacancy ? (
@@ -2506,10 +2529,10 @@ export default function VacanteDetallePage() {
                     <Link
                       href="/portal-rrhh/vacantes"
                       className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                      aria-label="Volver a vacantes"
+                      aria-label={tDetail("actions.backToVacanciesAria")}
                     >
                       <ArrowLeft className="h-4 w-4" aria-hidden />
-                      Volver a vacantes
+                      {tDetail("actions.backToVacancies")}
                     </Link>
                   </div>
 
@@ -2530,7 +2553,7 @@ export default function VacanteDetallePage() {
 
                   <section
                     className="mb-8 rounded-xl border border-border bg-card p-6"
-                    aria-label="Información de la vacante"
+                    aria-label={tDetail("page.vacancyInfoAria")}
                   >
                     <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                       <div className="flex min-w-0 flex-1 items-start gap-4">
@@ -2538,7 +2561,7 @@ export default function VacanteDetallePage() {
                           <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background">
                             <img
                               src={companyLogoSrc}
-                              alt={`Logo de ${vacancyCompanyDisplayName}`}
+                              alt={tDetail("page.logoAlt", { company: vacancyCompanyDisplayName })}
                               className="h-full w-full object-contain"
                               loading="lazy"
                             />
@@ -2559,7 +2582,7 @@ export default function VacanteDetallePage() {
                             <div className="flex flex-col gap-4">
                               <div className="flex flex-col gap-2">
                                 <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-desktop">
-                                  Nombre de la vacante <span className="text-vo-pink">*</span>
+                                  {t("form.fields.name.label")} <span className="text-vo-pink">*</span>
                                 </label>
                                 <input
                                   id="edit-vacancy-title-desktop"
@@ -2569,7 +2592,7 @@ export default function VacanteDetallePage() {
                                   className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                   aria-invalid={!!editErrors.title}
                                   aria-describedby={editErrors.title ? "edit-title-error-desktop" : undefined}
-                                  placeholder="Ej: Frontend Developer"
+                                  placeholder={t("form.fields.name.placeholder")}
                                 />
                                 {editErrors.title && (
                                   <p id="edit-title-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
@@ -2582,14 +2605,14 @@ export default function VacanteDetallePage() {
                                   className="font-sans text-sm font-medium text-foreground"
                                   htmlFor="edit-vacancy-company-desktop"
                                 >
-                                  Cliente / compañía
+                                  {t("form.fields.client.label")}
                                 </label>
                                 <select
                                   id="edit-vacancy-company-desktop"
                                   value={editCompanyId}
                                   onChange={(e) => setEditCompanyId(e.target.value)}
                                   className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                  aria-label="Cliente o compañía de la vacante"
+                                  aria-label={t("form.fields.client.ariaLabel")}
                                   disabled={loadingCompanies || companySelectOptions.length === 0}
                                 >
                                   {companySelectOptions.map((company) => (
@@ -2599,7 +2622,7 @@ export default function VacanteDetallePage() {
                                   ))}
                                 </select>
                                 <p className="font-sans text-xs text-muted-foreground">
-                                  Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes.
+                                  {tDetail("actions.companyChangeHint")}
                                 </p>
                               </div>
                               <VacancyLocationFields
@@ -2611,24 +2634,24 @@ export default function VacanteDetallePage() {
                                 }}
                                 countrySelectId="edit-vacancy-country-desktop"
                                 stateSelectId="edit-vacancy-state-desktop"
-                                countryLabel="País al que aplica la vacante"
-                                stateLabel="Estado / provincia"
+                                countryLabel={t("form.fields.country.label")}
+                                stateLabel={t("form.fields.state.label")}
                                 disabled={savingVacancy}
                               />
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-desktop">
-                                    Área (catálogo)
+                                    {t("form.fields.department.label")}
                                   </label>
                                   <select
                                     id="edit-vacancy-department-desktop"
                                     value={editVacancyDepartmentId}
                                     onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Área de la vacante en catálogo"
+                                    aria-label={t("form.fields.department.ariaLabel")}
                                     disabled={loadingVacancyCatalogs}
                                   >
-                                    <option value="">Sin especificar</option>
+                                    <option value="">{t("form.fields.unspecifiedOption")}</option>
                                     {mergedDepartmentOptions.map((option) => (
                                       <option key={option.id} value={option.id}>
                                         {option.displayName}
@@ -2638,17 +2661,17 @@ export default function VacanteDetallePage() {
                                 </div>
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-desktop">
-                                    Modalidad
+                                    {t("form.fields.modality.label")}
                                   </label>
                                   <select
                                     id="edit-vacancy-modality-desktop"
                                     value={editVacancyModalityId}
                                     onChange={(e) => setEditVacancyModalityId(e.target.value)}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Modalidad de la vacante"
+                                    aria-label={t("form.fields.modality.ariaLabel")}
                                     disabled={loadingVacancyCatalogs}
                                   >
-                                    <option value="">Sin especificar</option>
+                                    <option value="">{t("form.fields.unspecifiedOption")}</option>
                                     {mergedModalityOptions.map((option) => (
                                       <option key={option.id} value={option.id}>
                                         {option.displayName}
@@ -2695,7 +2718,7 @@ export default function VacanteDetallePage() {
                             ) : null}
                             <span className="flex items-center gap-1.5">
                               <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-                              Creada: {formatDate(vacancy.createdAt)}
+                              {tDetail("page.createdPrefix")} {formatDate(vacancy.createdAt)}
                             </span>
                           </div>
                           <span
@@ -2723,9 +2746,9 @@ export default function VacanteDetallePage() {
                                 type="button"
                                 onClick={() => setFinishProcessModalOpen(true)}
                                 className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
-                                aria-label="Finalizar proceso de la vacante"
+                                aria-label={tDetail("actions.finishProcessAria")}
                               >
-                                Finalizar proceso
+                                {tDetail("actions.finishProcess")}
                               </button>
                             ) : null}
                             {!isVacancyReadOnly ? (
@@ -2733,24 +2756,24 @@ export default function VacanteDetallePage() {
                                 type="button"
                                 onClick={handleEditVacancy}
                                 className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                                aria-label="Editar vacante"
+                                aria-label={tDetail("actions.editVacancyAria")}
                               >
-                                Editar vacante
+                                {tDetail("actions.editVacancy")}
                               </button>
                             ) : null}
                             <Link
                               href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                              aria-label="Ver entrevistas de esta vacante"
+                              aria-label={tDetail("actions.interviewsAria")}
                             >
-                              Entrevistas
+                              {tDetail("actions.interviews")}
                             </Link>
                             <Link
                               href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                              aria-label="Ver resultados y métricas de esta vacante"
+                              aria-label={tDetail("actions.resultsAria")}
                             >
-                              Resultados
+                              {tDetail("actions.results")}
                             </Link>
                           </>
                         ) : (
@@ -2759,12 +2782,12 @@ export default function VacanteDetallePage() {
                             onClick={handleSaveVacancy}
                             disabled={savingVacancy}
                             className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label="Guardar vacante"
+                                aria-label={tDetail("actions.saveAria")}
                           >
                             {savingVacancy ? (
                               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                             ) : null}
-                            {savingVacancy ? "Guardando..." : "Guardar"}
+                            {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
                           </button>
                         )}
                       </div>
@@ -2783,7 +2806,7 @@ export default function VacanteDetallePage() {
                               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-sky/10 text-vo-sky">
                                 <FileText className="h-4 w-4" aria-hidden />
                               </span>
-                              Descripción de la vacante
+                              {tDetail("sections.description")}
                             </h2>
                             {isEditing ? (
                               <div className="flex flex-col gap-2">
@@ -2792,10 +2815,10 @@ export default function VacanteDetallePage() {
                                   onChange={(e) => setEditDescription(e.target.value)}
                                   rows={5}
                                   className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
-                                  aria-label="Editar descripción de la vacante"
+                                  aria-label={t("form.fields.description.label")}
                                   aria-invalid={!!editErrors.description}
                                   aria-describedby={editErrors.description ? "edit-description-error-desktop" : undefined}
-                                  placeholder="Explicacion del rol de la vacante"
+                                  placeholder={t("form.fields.description.placeholder")}
                                 />
                                 {editErrors.description && (
                                   <p id="edit-description-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
@@ -2817,17 +2840,17 @@ export default function VacanteDetallePage() {
                                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-purple/10 text-vo-purple">
                                   <CheckSquare className="h-4 w-4" aria-hidden />
                                 </span>
-                                Requisitos
+                                {tDetail("sections.requirements")}
                               </h2>
                               {isEditing && (
                                 <button
                                   type="button"
                                   onClick={handleAddRequirement}
                                   className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                                  aria-label="Agregar requerimiento"
+                                  aria-label={tDetail("actions.addRequirementAria")}
                                 >
                                   <Plus className="h-4 w-4" aria-hidden />
-                                  Agregar
+                                  {tDetail("actions.addRequirement")}
                                 </button>
                               )}
                             </div>
@@ -2847,7 +2870,7 @@ export default function VacanteDetallePage() {
                                             onChange={(e) =>
                                               handleUpdateRequirement(req.id, "requirementName", e.target.value)
                                             }
-                                            placeholder="Nombre (ej: Licencia de conducir)"
+                                            placeholder={t("form.fields.requirements.namePlaceholder")}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Nombre`}
                                             aria-invalid={!!editErrors[`req-name-${req.id}`]}
@@ -2865,7 +2888,7 @@ export default function VacanteDetallePage() {
                                             onChange={(e) =>
                                               handleUpdateRequirement(req.id, "requirementValue", e.target.value)
                                             }
-                                            placeholder="Valor (ej: Pesada)"
+                                            placeholder={t("form.fields.requirements.valuePlaceholder")}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Valor`}
                                             aria-invalid={!!editErrors[`req-value-${req.id}`]}
@@ -2882,7 +2905,7 @@ export default function VacanteDetallePage() {
                                               htmlFor={`edit-scale-desktop-${req.id}`}
                                               className="font-sans text-xs text-muted-foreground"
                                             >
-                                              Importancia (1-10)
+                                              {t("form.fields.requirements.importanceLabel")}
                                             </label>
                                             <span className="font-sans text-xs font-medium text-foreground tabular-nums">
                                               {req.scale}
@@ -2914,7 +2937,7 @@ export default function VacanteDetallePage() {
                                   ))}
                                 </div>
                                 <p className="font-sans text-xs text-muted-foreground">
-                                  Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
+                                  {t("form.fields.requirements.helper")}
                                 </p>
                               </div>
                             ) : (
@@ -2933,16 +2956,16 @@ export default function VacanteDetallePage() {
                               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
                                 <Info className="h-4 w-4" aria-hidden />
                               </span>
-                              Detalles de la vacante
+                              {tDetail("sections.details")}
                             </h2>
                             {isEditing ? (
                               <textarea
                                 value={editDetails}
                                 onChange={(e) => setEditDetails(e.target.value)}
                                 rows={4}
-                                placeholder="Datos especificos de la vacante"
+                                placeholder={t("form.fields.details.placeholder")}
                                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label="Editar detalles de la vacante"
+                                aria-label={t("form.fields.details.label")}
                               />
                             ) : vacancy.details ? (
                               (() => {
@@ -2974,7 +2997,7 @@ export default function VacanteDetallePage() {
                               })()
                             ) : (
                               <p className="font-sans text-sm italic text-muted-foreground/70">
-                                No especificado
+                                {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
@@ -2988,16 +3011,16 @@ export default function VacanteDetallePage() {
                                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
                                     <DollarSign className="h-4 w-4" aria-hidden />
                                   </span>
-                                  Salario
+                                  {tDetail("sections.salary")}
                                 </h2>
                                 {isEditing ? (
                                   <input
                                     type="text"
                                     value={editSalary}
                                     onChange={(e) => setEditSalary(e.target.value)}
-                                    placeholder="Ej: US$1,200 - US$1,800 / mes"
+                                    placeholder={t("form.fields.salary.placeholder")}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Editar salario de la vacante"
+                                    aria-label={t("form.fields.salary.ariaLabel")}
                                   />
                                 ) : vacancy.salary ? (
                                   <p className="font-sans text-lg font-semibold text-foreground">
@@ -3005,7 +3028,7 @@ export default function VacanteDetallePage() {
                                   </p>
                                 ) : (
                                   <p className="font-sans text-sm italic text-muted-foreground/70">
-                                    No especificado
+                                    {tDetail("fallbacks.unspecified")}
                                   </p>
                                 )}
                               </div>
@@ -3017,16 +3040,16 @@ export default function VacanteDetallePage() {
                                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-pink/10 text-vo-pink">
                                     <Gift className="h-4 w-4" aria-hidden />
                                   </span>
-                                  Ventajas y beneficios de la vacante
+                                  {tDetail("sections.advantages")}
                                 </h2>
                                 {isEditing ? (
                                   <textarea
                                     value={editAdvantages}
                                     onChange={(e) => setEditAdvantages(e.target.value)}
                                     rows={4}
-                                    placeholder="Ej: Seguro médico, bono anual, home office, capacitación..."
+                                    placeholder={t("form.fields.advantages.placeholder")}
                                     className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                    aria-label="Editar ventajas y beneficios de la vacante"
+                                    aria-label={t("form.fields.advantages.label")}
                                   />
                                 ) : vacancy.advantages ? (
                                   <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
@@ -3034,7 +3057,7 @@ export default function VacanteDetallePage() {
                                   </p>
                                 ) : (
                                   <p className="font-sans text-sm italic text-muted-foreground/70">
-                                    No especificado
+                                    {tDetail("fallbacks.unspecified")}
                                   </p>
                                 )}
                               </div>
@@ -3380,7 +3403,7 @@ export default function VacanteDetallePage() {
                   aria-hidden
                 />
                 <p className="font-sans text-sm text-muted-foreground">
-                  Cargando vacante...
+                  {tDetail("loadingStates.loading")}
                 </p>
               </div>
             ) : fetchError ? (
@@ -3396,7 +3419,7 @@ export default function VacanteDetallePage() {
                   className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                 >
                   <ArrowLeft className="h-4 w-4" aria-hidden />
-                  Volver a vacantes
+                  {tDetail("actions.backToVacancies")}
                 </Link>
                 <button
                   type="button"
@@ -3412,10 +3435,10 @@ export default function VacanteDetallePage() {
                   <Link
                     href="/portal-rrhh/vacantes"
                     className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                    aria-label="Volver a vacantes"
+                    aria-label={tDetail("actions.backToVacanciesAria")}
                   >
                     <ArrowLeft className="h-4 w-4" aria-hidden />
-                    Volver a vacantes
+                    {tDetail("actions.backToVacancies")}
                   </Link>
                 </div>
 
@@ -3427,7 +3450,7 @@ export default function VacanteDetallePage() {
 
                 <section
                   className="mb-6 rounded-xl border border-border bg-card p-5"
-                  aria-label="Información de la vacante"
+                  aria-label={tDetail("page.vacancyInfoAria")}
                 >
                   <div className="flex flex-col gap-4">
                     <div className="flex items-start gap-3">
@@ -3435,7 +3458,7 @@ export default function VacanteDetallePage() {
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background">
                           <img
                             src={companyLogoSrc}
-                            alt={`Logo de ${vacancyCompanyDisplayName}`}
+                            alt={tDetail("page.logoAlt", { company: vacancyCompanyDisplayName })}
                             className="h-full w-full object-contain"
                             loading="lazy"
                           />
@@ -3456,7 +3479,7 @@ export default function VacanteDetallePage() {
                           <div className="flex flex-col gap-4">
                             <div className="flex flex-col gap-2">
                               <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-mobile">
-                                Nombre de la vacante <span className="text-vo-pink">*</span>
+                                {t("form.fields.name.label")} <span className="text-vo-pink">*</span>
                               </label>
                               <input
                                 id="edit-vacancy-title-mobile"
@@ -3466,7 +3489,7 @@ export default function VacanteDetallePage() {
                                 className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-invalid={!!editErrors.title}
                                 aria-describedby={editErrors.title ? "edit-title-error-mobile" : undefined}
-                                placeholder="Ej: Frontend Developer"
+                                placeholder={t("form.fields.name.placeholder")}
                               />
                               {editErrors.title && (
                                 <p id="edit-title-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
@@ -3479,14 +3502,14 @@ export default function VacanteDetallePage() {
                                 className="font-sans text-sm font-medium text-foreground"
                                 htmlFor="edit-vacancy-company-mobile"
                               >
-                                Cliente / compañía
+                                {t("form.fields.client.label")}
                               </label>
                               <select
                                 id="edit-vacancy-company-mobile"
                                 value={editCompanyId}
                                 onChange={(e) => setEditCompanyId(e.target.value)}
                                 className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label="Cliente o compañía de la vacante"
+                                aria-label={t("form.fields.client.ariaLabel")}
                                 disabled={loadingCompanies || companySelectOptions.length === 0}
                               >
                                 {companySelectOptions.map((company) => (
@@ -3496,7 +3519,7 @@ export default function VacanteDetallePage() {
                                 ))}
                               </select>
                               <p className="font-sans text-xs text-muted-foreground">
-                                Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes.
+                                {tDetail("actions.companyChangeHint")}
                               </p>
                             </div>
                             <VacancyLocationFields
@@ -3508,24 +3531,24 @@ export default function VacanteDetallePage() {
                                 }}
                                 countrySelectId="edit-vacancy-country-mobile"
                                 stateSelectId="edit-vacancy-state-mobile"
-                                countryLabel="País al que aplica la vacante"
-                                stateLabel="Estado / provincia"
+                                countryLabel={t("form.fields.country.label")}
+                                stateLabel={t("form.fields.state.label")}
                                 disabled={savingVacancy}
                               />
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-mobile">
-                                    Área (catálogo)
+                                    {t("form.fields.department.label")}
                                   </label>
                                   <select
                                     id="edit-vacancy-department-mobile"
                                     value={editVacancyDepartmentId}
                                     onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Área de la vacante en catálogo"
+                                    aria-label={t("form.fields.department.ariaLabel")}
                                     disabled={loadingVacancyCatalogs}
                                   >
-                                    <option value="">Sin especificar</option>
+                                    <option value="">{t("form.fields.unspecifiedOption")}</option>
                                     {mergedDepartmentOptions.map((option) => (
                                       <option key={option.id} value={option.id}>
                                         {option.displayName}
@@ -3535,17 +3558,17 @@ export default function VacanteDetallePage() {
                                 </div>
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-mobile">
-                                    Modalidad
+                                    {t("form.fields.modality.label")}
                                   </label>
                                   <select
                                     id="edit-vacancy-modality-mobile"
                                     value={editVacancyModalityId}
                                     onChange={(e) => setEditVacancyModalityId(e.target.value)}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Modalidad de la vacante"
+                                    aria-label={t("form.fields.modality.ariaLabel")}
                                     disabled={loadingVacancyCatalogs}
                                   >
-                                    <option value="">Sin especificar</option>
+                                    <option value="">{t("form.fields.unspecifiedOption")}</option>
                                     {mergedModalityOptions.map((option) => (
                                       <option key={option.id} value={option.id}>
                                         {option.displayName}
@@ -3592,7 +3615,7 @@ export default function VacanteDetallePage() {
                           ) : null}
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                            {formatDate(vacancy.createdAt)}
+                            {tDetail("page.createdPrefix")} {formatDate(vacancy.createdAt)}
                           </span>
                         </div>
                         <span
@@ -3610,24 +3633,24 @@ export default function VacanteDetallePage() {
                             type="button"
                             onClick={handleEditVacancy}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                            aria-label="Editar vacante"
+                            aria-label={tDetail("actions.editVacancyAria")}
                           >
-                            Editar vacante
+                            {tDetail("actions.editVacancy")}
                           </button>
                           ) : null}
                           <Link
                             href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                            aria-label="Ver entrevistas de esta vacante"
+                            aria-label={tDetail("actions.interviewsAria")}
                           >
-                            Entrevistas
+                            {tDetail("actions.interviews")}
                           </Link>
                           <Link
                             href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                            aria-label="Ver resultados y métricas de esta vacante"
+                            aria-label={tDetail("actions.resultsAria")}
                           >
-                            Resultados
+                            {tDetail("actions.results")}
                           </Link>
                         </>
                       ) : (
@@ -3636,12 +3659,12 @@ export default function VacanteDetallePage() {
                           onClick={handleSaveVacancy}
                           disabled={savingVacancy}
                           className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          aria-label="Guardar vacante"
+                                aria-label={tDetail("actions.saveAria")}
                         >
                           {savingVacancy ? (
                             <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                           ) : null}
-                          {savingVacancy ? "Guardando..." : "Guardar"}
+                          {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
                         </button>
                       )}
                     </div>
@@ -3658,7 +3681,7 @@ export default function VacanteDetallePage() {
                               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-sky/10 text-vo-sky">
                                 <FileText className="h-3.5 w-3.5" aria-hidden />
                               </span>
-                              Descripción de la vacante
+                              {tDetail("sections.description")}
                             </h2>
                             {isEditing ? (
                               <div className="flex flex-col gap-2">
@@ -3667,10 +3690,10 @@ export default function VacanteDetallePage() {
                                   onChange={(e) => setEditDescription(e.target.value)}
                                   rows={5}
                                   className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
-                                  aria-label="Editar descripción de la vacante"
+                                  aria-label={t("form.fields.description.label")}
                                   aria-invalid={!!editErrors.description}
                                   aria-describedby={editErrors.description ? "edit-description-error-mobile" : undefined}
-                                  placeholder="Explicacion del rol de la vacante"
+                                  placeholder={t("form.fields.description.placeholder")}
                                 />
                                 {editErrors.description && (
                                   <p id="edit-description-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
@@ -3692,17 +3715,17 @@ export default function VacanteDetallePage() {
                                 <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-purple/10 text-vo-purple">
                                   <CheckSquare className="h-3.5 w-3.5" aria-hidden />
                                 </span>
-                                Requisitos
+                                {tDetail("sections.requirements")}
                               </h2>
                               {isEditing && (
                                 <button
                                   type="button"
                                   onClick={handleAddRequirement}
                                   className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                                  aria-label="Agregar requerimiento"
+                                  aria-label={tDetail("actions.addRequirementAria")}
                                 >
                                   <Plus className="h-4 w-4" aria-hidden />
-                                  Agregar
+                                  {tDetail("actions.addRequirement")}
                                 </button>
                               )}
                             </div>
@@ -3722,7 +3745,7 @@ export default function VacanteDetallePage() {
                                             onChange={(e) =>
                                               handleUpdateRequirement(req.id, "requirementName", e.target.value)
                                             }
-                                            placeholder="Nombre (ej: Licencia de conducir)"
+                                            placeholder={t("form.fields.requirements.namePlaceholder")}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Nombre`}
                                             aria-invalid={!!editErrors[`req-name-${req.id}`]}
@@ -3740,7 +3763,7 @@ export default function VacanteDetallePage() {
                                             onChange={(e) =>
                                               handleUpdateRequirement(req.id, "requirementValue", e.target.value)
                                             }
-                                            placeholder="Valor (ej: Pesada)"
+                                            placeholder={t("form.fields.requirements.valuePlaceholder")}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Valor`}
                                             aria-invalid={!!editErrors[`req-value-${req.id}`]}
@@ -3757,7 +3780,7 @@ export default function VacanteDetallePage() {
                                               htmlFor={`edit-scale-mobile-${req.id}`}
                                               className="font-sans text-xs text-muted-foreground"
                                             >
-                                              Importancia (1-10)
+                                              {t("form.fields.requirements.importanceLabel")}
                                             </label>
                                             <span className="font-sans text-xs font-medium text-foreground tabular-nums">
                                               {req.scale}
@@ -3790,7 +3813,7 @@ export default function VacanteDetallePage() {
                                   ))}
                                 </div>
                                 <p className="font-sans text-xs text-muted-foreground">
-                                  Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
+                                  {t("form.fields.requirements.helper")}
                                 </p>
                               </div>
                             ) : (
@@ -3807,16 +3830,16 @@ export default function VacanteDetallePage() {
                               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 text-amber-600">
                                 <Info className="h-3.5 w-3.5" aria-hidden />
                               </span>
-                              Detalles de la vacante
+                              {tDetail("sections.details")}
                             </h2>
                             {isEditing ? (
                               <textarea
                                 value={editDetails}
                                 onChange={(e) => setEditDetails(e.target.value)}
                                 rows={4}
-                                placeholder="Datos especificos de la vacante"
+                                placeholder={t("form.fields.details.placeholder")}
                                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label="Editar detalles de la vacante"
+                                aria-label={t("form.fields.details.label")}
                               />
                             ) : vacancy.details ? (
                               (() => {
@@ -3848,7 +3871,7 @@ export default function VacanteDetallePage() {
                               })()
                             ) : (
                               <p className="font-sans text-sm italic text-muted-foreground/70">
-                                No especificado
+                                {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
@@ -3860,16 +3883,16 @@ export default function VacanteDetallePage() {
                               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600">
                                 <DollarSign className="h-3.5 w-3.5" aria-hidden />
                               </span>
-                              Salario
+                              {tDetail("sections.salary")}
                             </h2>
                             {isEditing ? (
                               <input
                                 type="text"
                                 value={editSalary}
                                 onChange={(e) => setEditSalary(e.target.value)}
-                                placeholder="Ej: US$1,200 - US$1,800 / mes"
+                                placeholder={t("form.fields.salary.placeholder")}
                                 className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label="Editar salario de la vacante"
+                                aria-label={t("form.fields.salary.ariaLabel")}
                               />
                             ) : vacancy.salary ? (
                               <p className="font-sans text-lg font-semibold text-foreground">
@@ -3877,7 +3900,7 @@ export default function VacanteDetallePage() {
                               </p>
                             ) : (
                               <p className="font-sans text-sm italic text-muted-foreground/70">
-                                No especificado
+                                {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
@@ -3889,16 +3912,16 @@ export default function VacanteDetallePage() {
                               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-pink/10 text-vo-pink">
                                 <Gift className="h-3.5 w-3.5" aria-hidden />
                               </span>
-                              Ventajas y beneficios de la vacante
+                              {tDetail("sections.advantages")}
                             </h2>
                             {isEditing ? (
                               <textarea
                                 value={editAdvantages}
                                 onChange={(e) => setEditAdvantages(e.target.value)}
                                 rows={4}
-                                placeholder="Ej: Seguro médico, bono anual, home office, capacitación..."
+                                placeholder={t("form.fields.advantages.placeholder")}
                                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label="Editar ventajas y beneficios de la vacante"
+                                aria-label={t("form.fields.advantages.label")}
                               />
                             ) : vacancy.advantages ? (
                               <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
@@ -3906,7 +3929,7 @@ export default function VacanteDetallePage() {
                               </p>
                             ) : (
                               <p className="font-sans text-sm italic text-muted-foreground/70">
-                                No especificado
+                                {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>

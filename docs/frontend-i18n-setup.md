@@ -2131,6 +2131,73 @@ labels de edición RRHH en `en`, availability dinámica verbatim.
 - `getCountrySelectOptions()` — nombres de país en español vía `Intl` (Etapa futura).
 - `lib/pageTitles.ts`, `lib/candidate-portal-translations.ts`, metadata `app/mi-perfil/page.tsx`.
 
+## 16-P. Detalle básico de vacante RRHH sin IA/Score/VacancyConfig (Etapa 17)
+
+Migración acotada de la UI estática del **detalle de vacante RRHH**. **No** se
+tocó Resultados IA, Score Breakdown, `VacancyConfig`, matching/scoring avanzado,
+`lib/pageTitles.ts`, `lib/candidate-portal-translations.ts`, Portal Admin ni
+PDF/export.
+
+### 16-P.1 Rutas y componentes auditados
+
+| Ruta / componente | Categoría | Decisión Etapa 17 |
+| ----------------- | --------- | ----------------- |
+| `app/portal-rrhh/vacantes/[id]/page.tsx` | Mezcla A/B/C/D | Solo bloque de información general, carga/error, edición inline básica y acciones de cabecera (A) |
+| `app/portal-rrhh/vacantes/[id]/layout.ts` | A | **Nuevo** — `generateMetadata` con `Metadata.recruiterVacancyDetail` |
+| `VacancyReadOnlyBanner.tsx` | A | Migrado |
+| `VacancyFinishedSummary.tsx` | A (+ data B) | Labels estáticos migrados; comentarios verbatim |
+| `FinishVacancyProcessModal.tsx` | A | Migrado |
+| Sección candidatos / IA / Kanban en `page.tsx` | C | **Fuera de scope** — sin cambios |
+| `MatchCard`, score breakdown, `AI_EFFICIENCY_KPIS` | C | **Fuera de scope** |
+| `formatVacancyDetailDocumentTitle` (`document.title`) | `pageTitles.ts` | **Fuera de scope** |
+
+### 16-P.2 Namespace usado
+
+`RecruiterPortal.vacancies.detail` (subárbol nuevo en los 5 diccionarios), con
+reutilización de keys existentes en `RecruiterPortal.vacancies.form`,
+`RecruiterPortal.vacancies.actions.retry` y `RecruiterPortal.vacancies.statuses`
+vía `getVacancyStatusLabel`.
+
+Metadata: `Metadata.recruiterVacancyDetail`.
+
+### 16-P.3 Bloques migrados (Categoría A)
+
+- Encabezado: breadcrumb estático, fallback «Detalle de vacante», logo alt.
+- Estados: carga (`Cargando vacante...`), error con `getApiErrorMessage(err) || t(...)`, reintentar.
+- Secciones: descripción, requisitos, detalles, salario, ventajas.
+- Edición inline: labels/placeholders/validaciones reutilizando `form.*`.
+- Acciones: volver, editar, guardar, finalizar proceso, entrevistas, resultados.
+- Banners y modales: solo lectura, resumen de proceso finalizado, modal de cierre.
+- Estado de vacante: `getVacancyStatusLabel` con fallback crudo.
+
+### 16-P.4 Fuera de scope (sin cambios)
+
+- Resultados IA, búsqueda preliminar, análisis preliminar, `MatchCard`.
+- Score breakdown, component scores, hard gates, used signals, razonamientos IA.
+- `VacancyConfig`, pesos de scoring, configuración avanzada.
+- Kanban / etapas / mover candidatos / emparejamiento / rematch.
+- `lib/pageTitles.ts` (`document.title` dinámico).
+- Mensajes de backend (`err.message`, `moveStageError` crudo, etc.).
+
+### 16-P.5 Reglas respetadas
+
+- Data dinámica verbatim: `vacancy.title`, `vacancy.description`, nombres de empresa/candidato/etapa.
+- Sin `locale` en requests al backend.
+- Sin rutas con prefijo `/en`, `/it`, etc.
+- Paridad exacta de keys en `es`, `en`, `it`, `de`, `fr`.
+
+### 16-P.6 Tests
+
+`tests/unit/recruiter-vacancy-detail-i18n.test.tsx`: carga en `es`/`en`, banners/modales,
+mapper de estado, paridad de namespace y metadata.
+
+### 16-P.7 Pendientes (siguiente etapa)
+
+- Sección candidatos con IA en `page.tsx` (búsqueda, posibles candidatos, Kanban).
+- `app/portal-rrhh/vacantes/[id]/resultados/page.tsx` (Resultados IA).
+- Score Breakdown y `VacancyConfig`.
+- Integrar `formatVacancyDetailDocumentTitle` con `next-intl` (deuda `pageTitles.ts`).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
@@ -2145,12 +2212,14 @@ labels de edición RRHH en `en`, availability dinámica verbatim.
   `VacancyLocationFields` (vía props) y metadata estática de
   `/portal-rrhh/vacantes`. El **detalle básico de candidato RRHH** se migró en
   Etapa 14 (§16-N: perfil sin IA). El **formulario de edición compartido** del
-  perfil candidato se migró en Etapa 15 (§16-O). Quedan pendientes los módulos RRHH pesados:
-  **formulario de edición** del detalle de vacante
-  (`app/portal-rrhh/vacantes/[id]/page.tsx`), detalle profundo de vacante con
-  postulaciones/documentos, Resultados IA / Score Breakdown, `VacancyConfig`,
-  Entrevistas avanzadas, Etapas/Estados y Configuraciones avanzadas. El mapper de estado de
-  vacante (`STATUS_LABELS` de la tarjeta) **se migró en Etapa 10** — ver §16-J.
+  perfil candidato se migró en Etapa 15 (§16-O). El **detalle básico de vacante
+  RRHH** (información general, carga/error, edición inline básica y cabecera) se
+  migró en Etapa 17 (§16-P). Quedan pendientes los módulos RRHH pesados:
+  **sección candidatos/IA/Kanban** del detalle de vacante
+  (`app/portal-rrhh/vacantes/[id]/page.tsx`, bloques C/D), Resultados IA /
+  Score Breakdown, `VacancyConfig`, Entrevistas avanzadas, Etapas/Estados y
+  Configuraciones avanzadas. El mapper de estado de vacante en tarjeta/detalle
+  usa `getVacancyStatusLabel` (Etapa 10 / reforzado en Etapa 17) — ver §16-J y §16-P.
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
   namespaces reservados (`Errors`, `EmptyStates`, etc.).
 - El **Portal Admin básico** se migró en Etapa 13 (§16-M: empresas, usuarios y

@@ -161,6 +161,10 @@
       "title": "ATS | Portale HR | Posizioni",
       "description": "Gestisci le posizioni aperte e le vacanze dell'azienda"
     },
+    "recruiterVacancyDetail": {
+      "title": "ATS | Portale HR | Dettaglio posizione",
+      "description": "Consulta le informazioni della posizione"
+    },
     "recruiterReports": {
       "title": "ATS | Portale HR | Report",
       "description": "Consulta metriche e report di reclutamento"
@@ -1177,6 +1181,96 @@
           "companiesLoadFallbackSuffix": "Verrà utilizzata l'azienda predefinita.",
           "catalogsLoadFailed": "Impossibile caricare reparti e modalità.",
           "catalogsLoadFallbackSuffix": "La posizione può comunque essere creata senza questi campi."
+        }
+      },
+      "detail": {
+        "page": {
+          "fallbackTitle": "Dettaglio posizione",
+          "vacancyInfoAria": "Informazioni sulla posizione",
+          "createdPrefix": "Creata:",
+          "logoAlt": "Logo di {company}"
+        },
+        "sections": {
+          "description": "Descrizione della posizione",
+          "requirements": "Requisiti",
+          "details": "Dettagli della posizione",
+          "salary": "Retribuzione",
+          "advantages": "Vantaggi e benefit della posizione"
+        },
+        "actions": {
+          "backToVacancies": "Torna alle posizioni",
+          "backToVacanciesAria": "Torna alle posizioni",
+          "editVacancy": "Modifica posizione",
+          "editVacancyAria": "Modifica posizione",
+          "save": "Salva",
+          "saving": "Salvataggio...",
+          "saveAria": "Salva posizione",
+          "finishProcess": "Concludi processo",
+          "finishProcessAria": "Concludi il processo della posizione",
+          "interviews": "Colloqui",
+          "interviewsAria": "Vedi i colloqui di questa posizione",
+          "results": "Risultati",
+          "resultsAria": "Vedi risultati e metriche di questa posizione",
+          "addRequirement": "Aggiungi",
+          "addRequirementAria": "Aggiungi requisito",
+          "companyChangeHint": "Cambiare il cliente non modifica lo stato della posizione né le candidature esistenti."
+        },
+        "loadingStates": {
+          "loading": "Caricamento posizione..."
+        },
+        "errors": {
+          "missingId": "Manca l'ID della posizione.",
+          "loadFailed": "Impossibile caricare la posizione.",
+          "saveFailed": "Impossibile salvare la posizione.",
+          "companyRequired": "Seleziona un'azienda cliente.",
+          "finishFailed": "Impossibile concludere il processo."
+        },
+        "fallbacks": {
+          "unspecified": "Non specificato"
+        },
+        "toasts": {
+          "saved": "Modifiche salvate correttamente.",
+          "finishSuccess": "Processo concluso correttamente."
+        },
+        "readOnlyBanner": {
+          "vacancy": {
+            "title": "Posizione inattiva — sola lettura",
+            "body": "Puoi consultare tutte le informazioni, ma non apportare modifiche né azioni su questa posizione."
+          },
+          "company": {
+            "title": "Azienda inattiva — sola lettura",
+            "body": "L'azienda di questa posizione è inattiva. Puoi consultare candidati e fasi, ma non eseguire ricerca o analisi preliminare con IA né altre azioni di modifica."
+          },
+          "done": {
+            "title": "Processo concluso — sola lettura",
+            "body": "Questa posizione ha completato il processo di reclutamento. Puoi consultare tutte le informazioni e i risultati, ma non apportare modifiche."
+          }
+        },
+        "finishedSummary": {
+          "title": "Valutazione del processo",
+          "ratingLabel": "Valutazione",
+          "ratingValue": "{rating} su 5 stelle",
+          "ratingValueSingular": "{rating} su 5 stella",
+          "commentsLabel": "Commenti"
+        },
+        "finishModal": {
+          "title": "Concludi il processo della posizione",
+          "cancelAria": "Annulla",
+          "confirmAria": "Conferma conclusione",
+          "confirm": "Concludi processo",
+          "completedTitle": "Processo completato",
+          "completedBody": "Al termine del processo, la posizione resterà inattiva e in sola lettura. Potrai consultare tutte le informazioni, ma non apportare modifiche.",
+          "ratingLabel": "Valutazione del processo",
+          "requiredAria": "obbligatorio",
+          "ratingValue": "{rating} su 5 stelle",
+          "ratingValueSingular": "{rating} su 5 stella",
+          "ratingHelper": "Seleziona da 1 a 5 stelle per valutare il processo di reclutamento.",
+          "commentsLabel": "Commenti (opzionale)",
+          "commentsPlaceholder": "Aggiungi i tuoi commenti sul processo di reclutamento...",
+          "commentsAria": "Commenti sul processo",
+          "commentsHelper": "Puoi aggiungere osservazioni o note su come è andato il processo.",
+          "validationRating": "La valutazione deve essere tra 1 e 5 stelle.",
+          "errorFallback": "Errore nella conclusione del processo"
         }
       }
     },

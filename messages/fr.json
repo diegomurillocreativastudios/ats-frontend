@@ -161,6 +161,10 @@
       "title": "ATS | Portail RH | Postes",
       "description": "Gérez les postes ouverts et les vacances de l'entreprise"
     },
+    "recruiterVacancyDetail": {
+      "title": "ATS | Portail RH | Détail du poste",
+      "description": "Consultez les informations du poste"
+    },
     "recruiterReports": {
       "title": "ATS | Portail RH | Rapports",
       "description": "Consultez les indicateurs et rapports de recrutement"
@@ -1177,6 +1181,96 @@
           "companiesLoadFallbackSuffix": "L'entreprise par défaut sera utilisée.",
           "catalogsLoadFailed": "Impossible de charger les services et les modalités.",
           "catalogsLoadFallbackSuffix": "Le poste peut tout de même être créé sans ces champs."
+        }
+      },
+      "detail": {
+        "page": {
+          "fallbackTitle": "Détail du poste",
+          "vacancyInfoAria": "Informations du poste",
+          "createdPrefix": "Créé :",
+          "logoAlt": "Logo de {company}"
+        },
+        "sections": {
+          "description": "Description du poste",
+          "requirements": "Exigences",
+          "details": "Détails du poste",
+          "salary": "Salaire",
+          "advantages": "Avantages et bénéfices du poste"
+        },
+        "actions": {
+          "backToVacancies": "Retour aux postes",
+          "backToVacanciesAria": "Retour aux postes",
+          "editVacancy": "Modifier le poste",
+          "editVacancyAria": "Modifier le poste",
+          "save": "Enregistrer",
+          "saving": "Enregistrement...",
+          "saveAria": "Enregistrer le poste",
+          "finishProcess": "Terminer le processus",
+          "finishProcessAria": "Terminer le processus du poste",
+          "interviews": "Entretiens",
+          "interviewsAria": "Voir les entretiens de ce poste",
+          "results": "Résultats",
+          "resultsAria": "Voir les résultats et métriques de ce poste",
+          "addRequirement": "Ajouter",
+          "addRequirementAria": "Ajouter une exigence",
+          "companyChangeHint": "Changer le client ne modifie pas le statut du poste ni les candidatures existantes."
+        },
+        "loadingStates": {
+          "loading": "Chargement du poste..."
+        },
+        "errors": {
+          "missingId": "L'identifiant du poste est manquant.",
+          "loadFailed": "Le poste n'a pas pu être chargé.",
+          "saveFailed": "Le poste n'a pas pu être enregistré.",
+          "companyRequired": "Sélectionnez une entreprise cliente.",
+          "finishFailed": "Le processus n'a pas pu être terminé."
+        },
+        "fallbacks": {
+          "unspecified": "Non spécifié"
+        },
+        "toasts": {
+          "saved": "Modifications enregistrées avec succès.",
+          "finishSuccess": "Processus terminé avec succès."
+        },
+        "readOnlyBanner": {
+          "vacancy": {
+            "title": "Poste inactif — lecture seule",
+            "body": "Vous pouvez consulter toutes les informations, mais vous ne pouvez pas apporter de modifications ni d'actions sur ce poste."
+          },
+          "company": {
+            "title": "Entreprise inactive — lecture seule",
+            "body": "L'entreprise de ce poste est inactive. Vous pouvez consulter les candidats et les étapes, mais vous ne pouvez pas lancer de recherche ni d'analyse préliminaire par IA ni d'autres actions d'édition."
+          },
+          "done": {
+            "title": "Processus terminé — lecture seule",
+            "body": "Ce poste a terminé son processus de recrutement. Vous pouvez consulter toutes les informations et résultats, mais vous ne pouvez pas apporter de modifications."
+          }
+        },
+        "finishedSummary": {
+          "title": "Évaluation du processus",
+          "ratingLabel": "Note",
+          "ratingValue": "{rating} sur 5 étoiles",
+          "ratingValueSingular": "{rating} sur 5 étoile",
+          "commentsLabel": "Commentaires"
+        },
+        "finishModal": {
+          "title": "Terminer le processus du poste",
+          "cancelAria": "Annuler",
+          "confirmAria": "Confirmer la fin",
+          "confirm": "Terminer le processus",
+          "completedTitle": "Processus terminé",
+          "completedBody": "En terminant le processus, le poste deviendra inactif et en lecture seule. Vous pourrez consulter toutes les informations, mais vous ne pourrez pas apporter de modifications.",
+          "ratingLabel": "Note du processus",
+          "requiredAria": "obligatoire",
+          "ratingValue": "{rating} sur 5 étoiles",
+          "ratingValueSingular": "{rating} sur 5 étoile",
+          "ratingHelper": "Sélectionnez entre 1 et 5 étoiles pour noter le processus de recrutement.",
+          "commentsLabel": "Commentaires (facultatif)",
+          "commentsPlaceholder": "Ajoutez vos commentaires sur le processus de recrutement...",
+          "commentsAria": "Commentaires sur le processus",
+          "commentsHelper": "Vous pouvez ajouter des observations ou des notes sur le déroulement du processus.",
+          "validationRating": "La note doit être comprise entre 1 et 5 étoiles.",
+          "errorFallback": "Erreur lors de la fin du processus"
         }
       }
     },

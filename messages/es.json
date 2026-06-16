@@ -161,6 +161,10 @@
       "title": "ATS | Portal RRHH | Vacantes",
       "description": "Gestiona las posiciones abiertas y vacantes de la empresa"
     },
+    "recruiterVacancyDetail": {
+      "title": "ATS | Portal RRHH | Detalle de vacante",
+      "description": "Consulta la información de la vacante"
+    },
     "recruiterReports": {
       "title": "ATS | Portal RRHH | Reportes",
       "description": "Consulta métricas y reportes de reclutamiento"
@@ -1177,6 +1181,96 @@
           "companiesLoadFallbackSuffix": "Se usará la compañía predeterminada.",
           "catalogsLoadFailed": "No se pudieron cargar departamentos y modalidades.",
           "catalogsLoadFallbackSuffix": "La vacante se puede crear igualmente sin estos campos."
+        }
+      },
+      "detail": {
+        "page": {
+          "fallbackTitle": "Detalle de vacante",
+          "vacancyInfoAria": "Información de la vacante",
+          "createdPrefix": "Creada:",
+          "logoAlt": "Logo de {company}"
+        },
+        "sections": {
+          "description": "Descripción de la vacante",
+          "requirements": "Requisitos",
+          "details": "Detalles de la vacante",
+          "salary": "Salario",
+          "advantages": "Ventajas y beneficios de la vacante"
+        },
+        "actions": {
+          "backToVacancies": "Volver a vacantes",
+          "backToVacanciesAria": "Volver a vacantes",
+          "editVacancy": "Editar vacante",
+          "editVacancyAria": "Editar vacante",
+          "save": "Guardar",
+          "saving": "Guardando...",
+          "saveAria": "Guardar vacante",
+          "finishProcess": "Finalizar proceso",
+          "finishProcessAria": "Finalizar proceso de la vacante",
+          "interviews": "Entrevistas",
+          "interviewsAria": "Ver entrevistas de esta vacante",
+          "results": "Resultados",
+          "resultsAria": "Ver resultados y métricas de esta vacante",
+          "addRequirement": "Agregar",
+          "addRequirementAria": "Agregar requerimiento",
+          "companyChangeHint": "Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes."
+        },
+        "loadingStates": {
+          "loading": "Cargando vacante..."
+        },
+        "errors": {
+          "missingId": "Falta el ID de la vacante.",
+          "loadFailed": "No se pudo cargar la vacante.",
+          "saveFailed": "No se pudo guardar la vacante.",
+          "companyRequired": "Selecciona una empresa cliente.",
+          "finishFailed": "No se pudo finalizar el proceso."
+        },
+        "fallbacks": {
+          "unspecified": "No especificado"
+        },
+        "toasts": {
+          "saved": "Cambios guardados correctamente.",
+          "finishSuccess": "Proceso finalizado correctamente."
+        },
+        "readOnlyBanner": {
+          "vacancy": {
+            "title": "Vacante inactiva — solo lectura",
+            "body": "Podés consultar toda la información, pero no realizar cambios ni acciones sobre esta vacante."
+          },
+          "company": {
+            "title": "Empresa inactiva — solo lectura",
+            "body": "La empresa de esta vacante está inactiva. Podés consultar candidatos y etapas, pero no ejecutar búsqueda ni análisis preliminar con IA ni otras acciones de edición."
+          },
+          "done": {
+            "title": "Proceso finalizado — solo lectura",
+            "body": "Esta vacante ha completado su proceso de reclutamiento. Podés consultar toda la información y resultados, pero no realizar cambios."
+          }
+        },
+        "finishedSummary": {
+          "title": "Evaluación del proceso",
+          "ratingLabel": "Calificación",
+          "ratingValue": "{rating} de 5 estrellas",
+          "ratingValueSingular": "{rating} de 5 estrella",
+          "commentsLabel": "Comentarios"
+        },
+        "finishModal": {
+          "title": "Finalizar proceso de la vacante",
+          "cancelAria": "Cancelar",
+          "confirmAria": "Confirmar finalización",
+          "confirm": "Finalizar proceso",
+          "completedTitle": "Proceso completado",
+          "completedBody": "Al finalizar el proceso, la vacante quedará inactiva y en estado de solo lectura. Podrás consultar toda la información, pero no realizar cambios.",
+          "ratingLabel": "Calificación del proceso",
+          "requiredAria": "requerido",
+          "ratingValue": "{rating} de 5 estrellas",
+          "ratingValueSingular": "{rating} de 5 estrella",
+          "ratingHelper": "Selecciona entre 1 y 5 estrellas para calificar el proceso de reclutamiento.",
+          "commentsLabel": "Comentarios (opcional)",
+          "commentsPlaceholder": "Agrega tus comentarios sobre el proceso de reclutamiento...",
+          "commentsAria": "Comentarios sobre el proceso",
+          "commentsHelper": "Puedes agregar observaciones o notas sobre cómo fue el proceso.",
+          "validationRating": "La calificación debe estar entre 1 y 5 estrellas.",
+          "errorFallback": "Error al finalizar el proceso"
         }
       }
     },
