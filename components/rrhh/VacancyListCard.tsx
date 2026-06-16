@@ -14,6 +14,7 @@ import {
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import type { VacancyListItem, VacancyListStatusKey } from "@/lib/vacancies/map-vacancy-list-item"
+import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
 
 const ICON_BY_KEY = {
   palette: Palette,
@@ -21,17 +22,17 @@ const ICON_BY_KEY = {
   briefcase: Briefcase,
 } as const
 
-// NOTE: Los labels de estado de vacante (Activa/Cerrada/Pausada/Borrador) provienen
-// de un mapper frontend acoplado a `status` derivado del backend. NO se migran en
-// esta etapa (Etapa 7); quedan pendientes para una etapa dedicada de mappers de estado.
-const STATUS_LABELS: Record<
+// Etapa 10: el styling por estado se mantiene acoplado al enum frontend estable
+// (`activa | cerrada | pausada | borrador`); el label visible se traduce vía
+// `getVacancyStatusLabel`, con fallback al valor crudo si el código es desconocido.
+const STATUS_STYLES: Record<
   VacancyListStatusKey,
-  { label: string; bgClass: string; textClass: string }
+  { bgClass: string; textClass: string }
 > = {
-  activa: { label: "Activa", bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
-  cerrada: { label: "Cerrada", bgClass: "bg-muted", textClass: "text-muted-foreground" },
-  pausada: { label: "Pausada", bgClass: "bg-amber-100", textClass: "text-amber-800" },
-  borrador: { label: "Borrador", bgClass: "bg-slate-100", textClass: "text-slate-700" },
+  activa: { bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
+  cerrada: { bgClass: "bg-muted", textClass: "text-muted-foreground" },
+  pausada: { bgClass: "bg-amber-100", textClass: "text-amber-800" },
+  borrador: { bgClass: "bg-slate-100", textClass: "text-slate-700" },
 }
 
 interface VacancyMetaItemProps {
@@ -60,7 +61,8 @@ export interface VacancyListCardProps {
 export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListCardProps) {
   const t = useTranslations("RecruiterPortal.vacancies")
   const Icon = ICON_BY_KEY[vacancy.iconKey] ?? Briefcase
-  const statusConfig = STATUS_LABELS[vacancy.status] ?? STATUS_LABELS.activa
+  const statusStyle = STATUS_STYLES[vacancy.status] ?? STATUS_STYLES.activa
+  const statusLabel = getVacancyStatusLabel(vacancy.status, t)
   const isReadOnly = !vacancy.isActive
 
   return (
@@ -169,10 +171,10 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
           </div>
           <span
             className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 font-sans text-xs font-medium ${
-              isReadOnly ? "bg-slate-100 text-slate-500" : `${statusConfig.bgClass} ${statusConfig.textClass}`
+              isReadOnly ? "bg-slate-100 text-slate-500" : `${statusStyle.bgClass} ${statusStyle.textClass}`
             }`}
           >
-            {statusConfig.label}
+            {statusLabel}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-3">

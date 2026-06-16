@@ -684,6 +684,7 @@
       "followUpSaved": "Nachverfolgung erfolgreich gespeichert",
       "hired": "Eingestellt",
       "notHired": "Nicht eingestellt",
+      "noName": "Kein Name",
       "rowAriaLabel": "Kandidat {name}",
       "followUpAriaLabel": "Nachverfolgung für {name}",
       "viewDetailAriaLabel": "Details von {name} anzeigen",
@@ -738,6 +739,12 @@
         "cardAria": "Stelle: {title}",
         "cardReadOnlyAria": "Inaktive Stelle, nur Ansicht: {title}",
         "logoAlt": "Logo von {company}"
+      },
+      "statuses": {
+        "active": "Aktiv",
+        "closed": "Geschlossen",
+        "paused": "Pausiert",
+        "draft": "Entwurf"
       },
       "actions": {
         "create": "Neue Stelle",

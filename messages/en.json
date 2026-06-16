@@ -684,6 +684,7 @@
       "followUpSaved": "Follow-up saved successfully",
       "hired": "Hired",
       "notHired": "Not hired",
+      "noName": "No name",
       "rowAriaLabel": "Candidate {name}",
       "followUpAriaLabel": "Follow-up for {name}",
       "viewDetailAriaLabel": "View details for {name}",
@@ -738,6 +739,12 @@
         "cardAria": "Vacancy: {title}",
         "cardReadOnlyAria": "Inactive vacancy, read-only: {title}",
         "logoAlt": "{company} logo"
+      },
+      "statuses": {
+        "active": "Active",
+        "closed": "Closed",
+        "paused": "Paused",
+        "draft": "Draft"
       },
       "actions": {
         "create": "New Vacancy",

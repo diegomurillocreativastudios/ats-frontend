@@ -34,7 +34,7 @@ const emptyToDash = (value) => (value && String(value).trim() ? String(value).tr
  * Maps API candidate document to table row shape.
  * New API shape: { id, document: { id, uploadedAt }, personalInfo: { name, email, phone, country }, profile: { headline, summary }, recruitment: { hired, evaluations } }
  */
-const mapCandidateFromApi = (item, index = 0) => {
+const mapCandidateFromApi = (item, index = 0, noNameLabel = "Sin nombre") => {
   // Handle both old and new format
   const id = String(
     item?.id ?? item?.profileId ?? item?.documentId ?? item?.uuid ?? index
@@ -46,7 +46,9 @@ const mapCandidateFromApi = (item, index = 0) => {
   const document = item?.document ?? {};
   const recruitment = item?.recruitment ?? {};
   
-  const name = emptyToDash(personalInfo?.name ?? item?.name) === "—" ? "Sin nombre" : (personalInfo?.name ?? item?.name ?? "Sin nombre").trim();
+  // Etapa 10: `noNameLabel` es un fallback frontend controlado (no es data del
+  // backend). Solo se aplica cuando el nombre real llega vacío.
+  const name = emptyToDash(personalInfo?.name ?? item?.name) === "—" ? noNameLabel : (personalInfo?.name ?? item?.name ?? noNameLabel).trim();
   const email = emptyToDash(personalInfo?.email ?? item?.email);
   const phone = formatPhoneSvDisplay(personalInfo?.phone ?? item?.phone);
   const country = resolveCountryDisplay(personalInfo?.country ?? item?.country, phone);
@@ -217,7 +219,8 @@ export default function CandidatosPage() {
       const list = Array.isArray(data)
         ? data
         : data?.candidates ?? data?.items ?? data?.data ?? [];
-      setCandidates(list.map((item, i) => mapCandidateFromApi(item, i)));
+      const noNameLabel = t("noName");
+      setCandidates(list.map((item, i) => mapCandidateFromApi(item, i, noNameLabel)));
     } catch (err) {
       setFetchError(
         err?.message ?? err?.detail ?? t("loadError")

@@ -684,6 +684,7 @@
       "followUpSaved": "Seguimiento guardado exitosamente",
       "hired": "Contratado",
       "notHired": "No Contratado",
+      "noName": "Sin nombre",
       "rowAriaLabel": "Candidato {name}",
       "followUpAriaLabel": "Seguimiento de {name}",
       "viewDetailAriaLabel": "Ver detalle de {name}",
@@ -738,6 +739,12 @@
         "cardAria": "Vacante: {title}",
         "cardReadOnlyAria": "Vacante inactiva, solo consulta: {title}",
         "logoAlt": "Logo de {company}"
+      },
+      "statuses": {
+        "active": "Activa",
+        "closed": "Cerrada",
+        "paused": "Pausada",
+        "draft": "Borrador"
       },
       "actions": {
         "create": "Nueva Vacante",

@@ -1151,6 +1151,11 @@ Recomendación futura: etapa dedicada que mapee cada key de estado conocida
 (`activa`/`cerrada`/`pausada`/`borrador`) a `next-intl`, conservando el `value`
 canónico que usa el styling y dejando intacto el fallback a `activa`.
 
+> **Actualización (Etapa 10): RESUELTO.** Este mapper se migró de forma segura en
+> la Etapa 10 — ver **§16-J**. El styling se conserva en `STATUS_STYLES` (keyed por
+> el enum frontend) y el label visible se traduce vía `getVacancyStatusLabel`, con
+> fallback al valor crudo si el código es desconocido.
+
 ### 16-G.5 Regla crítica: NO traducir data dinámica / IA / backend
 
 ```tsx
@@ -1450,6 +1455,146 @@ suite global (reportes PDF, `recruiter-companies-api`, `public-vacancies`,
 `admin-vacancy-catalog`, `report-filter-renderer`) son **preexistentes** y ajenas
 a esta etapa (verificado con y sin los cambios de Etapa 9).
 
+## 16-J. Mappers controlados de estados/labels (Etapa 10)
+
+Etapa de migración **segura y acotada** de mappers controlados de estados/labels
+que dependen de **códigos/enums/booleanos frontend estables**. Regla principal:
+
+> Solo traducir códigos/enums/booleanos controlados. Si llega texto libre, valor
+> desconocido o label configurado desde backend/BD, **mostrar el valor crudo**.
+
+### 16-J.1 Mappers auditados
+
+Patrones buscados: `STATUS_LABELS`, `statusLabel(s)`, `translateStageName`,
+`translateApplicationStatus`, `translateStageStatus`, `getApplicationStatusStyle`,
+`mapCandidateFromApi`, y fallbacks (`Sin nombre`, `Sin título`, `No especificado`,
+`Contratado`/`No Contratado`, `Activa`/`Cerrada`/`Pausada`/`Borrador`).
+
+| Mapper / archivo | Categoría | Decisión |
+| --- | --- | --- |
+| `STATUS_LABELS` (label) en `components/rrhh/VacancyListCard.tsx` | **A** | **Migrado** |
+| Fallback `"Sin nombre"` en `mapCandidateFromApi` (`app/portal-rrhh/candidatos/page.tsx`) | **A** | **Migrado** |
+| Booleano `hired`/`notHired` (`candidatos/page.tsx`) | A | Ya migrado en Etapa 6 (`t("hired")`/`t("notHired")`) — sin cambios |
+| Fallback `cards.untitled` (`"Sin título"`) en `VacancyListCard` | A | Ya migrado en Etapa 7 — sin cambios |
+| `translateApplicationStatus` (`lib/candidate-portal-translations.ts`) | **C** | No migrado (acoplado a `getApplicationStatusStyle` por substring) |
+| `translateStageStatus` (`lib/candidate-portal-translations.ts`) | B/C | No migrado (vive junto a los anteriores; se difiere en bloque) |
+| `translateStageName` (`lib/candidate-portal-translations.ts`) | **B** | No migrado (nombres de etapa del backend/BD) |
+| `getApplicationStatusStyle` (`lib/candidate-portal-translations.ts`) | **C** | No migrado (styling por substring del label) |
+
+### 16-J.2 Mappers migrados (Categoría A)
+
+**1) Estado de vacante — `lib/vacancies/vacancy-status-labels.ts` (nuevo).**
+
+El enum frontend estable `VacancyListStatusKey` (`activa | cerrada | pausada |
+borrador`), producido por `mapStatusKey`, se traduce con:
+
+```ts
+export const VACANCY_STATUS_TRANSLATION_KEYS = {
+  activa: "statuses.active",
+  cerrada: "statuses.closed",
+  pausada: "statuses.paused",
+  borrador: "statuses.draft",
+} as const satisfies Record<VacancyListStatusKey, string>
+
+export function getVacancyStatusLabel(status, t) {
+  if (!status) return ""
+  const key = VACANCY_STATUS_TRANSLATION_KEYS[status]
+  return key ? t(key) : String(status) // fallback al valor crudo
+}
+```
+
+En `VacancyListCard` el styling se separó en `STATUS_STYLES` (sólo `bgClass`/
+`textClass`, keyed por el enum) y el label visible se obtiene de
+`getVacancyStatusLabel(vacancy.status, t)` con `t = useTranslations("RecruiterPortal.vacancies")`.
+
+**2) Fallback `"Sin nombre"` — `mapCandidateFromApi`.**
+
+Es un **fallback frontend controlado** (no es data del backend): sólo se aplica
+cuando el nombre real llega vacío. Se parametrizó el mapper con `noNameLabel`
+(default crudo `"Sin nombre"`) y la página lo resuelve vía `t("noName")`:
+
+```ts
+const noNameLabel = t("noName")
+setCandidates(list.map((item, i) => mapCandidateFromApi(item, i, noNameLabel)))
+```
+
+El nombre real del candidato (data dinámica) **no** se traduce ni transforma.
+
+### 16-J.3 Namespaces agregados
+
+`es` es la fuente de verdad; paridad exacta en los 5 diccionarios.
+
+```jsonc
+"RecruiterPortal": {
+  "vacancies": {
+    "statuses": { "active": "Activa", "closed": "Cerrada", "paused": "Pausada", "draft": "Borrador" }
+  },
+  "candidates": {
+    "noName": "Sin nombre" // + hired/notHired ya existentes
+  }
+}
+```
+
+### 16-J.4 Regla de fallback al valor crudo
+
+Todo mapper migrado devuelve el **valor crudo** cuando el código no es un enum
+controlado conocido:
+
+```ts
+status = "ACTIVE"                    → t("statuses.active")
+status = "CUSTOM_STATUS_FROM_BACKEND" → "CUSTOM_STATUS_FROM_BACKEND" // sin traducir
+```
+
+### 16-J.5 Mappers NO migrados y razón
+
+- **`lib/candidate-portal-translations.ts` (se mantiene la decisión de 5B/5C/§15.3).**
+  - `translateStageName`: mapea **nombres de etapa del backend/BD** (`Revision`,
+    `Offer`, `Aplicantes`, `Entrevista`, `En espera`) → data dinámica, **no** UI
+    estática. Traducirla violaría la regla crítica.
+  - `getApplicationStatusStyle`: deriva el estilo por **substring del label**
+    traducido (`contratado`, `activ`, `pendiente`…). Traducir el label a `it/de/fr`
+    **rompería** el styling → **Categoría C**, requiere refactor dedicado que
+    separe códigos estables del styling.
+  - `translateApplicationStatus`/`translateStageStatus`: aunque las keys parecen
+    enums (`Active`, `Pending`…), están **acopladas** a `getApplicationStatusStyle`
+    vía el texto que producen → se difieren en bloque junto al refactor de estilos.
+
+### 16-J.6 Qué NO se tocó (en línea con el scope)
+
+- **No** se modificaron llamadas a API, payloads ni nombres de campos; **no** se
+  envía `locale` al backend.
+- **No** se modificó la lógica de RRHH/candidatos/vacantes/auth (sólo se separó
+  styling de label y se parametrizó un fallback de display).
+- **No** se tradujo data dinámica/IA/backend: `{candidate.name}`, `{vacancy.title}`,
+  `{company.name}`, `{stage.name}`, resultados/razonamientos de Vertex AI, Score
+  Breakdown, texto libre de API.
+- **No** se implementaron rutas con prefijo (`/en`, `/it`…) ni `app/[locale]`; **no**
+  se tocó `proxy.ts` ni `lib/pageTitles.ts`.
+- **No** se migró Portal Admin, Resultados IA, Score Breakdown ni `VacancyConfig`.
+
+### 16-J.7 Tests de la etapa
+
+- `tests/unit/recruiter-status-mappers-i18n.test.tsx` (nuevo):
+  - `getVacancyStatusLabel` traduce códigos conocidos en `es`/`en`, devuelve el
+    valor crudo para un código desconocido (sin invocar `t`) y `""` para `null`.
+  - `VacancyListCard` traduce el estado controlado en `es`/`en` y muestra el valor
+    crudo para un estado no controlado, sin tocar la data dinámica.
+  - Paridad de `vacancies.statuses` y de `candidates.noName/hired/notHired` en los
+    5 idiomas + verificación de las translation keys del mapper.
+- `tests/unit/recruiter-candidates-status-i18n.test.tsx` (nuevo): renderiza
+  `CandidatosPage` con `apiClient` mockeado y valida que `"Sin nombre"` se traduce
+  (`es`/`en`) **sólo** cuando el nombre llega vacío, que el nombre real no se
+  traduce, y que el booleano `hired`/`notHired` resuelve labels controlados.
+- `tests/unit/messages-structure.test.ts` sigue pasando (paridad de los 5
+  diccionarios).
+
+Los **7 fallos preexistentes** de Vitest (`admin-vacancy-catalog-content`,
+`build-vacancy-progress-report-pdfkit-buffer`, `public-vacancies`,
+`recruiter-companies-api`, `report-filter-renderer`) **no** están relacionados con
+esta etapa: se verificó vía `git stash` que fallan igual sin estos cambios.
+`npm run build` pasa (exit 0). `tsc`/`lint` reportan únicamente errores
+preexistentes en archivos fuera de scope (tests de reportes/admin/companies).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
@@ -1466,8 +1611,8 @@ a esta etapa (verificado con y sin los cambios de Etapa 9).
   **formulario de edición** del detalle de vacante
   (`app/portal-rrhh/vacantes/[id]/page.tsx`), detalle profundo de
   candidato, Resultados IA / Score Breakdown, `VacancyConfig`, Reportes,
-  Entrevistas, Etapas/Estados (mappers de enums, incl. `STATUS_LABELS` de la
-  tarjeta de vacante — ver §16-G.4) y Configuraciones avanzadas.
+  Entrevistas, Etapas/Estados y Configuraciones avanzadas. El mapper de estado de
+  vacante (`STATUS_LABELS` de la tarjeta) **se migró en Etapa 10** — ver §16-J.
 - Migrar módulos de negocio (Vacantes, Candidatos, Admin) por fases, poblando los
   namespaces reservados (`Errors`, `EmptyStates`, etc.).
 - El **Perfil del Candidato** se migró en Etapa 5D (§16). Quedan pendientes los
