@@ -56,7 +56,6 @@ import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProces
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
-import { technicalSheetMessages } from "@/lib/messages/technical-sheet"
 import {
   AiDisclosureBadge,
   AiDisclosureNotice,
@@ -1064,6 +1063,7 @@ const KanbanCard = ({
   vacancyTitle = null,
   readOnly = false,
 }) => {
+  const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false);
   const sheetCandidateProfileId =
     match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
@@ -1142,7 +1142,7 @@ const KanbanCard = ({
               }}
               onMouseDown={(e) => e.stopPropagation()}
               className="shrink-0 rounded-md border border-border bg-background p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              aria-label={technicalSheetMessages.viewSheet}
+              aria-label={tTechnicalSheet("aria.viewSheet")}
             >
               <FileText className="h-4 w-4" aria-hidden />
             </button>

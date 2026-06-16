@@ -23,7 +23,6 @@ import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-sta
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
-import { technicalSheetMessages } from "@/lib/messages/technical-sheet"
 
 const STATUS_FILTER_VALUES: ("" | InterviewStatus)[] = [
   "",
@@ -56,6 +55,7 @@ function formatDurationCell(minutes: number | null): string {
 
 export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps) {
   const t = useTranslations("RecruiterPortal.interviews")
+  const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -411,7 +411,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                             setTechnicalSheetProfileId(row.candidateProfileId)
                           }
                           className="inline-flex items-center gap-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
-                          aria-label={technicalSheetMessages.viewSheet}
+                          aria-label={tTechnicalSheet("aria.viewSheet")}
                           data-testid={`interview-open-technical-sheet-${row.id}`}
                         >
                           <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />

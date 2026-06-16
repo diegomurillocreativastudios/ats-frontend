@@ -1480,6 +1480,34 @@
         "deleted": "Vorstellungsgespräch gelöscht.",
         "notesSaved": "Notizen gespeichert."
       }
+    },
+    "technicalSheet": {
+      "title": "Technisches Datenblatt",
+      "actions": {
+        "viewSheet": "Technisches Datenblatt anzeigen",
+        "downloadPdf": "PDF herunterladen",
+        "close": "Schließen",
+        "backToVacancy": "Zurück zur Stelle"
+      },
+      "loadingStates": {
+        "loading": "Technisches Datenblatt wird geladen…",
+        "downloadingPdf": "PDF wird heruntergeladen…"
+      },
+      "errors": {
+        "notPosted": "Dieser Kandidat hat sich nicht auf diese Stelle beworben oder es gibt keine Datenblattdaten.",
+        "noTemplate": "Es gibt keine als technisches Datenblatt markierte Dokumentvorlage. Konfigurieren Sie sie unter Verwaltung → Vorlagen.",
+        "generic": "Das technische Datenblatt konnte nicht geladen werden.",
+        "forbidden": "Sie haben keine Berechtigung, dieses Datenblatt anzuzeigen.",
+        "pdfExportFailed": "Das PDF konnte nicht erstellt werden. Versuchen Sie es erneut oder öffnen Sie die Browser-Konsole (F12), wenn das Problem weiterhin besteht.",
+        "missingParams": "Stellen- oder Kandidatenparameter fehlen in der URL."
+      },
+      "page": {
+        "breadcrumb": "Technisches Datenblatt"
+      },
+      "aria": {
+        "close": "Schließen",
+        "viewSheet": "Technisches Datenblatt anzeigen"
+      }
     }
   },
   "AdminPortal": {

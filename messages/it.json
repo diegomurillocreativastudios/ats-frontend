@@ -1480,6 +1480,34 @@
         "deleted": "Colloquio eliminato.",
         "notesSaved": "Note salvate."
       }
+    },
+    "technicalSheet": {
+      "title": "Scheda tecnica",
+      "actions": {
+        "viewSheet": "Vedi scheda tecnica",
+        "downloadPdf": "Scarica PDF",
+        "close": "Chiudi",
+        "backToVacancy": "Torna alla vacante"
+      },
+      "loadingStates": {
+        "loading": "Caricamento scheda tecnica…",
+        "downloadingPdf": "Download PDF in corso…"
+      },
+      "errors": {
+        "notPosted": "Questo candidato non è iscritto a questa vacante o non ci sono dati della scheda.",
+        "noTemplate": "Non esiste un modello di documento contrassegnato come scheda tecnica. Configuralo in Amministrazione → Modelli.",
+        "generic": "Impossibile caricare la scheda tecnica.",
+        "forbidden": "Non hai i permessi per visualizzare questa scheda.",
+        "pdfExportFailed": "Impossibile generare il PDF. Riprova o apri la console del browser (F12) se il problema persiste.",
+        "missingParams": "Parametri di vacante o candidato mancanti nell'URL."
+      },
+      "page": {
+        "breadcrumb": "Scheda tecnica"
+      },
+      "aria": {
+        "close": "Chiudi",
+        "viewSheet": "Vedi scheda tecnica"
+      }
     }
   },
   "AdminPortal": {

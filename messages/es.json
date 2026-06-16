@@ -1480,6 +1480,34 @@
         "deleted": "Entrevista eliminada.",
         "notesSaved": "Notas guardadas."
       }
+    },
+    "technicalSheet": {
+      "title": "Ficha técnica",
+      "actions": {
+        "viewSheet": "Ver ficha técnica",
+        "downloadPdf": "Descargar PDF",
+        "close": "Cerrar",
+        "backToVacancy": "Volver a la vacante"
+      },
+      "loadingStates": {
+        "loading": "Cargando ficha técnica…",
+        "downloadingPdf": "Descargando PDF…"
+      },
+      "errors": {
+        "notPosted": "Este candidato no está postulado a esta vacante o no hay datos de ficha.",
+        "noTemplate": "No hay una plantilla de tipo documento marcada como ficha técnica. Configurala en Administración → Plantillas.",
+        "generic": "No se pudo cargar la ficha técnica.",
+        "forbidden": "No tenés permisos para ver esta ficha.",
+        "pdfExportFailed": "No se pudo generar el PDF. Probá de nuevo o abrí la consola del navegador (F12) si el problema continúa.",
+        "missingParams": "Faltan parámetros de vacante o candidato en la URL."
+      },
+      "page": {
+        "breadcrumb": "Ficha técnica"
+      },
+      "aria": {
+        "close": "Cerrar",
+        "viewSheet": "Ver ficha técnica"
+      }
     }
   },
   "AdminPortal": {

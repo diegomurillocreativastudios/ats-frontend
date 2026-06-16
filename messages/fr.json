@@ -1480,6 +1480,34 @@
         "deleted": "Entretien supprimé.",
         "notesSaved": "Notes enregistrées."
       }
+    },
+    "technicalSheet": {
+      "title": "Fiche technique",
+      "actions": {
+        "viewSheet": "Voir la fiche technique",
+        "downloadPdf": "Télécharger le PDF",
+        "close": "Fermer",
+        "backToVacancy": "Retour à l'offre"
+      },
+      "loadingStates": {
+        "loading": "Chargement de la fiche technique…",
+        "downloadingPdf": "Téléchargement du PDF…"
+      },
+      "errors": {
+        "notPosted": "Ce candidat n'est pas postulé à cette offre ou il n'y a pas de données de fiche.",
+        "noTemplate": "Il n'y a pas de modèle de document marqué comme fiche technique. Configurez-le dans Administration → Modèles.",
+        "generic": "Impossible de charger la fiche technique.",
+        "forbidden": "Vous n'avez pas l'autorisation de consulter cette fiche.",
+        "pdfExportFailed": "Impossible de générer le PDF. Réessayez ou ouvrez la console du navigateur (F12) si le problème persiste.",
+        "missingParams": "Paramètres d'offre ou de candidat manquants dans l'URL."
+      },
+      "page": {
+        "breadcrumb": "Fiche technique"
+      },
+      "aria": {
+        "close": "Fermer",
+        "viewSheet": "Voir la fiche technique"
+      }
     }
   },
   "AdminPortal": {

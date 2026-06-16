@@ -2267,6 +2267,69 @@ y metadata.
 - `TechnicalSheetModal` / ficha técnica.
 - Integrar `formatVacancyResultadosDocumentTitle` con `next-intl`.
 
+## 16-R. TechnicalSheetModal y ficha técnica segura (Etapa 19)
+
+Migración acotada de **`TechnicalSheetModal`**, **`TechnicalSheetPanel`** y puntos de
+entrada relacionados (entrevistas, Kanban aria-label, página dedicada). **No** se tradujo
+contenido técnico dinámico, data de IA/scoring/matching, ni se tocó PDF/export ni
+`lib/messages/technical-sheet.ts` (reservado para PDFKit/servidor).
+
+### 16-R.1 Rutas y componentes auditados
+
+| Ruta / componente | Categoría | Decisión Etapa 19 |
+| ----------------- | --------- | ----------------- |
+| `components/rrhh/technical-sheet/technical-sheet-modal.tsx` | A | UI estática migrada (`aria.close`) |
+| `components/rrhh/technical-sheet/technical-sheet-panel.tsx` | A + B/C | Labels/carga/errores migrados; iframe con data API/IA verbatim |
+| `app/portal-rrhh/vacantes/[id]/candidatos/.../technical-sheet/page.tsx` | A + B | Breadcrumb/acciones/errores migrados; títulos de vacante API verbatim |
+| `components/rrhh/interviews/interview-list.tsx` | A | `aria.viewSheet` migrado |
+| `components/rrhh/interviews/candidate-interview-list.tsx` | A | Label/aria de ficha técnica migrados |
+| `app/portal-rrhh/vacantes/[id]/page.tsx` (`KanbanCard`) | A | Solo `aria.viewSheet` del botón ficha técnica |
+| `lib/messages/technical-sheet.ts` | Servidor/PDF | **Sin cambios** — PDFKit y rutas PDF |
+| `lib/technical-sheet/template-interpolate.ts` | B/C | **Sin cambios** — contenido dinámico en plantilla |
+| `lib/technical-sheet/build-technical-sheet-pdfkit.ts` | PDF | **Fuera de scope** |
+| `render-technical-sheet-pdf-response.ts` | PDF | **Fuera de scope** |
+
+### 16-R.2 Namespace usado
+
+`RecruiterPortal.technicalSheet` (subárbol nuevo en los 5 diccionarios), neutral porque el
+modal es compartido entre resultados, detalle de vacante, entrevistas y ruta dedicada.
+
+Reutilización de keys existentes: `RecruiterPortal.vacancies.breadcrumb`,
+`RecruiterPortal.vacancies.results.page.vacancyFallback`.
+
+### 16-R.3 Bloques migrados (Categoría A)
+
+- Modal/panel: título, carga, descarga PDF, cierre, errores frontend controlados.
+- Página dedicada: breadcrumb, volver, error de parámetros faltantes.
+- Entradas: `aria-label` / label de «Ver ficha técnica» en entrevistas y Kanban.
+
+### 16-R.4 Fuera de scope (sin cambios)
+
+- Contenido interpolado en plantilla HTML/PDF (`positiveReasons`, `qualitativeReasoning*`,
+  `usedSignals`, `scoreBreakdown`, nombres, scores).
+- PDF/export, `lib/pageTitles.ts`, `lib/candidate-portal-translations.ts`.
+- Sección candidatos/IA/Kanban completa en detalle de vacante (solo aria-label del botón).
+- `VacancyConfig`, Score Breakdown, matching/ranking/scoring.
+
+### 16-R.5 Reglas respetadas
+
+- Solo labels estáticos con `useTranslations`; contenido dinámico/IA sin `t()`.
+- `getApiErrorMessage(err) || t('errors.generic')` en errores genéricos del panel.
+- Sin `locale` en requests al backend.
+- Paridad exacta de keys en `es`, `en`, `it`, `de`, `fr`.
+
+### 16-R.6 Tests
+
+`tests/unit/recruiter-technical-sheet-i18n.test.tsx`: carga en `es`/`en`, error de plantilla,
+contenido de match/IA verbatim en iframe, paridad de namespace.
+
+### 16-R.7 Pendientes (siguiente etapa)
+
+- Sección candidatos/IA/Kanban en `app/portal-rrhh/vacantes/[id]/page.tsx`.
+- Score Breakdown y `VacancyConfig`.
+- Integrar `formatVacancyResultadosDocumentTitle` con `next-intl`.
+- Localizar labels de secciones en PDF/plantillas servidor (`lib/messages/technical-sheet.ts`).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
@@ -2285,7 +2348,8 @@ y metadata.
   RRHH** (información general, carga/error, edición inline básica y cabecera) se
   migró en Etapa 17 (§16-P). El **resultado de vacante RRHH** (UI estática de
   `/portal-rrhh/vacantes/[id]/resultados` y componentes `vacancy-resultados/*`) se
-  migró en Etapa 18 (§16-Q). Quedan pendientes los módulos RRHH pesados:
+  migró en Etapa 18 (§16-Q). **`TechnicalSheetModal` y ficha técnica** se migraron en
+  Etapa 19 (§16-R). Quedan pendientes los módulos RRHH pesados:
   **sección candidatos/IA/Kanban** del detalle de vacante
   (`app/portal-rrhh/vacantes/[id]/page.tsx`, bloques C/D), Score Breakdown,
   `VacancyConfig`, Entrevistas avanzadas, Etapas/Estados y

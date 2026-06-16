@@ -1480,6 +1480,34 @@
         "deleted": "Interview deleted.",
         "notesSaved": "Notes saved."
       }
+    },
+    "technicalSheet": {
+      "title": "Technical sheet",
+      "actions": {
+        "viewSheet": "View technical sheet",
+        "downloadPdf": "Download PDF",
+        "close": "Close",
+        "backToVacancy": "Back to vacancy"
+      },
+      "loadingStates": {
+        "loading": "Loading technical sheet…",
+        "downloadingPdf": "Downloading PDF…"
+      },
+      "errors": {
+        "notPosted": "This candidate is not applied to this vacancy or there is no sheet data.",
+        "noTemplate": "There is no document template marked as a technical sheet. Configure it in Admin → Templates.",
+        "generic": "Could not load the technical sheet.",
+        "forbidden": "You do not have permission to view this sheet.",
+        "pdfExportFailed": "Could not generate the PDF. Try again or open the browser console (F12) if the problem persists.",
+        "missingParams": "Vacancy or candidate parameters are missing from the URL."
+      },
+      "page": {
+        "breadcrumb": "Technical sheet"
+      },
+      "aria": {
+        "close": "Close",
+        "viewSheet": "View technical sheet"
+      }
     }
   },
   "AdminPortal": {

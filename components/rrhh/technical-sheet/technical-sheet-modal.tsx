@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { X } from "lucide-react"
-import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
+import { useTranslations } from "next-intl"
 import { TechnicalSheetPanel } from "@/components/rrhh/technical-sheet/technical-sheet-panel"
 
 export interface TechnicalSheetModalProps {
@@ -22,6 +22,8 @@ export function TechnicalSheetModal({
   vacancyTitle,
   candidateLabel,
 }: TechnicalSheetModalProps) {
+  const t = useTranslations("RecruiterPortal.technicalSheet")
+
   useEffect(() => {
     if (!isOpen) return
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -54,7 +56,7 @@ export function TechnicalSheetModal({
             type="button"
             onClick={onClose}
             className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            aria-label={m.close}
+            aria-label={t("aria.close")}
           >
             <X className="h-5 w-5" aria-hidden />
           </button>

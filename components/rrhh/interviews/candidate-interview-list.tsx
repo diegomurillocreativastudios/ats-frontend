@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { Calendar, FileText, Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import {
@@ -14,7 +15,6 @@ import { InterviewDetailModal } from "@/components/rrhh/interviews/interview-det
 import { InterviewNotesModal } from "@/components/rrhh/interviews/interview-notes-modal"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
-import { technicalSheetMessages } from "@/lib/messages/technical-sheet"
 
 export interface CandidateInterviewListProps {
   candidateProfileId: string
@@ -23,6 +23,7 @@ export interface CandidateInterviewListProps {
 export function CandidateInterviewList({
   candidateProfileId,
 }: CandidateInterviewListProps) {
+  const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const [items, setItems] = useState<Interview[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -154,10 +155,10 @@ export function CandidateInterviewList({
                             })
                           }
                           className="inline-flex items-center gap-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
-                          aria-label={technicalSheetMessages.viewSheet}
+                          aria-label={tTechnicalSheet("aria.viewSheet")}
                         >
                           <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                          Ficha técnica
+                          {tTechnicalSheet("title")}
                         </button>
                       </div>
                     </td>
