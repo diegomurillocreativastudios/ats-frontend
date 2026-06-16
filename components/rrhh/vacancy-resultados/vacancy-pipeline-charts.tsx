@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import type {
   ComponentScoreAverages,
   ScoreBucketRow,
@@ -29,24 +30,29 @@ export interface VacancyPipelineChartsProps {
 }
 
 function buildComponentAverageRows(
-  averages: ComponentScoreAverages
+  averages: ComponentScoreAverages,
+  labels: {
+    qualitative: string
+    vector: string
+    attribute: string
+  }
 ): { name: string; pct: number }[] {
   const rows: { name: string; pct: number }[] = []
   if (averages.qualitativeMean01 != null && Number.isFinite(averages.qualitativeMean01)) {
     rows.push({
-      name: "Cualitativo (prom.)",
+      name: labels.qualitative,
       pct: Math.round(averages.qualitativeMean01 * 1000) / 10,
     })
   }
   if (averages.vectorMean01 != null && Number.isFinite(averages.vectorMean01)) {
     rows.push({
-      name: "Similitud vectorial (prom.)",
+      name: labels.vector,
       pct: Math.round(averages.vectorMean01 * 1000) / 10,
     })
   }
   if (averages.attributeMean01 != null && Number.isFinite(averages.attributeMean01)) {
     rows.push({
-      name: "Atributos (prom.)",
+      name: labels.attribute,
       pct: Math.round(averages.attributeMean01 * 1000) / 10,
     })
   }
@@ -60,15 +66,20 @@ export function VacancyPipelineCharts({
   scoreSummary,
   totalApplicants,
 }: VacancyPipelineChartsProps) {
-  const componentAvgRows = buildComponentAverageRows(componentAverages)
+  const t = useTranslations("RecruiterPortal.vacancies.results.charts")
+  const componentAvgRows = buildComponentAverageRows(componentAverages, {
+    qualitative: t("qualitativeAvg"),
+    vector: t("vectorAvg"),
+    attribute: t("attributeAvg"),
+  })
+
   if (totalApplicants === 0) {
     return (
       <p
         className="rounded-lg border border-border bg-muted/40 px-4 py-8 text-center font-sans text-sm text-muted-foreground"
         role="status"
       >
-        No hay postulantes en esta vacante todavía. Cuando haya candidatos en el tablero, aquí
-        verás la distribución por etapa y puntaje.
+        {t("noApplicants")}
       </p>
     )
   }
@@ -82,11 +93,9 @@ export function VacancyPipelineCharts({
         id="vacancy-resultados-charts-heading"
         className="mb-1 font-sans text-sm font-semibold text-foreground"
       >
-        Indicadores gráficos
+        {t("heading")}
       </h2>
-      <p className="mb-4 font-sans text-xs text-muted-foreground">
-        Vista compacta de la tubería y del emparejamiento; el listado operativo está debajo.
-      </p>
+      <p className="mb-4 font-sans text-xs text-muted-foreground">{t("description")}</p>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div
@@ -97,10 +106,10 @@ export function VacancyPipelineCharts({
             id="vacancy-resultados-stages-heading"
             className="mb-1 font-sans text-xs font-semibold text-foreground"
           >
-            Postulantes por etapa
+            {t("byStageHeading")}
           </h3>
           <p className="mb-2 font-sans text-[11px] text-muted-foreground">
-            Conteo según la etapa actual de cada postulación.
+            {t("byStageDescription")}
           </p>
           <div className="h-[220px] w-full min-h-[200px] sm:h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -132,11 +141,16 @@ export function VacancyPipelineCharts({
                   }}
                   formatter={(value) => [
                     typeof value === "number" ? value : Number(value) || 0,
-                    "Postulantes",
+                    t("tooltipApplicants"),
                   ]}
                   labelFormatter={(label) => String(label)}
                 />
-                <Bar dataKey="count" name="Postulantes" fill={COLOR_STAGE} radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="count"
+                  name={t("tooltipApplicants")}
+                  fill={COLOR_STAGE}
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -150,14 +164,17 @@ export function VacancyPipelineCharts({
             id="vacancy-resultados-scores-heading"
             className="mb-1 font-sans text-xs font-semibold text-foreground"
           >
-            Distribución de puntaje
+            {t("scoreDistributionHeading")}
           </h3>
           <p className="mb-2 font-sans text-[11px] text-muted-foreground">
-            Postulantes con puntaje numérico ({scoreSummary.count} de {totalApplicants}).
+            {t("scoreDistributionDescription", {
+              scored: scoreSummary.count,
+              total: totalApplicants,
+            })}
           </p>
           {scoreSummary.count === 0 ? (
             <p className="py-8 text-center font-sans text-xs text-muted-foreground" role="status">
-              Aún no hay puntajes numéricos para graficar.
+              {t("noScoresYet")}
             </p>
           ) : (
             <div className="h-[220px] w-full min-h-[200px] sm:h-[240px]">
@@ -186,11 +203,16 @@ export function VacancyPipelineCharts({
                     }}
                     formatter={(value) => [
                       typeof value === "number" ? value : Number(value) || 0,
-                      "Postulantes",
+                      t("tooltipApplicants"),
                     ]}
-                    labelFormatter={(label) => `Rango ${label} %`}
+                    labelFormatter={(label) => t("tooltipRangeSuffix", { label })}
                   />
-                  <Bar dataKey="count" name="Postulantes" fill={COLOR_SCORE} radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="count"
+                    name={t("tooltipApplicants")}
+                    fill={COLOR_SCORE}
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -207,11 +229,12 @@ export function VacancyPipelineCharts({
             id="vacancy-resultados-components-heading"
             className="mb-1 font-sans text-xs font-semibold text-foreground"
           >
-            Promedio de subpuntajes (match)
+            {t("componentAveragesHeading")}
           </h3>
           <p className="mb-2 font-sans text-[11px] text-muted-foreground">
-            Media por componente ({componentAverages.samplesWithAnyComponent} postulantes con datos
-            de desglose).
+            {t("componentAveragesDescription", {
+              samples: componentAverages.samplesWithAnyComponent,
+            })}
           </p>
           <div className="h-[200px] w-full min-h-[180px] sm:h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -243,10 +266,10 @@ export function VacancyPipelineCharts({
                   }}
                   formatter={(value) => {
                     const n = typeof value === "number" ? value : Number(value)
-                    return [`${Number.isFinite(n) ? n.toFixed(1) : "—"} %`, "Promedio"]
+                    return [`${Number.isFinite(n) ? n.toFixed(1) : "—"} %`, t("tooltipAverage")]
                   }}
                 />
-                <Bar dataKey="pct" name="Promedio" fill={COLOR_COMPONENT} radius={[0, 4, 4, 0]} />
+                <Bar dataKey="pct" name={t("tooltipAverage")} fill={COLOR_COMPONENT} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -165,6 +165,10 @@
       "title": "ATS | Portale HR | Dettaglio posizione",
       "description": "Consulta le informazioni della posizione"
     },
+    "recruiterVacancyResults": {
+      "title": "ATS | Portale HR | Risultati posizione",
+      "description": "Consulta i risultati dei candidati valutati"
+    },
     "recruiterReports": {
       "title": "ATS | Portale HR | Report",
       "description": "Consulta metriche e report di reclutamento"
@@ -1271,6 +1275,128 @@
           "commentsHelper": "Puoi aggiungere osservazioni o note su come è andato il processo.",
           "validationRating": "La valutazione deve essere tra 1 e 5 stelle.",
           "errorFallback": "Errore nella conclusione del processo"
+        }
+      },
+      "results": {
+        "page": {
+          "eyebrow": "Risultati della posizione",
+          "untitledVacancy": "Posizione senza titolo",
+          "createdPrefix": "Creata:",
+          "needsRematch": "Richiede nuovo abbinamento",
+          "vacancyFallback": "Posizione",
+          "breadcrumbResults": "Risultati"
+        },
+        "actions": {
+          "scheduleInterview": "Pianifica colloquio",
+          "scheduleInterviewAria": "Pianifica un nuovo colloquio per questa posizione",
+          "interviews": "Colloqui",
+          "interviewsAria": "Vai ai colloqui di questa posizione",
+          "backToVacancy": "Torna alla posizione",
+          "backToVacancyAria": "Torna al dettaglio della posizione",
+          "clearFilters": "Cancella filtri",
+          "viewMoreContext": "Vedi più contesto",
+          "technicalSheet": "Scheda tecnica",
+          "viewProfile": "Vedi profilo"
+        },
+        "loadingStates": {
+          "loading": "Caricamento risultati…"
+        },
+        "errors": {
+          "missingId": "Manca l'identificativo della posizione.",
+          "loadFailed": "Impossibile caricare i risultati della posizione."
+        },
+        "filters": {
+          "heading": "Filtri candidati",
+          "description": "Si applicano all'elenco principale sotto i grafici.",
+          "searchAria": "Cerca per nome o email",
+          "searchPlaceholder": "Cerca per nome o email…",
+          "applicationStatus": "Stato candidatura",
+          "score": "Punteggio",
+          "all": "Tutti",
+          "scored": "Con punteggio",
+          "unscored": "Senza punteggio",
+          "tierP0_40": "0% – 40%",
+          "tierP40_60": "40% – 60%",
+          "tierP60_80": "60% – 80%",
+          "tierP80_100": "80% – 100%"
+        },
+        "candidates": {
+          "heading": "Candidati per fase",
+          "description": "Elenco principale per fase della pipeline. I filtri della sezione precedente si applicano qui.",
+          "stagesTablistAria": "Fasi del processo",
+          "noStageData": "Nessun dato sulle fasi.",
+          "emptyStageTitle": "Nessun candidato in questa fase",
+          "emptyStageBody": "Quando i candidati vengono spostati nella board, appariranno qui.",
+          "noFilterMatch": "Nessun candidato corrisponde ai filtri",
+          "stageLabel": "Fase:",
+          "statusLabel": "Stato:",
+          "matchLabel": "Abbinamento",
+          "noLinkedProfile": "Nessun profilo collegato per le azioni."
+        },
+        "sections": {
+          "strengths": "Punti di forza",
+          "considerations": "Aspetti da considerare",
+          "interview": "Colloquio",
+          "comments": "Commenti"
+        },
+        "fields": {
+          "qualitative": "Qualitativo",
+          "vectorSimilarity": "Similarità vettoriale",
+          "attributeAggregate": "Attributi (aggregato)"
+        },
+        "fallbacks": {
+          "noInterviewData": "Nessun dato sul colloquio."
+        },
+        "kpis": {
+          "heading": "Metriche principali",
+          "applicants": "Candidati",
+          "scored": "Con punteggio",
+          "scoredHint": "Abbinamento numerico disponibile",
+          "averageMatch": "Abbinamento medio",
+          "bestMatch": "Miglior abbinamento",
+          "inInterviewApprox": "In colloquio (circa)",
+          "hiredRejectedApprox": "Assunti / rifiutati (circa)",
+          "hiredRejectedHint": "Per nome fase della pipeline"
+        },
+        "charts": {
+          "noApplicants": "Non ci sono ancora candidati per questa posizione. Quando ci saranno candidati nella board, vedrai qui la distribuzione per fase e punteggio.",
+          "heading": "Indicatori grafici",
+          "description": "Vista compatta della pipeline e dell'abbinamento; l'elenco operativo è sotto.",
+          "byStageHeading": "Candidati per fase",
+          "byStageDescription": "Conteggio per fase attuale di ogni candidatura.",
+          "scoreDistributionHeading": "Distribuzione punteggi",
+          "scoreDistributionDescription": "Candidati con punteggio numerico ({scored} di {total}).",
+          "noScoresYet": "Ancora nessun punteggio numerico da graficare.",
+          "componentAveragesHeading": "Media sottopunteggi (match)",
+          "componentAveragesDescription": "Media per componente ({samples} candidati con dati di dettaglio).",
+          "tooltipApplicants": "Candidati",
+          "tooltipAverage": "Media",
+          "tooltipRangeSuffix": "Intervallo {label} %",
+          "qualitativeAvg": "Qualitativo (media)",
+          "vectorAvg": "Similarità vettoriale (media)",
+          "attributeAvg": "Attributi (media)"
+        },
+        "meta": {
+          "srOnlyContext": "Contesto posizione: {title}",
+          "company": "Azienda",
+          "countryCode": "Paese (codice)",
+          "department": "Dipartimento",
+          "modality": "Modalità",
+          "created": "Creata",
+          "modelWeightsHeading": "Pesi del modello",
+          "noStructuredWeights": "Nessun peso di abbinamento strutturato nella risposta API.",
+          "semanticWeight": "Peso similarità semantica",
+          "attributeWeights": "Pesi per attributo",
+          "noAdditionalAttributeWeights": "Nessun peso aggiuntivo per attributi in questa posizione.",
+          "viewFullDescription": "Vedi descrizione completa",
+          "expandHint": "(clic per espandere)",
+          "technicalDetails": "Dettagli tecnici",
+          "technicalDetailsHint": "(requisiti, suggerimenti IA)",
+          "requirementsPayload": "Requisiti (payload)",
+          "noRequirements": "Nessun requisito nel payload.",
+          "emptyRequirements": "Requisiti vuoti (oggetto senza chiavi). L'abbinamento può basarsi solo sul testo libero della descrizione.",
+          "aiSuggestionsHeading": "Suggerimenti IA ({count})",
+          "aiSuggestionsAria": "Suggerimenti IA"
         }
       }
     },

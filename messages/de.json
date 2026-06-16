@@ -165,6 +165,10 @@
       "title": "ATS | HR-Portal | Stellendetails",
       "description": "Stelleninformationen anzeigen"
     },
+    "recruiterVacancyResults": {
+      "title": "ATS | HR-Portal | Stellenergebnisse",
+      "description": "Bewertete Kandidatenergebnisse anzeigen"
+    },
     "recruiterReports": {
       "title": "ATS | HR-Portal | Berichte",
       "description": "Rekrutierungskennzahlen und Berichte einsehen"
@@ -1271,6 +1275,128 @@
           "commentsHelper": "Du kannst Beobachtungen oder Notizen zum Verlauf des Prozesses hinzufügen.",
           "validationRating": "Die Bewertung muss zwischen 1 und 5 Sternen liegen.",
           "errorFallback": "Fehler beim Abschließen des Prozesses"
+        }
+      },
+      "results": {
+        "page": {
+          "eyebrow": "Stellenergebnisse",
+          "untitledVacancy": "Stelle ohne Titel",
+          "createdPrefix": "Erstellt:",
+          "needsRematch": "Erneutes Matching erforderlich",
+          "vacancyFallback": "Stelle",
+          "breadcrumbResults": "Ergebnisse"
+        },
+        "actions": {
+          "scheduleInterview": "Interview planen",
+          "scheduleInterviewAria": "Neues Interview für diese Stelle planen",
+          "interviews": "Interviews",
+          "interviewsAria": "Zu Interviews dieser Stelle",
+          "backToVacancy": "Zurück zur Stelle",
+          "backToVacancyAria": "Zurück zu den Stellendetails",
+          "clearFilters": "Filter zurücksetzen",
+          "viewMoreContext": "Mehr Kontext anzeigen",
+          "technicalSheet": "Technisches Blatt",
+          "viewProfile": "Profil anzeigen"
+        },
+        "loadingStates": {
+          "loading": "Ergebnisse werden geladen…"
+        },
+        "errors": {
+          "missingId": "Stellenkennung fehlt.",
+          "loadFailed": "Stellenergebnisse konnten nicht geladen werden."
+        },
+        "filters": {
+          "heading": "Bewerberfilter",
+          "description": "Gelten für die Hauptliste unter den Diagrammen.",
+          "searchAria": "Nach Name oder E-Mail suchen",
+          "searchPlaceholder": "Nach Name oder E-Mail suchen…",
+          "applicationStatus": "Bewerbungsstatus",
+          "score": "Punktzahl",
+          "all": "Alle",
+          "scored": "Mit Punktzahl",
+          "unscored": "Ohne Punktzahl",
+          "tierP0_40": "0% – 40%",
+          "tierP40_60": "40% – 60%",
+          "tierP60_80": "60% – 80%",
+          "tierP80_100": "80% – 100%"
+        },
+        "candidates": {
+          "heading": "Bewerber nach Phase",
+          "description": "Hauptliste nach Pipeline-Phase. Filter aus dem vorherigen Abschnitt gelten hier.",
+          "stagesTablistAria": "Prozessphasen",
+          "noStageData": "Keine Phasendaten.",
+          "emptyStageTitle": "Keine Bewerber in dieser Phase",
+          "emptyStageBody": "Wenn Kandidaten auf dem Board verschoben werden, erscheinen sie hier.",
+          "noFilterMatch": "Keine Kandidaten entsprechen den Filtern",
+          "stageLabel": "Phase:",
+          "statusLabel": "Status:",
+          "matchLabel": "Übereinstimmung",
+          "noLinkedProfile": "Kein verknüpftes Profil für Aktionen."
+        },
+        "sections": {
+          "strengths": "Stärken",
+          "considerations": "Zu berücksichtigen",
+          "interview": "Interview",
+          "comments": "Kommentare"
+        },
+        "fields": {
+          "qualitative": "Qualitativ",
+          "vectorSimilarity": "Vektorähnlichkeit",
+          "attributeAggregate": "Attribute (aggregiert)"
+        },
+        "fallbacks": {
+          "noInterviewData": "Keine Interviewdaten."
+        },
+        "kpis": {
+          "heading": "Hauptkennzahlen",
+          "applicants": "Bewerber",
+          "scored": "Mit Punktzahl",
+          "scoredHint": "Numerisches Matching verfügbar",
+          "averageMatch": "Durchschnittliches Matching",
+          "bestMatch": "Bestes Matching",
+          "inInterviewApprox": "Im Interview (ca.)",
+          "hiredRejectedApprox": "Eingestellt / abgelehnt (ca.)",
+          "hiredRejectedHint": "Nach Pipeline-Phasenname"
+        },
+        "charts": {
+          "noApplicants": "Es gibt noch keine Bewerber für diese Stelle. Sobald Kandidaten auf dem Board sind, sehen Sie hier die Verteilung nach Phase und Punktzahl.",
+          "heading": "Diagrammindikatoren",
+          "description": "Kompakte Ansicht der Pipeline und des Matchings; die operative Liste ist unten.",
+          "byStageHeading": "Bewerber nach Phase",
+          "byStageDescription": "Anzahl nach aktueller Phase jeder Bewerbung.",
+          "scoreDistributionHeading": "Punktzahlverteilung",
+          "scoreDistributionDescription": "Bewerber mit numerischer Punktzahl ({scored} von {total}).",
+          "noScoresYet": "Noch keine numerischen Punktzahlen zum Darstellen.",
+          "componentAveragesHeading": "Teilpunkte-Durchschnitt (Match)",
+          "componentAveragesDescription": "Durchschnitt pro Komponente ({samples} Bewerber mit Aufschlüsselungsdaten).",
+          "tooltipApplicants": "Bewerber",
+          "tooltipAverage": "Durchschnitt",
+          "tooltipRangeSuffix": "Bereich {label} %",
+          "qualitativeAvg": "Qualitativ (Ø)",
+          "vectorAvg": "Vektorähnlichkeit (Ø)",
+          "attributeAvg": "Attribute (Ø)"
+        },
+        "meta": {
+          "srOnlyContext": "Stellenkontext: {title}",
+          "company": "Unternehmen",
+          "countryCode": "Land (Code)",
+          "department": "Abteilung",
+          "modality": "Modalität",
+          "created": "Erstellt",
+          "modelWeightsHeading": "Modellgewichte",
+          "noStructuredWeights": "Keine strukturierten Matching-Gewichte in der API-Antwort.",
+          "semanticWeight": "Gewicht semantische Ähnlichkeit",
+          "attributeWeights": "Gewichte nach Attribut",
+          "noAdditionalAttributeWeights": "Keine zusätzlichen Attributgewichte für diese Stelle.",
+          "viewFullDescription": "Vollständige Beschreibung anzeigen",
+          "expandHint": "(klicken zum Erweitern)",
+          "technicalDetails": "Technische Details",
+          "technicalDetailsHint": "(Anforderungen, KI-Vorschläge)",
+          "requirementsPayload": "Anforderungen (Payload)",
+          "noRequirements": "Keine Anforderungen im Payload.",
+          "emptyRequirements": "Leere Anforderungen (Objekt ohne Schlüssel). Matching kann nur auf Freitext in der Beschreibung basieren.",
+          "aiSuggestionsHeading": "KI-Vorschläge ({count})",
+          "aiSuggestionsAria": "KI-Vorschläge"
         }
       }
     },

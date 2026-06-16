@@ -165,6 +165,10 @@
       "title": "ATS | HR Portal | Vacancy details",
       "description": "View vacancy information"
     },
+    "recruiterVacancyResults": {
+      "title": "ATS | HR Portal | Vacancy results",
+      "description": "View evaluated candidate results"
+    },
     "recruiterReports": {
       "title": "ATS | HR Portal | Reports",
       "description": "Review recruiting metrics and reports"
@@ -1271,6 +1275,128 @@
           "commentsHelper": "You can add observations or notes about how the process went.",
           "validationRating": "Rating must be between 1 and 5 stars.",
           "errorFallback": "Error finishing the process"
+        }
+      },
+      "results": {
+        "page": {
+          "eyebrow": "Vacancy results",
+          "untitledVacancy": "Untitled vacancy",
+          "createdPrefix": "Created:",
+          "needsRematch": "Requires re-match",
+          "vacancyFallback": "Vacancy",
+          "breadcrumbResults": "Results"
+        },
+        "actions": {
+          "scheduleInterview": "Schedule interview",
+          "scheduleInterviewAria": "Schedule a new interview for this vacancy",
+          "interviews": "Interviews",
+          "interviewsAria": "Go to interviews for this vacancy",
+          "backToVacancy": "Back to vacancy",
+          "backToVacancyAria": "Back to vacancy details",
+          "clearFilters": "Clear filters",
+          "viewMoreContext": "View more context",
+          "technicalSheet": "Technical sheet",
+          "viewProfile": "View profile"
+        },
+        "loadingStates": {
+          "loading": "Loading results…"
+        },
+        "errors": {
+          "missingId": "Vacancy identifier is missing.",
+          "loadFailed": "Could not load vacancy results."
+        },
+        "filters": {
+          "heading": "Applicant filters",
+          "description": "Apply to the main list below the charts.",
+          "searchAria": "Search by name or email",
+          "searchPlaceholder": "Search by name or email…",
+          "applicationStatus": "Application status",
+          "score": "Score",
+          "all": "All",
+          "scored": "With score",
+          "unscored": "Without score",
+          "tierP0_40": "0% – 40%",
+          "tierP40_60": "40% – 60%",
+          "tierP60_80": "60% – 80%",
+          "tierP80_100": "80% – 100%"
+        },
+        "candidates": {
+          "heading": "Applicants by stage",
+          "description": "Main list by pipeline stage. Filters from the previous section apply here.",
+          "stagesTablistAria": "Process stages",
+          "noStageData": "No stage data.",
+          "emptyStageTitle": "No applicants in this stage",
+          "emptyStageBody": "When candidates are moved on the board, they will appear here.",
+          "noFilterMatch": "No candidates match the filters",
+          "stageLabel": "Stage:",
+          "statusLabel": "Status:",
+          "matchLabel": "Match",
+          "noLinkedProfile": "No linked profile for actions."
+        },
+        "sections": {
+          "strengths": "Strengths",
+          "considerations": "Points to consider",
+          "interview": "Interview",
+          "comments": "Comments"
+        },
+        "fields": {
+          "qualitative": "Qualitative",
+          "vectorSimilarity": "Vector similarity",
+          "attributeAggregate": "Attributes (aggregate)"
+        },
+        "fallbacks": {
+          "noInterviewData": "No interview data."
+        },
+        "kpis": {
+          "heading": "Key metrics",
+          "applicants": "Applicants",
+          "scored": "With score",
+          "scoredHint": "Numeric match available",
+          "averageMatch": "Average match",
+          "bestMatch": "Best match",
+          "inInterviewApprox": "In interview (approx.)",
+          "hiredRejectedApprox": "Hired / rejected (approx.)",
+          "hiredRejectedHint": "By pipeline stage name"
+        },
+        "charts": {
+          "noApplicants": "There are no applicants for this vacancy yet. When candidates are on the board, you will see distribution by stage and score here.",
+          "heading": "Chart indicators",
+          "description": "Compact view of the pipeline and matching; the operational list is below.",
+          "byStageHeading": "Applicants by stage",
+          "byStageDescription": "Count by each applicant's current stage.",
+          "scoreDistributionHeading": "Score distribution",
+          "scoreDistributionDescription": "Applicants with numeric score ({scored} of {total}).",
+          "noScoresYet": "No numeric scores to chart yet.",
+          "componentAveragesHeading": "Sub-score averages (match)",
+          "componentAveragesDescription": "Average per component ({samples} applicants with breakdown data).",
+          "tooltipApplicants": "Applicants",
+          "tooltipAverage": "Average",
+          "tooltipRangeSuffix": "Range {label} %",
+          "qualitativeAvg": "Qualitative (avg.)",
+          "vectorAvg": "Vector similarity (avg.)",
+          "attributeAvg": "Attributes (avg.)"
+        },
+        "meta": {
+          "srOnlyContext": "Vacancy context: {title}",
+          "company": "Company",
+          "countryCode": "Country (code)",
+          "department": "Department",
+          "modality": "Modality",
+          "created": "Created",
+          "modelWeightsHeading": "Model weights",
+          "noStructuredWeights": "No structured matching weights in the API response.",
+          "semanticWeight": "Semantic similarity weight",
+          "attributeWeights": "Weights by attribute",
+          "noAdditionalAttributeWeights": "No additional attribute weights for this vacancy.",
+          "viewFullDescription": "View full description",
+          "expandHint": "(click to expand)",
+          "technicalDetails": "Technical details",
+          "technicalDetailsHint": "(requirements, AI suggestions)",
+          "requirementsPayload": "Requirements (payload)",
+          "noRequirements": "No requirements in the payload.",
+          "emptyRequirements": "Empty requirements (object with no keys). Matching may rely only on free text in the description.",
+          "aiSuggestionsHeading": "AI suggestions ({count})",
+          "aiSuggestionsAria": "AI suggestions"
         }
       }
     },

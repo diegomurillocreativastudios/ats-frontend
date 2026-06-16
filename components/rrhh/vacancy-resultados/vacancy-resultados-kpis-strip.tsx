@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import type { ScoreSummary, StageCountRow } from "@/lib/rrhh/vacancy-pipeline-stats"
 
 export interface VacancyResultadosKpisStripProps {
@@ -39,23 +40,24 @@ export function VacancyResultadosKpisStrip({
   scoreSummary,
   byStage,
 }: VacancyResultadosKpisStripProps) {
+  const t = useTranslations("RecruiterPortal.vacancies.results.kpis")
   const signals = aggregateStageSignals(byStage)
   const items: { label: string; value: string; hint?: string }[] = [
-    { label: "Postulantes", value: String(totalApplicants) },
+    { label: t("applicants"), value: String(totalApplicants) },
     {
-      label: "Con puntaje",
+      label: t("scored"),
       value: String(scoreSummary.count),
-      hint: "Emparejamiento numérico disponible",
+      hint: t("scoredHint"),
     },
-    { label: "Emparejamiento promedio", value: formatPercent(scoreSummary.meanPercent) },
-    { label: "Mejor emparejamiento", value: formatPercent(scoreSummary.maxPercent) },
-    { label: "En entrevista (aprox.)", value: String(signals.inInterview) },
+    { label: t("averageMatch"), value: formatPercent(scoreSummary.meanPercent) },
+    { label: t("bestMatch"), value: formatPercent(scoreSummary.maxPercent) },
+    { label: t("inInterviewApprox"), value: String(signals.inInterview) },
   ]
   if (signals.hired > 0 || signals.rejected > 0) {
     items.push({
-      label: "Contratados / rechazados (aprox.)",
+      label: t("hiredRejectedApprox"),
       value: `${signals.hired} / ${signals.rejected}`,
-      hint: "Por nombre de etapa del tablero",
+      hint: t("hiredRejectedHint"),
     })
   }
 
@@ -68,7 +70,7 @@ export function VacancyResultadosKpisStrip({
         id="vacancy-resultados-kpis-heading"
         className="mb-3 font-sans text-sm font-semibold text-foreground"
       >
-        Métricas principales
+        {t("heading")}
       </h2>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {items.map((item) => (
