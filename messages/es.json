@@ -846,6 +846,87 @@
           "catalogsLoadFallbackSuffix": "La vacante se puede crear igualmente sin estos campos."
         }
       }
+    },
+    "interviews": {
+      "breadcrumb": "Entrevistas",
+      "hub": {
+        "title": "Entrevistas",
+        "description": "Elige una vacante para ver y gestionar sus entrevistas.",
+        "headerRegionLabel": "Encabezado de entrevistas",
+        "vacanciesRegionLabel": "Vacantes"
+      },
+      "page": {
+        "title": "Entrevistas",
+        "descriptionLoading": "Cargando datos de la vacante…",
+        "descriptionWithVacancy": "Vacante: {title}",
+        "descriptionLoadError": "No se pudo cargar el título de la vacante.",
+        "descriptionDefault": "Gestión de entrevistas de la vacante",
+        "vacancyFallback": "Vacante",
+        "suspenseLoading": "Cargando…"
+      },
+      "filters": {
+        "regionLabel": "Filtros de entrevistas",
+        "status": "Estado",
+        "allStatuses": "Todos los estados",
+        "from": "Desde (local)",
+        "to": "Hasta (local)",
+        "apply": "Aplicar filtros",
+        "timezoneHelper": "Los filtros de rango usan la zona horaria del navegador; el API recibe UTC."
+      },
+      "list": {
+        "regionLabel": "Listado de entrevistas",
+        "table": {
+          "dateTime": "Fecha y hora",
+          "candidate": "Candidato",
+          "type": "Tipo",
+          "duration": "Duración",
+          "interviewer": "Entrevistador",
+          "status": "Estado",
+          "actions": "Acciones"
+        }
+      },
+      "cards": {
+        "viewInterviews": "Ver entrevistas",
+        "viewInterviewsAria": "Ver entrevistas de la vacante {title}",
+        "candidatesCount": "{count, plural, one {# candidato} other {# candidatos}}",
+        "candidateFallback": "Candidato ({id}…)"
+      },
+      "actions": {
+        "goToVacancies": "Ir a vacantes",
+        "reviewCandidates": "Revisar candidatos",
+        "reviewCandidatesAria": "Ir a resultados de la vacante para revisar candidatos antes de agendar una entrevista",
+        "newInterview": "Nueva entrevista",
+        "createFirst": "Crear primera entrevista",
+        "manage": "Administrar",
+        "notes": "Notas",
+        "technicalSheet": "Ficha técnica",
+        "retry": "Reintentar"
+      },
+      "statuses": {
+        "scheduled": "Programada",
+        "completed": "Completada",
+        "cancelled": "Cancelada",
+        "noShow": "No asistió"
+      },
+      "emptyStates": {
+        "noVacancies": "No hay vacantes. Crea una vacante primero para agendar entrevistas.",
+        "noInterviews": "No hay entrevistas para esta vacante."
+      },
+      "loadingStates": {
+        "loadingVacancies": "Cargando vacantes…",
+        "loadingInterviews": "Cargando entrevistas..."
+      },
+      "errors": {
+        "loadVacanciesFailed": "No se pudieron cargar las vacantes.",
+        "loadInterviewsFailed": "Ocurrió un error al cargar las entrevistas.",
+        "missingVacancyId": "Falta el identificador de la vacante."
+      },
+      "toasts": {
+        "created": "Entrevista creada correctamente.",
+        "saved": "Cambios guardados.",
+        "deleted": "Entrevista eliminada.",
+        "notesSaved": "Notas guardadas."
+      }
     }
   }
 }

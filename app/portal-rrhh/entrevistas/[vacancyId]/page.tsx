@@ -1,6 +1,7 @@
 "use client"
 
 import { Suspense, useEffect } from "react"
+import { useTranslations } from "next-intl"
 import { Loader2 } from "lucide-react"
 import { useParams } from "next/navigation"
 import { RrhhInterviewsShell } from "@/components/rrhh/interviews/rrhh-interviews-shell"
@@ -9,6 +10,7 @@ import { useRecruiterVacancySummary } from "@/hooks/use-recruiter-vacancy-summar
 import { formatEntrevistasByVacancyDocumentTitle } from "@/lib/pageTitles"
 
 export default function EntrevistasByVacancyPage() {
+  const t = useTranslations("RecruiterPortal.interviews")
   const params = useParams()
   const raw = params?.vacancyId
   const vacancyId = Array.isArray(raw) ? raw[0] : raw ?? ""
@@ -31,17 +33,17 @@ export default function EntrevistasByVacancyPage() {
   const trail =
     vacancyId.length > 0
       ? [
-          { label: "Entrevistas", href: "/portal-rrhh/entrevistas" },
+          { label: t("breadcrumb"), href: "/portal-rrhh/entrevistas" },
           {
             label: vacancySummary.loading
               ? "…"
-              : vacancySummary.title?.trim() || "Vacante",
+              : vacancySummary.title?.trim() || t("page.vacancyFallback"),
           },
         ]
-      : [{ label: "Entrevistas", href: "/portal-rrhh/entrevistas" }]
+      : [{ label: t("breadcrumb"), href: "/portal-rrhh/entrevistas" }]
 
   return (
-    <RrhhInterviewsShell breadcrumbLabel="Entrevistas" breadcrumbTrail={trail}>
+    <RrhhInterviewsShell breadcrumbLabel={t("breadcrumb")} breadcrumbTrail={trail}>
       {vacancyId ? (
         <Suspense
           fallback={
@@ -55,7 +57,7 @@ export default function EntrevistasByVacancyPage() {
                 aria-hidden
               />
               <p className="font-sans text-sm text-muted-foreground">
-                Cargando…
+                {t("page.suspenseLoading")}
               </p>
             </div>
           }
@@ -64,7 +66,7 @@ export default function EntrevistasByVacancyPage() {
         </Suspense>
       ) : (
         <p className="p-8 font-sans text-sm text-destructive" role="alert">
-          Falta el identificador de la vacante.
+          {t("errors.missingVacancyId")}
         </p>
       )}
     </RrhhInterviewsShell>

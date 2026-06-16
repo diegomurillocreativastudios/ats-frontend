@@ -1595,6 +1595,111 @@ esta etapa: se verificó vía `git stash` que fallan igual sin estos cambios.
 `npm run build` pasa (exit 0). `tsc`/`lint` reportan únicamente errores
 preexistentes en archivos fuera de scope (tests de reportes/admin/companies).
 
+## 16-K. Entrevistas RRHH básico (Etapa 11)
+
+Migración **acotada** de la UI estática simple del módulo de **Entrevistas RRHH**
+a `next-intl`. No se tocó IA, Score Breakdown, `VacancyConfig`, reportes, ni la
+lógica compleja de agenda/calendario/OAuth.
+
+### 16-K.1 Componentes/rutas migradas
+
+- `app/portal-rrhh/entrevistas/page.tsx` (hub de entrevistas / selector de
+  vacante): encabezado, descripción, `aria-label`s de región, estado de carga,
+  estado vacío, botón "Ir a vacantes", etiqueta de estado de la vacante (reusa el
+  mapper de Etapa 10 `getVacancyStatusLabel`), conteo de candidatos (plural ICU),
+  acción "Ver entrevistas" + su `aria-label`, breadcrumb del topbar y fallback de
+  error de carga (`getApiErrorMessage(err) || t('errors.loadVacanciesFailed')`).
+- `app/portal-rrhh/entrevistas/[vacancyId]/page.tsx`: breadcrumb, trail (incluido
+  el **fallback** estático "Vacante"; el `title` real sigue siendo dinámico),
+  fallback del `Suspense` y error "Falta el identificador de la vacante".
+- `app/portal-rrhh/entrevistas/[vacancyId]/loading.tsx`: convertido a client
+  component para resolver "Cargando…" desde el diccionario (renderiza bajo el
+  `NextIntlClientProvider` del root layout).
+- `app/portal-rrhh/entrevistas/[vacancyId]/error.tsx`: fallback de error
+  controlado + "Reintentar". Se **prioriza** `error.message` (crudo) sobre el
+  fallback del diccionario.
+- `components/rrhh/interviews/interview-list.tsx`: título/descripciones del header
+  (incluida `descriptionWithVacancy` con el título inyectado como **valor**, no
+  traducido), acciones ("Revisar candidatos" + aria, "Nueva entrevista", "Crear
+  primera entrevista", "Administrar", "Notas", "Ficha técnica", "Reintentar"),
+  filtros (label/opciones de estado vía mapper, "Desde/Hasta (local)", "Aplicar
+  filtros", helper de zona horaria), encabezados de tabla, estados de
+  carga/vacío/error, toasts fallback controlados por frontend y el **fallback** de
+  etiqueta de candidato sin nombre (`cards.candidateFallback`, con el id como
+  valor).
+- `components/rrhh/interviews/interview-status-badge.tsx` (átomo compartido):
+  la etiqueta **fallback** del enum se resuelve por mapper; el `displayName` del
+  API se sigue **priorizando** crudo.
+
+### 16-K.2 Namespace agregado
+
+- `RecruiterPortal.interviews` (nuevo) en los **5** diccionarios, con subsecciones:
+  `breadcrumb`, `hub`, `page`, `filters`, `list.table`, `cards`, `actions`,
+  `statuses`, `emptyStates`, `loadingStates`, `errors`, `toasts`.
+- Reusa `RecruiterPortal.vacancies.statuses` (Etapa 10) para el estado de vacante
+  del hub, evitando duplicar keys.
+
+### 16-K.3 Mappers auditados/migrados/no migrados
+
+- **Migrado (Categoría A):** `lib/interviews/interview-status-labels.ts` →
+  `getInterviewStatusLabel(status, t)`. Sólo traduce el enum frontend estable
+  `InterviewStatus` (`Scheduled | Completed | Cancelled | NoShow`) y **devuelve el
+  valor crudo** (`String(status)`) para códigos desconocidos; `""` para vacío/null.
+  Se usa en las opciones del filtro de estado y en el badge.
+- **No migrado (fuera de scope):** `getInterviewHttpErrorMessage`
+  (`lib/api/interviews.ts`) — helper de mensajes por status HTTP; se mantiene tal
+  cual (no se traduce el mensaje literal del backend).
+- **No migrado:** tipos de entrevista (`row.interviewTypeLabel ??
+  row.interviewType`) → provienen del API (texto libre/CRUD de usuario) → data
+  dinámica, **no** se traducen.
+
+### 16-K.4 Metadata
+
+- **No aplica:** las rutas de entrevistas RRHH **no** exportan `metadata` estática
+  (`page.tsx` es client component; el título de pestaña lo fija
+  `lib/pageTitles.ts` vía `document.title`, **fuera de scope**). Por tanto **no**
+  se creó `generateMetadata()` ni `Metadata.recruiterInterviews`.
+
+### 16-K.5 Regla crítica — qué NO se tradujo
+
+- Nombres de candidatos (`formatCandidateLabel` devuelve el label real sin tocar),
+  títulos de vacante (`vacancy.title`), `interviewerName`, `interviewTypeLabel`,
+  `statusDisplayName` del API, notas, fechas/horas (`formatInterviewLocalDateTime`)
+  y cualquier resultado de IA/Vertex AI/Score Breakdown.
+- **No** se modificaron llamadas a API, payloads ni nombres de campos; **no** se
+  envía `locale` al backend; **no** se tocó la lógica de filtros/agenda/calendario/
+  OAuth/auth/navegación.
+
+### 16-K.6 Tests de la etapa
+
+- `tests/unit/recruiter-interviews-i18n.test.tsx` (nuevo): hub de entrevistas
+  (estado vacío) en `es`/`en`, `InterviewList` (header + filtros + estado vacío) en
+  `es`/`en`, `error.tsx` (fallback del diccionario vs. mensaje crudo del error),
+  unit del mapper `getInterviewStatusLabel` (fallback crudo para desconocidos) y
+  paridad del subnamespace `RecruiterPortal.interviews` en los 5 idiomas.
+- `tests/unit/interview-status-badge.test.tsx` (actualizado): se envuelve en
+  `NextIntlClientProvider`; valida label traducido `es`/`en`, prioridad del label
+  del API y fallback crudo para estado desconocido.
+- `tests/unit/messages-structure.test.ts` sigue pasando (paridad estructural).
+
+Los **7 fallos preexistentes** de Vitest (`admin-vacancy-catalog-content`,
+`build-vacancy-progress-report-pdfkit-buffer`, `public-vacancies`,
+`recruiter-companies-api`, `report-filter-renderer`) **no** están relacionados con
+esta etapa: se verificó vía `git stash` que fallan igual sin estos cambios.
+`tsc`/`lint` sólo reportan errores **preexistentes** en archivos fuera de scope
+(tests de reportes/admin/companies); los archivos de esta etapa pasan `eslint`.
+
+### 16-K.7 Pendientes de Entrevistas RRHH
+
+- Formato de fecha localizado: `formatCreatedAtLabel` (hub) usa `Intl.DateTimeFormat("es", …)`
+  y `formatInterviewLocalDateTime` (`lib/interview-datetime.ts`) tiene formato
+  fijo; se difiere a una etapa de formato/locale para no alterar la lógica.
+- Modales/detalle de entrevista (`interview-create-modal`, `interview-detail-*`,
+  `interview-notes-modal`), agenda/calendario, integración Google Calendar y OAuth
+  quedan **fuera de scope** de Etapa 11.
+- `getInterviewHttpErrorMessage` se internacionalizaría sólo si se separan códigos
+  estables del texto (deuda frontend).
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).

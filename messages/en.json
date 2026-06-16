@@ -846,6 +846,87 @@
           "catalogsLoadFallbackSuffix": "The vacancy can still be created without these fields."
         }
       }
+    },
+    "interviews": {
+      "breadcrumb": "Interviews",
+      "hub": {
+        "title": "Interviews",
+        "description": "Choose a vacancy to view and manage its interviews.",
+        "headerRegionLabel": "Interviews header",
+        "vacanciesRegionLabel": "Vacancies"
+      },
+      "page": {
+        "title": "Interviews",
+        "descriptionLoading": "Loading vacancy data…",
+        "descriptionWithVacancy": "Vacancy: {title}",
+        "descriptionLoadError": "The vacancy title could not be loaded.",
+        "descriptionDefault": "Manage the vacancy interviews",
+        "vacancyFallback": "Vacancy",
+        "suspenseLoading": "Loading…"
+      },
+      "filters": {
+        "regionLabel": "Interview filters",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "from": "From (local)",
+        "to": "To (local)",
+        "apply": "Apply filters",
+        "timezoneHelper": "Range filters use the browser time zone; the API receives UTC."
+      },
+      "list": {
+        "regionLabel": "Interviews list",
+        "table": {
+          "dateTime": "Date and time",
+          "candidate": "Candidate",
+          "type": "Type",
+          "duration": "Duration",
+          "interviewer": "Interviewer",
+          "status": "Status",
+          "actions": "Actions"
+        }
+      },
+      "cards": {
+        "viewInterviews": "View interviews",
+        "viewInterviewsAria": "View interviews for vacancy {title}",
+        "candidatesCount": "{count, plural, one {# candidate} other {# candidates}}",
+        "candidateFallback": "Candidate ({id}…)"
+      },
+      "actions": {
+        "goToVacancies": "Go to vacancies",
+        "reviewCandidates": "Review candidates",
+        "reviewCandidatesAria": "Go to vacancy results to review candidates before scheduling an interview",
+        "newInterview": "New interview",
+        "createFirst": "Create first interview",
+        "manage": "Manage",
+        "notes": "Notes",
+        "technicalSheet": "Technical sheet",
+        "retry": "Retry"
+      },
+      "statuses": {
+        "scheduled": "Scheduled",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "noShow": "No show"
+      },
+      "emptyStates": {
+        "noVacancies": "No vacancies. Create a vacancy first to schedule interviews.",
+        "noInterviews": "There are no interviews for this vacancy."
+      },
+      "loadingStates": {
+        "loadingVacancies": "Loading vacancies…",
+        "loadingInterviews": "Loading interviews..."
+      },
+      "errors": {
+        "loadVacanciesFailed": "Vacancies could not be loaded.",
+        "loadInterviewsFailed": "An error occurred while loading the interviews.",
+        "missingVacancyId": "The vacancy identifier is missing."
+      },
+      "toasts": {
+        "created": "Interview created successfully.",
+        "saved": "Changes saved.",
+        "deleted": "Interview deleted.",
+        "notesSaved": "Notes saved."
+      }
     }
   }
 }

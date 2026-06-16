@@ -846,6 +846,87 @@
           "catalogsLoadFallbackSuffix": "Le poste peut tout de même être créé sans ces champs."
         }
       }
+    },
+    "interviews": {
+      "breadcrumb": "Entretiens",
+      "hub": {
+        "title": "Entretiens",
+        "description": "Choisissez un poste pour voir et gérer ses entretiens.",
+        "headerRegionLabel": "En-tête des entretiens",
+        "vacanciesRegionLabel": "Postes"
+      },
+      "page": {
+        "title": "Entretiens",
+        "descriptionLoading": "Chargement des données du poste…",
+        "descriptionWithVacancy": "Poste : {title}",
+        "descriptionLoadError": "Impossible de charger le titre du poste.",
+        "descriptionDefault": "Gestion des entretiens du poste",
+        "vacancyFallback": "Poste",
+        "suspenseLoading": "Chargement…"
+      },
+      "filters": {
+        "regionLabel": "Filtres des entretiens",
+        "status": "Statut",
+        "allStatuses": "Tous les statuts",
+        "from": "De (local)",
+        "to": "À (local)",
+        "apply": "Appliquer les filtres",
+        "timezoneHelper": "Les filtres de plage utilisent le fuseau horaire du navigateur ; l'API reçoit l'heure UTC."
+      },
+      "list": {
+        "regionLabel": "Liste des entretiens",
+        "table": {
+          "dateTime": "Date et heure",
+          "candidate": "Candidat",
+          "type": "Type",
+          "duration": "Durée",
+          "interviewer": "Intervieweur",
+          "status": "Statut",
+          "actions": "Actions"
+        }
+      },
+      "cards": {
+        "viewInterviews": "Voir les entretiens",
+        "viewInterviewsAria": "Voir les entretiens du poste {title}",
+        "candidatesCount": "{count, plural, one {# candidat} other {# candidats}}",
+        "candidateFallback": "Candidat ({id}…)"
+      },
+      "actions": {
+        "goToVacancies": "Aller aux postes",
+        "reviewCandidates": "Examiner les candidats",
+        "reviewCandidatesAria": "Aller aux résultats du poste pour examiner les candidats avant de planifier un entretien",
+        "newInterview": "Nouvel entretien",
+        "createFirst": "Créer le premier entretien",
+        "manage": "Gérer",
+        "notes": "Notes",
+        "technicalSheet": "Fiche technique",
+        "retry": "Réessayer"
+      },
+      "statuses": {
+        "scheduled": "Planifié",
+        "completed": "Terminé",
+        "cancelled": "Annulé",
+        "noShow": "Absent"
+      },
+      "emptyStates": {
+        "noVacancies": "Aucun poste. Créez d'abord un poste pour planifier des entretiens.",
+        "noInterviews": "Il n'y a aucun entretien pour ce poste."
+      },
+      "loadingStates": {
+        "loadingVacancies": "Chargement des postes…",
+        "loadingInterviews": "Chargement des entretiens..."
+      },
+      "errors": {
+        "loadVacanciesFailed": "Impossible de charger les postes.",
+        "loadInterviewsFailed": "Une erreur s'est produite lors du chargement des entretiens.",
+        "missingVacancyId": "L'identifiant du poste est manquant."
+      },
+      "toasts": {
+        "created": "Entretien créé avec succès.",
+        "saved": "Modifications enregistrées.",
+        "deleted": "Entretien supprimé.",
+        "notesSaved": "Notes enregistrées."
+      }
     }
   }
 }

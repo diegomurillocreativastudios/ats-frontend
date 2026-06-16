@@ -846,6 +846,87 @@
           "catalogsLoadFallbackSuffix": "La posizione può comunque essere creata senza questi campi."
         }
       }
+    },
+    "interviews": {
+      "breadcrumb": "Colloqui",
+      "hub": {
+        "title": "Colloqui",
+        "description": "Scegli una posizione per visualizzare e gestire i suoi colloqui.",
+        "headerRegionLabel": "Intestazione dei colloqui",
+        "vacanciesRegionLabel": "Posizioni"
+      },
+      "page": {
+        "title": "Colloqui",
+        "descriptionLoading": "Caricamento dei dati della posizione…",
+        "descriptionWithVacancy": "Posizione: {title}",
+        "descriptionLoadError": "Impossibile caricare il titolo della posizione.",
+        "descriptionDefault": "Gestione dei colloqui della posizione",
+        "vacancyFallback": "Posizione",
+        "suspenseLoading": "Caricamento…"
+      },
+      "filters": {
+        "regionLabel": "Filtri dei colloqui",
+        "status": "Stato",
+        "allStatuses": "Tutti gli stati",
+        "from": "Da (locale)",
+        "to": "A (locale)",
+        "apply": "Applica filtri",
+        "timezoneHelper": "I filtri per intervallo usano il fuso orario del browser; l'API riceve UTC."
+      },
+      "list": {
+        "regionLabel": "Elenco dei colloqui",
+        "table": {
+          "dateTime": "Data e ora",
+          "candidate": "Candidato",
+          "type": "Tipo",
+          "duration": "Durata",
+          "interviewer": "Intervistatore",
+          "status": "Stato",
+          "actions": "Azioni"
+        }
+      },
+      "cards": {
+        "viewInterviews": "Vedi colloqui",
+        "viewInterviewsAria": "Vedi i colloqui della posizione {title}",
+        "candidatesCount": "{count, plural, one {# candidato} other {# candidati}}",
+        "candidateFallback": "Candidato ({id}…)"
+      },
+      "actions": {
+        "goToVacancies": "Vai alle posizioni",
+        "reviewCandidates": "Esamina candidati",
+        "reviewCandidatesAria": "Vai ai risultati della posizione per esaminare i candidati prima di pianificare un colloquio",
+        "newInterview": "Nuovo colloquio",
+        "createFirst": "Crea il primo colloquio",
+        "manage": "Gestisci",
+        "notes": "Note",
+        "technicalSheet": "Scheda tecnica",
+        "retry": "Riprova"
+      },
+      "statuses": {
+        "scheduled": "Programmato",
+        "completed": "Completato",
+        "cancelled": "Annullato",
+        "noShow": "Assente"
+      },
+      "emptyStates": {
+        "noVacancies": "Nessuna posizione. Crea prima una posizione per pianificare i colloqui.",
+        "noInterviews": "Non ci sono colloqui per questa posizione."
+      },
+      "loadingStates": {
+        "loadingVacancies": "Caricamento delle posizioni…",
+        "loadingInterviews": "Caricamento dei colloqui..."
+      },
+      "errors": {
+        "loadVacanciesFailed": "Impossibile caricare le posizioni.",
+        "loadInterviewsFailed": "Si è verificato un errore durante il caricamento dei colloqui.",
+        "missingVacancyId": "Manca l'identificatore della posizione."
+      },
+      "toasts": {
+        "created": "Colloquio creato correttamente.",
+        "saved": "Modifiche salvate.",
+        "deleted": "Colloquio eliminato.",
+        "notesSaved": "Note salvate."
+      }
     }
   }
 }

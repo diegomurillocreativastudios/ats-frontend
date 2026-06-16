@@ -846,6 +846,87 @@
           "catalogsLoadFallbackSuffix": "Die Stelle kann auch ohne diese Felder erstellt werden."
         }
       }
+    },
+    "interviews": {
+      "breadcrumb": "Vorstellungsgespräche",
+      "hub": {
+        "title": "Vorstellungsgespräche",
+        "description": "Wähle eine Stelle aus, um ihre Vorstellungsgespräche anzuzeigen und zu verwalten.",
+        "headerRegionLabel": "Kopfbereich der Vorstellungsgespräche",
+        "vacanciesRegionLabel": "Stellen"
+      },
+      "page": {
+        "title": "Vorstellungsgespräche",
+        "descriptionLoading": "Stellendaten werden geladen…",
+        "descriptionWithVacancy": "Stelle: {title}",
+        "descriptionLoadError": "Der Stellentitel konnte nicht geladen werden.",
+        "descriptionDefault": "Verwaltung der Vorstellungsgespräche der Stelle",
+        "vacancyFallback": "Stelle",
+        "suspenseLoading": "Wird geladen…"
+      },
+      "filters": {
+        "regionLabel": "Filter für Vorstellungsgespräche",
+        "status": "Status",
+        "allStatuses": "Alle Status",
+        "from": "Von (lokal)",
+        "to": "Bis (lokal)",
+        "apply": "Filter anwenden",
+        "timezoneHelper": "Bereichsfilter verwenden die Zeitzone des Browsers; die API erhält UTC."
+      },
+      "list": {
+        "regionLabel": "Liste der Vorstellungsgespräche",
+        "table": {
+          "dateTime": "Datum und Uhrzeit",
+          "candidate": "Kandidat",
+          "type": "Typ",
+          "duration": "Dauer",
+          "interviewer": "Interviewer",
+          "status": "Status",
+          "actions": "Aktionen"
+        }
+      },
+      "cards": {
+        "viewInterviews": "Gespräche ansehen",
+        "viewInterviewsAria": "Vorstellungsgespräche der Stelle {title} ansehen",
+        "candidatesCount": "{count, plural, one {# Kandidat} other {# Kandidaten}}",
+        "candidateFallback": "Kandidat ({id}…)"
+      },
+      "actions": {
+        "goToVacancies": "Zu den Stellen",
+        "reviewCandidates": "Kandidaten prüfen",
+        "reviewCandidatesAria": "Zu den Stellenergebnissen gehen, um Kandidaten vor der Planung eines Gesprächs zu prüfen",
+        "newInterview": "Neues Gespräch",
+        "createFirst": "Erstes Gespräch erstellen",
+        "manage": "Verwalten",
+        "notes": "Notizen",
+        "technicalSheet": "Technisches Datenblatt",
+        "retry": "Erneut versuchen"
+      },
+      "statuses": {
+        "scheduled": "Geplant",
+        "completed": "Abgeschlossen",
+        "cancelled": "Abgesagt",
+        "noShow": "Nicht erschienen"
+      },
+      "emptyStates": {
+        "noVacancies": "Keine Stellen. Erstelle zuerst eine Stelle, um Vorstellungsgespräche zu planen.",
+        "noInterviews": "Für diese Stelle gibt es keine Vorstellungsgespräche."
+      },
+      "loadingStates": {
+        "loadingVacancies": "Stellen werden geladen…",
+        "loadingInterviews": "Vorstellungsgespräche werden geladen..."
+      },
+      "errors": {
+        "loadVacanciesFailed": "Die Stellen konnten nicht geladen werden.",
+        "loadInterviewsFailed": "Beim Laden der Vorstellungsgespräche ist ein Fehler aufgetreten.",
+        "missingVacancyId": "Die Stellenkennung fehlt."
+      },
+      "toasts": {
+        "created": "Vorstellungsgespräch erfolgreich erstellt.",
+        "saved": "Änderungen gespeichert.",
+        "deleted": "Vorstellungsgespräch gelöscht.",
+        "notesSaved": "Notizen gespeichert."
+      }
     }
   }
 }
