@@ -752,6 +752,83 @@
       },
       "toasts": {
         "created": "Posizione creata con successo."
+      },
+      "form": {
+        "title": "Nuova posizione",
+        "fields": {
+          "name": {
+            "label": "Nome della posizione",
+            "placeholder": "Es.: Frontend Developer"
+          },
+          "description": {
+            "label": "Descrizione della posizione",
+            "placeholder": "Spiegazione del ruolo della posizione"
+          },
+          "details": {
+            "label": "Dettagli della posizione",
+            "placeholder": "Dati specifici della posizione"
+          },
+          "salary": {
+            "label": "Stipendio",
+            "ariaLabel": "Stipendio della posizione",
+            "placeholder": "Es.: US$1,200 - US$1,800 / mese"
+          },
+          "advantages": {
+            "label": "Vantaggi e benefit della posizione",
+            "placeholder": "Es.: Assicurazione sanitaria, bonus annuale, home office, formazione..."
+          },
+          "client": {
+            "label": "Cliente / azienda",
+            "ariaLabel": "Cliente o azienda della posizione"
+          },
+          "country": {
+            "label": "Paese a cui si applica la posizione"
+          },
+          "state": {
+            "label": "Stato / provincia"
+          },
+          "locationHelper": "Facoltativo. Scegli il paese e lo stato o la provincia in cui si applica la posizione.",
+          "department": {
+            "label": "Area (catalogo)",
+            "ariaLabel": "Area della posizione nel catalogo"
+          },
+          "modality": {
+            "label": "Modalità",
+            "ariaLabel": "Modalità della posizione"
+          },
+          "unspecifiedOption": "Non specificato",
+          "requirements": {
+            "label": "Requisiti",
+            "namePlaceholder": "Nome (es.: Patente di guida)",
+            "valuePlaceholder": "Valore (es.: Pesante)",
+            "importanceLabel": "Importanza (1-10)",
+            "helper": "Ogni requisito ha un nome, un valore e un livello medio da 1 a 10.",
+            "nameAria": "Requisito {index} - Nome",
+            "valueAria": "Requisito {index} - Valore",
+            "scaleAria": "Requisito {index} - Livello medio da 1 a 10",
+            "removeAria": "Elimina requisito {index}"
+          }
+        },
+        "actions": {
+          "add": "Aggiungi",
+          "addRequirementAria": "Aggiungi requisito",
+          "cancel": "Annulla",
+          "submit": "Crea posizione"
+        },
+        "validation": {
+          "nameRequired": "Il nome è obbligatorio",
+          "descriptionRequired": "La descrizione è obbligatoria",
+          "companyRequired": "Seleziona un'azienda cliente",
+          "requirementValueRequired": "Valore obbligatorio",
+          "requirementNameRequired": "Nome obbligatorio"
+        },
+        "errors": {
+          "createFailed": "Impossibile creare la posizione. Riprova.",
+          "companiesLoadFailed": "Impossibile caricare i clienti.",
+          "companiesLoadFallbackSuffix": "Verrà utilizzata l'azienda predefinita.",
+          "catalogsLoadFailed": "Impossibile caricare reparti e modalità.",
+          "catalogsLoadFallbackSuffix": "La posizione può comunque essere creata senza questi campi."
+        }
       }
     }
   }

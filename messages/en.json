@@ -752,6 +752,83 @@
       },
       "toasts": {
         "created": "Vacancy created successfully."
+      },
+      "form": {
+        "title": "New vacancy",
+        "fields": {
+          "name": {
+            "label": "Vacancy name",
+            "placeholder": "E.g.: Frontend Developer"
+          },
+          "description": {
+            "label": "Vacancy description",
+            "placeholder": "Explanation of the vacancy role"
+          },
+          "details": {
+            "label": "Vacancy details",
+            "placeholder": "Specific vacancy data"
+          },
+          "salary": {
+            "label": "Salary",
+            "ariaLabel": "Vacancy salary",
+            "placeholder": "E.g.: US$1,200 - US$1,800 / month"
+          },
+          "advantages": {
+            "label": "Vacancy perks and benefits",
+            "placeholder": "E.g.: Health insurance, annual bonus, home office, training..."
+          },
+          "client": {
+            "label": "Client / company",
+            "ariaLabel": "Vacancy client or company"
+          },
+          "country": {
+            "label": "Country the vacancy applies to"
+          },
+          "state": {
+            "label": "State / province"
+          },
+          "locationHelper": "Optional. Choose the country and state or province where the vacancy applies.",
+          "department": {
+            "label": "Area (catalog)",
+            "ariaLabel": "Vacancy area in catalog"
+          },
+          "modality": {
+            "label": "Modality",
+            "ariaLabel": "Vacancy modality"
+          },
+          "unspecifiedOption": "Unspecified",
+          "requirements": {
+            "label": "Requirements",
+            "namePlaceholder": "Name (e.g.: Driver's license)",
+            "valuePlaceholder": "Value (e.g.: Heavy)",
+            "importanceLabel": "Importance (1-10)",
+            "helper": "Each requirement has a name, a value and an average level from 1 to 10.",
+            "nameAria": "Requirement {index} - Name",
+            "valueAria": "Requirement {index} - Value",
+            "scaleAria": "Requirement {index} - Average level from 1 to 10",
+            "removeAria": "Remove requirement {index}"
+          }
+        },
+        "actions": {
+          "add": "Add",
+          "addRequirementAria": "Add requirement",
+          "cancel": "Cancel",
+          "submit": "Create vacancy"
+        },
+        "validation": {
+          "nameRequired": "Name is required",
+          "descriptionRequired": "Description is required",
+          "companyRequired": "Select a client company",
+          "requirementValueRequired": "Value required",
+          "requirementNameRequired": "Name required"
+        },
+        "errors": {
+          "createFailed": "The vacancy could not be created. Please try again.",
+          "companiesLoadFailed": "Clients could not be loaded.",
+          "companiesLoadFallbackSuffix": "The default company will be used.",
+          "catalogsLoadFailed": "Departments and modalities could not be loaded.",
+          "catalogsLoadFallbackSuffix": "The vacancy can still be created without these fields."
+        }
       }
     }
   }

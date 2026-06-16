@@ -752,6 +752,83 @@
       },
       "toasts": {
         "created": "Stelle erfolgreich erstellt."
+      },
+      "form": {
+        "title": "Neue Stelle",
+        "fields": {
+          "name": {
+            "label": "Name der Stelle",
+            "placeholder": "Z. B.: Frontend Developer"
+          },
+          "description": {
+            "label": "Beschreibung der Stelle",
+            "placeholder": "Erläuterung der Rolle der Stelle"
+          },
+          "details": {
+            "label": "Details der Stelle",
+            "placeholder": "Spezifische Angaben zur Stelle"
+          },
+          "salary": {
+            "label": "Gehalt",
+            "ariaLabel": "Gehalt der Stelle",
+            "placeholder": "Z. B.: US$1,200 - US$1,800 / Monat"
+          },
+          "advantages": {
+            "label": "Vorteile und Zusatzleistungen der Stelle",
+            "placeholder": "Z. B.: Krankenversicherung, Jahresbonus, Homeoffice, Weiterbildung..."
+          },
+          "client": {
+            "label": "Kunde / Unternehmen",
+            "ariaLabel": "Kunde oder Unternehmen der Stelle"
+          },
+          "country": {
+            "label": "Land, für das die Stelle gilt"
+          },
+          "state": {
+            "label": "Bundesland / Provinz"
+          },
+          "locationHelper": "Optional. Wähle das Land und das Bundesland oder die Provinz, für die die Stelle gilt.",
+          "department": {
+            "label": "Bereich (Katalog)",
+            "ariaLabel": "Bereich der Stelle im Katalog"
+          },
+          "modality": {
+            "label": "Arbeitsmodell",
+            "ariaLabel": "Arbeitsmodell der Stelle"
+          },
+          "unspecifiedOption": "Nicht angegeben",
+          "requirements": {
+            "label": "Anforderungen",
+            "namePlaceholder": "Name (z. B.: Führerschein)",
+            "valuePlaceholder": "Wert (z. B.: Schwer)",
+            "importanceLabel": "Wichtigkeit (1-10)",
+            "helper": "Jede Anforderung hat einen Namen, einen Wert und ein durchschnittliches Niveau von 1 bis 10.",
+            "nameAria": "Anforderung {index} - Name",
+            "valueAria": "Anforderung {index} - Wert",
+            "scaleAria": "Anforderung {index} - Durchschnittliches Niveau von 1 bis 10",
+            "removeAria": "Anforderung {index} entfernen"
+          }
+        },
+        "actions": {
+          "add": "Hinzufügen",
+          "addRequirementAria": "Anforderung hinzufügen",
+          "cancel": "Abbrechen",
+          "submit": "Stelle erstellen"
+        },
+        "validation": {
+          "nameRequired": "Der Name ist erforderlich",
+          "descriptionRequired": "Die Beschreibung ist erforderlich",
+          "companyRequired": "Wähle ein Kundenunternehmen aus",
+          "requirementValueRequired": "Wert erforderlich",
+          "requirementNameRequired": "Name erforderlich"
+        },
+        "errors": {
+          "createFailed": "Die Stelle konnte nicht erstellt werden. Bitte versuche es erneut.",
+          "companiesLoadFailed": "Die Kunden konnten nicht geladen werden.",
+          "companiesLoadFallbackSuffix": "Es wird das Standardunternehmen verwendet.",
+          "catalogsLoadFailed": "Abteilungen und Arbeitsmodelle konnten nicht geladen werden.",
+          "catalogsLoadFallbackSuffix": "Die Stelle kann auch ohne diese Felder erstellt werden."
+        }
       }
     }
   }

@@ -752,6 +752,83 @@
       },
       "toasts": {
         "created": "Poste créé avec succès."
+      },
+      "form": {
+        "title": "Nouveau poste",
+        "fields": {
+          "name": {
+            "label": "Nom du poste",
+            "placeholder": "Ex. : Frontend Developer"
+          },
+          "description": {
+            "label": "Description du poste",
+            "placeholder": "Explication du rôle du poste"
+          },
+          "details": {
+            "label": "Détails du poste",
+            "placeholder": "Données spécifiques du poste"
+          },
+          "salary": {
+            "label": "Salaire",
+            "ariaLabel": "Salaire du poste",
+            "placeholder": "Ex. : US$1,200 - US$1,800 / mois"
+          },
+          "advantages": {
+            "label": "Avantages et bénéfices du poste",
+            "placeholder": "Ex. : Assurance santé, prime annuelle, télétravail, formation..."
+          },
+          "client": {
+            "label": "Client / entreprise",
+            "ariaLabel": "Client ou entreprise du poste"
+          },
+          "country": {
+            "label": "Pays auquel s'applique le poste"
+          },
+          "state": {
+            "label": "État / province"
+          },
+          "locationHelper": "Facultatif. Choisissez le pays et l'état ou la province où s'applique le poste.",
+          "department": {
+            "label": "Domaine (catalogue)",
+            "ariaLabel": "Domaine du poste dans le catalogue"
+          },
+          "modality": {
+            "label": "Modalité",
+            "ariaLabel": "Modalité du poste"
+          },
+          "unspecifiedOption": "Non spécifié",
+          "requirements": {
+            "label": "Exigences",
+            "namePlaceholder": "Nom (ex. : Permis de conduire)",
+            "valuePlaceholder": "Valeur (ex. : Lourd)",
+            "importanceLabel": "Importance (1-10)",
+            "helper": "Chaque exigence a un nom, une valeur et un niveau moyen de 1 à 10.",
+            "nameAria": "Exigence {index} - Nom",
+            "valueAria": "Exigence {index} - Valeur",
+            "scaleAria": "Exigence {index} - Niveau moyen de 1 à 10",
+            "removeAria": "Supprimer l'exigence {index}"
+          }
+        },
+        "actions": {
+          "add": "Ajouter",
+          "addRequirementAria": "Ajouter une exigence",
+          "cancel": "Annuler",
+          "submit": "Créer le poste"
+        },
+        "validation": {
+          "nameRequired": "Le nom est requis",
+          "descriptionRequired": "La description est requise",
+          "companyRequired": "Sélectionnez une entreprise cliente",
+          "requirementValueRequired": "Valeur requise",
+          "requirementNameRequired": "Nom requis"
+        },
+        "errors": {
+          "createFailed": "Impossible de créer le poste. Veuillez réessayer.",
+          "companiesLoadFailed": "Impossible de charger les clients.",
+          "companiesLoadFallbackSuffix": "L'entreprise par défaut sera utilisée.",
+          "catalogsLoadFailed": "Impossible de charger les services et les modalités.",
+          "catalogsLoadFallbackSuffix": "Le poste peut tout de même être créé sans ces champs."
+        }
       }
     }
   }

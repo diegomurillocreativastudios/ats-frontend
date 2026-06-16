@@ -1208,6 +1208,115 @@ Vitest (`admin-vacancy-catalog-content`, `build-vacancy-progress-report-pdfkit-b
 están relacionados con esta etapa (se verificó que fallan también sin estos
 cambios).
 
+## 16-H. Formulario de creación de vacante RRHH (Etapa 8)
+
+Etapa acotada de i18n para la **UI estática del formulario de creación de
+vacante** RRHH (`NuevaVacanteModal`), que quedó como pendiente de la Etapa 7.
+
+### 16-H.1 Componentes / rutas migrados
+
+```txt
+components/rrhh/NuevaVacanteModal.tsx
+```
+
+`NuevaVacanteModal` ahora consume `useTranslations("RecruiterPortal.vacancies.form")`
+para todo su texto estático: título del modal, labels y placeholders de campos,
+labels de ubicación (pasados por props al `VacancyLocationFields` ya existente),
+opción `Sin especificar` de los selects de área/modalidad, sección de
+requerimientos (labels, placeholders, `aria-label` con índice y texto de ayuda),
+acciones del footer (`Cancelar` / `Crear vacante`), validaciones frontend y
+fallbacks de error controlados por frontend.
+
+### 16-H.2 Namespace `RecruiterPortal.vacancies.form` (5 idiomas)
+
+Se amplió `RecruiterPortal.vacancies` con el subnamespace `form`, presente en los
+5 diccionarios (`es`, `en`, `it`, `de`, `fr`) con paridad exacta de keys:
+
+```txt
+form.title
+form.fields.name.{label,placeholder}
+form.fields.description.{label,placeholder}
+form.fields.details.{label,placeholder}
+form.fields.salary.{label,ariaLabel,placeholder}
+form.fields.advantages.{label,placeholder}
+form.fields.client.{label,ariaLabel}
+form.fields.country.label
+form.fields.state.label
+form.fields.locationHelper
+form.fields.department.{label,ariaLabel}
+form.fields.modality.{label,ariaLabel}
+form.fields.unspecifiedOption
+form.fields.requirements.{label,namePlaceholder,valuePlaceholder,importanceLabel,helper,nameAria,valueAria,scaleAria,removeAria}
+form.actions.{add,addRequirementAria,cancel,submit}
+form.validation.{nameRequired,descriptionRequired,companyRequired,requirementValueRequired,requirementNameRequired}
+form.errors.{createFailed,companiesLoadFailed,companiesLoadFallbackSuffix,catalogsLoadFailed,catalogsLoadFallbackSuffix}
+```
+
+Los `aria-label` indexados usan placeholder ICU `{index}` (p. ej.
+`"Requerimiento {index} - Nombre"`), inyectando `index + 1` como valor.
+
+### 16-H.3 Regla de `value` canónico (selects)
+
+Los selects controlados por frontend traducen **solo el label visible**, nunca el
+`value`. La única opción frontend del formulario es `Sin especificar`, cuyo
+`value` permanece `""` (canónico) mientras el label sale del diccionario
+(`form.fields.unspecifiedOption`). El test verifica explícitamente que el `value`
+no cambia al traducir.
+
+### 16-H.4 Regla crítica: NO traducir data dinámica / IA / backend
+
+- Opciones de **empresa/cliente**, **área (departamento)** y **modalidad** vienen
+  de API/BD (`listRecruiterCompanies`, `listAdminVacancyCatalog`) y **no** se
+  traducen; su texto se renderiza tal cual (`company.name`, `option.displayName`).
+- El nombre por defecto de compañía `Visible Outsource` es un **nombre propio** y
+  se mantiene hardcodeado (no se traduce).
+- Las opciones de **país/estado** del `VacancyLocationFields` provienen de
+  catálogos remotos (GeoNames / countrystatecity) y **no** se traducen; solo se
+  pasan por props los labels estáticos del campo.
+- Los **valores ingresados por el usuario** (nombre, descripción, detalles,
+  salario, ventajas, requerimientos) **no** se transforman: se envían tal cual en
+  el payload.
+- Errores: se conserva el patrón `err?.message || err?.detail || t(fallback)`. El
+  mensaje del **backend** se muestra tal cual; solo el **fallback** de frontend
+  sale del diccionario. En los avisos de carga, el mensaje del backend (o vacío)
+  se concatena con un sufijo estático traducido.
+
+### 16-H.5 Qué NO se tocó / fuera de scope
+
+- **No** se modificaron llamadas a API, payloads ni nombres de campos; **no** se
+  envía `locale` al backend (sigue `POST /api/recruiter/vacancies`).
+- **No** se modificó la lógica funcional de creación de vacante (validación de
+  negocio, `toSnakeCase`, pesos/atributos, `appendVacancyLocationToPayload`,
+  `persistVacancyCompanyId`).
+- **No** se migró el **formulario de edición** del detalle de vacante
+  (`app/portal-rrhh/vacantes/[id]/page.tsx`): está acoplado a Resultados IA,
+  Score Breakdown y `VacancyConfig` (fuera de scope) → **pendiente** para una
+  etapa dedicada.
+- **No** se migraron los textos internos de `VacancyLocationFields`
+  (`Sin especificar` de país/estado, helper por defecto, errores de carga), por
+  ser un componente compartido también con el detalle de vacante → **pendiente**.
+- **No** se tocó `STATUS_LABELS` / mappers de estado, `lib/pageTitles.ts` ni
+  `lib/candidate-portal-translations.ts`.
+- **No** se implementaron rutas con prefijo ni se tocó `proxy.ts`.
+- **No** se migró Portal Admin, Resultados IA, Score Breakdown ni componentes que
+  renderizan salida de Vertex AI.
+
+### 16-H.6 Tests de la etapa
+
+`tests/unit/recruiter-vacancy-form-i18n.test.tsx` valida (Vitest + Testing Library):
+
+- `NuevaVacanteModal` renderiza su UI estática desde `next-intl` en `es` y `en`
+  (título, labels, placeholders, acciones, labels de ubicación), con API y
+  catálogos mockeados.
+- Las validaciones frontend (`nombre`/`descripción` requeridos) salen del
+  diccionario en `es` y `en` al enviar el formulario vacío.
+- El `value` canónico de la opción `Sin especificar` permanece `""` aunque el
+  label se traduzca.
+- Paridad exacta de keys del subnamespace `form` en los 5 idiomas.
+
+La suite i18n previa (incl. `recruiter-vacancies-i18n` de Etapa 7 y
+`messages-structure`) sigue pasando.
+
 ## 17. Pendientes para la siguiente etapa
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
@@ -1216,8 +1325,11 @@ cambios).
   server wrapper + client content (o cuando se migre a ruteo por prefijo).
 - El **Portal RRHH básico** se migró en Etapa 6 (§16-F: listado de candidatos +
   configuración) y **Vacantes RRHH básico** en Etapa 7 (§16-G: listado, filtros
-  simples y tarjeta). Quedan pendientes los módulos RRHH pesados: formularios de
-  creación/edición de vacante (`NuevaVacanteModal`), detalle profundo de
+  simples y tarjeta). El **formulario de creación de vacante**
+  (`NuevaVacanteModal`) se migró en Etapa 8 (§16-H). Quedan pendientes los módulos
+  RRHH pesados: **formulario de edición** del detalle de vacante
+  (`app/portal-rrhh/vacantes/[id]/page.tsx`) y los textos internos de
+  `VacancyLocationFields`, detalle profundo de
   candidato, Resultados IA / Score Breakdown, Reportes, Entrevistas,
   Etapas/Estados (mappers de enums, incl. `STATUS_LABELS` de la tarjeta de
   vacante — ver §16-G.4) y Configuraciones avanzadas.

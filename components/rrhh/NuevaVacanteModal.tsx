@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -34,6 +35,7 @@ export const createEmptyRequirement = () => ({
 });
 
 export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackbar }) {
+  const t = useTranslations("RecruiterPortal.vacancies.form");
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [detalles, setDetalles] = useState("");
@@ -82,7 +84,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         setCompanyLoadError(
           (error as { message?: string })?.message ||
             (error as { detail?: string })?.detail ||
-            "No se pudieron cargar los clientes."
+            ""
         )
       } finally {
         if (!cancelled) setLoadingCompanies(false)
@@ -110,7 +112,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         setCatalogLoadError(
           error?.message ||
             error?.detail ||
-            "No se pudieron cargar departamentos y modalidades."
+            ""
         )
       } finally {
         if (!cancelled) setLoadingCatalogs(false)
@@ -160,22 +162,22 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const validate = () => {
     const nextErrors: Record<string, string> = {};
     if (!nombre.trim()) {
-      nextErrors.nombre = "El nombre es requerido";
+      nextErrors.nombre = t("validation.nameRequired");
     }
     if (!descripcion.trim()) {
-      nextErrors.descripcion = "La descripción es requerida";
+      nextErrors.descripcion = t("validation.descriptionRequired");
     }
     if (!selectedCompanyId.trim()) {
-      nextErrors.empresa = "Selecciona una empresa cliente";
+      nextErrors.empresa = t("validation.companyRequired");
     }
     requerimientos.forEach((req) => {
       const hasName = !!req.requirementName.trim();
       const hasValue = !!req.requirementValue.trim();
       if (hasName && !hasValue) {
-        nextErrors[`req-value-${req.id}`] = "Valor requerido";
+        nextErrors[`req-value-${req.id}`] = t("validation.requirementValueRequired");
       }
       if (!hasName && hasValue) {
-        nextErrors[`req-name-${req.id}`] = "Nombre requerido";
+        nextErrors[`req-name-${req.id}`] = t("validation.requirementNameRequired");
       }
     });
     setErrors(nextErrors);
@@ -245,7 +247,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
       onSubmit?.(data);
     } catch (err) {
       const msg =
-        err?.message || err?.detail || "No se pudo crear la vacante. Intenta de nuevo."
+        err?.message || err?.detail || t("errors.createFailed")
       setSubmitError(msg)
       onSnackbar?.(msg, "error")
     } finally {
@@ -277,18 +279,18 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         variant="outline"
         onClick={handleClose}
         disabled={loading}
-        aria-label="Cancelar"
+        aria-label={t("actions.cancel")}
       >
-        Cancelar
+        {t("actions.cancel")}
       </Button>
       <Button
         type="submit"
         form="nueva-vacante-form"
-        aria-label="Crear vacante"
+        aria-label={t("actions.submit")}
         disabled={loading}
         loading={loading}
       >
-        Crear vacante
+        {t("actions.submit")}
       </Button>
     </>
   );
@@ -297,7 +299,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Nueva vacante"
+      title={t("title")}
       footer={footer}
       size="lg"
       closeOnOverlayClick
@@ -313,14 +315,14 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             htmlFor="vacante-nombre"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Nombre de la vacante <span className="text-vo-pink">*</span>
+            {t("fields.name.label")} <span className="text-vo-pink">*</span>
           </label>
           <input
             id="vacante-nombre"
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Frontend Developer"
+            placeholder={t("fields.name.placeholder")}
             className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
             aria-invalid={!!errors.nombre}
             aria-describedby={errors.nombre ? "nombre-error" : undefined}
@@ -337,13 +339,13 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             htmlFor="vacante-descripcion"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Descripción de la vacante <span className="text-vo-pink">*</span>
+            {t("fields.description.label")} <span className="text-vo-pink">*</span>
           </label>
           <textarea
             id="vacante-descripcion"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            placeholder="Explicacion del rol de la vacante"
+            placeholder={t("fields.description.placeholder")}
             rows={4}
             className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
             aria-invalid={!!errors.descripcion}
@@ -361,16 +363,16 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             htmlFor="vacante-detalles"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Detalles de la vacante
+            {t("fields.details.label")}
           </label>
           <textarea
             id="vacante-detalles"
             value={detalles}
             onChange={(e) => setDetalles(e.target.value)}
-            placeholder="Datos especificos de la vacante"
+            placeholder={t("fields.details.placeholder")}
             rows={3}
             className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]"
-            aria-label="Detalles de la vacante"
+            aria-label={t("fields.details.label")}
           />
         </div>
 
@@ -379,16 +381,16 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             htmlFor="vacante-salario"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Salario
+            {t("fields.salary.label")}
           </label>
           <input
             id="vacante-salario"
             type="text"
             value={salario}
             onChange={(e) => setSalario(e.target.value)}
-            placeholder="Ej: US$1,200 - US$1,800 / mes"
+            placeholder={t("fields.salary.placeholder")}
             className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Salario de la vacante"
+            aria-label={t("fields.salary.ariaLabel")}
           />
         </div>
 
@@ -397,16 +399,16 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             htmlFor="vacante-ventajas"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Ventajas y beneficios de la vacante
+            {t("fields.advantages.label")}
           </label>
           <textarea
             id="vacante-ventajas"
             value={ventajas}
             onChange={(e) => setVentajas(e.target.value)}
-            placeholder="Ej: Seguro médico, bono anual, home office, capacitación..."
+            placeholder={t("fields.advantages.placeholder")}
             rows={3}
             className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]"
-            aria-label="Ventajas y beneficios de la vacante"
+            aria-label={t("fields.advantages.label")}
           />
         </div>
 
@@ -415,14 +417,14 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             htmlFor="vacante-cliente"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Cliente / compañía <span className="text-vo-pink">*</span>
+            {t("fields.client.label")} <span className="text-vo-pink">*</span>
           </label>
           <select
             id="vacante-cliente"
             value={selectedCompanyId}
             onChange={(e) => setSelectedCompanyId(e.target.value)}
             className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Cliente o compañía de la vacante"
+            aria-label={t("fields.client.ariaLabel")}
             aria-invalid={!!errors.empresa}
             aria-describedby={errors.empresa ? "empresa-error" : undefined}
             disabled={loading || loadingCompanies}
@@ -444,12 +446,12 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
           ) : null}
         </div>
 
-        {companyLoadError ? (
+        {companyLoadError !== null ? (
           <div
             className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 font-sans text-sm text-amber-800"
             role="status"
           >
-            {companyLoadError} Se usará la compañía predeterminada.
+            {companyLoadError || t("errors.companiesLoadFailed")} {t("errors.companiesLoadFallbackSuffix")}
           </div>
         ) : null}
 
@@ -462,8 +464,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
           }}
           countrySelectId="vacante-pais"
           stateSelectId="vacante-estado"
-          countryLabel="País al que aplica la vacante"
-          stateLabel="Estado / provincia"
+          countryLabel={t("fields.country.label")}
+          stateLabel={t("fields.state.label")}
+          helperText={t("fields.locationHelper")}
           disabled={loading}
         />
 
@@ -473,17 +476,17 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
               htmlFor="vacante-department"
               className="font-sans text-sm font-medium text-foreground"
             >
-              Área (catálogo)
+              {t("fields.department.label")}
             </label>
             <select
               id="vacante-department"
               value={vacancyDepartmentId}
               onChange={(e) => setVacancyDepartmentId(e.target.value)}
               className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Área de la vacante en catálogo"
+              aria-label={t("fields.department.ariaLabel")}
               disabled={loading || loadingCatalogs}
             >
-              <option value="">Sin especificar</option>
+              <option value="">{t("fields.unspecifiedOption")}</option>
               {departmentOptions.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.displayName}
@@ -497,17 +500,17 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
               htmlFor="vacante-modality"
               className="font-sans text-sm font-medium text-foreground"
             >
-              Modalidad
+              {t("fields.modality.label")}
             </label>
             <select
               id="vacante-modality"
               value={vacancyModalityId}
               onChange={(e) => setVacancyModalityId(e.target.value)}
               className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Modalidad de la vacante"
+              aria-label={t("fields.modality.ariaLabel")}
               disabled={loading || loadingCatalogs}
             >
-              <option value="">Sin especificar</option>
+              <option value="">{t("fields.unspecifiedOption")}</option>
               {modalityOptions.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.displayName}
@@ -517,12 +520,12 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
           </div>
         </div>
 
-        {catalogLoadError ? (
+        {catalogLoadError !== null ? (
           <div
             className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 font-sans text-sm text-amber-800"
             role="status"
           >
-            {catalogLoadError} La vacante se puede crear igualmente sin estos campos.
+            {catalogLoadError || t("errors.catalogsLoadFailed")} {t("errors.catalogsLoadFallbackSuffix")}
           </div>
         ) : null}
 
@@ -538,16 +541,16 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <label className="font-sans text-sm font-medium text-foreground">
-              Requerimientos
+              {t("fields.requirements.label")}
             </label>
             <button
               type="button"
               onClick={handleAddRequirement}
               className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              aria-label="Agregar requerimiento"
+              aria-label={t("actions.addRequirementAria")}
             >
               <Plus className="h-4 w-4" aria-hidden />
-              Agregar
+              {t("actions.add")}
             </button>
           </div>
 
@@ -572,9 +575,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
                         onChange={(e) =>
                           handleUpdateRequirement(req.id, "requirementName", e.target.value)
                         }
-                        placeholder="Nombre (ej: Licencia de conducir)"
+                        placeholder={t("fields.requirements.namePlaceholder")}
                         className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
-                        aria-label={`Requerimiento ${index + 1} - Nombre`}
+                        aria-label={t("fields.requirements.nameAria", { index: index + 1 })}
                       />
                       {errors[`req-name-${req.id}`] && (
                         <p className="font-sans text-xs text-vo-pink" role="alert">
@@ -589,9 +592,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
                         onChange={(e) =>
                           handleUpdateRequirement(req.id, "requirementValue", e.target.value)
                         }
-                        placeholder="Valor (ej: Pesada)"
+                        placeholder={t("fields.requirements.valuePlaceholder")}
                         className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
-                        aria-label={`Requerimiento ${index + 1} - Valor`}
+                        aria-label={t("fields.requirements.valueAria", { index: index + 1 })}
                       />
                       {errors[`req-value-${req.id}`] && (
                         <p className="font-sans text-xs text-vo-pink" role="alert">
@@ -605,7 +608,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
                           htmlFor={`scale-${req.id}`}
                           className="font-sans text-xs text-muted-foreground"
                         >
-                          Importancia (1-10)
+                          {t("fields.requirements.importanceLabel")}
                         </label>
                         <span className="font-sans text-xs font-medium text-foreground tabular-nums">
                           {req.scale}
@@ -621,14 +624,14 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
                           handleUpdateRequirement(req.id, "scale", e.target.value)
                         }
                         className="h-2 w-full cursor-pointer accent-vo-purple"
-                        aria-label={`Requerimiento ${index + 1} - Nivel promedio del 1 al 10`}
+                        aria-label={t("fields.requirements.scaleAria", { index: index + 1 })}
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveRequirement(req.id)}
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-vo-purple"
-                      aria-label={`Eliminar requerimiento ${index + 1}`}
+                      aria-label={t("fields.requirements.removeAria", { index: index + 1 })}
                     >
                       <Trash2 className="h-4 w-4" aria-hidden />
                     </button>
@@ -638,7 +641,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             ))}
           </div>
           <p className="font-sans text-xs text-muted-foreground">
-            Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
+            {t("fields.requirements.helper")}
           </p>
         </div>
       </form>

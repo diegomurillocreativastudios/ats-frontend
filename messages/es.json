@@ -752,6 +752,83 @@
       },
       "toasts": {
         "created": "Vacante creada correctamente."
+      },
+      "form": {
+        "title": "Nueva vacante",
+        "fields": {
+          "name": {
+            "label": "Nombre de la vacante",
+            "placeholder": "Ej: Frontend Developer"
+          },
+          "description": {
+            "label": "Descripción de la vacante",
+            "placeholder": "Explicación del rol de la vacante"
+          },
+          "details": {
+            "label": "Detalles de la vacante",
+            "placeholder": "Datos específicos de la vacante"
+          },
+          "salary": {
+            "label": "Salario",
+            "ariaLabel": "Salario de la vacante",
+            "placeholder": "Ej: US$1,200 - US$1,800 / mes"
+          },
+          "advantages": {
+            "label": "Ventajas y beneficios de la vacante",
+            "placeholder": "Ej: Seguro médico, bono anual, home office, capacitación..."
+          },
+          "client": {
+            "label": "Cliente / compañía",
+            "ariaLabel": "Cliente o compañía de la vacante"
+          },
+          "country": {
+            "label": "País al que aplica la vacante"
+          },
+          "state": {
+            "label": "Estado / provincia"
+          },
+          "locationHelper": "Opcional. Elige país y estado o provincia donde aplica la vacante.",
+          "department": {
+            "label": "Área (catálogo)",
+            "ariaLabel": "Área de la vacante en catálogo"
+          },
+          "modality": {
+            "label": "Modalidad",
+            "ariaLabel": "Modalidad de la vacante"
+          },
+          "unspecifiedOption": "Sin especificar",
+          "requirements": {
+            "label": "Requerimientos",
+            "namePlaceholder": "Nombre (ej: Licencia de conducir)",
+            "valuePlaceholder": "Valor (ej: Pesada)",
+            "importanceLabel": "Importancia (1-10)",
+            "helper": "Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.",
+            "nameAria": "Requerimiento {index} - Nombre",
+            "valueAria": "Requerimiento {index} - Valor",
+            "scaleAria": "Requerimiento {index} - Nivel promedio del 1 al 10",
+            "removeAria": "Eliminar requerimiento {index}"
+          }
+        },
+        "actions": {
+          "add": "Agregar",
+          "addRequirementAria": "Agregar requerimiento",
+          "cancel": "Cancelar",
+          "submit": "Crear vacante"
+        },
+        "validation": {
+          "nameRequired": "El nombre es requerido",
+          "descriptionRequired": "La descripción es requerida",
+          "companyRequired": "Selecciona una empresa cliente",
+          "requirementValueRequired": "Valor requerido",
+          "requirementNameRequired": "Nombre requerido"
+        },
+        "errors": {
+          "createFailed": "No se pudo crear la vacante. Intenta de nuevo.",
+          "companiesLoadFailed": "No se pudieron cargar los clientes.",
+          "companiesLoadFallbackSuffix": "Se usará la compañía predeterminada.",
+          "catalogsLoadFailed": "No se pudieron cargar departamentos y modalidades.",
+          "catalogsLoadFallbackSuffix": "La vacante se puede crear igualmente sin estos campos."
+        }
       }
     }
   }
