@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
@@ -26,6 +27,8 @@ export function InterviewStatusesCrudModal({
   onClose,
   onMutate,
 }: InterviewStatusesCrudModalProps) {
+  const t = useTranslations("RecruiterPortal.interviews.crud.statuses")
+  const tCommon = useTranslations("RecruiterPortal.interviews.crud.common")
   const [items, setItems] = useState<InterviewStatusAdmin[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -111,7 +114,7 @@ export function InterviewStatusesCrudModal({
       setNewIsTerminal(false)
       await loadList()
       onMutate?.()
-      showSnackbar("success", "Estado de entrevista creado correctamente.")
+      showSnackbar("success", t("created"))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -150,7 +153,7 @@ export function InterviewStatusesCrudModal({
       setEditingId(null)
       await loadList()
       onMutate?.()
-      showSnackbar("success", "Estado de entrevista actualizado correctamente.")
+      showSnackbar("success", t("updated"))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -173,7 +176,7 @@ export function InterviewStatusesCrudModal({
       setDeleteTarget(null)
       await loadList()
       onMutate?.()
-      showSnackbar("success", "Estado de entrevista eliminado correctamente.")
+      showSnackbar("success", t("deleted"))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -189,7 +192,7 @@ export function InterviewStatusesCrudModal({
 
   const footer = (
     <Button type="button" variant="outline" onClick={onClose}>
-      Cerrar
+      {tCommon("close")}
     </Button>
   )
 
@@ -204,7 +207,7 @@ export function InterviewStatusesCrudModal({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title="Estados de entrevista"
+        title={t("title")}
         footer={footer}
         size="lg"
         closeOnOverlayClick={!saving && !deleting}
@@ -215,10 +218,10 @@ export function InterviewStatusesCrudModal({
           <form
             onSubmit={handleCreate}
             className="flex flex-col gap-3 rounded-lg border border-border bg-muted/20 p-4"
-            aria-label="Crear estado de entrevista"
+            aria-label={t("createAria")}
           >
             <p className="font-sans text-sm font-medium text-foreground">
-              Nuevo estado
+              {t("newLabel")}
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -226,14 +229,14 @@ export function InterviewStatusesCrudModal({
                   htmlFor="new-interview-status-display"
                   className="font-sans text-sm font-medium text-foreground"
                 >
-                  Nombre visible <span className="text-vo-pink">*</span>
+                  {t("displayNameLabel")} <span className="text-vo-pink">*</span>
                 </label>
                 <input
                   id="new-interview-status-display"
                   type="text"
                   value={newDisplayName}
                   onChange={(e) => setNewDisplayName(e.target.value)}
-                  placeholder="ej: Programada"
+                  placeholder={t("displayNamePlaceholder")}
                   className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm"
                   disabled={saving || loading}
                   autoComplete="off"
@@ -247,7 +250,7 @@ export function InterviewStatusesCrudModal({
                 className="shrink-0 px-5 py-2.5"
               >
                 <Plus className="h-4 w-4" aria-hidden />
-                Añadir
+                {tCommon("add")}
               </Button>
             </div>
             <div className="flex items-start gap-2">
@@ -263,10 +266,9 @@ export function InterviewStatusesCrudModal({
                 htmlFor="new-interview-status-terminal"
                 className="font-sans text-sm leading-snug text-foreground"
               >
-                Estado terminal
+                {t("terminalLabel")}
                 <span className="mt-0.5 block font-sans text-xs font-normal text-muted-foreground">
-                  Marca si este estado cierra el ciclo de la entrevista (p. ej.
-                  completada o cancelada).
+                  {t("terminalHint")}
                 </span>
               </label>
             </div>
@@ -281,11 +283,11 @@ export function InterviewStatusesCrudModal({
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-12 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-              Cargando estados…
+              {t("loading")}
             </div>
           ) : items.length === 0 ? (
             <p className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-8 text-center font-sans text-sm text-muted-foreground">
-              No hay estados definidos. Añade el primero arriba.
+              {t("empty")}
             </p>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
@@ -293,16 +295,16 @@ export function InterviewStatusesCrudModal({
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
                     <th scope="col" className="px-3 py-2 font-semibold">
-                      Código
+                      {t("code")}
                     </th>
                     <th scope="col" className="px-3 py-2 font-semibold">
-                      Nombre
+                      {tCommon("name")}
                     </th>
                     <th scope="col" className="px-3 py-2 font-semibold">
-                      Terminal
+                      {t("terminal")}
                     </th>
                     <th scope="col" className="w-[1%] whitespace-nowrap px-3 py-2 font-semibold">
-                      Acciones
+                      {tCommon("actions")}
                     </th>
                   </tr>
                 </thead>
@@ -329,7 +331,7 @@ export function InterviewStatusesCrudModal({
                             onChange={(e) => setEditDisplayName(e.target.value)}
                             className="h-9 w-full min-w-40 rounded-md border border-input bg-background px-2 font-sans text-sm"
                             disabled={saving}
-                            aria-label="Nombre visible"
+                            aria-label={t("displayNameAria")}
                           />
                         ) : (
                           <span className="text-foreground">{row.displayName}</span>
@@ -347,18 +349,18 @@ export function InterviewStatusesCrudModal({
                               }
                               disabled={saving}
                               className="h-4 w-4 shrink-0 rounded border-input text-vo-purple focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                              aria-label="Estado terminal"
+                              aria-label={t("terminalAria")}
                             />
                             <label
                               htmlFor={`edit-interview-status-terminal-${row.id}`}
                               className="font-sans text-xs text-muted-foreground"
                             >
-                              Terminal
+                              {t("terminal")}
                             </label>
                           </div>
                         ) : (
                           <span className="text-foreground">
-                            {row.isTerminal ? "Sí" : "No"}
+                            {row.isTerminal ? tCommon("yes") : tCommon("no")}
                           </span>
                         )}
                       </td>
@@ -373,7 +375,7 @@ export function InterviewStatusesCrudModal({
                               }
                               className="w-full rounded-md bg-vo-purple px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
                             >
-                              Guardar
+                              {tCommon("save")}
                             </button>
                             <button
                               type="button"
@@ -381,7 +383,7 @@ export function InterviewStatusesCrudModal({
                               disabled={saving}
                               className="w-full rounded-md border border-border px-3 py-1.5 text-center text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
                             >
-                              Cancelar
+                              {tCommon("cancel")}
                             </button>
                           </div>
                         ) : (
@@ -391,7 +393,7 @@ export function InterviewStatusesCrudModal({
                               onClick={() => handleStartEdit(row)}
                               disabled={saving || !!editingId}
                               className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-foreground hover:bg-muted disabled:opacity-50"
-                              aria-label={`Editar ${row.displayName}`}
+                              aria-label={tCommon("editAria", { name: row.displayName })}
                             >
                               <Pencil className="h-4 w-4" aria-hidden />
                             </button>
@@ -400,7 +402,7 @@ export function InterviewStatusesCrudModal({
                               onClick={() => setDeleteTarget(row)}
                               disabled={saving || !!editingId}
                               className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                              aria-label={`Eliminar ${row.displayName}`}
+                              aria-label={tCommon("deleteAria", { name: row.displayName })}
                             >
                               <Trash2 className="h-4 w-4" aria-hidden />
                             </button>
@@ -420,13 +422,13 @@ export function InterviewStatusesCrudModal({
         isOpen={!!deleteTarget}
         onClose={() => !deleting && setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Eliminar estado de entrevista"
+        title={t("deleteTitle")}
         message={
           deleteTarget
-            ? `¿Eliminar «${deleteTarget.displayName}»? Solo se permitirá si no hay entrevistas usando este estado.`
+            ? t("deleteMessage", { name: deleteTarget.displayName })
             : ""
         }
-        confirmText="Eliminar"
+        confirmText={tCommon("delete")}
         loading={deleting}
       />
       <Snackbar

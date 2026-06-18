@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useTranslations } from "next-intl"
 import {
   getCountries,
   getStatesOfCountry,
@@ -54,13 +55,21 @@ export function VacancyLocationFields({
   disabled = false,
   countrySelectId = "vacancy-location-country",
   stateSelectId = "vacancy-location-state",
-  countryLabel = "País",
-  stateLabel = "Estado / provincia",
-  helperText = "Opcional. Elige país y estado o provincia donde aplica la vacante.",
-  unspecifiedLabel = "Sin especificar",
-  loadCountriesErrorLabel = "No se pudieron cargar los países.",
-  loadStatesErrorLabel = "No se pudieron cargar los estados o provincias.",
+  countryLabel,
+  stateLabel,
+  helperText,
+  unspecifiedLabel,
+  loadCountriesErrorLabel,
+  loadStatesErrorLabel,
 }: VacancyLocationFieldsProps) {
+  const tLocation = useTranslations("RecruiterPortal.vacancies.location")
+  const resolvedCountryLabel = countryLabel ?? tLocation("countryLabel")
+  const resolvedStateLabel = stateLabel ?? tLocation("stateLabel")
+  const resolvedHelperText = helperText ?? tLocation("helperText")
+  const resolvedUnspecifiedLabel = unspecifiedLabel ?? tLocation("unspecified")
+  const resolvedLoadCountriesError =
+    loadCountriesErrorLabel ?? tLocation("loadCountriesError")
+  const resolvedLoadStatesError = loadStatesErrorLabel ?? tLocation("loadStatesError")
   const [useGeoNamesApi, setUseGeoNamesApi] = useState(false)
   const [countryOptions, setCountryOptions] = useState<CountryOption[]>([])
   const [stateOptions, setStateOptions] = useState<StateOption[]>([])
@@ -237,9 +246,9 @@ export function VacancyLocationFields({
 
   const loadErrorLabel =
     loadError === "countries"
-      ? loadCountriesErrorLabel
+      ? resolvedLoadCountriesError
       : loadError === "states"
-        ? loadStatesErrorLabel
+        ? resolvedLoadStatesError
         : null
 
   return (
@@ -247,17 +256,17 @@ export function VacancyLocationFields({
       <div className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor={countrySelectId} className="font-sans text-sm font-medium text-foreground">
-            {countryLabel}
+            {resolvedCountryLabel}
           </label>
           <select
             id={countrySelectId}
             value={normalizedCountryCode}
             onChange={(event) => handleCountryChange(event.target.value)}
             className={selectClassName}
-            aria-label={countryLabel}
+            aria-label={resolvedCountryLabel}
             disabled={disabled || loadingCountries}
           >
-            <option value="">{unspecifiedLabel}</option>
+            <option value="">{resolvedUnspecifiedLabel}</option>
             {countryOptionsWithSelection.map((country) => (
               <option key={country.iso2} value={country.iso2}>
                 {country.label}
@@ -268,17 +277,17 @@ export function VacancyLocationFields({
 
         <div className="flex flex-col gap-2">
           <label htmlFor={stateSelectId} className="font-sans text-sm font-medium text-foreground">
-            {stateLabel}
+            {resolvedStateLabel}
           </label>
           <select
             id={stateSelectId}
             value={normalizedStateCode}
             onChange={(event) => handleStateChange(event.target.value)}
             className={selectClassName}
-            aria-label={stateLabel}
+            aria-label={resolvedStateLabel}
             disabled={disabled || !normalizedCountryCode || loadingStates}
           >
-            <option value="">{unspecifiedLabel}</option>
+            <option value="">{resolvedUnspecifiedLabel}</option>
             {stateOptionsWithSelection.map((state) => (
               <option key={state.code} value={state.code}>
                 {state.label}
@@ -288,8 +297,8 @@ export function VacancyLocationFields({
         </div>
       </div>
 
-      {helperText ? (
-        <p className="font-sans text-xs text-muted-foreground">{helperText}</p>
+      {resolvedHelperText ? (
+        <p className="font-sans text-xs text-muted-foreground">{resolvedHelperText}</p>
       ) : null}
 
       {loadErrorLabel ? (

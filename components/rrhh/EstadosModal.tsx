@@ -7,6 +7,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
@@ -29,6 +30,8 @@ const DefaultStatusSwitch = ({
   status,
   onActivate,
   disabled,
+  defaultActiveAria,
+  markDefaultAria,
 }) => {
   const isOn = Boolean(status.isDefault);
   const handleClick = () => {
@@ -51,8 +54,8 @@ const DefaultStatusSwitch = ({
       aria-checked={isOn}
       aria-label={
         isOn
-          ? `${status.name}: Estado por Defecto activo`
-          : `Marcar ${status.name} como Estado por Defecto`
+          ? defaultActiveAria(status.name)
+          : markDefaultAria(status.name)
       }
       disabled={disabled}
       onClick={handleClick}
@@ -75,7 +78,18 @@ const DefaultStatusSwitch = ({
   );
 };
 
-const StatusItem = ({ status, onEdit, onDelete, onDefaultActivate, defaultSwitchDisabled }) => {
+const StatusItem = ({
+  status,
+  onEdit,
+  onDelete,
+  onDefaultActivate,
+  defaultSwitchDisabled,
+  defaultStatusLabel,
+  defaultActiveAria,
+  markDefaultAria,
+  editAria,
+  deleteAria,
+}) => {
   return (
     <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1.5 rounded-lg border border-border bg-white px-4 py-3.5">
       <p className="row-span-2 min-w-0 self-center font-sans text-sm font-medium leading-snug text-foreground">
@@ -85,19 +99,21 @@ const StatusItem = ({ status, onEdit, onDelete, onDefaultActivate, defaultSwitch
         className="col-start-2 justify-self-end font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70"
         aria-hidden
       >
-        Estado por Defecto
+        {defaultStatusLabel}
       </span>
       <div className="col-start-2 flex shrink-0 items-center justify-end gap-1.5">
         <DefaultStatusSwitch
           status={status}
           onActivate={onDefaultActivate}
           disabled={defaultSwitchDisabled}
+          defaultActiveAria={defaultActiveAria}
+          markDefaultAria={markDefaultAria}
         />
         <button
           type="button"
           onClick={() => onEdit(status)}
           className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
-          aria-label={`Editar estado ${status.name}`}
+          aria-label={editAria(status.name)}
         >
           <Pencil className="h-4 w-4" aria-hidden />
         </button>
@@ -105,7 +121,7 @@ const StatusItem = ({ status, onEdit, onDelete, onDefaultActivate, defaultSwitch
           type="button"
           onClick={() => onDelete(status)}
           className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-destructive transition-colors hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-destructive"
-          aria-label={`Eliminar estado ${status.name}`}
+          aria-label={deleteAria(status.name)}
         >
           <Trash2 className="h-4 w-4" aria-hidden />
         </button>
@@ -115,6 +131,8 @@ const StatusItem = ({ status, onEdit, onDelete, onDefaultActivate, defaultSwitch
 };
 
 export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
+  const t = useTranslations("AdminPortal.statuses.modal");
+  const tCommon = useTranslations("Common");
   const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
@@ -166,7 +184,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
       return true;
     } catch (err: unknown) {
       const msg =
-        getApiErrorMessage(err) || "No se pudieron cargar los estados.";
+        getApiErrorMessage(err) || t("loadFailed");
       setFetchError(msg);
       setStatuses([]);
       showSnackbar(msg, "error");
@@ -219,11 +237,11 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
       }
       const refreshed = await fetchStatuses(true);
       if (refreshed) {
-        showSnackbar("Estado por defecto cambiado", "info");
+        showSnackbar(t("defaultChanged"), "info");
       }
     } catch (err) {
       const msg =
-        err?.message || err?.detail || "No se pudo actualizar el estado por defecto.";
+        getApiErrorMessage(err) || t("defaultUpdateFailed");
       setFetchError(msg);
       showSnackbar(msg, "error");
     } finally {
@@ -248,11 +266,11 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
       setStatusToDelete(null);
       const refreshed = await fetchStatuses();
       if (refreshed) {
-        showSnackbar("Estado eliminado", "success");
+        showSnackbar(t("deleted"), "success");
       }
     } catch (err: unknown) {
       const msg =
-        getApiErrorMessage(err) || "No se pudo eliminar el estado. Intenta de nuevo.";
+        getApiErrorMessage(err) || t("deleteFailed");
       setFetchError(msg);
       showSnackbar(msg, "error");
     } finally {
@@ -284,7 +302,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
   const validateForm = () => {
     const errors: Record<string, string> = {};
     if (!formData.name.trim()) {
-      errors.name = "El nombre es requerido";
+      errors.name = t("validationNameRequired");
     }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -322,14 +340,13 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
       const refreshed = await fetchStatuses(true);
       if (refreshed) {
         showSnackbar(
-          wasEditing ? "Estado actualizado" : "Estado creado exitosamente",
+          wasEditing ? t("updated") : t("created"),
           "success"
         );
       }
     } catch (err: unknown) {
       const msg =
-        getApiErrorMessage(err) ||
-        `No se pudo ${editingStatus ? "actualizar" : "crear"} el estado. Intenta de nuevo.`;
+        getApiErrorMessage(err) || t("saveFailed");
       setSubmitError(msg);
       showSnackbar(msg, "error");
     } finally {
@@ -352,13 +369,13 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <h2 className="font-sans text-xl font-semibold text-foreground">
-              Gestionar Estados
+              {t("title")}
             </h2>
             <button
               type="button"
               onClick={onClose}
               className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
-              aria-label="Cerrar"
+              aria-label={t("close")}
             >
               <X className="h-5 w-5" aria-hidden />
             </button>
@@ -373,14 +390,14 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                     htmlFor="status-name"
                     className="font-sans text-sm font-medium text-foreground"
                   >
-                    Nombre del estado <span className="text-vo-pink">*</span>
+                    {t("nameLabel")} <span className="text-vo-pink">*</span>
                   </label>
                   <input
                     id="status-name"
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ name: e.target.value })}
-                    placeholder="Ej: En proceso"
+                    placeholder={t("namePlaceholder")}
                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                     aria-invalid={!!formErrors.name}
                     aria-describedby={formErrors.name ? "name-error" : undefined}
@@ -408,14 +425,14 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                     onClick={handleCloseForm}
                     disabled={submitLoading}
                   >
-                    Cancelar
+                    {tCommon("cancel")}
                   </Button>
                   <Button
                     type="submit"
                     disabled={submitLoading}
                     loading={submitLoading}
                   >
-                    {editingStatus ? "Actualizar" : "Crear"}
+                    {editingStatus ? t("update") : t("create")}
                   </Button>
                 </div>
               </form>
@@ -425,7 +442,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                   <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                     <div className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
                     <p className="font-sans text-sm text-muted-foreground">
-                      Cargando estados...
+                      {t("loading")}
                     </p>
                   </div>
                 ) : fetchError ? (
@@ -438,13 +455,13 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                       onClick={fetchStatuses}
                       className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                     >
-                      Reintentar
+                      {t("retry")}
                     </button>
                   </div>
                 ) : statuses.length === 0 ? (
                   <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/30 py-12 text-center">
                     <p className="font-sans text-sm text-muted-foreground">
-                      No hay estados creados
+                      {t("empty")}
                     </p>
                   </div>
                 ) : (
@@ -457,10 +474,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                       id="estados-default-legend"
                       className="font-sans text-[12px] leading-snug text-muted-foreground/75"
                     >
-                      <span className="text-muted-foreground/90">Estado por Defecto</span>
-                      {" — "}
-                      Al mover candidatos entre etapas (Kanban) solo uno aplica; al activar otro,
-                      el resto queda desactivado.
+                      {t("defaultLegend")}
                     </p>
                     {statuses.map((status) => (
                       <StatusItem
@@ -470,6 +484,11 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                         onDelete={handleDelete}
                         onDefaultActivate={handleDefaultActivate}
                         defaultSwitchDisabled={defaultSwitchLoading}
+                        defaultStatusLabel={t("defaultStatus")}
+                        defaultActiveAria={(name) => t("defaultActiveAria", { name })}
+                        markDefaultAria={(name) => t("markDefaultAria", { name })}
+                        editAria={(name) => t("editAria", { name })}
+                        deleteAria={(name) => t("deleteAria", { name })}
                       />
                     ))}
                   </div>
@@ -486,14 +505,14 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                 variant="outline"
                 onClick={onClose}
               >
-                Cerrar
+                {t("close")}
               </Button>
               <Button
                 type="button"
                 onClick={handleNewStatus}
               >
                 <Plus className="h-4 w-4" aria-hidden />
-                Nuevo Estado
+                {t("newStatus")}
               </Button>
             </div>
           )}
@@ -506,10 +525,14 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
         onConfirm={handleConfirmDelete}
-        title="Eliminar estado"
-        message={`¿Estás seguro de eliminar el estado "${statusToDelete?.name}"?`}
-        confirmText="Aceptar"
-        cancelText="Cancelar"
+        title={t("deleteTitle")}
+        message={
+          statusToDelete
+            ? t("deleteMessage", { name: statusToDelete.name })
+            : ""
+        }
+        confirmText={t("accept")}
+        cancelText={tCommon("cancel")}
         loading={deleteLoading}
       />
       )}

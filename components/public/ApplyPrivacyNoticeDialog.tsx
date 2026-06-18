@@ -8,6 +8,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react"
+import { useTranslations } from "next-intl"
 import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/Button"
 
@@ -27,6 +28,7 @@ export function ApplyPrivacyNoticeDialog({
   onAccept,
   onDecline,
 }: ApplyPrivacyNoticeDialogProps) {
+  const t = useTranslations("PublicOpportunities.privacy")
   const [isExitAnimating, setIsExitAnimating] = useState(false)
   const isClient = useSyncExternalStore(
     () => () => {},
@@ -145,7 +147,7 @@ export function ApplyPrivacyNoticeDialog({
             id={titleId}
             className="text-balance text-center text-base font-semibold uppercase leading-snug tracking-[0.06em] text-white sm:text-lg"
           >
-            AVISO DE PRIVACIDAD Y PROTECCIÓN DE DATOS PERSONALES
+            {t("title")}
           </h2>
         </div>
 
@@ -153,30 +155,17 @@ export function ApplyPrivacyNoticeDialog({
           id={bodyId}
           className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4 text-sm leading-relaxed text-white/90 sm:px-6 sm:py-5"
         >
-          <p className="text-pretty text-white/88">
-            Sus datos personales serán incorporados a la base de datos de Visible Outsource y
-            procesados exclusivamente por profesionales autorizados del área de Recursos Humanos en
-            el contexto de procesos de selección y gestión de personal.
-          </p>
-          <p className="mt-4 font-medium text-white/92">Tratamiento de datos:</p>
+          <p className="text-pretty text-white/88">{t("intro")}</p>
+          <p className="mt-4 font-medium text-white/92">{t("dataTreatmentHeading")}</p>
           <ul className="mt-2 list-inside list-disc space-y-2.5 pl-0.5 text-white/86 marker:text-vo-sky/90">
-            <li>Finalidad: Evaluación de candidatos y gestión de procesos de reclutamiento</li>
-            <li>Acceso: Personal autorizado de RRHH únicamente</li>
-            <li>
-              Confidencialidad: Sus datos serán tratados bajo estrictos estándares de
-              confidencialidad y seguridad de información
-            </li>
-            <li>
-              Derechos: Usted tiene derecho a acceder, rectificar o solicitar la eliminación de sus
-              datos personales
-            </li>
+            <li>{t("purposeItem")}</li>
+            <li>{t("accessItem")}</li>
+            <li>{t("confidentialityItem")}</li>
+            <li>{t("rightsItem")}</li>
           </ul>
+          <p className="mt-4 text-white/86">{t("compliance")}</p>
           <p className="mt-4 text-white/86">
-            Este sistema cumple con la normativa vigente de protección de datos personales.
-          </p>
-          <p className="mt-4 text-white/86">
-            Si desea eliminar o rectificar sus datos personales en nuestra base de datos, favor
-            escriba a{" "}
+            {t("contactPrefix")}{" "}
             <a
               className="font-medium text-sky-200/95 underline decoration-white/30 underline-offset-2 transition-colors hover:text-white hover:decoration-white/60 focus:outline-none focus:ring-2 focus:ring-vo-sky focus:ring-offset-2 focus:ring-offset-[#1a2238]"
               href="mailto:info@visibleo.us"
@@ -196,7 +185,7 @@ export function ApplyPrivacyNoticeDialog({
               disabled={isExitAnimating}
               className="w-full border-white/32 bg-white/5 text-white hover:border-white/45 hover:bg-white/10 hover:text-white focus-visible:ring-vo-sky sm:w-auto"
             >
-              No, gracias
+              {t("decline")}
             </Button>
             <Button
               type="button"
@@ -205,7 +194,7 @@ export function ApplyPrivacyNoticeDialog({
               disabled={isExitAnimating}
               className="w-full sm:w-auto"
             >
-              Acepto
+              {t("accept")}
             </Button>
           </div>
         </div>

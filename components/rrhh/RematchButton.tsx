@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { apiClient } from "@/lib/api";
 
 /**
@@ -16,6 +17,7 @@ export default function RematchButton({
   variant = "default",
   disabled = false,
 }) {
+  const t = useTranslations("RecruiterPortal.vacancies.rematch");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [errorMessage, setErrorMessage] = useState("");
@@ -43,7 +45,7 @@ export default function RematchButton({
       setIsDismissedAfterSuccess(true);
       if (onSnackbar) {
         setStatus("idle");
-        onSnackbar("Emparejamiento reajustado correctamente.", "success");
+        onSnackbar(t("toastSuccess"), "success");
       } else {
         setStatus("success");
         setTimeout(() => setStatus("idle"), 3000);
@@ -52,7 +54,7 @@ export default function RematchButton({
     } catch (err) {
       console.error("Rematch failed:", err);
       setIsDismissedAfterSuccess(false);
-      const msg = err?.message || "Error al reajustar emparejamiento";
+      const msg = err?.message || t("toastError");
       if (onSnackbar) {
         setStatus("idle");
         onSnackbar(msg, "error");
@@ -76,7 +78,7 @@ export default function RematchButton({
     return (
       <div className="flex items-center gap-2 text-green-600 font-sans text-sm animate-in fade-in duration-300">
         <CheckCircle2 className="h-4 w-4" />
-        <span>¡Éxito!</span>
+        <span>{t("success")}</span>
       </div>
     );
   }
@@ -86,7 +88,7 @@ export default function RematchButton({
       <div className="flex items-center gap-2 text-destructive font-sans text-xs animate-in fade-in duration-300 max-w-[150px]">
         <AlertCircle className="h-4 w-4 shrink-0" />
         <span className="truncate" title={errorMessage}>
-          {errorMessage || "Error al procesar"}
+          {errorMessage || t("processError")}
         </span>
       </div>
     );
@@ -108,15 +110,21 @@ export default function RematchButton({
       onClick={handleRematch}
       disabled={loading || disabled}
       className={isListVariant ? listClasses : detailClasses}
-      aria-label="Reajustar emparejamientos"
-      title={needsRematch ? "Requisitos actualizados. Se recomienda reajustar emparejamientos." : "Reajustar emparejamientos"}
+      aria-label={t("ariaLabel")}
+      title={needsRematch ? t("titleNeedsRematch") : t("titleDefault")}
     >
       {loading ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <Sparkles className={`h-4 w-4 ${needsRematch ? "animate-pulse text-amber-600" : "text-vo-purple"}`} />
       )}
-      <span>{loading ? "Ajustando..." : isListVariant && !needsRematch ? "Reajustar" : "Reajustar emparejamiento"}</span>
+      <span>
+        {loading
+          ? t("adjusting")
+          : isListVariant && !needsRematch
+            ? t("short")
+            : t("label")}
+      </span>
       {needsRematch && !isListVariant && (
         <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-amber-500 animate-ping" />
       )}

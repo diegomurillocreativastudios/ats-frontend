@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, type ReactNode, type MouseEvent } from "react"
 import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const MODAL_STYLES = {
   /** z-index va en `overlayZIndexClass` para permitir modales anidados. */
@@ -48,6 +49,7 @@ export default function Modal({
   closeOnEscape = true,
   overlayZIndexClass = "z-50",
 }: ModalProps) {
+  const t = useTranslations("Common")
   const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md
   const handleEscape = useCallback(
     (e: Event) => {
@@ -100,7 +102,7 @@ export default function Modal({
             type="button"
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            aria-label="Cerrar modal"
+            aria-label={t("closeModal")}
           >
             <X className="h-5 w-5" aria-hidden />
           </button>

@@ -1,9 +1,12 @@
+import { getTranslations } from "next-intl/server"
 import CandidateInterviewsContent from "@/components/candidato/CandidateInterviewsContent"
 
-export const metadata = {
-  title: { absolute: "ATS | Portal Candidato - Entrevistas" },
-  description:
-    "Consultá tus entrevistas agendadas e historial en el portal del candidato",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.candidatePortal.interviews")
+  return {
+    title: { absolute: t("title") },
+    description: t("description"),
+  }
 }
 
 export default function PortalCandidatoEntrevistasPage() {

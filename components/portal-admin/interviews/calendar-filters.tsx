@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Loader2, RefreshCw } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { fetchAdminCompaniesList } from "@/lib/api/admin-companies"
 import { fetchAdminUsersAllByRole } from "@/lib/api/admin-users"
 import {
@@ -30,6 +31,7 @@ export function CalendarFilters({
   onReload,
   loading = false,
 }: CalendarFiltersProps) {
+  const t = useTranslations("AdminPortal.interviews.calendar.filters")
   const [companiesLoading, setCompaniesLoading] = useState(true)
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([])
   const [recruitersLoading, setRecruitersLoading] = useState(true)
@@ -172,17 +174,17 @@ export function CalendarFilters({
   return (
     <section
       className="rounded-xl border border-border bg-card p-4"
-      aria-label="Filtros del calendario"
+      aria-label={t("regionAria")}
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-sans text-sm font-semibold text-foreground">Filtros</h3>
+        <h3 className="font-sans text-sm font-semibold text-foreground">{t("heading")}</h3>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={onReset}
             className="rounded-md border border-border px-3 py-1.5 font-sans text-xs font-medium text-foreground hover:bg-muted"
           >
-            Limpiar filtros
+            {t("clear")}
           </button>
           <button
             type="button"
@@ -195,7 +197,7 @@ export function CalendarFilters({
             ) : (
               <RefreshCw className="h-3.5 w-3.5" aria-hidden />
             )}
-            Actualizar
+            {t("reload")}
           </button>
         </div>
       </div>
@@ -203,7 +205,7 @@ export function CalendarFilters({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="cal-filter-company" className="font-sans text-xs font-medium">
-            Empresa
+            {t("company")}
           </label>
           <select
             id="cal-filter-company"
@@ -214,7 +216,7 @@ export function CalendarFilters({
             disabled={companiesLoading}
             className={selectClass}
           >
-            <option value="">Todas</option>
+            <option value="">{t("allFeminine")}</option>
             {companies.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -225,7 +227,7 @@ export function CalendarFilters({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="cal-filter-vacancy" className="font-sans text-xs font-medium">
-            Vacante
+            {t("vacancy")}
           </label>
           <select
             id="cal-filter-vacancy"
@@ -234,7 +236,7 @@ export function CalendarFilters({
             disabled={vacanciesLoading}
             className={selectClass}
           >
-            <option value="">Todas</option>
+            <option value="">{t("allFeminine")}</option>
             {vacancyOptions.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.title}
@@ -245,7 +247,7 @@ export function CalendarFilters({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="cal-filter-recruiter" className="font-sans text-xs font-medium">
-            Reclutador
+            {t("recruiter")}
           </label>
           <select
             id="cal-filter-recruiter"
@@ -254,7 +256,7 @@ export function CalendarFilters({
             disabled={recruitersLoading}
             className={selectClass}
           >
-            <option value="">Todos</option>
+            <option value="">{t("allMasculine")}</option>
             {recruiters.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.label}
@@ -265,7 +267,7 @@ export function CalendarFilters({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="cal-filter-status" className="font-sans text-xs font-medium">
-            Estado
+            {t("status")}
           </label>
           <select
             id="cal-filter-status"
@@ -274,7 +276,7 @@ export function CalendarFilters({
             disabled={statusesLoading}
             className={selectClass}
           >
-            <option value="">Todos</option>
+            <option value="">{t("allMasculine")}</option>
             {statuses.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.label}
@@ -285,7 +287,7 @@ export function CalendarFilters({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="cal-filter-type" className="font-sans text-xs font-medium">
-            Tipo (local)
+            {t("typeLocal")}
           </label>
           <select
             id="cal-filter-type"
@@ -294,10 +296,10 @@ export function CalendarFilters({
             disabled={typesLoading}
             className={selectClass}
           >
-            <option value="">Todos</option>
-            {types.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.label}
+            <option value="">{t("allMasculine")}</option>
+            {types.map((typeOption) => (
+              <option key={typeOption.id} value={typeOption.id}>
+                {typeOption.label}
               </option>
             ))}
           </select>
@@ -305,7 +307,7 @@ export function CalendarFilters({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="cal-filter-modality" className="font-sans text-xs font-medium">
-            Modalidad (local)
+            {t("modalityLocal")}
           </label>
           <select
             id="cal-filter-modality"
@@ -314,7 +316,7 @@ export function CalendarFilters({
             disabled={modalitiesLoading}
             className={selectClass}
           >
-            <option value="">Todas</option>
+            <option value="">{t("allFeminine")}</option>
             {modalities.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.label}
@@ -325,14 +327,14 @@ export function CalendarFilters({
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
           <label htmlFor="cal-filter-search" className="font-sans text-xs font-medium">
-            Buscar
+            {t("search")}
           </label>
           <input
             id="cal-filter-search"
             type="search"
             value={filters.search}
             onChange={(e) => onChange({ search: e.target.value })}
-            placeholder="Candidato, vacante, reclutador…"
+            placeholder={t("searchPlaceholder")}
             className={selectClass}
           />
         </div>
@@ -345,7 +347,7 @@ export function CalendarFilters({
               onChange={(e) => onChange({ includeCancelled: e.target.checked })}
               className="h-4 w-4 rounded border-input accent-vo-purple"
             />
-            Incluir canceladas
+            {t("includeCancelled")}
           </label>
         </div>
       </div>

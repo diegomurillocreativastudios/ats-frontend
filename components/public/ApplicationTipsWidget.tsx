@@ -1,33 +1,31 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Lightbulb } from "lucide-react"
-
-const APPLICATION_TIPS = [
-  "Revisa que tu correo electrónico y teléfono estén actualizados.",
-  "Sube tu hoja de vida en formato PDF.",
-  "Verifica que todos tus datos estén correctos antes de enviar.",
-  "Asegúrate de cumplir con los requisitos principales de la vacante.",
-  "Mantente pendiente de tu correo y teléfono después de postularte.",
-  "Utiliza un nombre de archivo profesional para tu CV.",
-  "Revisa la ortografía de tu información antes de continuar.",
-  "Adjunta todos los documentos solicitados.",
-  "No olvides incluir tu experiencia laboral más reciente.",
-  "Confirma que tu disponibilidad coincida con lo solicitado en la vacante.",
-]
+import { useTranslations } from "next-intl"
 
 const TIP_ROTATION_INTERVAL = 7000
 
-function getRandomTip(excludeIndex?: number): { tip: string; index: number } {
-  const availableIndices = APPLICATION_TIPS.map((_, i) => i).filter(
+const TIP_KEYS = [
+  "tip1",
+  "tip2",
+  "tip3",
+  "tip4",
+  "tip5",
+  "tip6",
+  "tip7",
+  "tip8",
+  "tip9",
+  "tip10",
+] as const
+
+function getRandomTipIndex(excludeIndex?: number, total: number = TIP_KEYS.length): number {
+  const availableIndices = Array.from({ length: total }, (_, i) => i).filter(
     (i) => i !== excludeIndex
   )
-  const randomIndex =
-    availableIndices[Math.floor(Math.random() * availableIndices.length)]
-  return {
-    tip: APPLICATION_TIPS[randomIndex] ?? APPLICATION_TIPS[0] ?? "",
-    index: randomIndex ?? 0,
-  }
+  return (
+    availableIndices[Math.floor(Math.random() * availableIndices.length)] ?? 0
+  )
 }
 
 interface ApplicationTipsWidgetProps {
@@ -37,7 +35,11 @@ interface ApplicationTipsWidgetProps {
 export function ApplicationTipsWidget({
   position = "left",
 }: ApplicationTipsWidgetProps = {}) {
-  const [currentTipData, setCurrentTipData] = useState(() => getRandomTip())
+  const t = useTranslations("PublicOpportunities.tips")
+  const tips = useMemo(() => TIP_KEYS.map((key) => t(key)), [t])
+  const [currentTipIndex, setCurrentTipIndex] = useState(() =>
+    getRandomTipIndex(undefined, tips.length)
+  )
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
@@ -45,16 +47,16 @@ export function ApplicationTipsWidget({
       setIsVisible(false)
 
       setTimeout(() => {
-        setCurrentTipData((prev) => getRandomTip(prev.index))
+        setCurrentTipIndex((prev) => getRandomTipIndex(prev, tips.length))
         setIsVisible(true)
       }, 300)
     }, TIP_ROTATION_INTERVAL)
 
     return () => clearInterval(intervalId)
-  }, [])
+  }, [tips.length])
 
-  const positionClassName =
-    position === "right" ? "right-6" : "left-6"
+  const positionClassName = position === "right" ? "right-6" : "left-6"
+  const currentTip = tips[currentTipIndex] ?? tips[0] ?? ""
 
   return (
     <aside
@@ -79,11 +81,9 @@ export function ApplicationTipsWidget({
 
             <div className="flex-1 space-y-1.5">
               <h3 className="text-sm font-semibold tracking-tight text-white">
-                Consejo para tu postulación
+                {t("title")}
               </h3>
-              <p className="text-sm leading-relaxed text-white/84">
-                {currentTipData.tip}
-              </p>
+              <p className="text-sm leading-relaxed text-white/84">{currentTip}</p>
             </div>
           </div>
         </div>

@@ -137,8 +137,8 @@ const extractApiErrorMessage = (err) => {
  * El API de move-to-stage exige un "estado de postulación por defecto" en la empresa.
  * Si falta, el backend devuelve un mensaje en inglés; aquí lo traducimos y damos contexto.
  */
-const normalizeMoveStageError = (err) => {
-  const fallback = "No se pudo mover el candidato de etapa."
+const normalizeMoveStageError = (err, t) => {
+  const fallback = t("errors.moveStageFailed")
   const raw = extractApiErrorMessage(err) ?? fallback
   const lower = raw.toLowerCase()
   const isDefaultStatusMissing =
@@ -146,15 +146,15 @@ const normalizeMoveStageError = (err) => {
     lower.includes("missing default application status")
   if (isDefaultStatusMissing) {
     return {
-      text: "Falta el estado de postulación por defecto de la empresa. El servidor lo necesita al mover candidatos entre etapas. Configúralo en Etapas (estados) o pide a un administrador que lo haga.",
+      text: t("errors.missingDefaultApplicationStatus"),
       showEstadosLink: true,
     }
   }
   return { text: raw, showEstadosLink: false }
 }
 
-const normalizeApplicationStatusError = (err) => {
-  const fallback = "No se pudo actualizar el estado de la postulación."
+const normalizeApplicationStatusError = (err, t) => {
+  const fallback = t("errors.updateApplicationStatusFailed")
   const raw = extractApiErrorMessage(err) ?? fallback
   return { text: raw, showEstadosLink: false }
 }
@@ -309,23 +309,23 @@ const getStatusConfig = (status, t) => {
   return { ...styles, label };
 };
 
-const AI_EFFICIENCY_KPIS = [
+const AI_EFFICIENCY_KPI_KEYS = [
   {
-    label: "Búsqueda preliminar",
-    value: "De horas a segundos en la primera exploracion",
-    helper: "Priorización inicial asistida por IA",
+    titleKey: "kpis.preliminarySearchTitle",
+    valueKey: "kpis.preliminarySearchSubtitle",
+    helperKey: "kpis.prioritizationTitle",
   },
   {
-    label: "Emparejamiento preliminar",
-    value: "Precision observada de 75% a 80%",
-    helper: "Objetivo de calibración: 90%",
+    titleKey: "kpis.preliminaryMatchTitle",
+    valueKey: "kpis.preliminaryMatchSubtitle",
+    helperKey: "kpis.preliminaryMatchGoal",
   },
   {
-    label: "Cobertura de resultados",
-    value: "Shortlist inicial con candidatos sugeridos",
-    helper: "Punto de partida para validación de RRHH",
+    titleKey: "kpis.coverageTitle",
+    valueKey: "kpis.coverageSubtitle",
+    helperKey: "kpis.coverageHint",
   },
-];
+] as const;
 
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
@@ -1192,6 +1192,7 @@ const KanbanCard = ({
 };
 
 const MoveStageErrorBanner = ({ error }) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
   if (!error) return null
   return (
     <div
@@ -1203,9 +1204,9 @@ const MoveStageErrorBanner = ({ error }) => {
         <Link
           href="/portal-admin/etapas"
           className="font-sans text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
-          aria-label="Ir a la sección Etapas para administrar estados de postulación"
+          aria-label={tMatching("errors.goToStagesAria")}
         >
-          Ir a Etapas y administrar estados
+          {tMatching("goToStagesLink")}
         </Link>
       ) : null}
     </div>
@@ -1327,6 +1328,7 @@ const KanbanColumn = ({
 export default function VacanteDetallePage() {
   const t = useTranslations("RecruiterPortal.vacancies");
   const tDetail = useTranslations("RecruiterPortal.vacancies.detail");
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
   const params = useParams();
   const id = params?.id ?? null;
   const [vacancy, setVacancy] = useState(null);
@@ -2285,7 +2287,7 @@ export default function VacanteDetallePage() {
             /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
           }
         } catch (err) {
-          const normalized = normalizeMoveStageError(err);
+          const normalized = normalizeMoveStageError(err, tMatching);
           setMoveStageError(normalized);
           setSnackbar({
             open: true,
@@ -2353,7 +2355,7 @@ export default function VacanteDetallePage() {
           /* El estado ya se guardó; si falla recargar la vacante, el override mantiene la UI coherente. */
         }
       } catch (err) {
-        const normalized = normalizeApplicationStatusError(err);
+        const normalized = normalizeApplicationStatusError(err, tMatching);
         setApplicationStatusError(normalized);
         setSnackbar({
           open: true,
@@ -2419,7 +2421,7 @@ export default function VacanteDetallePage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Proceso iniciado para los candidatos seleccionados.",
+        message: tMatching("toasts.processStarted"),
       });
       scrollToEtapas();
     } catch (err) {
@@ -2450,7 +2452,7 @@ export default function VacanteDetallePage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Emparejamiento ejecutado correctamente.",
+        message: tMatching("toasts.matchSuccess"),
       });
       scrollToPossibleCandidates();
     } catch (err) {
@@ -3070,19 +3072,19 @@ export default function VacanteDetallePage() {
 
                   <section
                     className="flex flex-col gap-4"
-                    aria-label="Candidatos con emparejamiento"
+                    aria-label={tMatching("aria.matchedCandidates")}
                   >
                   <AiDisclosureNotice
-                    title="Búsqueda y análisis preliminar con IA"
-                    description="La IA prioriza coincidencias iniciales y genera análisis preliminar. RRHH valida la decisión final."
+                    title={tMatching("sectionTitle")}
+                    description={tMatching("sectionDescription")}
                   />
                   <div className="grid gap-2 sm:grid-cols-3">
-                    {AI_EFFICIENCY_KPIS.map((item) => (
+                    {AI_EFFICIENCY_KPI_KEYS.map((item) => (
                       <AiKpiCard
-                        key={item.label}
-                        label={item.label}
-                        value={item.value}
-                        helper={item.helper}
+                        key={item.titleKey}
+                        label={tMatching(item.titleKey)}
+                        value={tMatching(item.valueKey)}
+                        helper={tMatching(item.helperKey)}
                       />
                     ))}
                   </div>
@@ -3092,7 +3094,7 @@ export default function VacanteDetallePage() {
                         onClick={handleSearchSmartRecommendations}
                         disabled={loadingSmart || isVacancyReadOnly}
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        aria-label="Búsqueda preliminar"
+                        aria-label={tMatching("aria.preliminarySearch")}
                         title={vacancyReadOnlyTitle}
                       >
                         {loadingSmart ? (
@@ -3101,8 +3103,8 @@ export default function VacanteDetallePage() {
                           <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                         )}
                         {loadingSmart
-                          ? "Actualizando busqueda con IA..."
-                          : "Búsqueda preliminar"}
+                          ? tMatching("updatingSearch")
+                          : tMatching("preliminarySearch")}
                       </button>
                       {displayCandidates.length > 0 && (
                         <button
@@ -3110,7 +3112,7 @@ export default function VacanteDetallePage() {
                           onClick={handleMatch}
                           disabled={loadingMatch || selectedDocumentIds.length === 0 || isVacancyReadOnly}
                           className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          aria-label="Análisis preliminar"
+                          aria-label={tMatching("aria.preliminaryAnalysis")}
                           title={vacancyReadOnlyTitle}
                         >
                           {loadingMatch ? (
@@ -3118,7 +3120,7 @@ export default function VacanteDetallePage() {
                           ) : (
                             <Scale className="h-4 w-4 shrink-0" aria-hidden />
                           )}
-                          {loadingMatch ? "Reanalizando con IA..." : "Análisis preliminar"}
+                          {loadingMatch ? tMatching("reanalyzing") : tMatching("preliminaryAnalysis")}
                         </button>
                       )}
                     </div>
@@ -3140,7 +3142,7 @@ export default function VacanteDetallePage() {
                           className="w-full max-w-2xl space-y-2"
                           role="status"
                           aria-live="polite"
-                          aria-label="Reanalizando con IA"
+                          aria-label={tMatching("reanalyzingEllipsis")}
                         >
                           <AiDisclosurePillProgress
                             percent={null}
@@ -3149,16 +3151,16 @@ export default function VacanteDetallePage() {
                             )}
                             preliminaryMatchStepLabels
                             className="mt-0!"
-                            aria-label="Progreso del análisis preliminar con IA"
+                            aria-label={tMatching("aria.analysisProgress")}
                           />
                           <p className="font-sans text-sm text-muted-foreground">
-                            Reanalizando con IA…
+                            {tMatching("reanalyzingEllipsis")}
                           </p>
                         </div>
                       ) : null}
                       <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
                         <Sparkles className="h-5 w-5" aria-hidden />
-                        Resultados de búsqueda
+                        {tMatching("searchResults")}
                         {smartCandidates !== null && (
                           <span className="font-sans text-sm font-normal text-muted-foreground">
                             ({searchResultsToDisplay.length})
@@ -3167,7 +3169,7 @@ export default function VacanteDetallePage() {
                       </h2>
                       <div
                         className="rounded-xl border border-border bg-card p-6"
-                        aria-label="Resultados de búsqueda"
+                        aria-label={tMatching("aria.searchResults")}
                       >
                         {loadingSmart && smartCandidates === null ? (
                           <div className="flex flex-col items-center justify-center gap-4 py-10 text-center">
@@ -3176,21 +3178,21 @@ export default function VacanteDetallePage() {
                                 percent={null}
                                 timeBasedTypicalMs={VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS}
                                 className="mt-0!"
-                                aria-label="Progreso de la búsqueda preliminar con IA"
+                                aria-label={tMatching("aria.searchProgress")}
                               />
                             </div>
                             <p
                               className="font-sans text-sm text-muted-foreground"
                               aria-live="polite"
                             >
-                              Actualizando búsqueda con IA…
+                              {tMatching("updatingSearchEllipsis")}
                             </p>
                           </div>
                         ) : smartCandidates === null ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Sparkles className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
-                              Ejecuta la busqueda preliminar para ver coincidencias asistidas por IA.
+                              {tMatching("emptySearch")}
                             </p>
                           </div>
                         ) : searchResultsToDisplay.length === 0 ? (
@@ -3198,8 +3200,8 @@ export default function VacanteDetallePage() {
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
                               {smartCandidates.length === 0
-                                ? "No se encontraron candidatos en la búsqueda."
-                                : "Los candidatos encontrados ya están en Posibles candidatos o en Etapas."}
+                                ? tMatching("errors.searchNoResults")
+                                : tMatching("errors.searchAlreadyInPipeline")}
                             </p>
                           </div>
                         ) : (
@@ -3210,22 +3212,22 @@ export default function VacanteDetallePage() {
                                 onClick={handleSelectAllCandidates}
                                 disabled={isVacancyReadOnly}
                                 className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-                                aria-label="Seleccionar todos los candidatos"
+                                aria-label={tMatching("aria.selectAll")}
                               >
-                                Seleccionar todos
+                                {tMatching("selectAll")}
                               </button>
                               <button
                                 type="button"
                                 onClick={handleDeselectAllCandidates}
                                 disabled={isVacancyReadOnly}
                                 className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-                                aria-label="Desmarcar todos los candidatos"
+                                aria-label={tMatching("aria.deselectAll")}
                               >
-                                Desmarcar todos
+                                {tMatching("deselectAll")}
                               </button>
                               {selectedCount > 0 && (
                                 <span className="font-sans text-sm text-muted-foreground" aria-live="polite">
-                                  {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
+                                  {tMatching("selectedCount", { count: selectedCount })}
                                 </span>
                               )}
                             </div>
@@ -3239,7 +3241,7 @@ export default function VacanteDetallePage() {
                                       candidateId={candidateId}
                                       isSelected={selectedCandidateIds.has(candidateId)}
                                       onToggle={handleToggleCandidate}
-                                      aiLabel="Coincidencia preliminar IA"
+                                      aiLabel={tMatching("preliminaryMatchBadge")}
                                       readOnly={isVacancyReadOnly}
                                     />
                                   </li>
@@ -3259,12 +3261,12 @@ export default function VacanteDetallePage() {
                       <div className="flex flex-wrap items-center gap-3">
                         <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
                           <Users className="h-5 w-5" aria-hidden />
-                          Posibles candidatos
+                          {tMatching("possibleCandidates")}
                           <span className="font-sans text-sm font-normal text-muted-foreground">
                             ({vacancyCandidates.length})
                           </span>
                         </h2>
-                        <AiDisclosureBadge label="Análisis preliminar IA" />
+                        <AiDisclosureBadge label={tMatching("preliminaryAnalysisBadge")} />
                         <button
                           type="button"
                           disabled={
@@ -3273,7 +3275,7 @@ export default function VacanteDetallePage() {
                             loadingStartProcess
                           }
                           className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
-                          aria-label="Incluir al proceso con candidatos seleccionados"
+                          aria-label={tMatching("includeSelectedHint")}
                           onClick={handleStartProcess}
                         >
                           {loadingStartProcess ? (
@@ -3281,7 +3283,7 @@ export default function VacanteDetallePage() {
                           ) : (
                             <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                           )}
-                          {loadingStartProcess ? "Incluyendo..." : "Incluir al proceso"}
+                          {loadingStartProcess ? tMatching("including") : tMatching("includeInProcess")}
                         </button>
                       </div>
                       {startProcessError && (
@@ -3291,13 +3293,13 @@ export default function VacanteDetallePage() {
                       )}
                       <div
                         className="rounded-xl border border-border bg-card p-6"
-                        aria-label="Posibles candidatos"
+                        aria-label={tMatching("aria.possibleCandidates")}
                       >
                         {vacancyCandidates.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
-                              No hay sugerencias de emparejamiento para esta vacante.
+                              {tMatching("noSuggestions")}
                             </p>
                           </div>
                         ) : (
@@ -3312,7 +3314,7 @@ export default function VacanteDetallePage() {
                                     isSelected={selectedPossibleCandidateIds.has(candidateId)}
                                     onToggle={handleTogglePossibleCandidate}
                                     showVerPerfil
-                                    aiLabel="Sugerencia IA"
+                                    aiLabel={tMatching("aiSuggestionBadge")}
                                     readOnly={isVacancyReadOnly}
                                   />
                                 </li>
@@ -3330,7 +3332,7 @@ export default function VacanteDetallePage() {
                     >
                       <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
                         <Users className="h-5 w-5" aria-hidden />
-                        Etapas
+                        {tMatching("stagesTitle")}
                         <span className="font-sans text-sm font-normal text-muted-foreground">
                           ({applicants.length})
                         </span>
@@ -3339,20 +3341,20 @@ export default function VacanteDetallePage() {
                       <MoveStageErrorBanner error={applicationStatusError} />
                       <div
                         className="rounded-xl border border-border bg-card p-6"
-                        aria-label="Contenedor del tablero Kanban"
+                        aria-label={tMatching("kanbanBoardAria")}
                       >
                         {applicants.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
-                              Aún no hay postulantes en esta vacante.
+                              {tMatching("emptyApplicants")}
                             </p>
                           </div>
                         ) : (
                           <div
                             className="flex gap-4 overflow-x-auto pb-2"
                             role="region"
-                            aria-label="Etapas de candidatos"
+                            aria-label={tMatching("kanbanStagesAria")}
                           >
                             {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
                               <KanbanColumn
@@ -3944,16 +3946,16 @@ export default function VacanteDetallePage() {
                   aria-label="Candidatos con emparejamiento"
                 >
                   <AiDisclosureNotice
-                    title="Búsqueda y análisis preliminar con IA"
-                    description="La IA prioriza coincidencias iniciales y genera análisis preliminar. RRHH valida la decisión final."
+                    title={tMatching("sectionTitle")}
+                    description={tMatching("sectionDescription")}
                   />
                   <div className="grid gap-2 sm:grid-cols-3">
-                    {AI_EFFICIENCY_KPIS.map((item) => (
+                    {AI_EFFICIENCY_KPI_KEYS.map((item) => (
                       <AiKpiCard
-                        key={item.label}
-                        label={item.label}
-                        value={item.value}
-                        helper={item.helper}
+                        key={item.titleKey}
+                        label={tMatching(item.titleKey)}
+                        value={tMatching(item.valueKey)}
+                        helper={tMatching(item.helperKey)}
                       />
                     ))}
                   </div>
@@ -3963,7 +3965,7 @@ export default function VacanteDetallePage() {
                       onClick={handleSearchSmartRecommendations}
                       disabled={loadingSmart || isVacancyReadOnly}
                       className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      aria-label="Búsqueda preliminar"
+                      aria-label={tMatching("aria.preliminarySearch")}
                       title={vacancyReadOnlyTitle}
                     >
                       {loadingSmart ? (
@@ -3972,8 +3974,8 @@ export default function VacanteDetallePage() {
                         <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                       )}
                       {loadingSmart
-                        ? "Actualizando busqueda con IA..."
-                        : "Búsqueda preliminar"}
+                        ? tMatching("updatingSearch")
+                        : tMatching("preliminarySearch")}
                     </button>
                     {displayCandidates.length > 0 && (
                       <button
@@ -3985,7 +3987,7 @@ export default function VacanteDetallePage() {
                           selectedDocumentIds.length === 0
                         }
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        aria-label="Análisis preliminar"
+                        aria-label={tMatching("aria.preliminaryAnalysis")}
                         title={vacancyReadOnlyTitle}
                       >
                         {loadingMatch ? (
@@ -3993,7 +3995,7 @@ export default function VacanteDetallePage() {
                         ) : (
                           <Scale className="h-4 w-4 shrink-0" aria-hidden />
                         )}
-                        {loadingMatch ? "Reanalizando con IA..." : "Análisis preliminar"}
+                        {loadingMatch ? tMatching("reanalyzing") : tMatching("preliminaryAnalysis")}
                       </button>
                     )}
                   </div>
@@ -4033,7 +4035,7 @@ export default function VacanteDetallePage() {
                     ) : null}
                     <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
                       <Sparkles className="h-4 w-4" aria-hidden />
-                      Resultados de búsqueda
+                      {tMatching("searchResults")}
                       {smartCandidates !== null && (
                         <span className="font-sans text-sm font-normal text-muted-foreground">
                           ({searchResultsToDisplay.length})
@@ -4042,7 +4044,7 @@ export default function VacanteDetallePage() {
                     </h2>
                     <div
                       className="rounded-xl border border-border bg-card p-5"
-                      aria-label="Resultados de búsqueda"
+                      aria-label={tMatching("aria.searchResults")}
                     >
                       {loadingSmart && smartCandidates === null ? (
                         <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
@@ -4058,14 +4060,14 @@ export default function VacanteDetallePage() {
                             className="font-sans text-sm text-muted-foreground"
                             aria-live="polite"
                           >
-                            Actualizando búsqueda con IA…
+                            {tMatching("updatingSearchEllipsis")}
                           </p>
                         </div>
                       ) : smartCandidates === null ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Sparkles className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
-                            Ejecuta la busqueda preliminar para ver coincidencias asistidas por IA.
+                            {tMatching("emptySearch")}
                           </p>
                         </div>
                       ) : searchResultsToDisplay.length === 0 ? (
@@ -4073,8 +4075,8 @@ export default function VacanteDetallePage() {
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
                             {smartCandidates.length === 0
-                              ? "No se encontraron candidatos en la búsqueda."
-                              : "Los candidatos encontrados ya están en Posibles candidatos o en Etapas."}
+                              ? tMatching("errors.searchNoResults")
+                              : tMatching("errors.searchAlreadyInPipeline")}
                           </p>
                         </div>
                       ) : (
@@ -4085,22 +4087,22 @@ export default function VacanteDetallePage() {
                               onClick={handleSelectAllCandidates}
                               disabled={isVacancyReadOnly}
                               className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-                              aria-label="Seleccionar todos los candidatos"
+                              aria-label={tMatching("aria.selectAll")}
                             >
-                              Seleccionar todos
+                              {tMatching("selectAll")}
                             </button>
                             <button
                               type="button"
                               onClick={handleDeselectAllCandidates}
                               disabled={isVacancyReadOnly}
                               className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-                              aria-label="Desmarcar todos los candidatos"
+                              aria-label={tMatching("aria.deselectAll")}
                             >
-                              Desmarcar todos
+                              {tMatching("deselectAll")}
                             </button>
                             {selectedCount > 0 && (
                               <span className="font-sans text-sm text-muted-foreground" aria-live="polite">
-                                {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
+                                {tMatching("selectedCount", { count: selectedCount })}
                               </span>
                             )}
                           </div>
@@ -4114,7 +4116,7 @@ export default function VacanteDetallePage() {
                                     candidateId={candidateId}
                                     isSelected={selectedCandidateIds.has(candidateId)}
                                     onToggle={handleToggleCandidate}
-                                    aiLabel="Coincidencia preliminar IA"
+                                    aiLabel={tMatching("preliminaryMatchBadge")}
                                     readOnly={isVacancyReadOnly}
                                   />
                                 </li>
@@ -4134,12 +4136,12 @@ export default function VacanteDetallePage() {
                     <div className="flex flex-wrap items-center gap-3">
                       <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
                         <Users className="h-4 w-4" aria-hidden />
-                        Posibles candidatos
+                        {tMatching("possibleCandidates")}
                         <span className="font-sans text-sm font-normal text-muted-foreground">
                           ({vacancyCandidates.length})
                         </span>
                       </h2>
-                      <AiDisclosureBadge label="Análisis preliminar IA" />
+                      <AiDisclosureBadge label={tMatching("preliminaryAnalysisBadge")} />
                       <button
                         type="button"
                         disabled={
@@ -4148,7 +4150,7 @@ export default function VacanteDetallePage() {
                           loadingStartProcess
                         }
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
-                        aria-label="Iniciar proceso con candidatos seleccionados"
+                        aria-label={tMatching("includeSelectedHint")}
                         onClick={handleStartProcess}
                       >
                         {loadingStartProcess ? (
@@ -4156,7 +4158,7 @@ export default function VacanteDetallePage() {
                         ) : (
                           <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                         )}
-                        {loadingStartProcess ? "Iniciando..." : "Iniciar proceso"}
+                        {loadingStartProcess ? tMatching("starting") : tMatching("startProcess")}
                       </button>
                     </div>
                     {startProcessError && (
@@ -4166,13 +4168,13 @@ export default function VacanteDetallePage() {
                     )}
                     <div
                       className="rounded-xl border border-border bg-card p-5"
-                      aria-label="Posibles candidatos"
+                      aria-label={tMatching("aria.possibleCandidates")}
                     >
                       {vacancyCandidates.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
-                            No hay sugerencias de emparejamiento para esta vacante.
+                            {tMatching("noSuggestions")}
                           </p>
                         </div>
                       ) : (
@@ -4214,20 +4216,20 @@ export default function VacanteDetallePage() {
                     <MoveStageErrorBanner error={applicationStatusError} />
                     <div
                       className="rounded-xl border border-border bg-card p-5"
-                      aria-label="Contenedor del tablero Kanban"
+                      aria-label={tMatching("kanbanBoardAria")}
                     >
                       {applicants.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
-                            Aún no hay postulantes en esta vacante.
+                            {tMatching("emptyApplicants")}
                           </p>
                         </div>
                       ) : (
                         <div
                           className="flex gap-3 overflow-x-auto pb-2"
                           role="region"
-                          aria-label="Etapas de candidatos"
+                          aria-label={tMatching("kanbanStagesAria")}
                         >
                           {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
                             <KanbanColumn

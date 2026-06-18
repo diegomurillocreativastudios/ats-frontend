@@ -1,7 +1,12 @@
-export const metadata = {
-  title: "Registrarse",
-};
+import { getTranslations } from "next-intl/server"
 
-export default function AuthRegistrateLayout({ children }) {
-  return children;
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.auth.register")
+  return {
+    title: t("title"),
+  }
+}
+
+export default function AuthRegistrarseLayout({ children }) {
+  return children
 }

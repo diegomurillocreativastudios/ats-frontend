@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useTranslations } from "next-intl"
 import {
   ArrowRight,
   BarChart3,
@@ -250,6 +251,7 @@ function buildResultsSummary({
   modality,
   country,
   isLoading,
+  t,
 }: {
   totalCount: number
   currentPage: number
@@ -258,37 +260,45 @@ function buildResultsSummary({
   modality: string | null
   country: string | null
   isLoading: boolean
+  t: ReturnType<typeof useTranslations<"PublicOpportunities.page">>
 }): string {
-  if (isLoading) return "Preparando el listado con la búsqueda y filtros activos."
+  if (isLoading) return t("preparingList")
 
-  const descriptors = [
-    search ? `para "${search}"` : null,
-    department ? `en el departamento ${department}` : null,
-    modality ? `con modalidad ${modality}` : null,
-    country ? `en ${country}` : null,
+  const suffixParts = [
+    search ? t("resultsFilterQuote", { query: search }) : null,
+    department ? t("resultsFilterDepartment", { department }) : null,
+    modality ? t("resultsFilterModality", { modality }) : null,
+    country ? t("resultsFilterCountry", { country }) : null,
   ].filter(Boolean)
 
-  const suffix = descriptors.length ? ` ${descriptors.join(", ")}` : ""
-  const pageLabel = currentPage > 1 ? ` en la página ${currentPage}` : ""
+  const suffix = suffixParts.length ? ` ${suffixParts.join(", ")}` : ""
+  const pageLabel =
+    currentPage > 1 ? ` ${t("resultsPage", { page: currentPage })}` : ""
 
-  return `Mostrando ${formatCountLabel(totalCount)}${suffix}${pageLabel}.`
+  const from = totalCount > 0 ? 1 : 0
+  const to = totalCount
+  return `${t("resultsShowing", { from, to, total: totalCount })}${suffix}${pageLabel}.`
 }
 
 function OpportunityCard({
   vacancy,
   queryString,
+  t,
 }: {
   vacancy: OpportunityVacancySummary
   queryString: string
+  t: ReturnType<typeof useTranslations<"PublicOpportunities.page">>
 }) {
   const publishedLabel = formatPublishedLabel(vacancy.publishedAt)
   const href = `/portal-oportunidades/${vacancy.id}${queryString ? `?${queryString}` : ""}`
-  const departmentLabel = vacancy.department?.displayName ?? "Departamento no especificado"
-  const modalityLabel = vacancy.modality?.displayName ?? "Modalidad no especificada"
+  const departmentLabel = vacancy.department?.displayName ?? t("fallbackDepartment")
+  const modalityLabel = vacancy.modality?.displayName ?? t("fallbackModality")
   const companyName = vacancy.company.name?.trim() ?? ""
   const DepartmentIcon = getDepartmentIcon(vacancy.department)
   const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy.company.logo)
-  const companyLogoAlt = companyName ? `Logo de ${companyName}` : "Logo de la empresa"
+  const companyLogoAlt = companyName
+    ? t("companyLogoAlt", { company: companyName })
+    : t("companyLogoGeneric")
 
   return (
     <article className="group border-b border-white/10 last:border-b-0">
@@ -351,7 +361,7 @@ function OpportunityCard({
               <VacancyLocationLabel
                 countryCode={vacancy.countryCode}
                 stateCode={vacancy.stateCode}
-                emptyLabel="Ubicación no especificada"
+                emptyLabel={t("fallbackLocation")}
               />
             </p>
             <p className="text-xs text-white/46">{modalityLabel}</p>
@@ -363,7 +373,7 @@ function OpportunityCard({
             href={href}
             className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm font-medium text-white/82 transition-colors hover:border-[#8dd8ff]/40 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#161d34]"
           >
-            Ver detalle
+            {t("viewDetail")}
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </div>
@@ -392,21 +402,29 @@ function OpportunityCardSkeleton() {
   )
 }
 
-function OpportunityTableHeader() {
+function OpportunityTableHeader({
+  t,
+}: {
+  t: ReturnType<typeof useTranslations<"PublicOpportunities.page">>
+}) {
   return (
     <div className="hidden grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(220px,1fr)_auto] gap-6 border-b border-white/10 px-6 py-4 text-[11px] uppercase tracking-[0.22em] text-white/40 lg:grid">
-      <span>Vacante</span>
-      <span>Departamento</span>
-      <span>Ubicación</span>
-      <span className="text-right">Acción</span>
+      <span>{t("vacancy")}</span>
+      <span>{t("tableDepartment")}</span>
+      <span>{t("tableLocation")}</span>
+      <span className="text-right">{t("tableAction")}</span>
     </div>
   )
 }
 
-function OpportunityTableSkeleton() {
+function OpportunityTableSkeleton({
+  t,
+}: {
+  t: ReturnType<typeof useTranslations<"PublicOpportunities.page">>
+}) {
   return (
     <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/10">
-      <OpportunityTableHeader />
+      <OpportunityTableHeader t={t} />
       <div className="divide-y divide-white/10">
         {Array.from({ length: 4 }).map((_, index) => (
           <OpportunityCardSkeleton key={index} />
@@ -431,6 +449,7 @@ function ActiveFilterChip({ label, value, onRemove }: ActiveFilterChipProps) {
 }
 
 export function PublicVacanciesPage() {
+  const t = useTranslations("PublicOpportunities.page")
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -465,7 +484,7 @@ export function PublicVacanciesPage() {
         const message =
           error instanceof Error && error.message.trim() !== ""
             ? error.message
-            : "No se pudieron cargar las oportunidades."
+            : t("loadFailed")
         setErrorMessage(message)
         setResponse(null)
       } finally {
@@ -555,6 +574,7 @@ export function PublicVacanciesPage() {
     modality: selectedModalityLabel,
     country: selectedCountryLabel,
     isLoading,
+    t,
   })
 
   return (
@@ -582,16 +602,15 @@ export function PublicVacanciesPage() {
           <div className="relative max-w-3xl space-y-6">
               <p className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/7 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.28em] text-white/76">
                 <Sparkles className="h-3.5 w-3.5 text-[#f5b0ff]" aria-hidden />
-                Portal de oportunidades
+                {t("portalTitle")}
               </p>
 
               <div className="space-y-4">
                 <h1 className="max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-[3.45rem]">
-                  Encontrá oportunidades con una lectura clara desde el primer vistazo
+                  {t("heroTitle")}
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
-                  Explorá vacantes activas por departamento, modalidad y contexto de trabajo
-                  en una experiencia pública pensada para descubrir rápido y decidir mejor.
+                  {t("heroBody")}
                 </p>
               </div>
 
@@ -600,7 +619,7 @@ export function PublicVacanciesPage() {
                   href="#public-opportunities-explorer"
                   className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-[#18213d] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
                 >
-                  Explorar oportunidades
+                  {t("exploreCta")}
                 </Link>
               </div>
           </div>
@@ -619,14 +638,14 @@ export function PublicVacanciesPage() {
                 <div className="max-w-2xl space-y-3">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/60">
                     <Layers3 className="h-3.5 w-3.5 text-[#8dd8ff]" aria-hidden />
-                    Exploración pública
+                    {t("explorerLabel")}
                   </div>
                   <div className="space-y-2">
                     <h2
                       id="public-opportunities-explorer-title"
                       className="text-2xl font-semibold tracking-tight text-white sm:text-[2rem]"
                     >
-                      Oportunidades disponibles
+                      {t("listTitle")}
                     </h2>
                     <p className="text-sm leading-7 text-white/64">{resultsSummary}</p>
                   </div>
@@ -634,7 +653,7 @@ export function PublicVacanciesPage() {
 
                 <div className="w-full lg:max-w-xl">
                   <label htmlFor="public-vacancies-search" className="sr-only">
-                    Buscar vacantes
+                    {t("searchLabel")}
                   </label>
                   <div className="relative flex-1">
                     <Search
@@ -646,7 +665,7 @@ export function PublicVacanciesPage() {
                       type="search"
                       value={searchInput}
                       onChange={(event) => setSearchInput(event.target.value)}
-                      placeholder="Buscar vacantes por nombre"
+                      placeholder={t("searchPlaceholder")}
                       className="h-12 w-full rounded-full border border-white/10 bg-white/6 pl-11 pr-4 text-sm text-white placeholder:text-white/38 focus:outline-none focus:ring-2 focus:ring-[#f0a7ff]"
                     />
                   </div>
@@ -662,7 +681,7 @@ export function PublicVacanciesPage() {
                       <div className="flex flex-wrap gap-2">
                         {selectedDepartmentLabel ? (
                           <ActiveFilterChip
-                            label="Departamento"
+                            label={t("filterDepartment")}
                             value={selectedDepartmentLabel}
                             onRemove={() =>
                               updateQuery({
@@ -675,7 +694,7 @@ export function PublicVacanciesPage() {
                         ) : null}
                         {selectedModalityLabel ? (
                           <ActiveFilterChip
-                            label="Modalidad"
+                            label={t("filterModality")}
                             value={selectedModalityLabel}
                             onRemove={() =>
                               updateQuery({
@@ -688,7 +707,7 @@ export function PublicVacanciesPage() {
                         ) : null}
                         {selectedCountryLabel ? (
                           <ActiveFilterChip
-                            label="País"
+                            label={t("filterCountry")}
                             value={selectedCountryLabel}
                             onRemove={() =>
                               updateQuery({
@@ -715,20 +734,21 @@ export function PublicVacanciesPage() {
                           onClick={() => setRetryToken((current) => current + 1)}
                           className="mt-3 font-medium text-white hover:text-[#ffd0e7]"
                         >
-                          Intentar de nuevo
+                          {t("retry")}
                         </button>
                       </div>
                     ) : isLoading ? (
-                      <OpportunityTableSkeleton />
+                      <OpportunityTableSkeleton t={t} />
                     ) : filteredItems.length ? (
                       <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/10">
-                        <OpportunityTableHeader />
+                        <OpportunityTableHeader t={t} />
                         <div>
                           {filteredItems.map((vacancy) => (
                             <OpportunityCard
                               key={vacancy.id}
                               vacancy={vacancy}
                               queryString={currentQueryString}
+                              t={t}
                             />
                           ))}
                         </div>
@@ -739,11 +759,10 @@ export function PublicVacanciesPage() {
                           <Briefcase className="h-7 w-7" aria-hidden />
                         </div>
                         <h3 className="mt-5 text-2xl font-semibold text-white">
-                          No encontramos vacantes con esos filtros.
+                          {t("emptyTitle")}
                         </h3>
                         <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-white/62">
-                          Conservamos tu contexto actual para que puedas ajustar la búsqueda,
-                          remover chips o volver a explorar todas las oportunidades disponibles.
+                          {t("emptyBody")}
                         </p>
                         {hasActiveFilters ? (
                           <div className="mt-6">
@@ -752,7 +771,7 @@ export function PublicVacanciesPage() {
                               className="rounded-full bg-vo-pink px-6 py-3 text-[#18213d]"
                               onClick={handleClearAll}
                             >
-                              Ver todas las vacantes
+                              {t("viewAll")}
                             </Button>
                           </div>
                         ) : null}
@@ -763,7 +782,7 @@ export function PublicVacanciesPage() {
                   {!isLoading && !errorMessage && totalPages > 1 ? (
                     <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-sm text-white/58">
-                        Página {currentPage} de {totalPages}
+                        {t("pageSummary", { page: currentPage, total: totalPages })}
                       </p>
 
                       <div className="flex items-center gap-2">
@@ -775,7 +794,7 @@ export function PublicVacanciesPage() {
                           disabled={currentPage <= 1}
                         >
                           <ChevronLeft className="h-4 w-4" aria-hidden />
-                          Anterior
+                          {t("prev")}
                         </Button>
                         <Button
                           type="button"
@@ -784,7 +803,7 @@ export function PublicVacanciesPage() {
                           onClick={() => updateQuery({ page: currentPage + 1 })}
                           disabled={currentPage >= totalPages}
                         >
-                          Siguiente
+                          {t("next")}
                           <ChevronRight className="h-4 w-4" aria-hidden />
                         </Button>
                       </div>

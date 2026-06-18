@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import { InterviewDetailPanel } from "@/components/rrhh/interviews/interview-detail-panel"
 
@@ -20,13 +21,14 @@ export function InterviewDetailModal({
   onSaved,
   onDeleted,
 }: InterviewDetailModalProps) {
+  const t = useTranslations("RecruiterPortal.interviews.modals")
   if (!interviewId) return null
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Administrar entrevista"
+      title={t("detailTitle")}
       size="lg"
       closeOnOverlayClick={false}
     >

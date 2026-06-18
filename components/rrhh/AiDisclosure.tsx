@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ApplyStyleProgressBar } from "@/components/public/apply-style-progress-bar";
 import {
   APPLY_LOADING_TICK_MS,
@@ -40,13 +41,15 @@ export interface AiDisclosurePillProgressProps {
  */
 export function AiDisclosurePillProgress({
   percent,
-  "aria-label": ariaLabel = "Progreso del procesamiento con IA",
+  "aria-label": ariaLabel,
   timeBasedTypicalMs = RECRUITER_ADD_CANDIDATE_TYPICAL_MS,
   className = "",
   ingestStepLabels = false,
   preliminaryMatchStepLabels = false,
   isCompleted = false,
 }: AiDisclosurePillProgressProps) {
+  const t = useTranslations("RecruiterPortal.aiDisclosure");
+  const resolvedAriaLabel = ariaLabel ?? t("progressAria");
   const isTimeBased = percent === null && !isCompleted
   const [simulatedPercent, setSimulatedPercent] = useState(0)
 
@@ -89,8 +92,8 @@ export function AiDisclosurePillProgress({
 
   const rounded = Math.round(displayPercent)
   const ariaValueText = stepLabel
-    ? `${stepLabel}. ${rounded} por ciento`
-    : `${rounded} por ciento`
+    ? `${stepLabel}. ${t("percentComplete", { percent: rounded })}`
+    : t("percentComplete", { percent: rounded })
 
   const isBusy = !isCompleted && rounded < 100
 
@@ -99,8 +102,8 @@ export function AiDisclosurePillProgress({
     : getAiIngestStepIndexFromPercent(displayPercent)
 
   const stepperNavAriaLabel = showVacancyMatchStepper
-    ? "Etapas del análisis preliminar"
-    : "Estados del procesamiento"
+    ? t("preliminaryStepsAria")
+    : t("processingStepsAria")
 
   const classNames = (...classes: Array<string | boolean>) =>
     classes.filter(Boolean).join(" ")
@@ -114,7 +117,7 @@ export function AiDisclosurePillProgress({
       aria-valuenow={rounded}
       aria-valuetext={ariaValueText}
       aria-busy={isBusy}
-      aria-label={ariaLabel}
+      aria-label={resolvedAriaLabel}
     >
       {showStepper ? (
         <div className="space-y-2">
@@ -214,11 +217,13 @@ export function AiDisclosurePillProgress({
   );
 }
 
-export function AiDisclosureBadge({ label = "Asistido por IA" }) {
+export function AiDisclosureBadge({ label }: { label?: string }) {
+  const t = useTranslations("RecruiterPortal.aiDisclosure");
+  const resolvedLabel = label ?? t("assistedByAi");
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-vo-purple/30 bg-vo-purple/10 px-2.5 py-1 font-sans text-xs font-semibold text-vo-purple">
       <Sparkles className="h-3.5 w-3.5" aria-hidden />
-      {label}
+      {resolvedLabel}
     </span>
   );
 }

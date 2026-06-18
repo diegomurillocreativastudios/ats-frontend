@@ -8,6 +8,7 @@ import {
   useState,
 } from "react"
 import { AlertCircle, FileDown, Loader2, RefreshCw } from "lucide-react"
+import { useTranslations } from "next-intl"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import ReportesFiltersPlaceholder, {
   ReportesFilterControl,
@@ -295,6 +296,8 @@ function FilterField({
 export function ReportDataViewClient({
   catalogItem,
 }: ReportDataViewClientProps) {
+  const t = useTranslations("RecruiterPortal.reports.dataView")
+  const tReports = useTranslations("RecruiterPortal.reports")
   const catalogFilters = useMemo(
     () => catalogItem.filters ?? [],
     [catalogItem.filters]
@@ -388,10 +391,10 @@ export function ReportDataViewClient({
             ? Number((err as { status?: number }).status)
             : 0
         if (status === 401 || status === 403) {
-          setError("No tenés permisos para consultar este reporte.")
+          setError(t("errors.forbidden"))
         } else {
           setError(
-            getApiErrorMessage(err) || "No se pudieron cargar los datos del reporte."
+            getApiErrorMessage(err) || t("errors.loadDataFailed")
           )
         }
         setResponse(null)
@@ -426,7 +429,7 @@ export function ReportDataViewClient({
       .catch((err: unknown) => {
         if (cancelled) return
         setTemplate(null)
-        setTemplateError(getApiErrorMessage(err) || "No se pudo cargar la plantilla del reporte.")
+        setTemplateError(getApiErrorMessage(err) || t("errors.loadTemplateFailed"))
       })
       .finally(() => {
         if (cancelled) return
@@ -505,7 +508,7 @@ export function ReportDataViewClient({
     if (!usesSchemaPipeline) return null
     const content = template?.contentTemplate?.trim() ?? ""
     if (!content) {
-      return { success: false as const, error: "No se encontró una plantilla JSON." }
+      return { success: false as const, error: t("noTemplate") }
     }
     return safeParseReportSchema(content)
   }, [template?.contentTemplate, usesSchemaPipeline])
@@ -544,9 +547,7 @@ export function ReportDataViewClient({
     const summary = buildSummaryPayload()
 
     if (rows.length === 0) {
-      setPdfActionError(
-        "No hay datos del reporte para generar el PDF. Aplicá filtros con resultados e intentá de nuevo."
-      )
+      setPdfActionError(t("errors.pdfFailed"))
       setDownloadingPdf(false)
       return
     }
@@ -570,8 +571,7 @@ export function ReportDataViewClient({
     } catch (err: unknown) {
       console.error("[Report PDF] Download failed", err)
       setPdfActionError(
-        getApiErrorMessage(err) ||
-          "No se pudo generar el PDF. Intentá de nuevo."
+        getApiErrorMessage(err) || t("errors.pdfFailed")
       )
     } finally {
       setDownloadingPdf(false)
@@ -600,10 +600,10 @@ export function ReportDataViewClient({
 
   const trail = useMemo(
     () => [
-      { label: "Reportes", href: "/portal-rrhh/reportes" },
+      { label: t("breadcrumb"), href: "/portal-rrhh/reportes" },
       { label: catalogItem.name },
     ],
-    [catalogItem.name]
+    [catalogItem.name, t]
   )
 
   const totalCountLabel =
@@ -631,7 +631,7 @@ export function ReportDataViewClient({
                   reportKey: {catalogItem.reportKey}
                 </span>
                 <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2.5 py-0.5 font-sans text-xs font-medium text-muted-foreground">
-                  Filas: {totalCountLabel}
+                  {t("rows")} {totalCountLabel}
                 </span>
                 {usesSchemaPipeline && (linkedTemplateId || template) ? (
                   <button
@@ -648,7 +648,7 @@ export function ReportDataViewClient({
                     ) : (
                       <FileDown className="h-4 w-4 shrink-0" aria-hidden />
                     )}
-                    {downloadingPdf ? "Generando PDF…" : "Descargar PDF"}
+                    {downloadingPdf ? t("generatingPdf") : t("downloadPdf")}
                   </button>
                 ) : null}
               </div>
@@ -671,7 +671,7 @@ export function ReportDataViewClient({
         {hasFilters ? (
           <section aria-label="Filtros del reporte">
             <ReportesFiltersPlaceholder
-              hintText="Los valores se envían como query params al endpoint del reporte."
+              hintText={tReports("filters.hint")}
               controlsClassName={filterGridClass}
             >
               {catalogFilters.map((filter) => (
@@ -699,7 +699,7 @@ export function ReportDataViewClient({
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   ) : null}
-                  Aplicar filtros
+                  {t("applyFilters")}
                 </button>
                 <button
                   type="button"
@@ -707,7 +707,7 @@ export function ReportDataViewClient({
                   className={resetButtonClass}
                   disabled={loading}
                 >
-                  Limpiar
+                  {t("clear")}
                 </button>
               </div>
             </ReportesFiltersPlaceholder>
@@ -726,7 +726,7 @@ export function ReportDataViewClient({
               />
               <div className="space-y-1">
                 <p className="font-sans text-sm font-medium text-foreground">
-                  No se pudo cargar el reporte
+                  {t("loadFailed")}
                 </p>
                 <p className="font-sans text-sm text-muted-foreground">{error}</p>
               </div>
@@ -735,10 +735,10 @@ export function ReportDataViewClient({
               type="button"
               onClick={handleRetry}
               className={resetButtonClass}
-              aria-label="Reintentar carga del reporte"
+              aria-label={t("retryAria")}
             >
               <RefreshCw className="h-4 w-4" aria-hidden />
-              Reintentar
+              {t("retry")}
             </button>
           </div>
         ) : null}
@@ -750,7 +750,7 @@ export function ReportDataViewClient({
             aria-live="polite"
           >
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            Cargando datos…
+            {t("loadingData")}
           </div>
         ) : null}
 
@@ -767,13 +767,13 @@ export function ReportDataViewClient({
             aria-live="polite"
           >
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            Cargando plantilla del reporte…
+            {t("loadingTemplate")}
           </div>
         ) : null}
 
         {previewSrcDoc ? (
           <section
-            aria-label="Vista previa del reporte"
+            aria-label={t("previewTitle")}
             className="report-preview-wrapper flex min-h-0 flex-col gap-3"
           >
             <h2 className="font-sans text-sm font-semibold text-foreground">

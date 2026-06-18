@@ -4,11 +4,13 @@ import Link from "next/link"
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
 } from "react"
+import { useTranslations } from "next-intl"
 import { CheckCircle2, LoaderCircle, Mail, Paperclip } from "lucide-react"
 import {
   getPublicApplyErrorMessage,
@@ -32,12 +34,7 @@ import {
 
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
 
-const SOURCE_OPTIONS = [
-  { value: "Redes sociales", label: "Redes sociales" },
-  { value: "Amigos", label: "Amigos" },
-  { value: "Feria de empleo", label: "Feria de empleo" },
-  { value: "Otros", label: "Otros" },
-] as const
+const SOURCE_OPTION_KEYS = ["social", "friends", "jobFair", "other"] as const
 
 interface PublicVacancyApplicationFormState {
   firstName: string
@@ -98,14 +95,6 @@ function themeTextareaClass(theme: PublicVacancyApplicationFormTheme): string {
   return "min-h-[120px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-vo-purple"
 }
 
-const APPLY_PROGRESS_STEPS = [
-  { step: 1, label: "Creación" },
-  { step: 2, label: "Análisis" },
-  { step: 3, label: "Postulación" },
-  { step: 4, label: "Guardado" },
-  { step: 5, label: "Éxito" },
-] as const
-
 function getLoadingStepFromPercent(percent: number): 1 | 2 | 3 | 4 {
   if (percent < 24) return 1
   if (percent < 48) return 2
@@ -136,11 +125,18 @@ function PublicApplicationSubmitProgress({
   loadingBarPercent?: number
   showLongWaitHint?: boolean
 }) {
+  const t = useTranslations("PublicOpportunities.applicationForm")
   const isDark = theme === "dark"
   const isSuccess = mode === "success"
   const currentStep = isSuccess ? 5 : getLoadingStepFromPercent(loadingBarPercent)
-  const activeLabel =
-    APPLY_PROGRESS_STEPS.find((s) => s.step === currentStep)?.label ?? ""
+  const stepLabels = [
+    t("steps.creation"),
+    t("steps.analysis"),
+    t("steps.application"),
+    t("steps.saved"),
+    t("steps.success"),
+  ]
+  const activeLabel = stepLabels[currentStep - 1] ?? ""
 
   return (
     <div
@@ -182,7 +178,7 @@ function PublicApplicationSubmitProgress({
               : "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
           }
         >
-          {isSuccess ? "Listo" : "Procesando tu postulación"}
+          {isSuccess ? t("steps.ready") : t("steps.processingTitle")}
         </p>
         <p
           className={
@@ -201,8 +197,7 @@ function PublicApplicationSubmitProgress({
                 : "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
             }
           >
-            El procesamiento de tu CV suele tardar alrededor de un minuto. No cierres esta pestaña;
-            seguimos trabajando en tu postulación.
+            {t("steps.processingLongWait")}
           </p>
         ) : null}
       </div>
@@ -213,14 +208,15 @@ function PublicApplicationSubmitProgress({
         percent={isSuccess ? 100 : loadingBarPercent}
       />
 
-      <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-5 sm:gap-2" aria-label="Estado del envío">
-        {APPLY_PROGRESS_STEPS.map((item) => {
-          const isComplete = currentStep > item.step
-          const isCurrent = currentStep === item.step
-          const isSuccessStep = item.step === 5
+      <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-5 sm:gap-2" aria-label={t("aria.submitStatus")}>
+        {[1, 2, 3, 4, 5].map((step) => {
+          const isComplete = currentStep > step
+          const isCurrent = currentStep === step
+          const isSuccessStep = step === 5
+          const label = stepLabels[step - 1] ?? ""
           return (
             <li
-              key={item.step}
+              key={step}
               className={
                 isDark
                   ? `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
@@ -243,7 +239,7 @@ function PublicApplicationSubmitProgress({
                     }`
               }
             >
-              {item.label}
+              {label}
             </li>
           )
         })}
@@ -265,6 +261,7 @@ export function PublicVacancyApplicationForm({
   /** Tras éxito o al cerrar desde el modal. */
   onRequestClose?: () => void
 }) {
+  const t = useTranslations("PublicOpportunities.applicationForm")
   const [values, setValues] = useState<PublicVacancyApplicationFormState>(initialState)
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
@@ -345,37 +342,37 @@ export function PublicVacancyApplicationForm({
     if (file && !isAllowedCvFile(file)) {
       event.target.value = ""
       setCvFile(null)
-      setErrors((prev) => ({ ...prev, cvFile: "Solo se aceptan archivos PDF o DOCX." }))
+      setErrors((prev) => ({ ...prev, cvFile: t("validation.fileType") }))
       setServerError(null)
       return
     }
     setCvFile(file)
     setErrors((prev) => ({ ...prev, cvFile: undefined }))
     setServerError(null)
-  }, [])
+  }, [t])
 
   const validateClient = useCallback((): Partial<Record<FieldKey, string>> => {
     const next: Partial<Record<FieldKey, string>> = {}
-    if (!values.firstName.trim()) next.firstName = "Ingresa tu nombre."
-    if (!values.lastName.trim()) next.lastName = "Ingresa tu apellido."
-    if (!values.email.trim()) next.email = "Ingresa tu correo."
-    else if (!isValidEmailFormat(values.email)) next.email = "Ingresa un correo válido."
-    if (!cvFile) next.cvFile = "Adjunta tu CV en PDF o DOCX."
+    if (!values.firstName.trim()) next.firstName = t("validation.firstNameRequired")
+    if (!values.lastName.trim()) next.lastName = t("validation.lastNameRequired")
+    if (!values.email.trim()) next.email = t("validation.emailRequired")
+    else if (!isValidEmailFormat(values.email)) next.email = t("validation.emailInvalid")
+    if (!cvFile) next.cvFile = t("validation.cvRequired")
     else if (!isAllowedCvFile(cvFile))
-      next.cvFile = "Solo se aceptan archivos PDF o DOCX."
+      next.cvFile = t("validation.fileType")
     
     const hasDocumentType = values.documentTypeId.trim() !== ""
     const hasNationalId = values.nationalId.trim() !== ""
     
     if (hasDocumentType && !hasNationalId) {
-      next.nationalId = "Si seleccionas un tipo de documento, debes ingresar el número."
+      next.nationalId = t("validation.documentTypeRequiresNumber")
     }
     if (hasNationalId && !hasDocumentType) {
-      next.documentTypeId = "Si ingresas un número de documento, debes seleccionar el tipo."
+      next.documentTypeId = t("validation.documentNumberRequiresType")
     }
     
     return next
-  }, [values.firstName, values.lastName, values.email, values.documentTypeId, values.nationalId, cvFile])
+  }, [values.firstName, values.lastName, values.email, values.documentTypeId, values.nationalId, cvFile, t])
 
   const executeSubmit = useCallback(async () => {
     if (!cvFile) return
@@ -420,14 +417,14 @@ export function PublicVacancyApplicationForm({
         const fieldMap = parsePublicApplyFieldErrors(body)
         if (Object.keys(fieldMap).length > 0) {
           setErrors(fieldMap as Partial<Record<FieldKey, string>>)
-          setServerError("Revisa los datos indicados.")
+          setServerError(t("validation.reviewFields"))
           return
         }
       }
 
       setServerError(getPublicApplyErrorMessage(status, body))
     }
-  }, [cvFile, values, vacancyId])
+  }, [cvFile, values, vacancyId, t])
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -466,7 +463,7 @@ export function PublicVacancyApplicationForm({
                   : "inline-flex items-center justify-center rounded-lg border border-border bg-muted px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted/80"
               }
             >
-              Volver a la vacante
+              {t("actions.backToVacancy")}
             </Link>
           ) : null}
           <Link
@@ -477,7 +474,7 @@ export function PublicVacancyApplicationForm({
                 : "inline-flex items-center justify-center rounded-lg bg-vo-purple px-5 py-2.5 text-sm font-medium text-white hover:opacity-95"
             }
           >
-            Volver a vacantes
+            {t("actions.backToList")}
           </Link>
           {onRequestClose ? (
             <button
@@ -489,7 +486,7 @@ export function PublicVacancyApplicationForm({
                   : "inline-flex items-center justify-center rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
               }
             >
-              Cerrar
+              {t("actions.close")}
             </button>
           ) : null}
         </div>
@@ -525,7 +522,7 @@ export function PublicVacancyApplicationForm({
 
       <div className="space-y-2">
           <label htmlFor="apply-firstName" className={labelClass}>
-            Nombre *
+            {t("fields.firstName")}
           </label>
           <input
             id="apply-firstName"
@@ -546,7 +543,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-lastName" className={labelClass}>
-            Apellido *
+            {t("fields.lastName")}
           </label>
           <input
             id="apply-lastName"
@@ -567,7 +564,7 @@ export function PublicVacancyApplicationForm({
         </div>
       <div className="space-y-2">
           <label htmlFor="apply-email" className={labelClass}>
-            Correo electrónico *
+            {t("fields.email")}
           </label>
           <input
             id="apply-email"
@@ -589,7 +586,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-phone" className={labelClass}>
-            Teléfono
+            {t("fields.phone")}
           </label>
           <input
             id="apply-phone"
@@ -604,7 +601,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-documentTypeId" className={labelClass}>
-            Tipo de documento
+            {t("fields.documentType")}
           </label>
           <select
             id="apply-documentTypeId"
@@ -618,10 +615,10 @@ export function PublicVacancyApplicationForm({
           >
             <option value="">
               {isLoadingDocumentTypes
-                ? "Cargando tipos de documento..."
+                ? t("placeholders.loadingDocTypes")
                 : documentTypes.length === 0
-                  ? "No hay tipos disponibles"
-                  : "Seleccioná un tipo"}
+                  ? t("placeholders.noDocTypes")
+                  : t("placeholders.selectDocType")}
             </option>
             {documentTypes.map((docType) => (
               <option key={docType.id} value={docType.id}>
@@ -637,7 +634,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-nationalId" className={labelClass}>
-            Número de documento
+            {t("fields.documentNumber")}
           </label>
           <input
             id="apply-nationalId"
@@ -646,7 +643,7 @@ export function PublicVacancyApplicationForm({
             onChange={handleChange}
             className={inputClass}
             disabled={disabled}
-            placeholder="Ingresá tu número de documento"
+            placeholder={t("placeholders.documentNumber")}
             aria-invalid={Boolean(errors.nationalId)}
             aria-describedby={errors.nationalId ? "apply-nationalId-err" : undefined}
           />
@@ -658,7 +655,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-source" className={labelClass}>
-            ¿Cómo supiste de esta vacante?
+            {t("fields.source")}
           </label>
           <select
             id="apply-source"
@@ -670,10 +667,10 @@ export function PublicVacancyApplicationForm({
             aria-invalid={Boolean(errors.source)}
             aria-describedby={errors.source ? "apply-source-err" : undefined}
           >
-            <option value="">Seleccioná una opción</option>
-            {SOURCE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
+            <option value="">{t("placeholders.selectOption")}</option>
+            {SOURCE_OPTION_KEYS.map((key) => (
+              <option key={key} value={t(`sources.${key}`)}>
+                {t(`sources.${key}`)}
               </option>
             ))}
           </select>
@@ -685,7 +682,7 @@ export function PublicVacancyApplicationForm({
         </div>
       <div className="space-y-2">
           <label htmlFor="apply-linkedin" className={labelClass}>
-            Perfil de LinkedIn
+            {t("fields.linkedin")}
           </label>
           <input
             id="apply-linkedin"
@@ -699,7 +696,7 @@ export function PublicVacancyApplicationForm({
         </div>
       <div className="space-y-2">
           <label htmlFor="apply-website" className={labelClass}>
-            Sitio web o portafolio
+            {t("fields.website")}
           </label>
           <input
             id="apply-website"
@@ -713,7 +710,7 @@ export function PublicVacancyApplicationForm({
         </div>
       <div className="space-y-2">
         <label htmlFor="apply-notes" className={labelClass}>
-          Notas
+          {t("fields.notes")}
         </label>
         <textarea
           id="apply-notes"
@@ -733,7 +730,7 @@ export function PublicVacancyApplicationForm({
 
       <div className="col-span-2 space-y-2">
         <label htmlFor="apply-cv" className={labelClass}>
-          Currículum (PDF) *
+          {t("fields.resume")}
         </label>
         <div
           className={
@@ -751,7 +748,7 @@ export function PublicVacancyApplicationForm({
             }
           >
             <Paperclip className="h-4 w-4 shrink-0" aria-hidden />
-            Seleccionar PDF
+            {t("file.selectPdf")}
           </label>
           <input
             id="apply-cv"
@@ -769,7 +766,7 @@ export function PublicVacancyApplicationForm({
                 : "mt-3 text-xs text-muted-foreground"
             }
           >
-            Solo se acepta formato PDF o DOCX.
+            {t("file.helper")}
           </p>
           {cvFile ? (
             <p
@@ -808,7 +805,7 @@ export function PublicVacancyApplicationForm({
           ) : (
             <Mail className="h-4 w-4 shrink-0" aria-hidden />
           )}
-          {disabled ? "Enviando postulación…" : "Enviar postulación"}
+          {disabled ? t("actions.submitting") : t("actions.submit")}
         </button>
         {disabled ? (
           <p
@@ -820,8 +817,7 @@ export function PublicVacancyApplicationForm({
             role="status"
             aria-live="polite"
           >
-            Estamos validando tu información y procesando tu CV. Suele tardar alrededor de un
-            minuto; no cierres esta pestaña.
+            {t("steps.processingHint")}
           </p>
         ) : null}
       </div>

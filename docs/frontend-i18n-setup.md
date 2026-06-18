@@ -2330,10 +2330,209 @@ contenido de match/IA verbatim en iframe, paridad de namespace.
 - Integrar `formatVacancyResultadosDocumentTitle` con `next-intl`.
 - Localizar labels de secciones en PDF/plantillas servidor (`lib/messages/technical-sheet.ts`).
 
-## 17. Pendientes para la siguiente etapa
+## 16-S. Cierre final: auditoría i18n, pageTitles y pendientes no migrables (Etapa 20)
+
+Etapa de **cierre controlado** de la feature de i18n frontend. **No** intenta migrar
+todo lo pendiente de forma agresiva. Prioriza auditoría honesta, clasificación A/B/C/D
+y documentación de deuda técnica no bloqueante.
+
+### 16-S.1 Nota sobre «Etapa 16»
+
+**No existe una Etapa 16 numerada** en el historial de migración del repo. La
+numeración de etapas ejecutadas salta de **Etapa 15** (perfil compartido) a
+**Etapa 17** (detalle básico de vacante RRHH). Las secciones **§16-*** en este
+documento son **subsecciones de registro de migración**, no etapas independientes.
+
+### 16-S.2 Etapas completadas (0–20)
+
+| Etapa | Alcance |
+| ----- | ------- |
+| 0 | Alcance documentado (`frontend-i18n-scope.md`) |
+| 1 | Infraestructura `next-intl@4.13.0`, cookie `NEXT_LOCALE`, sin prefijo URL |
+| 2 | Selector de idioma |
+| 3 | Topbars / sidebars transversales |
+| 4 | Auth / acceso (login, forgot, reset, selección portal) |
+| 5A | Metadata auth/acceso |
+| 5B | Portal Candidato básico (home, cards) |
+| 5C | Documentos / subida / modal Portal Candidato |
+| 5D | Perfil del Candidato |
+| 5E | Cierre seguro Portal Candidato |
+| 6 | Portal RRHH básico (candidatos listado, configuración) |
+| 7 | Vacantes RRHH listado / cards / filtros |
+| 8 | `NuevaVacanteModal` |
+| 9 | Cierre seguro Vacantes RRHH (`VacancyLocationFields` vía props) |
+| 10 | Mappers controlados de estados/labels (`getVacancyStatusLabel`, etc.) |
+| 11 | Entrevistas RRHH básicas |
+| 12 | Reportes RRHH básicos (hub, filtros placeholder) |
+| 13 | Portal Admin básico (empresas, usuarios, configuración) |
+| 14 | Detalle básico candidato RRHH sin IA |
+| 15 | Perfil candidato compartido y edición segura |
+| 17 | Detalle básico vacante RRHH sin IA/Score/VacancyConfig |
+| 18 | Resultados vacante UI estática sin traducir IA |
+| 19 | `TechnicalSheetModal` / ficha técnica segura |
+| **20** | **Auditoría final, deuda documentada, cierre de feature** |
+
+### 16-S.3 Namespaces principales (estado final)
+
+| Namespace | Módulos cubiertos |
+| --------- | ----------------- |
+| `Common`, `Actions`, `Navigation`, `Topbar`, `Sidebar`, `LanguageSwitcher` | UI transversal |
+| `Auth`, `Validation`, `Errors`, `Metadata`, `PortalSelection` | Acceso y metadata auth |
+| `CandidatePortal` | Portal candidato (home, documentos, entrevistas, perfil) |
+| `RecruiterPortal` | Portal RRHH (candidatos, vacantes, entrevistas, reportes, resultados, technical sheet, mappers) |
+| `AdminPortal` | Portal admin básico |
+
+`es.json` es la fuente de verdad. Paridad validada por `tests/unit/messages-structure.test.ts`.
+
+### 16-S.4 Auditoría de strings hardcodeadas (resumen)
+
+Búsquedas ejecutadas: patrones `Cargando`, `Error al`, `Sin `, `No hay`, `Guardar`,
+`Cancelar`, `Reintentar`, `Vacante`, `Candidato`, etc. en `app/`, `components/`,
+`lib/`, `hooks/`; y literales con tildes (`rg '"[^"]*[áéíóúñÑ]…"'`).
+
+| Categoría | Cantidad aprox. | Ejemplos representativos |
+| --------- | --------------- | ------------------------ |
+| **A — Migrable seguro** | Pocos aislados | `LoadingSpinner` aria-label; aria-labels en componentes públicos aún sin migrar |
+| **B — No migrable (regla negocio)** | Mayoría en reportes/PDF/API | `lib/reportes-*` con nombres de vacante; errores API `getApiErrorMessage`; contenido IA en `vacancy-resultados` y Kanban |
+| **C — Etapa técnica dedicada** | Módulos pesados pendientes | `pageTitles.ts`, `candidate-portal-translations.ts`, PDF server, Score/VacancyConfig, países, roles, portal oportunidades, admin catálogos |
+| **D — Ya migrado / falso positivo** | Tests i18n, componentes con `useTranslations` | `tests/unit/*-i18n.test.tsx`; sidebars/topbars; módulos Etapas 4–19 |
+
+### 16-S.5 Hallazgos Categoría A migrados en Etapa 20
+
+| Archivo | Cambio |
+| ------- | ------ |
+| `components/common/loading-spinner.tsx` | `aria-label` usa `useTranslations("Common").loading` (reutiliza key existente; sin nuevas keys) |
+
+**No migrados en Etapa 20** (riesgo o scope amplio): `PublicOpportunitiesNavbar`,
+`PublicVacancyApplicationForm`, `Snackbar` close aria-label, entrevistas admin CRUD,
+`DeleteConfirmModal` defaults, `lib/pageTitles.ts`, reportes/PDF server.
+
+### 16-S.6 Decisión: `lib/pageTitles.ts` — **Opción B (deuda técnica)**
+
+**No se migró** en Etapa 20. Motivos:
+
+- Acoplamiento a `pathname` + segmentos dinámicos (UUIDs, nombres de vacante/candidato).
+- `PageTitle.tsx` actualiza `document.title` en cliente sin contexto `t` centralizado.
+- Funciones como `formatVacancyDetailDocumentTitle` mezclan labels estáticos (`"Vacantes"`)
+  con datos API verbatim (`vacancyDisplayName`).
+- Migración segura requiere helper `getStaticPageTitleKey(pathname, t)` + etapa dedicada,
+  idealmente junto con ruteo `app/[locale]/`.
+
+**Estado:** títulos de documento permanecen en español hasta etapa futura.
+
+### 16-S.7 Decisión: `lib/candidate-portal-translations.ts` — **deuda técnica**
+
+**No se migró.** El archivo mapea códigos API → labels españoles y
+`getApplicationStatusStyle` hace **substring matching** en español/inglés sobre el
+label visible. Migrar implica:
+
+- Mapas por locale keyed por código estable (`Active`, `Pending`, …).
+- Refactor de styling para usar **código**, no texto visible.
+- Riesgo de romper badges si se traducen labels sin cambiar la lógica de estilo.
+
+Documentado como **Categoría C** — etapa dedicada post-cierre.
+
+### 16-S.8 Decisión: PDF server / `lib/messages/technical-sheet.ts` — **fuera de scope**
+
+**Sin cambios.** Labels en `lib/messages/technical-sheet.ts`, `lib/pdf/*`,
+`lib/technical-sheet/build-technical-sheet-pdfkit.ts`, `lib/reportes/handle-report-pdf-post.ts`
+y `render-report-schema-to-html.ts` alimentan **generación server-side / PDFKit /
+export**. Requieren estrategia separada: locale en servidor de export, contratos PDF
+y sincronización con UI ya migrada (`RecruiterPortal.technicalSheet`).
+
+### 16-S.9 Decisión: Score Breakdown y VacancyConfig — **sin cambios**
+
+En `app/portal-rrhh/vacantes/[id]/page.tsx` y componentes relacionados:
+
+- `scoreBreakdown`, `componentScores`, `usedSignals`, `hardGateResults`,
+  `qualitativeReasoning*`, Kanban con IA — **Categoría B** (data IA/API).
+- Bloques de configuración de scoring/pesos (`VacancyConfig`) — **Categoría C**;
+  migrar UI implica refactor funcional de alto riesgo.
+
+**No se tocó** matching, ranking, scoring, rematch ni hard gates.
+
+### 16-S.10 Decisión: países y roles — **deuda técnica**
+
+**Países:** `getCountrySelectOptions` / `getCountryIso2SelectOptions` usan
+`Intl.DisplayNames(["es"])` con **cache global** (`countryOptionsCache`). Consumidores
+múltiples (`VacancyListFilters`, perfil candidato). Migrar requiere locale-aware
+cache por `NEXT_LOCALE` sin enviar locale al backend — **Categoría C**.
+
+**Roles:** `Admin` / `Recruiter` / `Candidate` en filtros y payloads. Solo migrar
+display con mapper explícito + fallback al valor crudo, sin cambiar `value` enviado —
+**Categoría C** (parcial en Admin Etapa 13).
+
+### 16-S.11 Reglas de negocio confirmadas (cierre)
+
+- ✅ IA (`positiveReasons`, `qualitativeReasoning*`, `usedSignals`, `scoreBreakdown`, etc.) **no traducida**
+- ✅ Data dinámica API/BD/usuario **no traducida**
+- ✅ Texto libre backend **mostrado verbatim**
+- ✅ APIs, payloads, query params **sin cambios**
+- ✅ Locale **no enviado** al backend
+- ✅ Sin rutas `/en`, `/it`, … ni `app/[locale]/`
+- ✅ `proxy.ts` **intacto**
+- ✅ PDF/export server-side **intacto**
+
+### 16-S.12 Checklist final de cierre
+
+- [x] Infraestructura next-intl OK
+- [x] Cookie `NEXT_LOCALE` OK
+- [x] Sin rutas con prefijo
+- [x] Diccionarios `es`/`en`/`it`/`de`/`fr` con paridad
+- [x] Selector idioma OK
+- [x] Auth OK
+- [x] Portal Candidato OK (módulos Etapas 5B–5E)
+- [x] Portal RRHH básico OK (Etapas 6–12, 14–19)
+- [x] Vacantes OK (listado, formulario, detalle básico, resultados estáticos)
+- [x] Entrevistas OK (básico Etapa 11)
+- [x] Reportes básicos OK (hub Etapa 12)
+- [x] Portal Admin básico OK (Etapa 13)
+- [x] Technical Sheet UI OK (Etapa 19)
+- [x] IA no traducida
+- [x] Backend libre no traducido
+- [x] Data dinámica no traducida
+- [x] APIs sin cambios
+- [x] Locale no enviado al backend
+- [ ] `pageTitles` / `document.title` localizados (deuda — no bloqueante)
+- [ ] Portal oportunidades público (deuda — no bloqueante)
+- [ ] Admin catálogos complejos / PDF server (deuda — no bloqueante)
+
+### 16-S.13 Tests y validaciones (Etapa 20)
+
+Resultados ejecutados al cerrar Etapa 20:
+
+| Comando | Resultado |
+| ------- | --------- |
+| `npm run build` | ✅ OK (Next.js 16.1.6) |
+| `npx vitest run tests/unit/messages-structure.test.ts` | ✅ 6/6 |
+| `npx vitest run tests/unit/*i18n*` (+ `language-switcher`, `metadata-i18n`) | ✅ 174/174 |
+| `npx vitest run` (suite completa) | ⚠️ 500/507 — **7 fallos preexistentes** (no i18n): `admin-vacancy-catalog-content`, `build-vacancy-progress-report-pdfkit-buffer`, `public-vacancies`, `recruiter-companies-api`, `report-filter-renderer` |
+| `npm run lint` | ⚠️ 32 problemas (12 errors, 20 warnings) — **preexistentes**, fuera de scope Etapa 20 |
+| `npx tsc --noEmit` | ⚠️ Errores en tests unitarios (`NODE_ENV`, tipos `RecruiterCompanyOption`, `VacancyListItem`) — **preexistentes** |
+
+Tests i18n focalizados existentes: `tests/unit/*-i18n.test.tsx`, `metadata-i18n.test.ts`,
+`messages-structure.test.ts`, `i18n-setup.test.tsx`, `language-switcher.test.tsx`.
+
+**Etapa 20 no añadió tests nuevos** (solo migración mínima de `LoadingSpinner` con key existente).
+
+### 16-S.14 Veredicto y recomendación Jira/PR
+
+**Veredicto: FEATURE I18N FRONTEND CERRABLE** con deuda técnica documentada y no bloqueante.
+
+La plataforma soporta 5 idiomas en UI estática de los módulos migrados (Etapas 1–19).
+El usuario puede cambiar idioma vía cookie sin afectar IA, APIs ni datos dinámicos.
+Pendientes explícitos (`pageTitles`, PDF server, portal público, admin pesado, países,
+roles, Score/VacancyConfig) quedan como **follow-ups** en tickets separados.
+
+**Recomendación PR:** merge a `develop` con label `i18n-phase-1-complete`; abrir epics
+post-cierre para `pageTitles`, PDF locale server-side y portal oportunidades.
+
+---
+
+## 17. Pendientes post-cierre (deuda técnica no bloqueante)
 
 - Decidir si se adopta ruteo por prefijo (requiere mover rutas a `app/[locale]/`).
-- Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7 y §13.4.
+- Integrar `lib/pageTitles.ts` con `next-intl` (breadcrumbs/títulos) — ver §11.7, §13.4 y §16-S.6.
 - Aplicar `Metadata.auth.login` cuando se decida reestructurar el login a
   server wrapper + client content (o cuando se migre a ruteo por prefijo).
 - El **Portal RRHH básico** se migró en Etapa 6 (§16-F: listado de candidatos +
@@ -2373,3 +2572,76 @@ contenido de match/IA verbatim en iframe, paridad de namespace.
   error estables (deuda compartida frontend/backend).
 - Migrar la metadata de rutas de negocio (`portal-*`) si se requiere SEO/títulos
   localizados, una vez migrados sus módulos.
+
+---
+
+## 17. Fase 2 — Cobertura de textos pendientes (Categoría A)
+
+> Migración de textos estáticos de UI que la auditoría de cierre marcó como
+> **Categoría A pendiente**, sin tocar IA, backend libre ni data dinámica.
+
+### 17.1 Módulos migrados
+
+| Módulo | Archivos principales |
+| ------ | -------------------- |
+| Entrevistas RRHH (subcomponentes) | `interview-form`, `interview-detail-panel`, modales, CRUD catálogos, calendario, `interviewer-recruiter-select`, `candidate-interview-list` |
+| Admin etapas y plantillas | `app/portal-admin/etapas`, `plantillas`, `EtapaModal`, `EstadosModal`, `PlantillaModal` |
+| Oportunidades públicas | `PublicVacanciesPage`, `PublicVacancyDetailPage`, `PublicVacancyApplicationForm`, modales de confirmación/privacidad |
+| Auth registro | `app/auth/registrarse/page.tsx` |
+| Reportes resumen / vista | `reporte-resumen-dashboard` (labels KPI), `report-data-view-client`, `app/portal-rrhh/reportes/resumen/page.tsx` |
+| Detalle vacante — matching/IA UI | `app/portal-rrhh/vacantes/[id]/page.tsx` (solo labels estáticos alrededor de matching) |
+
+### 17.2 Namespaces agregados o ampliados
+
+- `RecruiterPortal.interviews.{form,detail,modals,calendar,crud,interviewerSelect,candidateList}`
+- `AdminPortal.{stages,statuses,templates}`
+- `PublicOpportunities.{page,detail,applicationForm,confirmation,privacy,actions,fallbacks}`
+- `Auth.register`
+- `RecruiterPortal.reports.{summary,dataView}`
+- `RecruiterPortal.vacancies.matching`
+
+### 17.3 Hallazgos Categoría B (no traducidos)
+
+- Contenido IA: `positiveReasons`, `qualitativeReasoning*`, `aiSummary`, atributos de match, etc.
+- Nombres de candidatos, vacantes, empresas, etapas configurables, tipos/modalidades de catálogo API.
+- Mensajes de error HTTP/API verbatim (`getInterviewHttpErrorMessage`, `getApiErrorMessage`).
+- Narrativas calculadas en `buildInsights()` del dashboard de resumen (texto generado en cliente a partir de métricas).
+- Cuerpo legal completo de `ApplyPrivacyNoticeDialog` (solo título y botones migrados).
+- Valores técnicos canónicos: enums de estado en `<option value>`, formatos `PDF`/`DOCX`.
+
+### 17.4 Hallazgos Categoría C (tickets separados)
+
+- `lib/pageTitles.ts` / `document.title` dinámico en oportunidades públicas.
+- Admin catálogos pesados (`AdminVacancyCatalogContent`, `AdminIdentityDocumentTypesContent`, calendario admin entrevistas).
+- Subtítulos narrativos del dashboard de resumen no cubiertos por keys dedicadas.
+- `getCountrySelectOptions` y cache `Intl.DisplayNames(["es"])`.
+
+### 17.5 Validación Fase 2
+
+| Comando | Resultado |
+| ------- | --------- |
+| `npm run build` | OK |
+| `npx vitest run tests/unit/messages-structure.test.ts` | OK (paridad es/en/it/de/fr) |
+| `npx vitest run` | 7 fallos **preexistentes** (p. ej. `recruiter-companies-api`, `report-filter-renderer`) — no introducidos por Fase 2 |
+| `npm run lint` | 12 errores / 32 warnings **preexistentes** |
+| `npx tsc --noEmit` | Verificar localmente; sin errores nuevos en archivos migrados |
+
+### 17.6 Tests focalizados
+
+- `tests/unit/recruiter-interviews-i18n.test.tsx` (hub/listado — Etapa 11; compatible con subcomponentes Fase 2)
+- `tests/unit/admin-portal-i18n.test.tsx`, `tests/unit/PlantillaModal.test.tsx`
+- `tests/unit/admin-vacancy-catalog-content.test.tsx` (catálogos departamentos/modalidades con `renderWithIntl`)
+- `tests/unit/auth-i18n.test.tsx` (login/forgot; registro usa `Auth.register`)
+
+### 17.7 Portal Admin — cobertura ampliada
+
+Además de etapas/plantillas (Fase 2), se migró el resto del Portal Admin:
+
+- `AdminVacancyCatalogContent` → `AdminPortal.vacancyCatalog`
+- `AdminIdentityDocumentTypesContent` → `AdminPortal.documentTypes`
+- `app/portal-admin/entrevistas/page.tsx` → `AdminPortal.interviews.catalog`
+- Calendario admin (`AdminInterviewsCalendarContent` + filtros/toolbar/KPIs/vistas/modal) → `AdminPortal.interviews.calendar`
+- `AdminTopbar` breadcrumbs + `AdminSidebar` fallbacks → `Navigation`, `Topbar`, `AdminPortal.shell`
+- Metadata via `generateMetadata` en layouts de etapas, plantillas, departamentos, modalidades, tipos de documento, calendario entrevistas
+
+Script de sincronización: `scripts/sync-messages-from-es.mjs`

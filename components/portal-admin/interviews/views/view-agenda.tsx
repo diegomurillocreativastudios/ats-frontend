@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 import type { AdminCalendarEvent } from "@/lib/api/admin-interviews-calendar"
 import { groupEventsByLocalDateKey } from "@/lib/admin/interviews-calendar-layout"
 import {
@@ -15,6 +16,10 @@ export interface ViewAgendaProps {
 }
 
 export function ViewAgenda({ events, onSelectEvent }: ViewAgendaProps) {
+  const t = useTranslations("AdminPortal.interviews.calendar")
+  const tAgenda = useTranslations("AdminPortal.interviews.calendar.agenda")
+  const dash = t("eventDetail.dash")
+
   const grouped = useMemo(() => {
     const map = groupEventsByLocalDateKey(events)
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))
@@ -23,7 +28,7 @@ export function ViewAgenda({ events, onSelectEvent }: ViewAgendaProps) {
   if (grouped.length === 0) {
     return (
       <p className="rounded-xl border border-dashed border-border py-12 text-center font-sans text-sm text-muted-foreground">
-        No hay entrevistas en este rango con los filtros actuales.
+        {t("emptyStates.noEvents")}
       </p>
     )
   }
@@ -31,7 +36,7 @@ export function ViewAgenda({ events, onSelectEvent }: ViewAgendaProps) {
   return (
     <div className="flex flex-col gap-6">
       {grouped.map(([dateKey, dayEvents]) => (
-        <section key={dateKey} aria-label={`Agenda ${dateKey}`}>
+        <section key={dateKey} aria-label={tAgenda("aria", { dateKey })}>
           <h3 className="sticky top-0 z-10 border-b border-border bg-background/95 py-2 font-sans text-sm font-semibold text-foreground backdrop-blur">
             {formatInterviewScheduleDateLabel(dateKey) || dateKey}
           </h3>
@@ -39,14 +44,14 @@ export function ViewAgenda({ events, onSelectEvent }: ViewAgendaProps) {
             <table className="w-full min-w-[720px] border-collapse text-left font-sans text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="px-4 py-2 font-semibold">Hora</th>
-                  <th className="px-4 py-2 font-semibold">Candidato</th>
-                  <th className="px-4 py-2 font-semibold">Vacante</th>
-                  <th className="px-4 py-2 font-semibold">Empresa</th>
-                  <th className="px-4 py-2 font-semibold">Reclutador</th>
-                  <th className="px-4 py-2 font-semibold">Tipo</th>
-                  <th className="px-4 py-2 font-semibold">Modalidad</th>
-                  <th className="px-4 py-2 font-semibold">Estado</th>
+                  <th className="px-4 py-2 font-semibold">{tAgenda("time")}</th>
+                  <th className="px-4 py-2 font-semibold">{tAgenda("candidate")}</th>
+                  <th className="px-4 py-2 font-semibold">{tAgenda("vacancy")}</th>
+                  <th className="px-4 py-2 font-semibold">{tAgenda("company")}</th>
+                  <th className="px-4 py-2 font-semibold">{tAgenda("recruiter")}</th>
+                  <th className="px-4 py-2 font-semibold">{tAgenda("type")}</th>
+                  <th className="px-4 py-2 font-semibold">{tAgenda("modality")}</th>
+                  <th className="px-4 py-2 font-semibold">{tAgenda("status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -74,16 +79,16 @@ export function ViewAgenda({ events, onSelectEvent }: ViewAgendaProps) {
                       {ev.vacancy.title}
                     </td>
                     <td className="max-w-[120px] truncate px-4 py-2 text-muted-foreground">
-                      {ev.vacancy.companyName ?? "—"}
+                      {ev.vacancy.companyName ?? dash}
                     </td>
                     <td className="max-w-[140px] truncate px-4 py-2 text-muted-foreground">
                       {ev.recruiter.userName}
                     </td>
                     <td className="px-4 py-2 text-muted-foreground">
-                      {ev.interviewType?.displayName ?? "—"}
+                      {ev.interviewType?.displayName ?? dash}
                     </td>
                     <td className="px-4 py-2 text-muted-foreground">
-                      {ev.interviewModality?.displayName ?? "—"}
+                      {ev.interviewModality?.displayName ?? dash}
                     </td>
                     <td className="px-4 py-2">
                       <InterviewStatusBadge

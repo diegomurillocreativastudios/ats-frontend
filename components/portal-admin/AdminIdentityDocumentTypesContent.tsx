@@ -8,6 +8,7 @@ import {
   type ChangeEvent,
 } from "react"
 import { FileText, Loader2, Pencil, Plus, RefreshCw, Search, Trash2 } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { Button } from "@/components/ui/Button"
@@ -36,6 +37,11 @@ interface IdentityDocumentTypeFormErrors {
   name?: string
 }
 
+type DocumentTypeValidationTranslator = (
+  key: "codeRequired" | "codeMaxLength" | "nameRequired" | "nameMaxLength",
+  values?: { max?: number },
+) => string
+
 const CODE_MAX_LENGTH = 60
 const NAME_MAX_LENGTH = 120
 
@@ -56,22 +62,23 @@ function mapItemToFormState(
 }
 
 function validateForm(
-  values: IdentityDocumentTypeFormState
+  values: IdentityDocumentTypeFormState,
+  tValidation: DocumentTypeValidationTranslator,
 ): IdentityDocumentTypeFormErrors {
   const errors: IdentityDocumentTypeFormErrors = {}
   const normalizedCode = values.code.trim()
   const normalizedName = values.name.trim()
 
   if (normalizedCode === "") {
-    errors.code = "El código es requerido."
+    errors.code = tValidation("codeRequired")
   } else if (normalizedCode.length > CODE_MAX_LENGTH) {
-    errors.code = `El código no puede superar los ${CODE_MAX_LENGTH} caracteres.`
+    errors.code = tValidation("codeMaxLength", { max: CODE_MAX_LENGTH })
   }
 
   if (normalizedName === "") {
-    errors.name = "El nombre es requerido."
+    errors.name = tValidation("nameRequired")
   } else if (normalizedName.length > NAME_MAX_LENGTH) {
-    errors.name = `El nombre no puede superar los ${NAME_MAX_LENGTH} caracteres.`
+    errors.name = tValidation("nameMaxLength", { max: NAME_MAX_LENGTH })
   }
 
   return errors
@@ -95,11 +102,15 @@ function buildUpdatePayload(
   }
 }
 
-function formatDateTime(dateString: string | null): string {
-  if (!dateString) return "Sin actualizar"
+function formatDateTime(
+  dateString: string | null,
+  locale: string,
+  notUpdatedLabel: string,
+): string {
+  if (!dateString) return notUpdatedLabel
   try {
     const date = new Date(dateString)
-    return date.toLocaleDateString("es-ES", {
+    return date.toLocaleDateString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -112,6 +123,10 @@ function formatDateTime(dateString: string | null): string {
 }
 
 export function AdminIdentityDocumentTypesContent() {
+  const t = useTranslations("AdminPortal.documentTypes")
+  const tCommon = useTranslations("Common")
+  const locale = useLocale()
+
   const [items, setItems] = useState<IdentityDocumentTypeResponseDto[]>([])
   const [loading, setLoading] = useState(true)
   const [listError, setListError] = useState<string | null>(null)
@@ -169,13 +184,11 @@ export function AdminIdentityDocumentTypesContent() {
       setItems(nextItems)
     } catch (error) {
       setItems([])
-      setListError(
-        getApiErrorMessage(error) || "No se pudo cargar el catálogo."
-      )
+      setListError(getApiErrorMessage(error) || t("errors.loadCatalog"))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void loadList()
@@ -202,9 +215,7 @@ export function AdminIdentityDocumentTypesContent() {
       const detail = await getAdminIdentityDocumentTypeById(itemId)
       setFormState(mapItemToFormState(detail))
     } catch (error) {
-      setFormLoadError(
-        getApiErrorMessage(error) || "No se pudo cargar el tipo de documento."
-      )
+      setFormLoadError(getApiErrorMessage(error) || t("errors.loadItem"))
     } finally {
       setFormLoading(false)
     }
@@ -233,7 +244,9 @@ export function AdminIdentityDocumentTypesContent() {
     event.preventDefault()
     if (formSubmitting) return
 
-    const validationErrors = validateForm(formState)
+    const validationErrors = validateForm(formState, (key, values) =>
+      t(`validation.${key}`, values ?? {})
+    )
     if (Object.keys(validationErrors).length > 0) {
       setFormErrors(validationErrors)
       return
@@ -245,18 +258,18 @@ export function AdminIdentityDocumentTypesContent() {
       if (formMode === "create") {
         const payload = buildCreatePayload(formState)
         await createAdminIdentityDocumentType(payload)
-        showSnackbar("success", "Tipo de documento creado correctamente.")
+        showSnackbar("success", t("toasts.created"))
       } else if (editingItemId) {
         const payload = buildUpdatePayload(formState)
         await updateAdminIdentityDocumentType(editingItemId, payload)
-        showSnackbar("success", "Tipo de documento actualizado correctamente.")
+        showSnackbar("success", t("toasts.updated"))
       }
 
       setIsFormOpen(false)
       await loadList()
     } catch (error) {
       const errorMessage = getApiErrorMessage(error)
-      showSnackbar("error", errorMessage || "No se pudo guardar el registro.")
+      showSnackbar("error", errorMessage || t("errors.saveFailed"))
     } finally {
       setFormSubmitting(false)
     }
@@ -269,7 +282,7 @@ export function AdminIdentityDocumentTypesContent() {
     try {
       await deleteAdminIdentityDocumentType(deleteTarget.id)
       setDeleteTarget(null)
-      showSnackbar("success", "Tipo de documento eliminado correctamente.")
+      showSnackbar("success", t("toasts.deleted"))
       await loadList()
     } catch (error) {
       const status =
@@ -278,16 +291,10 @@ export function AdminIdentityDocumentTypesContent() {
           : undefined
 
       if (status === 403) {
-        showSnackbar(
-          "error",
-          "No tienes permisos para realizar esta acción."
-        )
+        showSnackbar("error", t("errors.forbidden"))
       } else {
         const errorMessage = getApiErrorMessage(error)
-        showSnackbar(
-          "error",
-          errorMessage || "No se pudo eliminar el registro."
-        )
+        showSnackbar("error", errorMessage || t("errors.deleteFailed"))
       }
     } finally {
       setBusyAction(false)
@@ -298,6 +305,7 @@ export function AdminIdentityDocumentTypesContent() {
   const loadingGridClassName =
     "grid animate-pulse grid-cols-[1fr_1.5fr_180px_180px_120px] gap-3 rounded-lg border border-border/60 bg-muted/30 p-4"
   const tableMinWidthClassName = "min-w-[800px]"
+  const notUpdatedLabel = t("fallbacks.notUpdated")
 
   return (
     <main
@@ -306,31 +314,31 @@ export function AdminIdentityDocumentTypesContent() {
     >
       <PortalPageHeader
         id="portal-admin-identity-document-types-heading"
-        title="Tipos de Documento"
-        description="Administra los tipos de documento disponibles para los candidatos."
+        title={t("page.title")}
+        description={t("page.description")}
         className="mb-6"
         contentClassName="max-w-3xl"
         actions={
           <Button type="button" variant="primary" onClick={handleOpenCreate}>
             <Plus className="h-4 w-4" aria-hidden />
-            Nuevo tipo de documento
+            {t("page.createCta")}
           </Button>
         }
       />
 
       <section
         className="mb-5 rounded-xl border border-border bg-card p-4 shadow-sm"
-        aria-label="Resumen de tipos de documento"
+        aria-label={t("aria.summary")}
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm text-foreground">
               {loading
-                ? "Cargando..."
-                : `${filteredItems.length} tipo${filteredItems.length !== 1 ? "s" : ""} de documento`}
+                ? t("page.countLoading")
+                : t("page.countSummary", { count: filteredItems.length })}
             </span>
             <span className="text-sm text-muted-foreground">
-              Gestiona tipos de documento disponibles para candidatos.
+              {t("page.summaryHelper")}
             </span>
           </div>
 
@@ -342,7 +350,7 @@ export function AdminIdentityDocumentTypesContent() {
             disabled={loading}
           >
             <RefreshCw className="h-4 w-4" aria-hidden />
-            Refrescar
+            {t("actions.refresh")}
           </Button>
         </div>
       </section>
@@ -353,7 +361,7 @@ export function AdminIdentityDocumentTypesContent() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Buscar por código o nombre..."
+              placeholder={t("filters.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-md border border-input bg-white py-2 pl-10 pr-4 text-sm text-black placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple"
@@ -365,14 +373,14 @@ export function AdminIdentityDocumentTypesContent() {
       {listError ? (
         <section
           className="rounded-xl border border-destructive/30 bg-destructive/5 p-6"
-          aria-label="Error al cargar tipos de documento"
+          aria-label={t("aria.loadError")}
         >
           <p className="font-sans text-sm text-destructive" role="alert">
-            {listError || "No se pudo cargar el catálogo."}
+            {listError || t("errors.loadCatalog")}
           </p>
           <div className="mt-4">
             <Button type="button" variant="primary" onClick={() => void loadList()}>
-              Reintentar
+              {t("actions.retry")}
             </Button>
           </div>
         </section>
@@ -381,7 +389,7 @@ export function AdminIdentityDocumentTypesContent() {
       {!listError ? (
         <section
           className="min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-          aria-label="Listado de tipos de documento"
+          aria-label={t("aria.list")}
         >
           {loading ? (
             <div className="space-y-3 p-5">
@@ -403,19 +411,19 @@ export function AdminIdentityDocumentTypesContent() {
               <div className="space-y-2">
                 <h2 className="font-sans text-lg font-semibold text-foreground">
                   {searchTerm
-                    ? "No se encontraron resultados"
-                    : "No hay tipos de documento registrados"}
+                    ? t("emptyStates.noResults")
+                    : t("emptyStates.noItems")}
                 </h2>
                 <p className="max-w-lg font-sans text-sm text-muted-foreground">
                   {searchTerm
-                    ? "Intenta buscar con otros términos."
-                    : "Cuando crees un tipo de documento, quedará disponible para clasificar documentos de identidad de candidatos."}
+                    ? t("emptyStates.searchHint")
+                    : t("emptyStates.createHint")}
                 </p>
               </div>
               {!searchTerm ? (
                 <Button type="button" variant="primary" onClick={handleOpenCreate}>
                   <Plus className="h-4 w-4" aria-hidden />
-                  Nuevo tipo de documento
+                  {t("page.createCta")}
                 </Button>
               ) : null}
             </div>
@@ -426,16 +434,20 @@ export function AdminIdentityDocumentTypesContent() {
               >
                 <thead className="border-b border-border bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 font-medium text-foreground">Código</th>
-                    <th className="px-4 py-3 font-medium text-foreground">Nombre</th>
                     <th className="px-4 py-3 font-medium text-foreground">
-                      Fecha de creación
+                      {t("table.code")}
                     </th>
                     <th className="px-4 py-3 font-medium text-foreground">
-                      Última actualización
+                      {t("table.name")}
                     </th>
                     <th className="px-4 py-3 font-medium text-foreground">
-                      Acciones
+                      {t("table.createdAt")}
+                    </th>
+                    <th className="px-4 py-3 font-medium text-foreground">
+                      {t("table.updatedAt")}
+                    </th>
+                    <th className="px-4 py-3 font-medium text-foreground">
+                      {t("table.actions")}
                     </th>
                   </tr>
                 </thead>
@@ -454,10 +466,10 @@ export function AdminIdentityDocumentTypesContent() {
                         <p className="font-medium text-foreground">{item.name}</p>
                       </td>
                       <td className="px-4 py-3 align-top text-muted-foreground">
-                        {formatDateTime(item.createdAtUtc)}
+                        {formatDateTime(item.createdAtUtc, locale, notUpdatedLabel)}
                       </td>
                       <td className="px-4 py-3 align-top text-muted-foreground">
-                        {formatDateTime(item.updatedAtUtc)}
+                        {formatDateTime(item.updatedAtUtc, locale, notUpdatedLabel)}
                       </td>
                       <td className="px-4 py-3 align-top">
                         <div className="flex flex-wrap gap-2">
@@ -468,7 +480,7 @@ export function AdminIdentityDocumentTypesContent() {
                             onClick={() => void handleOpenEdit(item.id)}
                           >
                             <Pencil className="h-3.5 w-3.5" aria-hidden />
-                            Editar
+                            {t("actions.edit")}
                           </Button>
                           <Button
                             type="button"
@@ -477,7 +489,7 @@ export function AdminIdentityDocumentTypesContent() {
                             onClick={() => setDeleteTarget(item)}
                           >
                             <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                            Eliminar
+                            {t("actions.delete")}
                           </Button>
                         </div>
                       </td>
@@ -493,11 +505,7 @@ export function AdminIdentityDocumentTypesContent() {
       <Modal
         isOpen={isFormOpen}
         onClose={handleCloseForm}
-        title={
-          formMode === "create"
-            ? "Nuevo tipo de documento"
-            : "Editar tipo de documento"
-        }
+        title={formMode === "create" ? t("form.createTitle") : t("form.editTitle")}
         size="lg"
         closeOnEscape={!formSubmitting && !formLoading}
         closeOnOverlayClick={!formSubmitting && !formLoading}
@@ -509,7 +517,7 @@ export function AdminIdentityDocumentTypesContent() {
               onClick={handleCloseForm}
               disabled={formSubmitting || formLoading}
             >
-              Cancelar
+              {tCommon("cancel")}
             </Button>
             <Button
               type="submit"
@@ -518,7 +526,7 @@ export function AdminIdentityDocumentTypesContent() {
               loading={formSubmitting}
               disabled={formSubmitting || formLoading}
             >
-              {formMode === "create" ? "Guardar" : "Guardar cambios"}
+              {formMode === "create" ? t("form.save") : t("form.saveChanges")}
             </Button>
           </div>
         }
@@ -526,7 +534,7 @@ export function AdminIdentityDocumentTypesContent() {
         {formLoading ? (
           <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-            Cargando tipo de documento...
+            {t("form.loading")}
           </div>
         ) : formLoadError ? (
           <div className="space-y-4">
@@ -541,7 +549,7 @@ export function AdminIdentityDocumentTypesContent() {
                 void handleOpenEdit(editingItemId)
               }}
             >
-              Reintentar
+              {t("actions.retry")}
             </Button>
           </div>
         ) : (
@@ -553,14 +561,14 @@ export function AdminIdentityDocumentTypesContent() {
             <Input
               id="identity-document-type-code"
               name="code"
-              label="Código"
+              label={t("form.codeLabel")}
               required
               value={formState.code}
               error={formErrors.code || ""}
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
                 handleCodeChange(event.target.value)
               }
-              placeholder="Ej. DUI, PASSPORT, NIT"
+              placeholder={t("form.codePlaceholder")}
               disabled={formSubmitting}
               maxLength={CODE_MAX_LENGTH}
             />
@@ -568,14 +576,14 @@ export function AdminIdentityDocumentTypesContent() {
             <Input
               id="identity-document-type-name"
               name="name"
-              label="Nombre"
+              label={t("form.nameLabel")}
               required
               value={formState.name}
               error={formErrors.name || ""}
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
                 handleNameChange(event.target.value)
               }
-              placeholder="Ej. Documento Único de Identidad"
+              placeholder={t("form.namePlaceholder")}
               disabled={formSubmitting}
               maxLength={NAME_MAX_LENGTH}
             />
@@ -587,14 +595,10 @@ export function AdminIdentityDocumentTypesContent() {
         isOpen={deleteTarget != null}
         onClose={() => !busyAction && setDeleteTarget(null)}
         onConfirm={() => void handleConfirmDelete()}
-        title="Eliminar tipo de documento"
-        message={
-          deleteTarget
-            ? `¿Seguro que deseas eliminar este tipo de documento? Esta acción lo ocultará de los listados activos.`
-            : ""
-        }
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        title={t("deleteConfirm.title")}
+        message={deleteTarget ? t("deleteConfirm.message") : ""}
+        confirmText={t("actions.delete")}
+        cancelText={tCommon("cancel")}
         loading={busyAction}
       />
 

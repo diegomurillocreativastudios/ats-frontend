@@ -18,50 +18,44 @@ import {
 } from "lucide-react"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { getInitials } from "@/lib/getInitials"
+import {
+  ADMIN_PORTAL_NAV_LINKS,
+  ADMIN_SETTINGS_NAV_LINK,
+} from "@/lib/admin-portal-nav"
 
-const navItems = [
-  { href: "/portal-admin/etapas", labelKey: "stages", icon: ClipboardList },
-  { href: "/portal-admin/plantillas", labelKey: "templates", icon: FileText },
-  { href: "/portal-admin/entrevistas", labelKey: "interviewsCatalog", icon: Calendar },
-  {
-    href: "/portal-admin/entrevistas/general",
-    labelKey: "interviewsCalendar",
-    icon: CalendarDays,
-  },
-  { href: "/portal-admin/usuarios", labelKey: "users", icon: Users },
-  { href: "/portal-admin/empresas", labelKey: "companies", icon: Landmark },
-  {
-    href: "/portal-admin/departamentos",
-    labelKey: "departments",
-    icon: Building2,
-  },
-  {
-    href: "/portal-admin/modalidades",
-    labelKey: "modalities",
-    icon: Briefcase,
-  },
-  {
-    href: "/portal-admin/tipos-de-documento",
-    labelKey: "documentTypes",
-    icon: IdCard,
-  },
-] as const
+const NAV_ICONS = {
+  stages: ClipboardList,
+  templates: FileText,
+  interviewsCatalog: Calendar,
+  interviewsCalendar: CalendarDays,
+  users: Users,
+  companies: Landmark,
+  departments: Building2,
+  modalities: Briefcase,
+  documentTypes: IdCard,
+  settings: Cog,
+} as const
+
+const navItems = ADMIN_PORTAL_NAV_LINKS.map((item) => ({
+  ...item,
+  icon: NAV_ICONS[item.labelKey],
+}))
 
 const settingsNavItem = {
-  href: "/portal-admin/configuracion",
-  labelKey: "settings",
-  icon: Cog,
-} as const
+  ...ADMIN_SETTINGS_NAV_LINK,
+  icon: NAV_ICONS[ADMIN_SETTINGS_NAV_LINK.labelKey],
+}
 
 export default function AdminSidebar() {
   const pathname = usePathname()
   const t = useTranslations("Navigation")
   const tSidebar = useTranslations("Sidebar")
   const tCommon = useTranslations("Common")
+  const tShell = useTranslations("AdminPortal.shell")
   const { user, loading } = useCurrentUser()
-  const displayName = user?.name || user?.email || "Usuario"
+  const displayName = user?.name || user?.email || tShell("userFallback")
   const initials = getInitials(user?.name, user?.email)
-  const roleLabel = user?.role || "Administrador"
+  const roleLabel = user?.role || tShell("roleFallback")
 
   return (
     <aside

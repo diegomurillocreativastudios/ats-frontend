@@ -23,6 +23,11 @@ export interface CandidateInterviewListProps {
 export function CandidateInterviewList({
   candidateProfileId,
 }: CandidateInterviewListProps) {
+  const t = useTranslations("RecruiterPortal.interviews.candidateList")
+  const tList = useTranslations("RecruiterPortal.interviews.list.table")
+  const tVacancy = useTranslations("PublicOpportunities.page")
+  const tActions = useTranslations("RecruiterPortal.interviews.actions")
+  const tToasts = useTranslations("RecruiterPortal.interviews.toasts")
   const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const [items, setItems] = useState<Interview[]>([])
   const [loading, setLoading] = useState(true)
@@ -80,15 +85,15 @@ export function CandidateInterviewList({
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8">
       <PortalPageHeader
-        title="Entrevistas del candidato"
-        description="Timeline de entrevistas en todas las vacantes."
+        title={t("title")}
+        description={t("description")}
       />
 
-      <section aria-label="Listado de entrevistas del candidato">
+      <section aria-label={t("regionAria")}>
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
             <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
-            <p className="font-sans text-sm text-muted-foreground">Cargando…</p>
+            <p className="font-sans text-sm text-muted-foreground">{t("loading")}</p>
           </div>
         ) : error ? (
           <p className="font-sans text-sm text-destructive" role="alert">
@@ -98,7 +103,7 @@ export function CandidateInterviewList({
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16">
             <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
             <p className="font-sans text-sm text-muted-foreground">
-              No hay entrevistas registradas para este candidato.
+              {t("empty")}
             </p>
           </div>
         ) : (
@@ -106,10 +111,10 @@ export function CandidateInterviewList({
             <table className="w-full min-w-[640px] border-collapse text-left font-sans text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="px-4 py-3 font-semibold">Fecha y hora</th>
-                  <th className="px-4 py-3 font-semibold">Vacante</th>
-                  <th className="px-4 py-3 font-semibold">Estado</th>
-                  <th className="px-4 py-3 font-semibold">Acciones</th>
+                  <th className="px-4 py-3 font-semibold">{tList("dateTime")}</th>
+                  <th className="px-4 py-3 font-semibold">{tVacancy("vacancy")}</th>
+                  <th className="px-4 py-3 font-semibold">{tList("status")}</th>
+                  <th className="px-4 py-3 font-semibold">{tList("actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -137,14 +142,14 @@ export function CandidateInterviewList({
                           onClick={() => handleOpenDetail(row.id, row.vacancyId)}
                           className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
                         >
-                          Administrar
+                          {tActions("manage")}
                         </button>
                         <button
                           type="button"
                           onClick={() => setNotesInterviewId(row.id)}
                           className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
                         >
-                          Notas
+                          {tActions("notes")}
                         </button>
                         <button
                           type="button"
@@ -191,7 +196,7 @@ export function CandidateInterviewList({
           setSnackbar({
             open: true,
             variant: "success",
-            message: "Cambios guardados.",
+            message: tToasts("saved"),
           })
         }}
         onDeleted={(id) => {
@@ -201,7 +206,7 @@ export function CandidateInterviewList({
           setSnackbar({
             open: true,
             variant: "success",
-            message: "Entrevista eliminada.",
+            message: tToasts("deleted"),
           })
         }}
       />
@@ -230,7 +235,7 @@ export function CandidateInterviewList({
           setSnackbar({
             open: true,
             variant: "success",
-            message: "Notas guardadas.",
+            message: tToasts("notesSaved"),
           })
         }}
       />

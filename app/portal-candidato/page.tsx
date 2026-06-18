@@ -1,10 +1,14 @@
-import CandidatePortalHome from "@/components/candidato/candidate-portal-home";
+import { getTranslations } from "next-intl/server"
+import CandidatePortalHome from "@/components/candidato/candidate-portal-home"
 
-export const metadata = {
-  title: { absolute: "ATS | Portal Candidato" },
-  description: "Portal del candidato - Resumen de tu proceso de selección",
-};
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.candidatePortal.home")
+  return {
+    title: { absolute: t("title") },
+    description: t("description"),
+  }
+}
 
 export default function CandidatePortalHomePage() {
-  return <CandidatePortalHome />;
+  return <CandidatePortalHome />
 }

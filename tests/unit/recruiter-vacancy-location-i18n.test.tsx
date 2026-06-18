@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
-import { render, screen } from "@testing-library/react"
+import { screen } from "@testing-library/react"
+
+import { renderWithIntl } from "../helpers/render-with-intl"
 
 import { locales, type Locale } from "@/i18n/routing"
 import esMessages from "@/messages/es.json"
@@ -55,7 +57,7 @@ const noop = () => {}
 
 describe("VacancyLocationFields i18n por props (Etapa 9)", () => {
   it("renderiza la opción 'Sin especificar' y el error de países desde props (es)", async () => {
-    render(
+    renderWithIntl(
       <VacancyLocationFields
         countryCode=""
         stateCode=""
@@ -64,6 +66,7 @@ describe("VacancyLocationFields i18n por props (Etapa 9)", () => {
         loadCountriesErrorLabel="No se pudieron cargar los países."
         loadStatesErrorLabel="No se pudieron cargar los estados o provincias."
       />,
+      { locale: "es" },
     )
 
     const unspecified = await screen.findAllByText("Sin especificar")
@@ -74,7 +77,7 @@ describe("VacancyLocationFields i18n por props (Etapa 9)", () => {
   })
 
   it("renderiza la opción 'Unspecified' y el error de países desde props (en)", async () => {
-    render(
+    renderWithIntl(
       <VacancyLocationFields
         countryCode=""
         stateCode=""
@@ -83,6 +86,7 @@ describe("VacancyLocationFields i18n por props (Etapa 9)", () => {
         loadCountriesErrorLabel="Countries could not be loaded."
         loadStatesErrorLabel="States or provinces could not be loaded."
       />,
+      { locale: "en" },
     )
 
     const unspecified = await screen.findAllByText("Unspecified")
@@ -92,10 +96,15 @@ describe("VacancyLocationFields i18n por props (Etapa 9)", () => {
     ).toBeInTheDocument()
   })
 
-  it("usa los defaults en español si no se pasan labels (consumidores legacy)", async () => {
-    render(<VacancyLocationFields countryCode="" stateCode="" onChange={noop} />)
+  it("usa los defaults traducidos desde next-intl si no se pasan labels", async () => {
+    renderWithIntl(
+      <VacancyLocationFields countryCode="" stateCode="" onChange={noop} />,
+      { locale: "es" },
+    )
 
-    const unspecified = await screen.findAllByText("Sin especificar")
+    const unspecified = await screen.findAllByText(
+      esMessages.RecruiterPortal.vacancies.location.unspecified,
+    )
     expect(unspecified.length).toBeGreaterThan(0)
   })
 })

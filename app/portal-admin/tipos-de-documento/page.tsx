@@ -1,8 +1,12 @@
+import { getTranslations } from "next-intl/server"
 import { AdminIdentityDocumentTypesContent } from "@/components/portal-admin/AdminIdentityDocumentTypesContent"
 
-export const metadata = {
-  title: "Tipos de Documento",
-  description: "Gestión del catálogo global de tipos de documento de identidad",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.adminPortal.documentTypes")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function PortalAdminIdentityDocumentTypesPage() {

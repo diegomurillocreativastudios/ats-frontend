@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useTranslations } from "next-intl";
 import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import {
   fetchReportsCatalog,
   findReportForTemplate,
@@ -56,6 +58,9 @@ const INITIAL_FORM: PlantillaFormData = {
   isMandatory: false,
 }
 
+/** HTML de ejemplo; se pasa como variable ICU para evitar que next-intl interprete `<h1>` como rich text. */
+const CONTENT_TEMPLATE_HTML_EXAMPLE = "<h1>Contrato</h1>..."
+
 const buildPayload = (
   formData: PlantillaFormData,
   isEditing: boolean,
@@ -104,6 +109,9 @@ export default function PlantillaModal({
   editingTemplate,
   onSnackbar,
 }: PlantillaModalProps) {
+  const t = useTranslations("AdminPortal.templates.modal");
+  const tTemplates = useTranslations("AdminPortal.templates");
+  const tCommon = useTranslations("Common");
   const [formData, setFormData] = useState<PlantillaFormData>(INITIAL_FORM)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
@@ -192,8 +200,7 @@ export default function PlantillaModal({
       })
       .catch((err: unknown) => {
         const msg =
-          (err as { message?: string } | null)?.message ||
-          "No se pudo cargar el catálogo de reportes."
+          getApiErrorMessage(err) || t("reportCatalogLoadFailed");
         setCatalogError(msg)
       })
       .finally(() => {
@@ -233,14 +240,14 @@ export default function PlantillaModal({
 
   const validate = () => {
     const nextErrors: Record<string, string> = {}
-    if (!formData.name.trim()) nextErrors.name = "El nombre es requerido"
+    if (!formData.name.trim()) nextErrors.name = t("validation.nameRequired")
 
     if (formData.type === "Notification") {
-      if (!formData.subject.trim()) nextErrors.subject = "El asunto es requerido"
-      if (!formData.body.trim()) nextErrors.body = "El contenido es requerido"
+      if (!formData.subject.trim()) nextErrors.subject = t("validation.subjectRequired")
+      if (!formData.body.trim()) nextErrors.body = t("validation.contentRequired")
     } else if (formData.type === "Document") {
       if (!formData.contentTemplate.trim()) {
-        nextErrors.contentTemplate = "La plantilla de contenido es requerida"
+        nextErrors.contentTemplate = t("validation.contentTemplateRequired")
       }
       const selectedReportKey = formData.reportKey.trim()
       if (
@@ -249,12 +256,11 @@ export default function PlantillaModal({
         reportsCatalog.length > 0 &&
         !isCatalogReportKey(selectedReportKey, reportsCatalog)
       ) {
-        nextErrors.reportKey =
-          "Selecciona un tipo de reporte válido del catálogo."
+        nextErrors.reportKey = t("validation.reportTypeRequired")
       }
     } else if (formData.type === "Questionnaire") {
       if (!formData.description.trim()) {
-        nextErrors.description = "La descripción es requerida"
+        nextErrors.description = t("validation.descriptionRequired")
       }
     }
 
@@ -326,20 +332,14 @@ export default function PlantillaModal({
         onSnackbar?.(bindingWarning, "warning")
       } else {
         onSnackbar?.(
-          isEditing
-            ? "Plantilla actualizada correctamente."
-            : "Plantilla creada correctamente.",
+          isEditing ? t("toastUpdated") : t("toastCreated"),
           "success"
         )
       }
       handleClose()
       onSubmit?.()
     } catch (err) {
-      const e = err as { message?: string; detail?: string } | null
-      const msg =
-        e?.message ||
-        e?.detail ||
-        `No se pudo ${isEditing ? "actualizar" : "crear"} la plantilla. Intenta de nuevo.`
+      const msg = getApiErrorMessage(err) || t("toastSaveFailed")
       setSubmitError(msg)
       onSnackbar?.(msg, "error")
     } finally {
@@ -362,18 +362,18 @@ export default function PlantillaModal({
         variant="outline"
         onClick={handleClose}
         disabled={loading}
-        aria-label="Cancelar"
+        aria-label={t("cancel")}
       >
-        Cancelar
+        {tCommon("cancel")}
       </Button>
       <Button
         type="submit"
         form="plantilla-form"
-        aria-label={isEditing ? "Actualizar plantilla" : "Crear plantilla"}
+        aria-label={isEditing ? t("update") : t("create")}
         disabled={loading}
         loading={loading}
       >
-        {isEditing ? "Actualizar plantilla" : "Crear plantilla"}
+        {isEditing ? t("update") : t("create")}
       </Button>
     </>
   )
@@ -382,7 +382,7 @@ export default function PlantillaModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={isEditing ? "Editar plantilla" : "Nueva plantilla"}
+      title={isEditing ? t("editTitle") : t("createTitle")}
       footer={footer}
       size="lg"
       closeOnOverlayClick
@@ -398,7 +398,7 @@ export default function PlantillaModal({
             htmlFor="plantilla-type"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Tipo de plantilla <span className="text-vo-pink">*</span>
+            {t("typeLabel")} <span className="text-vo-pink">*</span>
           </label>
           <select
             id="plantilla-type"
@@ -407,9 +407,9 @@ export default function PlantillaModal({
             className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isEditing}
           >
-            <option value="Notification">Notificación (Email/SMS)</option>
-            <option value="Document">Documento (PDF/Contrato)</option>
-            <option value="Questionnaire">Cuestionario</option>
+            <option value="Notification">{t("typeNotification")}</option>
+            <option value="Document">{t("typeDocument")}</option>
+            <option value="Questionnaire">{t("typeQuestionnaire")}</option>
           </select>
         </div>
 
@@ -418,14 +418,14 @@ export default function PlantillaModal({
             htmlFor="plantilla-name"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Nombre <span className="text-vo-pink">*</span>
+            {t("nameLabel")} <span className="text-vo-pink">*</span>
           </label>
           <input
             id="plantilla-name"
             type="text"
             value={formData.name}
             onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-            placeholder="Ej: Notificación de entrevista"
+            placeholder={t("namePlaceholder")}
             className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? "name-error" : undefined}
@@ -444,14 +444,14 @@ export default function PlantillaModal({
                 htmlFor="plantilla-subject"
                 className="font-sans text-sm font-medium text-foreground"
               >
-                Asunto <span className="text-vo-pink">*</span>
+                {t("subjectLabel")} <span className="text-vo-pink">*</span>
               </label>
               <input
                 id="plantilla-subject"
                 type="text"
                 value={formData.subject}
                 onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
-                placeholder="Ej: Tu entrevista ha sido programada"
+                placeholder={t("subjectPlaceholder")}
                 className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                 aria-invalid={!!errors.subject}
               />
@@ -467,13 +467,13 @@ export default function PlantillaModal({
                 htmlFor="plantilla-body"
                 className="font-sans text-sm font-medium text-foreground"
               >
-                Contenido <span className="text-vo-pink">*</span>
+                {t("contentLabel")} <span className="text-vo-pink">*</span>
               </label>
               <textarea
                 id="plantilla-body"
                 value={formData.body}
                 onChange={(e) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
-                placeholder="Escribe el contenido de la plantilla..."
+                placeholder={t("contentPlaceholder")}
                 rows={6}
                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent min-h-[120px]"
                 aria-invalid={!!errors.body}
@@ -494,13 +494,15 @@ export default function PlantillaModal({
                 htmlFor="plantilla-content-template"
                 className="font-sans text-sm font-medium text-foreground"
               >
-                Plantilla de contenido <span className="text-vo-pink">*</span>
+                {t("contentTemplateLabel")} <span className="text-vo-pink">*</span>
               </label>
               <textarea
                 id="plantilla-content-template"
                 value={formData.contentTemplate}
                 onChange={(e) => setFormData((prev) => ({ ...prev, contentTemplate: e.target.value }))}
-                placeholder="Ej: <h1>Contrato</h1>..."
+                placeholder={t("contentTemplatePlaceholder", {
+                  htmlExample: CONTENT_TEMPLATE_HTML_EXAMPLE,
+                })}
                 rows={8}
                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent min-h-[150px]"
                 aria-invalid={!!errors.contentTemplate}
@@ -517,7 +519,7 @@ export default function PlantillaModal({
                 htmlFor="plantilla-output-format"
                 className="font-sans text-sm font-medium text-foreground"
               >
-                Formato de salida
+                {t("outputFormatLabel")}
               </label>
               <select
                 id="plantilla-output-format"
@@ -550,14 +552,14 @@ export default function PlantillaModal({
                   htmlFor="plantilla-is-technical-sheet"
                   className="font-sans text-sm font-medium text-foreground cursor-pointer"
                 >
-                  Es plantilla de ficha técnica
+                  {t("isTechnicalSheet")}
                 </label>
               </div>
               <p
                 id="plantilla-is-technical-sheet-hint"
                 className="pl-6 font-sans text-xs text-muted-foreground"
               >
-                Marca esta opción si el documento corresponde al diseño de una ficha técnica.
+                {t("technicalSheetHint")}
               </p>
             </div>
 
@@ -582,14 +584,14 @@ export default function PlantillaModal({
                   htmlFor="plantilla-is-report"
                   className="cursor-pointer font-sans text-sm font-medium text-foreground"
                 >
-                  Es plantilla de reporte
+                  {t("isReport")}
                 </label>
               </div>
               <p
                 id="plantilla-is-report-hint"
                 className="pl-6 font-sans text-xs text-muted-foreground"
               >
-                Marca esta opción si el documento se usa como plantilla de reportes.
+                {t("reportHint")}
               </p>
             </div>
 
@@ -599,7 +601,7 @@ export default function PlantillaModal({
                   htmlFor="plantilla-report-key"
                   className="font-sans text-sm font-medium text-foreground"
                 >
-                  Tipo de reporte
+                  {t("reportTypeLabel")}
                 </label>
                 {catalogError ? (
                   <div className="flex flex-col gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5">
@@ -614,7 +616,7 @@ export default function PlantillaModal({
                       onClick={handleRetryCatalog}
                       className="self-start font-sans text-xs font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                     >
-                      Reintentar
+                      {tTemplates("actions.retry")}
                     </button>
                   </div>
                 ) : (
@@ -638,14 +640,14 @@ export default function PlantillaModal({
                   >
                     <option value="">
                       {catalogLoading
-                        ? "Cargando reportes…"
-                        : "Selecciona un reporte (opcional)"}
+                        ? t("reportCatalogLoading")
+                        : t("reportSelectPlaceholder")}
                     </option>
                     {reportsCatalog.map((item) => {
                       const isLocked = lockedReportKeys.has(item.reportKey)
                       const linkedName = item.linkedTemplate?.name
-                      const label = isLocked
-                        ? `${item.name} — ya vinculado${linkedName ? ` a "${linkedName}"` : ""}`
+                      const label = isLocked && linkedName
+                        ? t("reportLinkedOption", { name: item.name, linkedName })
                         : item.name
                       return (
                         <option
@@ -672,8 +674,7 @@ export default function PlantillaModal({
                   id="plantilla-report-key-hint"
                   className="font-sans text-xs text-muted-foreground"
                 >
-                  Vincula esta plantilla con un reporte del catálogo. Puedes
-                  dejarlo vacío para configurarlo más adelante.
+                  {t("reportLinkHint")}
                 </p>
               </div>
             )}
@@ -687,13 +688,13 @@ export default function PlantillaModal({
                 htmlFor="plantilla-description"
                 className="font-sans text-sm font-medium text-foreground"
               >
-                Descripción <span className="text-vo-pink">*</span>
+                {t("descriptionLabel")} <span className="text-vo-pink">*</span>
               </label>
               <textarea
                 id="plantilla-description"
                 value={formData.description}
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                placeholder="Ej: Por favor completa esta información técnica..."
+                placeholder={t("descriptionPlaceholder")}
                 rows={4}
                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                 aria-invalid={!!errors.description}
@@ -717,7 +718,7 @@ export default function PlantillaModal({
                 htmlFor="plantilla-is-mandatory"
                 className="font-sans text-sm font-medium text-foreground cursor-pointer"
               >
-                Es obligatorio
+                {t("isRequired")}
               </label>
             </div>
           </>

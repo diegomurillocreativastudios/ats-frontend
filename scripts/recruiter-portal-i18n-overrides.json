@@ -1,0 +1,1490 @@
+{
+  "en": {
+    "reports": {
+      "breadcrumb": "Reports",
+      "summary": {
+        "breadcrumb": "Summary",
+        "title": "Executive report summary",
+        "description": "Consolidated indicators for the period. Apply filters to narrow by client and dates.",
+        "headerAria": "Report header",
+        "filtersAria": "Filters and executive panel",
+        "filters": {
+          "client": "Client",
+          "from": "From",
+          "to": "To",
+          "all": "All",
+          "apply": "Apply filters"
+        },
+        "actions": {
+          "downloadPdf": "Download PDF"
+        },
+        "loadingStates": {
+          "loading": "Loading indicators…",
+          "updated": "Data updated"
+        },
+        "errors": {
+          "loadFailed": "The summary could not be loaded."
+        },
+        "emptyStates": {
+          "noData": "No data to display"
+        },
+        "dashboard": {
+          "loadFailed": "The summary could not be loaded",
+          "loading": "Loading summary",
+          "kpisAria": "Key indicators",
+          "clients": "Clients",
+          "vacancies": "Vacancies",
+          "openVacancies": "Open vacancies",
+          "candidates": "Candidates",
+          "hired": "Hired",
+          "vacancyStatus": "Vacancy status",
+          "open": "Open:",
+          "closed": "Closed:",
+          "avgProgress": "Average vacancy progress",
+          "avgMatch": "Average preliminary matching",
+          "candidateFlow": "Candidate flow",
+          "registered": "Registered",
+          "inInterview": "In interview",
+          "percentOfTotal": "% of total candidates",
+          "noCandidatesInPeriod": "No candidates in the period",
+          "technicalEvaluations": "Technical evaluations",
+          "mainSource": "Primary sourcing channel",
+          "periodFindings": "Period findings",
+          "insufficientData": "Insufficient data for this indicator.",
+          "clientsRegistered": "Clients registered in the period",
+          "vacanciesCreated": "Vacancies created",
+          "vacanciesDistribution": "Distribution between open and closed vacancies in the period.",
+          "candidatesRegistered": "Candidates registered",
+          "candidatesHired": "Candidates marked as hired",
+          "technicalEvaluationsSubtitle": "Tracking of completed evaluations and pass rate.",
+          "mainSourceSubtitle": "Channel with the highest activity recorded in the selected period.",
+          "noRegisteredSource": "No registered source",
+          "earlyStageHint": "Early stage: most processes still have significant work ahead relative to overall progress.",
+          "noVacanciesInPeriod": "No vacancies registered in the selected period.",
+          "activeProcessesSubtitle": "Currently active processes"
+        }
+      },
+      "dataView": {
+        "breadcrumb": "Reports",
+        "invalidTemplateTitle": "Invalid report template",
+        "invalidTemplateBody": "Review the JSON saved in Administration → Templates.",
+        "all": "All",
+        "allFeminine": "All",
+        "client": "Client",
+        "rows": "Rows:",
+        "generatingPdf": "Generating PDF…",
+        "downloadPdf": "Download PDF",
+        "applyFilters": "Apply filters",
+        "clear": "Clear",
+        "loadFailed": "The report could not be loaded",
+        "retry": "Retry",
+        "retryAria": "Retry report load",
+        "loadingData": "Loading data…",
+        "loadingTemplate": "Loading report template…",
+        "preview": "Preview",
+        "previewTitle": "Report preview",
+        "noTemplate": "No JSON template was found.",
+        "errors": {
+          "forbidden": "You do not have permission to view this report.",
+          "loadDataFailed": "Report data could not be loaded.",
+          "loadTemplateFailed": "The report template could not be loaded.",
+          "pdfFailed": "The PDF could not be generated."
+        },
+        "headerAria": "Report header",
+        "liveDataHint": "Live report data. Adjust filters and apply to reload.",
+        "filtersAria": "Report filters"
+      },
+      "templateDetail": {
+        "loading": "Loading report…",
+        "loadingConfig": "Loading report configuration…",
+        "loadingData": "Loading report data…",
+        "errorNoTemplate": "No report template was found with that identifier.",
+        "errorNoConfig": "This template does not have report configuration yet. Contact the administrator or use a report from the list.",
+        "errorNoContent": "The template has no HTML content. Configure contentTemplate in Administration → Templates.",
+        "errorNoData": "No data for the selected filters. Try widening the range or changing the client.",
+        "errorForbidden": "You do not have permission to view this report.",
+        "errorGeneric": "The report could not be loaded.",
+        "errorPreview": "The preview could not be generated. Review the filters and try again.",
+        "errorInvalidId": "Invalid template identifier.",
+        "downloadPdf": "Download PDF",
+        "downloadingPdf": "Generating PDF…",
+        "savingPdf": "Saving copy to history…",
+        "pdfExportFailed": "The PDF could not be generated. Please try again.",
+        "pdfHistoryWarning": "The PDF downloaded successfully, but it could not be saved to history. You can retry later.",
+        "previewTitle": "Report preview",
+        "filtersHint": "Adjust the filters and apply to update the report preview.",
+        "applyFilters": "Apply filters",
+        "legacyModeHint": "Temporary mode: using executive summary until the backend publishes dynamic configuration.",
+        "reportKeyBadge": "Report type",
+        "headerAria": "Report header",
+        "filtersAria": "Report filters",
+        "backToReports": "Back to reports",
+        "breadcrumbReport": "Report",
+        "breadcrumbReports": "Reports",
+        "clientFallback": "Client"
+      },
+      "resolver": {
+        "loading": "Looking up the report in the catalog…",
+        "notFound": "Report not found",
+        "openFailed": "The report could not be opened",
+        "backToReports": "Back to reports",
+        "notFoundDetail": "We could not find a report with that identifier in the catalog.",
+        "unlinked": "This report does not have a linked template yet. Ask the administrator to link a template from the reports module."
+      }
+    },
+    "vacancies": {
+      "matching": {
+        "sectionTitle": "AI preliminary search and analysis",
+        "sectionDescription": "Explore candidates with preliminary search and AI-assisted analysis before moving them into the process.",
+        "preliminarySearch": "Preliminary search",
+        "preliminaryAnalysis": "Preliminary analysis",
+        "updatingSearch": "Updating AI search…",
+        "reanalyzing": "Re-analyzing with AI…",
+        "includeInProcess": "Add to process",
+        "including": "Adding…",
+        "startProcess": "Start process",
+        "starting": "Starting…",
+        "searchResults": "Search results",
+        "reanalyzingEllipsis": "Re-analyzing with AI…",
+        "updatingSearchEllipsis": "Updating AI search…",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "selectedCount": "{count} selected",
+        "possibleCandidates": "Possible candidates",
+        "includeSelectedHint": "Add selected candidates to the process",
+        "noSuggestions": "There are no matching suggestions for this vacancy.",
+        "preliminaryMatchBadge": "AI preliminary match",
+        "preliminaryAnalysisBadge": "AI preliminary analysis",
+        "aiSuggestionBadge": "AI suggestion",
+        "score": "Score",
+        "viewProfile": "View profile",
+        "uploadedPrefix": "Uploaded:",
+        "viewTechnicalSheet": "View technical sheet",
+        "refreshAnalysis": "Refresh analysis",
+        "loadingCandidates": "Loading candidates",
+        "noCandidates": "No candidates",
+        "emptySearch": "Run the preliminary search to see suggested candidates.",
+        "emptyAnalysis": "Run the preliminary analysis to see evaluated candidates.",
+        "emptyDefault": "No candidates to display at this time.",
+        "profileModal": {
+          "aiProcessed": "Analysis processed with AI",
+          "aiDisclosure": "The following content was generated by AI and is shown unmodified.",
+          "attributes": "Attributes",
+          "qualitativeScore": "Qualitative score",
+          "semanticSimilarity": "Semantic similarity",
+          "attributeMatch": "Attribute match",
+          "routePrefix": "Route:",
+          "strengths": "Strengths",
+          "considerations": "Points to consider",
+          "qualitativeReasoning": "Qualitative reasoning",
+          "totalMatchScore": "Total matching score:",
+          "noAdditionalInfo": "No additional information available.",
+          "downloading": "Downloading…",
+          "downloadCv": "Download CV",
+          "viewFullProfile": "View full profile",
+          "close": "Close"
+        },
+        "scoreKeys": {
+          "qualitative": "Qualitative score",
+          "semanticSimilarity": "Semantic similarity",
+          "semanticScore": "Semantic score",
+          "total": "Total score",
+          "attributesCombined": "Combined attributes",
+          "keywordMatch": "Keyword match",
+          "experience": "Experience",
+          "education": "Education",
+          "skills": "Skills"
+        },
+        "kanban": {
+          "score": "Score",
+          "moveStageAria": "Move {name} to another stage",
+          "statusAria": "Status of {name}"
+        },
+        "aria": {
+          "matchedCandidates": "Matched candidates",
+          "preliminarySearch": "Preliminary search",
+          "preliminaryAnalysis": "Preliminary analysis",
+          "analysisProgress": "AI preliminary analysis progress",
+          "searchProgress": "AI preliminary search progress",
+          "searchResults": "Search results",
+          "possibleCandidates": "Possible candidates",
+          "selectAll": "Select all candidates",
+          "deselectAll": "Deselect all candidates",
+          "selectCandidate": "Select candidate {name}",
+          "viewCandidate": "View profile of {name}"
+        },
+        "toasts": {
+          "matchSuccess": "Matching completed successfully.",
+          "matchFailed": "Matching could not be run.",
+          "loadMatchFailed": "Matching could not be loaded.",
+          "processStarted": "Process started…",
+          "processFailed": "The process could not be started.",
+          "manualFallbackSuffix": " You can continue with filters and manual review."
+        },
+        "kpis": {
+          "preliminarySearchTitle": "Preliminary search",
+          "preliminarySearchSubtitle": "From hours to seconds on first exploration",
+          "preliminaryMatchTitle": "Preliminary matching",
+          "preliminaryMatchSubtitle": "Observed accuracy of 75% to 80%",
+          "preliminaryMatchGoal": "Calibration target: 90%",
+          "coverageTitle": "Results coverage",
+          "coverageSubtitle": "Initial shortlist with suggested candidates",
+          "coverageHint": "Starting point for HR validation",
+          "prioritizationTitle": "AI-assisted initial prioritization"
+        },
+        "errors": {
+          "moveStageFailed": "The candidate could not be moved to another stage.",
+          "missingDefaultApplicationStatus": "The company's default application status is missing. The server needs it when moving candidates between stages. Configure it in Stages (statuses) or ask an administrator to do so.",
+          "updateApplicationStatusFailed": "The application status could not be updated.",
+          "candidateMovedStage": "Candidate moved to another stage.",
+          "applicationStatusUpdated": "Application status updated.",
+          "missingApplicationId": "The application ID to update the status was not found.",
+          "downloadCvFailed": "The CV could not be downloaded.",
+          "searchNoResults": "No candidates were found in the search.",
+          "searchAlreadyInPipeline": "The candidates found are already in Possible candidates or Stages.",
+          "goToStagesAria": "Go to the Stages section to manage application statuses",
+          "openProfileAria": "Open the candidate profile in a new tab"
+        },
+        "scoreTooltips": {
+          "semanticSimilarity": "Measures how closely the CV content aligns with the vacancy description using semantic text comparison."
+        }
+      },
+      "rematch": {
+        "ariaLabel": "Re-adjust matching",
+        "titleNeedsRematch": "Requirements updated. Re-adjusting matching is recommended.",
+        "titleDefault": "Re-adjust matching",
+        "adjusting": "Adjusting…",
+        "short": "Re-adjust",
+        "label": "Re-adjust matching",
+        "success": "Success!",
+        "processError": "Processing error",
+        "toastSuccess": "Matching re-adjusted successfully.",
+        "toastError": "Error re-adjusting matching"
+      }
+    },
+    "interviews": {
+      "form": {
+        "pageTitle": "New interview",
+        "backToList": "← Back to list",
+        "ariaLabel": "New interview form",
+        "loadingCandidates": "Loading vacancy candidates…",
+        "noCandidates": "This vacancy has no candidates yet. Add candidates to the vacancy first; then you can schedule an interview.",
+        "fields": {
+          "candidate": "Candidate",
+          "dateTime": "Date and time",
+          "type": "Type",
+          "modality": "Modality",
+          "interviewer": "Interviewer",
+          "description": "Description"
+        },
+        "placeholders": {
+          "select": "Select…",
+          "selectModality": "Select a modality…",
+          "typeExample": "e.g. Technical, cultural…"
+        },
+        "loadingTypes": "Loading interview types…",
+        "loadingModalities": "Loading modalities…",
+        "calendar": {
+          "willSync": "This interview will sync with Google Calendar when saved (if the server supports it).",
+          "notConnected": "Google Calendar is not connected.",
+          "connectLink": "Connect in settings",
+          "notConnectedSuffix": "for invitations and automatic events.",
+          "meetWillGenerate": "A Google Meet link will be generated when saved (via Google Calendar).",
+          "meetNotConnected": "This modality generates a Google Meet link, but Google Calendar is not connected.",
+          "meetNotConnectedSuffix": "so it can be created automatically."
+        },
+        "validation": {
+          "selectCandidate": "Select a candidate",
+          "indicateDateTime": "Enter date and time",
+          "invalidDateTime": "Invalid date or time"
+        },
+        "actions": {
+          "schedule": "Schedule interview",
+          "scheduling": "Saving…",
+          "cancel": "Cancel"
+        }
+      },
+      "detail": {
+        "pageTitle": "Interview",
+        "backToInterviews": "← Back to interviews",
+        "loading": "Loading interview…",
+        "loadFailed": "The interview could not be loaded.",
+        "close": "Close",
+        "backToList": "Back to list",
+        "fields": {
+          "status": "Status",
+          "dateTime": "Date and time",
+          "type": "Type",
+          "modality": "Modality",
+          "interviewer": "Interviewer",
+          "description": "Description"
+        },
+        "statusAria": "Interview status",
+        "terminalReadOnly": "This interview is closed (terminal status). Data is read-only.",
+        "validation": {
+          "invalidDateTime": "The date or time is invalid. Check the time field."
+        },
+        "actions": {
+          "save": "Save changes",
+          "saving": "Saving…",
+          "discard": "Discard changes",
+          "delete": "Delete",
+          "deleteAria": "Delete interview"
+        },
+        "deleteConfirm": {
+          "title": "Delete interview",
+          "message": "Delete this interview? It will be archived and removed from listings."
+        }
+      },
+      "modals": {
+        "createTitle": "New interview",
+        "detailTitle": "Manage interview",
+        "notesTitle": "Interview notes",
+        "notesField": "Notes",
+        "notesPlaceholder": "Write observations or follow-up about this interview…",
+        "notesSave": "Save",
+        "notesSaving": "Saving…"
+      },
+      "calendar": {
+        "title": "Google Calendar",
+        "notConnected": "Connect your Google Calendar in",
+        "settingsLink": "settings",
+        "notConnectedSuffix": "to sync interviews and send invitations.",
+        "noSchedule": "Set the interview date and time to generate or link the event in Google Calendar.",
+        "loadingEvent": "Loading event…",
+        "synced": "Event synced with Google Calendar.",
+        "viewInGoogle": "View in Google Calendar",
+        "pending": "Sync pending…",
+        "notSynced": "The event is not synced or an error occurred.",
+        "noEvent": "No linked event yet. Save the interview or sync from settings.",
+        "retry": "Retry",
+        "updating": "Updating…",
+        "toastSynced": "Calendar status updated.",
+        "syncFailed": "Could not sync"
+      }
+    },
+    "aiDisclosure": {
+      "progressAria": "AI processing progress",
+      "preliminaryStepsAria": "Preliminary analysis steps",
+      "processingStepsAria": "Processing states",
+      "percentComplete": "{percent} percent",
+      "assistedByAi": "AI-assisted"
+    }
+  },
+  "fr": {
+    "reports": {
+      "breadcrumb": "Rapports",
+      "summary": {
+        "breadcrumb": "Résumé",
+        "title": "Résumé exécutif des rapports",
+        "description": "Indicateurs consolidés de la période. Appliquez des filtres pour affiner par client et dates.",
+        "headerAria": "En-tête du rapport",
+        "filtersAria": "Filtres et panneau exécutif",
+        "filters": {
+          "client": "Client",
+          "from": "Du",
+          "to": "Au",
+          "all": "Tous",
+          "apply": "Appliquer les filtres"
+        },
+        "actions": {
+          "downloadPdf": "Télécharger le PDF"
+        },
+        "loadingStates": {
+          "loading": "Chargement des indicateurs…",
+          "updated": "Données mises à jour"
+        },
+        "errors": {
+          "loadFailed": "Impossible de charger le résumé."
+        },
+        "emptyStates": {
+          "noData": "Aucune donnée à afficher"
+        },
+        "dashboard": {
+          "loadFailed": "Impossible de charger le résumé",
+          "loading": "Chargement du résumé",
+          "kpisAria": "Indicateurs principaux",
+          "clients": "Clients",
+          "vacancies": "Postes vacants",
+          "openVacancies": "Postes ouverts",
+          "candidates": "Candidats",
+          "hired": "Embauchés",
+          "vacancyStatus": "État des postes",
+          "open": "Ouverts :",
+          "closed": "Fermés :",
+          "avgProgress": "Progression moyenne des postes",
+          "avgMatch": "Correspondance préliminaire moyenne",
+          "candidateFlow": "Flux de candidats",
+          "registered": "Inscrits",
+          "inInterview": "En entretien",
+          "percentOfTotal": "% du total des candidats",
+          "noCandidatesInPeriod": "Aucun candidat sur la période",
+          "technicalEvaluations": "Évaluations techniques",
+          "mainSource": "Principal canal de sourcing",
+          "periodFindings": "Constats de la période",
+          "insufficientData": "Données insuffisantes pour cet indicateur.",
+          "clientsRegistered": "Clients enregistrés sur la période",
+          "vacanciesCreated": "Postes créés",
+          "vacanciesDistribution": "Répartition entre postes ouverts et fermés sur la période.",
+          "candidatesRegistered": "Candidats enregistrés",
+          "candidatesHired": "Candidats finalisés comme embauchés",
+          "technicalEvaluationsSubtitle": "Suivi des évaluations terminées et taux de réussite.",
+          "mainSourceSubtitle": "Canal ayant enregistré le plus d'activité sur la période sélectionnée.",
+          "noRegisteredSource": "Aucune source enregistrée",
+          "earlyStageHint": "Étape précoce : la plupart des processus ont encore un travail important devant eux par rapport à l'avancement global.",
+          "noVacanciesInPeriod": "Aucun poste enregistré sur la période sélectionnée.",
+          "activeProcessesSubtitle": "Processus actifs actuellement"
+        }
+      },
+      "dataView": {
+        "breadcrumb": "Rapports",
+        "invalidTemplateTitle": "Modèle de rapport invalide",
+        "invalidTemplateBody": "Vérifiez le JSON enregistré dans Administration → Modèles.",
+        "all": "Tous",
+        "allFeminine": "Toutes",
+        "client": "Client",
+        "rows": "Lignes :",
+        "generatingPdf": "Génération du PDF…",
+        "downloadPdf": "Télécharger le PDF",
+        "applyFilters": "Appliquer les filtres",
+        "clear": "Effacer",
+        "loadFailed": "Impossible de charger le rapport",
+        "retry": "Réessayer",
+        "retryAria": "Réessayer le chargement du rapport",
+        "loadingData": "Chargement des données…",
+        "loadingTemplate": "Chargement du modèle de rapport…",
+        "preview": "Aperçu",
+        "previewTitle": "Aperçu du rapport",
+        "noTemplate": "Aucun modèle JSON trouvé.",
+        "errors": {
+          "forbidden": "Vous n'avez pas l'autorisation de consulter ce rapport.",
+          "loadDataFailed": "Impossible de charger les données du rapport.",
+          "loadTemplateFailed": "Impossible de charger le modèle de rapport.",
+          "pdfFailed": "Impossible de générer le PDF."
+        },
+        "headerAria": "En-tête du rapport",
+        "liveDataHint": "Données en direct du rapport. Ajustez les filtres et appliquez pour recharger.",
+        "filtersAria": "Filtres du rapport"
+      },
+      "templateDetail": {
+        "loading": "Chargement du rapport…",
+        "loadingConfig": "Chargement de la configuration du rapport…",
+        "loadingData": "Chargement des données du rapport…",
+        "errorNoTemplate": "Aucun modèle de rapport trouvé avec cet identifiant.",
+        "errorNoConfig": "Ce modèle n'a pas encore de configuration de rapport. Contactez l'administrateur ou utilisez un rapport de la liste.",
+        "errorNoContent": "Le modèle n'a pas de contenu HTML. Configurez contentTemplate dans Administration → Modèles.",
+        "errorNoData": "Aucune donnée pour les filtres sélectionnés. Essayez d'élargir la plage ou de changer le client.",
+        "errorForbidden": "Vous n'avez pas l'autorisation de voir ce rapport.",
+        "errorGeneric": "Impossible de charger le rapport.",
+        "errorPreview": "Impossible de générer l'aperçu. Vérifiez les filtres et réessayez.",
+        "errorInvalidId": "Identifiant de modèle non valide.",
+        "downloadPdf": "Télécharger le PDF",
+        "downloadingPdf": "Génération du PDF…",
+        "savingPdf": "Enregistrement d'une copie dans l'historique…",
+        "pdfExportFailed": "Impossible de générer le PDF. Veuillez réessayer.",
+        "pdfHistoryWarning": "Le PDF a été téléchargé correctement, mais il n'a pas pu être enregistré dans l'historique. Vous pouvez réessayer plus tard.",
+        "previewTitle": "Aperçu du rapport",
+        "filtersHint": "Ajustez les filtres et appliquez pour mettre à jour l'aperçu du rapport.",
+        "applyFilters": "Appliquer les filtres",
+        "legacyModeHint": "Mode temporaire : utilisation du résumé exécutif jusqu'à la publication de la configuration dynamique par le backend.",
+        "reportKeyBadge": "Type de rapport",
+        "headerAria": "En-tête du rapport",
+        "filtersAria": "Filtres du rapport",
+        "backToReports": "Retour aux rapports",
+        "breadcrumbReport": "Rapport",
+        "breadcrumbReports": "Rapports",
+        "clientFallback": "Client"
+      },
+      "resolver": {
+        "loading": "Recherche du rapport dans le catalogue…",
+        "notFound": "Rapport introuvable",
+        "openFailed": "Impossible d'ouvrir le rapport",
+        "backToReports": "Retour aux rapports",
+        "notFoundDetail": "Nous n'avons pas trouvé de rapport avec cet identifiant dans le catalogue.",
+        "unlinked": "Ce rapport n'a pas encore de modèle lié. Demandez à l'administrateur d'en lier un depuis le module des rapports."
+      }
+    },
+    "vacancies": {
+      "matching": {
+        "sectionTitle": "Recherche et analyse préliminaire par IA",
+        "sectionDescription": "Explorez les candidats avec une recherche préliminaire et une analyse assistée par IA avant de les intégrer au processus.",
+        "preliminarySearch": "Recherche préliminaire",
+        "preliminaryAnalysis": "Analyse préliminaire",
+        "updatingSearch": "Mise à jour de la recherche IA…",
+        "reanalyzing": "Réanalyse par IA…",
+        "includeInProcess": "Inclure au processus",
+        "including": "Inclusion…",
+        "startProcess": "Démarrer le processus",
+        "starting": "Démarrage…",
+        "searchResults": "Résultats de recherche",
+        "reanalyzingEllipsis": "Réanalyse par IA…",
+        "updatingSearchEllipsis": "Mise à jour de la recherche IA…",
+        "selectAll": "Tout sélectionner",
+        "deselectAll": "Tout désélectionner",
+        "selectedCount": "{count} sélectionné(s)",
+        "possibleCandidates": "Candidats potentiels",
+        "includeSelectedHint": "Inclure au processus les candidats sélectionnés",
+        "noSuggestions": "Aucune suggestion de correspondance pour ce poste.",
+        "preliminaryMatchBadge": "Correspondance préliminaire IA",
+        "preliminaryAnalysisBadge": "Analyse préliminaire IA",
+        "aiSuggestionBadge": "Suggestion IA",
+        "score": "Score",
+        "viewProfile": "Voir le profil",
+        "uploadedPrefix": "Téléversé :",
+        "viewTechnicalSheet": "Voir la fiche technique",
+        "refreshAnalysis": "Actualiser l'analyse",
+        "loadingCandidates": "Chargement des candidats",
+        "noCandidates": "Aucun candidat",
+        "emptySearch": "Lancez la recherche préliminaire pour voir les candidats suggérés.",
+        "emptyAnalysis": "Lancez l'analyse préliminaire pour voir les candidats évalués.",
+        "emptyDefault": "Aucun candidat à afficher pour le moment.",
+        "profileModal": {
+          "aiProcessed": "Analyse traitée par IA",
+          "aiDisclosure": "Le contenu suivant a été généré par IA et est affiché sans modification.",
+          "attributes": "Attributs",
+          "qualitativeScore": "Score qualitatif",
+          "semanticSimilarity": "Similarité sémantique",
+          "attributeMatch": "Correspondance d'attributs",
+          "routePrefix": "Parcours :",
+          "strengths": "Points forts",
+          "considerations": "Points à considérer",
+          "qualitativeReasoning": "Raisonnement qualitatif",
+          "totalMatchScore": "Score total de correspondance :",
+          "noAdditionalInfo": "Aucune information supplémentaire disponible.",
+          "downloading": "Téléchargement…",
+          "downloadCv": "Télécharger le CV",
+          "viewFullProfile": "Voir le profil complet",
+          "close": "Fermer"
+        },
+        "scoreKeys": {
+          "qualitative": "Score qualitatif",
+          "semanticSimilarity": "Similarité sémantique",
+          "semanticScore": "Score sémantique",
+          "total": "Score total",
+          "attributesCombined": "Attributs combinés",
+          "keywordMatch": "Correspondance de mots-clés",
+          "experience": "Expérience",
+          "education": "Formation",
+          "skills": "Compétences"
+        },
+        "kanban": {
+          "score": "Score",
+          "moveStageAria": "Déplacer {name} vers une autre étape",
+          "statusAria": "Statut de {name}"
+        },
+        "aria": {
+          "matchedCandidates": "Candidats correspondants",
+          "preliminarySearch": "Recherche préliminaire",
+          "preliminaryAnalysis": "Analyse préliminaire",
+          "analysisProgress": "Progression de l'analyse préliminaire par IA",
+          "searchProgress": "Progression de la recherche préliminaire par IA",
+          "searchResults": "Résultats de recherche",
+          "possibleCandidates": "Candidats potentiels",
+          "selectAll": "Sélectionner tous les candidats",
+          "deselectAll": "Désélectionner tous les candidats",
+          "selectCandidate": "Sélectionner le candidat {name}",
+          "viewCandidate": "Voir le profil de {name}"
+        },
+        "toasts": {
+          "matchSuccess": "Correspondance exécutée avec succès.",
+          "matchFailed": "Impossible d'exécuter la correspondance.",
+          "loadMatchFailed": "Impossible de charger la correspondance.",
+          "processStarted": "Processus démarré…",
+          "processFailed": "Impossible de démarrer le processus.",
+          "manualFallbackSuffix": " Vous pouvez continuer avec les filtres et une revue manuelle."
+        },
+        "kpis": {
+          "preliminarySearchTitle": "Recherche préliminaire",
+          "preliminarySearchSubtitle": "De plusieurs heures à quelques secondes pour la première exploration",
+          "preliminaryMatchTitle": "Correspondance préliminaire",
+          "preliminaryMatchSubtitle": "Précision observée de 75 % à 80 %",
+          "preliminaryMatchGoal": "Objectif de calibration : 90 %",
+          "coverageTitle": "Couverture des résultats",
+          "coverageSubtitle": "Liste restreinte initiale avec candidats suggérés",
+          "coverageHint": "Point de départ pour la validation RH",
+          "prioritizationTitle": "Priorisation initiale assistée par IA"
+        },
+        "errors": {
+          "moveStageFailed": "Impossible de déplacer le candidat vers une autre étape.",
+          "missingDefaultApplicationStatus": "Le statut de candidature par défaut de l'entreprise est manquant. Le serveur en a besoin pour déplacer les candidats entre les étapes. Configurez-le dans Étapes (statuts) ou demandez à un administrateur de le faire.",
+          "updateApplicationStatusFailed": "Impossible de mettre à jour le statut de la candidature.",
+          "candidateMovedStage": "Candidat déplacé vers une autre étape.",
+          "applicationStatusUpdated": "Statut de candidature mis à jour.",
+          "missingApplicationId": "L'identifiant de candidature pour mettre à jour le statut est introuvable.",
+          "downloadCvFailed": "Impossible de télécharger le CV.",
+          "searchNoResults": "Aucun candidat trouvé dans la recherche.",
+          "searchAlreadyInPipeline": "Les candidats trouvés sont déjà dans Candidats potentiels ou Étapes.",
+          "goToStagesAria": "Aller à la section Étapes pour gérer les statuts de candidature",
+          "openProfileAria": "Ouvrir le profil du candidat dans un nouvel onglet"
+        },
+        "scoreTooltips": {
+          "semanticSimilarity": "Mesure dans quelle mesure le contenu du CV correspond à la description du poste, par comparaison sémantique du texte."
+        }
+      },
+      "rematch": {
+        "ariaLabel": "Réajuster les correspondances",
+        "titleNeedsRematch": "Exigences mises à jour. Il est recommandé de réajuster les correspondances.",
+        "titleDefault": "Réajuster les correspondances",
+        "adjusting": "Ajustement…",
+        "short": "Réajuster",
+        "label": "Réajuster la correspondance",
+        "success": "Succès !",
+        "processError": "Erreur de traitement",
+        "toastSuccess": "Correspondance réajustée avec succès.",
+        "toastError": "Erreur lors du réajustement de la correspondance"
+      }
+    },
+    "interviews": {
+      "form": {
+        "pageTitle": "Nouvel entretien",
+        "backToList": "← Retour à la liste",
+        "ariaLabel": "Formulaire de nouvel entretien",
+        "loadingCandidates": "Chargement des candidats du poste…",
+        "noCandidates": "Ce poste n'a pas encore de candidats. Ajoutez d'abord des candidats au poste ; vous pourrez ensuite planifier un entretien.",
+        "fields": {
+          "candidate": "Candidat",
+          "dateTime": "Date et heure",
+          "type": "Type",
+          "modality": "Modalité",
+          "interviewer": "Intervieweur",
+          "description": "Description"
+        },
+        "placeholders": {
+          "select": "Sélectionner…",
+          "selectModality": "Sélectionnez une modalité…",
+          "typeExample": "Ex. : technique, culturel…"
+        },
+        "loadingTypes": "Chargement des types d'entretien…",
+        "loadingModalities": "Chargement des modalités…",
+        "calendar": {
+          "willSync": "Cet entretien sera synchronisé avec Google Calendar à l'enregistrement (si le serveur le prend en charge).",
+          "notConnected": "Google Calendar n'est pas connecté.",
+          "connectLink": "Connecter dans les paramètres",
+          "notConnectedSuffix": "pour les invitations et les événements automatiques.",
+          "meetWillGenerate": "Un lien Google Meet sera généré à l'enregistrement (via Google Calendar).",
+          "meetNotConnected": "Cette modalité génère un lien Google Meet, mais Google Calendar n'est pas connecté.",
+          "meetNotConnectedSuffix": "pour qu'il soit créé automatiquement."
+        },
+        "validation": {
+          "selectCandidate": "Sélectionnez un candidat",
+          "indicateDateTime": "Indiquez la date et l'heure",
+          "invalidDateTime": "Date ou heure non valide"
+        },
+        "actions": {
+          "schedule": "Planifier l'entretien",
+          "scheduling": "Enregistrement…",
+          "cancel": "Annuler"
+        }
+      },
+      "detail": {
+        "pageTitle": "Entretien",
+        "backToInterviews": "← Retour aux entretiens",
+        "loading": "Chargement de l'entretien…",
+        "loadFailed": "Impossible de charger l'entretien.",
+        "close": "Fermer",
+        "backToList": "Retour à la liste",
+        "fields": {
+          "status": "Statut",
+          "dateTime": "Date et heure",
+          "type": "Type",
+          "modality": "Modalité",
+          "interviewer": "Intervieweur",
+          "description": "Description"
+        },
+        "statusAria": "Statut de l'entretien",
+        "terminalReadOnly": "Cet entretien est clôturé (statut terminal). Les données sont en lecture seule.",
+        "validation": {
+          "invalidDateTime": "La date ou l'heure n'est pas valide. Vérifiez le champ horaire."
+        },
+        "actions": {
+          "save": "Enregistrer les modifications",
+          "saving": "Enregistrement…",
+          "discard": "Annuler les modifications",
+          "delete": "Supprimer",
+          "deleteAria": "Supprimer l'entretien"
+        },
+        "deleteConfirm": {
+          "title": "Supprimer l'entretien",
+          "message": "Supprimer cet entretien ? Il sera archivé et ne s'affichera plus dans les listes."
+        }
+      },
+      "modals": {
+        "createTitle": "Nouvel entretien",
+        "detailTitle": "Gérer l'entretien",
+        "notesTitle": "Notes de l'entretien",
+        "notesField": "Notes",
+        "notesPlaceholder": "Rédigez des observations ou un suivi concernant cet entretien…",
+        "notesSave": "Enregistrer",
+        "notesSaving": "Enregistrement…"
+      },
+      "calendar": {
+        "title": "Google Calendar",
+        "notConnected": "Connectez votre Google Calendar dans les",
+        "settingsLink": "paramètres",
+        "notConnectedSuffix": "pour synchroniser les entretiens et envoyer des invitations.",
+        "noSchedule": "Définissez la date et l'heure de l'entretien pour générer ou lier l'événement dans Google Calendar.",
+        "loadingEvent": "Chargement de l'événement…",
+        "synced": "Événement synchronisé avec Google Calendar.",
+        "viewInGoogle": "Voir dans Google Calendar",
+        "pending": "Synchronisation en attente…",
+        "notSynced": "L'événement n'est pas synchronisé ou une erreur s'est produite.",
+        "noEvent": "Aucun événement lié pour le moment. Enregistrez l'entretien ou synchronisez depuis les paramètres.",
+        "retry": "Réessayer",
+        "updating": "Mise à jour…",
+        "toastSynced": "Statut du calendrier mis à jour.",
+        "syncFailed": "Impossible de synchroniser"
+      }
+    },
+    "aiDisclosure": {
+      "progressAria": "Progression du traitement par IA",
+      "preliminaryStepsAria": "Étapes de l'analyse préliminaire",
+      "processingStepsAria": "États du traitement",
+      "percentComplete": "{percent} pour cent",
+      "assistedByAi": "Assisté par IA"
+    }
+  },
+  "de": {
+    "reports": {
+      "breadcrumb": "Berichte",
+      "summary": {
+        "breadcrumb": "Zusammenfassung",
+        "title": "Zusammenfassender Berichtsüberblick",
+        "description": "Konsolidierte Kennzahlen für den Zeitraum. Wenden Sie Filter an, um nach Kunde und Datum einzugrenzen.",
+        "headerAria": "Berichtskopf",
+        "filtersAria": "Filter und Managementübersicht",
+        "filters": {
+          "client": "Kunde",
+          "from": "Von",
+          "to": "Bis",
+          "all": "Alle",
+          "apply": "Filter anwenden"
+        },
+        "actions": {
+          "downloadPdf": "PDF herunterladen"
+        },
+        "loadingStates": {
+          "loading": "Kennzahlen werden geladen…",
+          "updated": "Daten aktualisiert"
+        },
+        "errors": {
+          "loadFailed": "Die Zusammenfassung konnte nicht geladen werden."
+        },
+        "emptyStates": {
+          "noData": "Keine Daten zum Anzeigen"
+        },
+        "dashboard": {
+          "loadFailed": "Die Zusammenfassung konnte nicht geladen werden",
+          "loading": "Zusammenfassung wird geladen",
+          "kpisAria": "Hauptkennzahlen",
+          "clients": "Kunden",
+          "vacancies": "Stellen",
+          "openVacancies": "Offene Stellen",
+          "candidates": "Kandidaten",
+          "hired": "Eingestellt",
+          "vacancyStatus": "Stellenstatus",
+          "open": "Offen:",
+          "closed": "Geschlossen:",
+          "avgProgress": "Durchschnittlicher Stellenfortschritt",
+          "avgMatch": "Durchschnittliches vorläufiges Matching",
+          "candidateFlow": "Kandidatenfluss",
+          "registered": "Registriert",
+          "inInterview": "Im Vorstellungsgespräch",
+          "percentOfTotal": "% der Kandidaten insgesamt",
+          "noCandidatesInPeriod": "Keine Kandidaten im Zeitraum",
+          "technicalEvaluations": "Technische Bewertungen",
+          "mainSource": "Hauptquelle der Kandidatengewinnung",
+          "periodFindings": "Erkenntnisse des Zeitraums",
+          "insufficientData": "Unzureichende Daten für diese Kennzahl.",
+          "clientsRegistered": "Im Zeitraum registrierte Kunden",
+          "vacanciesCreated": "Erstellte Stellen",
+          "vacanciesDistribution": "Verteilung zwischen offenen und geschlossenen Stellen im Zeitraum.",
+          "candidatesRegistered": "Registrierte Kandidaten",
+          "candidatesHired": "Als eingestellt abgeschlossene Kandidaten",
+          "technicalEvaluationsSubtitle": "Nachverfolgung abgeschlossener Bewertungen und Bestehensquote.",
+          "mainSourceSubtitle": "Kanal mit der höchsten Aktivität im ausgewählten Zeitraum.",
+          "noRegisteredSource": "Keine registrierte Quelle",
+          "earlyStageHint": "Frühe Phase: Die meisten Prozesse haben noch erheblichen Aufwand vor sich im Verhältnis zum Gesamtfortschritt.",
+          "noVacanciesInPeriod": "Keine Stellen im ausgewählten Zeitraum registriert.",
+          "activeProcessesSubtitle": "Derzeit aktive Prozesse"
+        }
+      },
+      "dataView": {
+        "breadcrumb": "Berichte",
+        "invalidTemplateTitle": "Ungültige Berichtsvorlage",
+        "invalidTemplateBody": "Überprüfen Sie das in Administration → Vorlagen gespeicherte JSON.",
+        "all": "Alle",
+        "allFeminine": "Alle",
+        "client": "Kunde",
+        "rows": "Zeilen:",
+        "generatingPdf": "PDF wird erstellt…",
+        "downloadPdf": "PDF herunterladen",
+        "applyFilters": "Filter anwenden",
+        "clear": "Zurücksetzen",
+        "loadFailed": "Der Bericht konnte nicht geladen werden",
+        "retry": "Erneut versuchen",
+        "retryAria": "Berichtsladen erneut versuchen",
+        "loadingData": "Daten werden geladen…",
+        "loadingTemplate": "Berichtsvorlage wird geladen…",
+        "preview": "Vorschau",
+        "previewTitle": "Berichtsvorschau",
+        "noTemplate": "Keine JSON-Vorlage gefunden.",
+        "errors": {
+          "forbidden": "Sie haben keine Berechtigung, diesen Bericht einzusehen.",
+          "loadDataFailed": "Die Berichtsdaten konnten nicht geladen werden.",
+          "loadTemplateFailed": "Die Berichtsvorlage konnte nicht geladen werden.",
+          "pdfFailed": "Das PDF konnte nicht erstellt werden."
+        },
+        "headerAria": "Berichtskopf",
+        "liveDataHint": "Live-Berichtsdaten. Passen Sie die Filter an und wenden Sie sie an, um neu zu laden.",
+        "filtersAria": "Berichtsfilter"
+      },
+      "templateDetail": {
+        "loading": "Bericht wird geladen…",
+        "loadingConfig": "Berichtskonfiguration wird geladen…",
+        "loadingData": "Berichtsdaten werden geladen…",
+        "errorNoTemplate": "Keine Berichtsvorlage mit dieser Kennung gefunden.",
+        "errorNoConfig": "Diese Vorlage hat noch keine Berichtskonfiguration. Wenden Sie sich an den Administrator oder verwenden Sie einen Bericht aus der Liste.",
+        "errorNoContent": "Die Vorlage hat keinen HTML-Inhalt. Konfigurieren Sie contentTemplate in Administration → Vorlagen.",
+        "errorNoData": "Keine Daten für die ausgewählten Filter. Erweitern Sie den Zeitraum oder ändern Sie den Kunden.",
+        "errorForbidden": "Sie haben keine Berechtigung, diesen Bericht einzusehen.",
+        "errorGeneric": "Der Bericht konnte nicht geladen werden.",
+        "errorPreview": "Die Vorschau konnte nicht erstellt werden. Überprüfen Sie die Filter und versuchen Sie es erneut.",
+        "errorInvalidId": "Ungültige Vorlagenkennung.",
+        "downloadPdf": "PDF herunterladen",
+        "downloadingPdf": "PDF wird erstellt…",
+        "savingPdf": "Kopie wird im Verlauf gespeichert…",
+        "pdfExportFailed": "Das PDF konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+        "pdfHistoryWarning": "Das PDF wurde erfolgreich heruntergeladen, konnte aber nicht im Verlauf gespeichert werden. Sie können es später erneut versuchen.",
+        "previewTitle": "Berichtsvorschau",
+        "filtersHint": "Passen Sie die Filter an und wenden Sie sie an, um die Berichtsvorschau zu aktualisieren.",
+        "applyFilters": "Filter anwenden",
+        "legacyModeHint": "Temporärer Modus: Verwendung der Managementzusammenfassung, bis das Backend die dynamische Konfiguration bereitstellt.",
+        "reportKeyBadge": "Berichtstyp",
+        "headerAria": "Berichtskopf",
+        "filtersAria": "Berichtsfilter",
+        "backToReports": "Zurück zu Berichten",
+        "breadcrumbReport": "Bericht",
+        "breadcrumbReports": "Berichte",
+        "clientFallback": "Kunde"
+      },
+      "resolver": {
+        "loading": "Bericht wird im Katalog gesucht…",
+        "notFound": "Bericht nicht gefunden",
+        "openFailed": "Der Bericht konnte nicht geöffnet werden",
+        "backToReports": "Zurück zu Berichten",
+        "notFoundDetail": "Wir haben keinen Bericht mit dieser Kennung im Katalog gefunden.",
+        "unlinked": "Dieser Bericht hat noch keine verknüpfte Vorlage. Bitten Sie den Administrator, eine Vorlage im Berichtsmodul zu verknüpfen."
+      }
+    },
+    "vacancies": {
+      "matching": {
+        "sectionTitle": "KI-Vorabrecherche und -analyse",
+        "sectionDescription": "Erkunden Sie Kandidaten mit Vorabrecherche und KI-gestützter Analyse, bevor Sie sie in den Prozess übernehmen.",
+        "preliminarySearch": "Vorabrecherche",
+        "preliminaryAnalysis": "Vorabanalyse",
+        "updatingSearch": "KI-Suche wird aktualisiert…",
+        "reanalyzing": "Neuanalyse mit KI…",
+        "includeInProcess": "Zum Prozess hinzufügen",
+        "including": "Wird hinzugefügt…",
+        "startProcess": "Prozess starten",
+        "starting": "Wird gestartet…",
+        "searchResults": "Suchergebnisse",
+        "reanalyzingEllipsis": "Neuanalyse mit KI…",
+        "updatingSearchEllipsis": "KI-Suche wird aktualisiert…",
+        "selectAll": "Alle auswählen",
+        "deselectAll": "Alle abwählen",
+        "selectedCount": "{count} ausgewählt",
+        "possibleCandidates": "Mögliche Kandidaten",
+        "includeSelectedHint": "Ausgewählte Kandidaten zum Prozess hinzufügen",
+        "noSuggestions": "Keine Matching-Vorschläge für diese Stelle.",
+        "preliminaryMatchBadge": "KI-Vorab-Match",
+        "preliminaryAnalysisBadge": "KI-Vorabanalyse",
+        "aiSuggestionBadge": "KI-Vorschlag",
+        "score": "Punktzahl",
+        "viewProfile": "Profil anzeigen",
+        "uploadedPrefix": "Hochgeladen:",
+        "viewTechnicalSheet": "Technisches Datenblatt anzeigen",
+        "refreshAnalysis": "Analyse aktualisieren",
+        "loadingCandidates": "Kandidaten werden geladen",
+        "noCandidates": "Keine Kandidaten",
+        "emptySearch": "Führen Sie die Vorabrecherche aus, um vorgeschlagene Kandidaten zu sehen.",
+        "emptyAnalysis": "Führen Sie die Vorabanalyse aus, um bewertete Kandidaten zu sehen.",
+        "emptyDefault": "Derzeit keine Kandidaten zum Anzeigen.",
+        "profileModal": {
+          "aiProcessed": "Mit KI verarbeitete Analyse",
+          "aiDisclosure": "Der folgende Inhalt wurde von KI generiert und unverändert angezeigt.",
+          "attributes": "Attribute",
+          "qualitativeScore": "Qualitative Punktzahl",
+          "semanticSimilarity": "Semantische Ähnlichkeit",
+          "attributeMatch": "Attributübereinstimmung",
+          "routePrefix": "Pfad:",
+          "strengths": "Stärken",
+          "considerations": "Zu berücksichtigende Aspekte",
+          "qualitativeReasoning": "Qualitative Begründung",
+          "totalMatchScore": "Gesamte Matching-Punktzahl:",
+          "noAdditionalInfo": "Keine weiteren Informationen verfügbar.",
+          "downloading": "Wird heruntergeladen…",
+          "downloadCv": "Lebenslauf herunterladen",
+          "viewFullProfile": "Vollständiges Profil anzeigen",
+          "close": "Schließen"
+        },
+        "scoreKeys": {
+          "qualitative": "Qualitative Punktzahl",
+          "semanticSimilarity": "Semantische Ähnlichkeit",
+          "semanticScore": "Semantische Punktzahl",
+          "total": "Gesamtpunktzahl",
+          "attributesCombined": "Kombinierte Attribute",
+          "keywordMatch": "Schlüsselwortübereinstimmung",
+          "experience": "Berufserfahrung",
+          "education": "Ausbildung",
+          "skills": "Fähigkeiten"
+        },
+        "kanban": {
+          "score": "Punktzahl",
+          "moveStageAria": "{name} in eine andere Phase verschieben",
+          "statusAria": "Status von {name}"
+        },
+        "aria": {
+          "matchedCandidates": "Gematchte Kandidaten",
+          "preliminarySearch": "Vorabrecherche",
+          "preliminaryAnalysis": "Vorabanalyse",
+          "analysisProgress": "Fortschritt der KI-Vorabanalyse",
+          "searchProgress": "Fortschritt der KI-Vorabrecherche",
+          "searchResults": "Suchergebnisse",
+          "possibleCandidates": "Mögliche Kandidaten",
+          "selectAll": "Alle Kandidaten auswählen",
+          "deselectAll": "Alle Kandidaten abwählen",
+          "selectCandidate": "Kandidat {name} auswählen",
+          "viewCandidate": "Profil von {name} anzeigen"
+        },
+        "toasts": {
+          "matchSuccess": "Matching erfolgreich ausgeführt.",
+          "matchFailed": "Matching konnte nicht ausgeführt werden.",
+          "loadMatchFailed": "Matching konnte nicht geladen werden.",
+          "processStarted": "Prozess gestartet…",
+          "processFailed": "Der Prozess konnte nicht gestartet werden.",
+          "manualFallbackSuffix": " Sie können mit Filtern und manueller Prüfung fortfahren."
+        },
+        "kpis": {
+          "preliminarySearchTitle": "Vorabrecherche",
+          "preliminarySearchSubtitle": "Von Stunden auf Sekunden bei der ersten Erkundung",
+          "preliminaryMatchTitle": "Vorläufiges Matching",
+          "preliminaryMatchSubtitle": "Beobachtete Genauigkeit von 75 % bis 80 %",
+          "preliminaryMatchGoal": "Kalibrierungsziel: 90 %",
+          "coverageTitle": "Ergebnisabdeckung",
+          "coverageSubtitle": "Erste Shortlist mit vorgeschlagenen Kandidaten",
+          "coverageHint": "Ausgangspunkt für die HR-Validierung",
+          "prioritizationTitle": "KI-gestützte Erstpriorisierung"
+        },
+        "errors": {
+          "moveStageFailed": "Der Kandidat konnte nicht in eine andere Phase verschoben werden.",
+          "missingDefaultApplicationStatus": "Der Standard-Bewerbungsstatus des Unternehmens fehlt. Der Server benötigt ihn beim Verschieben von Kandidaten zwischen Phasen. Konfigurieren Sie ihn unter Phasen (Status) oder bitten Sie einen Administrator, dies zu tun.",
+          "updateApplicationStatusFailed": "Der Bewerbungsstatus konnte nicht aktualisiert werden.",
+          "candidateMovedStage": "Kandidat in eine andere Phase verschoben.",
+          "applicationStatusUpdated": "Bewerbungsstatus aktualisiert.",
+          "missingApplicationId": "Die Bewerbungs-ID zum Aktualisieren des Status wurde nicht gefunden.",
+          "downloadCvFailed": "Der Lebenslauf konnte nicht heruntergeladen werden.",
+          "searchNoResults": "In der Suche wurden keine Kandidaten gefunden.",
+          "searchAlreadyInPipeline": "Die gefundenen Kandidaten befinden sich bereits unter Mögliche Kandidaten oder Phasen.",
+          "goToStagesAria": "Zum Bereich Phasen gehen, um Bewerbungsstatus zu verwalten",
+          "openProfileAria": "Kandidatenprofil in neuem Tab öffnen"
+        },
+        "scoreTooltips": {
+          "semanticSimilarity": "Misst, wie gut der Lebenslauf-Inhalt mit der Stellenbeschreibung übereinstimmt, mittels semantischem Textvergleich."
+        }
+      },
+      "rematch": {
+        "ariaLabel": "Matching neu anpassen",
+        "titleNeedsRematch": "Anforderungen aktualisiert. Eine Neuanpassung des Matchings wird empfohlen.",
+        "titleDefault": "Matching neu anpassen",
+        "adjusting": "Wird angepasst…",
+        "short": "Neu anpassen",
+        "label": "Matching neu anpassen",
+        "success": "Erfolg!",
+        "processError": "Verarbeitungsfehler",
+        "toastSuccess": "Matching erfolgreich neu angepasst.",
+        "toastError": "Fehler beim Neu-Anpassen des Matchings"
+      }
+    },
+    "interviews": {
+      "form": {
+        "pageTitle": "Neues Vorstellungsgespräch",
+        "backToList": "← Zurück zur Liste",
+        "ariaLabel": "Formular für neues Vorstellungsgespräch",
+        "loadingCandidates": "Kandidaten der Stelle werden geladen…",
+        "noCandidates": "Diese Stelle hat noch keine Kandidaten. Fügen Sie zuerst Kandidaten zur Stelle hinzu; danach können Sie ein Vorstellungsgespräch planen.",
+        "fields": {
+          "candidate": "Kandidat",
+          "dateTime": "Datum und Uhrzeit",
+          "type": "Typ",
+          "modality": "Modalität",
+          "interviewer": "Interviewer",
+          "description": "Beschreibung"
+        },
+        "placeholders": {
+          "select": "Auswählen…",
+          "selectModality": "Modalität auswählen…",
+          "typeExample": "z. B. technisch, kulturell…"
+        },
+        "loadingTypes": "Gesprächstypen werden geladen…",
+        "loadingModalities": "Modalitäten werden geladen…",
+        "calendar": {
+          "willSync": "Dieses Gespräch wird beim Speichern mit Google Calendar synchronisiert (sofern der Server dies unterstützt).",
+          "notConnected": "Google Calendar ist nicht verbunden.",
+          "connectLink": "In den Einstellungen verbinden",
+          "notConnectedSuffix": "für Einladungen und automatische Termine.",
+          "meetWillGenerate": "Beim Speichern wird ein Google-Meet-Link erstellt (über Google Calendar).",
+          "meetNotConnected": "Diese Modalität erzeugt einen Google-Meet-Link, aber Google Calendar ist nicht verbunden.",
+          "meetNotConnectedSuffix": "damit er automatisch erstellt werden kann."
+        },
+        "validation": {
+          "selectCandidate": "Wählen Sie einen Kandidaten",
+          "indicateDateTime": "Geben Sie Datum und Uhrzeit an",
+          "invalidDateTime": "Ungültiges Datum oder Uhrzeit"
+        },
+        "actions": {
+          "schedule": "Gespräch planen",
+          "scheduling": "Wird gespeichert…",
+          "cancel": "Abbrechen"
+        }
+      },
+      "detail": {
+        "pageTitle": "Vorstellungsgespräch",
+        "backToInterviews": "← Zurück zu Gesprächen",
+        "loading": "Gespräch wird geladen…",
+        "loadFailed": "Das Gespräch konnte nicht geladen werden.",
+        "close": "Schließen",
+        "backToList": "Zurück zur Liste",
+        "fields": {
+          "status": "Status",
+          "dateTime": "Datum und Uhrzeit",
+          "type": "Typ",
+          "modality": "Modalität",
+          "interviewer": "Interviewer",
+          "description": "Beschreibung"
+        },
+        "statusAria": "Status des Gesprächs",
+        "terminalReadOnly": "Dieses Gespräch ist abgeschlossen (Endstatus). Die Daten sind schreibgeschützt.",
+        "validation": {
+          "invalidDateTime": "Datum oder Uhrzeit ist ungültig. Überprüfen Sie das Uhrzeitfeld."
+        },
+        "actions": {
+          "save": "Änderungen speichern",
+          "saving": "Wird gespeichert…",
+          "discard": "Änderungen verwerfen",
+          "delete": "Löschen",
+          "deleteAria": "Gespräch löschen"
+        },
+        "deleteConfirm": {
+          "title": "Gespräch löschen",
+          "message": "Dieses Gespräch löschen? Es wird archiviert und erscheint nicht mehr in den Listen."
+        }
+      },
+      "modals": {
+        "createTitle": "Neues Vorstellungsgespräch",
+        "detailTitle": "Gespräch verwalten",
+        "notesTitle": "Gesprächsnotizen",
+        "notesField": "Notizen",
+        "notesPlaceholder": "Schreiben Sie Beobachtungen oder Nachverfolgung zu diesem Gespräch…",
+        "notesSave": "Speichern",
+        "notesSaving": "Wird gespeichert…"
+      },
+      "calendar": {
+        "title": "Google Calendar",
+        "notConnected": "Verbinden Sie Ihren Google Calendar in den",
+        "settingsLink": "Einstellungen",
+        "notConnectedSuffix": "um Gespräche zu synchronisieren und Einladungen zu senden.",
+        "noSchedule": "Legen Sie Datum und Uhrzeit des Gesprächs fest, um den Termin in Google Calendar zu erstellen oder zu verknüpfen.",
+        "loadingEvent": "Termin wird geladen…",
+        "synced": "Termin mit Google Calendar synchronisiert.",
+        "viewInGoogle": "In Google Calendar anzeigen",
+        "pending": "Synchronisierung ausstehend…",
+        "notSynced": "Der Termin ist nicht synchronisiert oder es ist ein Fehler aufgetreten.",
+        "noEvent": "Noch kein verknüpfter Termin. Speichern Sie das Gespräch oder synchronisieren Sie über die Einstellungen.",
+        "retry": "Erneut versuchen",
+        "updating": "Wird aktualisiert…",
+        "toastSynced": "Kalenderstatus aktualisiert.",
+        "syncFailed": "Synchronisierung fehlgeschlagen"
+      }
+    },
+    "aiDisclosure": {
+      "progressAria": "Fortschritt der KI-Verarbeitung",
+      "preliminaryStepsAria": "Schritte der Vorabanalyse",
+      "processingStepsAria": "Verarbeitungsstatus",
+      "percentComplete": "{percent} Prozent",
+      "assistedByAi": "KI-gestützt"
+    }
+  },
+  "it": {
+    "reports": {
+      "breadcrumb": "Report",
+      "summary": {
+        "breadcrumb": "Riepilogo",
+        "title": "Riepilogo esecutivo dei report",
+        "description": "Indicatori consolidati del periodo. Applica i filtri per restringere per cliente e date.",
+        "headerAria": "Intestazione del report",
+        "filtersAria": "Filtri e pannello esecutivo",
+        "filters": {
+          "client": "Cliente",
+          "from": "Da",
+          "to": "A",
+          "all": "Tutti",
+          "apply": "Applica filtri"
+        },
+        "actions": {
+          "downloadPdf": "Scarica PDF"
+        },
+        "loadingStates": {
+          "loading": "Caricamento indicatori…",
+          "updated": "Dati aggiornati"
+        },
+        "errors": {
+          "loadFailed": "Impossibile caricare il riepilogo."
+        },
+        "emptyStates": {
+          "noData": "Nessun dato da mostrare"
+        },
+        "dashboard": {
+          "loadFailed": "Impossibile caricare il riepilogo",
+          "loading": "Caricamento riepilogo",
+          "kpisAria": "Indicatori principali",
+          "clients": "Clienti",
+          "vacancies": "Posizioni aperte",
+          "openVacancies": "Posizioni aperte",
+          "candidates": "Candidati",
+          "hired": "Assunti",
+          "vacancyStatus": "Stato delle posizioni",
+          "open": "Aperte:",
+          "closed": "Chiuse:",
+          "avgProgress": "Progresso medio delle posizioni",
+          "avgMatch": "Corrispondenza preliminare media",
+          "candidateFlow": "Flusso candidati",
+          "registered": "Registrati",
+          "inInterview": "In colloquio",
+          "percentOfTotal": "% del totale candidati",
+          "noCandidatesInPeriod": "Nessun candidato nel periodo",
+          "technicalEvaluations": "Valutazioni tecniche",
+          "mainSource": "Principale canale di sourcing",
+          "periodFindings": "Risultati del periodo",
+          "insufficientData": "Dati insufficienti per questo indicatore.",
+          "clientsRegistered": "Clienti registrati nel periodo",
+          "vacanciesCreated": "Posizioni create",
+          "vacanciesDistribution": "Distribuzione tra posizioni aperte e chiuse nel periodo.",
+          "candidatesRegistered": "Candidati registrati",
+          "candidatesHired": "Candidati conclusi come assunti",
+          "technicalEvaluationsSubtitle": "Monitoraggio delle valutazioni completate e tasso di superamento.",
+          "mainSourceSubtitle": "Canale con la maggiore attività registrata nel periodo selezionato.",
+          "noRegisteredSource": "Nessuna fonte registrata",
+          "earlyStageHint": "Fase iniziale: la maggior parte dei processi ha ancora molto lavoro davanti rispetto all'avanzamento complessivo.",
+          "noVacanciesInPeriod": "Nessuna posizione registrata nel periodo selezionato.",
+          "activeProcessesSubtitle": "Processi attualmente attivi"
+        }
+      },
+      "dataView": {
+        "breadcrumb": "Report",
+        "invalidTemplateTitle": "Modello di report non valido",
+        "invalidTemplateBody": "Controlla il JSON salvato in Amministrazione → Modelli.",
+        "all": "Tutti",
+        "allFeminine": "Tutte",
+        "client": "Cliente",
+        "rows": "Righe:",
+        "generatingPdf": "Generazione PDF…",
+        "downloadPdf": "Scarica PDF",
+        "applyFilters": "Applica filtri",
+        "clear": "Cancella",
+        "loadFailed": "Impossibile caricare il report",
+        "retry": "Riprova",
+        "retryAria": "Riprova caricamento report",
+        "loadingData": "Caricamento dati…",
+        "loadingTemplate": "Caricamento modello report…",
+        "preview": "Anteprima",
+        "previewTitle": "Anteprima del report",
+        "noTemplate": "Nessun modello JSON trovato.",
+        "errors": {
+          "forbidden": "Non hai i permessi per consultare questo report.",
+          "loadDataFailed": "Impossibile caricare i dati del report.",
+          "loadTemplateFailed": "Impossibile caricare il modello del report.",
+          "pdfFailed": "Impossibile generare il PDF."
+        },
+        "headerAria": "Intestazione del report",
+        "liveDataHint": "Dati in tempo reale del report. Modifica i filtri e applica per ricaricare.",
+        "filtersAria": "Filtri del report"
+      },
+      "templateDetail": {
+        "loading": "Caricamento report…",
+        "loadingConfig": "Caricamento configurazione report…",
+        "loadingData": "Caricamento dati report…",
+        "errorNoTemplate": "Nessun modello di report trovato con quell'identificatore.",
+        "errorNoConfig": "Questo modello non ha ancora la configurazione del report. Contatta l'amministratore o usa un report dall'elenco.",
+        "errorNoContent": "Il modello non ha contenuto HTML. Configura contentTemplate in Amministrazione → Modelli.",
+        "errorNoData": "Nessun dato per i filtri selezionati. Prova ad ampliare l'intervallo o a cambiare il cliente.",
+        "errorForbidden": "Non hai i permessi per visualizzare questo report.",
+        "errorGeneric": "Impossibile caricare il report.",
+        "errorPreview": "Impossibile generare l'anteprima. Controlla i filtri e riprova.",
+        "errorInvalidId": "Identificatore modello non valido.",
+        "downloadPdf": "Scarica PDF",
+        "downloadingPdf": "Generazione PDF…",
+        "savingPdf": "Salvataggio copia nella cronologia…",
+        "pdfExportFailed": "Impossibile generare il PDF. Riprova.",
+        "pdfHistoryWarning": "Il PDF è stato scaricato correttamente, ma non è stato possibile salvarlo nella cronologia. Puoi riprovare più tardi.",
+        "previewTitle": "Anteprima del report",
+        "filtersHint": "Modifica i filtri e applica per aggiornare l'anteprima del report.",
+        "applyFilters": "Applica filtri",
+        "legacyModeHint": "Modalità temporanea: uso del riepilogo esecutivo fino alla pubblicazione della configurazione dinamica da parte del backend.",
+        "reportKeyBadge": "Tipo di report",
+        "headerAria": "Intestazione del report",
+        "filtersAria": "Filtri del report",
+        "backToReports": "Torna ai report",
+        "breadcrumbReport": "Report",
+        "breadcrumbReports": "Report",
+        "clientFallback": "Cliente"
+      },
+      "resolver": {
+        "loading": "Ricerca del report nel catalogo…",
+        "notFound": "Report non trovato",
+        "openFailed": "Impossibile aprire il report",
+        "backToReports": "Torna ai report",
+        "notFoundDetail": "Non abbiamo trovato un report con quell'identificatore nel catalogo.",
+        "unlinked": "Questo report non ha ancora un modello collegato. Chiedi all'amministratore di collegarne uno dal modulo report."
+      }
+    },
+    "vacancies": {
+      "matching": {
+        "sectionTitle": "Ricerca e analisi preliminare con IA",
+        "sectionDescription": "Esplora i candidati con ricerca preliminare e analisi assistita da IA prima di inserirli nel processo.",
+        "preliminarySearch": "Ricerca preliminare",
+        "preliminaryAnalysis": "Analisi preliminare",
+        "updatingSearch": "Aggiornamento ricerca IA…",
+        "reanalyzing": "Rianalisi con IA…",
+        "includeInProcess": "Includi nel processo",
+        "including": "Inclusione…",
+        "startProcess": "Avvia processo",
+        "starting": "Avvio…",
+        "searchResults": "Risultati di ricerca",
+        "reanalyzingEllipsis": "Rianalisi con IA…",
+        "updatingSearchEllipsis": "Aggiornamento ricerca IA…",
+        "selectAll": "Seleziona tutti",
+        "deselectAll": "Deseleziona tutti",
+        "selectedCount": "{count} selezionato/i",
+        "possibleCandidates": "Candidati possibili",
+        "includeSelectedHint": "Includi nel processo i candidati selezionati",
+        "noSuggestions": "Nessun suggerimento di corrispondenza per questa posizione.",
+        "preliminaryMatchBadge": "Corrispondenza preliminare IA",
+        "preliminaryAnalysisBadge": "Analisi preliminare IA",
+        "aiSuggestionBadge": "Suggerimento IA",
+        "score": "Punteggio",
+        "viewProfile": "Vedi profilo",
+        "uploadedPrefix": "Caricato:",
+        "viewTechnicalSheet": "Vedi scheda tecnica",
+        "refreshAnalysis": "Aggiorna analisi",
+        "loadingCandidates": "Caricamento candidati",
+        "noCandidates": "Nessun candidato",
+        "emptySearch": "Esegui la ricerca preliminare per vedere i candidati suggeriti.",
+        "emptyAnalysis": "Esegui l'analisi preliminare per vedere i candidati valutati.",
+        "emptyDefault": "Nessun candidato da mostrare al momento.",
+        "profileModal": {
+          "aiProcessed": "Analisi elaborata con IA",
+          "aiDisclosure": "Il contenuto seguente è stato generato da IA e viene mostrato senza modifiche.",
+          "attributes": "Attributi",
+          "qualitativeScore": "Punteggio qualitativo",
+          "semanticSimilarity": "Similarità semantica",
+          "attributeMatch": "Corrispondenza attributi",
+          "routePrefix": "Percorso:",
+          "strengths": "Punti di forza",
+          "considerations": "Aspetti da considerare",
+          "qualitativeReasoning": "Ragionamento qualitativo",
+          "totalMatchScore": "Punteggio totale di corrispondenza:",
+          "noAdditionalInfo": "Nessuna informazione aggiuntiva disponibile.",
+          "downloading": "Download in corso…",
+          "downloadCv": "Scarica CV",
+          "viewFullProfile": "Vedi profilo completo",
+          "close": "Chiudi"
+        },
+        "scoreKeys": {
+          "qualitative": "Punteggio qualitativo",
+          "semanticSimilarity": "Similarità semantica",
+          "semanticScore": "Punteggio semantico",
+          "total": "Punteggio totale",
+          "attributesCombined": "Attributi combinati",
+          "keywordMatch": "Corrispondenza parole chiave",
+          "experience": "Esperienza",
+          "education": "Formazione",
+          "skills": "Competenze"
+        },
+        "kanban": {
+          "score": "Punteggio",
+          "moveStageAria": "Sposta {name} in un'altra fase",
+          "statusAria": "Stato di {name}"
+        },
+        "aria": {
+          "matchedCandidates": "Candidati con corrispondenza",
+          "preliminarySearch": "Ricerca preliminare",
+          "preliminaryAnalysis": "Analisi preliminare",
+          "analysisProgress": "Progresso dell'analisi preliminare con IA",
+          "searchProgress": "Progresso della ricerca preliminare con IA",
+          "searchResults": "Risultati di ricerca",
+          "possibleCandidates": "Candidati possibili",
+          "selectAll": "Seleziona tutti i candidati",
+          "deselectAll": "Deseleziona tutti i candidati",
+          "selectCandidate": "Seleziona candidato {name}",
+          "viewCandidate": "Vedi profilo di {name}"
+        },
+        "toasts": {
+          "matchSuccess": "Corrispondenza eseguita correttamente.",
+          "matchFailed": "Impossibile eseguire la corrispondenza.",
+          "loadMatchFailed": "Impossibile caricare la corrispondenza.",
+          "processStarted": "Processo avviato…",
+          "processFailed": "Impossibile avviare il processo.",
+          "manualFallbackSuffix": " Puoi continuare con filtri e revisione manuale."
+        },
+        "kpis": {
+          "preliminarySearchTitle": "Ricerca preliminare",
+          "preliminarySearchSubtitle": "Da ore a secondi nella prima esplorazione",
+          "preliminaryMatchTitle": "Corrispondenza preliminare",
+          "preliminaryMatchSubtitle": "Precisione osservata dal 75% all'80%",
+          "preliminaryMatchGoal": "Obiettivo di calibrazione: 90%",
+          "coverageTitle": "Copertura dei risultati",
+          "coverageSubtitle": "Shortlist iniziale con candidati suggeriti",
+          "coverageHint": "Punto di partenza per la validazione HR",
+          "prioritizationTitle": "Prioritizzazione iniziale assistita da IA"
+        },
+        "errors": {
+          "moveStageFailed": "Impossibile spostare il candidato di fase.",
+          "missingDefaultApplicationStatus": "Manca lo stato di candidatura predefinito dell'azienda. Il server ne ha bisogno quando si spostano candidati tra le fasi. Configuralo in Fasi (stati) o chiedi a un amministratore di farlo.",
+          "updateApplicationStatusFailed": "Impossibile aggiornare lo stato della candidatura.",
+          "candidateMovedStage": "Candidato spostato di fase.",
+          "applicationStatusUpdated": "Stato candidatura aggiornato.",
+          "missingApplicationId": "ID candidatura non trovato per aggiornare lo stato.",
+          "downloadCvFailed": "Impossibile scaricare il CV.",
+          "searchNoResults": "Nessun candidato trovato nella ricerca.",
+          "searchAlreadyInPipeline": "I candidati trovati sono già in Candidati possibili o Fasi.",
+          "goToStagesAria": "Vai alla sezione Fasi per gestire gli stati di candidatura",
+          "openProfileAria": "Apri il profilo del candidato in una nuova scheda"
+        },
+        "scoreTooltips": {
+          "semanticSimilarity": "Misura quanto il contenuto del CV è allineato alla descrizione della posizione, usando il confronto semantico del testo."
+        }
+      },
+      "rematch": {
+        "ariaLabel": "Ricalibra corrispondenze",
+        "titleNeedsRematch": "Requisiti aggiornati. Si consiglia di ricalibrare le corrispondenze.",
+        "titleDefault": "Ricalibra corrispondenze",
+        "adjusting": "Ricalibrazione…",
+        "short": "Ricalibra",
+        "label": "Ricalibra corrispondenza",
+        "success": "Operazione riuscita!",
+        "processError": "Errore di elaborazione",
+        "toastSuccess": "Corrispondenza ricalibrata correttamente.",
+        "toastError": "Errore durante la ricalibrazione della corrispondenza"
+      }
+    },
+    "interviews": {
+      "form": {
+        "pageTitle": "Nuovo colloquio",
+        "backToList": "← Torna all'elenco",
+        "ariaLabel": "Modulo nuovo colloquio",
+        "loadingCandidates": "Caricamento candidati della posizione…",
+        "noCandidates": "Questa posizione non ha ancora candidati. Aggiungi prima i candidati alla posizione; poi potrai programmare un colloquio.",
+        "fields": {
+          "candidate": "Candidato",
+          "dateTime": "Data e ora",
+          "type": "Tipo",
+          "modality": "Modalità",
+          "interviewer": "Intervistatore",
+          "description": "Descrizione"
+        },
+        "placeholders": {
+          "select": "Seleziona…",
+          "selectModality": "Seleziona una modalità…",
+          "typeExample": "Es.: tecnico, culturale…"
+        },
+        "loadingTypes": "Caricamento tipi di colloquio…",
+        "loadingModalities": "Caricamento modalità…",
+        "calendar": {
+          "willSync": "Questo colloquio verrà sincronizzato con Google Calendar al salvataggio (se il server lo supporta).",
+          "notConnected": "Google Calendar non è connesso.",
+          "connectLink": "Connetti nelle impostazioni",
+          "notConnectedSuffix": "per inviti ed eventi automatici.",
+          "meetWillGenerate": "Verrà generato un link Google Meet al salvataggio (tramite Google Calendar).",
+          "meetNotConnected": "Questa modalità genera un link Google Meet, ma Google Calendar non è connesso.",
+          "meetNotConnectedSuffix": "affinché venga creato automaticamente."
+        },
+        "validation": {
+          "selectCandidate": "Seleziona un candidato",
+          "indicateDateTime": "Indica data e ora",
+          "invalidDateTime": "Data o ora non valida"
+        },
+        "actions": {
+          "schedule": "Programma colloquio",
+          "scheduling": "Salvataggio…",
+          "cancel": "Annulla"
+        }
+      },
+      "detail": {
+        "pageTitle": "Colloquio",
+        "backToInterviews": "← Torna ai colloqui",
+        "loading": "Caricamento colloquio…",
+        "loadFailed": "Impossibile caricare il colloquio.",
+        "close": "Chiudi",
+        "backToList": "Torna all'elenco",
+        "fields": {
+          "status": "Stato",
+          "dateTime": "Data e ora",
+          "type": "Tipo",
+          "modality": "Modalità",
+          "interviewer": "Intervistatore",
+          "description": "Descrizione"
+        },
+        "statusAria": "Stato del colloquio",
+        "terminalReadOnly": "Questo colloquio è chiuso (stato terminale). I dati sono in sola lettura.",
+        "validation": {
+          "invalidDateTime": "La data o l'ora non è valida. Controlla il campo orario."
+        },
+        "actions": {
+          "save": "Salva modifiche",
+          "saving": "Salvataggio…",
+          "discard": "Annulla modifiche",
+          "delete": "Elimina",
+          "deleteAria": "Elimina colloquio"
+        },
+        "deleteConfirm": {
+          "title": "Elimina colloquio",
+          "message": "Eliminare questo colloquio? Verrà archiviato e non sarà più visibile negli elenchi."
+        }
+      },
+      "modals": {
+        "createTitle": "Nuovo colloquio",
+        "detailTitle": "Gestisci colloquio",
+        "notesTitle": "Note del colloquio",
+        "notesField": "Appunti",
+        "notesPlaceholder": "Scrivi osservazioni o follow-up su questo colloquio…",
+        "notesSave": "Salva",
+        "notesSaving": "Salvataggio…"
+      },
+      "calendar": {
+        "title": "Google Calendar",
+        "notConnected": "Connetti il tuo Google Calendar nelle",
+        "settingsLink": "impostazioni",
+        "notConnectedSuffix": "per sincronizzare i colloqui e inviare inviti.",
+        "noSchedule": "Imposta data e ora del colloquio per generare o collegare l'evento in Google Calendar.",
+        "loadingEvent": "Caricamento evento…",
+        "synced": "Evento sincronizzato con Google Calendar.",
+        "viewInGoogle": "Vedi in Google Calendar",
+        "pending": "Sincronizzazione in sospeso…",
+        "notSynced": "L'evento non è sincronizzato o si è verificato un errore.",
+        "noEvent": "Nessun evento collegato ancora. Salva il colloquio o sincronizza dalle impostazioni.",
+        "retry": "Riprova",
+        "updating": "Aggiornamento…",
+        "toastSynced": "Stato calendario aggiornato.",
+        "syncFailed": "Impossibile sincronizzare"
+      }
+    },
+    "aiDisclosure": {
+      "progressAria": "Progresso dell'elaborazione con IA",
+      "preliminaryStepsAria": "Fasi dell'analisi preliminare",
+      "processingStepsAria": "Stati dell'elaborazione",
+      "percentComplete": "{percent} per cento",
+      "assistedByAi": "Assistito da IA"
+    }
+  }
+}

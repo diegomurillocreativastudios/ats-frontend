@@ -9,11 +9,12 @@ import type { Locale } from "@/i18n/routing"
 import esMessages from "@/messages/es.json"
 import enMessages from "@/messages/en.json"
 
-const { useCurrentUserMock } = vi.hoisted(() => ({
+const { useCurrentUserMock, usePathnameMock } = vi.hoisted(() => ({
   useCurrentUserMock: vi.fn(() => ({
     user: { name: "Ada Lovelace", email: "ada@example.com", role: "admin" },
     loading: false,
   })),
+  usePathnameMock: vi.fn(() => "/portal-admin"),
 }))
 
 vi.mock("@/hooks/useCurrentUser", () => ({
@@ -22,7 +23,7 @@ vi.mock("@/hooks/useCurrentUser", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
-  usePathname: () => "/portal-admin",
+  usePathname: usePathnameMock,
 }))
 
 const messagesByLocale = { es: esMessages, en: enMessages } as const
@@ -37,6 +38,7 @@ function renderWithIntl(ui: React.ReactNode, locale: Locale) {
 
 beforeEach(() => {
   useCurrentUserMock.mockClear()
+  usePathnameMock.mockReturnValue("/portal-admin")
 })
 
 describe("Topbars i18n (Etapa 3)", () => {
@@ -72,5 +74,15 @@ describe("Topbars i18n (Etapa 3)", () => {
     fireEvent.click(screen.getByRole("button", { name: "User menu" }))
     const menu = screen.getByRole("menu")
     expect(within(menu).getByText("Log out")).toBeInTheDocument()
+  })
+
+  it("AdminTopbar traduce el breadcrumb de etapas con la misma clave que el sidebar", () => {
+    usePathnameMock.mockReturnValue("/portal-admin/etapas")
+    const { unmount } = renderWithIntl(<AdminTopbar />, "es")
+    expect(screen.getByText("Etapas")).toBeInTheDocument()
+    unmount()
+
+    renderWithIntl(<AdminTopbar />, "en")
+    expect(screen.getByText("Stages")).toBeInTheDocument()
   })
 })

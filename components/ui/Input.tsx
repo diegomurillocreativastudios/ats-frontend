@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export function Input({
   label,
@@ -16,6 +17,7 @@ export function Input({
   className = '',
   ...props
 }) {
+  const t = useTranslations('Common');
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
   const inputType = isPassword && showPassword ? 'text' : type;
@@ -59,7 +61,7 @@ export function Input({
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none focus:text-black"
-            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            aria-label={showPassword ? t('hidePassword') : t('showPassword')}
             tabIndex={-1}
           >
             {showPassword ? (

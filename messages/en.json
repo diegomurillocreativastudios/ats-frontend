@@ -2,10 +2,35 @@
   "Common": {
     "loading": "Loading...",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "closeModal": "Close modal",
+    "closeNotification": "Close notification",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "pickDate": "Pick a date",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "delete": "Delete",
+    "unspecified": "No especificar",
+    "downloadPdf": "Descargar PDF",
+    "generatingPdf": "Generando PDF...",
+    "userFallback": "User",
+    "adminRoleFallback": "Administrador",
+    "selectPlaceholder": "Select...",
+    "retry": "Retry",
+    "search": "Search",
+    "clear": "Clear",
+    "edit": "Edit",
+    "create": "Crear",
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue"
   },
   "Actions": {
-    "logout": "Log out"
+    "logout": "Log out",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "Navigation": {
     "home": "Home",
@@ -121,7 +146,37 @@
       "invalidCardBody": "A verified email or a valid token is missing. Go back to \"Forgot your password?\" and complete the previous step.",
       "invalidGoForgot": "Go to forgot my password"
     },
-    "loadingFallback": "Loading…"
+    "loadingFallback": "Loading…",
+    "register": {
+      "brandTitle": "Únete a la plataforma líder en reclutamiento",
+      "brandSubtitle": "Crea tu cuenta y comienza a optimizar tu proceso de selección con IA.",
+      "brandSubtitleSm": "Crea tu cuenta y optimiza tu selección.",
+      "feature1": "Configuración rápida en minutos",
+      "feature2": "Datos seguros y encriptados",
+      "feature3": "Soporte 24/7 disponible",
+      "tabletTitle": "Sistema de Reclutamiento Inteligente",
+      "title": "Sign up",
+      "subtitle": "Completa tus datos",
+      "subtitleExtended": "para registrarte",
+      "emailLabel": "Email",
+      "emailPlaceholder": "juan@empresa.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Mínimo 8 caracteres",
+      "confirmPasswordLabel": "Confirm password",
+      "confirmPasswordPlaceholder": "Repetir contraseña",
+      "showPasswords": "Mostrar contraseñas",
+      "showPasswordsAria": "Mostrar contraseñas",
+      "submit": "Crear Cuenta",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "toastSuccess": "Cuenta creada correctamente. Ya puedes iniciar sesión.",
+      "errors": {
+        "generic": "Error al crear la cuenta. Intenta de nuevo.",
+        "emailTaken": "Este correo ya está registrado.",
+        "server": "Error del servidor. Intenta más tarde."
+      }
+    }
   },
   "Validation": {
     "userOrEmailRequired": "Enter your username or email",
@@ -147,6 +202,10 @@
       "resetPassword": {
         "title": "Reset password",
         "description": "Set a new password after verifying your email or with the recovery link"
+      },
+      "register": {
+        "title": "Registrarse",
+        "description": "Create tu cuenta en la plataforma ATS"
       }
     },
     "portalSelection": {
@@ -188,9 +247,80 @@
         "title": "Users",
         "description": "Manage the platform's users"
       },
+      "stages": {
+        "title": "Stages",
+        "description": "Manage recruitment process stages and statuses"
+      },
+      "templates": {
+        "title": "Templates",
+        "description": "Manage notification and document templates"
+      },
+      "departments": {
+        "title": "Departments",
+        "description": "Manage the global catalog of vacancy departments"
+      },
+      "modalities": {
+        "title": "Modalities",
+        "description": "Manage the global catalog of vacancy modalities"
+      },
+      "documentTypes": {
+        "title": "Document Types",
+        "description": "Manage the global catalog of identity document types"
+      },
+      "interviewsCatalog": {
+        "title": "Interviews",
+        "description": "Catalogs of interview types, modalities, and statuses"
+      },
+      "interviewsCalendar": {
+        "title": "Interview calendar | Admin Portal",
+        "description": "Overview of scheduled interviews"
+      },
       "configuration": {
         "title": "Settings",
         "description": "General settings of the administration portal"
+      }
+    },
+    "root": {
+      "description": "Portal del candidate - Resumen de tu proceso de seleccion"
+    },
+    "candidatePortal": {
+      "home": {
+        "title": "ATS | Portal Candidate",
+        "description": "Portal del candidate - Resumen de tu proceso de seleccion"
+      },
+      "documents": {
+        "title": "ATS | Portal Candidate | Documents",
+        "description": "Manage tus documentos en el portal del candidate"
+      },
+      "interviews": {
+        "title": "ATS | Portal Candidate | Interviews",
+        "description": "View tus interviews agendadas e historial en el portal del candidate"
+      }
+    },
+    "recruiterPortal": {
+      "title": "ATS | Portal RRHH",
+      "description": "Portal RRHH - Dashboard de reclutamiento y gestion de candidates"
+    },
+    "recruiterCandidates": {
+      "title": "ATS | Portal RRHH | Candidates",
+      "description": "Manage los candidates y sus perfiles en el portal RRHH"
+    },
+    "recruiterSettings": {
+      "title": "ATS | Portal RRHH | Settings",
+      "description": "Settings del portal RRHH"
+    },
+    "publicOpportunities": {
+      "list": {
+        "title": "ATS | Opportunities",
+        "description": "Browse active vacancies by department and work mode"
+      },
+      "detail": {
+        "title": "ATS | Opportunities | Vacancy",
+        "description": "Public details of an active vacancy"
+      },
+      "apply": {
+        "title": "ATS | Opportunities | Apply",
+        "description": "Public form to apply for an active vacancy"
       }
     }
   },
@@ -757,6 +887,135 @@
         "catalogLoadFailed": "Could not load the reports catalog.",
         "catalogForbidden": "You do not have permission to view the reports catalog.",
         "pdfFailed": "The PDF could not be generated."
+      },
+      "summary": {
+        "breadcrumb": "Summary",
+        "title": "Executive report summary",
+        "description": "Consolidated indicators for the period. Apply filters to narrow by client and dates.",
+        "headerAria": "Report header",
+        "filtersAria": "Filters and executive panel",
+        "filters": {
+          "client": "Client",
+          "from": "From",
+          "to": "To",
+          "all": "All",
+          "apply": "Apply filters"
+        },
+        "actions": {
+          "downloadPdf": "Download PDF"
+        },
+        "loadingStates": {
+          "loading": "Loading indicators…",
+          "updated": "Data updated"
+        },
+        "errors": {
+          "loadFailed": "The summary could not be loaded."
+        },
+        "emptyStates": {
+          "noData": "No data to display"
+        },
+        "dashboard": {
+          "loadFailed": "The summary could not be loaded",
+          "loading": "Loading summary",
+          "kpisAria": "Key indicators",
+          "clients": "Clients",
+          "vacancies": "Vacancies",
+          "openVacancies": "Open vacancies",
+          "candidates": "Candidates",
+          "hired": "Hired",
+          "vacancyStatus": "Vacancy status",
+          "open": "Open:",
+          "closed": "Closed:",
+          "avgProgress": "Average vacancy progress",
+          "avgMatch": "Average preliminary matching",
+          "candidateFlow": "Candidate flow",
+          "registered": "Registered",
+          "inInterview": "In interview",
+          "percentOfTotal": "% of total candidates",
+          "noCandidatesInPeriod": "No candidates in the period",
+          "technicalEvaluations": "Technical evaluations",
+          "mainSource": "Primary sourcing channel",
+          "periodFindings": "Period findings",
+          "insufficientData": "Insufficient data for this indicator.",
+          "clientsRegistered": "Clients registered in the period",
+          "vacanciesCreated": "Vacancies created",
+          "vacanciesDistribution": "Distribution between open and closed vacancies in the period.",
+          "candidatesRegistered": "Candidates registered",
+          "candidatesHired": "Candidates marked as hired",
+          "technicalEvaluationsSubtitle": "Tracking of completed evaluations and pass rate.",
+          "mainSourceSubtitle": "Channel with the highest activity recorded in the selected period.",
+          "noRegisteredSource": "No registered source",
+          "earlyStageHint": "Early stage: most processes still have significant work ahead relative to overall progress.",
+          "noVacanciesInPeriod": "No vacancies registered in the selected period.",
+          "activeProcessesSubtitle": "Currently active processes"
+        }
+      },
+      "dataView": {
+        "breadcrumb": "Reports",
+        "invalidTemplateTitle": "Invalid report template",
+        "invalidTemplateBody": "Review the JSON saved in Administration → Templates.",
+        "all": "All",
+        "allFeminine": "All",
+        "client": "Client",
+        "rows": "Rows:",
+        "generatingPdf": "Generating PDF…",
+        "downloadPdf": "Download PDF",
+        "applyFilters": "Apply filters",
+        "clear": "Clear",
+        "loadFailed": "The report could not be loaded",
+        "retry": "Retry",
+        "retryAria": "Retry report load",
+        "loadingData": "Loading data…",
+        "loadingTemplate": "Loading report template…",
+        "preview": "Preview",
+        "previewTitle": "Report preview",
+        "noTemplate": "No JSON template was found.",
+        "errors": {
+          "forbidden": "You do not have permission to view this report.",
+          "loadDataFailed": "Report data could not be loaded.",
+          "loadTemplateFailed": "The report template could not be loaded.",
+          "pdfFailed": "The PDF could not be generated."
+        },
+        "headerAria": "Report header",
+        "liveDataHint": "Live report data. Adjust filters and apply to reload.",
+        "filtersAria": "Report filters"
+      },
+      "templateDetail": {
+        "loading": "Loading report…",
+        "loadingConfig": "Loading report configuration…",
+        "loadingData": "Loading report data…",
+        "errorNoTemplate": "No report template was found with that identifier.",
+        "errorNoConfig": "This template does not have report configuration yet. Contact the administrator or use a report from the list.",
+        "errorNoContent": "The template has no HTML content. Configure contentTemplate in Administration → Templates.",
+        "errorNoData": "No data for the selected filters. Try widening the range or changing the client.",
+        "errorForbidden": "You do not have permission to view this report.",
+        "errorGeneric": "The report could not be loaded.",
+        "errorPreview": "The preview could not be generated. Review the filters and try again.",
+        "errorInvalidId": "Invalid template identifier.",
+        "downloadPdf": "Download PDF",
+        "downloadingPdf": "Generating PDF…",
+        "savingPdf": "Saving copy to history…",
+        "pdfExportFailed": "The PDF could not be generated. Please try again.",
+        "pdfHistoryWarning": "The PDF downloaded successfully, but it could not be saved to history. You can retry later.",
+        "previewTitle": "Report preview",
+        "filtersHint": "Adjust the filters and apply to update the report preview.",
+        "applyFilters": "Apply filters",
+        "legacyModeHint": "Temporary mode: using executive summary until the backend publishes dynamic configuration.",
+        "reportKeyBadge": "Report type",
+        "headerAria": "Report header",
+        "filtersAria": "Report filters",
+        "backToReports": "Back to reports",
+        "breadcrumbReport": "Report",
+        "breadcrumbReports": "Reports",
+        "clientFallback": "Client"
+      },
+      "resolver": {
+        "loading": "Looking up the report in the catalog…",
+        "notFound": "Report not found",
+        "openFailed": "The report could not be opened",
+        "backToReports": "Back to reports",
+        "notFoundDetail": "We could not find a report with that identifier in the catalog.",
+        "unlinked": "This report does not have a linked template yet. Ask the administrator to link a template from the reports module."
       }
     },
     "candidates": {
@@ -1036,6 +1295,29 @@
         "otherPrompt": "Other — enter the name",
         "otherNameLabel": "Platform name",
         "otherNamePlaceholder": "e.g. Portfolio, Behance…"
+      },
+      "followUp": {
+        "title": "Follow-up | {name}",
+        "add": "Add",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "save": "Save seguimiento",
+        "sectionTitle": "Follow-up {index}",
+        "periodLabel": "Period de seguimiento",
+        "selectPeriod": "Select periodo",
+        "commentsLabel": "Comments de evaluacion",
+        "commentsPlaceholder": "Escribe comentarios sobre el seguimiento del candidate...",
+        "deleteAria": "Delete seguimiento {index}",
+        "period3": "3 meses post-contratacion",
+        "period6": "6 meses post-contratacion",
+        "period12": "12 meses post-contratacion",
+        "periodMonths": "{months} meses",
+        "errors": {
+          "missingCandidateId": "ID de candidate no disponible",
+          "emptyFollowUp": "Debes completar al menos un seguimiento con un periodo o comentarios.",
+          "invalidPeriod": "Debes seleccionar un periodo de seguimiento valido.",
+          "saveFailed": "Could not guardar el seguimiento."
+        }
       }
     },
     "settings": {
@@ -1046,6 +1328,39 @@
       "googleCalendar": {
         "title": "Google Calendar",
         "description": "Connect and manage interview synchronization."
+      },
+      "calendarPage": {
+        "title": "Calendar",
+        "description": "Connect Google Calendar to sync interviews and send automatic invitations.",
+        "pageDescription": "Connect Google Calendar to sync interviews from the ATS.",
+        "connectedToast": "Google Calendar connected successfully.",
+        "syncing": "Syncing…",
+        "syncInterviews": "Sync interviews",
+        "connectedAs": "Connected as {email} (your account)",
+        "notConnected": "Google Calendar is not connected.",
+        "connectHint": "Connect your account to sync interviews.",
+        "connectDescription": "When you connect, you authorize the ATS to create events and invitations in your Google Calendar (depending on backend implementation).",
+        "connectedServerHint": "Dated interviews may be created or updated in your calendar according to server configuration.",
+        "syncFailed": "Could not sync the calendar.",
+        "syncResultPartial": "Synced: {synced} ok, {failed} with errors.",
+        "syncResultSuccess": "Synced: {synced} interview(s).",
+        "accountFallback": "your account"
+      },
+      "calendarConnect": {
+        "label": "Connect Google Calendar",
+        "redirecting": "Redirecting…",
+        "ariaLabel": "Connect Google Calendar"
+      },
+      "calendarDisconnect": {
+        "title": "Disconnect Google Calendar?",
+        "body": "Already synced interviews will not be removed from your calendar, but you will stop receiving new automatic invitations.",
+        "bodyEventsKept": "Events already created in your calendar are not deleted.",
+        "confirm": "Disconnect",
+        "cancel": "Cancel",
+        "triggerLabel": "Disconnect Google Calendar",
+        "toastSuccess": "Google Calendar disconnected.",
+        "toastError": "Could not disconnect Google Calendar.",
+        "toastErrorGeneric": "Could not disconnect"
       }
     },
     "vacancies": {
@@ -1053,7 +1368,10 @@
       "location": {
         "unspecified": "Unspecified",
         "loadCountriesError": "Countries could not be loaded.",
-        "loadStatesError": "States or provinces could not be loaded."
+        "loadStatesError": "States or provinces could not be loaded.",
+        "countryLabel": "Pais",
+        "stateLabel": "Estado / provincia",
+        "helperText": "Opcional. Elige pais y estado o provincia donde aplica la vacancy."
       },
       "page": {
         "title": "Vacancies",
@@ -1398,6 +1716,139 @@
           "aiSuggestionsHeading": "AI suggestions ({count})",
           "aiSuggestionsAria": "AI suggestions"
         }
+      },
+      "matching": {
+        "sectionTitle": "AI preliminary search and analysis",
+        "sectionDescription": "Explore candidates with preliminary search and AI-assisted analysis before moving them into the process.",
+        "preliminarySearch": "Preliminary search",
+        "preliminaryAnalysis": "Preliminary analysis",
+        "updatingSearch": "Updating AI search…",
+        "reanalyzing": "Re-analyzing with AI…",
+        "includeInProcess": "Add to process",
+        "including": "Adding…",
+        "startProcess": "Start process",
+        "starting": "Starting…",
+        "searchResults": "Search results",
+        "reanalyzingEllipsis": "Re-analyzing with AI…",
+        "updatingSearchEllipsis": "Updating AI search…",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "selectedCount": "{count} selected",
+        "possibleCandidates": "Possible candidates",
+        "includeSelectedHint": "Add selected candidates to the process",
+        "noSuggestions": "There are no matching suggestions for this vacancy.",
+        "preliminaryMatchBadge": "AI preliminary match",
+        "preliminaryAnalysisBadge": "AI preliminary analysis",
+        "aiSuggestionBadge": "AI suggestion",
+        "score": "Score",
+        "viewProfile": "View profile",
+        "uploadedPrefix": "Uploaded:",
+        "viewTechnicalSheet": "View technical sheet",
+        "refreshAnalysis": "Refresh analysis",
+        "loadingCandidates": "Loading candidates",
+        "noCandidates": "No candidates",
+        "emptySearch": "Run the preliminary search to see suggested candidates.",
+        "emptyAnalysis": "Run the preliminary analysis to see evaluated candidates.",
+        "emptyDefault": "No candidates to display at this time.",
+        "profileModal": {
+          "aiProcessed": "Analysis processed with AI",
+          "aiDisclosure": "The following content was generated by AI and is shown unmodified.",
+          "attributes": "Attributes",
+          "qualitativeScore": "Qualitative score",
+          "semanticSimilarity": "Semantic similarity",
+          "attributeMatch": "Attribute match",
+          "routePrefix": "Route:",
+          "strengths": "Strengths",
+          "considerations": "Points to consider",
+          "qualitativeReasoning": "Qualitative reasoning",
+          "totalMatchScore": "Total matching score:",
+          "noAdditionalInfo": "No additional information available.",
+          "downloading": "Downloading…",
+          "downloadCv": "Download CV",
+          "viewFullProfile": "View full profile",
+          "close": "Close"
+        },
+        "scoreKeys": {
+          "qualitative": "Qualitative score",
+          "semanticSimilarity": "Semantic similarity",
+          "semanticScore": "Semantic score",
+          "total": "Total score",
+          "attributesCombined": "Combined attributes",
+          "keywordMatch": "Keyword match",
+          "experience": "Experience",
+          "education": "Education",
+          "skills": "Skills"
+        },
+        "kanban": {
+          "score": "Score",
+          "moveStageAria": "Move {name} to another stage",
+          "statusAria": "Status of {name}"
+        },
+        "aria": {
+          "matchedCandidates": "Matched candidates",
+          "preliminarySearch": "Preliminary search",
+          "preliminaryAnalysis": "Preliminary analysis",
+          "analysisProgress": "AI preliminary analysis progress",
+          "searchProgress": "AI preliminary search progress",
+          "searchResults": "Search results",
+          "possibleCandidates": "Possible candidates",
+          "selectAll": "Select all candidates",
+          "deselectAll": "Deselect all candidates",
+          "selectCandidate": "Select candidate {name}",
+          "viewCandidate": "View profile of {name}"
+        },
+        "toasts": {
+          "matchSuccess": "Matching completed successfully.",
+          "matchFailed": "Matching could not be run.",
+          "loadMatchFailed": "Matching could not be loaded.",
+          "processStarted": "Process started…",
+          "processFailed": "The process could not be started.",
+          "manualFallbackSuffix": " You can continue with filters and manual review."
+        },
+        "kpis": {
+          "preliminarySearchTitle": "Preliminary search",
+          "preliminarySearchSubtitle": "From hours to seconds on first exploration",
+          "preliminaryMatchTitle": "Preliminary matching",
+          "preliminaryMatchSubtitle": "Observed accuracy of 75% to 80%",
+          "preliminaryMatchGoal": "Calibration target: 90%",
+          "coverageTitle": "Results coverage",
+          "coverageSubtitle": "Initial shortlist with suggested candidates",
+          "coverageHint": "Starting point for HR validation",
+          "prioritizationTitle": "AI-assisted initial prioritization"
+        },
+        "errors": {
+          "moveStageFailed": "The candidate could not be moved to another stage.",
+          "missingDefaultApplicationStatus": "The company's default application status is missing. The server needs it when moving candidates between stages. Configure it in Stages (statuses) or ask an administrator to do so.",
+          "updateApplicationStatusFailed": "The application status could not be updated.",
+          "candidateMovedStage": "Candidate moved to another stage.",
+          "applicationStatusUpdated": "Application status updated.",
+          "missingApplicationId": "The application ID to update the status was not found.",
+          "downloadCvFailed": "The CV could not be downloaded.",
+          "searchNoResults": "No candidates were found in the search.",
+          "searchAlreadyInPipeline": "The candidates found are already in Possible candidates or Stages.",
+          "goToStagesAria": "Go to the Stages section to manage application statuses",
+          "openProfileAria": "Open the candidate profile in a new tab"
+        },
+        "scoreTooltips": {
+          "semanticSimilarity": "Measures how closely the CV content aligns with the vacancy description using semantic text comparison."
+        },
+        "stagesTitle": "Stages",
+        "emptyApplicants": "There are no applicants on this vacancy yet.",
+        "kanbanBoardAria": "Kanban board container",
+        "kanbanStagesAria": "Candidate stages",
+        "goToStagesLink": "Go to Stages and manage statuses"
+      },
+      "rematch": {
+        "ariaLabel": "Re-adjust matching",
+        "titleNeedsRematch": "Requirements updated. Re-adjusting matching is recommended.",
+        "titleDefault": "Re-adjust matching",
+        "adjusting": "Adjusting…",
+        "short": "Re-adjust",
+        "label": "Re-adjust matching",
+        "success": "Success!",
+        "processError": "Processing error",
+        "toastSuccess": "Matching re-adjusted successfully.",
+        "toastError": "Error re-adjusting matching"
       }
     },
     "interviews": {
@@ -1479,6 +1930,231 @@
         "saved": "Changes saved.",
         "deleted": "Interview deleted.",
         "notesSaved": "Notes saved."
+      },
+      "form": {
+        "pageTitle": "New interview",
+        "backToList": "← Back to list",
+        "ariaLabel": "New interview form",
+        "loadingCandidates": "Loading vacancy candidates…",
+        "noCandidates": "This vacancy has no candidates yet. Add candidates to the vacancy first; then you can schedule an interview.",
+        "fields": {
+          "candidate": "Candidate",
+          "dateTime": "Date and time",
+          "type": "Type",
+          "modality": "Modality",
+          "interviewer": "Interviewer",
+          "description": "Description"
+        },
+        "placeholders": {
+          "select": "Select…",
+          "selectModality": "Select a modality…",
+          "typeExample": "e.g. Technical, cultural…"
+        },
+        "loadingTypes": "Loading interview types…",
+        "loadingModalities": "Loading modalities…",
+        "calendar": {
+          "willSync": "This interview will sync with Google Calendar when saved (if the server supports it).",
+          "notConnected": "Google Calendar is not connected.",
+          "connectLink": "Connect in settings",
+          "notConnectedSuffix": "for invitations and automatic events.",
+          "meetWillGenerate": "A Google Meet link will be generated when saved (via Google Calendar).",
+          "meetNotConnected": "This modality generates a Google Meet link, but Google Calendar is not connected.",
+          "meetNotConnectedSuffix": "so it can be created automatically."
+        },
+        "validation": {
+          "selectCandidate": "Select a candidate",
+          "indicateDateTime": "Enter date and time",
+          "invalidDateTime": "Invalid date or time"
+        },
+        "actions": {
+          "schedule": "Schedule interview",
+          "scheduling": "Saving…",
+          "cancel": "Cancel"
+        }
+      },
+      "detail": {
+        "pageTitle": "Interview",
+        "backToInterviews": "← Back to interviews",
+        "loading": "Loading interview…",
+        "loadFailed": "The interview could not be loaded.",
+        "close": "Close",
+        "backToList": "Back to list",
+        "fields": {
+          "status": "Status",
+          "dateTime": "Date and time",
+          "type": "Type",
+          "modality": "Modality",
+          "interviewer": "Interviewer",
+          "description": "Description"
+        },
+        "statusAria": "Interview status",
+        "terminalReadOnly": "This interview is closed (terminal status). Data is read-only.",
+        "validation": {
+          "invalidDateTime": "The date or time is invalid. Check the time field."
+        },
+        "actions": {
+          "save": "Save changes",
+          "saving": "Saving…",
+          "discard": "Discard changes",
+          "delete": "Delete",
+          "deleteAria": "Delete interview"
+        },
+        "deleteConfirm": {
+          "title": "Delete interview",
+          "message": "Delete this interview? It will be archived and removed from listings."
+        }
+      },
+      "modals": {
+        "createTitle": "New interview",
+        "detailTitle": "Manage interview",
+        "notesTitle": "Interview notes",
+        "notesField": "Notes",
+        "notesPlaceholder": "Write observations or follow-up about this interview…",
+        "notesSave": "Save",
+        "notesSaving": "Saving…"
+      },
+      "calendar": {
+        "title": "Google Calendar",
+        "notConnected": "Connect your Google Calendar in",
+        "settingsLink": "settings",
+        "notConnectedSuffix": "to sync interviews and send invitations.",
+        "noSchedule": "Set the interview date and time to generate or link the event in Google Calendar.",
+        "loadingEvent": "Loading event…",
+        "synced": "Event synced with Google Calendar.",
+        "viewInGoogle": "View in Google Calendar",
+        "pending": "Sync pending…",
+        "notSynced": "The event is not synced or an error occurred.",
+        "noEvent": "No linked event yet. Save the interview or sync from settings.",
+        "retry": "Retry",
+        "updating": "Updating…",
+        "toastSynced": "Calendar status updated.",
+        "syncFailed": "Could not sync"
+      },
+      "crud": {
+        "common": {
+          "close": "Close",
+          "add": "Add",
+          "save": "Save",
+          "cancel": "Cancel",
+          "delete": "Delete",
+          "name": "Name",
+          "actions": "Actions",
+          "yes": "Yes",
+          "no": "No",
+          "editNameAria": "Edit type name",
+          "editAria": "Edit {name}",
+          "deleteAria": "Delete {name}"
+        },
+        "types": {
+          "title": "Interview types",
+          "createAria": "Create interview type",
+          "newLabel": "New type",
+          "namePlaceholder": "Type name",
+          "loading": "Loading types…",
+          "empty": "No types defined. Add the first one above.",
+          "created": "Interview type created successfully.",
+          "updated": "Interview type updated successfully.",
+          "deleted": "Interview type deleted successfully.",
+          "deleteTitle": "Delete interview type",
+          "deleteMessage": "Delete «{name}»? This action cannot be undone."
+        },
+        "statuses": {
+          "title": "Interview statuses",
+          "createAria": "Create interview status",
+          "newLabel": "New status",
+          "displayNameLabel": "Display name",
+          "displayNamePlaceholder": "e.g.: Scheduled",
+          "terminalLabel": "Terminal status",
+          "terminalHint": "Check if this status closes the interview cycle (e.g. completed or cancelled).",
+          "code": "Code",
+          "terminal": "Terminal",
+          "terminalAria": "Terminal status",
+          "displayNameAria": "Display name",
+          "loading": "Loading statuses…",
+          "empty": "No statuses defined. Add the first one above.",
+          "created": "Interview status created successfully.",
+          "updated": "Interview status updated successfully.",
+          "deleted": "Interview status deleted successfully.",
+          "deleteTitle": "Delete interview status",
+          "deleteMessage": "Delete «{name}»? Only allowed if no interviews are using this status."
+        },
+        "modalities": {
+          "title": "Interview modalities",
+          "createAria": "Create interview modality",
+          "newLabel": "New modality",
+          "namePlaceholder": "Display name",
+          "googleMeet": "Google Meet",
+          "meetLabel": "Meet",
+          "meetAria": "Include Google Meet link",
+          "editNameAria": "Edit modality name",
+          "loading": "Loading modalities…",
+          "empty": "No modalities defined. Add the first one above.",
+          "created": "Interview modality created successfully.",
+          "updated": "Interview modality updated successfully.",
+          "deleted": "Interview modality deleted successfully.",
+          "deleteTitle": "Delete interview modality",
+          "deleteMessage": "Delete «{name}»? Only allowed if no interviews are using this modality."
+        }
+      },
+      "interviewerSelect": {
+        "loading": "Loading recruiters…",
+        "select": "Select…",
+        "manualHint": "You can enter the name manually."
+      },
+      "candidateList": {
+        "title": "Candidate interviews",
+        "description": "Interview timeline across all vacancies.",
+        "regionAria": "Candidate interview list",
+        "loading": "Loading…",
+        "empty": "No interviews recorded for this candidate."
+      },
+      "aria": {
+        "formNewInterview": "New interview form"
+      },
+      "prepPanel": {
+        "titleEmbedded": "Vacancy candidates",
+        "titleDrawer": "Review candidates",
+        "vacancyFallback": "Vacancy candidates",
+        "embeddedDescription": "{title} · Per-applicant context to schedule interviews or open the technical sheet.",
+        "closeAria": "Close panel",
+        "loading": "Loading candidates…",
+        "retry": "Retry",
+        "empty": "There are no applicants for this vacancy yet.",
+        "listAria": "Candidate list",
+        "currentStage": "Current stage",
+        "applicationStatus": "Application status",
+        "interview": "Interview",
+        "strengths": "Strengths",
+        "considerations": "Considerations",
+        "comments": "Comments",
+        "scheduleInterview": "Schedule interview",
+        "technicalSheet": "Technical sheet",
+        "viewProfile": "View profile"
+      },
+      "schedule": {
+        "dateLabel": "Interview date",
+        "startTimeLabel": "Start time",
+        "startLabel": "Start",
+        "endTimeLabel": "End time",
+        "dateShort": "Date",
+        "timeShort": "Time"
+      }
+    },
+    "dashboard": {
+      "statsAria": "Dashboard statistics",
+      "activeCandidates": "Active candidates",
+      "openVacancies": "Open vacancies",
+      "interviewsToday": "Interviews today",
+      "hiresThisMonth": "Hires this month",
+      "recentActivityAria": "Recent activity",
+      "recentActivityTitle": "Recent activity",
+      "recentCandidatesAria": "Recent candidates",
+      "recentCandidatesTitle": "Recent candidates",
+      "newCandidatesBadge": "{count} new",
+      "mockBadges": {
+        "interview": "Interview",
+        "evaluation": "Evaluacion",
+        "hired": "Contratado"
       }
     },
     "technicalSheet": {
@@ -1508,6 +2184,13 @@
         "close": "Close",
         "viewSheet": "View technical sheet"
       }
+    },
+    "aiDisclosure": {
+      "progressAria": "AI processing progress",
+      "preliminaryStepsAria": "Preliminary analysis steps",
+      "processingStepsAria": "Processing states",
+      "percentComplete": "{percent} percent",
+      "assistedByAi": "AI-assisted"
     }
   },
   "AdminPortal": {
@@ -1699,10 +2382,740 @@
         "created": "User created."
       }
     },
+    "stages": {
+      "page": {
+        "title": "Stages",
+        "description": "Manage recruitment process stages",
+        "headerAria": "Stages header",
+        "listAria": "Stages list",
+        "searchPlaceholder": "Search stages...",
+        "searchAria": "Search stages"
+      },
+      "actions": {
+        "statuses": "Statuses",
+        "statusesAria": "Manage statuses",
+        "newStage": "New stage",
+        "newStageAria": "Create new stage",
+        "edit": "Edit",
+        "delete": "Delete",
+        "createStage": "Create stage",
+        "retry": "Retry",
+        "accept": "Accept",
+        "cancel": "Cancel",
+        "dragAria": "Drag to reorder"
+      },
+      "fields": {
+        "defaultStage": "Default stage",
+        "finalStage": "Final stage",
+        "hiredStage": "Hiring stage",
+        "order": "Order:"
+      },
+      "switches": {
+        "defaultActive": "{name}: default stage active",
+        "markDefault": "Mark {name} as default stage",
+        "finalActive": "{name}: final stage active",
+        "markFinal": "Mark {name} as final stage",
+        "hiredActive": "{name}: hiring stage active",
+        "markHired": "Mark {name} as hiring stage"
+      },
+      "loadingStates": {
+        "savingOrder": "Saving order...",
+        "loading": "Loading stages..."
+      },
+      "emptyStates": {
+        "notFound": "No stages found"
+      },
+      "aria": {
+        "editStage": "Edit stage {name}",
+        "deleteStage": "Delete stage {name}"
+      },
+      "errors": {
+        "loadFailed": "Could not load stages.",
+        "defaultUpdateFailed": "Could not update the default stage. Please try again.",
+        "updateFailed": "Could not update the stage. Please try again.",
+        "hiredUpdateFailed": "Could not update the hiring stage. Please try again.",
+        "forbidden": "You do not have permission to change this stage.",
+        "notFound": "The stage no longer exists. Reloading list...",
+        "deleteFailed": "Could not delete the stage. Please try again.",
+        "reorderFilterHint": "To save the order, show all stages (clear the search filter).",
+        "reorderFailed": "Could not reorder stages. Please try again."
+      },
+      "toasts": {
+        "created": "Stage created successfully.",
+        "updated": "Stage updated successfully.",
+        "defaultUpdated": "Default stage updated.",
+        "finalMarked": "Stage marked as final.",
+        "finalUnmarked": "Stage unmarked as final.",
+        "hiredMarked": "Stage marked as hiring stage.",
+        "hiredUnmarked": "Stage unmarked as hiring stage.",
+        "deleted": "Stage deleted successfully.",
+        "orderSaved": "Order saved successfully."
+      },
+      "deleteConfirm": {
+        "title": "Delete stage",
+        "message": "Are you sure you want to delete the stage \"{name}\"?"
+      },
+      "modal": {
+        "editTitle": "Edit stage",
+        "createTitle": "New stage",
+        "nameLabel": "Stage name",
+        "namePlaceholder": "E.g.: Technical interview",
+        "cancel": "Cancel",
+        "update": "Update stage",
+        "create": "Create stage",
+        "cancelAria": "Cancel",
+        "submitAriaUpdate": "Update stage",
+        "submitAriaCreate": "Create stage",
+        "validationNameRequired": "Name is required",
+        "toastUpdated": "Stage updated successfully.",
+        "toastCreated": "Stage created successfully.",
+        "toastSaveFailed": "Could not save the stage. Please try again."
+      }
+    },
+    "statuses": {
+      "modal": {
+        "title": "Manage statuses",
+        "close": "Close",
+        "newStatus": "New status",
+        "nameLabel": "Status name",
+        "namePlaceholder": "E.g.: In progress",
+        "cancel": "Cancel",
+        "update": "Update",
+        "create": "Create",
+        "defaultStatus": "Default status",
+        "loading": "Loading statuses...",
+        "retry": "Retry",
+        "empty": "No statuses created",
+        "defaultLegend": "Default status — When moving candidates between stages (Kanban), only one applies; activating another deactivates the rest.",
+        "defaultActiveAria": "{name}: default status active",
+        "markDefaultAria": "Mark {name} as default status",
+        "editAria": "Edit status {name}",
+        "deleteAria": "Delete status {name}",
+        "validationNameRequired": "Name is required",
+        "loadFailed": "Could not load statuses.",
+        "defaultChanged": "Default status changed",
+        "defaultUpdateFailed": "Could not update the default status.",
+        "deleted": "Status deleted",
+        "deleteFailed": "Could not delete the status. Please try again.",
+        "updated": "Status updated",
+        "created": "Status created successfully",
+        "saveFailed": "Could not save the status. Please try again.",
+        "deleteTitle": "Delete status",
+        "deleteMessage": "Are you sure you want to delete the status \"{name}\"?",
+        "accept": "Accept"
+      }
+    },
+    "templates": {
+      "page": {
+        "title": "Templates",
+        "description": "Manage notification templates",
+        "headerAria": "Templates header",
+        "listAria": "Templates list",
+        "searchPlaceholder": "Search templates...",
+        "searchAria": "Search templates",
+        "newTemplate": "New template",
+        "newTemplateAria": "Create new template"
+      },
+      "types": {
+        "notification": "Notification",
+        "document": "Document",
+        "questionnaire": "Questionnaire",
+        "technicalSheet": "Technical sheet",
+        "report": "Report"
+      },
+      "card": {
+        "subject": "Subject:",
+        "format": "Format:",
+        "required": "(Required)",
+        "templateAria": "Template: {name}"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "create": "Create template",
+        "retry": "Retry",
+        "accept": "Accept",
+        "cancel": "Cancel",
+        "editAria": "Edit template {name}",
+        "deleteAria": "Delete template {name}"
+      },
+      "loadingStates": {
+        "loading": "Loading templates..."
+      },
+      "emptyStates": {
+        "notFound": "No templates found"
+      },
+      "errors": {
+        "loadFailed": "Could not load templates.",
+        "deleteFailed": "Could not delete the template. Please try again."
+      },
+      "toasts": {
+        "deleted": "Template deleted successfully."
+      },
+      "deleteConfirm": {
+        "title": "Delete template",
+        "message": "Are you sure you want to delete the template \"{name}\"?"
+      },
+      "modal": {
+        "editTitle": "Edit template",
+        "createTitle": "New template",
+        "typeLabel": "Template type",
+        "typeNotification": "Notification (Email/SMS)",
+        "typeDocument": "Document (PDF/Contract)",
+        "typeQuestionnaire": "Questionnaire",
+        "nameLabel": "Name",
+        "subjectLabel": "Subject",
+        "contentLabel": "Content",
+        "contentTemplateLabel": "Content template",
+        "outputFormatLabel": "Output format",
+        "isTechnicalSheet": "Technical sheet template",
+        "technicalSheetHint": "Only one document-type template can be marked as a technical sheet.",
+        "isReport": "Report template",
+        "reportHint": "Link this template to a catalog report to generate PDFs from HR.",
+        "reportTypeLabel": "Report type",
+        "descriptionLabel": "Description",
+        "isRequired": "Required",
+        "namePlaceholder": "E.g.: Interview notification",
+        "subjectPlaceholder": "E.g.: Your interview has been scheduled",
+        "contentPlaceholder": "Write the template content...",
+        "contentTemplatePlaceholder": "E.g.: {htmlExample}",
+        "descriptionPlaceholder": "E.g.: Please complete this technical information...",
+        "reportCatalogLoadFailed": "Could not load the report catalog.",
+        "reportCatalogLoading": "Loading reports…",
+        "reportSelectPlaceholder": "Select a report (optional)",
+        "reportLinkedOption": "{name} — already linked to \"{linkedName}\"",
+        "reportLinkHint": "The link uses the official system report catalog.",
+        "cancel": "Cancel",
+        "update": "Update template",
+        "create": "Create template",
+        "validation": {
+          "nameRequired": "Name is required",
+          "subjectRequired": "Subject is required",
+          "contentRequired": "Content is required",
+          "contentTemplateRequired": "Content template is required",
+          "reportTypeRequired": "Select a valid report type from the catalog.",
+          "descriptionRequired": "Description is required"
+        },
+        "toastUpdated": "Template updated successfully.",
+        "toastCreated": "Template created successfully.",
+        "toastSaveFailed": "Could not save the template. Please try again."
+      }
+    },
+    "vacancyCatalog": {
+      "shared": {
+        "table": {
+          "name": "Name",
+          "description": "Description",
+          "actions": "Actions"
+        },
+        "actions": {
+          "refresh": "Refresh",
+          "retry": "Retry",
+          "edit": "Edit",
+          "delete": "Delete",
+          "cancel": "Cancel",
+          "save": "Save",
+          "update": "Update",
+          "close": "Close",
+          "deactivateInstead": "Deactivate instead"
+        },
+        "count": {
+          "loading": "Loading...",
+          "summary": "{count} {plural}"
+        },
+        "summaryHelper": "Manage available {plural} for new vacancies.",
+        "inUse": "In use by active or historical vacancies.",
+        "emptyBody": "When you create a {singular}, it will be available to classify vacancies throughout the ATS.",
+        "form": {
+          "nameLabel": "Name",
+          "descriptionLabel": "Description",
+          "namePlaceholder": "Name of the {singular}",
+          "descriptionPlaceholder": "Brief description of the {singular}",
+          "loading": "Loading {singular}..."
+        },
+        "validation": {
+          "nameRequired": "Name is required.",
+          "codeRequired": "Code is required.",
+          "codePattern": "Use lowercase letters, numbers and hyphens only.",
+          "sortOrderRequired": "Sort order is required.",
+          "sortOrderInvalid": "Enter a valid integer."
+        },
+        "errors": {
+          "loadCatalog": "Could not load the catalog.",
+          "loadItem": "Could not load the {singular}.",
+          "saveFailed": "Could not save the record.",
+          "updateFailed": "Could not update the record.",
+          "deleteFailed": "Could not delete the record."
+        },
+        "deleteConfirm": {
+          "confirmDelete": "Delete",
+          "message": "Delete the {singular} \"{name}\"? This action attempts to permanently delete the record."
+        },
+        "conflict": {
+          "title": "Cannot delete {singular}",
+          "deactivateHint": "You can deactivate {article} {singular} to stop offering it on new vacancies without losing references from existing ones."
+        },
+        "aria": {
+          "summary": "Summary of {plural}",
+          "loadError": "Error loading {plural}",
+          "list": "List of {plural}"
+        },
+        "dash": "—"
+      },
+      "departments": {
+        "title": "Departments",
+        "singular": "department",
+        "singularCapitalized": "Department",
+        "plural": "departments",
+        "article": "the",
+        "createCta": "Create department",
+        "emptyMessage": "No departments created yet",
+        "headingDescription": "Manage the global catalog of departments for vacancies.",
+        "createSuccess": "Department created.",
+        "updateSuccess": "Department updated.",
+        "activateSuccess": "Department activated.",
+        "deactivateSuccess": "Department deactivated.",
+        "deleteSuccess": "Department deleted.",
+        "deleteConflictMessage": "Cannot delete because it is linked to existing vacancies.",
+        "formCreateTitle": "New {singularCapitalized}",
+        "formEditTitle": "Edit {singular}",
+        "deleteTitle": "Delete {singular}"
+      },
+      "modalities": {
+        "title": "Modalities",
+        "singular": "modality",
+        "singularCapitalized": "Modality",
+        "plural": "modalities",
+        "article": "the",
+        "createCta": "Create modality",
+        "emptyMessage": "No modalities created yet",
+        "headingDescription": "Manage the global catalog of modalities for vacancies.",
+        "createSuccess": "Modality created.",
+        "updateSuccess": "Modality updated.",
+        "activateSuccess": "Modality activated.",
+        "deactivateSuccess": "Modality deactivated.",
+        "deleteSuccess": "Modality deleted.",
+        "deleteConflictMessage": "Cannot delete because it is linked to existing vacancies.",
+        "formCreateTitle": "New {singularCapitalized}",
+        "formEditTitle": "Edit {singular}",
+        "deleteTitle": "Delete {singular}"
+      }
+    },
+    "documentTypes": {
+      "page": {
+        "title": "Document Types",
+        "description": "Manage the document types available to candidates.",
+        "createCta": "New document type",
+        "summaryHelper": "Manage document types available for candidates.",
+        "countLoading": "Loading...",
+        "countSummary": "{count, plural, one {# document type} other {# document types}}"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by code or name..."
+      },
+      "table": {
+        "code": "Code",
+        "name": "Name",
+        "createdAt": "Created at",
+        "updatedAt": "Last updated",
+        "actions": "Actions"
+      },
+      "form": {
+        "createTitle": "New document type",
+        "editTitle": "Edit document type",
+        "codeLabel": "Code",
+        "nameLabel": "Name",
+        "codePlaceholder": "E.g. DUI, PASSPORT, NIT",
+        "namePlaceholder": "E.g. National ID Document",
+        "loading": "Loading document type...",
+        "save": "Save",
+        "saveChanges": "Save changes"
+      },
+      "validation": {
+        "codeRequired": "Code is required.",
+        "codeMaxLength": "Code cannot exceed {max} characters.",
+        "nameRequired": "Name is required.",
+        "nameMaxLength": "Name cannot exceed {max} characters."
+      },
+      "errors": {
+        "loadCatalog": "Could not load the catalog.",
+        "loadItem": "Could not load the document type.",
+        "saveFailed": "Could not save the record.",
+        "deleteFailed": "Could not delete the record.",
+        "forbidden": "You do not have permission to perform this action."
+      },
+      "toasts": {
+        "created": "Document type created successfully.",
+        "updated": "Document type updated successfully.",
+        "deleted": "Document type deleted successfully."
+      },
+      "emptyStates": {
+        "noResults": "No results found",
+        "noItems": "No document types registered",
+        "searchHint": "Try searching with other terms.",
+        "createHint": "When you create a document type, it will be available to classify candidate identity documents."
+      },
+      "deleteConfirm": {
+        "title": "Delete document type",
+        "message": "Are you sure you want to delete this document type? It will be hidden from active listings."
+      },
+      "fallbacks": {
+        "notUpdated": "Not updated"
+      },
+      "actions": {
+        "refresh": "Refresh",
+        "retry": "Retry",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel"
+      },
+      "aria": {
+        "summary": "Summary of document types",
+        "loadError": "Error loading document types",
+        "list": "List of document types"
+      }
+    },
+    "interviews": {
+      "catalog": {
+        "page": {
+          "title": "Interviews",
+          "description": "Define the interview types, modalities, and statuses recruiters will use when scheduling and tracking interviews in the HR portal.",
+          "regionAria": "Interview settings"
+        },
+        "actions": {
+          "types": "Interview types",
+          "modalities": "Interview modalities",
+          "statuses": "Interview statuses"
+        }
+      },
+      "calendar": {
+        "page": {
+          "title": "Interview calendar",
+          "description": "Overview of all scheduled interviews. Times are shown in your time zone; the API operates in UTC."
+        },
+        "loadingStates": {
+          "loading": "Loading interviews…"
+        },
+        "emptyStates": {
+          "noEvents": "No interviews in this range with the current filters."
+        },
+        "actions": {
+          "retry": "Retry"
+        },
+        "filters": {
+          "regionAria": "Calendar filters",
+          "heading": "Filters",
+          "clear": "Clear filters",
+          "reload": "Update",
+          "company": "Company",
+          "vacancy": "Vacancy",
+          "recruiter": "Recruiter",
+          "status": "Status",
+          "typeLocal": "Type (local)",
+          "modalityLocal": "Modality (local)",
+          "search": "Search",
+          "searchPlaceholder": "Candidate, vacancy, recruiter…",
+          "includeCancelled": "Include cancelled",
+          "allFeminine": "All",
+          "allMasculine": "All"
+        },
+        "toolbar": {
+          "today": "Today",
+          "prevPeriodAria": "Previous period",
+          "nextPeriodAria": "Next period",
+          "mobileAgendaHint": "Agenda view on mobile",
+          "viewSwitcherAria": "Calendar view",
+          "views": {
+            "day": "Day",
+            "week": "Week",
+            "month": "Month",
+            "year": "Year",
+            "agenda": "Agenda"
+          }
+        },
+        "kpis": {
+          "regionAria": "Interview indicators",
+          "total": "Total in range",
+          "scheduled": "Scheduled",
+          "completed": "Completed",
+          "cancelled": "Cancelled"
+        },
+        "eventDetail": {
+          "title": "Interview detail",
+          "openInPortal": "Open in HR portal →",
+          "close": "Close",
+          "when": "When",
+          "duration": "Duration",
+          "timezone": "Time zone",
+          "vacancy": "Vacancy",
+          "recruiter": "Recruiter",
+          "type": "Tipo",
+          "modality": "Modality",
+          "interviewer": "Interviewer",
+          "googleMeet": "Google Meet",
+          "googleCalendar": "Google Calendar",
+          "minutes": "{minutes} min",
+          "dash": "—"
+        },
+        "eventChip": {
+          "interview": "Interview",
+          "with": "con",
+          "for": "para"
+        },
+        "agenda": {
+          "time": "Time",
+          "candidate": "Candidate",
+          "vacancy": "Vacancy",
+          "company": "Company",
+          "recruiter": "Recruiter",
+          "type": "Tipo",
+          "modality": "Modality",
+          "status": "Status",
+          "aria": "Agenda {dateKey}"
+        },
+        "month": {
+          "weekdays": {
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat",
+            "sun": "Sun"
+          },
+          "dayAria": "Day {day}",
+          "overflowMore": "++{count} more"
+        },
+        "year": {
+          "months": {
+            "jan": "Jan",
+            "feb": "Feb",
+            "mar": "Tue",
+            "apr": "Apr",
+            "may": "May",
+            "jun": "Jun",
+            "jul": "Jul",
+            "aug": "Aug",
+            "sep": "Sep",
+            "oct": "Oct",
+            "nov": "Nov",
+            "dec": "Dec"
+          },
+          "dayTitle": "{day}: {count, plural, one {# interview} other {# interviews}}",
+          "dayAria": "{day} de {month}, {count, plural, one {# interview} other {# interviews}}"
+        }
+      }
+    },
     "configuration": {
       "regionAria": "Admin portal settings",
       "title": "Settings",
       "description": "This view is ready to centralize the admin portal settings."
+    },
+    "shell": {
+      "userFallback": "Usuario",
+      "roleFallback": "Administrador"
+    }
+  },
+  "PublicOpportunities": {
+    "page": {
+      "portalTitle": "Opportunities portal",
+      "heroTitle": "Find opportunities with a clear view from the first glance",
+      "heroBody": "Browse public vacancies with filters by department, work mode, and location.",
+      "exploreCta": "Explore opportunities",
+      "explorerLabel": "Public exploration",
+      "listTitle": "Available opportunities",
+      "searchLabel": "Search vacancies",
+      "searchPlaceholder": "Search vacancies by name",
+      "filterDepartment": "Department",
+      "filterModality": "Work mode",
+      "filterCountry": "Country",
+      "preparingList": "Preparing the list with active search and filters.",
+      "tableDepartment": "Department",
+      "tableLocation": "Location",
+      "tableAction": "Action",
+      "viewDetail": "View details",
+      "vacancy": "Vacancy",
+      "retry": "Try again",
+      "emptyTitle": "No vacancies found with those filters.",
+      "emptyBody": "Try adjusting the filters or view all available opportunities again.",
+      "viewAll": "View all vacancies",
+      "pageSummary": "Page {page} of {total}",
+      "prev": "Previous",
+      "next": "Next",
+      "loadFailed": "Could not load opportunities.",
+      "opportunityCount": "{count, plural, one {# opportunity} other {# opportunities}}",
+      "fallbackDepartment": "Department not specified",
+      "fallbackModality": "Work mode not specified",
+      "fallbackLocation": "Location not specified",
+      "companyLogoAlt": "{company} logo",
+      "companyLogoGeneric": "Company logo",
+      "resultsShowing": "Showing {from}-{to} of {total}",
+      "resultsFilterQuote": "for \"{query}\"",
+      "resultsPage": "on page {page}",
+      "locationMobileLabel": "Location",
+      "resultsFilterDepartment": "in department {department}",
+      "resultsFilterModality": "with work mode {modality}",
+      "resultsFilterCountry": "in {country}",
+      "activeProcessesSubtitle": "Currently active processes"
+    },
+    "detail": {
+      "notFound": "We could not find the requested vacancy.",
+      "loadFailed": "Could not load the vacancy.",
+      "viewAll": "View all opportunities",
+      "back": "Back to opportunities",
+      "apply": "Apply",
+      "activeBadge": "Active vacancy",
+      "unspecified": "Not specified",
+      "published": "Published {date}",
+      "keyBlock": "Key block",
+      "roleContext": "Role context",
+      "jobDescription": "Job description",
+      "moreAboutRole": "More about the role",
+      "additionalDetails": "Additional details",
+      "whatWeOffer": "What we offer",
+      "benefits": "Benefits",
+      "responsibilities": "Responsibilities",
+      "requirements": "Requirements",
+      "sidebarTitle": "Vacancy details",
+      "company": "Company",
+      "department": "Department",
+      "modality": "Work mode",
+      "location": "Location",
+      "salary": "Salary",
+      "publishedLabel": "Published"
+    },
+    "applicationForm": {
+      "sources": {
+        "social": "Social media",
+        "friends": "Friends",
+        "jobFair": "Job fair",
+        "other": "Other"
+      },
+      "steps": {
+        "creation": "Creation",
+        "analysis": "Analysis",
+        "application": "Application",
+        "saved": "Saved",
+        "success": "Success",
+        "ready": "Ready",
+        "processingTitle": "Processing your application",
+        "processingHint": "We are validating your data and preparing the submission. This may take a few seconds.",
+        "processingLongWait": "If the wait takes longer, do not close this window. We are still processing your application."
+      },
+      "validation": {
+        "fileType": "Only PDF or DOCX files are accepted.",
+        "firstNameRequired": "Enter your first name.",
+        "lastNameRequired": "Enter your last name.",
+        "emailRequired": "Enter your email.",
+        "emailInvalid": "Enter a valid email.",
+        "cvRequired": "Attach your CV in PDF or DOCX.",
+        "reviewFields": "Review the indicated fields.",
+        "documentTypeRequiresNumber": "If you select a document type, you must enter the number.",
+        "documentNumberRequiresType": "If you enter a document number, you must select the type."
+      },
+      "fields": {
+        "firstName": "First name *",
+        "lastName": "Last name *",
+        "email": "Email *",
+        "phone": "Phone",
+        "documentType": "Document type",
+        "documentNumber": "Document number",
+        "source": "How did you hear about this vacancy?",
+        "linkedin": "LinkedIn profile",
+        "website": "Website or portfolio",
+        "notes": "Notes",
+        "resume": "Resume (PDF) *"
+      },
+      "placeholders": {
+        "loadingDocTypes": "Loading document types...",
+        "noDocTypes": "No types available",
+        "selectDocType": "Select a type",
+        "selectOption": "Select an option",
+        "documentNumber": "Enter your document number"
+      },
+      "file": {
+        "selectPdf": "Select PDF",
+        "helper": "Only PDF or DOCX format is accepted."
+      },
+      "actions": {
+        "submitting": "Submitting application…",
+        "submit": "Submit application",
+        "backToVacancy": "Back to vacancy",
+        "backToList": "Back to vacancies",
+        "close": "Close"
+      },
+      "aria": {
+        "submitStatus": "Submission status"
+      },
+      "toasts": {
+        "submitSuccess": "Application submitted",
+        "submitFailed": "Failed to submit application"
+      }
+    },
+    "confirmation": {
+      "title": "Confirm your contact email",
+      "closeAria": "Close modal",
+      "contactEmail": "Contact email:",
+      "body1": "We will use this email to communicate about your application.",
+      "body2": "Verify that it is correct before submitting.",
+      "warning": "If the email is invalid, you may not receive updates about the process.",
+      "cancel": "Cancel",
+      "confirm": "Confirm and submit application"
+    },
+    "privacy": {
+      "title": "PRIVACY NOTICE AND PERSONAL DATA PROTECTION",
+      "decline": "No, thanks",
+      "accept": "I accept",
+      "intro": "Your personal data will be added to the Visible Outsource database and processed exclusively by authorized Human Resources professionals in the context of recruitment and personnel management processes.",
+      "dataTreatmentHeading": "Data processing:",
+      "purposeItem": "Purpose: Candidate evaluation and recruitment process management",
+      "accessItem": "Access: Authorized HR staff only",
+      "confidentialityItem": "Confidentiality: Your data will be handled under strict confidentiality and information security standards",
+      "rightsItem": "Rights: You have the right to access, rectify, or request deletion of your personal data",
+      "compliance": "This system complies with applicable personal data protection regulations.",
+      "contactPrefix": "If you wish to delete or rectify your personal data in our database, please write to"
+    },
+    "actions": {
+      "applyToVacancy": "Apply to this vacancy"
+    },
+    "fallbacks": {
+      "unspecified": "Not specified"
+    },
+    "navbar": {
+      "ariaMain": "Main opportunities portal navigation",
+      "ariaGoToPortal": "Go to opportunities portal",
+      "logoIconAlt": "ATS logo icon",
+      "portalSubtitle": "Opportunities portal",
+      "ariaGoToSelection": "Go to portal selection",
+      "changePortal": "Change portal",
+      "portalsShort": "Portals"
+    },
+    "tips": {
+      "title": "Tip for your application",
+      "tip1": "Make sure your email and phone number are up to date.",
+      "tip2": "Upload your resume in PDF format.",
+      "tip3": "Verify that all your information is correct before submitting.",
+      "tip4": "Make sure you meet the main requirements of the vacancy.",
+      "tip5": "Stay alert for emails and calls after applying.",
+      "tip6": "Use a professional file name for your CV.",
+      "tip7": "Check the spelling of your information before continuing.",
+      "tip8": "Attach all requested documents.",
+      "tip9": "Do not forget to include your most recent work experience.",
+      "tip10": "Confirm that your availability matches what is requested in the vacancy."
+    },
+    "apply": {
+      "vacancyNotFound": "We could not find the vacancy for this application.",
+      "loadFailed": "Could not load the application form.",
+      "backToDetail": "Back to vacancy details",
+      "applyBadge": "Apply",
+      "beforeSubmit": "Before submitting",
+      "checklistCv": "Have your CV in PDF ready to attach.",
+      "checklistEmail": "Use the same email associated with your candidate account.",
+      "checklistData": "Complete first name, last name, and email with real data.",
+      "formSectionLabel": "Application form",
+      "formTitle": "Submit your application",
+      "formBody": "Complete the information and attach your CV. The data is sent securely to the recruitment team.",
+      "documentTitle": "ATS | Opportunities | Apply to {title}"
     }
   }
 }

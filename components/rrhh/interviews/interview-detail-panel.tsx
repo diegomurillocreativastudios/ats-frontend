@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Loader2, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import {
   deleteRecruiterInterview,
   fetchInterviewTypes,
@@ -30,13 +31,7 @@ import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
-
-const STATUS_ACTIONS: { value: InterviewStatus; label: string }[] = [
-  { value: "Scheduled", label: "Programada" },
-  { value: "Completed", label: "Completada" },
-  { value: "Cancelled", label: "Cancelada" },
-  { value: "NoShow", label: "No asistió" },
-]
+import { getInterviewStatusLabel } from "@/lib/interviews/interview-status-labels"
 
 export interface InterviewDetailPanelProps {
   interviewId: string
@@ -57,8 +52,20 @@ export function InterviewDetailPanel({
   onSaved,
   onDeleted,
 }: InterviewDetailPanelProps) {
+  const t = useTranslations("RecruiterPortal.interviews")
   const router = useRouter()
   const { status: calendarStatus } = useGoogleCalendar()
+
+  const statusActions = useMemo(
+    (): { value: InterviewStatus; label: string }[] => [
+      { value: "Scheduled", label: getInterviewStatusLabel("Scheduled", t) },
+      { value: "Completed", label: getInterviewStatusLabel("Completed", t) },
+      { value: "Cancelled", label: getInterviewStatusLabel("Cancelled", t) },
+      { value: "NoShow", label: getInterviewStatusLabel("NoShow", t) },
+    ],
+    [t],
+  )
+
   const [interview, setInterview] = useState<Interview | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -240,7 +247,7 @@ export function InterviewDetailPanel({
           setSnackbar({
             open: true,
             variant: "error",
-            message: "La fecha u hora no es válida. Revisa el campo de hora.",
+            message: t("detail.validation.invalidDateTime"),
           })
           return
         }
@@ -255,7 +262,7 @@ export function InterviewDetailPanel({
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Cambios guardados.",
+        message: t("toasts.saved"),
       })
     } catch (err: unknown) {
       const status =
@@ -311,7 +318,7 @@ export function InterviewDetailPanel({
       >
         <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
         <p className="font-sans text-sm text-muted-foreground">
-          Cargando entrevista...
+          {t("detail.loading")}
         </p>
       </div>
     )
@@ -321,7 +328,7 @@ export function InterviewDetailPanel({
     return (
       <div className="flex flex-col gap-4 p-6">
         <p className="font-sans text-sm text-destructive" role="alert">
-          {error ?? "No se pudo cargar la entrevista."}
+          {error ?? t("detail.loadFailed")}
         </p>
         <button
           type="button"
@@ -331,7 +338,7 @@ export function InterviewDetailPanel({
           }}
           className="w-fit rounded-md bg-vo-purple px-4 py-2 font-sans text-sm text-white"
         >
-          {variant === "modal" && onClose ? "Cerrar" : "Volver al listado"}
+          {variant === "modal" && onClose ? t("detail.close") : t("detail.backToList")}
         </button>
       </div>
     )
@@ -350,12 +357,12 @@ export function InterviewDetailPanel({
             href={listHref}
             className="w-fit font-sans text-sm text-muted-foreground hover:text-foreground"
           >
-            ← Volver a entrevistas
+            {t("detail.backToInterviews")}
           </Link>
         ) : null}
         <div className="flex flex-wrap items-center gap-3">
           {variant === "page" ? (
-            <PortalPageHeader title="Entrevista" className="w-full pb-0" />
+            <PortalPageHeader title={t("detail.pageTitle")} className="w-full pb-0" />
           ) : null}
           {isEditable ? (
             <InterviewStatusBadge status={statusChoice} />
@@ -372,7 +379,7 @@ export function InterviewDetailPanel({
       >
       <div className="flex max-w-xl flex-col gap-5 rounded-xl border border-border bg-card p-6 lg:max-w-none">
         <div className="flex flex-col gap-1.5">
-          <span className="font-sans text-sm font-medium">Estado</span>
+          <span className="font-sans text-sm font-medium">{t("detail.fields.status")}</span>
           {isEditable ? (
             <select
               value={statusChoice}
@@ -380,9 +387,9 @@ export function InterviewDetailPanel({
                 setStatusChoice(e.target.value as InterviewStatus)
               }
               className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm"
-              aria-label="Estado de la entrevista"
+              aria-label={t("detail.statusAria")}
             >
-              {STATUS_ACTIONS.map((s) => (
+              {statusActions.map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
                 </option>
@@ -398,15 +405,14 @@ export function InterviewDetailPanel({
           )}
           {!isEditable ? (
             <p className="font-sans text-xs text-muted-foreground" role="status">
-              Esta entrevista está cerrada (estado terminal). Los datos son solo
-              lectura.
+              {t("detail.terminalReadOnly")}
             </p>
           ) : null}
         </div>
 
         <div className="flex flex-col gap-1.5">
           <span id="detail-when-label" className="font-sans text-sm font-medium">
-            Fecha y hora
+            {t("detail.fields.dateTime")}
           </span>
           <InterviewScheduleRow
             scheduledLocal={scheduledLocal}
@@ -420,12 +426,12 @@ export function InterviewDetailPanel({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="detail-type" className="font-sans text-sm font-medium">
-            Tipo
+            {t("detail.fields.type")}
           </label>
           {loadingInterviewTypes ? (
             <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-              Cargando tipos de entrevista…
+              {t("form.loadingTypes")}
             </div>
           ) : (
             <select
@@ -435,7 +441,7 @@ export function InterviewDetailPanel({
               disabled={!isEditable}
               className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
             >
-              <option value="">Ej: Técnica, cultural…</option>
+              <option value="">{t("form.placeholders.typeExample")}</option>
               {interviewTypeOptions.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
@@ -453,12 +459,12 @@ export function InterviewDetailPanel({
             htmlFor="detail-modality"
             className="font-sans text-sm font-medium"
           >
-            Modalidad
+            {t("detail.fields.modality")}
           </label>
           {loadingModalities ? (
             <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-              Cargando modalidades…
+              {t("form.loadingModalities")}
             </div>
           ) : (
             <select
@@ -468,7 +474,7 @@ export function InterviewDetailPanel({
               disabled={!isEditable}
               className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
             >
-              <option value="">Selecciona una modalidad…</option>
+              <option value="">{t("form.placeholders.selectModality")}</option>
               {modalityOptions.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.displayName}
@@ -489,21 +495,17 @@ export function InterviewDetailPanel({
               role="status"
             >
               {calendarStatus.isConnected ? (
-                <span>
-                  Se generará un enlace de Google Meet al guardar (vía Google
-                  Calendar).
-                </span>
+                <span>{t("form.calendar.meetWillGenerate")}</span>
               ) : (
                 <span>
-                  Esta modalidad genera un enlace de Google Meet, pero Google
-                  Calendar no está conectado.{" "}
+                  {t("form.calendar.meetNotConnected")}{" "}
                   <Link
                     href="/portal-rrhh/configuracion/calendario"
                     className="font-medium text-vo-purple underline-offset-2 hover:underline"
                   >
-                    Conectar en configuración
+                    {t("form.calendar.connectLink")}
                   </Link>{" "}
-                  para que se cree automáticamente.
+                  {t("form.calendar.meetNotConnectedSuffix")}
                 </span>
               )}
             </div>
@@ -515,7 +517,7 @@ export function InterviewDetailPanel({
             htmlFor="detail-interviewer"
             className="font-sans text-sm font-medium"
           >
-            Entrevistador(a)
+            {t("detail.fields.interviewer")}
           </label>
           <InterviewerRecruiterSelect
             id="detail-interviewer"
@@ -530,7 +532,7 @@ export function InterviewDetailPanel({
             htmlFor="detail-descripcion"
             className="font-sans text-sm font-medium"
           >
-            Descripcion
+            {t("detail.fields.description")}
           </label>
           <textarea
             id="detail-descripcion"
@@ -552,7 +554,7 @@ export function InterviewDetailPanel({
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             ) : null}
-            {saving ? "Guardando..." : "Guardar cambios"}
+            {saving ? t("detail.actions.saving") : t("detail.actions.save")}
           </button>
           <button
             type="button"
@@ -560,17 +562,17 @@ export function InterviewDetailPanel({
             disabled={saving || deleting}
             className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
           >
-            Descartar cambios
+            {t("detail.actions.discard")}
           </button>
           <button
             type="button"
             onClick={() => setDeleteConfirmOpen(true)}
             disabled={saving || deleting || deleteConfirmOpen}
             className="inline-flex items-center gap-2 rounded-md border border-destructive/60 px-5 py-2.5 font-sans text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
-            aria-label="Eliminar entrevista"
+            aria-label={t("detail.actions.deleteAria")}
           >
             <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
-            Eliminar
+            {t("detail.actions.delete")}
           </button>
         </div>
       </div>
@@ -588,8 +590,8 @@ export function InterviewDetailPanel({
           if (!deleting) setDeleteConfirmOpen(false)
         }}
         onConfirm={() => void handleConfirmDelete()}
-        title="Eliminar entrevista"
-        message="¿Eliminar esta entrevista? Se archivará y dejará de mostrarse en los listados."
+        title={t("detail.deleteConfirm.title")}
+        message={t("detail.deleteConfirm.message")}
         loading={deleting}
         overlayZIndexClass={
           variant === "modal" ? "z-[100]" : undefined

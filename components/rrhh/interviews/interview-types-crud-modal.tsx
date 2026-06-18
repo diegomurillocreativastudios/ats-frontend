@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
@@ -28,6 +29,8 @@ export function InterviewTypesCrudModal({
   onClose,
   onMutate,
 }: InterviewTypesCrudModalProps) {
+  const t = useTranslations("RecruiterPortal.interviews.crud.types")
+  const tCommon = useTranslations("RecruiterPortal.interviews.crud.common")
   const [items, setItems] = useState<InterviewTypeAdmin[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -95,7 +98,7 @@ export function InterviewTypesCrudModal({
       setNewName("")
       await loadList()
       onMutate?.()
-      showSnackbar("success", "Tipo de entrevista creado correctamente.")
+      showSnackbar("success", t("created"))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -135,7 +138,7 @@ export function InterviewTypesCrudModal({
       setEditName("")
       await loadList()
       onMutate?.()
-      showSnackbar("success", "Tipo de entrevista actualizado correctamente.")
+      showSnackbar("success", t("updated"))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -158,7 +161,7 @@ export function InterviewTypesCrudModal({
       setDeleteTarget(null)
       await loadList()
       onMutate?.()
-      showSnackbar("success", "Tipo de entrevista eliminado correctamente.")
+      showSnackbar("success", t("deleted"))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -174,7 +177,7 @@ export function InterviewTypesCrudModal({
 
   const footer = (
     <Button type="button" variant="outline" onClick={onClose}>
-      Cerrar
+      {tCommon("close")}
     </Button>
   )
 
@@ -183,7 +186,7 @@ export function InterviewTypesCrudModal({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title="Tipos de entrevista"
+        title={t("title")}
         footer={footer}
         size="lg"
         closeOnOverlayClick={!saving && !deleting}
@@ -193,21 +196,21 @@ export function InterviewTypesCrudModal({
           <form
             onSubmit={handleCreate}
             className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3"
-            aria-label="Crear tipo de entrevista"
+            aria-label={t("createAria")}
           >
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <label
                 htmlFor="new-interview-type-name"
                 className="font-sans text-sm font-medium text-foreground"
               >
-                Nuevo tipo
+                {t("newLabel")}
               </label>
               <input
                 id="new-interview-type-name"
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="Nombre del tipo"
+                placeholder={t("namePlaceholder")}
                 className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm"
                 disabled={saving || loading}
                 autoComplete="off"
@@ -221,7 +224,7 @@ export function InterviewTypesCrudModal({
               className="shrink-0 px-5 py-2.5"
             >
               <Plus className="h-4 w-4" aria-hidden />
-              Añadir
+              {tCommon("add")}
             </Button>
           </form>
 
@@ -234,11 +237,11 @@ export function InterviewTypesCrudModal({
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-12 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-              Cargando tipos…
+              {t("loading")}
             </div>
           ) : items.length === 0 ? (
             <p className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-8 text-center font-sans text-sm text-muted-foreground">
-              No hay tipos definidos. Añade el primero arriba.
+              {t("empty")}
             </p>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
@@ -246,10 +249,10 @@ export function InterviewTypesCrudModal({
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
                     <th scope="col" className="px-3 py-2 font-semibold">
-                      Nombre
+                      {tCommon("name")}
                     </th>
                     <th scope="col" className="w-[1%] whitespace-nowrap px-3 py-2 font-semibold">
-                      Acciones
+                      {tCommon("actions")}
                     </th>
                   </tr>
                 </thead>
@@ -267,7 +270,7 @@ export function InterviewTypesCrudModal({
                             onChange={(e) => setEditName(e.target.value)}
                             className="h-9 w-full min-w-48 rounded-md border border-input bg-background px-2 font-sans text-sm"
                             disabled={saving}
-                            aria-label="Editar nombre del tipo"
+                            aria-label={tCommon("editNameAria")}
                           />
                         ) : (
                           <span className="text-foreground">{row.name}</span>
@@ -284,7 +287,7 @@ export function InterviewTypesCrudModal({
                               }
                               className="w-full rounded-md bg-vo-purple px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
                             >
-                              Guardar
+                              {tCommon("save")}
                             </button>
                             <button
                               type="button"
@@ -292,7 +295,7 @@ export function InterviewTypesCrudModal({
                               disabled={saving}
                               className="w-full rounded-md border border-border px-3 py-1.5 text-center text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
                             >
-                              Cancelar
+                              {tCommon("cancel")}
                             </button>
                           </div>
                         ) : (
@@ -302,7 +305,7 @@ export function InterviewTypesCrudModal({
                               onClick={() => handleStartEdit(row)}
                               disabled={saving || !!editingId}
                               className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-foreground hover:bg-muted disabled:opacity-50"
-                              aria-label={`Editar ${row.name}`}
+                              aria-label={tCommon("editAria", { name: row.name })}
                             >
                               <Pencil className="h-4 w-4" aria-hidden />
                             </button>
@@ -311,7 +314,7 @@ export function InterviewTypesCrudModal({
                               onClick={() => setDeleteTarget(row)}
                               disabled={saving || !!editingId}
                               className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                              aria-label={`Eliminar ${row.name}`}
+                              aria-label={tCommon("deleteAria", { name: row.name })}
                             >
                               <Trash2 className="h-4 w-4" aria-hidden />
                             </button>
@@ -331,13 +334,13 @@ export function InterviewTypesCrudModal({
         isOpen={!!deleteTarget}
         onClose={() => !deleting && setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Eliminar tipo de entrevista"
+        title={t("deleteTitle")}
         message={
           deleteTarget
-            ? `¿Eliminar «${deleteTarget.name}»? Esta acción no se puede deshacer.`
+            ? t("deleteMessage", { name: deleteTarget.name })
             : ""
         }
-        confirmText="Eliminar"
+        confirmText={tCommon("delete")}
         loading={deleting}
       />
       <Snackbar

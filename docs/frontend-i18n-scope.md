@@ -307,3 +307,99 @@ Principios:
 - 🚫 **No** se implementó `next-intl`.
 - 🚫 **No** se modificaron componentes funcionales ni el comportamiento del sistema.
 - 🚫 **No** se modificaron APIs ni el pipeline de Vertex AI.
+
+---
+
+## 11. Cierre de la feature (Etapa 20)
+
+> **Etapa 20 — Auditoría final y cierre controlado.**
+> Complementa el detalle técnico en [`frontend-i18n-setup.md`](./frontend-i18n-setup.md) §16-S.
+
+### 11.1 Veredicto
+
+La **fase 1 de i18n frontend** está **cerrable**: infraestructura `next-intl`, selector
+de idioma, diccionarios en 5 locales y migración incremental de módulos críticos
+(Etapas 1–19) sin violar la regla de IA/datos dinámicos. Quedan pendientes **no
+bloqueantes** documentados como deuda técnica.
+
+### 11.2 Qué se traduce (confirmado en cierre)
+
+- UI estática controlada por frontend en módulos migrados (ver Etapas 1–19 en setup).
+- Labels, botones, placeholders, empty/loading/error states frontend, tooltips y
+  `aria-label` donde se aplicó `useTranslations` / `getTranslations`.
+- Mappers de **códigos** estables con fallback al valor crudo (p. ej. estados de vacante Etapa 10).
+
+### 11.3 Qué NO se traduce (confirmado en cierre)
+
+- Contenido generado por IA y campos asociados (`positiveReasons`, `qualitativeReasoning*`,
+  `usedSignals`, `scoreBreakdown`, `componentScores`, `hardGateResults`, `aiSummary`, etc.).
+- Texto de API/BD, input de usuario, nombres propios, nombres de vacantes/candidatos/empresas/etapas/documentos.
+- Mensajes de error del backend mostrados verbatim (`getApiErrorMessage`).
+- PDF server, export server-side y plantillas PDF (`lib/messages/technical-sheet.ts`, `lib/pdf/*`).
+- Scores, rankings, porcentajes y datos calculados.
+
+### 11.4 Pendientes no migrables en fase 1 (deuda técnica)
+
+| Área | Categoría | Motivo |
+| ---- | --------- | ------ |
+| `lib/pageTitles.ts` / `document.title` | C | Mezcla rutas estáticas, dinámicas y nombres runtime |
+| `lib/candidate-portal-translations.ts` | C | Substring styling + labels hardcodeados ES |
+| PDF / reportes server | C | PDFKit, HTML de export, locale servidor |
+| Score Breakdown / VacancyConfig en detalle vacante | B + C | IA verbatim + refactor funcional |
+| `getCountrySelectOptions` (cache + `Intl.DisplayNames(["es"])`) | C | Cache global, múltiples consumidores |
+| Roles `Admin`/`Recruiter`/`Candidate` en filtros | C | Display vs payload |
+| Portal oportunidades público | C | No migrado en fases 1–19 |
+| Admin catálogos / etapas / plantillas / entrevistas admin | C | Módulos complejos fuera de Etapa 13 |
+| Reportes detalle / builders / métricas dinámicas | B + C | Mezcla UI + data calculada |
+| Sección candidatos/IA/Kanban completa en `vacantes/[id]/page.tsx` | B + C | Contenido IA + UI acoplada |
+
+### 11.5 Decisión arquitectónica vigente
+
+- **Cookie `NEXT_LOCALE`**, sin prefijo `/en`, `/it`, etc.
+- **Sin** `app/[locale]/` ni cambios a `proxy.ts`.
+- **Sin** envío de locale al backend.
+- `es.json` fuente de verdad; deep-merge fallback en `i18n/request.ts`.
+
+### 11.6 Checklist de validación (cierre)
+
+Ver checklist completo en `frontend-i18n-setup.md` §16-S.12.
+
+### 11.7 Nota sobre Etapa 16
+
+No existe **Etapa 16** numerada en el historial de ejecución; la numeración salta de 15 a 17.
+Las referencias **§16-*** en `frontend-i18n-setup.md` son subsecciones de registro, no etapas.
+
+---
+
+## 12. Fase 2 — Cobertura de textos pendientes
+
+La **Fase 2** migró los textos **Categoría A** identificados en la auditoría de cierre
+para: entrevistas RRHH (subcomponentes), admin etapas/plantillas, oportunidades públicas,
+auth registro, reportes resumen/vista y labels de matching/IA en detalle de vacante.
+
+**Confirmación:** IA, data dinámica, backend libre, APIs, `proxy.ts` y rutas sin prefijo
+permanecen sin cambios funcionales. Detalle en `frontend-i18n-setup.md` §17.
+
+### 12.1 Pendientes post-Fase 2 (no bloqueantes)
+
+| Área | Categoría |
+| ---- | --------- |
+| Narrativas `buildInsights()` en resumen ejecutivo | B + C |
+| Cuerpo legal aviso de privacidad público | C |
+| `lib/pageTitles.ts`, metadata dinámica | C |
+| Score Breakdown / VacancyConfig completo | B + C |
+
+### 12.2 Portal Admin — cobertura ampliada (Fase 2+)
+
+Migrados en esta revisión los módulos que quedaban sin i18n en Portal Admin:
+
+| Módulo | Namespace |
+| ------ | --------- |
+| Catálogos vacante (departamentos/modalidades) | `AdminPortal.vacancyCatalog.*` |
+| Tipos de documento de identidad | `AdminPortal.documentTypes.*` |
+| Entrevistas — catálogos (página) | `AdminPortal.interviews.catalog.*` |
+| Entrevistas — calendario general | `AdminPortal.interviews.calendar.*` |
+| Shell (sidebar fallbacks, topbar breadcrumbs) | `AdminPortal.shell`, `Navigation`, `Topbar` |
+| Metadata de rutas admin | `Metadata.adminPortal.*` |
+
+Ya migrados previamente: empresas, usuarios, etapas, plantillas, estados, configuración.

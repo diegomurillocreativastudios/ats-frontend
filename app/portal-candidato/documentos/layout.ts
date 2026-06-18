@@ -1,8 +1,13 @@
-export const metadata = {
-  title: { absolute: "ATS | Portal Candidato | Documentos" },
-  description: "Gestiona tus documentos en el portal del candidato",
-};
+import { getTranslations } from "next-intl/server"
+
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.candidatePortal.documents")
+  return {
+    title: { absolute: t("title") },
+    description: t("description"),
+  }
+}
 
 export default function PortalCandidatoDocumentosLayout({ children }) {
-  return children;
+  return children
 }

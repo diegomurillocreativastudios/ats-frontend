@@ -13,6 +13,7 @@ import {
   formatInterviewScheduleDateLabel,
   getTodayDateInputValue,
 } from "@/lib/interview-datetime"
+import { useTranslations } from "next-intl"
 
 const pad2 = (n: number) => String(n).padStart(2, "0")
 
@@ -88,8 +89,8 @@ export function DatePicker({
   value,
   onChange,
   disabled = false,
-  placeholder = "Elegir fecha",
-  ariaLabel = "Elegir fecha",
+  placeholder,
+  ariaLabel,
   errorMessage,
   id,
   buttonClassName = datePickerButtonClass,
@@ -97,6 +98,9 @@ export function DatePicker({
   minYear: minYearProp,
   maxYear: maxYearProp,
 }: DatePickerProps) {
+  const t = useTranslations("Common")
+  const resolvedPlaceholder = placeholder ?? t("pickDate")
+  const resolvedAriaLabel = ariaLabel ?? t("pickDate")
   const [open, setOpen] = useState(false)
   const [viewMonth, setViewMonth] = useState(() => {
     const n = new Date()
@@ -187,7 +191,7 @@ export function DatePicker({
 
   const displayLabel = value
     ? formatInterviewScheduleDateLabel(value)
-    : placeholder
+    : resolvedPlaceholder
 
   return (
     <div className={wrapperClassName} ref={rootRef}>
@@ -206,7 +210,7 @@ export function DatePicker({
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-controls={open ? dialogId : undefined}
-        aria-label={ariaLabel}
+        aria-label={resolvedAriaLabel}
         data-invalid={errorMessage ? "true" : undefined}
       >
         <span className="select-none px-1">{displayLabel}</span>
@@ -216,7 +220,7 @@ export function DatePicker({
         <div
           id={dialogId}
           role="dialog"
-          aria-label={ariaLabel}
+          aria-label={resolvedAriaLabel}
           className="absolute left-0 top-[calc(100%+6px)] z-50 w-[min(100vw-1.5rem,20rem)] rounded-xl border border-border bg-background p-3 shadow-lg"
         >
           <div className="mb-3 flex items-center gap-1.5">
@@ -225,7 +229,7 @@ export function DatePicker({
               onClick={handlePrevMonth}
               disabled={year <= minYear && monthIndex <= 0}
               className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label="Mes anterior"
+              aria-label={t("prevMonth")}
             >
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </button>
@@ -258,7 +262,7 @@ export function DatePicker({
               onClick={handleNextMonth}
               disabled={year >= maxYear && monthIndex >= 11}
               className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label="Mes siguiente"
+              aria-label={t("nextMonth")}
             >
               <ChevronRight className="h-4 w-4" aria-hidden />
             </button>

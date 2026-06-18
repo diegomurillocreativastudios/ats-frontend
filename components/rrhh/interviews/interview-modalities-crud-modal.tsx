@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
@@ -26,6 +27,8 @@ export function InterviewModalitiesCrudModal({
   onClose,
   onMutate,
 }: InterviewModalitiesCrudModalProps) {
+  const t = useTranslations("RecruiterPortal.interviews.crud.modalities")
+  const tCommon = useTranslations("RecruiterPortal.interviews.crud.common")
   const [items, setItems] = useState<InterviewModalityAdmin[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -102,7 +105,7 @@ export function InterviewModalitiesCrudModal({
       setNewIncludeGoogleMeetLink(false)
       await loadList()
       onMutate?.()
-      showSnackbar("success", "Modalidad de entrevista creada correctamente.")
+      showSnackbar("success", t("created"))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -145,10 +148,7 @@ export function InterviewModalitiesCrudModal({
       setEditIncludeGoogleMeetLink(false)
       await loadList()
       onMutate?.()
-      showSnackbar(
-        "success",
-        "Modalidad de entrevista actualizada correctamente."
-      )
+      showSnackbar("success", t("updated"))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -171,10 +171,7 @@ export function InterviewModalitiesCrudModal({
       setDeleteTarget(null)
       await loadList()
       onMutate?.()
-      showSnackbar(
-        "success",
-        "Modalidad de entrevista eliminada correctamente."
-      )
+      showSnackbar("success", t("deleted"))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -190,7 +187,7 @@ export function InterviewModalitiesCrudModal({
 
   const footer = (
     <Button type="button" variant="outline" onClick={onClose}>
-      Cerrar
+      {tCommon("close")}
     </Button>
   )
 
@@ -199,7 +196,7 @@ export function InterviewModalitiesCrudModal({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title="Modalidades de entrevista"
+        title={t("title")}
         footer={footer}
         size="lg"
         closeOnOverlayClick={!saving && !deleting}
@@ -209,7 +206,7 @@ export function InterviewModalitiesCrudModal({
           <form
             onSubmit={handleCreate}
             className="flex flex-col gap-3"
-            aria-label="Crear modalidad de entrevista"
+            aria-label={t("createAria")}
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -217,14 +214,14 @@ export function InterviewModalitiesCrudModal({
                   htmlFor="new-interview-modality-display-name"
                   className="font-sans text-sm font-medium text-foreground"
                 >
-                  Nueva modalidad
+                  {t("newLabel")}
                 </label>
                 <input
                   id="new-interview-modality-display-name"
                   type="text"
                   value={newDisplayName}
                   onChange={(e) => setNewDisplayName(e.target.value)}
-                  placeholder="Nombre visible"
+                  placeholder={t("namePlaceholder")}
                   className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm"
                   disabled={saving || loading}
                   autoComplete="off"
@@ -238,7 +235,7 @@ export function InterviewModalitiesCrudModal({
                 className="shrink-0 px-5 py-2.5"
               >
                 <Plus className="h-4 w-4" aria-hidden />
-                Añadir
+                {tCommon("add")}
               </Button>
             </div>
             
@@ -253,11 +250,11 @@ export function InterviewModalitiesCrudModal({
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-12 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-              Cargando modalidades…
+              {t("loading")}
             </div>
           ) : items.length === 0 ? (
             <p className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-8 text-center font-sans text-sm text-muted-foreground">
-              No hay modalidades definidas. Añade la primera arriba.
+              {t("empty")}
             </p>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
@@ -265,16 +262,16 @@ export function InterviewModalitiesCrudModal({
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
                     <th scope="col" className="px-3 py-2 font-semibold">
-                      Nombre
+                      {tCommon("name")}
                     </th>
                     <th scope="col" className="px-3 py-2 font-semibold">
-                      Google Meet
+                      {t("googleMeet")}
                     </th>
                     <th
                       scope="col"
                       className="w-[1%] whitespace-nowrap px-3 py-2 font-semibold"
                     >
-                      Acciones
+                      {tCommon("actions")}
                     </th>
                   </tr>
                 </thead>
@@ -292,7 +289,7 @@ export function InterviewModalitiesCrudModal({
                             onChange={(e) => setEditDisplayName(e.target.value)}
                             className="h-9 w-full min-w-48 rounded-md border border-input bg-background px-2 font-sans text-sm"
                             disabled={saving}
-                            aria-label="Editar nombre de la modalidad"
+                            aria-label={t("editNameAria")}
                           />
                         ) : (
                           <span className="text-foreground">
@@ -312,18 +309,18 @@ export function InterviewModalitiesCrudModal({
                               }
                               disabled={saving}
                               className="h-4 w-4 shrink-0 rounded border-input text-vo-purple focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                              aria-label="Incluir enlace de Google Meet"
+                              aria-label={t("meetAria")}
                             />
                             <label
                               htmlFor={`edit-interview-modality-google-meet-${row.id}`}
                               className="font-sans text-xs text-muted-foreground"
                             >
-                              Meet
+                              {t("meetLabel")}
                             </label>
                           </div>
                         ) : (
                           <span className="text-foreground">
-                            {row.includeGoogleMeetLink ? "Sí" : "No"}
+                            {row.includeGoogleMeetLink ? tCommon("yes") : tCommon("no")}
                           </span>
                         )}
                       </td>
@@ -340,7 +337,7 @@ export function InterviewModalitiesCrudModal({
                               }
                               className="w-full rounded-md bg-vo-purple px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
                             >
-                              Guardar
+                              {tCommon("save")}
                             </button>
                             <button
                               type="button"
@@ -348,7 +345,7 @@ export function InterviewModalitiesCrudModal({
                               disabled={saving}
                               className="w-full rounded-md border border-border px-3 py-1.5 text-center text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
                             >
-                              Cancelar
+                              {tCommon("cancel")}
                             </button>
                           </div>
                         ) : (
@@ -358,7 +355,7 @@ export function InterviewModalitiesCrudModal({
                               onClick={() => handleStartEdit(row)}
                               disabled={saving || !!editingId}
                               className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-foreground hover:bg-muted disabled:opacity-50"
-                              aria-label={`Editar ${row.displayName}`}
+                              aria-label={tCommon("editAria", { name: row.displayName })}
                             >
                               <Pencil className="h-4 w-4" aria-hidden />
                             </button>
@@ -367,7 +364,7 @@ export function InterviewModalitiesCrudModal({
                               onClick={() => setDeleteTarget(row)}
                               disabled={saving || !!editingId}
                               className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                              aria-label={`Eliminar ${row.displayName}`}
+                              aria-label={tCommon("deleteAria", { name: row.displayName })}
                             >
                               <Trash2 className="h-4 w-4" aria-hidden />
                             </button>
@@ -387,13 +384,13 @@ export function InterviewModalitiesCrudModal({
         isOpen={!!deleteTarget}
         onClose={() => !deleting && setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Eliminar modalidad de entrevista"
+        title={t("deleteTitle")}
         message={
           deleteTarget
-            ? `¿Eliminar «${deleteTarget.displayName}»? Solo se permitirá si no hay entrevistas usando esta modalidad.`
+            ? t("deleteMessage", { name: deleteTarget.displayName })
             : ""
         }
-        confirmText="Eliminar"
+        confirmText={tCommon("delete")}
         loading={deleting}
       />
       <Snackbar

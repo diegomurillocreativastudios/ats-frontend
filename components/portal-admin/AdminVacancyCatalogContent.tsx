@@ -16,6 +16,7 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { Button } from "@/components/ui/Button"
@@ -53,62 +54,14 @@ interface CatalogFormErrors {
   sortOrder?: string
 }
 
-interface CatalogCopy {
-  title: string
-  singular: string
-  singularCapitalized: string
-  plural: string
-  endpoint: string
-  createCta: string
-  emptyMessage: string
-  headingDescription: string
-  createSuccess: string
-  updateSuccess: string
-  activateSuccess: string
-  deactivateSuccess: string
-  deleteSuccess: string
-  relatedUsageLabel: string
-  deleteConflictMessage: string
-}
-
-const CATALOG_COPY_BY_KIND: Record<VacancyCatalogKind, CatalogCopy> = {
-  departments: {
-    title: "Departamentos",
-    singular: "departamento",
-    singularCapitalized: "Departamento",
-    plural: "departamentos",
-    endpoint: "/api/admin/vacancy-departments",
-    createCta: "Crear departamento",
-    emptyMessage: "Aún no hay departamentos creados",
-    headingDescription: "Gestiona el catálogo global de departamentos para vacantes.",
-    createSuccess: "Departamento creado.",
-    updateSuccess: "Departamento actualizado.",
-    activateSuccess: "Departamento activado.",
-    deactivateSuccess: "Departamento desactivado.",
-    deleteSuccess: "Departamento eliminado.",
-    relatedUsageLabel: "Vacantes asociadas",
-    deleteConflictMessage:
-      "No se puede eliminar porque está asociado a vacantes existentes.",
-  },
-  modalities: {
-    title: "Modalidades",
-    singular: "modalidad",
-    singularCapitalized: "Modalidad",
-    plural: "modalidades",
-    endpoint: "/api/admin/vacancy-modalities",
-    createCta: "Crear modalidad",
-    emptyMessage: "Aún no hay modalidades creadas",
-    headingDescription: "Gestiona el catálogo global de modalidades para vacantes.",
-    createSuccess: "Modalidad creada.",
-    updateSuccess: "Modalidad actualizada.",
-    activateSuccess: "Modalidad activada.",
-    deactivateSuccess: "Modalidad desactivada.",
-    deleteSuccess: "Modalidad eliminada.",
-    relatedUsageLabel: "Vacantes asociadas",
-    deleteConflictMessage:
-      "No se puede eliminar porque está asociado a vacantes existentes.",
-  },
-}
+type CatalogValidationTranslator = (
+  key:
+    | "nameRequired"
+    | "codeRequired"
+    | "codePattern"
+    | "sortOrderRequired"
+    | "sortOrderInvalid",
+) => string
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
@@ -150,28 +103,31 @@ function mapItemToFormState(item: VacancyCatalogAdminItem): CatalogFormState {
   }
 }
 
-function validateCatalogForm(values: CatalogFormState): CatalogFormErrors {
+function validateCatalogForm(
+  values: CatalogFormState,
+  tValidation: CatalogValidationTranslator,
+): CatalogFormErrors {
   const errors: CatalogFormErrors = {}
   const normalizedName = values.displayName.trim()
   const normalizedCode = values.code.trim()
   const normalizedSortOrder = values.sortOrder.trim()
 
   if (normalizedName === "") {
-    errors.displayName = "El nombre es obligatorio."
+    errors.displayName = tValidation("nameRequired")
   }
 
   if (normalizedCode === "") {
-    errors.code = "El código es obligatorio."
+    errors.code = tValidation("codeRequired")
   } else if (!SLUG_PATTERN.test(normalizedCode)) {
-    errors.code = "Usa solo minúsculas, números y guiones."
+    errors.code = tValidation("codePattern")
   }
 
   if (normalizedSortOrder === "") {
-    errors.sortOrder = "El orden es obligatorio."
+    errors.sortOrder = tValidation("sortOrderRequired")
   } else {
     const parsed = Number(normalizedSortOrder)
     if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) {
-      errors.sortOrder = "Ingresa un número entero válido."
+      errors.sortOrder = tValidation("sortOrderInvalid")
     }
   }
 
@@ -191,9 +147,18 @@ function buildPayload(values: CatalogFormState): VacancyCatalogFormValues {
 export function AdminVacancyCatalogContent({
   catalog,
 }: AdminVacancyCatalogContentProps) {
-  const copy = CATALOG_COPY_BY_KIND[catalog]
+  const tShared = useTranslations("AdminPortal.vacancyCatalog.shared")
+  const tKind = useTranslations(`AdminPortal.vacancyCatalog.${catalog}`)
+  const tCommon = useTranslations("Common")
   const CatalogIcon = catalog === "departments" ? Building2 : Briefcase
   const isDepartmentCatalog = catalog === "departments"
+
+  const kindValues = {
+    singular: tKind("singular"),
+    singularCapitalized: tKind("singularCapitalized"),
+    plural: tKind("plural"),
+    article: tKind("article"),
+  }
 
   const [items, setItems] = useState<VacancyCatalogAdminItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -246,11 +211,11 @@ export function AdminVacancyCatalogContent({
       setItems(nextItems)
     } catch (error) {
       setItems([])
-      setListError(getApiErrorMessage(error) || "No se pudo cargar el catálogo.")
+      setListError(getApiErrorMessage(error) || tShared("errors.loadCatalog"))
     } finally {
       setLoading(false)
     }
-  }, [catalog])
+  }, [catalog, tShared])
 
   useEffect(() => {
     void loadList()
@@ -282,7 +247,8 @@ export function AdminVacancyCatalogContent({
       )
     } catch (error) {
       setFormLoadError(
-        getApiErrorMessage(error) || `No se pudo cargar el ${copy.singular}.`
+        getApiErrorMessage(error) ||
+          tShared("errors.loadItem", { singular: kindValues.singular })
       )
     } finally {
       setFormLoading(false)
@@ -332,7 +298,9 @@ export function AdminVacancyCatalogContent({
     event.preventDefault()
     if (formSubmitting) return
 
-    const validationErrors = validateCatalogForm(formState)
+    const validationErrors = validateCatalogForm(formState, (key) =>
+      tShared(`validation.${key}`)
+    )
     if (Object.keys(validationErrors).length > 0) {
       setFormErrors(validationErrors)
       return
@@ -344,10 +312,10 @@ export function AdminVacancyCatalogContent({
     try {
       if (formMode === "create") {
         await createAdminVacancyCatalogItem(catalog, payload)
-        showSnackbar("success", copy.createSuccess)
+        showSnackbar("success", tKind("createSuccess"))
       } else if (editingItemId) {
         await updateAdminVacancyCatalogItem(catalog, editingItemId, payload)
-        showSnackbar("success", copy.updateSuccess)
+        showSnackbar("success", tKind("updateSuccess"))
       }
 
       setIsFormOpen(false)
@@ -355,7 +323,7 @@ export function AdminVacancyCatalogContent({
     } catch (error) {
       showSnackbar(
         "error",
-        getApiErrorMessage(error) || "No se pudo guardar el registro."
+        getApiErrorMessage(error) || tShared("errors.saveFailed")
       )
     } finally {
       setFormSubmitting(false)
@@ -380,13 +348,13 @@ export function AdminVacancyCatalogContent({
       setConflictTarget(null)
       showSnackbar(
         "success",
-        nextIsActive ? copy.activateSuccess : copy.deactivateSuccess
+        nextIsActive ? tKind("activateSuccess") : tKind("deactivateSuccess")
       )
       await loadList()
     } catch (error) {
       showSnackbar(
         "error",
-        getApiErrorMessage(error) || "No se pudo actualizar el registro."
+        getApiErrorMessage(error) || tShared("errors.updateFailed")
       )
     } finally {
       setBusyAction(false)
@@ -400,7 +368,7 @@ export function AdminVacancyCatalogContent({
     try {
       await deleteAdminVacancyCatalogItem(catalog, deleteTarget.id)
       setDeleteTarget(null)
-      showSnackbar("success", copy.deleteSuccess)
+      showSnackbar("success", tKind("deleteSuccess"))
       await loadList()
     } catch (error) {
       const status =
@@ -411,11 +379,11 @@ export function AdminVacancyCatalogContent({
       if (status === 409) {
         setDeleteTarget(null)
         setConflictTarget(deleteTarget)
-        showSnackbar("warning", copy.deleteConflictMessage)
+        showSnackbar("warning", tKind("deleteConflictMessage"))
       } else {
         showSnackbar(
           "error",
-          getApiErrorMessage(error) || "No se pudo eliminar el registro."
+          getApiErrorMessage(error) || tShared("errors.deleteFailed")
         )
       }
     } finally {
@@ -435,8 +403,8 @@ export function AdminVacancyCatalogContent({
     >
       <PortalPageHeader
         id={`portal-admin-${catalog}-heading`}
-        title={copy.title}
-        description={copy.headingDescription}
+        title={tKind("title")}
+        description={tKind("headingDescription")}
         className="mb-6"
         contentClassName="max-w-3xl"
         actions={
@@ -446,24 +414,27 @@ export function AdminVacancyCatalogContent({
             onClick={handleOpenCreate}
           >
             <Plus className="h-4 w-4" aria-hidden />
-            {copy.createCta}
+            {tKind("createCta")}
           </Button>
         }
       />
 
       <section
         className="mb-5 rounded-xl border border-border bg-card p-4 shadow-sm"
-        aria-label={`Resumen de ${copy.plural}`}
+        aria-label={tShared("aria.summary", { plural: kindValues.plural })}
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm text-foreground">
               {loading
-                ? "Cargando..."
-                : `${sortedItems.length} ${copy.plural}`}
+                ? tShared("count.loading")
+                : tShared("count.summary", {
+                    count: sortedItems.length,
+                    plural: kindValues.plural,
+                  })}
             </span>
             <span className="text-sm text-muted-foreground">
-              Gestiona {copy.plural} disponibles para nuevas vacantes.
+              {tShared("summaryHelper", { plural: kindValues.plural })}
             </span>
           </div>
 
@@ -475,7 +446,7 @@ export function AdminVacancyCatalogContent({
             disabled={loading}
           >
             <RefreshCw className="h-4 w-4" aria-hidden />
-            Refrescar
+            {tShared("actions.refresh")}
           </Button>
         </div>
       </section>
@@ -483,14 +454,14 @@ export function AdminVacancyCatalogContent({
       {listError ? (
         <section
           className="rounded-xl border border-destructive/30 bg-destructive/5 p-6"
-          aria-label={`Error al cargar ${copy.plural}`}
+          aria-label={tShared("aria.loadError", { plural: kindValues.plural })}
         >
           <p className="font-sans text-sm text-destructive" role="alert">
-            {listError || "No se pudo cargar el catálogo."}
+            {listError || tShared("errors.loadCatalog")}
           </p>
           <div className="mt-4">
             <Button type="button" variant="primary" onClick={() => void loadList()}>
-              Reintentar
+              {tShared("actions.retry")}
             </Button>
           </div>
         </section>
@@ -499,7 +470,7 @@ export function AdminVacancyCatalogContent({
       {!listError ? (
         <section
           className="min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-          aria-label={`Listado de ${copy.plural}`}
+          aria-label={tShared("aria.list", { plural: kindValues.plural })}
         >
           {loading ? (
             <div className="space-y-3 p-5">
@@ -521,16 +492,15 @@ export function AdminVacancyCatalogContent({
               </div>
               <div className="space-y-2">
                 <h2 className="font-sans text-lg font-semibold text-foreground">
-                  {copy.emptyMessage}
+                  {tKind("emptyMessage")}
                 </h2>
                 <p className="max-w-lg font-sans text-sm text-muted-foreground">
-                  Cuando crees un {copy.singular}, quedará disponible para clasificar
-                  vacantes desde el resto del ATS.
+                  {tShared("emptyBody", { singular: kindValues.singular })}
                 </p>
               </div>
               <Button type="button" variant="primary" onClick={handleOpenCreate}>
                 <Plus className="h-4 w-4" aria-hidden />
-                {copy.createCta}
+                {tKind("createCta")}
               </Button>
             </div>
           ) : (
@@ -540,12 +510,14 @@ export function AdminVacancyCatalogContent({
               >
                 <thead className="border-b border-border bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 font-medium text-foreground">Nombre</th>
                     <th className="px-4 py-3 font-medium text-foreground">
-                      Descripción
+                      {tShared("table.name")}
                     </th>
                     <th className="px-4 py-3 font-medium text-foreground">
-                      Acciones
+                      {tShared("table.description")}
+                    </th>
+                    <th className="px-4 py-3 font-medium text-foreground">
+                      {tShared("table.actions")}
                     </th>
                   </tr>
                 </thead>
@@ -562,13 +534,13 @@ export function AdminVacancyCatalogContent({
                           </p>
                           {(item.vacanciesCount ?? 0) > 0 ? (
                             <p className="text-xs text-muted-foreground">
-                              En uso por vacantes activas o históricas.
+                              {tShared("inUse")}
                             </p>
                           ) : null}
                         </div>
                       </td>
                       <td className="px-4 py-3 align-top text-muted-foreground">
-                        {item.description?.trim() || "—"}
+                        {item.description?.trim() || tShared("dash")}
                       </td>
                       <td className="px-4 py-3 align-top">
                         <div className="flex flex-wrap gap-2">
@@ -579,7 +551,7 @@ export function AdminVacancyCatalogContent({
                             onClick={() => void handleOpenEdit(item.id)}
                           >
                             <Pencil className="h-3.5 w-3.5" aria-hidden />
-                            Editar
+                            {tShared("actions.edit")}
                           </Button>
                           <Button
                             type="button"
@@ -588,7 +560,7 @@ export function AdminVacancyCatalogContent({
                             onClick={() => setDeleteTarget(item)}
                           >
                             <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                            Eliminar
+                            {tShared("actions.delete")}
                           </Button>
                         </div>
                       </td>
@@ -606,8 +578,10 @@ export function AdminVacancyCatalogContent({
         onClose={handleCloseForm}
         title={
           formMode === "create"
-            ? `${copy.singularCapitalized} nuevo`
-            : `Editar ${copy.singular}`
+            ? tKind("formCreateTitle", {
+                singularCapitalized: kindValues.singularCapitalized,
+              })
+            : tKind("formEditTitle", { singular: kindValues.singular })
         }
         size="lg"
         closeOnEscape={!formSubmitting && !formLoading}
@@ -620,7 +594,7 @@ export function AdminVacancyCatalogContent({
               onClick={handleCloseForm}
               disabled={formSubmitting || formLoading}
             >
-              Cancelar
+              {tCommon("cancel")}
             </Button>
             <Button
               type="submit"
@@ -629,7 +603,9 @@ export function AdminVacancyCatalogContent({
               loading={formSubmitting}
               disabled={formSubmitting || formLoading}
             >
-              {formMode === "create" ? "Guardar" : "Actualizar"}
+              {formMode === "create"
+                ? tShared("actions.save")
+                : tShared("actions.update")}
             </Button>
           </div>
         }
@@ -637,7 +613,7 @@ export function AdminVacancyCatalogContent({
         {formLoading ? (
           <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-            Cargando {copy.singular}...
+            {tShared("form.loading", { singular: kindValues.singular })}
           </div>
         ) : formLoadError ? (
           <div className="space-y-4">
@@ -652,7 +628,7 @@ export function AdminVacancyCatalogContent({
                 void handleOpenEdit(editingItemId)
               }}
             >
-              Reintentar
+              {tShared("actions.retry")}
             </Button>
           </div>
         ) : (
@@ -665,14 +641,16 @@ export function AdminVacancyCatalogContent({
               <Input
                 id={`${catalog}-displayName`}
                 name="displayName"
-                label="Nombre"
+                label={tShared("form.nameLabel")}
                 required
                 value={formState.displayName}
                 error={formErrors.displayName || ""}
                 onChange={(event: ChangeEvent<HTMLInputElement>) =>
                   handleDisplayNameChange(event.target.value)
                 }
-                placeholder={`Nombre del ${copy.singular}`}
+                placeholder={tShared("form.namePlaceholder", {
+                  singular: kindValues.singular,
+                })}
                 disabled={formSubmitting}
               />
             </div>
@@ -682,7 +660,7 @@ export function AdminVacancyCatalogContent({
                 htmlFor={`${catalog}-description`}
                 className="mb-2 block text-sm font-medium text-black"
               >
-                Descripción
+                {tShared("form.descriptionLabel")}
               </label>
               <textarea
                 id={`${catalog}-description`}
@@ -696,7 +674,9 @@ export function AdminVacancyCatalogContent({
                   }))
                 }
                 className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-black placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder={`Descripción breve del ${copy.singular}`}
+                placeholder={tShared("form.descriptionPlaceholder", {
+                  singular: kindValues.singular,
+                })}
                 disabled={formSubmitting}
               />
             </div>
@@ -708,21 +688,24 @@ export function AdminVacancyCatalogContent({
         isOpen={deleteTarget != null}
         onClose={() => !busyAction && setDeleteTarget(null)}
         onConfirm={() => void handleConfirmDelete()}
-        title={`Eliminar ${copy.singular}`}
+        title={tKind("deleteTitle", { singular: kindValues.singular })}
         message={
           deleteTarget
-            ? `¿Eliminar el ${copy.singular} "${deleteTarget.displayName}"? Esta acción intenta borrar el registro de forma definitiva.`
+            ? tShared("deleteConfirm.message", {
+                singular: kindValues.singular,
+                name: deleteTarget.displayName,
+              })
             : ""
         }
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        confirmText={tShared("deleteConfirm.confirmDelete")}
+        cancelText={tCommon("cancel")}
         loading={busyAction}
       />
 
       <Modal
         isOpen={conflictTarget != null}
         onClose={() => !busyAction && setConflictTarget(null)}
-        title={`No se puede eliminar ${copy.singular}`}
+        title={tShared("conflict.title", { singular: kindValues.singular })}
         size="md"
         closeOnEscape={!busyAction}
         closeOnOverlayClick={!busyAction}
@@ -734,7 +717,7 @@ export function AdminVacancyCatalogContent({
               onClick={() => setConflictTarget(null)}
               disabled={busyAction}
             >
-              Cerrar
+              {tShared("actions.close")}
             </Button>
             {!isDepartmentCatalog ? (
               <Button
@@ -747,19 +730,20 @@ export function AdminVacancyCatalogContent({
                   void updateItemActiveState(conflictTarget, false)
                 }}
               >
-                Desactivar en su lugar
+                {tShared("actions.deactivateInstead")}
               </Button>
             ) : null}
           </div>
         }
       >
         <div className="space-y-3">
-          <p className="text-sm text-foreground">{copy.deleteConflictMessage}</p>
+          <p className="text-sm text-foreground">{tKind("deleteConflictMessage")}</p>
           {!isDepartmentCatalog ? (
             <p className="text-sm text-muted-foreground">
-              Podés desactivar {copy.singular === "modalidad" ? "la" : "el"}{" "}
-              {copy.singular} para dejar de ofrecerlo en nuevas vacantes sin perder
-              la referencia de las ya existentes.
+              {tShared("conflict.deactivateHint", {
+                article: kindValues.article,
+                singular: kindValues.singular,
+              })}
             </p>
           ) : null}
         </div>

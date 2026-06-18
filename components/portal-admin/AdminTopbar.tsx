@@ -9,6 +9,7 @@ import ProductBrand from "@/components/branding/ProductBrand"
 import LanguageSwitcher from "@/components/language-switcher"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { getInitials } from "@/lib/getInitials"
+import { resolveAdminPortalNavLabelKey } from "@/lib/admin-portal-nav"
 import { segmentToTitle } from "@/lib/pageTitles"
 
 const DESKTOP_PADDING = "px-8"
@@ -26,16 +27,25 @@ interface AdminTopbarProps {
   breadcrumbTrail?: BreadcrumbSegment[] | null
 }
 
-function defaultBreadcrumbLabel(pathname: string): string {
+function defaultBreadcrumbLabel(
+  pathname: string,
+  homeLabel: string,
+  adminShortcutLabel: string,
+  tNav: (key: string) => string,
+): string {
   const normalized =
     pathname.endsWith("/") && pathname.length > 1
       ? pathname.slice(0, -1)
       : pathname
-  if (normalized === "/portal-admin") return "Inicio"
+  if (normalized === "/portal-admin") return homeLabel
+
+  const navLabelKey = resolveAdminPortalNavLabelKey(pathname)
+  if (navLabelKey) return tNav(navLabelKey)
+
   const segments = normalized.split("/").filter(Boolean)
   const last = segments[segments.length - 1]
-  if (!last) return "Administración"
-  if (last === "portal-admin") return "Inicio"
+  if (!last) return adminShortcutLabel
+  if (last === "portal-admin") return homeLabel
   return segmentToTitle(last)
 }
 
@@ -45,6 +55,7 @@ export default function AdminTopbar({
   breadcrumbTrail = null,
 }: AdminTopbarProps) {
   const t = useTranslations("Topbar")
+  const tNav = useTranslations("Navigation")
   const tActions = useTranslations("Actions")
   const pathname = usePathname()
   const isDesktop = variant === "desktop"
@@ -57,7 +68,8 @@ export default function AdminTopbar({
   const router = useRouter()
 
   const breadcrumbLabel =
-    breadcrumbLabelProp ?? defaultBreadcrumbLabel(pathname)
+    breadcrumbLabelProp ??
+    defaultBreadcrumbLabel(pathname, tNav("home"), t("adminShortcut"), tNav)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

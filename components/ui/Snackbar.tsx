@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useState, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 import {
   X,
   CheckCircle2,
@@ -70,6 +71,7 @@ const Snackbar = ({
   duration = 5000,
   autoHide = true,
 }) => {
+  const t = useTranslations("Common");
   const [mounted, setMounted] = useState(false);
   const [displayed, setDisplayed] = useState(false);
   const [entered, setEntered] = useState(false);
@@ -199,7 +201,7 @@ const Snackbar = ({
           onClick={handleClose}
           onKeyDown={handleKeyDown}
           className={`shrink-0 rounded-md p-1 transition-colors focus:outline-none focus:ring-2 ${config.closeClass}`}
-          aria-label="Cerrar notificación"
+          aria-label={t("closeNotification")}
         >
           <X className="h-4 w-4" aria-hidden />
         </button>

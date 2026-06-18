@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
 import Snackbar from "@/components/ui/Snackbar"
 
@@ -12,6 +13,7 @@ export interface GoogleCalendarDisconnectProps {
 export function GoogleCalendarDisconnect({
   onDisconnected,
 }: GoogleCalendarDisconnectProps) {
+  const t = useTranslations("RecruiterPortal.settings.calendarDisconnect")
   const { disconnect, isLoading } = useGoogleCalendar()
   const [showConfirm, setShowConfirm] = useState(false)
   const [snackbar, setSnackbar] = useState<{
@@ -26,13 +28,13 @@ export function GoogleCalendarDisconnect({
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Google Calendar desconectado.",
+        message: t("toastSuccess"),
       })
       setShowConfirm(false)
       onDisconnected?.()
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "No se pudo desconectar"
+        error instanceof Error ? error.message : t("toastErrorGeneric")
       setSnackbar({ open: true, variant: "error", message })
     }
   }
@@ -41,11 +43,9 @@ export function GoogleCalendarDisconnect({
     <>
       {showConfirm ? (
         <div className="rounded-lg border border-amber-700 bg-amber-50 p-4 text-sm text-amber-700">
-          <p className="font-sans font-medium">
-            ¿Desconectar Google Calendar?
-          </p>
+          <p className="font-sans font-medium">{t("title")}</p>
           <p className="mt-2 font-sans text-muted-foreground">
-            Los eventos ya creados en tu calendario no se eliminan.
+            {t("bodyEventsKept")}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <button
@@ -57,14 +57,14 @@ export function GoogleCalendarDisconnect({
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
               ) : null}
-              Desconectar
+              {t("confirm")}
             </button>
             <button
               type="button"
               onClick={() => setShowConfirm(false)}
               className="rounded-md border border-border px-4 py-2 font-sans text-sm hover:bg-muted"
             >
-              Cancelar
+              {t("cancel")}
             </button>
           </div>
         </div>
@@ -74,7 +74,7 @@ export function GoogleCalendarDisconnect({
           onClick={() => setShowConfirm(true)}
           className="rounded-md border border-destructive/50 px-4 py-2 font-sans text-sm font-medium text-destructive hover:bg-destructive/10"
         >
-          Desconectar Google Calendar
+          {t("triggerLabel")}
         </button>
       )}
       <Snackbar

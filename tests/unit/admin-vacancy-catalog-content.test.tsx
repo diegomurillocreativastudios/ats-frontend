@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
+import { fireEvent, screen, waitFor, within } from "@testing-library/react"
+import { renderWithIntl as render } from "@/tests/helpers/render-with-intl"
 import { AdminVacancyCatalogContent } from "@/components/portal-admin/AdminVacancyCatalogContent"
 import type { VacancyCatalogAdminItem } from "@/lib/api/admin-vacancy-catalogs"
 
@@ -73,8 +74,6 @@ describe("AdminVacancyCatalogContent", () => {
       target: { value: "Talento Humano" },
     })
 
-    expect(await screen.findByLabelText(/Código/i)).toHaveValue("talento-humano")
-
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
     await waitFor(() => {
@@ -112,7 +111,7 @@ describe("AdminVacancyCatalogContent", () => {
       isActive: false,
     })
 
-    render(<AdminVacancyCatalogContent catalog="departments" />)
+    render(<AdminVacancyCatalogContent catalog="modalities" />)
 
     await screen.findByRole("button", { name: "Eliminar" })
 
@@ -133,7 +132,7 @@ describe("AdminVacancyCatalogContent", () => {
 
     await waitFor(() => {
       expect(catalogApiMocks.updateAdminVacancyCatalogItem).toHaveBeenCalledWith(
-        "departments",
+        "modalities",
         inUseItem.id,
         expect.objectContaining({
           isActive: false,

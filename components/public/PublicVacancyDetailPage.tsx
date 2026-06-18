@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useTranslations } from "next-intl"
 import {
   ArrowLeft,
   Briefcase,
@@ -75,9 +76,11 @@ function DetailRow({
 function BulletList({
   title,
   items,
+  keyBlockLabel,
 }: {
   title: string
   items: string[]
+  keyBlockLabel: string
 }) {
   if (!items.length) return null
 
@@ -88,7 +91,7 @@ function BulletList({
           <CheckCircle2 className="h-5 w-5" aria-hidden />
         </div>
         <div>
-          <p className="text-[11px] uppercase tracking-[0.24em] text-white/46">Bloque clave</p>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-white/46">{keyBlockLabel}</p>
           <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
         </div>
       </div>
@@ -157,14 +160,21 @@ function VacancyTextSection({
   )
 }
 
-function VacancyDescription({ description }: { description?: string }) {
+function VacancyDescription({
+  description,
+  t,
+}: {
+  description?: string
+  t: ReturnType<typeof useTranslations<"PublicOpportunities.detail">>
+}) {
   return (
     <VacancyTextSection
       icon={<Compass className="h-5 w-5" aria-hidden />}
       iconColorClassName="text-[#8dd8ff]"
-      eyebrow="Contexto del rol"
-      title="Descripción del puesto"
+      eyebrow={t("roleContext")}
+      title={t("jobDescription")}
       content={description}
+      emptyLabel={t("unspecified")}
     />
   )
 }
@@ -210,6 +220,8 @@ export function PublicVacancyDetailPage({
 }: {
   vacancyId: string
 }) {
+  const t = useTranslations("PublicOpportunities.detail")
+  const tPage = useTranslations("PublicOpportunities.page")
   const searchParams = useSearchParams()
   const [vacancy, setVacancy] = useState<OpportunityVacancyDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -233,7 +245,7 @@ export function PublicVacancyDetailPage({
         if (isCancelled) return
         if (!nextVacancy) {
           setVacancy(null)
-          setErrorMessage("No encontramos la vacante solicitada.")
+          setErrorMessage(t("notFound"))
           return
         }
 
@@ -243,7 +255,7 @@ export function PublicVacancyDetailPage({
         const message =
           error instanceof Error && error.message.trim() !== ""
             ? error.message
-            : "No se pudo cargar la vacante."
+            : t("loadFailed")
         setVacancy(null)
         setErrorMessage(message)
       } finally {
@@ -268,7 +280,10 @@ export function PublicVacancyDetailPage({
   const publishedLabel = formatPublishedLabel(vacancy?.publishedAt)
   const companyName = vacancy?.company.name?.trim() ?? ""
   const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy?.company.logo ?? null)
-  const companyLogoAlt = companyName ? `Logo de ${companyName}` : "Logo de la empresa"
+  const companyLogoAlt = companyName
+    ? tPage("companyLogoAlt", { company: companyName })
+    : tPage("companyLogoGeneric")
+  const unspecified = t("unspecified")
   const applyHref = queryString
     ? `/portal-oportunidades/${vacancyId}/aplicar?${queryString}`
     : `/portal-oportunidades/${vacancyId}/aplicar`
@@ -291,7 +306,7 @@ export function PublicVacancyDetailPage({
               className="inline-flex items-center gap-2 text-sm font-medium text-white/76 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
-              Volver a oportunidades
+              {t("back")}
             </Link>
           </div>
 
@@ -305,7 +320,7 @@ export function PublicVacancyDetailPage({
                   href="/portal-oportunidades"
                   className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-[#ffd0e7]"
                 >
-                  Ver todas las oportunidades
+                  {t("viewAll")}
                 </Link>
               </div>
             </div>
@@ -322,7 +337,7 @@ export function PublicVacancyDetailPage({
                     <div className="space-y-4">
                       <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-white/76">
                         <Sparkles className="h-3.5 w-3.5 text-[#f5b0ff]" aria-hidden />
-                        Vacante activa
+                        {t("activeBadge")}
                       </p>
 
                       <div className="space-y-3">
@@ -341,12 +356,12 @@ export function PublicVacancyDetailPage({
                             <VacancyLocationLabel
                               countryCode={vacancy.countryCode}
                               stateCode={vacancy.stateCode}
-                              emptyLabel="Ubicación no especificada"
+                              emptyLabel={tPage("fallbackLocation")}
                             />
                           </span>
                           <span className="inline-flex items-center gap-2">
                             <Briefcase className="h-4 w-4 text-[#f5b0ff]" aria-hidden />
-                            {vacancy.modality?.displayName ?? "No especificado"}
+                            {vacancy.modality?.displayName ?? unspecified}
                           </span>
                         </div>
                       </div>
@@ -372,46 +387,48 @@ export function PublicVacancyDetailPage({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <DetailPill value={vacancy.department?.displayName ?? "No especificado"} />
-                    <DetailPill value={vacancy.modality?.displayName ?? "No especificado"} />
+                    <DetailPill value={vacancy.department?.displayName ?? unspecified} />
+                    <DetailPill value={vacancy.modality?.displayName ?? unspecified} />
                     <DetailPill
                       value={
                         <VacancyLocationLabel
                           countryCode={vacancy.countryCode}
                           stateCode={vacancy.stateCode}
-                          emptyLabel="No especificado"
+                          emptyLabel={unspecified}
                         />
                       }
                     />
-                    {publishedLabel ? <DetailPill value={`Publicada ${publishedLabel}`} /> : null}
+                    {publishedLabel ? (
+                      <DetailPill value={t("published", { date: publishedLabel })} />
+                    ) : null}
                     <Link
                       href={applyHref}
                       className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-medium text-[#18213d] shadow-sm transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
                     >
-                      Postularme
+                      {t("apply")}
                     </Link>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">Departamento</p>
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">{t("department")}</p>
                       <p className="mt-2 text-lg font-semibold text-white">
-                        {vacancy.department?.displayName ?? "No especificado"}
+                        {vacancy.department?.displayName ?? unspecified}
                       </p>
                     </div>
                     <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">Modalidad</p>
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">{t("modality")}</p>
                       <p className="mt-2 text-lg font-semibold text-white">
-                        {vacancy.modality?.displayName ?? "No especificado"}
+                        {vacancy.modality?.displayName ?? unspecified}
                       </p>
                     </div>
                     <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">Ubicación</p>
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">{t("location")}</p>
                       <p className="mt-2 text-lg font-semibold text-white">
                         <VacancyLocationLabel
                           countryCode={vacancy.countryCode}
                           stateCode={vacancy.stateCode}
-                          emptyLabel="No especificado"
+                          emptyLabel={unspecified}
                         />
                       </p>
                     </div>
@@ -419,14 +436,14 @@ export function PublicVacancyDetailPage({
                 </div>
               </section>
 
-              <VacancyDescription description={vacancy.description} />
+              <VacancyDescription description={vacancy.description} t={t} />
 
               {vacancy.details ? (
                 <VacancyTextSection
                   icon={<Info className="h-5 w-5" aria-hidden />}
                   iconColorClassName="text-[#f6c482]"
-                  eyebrow="Más sobre el puesto"
-                  title="Detalles adicionales"
+                  eyebrow={t("moreAboutRole")}
+                  title={t("additionalDetails")}
                   content={vacancy.details}
                 />
               ) : null}
@@ -435,25 +452,25 @@ export function PublicVacancyDetailPage({
                 <VacancyTextSection
                   icon={<Gift className="h-5 w-5" aria-hidden />}
                   iconColorClassName="text-[#f0a7ff]"
-                  eyebrow="Lo que ofrecemos"
-                  title="Ventajas y beneficios"
+                  eyebrow={t("whatWeOffer")}
+                  title={t("benefits")}
                   content={vacancy.advantages}
                 />
               ) : null}
 
-              <BulletList title="Responsabilidades" items={vacancy.responsibilities ?? []} />
-              <BulletList title="Requisitos" items={vacancy.requirements ?? []} />
-              <BulletList title="Beneficios" items={vacancy.benefits ?? []} />
+              <BulletList title={t("responsibilities")} items={vacancy.responsibilities ?? []} keyBlockLabel={t("keyBlock")} />
+              <BulletList title={t("requirements")} items={vacancy.requirements ?? []} keyBlockLabel={t("keyBlock")} />
+              <BulletList title={t("benefits")} items={vacancy.benefits ?? []} keyBlockLabel={t("keyBlock")} />
             </div>
 
               <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
                 <section className={`rounded-[30px] p-6 ${darkPanelClassName}`}>
-                  <h2 className="text-xl font-semibold text-white">Detalles de la vacante</h2>
+                  <h2 className="text-xl font-semibold text-white">{t("sidebarTitle")}</h2>
 
                   <dl className="mt-4">
                     {companyName ? (
                       <DetailRow
-                        label="Empresa"
+                        label={t("company")}
                         value={
                           <span className="inline-flex items-center justify-end gap-2">
                             {companyLogoSrc ? (
@@ -475,26 +492,26 @@ export function PublicVacancyDetailPage({
                       />
                     ) : null}
                     <DetailRow
-                      label="Departamento"
-                      value={vacancy.department?.displayName ?? "No especificado"}
+                      label={t("department")}
+                      value={vacancy.department?.displayName ?? unspecified}
                     />
                     <DetailRow
-                      label="Modalidad"
-                      value={vacancy.modality?.displayName ?? "No especificado"}
+                      label={t("modality")}
+                      value={vacancy.modality?.displayName ?? unspecified}
                     />
                     <DetailRow
-                      label="Ubicación"
+                      label={t("location")}
                       value={
                         <VacancyLocationLabel
                           countryCode={vacancy.countryCode}
                           stateCode={vacancy.stateCode}
-                          emptyLabel="No especificado"
+                          emptyLabel={unspecified}
                         />
                       }
                     />
                     {vacancy.salary ? (
                       <DetailRow
-                        label="Salario"
+                        label={t("salary")}
                         value={
                           <span className="inline-flex items-center justify-end gap-2">
                             <DollarSign className="h-3.5 w-3.5 text-[#8dd8ff]" aria-hidden />
@@ -504,7 +521,7 @@ export function PublicVacancyDetailPage({
                       />
                     ) : null}
                     {publishedLabel ? (
-                      <DetailRow label="Publicación" value={publishedLabel} />
+                      <DetailRow label={t("publishedLabel")} value={publishedLabel} />
                     ) : null}
                   </dl>
 
@@ -513,7 +530,7 @@ export function PublicVacancyDetailPage({
                       href={applyHref}
                       className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-[#18213d] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
                     >
-                      Postularme
+                      {t("apply")}
                     </Link>
                   </div>
                 </section>

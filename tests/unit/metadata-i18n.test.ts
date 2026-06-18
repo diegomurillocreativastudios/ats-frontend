@@ -166,6 +166,7 @@ describe("Diccionarios Metadata (Etapa 5A)", () => {
       expect(Object.keys(auth).sort()).toEqual([
         "forgotPassword",
         "login",
+        "register",
         "resetPassword",
       ])
       expect(Object.keys(metadata.portalSelection as object).sort()).toEqual([

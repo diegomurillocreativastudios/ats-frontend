@@ -5,9 +5,12 @@ import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 
-export const metadata = {
-  title: "Configuracion",
-  description: "Configuración del portal RRHH",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.recruiterSettings")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default async function RRHHConfiguracionPage() {

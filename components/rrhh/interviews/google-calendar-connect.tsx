@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
 
 function GoogleMark({ className }: { className?: string }) {
@@ -21,6 +22,7 @@ function GoogleMark({ className }: { className?: string }) {
 }
 
 export function GoogleCalendarConnect() {
+  const t = useTranslations("RecruiterPortal.settings.calendarConnect")
   const { connect, isLoading } = useGoogleCalendar()
   const [isConnecting, setIsConnecting] = useState(false)
 
@@ -41,14 +43,14 @@ export function GoogleCalendarConnect() {
       onClick={() => void handleClick()}
       disabled={disabled}
       className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground shadow-sm hover:bg-muted disabled:opacity-50"
-      aria-label="Conectar Google Calendar"
+      aria-label={t("ariaLabel")}
     >
       {isConnecting ? (
         <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
       ) : (
         <GoogleMark className="h-4 w-4 shrink-0" />
       )}
-      {isConnecting ? "Redirigiendo…" : "Conectar Google Calendar"}
+      {isConnecting ? t("redirecting") : t("label")}
     </button>
   )
 }

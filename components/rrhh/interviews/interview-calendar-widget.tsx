@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { ExternalLink, Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { getInterviewCalendarEvent } from "@/lib/google-calendar"
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
 import type { InterviewCalendarEvent } from "@/types/calendar"
@@ -20,6 +21,7 @@ export function InterviewCalendarWidget({
   scheduledAtUtc,
   onSync,
 }: InterviewCalendarWidgetProps) {
+  const t = useTranslations("RecruiterPortal.interviews.calendar")
   const { status } = useGoogleCalendar()
   const [calendarEvent, setCalendarEvent] =
     useState<InterviewCalendarEvent | null>(null)
@@ -52,11 +54,11 @@ export function InterviewCalendarWidget({
     try {
       setIsSyncing(true)
       await loadCalendarEvent()
-      setToast({ type: "success", message: "Estado del calendario actualizado." })
+      setToast({ type: "success", message: t("toastSynced") })
       onSync?.()
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "No se pudo sincronizar"
+        error instanceof Error ? error.message : t("syncFailed")
       setToast({ type: "error", message })
     } finally {
       setIsSyncing(false)
@@ -70,17 +72,17 @@ export function InterviewCalendarWidget({
     return (
       <div className={cardClass}>
         <h3 className="text-base font-semibold text-foreground">
-          Google Calendar
+          {t("title")}
         </h3>
         <p className="mt-2 text-muted-foreground">
-          Conectá tu Google Calendar en{" "}
+          {t("notConnected")}{" "}
           <Link
             href="/portal-rrhh/configuracion/calendario"
             className="font-medium text-vo-purple underline-offset-2 hover:underline"
           >
-            configuración
+            {t("settingsLink")}
           </Link>{" "}
-          para sincronizar entrevistas y enviar invitaciones.
+          {t("notConnectedSuffix")}
         </p>
       </div>
     )
@@ -90,11 +92,10 @@ export function InterviewCalendarWidget({
     return (
       <div className={cardClass}>
         <h3 className="text-base font-semibold text-foreground">
-          Google Calendar
+          {t("title")}
         </h3>
         <p className="mt-2 text-muted-foreground">
-          Define fecha y hora de la entrevista para generar o vincular el evento en
-          Google Calendar.
+          {t("noSchedule")}
         </p>
       </div>
     )
@@ -104,19 +105,19 @@ export function InterviewCalendarWidget({
     <>
       <div className={`${cardClass} border-vo-purple/30`}>
         <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-          Google Calendar
+          {t("title")}
         </h3>
 
         {isLoading ? (
           <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-            Cargando evento…
+            {t("loadingEvent")}
           </div>
         ) : calendarEvent?.syncStatus === "synced" &&
           calendarEvent.googleCalendarUrl ? (
           <div className="mt-3 flex flex-col gap-3">
             <p className="rounded-md border border-emerald-700 bg-emerald-50 px-3 py-2 text-emerald-700">
-              Evento sincronizado con Google Calendar.
+              {t("synced")}
             </p>
             <a
               href={calendarEvent.googleCalendarUrl}
@@ -124,20 +125,18 @@ export function InterviewCalendarWidget({
               rel="noopener noreferrer"
               className="inline-flex w-fit items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
             >
-              Ver en Google Calendar
+              {t("viewInGoogle")}
               <ExternalLink className="h-4 w-4" aria-hidden />
             </a>
           </div>
         ) : calendarEvent?.syncStatus === "pending" ? (
           <p className="mt-3 rounded-md border border-border bg-muted px-3 py-2 text-foreground">
-            Sincronización pendiente…
+            {t("pending")}
           </p>
         ) : (
           <div className="mt-3 flex flex-col gap-3">
             <p className="rounded-md border border-amber-700 bg-amber-50 px-3 py-2 text-amber-700">
-              {calendarEvent
-                ? "El evento no está sincronizado o hubo un error."
-                : "Aún no hay evento vinculado. Guarda la entrevista o sincroniza desde configuración."}
+              {calendarEvent ? t("notSynced") : t("noEvent")}
             </p>
             <button
               type="button"
@@ -145,7 +144,7 @@ export function InterviewCalendarWidget({
               disabled={isSyncing}
               className="w-fit rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
             >
-              {isSyncing ? "Actualizando…" : "Reintentar"}
+              {isSyncing ? t("updating") : t("retry")}
             </button>
           </div>
         )}
