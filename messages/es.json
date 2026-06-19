@@ -1826,6 +1826,8 @@
         },
         "errors": {
           "moveStageFailed": "No se pudo mover el candidato de etapa.",
+          "stageSkipNotAllowed": "Solo puedes mover el candidato a la etapa consecutiva (anterior o siguiente). No se permiten saltos.",
+          "finalStatusRequiredForStageMove": "Para avanzar a la siguiente etapa, el candidato debe estar en un estado de postulación marcado como final.",
           "missingDefaultApplicationStatus": "Falta el estado de postulación por defecto de la empresa. El servidor lo necesita al mover candidatos entre etapas. Configúralo en Etapas (estados) o pide a un administrador que lo haga.",
           "updateApplicationStatusFailed": "No se pudo actualizar el estado de la postulación.",
           "candidateMovedStage": "Candidato movido de etapa.",

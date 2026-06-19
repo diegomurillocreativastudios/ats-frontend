@@ -1826,6 +1826,8 @@
         },
         "errors": {
           "moveStageFailed": "The candidate could not be moved to another stage.",
+          "stageSkipNotAllowed": "You can only move the candidate to the consecutive stage (previous or next). Skipping stages is not allowed.",
+          "finalStatusRequiredForStageMove": "To advance to the next stage, the candidate must be in an application status marked as final.",
           "missingDefaultApplicationStatus": "The company's default application status is missing. The server needs it when moving candidates between stages. Configure it in Stages (statuses) or ask an administrator to do so.",
           "updateApplicationStatusFailed": "The application status could not be updated.",
           "candidateMovedStage": "Candidate moved to another stage.",

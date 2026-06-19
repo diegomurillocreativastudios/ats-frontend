@@ -72,6 +72,7 @@ import {
   normalizeKanbanStage,
   resolveOrderedStageNames,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
+import { validateStageMove } from "@/lib/recruiter/stage-move-validation"
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
 import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api";
@@ -167,6 +168,19 @@ const normalizeApplicationStatusError = (err, t) => {
   const fallback = t("errors.updateApplicationStatusFailed")
   const raw = extractApiErrorMessage(err) ?? fallback
   return { text: raw, showEstadosLink: false }
+}
+
+const normalizeStageMoveValidationError = (code, t) => {
+  if (code === "final_status_required") {
+    return {
+      text: t("errors.finalStatusRequiredForStageMove"),
+      showEstadosLink: true,
+    }
+  }
+  return {
+    text: t("errors.stageSkipNotAllowed"),
+    showEstadosLink: false,
+  }
 }
 
 /** Converts any value to a string safe for React (never render an object). */
@@ -1065,7 +1079,8 @@ const MatchCard = ({
 const mapStatusFromApi = (item, index = 0) => {
   const id = String(item?.id ?? item?.uuid ?? index);
   const name = item?.name ?? item?.status_name ?? "";
-  return { id, name };
+  const final = Boolean(item?.final ?? item?.isFinal ?? item?.is_final);
+  return { id, name, final };
 };
 
 const KanbanCard = ({
@@ -1398,7 +1413,6 @@ export default function VacanteDetallePage() {
   const [statuses, setStatuses] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
-  const [moveStageError, setMoveStageError] = useState(null);
   const [loadingMoveStage, setLoadingMoveStage] = useState(false);
   const [applicationStatusError, setApplicationStatusError] = useState(null);
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
@@ -2264,12 +2278,51 @@ export default function VacanteDetallePage() {
   const handleKanbanStageDrop = useCallback(
     async (candidateId, newStage) => {
       if (isVacancyReadOnly) return;
-      setMoveStageError(null);
       setApplicationStatusError(null);
       const applicant = applicants.find(
         (m, i) => getCandidateId(m, i) === candidateId
       );
       const applicationId = applicant?.applicationId ?? applicant?.application_id;
+      const currentStage =
+        candidateStageOverrides[candidateId] ??
+        normalizeKanbanStage(
+          applicant?.applicationStage ?? applicant?.stage,
+          kanbanStageNames
+        );
+      const currentStatusId =
+        candidateStatusOverrides[candidateId] ??
+        applicant?.applicationStatusId ??
+        applicant?.statusId ??
+        statuses.find(
+          (status) =>
+            (status.name || "").toLowerCase() ===
+            String(
+              applicant?.applicationStatus ?? applicant?.status ?? ""
+            ).toLowerCase()
+        )?.id ??
+        statuses[0]?.id ??
+        "";
+      const validation = validateStageMove(
+        currentStage,
+        newStage,
+        stages,
+        currentStatusId,
+        statuses
+      );
+
+      if (!validation.allowed) {
+        const normalized = normalizeStageMoveValidationError(
+          validation.code,
+          tMatching
+        );
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: normalized.text,
+        });
+        return;
+      }
+
       const stageObj = stages.find(
         (s) => (s.name || "").trim() === (newStage || "").trim()
       );
@@ -2307,7 +2360,6 @@ export default function VacanteDetallePage() {
           }
         } catch (err) {
           const normalized = normalizeMoveStageError(err, tMatching);
-          setMoveStageError(normalized);
           setSnackbar({
             open: true,
             variant: "error",
@@ -2323,7 +2375,7 @@ export default function VacanteDetallePage() {
         }
       }
     },
-    [applicants, stages, fetchVacancy, isVacancyReadOnly, tMatching]
+    [applicants, stages, statuses, kanbanStageNames, candidateStageOverrides, candidateStatusOverrides, fetchVacancy, isVacancyReadOnly, tMatching]
   );
 
   const handleKanbanDragEnter = useCallback((stage) => {
@@ -2338,7 +2390,6 @@ export default function VacanteDetallePage() {
     async (candidateId, statusId) => {
       if (isVacancyReadOnly) return;
       setApplicationStatusError(null);
-      setMoveStageError(null);
       const applicant = applicants.find(
         (m, i) => getCandidateId(m, i) === candidateId
       );
@@ -3356,7 +3407,6 @@ export default function VacanteDetallePage() {
                           ({applicants.length})
                         </span>
                       </h2>
-                      <MoveStageErrorBanner error={moveStageError} />
                       <MoveStageErrorBanner error={applicationStatusError} />
                       <div
                         className="rounded-xl border border-border bg-card p-6"
@@ -4231,7 +4281,6 @@ export default function VacanteDetallePage() {
                         ({applicants.length})
                       </span>
                     </h2>
-                    <MoveStageErrorBanner error={moveStageError} />
                     <MoveStageErrorBanner error={applicationStatusError} />
                     <div
                       className="rounded-xl border border-border bg-card p-5"

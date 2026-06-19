@@ -1826,6 +1826,8 @@
         },
         "errors": {
           "moveStageFailed": "Impossible de déplacer le candidat vers une autre étape.",
+          "stageSkipNotAllowed": "Vous ne pouvez déplacer le candidat que vers l'étape consécutive (précédente ou suivante). Les sauts ne sont pas autorisés.",
+          "finalStatusRequiredForStageMove": "Pour passer à l'étape suivante, le candidat doit être dans un statut de candidature marqué comme final.",
           "missingDefaultApplicationStatus": "Le statut de candidature par défaut de l'entreprise est manquant. Le serveur en a besoin pour déplacer les candidats entre les étapes. Configurez-le dans Étapes (statuts) ou demandez à un administrateur de le faire.",
           "updateApplicationStatusFailed": "Impossible de mettre à jour le statut de la candidature.",
           "candidateMovedStage": "Candidat déplacé vers une autre étape.",

@@ -1826,6 +1826,8 @@
         },
         "errors": {
           "moveStageFailed": "Der Kandidat konnte nicht in eine andere Phase verschoben werden.",
+          "stageSkipNotAllowed": "Sie können den Kandidaten nur in die unmittelbar vorherige oder nächste Phase verschieben. Überspringen ist nicht erlaubt.",
+          "finalStatusRequiredForStageMove": "Um zur nächsten Phase zu wechseln, muss der Kandidat einen Bewerbungsstatus mit Markierung „final“ haben.",
           "missingDefaultApplicationStatus": "Der Standard-Bewerbungsstatus des Unternehmens fehlt. Der Server benötigt ihn beim Verschieben von Kandidaten zwischen Phasen. Konfigurieren Sie ihn unter Phasen (Status) oder bitten Sie einen Administrator, dies zu tun.",
           "updateApplicationStatusFailed": "Der Bewerbungsstatus konnte nicht aktualisiert werden.",
           "candidateMovedStage": "Kandidat in eine andere Phase verschoben.",

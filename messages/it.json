@@ -1826,6 +1826,8 @@
         },
         "errors": {
           "moveStageFailed": "Impossibile spostare il candidato di fase.",
+          "stageSkipNotAllowed": "Puoi spostare il candidato solo alla fase consecutiva (precedente o successiva). Non sono ammessi salti.",
+          "finalStatusRequiredForStageMove": "Per passare alla fase successiva, il candidato deve essere in uno stato di candidatura contrassegnato come finale.",
           "missingDefaultApplicationStatus": "Manca lo stato di candidatura predefinito dell'azienda. Il server ne ha bisogno quando si spostano candidati tra le fasi. Configuralo in Fasi (stati) o chiedi a un amministratore di farlo.",
           "updateApplicationStatusFailed": "Impossibile aggiornare lo stato della candidatura.",
           "candidateMovedStage": "Candidato spostato di fase.",
