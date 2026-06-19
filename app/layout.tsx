@@ -1,14 +1,20 @@
-import { Montserrat } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { APP_NAME } from "@/lib/app-brand";
 import "./globals.css";
 import PageTitle from "@/components/PageTitle";
 
-const montserrat = Montserrat({
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-montserrat",
+  variable: "--font-inter",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-manrope",
 });
 
 export async function generateMetadata() {
@@ -24,8 +30,8 @@ export default async function RootLayout({ children }) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={montserrat.variable}>
-      <body className="antialiased">
+    <html lang={locale} className={`${inter.variable} ${manrope.variable}`}>
+      <body className="font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <PageTitle />
           {children}

@@ -26,7 +26,7 @@ function getWordmarkClassName(density: ProductBrandProps["density"]): string {
             ? "text-2xl"
             : "text-xl"
 
-  return `font-display font-bold tracking-tight whitespace-nowrap leading-none ${sizeClass}`
+  return `font-brand font-bold tracking-tight whitespace-nowrap leading-none ${sizeClass}`
 }
 
 function AppWordmark({

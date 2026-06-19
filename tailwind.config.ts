@@ -79,13 +79,19 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: [
-          "var(--font-montserrat)",
-          "ui-sans-serif",
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        brand: [
+          "var(--font-manrope)",
+          "var(--font-inter)",
           "system-ui",
           "sans-serif",
         ],
-        montserrat: ["var(--font-montserrat)", "sans-serif"],
+        display: [
+          "var(--font-manrope)",
+          "var(--font-inter)",
+          "system-ui",
+          "sans-serif",
+        ],
       },
       borderRadius: {
         DEFAULT: '6px',

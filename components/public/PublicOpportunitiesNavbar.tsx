@@ -37,7 +37,7 @@ export function PublicOpportunitiesNavbar({
 
           <span className="flex min-w-0 flex-col justify-center">
             <span
-              className={`font-display text-xl font-bold tracking-tight leading-none sm:text-2xl md:text-3xl ${theme.textHeading}`}
+              className={`font-brand text-xl font-bold tracking-tight leading-none sm:text-2xl md:text-3xl ${theme.textHeading}`}
               aria-label={APP_NAME}
             >
               <span>Appli</span>
