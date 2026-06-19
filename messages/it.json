@@ -1752,6 +1752,9 @@
         "emptyDefault": "Nessun candidato da mostrare al momento.",
         "profileModal": {
           "aiProcessed": "Analisi elaborata con IA",
+          "aiIntro": "Questa valutazione è stata elaborata con IA per accelerare la lettura iniziale del profilo.",
+          "aiTiming": "Un'analisi manuale può richiedere tra <strong>2 ore e 1 giorno</strong>, mentre con l'IA questo risultato viene generato in <strong>secondi</strong>.",
+          "aiValidationHint": "Usa questi risultati come supporto e convalida la decisione finale dal team HR.",
           "aiDisclosure": "Il contenuto seguente è stato generato da IA e viene mostrato senza modifiche.",
           "attributes": "Attributi",
           "qualitativeScore": "Punteggio qualitativo",
@@ -1765,8 +1768,11 @@
           "noAdditionalInfo": "Nessuna informazione aggiuntiva disponibile.",
           "downloading": "Download in corso…",
           "downloadCv": "Scarica CV",
+          "downloadCvAria": "Scarica CV del candidato",
           "viewFullProfile": "Vedi profilo completo",
-          "close": "Chiudi"
+          "close": "Chiudi",
+          "profileAria": "Profilo di {name}",
+          "closeProfileAria": "Chiudi profilo"
         },
         "scoreKeys": {
           "qualitative": "Punteggio qualitativo",
@@ -1781,6 +1787,7 @@
         },
         "kanban": {
           "score": "Punteggio",
+          "columnAria": "Colonna {stage}",
           "moveStageAria": "Sposta {name} in un'altra fase",
           "statusAria": "Stato di {name}"
         },
@@ -1795,7 +1802,8 @@
           "selectAll": "Seleziona tutti i candidati",
           "deselectAll": "Deseleziona tutti i candidati",
           "selectCandidate": "Seleziona candidato {name}",
-          "viewCandidate": "Vedi profilo di {name}"
+          "viewCandidate": "Vedi profilo di {name}",
+          "candidateCard": "Candidato {name}"
         },
         "toasts": {
           "matchSuccess": "Corrispondenza eseguita correttamente.",
@@ -1830,7 +1838,8 @@
           "openProfileAria": "Apri il profilo del candidato in una nuova scheda"
         },
         "scoreTooltips": {
-          "semanticSimilarity": "Misura quanto il contenuto del CV è allineato alla descrizione della posizione, usando il confronto semantico del testo."
+          "semanticSimilarity": "Misura quanto il contenuto del CV è allineato alla descrizione della posizione, usando il confronto semantico del testo.",
+          "qualitativeScore": "Valuta la compatibilità qualitativa del candidato in aspetti come esperienza, competenze e contesto del profilo rispetto alla vacanza."
         },
         "stagesTitle": "Fasi",
         "emptyApplicants": "Non ci sono ancora candidati su questa posizione.",

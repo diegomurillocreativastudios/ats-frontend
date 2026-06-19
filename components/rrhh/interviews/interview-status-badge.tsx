@@ -4,7 +4,7 @@ import { getInterviewStatusLabel } from "@/lib/interviews/interview-status-label
 
 const STATUS_STYLES: Record<InterviewStatus, { className: string }> = {
   Scheduled: {
-    className: "border border-vo-sky/40 bg-vo-sky/10 text-vo-sky",
+    className: "border border-ats-arena bg-ats-arena/60 text-gray-700",
   },
   Completed: {
     className: "border border-vo-navy/40 bg-vo-navy/10 text-vo-navy",

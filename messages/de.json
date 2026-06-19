@@ -1752,6 +1752,9 @@
         "emptyDefault": "Derzeit keine Kandidaten zum Anzeigen.",
         "profileModal": {
           "aiProcessed": "Mit KI verarbeitete Analyse",
+          "aiIntro": "Diese Bewertung wurde mit KI verarbeitet, um die erste Profilprüfung zu beschleunigen.",
+          "aiTiming": "Eine manuelle Analyse kann zwischen <strong>2 Stunden und 1 Tag</strong> dauern, während KI dieses Ergebnis in <strong>Sekunden</strong> erzeugt.",
+          "aiValidationHint": "Nutzen Sie diese Ergebnisse als Unterstützung und validieren Sie die endgültige Entscheidung im HR-Team.",
           "aiDisclosure": "Der folgende Inhalt wurde von KI generiert und unverändert angezeigt.",
           "attributes": "Attribute",
           "qualitativeScore": "Qualitative Punktzahl",
@@ -1765,8 +1768,11 @@
           "noAdditionalInfo": "Keine weiteren Informationen verfügbar.",
           "downloading": "Wird heruntergeladen…",
           "downloadCv": "Lebenslauf herunterladen",
+          "downloadCvAria": "Lebenslauf des Kandidaten herunterladen",
           "viewFullProfile": "Vollständiges Profil anzeigen",
-          "close": "Schließen"
+          "close": "Schließen",
+          "profileAria": "Profil von {name}",
+          "closeProfileAria": "Profil schließen"
         },
         "scoreKeys": {
           "qualitative": "Qualitative Punktzahl",
@@ -1781,6 +1787,7 @@
         },
         "kanban": {
           "score": "Punktzahl",
+          "columnAria": "Spalte {stage}",
           "moveStageAria": "{name} in eine andere Phase verschieben",
           "statusAria": "Status von {name}"
         },
@@ -1795,7 +1802,8 @@
           "selectAll": "Alle Kandidaten auswählen",
           "deselectAll": "Alle Kandidaten abwählen",
           "selectCandidate": "Kandidat {name} auswählen",
-          "viewCandidate": "Profil von {name} anzeigen"
+          "viewCandidate": "Profil von {name} anzeigen",
+          "candidateCard": "Kandidat {name}"
         },
         "toasts": {
           "matchSuccess": "Matching erfolgreich ausgeführt.",
@@ -1830,7 +1838,8 @@
           "openProfileAria": "Kandidatenprofil in neuem Tab öffnen"
         },
         "scoreTooltips": {
-          "semanticSimilarity": "Misst, wie gut der Lebenslauf-Inhalt mit der Stellenbeschreibung übereinstimmt, mittels semantischem Textvergleich."
+          "semanticSimilarity": "Misst, wie gut der Lebenslauf-Inhalt mit der Stellenbeschreibung übereinstimmt, mittels semantischem Textvergleich.",
+          "qualitativeScore": "Bewertet die qualitative Passung des Kandidaten in Bezug auf Erfahrung, Fähigkeiten und Profilkontext zur Stelle."
         },
         "stagesTitle": "Phasen",
         "emptyApplicants": "Für diese Stelle gibt es noch keine Bewerber.",

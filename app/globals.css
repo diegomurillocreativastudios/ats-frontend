@@ -36,7 +36,7 @@
   --border: var(--ats-arena);
   --input: var(--ats-arena);
   --muted: var(--ats-arena);
-  --muted-foreground: #5A5B5E;
+  --muted-foreground: #48494C;
 
   --font-sans: var(--font-montserrat);
   --font-display: var(--font-montserrat);
@@ -82,7 +82,7 @@
   --color-gray-300: #D5C9BC;
   --color-gray-400: #A8A39C;
   --color-gray-500: #7A7B7E;
-  --color-gray-600: #5A5B5E;
+  --color-gray-600: #48494C;
   --color-gray-700: #3D3E41;
   --color-gray-800: #2A2B2E;
   --color-gray-900: #202124;
@@ -108,7 +108,7 @@
   --color-slate-300: #D5C9BC;
   --color-slate-400: #A8A39C;
   --color-slate-500: #7A7B7E;
-  --color-slate-600: #5A5B5E;
+  --color-slate-600: #48494C;
   --color-slate-700: #3D3E41;
   --color-slate-800: #2A2B2E;
   --color-slate-900: #202124;
@@ -120,7 +120,7 @@
   --color-zinc-300: #D5C9BC;
   --color-zinc-400: #A8A39C;
   --color-zinc-500: #7A7B7E;
-  --color-zinc-600: #5A5B5E;
+  --color-zinc-600: #48494C;
   --color-zinc-700: #3D3E41;
   --color-zinc-800: #2A2B2E;
   --color-zinc-900: #202124;
@@ -132,7 +132,7 @@
   --color-stone-300: #D5C9BC;
   --color-stone-400: #A8A39C;
   --color-stone-500: #7A7B7E;
-  --color-stone-600: #5A5B5E;
+  --color-stone-600: #48494C;
   --color-stone-700: #3D3E41;
   --color-stone-800: #2A2B2E;
   --color-stone-900: #202124;
@@ -144,7 +144,7 @@
   --color-neutral-300: #D5C9BC;
   --color-neutral-400: #A8A39C;
   --color-neutral-500: #7A7B7E;
-  --color-neutral-600: #5A5B5E;
+  --color-neutral-600: #48494C;
   --color-neutral-700: #3D3E41;
   --color-neutral-800: #2A2B2E;
   --color-neutral-900: #202124;

@@ -11,7 +11,7 @@ function getActivityIcon(kind: string) {
 
 function getActivityIconStyles(kind: string) {
   if (kind === "interview")
-    return { iconBg: "bg-[#DCFCE7]", iconColor: "text-success" as const };
+    return { iconBg: "bg-emerald-100", iconColor: "text-emerald-800" as const };
   return { iconBg: "bg-[#DBEAFE]", iconColor: "text-vo-navy" as const };
 }
 

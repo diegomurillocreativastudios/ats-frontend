@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeft,
   ArrowRight,
@@ -98,12 +98,22 @@ import {
   mergeCatalogOption,
 } from "@/lib/vacancy-catalogs";
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels";
+import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles";
 
-const formatDate = (value) => {
+const LOCALE_DATE_MAP = {
+  es: "es-CL",
+  en: "en-US",
+  it: "it-IT",
+  de: "de-DE",
+  fr: "fr-FR",
+};
+
+const formatDate = (value, locale = "es") => {
   if (!value) return "—";
   const d = typeof value === "string" ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("es-CL", {
+  const dateLocale = LOCALE_DATE_MAP[locale] ?? locale;
+  return d.toLocaleDateString(dateLocale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -219,10 +229,11 @@ const ScoreBarRow = ({
   barTrackClass = "bg-slate-200/90",
   isTotalRow = false,
   hideLabel = false,
+  getScoreLabel,
 }) => {
   const pct = typeof val === "number" ? (val * 100).toFixed(1) : null;
   const barWidth = typeof val === "number" ? Math.min(val * 100, 100) : 0;
-  const labelText = formatScoreKey(scoreKey);
+  const labelText = getScoreLabel(scoreKey);
   return (
     <li
       className={
@@ -277,14 +288,7 @@ const ScoreTooltip = ({ text, accentClass = "text-slate-500" }) => (
   </span>
 );
 
-const STATUS_STYLES = {
-  activa: { bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
-  cerrada: { bgClass: "bg-muted", textClass: "text-muted-foreground" },
-  pausada: { bgClass: "bg-amber-100", textClass: "text-amber-800" },
-  open: { bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
-  closed: { bgClass: "bg-muted", textClass: "text-muted-foreground" },
-  paused: { bgClass: "bg-amber-100", textClass: "text-amber-800" },
-};
+const STATUS_STYLES = VACANCY_STATUS_STYLES;
 
 const normalizeVacancyStatusKey = (status) => {
   if (!status) return "activa";
@@ -345,36 +349,36 @@ const createEmptyRequirement = () => ({
 });
 
 /** Converts a raw score/attribute key into a natural human-readable label. */
-const formatScoreKey = (key) => {
+const formatScoreKey = (key, t) => {
   const k = String(key).trim();
   const map = {
-    QualitativeScore: "Puntaje cualitativo",
-    qualitativeScore: "Puntaje cualitativo",
-    qualitative_score: "Puntaje cualitativo",
-    VectorSimilarity: "Similitud semántica",
-    vectorSimilarity: "Similitud semántica",
-    vector_similarity: "Similitud semántica",
-    SemanticScore: "Puntaje semántico",
-    semanticScore: "Puntaje semántico",
-    semantic_score: "Puntaje semántico",
-    TotalScore: "Puntaje total",
-    totalScore: "Puntaje total",
-    total_score: "Puntaje total",
-    attribute_aggregate: "Atributos en conjunto",
-    AttributeAggregate: "Atributos en conjunto",
-    attributeAggregate: "Atributos en conjunto",
-    KeywordScore: "Coincidencia de palabras clave",
-    keywordScore: "Coincidencia de palabras clave",
-    keyword_score: "Coincidencia de palabras clave",
-    ExperienceScore: "Experiencia",
-    experienceScore: "Experiencia",
-    experience_score: "Experiencia",
-    EducationScore: "Educación",
-    educationScore: "Educación",
-    education_score: "Educación",
-    SkillsScore: "Habilidades",
-    skillsScore: "Habilidades",
-    skills_score: "Habilidades",
+    QualitativeScore: t("scoreKeys.qualitative"),
+    qualitativeScore: t("scoreKeys.qualitative"),
+    qualitative_score: t("scoreKeys.qualitative"),
+    VectorSimilarity: t("scoreKeys.semanticSimilarity"),
+    vectorSimilarity: t("scoreKeys.semanticSimilarity"),
+    vector_similarity: t("scoreKeys.semanticSimilarity"),
+    SemanticScore: t("scoreKeys.semanticScore"),
+    semanticScore: t("scoreKeys.semanticScore"),
+    semantic_score: t("scoreKeys.semanticScore"),
+    TotalScore: t("scoreKeys.total"),
+    totalScore: t("scoreKeys.total"),
+    total_score: t("scoreKeys.total"),
+    attribute_aggregate: t("scoreKeys.attributesCombined"),
+    AttributeAggregate: t("scoreKeys.attributesCombined"),
+    attributeAggregate: t("scoreKeys.attributesCombined"),
+    KeywordScore: t("scoreKeys.keywordMatch"),
+    keywordScore: t("scoreKeys.keywordMatch"),
+    keyword_score: t("scoreKeys.keywordMatch"),
+    ExperienceScore: t("scoreKeys.experience"),
+    experienceScore: t("scoreKeys.experience"),
+    experience_score: t("scoreKeys.experience"),
+    EducationScore: t("scoreKeys.education"),
+    educationScore: t("scoreKeys.education"),
+    education_score: t("scoreKeys.education"),
+    SkillsScore: t("scoreKeys.skills"),
+    skillsScore: t("scoreKeys.skills"),
+    skills_score: t("scoreKeys.skills"),
   };
   if (map[k]) return map[k];
 
@@ -465,14 +469,14 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
               key={key}
               className="flex flex-wrap items-center gap-2"
             >
-              <span className="requirement_key inline-flex items-center gap-1.5 rounded-md bg-vo-purple/10 px-2.5 py-1 font-medium text-vo-purple">
+              <span className="requirement_key inline-flex items-center gap-1.5 rounded-md bg-vo-purple/15 px-2.5 py-1 font-semibold text-vo-purple">
                 {formatRequirementKey(key)}
               </span>
-              <span className="requirement_value inline-flex items-center rounded-md bg-vo-sky/10 px-2.5 py-1 text-vo-sky">
+              <span className="requirement_value inline-flex items-center rounded-md bg-ats-arena/70 px-2.5 py-1 font-medium text-gray-700">
                 {levelText}
               </span>
               {weight != null && (
-                <span className="requirement_weight inline-flex items-center gap-1.5 rounded-md bg-vo-pink/10 px-2.5 py-1 text-vo-pink">
+                <span className="requirement_weight inline-flex items-center gap-1.5 rounded-md bg-amber-100 px-2.5 py-1 font-semibold text-amber-800">
                   <Scale className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   {weight * 10}
                 </span>
@@ -528,6 +532,11 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
 };
 
 const CandidateProfileModal = ({ match, candidateId, onClose }) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
+  const tModal = useTranslations("RecruiterPortal.vacancies.matching.profileModal");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
+  const getScoreLabel = (key) => formatScoreKey(key, tMatching);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(null);
 
@@ -551,7 +560,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
         method: "GET",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error("No se pudo descargar el CV.");
+      if (!res.ok) throw new Error(tMatching("errors.downloadCvFailed"));
       const blob = await res.blob();
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -562,7 +571,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
       document.body.removeChild(a);
       URL.revokeObjectURL(objUrl);
     } catch (err) {
-      setDownloadError(err?.message ?? "Error al descargar.");
+      setDownloadError(err?.message ?? tMatching("errors.downloadCvFailed"));
     } finally {
       setDownloading(false);
     }
@@ -652,7 +661,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
-      aria-label={`Perfil de ${emptyToDash(match.name)}`}
+      aria-label={tModal("profileAria", { name: emptyToDash(match.name) })}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-background text-slate-900 shadow-xl">
@@ -682,11 +691,11 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 )}
               </div>
               <p className="font-sans text-xs text-slate-600">
-                Subido: {formatDate(match.uploadedAt)}
+                {tMatching("uploadedPrefix")} {formatDate(match.uploadedAt, locale)}
               </p>
               {totalScorePercent != null && (
                 <p className="font-sans text-xs font-semibold text-vo-purple">
-                  Puntaje total del emparejamiento: {totalScorePercent}%
+                  {tModal("totalMatchScore")} {totalScorePercent}%
                 </p>
               )}
             </div>
@@ -695,7 +704,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
             type="button"
             onClick={onClose}
             className="rounded-md p-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            aria-label="Cerrar modal"
+            aria-label={tCommon("closeModal")}
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
@@ -707,23 +716,25 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
             <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
               <User className="h-10 w-10 text-slate-400" aria-hidden />
               <p className="font-sans text-sm text-slate-600">
-                No hay información adicional disponible.
+                {tModal("noAdditionalInfo")}
               </p>
             </div>
           ) : (
             <div className="flex flex-col gap-6">
-              <div className="rounded-xl border border-vo-purple/25 bg-vo-purple/5 p-4 shadow-sm">
+              <div className="rounded-xl border border-vo-purple/35 bg-vo-purple/10 p-4 shadow-sm">
                 <h3 className="font-sans text-sm font-semibold text-vo-purple">
-                  Análisis procesado con IA
+                  {tModal("aiProcessed")}
                 </h3>
                 <p className="mt-2 font-sans text-sm text-slate-700">
-                  Esta evaluación fue procesada con IA para acelerar la lectura inicial del perfil.
+                  {tModal("aiIntro")}
                 </p>
                 <p className="mt-1 font-sans text-sm text-slate-700">
-                  Un análisis manual puede tomar entre <strong>2 horas y 1 día</strong>, mientras que con IA este resultado se genera en <strong>segundos</strong>.
+                  {tModal.rich("aiTiming", {
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                  })}
                 </p>
                 <p className="mt-1 font-sans text-xs text-slate-600">
-                  Usa estos resultados como apoyo y valida la decisión final desde RRHH.
+                  {tModal("aiValidationHint")}
                 </p>
               </div>
               {/* Component Scores */}
@@ -732,7 +743,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   {hasAttributeBlock && (
                     <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-sky-200/60">
                       <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900">
-                        Atributos
+                        {tModal("attributes")}
                       </h3>
                       <ul className="flex flex-col gap-3" role="list">
                         {attributeIndividuals.map(([key, val]) => (
@@ -740,6 +751,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                             key={key}
                             scoreKey={key}
                             val={val}
+                            getScoreLabel={getScoreLabel}
                             labelClass="text-slate-800"
                             barClass="bg-sky-500"
                             valueClass="text-slate-900"
@@ -750,6 +762,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           <ScoreBarRow
                             scoreKey={aggregateEntry[0]}
                             val={aggregateEntry[1]}
+                            getScoreLabel={getScoreLabel}
                             labelClass="text-slate-800"
                             barClass="bg-sky-600"
                             valueClass="text-slate-900"
@@ -765,10 +778,10 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                     <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-amber-200/70">
                       <div className="mb-3.5 flex items-center gap-1.5">
                         <h3 className="font-sans text-sm font-semibold text-amber-950">
-                          Puntaje cualitativo
+                          {tModal("qualitativeScore")}
                         </h3>
                         <ScoreTooltip
-                          text="Evalua la compatibilidad del candidato en aspectos cualitativos como experiencia, habilidades y contexto del perfil respecto a la vacante."
+                          text={tMatching("scoreTooltips.qualitativeScore")}
                           accentClass="text-amber-800"
                         />
                       </div>
@@ -776,6 +789,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                         <ScoreBarRow
                           scoreKey={qualitativeEntry[0]}
                           val={qualitativeEntry[1]}
+                          getScoreLabel={getScoreLabel}
                           labelClass="text-amber-900"
                           barClass="bg-amber-500"
                           valueClass="text-amber-950"
@@ -790,10 +804,10 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                     <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-vo-purple/25">
                       <div className="mb-3.5 flex items-center gap-1.5">
                         <h3 className="font-sans text-sm font-semibold text-vo-purple">
-                          Similitud semántica
+                          {tModal("semanticSimilarity")}
                         </h3>
                         <ScoreTooltip
-                          text="Mide qué tan alineado está el contenido del CV con la descripción de la vacante, usando comparación semántica de texto."
+                          text={tMatching("scoreTooltips.semanticSimilarity")}
                           accentClass="text-vo-purple"
                         />
                       </div>
@@ -801,6 +815,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                         <ScoreBarRow
                           scoreKey={semanticEntry[0]}
                           val={semanticEntry[1]}
+                          getScoreLabel={getScoreLabel}
                           labelClass="text-vo-purple"
                           barClass="bg-vo-purple"
                           valueClass="text-violet-900"
@@ -817,7 +832,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               {hasMatchedAttributesBlock && (
                 <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/70">
                   <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
-                    Coincidencia de atributos
+                    {tModal("attributeMatch")}
                   </h3>
                   <ul className="flex flex-col gap-2.5 font-sans text-sm text-slate-700" role="list">
                     {matchedAttributesEntries.map(([attrKey, attrVal]) => {
@@ -833,7 +848,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           <span className="text-slate-700">{emptyToDash(String(attrVal ?? ""))}</span>
                           {pathVal != null && pathVal !== "" && (
                             <span className="font-sans text-xs text-slate-500">
-                              Ruta: {pathVal}
+                              {tModal("routePrefix")} {pathVal}
                             </span>
                           )}
                         </li>
@@ -849,7 +864,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   {qualitativeReasoningPositive != null && (
                     <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/50">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">
-                        Fortalezas
+                        {tModal("strengths")}
                       </h3>
                       <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
                         {qualitativeReasoningPositive}
@@ -859,7 +874,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   {qualitativeReasoningNegative != null && (
                     <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-amber-200/70">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-amber-950">
-                        Aspectos a considerar
+                        {tModal("considerations")}
                       </h3>
                       <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
                         {qualitativeReasoningNegative}
@@ -871,7 +886,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 qualitativeReasoningLegacy != null && (
                   <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-border/60">
                     <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
-                      Razonamiento cualitativo
+                      {tModal("qualitativeReasoning")}
                     </h3>
                     <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
                       {qualitativeReasoningLegacy}
@@ -899,14 +914,14 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 onClick={handleDownloadCV}
                 disabled={downloading}
                 className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Descargar CV del candidato"
+                aria-label={tModal("downloadCvAria")}
               >
                 {downloading ? (
                   <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                 ) : (
                   <Download className="h-4 w-4 shrink-0" aria-hidden />
                 )}
-                {downloading ? "Descargando..." : "Descargar CV"}
+                {downloading ? tModal("downloading") : tModal("downloadCv")}
               </button>
             )}
             {profileHref != null && (
@@ -915,19 +930,19 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-md border border-vo-purple/40 bg-background px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                aria-label="Abrir perfil del candidato en una nueva pestaña"
+                aria-label={tMatching("errors.openProfileAria")}
               >
                 <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
-                Ver perfil completo
+                {tModal("viewFullProfile")}
               </Link>
             )}
             <button
               type="button"
               onClick={onClose}
               className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              aria-label="Cerrar perfil"
+              aria-label={tModal("closeProfileAria")}
             >
-              Cerrar
+              {tModal("close")}
             </button>
           </div>
         </div>
@@ -945,6 +960,8 @@ const MatchCard = ({
   aiLabel,
   readOnly = false,
 }) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
+  const locale = useLocale();
   const [showModal, setShowModal] = useState(false);
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
@@ -962,14 +979,14 @@ const MatchCard = ({
     <>
       <article
         className="rounded-xl border border-border bg-card p-5"
-        aria-label={`Candidato ${emptyToDash(match.name)}`}
+        aria-label={tMatching("aria.candidateCard", { name: emptyToDash(match.name) })}
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 flex-1 items-start gap-4">
             <div className="flex shrink-0 items-start gap-3">
               <label
                 className={`flex items-center justify-center rounded ${readOnly ? "cursor-not-allowed opacity-60" : "cursor-pointer focus-within:ring-2 focus-within:ring-vo-purple focus-within:ring-offset-2"}`}
-                aria-label={`Seleccionar ${emptyToDash(match.name)}`}
+                aria-label={tMatching("aria.selectCandidate", { name: emptyToDash(match.name) })}
               >
                 <input
                   type="checkbox"
@@ -977,7 +994,7 @@ const MatchCard = ({
                   onChange={handleCheckboxChange}
                   disabled={readOnly}
                   className="h-4 w-4 rounded border-border text-vo-purple focus:ring-vo-purple focus:ring-offset-0 disabled:cursor-not-allowed"
-                  aria-label={`Seleccionar candidato ${emptyToDash(match.name)}`}
+                  aria-label={tMatching("aria.selectCandidate", { name: emptyToDash(match.name) })}
                 />
               </label>
               <div
@@ -1009,7 +1026,7 @@ const MatchCard = ({
                 )}
               </div>
               <p className="font-sans text-xs text-muted-foreground">
-                Subido: {formatDate(match.uploadedAt)}
+                {tMatching("uploadedPrefix")} {formatDate(match.uploadedAt, locale)}
               </p>
             </div>
           </div>
@@ -1021,7 +1038,7 @@ const MatchCard = ({
                   : "—"}
               </span>
               <span className="font-sans text-xs text-muted-foreground">
-                Puntaje
+                {tMatching("score")}
               </span>
             </div>
             {showVerPerfil && (
@@ -1029,10 +1046,10 @@ const MatchCard = ({
                 type="button"
                 onClick={handleOpenModal}
                 className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                aria-label={`Ver perfil de ${emptyToDash(match.name)}`}
+                aria-label={tMatching("aria.viewCandidate", { name: emptyToDash(match.name) })}
               >
                 <User className="h-4 w-4" aria-hidden />
-                Ver perfil
+                {tMatching("viewProfile")}
               </button>
             )}
           </div>
@@ -1064,6 +1081,7 @@ const KanbanCard = ({
   readOnly = false,
 }) => {
   const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
   const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false);
   const sheetCandidateProfileId =
     match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
@@ -1117,7 +1135,7 @@ const KanbanCard = ({
         className={`flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md ${readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"}`}
         role={readOnly ? undefined : "button"}
         tabIndex={readOnly ? undefined : 0}
-        aria-label={readOnly ? undefined : `Mover ${displayName} a otra etapa`}
+        aria-label={readOnly ? undefined : tMatching("kanban.moveStageAria", { name: displayName })}
         aria-describedby={`kanban-card-${candidateId}`}
       >
         <div className="flex items-center gap-2.5" id={`kanban-card-${candidateId}`}>
@@ -1151,7 +1169,7 @@ const KanbanCard = ({
 
         <div className="flex items-center justify-between gap-2">
           <div className="inline-flex items-center gap-1 font-sans text-xs">
-            <span className="text-muted-foreground">Puntaje</span>
+            <span className="text-muted-foreground">{tMatching("kanban.score")}</span>
             <span className="font-semibold tabular-nums text-foreground">{score}</span>
           </div>
           <span className="inline-flex shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-foreground">
@@ -1167,7 +1185,7 @@ const KanbanCard = ({
             onClick={handleSelectClick}
             disabled={statusSelectDisabled || readOnly}
             className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-            aria-label={`Estado de ${displayName}`}
+            aria-label={tMatching("kanban.statusAria", { name: displayName })}
           >
             {statuses.map((s) => (
               <option key={s.id} value={s.id}>
@@ -1228,6 +1246,7 @@ const KanbanColumn = ({
   vacancyTitle = null,
   readOnly = false,
 }) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
   const handleDragOver = (e) => {
     if (readOnly) return;
     e.preventDefault();
@@ -1284,7 +1303,7 @@ const KanbanColumn = ({
   return (
     <div
       className={`flex min-h-[320px] flex-col rounded-xl border border-border bg-muted/30 ${widthClasses}`}
-      aria-label={`Columna ${stage}`}
+      aria-label={tMatching("kanban.columnAria", { stage })}
     >
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <h3 className="font-sans text-sm font-semibold text-foreground">
@@ -2110,7 +2129,7 @@ export default function VacanteDetallePage() {
           });
         }
       } catch (err) {
-        const msg = err?.message ?? err?.detail ?? "No se pudo cargar el emparejamiento.";
+        const msg = err?.message ?? err?.detail ?? tMatching("toasts.loadMatchFailed");
         setSmartError(msg);
         setSmartCandidates([]);
         if (!options?.silent) {
@@ -2120,7 +2139,7 @@ export default function VacanteDetallePage() {
         setLoadingSmart(false);
       }
     },
-    [id, isVacancyReadOnly]
+    [id, isVacancyReadOnly, tMatching]
   );
 
   const handleSearchSmartRecommendations = useCallback(() => {
@@ -2268,7 +2287,7 @@ export default function VacanteDetallePage() {
           setSnackbar({
             open: true,
             variant: "success",
-            message: "Candidato movido de etapa.",
+            message: tMatching("errors.candidateMovedStage"),
           });
           /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
           try {
@@ -2304,7 +2323,7 @@ export default function VacanteDetallePage() {
         }
       }
     },
-    [applicants, stages, fetchVacancy, isVacancyReadOnly]
+    [applicants, stages, fetchVacancy, isVacancyReadOnly, tMatching]
   );
 
   const handleKanbanDragEnter = useCallback((stage) => {
@@ -2326,7 +2345,7 @@ export default function VacanteDetallePage() {
       const applicationId = applicant?.applicationId ?? applicant?.application_id;
       if (!applicationId) {
         setApplicationStatusError({
-          text: "No se encontró el ID de la postulación para actualizar el estado.",
+          text: tMatching("errors.missingApplicationId"),
           showEstadosLink: false,
         });
         return;
@@ -2342,7 +2361,7 @@ export default function VacanteDetallePage() {
         setSnackbar({
           open: true,
           variant: "success",
-          message: "Estado de postulación actualizado.",
+          message: tMatching("errors.applicationStatusUpdated"),
         });
         try {
           await fetchVacancy(true);
@@ -2371,7 +2390,7 @@ export default function VacanteDetallePage() {
         setUpdatingStatusCandidateId(null);
       }
     },
-    [applicants, fetchVacancy, isVacancyReadOnly]
+    [applicants, fetchVacancy, isVacancyReadOnly, tMatching]
   );
 
   const handleToggleCandidate = useCallback((id, checked) => {
@@ -2530,7 +2549,7 @@ export default function VacanteDetallePage() {
                   <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <Link
                       href="/portal-rrhh/vacantes"
-                      className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                      className="inline-flex w-fit items-center gap-2 font-sans text-sm text-gray-600 transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                       aria-label={tDetail("actions.backToVacanciesAria")}
                     >
                       <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -2693,7 +2712,7 @@ export default function VacanteDetallePage() {
                               {emptyToDash(vacancy.title)}
                             </h1>
                           )}
-                          <div className="flex flex-wrap items-center gap-4 font-sans text-sm text-muted-foreground">
+                          <div className="flex flex-wrap items-center gap-4 font-sans text-sm text-gray-600">
                             {!isEditing ? (
                               <span className="flex min-w-0 items-center gap-1.5">
                                 <Building2 className="h-4 w-4 shrink-0" aria-hidden />
@@ -2805,7 +2824,7 @@ export default function VacanteDetallePage() {
                         {(vacancy.description || isEditing) && (
                           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                             <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-sky/10 text-vo-sky">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ats-arena/80 text-gray-700">
                                 <FileText className="h-4 w-4" aria-hidden />
                               </span>
                               {tDetail("sections.description")}
@@ -2839,7 +2858,7 @@ export default function VacanteDetallePage() {
                           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                               <h2 className="flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-purple/10 text-vo-purple">
+                                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-purple/15 text-vo-purple">
                                   <CheckSquare className="h-4 w-4" aria-hidden />
                                 </span>
                                 {tDetail("sections.requirements")}
@@ -2980,7 +2999,7 @@ export default function VacanteDetallePage() {
                                           key={`${key}-${value}`}
                                           className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0 sm:last:border-b sm:nth-last-[-n+2]:border-b-0"
                                         >
-                                          <dt className="font-sans text-xs font-medium uppercase tracking-wide text-muted-foreground/80">
+                                          <dt className="font-sans text-xs font-medium uppercase tracking-wide text-gray-600">
                                             {key}
                                           </dt>
                                           <dd className="font-sans text-sm text-foreground">
@@ -2998,7 +3017,7 @@ export default function VacanteDetallePage() {
                                 );
                               })()
                             ) : (
-                              <p className="font-sans text-sm italic text-muted-foreground/70">
+                              <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
@@ -3029,7 +3048,7 @@ export default function VacanteDetallePage() {
                                     {safeString(vacancy.salary)}
                                   </p>
                                 ) : (
-                                  <p className="font-sans text-sm italic text-muted-foreground/70">
+                                  <p className="font-sans text-sm italic text-gray-600">
                                     {tDetail("fallbacks.unspecified")}
                                   </p>
                                 )}
@@ -3058,7 +3077,7 @@ export default function VacanteDetallePage() {
                                     {safeString(vacancy.advantages)}
                                   </p>
                                 ) : (
-                                  <p className="font-sans text-sm italic text-muted-foreground/70">
+                                  <p className="font-sans text-sm italic text-gray-600">
                                     {tDetail("fallbacks.unspecified")}
                                   </p>
                                 )}
@@ -3093,7 +3112,7 @@ export default function VacanteDetallePage() {
                         type="button"
                         onClick={handleSearchSmartRecommendations}
                         disabled={loadingSmart || isVacancyReadOnly}
-                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple/50 bg-vo-purple/10 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/15 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label={tMatching("aria.preliminarySearch")}
                         title={vacancyReadOnlyTitle}
                       >
@@ -3436,7 +3455,7 @@ export default function VacanteDetallePage() {
                 <div className="mb-4">
                   <Link
                     href="/portal-rrhh/vacantes"
-                    className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                    className="inline-flex w-fit items-center gap-2 font-sans text-sm text-gray-600 transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                     aria-label={tDetail("actions.backToVacanciesAria")}
                   >
                     <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -3590,7 +3609,7 @@ export default function VacanteDetallePage() {
                             {emptyToDash(vacancy.title)}
                           </h1>
                         )}
-                        <div className="flex flex-wrap items-center gap-3 font-sans text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-3 font-sans text-sm text-gray-600">
                           {!isEditing ? (
                             <span className="flex min-w-0 items-center gap-1">
                               <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -3680,7 +3699,7 @@ export default function VacanteDetallePage() {
                         {(vacancy.description || isEditing) && (
                           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
                             <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-sky/10 text-vo-sky">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ats-arena/80 text-gray-700">
                                 <FileText className="h-3.5 w-3.5" aria-hidden />
                               </span>
                               {tDetail("sections.description")}
@@ -3714,7 +3733,7 @@ export default function VacanteDetallePage() {
                           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
                             <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
                               <h2 className="flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-purple/10 text-vo-purple">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-purple/15 text-vo-purple">
                                   <CheckSquare className="h-3.5 w-3.5" aria-hidden />
                                 </span>
                                 {tDetail("sections.requirements")}
@@ -3854,7 +3873,7 @@ export default function VacanteDetallePage() {
                                           key={`${key}-${value}`}
                                           className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0"
                                         >
-                                          <dt className="font-sans text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">
+                                          <dt className="font-sans text-[11px] font-medium uppercase tracking-wide text-gray-600">
                                             {key}
                                           </dt>
                                           <dd className="font-sans text-sm text-foreground">
@@ -3872,7 +3891,7 @@ export default function VacanteDetallePage() {
                                 );
                               })()
                             ) : (
-                              <p className="font-sans text-sm italic text-muted-foreground/70">
+                              <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
@@ -3901,7 +3920,7 @@ export default function VacanteDetallePage() {
                                 {safeString(vacancy.salary)}
                               </p>
                             ) : (
-                              <p className="font-sans text-sm italic text-muted-foreground/70">
+                              <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
@@ -3930,7 +3949,7 @@ export default function VacanteDetallePage() {
                                 {safeString(vacancy.advantages)}
                               </p>
                             ) : (
-                              <p className="font-sans text-sm italic text-muted-foreground/70">
+                              <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
@@ -3964,7 +3983,7 @@ export default function VacanteDetallePage() {
                       type="button"
                       onClick={handleSearchSmartRecommendations}
                       disabled={loadingSmart || isVacancyReadOnly}
-                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple/50 bg-vo-purple/10 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/15 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label={tMatching("aria.preliminarySearch")}
                       title={vacancyReadOnlyTitle}
                     >

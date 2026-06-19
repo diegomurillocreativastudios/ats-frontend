@@ -169,7 +169,7 @@ export default function ForgotPasswordContent() {
         <div className="hidden flex-col gap-4 lg:flex">
           <div className="flex items-center gap-3">
             <svg
-              className="h-5 w-5 text-vo-sky"
+              className="h-5 w-5 text-vo-cobre"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -186,7 +186,7 @@ export default function ForgotPasswordContent() {
           </div>
           <div className="flex items-center gap-3">
             <svg
-              className="h-5 w-5 text-vo-sky"
+              className="h-5 w-5 text-vo-cobre"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"

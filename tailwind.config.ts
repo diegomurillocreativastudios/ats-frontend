@@ -67,7 +67,7 @@ const config: Config = {
         },
         muted: {
           DEFAULT: '#EAE0D5',
-          foreground: '#5A5B5E',
+          foreground: '#48494C',
         },
         destructive: {
           DEFAULT: '#A45C40',

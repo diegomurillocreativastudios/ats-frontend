@@ -15,6 +15,7 @@ import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import type { VacancyListItem, VacancyListStatusKey } from "@/lib/vacancies/map-vacancy-list-item"
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
+import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles"
 
 const ICON_BY_KEY = {
   palette: Palette,
@@ -29,10 +30,10 @@ const STATUS_STYLES: Record<
   VacancyListStatusKey,
   { bgClass: string; textClass: string }
 > = {
-  activa: { bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
-  cerrada: { bgClass: "bg-muted", textClass: "text-muted-foreground" },
-  pausada: { bgClass: "bg-amber-100", textClass: "text-amber-800" },
-  borrador: { bgClass: "bg-slate-100", textClass: "text-slate-700" },
+  activa: VACANCY_STATUS_STYLES.activa,
+  cerrada: VACANCY_STATUS_STYLES.cerrada,
+  pausada: VACANCY_STATUS_STYLES.pausada,
+  borrador: VACANCY_STATUS_STYLES.borrador,
 }
 
 interface VacancyMetaItemProps {

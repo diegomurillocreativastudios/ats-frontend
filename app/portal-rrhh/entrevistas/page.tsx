@@ -10,6 +10,7 @@ import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
+import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles"
 import { formatCountryCodeLabel } from "@/lib/profile-form-options"
 
 interface VacancyRow {
@@ -53,23 +54,23 @@ const formatCreatedAtLabel = (iso: unknown): string | null => {
 const STATUS_LABELS = {
   activa: {
     label: "Activa",
-    bgClass: "bg-[#DCFCE7]",
-    textClass: "text-[#166534]",
+    bgClass: VACANCY_STATUS_STYLES.activa.bgClass,
+    textClass: VACANCY_STATUS_STYLES.activa.textClass,
   },
   cerrada: {
     label: "Cerrada",
-    bgClass: "bg-muted",
-    textClass: "text-muted-foreground",
+    bgClass: VACANCY_STATUS_STYLES.cerrada.bgClass,
+    textClass: VACANCY_STATUS_STYLES.cerrada.textClass,
   },
   pausada: {
     label: "Pausada",
-    bgClass: "bg-amber-100",
-    textClass: "text-amber-800",
+    bgClass: VACANCY_STATUS_STYLES.pausada.bgClass,
+    textClass: VACANCY_STATUS_STYLES.pausada.textClass,
   },
   borrador: {
     label: "Borrador",
-    bgClass: "bg-slate-100",
-    textClass: "text-slate-700",
+    bgClass: VACANCY_STATUS_STYLES.borrador.bgClass,
+    textClass: VACANCY_STATUS_STYLES.borrador.textClass,
   },
 }
 
