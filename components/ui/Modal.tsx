@@ -9,7 +9,7 @@ const MODAL_STYLES = {
   overlayBase:
     "fixed inset-0 flex items-center justify-center bg-black/50 p-4",
   getContent: (sizeClass: string) =>
-    `relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-white shadow-xl ${sizeClass}`,
+    `relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-background shadow-xl ${sizeClass}`,
   header: "shrink-0 flex items-center justify-between border-b border-border px-6 py-4",
   body: "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 py-5",
   footer:

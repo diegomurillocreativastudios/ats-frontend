@@ -193,11 +193,11 @@
     "auth": {
       "login": {
         "title": "Accedi",
-        "description": "Accedi al tuo account ATS"
+        "description": "Accedi al tuo account Appli AI"
       },
       "forgotPassword": {
         "title": "Hai dimenticato la password?",
-        "description": "Richiedi istruzioni via email per reimpostare la password in ATS App"
+        "description": "Richiedi istruzioni via email per reimpostare la password in Appli AI"
       },
       "resetPassword": {
         "title": "Reimposta password",
@@ -205,7 +205,7 @@
       },
       "register": {
         "title": "Registrarse",
-        "description": "Create tu cuenta en la plataforma ATS"
+        "description": "Create tu cuenta en la plataforma Appli AI"
       }
     },
     "portalSelection": {
@@ -217,28 +217,28 @@
       "description": "Consulta e gestisci le informazioni del tuo account nel portale dei candidati"
     },
     "recruiterVacancies": {
-      "title": "ATS | Portale HR | Posizioni",
+      "title": "Appli AI | Portale HR | Posizioni",
       "description": "Gestisci le posizioni aperte e le vacanze dell'azienda"
     },
     "recruiterVacancyDetail": {
-      "title": "ATS | Portale HR | Dettaglio posizione",
+      "title": "Appli AI | Portale HR | Dettaglio posizione",
       "description": "Consulta le informazioni della posizione"
     },
     "recruiterVacancyResults": {
-      "title": "ATS | Portale HR | Risultati posizione",
+      "title": "Appli AI | Portale HR | Risultati posizione",
       "description": "Consulta i risultati dei candidati valutati"
     },
     "recruiterReports": {
-      "title": "ATS | Portale HR | Report",
+      "title": "Appli AI | Portale HR | Report",
       "description": "Consulta metriche e report di reclutamento"
     },
     "recruiterCandidateDetail": {
-      "title": "ATS | Portale HR | Candidato",
+      "title": "Appli AI | Portale HR | Candidato",
       "description": "Profilo dettagliato del candidato nel portale HR"
     },
     "adminPortal": {
       "title": "Portale Admin",
-      "description": "Amministrazione della piattaforma ATS",
+      "description": "Amministrazione della piattaforma Appli AI",
       "companies": {
         "title": "Aziende",
         "description": "Gestione delle aziende clienti (tenant) della piattaforma"
@@ -285,41 +285,41 @@
     },
     "candidatePortal": {
       "home": {
-        "title": "ATS | Portal Candidate",
+        "title": "Appli AI | Portal Candidate",
         "description": "Portal del candidate - Resumen de tu proceso de seleccion"
       },
       "documents": {
-        "title": "ATS | Portal Candidate | Documents",
+        "title": "Appli AI | Portal Candidate | Documents",
         "description": "Manage tus documentos en el portal del candidate"
       },
       "interviews": {
-        "title": "ATS | Portal Candidate | Interviews",
+        "title": "Appli AI | Portal Candidate | Interviews",
         "description": "View tus interviews agendadas e historial en el portal del candidate"
       }
     },
     "recruiterPortal": {
-      "title": "ATS | Portal RRHH",
+      "title": "Appli AI | Portal RRHH",
       "description": "Portal RRHH - Dashboard de reclutamiento y gestion de candidates"
     },
     "recruiterCandidates": {
-      "title": "ATS | Portal RRHH | Candidates",
+      "title": "Appli AI | Portal RRHH | Candidates",
       "description": "Manage los candidates y sus perfiles en el portal RRHH"
     },
     "recruiterSettings": {
-      "title": "ATS | Portal RRHH | Settings",
+      "title": "Appli AI | Portal RRHH | Settings",
       "description": "Settings del portal RRHH"
     },
     "publicOpportunities": {
       "list": {
-        "title": "ATS | Opportunità",
+        "title": "Appli AI | Opportunità",
         "description": "Esplora offerte attive per dipartimento e modalità"
       },
       "detail": {
-        "title": "ATS | Opportunità | Offerta",
+        "title": "Appli AI | Opportunità | Offerta",
         "description": "Dettaglio pubblico di un'offerta attiva"
       },
       "apply": {
-        "title": "ATS | Opportunità | Candidati",
+        "title": "Appli AI | Opportunità | Candidati",
         "description": "Modulo pubblico per candidarsi a un'offerta attiva"
       }
     }
@@ -494,7 +494,7 @@
         "processErrorSelf": "Errore durante l'elaborazione delle tue informazioni.",
         "processErrorRecruiter": "Errore durante l'elaborazione del candidato.",
         "aiIntro": "I CV e i documenti d'identità vengono elaborati con l'IA per estrarre informazioni preliminari del profilo.",
-        "kpisAria": "KPI di efficienza dell'ATS",
+        "kpisAria": "KPI di efficienza di Appli AI",
         "documentTypeHeading": "Tipo di documento d'identità",
         "documentTypeDescription": "Seleziona il tipo di documento che corrisponde al PDF da caricare.",
         "documentTypeAria": "Tipo di documento d'identità",
@@ -1332,14 +1332,14 @@
       "calendarPage": {
         "title": "Calendario",
         "description": "Collega Google Calendar per sincronizzare i colloqui e inviare inviti automatici.",
-        "pageDescription": "Collega Google Calendar per sincronizzare i colloqui dall'ATS.",
+        "pageDescription": "Collega Google Calendar per sincronizzare i colloqui da Appli AI.",
         "connectedToast": "Google Calendar collegato correttamente.",
         "syncing": "Sincronizzazione…",
         "syncInterviews": "Sincronizza colloqui",
         "connectedAs": "Connesso come {email} (il tuo account)",
         "notConnected": "Google Calendar non è connesso.",
         "connectHint": "Collega il tuo account per sincronizzare i colloqui.",
-        "connectDescription": "Collegandoti, autorizzi l'ATS a creare eventi e inviti nel tuo Google Calendar (in base all'implementazione del backend).",
+        "connectDescription": "Collegandoti, autorizzi Appli AI a creare eventi e inviti nel tuo Google Calendar (in base all'implementazione del backend).",
         "connectedServerHint": "I colloqui con data possono essere creati o aggiornati nel tuo calendario secondo la configurazione del server.",
         "syncFailed": "Impossibile sincronizzare il calendario.",
         "syncResultPartial": "Sincronizzato: {synced} ok, {failed} con errore.",
@@ -2625,7 +2625,7 @@
         },
         "summaryHelper": "Gestisci i {plural} disponibili per le nuove posizioni.",
         "inUse": "In uso da posizioni attive o storiche.",
-        "emptyBody": "Quando crei un {singular}, sarà disponibile per classificare le posizioni nel resto dell'ATS.",
+        "emptyBody": "Quando crei un {singular}, sarà disponibile per classificare le posizioni nel resto di Appli AI.",
         "form": {
           "nameLabel": "Nome",
           "descriptionLabel": "Descrizione",
@@ -3066,7 +3066,7 @@
       "title": "INFORMATIVA SULLA PRIVACY E PROTEZIONE DEI DATI PERSONALI",
       "decline": "No, grazie",
       "accept": "Accetto",
-      "intro": "I tuoi dati personali saranno inseriti nel database di Visible Outsource e trattati esclusivamente da professionisti autorizzati dell'area Risorse Umane nel contesto dei processi di selezione e gestione del personale.",
+      "intro": "I tuoi dati personali saranno inseriti nel database di Appli AI e trattati esclusivamente da professionisti autorizzati dell'area Risorse Umane nel contesto dei processi di selezione e gestione del personale.",
       "dataTreatmentHeading": "Trattamento dei dati:",
       "purposeItem": "Finalità: Valutazione dei candidati e gestione dei processi di reclutamento",
       "accessItem": "Accesso: Solo personale HR autorizzato",
@@ -3084,7 +3084,7 @@
     "navbar": {
       "ariaMain": "Navigazione principale del portale opportunità",
       "ariaGoToPortal": "Vai al portale opportunità",
-      "logoIconAlt": "Icona logo ATS",
+      "logoIconAlt": "Icona logo Appli AI",
       "portalSubtitle": "Portale opportunità",
       "ariaGoToSelection": "Vai alla selezione del portale",
       "changePortal": "Cambia portale",
@@ -3115,7 +3115,7 @@
       "formSectionLabel": "Modulo di candidatura",
       "formTitle": "Invia la tua candidatura",
       "formBody": "Completa i dati e allega il tuo CV. Le informazioni vengono inviate in modo sicuro al team di recruiting.",
-      "documentTitle": "ATS | Opportunità | Candidati a {title}"
+      "documentTitle": "Appli AI | Opportunità | Candidati a {title}"
     }
   }
 }

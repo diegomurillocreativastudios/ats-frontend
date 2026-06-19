@@ -27,7 +27,7 @@ export function Input({
       {label && (
         <label
           htmlFor={id}
-          className="text-sm font-medium text-black"
+          className="text-sm font-medium text-foreground"
         >
           {label}
           {required && <span className="text-vo-pink ml-1">*</span>}
@@ -47,7 +47,7 @@ export function Input({
           aria-describedby={error ? `${id}-error` : undefined}
           className={`
             w-full h-10 px-3 py-2 text-sm rounded-md border border-input
-            bg-white text-black
+            bg-background text-foreground
             placeholder:text-gray-500
             focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent
             disabled:cursor-not-allowed disabled:opacity-50
@@ -60,7 +60,7 @@ export function Input({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none focus:text-black"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-foreground focus:outline-none focus:text-foreground"
             aria-label={showPassword ? t('hidePassword') : t('showPassword')}
             tabIndex={-1}
           >

@@ -1,6 +1,7 @@
 import { Montserrat } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { APP_NAME } from "@/lib/app-brand";
 import "./globals.css";
 import PageTitle from "@/components/PageTitle";
 
@@ -13,7 +14,7 @@ const montserrat = Montserrat({
 export async function generateMetadata() {
   const t = await getTranslations("Metadata.root");
   return {
-    title: { default: "ATS", template: "ATS | %s" },
+    title: { default: APP_NAME, template: `${APP_NAME} | %s` },
     description: t("description"),
   };
 }

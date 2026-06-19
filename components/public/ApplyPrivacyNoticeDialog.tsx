@@ -136,7 +136,7 @@ export function ApplyPrivacyNoticeDialog({
         className={[
           "apply-privacy-panel",
           isExitAnimating && "apply-privacy-panel--exit",
-          "mx-auto flex w-full max-h-[min(90dvh,920px)] max-w-2xl flex-col overflow-hidden rounded-[20px] border border-white/14 bg-[linear-gradient(180deg,rgba(35,45,76,0.98)_0%,rgba(19,27,50,0.99)_100%)] text-white shadow-[0_32px_90px_rgba(4,6,12,0.7)] sm:rounded-[24px]",
+          "mx-auto flex w-full max-h-[min(90dvh,920px)] max-w-2xl flex-col overflow-hidden rounded-[20px] border border-white/14 bg-[linear-gradient(180deg,rgba(42,43,46,0.98)_0%,rgba(32,33,36,0.99)_100%)] text-white shadow-[0_32px_90px_rgba(32,33,36,0.7)] sm:rounded-[24px]",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -157,7 +157,7 @@ export function ApplyPrivacyNoticeDialog({
         >
           <p className="text-pretty text-white/88">{t("intro")}</p>
           <p className="mt-4 font-medium text-white/92">{t("dataTreatmentHeading")}</p>
-          <ul className="mt-2 list-inside list-disc space-y-2.5 pl-0.5 text-white/86 marker:text-vo-sky/90">
+          <ul className="mt-2 list-inside list-disc space-y-2.5 pl-0.5 text-white/86 marker:text-ats-cobre-light">
             <li>{t("purposeItem")}</li>
             <li>{t("accessItem")}</li>
             <li>{t("confidentialityItem")}</li>
@@ -167,7 +167,7 @@ export function ApplyPrivacyNoticeDialog({
           <p className="mt-4 text-white/86">
             {t("contactPrefix")}{" "}
             <a
-              className="font-medium text-sky-200/95 underline decoration-white/30 underline-offset-2 transition-colors hover:text-white hover:decoration-white/60 focus:outline-none focus:ring-2 focus:ring-vo-sky focus:ring-offset-2 focus:ring-offset-[#1a2238]"
+              className="font-medium text-ats-cobre-light/95 underline decoration-white/30 underline-offset-2 transition-colors hover:text-white hover:decoration-white/60 focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-ats-grafito"
               href="mailto:info@visibleo.us"
             >
               info@visibleo.us
@@ -183,7 +183,7 @@ export function ApplyPrivacyNoticeDialog({
               variant="outline"
               onClick={onDecline}
               disabled={isExitAnimating}
-              className="w-full border-white/32 bg-white/5 text-white hover:border-white/45 hover:bg-white/10 hover:text-white focus-visible:ring-vo-sky sm:w-auto"
+              className="w-full border-white/32 bg-white/5 text-white hover:border-white/45 hover:bg-white/10 hover:text-white focus-visible:ring-ats-cobre sm:w-auto"
             >
               {t("decline")}
             </Button>

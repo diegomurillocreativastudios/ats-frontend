@@ -193,11 +193,11 @@
     "auth": {
       "login": {
         "title": "Iniciar sesión",
-        "description": "Accedé a tu cuenta del ATS"
+        "description": "Accedé a tu cuenta de Appli AI"
       },
       "forgotPassword": {
         "title": "¿Olvidaste tu contraseña?",
-        "description": "Solicitá instrucciones por correo para restablecer tu contraseña en ATS App"
+        "description": "Solicitá instrucciones por correo para restablecer tu contraseña en Appli AI"
       },
       "resetPassword": {
         "title": "Restablecer contraseña",
@@ -205,7 +205,7 @@
       },
       "register": {
         "title": "Registrarse",
-        "description": "Creá tu cuenta en la plataforma ATS"
+        "description": "Creá tu cuenta en la plataforma Appli AI"
       }
     },
     "portalSelection": {
@@ -217,28 +217,28 @@
       "description": "Consultá y gestioná los datos de tu cuenta en el portal del candidato"
     },
     "recruiterVacancies": {
-      "title": "ATS | Portal RRHH | Vacantes",
+      "title": "Appli AI | Portal RRHH | Vacantes",
       "description": "Gestiona las posiciones abiertas y vacantes de la empresa"
     },
     "recruiterVacancyDetail": {
-      "title": "ATS | Portal RRHH | Detalle de vacante",
+      "title": "Appli AI | Portal RRHH | Detalle de vacante",
       "description": "Consulta la información de la vacante"
     },
     "recruiterVacancyResults": {
-      "title": "ATS | Portal RRHH | Resultados de vacante",
+      "title": "Appli AI | Portal RRHH | Resultados de vacante",
       "description": "Consulta los resultados de candidatos evaluados"
     },
     "recruiterReports": {
-      "title": "ATS | Portal RRHH | Reportes",
+      "title": "Appli AI | Portal RRHH | Reportes",
       "description": "Consulta métricas y reportes de reclutamiento"
     },
     "recruiterCandidateDetail": {
-      "title": "ATS | Portal RRHH | Candidato",
+      "title": "Appli AI | Portal RRHH | Candidato",
       "description": "Perfil detallado del candidato en el portal RRHH"
     },
     "adminPortal": {
       "title": "Portal Admin",
-      "description": "Administración de la plataforma ATS",
+      "description": "Administración de la plataforma Appli AI",
       "companies": {
         "title": "Empresas",
         "description": "Gestión de empresas cliente (tenants) de la plataforma"
@@ -285,41 +285,41 @@
     },
     "candidatePortal": {
       "home": {
-        "title": "ATS | Portal Candidato",
+        "title": "Appli AI | Portal Candidato",
         "description": "Portal del candidato - Resumen de tu proceso de selección"
       },
       "documents": {
-        "title": "ATS | Portal Candidato | Documentos",
+        "title": "Appli AI | Portal Candidato | Documentos",
         "description": "Gestiona tus documentos en el portal del candidato"
       },
       "interviews": {
-        "title": "ATS | Portal Candidato | Entrevistas",
+        "title": "Appli AI | Portal Candidato | Entrevistas",
         "description": "Consultá tus entrevistas agendadas e historial en el portal del candidato"
       }
     },
     "recruiterPortal": {
-      "title": "ATS | Portal RRHH",
+      "title": "Appli AI | Portal RRHH",
       "description": "Portal RRHH - Dashboard de reclutamiento y gestión de candidatos"
     },
     "recruiterCandidates": {
-      "title": "ATS | Portal RRHH | Candidatos",
+      "title": "Appli AI | Portal RRHH | Candidatos",
       "description": "Gestiona los candidatos y sus perfiles en el portal RRHH"
     },
     "recruiterSettings": {
-      "title": "ATS | Portal RRHH | Configuración",
+      "title": "Appli AI | Portal RRHH | Configuración",
       "description": "Configuración del portal RRHH"
     },
     "publicOpportunities": {
       "list": {
-        "title": "ATS | Oportunidades",
+        "title": "Appli AI | Oportunidades",
         "description": "Explorá vacantes activas por departamento y modalidad"
       },
       "detail": {
-        "title": "ATS | Oportunidades | Vacante",
+        "title": "Appli AI | Oportunidades | Vacante",
         "description": "Detalle público de una vacante activa"
       },
       "apply": {
-        "title": "ATS | Oportunidades | Aplicar",
+        "title": "Appli AI | Oportunidades | Aplicar",
         "description": "Formulario público para aplicar a una vacante activa"
       }
     }
@@ -494,7 +494,7 @@
         "processErrorSelf": "Error al procesar tu información.",
         "processErrorRecruiter": "Error al procesar el candidato.",
         "aiIntro": "Los CVs y documentos de identidad se procesan con IA para extraer información preliminar del perfil.",
-        "kpisAria": "KPIs de eficiencia del ATS",
+        "kpisAria": "KPIs de eficiencia de Appli AI",
         "documentTypeHeading": "Tipo de documento de identidad",
         "documentTypeDescription": "Selecciona el tipo de documento que corresponde al PDF que se cargará.",
         "documentTypeAria": "Tipo de documento de identidad",
@@ -1332,14 +1332,14 @@
       "calendarPage": {
         "title": "Calendario",
         "description": "Conectá Google Calendar para sincronizar entrevistas y enviar invitaciones automáticas.",
-        "pageDescription": "Conectá Google Calendar para sincronizar entrevistas desde el ATS.",
+        "pageDescription": "Conectá Google Calendar para sincronizar entrevistas desde Appli AI.",
         "connectedToast": "Google Calendar conectado correctamente.",
         "syncing": "Sincronizando…",
         "syncInterviews": "Sincronizar entrevistas",
         "connectedAs": "Conectado como {email} (tu cuenta)",
         "notConnected": "Google Calendar no está conectado.",
         "connectHint": "Conectá tu cuenta para sincronizar entrevistas.",
-        "connectDescription": "Al conectar, podrás autorizar al ATS a crear eventos e invitaciones en tu Google Calendar (según lo que implemente el backend).",
+        "connectDescription": "Al conectar, podrás autorizar a Appli AI a crear eventos e invitaciones en tu Google Calendar (según lo que implemente el backend).",
         "connectedServerHint": "Las entrevistas con fecha pueden generarse o actualizarse en tu calendario según la configuración del servidor.",
         "syncFailed": "No se pudo sincronizar el calendario.",
         "syncResultPartial": "Sincronizado: {synced} ok, {failed} con error.",
@@ -2625,7 +2625,7 @@
         },
         "summaryHelper": "Gestiona {plural} disponibles para nuevas vacantes.",
         "inUse": "En uso por vacantes activas o históricas.",
-        "emptyBody": "Cuando crees un {singular}, quedará disponible para clasificar vacantes desde el resto del ATS.",
+        "emptyBody": "Cuando crees un {singular}, quedará disponible para clasificar vacantes desde el resto de Appli AI.",
         "form": {
           "nameLabel": "Nombre",
           "descriptionLabel": "Descripción",
@@ -3066,7 +3066,7 @@
       "title": "AVISO DE PRIVACIDAD Y PROTECCIÓN DE DATOS PERSONALES",
       "decline": "No, gracias",
       "accept": "Acepto",
-      "intro": "Sus datos personales serán incorporados a la base de datos de Visible Outsource y procesados exclusivamente por profesionales autorizados del área de Recursos Humanos en el contexto de procesos de selección y gestión de personal.",
+      "intro": "Sus datos personales serán incorporados a la base de datos de Appli AI y procesados exclusivamente por profesionales autorizados del área de Recursos Humanos en el contexto de procesos de selección y gestión de personal.",
       "dataTreatmentHeading": "Tratamiento de datos:",
       "purposeItem": "Finalidad: Evaluación de candidatos y gestión de procesos de reclutamiento",
       "accessItem": "Acceso: Personal autorizado de RRHH únicamente",
@@ -3084,7 +3084,7 @@
     "navbar": {
       "ariaMain": "Navegación principal de oportunidades",
       "ariaGoToPortal": "Ir al portal de oportunidades",
-      "logoIconAlt": "Logo icono ATS",
+      "logoIconAlt": "Logo icono Appli AI",
       "portalSubtitle": "Portal de oportunidades",
       "ariaGoToSelection": "Ir a selección de portal",
       "changePortal": "Cambiar portal",
@@ -3115,7 +3115,7 @@
       "formSectionLabel": "Formulario de postulación",
       "formTitle": "Enviá tu postulación",
       "formBody": "Completá los datos y adjuntá tu CV. La información se envía de forma segura al equipo de reclutamiento.",
-      "documentTitle": "ATS | Oportunidades | Aplicar a {title}"
+      "documentTitle": "Appli AI | Oportunidades | Aplicar a {title}"
     }
   }
 }

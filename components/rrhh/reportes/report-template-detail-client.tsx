@@ -11,6 +11,7 @@ import ReportesFiltersPlaceholder from "@/components/rrhh/reportes/reportes-filt
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { APP_LOGO_SVG_SRC } from "@/lib/app-brand"
 import {
   fetchReportTemplateConfig,
   generateReportDocumentPreview,
@@ -263,7 +264,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
           const windowOrigin =
             typeof window !== "undefined" ? window.location.origin.replace(/\/$/, "") : ""
           const origin = publicBase || windowOrigin
-          const logoUrl = origin ? `${origin}/visible-icon.png` : ""
+          const logoUrl = origin ? `${origin}${APP_LOGO_SVG_SRC}` : ""
           const pdfFilters = {
             clientName: resolveClientName(String(filters.clientId ?? "")),
             from: formatIsoDateForPdf(String(filters.dateFrom ?? "")),
@@ -665,7 +666,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
                       title={m.previewTitle}
                       sandbox="allow-same-origin"
                       srcDoc={previewSrcDoc}
-                      className="min-h-[480px] w-full flex-1 border-0 bg-white"
+                      className="min-h-[480px] w-full flex-1 border-0 bg-background"
                     />
                   </div>
                 ) : (
@@ -696,7 +697,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
       {!loadingTemplate && !templateError && template && hasPreviewData && !previewError ? (
         <div
           ref={pdfCaptureRef}
-          className="pointer-events-none fixed left-[-12000px] top-0 z-[-1] overflow-visible bg-white"
+          className="pointer-events-none fixed left-[-12000px] top-0 z-[-1] overflow-visible bg-background"
           aria-hidden
         >
           {useReactPreview && pdfData ? (
@@ -707,7 +708,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             />
           ) : previewInnerHtml ? (
             <main
-              className="report-preview-doc w-[1600px] bg-white px-8 py-7 text-slate-950"
+              className="report-preview-doc w-[1600px] bg-background px-8 py-7 text-slate-950"
               style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
               dangerouslySetInnerHTML={{ __html: previewInnerHtml }}
             />

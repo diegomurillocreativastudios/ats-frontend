@@ -37,7 +37,7 @@ export interface AiDisclosurePillProgressProps {
 }
 
 /**
- * Mismos colores que la barra en overlay oscuro de aplicar (gradiente #f0a7ff → #8dd8ff + resplandor).
+ * Mismos colores que la barra en overlay oscuro de aplicar (gradiente #A45C40 → #B87333 + resplandor).
  */
 export function AiDisclosurePillProgress({
   percent,
@@ -156,12 +156,12 @@ export function AiDisclosurePillProgress({
                       <>
                         <div aria-hidden className="absolute inset-0 flex items-center">
                           <div className="h-0.5 w-full bg-muted-foreground/30 overflow-hidden">
-                            <span className="block h-full w-1/2 animate-apply-shimmer bg-[linear-gradient(90deg,transparent,#8c52ff,transparent)]" />
+                            <span className="block h-full w-1/2 animate-apply-shimmer bg-[linear-gradient(90deg,transparent,#B87333,transparent)]" />
                           </div>
                         </div>
                         <div
                           aria-current="step"
-                          className="relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-vo-purple bg-white"
+                          className="relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-vo-purple bg-background"
                         >
                           <span
                             aria-hidden
@@ -176,7 +176,7 @@ export function AiDisclosurePillProgress({
                         <div aria-hidden className="absolute inset-0 flex items-center">
                           <div className="h-0.5 w-full bg-muted-foreground/30" />
                         </div>
-                        <div className="group relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-muted-foreground/40 bg-white">
+                        <div className="group relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-muted-foreground/40 bg-background">
                           <span
                             aria-hidden
                             className={classNames(

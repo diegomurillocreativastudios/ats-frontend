@@ -270,7 +270,7 @@ const ScoreTooltip = ({ text, accentClass = "text-slate-500" }) => (
     </button>
     <span
       role="tooltip"
-      className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-md border border-border bg-white px-3 py-2 text-left font-sans text-xs font-normal leading-relaxed text-slate-700 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+      className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-md border border-border bg-background px-3 py-2 text-left font-sans text-xs font-normal leading-relaxed text-slate-700 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
     >
       {text}
     </span>
@@ -655,7 +655,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
       aria-label={`Perfil de ${emptyToDash(match.name)}`}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-white text-slate-900 shadow-xl">
+      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-background text-slate-900 shadow-xl">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-border p-6">
           <div className="flex items-center gap-4">
@@ -730,7 +730,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               {componentScores.length > 0 && (
                 <div className="flex flex-col gap-5">
                   {hasAttributeBlock && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-sky-200/60">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-sky-200/60">
                       <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900">
                         Atributos
                       </h3>
@@ -762,7 +762,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   )}
 
                   {qualitativeEntry != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-amber-200/70">
                       <div className="mb-3.5 flex items-center gap-1.5">
                         <h3 className="font-sans text-sm font-semibold text-amber-950">
                           Puntaje cualitativo
@@ -787,7 +787,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   )}
 
                   {semanticEntry != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-vo-purple/25">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-vo-purple/25">
                       <div className="mb-3.5 flex items-center gap-1.5">
                         <h3 className="font-sans text-sm font-semibold text-vo-purple">
                           Similitud semántica
@@ -815,7 +815,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
 
               {/* Coincidencia de atributos (CV vs vacante) */}
               {hasMatchedAttributesBlock && (
-                <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/70">
+                <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/70">
                   <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
                     Coincidencia de atributos
                   </h3>
@@ -847,7 +847,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               {hasSplitQualitative ? (
                 <div className="flex flex-col gap-4">
                   {qualitativeReasoningPositive != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/50">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/50">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">
                         Fortalezas
                       </h3>
@@ -857,7 +857,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                     </div>
                   )}
                   {qualitativeReasoningNegative != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-amber-200/70">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-amber-950">
                         Aspectos a considerar
                       </h3>
@@ -869,7 +869,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 </div>
               ) : (
                 qualitativeReasoningLegacy != null && (
-                  <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-border/60">
+                  <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-border/60">
                     <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
                       Razonamiento cualitativo
                     </h3>
@@ -898,7 +898,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 type="button"
                 onClick={handleDownloadCV}
                 disabled={downloading}
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-white px-4 py-2.5 font-sans text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Descargar CV del candidato"
               >
                 {downloading ? (
@@ -914,7 +914,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 href={profileHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-md border border-vo-purple/40 bg-white px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                className="inline-flex items-center gap-2 rounded-md border border-vo-purple/40 bg-background px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                 aria-label="Abrir perfil del candidato en una nueva pestaña"
               >
                 <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
@@ -2862,7 +2862,7 @@ export default function VacanteDetallePage() {
                                   {editRequirements.map((req, index) => (
                                     <div
                                       key={req.id}
-                                      className="flex flex-col gap-2 rounded-lg border border-border bg-white p-3"
+                                      className="flex flex-col gap-2 rounded-lg border border-border bg-background p-3"
                                     >
                                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
                                         <div className="flex-1 space-y-1">
@@ -3737,7 +3737,7 @@ export default function VacanteDetallePage() {
                                   {editRequirements.map((req, index) => (
                                     <div
                                       key={req.id}
-                                      className="flex flex-col gap-2 rounded-lg border border-border bg-white p-3"
+                                      className="flex flex-col gap-2 rounded-lg border border-border bg-background p-3"
                                     >
                                       <div className="flex flex-col gap-2">
                                         <div className="space-y-1">

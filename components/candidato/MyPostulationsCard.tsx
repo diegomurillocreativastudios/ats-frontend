@@ -73,7 +73,7 @@ export default function MyPostulationsCard({
               <button
                 key={post.id}
                 onClick={() => onSelectApplication?.(post)}
-                className="flex flex-col gap-3 rounded-lg border border-border bg-white p-4 text-left transition-all hover:border-blue-300 hover:shadow-sm"
+                className="flex flex-col gap-3 rounded-lg border border-border bg-background p-4 text-left transition-all hover:border-blue-300 hover:shadow-sm"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">

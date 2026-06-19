@@ -658,7 +658,7 @@ export function AdminVacancyCatalogContent({
             <div>
               <label
                 htmlFor={`${catalog}-description`}
-                className="mb-2 block text-sm font-medium text-black"
+                className="mb-2 block text-sm font-medium text-foreground"
               >
                 {tShared("form.descriptionLabel")}
               </label>
@@ -673,7 +673,7 @@ export function AdminVacancyCatalogContent({
                     description: event.target.value,
                   }))
                 }
-                className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-black placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder={tShared("form.descriptionPlaceholder", {
                   singular: kindValues.singular,
                 })}

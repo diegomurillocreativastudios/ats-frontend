@@ -171,7 +171,7 @@ function formatLeafValue(value: unknown): string {
 export interface TechnicalSheetTemplateContextOptions {
   vacancyTitleFallback?: string | null
   /**
-   * URL absoluta del logo (p. ej. `https://tu-dominio.com/visible-icon.png`).
+   * URL absoluta del logo (p. ej. `https://tu-dominio.com/appli-ai-logo.svg`).
    * Necesaria en plantillas renderizadas en iframe `srcDoc`, donde `/ruta` no resuelve contra el origen de la app.
    */
   logoUrl?: string | null

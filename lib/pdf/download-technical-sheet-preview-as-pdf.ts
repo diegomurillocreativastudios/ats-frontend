@@ -69,7 +69,7 @@ export async function downloadTechnicalSheetPreviewAsPdf({
       useCORS: true,
       allowTaint: false,
       logging: false,
-      backgroundColor: "#ffffff",
+      backgroundColor: "#FBFAF7",
       width: TECHNICAL_SHEET_PAGE_WIDTH_PX,
       height: TECHNICAL_SHEET_PAGE_HEIGHT_PX,
       windowWidth: TECHNICAL_SHEET_PAGE_WIDTH_PX,

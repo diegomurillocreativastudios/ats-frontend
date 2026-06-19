@@ -313,7 +313,7 @@ export default function DocumentsUploadZone({
         tabIndex={0}
         className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed bg-muted p-5 transition-colors md:gap-3 md:p-6 ${
           isDragging
-            ? "border-vo-purple bg-[#F3E8FF]"
+            ? "border-vo-purple bg-ats-arena/70"
             : "border-border hover:border-muted-foreground/30"
         }`}
         onClick={handleClick}

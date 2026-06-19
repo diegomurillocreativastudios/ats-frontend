@@ -37,6 +37,7 @@ import {
   type OpportunityVacancySummary,
 } from "@/lib/api/public-vacancies"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
+import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
 
 interface QueryState {
   departmentId: string
@@ -55,14 +56,11 @@ interface ActiveFilterChipProps {
   onRemove: () => void
 }
 
-const darkPanelClassName =
-  "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.97)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
+const darkPanelClassName = publicOpportunitiesTheme.panel
 
-const softPanelClassName =
-  "border border-white/10 bg-[linear-gradient(180deg,rgba(19,27,50,0.88)_0%,rgba(11,18,36,0.96)_100%)] shadow-[0_20px_60px_rgba(7,12,27,0.36)] backdrop-blur"
+const softPanelClassName = publicOpportunitiesTheme.panelSoft
 
-const cardGlowClassName =
-  "border border-white/10 bg-[linear-gradient(180deg,rgba(46,27,78,0.72)_0%,rgba(18,27,49,0.94)_100%)] shadow-[0_24px_70px_rgba(4,9,21,0.42)]"
+const cardGlowClassName = publicOpportunitiesTheme.panelAccent
 
 function getQueryState(searchParams: URLSearchParams): QueryState {
   const pageValue = Number(searchParams.get("page") ?? "1")
@@ -316,7 +314,7 @@ function OpportunityCard({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <DepartmentIcon className="h-5 w-5 text-[#8dd8ff]" aria-hidden />
+              <DepartmentIcon className="h-5 w-5 text-ats-cobre-light" aria-hidden />
             )}
           </div>
 
@@ -324,7 +322,7 @@ function OpportunityCard({
             <h3 className="text-base font-semibold tracking-tight text-white">
               <Link
                 href={href}
-                className="transition-colors hover:text-[#8dd8ff] focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#161d34]"
+                className="transition-colors hover:text-ats-cobre-light focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-ats-grafito"
               >
                 {vacancy.title}
               </Link>
@@ -332,13 +330,13 @@ function OpportunityCard({
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/56">
               {companyName ? (
                 <span className="inline-flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-[#8dd8ff]" aria-hidden />
+                  <Building2 className="h-3.5 w-3.5 text-ats-cobre-light" aria-hidden />
                   {companyName}
                 </span>
               ) : null}
               {publishedLabel ? (
                 <span className="inline-flex items-center gap-1.5 text-white/44">
-                  <Sparkles className="h-3.5 w-3.5 text-[#f0a7ff]" aria-hidden />
+                  <Sparkles className="h-3.5 w-3.5 text-ats-cobre" aria-hidden />
                   {publishedLabel}
                 </span>
               ) : null}
@@ -357,7 +355,7 @@ function OpportunityCard({
           <p className="text-[11px] uppercase tracking-[0.2em] text-white/38 lg:hidden">Ubicación</p>
           <div className="space-y-1">
             <p className="inline-flex items-center gap-2 text-sm text-white/74">
-              <MapPin className="h-3.5 w-3.5 text-[#f6c482]" aria-hidden />
+              <MapPin className="h-3.5 w-3.5 text-ats-cobre-light" aria-hidden />
               <VacancyLocationLabel
                 countryCode={vacancy.countryCode}
                 stateCode={vacancy.stateCode}
@@ -371,7 +369,7 @@ function OpportunityCard({
         <div className="flex items-center justify-start lg:justify-end">
           <Link
             href={href}
-            className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm font-medium text-white/82 transition-colors hover:border-[#8dd8ff]/40 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#161d34]"
+            className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm font-medium text-white/82 transition-colors hover:border-ats-cobre-light/40 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-ats-grafito"
           >
             {t("viewDetail")}
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -439,7 +437,7 @@ function ActiveFilterChip({ label, value, onRemove }: ActiveFilterChipProps) {
     <button
       type="button"
       onClick={onRemove}
-      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/7 px-3 py-1.5 text-xs font-medium text-white/82 transition-colors hover:bg-white/12 focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#161d34]"
+      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/7 px-3 py-1.5 text-xs font-medium text-white/82 transition-colors hover:bg-white/12 focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-ats-grafito"
     >
       <span className="text-white/52">{label}:</span>
       <span>{value}</span>
@@ -580,14 +578,14 @@ export function PublicVacanciesPage() {
   return (
     <div
       id="public-opportunities-top"
-      className="relative min-h-screen overflow-hidden bg-[#0b1224] text-white"
+      className="relative min-h-screen overflow-hidden bg-ats-grafito text-white"
     >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-[580px] bg-[linear-gradient(180deg,#5b2b86_0%,#25365d_34%,#0b1224_100%)]" />
-        <div className="absolute left-[-10%] top-8 h-72 w-72 rounded-full bg-[#c73277]/28 blur-3xl" />
-        <div className="absolute right-[2%] top-16 h-80 w-80 rounded-full bg-[#71bced]/18 blur-3xl" />
+        <div className="absolute inset-x-0 top-0 h-[580px] bg-[linear-gradient(180deg,#A45C40_0%,#3D3E41_34%,#202124_100%)]" />
+        <div className="absolute left-[-10%] top-8 h-72 w-72 rounded-full bg-ats-terracotta/28 blur-3xl" />
+        <div className="absolute right-[2%] top-16 h-80 w-80 rounded-full bg-ats-cobre/18 blur-3xl" />
         <div className="absolute inset-x-0 top-[360px] h-px bg-linear-to-r from-transparent via-white/12 to-transparent" />
-        <div className="absolute bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#6e3385]/12 blur-3xl" />
+        <div className="absolute bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-ats-terracotta/12 blur-3xl" />
       </div>
 
       <PublicOpportunitiesNavbar className="mb-6" />
@@ -596,12 +594,12 @@ export function PublicVacanciesPage() {
         <div className="mx-auto w-full max-w-6xl">
 
         <header className={`relative overflow-hidden rounded-[36px] px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 ${darkPanelClassName}`}>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.14),transparent_26%),radial-gradient(circle_at_top_right,rgba(199,50,119,0.34),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(113,188,237,0.18),transparent_28%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.14),transparent_26%),radial-gradient(circle_at_top_right,rgba(164,92,64,0.34),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(184,115,51,0.18),transparent_28%)]" />
           <div className="absolute -right-14 top-0 hidden h-48 w-48 rounded-full border border-white/10 bg-white/5 blur-2xl lg:block" />
 
           <div className="relative max-w-3xl space-y-6">
               <p className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/7 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.28em] text-white/76">
-                <Sparkles className="h-3.5 w-3.5 text-[#f5b0ff]" aria-hidden />
+                <Sparkles className="h-3.5 w-3.5 text-ats-cobre" aria-hidden />
                 {t("portalTitle")}
               </p>
 
@@ -617,7 +615,7 @@ export function PublicVacanciesPage() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="#public-opportunities-explorer"
-                  className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-[#18213d] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+                  className="inline-flex items-center justify-center rounded-full bg-ats-warm-white px-5 py-3 text-sm font-medium text-ats-grafito transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-ats-grafito"
                 >
                   {t("exploreCta")}
                 </Link>
@@ -630,14 +628,14 @@ export function PublicVacanciesPage() {
           className={`relative mt-6 overflow-hidden rounded-[36px] p-5 scroll-mt-6 sm:p-6 lg:p-7 ${darkPanelClassName}`}
           aria-labelledby="public-opportunities-explorer-title"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(199,50,119,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(113,188,237,0.14),transparent_24%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(164,92,64,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(184,115,51,0.14),transparent_24%)]" />
 
           <div className="relative">
             <div className={`rounded-[30px] p-5 sm:p-6 ${softPanelClassName}`}>
               <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl space-y-3">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/60">
-                    <Layers3 className="h-3.5 w-3.5 text-[#8dd8ff]" aria-hidden />
+                    <Layers3 className="h-3.5 w-3.5 text-ats-cobre-light" aria-hidden />
                     {t("explorerLabel")}
                   </div>
                   <div className="space-y-2">
@@ -666,7 +664,7 @@ export function PublicVacanciesPage() {
                       value={searchInput}
                       onChange={(event) => setSearchInput(event.target.value)}
                       placeholder={t("searchPlaceholder")}
-                      className="h-12 w-full rounded-full border border-white/10 bg-white/6 pl-11 pr-4 text-sm text-white placeholder:text-white/38 focus:outline-none focus:ring-2 focus:ring-[#f0a7ff]"
+                      className="h-12 w-full rounded-full border border-white/10 bg-white/6 pl-11 pr-4 text-sm text-white placeholder:text-white/38 focus:outline-none focus:ring-2 focus:ring-ats-cobre"
                     />
                   </div>
                 </div>
@@ -725,14 +723,14 @@ export function PublicVacanciesPage() {
                   <div className={hasVisibleFilterChips ? "mt-6" : ""}>
                     {errorMessage ? (
                       <div
-                        className="rounded-[28px] border border-[#ff93ca]/30 bg-[rgba(199,50,119,0.12)] px-5 py-6 text-sm text-[#ffd0e7]"
+                        className="rounded-[28px] border border-ats-terracotta/30 bg-[rgba(164,92,64,0.12)] px-5 py-6 text-sm text-ats-terracotta-soft"
                         role="alert"
                       >
                         <p>{errorMessage}</p>
                         <button
                           type="button"
                           onClick={() => setRetryToken((current) => current + 1)}
-                          className="mt-3 font-medium text-white hover:text-[#ffd0e7]"
+                          className="mt-3 font-medium text-white hover:text-ats-terracotta-soft"
                         >
                           {t("retry")}
                         </button>
@@ -755,7 +753,7 @@ export function PublicVacanciesPage() {
                       </div>
                     ) : (
                       <div className="rounded-[30px] border border-dashed border-white/12 bg-white/5 px-6 py-12 text-center">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[24px] border border-white/10 bg-white/8 text-[#f2adff] shadow-[0_24px_60px_rgba(110,51,133,0.18)]">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[24px] border border-white/10 bg-white/8 text-ats-cobre shadow-[0_24px_60px_rgba(164,92,64,0.18)]">
                           <Briefcase className="h-7 w-7" aria-hidden />
                         </div>
                         <h3 className="mt-5 text-2xl font-semibold text-white">
@@ -768,7 +766,7 @@ export function PublicVacanciesPage() {
                           <div className="mt-6">
                             <Button
                               type="button"
-                              className="rounded-full bg-vo-pink px-6 py-3 text-[#18213d]"
+                              className="rounded-full bg-ats-terracotta px-6 py-3 text-ats-warm-white"
                               onClick={handleClearAll}
                             >
                               {t("viewAll")}

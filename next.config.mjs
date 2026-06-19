@@ -5,8 +5,7 @@ const withNextIntl = createNextIntlPlugin()
 /** @type {import('next').NextConfig} */
 const pdfRouteTraceAssets = [
   "./node_modules/@sparticuz/chromium/**",
-  "./public/visible-icon.png",
-  "./public/visible-text.png",
+  "./public/appli-ai-logo.svg",
 ]
 
 const nextConfig = {

@@ -88,7 +88,7 @@ export default function LanguageSwitcher({
   const isOnDark = tone === "onDark"
 
   const defaultOnDarkTriggerClass =
-    "inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 sm:px-4 text-sm font-medium text-white/88 transition-colors hover:border-white/20 hover:bg-white/12 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e2744]"
+    "inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 sm:px-4 text-sm font-medium text-white/88 transition-colors hover:border-white/20 hover:bg-white/12 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-ats-grafito"
 
   const triggerClass =
     triggerClassName ??
@@ -124,7 +124,7 @@ export default function LanguageSwitcher({
         <ul
           className={
             isOnDark
-              ? "absolute right-0 top-full z-120 mt-2 min-w-46 overflow-hidden rounded-2xl border border-white/12 bg-[#1a2238]/98 py-1.5 shadow-[0_18px_48px_rgba(7,12,27,0.55)] backdrop-blur-md"
+              ? "absolute right-0 top-full z-120 mt-2 min-w-46 overflow-hidden rounded-2xl border border-white/12 bg-[#2A2B2E]/98 py-1.5 shadow-[0_18px_48px_rgba(7,12,27,0.55)] backdrop-blur-md"
               : "absolute right-0 top-full z-50 mt-2 min-w-[160px] rounded-lg border border-border bg-card py-1 shadow-lg"
           }
           role="listbox"
@@ -155,7 +155,7 @@ export default function LanguageSwitcher({
                   <span>{meta.endonym}</span>
                   {isActive && (
                     <Check
-                      className={`h-4 w-4 shrink-0 ${isOnDark ? "text-sky-200" : "text-vo-purple"}`}
+                      className={`h-4 w-4 shrink-0 ${isOnDark ? "text-ats-cobre-light" : "text-vo-purple"}`}
                       aria-hidden
                     />
                   )}

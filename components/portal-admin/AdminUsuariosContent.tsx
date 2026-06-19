@@ -363,7 +363,7 @@ export default function AdminUsuariosContent() {
           <div className="w-full min-w-[160px] md:w-48">
             <label
               htmlFor="filter-role"
-              className="mb-2 block text-sm font-medium text-black"
+              className="mb-2 block text-sm font-medium text-foreground"
             >
               {t("filters.roleLabel")}
             </label>
@@ -634,7 +634,7 @@ export default function AdminUsuariosContent() {
             placeholder={t("createModal.passwordPlaceholder")}
           />
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-black">
+            <legend className="mb-2 text-sm font-medium text-foreground">
               {t("createModal.rolesLegend")}
             </legend>
             <div className="flex flex-col gap-2">

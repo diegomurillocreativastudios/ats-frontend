@@ -91,7 +91,7 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
           <div
             className={
               isReadOnly
-                ? "flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-slate-200 bg-white"
+                ? "flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-slate-200 bg-background"
                 : "flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background"
             }
           >
@@ -191,7 +191,7 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
             href={`/portal-rrhh/vacantes/${vacancy.id}`}
             className={
               isReadOnly
-                ? "inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white/90 px-5 font-sans text-sm font-medium text-slate-600 transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 sm:flex-none sm:px-6"
+                ? "inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md border border-slate-200 bg-background/90 px-5 font-sans text-sm font-medium text-slate-600 transition-colors hover:bg-background focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 sm:flex-none sm:px-6"
                 : "inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:flex-none sm:px-6"
             }
             aria-label={t("actions.viewDetailsAria", { title: vacancy.title })}

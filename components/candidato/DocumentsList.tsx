@@ -130,7 +130,7 @@ export default function DocumentsList({
               key={doc.id}
               className="flex items-center gap-4 rounded-lg border border-border bg-card p-4 md:gap-5 md:p-5"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#F3E8FF] md:h-12 md:w-12">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ats-arena/70 md:h-12 md:w-12">
                 <FileText className="h-5 w-5 text-vo-purple md:h-6 md:w-6" aria-hidden />
               </div>
               <div className="min-w-0 flex-1">

@@ -67,7 +67,7 @@ const DefaultStatusSwitch = ({
       }`}
     >
       <span
-        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background transition-[transform,box-shadow] duration-200 ease-out ${
           isOn
             ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
             : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
@@ -91,7 +91,7 @@ const StatusItem = ({
   deleteAria,
 }) => {
   return (
-    <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1.5 rounded-lg border border-border bg-white px-4 py-3.5">
+    <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1.5 rounded-lg border border-border bg-background px-4 py-3.5">
       <p className="row-span-2 min-w-0 self-center font-sans text-sm font-medium leading-snug text-foreground">
         <span className="block truncate">{status.name}</span>
       </p>
@@ -363,7 +363,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
         onClick={onClose}
       >
         <div
-          className="relative max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-xl"
+          className="relative max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-xl bg-background shadow-xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}

@@ -1,7 +1,8 @@
+import { APP_NAME } from "@/lib/app-brand"
 import DocumentosContent from "./DocumentosContent";
 
 export const metadata = {
-  title: { absolute: "ATS | Portal Candidato - Documentos" },
+  title: { absolute: `${APP_NAME} | Portal Candidato - Documentos` },
   description: "Gestiona tus documentos en el portal del candidato",
 };
 

@@ -73,6 +73,7 @@ import { getAccessToken } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv"
 import { getInitials } from "@/lib/getInitials"
+import { APP_NAME } from "@/lib/app-brand"
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay"
 
 const formatCompliancePreview = (
@@ -343,7 +344,7 @@ export function CandidateSelfProfileView({
 
   useEffect(() => {
     if (displayName) {
-      document.title = `ATS | ${displayName}`
+      document.title = `${APP_NAME} | ${displayName}`
     }
   }, [displayName])
 

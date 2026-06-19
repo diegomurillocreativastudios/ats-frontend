@@ -51,7 +51,7 @@ function StageCard({
           ? "border-blue-300 bg-blue-50 shadow-sm"
           : isCompleted
             ? "border-emerald-200 bg-emerald-50/50"
-            : "border-gray-200 bg-white"
+            : "border-gray-200 bg-background"
       }`}
     >
       <div className="flex items-center justify-between gap-2">

@@ -16,45 +16,45 @@ const TRANSITION_MS = 280;
 const VARIANT_CONFIG = {
   success: {
     container:
-      "border-success/50 bg-success shadow-2xl ring-1 ring-white/25",
+      "border-green-400 bg-green-400 shadow-lg ring-1 ring-green-300/50",
     icon: CheckCircle2,
-    iconClass: "text-success-foreground shrink-0 drop-shadow-sm",
-    textClass: "text-success-foreground",
+    iconClass: "text-white shrink-0",
+    textClass: "text-white",
     closeClass:
-      "text-success-foreground/90 hover:bg-white/20 hover:text-success-foreground focus:ring-white focus:ring-offset-2 focus:ring-offset-success",
+      "text-white/90 hover:bg-background/20 hover:text-white focus:ring-white focus:ring-offset-2 focus:ring-offset-green-400",
     role: "status",
     ariaLive: "polite",
   },
   error: {
     container:
-      "border-destructive/90 bg-destructive shadow-2xl ring-1 ring-white/20",
+      "border-red-400 bg-red-400 shadow-lg ring-1 ring-red-300/50",
     icon: AlertCircle,
-    iconClass: "text-destructive-foreground shrink-0 drop-shadow-sm",
-    textClass: "text-destructive-foreground",
+    iconClass: "text-white shrink-0",
+    textClass: "text-white",
     closeClass:
-      "text-destructive-foreground/90 hover:bg-white/15 hover:text-destructive-foreground focus:ring-white focus:ring-offset-2 focus:ring-offset-destructive",
+      "text-white/90 hover:bg-background/20 hover:text-white focus:ring-white focus:ring-offset-2 focus:ring-offset-red-400",
     role: "alert",
     ariaLive: "assertive",
   },
   warning: {
     container:
-      "border-amber-700/40 bg-amber-500 shadow-2xl ring-1 ring-amber-300/50",
+      "border-yellow-500 bg-yellow-500 shadow-lg ring-1 ring-yellow-400/50",
     icon: AlertTriangle,
-    iconClass: "text-white shrink-0 drop-shadow-sm",
+    iconClass: "text-white shrink-0",
     textClass: "text-white",
     closeClass:
-      "text-white/90 hover:bg-white/20 hover:text-white focus:ring-white focus:ring-offset-2 focus:ring-offset-amber-500",
+      "text-white/90 hover:bg-background/20 hover:text-white focus:ring-white focus:ring-offset-2 focus:ring-offset-yellow-500",
     role: "alert",
     ariaLive: "assertive",
   },
   info: {
     container:
-      "border-blue-800/40 bg-blue-600 shadow-2xl ring-1 ring-blue-400/40",
+      "border-blue-400 bg-blue-400 shadow-lg ring-1 ring-blue-300/50",
     icon: Info,
-    iconClass: "text-white shrink-0 drop-shadow-sm",
+    iconClass: "text-white shrink-0",
     textClass: "text-white",
     closeClass:
-      "text-white/90 hover:bg-white/20 hover:text-white focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600",
+      "text-white/90 hover:bg-background/20 hover:text-white focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-400",
     role: "status",
     ariaLive: "polite",
   },

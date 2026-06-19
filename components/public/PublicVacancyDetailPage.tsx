@@ -16,6 +16,7 @@ import {
   MapPin,
   Sparkles,
 } from "lucide-react"
+import { APP_NAME } from "@/lib/app-brand"
 import {
   buildOpportunityCompanyLogoDataUri,
   getPublicVacancyDetail,
@@ -24,9 +25,9 @@ import {
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
+import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
 
-const darkPanelClassName =
-  "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
+const darkPanelClassName = publicOpportunitiesTheme.panel
 
 function formatPublishedLabel(publishedAt?: string): string | null {
   if (!publishedAt) return null
@@ -87,7 +88,7 @@ function BulletList({
   return (
     <section className={`rounded-[30px] p-6 sm:p-7 ${darkPanelClassName}`}>
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/6 text-[#f0a7ff]">
+        <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/6 text-ats-cobre">
           <CheckCircle2 className="h-5 w-5" aria-hidden />
         </div>
         <div>
@@ -102,7 +103,7 @@ function BulletList({
             key={item}
             className="flex items-start gap-3 rounded-[22px] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-7 text-white/72"
           >
-            <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#f0a7ff]" aria-hidden />
+            <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-ats-cobre" aria-hidden />
             <span>{item}</span>
           </li>
         ))}
@@ -170,7 +171,7 @@ function VacancyDescription({
   return (
     <VacancyTextSection
       icon={<Compass className="h-5 w-5" aria-hidden />}
-      iconColorClassName="text-[#8dd8ff]"
+      iconColorClassName="text-ats-cobre-light"
       eyebrow={t("roleContext")}
       title={t("jobDescription")}
       content={description}
@@ -183,7 +184,7 @@ function VacancySkeleton() {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="space-y-6">
-        <div className="animate-pulse rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,42,71,0.9)_0%,rgba(18,25,44,0.94)_100%)] p-8">
+        <div className="animate-pulse rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(42,43,46,0.9)_0%,rgba(32,33,36,0.94)_100%)] p-8">
           <div className="h-6 w-32 rounded-full bg-white/10" />
           <div className="mt-5 h-10 w-2/3 rounded-2xl bg-white/10" />
           <div className="mt-4 h-5 w-1/2 rounded-xl bg-white/10" />
@@ -193,7 +194,7 @@ function VacancySkeleton() {
             <div className="h-8 w-20 rounded-full bg-white/10" />
           </div>
         </div>
-        <div className="animate-pulse rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,42,71,0.9)_0%,rgba(18,25,44,0.94)_100%)] p-8">
+        <div className="animate-pulse rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(42,43,46,0.9)_0%,rgba(32,33,36,0.94)_100%)] p-8">
           <div className="h-6 w-48 rounded-xl bg-white/10" />
           <div className="mt-5 space-y-3">
             <div className="h-4 w-full rounded bg-white/10" />
@@ -203,7 +204,7 @@ function VacancySkeleton() {
         </div>
       </div>
 
-      <div className="animate-pulse rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,42,71,0.9)_0%,rgba(18,25,44,0.94)_100%)] p-8">
+      <div className="animate-pulse rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(42,43,46,0.9)_0%,rgba(32,33,36,0.94)_100%)] p-8">
         <div className="h-6 w-32 rounded-xl bg-white/10" />
         <div className="mt-5 space-y-4">
           <div className="h-4 w-full rounded bg-white/10" />
@@ -274,7 +275,7 @@ export function PublicVacancyDetailPage({
 
   useEffect(() => {
     if (!vacancy?.title) return
-    document.title = `ATS | Oportunidades | ${vacancy.title}`
+    document.title = `${APP_NAME} | Oportunidades | ${vacancy.title}`
   }, [vacancy?.title])
 
   const publishedLabel = formatPublishedLabel(vacancy?.publishedAt)
@@ -289,11 +290,11 @@ export function PublicVacancyDetailPage({
     : `/portal-oportunidades/${vacancyId}/aplicar`
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0b1224] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-ats-grafito text-white">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-[linear-gradient(180deg,#5b2b86_0%,#25365d_38%,#0b1224_100%)]" />
-        <div className="absolute left-[-8%] top-6 h-72 w-72 rounded-full bg-[#c73277]/26 blur-3xl" />
-        <div className="absolute right-[10%] top-16 h-80 w-80 rounded-full bg-[#71bced]/16 blur-3xl" />
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-[linear-gradient(180deg,#A45C40_0%,#3D3E41_38%,#202124_100%)]" />
+        <div className="absolute left-[-8%] top-6 h-72 w-72 rounded-full bg-ats-terracotta/26 blur-3xl" />
+        <div className="absolute right-[10%] top-16 h-80 w-80 rounded-full bg-ats-cobre/16 blur-3xl" />
       </div>
 
       <PublicOpportunitiesNavbar className="mb-5" />
@@ -303,7 +304,7 @@ export function PublicVacancyDetailPage({
           <div className="mb-5">
             <Link
               href={backHref}
-              className="inline-flex items-center gap-2 text-sm font-medium text-white/76 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+              className="inline-flex items-center gap-2 text-sm font-medium text-white/76 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-ats-grafito"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
               {t("back")}
@@ -312,13 +313,13 @@ export function PublicVacancyDetailPage({
 
           {errorMessage ? (
             <div className={`rounded-[30px] p-8 ${darkPanelClassName}`}>
-              <p className="text-sm text-[#ffd0e7]" role="alert">
+              <p className="text-sm text-ats-terracotta-soft" role="alert">
                 {errorMessage}
               </p>
               <div className="mt-5">
                 <Link
                   href="/portal-oportunidades"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-[#ffd0e7]"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-ats-terracotta-soft"
                 >
                   {t("viewAll")}
                 </Link>
@@ -330,13 +331,13 @@ export function PublicVacancyDetailPage({
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
               <div className="space-y-6">
               <section className={`relative overflow-hidden rounded-[34px] px-6 py-7 sm:px-8 sm:py-8 ${darkPanelClassName}`}>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(199,50,119,0.35),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(113,188,237,0.16),transparent_24%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(164,92,64,0.35),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(184,115,51,0.16),transparent_24%)]" />
 
                 <div className="relative flex flex-col gap-7">
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-4">
                       <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-white/76">
-                        <Sparkles className="h-3.5 w-3.5 text-[#f5b0ff]" aria-hidden />
+                        <Sparkles className="h-3.5 w-3.5 text-ats-cobre" aria-hidden />
                         {t("activeBadge")}
                       </p>
 
@@ -347,12 +348,12 @@ export function PublicVacancyDetailPage({
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/68">
                           {companyName ? (
                             <span className="inline-flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-[#8dd8ff]" aria-hidden />
+                              <Building2 className="h-4 w-4 text-ats-cobre-light" aria-hidden />
                               {companyName}
                             </span>
                           ) : null}
                           <span className="inline-flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-[#f6c482]" aria-hidden />
+                            <MapPin className="h-4 w-4 text-ats-cobre-light" aria-hidden />
                             <VacancyLocationLabel
                               countryCode={vacancy.countryCode}
                               stateCode={vacancy.stateCode}
@@ -360,7 +361,7 @@ export function PublicVacancyDetailPage({
                             />
                           </span>
                           <span className="inline-flex items-center gap-2">
-                            <Briefcase className="h-4 w-4 text-[#f5b0ff]" aria-hidden />
+                            <Briefcase className="h-4 w-4 text-ats-cobre" aria-hidden />
                             {vacancy.modality?.displayName ?? unspecified}
                           </span>
                         </div>
@@ -403,7 +404,7 @@ export function PublicVacancyDetailPage({
                     ) : null}
                     <Link
                       href={applyHref}
-                      className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-medium text-[#18213d] shadow-sm transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+                      className="inline-flex items-center justify-center rounded-full bg-ats-warm-white px-5 py-2.5 text-sm font-medium text-ats-grafito shadow-sm transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-ats-grafito"
                     >
                       {t("apply")}
                     </Link>
@@ -441,7 +442,7 @@ export function PublicVacancyDetailPage({
               {vacancy.details ? (
                 <VacancyTextSection
                   icon={<Info className="h-5 w-5" aria-hidden />}
-                  iconColorClassName="text-[#f6c482]"
+                  iconColorClassName="text-ats-cobre-light"
                   eyebrow={t("moreAboutRole")}
                   title={t("additionalDetails")}
                   content={vacancy.details}
@@ -451,7 +452,7 @@ export function PublicVacancyDetailPage({
               {vacancy.advantages ? (
                 <VacancyTextSection
                   icon={<Gift className="h-5 w-5" aria-hidden />}
-                  iconColorClassName="text-[#f0a7ff]"
+                  iconColorClassName="text-ats-cobre"
                   eyebrow={t("whatWeOffer")}
                   title={t("benefits")}
                   content={vacancy.advantages}
@@ -514,7 +515,7 @@ export function PublicVacancyDetailPage({
                         label={t("salary")}
                         value={
                           <span className="inline-flex items-center justify-end gap-2">
-                            <DollarSign className="h-3.5 w-3.5 text-[#8dd8ff]" aria-hidden />
+                            <DollarSign className="h-3.5 w-3.5 text-ats-cobre-light" aria-hidden />
                             <span className="whitespace-pre-wrap">{vacancy.salary}</span>
                           </span>
                         }
@@ -528,7 +529,7 @@ export function PublicVacancyDetailPage({
                   <div className="mt-6">
                     <Link
                       href={applyHref}
-                      className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-[#18213d] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+                      className="inline-flex w-full items-center justify-center rounded-full bg-ats-warm-white px-5 py-3 text-sm font-medium text-ats-grafito transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-ats-grafito"
                     >
                       {t("apply")}
                     </Link>

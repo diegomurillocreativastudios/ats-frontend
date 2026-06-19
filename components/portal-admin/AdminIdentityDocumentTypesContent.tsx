@@ -364,7 +364,7 @@ export function AdminIdentityDocumentTypesContent() {
               placeholder={t("filters.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-md border border-input bg-white py-2 pl-10 pr-4 text-sm text-black placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple"
+              className="w-full rounded-md border border-input bg-background py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple"
             />
           </div>
         </section>

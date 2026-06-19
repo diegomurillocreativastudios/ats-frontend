@@ -64,8 +64,8 @@ export function ApplyEmailConfirmationModal({
       <div
         className={
           isDark
-            ? "relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.97)_0%,rgba(19,27,50,0.99)_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.6)] backdrop-blur-xl"
-            : "relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-white shadow-xl"
+            ? "relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(42,43,46,0.97)_0%,rgba(32,33,36,0.99)_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+            : "relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-background shadow-xl"
         }
         onClick={(e) => e.stopPropagation()}
         role="document"
@@ -93,8 +93,8 @@ export function ApplyEmailConfirmationModal({
             disabled={isSubmitting}
             className={
               isDark
-                ? "flex h-8 w-8 items-center justify-center rounded-lg text-white/64 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#f0a7ff] focus:ring-offset-2 focus:ring-offset-[#1a2238] disabled:cursor-not-allowed disabled:opacity-50"
-                : "flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                ? "flex h-8 w-8 items-center justify-center rounded-lg text-white/64 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-ats-grafito disabled:cursor-not-allowed disabled:opacity-50"
+                : "flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ats-terracotta focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             }
             aria-label={t("closeAria")}
           >
@@ -128,8 +128,8 @@ export function ApplyEmailConfirmationModal({
             <p
               className={
                 isDark
-                  ? "mt-1.5 break-all text-base font-semibold text-[#8dd8ff]"
-                  : "mt-1.5 break-all text-base font-semibold text-vo-purple"
+                  ? "mt-1.5 break-all text-base font-semibold text-ats-cobre-light"
+                  : "mt-1.5 break-all text-base font-semibold text-ats-terracotta"
               }
             >
               {email}
@@ -160,7 +160,7 @@ export function ApplyEmailConfirmationModal({
           <div
             className={
               isDark
-                ? "rounded-2xl border border-[#f6c482]/20 bg-[#f6c482]/8 p-4"
+                ? "rounded-2xl border border-ats-cobre-light/20 bg-ats-cobre-light/8 p-4"
                 : "rounded-lg border border-amber-200 bg-amber-50 p-4"
             }
           >
@@ -201,8 +201,8 @@ export function ApplyEmailConfirmationModal({
             disabled={isSubmitting}
             className={
               isDark
-                ? "inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-[#18213d] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
-                : "inline-flex items-center justify-center gap-2 rounded-lg bg-vo-purple px-5 py-2.5 text-sm font-medium text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+                ? "inline-flex items-center justify-center gap-2 rounded-full bg-ats-warm-white px-5 py-2.5 text-sm font-medium text-ats-grafito transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+                : "inline-flex items-center justify-center gap-2 rounded-lg bg-ats-terracotta px-5 py-2.5 text-sm font-medium text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
             }
           >
             <Mail className="h-4 w-4 shrink-0" aria-hidden />

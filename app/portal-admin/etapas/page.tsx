@@ -104,7 +104,7 @@ const DefaultStageSwitch = ({ stage, onActivate, disabled, isUpdating, tStages }
         }`}
       >
         <span
-          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background transition-[transform,box-shadow] duration-200 ease-out ${
             isOn
               ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
               : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
@@ -151,16 +151,16 @@ const FinalStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) =>
         disabled={disabled || isUpdating}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
+        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
           isUpdating ? "opacity-60" : "opacity-100"
         } ${
           isOn
-            ? "bg-emerald-600 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
+            ? "bg-vo-purple shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
             : "border border-slate-300/80 bg-slate-100 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)]"
         }`}
       >
         <span
-          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background transition-[transform,box-shadow] duration-200 ease-out ${
             isOn
               ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
               : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
@@ -171,7 +171,7 @@ const FinalStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) =>
       {isUpdating && (
         <div className="absolute -right-6 top-1/2 -translate-y-1/2">
           <div
-            className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"
+            className="h-3 w-3 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
             aria-hidden
           />
         </div>
@@ -216,7 +216,7 @@ const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) =>
         }`}
       >
         <span
-          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background transition-[transform,box-shadow] duration-200 ease-out ${
             isOn
               ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
               : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"

@@ -56,7 +56,7 @@ export default function CandidateSidebar() {
                 href={item.href}
                 className={`flex items-center gap-3 rounded-md px-4 py-3 font-sans text-sm transition-colors ${
                   isActive
-                    ? "bg-[#F3E8FF] text-vo-purple font-medium"
+                    ? "bg-ats-arena/70 text-vo-purple font-medium"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
                 aria-current={isActive ? "page" : undefined}

@@ -19,6 +19,7 @@ import {
   datePickerFilterButtonClass,
 } from "@/components/ui/date-picker"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { APP_LOGO_SVG_SRC } from "@/lib/app-brand"
 import type {
   ReportCatalogFilter,
   ReportCatalogItem,
@@ -458,7 +459,7 @@ export function ReportDataViewClient({
     const origin = resolveBrowserOrigin()
     return {
       generatedAt: formatGeneratedAtForPdf(),
-      logoUrl: origin ? `${origin}/visible-icon.png` : "",
+      logoUrl: origin ? `${origin}${APP_LOGO_SVG_SRC}` : "",
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response])
@@ -784,7 +785,7 @@ export function ReportDataViewClient({
                 title="Vista previa del reporte"
                 sandbox="allow-same-origin"
                 srcDoc={previewSrcDoc}
-                className="min-h-[480px] w-full flex-1 border-0 bg-white"
+                className="min-h-[480px] w-full flex-1 border-0 bg-background"
               />
             </div>
           </section>

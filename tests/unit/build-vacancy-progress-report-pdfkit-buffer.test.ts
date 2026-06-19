@@ -166,7 +166,7 @@ describe("buildVacancyProgressReportPdfKitBuffer", () => {
         candidatesByStage: { Entrevista: 4, Finalista: 2, Contratado: 1 },
       },
       {
-        clientName: "Visible Outsource",
+        clientName: "Appli AI",
         vacancyTitle: "Frontend Developer",
         vacancyStatus: "open",
         openedAt: "2026-02-01",

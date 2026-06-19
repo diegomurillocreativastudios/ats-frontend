@@ -208,11 +208,11 @@ export function buildCandidatesByVacancyChartRows(
 }
 
 const DONUT_COLORS: Record<string, string> = {
-  open: "#6E3385",
-  closed: "#496FB3",
-  paused: "#CA8A04",
-  draft: "#94A3B8",
-  unknown: "#A1A1AA",
+  open: "#A45C40",
+  closed: "#202124",
+  paused: "#B87333",
+  draft: "#A8A39C",
+  unknown: "#7A7B7E",
 }
 
 export interface StatusDonutSlice {

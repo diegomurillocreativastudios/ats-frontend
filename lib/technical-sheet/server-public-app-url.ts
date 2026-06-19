@@ -1,3 +1,5 @@
+import { APP_LOGO_SVG_SRC } from "@/lib/app-brand"
+
 /**
  * Origen público de la app (https://…) para URLs absolutas en PDF headless.
  * Definí `NEXT_PUBLIC_APP_URL` en cada entorno. En Vercel se usa `VERCEL_URL` como respaldo.
@@ -16,5 +18,5 @@ export function getPublicAppOrigin(): string {
 export function buildVisibleLogoUrlForTechnicalSheet(): string {
   const origin = getPublicAppOrigin()
   if (!origin) return ""
-  return `${origin}/visible-icon.png`
+  return `${origin}${APP_LOGO_SVG_SRC}`
 }

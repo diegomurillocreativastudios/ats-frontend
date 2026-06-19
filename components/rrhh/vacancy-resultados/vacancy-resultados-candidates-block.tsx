@@ -327,7 +327,7 @@ function VacancyResultadosCandidateCard({
 
       <div className="mt-3 space-y-1.5">
         <MiniBar label={t("fields.qualitative")} value01={comps.qualitative} barClass="bg-emerald-500" />
-        <MiniBar label={t("fields.vectorSimilarity")} value01={comps.vector} barClass="bg-[#496FB3]" />
+        <MiniBar label={t("fields.vectorSimilarity")} value01={comps.vector} barClass="bg-ats-cobre" />
         <MiniBar
           label={t("fields.attributeAggregate")}
           value01={comps.attributeAggregate}

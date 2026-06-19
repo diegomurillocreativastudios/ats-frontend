@@ -10,11 +10,11 @@ export interface ToastProps {
 
 const typeClasses: Record<ToastProps["type"], string> = {
   success:
-    "border-emerald-700 bg-emerald-50 text-emerald-700",
-  error: "border-red-700 bg-red-50 text-red-700",
-  info: "border-border bg-muted text-foreground",
+    "border-green-400 bg-green-400 text-white",
+  error: "border-red-400 bg-red-400 text-white",
+  info: "border-blue-400 bg-blue-400 text-white",
   warning:
-    "border-amber-700 bg-amber-50 text-amber-700",
+    "border-yellow-500 bg-yellow-500 text-white",
 }
 
 export function Toast({ type, message, duration = 5000 }: ToastProps) {

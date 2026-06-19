@@ -1,5 +1,4 @@
-import { existsSync, readFileSync } from "fs"
-import { join } from "path"
+import { APP_NAME } from "@/lib/app-brand"
 import PDFDocument from "pdfkit"
 import type { TechnicalSheetPayload } from "@/lib/api/technical-sheet"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
@@ -7,18 +6,18 @@ import {
   getTechnicalSheetCandidateHeaderFacts,
   pickCandidateDisplayRecord,
 } from "@/lib/technical-sheet/candidate-from-payload"
+import { tryLoadAppLogoRasterBufferForPdfKit } from "@/lib/technical-sheet/technical-sheet-pdf-logo"
 
 /**
  * PDF estructurado con PDFKit. La ruta Next lo usa solo como rollback temporal (`?engine=pdfkit` / `TECHNICAL_SHEET_PDF_ENGINE=pdfkit`); el flujo principal es HTML → Chromium.
  */
 
-/** Alineado con marca Visible (`app/globals.css` --vo-purple) */
 const BRAND = {
-  purple: "#6E3385",
-  cyan: "#06B6D4",
-  footer: "#0f172a",
+  purple: "#A45C40",
+  cyan: "#B87333",
+  footer: "#202124",
   black: "#000000",
-  taglineGray: "#525252",
+  taglineGray: "#5A5B5E",
   dotGray: "#94a3b8",
 }
 
@@ -197,12 +196,11 @@ function drawPageDecorations(doc: PdfDoc) {
 }
 
 /**
- * Logo Visible + tagline + datos personales (solo página 1; las siguientes no repiten cabecera).
+ * Logo Appli AI + tagline + datos personales (solo página 1; las siguientes no repiten cabecera).
  */
 function drawRepeatedHeader(
   doc: PdfDoc,
   facts: ReturnType<typeof getTechnicalSheetCandidateHeaderFacts>,
-  wordmarkBuffer: Buffer | undefined,
   iconBuffer: Buffer | undefined
 ) {
   const { left, right, width } = contentMetrics(doc)
@@ -211,22 +209,19 @@ function drawRepeatedHeader(
   const factsColW = Math.min(240, width * 0.42)
   const factsX = factsRight - factsColW
   const iconW = 32
-  const iconGap = 8
-  const wordmarkW = 108
-  const wordmarkX = left + iconW + iconGap
+  const iconGap = 10
+  const wordmarkX = left + (iconBuffer ? iconW + iconGap : 0)
 
-  if (wordmarkBuffer && wordmarkBuffer.length > 0) {
-    try {
-      if (iconBuffer && iconBuffer.length > 0) {
-        doc.image(iconBuffer, left, headerTop, { width: iconW })
-      }
-      doc.image(wordmarkBuffer, wordmarkX, headerTop, { width: wordmarkW })
-      doc.fontSize(8.5).font("Helvetica").fillColor(BRAND.taglineGray)
-      doc.text(m.brandTagline, left, headerTop + 36, { width: wordmarkW + iconW + iconGap + 72, lineGap: 2 })
-    } catch {
-      drawVisibleFallbackWordmark(doc, left, headerTop)
+  try {
+    if (iconBuffer && iconBuffer.length > 0) {
+      doc.image(iconBuffer, left, headerTop, { width: iconW })
     }
-  } else {
+    doc.fontSize(15).font("Helvetica-Bold").fillColor(BRAND.purple).text(APP_NAME, wordmarkX, headerTop + 2, {
+      width: 160,
+    })
+    doc.fontSize(8.5).font("Helvetica").fillColor(BRAND.taglineGray)
+    doc.text(m.brandTagline, left, headerTop + 22, { width: 280, lineGap: 2 })
+  } catch {
     drawVisibleFallbackWordmark(doc, left, headerTop)
   }
 
@@ -258,7 +253,7 @@ function drawRepeatedHeader(
 }
 
 function drawVisibleFallbackWordmark(doc: PdfDoc, left: number, headerTop: number) {
-  doc.fontSize(15).font("Helvetica-Bold").fillColor(BRAND.purple).text("Visible", left, headerTop, {
+  doc.fontSize(15).font("Helvetica-Bold").fillColor(BRAND.purple).text(APP_NAME, left, headerTop, {
     width: 220,
   })
   doc.fontSize(8.5).font("Helvetica").fillColor(BRAND.taglineGray)
@@ -462,23 +457,14 @@ function renderTechnicalSheetBody(doc: PdfDoc, payload: TechnicalSheetPayload, r
 
 }
 
-function loadImageBuffer(publicFileName: string): Buffer | undefined {
-  const imagePath = join(process.cwd(), "public", publicFileName)
-  if (!existsSync(imagePath)) return undefined
-  try {
-    return readFileSync(imagePath)
-  } catch {
-    return undefined
-  }
-}
+export async function buildTechnicalSheetPdfKitBuffer(
+  payload: TechnicalSheetPayload
+): Promise<Buffer> {
+  const record = pickCandidateDisplayRecord(payload)
+  const facts = getTechnicalSheetCandidateHeaderFacts(payload)
+  const iconBuffer = (await tryLoadAppLogoRasterBufferForPdfKit(32)) ?? undefined
 
-export function buildTechnicalSheetPdfKitBuffer(payload: TechnicalSheetPayload): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const record = pickCandidateDisplayRecord(payload)
-    const facts = getTechnicalSheetCandidateHeaderFacts(payload)
-    const wordmarkBuffer = loadImageBuffer("visible-text.png")
-    const iconBuffer = loadImageBuffer("visible-icon.png")
-
     const doc = new PDFDocument({
       size: "LETTER",
       autoFirstPage: false,
@@ -495,7 +481,7 @@ export function buildTechnicalSheetPdfKitBuffer(payload: TechnicalSheetPayload):
 
       drawFooterBar(doc)
       drawPageDecorations(doc)
-      drawRepeatedHeader(doc, facts, wordmarkBuffer, iconBuffer)
+      drawRepeatedHeader(doc, facts, iconBuffer)
       resetTextCursorToContentArea(doc)
     }
 

@@ -74,7 +74,7 @@ export default function NextActivitiesCard({
             return (
               <div
                 key={act.id}
-                className="flex items-center gap-4 rounded-lg border border-border bg-white p-4 transition-all hover:border-blue-300 hover:shadow-sm"
+                className="flex items-center gap-4 rounded-lg border border-border bg-background p-4 transition-all hover:border-blue-300 hover:shadow-sm"
               >
                 <div
                   className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${styles.iconBg}`}

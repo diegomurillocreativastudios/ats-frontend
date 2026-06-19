@@ -58,7 +58,7 @@ describe("buildReportTemplateContext", () => {
       rows: [
         {
           clientId: "c1",
-          clientName: "Visible Outsource",
+          clientName: "Appli AI",
           vacancyId: "v1",
           vacancyTitle: "React Frontend Developer",
           vacancyStatus: "Open",
@@ -75,7 +75,7 @@ describe("buildReportTemplateContext", () => {
         },
         {
           clientId: "c1",
-          clientName: "Visible Outsource",
+          clientName: "Appli AI",
           vacancyId: "v2",
           vacancyTitle: "Backend Developer",
           vacancyStatus: "Filled",

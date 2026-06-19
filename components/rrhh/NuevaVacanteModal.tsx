@@ -431,7 +431,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             disabled={loading || loadingCompanies}
           >
             {companyOptions.length === 0 ? (
-              <option value={DEFAULT_RECRUITER_COMPANY_ID}>Visible Outsource</option>
+              <option value={DEFAULT_RECRUITER_COMPANY_ID}>Appli AI</option>
             ) : (
               companyOptions.map((company) => (
                 <option key={company.id} value={company.id}>
@@ -562,7 +562,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             {requerimientos.map((req, index) => (
               <div
                 key={req.id}
-                className="flex flex-col gap-2 rounded-lg border border-border bg-white p-3"
+                className="flex flex-col gap-2 rounded-lg border border-border bg-background p-3"
               >
                 <div className="flex items-start gap-2">
                   <div

@@ -193,11 +193,11 @@
     "auth": {
       "login": {
         "title": "Sign in",
-        "description": "Access your ATS account"
+        "description": "Access your Appli AI account"
       },
       "forgotPassword": {
         "title": "Forgot your password?",
-        "description": "Request instructions by email to reset your password in ATS App"
+        "description": "Request instructions by email to reset your password in Appli AI"
       },
       "resetPassword": {
         "title": "Reset password",
@@ -205,7 +205,7 @@
       },
       "register": {
         "title": "Registrarse",
-        "description": "Create tu cuenta en la plataforma ATS"
+        "description": "Create tu cuenta en la plataforma Appli AI"
       }
     },
     "portalSelection": {
@@ -217,28 +217,28 @@
       "description": "Review and manage your account information in the candidate portal"
     },
     "recruiterVacancies": {
-      "title": "ATS | HR Portal | Vacancies",
+      "title": "Appli AI | HR Portal | Vacancies",
       "description": "Manage the company's open positions and vacancies"
     },
     "recruiterVacancyDetail": {
-      "title": "ATS | HR Portal | Vacancy details",
+      "title": "Appli AI | HR Portal | Vacancy details",
       "description": "View vacancy information"
     },
     "recruiterVacancyResults": {
-      "title": "ATS | HR Portal | Vacancy results",
+      "title": "Appli AI | HR Portal | Vacancy results",
       "description": "View evaluated candidate results"
     },
     "recruiterReports": {
-      "title": "ATS | HR Portal | Reports",
+      "title": "Appli AI | HR Portal | Reports",
       "description": "Review recruiting metrics and reports"
     },
     "recruiterCandidateDetail": {
-      "title": "ATS | HR Portal | Candidate",
+      "title": "Appli AI | HR Portal | Candidate",
       "description": "Detailed candidate profile in the HR portal"
     },
     "adminPortal": {
       "title": "Admin Portal",
-      "description": "ATS platform administration",
+      "description": "Appli AI platform administration",
       "companies": {
         "title": "Companies",
         "description": "Manage the platform's client companies (tenants)"
@@ -285,41 +285,41 @@
     },
     "candidatePortal": {
       "home": {
-        "title": "ATS | Portal Candidate",
+        "title": "Appli AI | Portal Candidate",
         "description": "Portal del candidate - Resumen de tu proceso de seleccion"
       },
       "documents": {
-        "title": "ATS | Portal Candidate | Documents",
+        "title": "Appli AI | Portal Candidate | Documents",
         "description": "Manage tus documentos en el portal del candidate"
       },
       "interviews": {
-        "title": "ATS | Portal Candidate | Interviews",
+        "title": "Appli AI | Portal Candidate | Interviews",
         "description": "View tus interviews agendadas e historial en el portal del candidate"
       }
     },
     "recruiterPortal": {
-      "title": "ATS | Portal RRHH",
+      "title": "Appli AI | Portal RRHH",
       "description": "Portal RRHH - Dashboard de reclutamiento y gestion de candidates"
     },
     "recruiterCandidates": {
-      "title": "ATS | Portal RRHH | Candidates",
+      "title": "Appli AI | Portal RRHH | Candidates",
       "description": "Manage los candidates y sus perfiles en el portal RRHH"
     },
     "recruiterSettings": {
-      "title": "ATS | Portal RRHH | Settings",
+      "title": "Appli AI | Portal RRHH | Settings",
       "description": "Settings del portal RRHH"
     },
     "publicOpportunities": {
       "list": {
-        "title": "ATS | Opportunities",
+        "title": "Appli AI | Opportunities",
         "description": "Browse active vacancies by department and work mode"
       },
       "detail": {
-        "title": "ATS | Opportunities | Vacancy",
+        "title": "Appli AI | Opportunities | Vacancy",
         "description": "Public details of an active vacancy"
       },
       "apply": {
-        "title": "ATS | Opportunities | Apply",
+        "title": "Appli AI | Opportunities | Apply",
         "description": "Public form to apply for an active vacancy"
       }
     }
@@ -494,7 +494,7 @@
         "processErrorSelf": "Error processing your information.",
         "processErrorRecruiter": "Error processing the candidate.",
         "aiIntro": "CVs and identity documents are processed with AI to extract preliminary profile information.",
-        "kpisAria": "ATS efficiency KPIs",
+        "kpisAria": "Appli AI efficiency KPIs",
         "documentTypeHeading": "Identity document type",
         "documentTypeDescription": "Select the document type that matches the PDF to be uploaded.",
         "documentTypeAria": "Identity document type",
@@ -1332,14 +1332,14 @@
       "calendarPage": {
         "title": "Calendar",
         "description": "Connect Google Calendar to sync interviews and send automatic invitations.",
-        "pageDescription": "Connect Google Calendar to sync interviews from the ATS.",
+        "pageDescription": "Connect Google Calendar to sync interviews from Appli AI.",
         "connectedToast": "Google Calendar connected successfully.",
         "syncing": "Syncing…",
         "syncInterviews": "Sync interviews",
         "connectedAs": "Connected as {email} (your account)",
         "notConnected": "Google Calendar is not connected.",
         "connectHint": "Connect your account to sync interviews.",
-        "connectDescription": "When you connect, you authorize the ATS to create events and invitations in your Google Calendar (depending on backend implementation).",
+        "connectDescription": "When you connect, you authorize Appli AI to create events and invitations in your Google Calendar (depending on backend implementation).",
         "connectedServerHint": "Dated interviews may be created or updated in your calendar according to server configuration.",
         "syncFailed": "Could not sync the calendar.",
         "syncResultPartial": "Synced: {synced} ok, {failed} with errors.",
@@ -2625,7 +2625,7 @@
         },
         "summaryHelper": "Manage available {plural} for new vacancies.",
         "inUse": "In use by active or historical vacancies.",
-        "emptyBody": "When you create a {singular}, it will be available to classify vacancies throughout the ATS.",
+        "emptyBody": "When you create a {singular}, it will be available to classify vacancies throughout Appli AI.",
         "form": {
           "nameLabel": "Name",
           "descriptionLabel": "Description",
@@ -3066,7 +3066,7 @@
       "title": "PRIVACY NOTICE AND PERSONAL DATA PROTECTION",
       "decline": "No, thanks",
       "accept": "I accept",
-      "intro": "Your personal data will be added to the Visible Outsource database and processed exclusively by authorized Human Resources professionals in the context of recruitment and personnel management processes.",
+      "intro": "Your personal data will be added to the Appli AI database and processed exclusively by authorized Human Resources professionals in the context of recruitment and personnel management processes.",
       "dataTreatmentHeading": "Data processing:",
       "purposeItem": "Purpose: Candidate evaluation and recruitment process management",
       "accessItem": "Access: Authorized HR staff only",
@@ -3084,7 +3084,7 @@
     "navbar": {
       "ariaMain": "Main opportunities portal navigation",
       "ariaGoToPortal": "Go to opportunities portal",
-      "logoIconAlt": "ATS logo icon",
+      "logoIconAlt": "Appli AI logo icon",
       "portalSubtitle": "Opportunities portal",
       "ariaGoToSelection": "Go to portal selection",
       "changePortal": "Change portal",
@@ -3115,7 +3115,7 @@
       "formSectionLabel": "Application form",
       "formTitle": "Submit your application",
       "formBody": "Complete the information and attach your CV. The data is sent securely to the recruitment team.",
-      "documentTitle": "ATS | Opportunities | Apply to {title}"
+      "documentTitle": "Appli AI | Opportunities | Apply to {title}"
     }
   }
 }

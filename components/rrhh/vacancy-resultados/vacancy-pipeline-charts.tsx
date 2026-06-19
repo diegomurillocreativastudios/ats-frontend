@@ -17,9 +17,9 @@ import {
   YAxis,
 } from "recharts"
 
-const COLOR_STAGE = "#6E3385"
-const COLOR_SCORE = "#496FB3"
-const COLOR_COMPONENT = "#0D9488"
+const COLOR_STAGE = "#A45C40"
+const COLOR_SCORE = "#B87333"
+const COLOR_COMPONENT = "#B87333"
 
 export interface VacancyPipelineChartsProps {
   componentAverages: ComponentScoreAverages
