@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Lightbulb } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
 
 const TIP_ROTATION_INTERVAL = 7000
 
@@ -65,25 +66,25 @@ export function ApplicationTipsWidget({
       aria-atomic="true"
     >
       <div
-        className="overflow-hidden rounded-[26px] border border-white/20 bg-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-opacity duration-300"
+        className={`${publicOpportunitiesTheme.tipsWidget} backdrop-blur-xl transition-opacity duration-300`}
         style={{ opacity: isVisible ? 1 : 0 }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/8 via-transparent to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-ats-terracotta/6 via-transparent to-transparent" />
 
         <div className="relative p-5">
           <div className="flex items-start gap-3.5">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-ats-cobre-light/30 bg-linear-to-br from-[#D4A574]/20 to-[#B87333]/20">
               <Lightbulb
-                className="h-5 w-5 text-ats-cobre-light"
+                className="h-5 w-5 text-ats-terracotta"
                 aria-hidden="true"
               />
             </div>
 
             <div className="flex-1 space-y-1.5">
-              <h3 className="text-sm font-semibold tracking-tight text-white">
+              <h3 className="text-sm font-semibold tracking-tight text-foreground">
                 {t("title")}
               </h3>
-              <p className="text-sm leading-relaxed text-white/84">{currentTip}</p>
+              <p className="text-sm leading-relaxed text-muted-foreground">{currentTip}</p>
             </div>
           </div>
         </div>

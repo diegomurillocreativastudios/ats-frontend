@@ -66,13 +66,13 @@ const initialState: PublicVacancyApplicationFormState = {
 
 function themeFieldClass(theme: PublicVacancyApplicationFormTheme): string {
   if (theme === "dark") {
-    return "h-11 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-sm text-white outline-none transition placeholder:text-white/38 focus:ring-2 focus:ring-ats-cobre"
+    return "h-11 w-full rounded-2xl border border-border bg-muted/35 px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-cobre"
   }
   return "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-terracotta"
 }
 
 function themeLabelClass(theme: PublicVacancyApplicationFormTheme): string {
-  if (theme === "dark") return "text-sm font-medium text-white/82"
+  if (theme === "dark") return "text-sm font-medium text-foreground"
   return "text-sm font-medium text-foreground"
 }
 
@@ -83,14 +83,14 @@ function themeErrorClass(theme: PublicVacancyApplicationFormTheme): string {
 
 function themeSelectClass(theme: PublicVacancyApplicationFormTheme): string {
   if (theme === "dark") {
-    return "h-11 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-sm text-white outline-none transition focus:ring-2 focus:ring-ats-cobre [&>option]:bg-[#2A2B2E] [&>option]:text-white"
+    return "h-11 w-full rounded-2xl border border-border bg-muted/35 px-4 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ats-cobre [&>option]:bg-[#2A2B2E] [&>option]:text-foreground"
   }
   return "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ats-terracotta"
 }
 
 function themeTextareaClass(theme: PublicVacancyApplicationFormTheme): string {
   if (theme === "dark") {
-    return "min-h-[120px] w-full rounded-[22px] border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/38 focus:ring-2 focus:ring-ats-cobre"
+    return "min-h-[120px] w-full rounded-[22px] border border-border bg-muted/35 px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-cobre"
   }
   return "min-h-[120px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-terracotta"
 }
@@ -150,7 +150,7 @@ function PublicApplicationSubmitProgress({
         <div
           className={
             isDark
-              ? "flex h-14 w-14 items-center justify-center rounded-2xl border border-white/14 bg-white/8 shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
+              ? "flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-muted/45 shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
               : "flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-muted/60 shadow-sm"
           }
           aria-hidden
@@ -174,7 +174,7 @@ function PublicApplicationSubmitProgress({
         <p
           className={
             isDark
-              ? "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-white/50"
+              ? "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-foreground/50"
               : "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
           }
         >
@@ -183,7 +183,7 @@ function PublicApplicationSubmitProgress({
         <p
           className={
             isDark
-              ? "mt-2 text-lg font-semibold text-white"
+              ? "mt-2 text-lg font-semibold text-foreground"
               : "mt-2 text-lg font-semibold text-foreground"
           }
         >
@@ -193,7 +193,7 @@ function PublicApplicationSubmitProgress({
           <p
             className={
               isDark
-                ? "mt-2 max-w-md text-sm leading-relaxed text-white/64"
+                ? "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
                 : "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
             }
           >
@@ -203,7 +203,7 @@ function PublicApplicationSubmitProgress({
       </div>
 
       <ApplyStyleProgressBar
-        theme={isDark ? "dark" : "light"}
+        theme="light"
         mode={isSuccess ? "success" : "loading"}
         percent={isSuccess ? 100 : loadingBarPercent}
       />
@@ -223,10 +223,10 @@ function PublicApplicationSubmitProgress({
                       isCurrent
                         ? isSuccessStep
                           ? "border-ats-cobre/60 bg-ats-cobre/12 text-ats-cobre"
-                          : "border-ats-cobre/50 bg-white/8 text-white"
+                          : "border-ats-cobre/50 bg-muted/45 text-foreground"
                         : isComplete
-                          ? "border-white/12 bg-white/4 text-white/60"
-                          : "border-white/8 bg-white/3 text-white/40"
+                          ? "border-border bg-white/4 text-muted-foreground"
+                          : "border-white/8 bg-muted/20 text-muted-foreground"
                     }`
                   : `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
                       isCurrent
@@ -250,7 +250,7 @@ function PublicApplicationSubmitProgress({
 
 export function PublicVacancyApplicationForm({
   vacancyId,
-  theme = "dark",
+  theme = "light",
   backToVacancyHref,
   onRequestClose,
 }: {
@@ -459,7 +459,7 @@ export function PublicVacancyApplicationForm({
               href={backToVacancyHref}
               className={
                 theme === "dark"
-                  ? "inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/16"
+                  ? "inline-flex items-center justify-center rounded-full border border-border bg-muted/50 px-5 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted/60"
                   : "inline-flex items-center justify-center rounded-lg border border-border bg-muted px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted/80"
               }
             >
@@ -471,7 +471,7 @@ export function PublicVacancyApplicationForm({
             className={
               theme === "dark"
                 ? "inline-flex items-center justify-center rounded-full bg-ats-warm-white px-5 py-2.5 text-sm font-medium text-ats-grafito transition hover:opacity-95"
-                : "inline-flex items-center justify-center rounded-lg bg-ats-terracotta px-5 py-2.5 text-sm font-medium text-white hover:opacity-95"
+                : "inline-flex items-center justify-center rounded-lg bg-ats-terracotta px-5 py-2.5 text-sm font-medium text-ats-warm-white hover:opacity-95"
             }
           >
             {t("actions.backToList")}
@@ -482,7 +482,7 @@ export function PublicVacancyApplicationForm({
               onClick={onRequestClose}
               className={
                 theme === "dark"
-                  ? "inline-flex items-center justify-center rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/88 hover:bg-white/8"
+                  ? "inline-flex items-center justify-center rounded-full border border-border px-5 py-2.5 text-sm font-medium text-foreground/88 hover:bg-muted/45"
                   : "inline-flex items-center justify-center rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
               }
             >
@@ -735,7 +735,7 @@ export function PublicVacancyApplicationForm({
         <div
           className={
             theme === "dark"
-              ? "rounded-[22px] border border-dashed border-white/10 bg-white/6 p-4"
+              ? "rounded-[22px] border border-dashed border-border bg-muted/35 p-4"
               : "rounded-lg border border-dashed border-border bg-muted/40 p-4"
           }
         >
@@ -744,7 +744,7 @@ export function PublicVacancyApplicationForm({
             className={
               theme === "dark"
                 ? "inline-flex cursor-pointer items-center gap-2 rounded-full bg-ats-warm-white px-4 py-2 text-sm font-medium text-ats-grafito"
-                : "inline-flex cursor-pointer items-center gap-2 rounded-lg bg-ats-terracotta px-4 py-2 text-sm font-medium text-white"
+                : "inline-flex cursor-pointer items-center gap-2 rounded-lg bg-ats-terracotta px-4 py-2 text-sm font-medium text-ats-warm-white"
             }
           >
             <Paperclip className="h-4 w-4 shrink-0" aria-hidden />
@@ -762,7 +762,7 @@ export function PublicVacancyApplicationForm({
           <p
             className={
               theme === "dark"
-                ? "mt-3 text-xs text-white/56"
+                ? "mt-3 text-xs text-muted-foreground"
                 : "mt-3 text-xs text-muted-foreground"
             }
           >
@@ -771,7 +771,7 @@ export function PublicVacancyApplicationForm({
           {cvFile ? (
             <p
               className={
-                theme === "dark" ? "mt-2 text-sm text-white/78" : "mt-2 text-sm text-foreground"
+                theme === "dark" ? "mt-2 text-sm text-muted-foreground" : "mt-2 text-sm text-foreground"
               }
             >
               {cvFile.name}
@@ -787,7 +787,7 @@ export function PublicVacancyApplicationForm({
 
       <div
         className={`col-span-2 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center ${
-          theme === "dark" ? "border-white/10" : "border-border"
+          theme === "dark" ? "border-border" : "border-border"
         }`}
       >
         <button
@@ -796,7 +796,7 @@ export function PublicVacancyApplicationForm({
           className={
             theme === "dark"
               ? "inline-flex w-full items-center justify-center gap-2 rounded-full bg-ats-warm-white px-6 py-3 text-sm font-medium text-ats-grafito disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-              : "inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ats-terracotta px-6 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              : "inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ats-terracotta px-6 py-3 text-sm font-medium text-ats-warm-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           }
           aria-live="polite"
         >
@@ -811,7 +811,7 @@ export function PublicVacancyApplicationForm({
           <p
             className={
               theme === "dark"
-                ? "text-xs text-white/72 sm:ml-1"
+                ? "text-xs text-muted-foreground sm:ml-1"
                 : "text-xs text-muted-foreground sm:ml-1"
             }
             role="status"

@@ -31,7 +31,7 @@ export function ApplyStyleProgressBar({
 
   const trackClass =
     theme === "dark"
-      ? "bg-white/10"
+      ? "bg-muted/50"
       : theme === "onLight"
         ? "bg-ats-grafito/10"
         : "bg-muted"

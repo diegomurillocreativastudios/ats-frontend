@@ -11,7 +11,7 @@ export async function generateMetadata() {
 }
 
 function OpportunityApplyPageFallback() {
-  return <div className="min-h-screen bg-[#f5f7ff]" aria-hidden />
+  return <div className="min-h-screen bg-ats-warm-white" aria-hidden />
 }
 
 export default async function OpportunityApplyRoute({

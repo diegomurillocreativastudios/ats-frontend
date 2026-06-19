@@ -11,6 +11,7 @@ import {
 import { useTranslations } from "next-intl"
 import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/Button"
+import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
 
 interface ApplyPrivacyNoticeDialogProps {
   isOpen: boolean
@@ -123,7 +124,7 @@ export function ApplyPrivacyNoticeDialog({
         isExitAnimating
           ? "apply-privacy-backdrop apply-privacy-backdrop--exit"
           : "apply-privacy-backdrop",
-        "fixed inset-0 z-200 flex flex-col items-stretch justify-start bg-black/64 px-3 pt-3 pb-6 sm:pt-5 sm:px-5",
+        "fixed inset-0 z-200 flex flex-col items-stretch justify-start bg-foreground/25 px-3 pt-3 pb-6 backdrop-blur-sm sm:pt-5 sm:px-5",
         isExitAnimating ? "pointer-events-none" : "pointer-events-auto",
       ].join(" ")}
       ref={containerRef}
@@ -136,16 +137,16 @@ export function ApplyPrivacyNoticeDialog({
         className={[
           "apply-privacy-panel",
           isExitAnimating && "apply-privacy-panel--exit",
-          "mx-auto flex w-full max-h-[min(90dvh,920px)] max-w-2xl flex-col overflow-hidden rounded-[20px] border border-white/14 bg-[linear-gradient(180deg,rgba(42,43,46,0.98)_0%,rgba(32,33,36,0.99)_100%)] text-white shadow-[0_32px_90px_rgba(32,33,36,0.7)] sm:rounded-[24px]",
+          `mx-auto flex w-full max-h-[min(90dvh,920px)] max-w-2xl flex-col overflow-hidden rounded-[20px] ${publicOpportunitiesTheme.panel} sm:rounded-[24px]`,
         ]
           .filter(Boolean)
           .join(" ")}
         onAnimationEnd={handlePanelAnimationEnd}
       >
-        <div className="shrink-0 border-b border-white/10 px-4 py-4 sm:px-6 sm:py-5">
+        <div className="shrink-0 border-b border-border px-4 py-4 sm:px-6 sm:py-5">
           <h2
             id={titleId}
-            className="text-balance text-center text-base font-semibold uppercase leading-snug tracking-[0.06em] text-white sm:text-lg"
+            className="text-balance text-center text-base font-semibold uppercase leading-snug tracking-[0.06em] text-foreground sm:text-lg"
           >
             {t("title")}
           </h2>
@@ -153,21 +154,21 @@ export function ApplyPrivacyNoticeDialog({
 
         <div
           id={bodyId}
-          className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4 text-sm leading-relaxed text-white/90 sm:px-6 sm:py-5"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4 text-sm leading-relaxed text-foreground/90 sm:px-6 sm:py-5"
         >
-          <p className="text-pretty text-white/88">{t("intro")}</p>
-          <p className="mt-4 font-medium text-white/92">{t("dataTreatmentHeading")}</p>
-          <ul className="mt-2 list-inside list-disc space-y-2.5 pl-0.5 text-white/86 marker:text-ats-cobre-light">
+          <p className="text-pretty text-foreground/88">{t("intro")}</p>
+          <p className="mt-4 font-medium text-foreground/92">{t("dataTreatmentHeading")}</p>
+          <ul className="mt-2 list-inside list-disc space-y-2.5 pl-0.5 text-foreground/86 marker:text-ats-terracotta">
             <li>{t("purposeItem")}</li>
             <li>{t("accessItem")}</li>
             <li>{t("confidentialityItem")}</li>
             <li>{t("rightsItem")}</li>
           </ul>
-          <p className="mt-4 text-white/86">{t("compliance")}</p>
-          <p className="mt-4 text-white/86">
+          <p className="mt-4 text-foreground/86">{t("compliance")}</p>
+          <p className="mt-4 text-foreground/86">
             {t("contactPrefix")}{" "}
             <a
-              className="font-medium text-ats-cobre-light/95 underline decoration-white/30 underline-offset-2 transition-colors hover:text-white hover:decoration-white/60 focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-ats-grafito"
+              className="font-medium text-ats-terracotta underline decoration-border underline-offset-2 transition-colors hover:text-ats-terracotta-hover hover:decoration-ats-terracotta/40 focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-background"
               href="mailto:info@visibleo.us"
             >
               info@visibleo.us
@@ -175,7 +176,7 @@ export function ApplyPrivacyNoticeDialog({
           </p>
         </div>
 
-        <div className="shrink-0 border-t border-white/10 bg-black/15 px-4 py-4 sm:px-6 sm:py-4">
+        <div className={`shrink-0 border-t border-border bg-muted/20 px-4 py-4 sm:px-6 sm:py-4`}>
           <div className="flex w-full flex-col items-stretch justify-end gap-2.5 sm:flex-row sm:items-center sm:gap-3">
             <Button
               id="apply-privacy-decline"
@@ -183,7 +184,7 @@ export function ApplyPrivacyNoticeDialog({
               variant="outline"
               onClick={onDecline}
               disabled={isExitAnimating}
-              className="w-full border-white/32 bg-white/5 text-white hover:border-white/45 hover:bg-white/10 hover:text-white focus-visible:ring-ats-cobre sm:w-auto"
+              className="w-full border-border bg-card text-foreground hover:bg-muted/40 hover:text-foreground focus-visible:ring-ats-cobre sm:w-auto"
             >
               {t("decline")}
             </Button>

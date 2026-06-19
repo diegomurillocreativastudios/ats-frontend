@@ -27,7 +27,7 @@ import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
 import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
 
-const darkPanelClassName = publicOpportunitiesTheme.panel
+const panelClassName = publicOpportunitiesTheme.panel
 
 function formatPublishedLabel(publishedAt?: string): string | null {
   if (!publishedAt) return null
@@ -53,7 +53,7 @@ function getCompanyInitials(companyName: string): string {
 
 function DetailPill({ value }: { value: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/7 px-3 py-1.5 text-xs font-medium text-white/82">
+    <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground">
       {value}
     </span>
   )
@@ -67,9 +67,9 @@ function DetailRow({
   value: ReactNode
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-white/10 py-3 last:border-b-0 last:pb-0">
-      <dt className="text-sm font-medium text-white/48">{label}</dt>
-      <dd className="max-w-[60%] text-right text-sm font-medium text-white">{value}</dd>
+    <div className="flex items-start justify-between gap-4 border-b border-border py-3 last:border-b-0 last:pb-0">
+      <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
+      <dd className="max-w-[60%] text-right text-sm font-medium text-foreground">{value}</dd>
     </div>
   )
 }
@@ -86,14 +86,14 @@ function BulletList({
   if (!items.length) return null
 
   return (
-    <section className={`rounded-[30px] p-6 sm:p-7 ${darkPanelClassName}`}>
+    <section className={`rounded-[30px] p-6 sm:p-7 ${panelClassName}`}>
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/6 text-ats-cobre">
+        <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-border bg-muted/35 text-ats-cobre">
           <CheckCircle2 className="h-5 w-5" aria-hidden />
         </div>
         <div>
-          <p className="text-[11px] uppercase tracking-[0.24em] text-white/46">{keyBlockLabel}</p>
-          <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">{keyBlockLabel}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
         </div>
       </div>
 
@@ -101,7 +101,7 @@ function BulletList({
         {items.map((item) => (
           <li
             key={item}
-            className="flex items-start gap-3 rounded-[22px] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-7 text-white/72"
+            className="flex items-start gap-3 rounded-[22px] border border-border bg-muted/25 px-4 py-3 text-sm leading-7 text-muted-foreground"
           >
             <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-ats-cobre" aria-hidden />
             <span>{item}</span>
@@ -135,20 +135,20 @@ function VacancyTextSection({
     : []
 
   return (
-    <section className={`rounded-[30px] p-6 sm:p-7 ${darkPanelClassName}`}>
+    <section className={`rounded-[30px] p-6 sm:p-7 ${panelClassName}`}>
       <div className="flex items-center gap-3">
         <div
-          className={`flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/6 ${iconColorClassName}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-[18px] border border-border bg-muted/35 ${iconColorClassName}`}
         >
           {icon}
         </div>
         <div>
-          <p className="text-[11px] uppercase tracking-[0.24em] text-white/46">{eyebrow}</p>
-          <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">{eyebrow}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
         </div>
       </div>
 
-      <div className="mt-5 space-y-4 text-sm leading-8 text-white/72">
+      <div className="mt-5 space-y-4 text-sm leading-8 text-muted-foreground">
         {paragraphs.length ? (
           paragraphs.map((paragraph, index) => (
             <p key={`${index}-${paragraph}`}>{paragraph}</p>
@@ -171,7 +171,7 @@ function VacancyDescription({
   return (
     <VacancyTextSection
       icon={<Compass className="h-5 w-5" aria-hidden />}
-      iconColorClassName="text-ats-cobre-light"
+      iconColorClassName="text-ats-terracotta"
       eyebrow={t("roleContext")}
       title={t("jobDescription")}
       content={description}
@@ -184,32 +184,32 @@ function VacancySkeleton() {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="space-y-6">
-        <div className="animate-pulse rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(42,43,46,0.9)_0%,rgba(32,33,36,0.94)_100%)] p-8">
-          <div className="h-6 w-32 rounded-full bg-white/10" />
-          <div className="mt-5 h-10 w-2/3 rounded-2xl bg-white/10" />
-          <div className="mt-4 h-5 w-1/2 rounded-xl bg-white/10" />
+        <div className={`animate-pulse rounded-[34px] p-8 ${panelClassName}`}>
+          <div className="h-6 w-32 rounded-full bg-muted/50" />
+          <div className="mt-5 h-10 w-2/3 rounded-2xl bg-muted/50" />
+          <div className="mt-4 h-5 w-1/2 rounded-xl bg-muted/50" />
           <div className="mt-5 flex gap-2">
-            <div className="h-8 w-28 rounded-full bg-white/10" />
-            <div className="h-8 w-24 rounded-full bg-white/10" />
-            <div className="h-8 w-20 rounded-full bg-white/10" />
+            <div className="h-8 w-28 rounded-full bg-muted/50" />
+            <div className="h-8 w-24 rounded-full bg-muted/50" />
+            <div className="h-8 w-20 rounded-full bg-muted/50" />
           </div>
         </div>
-        <div className="animate-pulse rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(42,43,46,0.9)_0%,rgba(32,33,36,0.94)_100%)] p-8">
-          <div className="h-6 w-48 rounded-xl bg-white/10" />
+        <div className={`animate-pulse rounded-[30px] p-8 ${panelClassName}`}>
+          <div className="h-6 w-48 rounded-xl bg-muted/50" />
           <div className="mt-5 space-y-3">
-            <div className="h-4 w-full rounded bg-white/10" />
-            <div className="h-4 w-[94%] rounded bg-white/10" />
-            <div className="h-4 w-[76%] rounded bg-white/10" />
+            <div className="h-4 w-full rounded bg-muted/50" />
+            <div className="h-4 w-[94%] rounded bg-muted/50" />
+            <div className="h-4 w-[76%] rounded bg-muted/50" />
           </div>
         </div>
       </div>
 
-      <div className="animate-pulse rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(42,43,46,0.9)_0%,rgba(32,33,36,0.94)_100%)] p-8">
-        <div className="h-6 w-32 rounded-xl bg-white/10" />
+      <div className={`animate-pulse rounded-[30px] p-8 ${panelClassName}`}>
+        <div className="h-6 w-32 rounded-xl bg-muted/50" />
         <div className="mt-5 space-y-4">
-          <div className="h-4 w-full rounded bg-white/10" />
-          <div className="h-4 w-[85%] rounded bg-white/10" />
-          <div className="h-4 w-[72%] rounded bg-white/10" />
+          <div className="h-4 w-full rounded bg-muted/50" />
+          <div className="h-4 w-[85%] rounded bg-muted/50" />
+          <div className="h-4 w-[72%] rounded bg-muted/50" />
         </div>
       </div>
     </div>
@@ -290,11 +290,11 @@ export function PublicVacancyDetailPage({
     : `/portal-oportunidades/${vacancyId}/aplicar`
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-ats-grafito text-white">
+    <div className="relative min-h-screen overflow-hidden bg-ats-warm-white text-foreground">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-[linear-gradient(180deg,#A45C40_0%,#3D3E41_38%,#202124_100%)]" />
-        <div className="absolute left-[-8%] top-6 h-72 w-72 rounded-full bg-ats-terracotta/26 blur-3xl" />
-        <div className="absolute right-[10%] top-16 h-80 w-80 rounded-full bg-ats-cobre/16 blur-3xl" />
+        <div className={publicOpportunitiesTheme.heroGradientShort} />
+        <div className={`absolute left-[-8%] top-6 h-72 w-72 ${publicOpportunitiesTheme.orbTerracotta}`} />
+        <div className={`absolute right-[10%] top-16 h-80 w-80 ${publicOpportunitiesTheme.orbCobre}`} />
       </div>
 
       <PublicOpportunitiesNavbar className="mb-5" />
@@ -304,7 +304,7 @@ export function PublicVacancyDetailPage({
           <div className="mb-5">
             <Link
               href={backHref}
-              className="inline-flex items-center gap-2 text-sm font-medium text-white/76 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-ats-grafito"
+              className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-background"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
               {t("back")}
@@ -312,14 +312,14 @@ export function PublicVacancyDetailPage({
           </div>
 
           {errorMessage ? (
-            <div className={`rounded-[30px] p-8 ${darkPanelClassName}`}>
+            <div className={`rounded-[30px] p-8 ${panelClassName}`}>
               <p className="text-sm text-ats-terracotta-soft" role="alert">
                 {errorMessage}
               </p>
               <div className="mt-5">
                 <Link
                   href="/portal-oportunidades"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-ats-terracotta-soft"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:text-ats-terracotta-soft"
                 >
                   {t("viewAll")}
                 </Link>
@@ -330,30 +330,30 @@ export function PublicVacancyDetailPage({
           ) : vacancy ? (
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
               <div className="space-y-6">
-              <section className={`relative overflow-hidden rounded-[34px] px-6 py-7 sm:px-8 sm:py-8 ${darkPanelClassName}`}>
+              <section className={`relative overflow-hidden rounded-[34px] px-6 py-7 sm:px-8 sm:py-8 ${panelClassName}`}>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(164,92,64,0.35),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(184,115,51,0.16),transparent_24%)]" />
 
                 <div className="relative flex flex-col gap-7">
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-4">
-                      <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-white/76">
+                      <p className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
                         <Sparkles className="h-3.5 w-3.5 text-ats-cobre" aria-hidden />
                         {t("activeBadge")}
                       </p>
 
                       <div className="space-y-3">
-                        <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
+                        <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
                           {vacancy.title}
                         </h1>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/68">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
                           {companyName ? (
                             <span className="inline-flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-ats-cobre-light" aria-hidden />
+                              <Building2 className="h-4 w-4 text-ats-terracotta" aria-hidden />
                               {companyName}
                             </span>
                           ) : null}
                           <span className="inline-flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-ats-cobre-light" aria-hidden />
+                            <MapPin className="h-4 w-4 text-ats-terracotta" aria-hidden />
                             <VacancyLocationLabel
                               countryCode={vacancy.countryCode}
                               stateCode={vacancy.stateCode}
@@ -370,7 +370,7 @@ export function PublicVacancyDetailPage({
 
                     {companyLogoSrc ? (
                       <div
-                        className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-white/12 bg-white/8"
+                        className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-border bg-muted/45"
                         aria-label={companyLogoAlt}
                       >
                         <img
@@ -381,7 +381,7 @@ export function PublicVacancyDetailPage({
                         />
                       </div>
                     ) : companyName ? (
-                      <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-[24px] border border-white/12 bg-white/8 text-base font-semibold text-white/88 sm:flex">
+                      <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-[24px] border border-border bg-muted/45 text-base font-semibold text-foreground/88 sm:flex">
                         {getCompanyInitials(companyName) || "AT"}
                       </div>
                     ) : null}
@@ -404,28 +404,28 @@ export function PublicVacancyDetailPage({
                     ) : null}
                     <Link
                       href={applyHref}
-                      className="inline-flex items-center justify-center rounded-full bg-ats-warm-white px-5 py-2.5 text-sm font-medium text-ats-grafito shadow-sm transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-ats-grafito"
+                      className={publicOpportunitiesTheme.cta}
                     >
                       {t("apply")}
                     </Link>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">{t("department")}</p>
-                      <p className="mt-2 text-lg font-semibold text-white">
+                    <div className="rounded-[24px] border border-border bg-muted/20 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{t("department")}</p>
+                      <p className="mt-2 text-lg font-semibold text-foreground">
                         {vacancy.department?.displayName ?? unspecified}
                       </p>
                     </div>
-                    <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">{t("modality")}</p>
-                      <p className="mt-2 text-lg font-semibold text-white">
+                    <div className="rounded-[24px] border border-border bg-muted/20 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{t("modality")}</p>
+                      <p className="mt-2 text-lg font-semibold text-foreground">
                         {vacancy.modality?.displayName ?? unspecified}
                       </p>
                     </div>
-                    <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">{t("location")}</p>
-                      <p className="mt-2 text-lg font-semibold text-white">
+                    <div className="rounded-[24px] border border-border bg-muted/20 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{t("location")}</p>
+                      <p className="mt-2 text-lg font-semibold text-foreground">
                         <VacancyLocationLabel
                           countryCode={vacancy.countryCode}
                           stateCode={vacancy.stateCode}
@@ -442,7 +442,7 @@ export function PublicVacancyDetailPage({
               {vacancy.details ? (
                 <VacancyTextSection
                   icon={<Info className="h-5 w-5" aria-hidden />}
-                  iconColorClassName="text-ats-cobre-light"
+                  iconColorClassName="text-ats-terracotta"
                   eyebrow={t("moreAboutRole")}
                   title={t("additionalDetails")}
                   content={vacancy.details}
@@ -465,8 +465,8 @@ export function PublicVacancyDetailPage({
             </div>
 
               <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-                <section className={`rounded-[30px] p-6 ${darkPanelClassName}`}>
-                  <h2 className="text-xl font-semibold text-white">{t("sidebarTitle")}</h2>
+                <section className={`rounded-[30px] p-6 ${panelClassName}`}>
+                  <h2 className="text-xl font-semibold text-foreground">{t("sidebarTitle")}</h2>
 
                   <dl className="mt-4">
                     {companyName ? (
@@ -476,7 +476,7 @@ export function PublicVacancyDetailPage({
                           <span className="inline-flex items-center justify-end gap-2">
                             {companyLogoSrc ? (
                               <span
-                                className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/6"
+                                className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/35"
                                 aria-hidden
                               >
                                 <img
@@ -515,7 +515,7 @@ export function PublicVacancyDetailPage({
                         label={t("salary")}
                         value={
                           <span className="inline-flex items-center justify-end gap-2">
-                            <DollarSign className="h-3.5 w-3.5 text-ats-cobre-light" aria-hidden />
+                            <DollarSign className="h-3.5 w-3.5 text-ats-terracotta" aria-hidden />
                             <span className="whitespace-pre-wrap">{vacancy.salary}</span>
                           </span>
                         }
@@ -529,7 +529,7 @@ export function PublicVacancyDetailPage({
                   <div className="mt-6">
                     <Link
                       href={applyHref}
-                      className="inline-flex w-full items-center justify-center rounded-full bg-ats-warm-white px-5 py-3 text-sm font-medium text-ats-grafito transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-ats-grafito"
+                      className={`inline-flex w-full items-center justify-center ${publicOpportunitiesTheme.cta}`}
                     >
                       {t("apply")}
                     </Link>
