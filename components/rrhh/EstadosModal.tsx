@@ -726,7 +726,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
                     </p>
                     <button
                       type="button"
-                      onClick={fetchStatuses}
+                      onClick={() => void fetchStatuses()}
                       className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                     >
                       {t("retry")}
