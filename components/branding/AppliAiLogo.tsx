@@ -26,13 +26,19 @@ export function AppliAiLogo({
       focusable="false"
     >
       <path
-        d="M 100 30 C 100 65, 85 75, 55 75 C 85 75, 100 85, 100 125 C 100 85, 115 75, 145 75 C 115 75, 100 65, 100 30 Z"
+        d="M100 28c0 28-18.5 41.5-48 46 29.5 4.5 48 18 48 44 0-26 18.5-39.5 48-44-29.5-4.5-48-18-48-46z"
         fill={accentColor}
       />
-      <polygon points="45,170 75,170 92,128 80,95" fill={legColor} />
-      <polygon points="155,170 125,170 108,128 120,95" fill={legColor} />
+      <path
+        d="M77 94h10l-13.5 69q0 6-6 6H49q-6 0-4-6z"
+        fill={legColor}
+      />
+      <path
+        d="M123 94h-10l13.5 69q0 6 6 6h18.5q6 0 4-6z"
+        fill={legColor}
+      />
     </svg>
   )
 }
 
-export const APPLI_AI_LOGO_SVG_MARKUP = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M 100 30 C 100 65, 85 75, 55 75 C 85 75, 100 85, 100 125 C 100 85, 115 75, 145 75 C 115 75, 100 65, 100 30 Z" fill="${BRAND_COLORS.cobre}"/><polygon points="45,170 75,170 92,128 80,95" fill="${BRAND_COLORS.grafito}"/><polygon points="155,170 125,170 108,128 120,95" fill="${BRAND_COLORS.grafito}"/></svg>`
+export const APPLI_AI_LOGO_SVG_MARKUP = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Appli AI"><title>Appli AI</title><path fill="${BRAND_COLORS.cobre}" d="M100 28c0 28-18.5 41.5-48 46 29.5 4.5 48 18 48 44 0-26 18.5-39.5 48-44-29.5-4.5-48-18-48-46z"/><path fill="${BRAND_COLORS.grafito}" d="M77 94h10l-13.5 69q0 6-6 6H49q-6 0-4-6z"/><path fill="${BRAND_COLORS.grafito}" d="M123 94h-10l13.5 69q0 6 6 6h18.5q6 0 4-6z"/></svg>`
