@@ -16,7 +16,6 @@ import {
   MapPin,
   Sparkles,
 } from "lucide-react"
-import { APP_NAME } from "@/lib/app-brand"
 import {
   buildOpportunityCompanyLogoDataUri,
   getPublicVacancyDetail,
@@ -275,8 +274,8 @@ export function PublicVacancyDetailPage({
 
   useEffect(() => {
     if (!vacancy?.title) return
-    document.title = `${APP_NAME} | Oportunidades | ${vacancy.title}`
-  }, [vacancy?.title])
+    document.title = t("documentTitle", { title: vacancy.title })
+  }, [vacancy?.title, t])
 
   const publishedLabel = formatPublishedLabel(vacancy?.publishedAt)
   const companyName = vacancy?.company.name?.trim() ?? ""

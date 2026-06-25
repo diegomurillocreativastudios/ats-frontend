@@ -218,23 +218,23 @@
       "description": "Consulta e gestisci le informazioni del tuo account nel portale dei candidati"
     },
     "recruiterVacancies": {
-      "title": "Applican Tree | Portale HR | Posizioni",
+      "title": "ApplicanTree | Portale HR | Posizioni",
       "description": "Gestisci le posizioni aperte e le vacanze dell'azienda"
     },
     "recruiterVacancyDetail": {
-      "title": "Applican Tree | Portale HR | Dettaglio posizione",
+      "title": "ApplicanTree | Portale HR | Dettaglio posizione",
       "description": "Consulta le informazioni della posizione"
     },
     "recruiterVacancyResults": {
-      "title": "Applican Tree | Portale HR | Risultati posizione",
+      "title": "ApplicanTree | Portale HR | Risultati posizione",
       "description": "Consulta i risultati dei candidati valutati"
     },
     "recruiterReports": {
-      "title": "Applican Tree | Portale HR | Report",
+      "title": "ApplicanTree | Portale HR | Report",
       "description": "Consulta metriche e report di reclutamento"
     },
     "recruiterCandidateDetail": {
-      "title": "Applican Tree | Portale HR | Candidato",
+      "title": "ApplicanTree | Portale HR | Candidato",
       "description": "Profilo dettagliato del candidato nel portale HR"
     },
     "adminPortal": {
@@ -286,41 +286,41 @@
     },
     "candidatePortal": {
       "home": {
-        "title": "Applican Tree | Portal Candidate",
+        "title": "ApplicanTree | Portal Candidate",
         "description": "Portal del candidate - Resumen de tu proceso de seleccion"
       },
       "documents": {
-        "title": "Applican Tree | Portal Candidate | Documents",
+        "title": "ApplicanTree | Portal Candidate | Documents",
         "description": "Manage tus documentos en el portal del candidate"
       },
       "interviews": {
-        "title": "Applican Tree | Portal Candidate | Interviews",
+        "title": "ApplicanTree | Portal Candidate | Interviews",
         "description": "View tus interviews agendadas e historial en el portal del candidate"
       }
     },
     "recruiterPortal": {
-      "title": "Applican Tree | Portal RRHH",
+      "title": "ApplicanTree | Portal RRHH",
       "description": "Portal RRHH - Dashboard de reclutamiento y gestion de candidates"
     },
     "recruiterCandidates": {
-      "title": "Applican Tree | Portal RRHH | Candidates",
+      "title": "ApplicanTree | Portal RRHH | Candidates",
       "description": "Manage los candidates y sus perfiles en el portal RRHH"
     },
     "recruiterSettings": {
-      "title": "Applican Tree | Portal RRHH | Settings",
+      "title": "ApplicanTree | Portal RRHH | Settings",
       "description": "Settings del portal RRHH"
     },
     "publicOpportunities": {
       "list": {
-        "title": "Applican Tree | Opportunità",
+        "title": "ApplicanTree | Portale opportunità",
         "description": "Esplora offerte attive per dipartimento e modalità"
       },
       "detail": {
-        "title": "Applican Tree | Opportunità | Offerta",
+        "title": "ApplicanTree | Portale opportunità | Offerta",
         "description": "Dettaglio pubblico di un'offerta attiva"
       },
       "apply": {
-        "title": "Applican Tree | Opportunità | Candidati",
+        "title": "ApplicanTree | Portale opportunità | Candidati",
         "description": "Modulo pubblico per candidarsi a un'offerta attiva"
       }
     }
@@ -3002,7 +3002,8 @@
       "modality": "Modalità",
       "location": "Ubicazione",
       "salary": "Stipendio",
-      "publishedLabel": "Pubblicazione"
+      "publishedLabel": "Pubblicazione",
+      "documentTitle": "ApplicanTree | Portale opportunità | {title}"
     },
     "applicationForm": {
       "sources": {
@@ -3135,7 +3136,7 @@
       "formSectionLabel": "Modulo di candidatura",
       "formTitle": "Invia la tua candidatura",
       "formBody": "Completa i dati e allega il tuo CV. Le informazioni vengono inviate in modo sicuro al team di recruiting.",
-      "documentTitle": "Applican Tree | Opportunità | Candidati a {title}"
+      "documentTitle": "ApplicanTree | Portale opportunità | Candidati a {title}"
     }
   }
 }

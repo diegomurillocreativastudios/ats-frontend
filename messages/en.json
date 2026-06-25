@@ -218,23 +218,23 @@
       "description": "Review and manage your account information in the candidate portal"
     },
     "recruiterVacancies": {
-      "title": "Applican Tree | HR Portal | Vacancies",
+      "title": "ApplicanTree | HR Portal | Vacancies",
       "description": "Manage the company's open positions and vacancies"
     },
     "recruiterVacancyDetail": {
-      "title": "Applican Tree | HR Portal | Vacancy details",
+      "title": "ApplicanTree | HR Portal | Vacancy details",
       "description": "View vacancy information"
     },
     "recruiterVacancyResults": {
-      "title": "Applican Tree | HR Portal | Vacancy results",
+      "title": "ApplicanTree | HR Portal | Vacancy results",
       "description": "View evaluated candidate results"
     },
     "recruiterReports": {
-      "title": "Applican Tree | HR Portal | Reports",
+      "title": "ApplicanTree | HR Portal | Reports",
       "description": "Review recruiting metrics and reports"
     },
     "recruiterCandidateDetail": {
-      "title": "Applican Tree | HR Portal | Candidate",
+      "title": "ApplicanTree | HR Portal | Candidate",
       "description": "Detailed candidate profile in the HR portal"
     },
     "adminPortal": {
@@ -286,41 +286,41 @@
     },
     "candidatePortal": {
       "home": {
-        "title": "Applican Tree | Portal Candidate",
+        "title": "ApplicanTree | Portal Candidate",
         "description": "Portal del candidate - Resumen de tu proceso de seleccion"
       },
       "documents": {
-        "title": "Applican Tree | Portal Candidate | Documents",
+        "title": "ApplicanTree | Portal Candidate | Documents",
         "description": "Manage tus documentos en el portal del candidate"
       },
       "interviews": {
-        "title": "Applican Tree | Portal Candidate | Interviews",
+        "title": "ApplicanTree | Portal Candidate | Interviews",
         "description": "View tus interviews agendadas e historial en el portal del candidate"
       }
     },
     "recruiterPortal": {
-      "title": "Applican Tree | Portal RRHH",
+      "title": "ApplicanTree | Portal RRHH",
       "description": "Portal RRHH - Dashboard de reclutamiento y gestion de candidates"
     },
     "recruiterCandidates": {
-      "title": "Applican Tree | Portal RRHH | Candidates",
+      "title": "ApplicanTree | Portal RRHH | Candidates",
       "description": "Manage los candidates y sus perfiles en el portal RRHH"
     },
     "recruiterSettings": {
-      "title": "Applican Tree | Portal RRHH | Settings",
+      "title": "ApplicanTree | Portal RRHH | Settings",
       "description": "Settings del portal RRHH"
     },
     "publicOpportunities": {
       "list": {
-        "title": "Applican Tree | Opportunities",
+        "title": "ApplicanTree | Opportunities Portal",
         "description": "Browse active vacancies by department and work mode"
       },
       "detail": {
-        "title": "Applican Tree | Opportunities | Vacancy",
+        "title": "ApplicanTree | Opportunities Portal | Vacancy",
         "description": "Public details of an active vacancy"
       },
       "apply": {
-        "title": "Applican Tree | Opportunities | Apply",
+        "title": "ApplicanTree | Opportunities Portal | Apply",
         "description": "Public form to apply for an active vacancy"
       }
     }
@@ -3002,7 +3002,8 @@
       "modality": "Work mode",
       "location": "Location",
       "salary": "Salary",
-      "publishedLabel": "Published"
+      "publishedLabel": "Published",
+      "documentTitle": "ApplicanTree | Opportunities Portal | {title}"
     },
     "applicationForm": {
       "sources": {
@@ -3135,7 +3136,7 @@
       "formSectionLabel": "Application form",
       "formTitle": "Submit your application",
       "formBody": "Complete the information and attach your CV. The data is sent securely to the recruitment team.",
-      "documentTitle": "Applican Tree | Opportunities | Apply to {title}"
+      "documentTitle": "ApplicanTree | Opportunities Portal | Apply to {title}"
     }
   }
 }

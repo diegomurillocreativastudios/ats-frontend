@@ -218,23 +218,23 @@
       "description": "Consultá y gestioná los datos de tu cuenta en el portal del candidato"
     },
     "recruiterVacancies": {
-      "title": "Applican Tree | Portal RRHH | Vacantes",
+      "title": "ApplicanTree | Portal RRHH | Vacantes",
       "description": "Gestiona las posiciones abiertas y vacantes de la empresa"
     },
     "recruiterVacancyDetail": {
-      "title": "Applican Tree | Portal RRHH | Detalle de vacante",
+      "title": "ApplicanTree | Portal RRHH | Detalle de vacante",
       "description": "Consulta la información de la vacante"
     },
     "recruiterVacancyResults": {
-      "title": "Applican Tree | Portal RRHH | Resultados de vacante",
+      "title": "ApplicanTree | Portal RRHH | Resultados de vacante",
       "description": "Consulta los resultados de candidatos evaluados"
     },
     "recruiterReports": {
-      "title": "Applican Tree | Portal RRHH | Reportes",
+      "title": "ApplicanTree | Portal RRHH | Reportes",
       "description": "Consulta métricas y reportes de reclutamiento"
     },
     "recruiterCandidateDetail": {
-      "title": "Applican Tree | Portal RRHH | Candidato",
+      "title": "ApplicanTree | Portal RRHH | Candidato",
       "description": "Perfil detallado del candidato en el portal RRHH"
     },
     "adminPortal": {
@@ -286,41 +286,41 @@
     },
     "candidatePortal": {
       "home": {
-        "title": "Applican Tree | Portal Candidato",
+        "title": "ApplicanTree | Portal Candidato",
         "description": "Portal del candidato - Resumen de tu proceso de selección"
       },
       "documents": {
-        "title": "Applican Tree | Portal Candidato | Documentos",
+        "title": "ApplicanTree | Portal Candidato | Documentos",
         "description": "Gestiona tus documentos en el portal del candidato"
       },
       "interviews": {
-        "title": "Applican Tree | Portal Candidato | Entrevistas",
+        "title": "ApplicanTree | Portal Candidato | Entrevistas",
         "description": "Consultá tus entrevistas agendadas e historial en el portal del candidato"
       }
     },
     "recruiterPortal": {
-      "title": "Applican Tree | Portal RRHH",
+      "title": "ApplicanTree | Portal RRHH",
       "description": "Portal RRHH - Dashboard de reclutamiento y gestión de candidatos"
     },
     "recruiterCandidates": {
-      "title": "Applican Tree | Portal RRHH | Candidatos",
+      "title": "ApplicanTree | Portal RRHH | Candidatos",
       "description": "Gestiona los candidatos y sus perfiles en el portal RRHH"
     },
     "recruiterSettings": {
-      "title": "Applican Tree | Portal RRHH | Configuración",
+      "title": "ApplicanTree | Portal RRHH | Configuración",
       "description": "Configuración del portal RRHH"
     },
     "publicOpportunities": {
       "list": {
-        "title": "Applican Tree | Oportunidades",
+        "title": "ApplicanTree | Portal Oportunidades",
         "description": "Explorá vacantes activas por departamento y modalidad"
       },
       "detail": {
-        "title": "Applican Tree | Oportunidades | Vacante",
+        "title": "ApplicanTree | Portal Oportunidades | Vacante",
         "description": "Detalle público de una vacante activa"
       },
       "apply": {
-        "title": "Applican Tree | Oportunidades | Aplicar",
+        "title": "ApplicanTree | Portal Oportunidades | Aplicar",
         "description": "Formulario público para aplicar a una vacante activa"
       }
     }
@@ -3002,7 +3002,8 @@
       "modality": "Modalidad",
       "location": "Ubicación",
       "salary": "Salario",
-      "publishedLabel": "Publicación"
+      "publishedLabel": "Publicación",
+      "documentTitle": "ApplicanTree | Portal Oportunidades | {title}"
     },
     "applicationForm": {
       "sources": {
@@ -3135,7 +3136,7 @@
       "formSectionLabel": "Formulario de postulación",
       "formTitle": "Enviá tu postulación",
       "formBody": "Completá los datos y adjuntá tu CV. La información se envía de forma segura al equipo de reclutamiento.",
-      "documentTitle": "Applican Tree | Oportunidades | Aplicar a {title}"
+      "documentTitle": "ApplicanTree | Portal Oportunidades | Aplicar a {title}"
     }
   }
 }

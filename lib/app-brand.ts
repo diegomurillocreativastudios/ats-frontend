@@ -1,5 +1,5 @@
 /** Nombre comercial de la plataforma. */
-export const APP_NAME = "Applican Tree"
+export const APP_NAME = "ApplicanTree"
 
 export const APP_TAGLINE = "Inteligencia aplicada al reclutamiento"
 

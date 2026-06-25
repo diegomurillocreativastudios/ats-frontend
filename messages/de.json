@@ -218,23 +218,23 @@
       "description": "Überprüfe und verwalte deine Kontodaten im Kandidatenportal"
     },
     "recruiterVacancies": {
-      "title": "Applican Tree | HR-Portal | Stellen",
+      "title": "ApplicanTree | HR-Portal | Stellen",
       "description": "Verwalte die offenen Stellen und Vakanzen des Unternehmens"
     },
     "recruiterVacancyDetail": {
-      "title": "Applican Tree | HR-Portal | Stellendetails",
+      "title": "ApplicanTree | HR-Portal | Stellendetails",
       "description": "Stelleninformationen anzeigen"
     },
     "recruiterVacancyResults": {
-      "title": "Applican Tree | HR-Portal | Stellenergebnisse",
+      "title": "ApplicanTree | HR-Portal | Stellenergebnisse",
       "description": "Bewertete Kandidatenergebnisse anzeigen"
     },
     "recruiterReports": {
-      "title": "Applican Tree | HR-Portal | Berichte",
+      "title": "ApplicanTree | HR-Portal | Berichte",
       "description": "Rekrutierungskennzahlen und Berichte einsehen"
     },
     "recruiterCandidateDetail": {
-      "title": "Applican Tree | HR-Portal | Kandidat",
+      "title": "ApplicanTree | HR-Portal | Kandidat",
       "description": "Detailliertes Kandidatenprofil im HR-Portal"
     },
     "adminPortal": {
@@ -286,41 +286,41 @@
     },
     "candidatePortal": {
       "home": {
-        "title": "Applican Tree | Portal Candidate",
+        "title": "ApplicanTree | Portal Candidate",
         "description": "Portal del candidate - Resumen de tu proceso de seleccion"
       },
       "documents": {
-        "title": "Applican Tree | Portal Candidate | Documents",
+        "title": "ApplicanTree | Portal Candidate | Documents",
         "description": "Manage tus documentos en el portal del candidate"
       },
       "interviews": {
-        "title": "Applican Tree | Portal Candidate | Interviews",
+        "title": "ApplicanTree | Portal Candidate | Interviews",
         "description": "View tus interviews agendadas e historial en el portal del candidate"
       }
     },
     "recruiterPortal": {
-      "title": "Applican Tree | Portal RRHH",
+      "title": "ApplicanTree | Portal RRHH",
       "description": "Portal RRHH - Dashboard de reclutamiento y gestion de candidates"
     },
     "recruiterCandidates": {
-      "title": "Applican Tree | Portal RRHH | Candidates",
+      "title": "ApplicanTree | Portal RRHH | Candidates",
       "description": "Manage los candidates y sus perfiles en el portal RRHH"
     },
     "recruiterSettings": {
-      "title": "Applican Tree | Portal RRHH | Settings",
+      "title": "ApplicanTree | Portal RRHH | Settings",
       "description": "Settings del portal RRHH"
     },
     "publicOpportunities": {
       "list": {
-        "title": "Applican Tree | Stellen",
+        "title": "ApplicanTree | Stellenportal",
         "description": "Aktive Stellen nach Abteilung und Arbeitsmodell durchsuchen"
       },
       "detail": {
-        "title": "Applican Tree | Stellen | Stellenangebot",
+        "title": "ApplicanTree | Stellenportal | Stellenangebot",
         "description": "Öffentliche Details einer aktiven Stelle"
       },
       "apply": {
-        "title": "Applican Tree | Stellen | Bewerben",
+        "title": "ApplicanTree | Stellenportal | Bewerben",
         "description": "Öffentliches Formular zur Bewerbung auf eine aktive Stelle"
       }
     }
@@ -3002,7 +3002,8 @@
       "modality": "Arbeitsmodell",
       "location": "Standort",
       "salary": "Gehalt",
-      "publishedLabel": "Veröffentlichung"
+      "publishedLabel": "Veröffentlichung",
+      "documentTitle": "ApplicanTree | Stellenportal | {title}"
     },
     "applicationForm": {
       "sources": {
@@ -3135,7 +3136,7 @@
       "formSectionLabel": "Bewerbungsformular",
       "formTitle": "Bewerbung senden",
       "formBody": "Füllen Sie die Daten aus und hängen Sie Ihren Lebenslauf an. Die Informationen werden sicher an das Recruiting-Team gesendet.",
-      "documentTitle": "Applican Tree | Stellen | Bewerbung für {title}"
+      "documentTitle": "ApplicanTree | Stellenportal | Bewerbung für {title}"
     }
   }
 }
