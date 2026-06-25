@@ -1,6 +1,6 @@
-import { Suspense } from "react"
 import { getTranslations } from "next-intl/server"
 import { PublicVacanciesPage } from "@/components/public/PublicVacanciesPage"
+import { buildPublicOpportunitiesQueryString } from "@/lib/public-opportunities-query"
 
 export async function generateMetadata() {
   const t = await getTranslations("Metadata.publicOpportunities.list")
@@ -10,14 +10,13 @@ export async function generateMetadata() {
   }
 }
 
-function OpportunitiesPageFallback() {
-  return <div className="min-h-screen bg-ats-warm-white" aria-hidden />
-}
+export default async function OpportunitiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const query = await searchParams
+  const initialQueryString = buildPublicOpportunitiesQueryString(query)
 
-export default function OpportunitiesPage() {
-  return (
-    <Suspense fallback={<OpportunitiesPageFallback />}>
-      <PublicVacanciesPage />
-    </Suspense>
-  )
+  return <PublicVacanciesPage initialQueryString={initialQueryString} />
 }

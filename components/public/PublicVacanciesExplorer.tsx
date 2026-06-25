@@ -1,0 +1,815 @@
+"use client"
+
+import Link from "next/link"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react"
+import { useTranslations } from "next-intl"
+import {
+  ArrowRight,
+  BarChart3,
+  Briefcase,
+  Building2,
+  Code2,
+  Headset,
+  Megaphone,
+  Palette,
+  ChevronLeft,
+  ChevronRight,
+  Layers3,
+  MapPin,
+  Settings2,
+  ShieldCheck,
+  Stethoscope,
+  Search,
+  Sparkles,
+  Users,
+  X,
+  type LucideIcon,
+} from "lucide-react"
+import { Button } from "@/components/ui/Button"
+import {
+  buildOpportunityCompanyLogoDataUri,
+  listPublicVacancies,
+  type OpportunityFilterOption,
+  type OpportunityListFilters,
+  type OpportunityListResponse,
+  type OpportunityVacancySummary,
+} from "@/lib/api/public-vacancies"
+import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
+import {
+  getPublicOpportunitiesQueryState,
+  type PublicOpportunitiesQueryState,
+} from "@/lib/public-opportunities-query"
+import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
+
+interface ActiveFilterChipProps {
+  label: string
+  value: string
+  onRemove: () => void
+}
+
+interface PublicVacanciesExplorerProps {
+  initialQueryString?: string
+}
+
+const panelClassName = publicOpportunitiesTheme.panel
+const softPanelClassName = publicOpportunitiesTheme.panelSoft
+
+function toRequestFilters(queryState: PublicOpportunitiesQueryState): OpportunityListFilters {
+  return {
+    departmentId: queryState.departmentId || undefined,
+    departmentCode: queryState.departmentCode || undefined,
+    modalityId: queryState.modalityId || undefined,
+    modalityCode: queryState.modalityCode || undefined,
+    countryCode: queryState.countryCode || undefined,
+    country: queryState.country || undefined,
+    page: queryState.page > 1 ? queryState.page : undefined,
+  }
+}
+
+function matchesSelectedFilter(
+  option: OpportunityFilterOption,
+  selectedId: string,
+  selectedCode: string
+): boolean {
+  if (selectedId && option.id === selectedId) return true
+  if (selectedCode && option.code === selectedCode) return true
+  return false
+}
+
+function resolveSelectedFilterLabel(
+  options: OpportunityFilterOption[],
+  selectedId: string,
+  selectedCode: string
+): string | null {
+  if (!selectedId && !selectedCode) return null
+
+  const match = options.find((option) =>
+    matchesSelectedFilter(option, selectedId, selectedCode)
+  )
+
+  if (match) return match.displayName
+  return selectedCode || selectedId || null
+}
+
+function normalizeDepartmentKey(value?: string): string {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+}
+
+function getDepartmentIcon(department?: OpportunityVacancySummary["department"]): LucideIcon {
+  const normalizedKey = normalizeDepartmentKey(
+    department?.code ? `${department.code} ${department.displayName}` : department?.displayName
+  )
+
+  if (!normalizedKey) return Briefcase
+  if (
+    normalizedKey.includes("development") ||
+    normalizedKey.includes("developer") ||
+    normalizedKey.includes("software") ||
+    normalizedKey.includes("engineering") ||
+    normalizedKey.includes("ingenieria") ||
+    normalizedKey.includes("tech")
+  ) {
+    return Code2
+  }
+
+  if (
+    normalizedKey.includes("design") ||
+    normalizedKey.includes("ux") ||
+    normalizedKey.includes("ui") ||
+    normalizedKey.includes("creative")
+  ) {
+    return Palette
+  }
+
+  if (
+    normalizedKey.includes("marketing") ||
+    normalizedKey.includes("growth") ||
+    normalizedKey.includes("content") ||
+    normalizedKey.includes("brand") ||
+    normalizedKey.includes("ventas")
+  ) {
+    return Megaphone
+  }
+
+  if (
+    normalizedKey.includes("operations") ||
+    normalizedKey.includes("operaciones") ||
+    normalizedKey.includes("logistics") ||
+    normalizedKey.includes("supply")
+  ) {
+    return Settings2
+  }
+
+  if (
+    normalizedKey.includes("customer") ||
+    normalizedKey.includes("support") ||
+    normalizedKey.includes("success") ||
+    normalizedKey.includes("soporte")
+  ) {
+    return Headset
+  }
+
+  if (
+    normalizedKey.includes("people") ||
+    normalizedKey.includes("talent") ||
+    normalizedKey.includes("human") ||
+    normalizedKey.includes("rrhh") ||
+    normalizedKey.includes("recruit")
+  ) {
+    return Users
+  }
+
+  if (
+    normalizedKey.includes("finance") ||
+    normalizedKey.includes("account") ||
+    normalizedKey.includes("admin") ||
+    normalizedKey.includes("contab")
+  ) {
+    return BarChart3
+  }
+
+  if (
+    normalizedKey.includes("security") ||
+    normalizedKey.includes("compliance") ||
+    normalizedKey.includes("legal")
+  ) {
+    return ShieldCheck
+  }
+
+  if (normalizedKey.includes("health") || normalizedKey.includes("salud")) {
+    return Stethoscope
+  }
+
+  return Briefcase
+}
+
+function formatPublishedLabel(publishedAt?: string): string | null {
+  if (!publishedAt) return null
+
+  const date = new Date(publishedAt)
+  if (Number.isNaN(date.getTime())) return null
+
+  return new Intl.DateTimeFormat("es-SV", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date)
+}
+
+function getCountryFilterLabel(queryState: PublicOpportunitiesQueryState): string | null {
+  return queryState.country || queryState.countryCode || null
+}
+
+function buildResultsSummary({
+  totalCount,
+  currentPage,
+  search,
+  department,
+  modality,
+  country,
+  isLoading,
+  t,
+}: {
+  totalCount: number
+  currentPage: number
+  search: string
+  department: string | null
+  modality: string | null
+  country: string | null
+  isLoading: boolean
+  t: ReturnType<typeof useTranslations<"PublicOpportunities.page">>
+}): string {
+  if (isLoading) return t("preparingList")
+
+  const suffixParts = [
+    search ? t("resultsFilterQuote", { query: search }) : null,
+    department ? t("resultsFilterDepartment", { department }) : null,
+    modality ? t("resultsFilterModality", { modality }) : null,
+    country ? t("resultsFilterCountry", { country }) : null,
+  ].filter(Boolean)
+
+  const suffix = suffixParts.length ? ` ${suffixParts.join(", ")}` : ""
+  const pageLabel =
+    currentPage > 1 ? ` ${t("resultsPage", { page: currentPage })}` : ""
+
+  const from = totalCount > 0 ? 1 : 0
+  const to = totalCount
+  return `${t("resultsShowing", { from, to, total: totalCount })}${suffix}${pageLabel}.`
+}
+
+function OpportunityCard({
+  vacancy,
+  queryString,
+  t,
+}: {
+  vacancy: OpportunityVacancySummary
+  queryString: string
+  t: ReturnType<typeof useTranslations<"PublicOpportunities.page">>
+}) {
+  const publishedLabel = formatPublishedLabel(vacancy.publishedAt)
+  const href = `/portal-oportunidades/${vacancy.id}${queryString ? `?${queryString}` : ""}`
+  const departmentLabel = vacancy.department?.displayName ?? t("fallbackDepartment")
+  const modalityLabel = vacancy.modality?.displayName ?? t("fallbackModality")
+  const companyName = vacancy.company.name?.trim() ?? ""
+  const DepartmentIcon = getDepartmentIcon(vacancy.department)
+  const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy.company.logo)
+  const companyLogoAlt = companyName
+    ? t("companyLogoAlt", { company: companyName })
+    : t("companyLogoGeneric")
+
+  return (
+    <article className="group border-b border-border last:border-b-0">
+      <div className="grid gap-4 px-4 py-5 transition-colors duration-200 hover:bg-muted/25 sm:px-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(220px,1fr)_auto] lg:items-center lg:gap-6 lg:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted/35 text-xs font-semibold text-foreground/80"
+            aria-label={companyLogoSrc ? companyLogoAlt : undefined}
+          >
+            {companyLogoSrc ? (
+              <img
+                src={companyLogoSrc}
+                alt={companyLogoAlt}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <DepartmentIcon className="h-5 w-5 text-ats-terracotta" aria-hidden />
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <h3 className="text-base font-semibold tracking-tight text-foreground">
+              <Link
+                href={href}
+                className="transition-colors hover:text-ats-terracotta focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-background"
+              >
+                {vacancy.title}
+              </Link>
+            </h3>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              {companyName ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5 text-ats-terracotta" aria-hidden />
+                  {companyName}
+                </span>
+              ) : null}
+              {publishedLabel ? (
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <Sparkles className="h-3.5 w-3.5 text-ats-cobre" aria-hidden />
+                  {publishedLabel}
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-1 lg:space-y-0">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground lg:hidden">
+            Departamento
+          </p>
+          <p className="text-sm text-muted-foreground">{departmentLabel}</p>
+        </div>
+
+        <div className="space-y-1 lg:space-y-0">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground lg:hidden">Ubicación</p>
+          <div className="space-y-1">
+            <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-3.5 w-3.5 text-ats-terracotta" aria-hidden />
+              <VacancyLocationLabel
+                countryCode={vacancy.countryCode}
+                stateCode={vacancy.stateCode}
+                emptyLabel={t("fallbackLocation")}
+              />
+            </p>
+            <p className="text-xs text-muted-foreground">{modalityLabel}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-start lg:justify-end">
+          <Link
+            href={href}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/35 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-ats-cobre-light/40 hover:bg-muted/50 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-background"
+          >
+            {t("viewDetail")}
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function OpportunityCardSkeleton() {
+  return (
+    <div className="grid animate-pulse gap-4 px-4 py-5 sm:px-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(220px,1fr)_auto] lg:items-center lg:gap-6 lg:px-6">
+      <div className="flex items-start gap-3">
+        <div className="h-11 w-11 rounded-2xl bg-muted/50" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="h-5 w-44 rounded-xl bg-muted/50" />
+          <div className="h-4 w-40 rounded-lg bg-muted/50" />
+        </div>
+      </div>
+      <div className="h-4 w-32 rounded-lg bg-muted/50" />
+      <div className="space-y-2">
+        <div className="h-4 w-36 rounded-lg bg-muted/50" />
+        <div className="h-3 w-24 rounded-lg bg-muted/50" />
+      </div>
+      <div className="h-10 w-28 rounded-full bg-muted/50" />
+    </div>
+  )
+}
+
+function OpportunityTableHeader({
+  t,
+}: {
+  t: ReturnType<typeof useTranslations<"PublicOpportunities.page">>
+}) {
+  return (
+    <div className="hidden grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(220px,1fr)_auto] gap-6 border-b border-border px-6 py-4 text-[11px] uppercase tracking-[0.22em] text-muted-foreground lg:grid">
+      <span>{t("vacancy")}</span>
+      <span>{t("tableDepartment")}</span>
+      <span>{t("tableLocation")}</span>
+      <span className="text-right">{t("tableAction")}</span>
+    </div>
+  )
+}
+
+export function PublicVacanciesExplorerSkeleton() {
+  const t = useTranslations("PublicOpportunities.page")
+
+  return (
+    <section
+      id="public-opportunities-explorer"
+      className={`relative mt-6 overflow-hidden rounded-[36px] p-5 scroll-mt-6 sm:p-6 lg:p-7 ${panelClassName}`}
+      aria-labelledby="public-opportunities-explorer-title"
+      aria-busy="true"
+    >
+      <div className={`absolute inset-0 ${publicOpportunitiesTheme.radialPanel}`} />
+
+      <div className="relative">
+        <div className={`rounded-[30px] p-5 sm:p-6 ${softPanelClassName}`}>
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <div className={`inline-flex items-center gap-2 ${publicOpportunitiesTheme.badge}`}>
+                <Layers3 className="h-3.5 w-3.5 text-ats-terracotta" aria-hidden />
+                {t("explorerLabel")}
+              </div>
+              <div className="space-y-2">
+                <h2
+                  id="public-opportunities-explorer-title"
+                  className="text-2xl font-semibold tracking-tight text-foreground sm:text-[2rem]"
+                >
+                  {t("listTitle")}
+                </h2>
+                <p className="text-sm leading-7 text-muted-foreground">{t("preparingList")}</p>
+              </div>
+            </div>
+
+            <div className="w-full lg:max-w-xl">
+              <label htmlFor="public-vacancies-search" className="sr-only">
+                {t("searchLabel")}
+              </label>
+              <div className="relative flex-1">
+                <Search
+                  className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                />
+                <div className={`h-12 w-full rounded-full ${publicOpportunitiesTheme.skeleton}`} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <div className={`relative overflow-hidden rounded-[30px] p-5 sm:p-6 ${softPanelClassName}`}>
+            <div className={publicOpportunitiesTheme.tableWrap}>
+              <OpportunityTableHeader t={t} />
+              <div className="divide-y divide-border">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <OpportunityCardSkeleton key={index} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ActiveFilterChip({ label, value, onRemove }: ActiveFilterChipProps) {
+  return (
+    <button
+      type="button"
+      onClick={onRemove}
+      className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/55 focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-background"
+    >
+      <span className="text-muted-foreground">{label}:</span>
+      <span>{value}</span>
+      <X className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+    </button>
+  )
+}
+
+function PublicVacanciesExplorerContent({
+  initialQueryString = "",
+}: PublicVacanciesExplorerProps) {
+  const t = useTranslations("PublicOpportunities.page")
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const currentQueryString = useMemo(() => {
+    const clientQueryString = searchParams.toString()
+    return clientQueryString || initialQueryString
+  }, [initialQueryString, searchParams])
+
+  const queryState = useMemo(
+    () => getPublicOpportunitiesQueryState(new URLSearchParams(currentQueryString)),
+    [currentQueryString]
+  )
+  const requestFilters = useMemo(() => toRequestFilters(queryState), [queryState])
+
+  const [searchInput, setSearchInput] = useState(queryState.vacanteName)
+  const [response, setResponse] = useState<OpportunityListResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [retryToken, setRetryToken] = useState(0)
+
+  useEffect(() => {
+    setSearchInput(queryState.vacanteName)
+  }, [queryState.vacanteName])
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const loadVacancies = async () => {
+      setIsLoading(true)
+      setErrorMessage(null)
+
+      try {
+        const nextResponse = await listPublicVacancies(requestFilters)
+        if (isCancelled) return
+        setResponse(nextResponse)
+      } catch (error) {
+        if (isCancelled) return
+        const message =
+          error instanceof Error && error.message.trim() !== ""
+            ? error.message
+            : t("loadFailed")
+        setErrorMessage(message)
+        setResponse(null)
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadVacancies()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [requestFilters, retryToken])
+
+  const updateQuery = useCallback(
+    (updates: Record<string, string | number | null | undefined>) => {
+      const params = new URLSearchParams(currentQueryString)
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (value == null || value === "" || value === 1) {
+          params.delete(key)
+          continue
+        }
+
+        params.set(key, String(value))
+      }
+
+      const nextQuery = params.toString()
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+        scroll: false,
+      })
+    },
+    [currentQueryString, pathname, router]
+  )
+
+  const handleClearAll = useCallback(() => {
+    setSearchInput("")
+    router.replace(pathname, { scroll: false })
+  }, [pathname, router])
+
+  const selectedDepartmentLabel = resolveSelectedFilterLabel(
+    response?.availableFilters.departments ?? [],
+    queryState.departmentId,
+    queryState.departmentCode
+  )
+  const selectedModalityLabel = resolveSelectedFilterLabel(
+    response?.availableFilters.modalities ?? [],
+    queryState.modalityId,
+    queryState.modalityCode
+  )
+  const selectedCountryLabel = getCountryFilterLabel(queryState)
+  const normalizedVacanteName = searchInput.trim().toLowerCase()
+  const filteredItems = useMemo(() => {
+    const items = response?.items ?? []
+    if (!normalizedVacanteName) return items
+
+    return items.filter((vacancy) =>
+      vacancy.title.trim().toLowerCase().includes(normalizedVacanteName)
+    )
+  }, [normalizedVacanteName, response?.items])
+  const hasVisibleFilterChips = Boolean(
+    selectedDepartmentLabel || selectedModalityLabel || selectedCountryLabel
+  )
+
+  const hasActiveFilters = Boolean(
+    normalizedVacanteName ||
+      queryState.departmentId ||
+      queryState.departmentCode ||
+      queryState.modalityId ||
+      queryState.modalityCode ||
+      queryState.country ||
+      queryState.countryCode
+  )
+
+  const totalCount = normalizedVacanteName
+    ? filteredItems.length
+    : response?.pagination.totalCount ?? 0
+  const currentPage = response?.pagination.page ?? queryState.page
+  const totalPages = response?.pagination.totalPages ?? 1
+  const resultsSummary = buildResultsSummary({
+    totalCount,
+    currentPage,
+    search: searchInput.trim(),
+    department: selectedDepartmentLabel,
+    modality: selectedModalityLabel,
+    country: selectedCountryLabel,
+    isLoading,
+    t,
+  })
+
+  return (
+    <section
+      id="public-opportunities-explorer"
+      className={`relative mt-6 overflow-hidden rounded-[36px] p-5 scroll-mt-6 sm:p-6 lg:p-7 ${panelClassName}`}
+      aria-labelledby="public-opportunities-explorer-title"
+    >
+      <div className={`absolute inset-0 ${publicOpportunitiesTheme.radialPanel}`} />
+
+      <div className="relative">
+        <div className={`rounded-[30px] p-5 sm:p-6 ${softPanelClassName}`}>
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <div className={`inline-flex items-center gap-2 ${publicOpportunitiesTheme.badge}`}>
+                <Layers3 className="h-3.5 w-3.5 text-ats-terracotta" aria-hidden />
+                {t("explorerLabel")}
+              </div>
+              <div className="space-y-2">
+                <h2
+                  id="public-opportunities-explorer-title"
+                  className="text-2xl font-semibold tracking-tight text-foreground sm:text-[2rem]"
+                >
+                  {t("listTitle")}
+                </h2>
+                <p className="text-sm leading-7 text-muted-foreground">{resultsSummary}</p>
+              </div>
+            </div>
+
+            <div className="w-full lg:max-w-xl">
+              <label htmlFor="public-vacancies-search" className="sr-only">
+                {t("searchLabel")}
+              </label>
+              <div className="relative flex-1">
+                <Search
+                  className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                />
+                <input
+                  id="public-vacancies-search"
+                  type="search"
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  placeholder={t("searchPlaceholder")}
+                  className={publicOpportunitiesTheme.input}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <main className="min-w-0">
+            <section className={`relative overflow-hidden rounded-[30px] p-5 sm:p-6 ${softPanelClassName}`}>
+              <div className={hasVisibleFilterChips ? "flex flex-col gap-5 border-b border-border pb-5" : ""}>
+                {hasVisibleFilterChips ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedDepartmentLabel ? (
+                      <ActiveFilterChip
+                        label={t("filterDepartment")}
+                        value={selectedDepartmentLabel}
+                        onRemove={() =>
+                          updateQuery({
+                            departmentId: null,
+                            departmentCode: null,
+                            page: null,
+                          })
+                        }
+                      />
+                    ) : null}
+                    {selectedModalityLabel ? (
+                      <ActiveFilterChip
+                        label={t("filterModality")}
+                        value={selectedModalityLabel}
+                        onRemove={() =>
+                          updateQuery({
+                            modalityId: null,
+                            modalityCode: null,
+                            page: null,
+                          })
+                        }
+                      />
+                    ) : null}
+                    {selectedCountryLabel ? (
+                      <ActiveFilterChip
+                        label={t("filterCountry")}
+                        value={selectedCountryLabel}
+                        onRemove={() =>
+                          updateQuery({
+                            country: null,
+                            countryCode: null,
+                            page: null,
+                          })
+                        }
+                      />
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className={hasVisibleFilterChips ? "mt-6" : ""}>
+                {errorMessage ? (
+                  <div
+                    className={publicOpportunitiesTheme.alertPanel}
+                    role="alert"
+                  >
+                    <p>{errorMessage}</p>
+                    <button
+                      type="button"
+                      onClick={() => setRetryToken((current) => current + 1)}
+                      className="mt-3 font-medium text-foreground hover:text-ats-terracotta-soft"
+                    >
+                      {t("retry")}
+                    </button>
+                  </div>
+                ) : isLoading ? (
+                  <div className={publicOpportunitiesTheme.tableWrap}>
+                    <OpportunityTableHeader t={t} />
+                    <div className="divide-y divide-border">
+                      {Array.from({ length: 4 }).map((_, index) => (
+                        <OpportunityCardSkeleton key={index} />
+                      ))}
+                    </div>
+                  </div>
+                ) : filteredItems.length ? (
+                  <div className={publicOpportunitiesTheme.tableWrap}>
+                    <OpportunityTableHeader t={t} />
+                    <div>
+                      {filteredItems.map((vacancy) => (
+                        <OpportunityCard
+                          key={vacancy.id}
+                          vacancy={vacancy}
+                          queryString={currentQueryString}
+                          t={t}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={publicOpportunitiesTheme.emptyState}>
+                    <div className={publicOpportunitiesTheme.emptyStateIcon}>
+                      <Briefcase className="h-7 w-7" aria-hidden />
+                    </div>
+                    <h3 className="mt-5 text-2xl font-semibold text-foreground">
+                      {t("emptyTitle")}
+                    </h3>
+                    <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-muted-foreground">
+                      {t("emptyBody")}
+                    </p>
+                    {hasActiveFilters ? (
+                      <div className="mt-6">
+                        <Button
+                          type="button"
+                          className="rounded-full bg-ats-terracotta px-6 py-3 text-ats-warm-white"
+                          onClick={handleClearAll}
+                        >
+                          {t("viewAll")}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+
+              {!isLoading && !errorMessage && totalPages > 1 ? (
+                <div className="mt-6 flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {t("pageSummary", { page: currentPage, total: totalPages })}
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={`rounded-full ${publicOpportunitiesTheme.ctaOutline}`}
+                      onClick={() => updateQuery({ page: currentPage - 1 })}
+                      disabled={currentPage <= 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" aria-hidden />
+                      {t("prev")}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={`rounded-full ${publicOpportunitiesTheme.ctaOutline}`}
+                      onClick={() => updateQuery({ page: currentPage + 1 })}
+                      disabled={currentPage >= totalPages}
+                    >
+                      {t("next")}
+                      <ChevronRight className="h-4 w-4" aria-hidden />
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+            </section>
+          </main>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export function PublicVacanciesExplorer({
+  initialQueryString = "",
+}: PublicVacanciesExplorerProps) {
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  if (!hasMounted) {
+    return <PublicVacanciesExplorerSkeleton />
+  }
+
+  return (
+    <Suspense fallback={<PublicVacanciesExplorerSkeleton />}>
+      <PublicVacanciesExplorerContent initialQueryString={initialQueryString} />
+    </Suspense>
+  )
+}
