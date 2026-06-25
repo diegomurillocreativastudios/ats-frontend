@@ -66,7 +66,7 @@ function renderSectionTitle(
 ): void {
   drawSectionTitle(doc, resolveTemplateString(section.title, ctx))
   if (section.subtitle) {
-    doc.font("Helvetica").fontSize(9).fillColor("#5A5B5E")
+    doc.font("Helvetica").fontSize(9).fillColor("#57585B")
     doc.text(resolveTemplateString(section.subtitle, ctx), doc.x, doc.y + 2)
     doc.moveDown(0.6)
   }
@@ -133,12 +133,12 @@ function renderFindings(
 
   const boxTop = doc.y
   doc.save()
-  doc.lineWidth(0.75).strokeColor("#EAE0D5").fillColor("#FBFAF7")
-  doc.roundedRect(left, boxTop, width, boxHeight, 6).fillAndStroke("#FBFAF7", "#EAE0D5")
+  doc.lineWidth(0.75).strokeColor("#E8F5E0").fillColor("#FFFFFF")
+  doc.roundedRect(left, boxTop, width, boxHeight, 6).fillAndStroke("#FFFFFF", "#E8F5E0")
   doc.restore()
 
   let bulletY = boxTop + boxPadding
-  doc.font("Helvetica").fontSize(8.5).fillColor("#3D3E41")
+  doc.font("Helvetica").fontSize(8.5).fillColor("#454648")
   if (bulletLines.length === 0) {
     doc.text("No hay hallazgos destacados para los filtros actuales.", left + boxPadding, bulletY, {
       width: width - boxPadding * 2,
@@ -205,7 +205,7 @@ function renderVacancyCards(
   const cardWidth = width
 
   if (rows.length === 0) {
-    doc.font("Helvetica").fontSize(9).fillColor("#5A5B5E")
+    doc.font("Helvetica").fontSize(9).fillColor("#57585B")
     doc.text("No hay vacantes para mostrar con los filtros actuales.", left, doc.y)
     doc.moveDown(0.8)
     return
@@ -259,24 +259,24 @@ function renderVacancyCards(
 
     const cardTop = doc.y
     doc.save()
-    doc.lineWidth(0.7).strokeColor("#EAE0D5").fillColor("#FBFAF7")
-    doc.roundedRect(left, cardTop, cardWidth, cardHeight, 8).fillAndStroke("#FBFAF7", "#EAE0D5")
+    doc.lineWidth(0.7).strokeColor("#E8F5E0").fillColor("#FFFFFF")
+    doc.roundedRect(left, cardTop, cardWidth, cardHeight, 8).fillAndStroke("#FFFFFF", "#E8F5E0")
     doc.restore()
 
     let cursorY = cardTop + padding
 
-    doc.font("Helvetica-Bold").fontSize(12).fillColor("#202124")
+    doc.font("Helvetica-Bold").fontSize(12).fillColor("#256D35")
     doc.text(title, left + padding, cursorY, { width: cardWidth - padding * 2 })
     cursorY = doc.y + 4
 
     if (subtitle) {
-      doc.font("Helvetica").fontSize(9).fillColor("#5A5B5E")
+      doc.font("Helvetica").fontSize(9).fillColor("#57585B")
       doc.text(subtitle, left + padding, cursorY, { width: cardWidth - padding * 2 })
       cursorY = doc.y + 6
     }
 
     if (status) {
-      doc.font("Helvetica-Bold").fontSize(8.5).fillColor("#202124")
+      doc.font("Helvetica-Bold").fontSize(8.5).fillColor("#256D35")
       doc.text(`Estado: ${status}`, left + padding, cursorY, {
         width: cardWidth - padding * 2,
       })
@@ -284,11 +284,11 @@ function renderVacancyCards(
     }
 
     metrics.forEach((metric) => {
-      doc.font("Helvetica-Bold").fontSize(7.5).fillColor("#5A5B5E")
+      doc.font("Helvetica-Bold").fontSize(7.5).fillColor("#57585B")
       doc.text(metric.label.toUpperCase(), left + padding, cursorY, {
         width: cardWidth - padding * 2,
       })
-      doc.font("Helvetica-Bold").fontSize(8.5).fillColor("#202124")
+      doc.font("Helvetica-Bold").fontSize(8.5).fillColor("#256D35")
       doc.text(metric.value, left + padding, cursorY + 10, {
         width: cardWidth - padding * 2,
       })
@@ -308,7 +308,7 @@ function renderVacancyCards(
     }
 
     if (pipeline) {
-      doc.font("Helvetica-Bold").fontSize(8).fillColor("#5A5B5E")
+      doc.font("Helvetica-Bold").fontSize(8).fillColor("#57585B")
       doc.text(
         (pipeline.title ? resolveTemplateString(pipeline.title, rowCtx) : "PIPELINE POR ETAPA").toUpperCase(),
         left + padding,
@@ -317,7 +317,7 @@ function renderVacancyCards(
       )
       cursorY = doc.y + 6
 
-      doc.font("Helvetica").fontSize(8).fillColor("#3D3E41")
+      doc.font("Helvetica").fontSize(8).fillColor("#454648")
       if (!hasPipelineData || pipelineRows.length === 0) {
         doc.text(
           pipeline.emptyText ? resolveTemplateString(pipeline.emptyText, rowCtx) : "Sin etapas registradas —",
@@ -344,7 +344,7 @@ function renderVacancyCards(
     }
 
     if (additionalDetailText) {
-      doc.font("Helvetica-Bold").fontSize(8).fillColor("#5A5B5E")
+      doc.font("Helvetica-Bold").fontSize(8).fillColor("#57585B")
       doc.text(
         section.card.additionalDetail?.title
           ? resolveTemplateString(section.card.additionalDetail.title, rowCtx)
@@ -353,7 +353,7 @@ function renderVacancyCards(
         cursorY,
         { width: cardWidth - padding * 2 }
       )
-      doc.font("Helvetica").fontSize(8).fillColor("#3D3E41")
+      doc.font("Helvetica").fontSize(8).fillColor("#454648")
       doc.text(additionalDetailText, left + padding, cursorY + 10, {
         width: cardWidth - padding * 2,
       })

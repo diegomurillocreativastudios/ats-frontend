@@ -13,11 +13,11 @@ import { tryLoadAppLogoRasterBufferForPdfKit } from "@/lib/technical-sheet/techn
  */
 
 const BRAND = {
-  purple: "#A45C40",
-  cyan: "#B87333",
-  footer: "#202124",
+  purple: "#6EB940",
+  cyan: "#438C39",
+  footer: "#256D35",
   black: "#000000",
-  taglineGray: "#5A5B5E",
+  taglineGray: "#57585B",
   dotGray: "#94a3b8",
 }
 
@@ -196,7 +196,7 @@ function drawPageDecorations(doc: PdfDoc) {
 }
 
 /**
- * Logo Appli AI + tagline + datos personales (solo página 1; las siguientes no repiten cabecera).
+ * Logo Applican Tree + tagline + datos personales (solo página 1; las siguientes no repiten cabecera).
  */
 function drawRepeatedHeader(
   doc: PdfDoc,

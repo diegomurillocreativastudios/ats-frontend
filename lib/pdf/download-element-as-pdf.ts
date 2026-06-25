@@ -44,7 +44,7 @@ async function buildPdfFromElement({
     useCORS: true,
     allowTaint: false,
     logging: false,
-    backgroundColor: "#FBFAF7",
+    backgroundColor: "#FFFFFF",
     windowWidth: scrollWidth,
     windowHeight: scrollHeight,
     onclone: (clonedDoc, clonedElement) => {

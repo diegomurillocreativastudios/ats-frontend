@@ -139,12 +139,11 @@ export default function ForgotPasswordContent() {
         <LanguageSwitcher />
       </div>
       <div className="hidden flex-col justify-center bg-vo-navy text-white md:flex md:w-80 md:gap-6 md:px-10 lg:flex-1 lg:gap-8 lg:px-16">
-        <div className="flex flex-col md:gap-6 lg:gap-6">
+        <div className="flex flex-col md:gap-8 lg:gap-10">
           <ProductBrand
             layout="inline"
             tone="onDark"
             density="authMarketing"
-            className="min-w-0"
           />
 
           <div className="hidden lg:block">

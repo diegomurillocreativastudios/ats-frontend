@@ -16,7 +16,7 @@ function readAppLogoSvgBuffer(): Buffer | null {
 }
 
 /**
- * Logo Appli AI como data URI SVG (sin red) para vistas HTML / PDF headless.
+ * Logo Applican Tree como data URI SVG (sin red) para vistas HTML / PDF headless.
  */
 export function tryLoadVisibleLogoDataUriForTechnicalSheetPdf(): string | null {
   const buf = readAppLogoSvgBuffer()

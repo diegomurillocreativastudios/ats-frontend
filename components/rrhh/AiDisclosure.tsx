@@ -37,7 +37,7 @@ export interface AiDisclosurePillProgressProps {
 }
 
 /**
- * Mismos colores que la barra en overlay oscuro de aplicar (gradiente #A45C40 → #B87333 + resplandor).
+ * Mismos colores que la barra en overlay oscuro de aplicar (gradiente #6EB940 → #438C39 + resplandor).
  */
 export function AiDisclosurePillProgress({
   percent,
@@ -156,7 +156,7 @@ export function AiDisclosurePillProgress({
                       <>
                         <div aria-hidden className="absolute inset-0 flex items-center">
                           <div className="h-0.5 w-full bg-muted-foreground/30 overflow-hidden">
-                            <span className="block h-full w-1/2 animate-apply-shimmer bg-[linear-gradient(90deg,transparent,#B87333,transparent)]" />
+                            <span className="block h-full w-1/2 animate-apply-shimmer bg-[linear-gradient(90deg,transparent,#438C39,transparent)]" />
                           </div>
                         </div>
                         <div

@@ -723,7 +723,7 @@ export function PublicVacanciesPage() {
                   <div className={hasVisibleFilterChips ? "mt-6" : ""}>
                     {errorMessage ? (
                       <div
-                        className="rounded-[28px] border border-ats-terracotta/30 bg-[rgba(164,92,64,0.12)] px-5 py-6 text-sm text-ats-terracotta-soft"
+                        className={publicOpportunitiesTheme.alertPanel}
                         role="alert"
                       >
                         <p>{errorMessage}</p>
@@ -753,7 +753,7 @@ export function PublicVacanciesPage() {
                       </div>
                     ) : (
                       <div className={publicOpportunitiesTheme.emptyState}>
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[24px] border border-border bg-muted/45 text-ats-cobre shadow-[0_24px_60px_rgba(164,92,64,0.18)]">
+                        <div className={publicOpportunitiesTheme.emptyStateIcon}>
                           <Briefcase className="h-7 w-7" aria-hidden />
                         </div>
                         <h3 className="mt-5 text-2xl font-semibold text-foreground">

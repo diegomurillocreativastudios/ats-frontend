@@ -3,9 +3,8 @@
 import Link from "next/link"
 import { Grid3x3 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { AppliAiLogo } from "@/components/branding/AppliAiLogo"
+import { ApplicanTreeLogo } from "@/components/branding/ApplicanTreeLogo"
 import LanguageSwitcher from "@/components/language-switcher"
-import { APP_NAME } from "@/lib/app-brand"
 import { publicOpportunitiesTheme as theme } from "@/lib/public-opportunities-theme"
 
 interface PublicOpportunitiesNavbarProps {
@@ -30,21 +29,11 @@ export function PublicOpportunitiesNavbar({
           className={`inline-flex items-center gap-3.5 rounded-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ats-cobre focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:gap-4 ${theme.accentRing}`}
           aria-label={t("ariaGoToPortal")}
         >
-          <AppliAiLogo
-            variant="default"
-            className="h-11 w-11 shrink-0 sm:h-12 sm:w-12 md:h-14 md:w-14"
-          />
+          <ApplicanTreeLogo className="h-11 w-auto shrink-0 sm:h-12 md:h-14" />
 
           <span className="flex min-w-0 flex-col justify-center">
             <span
-              className={`font-brand text-xl font-bold tracking-tight leading-none sm:text-2xl md:text-3xl ${theme.textHeading}`}
-              aria-label={APP_NAME}
-            >
-              <span>Appli</span>
-              <span className="text-ats-terracotta"> AI</span>
-            </span>
-            <span
-              className={`mt-1.5 text-xs uppercase tracking-[0.22em] sm:text-[13px] ${theme.textSubtle}`}
+              className={`text-xs uppercase tracking-[0.22em] sm:text-[13px] ${theme.textSubtle}`}
             >
               {t("portalSubtitle")}
             </span>

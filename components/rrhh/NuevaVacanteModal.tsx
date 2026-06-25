@@ -431,7 +431,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             disabled={loading || loadingCompanies}
           >
             {companyOptions.length === 0 ? (
-              <option value={DEFAULT_RECRUITER_COMPANY_ID}>Appli AI</option>
+              <option value={DEFAULT_RECRUITER_COMPANY_ID}>Applican Tree</option>
             ) : (
               companyOptions.map((company) => (
                 <option key={company.id} value={company.id}>

@@ -6,7 +6,7 @@ const REPORT_PREVIEW_BASE_STYLES = `
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-size: 14px;
     line-height: 1.5;
-    color: #202124;
+    color: #256D35;
     background: #fff;
   }
   img { max-width: 100%; height: auto; }

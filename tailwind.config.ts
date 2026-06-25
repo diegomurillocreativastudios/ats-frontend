@@ -9,73 +9,73 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'ats-grafito': '#202124',
-        'ats-terracotta': {
-          DEFAULT: '#A45C40',
-          hover: '#8E4E36',
-          foreground: '#FBFAF7',
+        "ats-grafito": "#57585B",
+        "ats-terracotta": {
+          DEFAULT: "#6EB940",
+          hover: "#549E3C",
+          foreground: "#FFFFFF",
         },
-        'ats-cobre': {
-          DEFAULT: '#B87333',
-          hover: '#9A6329',
-          light: '#D4A574',
-          foreground: '#FBFAF7',
+        "ats-cobre": {
+          DEFAULT: "#438C39",
+          hover: "#337C37",
+          light: "#A8D98A",
+          foreground: "#FFFFFF",
         },
-        'ats-arena': '#EAE0D5',
-        'ats-cobre-light': '#D4A574',
-        'ats-terracotta-soft': '#E8C4B8',
-        'vo-purple': {
-          DEFAULT: '#A45C40',
-          hover: '#8E4E36',
-          foreground: '#FBFAF7',
+        "ats-arena": "#E8F5E0",
+        "ats-cobre-light": "#A8D98A",
+        "ats-terracotta-soft": "#D4EDCC",
+        "vo-purple": {
+          DEFAULT: "#6EB940",
+          hover: "#549E3C",
+          foreground: "#FFFFFF",
         },
-        'vo-magenta': {
-          DEFAULT: '#B87333',
-          hover: '#9A6329',
-          foreground: '#FBFAF7',
+        "vo-magenta": {
+          DEFAULT: "#438C39",
+          hover: "#337C37",
+          foreground: "#FFFFFF",
         },
-        'vo-navy': {
-          DEFAULT: '#202124',
-          foreground: '#FBFAF7',
+        "vo-navy": {
+          DEFAULT: "#57585B",
+          foreground: "#FFFFFF",
         },
-        'vo-sky': {
-          DEFAULT: '#EAE0D5',
-          foreground: '#202124',
+        "vo-sky": {
+          DEFAULT: "#E8F5E0",
+          foreground: "#57585B",
         },
-        'vo-pink': {
-          DEFAULT: '#A45C40',
-          hover: '#8E4E36',
-          foreground: '#FBFAF7',
+        "vo-pink": {
+          DEFAULT: "#6EB940",
+          hover: "#549E3C",
+          foreground: "#FFFFFF",
         },
-        'vo-yellow': {
-          DEFAULT: '#B87333',
-          foreground: '#202124',
+        "vo-yellow": {
+          DEFAULT: "#438C39",
+          foreground: "#57585B",
         },
-        'vo-cobre': {
-          DEFAULT: '#B87333',
-          hover: '#9A6329',
-          foreground: '#FBFAF7',
+        "vo-cobre": {
+          DEFAULT: "#438C39",
+          hover: "#337C37",
+          foreground: "#FFFFFF",
         },
-        border: '#EAE0D5',
-        input: '#EAE0D5',
-        ring: '#A45C40',
-        background: '#FBFAF7',
-        foreground: '#202124',
+        border: "#E8F5E0",
+        input: "#E8F5E0",
+        ring: "#6EB940",
+        background: "#FFFFFF",
+        foreground: "#57585B",
         card: {
-          DEFAULT: '#FBFAF7',
-          foreground: '#202124',
+          DEFAULT: "#FFFFFF",
+          foreground: "#57585B",
         },
         muted: {
-          DEFAULT: '#EAE0D5',
-          foreground: '#48494C',
+          DEFAULT: "#E8F5E0",
+          foreground: "#75767A",
         },
         destructive: {
-          DEFAULT: '#A45C40',
-          foreground: '#FBFAF7',
+          DEFAULT: "#DC2626",
+          foreground: "#FFFFFF",
         },
         success: {
-          DEFAULT: '#B87333',
-          foreground: '#FBFAF7',
+          DEFAULT: "#6EB940",
+          foreground: "#FFFFFF",
         },
       },
       fontFamily: {
@@ -94,16 +94,16 @@ const config: Config = {
         ],
       },
       borderRadius: {
-        DEFAULT: '6px',
+        DEFAULT: "6px",
       },
       keyframes: {
-        'apply-shimmer': {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(400%)' },
+        "apply-shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(400%)" },
         },
       },
       animation: {
-        'apply-shimmer': 'apply-shimmer 1.45s ease-in-out infinite',
+        "apply-shimmer": "apply-shimmer 1.45s ease-in-out infinite",
       },
     },
   },

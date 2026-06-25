@@ -177,12 +177,11 @@ export default function IniciarSesion() {
       </div>
       {/* Desktop & Tablet: Left Panel */}
       <div className="hidden md:flex md:w-80 lg:flex-1 bg-vo-purple text-white flex-col justify-center md:px-10 lg:px-16 md:gap-6 lg:gap-8">
-        <div className="flex flex-col md:gap-6 lg:gap-6">
+        <div className="flex flex-col md:gap-8 lg:gap-10">
           <ProductBrand
             layout="inline"
             tone="onDark"
             density="authMarketing"
-            className="min-w-0"
           />
 
           <div className="hidden lg:block">

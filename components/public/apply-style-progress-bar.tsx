@@ -1,9 +1,11 @@
+import { BRAND_COLORS } from "@/lib/brand-colors"
+import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
+
 const BAR_WIDTH_TRANSITION_MS = 320
 const BAR_WIDTH_SUCCESS_MS = 700
 
 /** Tema clásico (solid) / oscuro (gradiente) / mismo gradiente sobre fondos claros (RRHH) */
-const APPLY_GRADIENT_BAR_FILL =
-  "relative h-2.5 rounded-full bg-[linear-gradient(90deg,#A45C40_0%,#B87333_100%)] shadow-[0_0_24px_rgba(164,92,64,0.35)]"
+const APPLY_GRADIENT_BAR_FILL = `relative h-2.5 rounded-full bg-[linear-gradient(90deg,${BRAND_COLORS.greenPrimary}_0%,${BRAND_COLORS.greenMedium}_100%)] ${publicOpportunitiesTheme.progressBarGlow}`
 
 export type ApplyStyleProgressTheme = "light" | "dark" | "onLight"
 
@@ -17,7 +19,7 @@ export interface ApplyStyleProgressBarProps {
 
 /**
  * Barra alineada con `/portal-oportunidades/.../aplicar`: tema `light` = `bg-ats-terracotta` sobre `bg-muted`;
- * `dark` y `onLight` = gradiente terracota-cobre (#A45C40 → #B87333) y resplandor, como el overlay oscuro del formulario.
+ * `dark` y `onLight` = gradiente terracota-cobre (#6EB940 → #438C39) y resplandor, como el overlay oscuro del formulario.
  */
 export function ApplyStyleProgressBar({
   theme = "light",

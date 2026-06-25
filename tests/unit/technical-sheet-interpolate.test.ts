@@ -67,9 +67,9 @@ describe("interpolateTechnicalSheetTemplate", () => {
     )
     expect(
       interpolateTechnicalSheetTemplate(`<img src="{{logoUrl}}">`, {
-        logoUrl: "https://app.example.com/appli-ai-logo.svg",
+        logoUrl: "https://app.example.com/Applican_Tree.svg",
       })
-    ).toBe(`<img src="https://app.example.com/appli-ai-logo.svg">`)
+    ).toBe(`<img src="https://app.example.com/Applican_Tree.svg">`)
   })
 
   it("escapes logoUrl when it is not a safe URL scheme", () => {
@@ -101,12 +101,12 @@ describe("buildTechnicalSheetTemplateContext", () => {
   it("includes logoUrl from options for document templates", () => {
     const ctx = buildTechnicalSheetTemplateContext(
       {},
-      { logoUrl: "https://app.example.com/appli-ai-logo.svg" }
+      { logoUrl: "https://app.example.com/Applican_Tree.svg" }
     )
-    expect(ctx.logoUrl).toBe("https://app.example.com/appli-ai-logo.svg")
+    expect(ctx.logoUrl).toBe("https://app.example.com/Applican_Tree.svg")
     expect(
       renderTechnicalSheetHtml('<img src="{{logoUrl}}" alt="" />', ctx)
-    ).toBe('<img src="https://app.example.com/appli-ai-logo.svg" alt="" />')
+    ).toBe('<img src="https://app.example.com/Applican_Tree.svg" alt="" />')
   })
 
   it("fills responsibilities from Description when the API sends no bullet array", () => {

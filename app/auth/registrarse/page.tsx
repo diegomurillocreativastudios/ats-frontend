@@ -106,12 +106,11 @@ export default function Registrarse() {
   return (
     <div className="min-h-screen flex font-sans">
       <div className="hidden lg:flex flex-1 bg-vo-magenta text-white flex-col justify-center px-16 gap-8">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8 lg:gap-10">
           <ProductBrand
             layout="inline"
             tone="onDark"
             density="authMarketing"
-            className="min-w-0"
           />
 
           <h1 className="text-[40px] font-bold leading-[1.2]">
@@ -149,7 +148,6 @@ export default function Registrarse() {
           layout="inline"
           tone="onDark"
           density="authMarketing"
-          className="min-w-0 shrink"
         />
         <p className="text-sm text-white/80">{t("tabletTitle")}</p>
       </div>

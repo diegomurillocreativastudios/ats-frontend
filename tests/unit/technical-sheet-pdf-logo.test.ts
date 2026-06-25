@@ -7,7 +7,7 @@ describe("tryLoadVisibleLogoDataUriForTechnicalSheetPdf", () => {
     vi.restoreAllMocks()
   })
 
-  it("returns an SVG data URI from public/appli-ai-logo.svg without using NEXT_PUBLIC_APP_URL", () => {
+  it("returns an SVG data URI from public/Applican_Tree.svg without using NEXT_PUBLIC_APP_URL", () => {
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "")
     vi.stubEnv("VERCEL_URL", "")
     const uri = tryLoadVisibleLogoDataUriForTechnicalSheetPdf()

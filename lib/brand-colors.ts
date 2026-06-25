@@ -1,15 +1,24 @@
-/** Paleta oficial ATS — fuente única para UI, PDFs y plantillas HTML. */
+/** Paleta oficial Applican Tree — fuente única para UI, PDFs y plantillas HTML. */
 export const BRAND_COLORS = {
-  grafito: "#202124",
-  terracotta: "#A45C40",
-  terracottaHover: "#8E4E36",
-  cobre: "#B87333",
-  cobreHover: "#9A6329",
-  cobreLight: "#D4A574",
-  arena: "#EAE0D5",
-  warmWhite: "#FBFAF7",
-  terracottaSoft: "#E8C4B8",
-  grafitoSurface: "#2A2B2E",
+  greenPrimary: "#6EB940",
+  greenLight: "#549E3C",
+  greenMedium: "#438C39",
+  greenDark: "#337C37",
+  greenDeep: "#256D35",
+  textGray: "#57585B",
+  white: "#FFFFFF",
+  black: "#000000",
+  /** Aliases legacy (claves históricas ATS / vo-*) */
+  grafito: "#57585B",
+  terracotta: "#6EB940",
+  terracottaHover: "#549E3C",
+  cobre: "#438C39",
+  cobreHover: "#337C37",
+  cobreLight: "#A8D98A",
+  arena: "#E8F5E0",
+  warmWhite: "#FFFFFF",
+  terracottaSoft: "#D4EDCC",
+  grafitoSurface: "#454648",
 } as const
 
 export type BrandColorKey = keyof typeof BRAND_COLORS

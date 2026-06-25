@@ -208,9 +208,9 @@ export function buildCandidatesByVacancyChartRows(
 }
 
 const DONUT_COLORS: Record<string, string> = {
-  open: "#A45C40",
-  closed: "#202124",
-  paused: "#B87333",
+  open: "#6EB940",
+  closed: "#256D35",
+  paused: "#438C39",
   draft: "#A8A39C",
   unknown: "#7A7B7E",
 }

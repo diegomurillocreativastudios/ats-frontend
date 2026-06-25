@@ -13,14 +13,14 @@ const MARGIN = {
 const FOOTER_DEBUG_MARKER_PREFIX = "PDFKit v2 · "
 const FOOTER_RESERVE = 28
 
-const COLOR_INK = "#202124"
-const COLOR_INK_SOFT = "#3D3E41"
-const COLOR_MUTED = "#5A5B5E"
-const COLOR_BORDER = "#EAE0D5"
-const COLOR_HEADER_BG = "#202124"
+const COLOR_INK = "#57585B"
+const COLOR_INK_SOFT = "#454648"
+const COLOR_MUTED = "#57585B"
+const COLOR_BORDER = "#E8F5E0"
+const COLOR_HEADER_BG = "#256D35"
 const COLOR_HEADER_INK = "#ffffff"
-const COLOR_FILL_LIGHT = "#FBFAF7"
-const COLOR_PROGRESS_TRACK = "#EAE0D5"
+const COLOR_FILL_LIGHT = "#FFFFFF"
+const COLOR_PROGRESS_TRACK = "#E8F5E0"
 
 interface ContentMetrics {
   left: number
@@ -255,8 +255,8 @@ export function drawKpiCard(
   help?: string
 ): void {
   doc.save()
-  doc.lineWidth(0.6).strokeColor(COLOR_BORDER).fillColor("#FBFAF7")
-  doc.roundedRect(x, y, w, h, 6).fillAndStroke("#FBFAF7", COLOR_BORDER)
+  doc.lineWidth(0.6).strokeColor(COLOR_BORDER).fillColor("#FFFFFF")
+  doc.roundedRect(x, y, w, h, 6).fillAndStroke("#FFFFFF", COLOR_BORDER)
   doc.restore()
 
   const pad = 8
@@ -380,7 +380,7 @@ function drawTableBodyRow(
   }
 
   doc.save()
-  doc.lineWidth(0.35).strokeColor("#EAE0D5")
+  doc.lineWidth(0.35).strokeColor("#E8F5E0")
   doc.rect(left, rowTop, totalWidth, rowHeight).stroke()
   doc.restore()
 
@@ -632,8 +632,8 @@ export function drawVacancyDetailCard(doc: PdfDoc, formatted: PdfVacancyDetailRo
   ensureSpace(doc, totalHeight)
 
   doc.save()
-  doc.lineWidth(0.7).strokeColor(COLOR_BORDER).fillColor("#FBFAF7")
-  doc.roundedRect(left, doc.y, width, totalHeight, 8).fillAndStroke("#FBFAF7", COLOR_BORDER)
+  doc.lineWidth(0.7).strokeColor(COLOR_BORDER).fillColor("#FFFFFF")
+  doc.roundedRect(left, doc.y, width, totalHeight, 8).fillAndStroke("#FFFFFF", COLOR_BORDER)
   doc.restore()
 
   let cursorY = doc.y + padding
@@ -662,7 +662,7 @@ export function drawVacancyDetailCard(doc: PdfDoc, formatted: PdfVacancyDetailRo
   const infoWidth = width - padding * 2
   const infoCol = infoWidth / 4
   doc.save()
-  doc.lineWidth(0.5).strokeColor("#EAE0D5")
+  doc.lineWidth(0.5).strokeColor("#E8F5E0")
   doc.rect(left + padding, cursorY, infoWidth, 34).stroke()
   doc.restore()
 
@@ -678,7 +678,7 @@ export function drawVacancyDetailCard(doc: PdfDoc, formatted: PdfVacancyDetailRo
 
   const metricWidth = infoWidth / 5
   doc.save()
-  doc.lineWidth(0.5).strokeColor("#EAE0D5")
+  doc.lineWidth(0.5).strokeColor("#E8F5E0")
   doc.rect(left + padding, cursorY, infoWidth, 34).stroke()
   doc.restore()
 

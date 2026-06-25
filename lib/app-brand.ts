@@ -1,10 +1,10 @@
 /** Nombre comercial de la plataforma. */
-export const APP_NAME = "Appli AI"
+export const APP_NAME = "Applican Tree"
 
 export const APP_TAGLINE = "Inteligencia aplicada al reclutamiento"
 
-/** Ruta pública del logo SVG (marca «A»). */
-export const APP_LOGO_SVG_SRC = "/appli-ai-logo.svg"
+/** Ruta pública del logo SVG (árbol + wordmark). */
+export const APP_LOGO_SVG_SRC = "/Applican_Tree.svg"
 
 /** Nombre de archivo en `public/` (SVG único para UI, PDFs y reportes). */
-export const APP_LOGO_SVG_FILE = "appli-ai-logo.svg"
+export const APP_LOGO_SVG_FILE = "Applican_Tree.svg"

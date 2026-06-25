@@ -35,8 +35,8 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   body {
     margin: 0;
     padding: 0;
-    background: #FBFAF7;
-    color: #202124;
+    background: #FFFFFF;
+    color: #256D35;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 9.5pt;
     line-height: 1.42;
@@ -47,7 +47,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     max-width: 100%;
     margin: 0 auto;
     padding: 0;
-    background: #FBFAF7;
+    background: #FFFFFF;
   }
 
   /* ─────────── Header ─────────── */
@@ -59,7 +59,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     align-items: start;
     padding-top: 4px;
     padding-bottom: 16px;
-    border-bottom: 1.5px solid #EAE0D5;
+    border-bottom: 1.5px solid #E8F5E0;
     margin-bottom: 18px;
   }
 
@@ -74,7 +74,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #5A5B5E;
+    color: #57585B;
   }
 
   .report-title {
@@ -82,7 +82,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-size: 21pt;
     line-height: 1.08;
     font-weight: 800;
-    color: #202124;
+    color: #256D35;
     letter-spacing: -0.4px;
     overflow-wrap: anywhere;
   }
@@ -97,10 +97,10 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   }
 
   .report-meta {
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 9px;
     padding: 12px 14px;
-    background: #FBFAF7;
+    background: #FFFFFF;
   }
 
   .report-meta-row {
@@ -117,7 +117,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #5A5B5E;
+    color: #57585B;
     margin-bottom: 3px;
   }
 
@@ -125,7 +125,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     display: block;
     font-size: 9.2pt;
     font-weight: 700;
-    color: #202124;
+    color: #256D35;
     overflow-wrap: anywhere;
   }
 
@@ -143,11 +143,11 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   .section-title {
     margin: 0 0 11px;
     padding-bottom: 7px;
-    border-bottom: 2px solid #202124;
+    border-bottom: 2px solid #256D35;
     font-size: 12.5pt;
     line-height: 1.1;
     font-weight: 800;
-    color: #202124;
+    color: #256D35;
     letter-spacing: 0.2px;
     break-after: avoid;
     page-break-after: avoid;
@@ -170,17 +170,17 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   }
 
   .summary-card {
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 9px;
     padding: 11px 12px;
-    background: #FBFAF7;
+    background: #FFFFFF;
     min-height: 64px;
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
   .summary-card.secondary {
-    background: #FBFAF7;
+    background: #FFFFFF;
   }
 
   .summary-label {
@@ -188,7 +188,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #5A5B5E;
+    color: #57585B;
     margin-bottom: 4px;
   }
 
@@ -196,23 +196,23 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-size: 16.5pt;
     line-height: 1.05;
     font-weight: 800;
-    color: #202124;
+    color: #256D35;
   }
 
   .summary-help {
     margin-top: 4px;
     font-size: 7.8pt;
     line-height: 1.3;
-    color: #5A5B5E;
+    color: #57585B;
   }
 
   /* ─────────── Highlights ─────────── */
 
   .insights-box {
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 9px;
     padding: 12px 16px 12px 16px;
-    background: #FBFAF7;
+    background: #FFFFFF;
     break-inside: avoid;
     page-break-inside: avoid;
     margin-bottom: 12px;
@@ -227,7 +227,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     margin: 4px 0;
     font-size: 9pt;
     line-height: 1.5;
-    color: #3D3E41;
+    color: #454648;
     text-align: justify;
   }
 
@@ -238,10 +238,10 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   }
 
   .top-card {
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 9px;
     padding: 10px 12px;
-    background: #FBFAF7;
+    background: #FFFFFF;
     break-inside: avoid;
     page-break-inside: avoid;
   }
@@ -251,7 +251,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #5A5B5E;
+    color: #57585B;
     margin-bottom: 5px;
   }
 
@@ -260,7 +260,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-size: 9pt;
     line-height: 1.3;
     font-weight: 700;
-    color: #202124;
+    color: #256D35;
     margin-bottom: 4px;
     overflow-wrap: anywhere;
   }
@@ -269,9 +269,9 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     display: inline-block;
     font-size: 9.5pt;
     font-weight: 800;
-    color: #202124;
+    color: #256D35;
     background: #f3f4f6;
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 999px;
     padding: 2px 10px;
   }
@@ -305,20 +305,20 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   }
 
   .report-table th {
-    background: #202124;
+    background: #256D35;
     color: #ffffff;
     text-align: left;
     font-weight: 700;
     font-size: 7.6pt;
     letter-spacing: 0.04em;
     padding: 8px 9px;
-    border: 1px solid #3D3E41;
+    border: 1px solid #454648;
   }
 
   .report-table td {
     padding: 8px 9px;
-    border: 1px solid #EAE0D5;
-    color: #3D3E41;
+    border: 1px solid #E8F5E0;
+    color: #454648;
     vertical-align: top;
     overflow-wrap: anywhere;
     word-break: normal;
@@ -326,7 +326,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   }
 
   .report-table tbody tr:nth-child(even) td {
-    background: #FBFAF7;
+    background: #FFFFFF;
   }
 
   .center {
@@ -334,7 +334,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   }
 
   .muted {
-    color: #5A5B5E;
+    color: #57585B;
   }
 
   /* ─────────── Section 5: Vacancy detail cards ─────────── */
@@ -345,9 +345,9 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   }
 
   .vacancy-card {
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 10px;
-    background: #FBFAF7;
+    background: #FFFFFF;
     padding: 13px 15px;
     margin-bottom: 14px;
     break-inside: avoid;
@@ -371,7 +371,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-size: 12pt;
     line-height: 1.18;
     font-weight: 800;
-    color: #202124;
+    color: #256D35;
     overflow-wrap: anywhere;
   }
 
@@ -385,7 +385,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
 
   .vacancy-status {
     font-size: 8.2pt;
-    color: #3D3E41;
+    color: #454648;
     white-space: nowrap;
     text-align: right;
     padding-top: 3px;
@@ -393,23 +393,23 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
 
   .vacancy-status strong {
     font-weight: 800;
-    color: #202124;
+    color: #256D35;
   }
 
   .vacancy-info-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 7px;
     overflow: hidden;
     margin-bottom: 10px;
-    background: #FBFAF7;
+    background: #FFFFFF;
   }
 
   .vacancy-info-item {
     padding: 8px 10px;
-    border-right: 1px solid #EAE0D5;
-    border-bottom: 1px solid #EAE0D5;
+    border-right: 1px solid #E8F5E0;
+    border-bottom: 1px solid #E8F5E0;
     min-height: 38px;
   }
 
@@ -427,7 +427,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #5A5B5E;
+    color: #57585B;
     margin-bottom: 3px;
   }
 
@@ -435,7 +435,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     display: block;
     font-size: 8.6pt;
     font-weight: 700;
-    color: #202124;
+    color: #256D35;
     overflow-wrap: anywhere;
     line-height: 1.3;
   }
@@ -448,11 +448,11 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   }
 
   .metric-mini-card {
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 7px;
     padding: 8px 6px;
     text-align: center;
-    background: #FBFAF7;
+    background: #FFFFFF;
   }
 
   .metric-mini-label {
@@ -461,7 +461,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     letter-spacing: 0.06em;
     line-height: 1.2;
     text-transform: uppercase;
-    color: #5A5B5E;
+    color: #57585B;
     margin-bottom: 4px;
   }
 
@@ -469,7 +469,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-size: 13pt;
     line-height: 1.05;
     font-weight: 800;
-    color: #202124;
+    color: #256D35;
   }
 
   .ai-score-row {
@@ -480,10 +480,10 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
   }
 
   .ai-score-cell {
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 7px;
     padding: 7px 9px;
-    background: #FBFAF7;
+    background: #FFFFFF;
   }
 
   .ai-score-label {
@@ -492,7 +492,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #5A5B5E;
+    color: #57585B;
     margin-bottom: 3px;
   }
 
@@ -501,7 +501,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-size: 10.5pt;
     line-height: 1.1;
     font-weight: 800;
-    color: #202124;
+    color: #256D35;
   }
 
   .progress-row {
@@ -518,21 +518,21 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     gap: 12px;
     font-size: 8pt;
     font-weight: 700;
-    color: #3D3E41;
+    color: #454648;
     margin-bottom: 5px;
   }
 
   .progress-track {
     width: 100%;
     height: 7px;
-    background: #EAE0D5;
+    background: #E8F5E0;
     border-radius: 999px;
     overflow: hidden;
   }
 
   .progress-fill {
     height: 100%;
-    background: #202124;
+    background: #256D35;
     border-radius: 999px;
   }
 
@@ -545,7 +545,7 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #5A5B5E;
+    color: #57585B;
     margin-bottom: 6px;
   }
 
@@ -559,12 +559,12 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    border: 1px solid #EAE0D5;
+    border: 1px solid #E8F5E0;
     border-radius: 999px;
     padding: 3px 9px;
-    background: #FBFAF7;
+    background: #FFFFFF;
     font-size: 7.8pt;
-    color: #3D3E41;
+    color: #454648;
   }
 
   .stage-pill-name {
@@ -573,12 +573,12 @@ export const VACANCY_PROGRESS_REPORT_DEFAULT_TEMPLATE = `<style>
 
   .stage-pill-count {
     font-weight: 800;
-    color: #202124;
+    color: #256D35;
   }
 
   .stage-empty {
     font-size: 8pt;
-    color: #5A5B5E;
+    color: #57585B;
   }
 
   /* ─────────── Section 6: Technical table ─────────── */

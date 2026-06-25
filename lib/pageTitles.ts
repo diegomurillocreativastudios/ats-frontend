@@ -22,7 +22,7 @@ const PORTAL_ADMIN = "Portal Admin"
 const CUENTA = "Cuenta"
 const OPORTUNIDADES = "Oportunidades"
 
-/** Une partes con " | " (siempre incluye el prefijo Appli AI). */
+/** Une partes con " | " (siempre incluye el prefijo Applican Tree). */
 function joinDocumentTitle(...parts) {
   return parts.filter((p) => p != null && String(p).trim() !== "").join(" | ")
 }
@@ -159,7 +159,7 @@ export function getOpportunityDetailStaticTitle() {
   return joinDocumentTitle(BASE_TITLE, OPORTUNIDADES, "Vacante")
 }
 
-/** Sufijo (puede incluir ` | `) que se antepone a `Appli AI | …` para rutas exactas. */
+/** Sufijo (puede incluir ` | `) que se antepone a `Applican Tree | …` para rutas exactas. */
 const EXACT_PATH_SUFFIX = {
   "/": joinDocumentTitle(PORTAL_CANDIDATO, "Inicio"),
   "/mi-perfil": joinDocumentTitle(CUENTA, "Mi perfil"),
@@ -247,8 +247,8 @@ function titlePortalAdmin(normalizedPath) {
 }
 
 /**
- * Título del documento según la ruta: `Appli AI | [portal o Cuenta] | [pantalla …]`;
- * rutas bajo `/auth/` usan `Appli AI | <pantalla>` sin segmento «Cuenta».
+ * Título del documento según la ruta: `Applican Tree | [portal o Cuenta] | [pantalla …]`;
+ * rutas bajo `/auth/` usan `Applican Tree | <pantalla>` sin segmento «Cuenta».
  * @param {string} pathname - Ruta actual (ej: "/portal-rrhh/entrevistas")
  * @returns {string}
  */

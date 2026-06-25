@@ -38,7 +38,7 @@ type ExecutiveSummaryReportPdfTemplateProps = {
   generatedAt?: string
 }
 
-const purple = '#A45C40'
+const purple = '#6EB940'
 const green = '#00a878'
 const orange = '#f97316'
 
@@ -69,7 +69,7 @@ function KpiCard({
     <div className="rounded-xl border border-slate-200 bg-background p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-normal text-[#A45C40]">
+          <p className="text-[11px] font-bold uppercase tracking-normal text-[#6EB940]">
             {label}
           </p>
 
@@ -78,7 +78,7 @@ function KpiCard({
           </p>
         </div>
 
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-50 text-[#A45C40]">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-50 text-[#6EB940]">
           {icon}
         </div>
       </div>
@@ -252,7 +252,7 @@ export const ExecutiveSummaryReportPdfTemplate = forwardRef<
 
             <div className="mt-4 flex items-center gap-8 text-[12px] text-slate-700">
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#A45C40]" />
+                <span className="h-2 w-2 rounded-full bg-[#6EB940]" />
                 <span>
                   <strong>Abiertas:</strong> {openVacancies}{' '}
                   ({formatPercent(openVacanciesPercent)})
@@ -361,7 +361,7 @@ export const ExecutiveSummaryReportPdfTemplate = forwardRef<
             subtitle="Seguimiento de evaluaciones completadas y tasa de aprobación."
           >
             <div className="rounded-lg border border-dashed border-slate-200 bg-background px-4 py-5">
-              <Target className="text-[#A45C40]" size={20} />
+              <Target className="text-[#6EB940]" size={20} />
 
               <p className="mt-3 text-[13px] font-bold text-slate-900">
                 {data.technicalEvaluationsCompleted > 0
@@ -382,7 +382,7 @@ export const ExecutiveSummaryReportPdfTemplate = forwardRef<
             subtitle="Canal con mayor actividad registrada en el período seleccionado."
           >
             <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-[#A45C40]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-[#6EB940]">
                 <Megaphone size={18} />
               </div>
 
@@ -397,7 +397,7 @@ export const ExecutiveSummaryReportPdfTemplate = forwardRef<
 
         <section className="mt-4 rounded-xl border border-slate-200 bg-background p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           <div className="flex items-center gap-2">
-            <TrendingUp size={16} className="text-[#A45C40]" />
+            <TrendingUp size={16} className="text-[#6EB940]" />
             <h3 className="text-[15px] font-bold text-slate-950">
               Hallazgos del período
             </h3>

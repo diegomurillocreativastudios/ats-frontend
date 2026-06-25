@@ -194,11 +194,11 @@
     "auth": {
       "login": {
         "title": "Iniciar sesión",
-        "description": "Accedé a tu cuenta de Appli AI"
+        "description": "Accedé a tu cuenta de Applican Tree"
       },
       "forgotPassword": {
         "title": "¿Olvidaste tu contraseña?",
-        "description": "Solicitá instrucciones por correo para restablecer tu contraseña en Appli AI"
+        "description": "Solicitá instrucciones por correo para restablecer tu contraseña en Applican Tree"
       },
       "resetPassword": {
         "title": "Restablecer contraseña",
@@ -206,7 +206,7 @@
       },
       "register": {
         "title": "Registrarse",
-        "description": "Creá tu cuenta en la plataforma Appli AI"
+        "description": "Creá tu cuenta en la plataforma Applican Tree"
       }
     },
     "portalSelection": {
@@ -218,28 +218,28 @@
       "description": "Consultá y gestioná los datos de tu cuenta en el portal del candidato"
     },
     "recruiterVacancies": {
-      "title": "Appli AI | Portal RRHH | Vacantes",
+      "title": "Applican Tree | Portal RRHH | Vacantes",
       "description": "Gestiona las posiciones abiertas y vacantes de la empresa"
     },
     "recruiterVacancyDetail": {
-      "title": "Appli AI | Portal RRHH | Detalle de vacante",
+      "title": "Applican Tree | Portal RRHH | Detalle de vacante",
       "description": "Consulta la información de la vacante"
     },
     "recruiterVacancyResults": {
-      "title": "Appli AI | Portal RRHH | Resultados de vacante",
+      "title": "Applican Tree | Portal RRHH | Resultados de vacante",
       "description": "Consulta los resultados de candidatos evaluados"
     },
     "recruiterReports": {
-      "title": "Appli AI | Portal RRHH | Reportes",
+      "title": "Applican Tree | Portal RRHH | Reportes",
       "description": "Consulta métricas y reportes de reclutamiento"
     },
     "recruiterCandidateDetail": {
-      "title": "Appli AI | Portal RRHH | Candidato",
+      "title": "Applican Tree | Portal RRHH | Candidato",
       "description": "Perfil detallado del candidato en el portal RRHH"
     },
     "adminPortal": {
       "title": "Portal Admin",
-      "description": "Administración de la plataforma Appli AI",
+      "description": "Administración de la plataforma Applican Tree",
       "companies": {
         "title": "Empresas",
         "description": "Gestión de empresas cliente (tenants) de la plataforma"
@@ -286,41 +286,41 @@
     },
     "candidatePortal": {
       "home": {
-        "title": "Appli AI | Portal Candidato",
+        "title": "Applican Tree | Portal Candidato",
         "description": "Portal del candidato - Resumen de tu proceso de selección"
       },
       "documents": {
-        "title": "Appli AI | Portal Candidato | Documentos",
+        "title": "Applican Tree | Portal Candidato | Documentos",
         "description": "Gestiona tus documentos en el portal del candidato"
       },
       "interviews": {
-        "title": "Appli AI | Portal Candidato | Entrevistas",
+        "title": "Applican Tree | Portal Candidato | Entrevistas",
         "description": "Consultá tus entrevistas agendadas e historial en el portal del candidato"
       }
     },
     "recruiterPortal": {
-      "title": "Appli AI | Portal RRHH",
+      "title": "Applican Tree | Portal RRHH",
       "description": "Portal RRHH - Dashboard de reclutamiento y gestión de candidatos"
     },
     "recruiterCandidates": {
-      "title": "Appli AI | Portal RRHH | Candidatos",
+      "title": "Applican Tree | Portal RRHH | Candidatos",
       "description": "Gestiona los candidatos y sus perfiles en el portal RRHH"
     },
     "recruiterSettings": {
-      "title": "Appli AI | Portal RRHH | Configuración",
+      "title": "Applican Tree | Portal RRHH | Configuración",
       "description": "Configuración del portal RRHH"
     },
     "publicOpportunities": {
       "list": {
-        "title": "Appli AI | Oportunidades",
+        "title": "Applican Tree | Oportunidades",
         "description": "Explorá vacantes activas por departamento y modalidad"
       },
       "detail": {
-        "title": "Appli AI | Oportunidades | Vacante",
+        "title": "Applican Tree | Oportunidades | Vacante",
         "description": "Detalle público de una vacante activa"
       },
       "apply": {
-        "title": "Appli AI | Oportunidades | Aplicar",
+        "title": "Applican Tree | Oportunidades | Aplicar",
         "description": "Formulario público para aplicar a una vacante activa"
       }
     }
@@ -495,7 +495,7 @@
         "processErrorSelf": "Error al procesar tu información.",
         "processErrorRecruiter": "Error al procesar el candidato.",
         "aiIntro": "Los CVs y documentos de identidad se procesan con IA para extraer información preliminar del perfil.",
-        "kpisAria": "KPIs de eficiencia de Appli AI",
+        "kpisAria": "KPIs de eficiencia de Applican Tree",
         "documentTypeHeading": "Tipo de documento de identidad",
         "documentTypeDescription": "Selecciona el tipo de documento que corresponde al PDF que se cargará.",
         "documentTypeAria": "Tipo de documento de identidad",
@@ -1333,14 +1333,14 @@
       "calendarPage": {
         "title": "Calendario",
         "description": "Conectá Google Calendar para sincronizar entrevistas y enviar invitaciones automáticas.",
-        "pageDescription": "Conectá Google Calendar para sincronizar entrevistas desde Appli AI.",
+        "pageDescription": "Conectá Google Calendar para sincronizar entrevistas desde Applican Tree.",
         "connectedToast": "Google Calendar conectado correctamente.",
         "syncing": "Sincronizando…",
         "syncInterviews": "Sincronizar entrevistas",
         "connectedAs": "Conectado como {email} (tu cuenta)",
         "notConnected": "Google Calendar no está conectado.",
         "connectHint": "Conectá tu cuenta para sincronizar entrevistas.",
-        "connectDescription": "Al conectar, podrás autorizar a Appli AI a crear eventos e invitaciones en tu Google Calendar (según lo que implemente el backend).",
+        "connectDescription": "Al conectar, podrás autorizar a Applican Tree a crear eventos e invitaciones en tu Google Calendar (según lo que implemente el backend).",
         "connectedServerHint": "Las entrevistas con fecha pueden generarse o actualizarse en tu calendario según la configuración del servidor.",
         "syncFailed": "No se pudo sincronizar el calendario.",
         "syncResultPartial": "Sincronizado: {synced} ok, {failed} con error.",
@@ -2645,7 +2645,7 @@
         },
         "summaryHelper": "Gestiona {plural} disponibles para nuevas vacantes.",
         "inUse": "En uso por vacantes activas o históricas.",
-        "emptyBody": "Cuando crees un {singular}, quedará disponible para clasificar vacantes desde el resto de Appli AI.",
+        "emptyBody": "Cuando crees un {singular}, quedará disponible para clasificar vacantes desde el resto de Applican Tree.",
         "form": {
           "nameLabel": "Nombre",
           "descriptionLabel": "Descripción",
@@ -3086,7 +3086,7 @@
       "title": "AVISO DE PRIVACIDAD Y PROTECCIÓN DE DATOS PERSONALES",
       "decline": "No, gracias",
       "accept": "Acepto",
-      "intro": "Sus datos personales serán incorporados a la base de datos de Appli AI y procesados exclusivamente por profesionales autorizados del área de Recursos Humanos en el contexto de procesos de selección y gestión de personal.",
+      "intro": "Sus datos personales serán incorporados a la base de datos de Applican Tree y procesados exclusivamente por profesionales autorizados del área de Recursos Humanos en el contexto de procesos de selección y gestión de personal.",
       "dataTreatmentHeading": "Tratamiento de datos:",
       "purposeItem": "Finalidad: Evaluación de candidatos y gestión de procesos de reclutamiento",
       "accessItem": "Acceso: Personal autorizado de RRHH únicamente",
@@ -3104,7 +3104,7 @@
     "navbar": {
       "ariaMain": "Navegación principal de oportunidades",
       "ariaGoToPortal": "Ir al portal de oportunidades",
-      "logoIconAlt": "Logo icono Appli AI",
+      "logoIconAlt": "Logo icono Applican Tree",
       "portalSubtitle": "Portal de oportunidades",
       "ariaGoToSelection": "Ir a selección de portal",
       "changePortal": "Cambiar portal",
@@ -3135,7 +3135,7 @@
       "formSectionLabel": "Formulario de postulación",
       "formTitle": "Enviá tu postulación",
       "formBody": "Completá los datos y adjuntá tu CV. La información se envía de forma segura al equipo de reclutamiento.",
-      "documentTitle": "Appli AI | Oportunidades | Aplicar a {title}"
+      "documentTitle": "Applican Tree | Oportunidades | Aplicar a {title}"
     }
   }
 }

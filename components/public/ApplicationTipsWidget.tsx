@@ -73,7 +73,7 @@ export function ApplicationTipsWidget({
 
         <div className="relative p-5">
           <div className="flex items-start gap-3.5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-ats-cobre-light/30 bg-linear-to-br from-[#D4A574]/20 to-[#B87333]/20">
+            <div className={publicOpportunitiesTheme.tipsIconSurface}>
               <Lightbulb
                 className="h-5 w-5 text-ats-terracotta"
                 aria-hidden="true"

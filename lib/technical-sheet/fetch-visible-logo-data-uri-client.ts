@@ -1,7 +1,7 @@
 import { APP_LOGO_SVG_SRC } from "@/lib/app-brand"
 
 /**
- * Carga el icono de Appli AI como data URI en el navegador.
+ * Carga el icono de Applican Tree como data URI en el navegador.
  */
 export async function fetchVisibleLogoDataUriClient(origin: string): Promise<string> {
   const base = origin.replace(/\/$/, "")

@@ -53,7 +53,7 @@ function getCompanyInitials(companyName: string): string {
 
 function DetailPill({ value }: { value: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground">
+    <span className={publicOpportunitiesTheme.detailPill}>
       {value}
     </span>
   )
@@ -331,13 +331,13 @@ export function PublicVacancyDetailPage({
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
               <div className="space-y-6">
               <section className={`relative overflow-hidden rounded-[34px] px-6 py-7 sm:px-8 sm:py-8 ${panelClassName}`}>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(164,92,64,0.35),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(184,115,51,0.16),transparent_24%)]" />
+                <div className={publicOpportunitiesTheme.heroCardOverlay} />
 
                 <div className="relative flex flex-col gap-7">
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-4">
-                      <p className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                        <Sparkles className="h-3.5 w-3.5 text-ats-cobre" aria-hidden />
+                      <p className={publicOpportunitiesTheme.activeBadge}>
+                        <Sparkles className="h-3.5 w-3.5 text-ats-terracotta" aria-hidden />
                         {t("activeBadge")}
                       </p>
 
