@@ -1,14 +1,24 @@
 import { Suspense } from "react"
+import { getTranslations } from "next-intl/server"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
 import { CalendarSettingsClient } from "./calendar-settings-client"
 
-export default function CalendarSettingsPage() {
+export async function generateMetadata() {
+  const t = await getTranslations("RecruiterPortal.settings.calendarPage")
+  return {
+    title: t("title"),
+    description: t("pageDescription"),
+  }
+}
+
+export default async function CalendarSettingsPage() {
+  const t = await getTranslations("RecruiterPortal.settings")
   const trail = [
-    { label: "Portal RRHH", href: "/portal-rrhh/entrevistas" },
-    { label: "Configuracion", href: "/portal-rrhh/configuracion" },
-    { label: "Calendario" },
+    { label: t("portalCrumb"), href: "/portal-rrhh/entrevistas" },
+    { label: t("breadcrumb"), href: "/portal-rrhh/configuracion" },
+    { label: t("calendarPage.title") },
   ]
 
   const main = (
@@ -30,7 +40,7 @@ export default function CalendarSettingsPage() {
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <RRHHTopbar
             variant="desktop"
-            breadcrumbLabel="Calendario"
+            breadcrumbLabel={t("calendarPage.title")}
             breadcrumbTrail={trail}
           />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
@@ -41,7 +51,7 @@ export default function CalendarSettingsPage() {
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
         <RRHHTopbar
           variant="tablet"
-          breadcrumbLabel="Calendario"
+          breadcrumbLabel={t("calendarPage.title")}
           breadcrumbTrail={trail}
         />
         <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">

@@ -1,21 +1,27 @@
+"use client"
+
+import { useTranslations } from "next-intl"
+
 const RECENT_CANDIDATES = [
   { initials: "MC", name: "María Castro", role: "Diseñador UX/UI Senior", badge: "Entrevista", badgeClass: "bg-[#DBEAFE] text-[#1E40AF]" },
   { initials: "JP", name: "Juan Pérez", role: "Frontend Developer", badge: "Evaluación", badgeClass: "bg-[#FEF3C7] text-[#92400E]" },
   { initials: "AL", name: "Ana López", role: "Product Manager", badge: "Contratado", badgeClass: "bg-[#DCFCE7] text-[#166534]" },
-];
+]
 
 export default function RecentCandidatesCard() {
+  const t = useTranslations("RecruiterPortal.dashboard")
+
   return (
     <div
       className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6"
-      aria-label="Candidatos recientes"
+      aria-label={t("recentCandidatesAria")}
     >
       <div className="flex items-center justify-between">
         <h2 className="font-sans text-base font-semibold text-foreground">
-          Candidatos Recientes
+          {t("recentCandidatesTitle")}
         </h2>
         <span className="rounded-xl bg-[#DBEAFE] px-2.5 py-1 font-sans text-xs font-medium text-[#1E40AF]">
-          15 nuevos
+          {t("newCandidatesBadge", { count: 15 })}
         </span>
       </div>
       <ul className="flex flex-col gap-3">
@@ -46,5 +52,5 @@ export default function RecentCandidatesCard() {
         ))}
       </ul>
     </div>
-  );
+  )
 }

@@ -1,14 +1,36 @@
 "use client"
 
-import { useCallback, useEffect, useState, type FormEvent } from "react"
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react"
 import {
   buildCandidateProfileSaveBody,
-  getBirthDateInputValidationError,
+  getBirthDateInputValidationErrorCode,
+  type BirthDateValidationErrorCode,
   type CandidateProfile,
   type CandidateProfileSaveBody,
   type FullProfileFormInput,
 } from "@/lib/candidate-profile"
 import { buildFullFormStateFromSources } from "@/lib/candidate-profile-hydrate"
+
+export interface CandidateProfileEditorMessages {
+  requiredFields: string
+  resumeRequired: string
+  birthDate: Record<BirthDateValidationErrorCode, string>
+  triggerComplete: string
+  triggerEdit: string
+}
+
+const DEFAULT_EDITOR_MESSAGES: CandidateProfileEditorMessages = {
+  requiredFields: "Completá titular, resumen y documento de identidad.",
+  resumeRequired:
+    "Tu perfil debe tener currículum en texto registrado. Cargá un CV en Documentos o contactá soporte.",
+  birthDate: {
+    invalid: "Fecha inválida",
+    futureDate: "La fecha no puede estar en el futuro",
+    tooYoung: "Debés tener al menos 18 años",
+  },
+  triggerComplete: "Completar mi perfil",
+  triggerEdit: "Editar mi perfil",
+}
 
 export interface UseCandidateProfileEditorParams {
   initialProfile: CandidateProfile | null
@@ -18,6 +40,7 @@ export interface UseCandidateProfileEditorParams {
   saving: boolean
   saveError: string | null
   onDismissSaveError: () => void
+  messages?: Partial<CandidateProfileEditorMessages>
 }
 
 export function useCandidateProfileEditor({
@@ -28,7 +51,20 @@ export function useCandidateProfileEditor({
   saving,
   saveError,
   onDismissSaveError,
+  messages: messagesOverride,
 }: UseCandidateProfileEditorParams) {
+  const messages: CandidateProfileEditorMessages = useMemo(
+    () => ({
+      ...DEFAULT_EDITOR_MESSAGES,
+      ...messagesOverride,
+      birthDate: {
+        ...DEFAULT_EDITOR_MESSAGES.birthDate,
+        ...messagesOverride?.birthDate,
+      },
+    }),
+    [messagesOverride],
+  )
+
   const [form, setForm] = useState<FullProfileFormInput>(() =>
     buildFullFormStateFromSources(initialProfile, enrichedNd)
   )
@@ -77,18 +113,16 @@ export function useCandidateProfileEditor({
       const r = form.resumeMarkdown.trim()
       const n = form.nationalId.trim()
       if (!h || !s || !n) {
-        setValidationError("Completá titular, resumen y documento de identidad.")
+        setValidationError(messages.requiredFields)
         return
       }
       if (!r) {
-        setValidationError(
-          "Tu perfil debe tener currículum en texto registrado. Cargá un CV en Documentos o contactá soporte."
-        )
+        setValidationError(messages.resumeRequired)
         return
       }
-      const birthDateError = getBirthDateInputValidationError(form.birthDateInput)
-      if (birthDateError) {
-        setValidationError(birthDateError)
+      const birthDateErrorCode = getBirthDateInputValidationErrorCode(form.birthDateInput)
+      if (birthDateErrorCode) {
+        setValidationError(messages.birthDate[birthDateErrorCode])
         return
       }
       try {
@@ -98,7 +132,7 @@ export function useCandidateProfileEditor({
         /* saveError lo muestra el padre */
       }
     },
-    [form, onDismissSaveError, onSave]
+    [form, messages, onDismissSaveError, onSave]
   )
 
   return {
@@ -111,7 +145,7 @@ export function useCandidateProfileEditor({
     handleOpenEdit,
     handleCancelEdit,
     handleSubmit,
-    triggerLabel: isCreating ? "Completar mi perfil" : "Editar mi perfil",
+    triggerLabel: isCreating ? messages.triggerComplete : messages.triggerEdit,
     saving,
     saveError,
     onDismissSaveError,

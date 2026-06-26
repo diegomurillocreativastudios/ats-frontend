@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { downloadElementAsPdf, type DownloadElementAsPdfOptions } from "@/lib/pdf/download-element-as-pdf"
 
 export interface DownloadPdfButtonProps {
@@ -18,7 +19,7 @@ export interface DownloadPdfButtonProps {
 export function DownloadPdfButton({
   targetRef,
   fileName,
-  label = "Descargar PDF",
+  label,
   className,
   disabled = false,
   orientation = "portrait",
@@ -26,6 +27,8 @@ export function DownloadPdfButton({
   scale = 2,
   marginMm = 0,
 }: DownloadPdfButtonProps) {
+  const t = useTranslations("Common")
+  const resolvedLabel = label ?? t("downloadPdf")
   const [isGenerating, setIsGenerating] = useState(false)
 
   const handleDownload = async () => {
@@ -63,7 +66,7 @@ export function DownloadPdfButton({
       data-html2canvas-ignore="true"
       className={className}
     >
-      {isGenerating ? "Generando PDF..." : label}
+      {isGenerating ? t("generatingPdf") : resolvedLabel}
     </button>
   )
 }

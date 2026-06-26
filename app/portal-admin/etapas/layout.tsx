@@ -1,8 +1,12 @@
 import type { ReactNode } from "react"
+import { getTranslations } from "next-intl/server"
 
-export const metadata = {
-  title: "Etapas",
-  description: "Gestión de etapas y estados del proceso de reclutamiento",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.adminPortal.stages")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function PortalAdminEtapasLayout({

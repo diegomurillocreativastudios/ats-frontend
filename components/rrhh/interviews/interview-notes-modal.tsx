@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import Snackbar from "@/components/ui/Snackbar"
 import {
@@ -27,6 +28,9 @@ export function InterviewNotesModal({
   contextLine,
   onSaved,
 }: InterviewNotesModalProps) {
+  const t = useTranslations("RecruiterPortal.interviews.modals")
+  const tCommon = useTranslations("Common")
+  const tToasts = useTranslations("RecruiterPortal.interviews.toasts")
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +58,7 @@ export function InterviewNotesModal({
         setSnackbar({
           open: true,
           variant: "success",
-          message: "Notas guardadas.",
+          message: tToasts("notesSaved"),
         })
       }
       onClose()
@@ -69,7 +73,7 @@ export function InterviewNotesModal({
     } finally {
       setSaving(false)
     }
-  }, [interviewId, notes, onClose, onSaved])
+  }, [interviewId, notes, onClose, onSaved, tToasts])
 
   if (!interviewId) return null
 
@@ -80,7 +84,7 @@ export function InterviewNotesModal({
       onClose={() => {
         if (!saving) onClose()
       }}
-      title="Notas de la entrevista"
+      title={t("notesTitle")}
       size="md"
       closeOnOverlayClick={!saving}
       overlayZIndexClass="z-[100]"
@@ -92,7 +96,7 @@ export function InterviewNotesModal({
             disabled={saving}
             className="inline-flex items-center rounded-md border border-border px-4 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
           >
-            Cancelar
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -103,7 +107,7 @@ export function InterviewNotesModal({
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             ) : null}
-            {saving ? "Guardando…" : "Guardar"}
+            {saving ? t("notesSaving") : t("notesSave")}
           </button>
         </div>
       }
@@ -118,7 +122,7 @@ export function InterviewNotesModal({
           </p>
         ) : null}
         <label htmlFor="interview-notes-modal-field" className="font-sans text-sm font-medium">
-          Apuntes
+          {t("notesField")}
         </label>
         <textarea
           id="interview-notes-modal-field"
@@ -126,7 +130,7 @@ export function InterviewNotesModal({
           onChange={(e) => setNotes(e.target.value)}
           rows={8}
           disabled={saving}
-          placeholder="Escribí observaciones o seguimiento sobre esta entrevista…"
+          placeholder={t("notesPlaceholder")}
           className="resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
         />
       </div>

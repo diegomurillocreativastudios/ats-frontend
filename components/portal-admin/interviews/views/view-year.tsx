@@ -1,26 +1,27 @@
 "use client"
 
 import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 import type { AdminCalendarEvent } from "@/lib/api/admin-interviews-calendar"
 import {
   groupEventsByLocalDateKey,
   toLocalDateKey,
 } from "@/lib/admin/interviews-calendar-layout"
 
-const MONTH_NAMES = [
-  "Ene",
-  "Feb",
-  "Mar",
-  "Abr",
-  "May",
-  "Jun",
-  "Jul",
-  "Ago",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dic",
-]
+const MONTH_KEYS = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec",
+] as const
 
 function heatClass(count: number): string {
   if (count <= 0) return "bg-muted/30"
@@ -37,12 +38,14 @@ export interface ViewYearProps {
 }
 
 export function ViewYear({ anchorDate, events, onSelectDay }: ViewYearProps) {
+  const t = useTranslations("AdminPortal.interviews.calendar.year")
   const year = anchorDate.getFullYear()
   const byDay = useMemo(() => groupEventsByLocalDateKey(events), [events])
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {MONTH_NAMES.map((name, monthIndex) => {
+      {MONTH_KEYS.map((monthKey, monthIndex) => {
+        const monthName = t(`months.${monthKey}`)
         const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
         const firstDow = new Date(year, monthIndex, 1).getDay()
         const offset = firstDow === 0 ? 6 : firstDow - 1
@@ -53,11 +56,11 @@ export function ViewYear({ anchorDate, events, onSelectDay }: ViewYearProps) {
 
         return (
           <div
-            key={name}
+            key={monthKey}
             className="rounded-xl border border-border bg-card p-3"
           >
             <h3 className="mb-2 font-sans text-sm font-semibold text-foreground">
-              {name} {year}
+              {monthName} {year}
             </h3>
             <div className="grid grid-cols-7 gap-0.5">
               {cells.map((dayNum, idx) => {
@@ -71,10 +74,10 @@ export function ViewYear({ anchorDate, events, onSelectDay }: ViewYearProps) {
                   <button
                     key={key}
                     type="button"
-                    title={`${dayNum}: ${count} entrevista(s)`}
+                    title={t("dayTitle", { day: dayNum, count })}
                     onClick={() => onSelectDay(day)}
                     className={`h-4 w-full rounded-sm ${heatClass(count)} hover:ring-1 hover:ring-vo-purple`}
-                    aria-label={`${dayNum} de ${name}, ${count} entrevistas`}
+                    aria-label={t("dayAria", { day: dayNum, month: monthName, count })}
                   />
                 )
               })}

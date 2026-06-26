@@ -8,12 +8,14 @@ import {
 } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import Input from "@/components/auth/Input"
 import Button from "@/components/auth/Button"
 import AuthBrand from "@/components/auth/AuthBrand"
 import ProductBrand from "@/components/branding/ProductBrand"
 import Snackbar from "@/components/ui/Snackbar"
 import { apiClient } from "@/lib/api"
+import { getApiErrorMessage } from "@/lib/api-error"
 
 interface RegisterFormState {
   email: string
@@ -26,29 +28,21 @@ interface SnackbarState {
   text: string
 }
 
-const getMessageFromError = (err: unknown) => {
-  if (typeof err !== "object" || err === null) {
-    return "Error al crear la cuenta. Intenta de nuevo."
+const getRegisterErrorMessage = (
+  err: unknown,
+  t: ReturnType<typeof useTranslations<"Auth.register">>
+) => {
+  if (typeof err === "object" && err !== null) {
+    const e = err as Record<string, unknown>
+    if (e.status === 409) return t("errors.emailTaken")
+    if (typeof e.status === "number" && e.status >= 500) return t("errors.server")
   }
-  const e = err as Record<string, unknown>
-  if (e.errors && typeof e.errors === "object") {
-    const messages = Object.values(e.errors as Record<string, unknown[]>)
-      .flat()
-      .filter((m) => typeof m === "string" && m.trim())
-    if (messages.length > 0) return messages.join(" ")
-  }
-  if (typeof e.message === "string") return e.message
-  if (e.detail !== undefined)
-    return typeof e.detail === "string" ? e.detail : JSON.stringify(e.detail)
-  if (typeof e.error === "string") return e.error
-  if (typeof e.title === "string") return e.title
-  if (e.status === 409) return "Este correo ya está registrado."
-  if (typeof e.status === "number" && e.status >= 500)
-    return "Error del servidor. Intenta más tarde."
-  return "Error al crear la cuenta. Intenta de nuevo."
+  return getApiErrorMessage(err) || t("errors.generic")
 }
 
 export default function Registrarse() {
+  const t = useTranslations("Auth.register")
+  const tValidation = useTranslations("Validation")
   const router = useRouter()
   const [formData, setFormData] = useState<RegisterFormState>({
     email: "",
@@ -85,7 +79,7 @@ export default function Registrarse() {
     setErrors({});
 
     if (formData.password !== formData.confirmPassword) {
-      setErrors((prev) => ({ ...prev, confirmPassword: "Las contraseñas no coinciden" }));
+      setErrors((prev) => ({ ...prev, confirmPassword: tValidation("passwordsDontMatch") }));
       return;
     }
 
@@ -95,14 +89,14 @@ export default function Registrarse() {
         email: formData.email,
         password: formData.password
       });
-      setMessage({ type: "success", text: "Cuenta creada correctamente. Ya puedes iniciar sesión." });
+      setMessage({ type: "success", text: t("toastSuccess") });
       setTimeout(() => {
         router.push("/auth/iniciar-sesion");
       }, 2000);
     } catch (err: unknown) {
       setMessage({
         type: "error",
-        text: getMessageFromError(err),
+        text: getRegisterErrorMessage(err, t),
       })
     } finally {
       setLoading(false);
@@ -112,21 +106,18 @@ export default function Registrarse() {
   return (
     <div className="min-h-screen flex font-sans">
       <div className="hidden lg:flex flex-1 bg-vo-magenta text-white flex-col justify-center px-16 gap-8">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8 lg:gap-10">
           <ProductBrand
             layout="inline"
             tone="onDark"
             density="authMarketing"
-            className="min-w-0"
           />
 
           <h1 className="text-[40px] font-bold leading-[1.2]">
-            Únete a la plataforma<br />líder en reclutamiento
+            {t("brandTitle")}
           </h1>
-          <p className="text-lg text-white/80 leading-normal">
-            Crea tu cuenta y comienza a gestionar<br />
-            tu proceso de selección de manera<br />
-            inteligente.
+          <p className="text-lg text-white/80 leading-normal whitespace-pre-line">
+            {t("brandSubtitle")}
           </p>
         </div>
 
@@ -135,19 +126,19 @@ export default function Registrarse() {
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <span className="text-base">Configuración rápida en minutos</span>
+            <span className="text-base">{t("feature1")}</span>
           </div>
           <div className="flex items-center gap-3">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
-            <span className="text-base">Datos seguros y encriptados</span>
+            <span className="text-base">{t("feature2")}</span>
           </div>
           <div className="flex items-center gap-3">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
-            <span className="text-base">Soporte 24/7 disponible</span>
+            <span className="text-base">{t("feature3")}</span>
           </div>
         </div>
       </div>
@@ -157,13 +148,16 @@ export default function Registrarse() {
           layout="inline"
           tone="onDark"
           density="authMarketing"
-          className="min-w-0 shrink"
         />
-        <p className="text-sm text-white/80">Sistema de Reclutamiento Inteligente</p>
+        <p className="text-sm text-white/80">{t("tabletTitle")}</p>
       </div>
 
-      <div className="flex-1 flex items-center justify-center bg-background px-6 md:px-10 lg:px-12 py-6 md:py-40 lg:py-0 md:max-w-full lg:max-w-[560px]">
-        <div className="w-full md:max-w-[500px] lg:max-w-[420px]">
+      <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-background px-6 md:px-10 lg:px-12 py-6 md:py-40 lg:py-0 md:max-w-full lg:max-w-[560px]">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+          <div className="ambient-orb ambient-orb--green right-[-120px] top-[-80px] h-[360px] w-[360px]" />
+          <div className="ambient-orb ambient-orb--violet bottom-[-120px] left-[-100px] h-[340px] w-[340px]" />
+        </div>
+        <div className="glass-iridescent-card glass-edge-highlight w-full rounded-2xl p-6 md:max-w-[500px] md:p-8 lg:max-w-[420px]">
           <div className="md:hidden w-full flex justify-center mb-5">
             <AuthBrand size="mobile-register" variant="light-secondary" />
           </div>
@@ -171,21 +165,21 @@ export default function Registrarse() {
           <div className="flex flex-col gap-5 md:gap-5 lg:gap-6">
             <div className="flex flex-col items-center md:items-start gap-1 md:gap-1.5 lg:gap-2 text-center md:text-left">
               <h2 className="text-[22px] md:text-2xl lg:text-[28px] font-bold text-foreground">
-                Registrarse
+                {t("title")}
               </h2>
               <p className="text-sm md:text-sm lg:text-base text-muted-foreground">
-                Completa tus datos{" "}
-                <span className="hidden lg:inline">para registrarte</span>
+                {t("subtitle")}{" "}
+                <span className="hidden lg:inline">{t("subtitleExtended")}</span>
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-3.5 md:gap-4">
                 <Input
-                  label="Correo electrónico"
+                  label={t("emailLabel")}
                   type="email"
                   name="email"
-                  placeholder="juan@empresa.com"
+                  placeholder={t("emailPlaceholder")}
                   required
                   value={formData.email}
                   onChange={handleChange}
@@ -194,10 +188,10 @@ export default function Registrarse() {
                 />
 
                 <Input
-                  label="Contraseña"
+                  label={t("passwordLabel")}
                   type={showPasswords ? "text" : "password"}
                   name="password"
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder={t("passwordPlaceholder")}
                   required
                   value={formData.password}
                   onChange={handleChange}
@@ -206,10 +200,10 @@ export default function Registrarse() {
                 />
 
                 <Input
-                  label="Confirmar contraseña"
+                  label={t("confirmPasswordLabel")}
                   type={showPasswords ? "text" : "password"}
                   name="confirmPassword"
-                  placeholder="Repetir contraseña"
+                  placeholder={t("confirmPasswordPlaceholder")}
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -225,29 +219,29 @@ export default function Registrarse() {
                     onChange={(e) => setShowPasswords(e.target.checked)}
                     disabled={loading}
                     className="h-4 w-4 rounded border-input accent-vo-magenta focus:ring-vo-magenta"
-                    aria-label="Mostrar contraseñas"
+                    aria-label={t("showPasswordsAria")}
                   />
                   <label
                     htmlFor="showPasswords"
                     className="text-xs md:text-[13px] lg:text-[13px] text-foreground cursor-pointer"
                   >
-                    Mostrar contraseñas
+                    {t("showPasswords")}
                   </label>
                 </div>
               </div>
 
               <Button type="submit" variant="secondary" disabled={loading}>
-                {loading ? "Creando cuenta..." : "Crear Cuenta"}
+                {loading ? t("submitting") : t("submit")}
               </Button>
             </form>
 
             <div className="flex items-center justify-center gap-1 text-[13px] md:text-[13px] lg:text-sm">
-              <span className="text-muted-foreground">¿Ya tienes cuenta?</span>
+              <span className="text-muted-foreground">{t("hasAccount")}</span>
               <Link
                 href="/auth/iniciar-sesion"
                 className="font-medium text-vo-magenta hover:underline"
               >
-                Inicia sesión
+                {t("loginLink")}
               </Link>
             </div>
           </div>

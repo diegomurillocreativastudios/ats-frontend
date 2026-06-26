@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react"
 import Link from "next/link"
 import { X, Loader2, Calendar, FileText, User } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { Interview } from "@/lib/api/interviews"
 import { useVacancyInterviewPrep } from "@/hooks/use-vacancy-interview-prep"
 import { mergeApplicantsWithInterviews } from "@/lib/recruiter/vacancy-applicant-interview-prep"
@@ -39,6 +40,7 @@ export function InterviewCandidatePrepPanel({
   onOpenTechnicalSheet,
   onClose,
 }: InterviewCandidatePrepPanelProps) {
+  const t = useTranslations("RecruiterPortal.interviews.prepPanel")
   const { data, loading, error, load, reset } = useVacancyInterviewPrep(vacancyId)
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export function InterviewCandidatePrepPanel({
   const headerTitle =
     data?.vacancyTitle?.trim() ||
     vacancyTitleFallback?.trim() ||
-    "Candidatos de la vacante"
+    t("vacancyFallback")
 
   const isDrawer = variant === "drawer"
   const isEmbedded = variant === "embedded"
@@ -94,11 +96,11 @@ export function InterviewCandidatePrepPanel({
               isDrawer ? "text-lg" : "text-xl"
             }`}
           >
-            {isEmbedded ? "Candidatos de la vacante" : "Revisar candidatos"}
+            {isEmbedded ? t("titleEmbedded") : t("titleDrawer")}
           </h2>
           <p className="mt-1 font-sans text-sm text-muted-foreground">
             {isEmbedded
-              ? `${headerTitle} · Contexto por postulante para agendar entrevistas o abrir ficha técnica.`
+              ? t("embeddedDescription", { title: headerTitle })
               : headerTitle}
           </p>
         </div>
@@ -107,7 +109,7 @@ export function InterviewCandidatePrepPanel({
             type="button"
             onClick={onClose}
             className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            aria-label="Cerrar panel"
+            aria-label={t("closeAria")}
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
@@ -126,7 +128,7 @@ export function InterviewCandidatePrepPanel({
             aria-live="polite"
           >
             <Loader2 className="h-7 w-7 animate-spin text-vo-purple" aria-hidden />
-            <p className="font-sans text-sm text-muted-foreground">Cargando candidatos…</p>
+            <p className="font-sans text-sm text-muted-foreground">{t("loading")}</p>
           </div>
         ) : error ? (
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-3" role="alert">
@@ -138,15 +140,15 @@ export function InterviewCandidatePrepPanel({
               }}
               className="mt-3 inline-flex items-center rounded-md bg-vo-purple px-3 py-2 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple"
             >
-              Reintentar
+              {t("retry")}
             </button>
           </div>
         ) : rows.length === 0 ? (
           <p className="py-6 text-center font-sans text-sm text-muted-foreground">
-            No hay postulantes en esta vacante todavía.
+            {t("empty")}
           </p>
         ) : (
-          <ul className={listClassName} aria-label="Lista de candidatos">
+          <ul className={listClassName} aria-label={t("listAria")}>
             {rows.map((row) => (
               <li
                 key={row.candidateProfileId}
@@ -157,29 +159,29 @@ export function InterviewCandidatePrepPanel({
                 </p>
                 <dl className="mt-2 space-y-1.5 font-sans text-xs sm:text-sm">
                   <div>
-                    <dt className="text-muted-foreground">Etapa actual</dt>
+                    <dt className="text-muted-foreground">{t("currentStage")}</dt>
                     <dd className="text-foreground">{dash(row.stageLabel)}</dd>
                   </div>
                   {row.applicationStatusLabel ? (
                     <div>
-                      <dt className="text-muted-foreground">Estado de postulación</dt>
+                      <dt className="text-muted-foreground">{t("applicationStatus")}</dt>
                       <dd className="text-foreground">{row.applicationStatusLabel}</dd>
                     </div>
                   ) : null}
                   <div>
-                    <dt className="text-muted-foreground">Entrevista</dt>
+                    <dt className="text-muted-foreground">{t("interview")}</dt>
                     <dd className="text-foreground">{dash(row.interviewSummaryLabel)}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground">Fortalezas</dt>
+                    <dt className="text-muted-foreground">{t("strengths")}</dt>
                     <dd className="whitespace-pre-wrap text-foreground">{dash(row.strengths)}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground">Aspectos a considerar</dt>
+                    <dt className="text-muted-foreground">{t("considerations")}</dt>
                     <dd className="whitespace-pre-wrap text-foreground">{dash(row.considerations)}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground">Comentarios</dt>
+                    <dt className="text-muted-foreground">{t("comments")}</dt>
                     <dd className="whitespace-pre-wrap text-foreground">{dash(row.relevantComments)}</dd>
                   </div>
                 </dl>
@@ -190,7 +192,7 @@ export function InterviewCandidatePrepPanel({
                     className="inline-flex items-center gap-1.5 rounded-md border border-vo-purple bg-vo-purple px-2.5 py-1.5 font-sans text-xs font-medium text-white hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                   >
                     <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                    Agendar entrevista
+                    {t("scheduleInterview")}
                   </button>
                   <button
                     type="button"
@@ -200,14 +202,14 @@ export function InterviewCandidatePrepPanel({
                     className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                   >
                     <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                    Ficha técnica
+                    {t("technicalSheet")}
                   </button>
                   <Link
                     href={`/portal-rrhh/candidatos/${encodeURIComponent(row.candidateProfileId)}`}
                     className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                   >
                     <User className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                    Ver perfil
+                    {t("viewProfile")}
                   </Link>
                 </div>
               </li>

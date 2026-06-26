@@ -1,0 +1,3142 @@
+{
+  "Common": {
+    "loading": "Caricamento...",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "closeModal": "Chiudi modale",
+    "closeNotification": "Chiudi notifica",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password",
+    "pickDate": "Scegli data",
+    "prevMonth": "Mese precedente",
+    "nextMonth": "Mese successivo",
+    "delete": "Delete",
+    "unspecified": "No especificar",
+    "downloadPdf": "Descargar PDF",
+    "generatingPdf": "Generando PDF...",
+    "userFallback": "User",
+    "adminRoleFallback": "Administrador",
+    "selectPlaceholder": "Select...",
+    "retry": "Retry",
+    "search": "Search",
+    "clear": "Clear",
+    "edit": "Edit",
+    "create": "Crear",
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue"
+  },
+  "Actions": {
+    "logout": "Esci",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "Navigation": {
+    "home": "Home",
+    "myProfile": "Il mio profilo",
+    "documents": "Documenti",
+    "interviews": "Colloqui",
+    "candidates": "Candidati",
+    "vacancies": "Posizioni",
+    "reports": "Report",
+    "settings": "Impostazioni",
+    "stages": "Fasi",
+    "templates": "Modelli",
+    "interviewsCatalog": "Colloqui — Cataloghi",
+    "interviewsCalendar": "Colloqui — Calendario",
+    "users": "Utenti",
+    "companies": "Aziende",
+    "departments": "Reparti",
+    "modalities": "Modalità",
+    "documentTypes": "Tipi di documento"
+  },
+  "Topbar": {
+    "portalCandidate": "Portale candidato",
+    "portalRRHH": "Portale HR",
+    "portalAdmin": "Portale amministrazione",
+    "notifications": "Notifiche",
+    "openMenu": "Apri menu",
+    "userMenu": "Menu utente",
+    "breadcrumb": "Percorso di navigazione",
+    "adminShortcut": "Amministrazione"
+  },
+  "Sidebar": {
+    "goHome": "Vai alla home",
+    "ariaCandidate": "Navigazione principale",
+    "ariaRRHH": "Navigazione Portale HR",
+    "ariaAdmin": "Navigazione Portale amministrazione",
+    "menuCandidate": "Menu candidato",
+    "menuRRHH": "Menu HR",
+    "menuAdmin": "Menu amministrazione"
+  },
+  "Auth": {
+    "login": {
+      "brandTitle": "Sistema di gestione candidati<br></br>per i reparti HR",
+      "brandSubtitle": "Ottimizza il tuo processo di selezione con l'IA.<br></br>Gestisci candidati, posizioni e valutazioni<br></br>in un unico posto.",
+      "brandTitleSm": "Sistema di gestione<br></br>del reclutamento",
+      "brandSubtitleSm": "Ottimizza il tuo<br></br>processo di selezione con l'IA.",
+      "feature1": "Abbinamento intelligente dei candidati",
+      "feature2": "Processi di assunzione semplificati",
+      "feature3": "Report direzionali in tempo reale",
+      "title": "Accedi",
+      "subtitle": "Inserisci le tue credenziali",
+      "subtitleExtended": "per accedere al sistema",
+      "emailLabel": "Nome utente o email",
+      "emailPlaceholder": "admin o nome@azienda.com",
+      "passwordLabel": "Password",
+      "showPassword": "Mostra password",
+      "forgotPasswordLink": "Hai dimenticato la password?",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso...",
+      "noAccount": "Non hai un account?",
+      "registerShort": "Registrati",
+      "registerLong": "Registrati qui",
+      "toastSignedIn": "Accesso effettuato con successo",
+      "toastPasswordReset": "La tua password è stata aggiornata correttamente. Accedi con la nuova password.",
+      "toastLogoutSuccess": "Disconnessione effettuata correttamente.",
+      "toastLogoutError": "Non abbiamo potuto confermare la disconnessione, ma ti abbiamo reindirizzato alla pagina di accesso.",
+      "toastInvalidCredentials": "Credenziali non valide. Verifica email e password."
+    },
+    "forgot": {
+      "brandTitle": "Recupera l'accesso<br></br>al tuo account",
+      "brandSubtitle": "Verifichiamo la tua email e nel passaggio successivo imposti una nuova password.",
+      "brandSubtitleSm": "Verifichiamo la tua email e prosegui con la nuova password.",
+      "feature1": "Email verificata nel sistema",
+      "feature2": "Password sicura (min. 8 caratteri)",
+      "title": "Hai dimenticato la password?",
+      "subtitle": "Inserisci l'email del tuo account. Se è registrata, prosegui per scegliere una nuova password.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "nome@azienda.com",
+      "submit": "Invia istruzioni",
+      "submitting": "Invio in corso...",
+      "retryIn": "Riprova tra {seconds}s",
+      "backToLogin": "Torna all'accesso",
+      "toastSuccess": "Ti abbiamo inviato un'email con un link per reimpostare la password.",
+      "toastNoAccount": "Non esiste un account registrato con questa email. Verifica il dato o registrati.",
+      "toastRequestFailed": "Impossibile inviare la richiesta. Riprova."
+    },
+    "reset": {
+      "brandTitle": "Nuova password",
+      "brandSubtitle": "Scegli una password sicura che non usi su altri siti.",
+      "brandSubtitleEmailFlow": "La tua email è già verificata. Scegli una password sicura.",
+      "brandSubtitleSm": "Scegli una password sicura.",
+      "brandSubtitleSmEmailFlow": "Email verificata. Completa la tua nuova password.",
+      "feature1": "Scegli una password che ricordi",
+      "featureEmailVerified": "Email verificata",
+      "featureRecoveryLink": "Link di recupero",
+      "title": "Reimposta password",
+      "subtitle": "Inserisci la nuova password e confermala.",
+      "subtitleEmailFlow": "La tua email è stata verificata. Inserisci e conferma la nuova password.",
+      "emailLabel": "Email",
+      "newPasswordLabel": "Nuova password",
+      "newPasswordPlaceholder": "La tua nuova password",
+      "minChars": "Minimo 8 caratteri",
+      "confirmPasswordLabel": "Conferma password",
+      "confirmPasswordPlaceholder": "Ripeti password",
+      "showPasswords": "Mostra password",
+      "submit": "Salva password",
+      "submitting": "Salvataggio...",
+      "retryIn": "Riprova tra {seconds}s",
+      "backToLogin": "Torna all'accesso",
+      "toastResetFailed": "Impossibile reimpostare la password.",
+      "invalidBrandTitle": "Link non valido",
+      "invalidBrandSubtitle": "Avvia la reimpostazione da \"Hai dimenticato la password?\".",
+      "invalidCardTitle": "Non siamo riusciti ad aprire la reimpostazione",
+      "invalidCardBody": "Manca un'email verificata o un token valido. Torna a \"Hai dimenticato la password?\" e completa il passaggio precedente.",
+      "invalidGoForgot": "Vai a password dimenticata"
+    },
+    "loadingFallback": "Caricamento…",
+    "poweredBy": "Powered by <link>Creativa Studios</link> LLC",
+    "register": {
+      "brandTitle": "Únete a la plataforma líder en reclutamiento",
+      "brandSubtitle": "Crea tu cuenta y comienza a optimizar tu proceso de selección con IA.",
+      "brandSubtitleSm": "Crea tu cuenta y optimiza tu selección.",
+      "feature1": "Configuración rápida en minutos",
+      "feature2": "Datos seguros y encriptados",
+      "feature3": "Soporte 24/7 disponible",
+      "tabletTitle": "Sistema de Reclutamiento Inteligente",
+      "title": "Registrarse",
+      "subtitle": "Completa tus datos",
+      "subtitleExtended": "para registrarte",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "juan@empresa.com",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Mínimo 8 caracteres",
+      "confirmPasswordLabel": "Confirmar contraseña",
+      "confirmPasswordPlaceholder": "Repetir contraseña",
+      "showPasswords": "Mostrar contraseñas",
+      "showPasswordsAria": "Mostrar contraseñas",
+      "submit": "Crear Cuenta",
+      "submitting": "Creando cuenta...",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "loginLink": "Inicia sesión",
+      "toastSuccess": "Cuenta creada correctamente. Ya puedes iniciar sesión.",
+      "errors": {
+        "generic": "Error al crear la cuenta. Intenta de nuevo.",
+        "emailTaken": "Este correo ya está registrado.",
+        "server": "Error del servidor. Intenta más tarde."
+      }
+    }
+  },
+  "Validation": {
+    "userOrEmailRequired": "Inserisci il tuo nome utente o email",
+    "invalidEmail": "Email non valida",
+    "emailRequired": "L'email è obbligatoria",
+    "passwordRequired": "La password è obbligatoria",
+    "passwordMinLength": "La password deve contenere almeno 8 caratteri",
+    "passwordsDontMatch": "Le password non coincidono"
+  },
+  "Errors": {
+    "connection": "Errore di connessione. Riprova."
+  },
+  "Metadata": {
+    "auth": {
+      "login": {
+        "title": "Accedi",
+        "description": "Accedi al tuo account Applican Tree"
+      },
+      "forgotPassword": {
+        "title": "Hai dimenticato la password?",
+        "description": "Richiedi istruzioni via email per reimpostare la password in Applican Tree"
+      },
+      "resetPassword": {
+        "title": "Reimposta password",
+        "description": "Imposta una nuova password dopo aver verificato la tua email o con il link di recupero"
+      },
+      "register": {
+        "title": "Registrarse",
+        "description": "Create tu cuenta en la plataforma Applican Tree"
+      }
+    },
+    "portalSelection": {
+      "title": "Scegli un portale",
+      "description": "Seleziona il portale candidato, opportunità o reclutamento"
+    },
+    "candidateProfile": {
+      "title": "Il mio profilo",
+      "description": "Consulta e gestisci le informazioni del tuo account nel portale dei candidati"
+    },
+    "recruiterVacancies": {
+      "title": "ApplicanTree | Portale HR | Posizioni",
+      "description": "Gestisci le posizioni aperte e le vacanze dell'azienda"
+    },
+    "recruiterVacancyDetail": {
+      "title": "ApplicanTree | Portale HR | Dettaglio posizione",
+      "description": "Consulta le informazioni della posizione"
+    },
+    "recruiterVacancyResults": {
+      "title": "ApplicanTree | Portale HR | Risultati posizione",
+      "description": "Consulta i risultati dei candidati valutati"
+    },
+    "recruiterReports": {
+      "title": "ApplicanTree | Portale HR | Report",
+      "description": "Consulta metriche e report di reclutamento"
+    },
+    "recruiterCandidateDetail": {
+      "title": "ApplicanTree | Portale HR | Candidato",
+      "description": "Profilo dettagliato del candidato nel portale HR"
+    },
+    "adminPortal": {
+      "title": "Portale Admin",
+      "description": "Amministrazione della piattaforma Applican Tree",
+      "companies": {
+        "title": "Aziende",
+        "description": "Gestione delle aziende clienti (tenant) della piattaforma"
+      },
+      "users": {
+        "title": "Utenti",
+        "description": "Gestione degli utenti della piattaforma"
+      },
+      "stages": {
+        "title": "Fasi",
+        "description": "Gestione delle fasi e degli stati del processo di selezione"
+      },
+      "templates": {
+        "title": "Modelli",
+        "description": "Gestione dei modelli di notifiche e documenti"
+      },
+      "departments": {
+        "title": "Dipartimenti",
+        "description": "Gestione del catalogo globale di dipartimenti per le posizioni"
+      },
+      "modalities": {
+        "title": "Modalità",
+        "description": "Gestione del catalogo globale di modalità per le posizioni"
+      },
+      "documentTypes": {
+        "title": "Tipi di documento",
+        "description": "Gestione del catalogo globale dei tipi di documento di identità"
+      },
+      "interviewsCatalog": {
+        "title": "Colloqui",
+        "description": "Cataloghi di tipi, modalità e stati dei colloqui"
+      },
+      "interviewsCalendar": {
+        "title": "Interview calendar | Admin Portal",
+        "description": "Overview of scheduled interviews"
+      },
+      "configuration": {
+        "title": "Impostazioni",
+        "description": "Impostazioni generali del portale di amministrazione"
+      }
+    },
+    "root": {
+      "description": "Portal del candidate - Resumen de tu proceso de seleccion"
+    },
+    "candidatePortal": {
+      "home": {
+        "title": "ApplicanTree | Portal Candidate",
+        "description": "Portal del candidate - Resumen de tu proceso de seleccion"
+      },
+      "documents": {
+        "title": "ApplicanTree | Portal Candidate | Documents",
+        "description": "Manage tus documentos en el portal del candidate"
+      },
+      "interviews": {
+        "title": "ApplicanTree | Portal Candidate | Interviews",
+        "description": "View tus interviews agendadas e historial en el portal del candidate"
+      }
+    },
+    "recruiterPortal": {
+      "title": "ApplicanTree | Portal RRHH",
+      "description": "Portal RRHH - Dashboard de reclutamiento y gestion de candidates"
+    },
+    "recruiterCandidates": {
+      "title": "ApplicanTree | Portal RRHH | Candidates",
+      "description": "Manage los candidates y sus perfiles en el portal RRHH"
+    },
+    "recruiterSettings": {
+      "title": "ApplicanTree | Portal RRHH | Settings",
+      "description": "Settings del portal RRHH"
+    },
+    "publicOpportunities": {
+      "list": {
+        "title": "ApplicanTree | Portale opportunità",
+        "description": "Esplora offerte attive per dipartimento e modalità"
+      },
+      "detail": {
+        "title": "ApplicanTree | Portale opportunità | Offerta",
+        "description": "Dettaglio pubblico di un'offerta attiva"
+      },
+      "apply": {
+        "title": "ApplicanTree | Portale opportunità | Candidati",
+        "description": "Modulo pubblico per candidarsi a un'offerta attiva"
+      }
+    }
+  },
+  "PortalSelection": {
+    "title": "Dove vuoi entrare?",
+    "subtitle": "Scegli il portale in base al tuo ruolo per continuare",
+    "enter": "Entra →",
+    "footer": "Puoi cambiare portale in seguito dal menu o disconnettendoti e accedendo di nuovo.",
+    "candidateName": "Portale candidato",
+    "candidateDesc": "Il tuo processo, documenti e candidature",
+    "candidateAria": "Vai al portale del candidato",
+    "opportunitiesName": "Portale opportunità",
+    "opportunitiesDesc": "Esplora le posizioni attive e candidati",
+    "opportunitiesAria": "Vai al portale delle opportunità di lavoro",
+    "rrhhName": "Portale HR",
+    "rrhhDesc": "Candidati, posizioni, modelli e fasi",
+    "rrhhAria": "Vai al portale di reclutamento HR",
+    "adminName": "Portale amministrazione",
+    "adminDesc": "Utenti e configurazione della piattaforma",
+    "adminAria": "Vai al portale di amministrazione"
+  },
+  "CandidatePortal": {
+    "home": {
+      "loading": "Caricamento…",
+      "greeting": "Ciao, {name}! 👋",
+      "description": "Qui puoi controllare l'avanzamento delle tue candidature e le prossime attività.",
+      "statsAria": "Riepilogo statistiche",
+      "processAria": "Monitoraggio del processo",
+      "activitiesApplicationsAria": "Attività e candidature",
+      "upcomingActivitiesAria": "Prossime attività",
+      "myApplicationsAria": "Le mie candidature"
+    },
+    "stats": {
+      "activeApplications": "Candidature attive",
+      "activeApplicationsDesc": "Processi a cui stai partecipando attualmente.",
+      "pendingEvaluations": "Valutazioni in sospeso",
+      "pendingEvaluationsDesc": "Test o valutazioni che devi completare.",
+      "upcomingInterviews": "Prossimi colloqui",
+      "upcomingInterviewsDesc": "Appuntamenti programmati nel tuo processo.",
+      "unreadMessages": "Messaggi non letti",
+      "unreadMessagesDesc": "Comunicazioni da rivedere."
+    },
+    "activities": {
+      "title": "Prossime attività",
+      "emptyTitle": "Non hai attività in programma",
+      "emptyDescription": "Quando avrai colloqui, valutazioni o appuntamenti programmati, appariranno qui."
+    },
+    "applications": {
+      "title": "Le mie candidature",
+      "emptyTitle": "Non hai candidature attive",
+      "emptyDescription": "Quando ti candidi a una posizione, potrai seguire qui l'avanzamento del tuo processo.",
+      "stageProgress": "Fase {current} di {total}",
+      "progressAria": "Avanzamento: {percentage}%"
+    },
+    "process": {
+      "title": "Monitoraggio del mio processo",
+      "emptyTitle": "Non hai candidature attive",
+      "emptyDescription": "Quando ti candidi a una posizione, potrai seguire qui l'avanzamento del tuo processo.",
+      "currentStagePrefix": "Attualmente sei nella fase:",
+      "overallProgress": "Avanzamento generale",
+      "stageProgress": "Fase {current} di {total}",
+      "progressAria": "Avanzamento: {percentage}%",
+      "processStages": "Fasi del processo",
+      "stagesComingSoon": "Le fasi del processo verranno mostrate qui a breve.",
+      "stageLabel": "Fase {order}",
+      "stageCompleted": "Completata",
+      "stageCurrent": "In corso",
+      "stagePending": "In sospeso"
+    },
+    "interviews": {
+      "breadcrumb": "Colloqui",
+      "headerTitle": "I tuoi colloqui",
+      "headerDescription": "Una vista pensata per te: prossimi appuntamenti, dati del contatto e i dettagli condivisi dall'azienda, senza passaggi di modifica.",
+      "headerDescriptionShort": "Prossimi appuntamenti e cronologia del tuo processo.",
+      "loading": "Caricamento dei tuoi colloqui…",
+      "empty": "Non ci sono ancora colloqui programmati per il tuo profilo. Quando le Risorse Umane fisseranno un appuntamento, lo vedrai qui con data, modalità e indicazioni.",
+      "upcomingTitle": "Prossimi colloqui",
+      "upcomingDescription": "Conferma data e ora; se qualcosa cambia, il team di selezione ti contatterà.",
+      "upcomingEmpty": "Non hai colloqui programmati al momento.",
+      "historyTitle": "Cronologia",
+      "historyDescription": "Colloqui già svolti, annullati o riprogrammati.",
+      "historyEmpty": "Nessun colloquio precedente registrato.",
+      "upcomingAria": "Prossimi colloqui",
+      "historyAria": "Cronologia colloqui",
+      "cardAria": "Colloquio: {label}",
+      "defaultVacancyLabel": "Processo di selezione",
+      "vacancyShort": "Posizione · {id}…",
+      "defaultType": "Colloquio",
+      "joinGoogleMeet": "Partecipa a Google Meet",
+      "contactPrefix": "Contatto:",
+      "descriptionLabel": "Descrizione",
+      "instructionsLabel": "Indicazioni",
+      "durationMinutes": "{minutes} min",
+      "durationHours": "{hours} h",
+      "durationHoursMinutes": "{hours} h {minutes} min"
+    },
+    "documents": {
+      "breadcrumb": "Documenti",
+      "title": "Documenti",
+      "description": "Carica e gestisci i documenti del tuo processo di selezione",
+      "descriptionShort": "Carica e gestisci i tuoi documenti",
+      "completeInfo": "Completa le informazioni",
+      "completeInfoShort": "Completa info",
+      "completeInfoAria": "Completa le informazioni del candidato",
+      "loading": "Caricamento documenti...",
+      "uploadGeneral": "Carica documento generale",
+      "uploading": "Caricamento...",
+      "uploadGeneralAria": "Carica i documenti generali del candidato",
+      "toastDeleted": "Documento eliminato correttamente.",
+      "toastDeleteError": "Impossibile eliminare il documento.",
+      "toastProcessed": "Documento elaborato correttamente.",
+      "toastProcessError": "Errore durante l'elaborazione del documento.",
+      "toastProcessedMany": "{count, plural, one {# documento elaborato correttamente.} other {# documenti elaborati correttamente.}}",
+      "toastProcessManyError": "Errore durante l'elaborazione dei documenti.",
+      "toastSelectFile": "Seleziona almeno un file da caricare.",
+      "toastNoProfile": "Impossibile identificare il tuo profilo di candidato.",
+      "toastResumeBlocked": "Questo endpoint è solo per documenti generali. Rimuovi o sostituisci i file tipo CV/Resume (ad esempio: {fileName}).",
+      "toastGeneralUploaded": "{count, plural, one {Documento generale caricato correttamente.} other {# documenti generali caricati correttamente.}}",
+      "toastGeneralUploadError": "Impossibile caricare il documento generale.",
+      "upload": {
+        "dropzoneAria": "Trascina i file o fai clic per caricare i documenti",
+        "dropActive": "Rilascia i file qui",
+        "dropPrompt": "Trascina i file qui o fai clic per caricare",
+        "helperDefault": "PDF, DOC, DOCX fino a 10 MB",
+        "errorTypeNotAllowed": "Tipo non consentito. Solo .PDF",
+        "errorTooLarge": "Il file supera 10 MB ({size}).",
+        "selectedCount": "{count, plural, one {# file selezionato} other {# file selezionati}}",
+        "selectedListAria": "Elenco dei file selezionati",
+        "processAll": "Elabora tutti",
+        "processAllAria": "Elabora tutti i CV/Resume con l'IA",
+        "processing": "Elaborazione…",
+        "removeAll": "Rimuovi tutti",
+        "process": "Elabora",
+        "processAria": "Elabora con l'IA: {fileName}",
+        "processingAria": "Elaborazione: {fileName}",
+        "processedAria": "Elaborato: {fileName}",
+        "done": "Fatto",
+        "removeFileAria": "Rimuovi {fileName}",
+        "processError": "Errore durante l'elaborazione del documento.",
+        "processErrorMany": "Errore durante l'elaborazione dei documenti.",
+        "processErrorSingle": "Impossibile elaborare «{fileName}». {detail}",
+        "fileFallback": "il file"
+      },
+      "list": {
+        "heading": "I miei documenti",
+        "empty": "Non ci sono ancora documenti. Quelli che caricherai appariranno qui.",
+        "listAria": "Elenco dei documenti",
+        "downloadAria": "Scarica {name}",
+        "deleteAria": "Elimina {name}",
+        "downloadError": "Impossibile scaricare il documento.",
+        "deleteTitle": "Elimina documento",
+        "deleteConfirm": "Elimina",
+        "deleteCancel": "Annulla",
+        "deleteMessage": "Eliminare <name></name>? Non comparirà più nel tuo elenco."
+      },
+      "singleUpload": {
+        "dropActive": "Rilascia il file qui",
+        "dropPrompt": "Trascina il file qui o fai clic per caricare",
+        "dropzoneAria": "Trascina un file o fai clic per caricare",
+        "typeNotAllowed": "Tipo di file non consentito.",
+        "invalidFile": "File non valido.",
+        "tooLarge": "Il file supera {max} ({size}).",
+        "removeFileAria": "Rimuovi {fileName}"
+      },
+      "modal": {
+        "cancel": "Annulla",
+        "processing": "Elaborazione...",
+        "documentTypeRequired": "Devi selezionare il tipo di documento.",
+        "identityRequired": "Devi caricare il documento d'identità.",
+        "documentTypesLoadError": "Impossibile caricare i tipi di documento.",
+        "processErrorSelf": "Errore durante l'elaborazione delle tue informazioni.",
+        "processErrorRecruiter": "Errore durante l'elaborazione del candidato.",
+        "aiIntro": "I CV e i documenti d'identità vengono elaborati con l'IA per estrarre informazioni preliminari del profilo.",
+        "kpisAria": "KPI di efficienza di Applican Tree",
+        "documentTypeHeading": "Tipo di documento d'identità",
+        "documentTypeDescription": "Seleziona il tipo di documento che corrisponde al PDF da caricare.",
+        "documentTypeAria": "Tipo di documento d'identità",
+        "selectLoading": "Caricamento tipi di documento...",
+        "selectLoadError": "Impossibile caricare i tipi di documento",
+        "selectEmpty": "Nessun tipo di documento disponibile",
+        "selectPlaceholder": "Seleziona il tipo di documento",
+        "retry": "Riprova",
+        "noTypesConfigured": "Non ci sono ancora tipi di documento configurati. Chiedi a un amministratore di creare i cataloghi.",
+        "identityHeading": "Documento d'identità",
+        "identityDescription": "Carica il documento d'identità del candidato in formato PDF.",
+        "cvPrimaryText": "Trascina il CV qui o fai clic per caricare",
+        "cvHelperText": "PDF, DOCX o TXT fino a 10 MB",
+        "cvAria": "Trascina il CV o fai clic per caricare",
+        "cvTypeError": "Tipo non consentito. Solo PDF, DOCX o TXT.",
+        "identityPrimaryText": "Trascina il documento qui o fai clic per caricare",
+        "identityHelperText": "Solo file PDF fino a 10 MB",
+        "identityAria": "Trascina il documento d'identità o fai clic per caricare",
+        "identityTypeError": "Tipo non consentito. Solo file PDF.",
+        "kpis": {
+          "cv": {
+            "label": "Analisi del CV",
+            "value": "Da fino a 15 min a 30s-1min per CV",
+            "helper": "Acquisizione strutturata in un'unica esecuzione"
+          },
+          "insert": {
+            "label": "Inserimento dati",
+            "value": "Registrazione automatica nello stesso flusso",
+            "helper": "Senza trascrizione manuale su DB o Excel"
+          },
+          "savings": {
+            "label": "Risparmio stimato",
+            "value": "Riduzione operativa dal 93,3% al 96,7%",
+            "helper": "Nell'estrazione, analisi e inserimento del CV"
+          }
+        },
+        "self": {
+          "title": "Completa le informazioni",
+          "submit": "Salva le informazioni",
+          "success": "Le tue informazioni sono state aggiornate correttamente. Controlla il tuo profilo per vedere i dati.",
+          "errorPrefix": "Errore durante il salvataggio delle tue informazioni",
+          "cvRequired": "Devi caricare il tuo CV.",
+          "cvHeading": "Il tuo CV",
+          "cvDescription": "Carica il tuo CV per completare automaticamente le informazioni del tuo profilo.",
+          "aiNote": "Risultato generato dall'IA. Controlla i dati in Il mio profilo prima di candidarti."
+        },
+        "recruiter": {
+          "title": "Aggiungi candidato",
+          "submit": "Crea candidato",
+          "success": "Candidato creato ed elaborato correttamente.",
+          "errorPrefix": "Errore durante la creazione del candidato",
+          "cvRequired": "Devi caricare il CV del candidato.",
+          "cvHeading": "CV del candidato",
+          "cvDescription": "Carica il CV del candidato per creare automaticamente il suo profilo.",
+          "aiNote": "Risultato generato dall'IA. Richiede la convalida delle Risorse Umane."
+        }
+      }
+    },
+    "profile": {
+      "breadcrumb": "Il mio profilo",
+      "page": {
+        "title": "Il mio profilo",
+        "description": "Modifica la tua scheda con i dati obbligatori e verifica come si combina con le informazioni dei tuoi documenti.",
+        "refreshingCv": "Aggiornamento dei dati estesi del CV…",
+        "loadingTitle": "Caricamento del tuo profilo…",
+        "loadingDescription": "Recupero dei dati dal server.",
+        "errorTitle": "Non siamo riusciti a caricare il tuo profilo",
+        "retry": "Riprova"
+      },
+      "session": {
+        "title": "La tua sessione",
+        "description": "Dati di accesso di base. Il resto della scheda viene caricato dal server.",
+        "name": "Nome",
+        "email": "Email",
+        "role": "Ruolo"
+      },
+      "toasts": {
+        "saveSuccess": "Modifiche salvate correttamente.",
+        "saveError": "Non è stato possibile salvare le modifiche. Riprova."
+      },
+      "nav": {
+        "aria": "Vai alla sezione del profilo",
+        "edit": "Modifica",
+        "summary": "Riepilogo",
+        "accountContact": "Account e contatto",
+        "jobGoals": "Obiettivi lavorativi",
+        "career": "Percorso",
+        "competencies": "Competenze",
+        "links": "Link",
+        "references": "Referenze",
+        "compliance": "Conformità"
+      },
+      "groups": {
+        "accountPersonal": "Account e dati personali",
+        "goals": "Obiettivi",
+        "career": "Percorso professionale",
+        "competencies": "Competenze",
+        "onlinePresence": "Presenza online",
+        "referencesAchievements": "Referenze e riconoscimenti",
+        "requirementsCompliance": "Requisiti e conformità"
+      },
+      "actions": {
+        "aria": "Azioni del profilo",
+        "toolbarEditingAria": "Scarica il CV, documenti o termina la modifica",
+        "toolbarViewingAria": "Scarica il CV, modifica il profilo o gestisci i documenti",
+        "downloadCv": "Scarica il CV",
+        "downloadingCv": "Download in corso…",
+        "downloadCvAria": "Scarica il tuo ultimo CV caricato",
+        "manageDocuments": "Gestisci documenti",
+        "manageDocumentsAria": "Vai ai documenti per gestire i file",
+        "cancel": "Annulla",
+        "cancelAria": "Annulla la modifica senza salvare",
+        "save": "Salva modifiche",
+        "saving": "Salvataggio…",
+        "requiredHint": "Titolo, riepilogo e documento d'identità sono obbligatori al salvataggio.",
+        "triggerComplete": "Completa il mio profilo",
+        "triggerEdit": "Modifica il mio profilo"
+      },
+      "download": {
+        "genericError": "Errore di download.",
+        "cvError": "Non è stato possibile scaricare il CV."
+      },
+      "intro": {
+        "notRegistered": "Non hai ancora registrato la tua scheda. Compila i dati e salva per attivare il tuo profilo.",
+        "editHint": "Modifica le tue informazioni in ogni sezione della scheda. Scarica il tuo CV o gestisci i documenti quando ne hai bisogno."
+      },
+      "hero": {
+        "editTitle": "La tua scheda",
+        "editDescription": "Modifica nome, titolo e riepilogo nello stesso posto in cui li vedi leggendo il profilo.",
+        "profileSubtitle": "Così appare il tuo profilo professionale nel sistema.",
+        "summaryEmpty": "Completa il riepilogo modificando il profilo o dalle informazioni importate dai tuoi documenti.",
+        "defaultName": "Candidato"
+      },
+      "notFound": {
+        "intro": "Non hai ancora un profilo candidato sul server. Tocca ",
+        "cta": "Completa il mio profilo",
+        "outro": ", compila i dati obbligatori e salva per attivare la tua scheda."
+      },
+      "sections": {
+        "consolidated": "Scheda consolidata",
+        "consolidatedDescription": "Combiniamo i dati del tuo account (sessione), del profilo modificabile e, se applicabile, dei documenti elaborati.",
+        "accountReadOnly": "Account (sola lettura)",
+        "jobPreferences": "Preferenze lavorative",
+        "workExperience": "Esperienza lavorativa",
+        "education": "Istruzione",
+        "languages": "Lingue",
+        "skills": "Competenze",
+        "links": "Link",
+        "linksSubtitle": "Social e sito web",
+        "references": "Referenze",
+        "recognitions": "Riconoscimenti",
+        "compliance": "Conformità",
+        "technicalData": "Dati tecnici (revisione)"
+      },
+      "fields": {
+        "user": "Utente",
+        "email": "Email",
+        "phone": "Telefono",
+        "sessionRole": "Ruolo nella sessione",
+        "nationalId": "Documento d'identità",
+        "country": "Paese",
+        "birthCity": "Città di nascita",
+        "birthDate": "Data di nascita",
+        "maritalStatus": "Stato civile",
+        "gender": "Genere",
+        "minExpectedSalary": "Stipendio minimo previsto",
+        "availability": "Disponibilità",
+        "disabilityRegistered": "Disabilità (registrata)",
+        "sectors": "Settori",
+        "desiredRole": "Ruolo desiderato",
+        "minSalary": "Salario minimo",
+        "educationLevel": "Livello di istruzione",
+        "desiredCity": "Città desiderata",
+        "disability": "Disabilità"
+      },
+      "values": {
+        "yes": "Sì",
+        "no": "No",
+        "complianceValueLabel": "Valore"
+      },
+      "emptyStates": {
+        "enrichedEmptyPrefix": "Non c'è ancora alcun percorso o competenza nella tua scheda. Puoi aggiungerli modificando il profilo o caricando un CV in ",
+        "documentsLink": "Documenti",
+        "enrichedEmptySuffix": ".",
+        "technicalDataWarning": "Parte del tuo profilo è arrivata in un formato che non è stato possibile interpretare come JSON. Se vedi questo, avvisa il supporto.",
+        "complianceDash": "—",
+        "noWorkExperience": "Nessuna esperienza lavorativa registrata.",
+        "noEducation": "Nessuna formazione registrata.",
+        "noReferences": "Nessuna referenza registrata.",
+        "noRecognitions": "Nessun riconoscimento registrato."
+      },
+      "form": {
+        "identitySummary": "Identità e riepilogo",
+        "contact": "Contatto",
+        "locationPersonal": "Posizione e dati personali",
+        "jobPreferences": "Preferenze lavorative (obiettivo)",
+        "workExperience": "Esperienza lavorativa",
+        "education": "Istruzione",
+        "languages": "Lingue",
+        "skills": "Competenze",
+        "links": "Link",
+        "references": "Referenze",
+        "recognitions": "Riconoscimenti",
+        "labels": {
+          "firstName": "Nome",
+          "lastName": "Cognome",
+          "headline": "Titolo / headline",
+          "summary": "Riepilogo professionale",
+          "nationalId": "Documento d'identità",
+          "email": "Email",
+          "phone": "Telefono",
+          "country": "Paese",
+          "birthDate": "Data di nascita",
+          "birthCity": "Città di nascita",
+          "maritalStatus": "Stato civile",
+          "gender": "Genere",
+          "sectors": "Settori",
+          "desiredRole": "Ruolo desiderato",
+          "minSalary": "Stipendio minimo",
+          "educationLevel": "Livello di istruzione",
+          "desiredCity": "Città desiderata",
+          "availability": "Disponibilità",
+          "disability": "Disabilità",
+          "resumeMarkdown": "Curriculum in testo (markdown)",
+          "company": "Azienda",
+          "role": "Ruolo / posizione",
+          "start": "Inizio",
+          "end": "Fine",
+          "description": "Descrizione",
+          "institution": "Istituzione",
+          "degree": "Titolo / grado",
+          "language": "Lingua {index}",
+          "level": "Livello",
+          "skillsOnePerLine": "Una per riga",
+          "url": "URL",
+          "referenceName": "Nome",
+          "position": "Posizione",
+          "contact": "Contatto",
+          "recognitionsOnePerLine": "Uno per riga"
+        },
+        "placeholders": {
+          "workStart": "Es. 2020-01",
+          "workEnd": "Es. 2023-12 o attuale",
+          "url": "https://esempio.com",
+          "sectorsEmpty": "Scrivi un settore e premi Invio",
+          "sectorsMore": "Aggiungi altro…"
+        },
+        "hints": {
+          "resumeMarkdown": "Obbligatorio a ogni salvataggio.",
+          "skills": "Vengono salvate come elenco nel tuo profilo.",
+          "recognitions": "Premi, certificazioni indicate come testo."
+        },
+        "selects": {
+          "unspecified": "Non specificato",
+          "selectCountry": "Seleziona un paese",
+          "disabilityUnset": "Non indicato",
+          "yes": "Sì",
+          "no": "No"
+        },
+        "buttons": {
+          "addExperience": "Aggiungi esperienza",
+          "addEducation": "Aggiungi istruzione",
+          "addLanguage": "Aggiungi lingua",
+          "addReference": "Aggiungi referenza",
+          "addLink": "Aggiungi link",
+          "remove": "Rimuovi",
+          "cancel": "Annulla"
+        },
+        "items": {
+          "experience": "Esperienza {index}",
+          "education": "Formazione {index}",
+          "reference": "Referenza {index}",
+          "link": "Link {index}"
+        },
+        "aria": {
+          "sectorsGroup": "Settori",
+          "removeSector": "Rimuovi settore {label}",
+          "removeExperience": "Rimuovi esperienza {index}",
+          "removeEducation": "Rimuovi istruzione {index}",
+          "removeLanguage": "Rimuovi lingua {index}"
+        },
+        "addLink": {
+          "heading": "Aggiungi link",
+          "emptyHint": "Aggiungi link al tuo portfolio, LinkedIn, GitHub o altre piattaforme. Puoi aggiungerne diversi con il pulsante qui sotto.",
+          "errorSelectType": "Seleziona il tipo di link. Se scegli «Altro», inserisci il nome.",
+          "errorUrl": "Inserisci l'URL del link."
+        },
+        "legacy": {
+          "currentValue": "{value} (valore attuale)"
+        },
+        "validation": {
+          "birthDate": {
+            "invalid": "Data non valida",
+            "futureDate": "La data non può essere nel futuro",
+            "tooYoung": "Devi avere almeno 18 anni"
+          },
+          "requiredFields": "Titolo, riepilogo e documento di identità sono obbligatori.",
+          "resumeRequired": "Il profilo deve includere il curriculum in testo. Carica un CV in Documenti o contatta il supporto."
+        }
+      },
+      "salary": {
+        "title": "Aspettativa salariale",
+        "currency": "In dollari (USD)",
+        "monthlyLabel": "Importo mensile previsto",
+        "placeholder": "Es. 2500",
+        "hint": "Puoi anche regolarlo in Obiettivi lavorativi.",
+        "unset": "Non registrato"
+      },
+      "socialLink": {
+        "typeLabel": "Tipo di link",
+        "selectPlaceholder": "Seleziona il tipo di link",
+        "otherPrompt": "Altro — indica il nome",
+        "otherNameLabel": "Nome della piattaforma",
+        "otherNamePlaceholder": "Es. Portfolio, Behance…"
+      },
+      "options": {
+        "gender": {
+          "male": "Maschile",
+          "female": "Femminile"
+        },
+        "maritalStatus": {
+          "single": "Celibe/Nubile",
+          "married": "Sposato/a",
+          "freeUnion": "Unione libera",
+          "divorced": "Divorziato/a",
+          "widowed": "Vedovo/a",
+          "separated": "Separato/a"
+        },
+        "availability": {
+          "immediate": "Immediata",
+          "within15Days": "Entro 15 giorni o meno",
+          "within1Month": "Entro 1 mese",
+          "within2MonthsOrMore": "Entro 2 mesi o più",
+          "toBeAgreed": "Da concordare",
+          "perProposal": "Secondo proposta"
+        }
+      },
+      "fallbacks": {
+        "dash": "—",
+        "linkPlatform": "Link"
+      }
+    }
+  },
+  "LanguageSwitcher": {
+    "label": "Lingua",
+    "spanish": "Spagnolo",
+    "english": "Inglese",
+    "italian": "Italiano",
+    "german": "Tedesco",
+    "french": "Francese"
+  },
+  "RecruiterPortal": {
+    "reports": {
+      "breadcrumb": "Report",
+      "page": {
+        "title": "Report",
+        "description": "Scegli un report dai modelli o dalle viste di sistema. Puoi filtrare, esaminare i grafici e scaricare i dati quando disponibile.",
+        "headerRegionLabel": "Intestazione dei report"
+      },
+      "catalog": {
+        "heading": "Report",
+        "description": "Report ufficiali del sistema. Aprine uno qualsiasi per applicare i filtri e scaricare il PDF quando ha un modello collegato.",
+        "regionLabel": "Report disponibili per il download",
+        "descriptionFallback": "Report disponibile. Applica i filtri e scarica il risultato.",
+        "unlinkedHint": "Collega un modello di tipo Documento contrassegnato come report dall'area di amministrazione."
+      },
+      "cards": {
+        "openAndDownload": "Apri e scarica",
+        "unlinkedBadge": "Nessun modello collegato",
+        "openReportAria": "Apri report: {title}",
+        "unlinkedReportAria": "Report senza modello: {title}",
+        "templateBadge": "Modello: {name}"
+      },
+      "filters": {
+        "legend": "Filtri",
+        "hint": "I valori vengono inviati come query param all'API dei report."
+      },
+      "actions": {
+        "downloadPdf": "Scarica PDF",
+        "downloadingPdf": "Generazione PDF…",
+        "downloadPdfAria": "Scarica il PDF del report",
+        "downloadPdfTooltip": "Cattura il report visibile sullo schermo e lo scarica come PDF nel tuo browser.",
+        "retry": "Riprova report"
+      },
+      "emptyStates": {
+        "noCatalog": "Il catalogo dei report non restituisce ancora risultati."
+      },
+      "errors": {
+        "catalogLoadTitle": "Impossibile caricare il catalogo dei report",
+        "catalogLoadFailed": "Impossibile caricare il catalogo dei report.",
+        "catalogForbidden": "Non hai i permessi per visualizzare il catalogo dei report.",
+        "pdfFailed": "Impossibile generare il PDF."
+      },
+      "summary": {
+        "breadcrumb": "Riepilogo",
+        "title": "Riepilogo esecutivo dei report",
+        "description": "Indicatori consolidati del periodo. Applica i filtri per restringere per cliente e date.",
+        "headerAria": "Intestazione del report",
+        "filtersAria": "Filtri e pannello esecutivo",
+        "filters": {
+          "client": "Cliente",
+          "from": "Da",
+          "to": "A",
+          "all": "Tutti",
+          "apply": "Applica filtri"
+        },
+        "actions": {
+          "downloadPdf": "Scarica PDF"
+        },
+        "loadingStates": {
+          "loading": "Caricamento indicatori…",
+          "updated": "Dati aggiornati"
+        },
+        "errors": {
+          "loadFailed": "Impossibile caricare il riepilogo."
+        },
+        "emptyStates": {
+          "noData": "Nessun dato da mostrare"
+        },
+        "dashboard": {
+          "loadFailed": "Impossibile caricare il riepilogo",
+          "loading": "Caricamento riepilogo",
+          "kpisAria": "Indicatori principali",
+          "clients": "Clienti",
+          "vacancies": "Posizioni aperte",
+          "openVacancies": "Posizioni aperte",
+          "candidates": "Candidati",
+          "hired": "Assunti",
+          "vacancyStatus": "Stato delle posizioni",
+          "open": "Aperte:",
+          "closed": "Chiuse:",
+          "avgProgress": "Progresso medio delle posizioni",
+          "avgMatch": "Corrispondenza preliminare media",
+          "candidateFlow": "Flusso candidati",
+          "registered": "Registrati",
+          "inInterview": "In colloquio",
+          "percentOfTotal": "% del totale candidati",
+          "noCandidatesInPeriod": "Nessun candidato nel periodo",
+          "technicalEvaluations": "Valutazioni tecniche",
+          "mainSource": "Principale canale di sourcing",
+          "periodFindings": "Risultati del periodo",
+          "insufficientData": "Dati insufficienti per questo indicatore.",
+          "clientsRegistered": "Clienti registrati nel periodo",
+          "vacanciesCreated": "Posizioni create",
+          "vacanciesDistribution": "Distribuzione tra posizioni aperte e chiuse nel periodo.",
+          "candidatesRegistered": "Candidati registrati",
+          "candidatesHired": "Candidati conclusi come assunti",
+          "technicalEvaluationsSubtitle": "Monitoraggio delle valutazioni completate e tasso di superamento.",
+          "mainSourceSubtitle": "Canale con la maggiore attività registrata nel periodo selezionato.",
+          "noRegisteredSource": "Nessuna fonte registrata",
+          "earlyStageHint": "Fase iniziale: la maggior parte dei processi ha ancora molto lavoro davanti rispetto all'avanzamento complessivo.",
+          "noVacanciesInPeriod": "Nessuna posizione registrata nel periodo selezionato.",
+          "activeProcessesSubtitle": "Processi attualmente attivi"
+        }
+      },
+      "dataView": {
+        "breadcrumb": "Report",
+        "invalidTemplateTitle": "Modello di report non valido",
+        "invalidTemplateBody": "Controlla il JSON salvato in Amministrazione → Modelli.",
+        "all": "Tutti",
+        "allFeminine": "Tutte",
+        "client": "Cliente",
+        "rows": "Righe:",
+        "generatingPdf": "Generazione PDF…",
+        "downloadPdf": "Scarica PDF",
+        "applyFilters": "Applica filtri",
+        "clear": "Cancella",
+        "loadFailed": "Impossibile caricare il report",
+        "retry": "Riprova",
+        "retryAria": "Riprova caricamento report",
+        "loadingData": "Caricamento dati…",
+        "loadingTemplate": "Caricamento modello report…",
+        "preview": "Anteprima",
+        "previewTitle": "Anteprima del report",
+        "noTemplate": "Nessun modello JSON trovato.",
+        "errors": {
+          "forbidden": "Non hai i permessi per consultare questo report.",
+          "loadDataFailed": "Impossibile caricare i dati del report.",
+          "loadTemplateFailed": "Impossibile caricare il modello del report.",
+          "pdfFailed": "Impossibile generare il PDF."
+        },
+        "headerAria": "Intestazione del report",
+        "liveDataHint": "Dati in tempo reale del report. Modifica i filtri e applica per ricaricare.",
+        "filtersAria": "Filtri del report"
+      },
+      "templateDetail": {
+        "loading": "Caricamento report…",
+        "loadingConfig": "Caricamento configurazione report…",
+        "loadingData": "Caricamento dati report…",
+        "errorNoTemplate": "Nessun modello di report trovato con quell'identificatore.",
+        "errorNoConfig": "Questo modello non ha ancora la configurazione del report. Contatta l'amministratore o usa un report dall'elenco.",
+        "errorNoContent": "Il modello non ha contenuto HTML. Configura contentTemplate in Amministrazione → Modelli.",
+        "errorNoData": "Nessun dato per i filtri selezionati. Prova ad ampliare l'intervallo o a cambiare il cliente.",
+        "errorForbidden": "Non hai i permessi per visualizzare questo report.",
+        "errorGeneric": "Impossibile caricare il report.",
+        "errorPreview": "Impossibile generare l'anteprima. Controlla i filtri e riprova.",
+        "errorInvalidId": "Identificatore modello non valido.",
+        "downloadPdf": "Scarica PDF",
+        "downloadingPdf": "Generazione PDF…",
+        "savingPdf": "Salvataggio copia nella cronologia…",
+        "pdfExportFailed": "Impossibile generare il PDF. Riprova.",
+        "pdfHistoryWarning": "Il PDF è stato scaricato correttamente, ma non è stato possibile salvarlo nella cronologia. Puoi riprovare più tardi.",
+        "previewTitle": "Anteprima del report",
+        "filtersHint": "Modifica i filtri e applica per aggiornare l'anteprima del report.",
+        "applyFilters": "Applica filtri",
+        "legacyModeHint": "Modalità temporanea: uso del riepilogo esecutivo fino alla pubblicazione della configurazione dinamica da parte del backend.",
+        "reportKeyBadge": "Tipo di report",
+        "headerAria": "Intestazione del report",
+        "filtersAria": "Filtri del report",
+        "backToReports": "Torna ai report",
+        "breadcrumbReport": "Report",
+        "breadcrumbReports": "Report",
+        "clientFallback": "Cliente"
+      },
+      "resolver": {
+        "loading": "Ricerca del report nel catalogo…",
+        "notFound": "Report non trovato",
+        "openFailed": "Impossibile aprire il report",
+        "backToReports": "Torna ai report",
+        "notFoundDetail": "Non abbiamo trovato un report con quell'identificatore nel catalogo.",
+        "unlinked": "Questo report non ha ancora un modello collegato. Chiedi all'amministratore di collegarne uno dal modulo report."
+      }
+    },
+    "candidates": {
+      "breadcrumb": "Candidati",
+      "title": "Candidati",
+      "description": "Esamina e gestisci tutti i candidati",
+      "regionLabel": "Elenco dei candidati",
+      "headerRegionLabel": "Intestazione candidati",
+      "contentRegionLabel": "Contenuto candidati",
+      "searchPlaceholder": "Cerca candidati...",
+      "searchAriaLabel": "Cerca candidati",
+      "addCandidate": "Aggiungi candidato",
+      "loading": "Caricamento candidati...",
+      "retry": "Riprova",
+      "empty": "Nessun candidato",
+      "loadError": "Impossibile caricare i candidati.",
+      "followUpSaved": "Follow-up salvato con successo",
+      "hired": "Assunto",
+      "notHired": "Non assunto",
+      "noName": "Senza nome",
+      "rowAriaLabel": "Candidato {name}",
+      "followUpAriaLabel": "Follow-up di {name}",
+      "viewDetailAriaLabel": "Vedi dettaglio di {name}",
+      "table": {
+        "candidate": "Candidato",
+        "phone": "Telefono",
+        "country": "Paese",
+        "headline": "Titolo",
+        "uploadedAt": "Data di caricamento",
+        "actions": "Azioni"
+      }
+    },
+    "candidateDetail": {
+      "page": {
+        "loadingProfile": "Caricamento profilo...",
+        "backToCandidates": "Torna ai candidati",
+        "backToCandidatesAria": "Torna ai candidati",
+        "interviews": "Colloqui",
+        "interviewsAria": "Vedi i colloqui di questo candidato"
+      },
+      "nav": {
+        "aria": "Vai alla sezione del profilo",
+        "edit": "Modifica",
+        "summary": "Riepilogo",
+        "contact": "Contatto",
+        "goals": "Obiettivi",
+        "career": "Percorso",
+        "competencies": "Competenze",
+        "links": "Collegamenti",
+        "references": "Referenze"
+      },
+      "groups": {
+        "contactPersonal": "Dati di contatto e personali",
+        "jobPreferences": "Preferenze lavorative",
+        "career": "Percorso professionale",
+        "competencies": "Competenze",
+        "links": "Collegamenti",
+        "referencesAchievements": "Referenze e riconoscimenti"
+      },
+      "sections": {
+        "profileActions": "Azioni del profilo",
+        "summary": "Riepilogo del candidato",
+        "contactPersonal": "Contatto e dati personali",
+        "jobPreferences": "Preferenze lavorative",
+        "workExperience": "Esperienza lavorativa",
+        "education": "Istruzione",
+        "languages": "Lingue",
+        "skills": "Competenze",
+        "links": "Collegamenti",
+        "linksSubtitle": "Social e web",
+        "references": "Referenze",
+        "recognitions": "Riconoscimenti",
+        "normalizedDataRaw": "normalizedData (testo non analizzato)"
+      },
+      "fields": {
+        "email": "Email",
+        "phone": "Telefono",
+        "nationalId": "Documento d'identità",
+        "country": "Paese",
+        "birthCity": "Città di nascita",
+        "birthDate": "Data di nascita",
+        "maritalStatus": "Stato civile",
+        "gender": "Genere",
+        "sectors": "Settori",
+        "desiredRole": "Ruolo desiderato",
+        "minSalary": "Salario minimo",
+        "educationLevel": "Livello di istruzione",
+        "desiredCity": "Città desiderata",
+        "availability": "Disponibilità",
+        "disability": "Disabilità",
+        "idLabel": "ID"
+      },
+      "actions": {
+        "toolbarEditingAria": "Salva o annulla la modifica del profilo",
+        "downloadCv": "Scarica CV",
+        "downloadingCv": "Download in corso…",
+        "downloadCvAria": "Scarica CV in PDF",
+        "cancel": "Annulla",
+        "cancelAria": "Annulla la modifica senza salvare",
+        "save": "Salva modifiche",
+        "saving": "Salvataggio…",
+        "editProfile": "Modifica profilo",
+        "requiredHint": "Titolo, riepilogo e documento d'identità sono obbligatori al salvataggio.",
+        "retry": "Riprova"
+      },
+      "hero": {
+        "editTitle": "Modifica candidato",
+        "editDescription": "Nome, titolo e riepilogo professionale.",
+        "editHint": "Modifica le informazioni del candidato. Le modifiche aggiornano il profilo canonico e la scheda normalizzata."
+      },
+      "warnings": {
+        "parseFailed": "Parte dei dati del CV non è stata interpretata come JSON. Puoi modificare il profilo canonico; le modifiche salvate rigenereranno la scheda normalizzata.",
+        "normalizedDataRawIntro": "L'API ha restituito normalizedData come testo che non è JSON valido. Contenuto grezzo:"
+      },
+      "emptyStates": {
+        "noWorkExperience": "Nessuna esperienza lavorativa registrata.",
+        "noEducation": "Nessuna istruzione registrata.",
+        "noReferences": "Nessuna referenza registrata.",
+        "noRecognitions": "Nessun riconoscimento registrato."
+      },
+      "errors": {
+        "loadProfileFailed": "Impossibile caricare il profilo del candidato.",
+        "missingCandidateId": "Manca l'identificatore del candidato.",
+        "downloadFailed": "Errore durante il download.",
+        "downloadCvFailed": "Impossibile scaricare il CV.",
+        "saveInvalidFields": "Controlla i dati: alcuni campi non sono validi.",
+        "saveForbidden": "Il tuo account non ha il permesso di modificare questo profilo.",
+        "saveDuplicateNationalId": "Quel documento d'identità è già associato a un altro profilo."
+      },
+      "toasts": {
+        "saveSuccess": "Modifiche salvate correttamente.",
+        "saveError": "Impossibile salvare le modifiche. Riprova."
+      },
+      "fallbacks": {
+        "candidate": "Candidato",
+        "dash": "—",
+        "linkPlatform": "Collegamento"
+      },
+      "values": {
+        "yes": "Sì",
+        "no": "No"
+      },
+      "form": {
+        "identitySummary": "Identità e riepilogo",
+        "contact": "Contatto",
+        "locationPersonal": "Posizione e dati personali",
+        "jobPreferences": "Preferenze lavorative (obiettivo)",
+        "workExperience": "Esperienza lavorativa",
+        "education": "Istruzione",
+        "languages": "Lingue",
+        "skills": "Competenze",
+        "links": "Link",
+        "references": "Referenze",
+        "recognitions": "Riconoscimenti",
+        "labels": {
+          "firstName": "Nome",
+          "lastName": "Cognome",
+          "headline": "Titolo / headline",
+          "summary": "Riepilogo professionale",
+          "nationalId": "Documento d'identità",
+          "email": "Email",
+          "phone": "Telefono",
+          "country": "Paese",
+          "birthDate": "Data di nascita",
+          "birthCity": "Città di nascita",
+          "maritalStatus": "Stato civile",
+          "gender": "Genere",
+          "sectors": "Settori",
+          "desiredRole": "Ruolo desiderato",
+          "minSalary": "Stipendio minimo",
+          "educationLevel": "Livello di istruzione",
+          "desiredCity": "Città desiderata",
+          "availability": "Disponibilità",
+          "disability": "Disabilità",
+          "resumeMarkdown": "Curriculum in testo (markdown)",
+          "company": "Azienda",
+          "role": "Ruolo / posizione",
+          "start": "Inizio",
+          "end": "Fine",
+          "description": "Descrizione",
+          "institution": "Istituzione",
+          "degree": "Titolo / grado",
+          "language": "Lingua {index}",
+          "level": "Livello",
+          "skillsOnePerLine": "Una per riga",
+          "url": "URL",
+          "referenceName": "Nome",
+          "position": "Posizione",
+          "contact": "Contatto",
+          "recognitionsOnePerLine": "Uno per riga"
+        },
+        "placeholders": {
+          "workStart": "Es. 2020-01",
+          "workEnd": "Es. 2023-12 o attuale",
+          "url": "https://esempio.com",
+          "sectorsEmpty": "Scrivi un settore e premi Invio",
+          "sectorsMore": "Aggiungi altro…"
+        },
+        "hints": {
+          "resumeMarkdown": "Obbligatorio a ogni salvataggio.",
+          "skills": "Vengono salvate come elenco nel tuo profilo.",
+          "recognitions": "Premi, certificazioni indicate come testo."
+        },
+        "selects": {
+          "unspecified": "Non specificato",
+          "selectCountry": "Seleziona un paese",
+          "disabilityUnset": "Non indicato",
+          "yes": "Sì",
+          "no": "No"
+        },
+        "buttons": {
+          "addExperience": "Aggiungi esperienza",
+          "addEducation": "Aggiungi istruzione",
+          "addLanguage": "Aggiungi lingua",
+          "addReference": "Aggiungi referenza",
+          "addLink": "Aggiungi link",
+          "remove": "Rimuovi",
+          "cancel": "Annulla"
+        },
+        "items": {
+          "experience": "Esperienza {index}",
+          "education": "Formazione {index}",
+          "reference": "Referenza {index}",
+          "link": "Link {index}"
+        },
+        "aria": {
+          "sectorsGroup": "Settori",
+          "removeSector": "Rimuovi settore {label}",
+          "removeExperience": "Rimuovi esperienza {index}",
+          "removeEducation": "Rimuovi istruzione {index}",
+          "removeLanguage": "Rimuovi lingua {index}"
+        },
+        "addLink": {
+          "heading": "Aggiungi link",
+          "emptyHint": "Aggiungi link al tuo portfolio, LinkedIn, GitHub o altre piattaforme. Puoi aggiungerne diversi con il pulsante qui sotto.",
+          "errorSelectType": "Seleziona il tipo di link. Se scegli «Altro», inserisci il nome.",
+          "errorUrl": "Inserisci l'URL del link."
+        },
+        "legacy": {
+          "currentValue": "{value} (valore attuale)"
+        },
+        "validation": {
+          "birthDate": {
+            "invalid": "Data non valida",
+            "futureDate": "La data non può essere nel futuro",
+            "tooYoung": "Devi avere almeno 18 anni"
+          },
+          "requiredFields": "Titolo, riepilogo e documento di identità sono obbligatori.",
+          "resumeRequired": "Il profilo deve includere il curriculum in testo. Carica un CV o contatta il supporto."
+        }
+      },
+      "options": {
+        "gender": {
+          "male": "Maschile",
+          "female": "Femminile"
+        },
+        "maritalStatus": {
+          "single": "Celibe/Nubile",
+          "married": "Sposato/a",
+          "freeUnion": "Unione libera",
+          "divorced": "Divorziato/a",
+          "widowed": "Vedovo/a",
+          "separated": "Separato/a"
+        },
+        "availability": {
+          "immediate": "Immediata",
+          "within15Days": "Entro 15 giorni o meno",
+          "within1Month": "Entro 1 mese",
+          "within2MonthsOrMore": "Entro 2 mesi o più",
+          "toBeAgreed": "Da concordare",
+          "perProposal": "Secondo proposta"
+        }
+      },
+      "socialLink": {
+        "typeLabel": "Tipo di link",
+        "selectPlaceholder": "Seleziona il tipo di link",
+        "otherPrompt": "Altro — indica il nome",
+        "otherNameLabel": "Nome della piattaforma",
+        "otherNamePlaceholder": "Es. Portfolio, Behance…"
+      },
+      "followUp": {
+        "title": "Follow-up | {name}",
+        "add": "Add",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "save": "Save seguimiento",
+        "sectionTitle": "Follow-up {index}",
+        "periodLabel": "Period de seguimiento",
+        "selectPeriod": "Select periodo",
+        "commentsLabel": "Comments de evaluacion",
+        "commentsPlaceholder": "Escribe comentarios sobre el seguimiento del candidate...",
+        "deleteAria": "Delete seguimiento {index}",
+        "period3": "3 meses post-contratacion",
+        "period6": "6 meses post-contratacion",
+        "period12": "12 meses post-contratacion",
+        "periodMonths": "{months} meses",
+        "errors": {
+          "missingCandidateId": "ID de candidate no disponible",
+          "emptyFollowUp": "Debes completar al menos un seguimiento con un periodo o comentarios.",
+          "invalidPeriod": "Debes seleccionar un periodo de seguimiento valido.",
+          "saveFailed": "Could not guardar el seguimiento."
+        }
+      }
+    },
+    "settings": {
+      "breadcrumb": "Impostazioni",
+      "portalCrumb": "Portale RU",
+      "title": "Impostazioni",
+      "description": "Centralizza qui le impostazioni funzionali del portale RU.",
+      "googleCalendar": {
+        "title": "Google Calendar",
+        "description": "Connetti e gestisci la sincronizzazione dei colloqui."
+      },
+      "calendarPage": {
+        "title": "Calendario",
+        "description": "Collega Google Calendar per sincronizzare i colloqui e inviare inviti automatici.",
+        "pageDescription": "Collega Google Calendar per sincronizzare i colloqui da Applican Tree.",
+        "connectedToast": "Google Calendar collegato correttamente.",
+        "syncing": "Sincronizzazione…",
+        "syncInterviews": "Sincronizza colloqui",
+        "connectedAs": "Connesso come {email} (il tuo account)",
+        "notConnected": "Google Calendar non è connesso.",
+        "connectHint": "Collega il tuo account per sincronizzare i colloqui.",
+        "connectDescription": "Collegandoti, autorizzi Applican Tree a creare eventi e inviti nel tuo Google Calendar (in base all'implementazione del backend).",
+        "connectedServerHint": "I colloqui con data possono essere creati o aggiornati nel tuo calendario secondo la configurazione del server.",
+        "syncFailed": "Impossibile sincronizzare il calendario.",
+        "syncResultPartial": "Sincronizzato: {synced} ok, {failed} con errore.",
+        "syncResultSuccess": "Sincronizzato: {synced} colloquio/i.",
+        "accountFallback": "il tuo account"
+      },
+      "calendarConnect": {
+        "label": "Collega Google Calendar",
+        "redirecting": "Reindirizzamento…",
+        "ariaLabel": "Collega Google Calendar"
+      },
+      "calendarDisconnect": {
+        "title": "Disconnettere Google Calendar?",
+        "body": "I colloqui già sincronizzati non verranno rimossi dal calendario, ma non riceverai più nuovi inviti automatici.",
+        "bodyEventsKept": "Gli eventi già creati nel calendario non vengono eliminati.",
+        "confirm": "Disconnetti",
+        "cancel": "Annulla",
+        "triggerLabel": "Disconnetti Google Calendar",
+        "toastSuccess": "Google Calendar disconnesso.",
+        "toastError": "Impossibile disconnettere Google Calendar.",
+        "toastErrorGeneric": "Impossibile disconnettere"
+      }
+    },
+    "vacancies": {
+      "breadcrumb": "Posizioni",
+      "location": {
+        "unspecified": "Non specificato",
+        "loadCountriesError": "Impossibile caricare i paesi.",
+        "loadStatesError": "Impossibile caricare gli stati o le province.",
+        "countryLabel": "Pais",
+        "stateLabel": "Estado / provincia",
+        "helperText": "Opcional. Elige pais y estado o provincia donde aplica la vacancy."
+      },
+      "page": {
+        "title": "Posizioni",
+        "description": "Gestisci le posizioni aperte",
+        "headerRegionLabel": "Intestazione posizioni",
+        "listRegionLabel": "Elenco posizioni",
+        "filtersAndListRegionLabel": "Filtri ed elenco"
+      },
+      "filters": {
+        "regionLabel": "Filtri posizioni",
+        "name": "Nome",
+        "searchPlaceholder": "Cerca posizione...",
+        "company": "Azienda",
+        "modality": "Modalità",
+        "country": "Paese",
+        "department": "Reparto",
+        "allFemale": "Tutte",
+        "allMale": "Tutti",
+        "filterByAria": "Filtra per {label}"
+      },
+      "cards": {
+        "untitled": "Senza titolo",
+        "candidates": "Candidati",
+        "cardAria": "Posizione: {title}",
+        "cardReadOnlyAria": "Posizione inattiva, sola lettura: {title}",
+        "logoAlt": "Logo di {company}"
+      },
+      "statuses": {
+        "active": "Attiva",
+        "closed": "Chiusa",
+        "paused": "In pausa",
+        "draft": "Bozza"
+      },
+      "actions": {
+        "create": "Nuova posizione",
+        "createShort": "Nuova",
+        "createAria": "Crea nuova posizione",
+        "createVacancy": "Crea posizione",
+        "viewDetails": "Vedi dettagli",
+        "viewDetailsAria": "Vedi i dettagli della posizione {title}",
+        "clearFilters": "Cancella filtri",
+        "retry": "Riprova"
+      },
+      "emptyStates": {
+        "noVacancies": "Nessuna posizione trovata",
+        "noVacanciesFiltered": "Nessuna posizione trovata con i filtri applicati"
+      },
+      "loadingStates": {
+        "loading": "Caricamento posizioni..."
+      },
+      "errors": {
+        "loadFailed": "Impossibile caricare le posizioni."
+      },
+      "toasts": {
+        "created": "Posizione creata con successo."
+      },
+      "form": {
+        "title": "Nuova posizione",
+        "fields": {
+          "name": {
+            "label": "Nome della posizione",
+            "placeholder": "Es.: Frontend Developer"
+          },
+          "description": {
+            "label": "Descrizione della posizione",
+            "placeholder": "Spiegazione del ruolo della posizione"
+          },
+          "details": {
+            "label": "Dettagli della posizione",
+            "placeholder": "Dati specifici della posizione"
+          },
+          "salary": {
+            "label": "Stipendio",
+            "ariaLabel": "Stipendio della posizione",
+            "placeholder": "Es.: US$1,200 - US$1,800 / mese"
+          },
+          "advantages": {
+            "label": "Vantaggi e benefit della posizione",
+            "placeholder": "Es.: Assicurazione sanitaria, bonus annuale, home office, formazione..."
+          },
+          "client": {
+            "label": "Cliente / azienda",
+            "ariaLabel": "Cliente o azienda della posizione"
+          },
+          "country": {
+            "label": "Paese a cui si applica la posizione"
+          },
+          "state": {
+            "label": "Stato / provincia"
+          },
+          "locationHelper": "Facoltativo. Scegli il paese e lo stato o la provincia in cui si applica la posizione.",
+          "department": {
+            "label": "Area (catalogo)",
+            "ariaLabel": "Area della posizione nel catalogo"
+          },
+          "modality": {
+            "label": "Modalità",
+            "ariaLabel": "Modalità della posizione"
+          },
+          "unspecifiedOption": "Non specificato",
+          "requirements": {
+            "label": "Requisiti",
+            "namePlaceholder": "Nome (es.: Patente di guida)",
+            "valuePlaceholder": "Valore (es.: Pesante)",
+            "importanceLabel": "Importanza (1-10)",
+            "helper": "Ogni requisito ha un nome, un valore e un livello medio da 1 a 10.",
+            "nameAria": "Requisito {index} - Nome",
+            "valueAria": "Requisito {index} - Valore",
+            "scaleAria": "Requisito {index} - Livello medio da 1 a 10",
+            "removeAria": "Elimina requisito {index}"
+          }
+        },
+        "actions": {
+          "add": "Aggiungi",
+          "addRequirementAria": "Aggiungi requisito",
+          "cancel": "Annulla",
+          "submit": "Crea posizione"
+        },
+        "validation": {
+          "nameRequired": "Il nome è obbligatorio",
+          "descriptionRequired": "La descrizione è obbligatoria",
+          "companyRequired": "Seleziona un'azienda cliente",
+          "requirementValueRequired": "Valore obbligatorio",
+          "requirementNameRequired": "Nome obbligatorio"
+        },
+        "errors": {
+          "createFailed": "Impossibile creare la posizione. Riprova.",
+          "companiesLoadFailed": "Impossibile caricare i clienti.",
+          "companiesLoadFallbackSuffix": "Verrà utilizzata l'azienda predefinita.",
+          "catalogsLoadFailed": "Impossibile caricare reparti e modalità.",
+          "catalogsLoadFallbackSuffix": "La posizione può comunque essere creata senza questi campi."
+        }
+      },
+      "detail": {
+        "page": {
+          "fallbackTitle": "Dettaglio posizione",
+          "vacancyInfoAria": "Informazioni sulla posizione",
+          "createdPrefix": "Creata:",
+          "logoAlt": "Logo di {company}"
+        },
+        "sections": {
+          "description": "Descrizione della posizione",
+          "requirements": "Requisiti",
+          "details": "Dettagli della posizione",
+          "salary": "Retribuzione",
+          "advantages": "Vantaggi e benefit della posizione"
+        },
+        "actions": {
+          "backToVacancies": "Torna alle posizioni",
+          "backToVacanciesAria": "Torna alle posizioni",
+          "editVacancy": "Modifica posizione",
+          "editVacancyAria": "Modifica posizione",
+          "save": "Salva",
+          "saving": "Salvataggio...",
+          "saveAria": "Salva posizione",
+          "finishProcess": "Concludi processo",
+          "finishProcessAria": "Concludi il processo della posizione",
+          "interviews": "Colloqui",
+          "interviewsAria": "Vedi i colloqui di questa posizione",
+          "results": "Risultati",
+          "resultsAria": "Vedi risultati e metriche di questa posizione",
+          "addRequirement": "Aggiungi",
+          "addRequirementAria": "Aggiungi requisito",
+          "companyChangeHint": "Cambiare il cliente non modifica lo stato della posizione né le candidature esistenti."
+        },
+        "loadingStates": {
+          "loading": "Caricamento posizione..."
+        },
+        "errors": {
+          "missingId": "Manca l'ID della posizione.",
+          "loadFailed": "Impossibile caricare la posizione.",
+          "saveFailed": "Impossibile salvare la posizione.",
+          "companyRequired": "Seleziona un'azienda cliente.",
+          "finishFailed": "Impossibile concludere il processo."
+        },
+        "fallbacks": {
+          "unspecified": "Non specificato"
+        },
+        "toasts": {
+          "saved": "Modifiche salvate correttamente.",
+          "finishSuccess": "Processo concluso correttamente."
+        },
+        "readOnlyBanner": {
+          "vacancy": {
+            "title": "Posizione inattiva — sola lettura",
+            "body": "Puoi consultare tutte le informazioni, ma non apportare modifiche né azioni su questa posizione."
+          },
+          "company": {
+            "title": "Azienda inattiva — sola lettura",
+            "body": "L'azienda di questa posizione è inattiva. Puoi consultare candidati e fasi, ma non eseguire ricerca o analisi preliminare con IA né altre azioni di modifica."
+          },
+          "done": {
+            "title": "Processo concluso — sola lettura",
+            "body": "Questa posizione ha completato il processo di reclutamento. Puoi consultare tutte le informazioni e i risultati, ma non apportare modifiche."
+          }
+        },
+        "finishedSummary": {
+          "title": "Valutazione del processo",
+          "ratingLabel": "Valutazione",
+          "ratingValue": "{rating} su 5 stelle",
+          "ratingValueSingular": "{rating} su 5 stella",
+          "commentsLabel": "Commenti"
+        },
+        "finishModal": {
+          "title": "Concludi il processo della posizione",
+          "cancelAria": "Annulla",
+          "confirmAria": "Conferma conclusione",
+          "confirm": "Concludi processo",
+          "completedTitle": "Processo completato",
+          "completedBody": "Al termine del processo, la posizione resterà inattiva e in sola lettura. Potrai consultare tutte le informazioni, ma non apportare modifiche.",
+          "ratingLabel": "Valutazione del processo",
+          "requiredAria": "obbligatorio",
+          "ratingValue": "{rating} su 5 stelle",
+          "ratingValueSingular": "{rating} su 5 stella",
+          "ratingHelper": "Seleziona da 1 a 5 stelle per valutare il processo di reclutamento.",
+          "commentsLabel": "Commenti (opzionale)",
+          "commentsPlaceholder": "Aggiungi i tuoi commenti sul processo di reclutamento...",
+          "commentsAria": "Commenti sul processo",
+          "commentsHelper": "Puoi aggiungere osservazioni o note su come è andato il processo.",
+          "validationRating": "La valutazione deve essere tra 1 e 5 stelle.",
+          "errorFallback": "Errore nella conclusione del processo"
+        }
+      },
+      "results": {
+        "page": {
+          "eyebrow": "Risultati della posizione",
+          "untitledVacancy": "Posizione senza titolo",
+          "createdPrefix": "Creata:",
+          "needsRematch": "Richiede nuovo abbinamento",
+          "vacancyFallback": "Posizione",
+          "breadcrumbResults": "Risultati"
+        },
+        "actions": {
+          "scheduleInterview": "Pianifica colloquio",
+          "scheduleInterviewAria": "Pianifica un nuovo colloquio per questa posizione",
+          "interviews": "Colloqui",
+          "interviewsAria": "Vai ai colloqui di questa posizione",
+          "backToVacancy": "Torna alla posizione",
+          "backToVacancyAria": "Torna al dettaglio della posizione",
+          "clearFilters": "Cancella filtri",
+          "viewMoreContext": "Vedi più contesto",
+          "technicalSheet": "Scheda tecnica",
+          "viewProfile": "Vedi profilo"
+        },
+        "loadingStates": {
+          "loading": "Caricamento risultati…"
+        },
+        "errors": {
+          "missingId": "Manca l'identificativo della posizione.",
+          "loadFailed": "Impossibile caricare i risultati della posizione."
+        },
+        "filters": {
+          "heading": "Filtri candidati",
+          "description": "Si applicano all'elenco principale sotto i grafici.",
+          "searchAria": "Cerca per nome o email",
+          "searchPlaceholder": "Cerca per nome o email…",
+          "applicationStatus": "Stato candidatura",
+          "score": "Punteggio",
+          "all": "Tutti",
+          "scored": "Con punteggio",
+          "unscored": "Senza punteggio",
+          "tierP0_40": "0% – 40%",
+          "tierP40_60": "40% – 60%",
+          "tierP60_80": "60% – 80%",
+          "tierP80_100": "80% – 100%"
+        },
+        "candidates": {
+          "heading": "Candidati per fase",
+          "description": "Elenco principale per fase della pipeline. I filtri della sezione precedente si applicano qui.",
+          "stagesTablistAria": "Fasi del processo",
+          "noStageData": "Nessun dato sulle fasi.",
+          "emptyStageTitle": "Nessun candidato in questa fase",
+          "emptyStageBody": "Quando i candidati vengono spostati nella board, appariranno qui.",
+          "noFilterMatch": "Nessun candidato corrisponde ai filtri",
+          "stageLabel": "Fase:",
+          "statusLabel": "Stato:",
+          "matchLabel": "Abbinamento",
+          "noLinkedProfile": "Nessun profilo collegato per le azioni."
+        },
+        "sections": {
+          "strengths": "Punti di forza",
+          "considerations": "Aspetti da considerare",
+          "interview": "Colloquio",
+          "comments": "Commenti"
+        },
+        "fields": {
+          "qualitative": "Qualitativo",
+          "vectorSimilarity": "Similarità vettoriale",
+          "attributeAggregate": "Attributi (aggregato)"
+        },
+        "fallbacks": {
+          "noInterviewData": "Nessun dato sul colloquio."
+        },
+        "kpis": {
+          "heading": "Metriche principali",
+          "applicants": "Candidati",
+          "scored": "Con punteggio",
+          "scoredHint": "Abbinamento numerico disponibile",
+          "averageMatch": "Abbinamento medio",
+          "bestMatch": "Miglior abbinamento",
+          "inInterviewApprox": "In colloquio (circa)",
+          "hiredRejectedApprox": "Assunti / rifiutati (circa)",
+          "hiredRejectedHint": "Per nome fase della pipeline"
+        },
+        "charts": {
+          "noApplicants": "Non ci sono ancora candidati per questa posizione. Quando ci saranno candidati nella board, vedrai qui la distribuzione per fase e punteggio.",
+          "heading": "Indicatori grafici",
+          "description": "Vista compatta della pipeline e dell'abbinamento; l'elenco operativo è sotto.",
+          "byStageHeading": "Candidati per fase",
+          "byStageDescription": "Conteggio per fase attuale di ogni candidatura.",
+          "scoreDistributionHeading": "Distribuzione punteggi",
+          "scoreDistributionDescription": "Candidati con punteggio numerico ({scored} di {total}).",
+          "noScoresYet": "Ancora nessun punteggio numerico da graficare.",
+          "componentAveragesHeading": "Media sottopunteggi (match)",
+          "componentAveragesDescription": "Media per componente ({samples} candidati con dati di dettaglio).",
+          "tooltipApplicants": "Candidati",
+          "tooltipAverage": "Media",
+          "tooltipRangeSuffix": "Intervallo {label} %",
+          "qualitativeAvg": "Qualitativo (media)",
+          "vectorAvg": "Similarità vettoriale (media)",
+          "attributeAvg": "Attributi (media)"
+        },
+        "meta": {
+          "srOnlyContext": "Contesto posizione: {title}",
+          "company": "Azienda",
+          "countryCode": "Paese (codice)",
+          "department": "Dipartimento",
+          "modality": "Modalità",
+          "created": "Creata",
+          "modelWeightsHeading": "Pesi del modello",
+          "noStructuredWeights": "Nessun peso di abbinamento strutturato nella risposta API.",
+          "semanticWeight": "Peso similarità semantica",
+          "attributeWeights": "Pesi per attributo",
+          "noAdditionalAttributeWeights": "Nessun peso aggiuntivo per attributi in questa posizione.",
+          "viewFullDescription": "Vedi descrizione completa",
+          "expandHint": "(clic per espandere)",
+          "technicalDetails": "Dettagli tecnici",
+          "technicalDetailsHint": "(requisiti, suggerimenti IA)",
+          "requirementsPayload": "Requisiti (payload)",
+          "noRequirements": "Nessun requisito nel payload.",
+          "emptyRequirements": "Requisiti vuoti (oggetto senza chiavi). L'abbinamento può basarsi solo sul testo libero della descrizione.",
+          "aiSuggestionsHeading": "Suggerimenti IA ({count})",
+          "aiSuggestionsAria": "Suggerimenti IA"
+        }
+      },
+      "matching": {
+        "sectionTitle": "Ricerca e analisi preliminare con IA",
+        "sectionDescription": "Esplora i candidati con ricerca preliminare e analisi assistita da IA prima di inserirli nel processo.",
+        "preliminarySearch": "Ricerca preliminare",
+        "preliminaryAnalysis": "Analisi preliminare",
+        "updatingSearch": "Aggiornamento ricerca IA…",
+        "reanalyzing": "Rianalisi con IA…",
+        "includeInProcess": "Includi nel processo",
+        "including": "Inclusione…",
+        "startProcess": "Avvia processo",
+        "starting": "Avvio…",
+        "searchResults": "Risultati di ricerca",
+        "reanalyzingEllipsis": "Rianalisi con IA…",
+        "updatingSearchEllipsis": "Aggiornamento ricerca IA…",
+        "selectAll": "Seleziona tutti",
+        "deselectAll": "Deseleziona tutti",
+        "selectedCount": "{count} selezionato/i",
+        "possibleCandidates": "Candidati possibili",
+        "includeSelectedHint": "Includi nel processo i candidati selezionati",
+        "noSuggestions": "Nessun suggerimento di corrispondenza per questa posizione.",
+        "preliminaryMatchBadge": "Corrispondenza preliminare IA",
+        "preliminaryAnalysisBadge": "Analisi preliminare IA",
+        "aiSuggestionBadge": "Suggerimento IA",
+        "score": "Punteggio",
+        "viewProfile": "Vedi profilo",
+        "uploadedPrefix": "Caricato:",
+        "viewTechnicalSheet": "Vedi scheda tecnica",
+        "refreshAnalysis": "Aggiorna analisi",
+        "loadingCandidates": "Caricamento candidati",
+        "noCandidates": "Nessun candidato",
+        "emptySearch": "Esegui la ricerca preliminare per vedere i candidati suggeriti.",
+        "emptyAnalysis": "Esegui l'analisi preliminare per vedere i candidati valutati.",
+        "emptyDefault": "Nessun candidato da mostrare al momento.",
+        "profileModal": {
+          "aiProcessed": "Analisi elaborata con IA",
+          "aiIntro": "Questa valutazione è stata elaborata con IA per accelerare la lettura iniziale del profilo.",
+          "aiTiming": "Un'analisi manuale può richiedere tra <strong>2 ore e 1 giorno</strong>, mentre con l'IA questo risultato viene generato in <strong>secondi</strong>.",
+          "aiValidationHint": "Usa questi risultati come supporto e convalida la decisione finale dal team HR.",
+          "aiDisclosure": "Il contenuto seguente è stato generato da IA e viene mostrato senza modifiche.",
+          "attributes": "Attributi",
+          "qualitativeScore": "Punteggio qualitativo",
+          "semanticSimilarity": "Similarità semantica",
+          "attributeMatch": "Corrispondenza attributi",
+          "routePrefix": "Percorso:",
+          "strengths": "Punti di forza",
+          "considerations": "Aspetti da considerare",
+          "qualitativeReasoning": "Ragionamento qualitativo",
+          "totalMatchScore": "Punteggio totale di corrispondenza:",
+          "noAdditionalInfo": "Nessuna informazione aggiuntiva disponibile.",
+          "downloading": "Download in corso…",
+          "downloadCv": "Scarica CV",
+          "downloadCvAria": "Scarica CV del candidato",
+          "viewFullProfile": "Vedi profilo completo",
+          "close": "Chiudi",
+          "profileAria": "Profilo di {name}",
+          "closeProfileAria": "Chiudi profilo"
+        },
+        "scoreKeys": {
+          "qualitative": "Punteggio qualitativo",
+          "semanticSimilarity": "Similarità semantica",
+          "semanticScore": "Punteggio semantico",
+          "total": "Punteggio totale",
+          "attributesCombined": "Attributi combinati",
+          "keywordMatch": "Corrispondenza parole chiave",
+          "experience": "Esperienza",
+          "education": "Formazione",
+          "skills": "Competenze"
+        },
+        "kanban": {
+          "score": "Punteggio",
+          "columnAria": "Colonna {stage}",
+          "moveStageAria": "Sposta {name} in un'altra fase",
+          "statusAria": "Stato di {name}"
+        },
+        "aria": {
+          "matchedCandidates": "Candidati con corrispondenza",
+          "preliminarySearch": "Ricerca preliminare",
+          "preliminaryAnalysis": "Analisi preliminare",
+          "analysisProgress": "Progresso dell'analisi preliminare con IA",
+          "searchProgress": "Progresso della ricerca preliminare con IA",
+          "searchResults": "Risultati di ricerca",
+          "possibleCandidates": "Candidati possibili",
+          "selectAll": "Seleziona tutti i candidati",
+          "deselectAll": "Deseleziona tutti i candidati",
+          "selectCandidate": "Seleziona candidato {name}",
+          "viewCandidate": "Vedi profilo di {name}",
+          "candidateCard": "Candidato {name}"
+        },
+        "toasts": {
+          "matchSuccess": "Corrispondenza eseguita correttamente.",
+          "matchFailed": "Impossibile eseguire la corrispondenza.",
+          "loadMatchFailed": "Impossibile caricare la corrispondenza.",
+          "processStarted": "Processo avviato…",
+          "processFailed": "Impossibile avviare il processo.",
+          "manualFallbackSuffix": " Puoi continuare con filtri e revisione manuale."
+        },
+        "kpis": {
+          "preliminarySearchTitle": "Ricerca preliminare",
+          "preliminarySearchSubtitle": "Da ore a secondi nella prima esplorazione",
+          "preliminaryMatchTitle": "Corrispondenza preliminare",
+          "preliminaryMatchSubtitle": "Precisione osservata dal 75% all'80%",
+          "preliminaryMatchGoal": "Obiettivo di calibrazione: 90%",
+          "coverageTitle": "Copertura dei risultati",
+          "coverageSubtitle": "Shortlist iniziale con candidati suggeriti",
+          "coverageHint": "Punto di partenza per la validazione HR",
+          "prioritizationTitle": "Prioritizzazione iniziale assistita da IA"
+        },
+        "errors": {
+          "moveStageFailed": "Impossibile spostare il candidato di fase.",
+          "stageSkipNotAllowed": "Puoi spostare il candidato solo alla fase consecutiva (precedente o successiva). Non sono ammessi salti.",
+          "finalStatusRequiredForStageMove": "Per passare alla fase successiva, il candidato deve essere in uno stato di candidatura contrassegnato come finale.",
+          "missingDefaultApplicationStatus": "Manca lo stato di candidatura predefinito dell'azienda. Il server ne ha bisogno quando si spostano candidati tra le fasi. Configuralo in Fasi (stati) o chiedi a un amministratore di farlo.",
+          "updateApplicationStatusFailed": "Impossibile aggiornare lo stato della candidatura.",
+          "candidateMovedStage": "Candidato spostato di fase.",
+          "applicationStatusUpdated": "Stato candidatura aggiornato.",
+          "missingApplicationId": "ID candidatura non trovato per aggiornare lo stato.",
+          "downloadCvFailed": "Impossibile scaricare il CV.",
+          "searchNoResults": "Nessun candidato trovato nella ricerca.",
+          "searchAlreadyInPipeline": "I candidati trovati sono già in Candidati possibili o Fasi.",
+          "goToStagesAria": "Vai alla sezione Fasi per gestire gli stati di candidatura",
+          "openProfileAria": "Apri il profilo del candidato in una nuova scheda"
+        },
+        "scoreTooltips": {
+          "semanticSimilarity": "Misura quanto il contenuto del CV è allineato alla descrizione della posizione, usando il confronto semantico del testo.",
+          "qualitativeScore": "Valuta la compatibilità qualitativa del candidato in aspetti come esperienza, competenze e contesto del profilo rispetto alla vacanza."
+        },
+        "stagesTitle": "Fasi",
+        "emptyApplicants": "Non ci sono ancora candidati su questa posizione.",
+        "kanbanBoardAria": "Contenitore della board Kanban",
+        "kanbanStagesAria": "Fasi dei candidati",
+        "goToStagesLink": "Vai alle Fasi e gestisci gli stati"
+      },
+      "rematch": {
+        "ariaLabel": "Ricalibra corrispondenze",
+        "titleNeedsRematch": "Requisiti aggiornati. Si consiglia di ricalibrare le corrispondenze.",
+        "titleDefault": "Ricalibra corrispondenze",
+        "adjusting": "Ricalibrazione…",
+        "short": "Ricalibra",
+        "label": "Ricalibra corrispondenza",
+        "success": "Operazione riuscita!",
+        "processError": "Errore di elaborazione",
+        "toastSuccess": "Corrispondenza ricalibrata correttamente.",
+        "toastError": "Errore durante la ricalibrazione della corrispondenza"
+      }
+    },
+    "interviews": {
+      "breadcrumb": "Colloqui",
+      "hub": {
+        "title": "Colloqui",
+        "description": "Scegli una posizione per visualizzare e gestire i suoi colloqui.",
+        "headerRegionLabel": "Intestazione dei colloqui",
+        "vacanciesRegionLabel": "Posizioni"
+      },
+      "page": {
+        "title": "Colloqui",
+        "descriptionLoading": "Caricamento dei dati della posizione…",
+        "descriptionWithVacancy": "Posizione: {title}",
+        "descriptionLoadError": "Impossibile caricare il titolo della posizione.",
+        "descriptionDefault": "Gestione dei colloqui della posizione",
+        "vacancyFallback": "Posizione",
+        "suspenseLoading": "Caricamento…"
+      },
+      "filters": {
+        "regionLabel": "Filtri dei colloqui",
+        "status": "Stato",
+        "allStatuses": "Tutti gli stati",
+        "from": "Da (locale)",
+        "to": "A (locale)",
+        "apply": "Applica filtri",
+        "timezoneHelper": "I filtri per intervallo usano il fuso orario del browser; l'API riceve UTC."
+      },
+      "list": {
+        "regionLabel": "Elenco dei colloqui",
+        "table": {
+          "dateTime": "Data e ora",
+          "candidate": "Candidato",
+          "type": "Tipo",
+          "duration": "Durata",
+          "interviewer": "Intervistatore",
+          "status": "Stato",
+          "actions": "Azioni"
+        }
+      },
+      "cards": {
+        "viewInterviews": "Vedi colloqui",
+        "viewInterviewsAria": "Vedi i colloqui della posizione {title}",
+        "candidatesCount": "{count, plural, one {# candidato} other {# candidati}}",
+        "candidateFallback": "Candidato ({id}…)"
+      },
+      "actions": {
+        "goToVacancies": "Vai alle posizioni",
+        "reviewCandidates": "Esamina candidati",
+        "reviewCandidatesAria": "Vai ai risultati della posizione per esaminare i candidati prima di pianificare un colloquio",
+        "newInterview": "Nuovo colloquio",
+        "createFirst": "Crea il primo colloquio",
+        "manage": "Gestisci",
+        "notes": "Note",
+        "technicalSheet": "Scheda tecnica",
+        "retry": "Riprova"
+      },
+      "statuses": {
+        "scheduled": "Programmato",
+        "completed": "Completato",
+        "cancelled": "Annullato",
+        "noShow": "Assente"
+      },
+      "emptyStates": {
+        "noVacancies": "Nessuna posizione. Crea prima una posizione per pianificare i colloqui.",
+        "noInterviews": "Non ci sono colloqui per questa posizione."
+      },
+      "loadingStates": {
+        "loadingVacancies": "Caricamento delle posizioni…",
+        "loadingInterviews": "Caricamento dei colloqui..."
+      },
+      "errors": {
+        "loadVacanciesFailed": "Impossibile caricare le posizioni.",
+        "loadInterviewsFailed": "Si è verificato un errore durante il caricamento dei colloqui.",
+        "missingVacancyId": "Manca l'identificatore della posizione."
+      },
+      "toasts": {
+        "created": "Colloquio creato correttamente.",
+        "saved": "Modifiche salvate.",
+        "deleted": "Colloquio eliminato.",
+        "notesSaved": "Note salvate."
+      },
+      "form": {
+        "pageTitle": "Nuovo colloquio",
+        "backToList": "← Torna all'elenco",
+        "ariaLabel": "Modulo nuovo colloquio",
+        "loadingCandidates": "Caricamento candidati della posizione…",
+        "noCandidates": "Questa posizione non ha ancora candidati. Aggiungi prima i candidati alla posizione; poi potrai programmare un colloquio.",
+        "fields": {
+          "candidate": "Candidato",
+          "dateTime": "Data e ora",
+          "type": "Tipo",
+          "modality": "Modalità",
+          "interviewer": "Intervistatore",
+          "description": "Descrizione"
+        },
+        "placeholders": {
+          "select": "Seleziona…",
+          "selectModality": "Seleziona una modalità…",
+          "typeExample": "Es.: tecnico, culturale…"
+        },
+        "loadingTypes": "Caricamento tipi di colloquio…",
+        "loadingModalities": "Caricamento modalità…",
+        "calendar": {
+          "willSync": "Questo colloquio verrà sincronizzato con Google Calendar al salvataggio (se il server lo supporta).",
+          "notConnected": "Google Calendar non è connesso.",
+          "connectLink": "Connetti nelle impostazioni",
+          "notConnectedSuffix": "per inviti ed eventi automatici.",
+          "meetWillGenerate": "Verrà generato un link Google Meet al salvataggio (tramite Google Calendar).",
+          "meetNotConnected": "Questa modalità genera un link Google Meet, ma Google Calendar non è connesso.",
+          "meetNotConnectedSuffix": "affinché venga creato automaticamente."
+        },
+        "validation": {
+          "selectCandidate": "Seleziona un candidato",
+          "indicateDateTime": "Indica data e ora",
+          "invalidDateTime": "Data o ora non valida"
+        },
+        "actions": {
+          "schedule": "Programma colloquio",
+          "scheduling": "Salvataggio…",
+          "cancel": "Annulla"
+        }
+      },
+      "detail": {
+        "pageTitle": "Colloquio",
+        "backToInterviews": "← Torna ai colloqui",
+        "loading": "Caricamento colloquio…",
+        "loadFailed": "Impossibile caricare il colloquio.",
+        "close": "Chiudi",
+        "backToList": "Torna all'elenco",
+        "fields": {
+          "status": "Stato",
+          "dateTime": "Data e ora",
+          "type": "Tipo",
+          "modality": "Modalità",
+          "interviewer": "Intervistatore",
+          "description": "Descrizione"
+        },
+        "statusAria": "Stato del colloquio",
+        "terminalReadOnly": "Questo colloquio è chiuso (stato terminale). I dati sono in sola lettura.",
+        "validation": {
+          "invalidDateTime": "La data o l'ora non è valida. Controlla il campo orario."
+        },
+        "actions": {
+          "save": "Salva modifiche",
+          "saving": "Salvataggio…",
+          "discard": "Annulla modifiche",
+          "delete": "Elimina",
+          "deleteAria": "Elimina colloquio"
+        },
+        "deleteConfirm": {
+          "title": "Elimina colloquio",
+          "message": "Eliminare questo colloquio? Verrà archiviato e non sarà più visibile negli elenchi."
+        }
+      },
+      "modals": {
+        "createTitle": "Nuovo colloquio",
+        "detailTitle": "Gestisci colloquio",
+        "notesTitle": "Note del colloquio",
+        "notesField": "Appunti",
+        "notesPlaceholder": "Scrivi osservazioni o follow-up su questo colloquio…",
+        "notesSave": "Salva",
+        "notesSaving": "Salvataggio…"
+      },
+      "calendar": {
+        "title": "Google Calendar",
+        "notConnected": "Connetti il tuo Google Calendar nelle",
+        "settingsLink": "impostazioni",
+        "notConnectedSuffix": "per sincronizzare i colloqui e inviare inviti.",
+        "noSchedule": "Imposta data e ora del colloquio per generare o collegare l'evento in Google Calendar.",
+        "loadingEvent": "Caricamento evento…",
+        "synced": "Evento sincronizzato con Google Calendar.",
+        "viewInGoogle": "Vedi in Google Calendar",
+        "pending": "Sincronizzazione in sospeso…",
+        "notSynced": "L'evento non è sincronizzato o si è verificato un errore.",
+        "noEvent": "Nessun evento collegato ancora. Salva il colloquio o sincronizza dalle impostazioni.",
+        "retry": "Riprova",
+        "updating": "Aggiornamento…",
+        "toastSynced": "Stato calendario aggiornato.",
+        "syncFailed": "Impossibile sincronizzare"
+      },
+      "crud": {
+        "common": {
+          "close": "Chiudi",
+          "add": "Aggiungi",
+          "save": "Salva",
+          "cancel": "Annulla",
+          "delete": "Elimina",
+          "name": "Nome",
+          "actions": "Azioni",
+          "yes": "Sì",
+          "no": "No",
+          "editNameAria": "Modifica nome del tipo",
+          "editAria": "Modifica {name}",
+          "deleteAria": "Elimina {name}"
+        },
+        "types": {
+          "title": "Tipi di colloquio",
+          "createAria": "Crea tipo di colloquio",
+          "newLabel": "Nuovo tipo",
+          "namePlaceholder": "Nome del tipo",
+          "loading": "Caricamento tipi…",
+          "empty": "Nessun tipo definito. Aggiungi il primo sopra.",
+          "created": "Tipo di colloquio creato correttamente.",
+          "updated": "Tipo di colloquio aggiornato correttamente.",
+          "deleted": "Tipo di colloquio eliminato correttamente.",
+          "deleteTitle": "Elimina tipo di colloquio",
+          "deleteMessage": "Eliminare «{name}»? Questa azione non può essere annullata."
+        },
+        "statuses": {
+          "title": "Stati dei colloqui",
+          "createAria": "Crea stato del colloquio",
+          "newLabel": "Nuovo stato",
+          "displayNameLabel": "Nome visibile",
+          "displayNamePlaceholder": "es.: Programmato",
+          "terminalLabel": "Stato terminale",
+          "terminalHint": "Seleziona se questo stato chiude il ciclo del colloquio (es. completato o annullato).",
+          "code": "Codice",
+          "terminal": "Terminale",
+          "terminalAria": "Stato terminale",
+          "displayNameAria": "Nome visibile",
+          "loading": "Caricamento stati…",
+          "empty": "Nessuno stato definito. Aggiungi il primo sopra.",
+          "created": "Stato del colloquio creato correttamente.",
+          "updated": "Stato del colloquio aggiornato correttamente.",
+          "deleted": "Stato del colloquio eliminato correttamente.",
+          "deleteTitle": "Elimina stato del colloquio",
+          "deleteMessage": "Eliminare «{name}»? Consentito solo se non ci sono colloqui che usano questo stato."
+        },
+        "modalities": {
+          "title": "Modalità di colloquio",
+          "createAria": "Crea modalità di colloquio",
+          "newLabel": "Nuova modalità",
+          "namePlaceholder": "Nome visibile",
+          "googleMeet": "Google Meet",
+          "meetLabel": "Meet",
+          "meetAria": "Includi link Google Meet",
+          "editNameAria": "Modifica nome della modalità",
+          "loading": "Caricamento modalità…",
+          "empty": "Nessuna modalità definita. Aggiungi la prima sopra.",
+          "created": "Modalità di colloquio creata correttamente.",
+          "updated": "Modalità di colloquio aggiornata correttamente.",
+          "deleted": "Modalità di colloquio eliminata correttamente.",
+          "deleteTitle": "Elimina modalità di colloquio",
+          "deleteMessage": "Eliminare «{name}»? Consentito solo se non ci sono colloqui che usano questa modalità."
+        }
+      },
+      "interviewerSelect": {
+        "loading": "Caricamento reclutatori…",
+        "select": "Seleziona…",
+        "manualHint": "Puoi inserire il nome manualmente."
+      },
+      "candidateList": {
+        "title": "Colloqui del candidato",
+        "description": "Cronologia dei colloqui su tutte le posizioni.",
+        "regionAria": "Elenco colloqui del candidato",
+        "loading": "Caricamento…",
+        "empty": "Nessun colloquio registrato per questo candidato."
+      },
+      "aria": {
+        "formNewInterview": "Modulo nuovo colloquio"
+      },
+      "prepPanel": {
+        "titleEmbedded": "Candidati della posizione",
+        "titleDrawer": "Rivedi candidati",
+        "vacancyFallback": "Candidati della posizione",
+        "embeddedDescription": "{title} · Contesto per candidato per pianificare colloqui o aprire la scheda tecnica.",
+        "closeAria": "Chiudi pannello",
+        "loading": "Caricamento candidati…",
+        "retry": "Riprova",
+        "empty": "Non ci sono ancora candidati per questa posizione.",
+        "listAria": "Elenco candidati",
+        "currentStage": "Fase attuale",
+        "applicationStatus": "Stato candidatura",
+        "interview": "Colloquio",
+        "strengths": "Punti di forza",
+        "considerations": "Aspetti da considerare",
+        "comments": "Commenti",
+        "scheduleInterview": "Pianifica colloquio",
+        "technicalSheet": "Scheda tecnica",
+        "viewProfile": "Vedi profilo"
+      },
+      "schedule": {
+        "dateLabel": "Data del colloquio",
+        "startTimeLabel": "Ora di inizio",
+        "startLabel": "Inizio",
+        "endTimeLabel": "Ora di fine",
+        "dateShort": "Data",
+        "timeShort": "Ora"
+      }
+    },
+    "dashboard": {
+      "statsAria": "Statistiche della dashboard",
+      "activeCandidates": "Candidati attivi",
+      "openVacancies": "Posizioni aperte",
+      "interviewsToday": "Colloqui oggi",
+      "hiresThisMonth": "Assunzioni del mese",
+      "recentActivityAria": "Attività recente",
+      "recentActivityTitle": "Attività recente",
+      "recentCandidatesAria": "Candidati recenti",
+      "recentCandidatesTitle": "Candidati recenti",
+      "newCandidatesBadge": "{count} nuovi",
+      "mockBadges": {
+        "interview": "Interview",
+        "evaluation": "Evaluacion",
+        "hired": "Contratado"
+      }
+    },
+    "technicalSheet": {
+      "title": "Scheda tecnica",
+      "actions": {
+        "viewSheet": "Vedi scheda tecnica",
+        "downloadPdf": "Scarica PDF",
+        "close": "Chiudi",
+        "backToVacancy": "Torna alla vacante"
+      },
+      "loadingStates": {
+        "loading": "Caricamento scheda tecnica…",
+        "downloadingPdf": "Download PDF in corso…"
+      },
+      "errors": {
+        "notPosted": "Questo candidato non è iscritto a questa vacante o non ci sono dati della scheda.",
+        "noTemplate": "Non esiste un modello di documento contrassegnato come scheda tecnica. Configuralo in Amministrazione → Modelli.",
+        "generic": "Impossibile caricare la scheda tecnica.",
+        "forbidden": "Non hai i permessi per visualizzare questa scheda.",
+        "pdfExportFailed": "Impossibile generare il PDF. Riprova o apri la console del browser (F12) se il problema persiste.",
+        "missingParams": "Parametri di vacante o candidato mancanti nell'URL."
+      },
+      "page": {
+        "breadcrumb": "Scheda tecnica"
+      },
+      "aria": {
+        "close": "Chiudi",
+        "viewSheet": "Vedi scheda tecnica"
+      }
+    },
+    "aiDisclosure": {
+      "progressAria": "Progresso dell'elaborazione con IA",
+      "preliminaryStepsAria": "Fasi dell'analisi preliminare",
+      "processingStepsAria": "Stati dell'elaborazione",
+      "percentComplete": "{percent} per cento",
+      "assistedByAi": "Assistito da IA"
+    }
+  },
+  "AdminPortal": {
+    "companies": {
+      "page": {
+        "title": "Aziende",
+        "description": "Gestione dei clienti (tenant). Creando un'azienda vengono generati automaticamente stati e fasi della pipeline."
+      },
+      "table": {
+        "logo": "Logo",
+        "name": "Nome",
+        "industry": "Settore",
+        "status": "Stato",
+        "createdAt": "Creata",
+        "actions": "Azioni"
+      },
+      "status": {
+        "active": "Attiva",
+        "inactive": "Inattiva"
+      },
+      "logoCell": {
+        "withName": "Logo di {name}",
+        "none": "Nessun logo"
+      },
+      "count": {
+        "loading": "Caricamento…",
+        "summary": "{count, plural, one {# azienda} other {# aziende}}"
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "refreshAria": "Aggiorna elenco",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}"
+      },
+      "emptyStates": {
+        "title": "Ancora nessuna azienda",
+        "description": "Non è stata ancora registrata nessuna azienda. Crea la prima per iniziare."
+      },
+      "loadingStates": {
+        "company": "Caricamento azienda…"
+      },
+      "actions": {
+        "create": "Crea azienda",
+        "edit": "Modifica",
+        "activate": "Attiva",
+        "deactivate": "Disattiva",
+        "retry": "Riprova",
+        "prev": "Precedente",
+        "next": "Successiva"
+      },
+      "form": {
+        "createTitle": "Nuova azienda",
+        "editTitle": "Modifica azienda",
+        "nameLabel": "Nome",
+        "namePlaceholder": "Nome dell'azienda",
+        "industryLabel": "Settore (facoltativo)",
+        "industryPlaceholder": "es. Tecnologia, Retail",
+        "logoLegend": "Logo",
+        "logoHelper": "PNG, JPG, WEBP o SVG. Massimo 5 MB. Il logo viene caricato come blob al salvataggio.",
+        "logoPreviewAria": "Anteprima del logo",
+        "logoNoneAria": "Nessun logo",
+        "logoAlt": "Logo dell'azienda",
+        "changeLogo": "Cambia logo",
+        "uploadLogo": "Carica logo",
+        "cancelSelection": "Annulla selezione",
+        "removeLogo": "Rimuovi logo",
+        "undo": "Annulla",
+        "logoWillBeRemoved": "Il logo attuale verrà rimosso al salvataggio.",
+        "activeCheckbox": "Azienda attiva",
+        "deactivateHint": "Per ritirare un'azienda nel prodotto, disattivala invece di eliminarla.",
+        "cancel": "Annulla",
+        "save": "Salva",
+        "update": "Aggiorna"
+      },
+      "validation": {
+        "nameRequired": "Il nome è obbligatorio."
+      },
+      "errors": {
+        "listForbidden": "Non hai i permessi per elencare le aziende (è richiesto il ruolo Admin nell'API).",
+        "loadFailed": "Impossibile caricare l'azienda.",
+        "saveFailed": "Impossibile salvare l'azienda.",
+        "statusUpdateFailed": "Impossibile aggiornare lo stato.",
+        "logoType": "Sono consentiti solo file immagine.",
+        "logoSize": "Il logo non può superare i 5 MB."
+      },
+      "toasts": {
+        "created": "Azienda creata. ID: {id}",
+        "updated": "Azienda aggiornata.",
+        "activated": "Azienda attivata.",
+        "deactivated": "Azienda disattivata."
+      }
+    },
+    "users": {
+      "page": {
+        "title": "Utenti",
+        "description": "Elenco e amministrazione degli account del portale."
+      },
+      "filters": {
+        "regionAria": "Filtri",
+        "emailLabel": "Email (contiene)",
+        "emailPlaceholder": "es. @azienda.com",
+        "roleLabel": "Ruolo",
+        "allRoles": "Tutti",
+        "lockedOnly": "Solo bloccati",
+        "apply": "Applica filtri",
+        "clear": "Cancella"
+      },
+      "table": {
+        "email": "Email",
+        "userName": "Utente",
+        "roles": "Ruoli",
+        "emailOk": "Email OK",
+        "lockout": "Blocco",
+        "actions": "Azioni"
+      },
+      "values": {
+        "yes": "Sì",
+        "no": "No"
+      },
+      "count": {
+        "loading": "Caricamento…",
+        "summary": "{count, plural, one {# utente} other {# utenti}}"
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "refreshAria": "Aggiorna elenco",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}"
+      },
+      "emptyStates": {
+        "noResults": "Nessun utente corrisponde ai filtri attuali."
+      },
+      "actions": {
+        "create": "Nuovo utente",
+        "manage": "Gestisci",
+        "prev": "Precedente",
+        "next": "Successivo"
+      },
+      "createModal": {
+        "title": "Nuovo utente",
+        "emailLabel": "Email",
+        "emailPlaceholder": "utente@azienda.com",
+        "passwordLabel": "Password (facoltativa)",
+        "passwordPlaceholder": "Vuoto = l'utente imposta la password via email",
+        "rolesLegend": "Ruoli iniziali",
+        "cancel": "Annulla",
+        "create": "Crea"
+      },
+      "detail": {
+        "title": "Dettaglio utente",
+        "emailLabel": "Email",
+        "userNameLabel": "Nome utente",
+        "lockedCheckbox": "Account bloccato",
+        "emailConfirmed": "Email confermata",
+        "readOnly": "Sola lettura",
+        "lockoutHint": "Attivalo per bloccare manualmente l'utente e disattivalo per rimuovere il blocco.",
+        "lockoutActiveLabel": "Blocco attivo:",
+        "lockoutEndPrefix": "Fine:",
+        "rolesHeading": "Ruoli",
+        "noRoles": "Nessun ruolo",
+        "addRolesPrompt": "Aggiungi ruoli (solo quelli selezionati):",
+        "removeRoleAria": "Rimuovi ruolo {role}",
+        "allRolesAssigned": "Ha già tutti i ruoli assegnabili.",
+        "addRoles": "Aggiungi ruoli",
+        "sendReset": "Invia recupero password",
+        "close": "Chiudi"
+      },
+      "removeRole": {
+        "title": "Rimuovi ruolo",
+        "cancel": "Annulla",
+        "confirm": "Rimuovi ruolo",
+        "message": "Rimuovere il ruolo «{role}» da questo utente? L'operazione viene applicata immediatamente sul server."
+      },
+      "errors": {
+        "listForbidden": "Non hai i permessi per elencare gli utenti (è richiesto il ruolo Admin nell'API)."
+      },
+      "validation": {
+        "emailRequired": "L'email è obbligatoria.",
+        "selectRole": "Seleziona almeno un ruolo da aggiungere."
+      },
+      "toasts": {
+        "locked": "Utente bloccato.",
+        "unlocked": "Utente sbloccato.",
+        "updated": "Utente aggiornato.",
+        "rolesUpdated": "Ruoli aggiornati.",
+        "roleRemoved": "Ruolo rimosso.",
+        "resetSent": "Le istruzioni sono state inviate se l'email è valida.",
+        "created": "Utente creato."
+      }
+    },
+    "stages": {
+      "page": {
+        "title": "Fasi",
+        "description": "Gestisci le fasi del processo di selezione",
+        "headerAria": "Intestazione fasi",
+        "listAria": "Elenco fasi",
+        "searchPlaceholder": "Cerca fasi...",
+        "searchAria": "Cerca fasi"
+      },
+      "actions": {
+        "statuses": "Stati",
+        "statusesAria": "Gestisci stati",
+        "newStage": "Nuova fase",
+        "newStageAria": "Crea nuova fase",
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "createStage": "Crea fase",
+        "retry": "Riprova",
+        "accept": "Accetta",
+        "cancel": "Annulla",
+        "dragAria": "Trascina per riordinare"
+      },
+      "fields": {
+        "defaultStage": "Fase predefinita",
+        "finalStage": "Fase finale",
+        "hiredStage": "Fase di assunzione",
+        "order": "Ordine:"
+      },
+      "switches": {
+        "defaultActive": "{name}: fase predefinita attiva",
+        "markDefault": "Segna {name} come fase predefinita",
+        "finalActive": "{name}: fase finale attiva",
+        "markFinal": "Segna {name} come fase finale",
+        "hiredActive": "{name}: fase di assunzione attiva",
+        "markHired": "Segna {name} come fase di assunzione"
+      },
+      "loadingStates": {
+        "savingOrder": "Salvataggio ordine...",
+        "loading": "Caricamento fasi..."
+      },
+      "emptyStates": {
+        "notFound": "Nessuna fase trovata"
+      },
+      "aria": {
+        "editStage": "Modifica fase {name}",
+        "deleteStage": "Elimina fase {name}"
+      },
+      "errors": {
+        "loadFailed": "Impossibile caricare le fasi.",
+        "defaultUpdateFailed": "Impossibile aggiornare la fase predefinita. Riprova.",
+        "updateFailed": "Impossibile aggiornare la fase. Riprova.",
+        "hiredUpdateFailed": "Impossibile aggiornare la fase di assunzione. Riprova.",
+        "forbidden": "Non hai i permessi per modificare questa fase.",
+        "notFound": "La fase non esiste più. Ricaricamento elenco...",
+        "deleteFailed": "Impossibile eliminare la fase. Riprova.",
+        "reorderFilterHint": "Per salvare l'ordine, mostra tutte le fasi (senza filtro di ricerca).",
+        "reorderFailed": "Impossibile riordinare le fasi. Riprova."
+      },
+      "toasts": {
+        "created": "Fase creata correttamente.",
+        "updated": "Fase aggiornata correttamente.",
+        "defaultUpdated": "Fase predefinita aggiornata.",
+        "finalMarked": "Fase contrassegnata come finale.",
+        "finalUnmarked": "Fase non più contrassegnata come finale.",
+        "hiredMarked": "Fase contrassegnata come fase di assunzione.",
+        "hiredUnmarked": "Fase non più contrassegnata come fase di assunzione.",
+        "deleted": "Fase eliminata correttamente.",
+        "orderSaved": "Ordine salvato correttamente."
+      },
+      "deleteConfirm": {
+        "title": "Elimina fase",
+        "message": "Sei sicuro di voler eliminare la fase \"{name}\"?"
+      },
+      "modal": {
+        "editTitle": "Modifica fase",
+        "createTitle": "Nuova fase",
+        "nameLabel": "Nome della fase",
+        "namePlaceholder": "Es.: Colloquio tecnico",
+        "cancel": "Annulla",
+        "update": "Aggiorna fase",
+        "create": "Crea fase",
+        "cancelAria": "Annulla",
+        "submitAriaUpdate": "Aggiorna fase",
+        "submitAriaCreate": "Crea fase",
+        "validationNameRequired": "Il nome è obbligatorio",
+        "toastUpdated": "Fase aggiornata correttamente.",
+        "toastCreated": "Fase creata correttamente.",
+        "toastSaveFailed": "Impossibile salvare la fase. Riprova."
+      }
+    },
+    "statuses": {
+      "modal": {
+        "title": "Gestisci stati",
+        "close": "Chiudi",
+        "newStatus": "Nuovo stato",
+        "nameLabel": "Nome dello stato",
+        "namePlaceholder": "Es.: In corso",
+        "cancel": "Annulla",
+        "update": "Aggiorna",
+        "create": "Crea",
+        "defaultStatus": "Stato predefinito",
+        "finalStatus": "Stato finale",
+        "loading": "Caricamento stati...",
+        "retry": "Riprova",
+        "empty": "Nessuno stato creato",
+        "defaultLegend": "Stato predefinito — Quando si spostano i candidati tra le fasi (Kanban), ne vale uno solo; attivandone un altro, gli altri vengono disattivati.",
+        "finalLegend": "Stato finale — Attiva o disattiva se questo stato chiude il processo del candidato.",
+        "defaultActiveAria": "{name}: stato predefinito attivo",
+        "markDefaultAria": "Segna {name} come stato predefinito",
+        "finalActiveAria": "{name}: stato finale attivo",
+        "markFinalAria": "Segna {name} come stato finale",
+        "editAria": "Modifica stato {name}",
+        "deleteAria": "Elimina stato {name}",
+        "validationNameRequired": "Il nome è obbligatorio",
+        "loadFailed": "Impossibile caricare gli stati.",
+        "defaultChanged": "Stato predefinito modificato",
+        "defaultUpdateFailed": "Impossibile aggiornare lo stato predefinito.",
+        "finalChanged": "Stato finale modificato",
+        "finalMarked": "Stato contrassegnato come finale",
+        "finalUnmarked": "Stato rimosso come finale",
+        "finalUpdateFailed": "Impossibile aggiornare lo stato finale.",
+        "deleted": "Stato eliminato",
+        "deleteFailed": "Impossibile eliminare lo stato. Riprova.",
+        "updated": "Stato aggiornato",
+        "created": "Stato creato correttamente",
+        "saveFailed": "Impossibile salvare lo stato. Riprova.",
+        "deleteTitle": "Elimina stato",
+        "deleteMessage": "Sei sicuro di voler eliminare lo stato \"{name}\"?",
+        "accept": "Accetta"
+      }
+    },
+    "templates": {
+      "page": {
+        "title": "Modelli",
+        "description": "Gestisci i modelli di notifiche",
+        "headerAria": "Intestazione modelli",
+        "listAria": "Elenco modelli",
+        "searchPlaceholder": "Cerca modelli...",
+        "searchAria": "Cerca modelli",
+        "newTemplate": "Nuovo modello",
+        "newTemplateAria": "Crea nuovo modello"
+      },
+      "types": {
+        "notification": "Notifica",
+        "document": "Documento",
+        "questionnaire": "Questionario",
+        "technicalSheet": "Scheda tecnica",
+        "report": "Report"
+      },
+      "card": {
+        "subject": "Oggetto:",
+        "format": "Formato:",
+        "required": "(Obbligatorio)",
+        "templateAria": "Modello: {name}"
+      },
+      "actions": {
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "create": "Crea modello",
+        "retry": "Riprova",
+        "accept": "Accetta",
+        "cancel": "Annulla",
+        "editAria": "Modifica modello {name}",
+        "deleteAria": "Elimina modello {name}"
+      },
+      "loadingStates": {
+        "loading": "Caricamento modelli..."
+      },
+      "emptyStates": {
+        "notFound": "Nessun modello trovato"
+      },
+      "errors": {
+        "loadFailed": "Impossibile caricare i modelli.",
+        "deleteFailed": "Impossibile eliminare il modello. Riprova."
+      },
+      "toasts": {
+        "deleted": "Modello eliminato correttamente."
+      },
+      "deleteConfirm": {
+        "title": "Elimina modello",
+        "message": "Sei sicuro di voler eliminare il modello \"{name}\"?"
+      },
+      "modal": {
+        "editTitle": "Modifica modello",
+        "createTitle": "Nuovo modello",
+        "typeLabel": "Tipo di modello",
+        "typeNotification": "Notifica (e-mail/SMS)",
+        "typeDocument": "Documento (PDF/contratto)",
+        "typeQuestionnaire": "Questionario",
+        "nameLabel": "Nome",
+        "subjectLabel": "Oggetto",
+        "contentLabel": "Contenuto",
+        "contentTemplateLabel": "Modello di contenuto",
+        "outputFormatLabel": "Formato di output",
+        "isTechnicalSheet": "Modello scheda tecnica",
+        "technicalSheetHint": "Solo un modello di tipo documento può essere contrassegnato come scheda tecnica.",
+        "isReport": "Modello report",
+        "reportHint": "Collega questo modello a un report del catalogo per generare PDF dal portale HR.",
+        "reportTypeLabel": "Tipo di report",
+        "descriptionLabel": "Descrizione",
+        "isRequired": "Obbligatorio",
+        "namePlaceholder": "Es.: Notifica colloquio",
+        "subjectPlaceholder": "Es.: Il tuo colloquio è stato programmato",
+        "contentPlaceholder": "Scrivi il contenuto del modello...",
+        "contentTemplatePlaceholder": "Es.: {htmlExample}",
+        "descriptionPlaceholder": "Es.: Completa queste informazioni tecniche...",
+        "reportCatalogLoadFailed": "Impossibile caricare il catalogo report.",
+        "reportCatalogLoading": "Caricamento report…",
+        "reportSelectPlaceholder": "Seleziona un report (opzionale)",
+        "reportLinkedOption": "{name} — già collegato a \"{linkedName}\"",
+        "reportLinkHint": "Il collegamento usa il catalogo ufficiale dei report di sistema.",
+        "cancel": "Annulla",
+        "update": "Aggiorna modello",
+        "create": "Crea modello",
+        "validation": {
+          "nameRequired": "Il nome è obbligatorio",
+          "subjectRequired": "L'oggetto è obbligatorio",
+          "contentRequired": "Il contenuto è obbligatorio",
+          "contentTemplateRequired": "Il modello di contenuto è obbligatorio",
+          "reportTypeRequired": "Seleziona un tipo di report valido dal catalogo.",
+          "descriptionRequired": "La descrizione è obbligatoria"
+        },
+        "toastUpdated": "Modello aggiornato correttamente.",
+        "toastCreated": "Modello creato correttamente.",
+        "toastSaveFailed": "Impossibile salvare il modello. Riprova."
+      }
+    },
+    "vacancyCatalog": {
+      "shared": {
+        "table": {
+          "name": "Nome",
+          "description": "Descrizione",
+          "actions": "Azioni"
+        },
+        "actions": {
+          "refresh": "Aggiorna",
+          "retry": "Riprova",
+          "edit": "Modifica",
+          "delete": "Elimina",
+          "cancel": "Annulla",
+          "save": "Salva",
+          "update": "Aggiorna",
+          "close": "Chiudi",
+          "deactivateInstead": "Disattiva invece"
+        },
+        "count": {
+          "loading": "Caricamento…",
+          "summary": "{count} {plural}"
+        },
+        "summaryHelper": "Gestisci i {plural} disponibili per le nuove posizioni.",
+        "inUse": "In uso da posizioni attive o storiche.",
+        "emptyBody": "Quando crei un {singular}, sarà disponibile per classificare le posizioni nel resto di Applican Tree.",
+        "form": {
+          "nameLabel": "Nome",
+          "descriptionLabel": "Descrizione",
+          "namePlaceholder": "Nome del {singular}",
+          "descriptionPlaceholder": "Breve descrizione del {singular}",
+          "loading": "Caricamento {singular}…"
+        },
+        "validation": {
+          "nameRequired": "Il nome è obbligatorio.",
+          "codeRequired": "Il codice è obbligatorio.",
+          "codePattern": "Usa solo minuscole, numeri e trattini.",
+          "sortOrderRequired": "L'ordine è obbligatorio.",
+          "sortOrderInvalid": "Inserisci un numero intero valido."
+        },
+        "errors": {
+          "loadCatalog": "Impossibile caricare il catalogo.",
+          "loadItem": "Impossibile caricare il {singular}.",
+          "saveFailed": "Impossibile salvare il record.",
+          "updateFailed": "Impossibile aggiornare il record.",
+          "deleteFailed": "Impossibile eliminare il record."
+        },
+        "deleteConfirm": {
+          "confirmDelete": "Elimina",
+          "message": "Eliminare il {singular} \"{name}\"? Questa azione tenta di eliminare definitivamente il record."
+        },
+        "conflict": {
+          "title": "Impossibile eliminare il {singular}",
+          "deactivateHint": "Puoi disattivare {article} {singular} per non offrirlo nelle nuove posizioni senza perdere i riferimenti esistenti."
+        },
+        "aria": {
+          "summary": "Riepilogo dei {plural}",
+          "loadError": "Errore nel caricamento dei {plural}",
+          "list": "Elenco dei {plural}"
+        },
+        "dash": "—"
+      },
+      "departments": {
+        "title": "Dipartimenti",
+        "singular": "dipartimento",
+        "singularCapitalized": "Dipartimento",
+        "plural": "dipartimenti",
+        "article": "il",
+        "createCta": "Crea dipartimento",
+        "emptyMessage": "Nessun dipartimento creato",
+        "headingDescription": "Gestisci il catalogo globale di dipartimenti per le posizioni.",
+        "createSuccess": "Dipartimento creato.",
+        "updateSuccess": "Dipartimento aggiornato.",
+        "activateSuccess": "Dipartimento attivato.",
+        "deactivateSuccess": "Dipartimento disattivato.",
+        "deleteSuccess": "Dipartimento eliminato.",
+        "deleteConflictMessage": "Impossibile eliminare perché associato a posizioni esistenti.",
+        "formCreateTitle": "Nuovo {singularCapitalized}",
+        "formEditTitle": "Modifica {singular}",
+        "deleteTitle": "Elimina {singular}"
+      },
+      "modalities": {
+        "title": "Modalità",
+        "singular": "modalità",
+        "singularCapitalized": "Modalità",
+        "plural": "modalità",
+        "article": "la",
+        "createCta": "Crea modalità",
+        "emptyMessage": "Nessuna modalità creata",
+        "headingDescription": "Gestisci il catalogo globale di modalità per le posizioni.",
+        "createSuccess": "Modalità creata.",
+        "updateSuccess": "Modalità aggiornata.",
+        "activateSuccess": "Modalità attivata.",
+        "deactivateSuccess": "Modalità disattivata.",
+        "deleteSuccess": "Modalità eliminata.",
+        "deleteConflictMessage": "Impossibile eliminare perché associata a posizioni esistenti.",
+        "formCreateTitle": "Nuova {singularCapitalized}",
+        "formEditTitle": "Modifica {singular}",
+        "deleteTitle": "Elimina {singular}"
+      }
+    },
+    "documentTypes": {
+      "page": {
+        "title": "Tipi di documento",
+        "description": "Gestisci i tipi di documento disponibili per i candidati.",
+        "createCta": "Nuovo tipo di documento",
+        "summaryHelper": "Gestisci i tipi di documento disponibili per i candidati.",
+        "countLoading": "Caricamento…",
+        "countSummary": "{count, plural, one {# tipo di documento} other {# tipi di documento}}"
+      },
+      "filters": {
+        "searchPlaceholder": "Cerca per codice o nome…"
+      },
+      "table": {
+        "code": "Codice",
+        "name": "Nome",
+        "createdAt": "Data di creazione",
+        "updatedAt": "Ultimo aggiornamento",
+        "actions": "Azioni"
+      },
+      "form": {
+        "createTitle": "Nuovo tipo di documento",
+        "editTitle": "Modifica tipo di documento",
+        "codeLabel": "Codice",
+        "nameLabel": "Nome",
+        "codePlaceholder": "Es. DUI, PASSPORT, NIT",
+        "namePlaceholder": "Es. Documento nazionale d'identità",
+        "loading": "Caricamento tipo di documento…",
+        "save": "Salva",
+        "saveChanges": "Salva modifiche"
+      },
+      "validation": {
+        "codeRequired": "Il codice è obbligatorio.",
+        "codeMaxLength": "Il codice non può superare {max} caratteri.",
+        "nameRequired": "Il nome è obbligatorio.",
+        "nameMaxLength": "Il nome non può superare {max} caratteri."
+      },
+      "errors": {
+        "loadCatalog": "Impossibile caricare il catalogo.",
+        "loadItem": "Impossibile caricare il tipo di documento.",
+        "saveFailed": "Impossibile salvare il record.",
+        "deleteFailed": "Impossibile eliminare il record.",
+        "forbidden": "Non hai i permessi per eseguire questa azione."
+      },
+      "toasts": {
+        "created": "Tipo di documento creato correttamente.",
+        "updated": "Tipo di documento aggiornato correttamente.",
+        "deleted": "Tipo di documento eliminato correttamente."
+      },
+      "emptyStates": {
+        "noResults": "Nessun risultato trovato",
+        "noItems": "Nessun tipo di documento registrato",
+        "searchHint": "Prova a cercare con altri termini.",
+        "createHint": "Quando crei un tipo di documento, sarà disponibile per classificare i documenti di identità dei candidati."
+      },
+      "deleteConfirm": {
+        "title": "Elimina tipo di documento",
+        "message": "Sei sicuro di voler eliminare questo tipo di documento? Verrà nascosto dagli elenchi attivi."
+      },
+      "fallbacks": {
+        "notUpdated": "Non aggiornato"
+      },
+      "actions": {
+        "refresh": "Aggiorna",
+        "retry": "Riprova",
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "cancel": "Annulla"
+      },
+      "aria": {
+        "summary": "Riepilogo dei tipi di documento",
+        "loadError": "Errore nel caricamento dei tipi di documento",
+        "list": "Elenco dei tipi di documento"
+      }
+    },
+    "interviews": {
+      "catalog": {
+        "page": {
+          "title": "Colloqui",
+          "description": "Definisci tipi, modalità e stati dei colloqui che i recruiter useranno per pianificare e monitorare i colloqui nel portale HR.",
+          "regionAria": "Configurazione colloqui"
+        },
+        "actions": {
+          "types": "Tipi di colloquio",
+          "modalities": "Modalità di colloquio",
+          "statuses": "Stati dei colloqui"
+        }
+      },
+      "calendar": {
+        "page": {
+          "title": "Interview calendar",
+          "description": "Overview of all scheduled interviews. Times are shown in your time zone; the API operates in UTC."
+        },
+        "loadingStates": {
+          "loading": "Loading interviews…"
+        },
+        "emptyStates": {
+          "noEvents": "No interviews in this range with the current filters."
+        },
+        "actions": {
+          "retry": "Retry"
+        },
+        "filters": {
+          "regionAria": "Calendar filters",
+          "heading": "Filters",
+          "clear": "Clear filters",
+          "reload": "Update",
+          "company": "Company",
+          "vacancy": "Vacancy",
+          "recruiter": "Recruiter",
+          "status": "Status",
+          "typeLocal": "Type (local)",
+          "modalityLocal": "Modality (local)",
+          "search": "Search",
+          "searchPlaceholder": "Candidate, vacancy, recruiter…",
+          "includeCancelled": "Include cancelled",
+          "allFeminine": "All",
+          "allMasculine": "All"
+        },
+        "toolbar": {
+          "today": "Today",
+          "prevPeriodAria": "Previous period",
+          "nextPeriodAria": "Next period",
+          "mobileAgendaHint": "Agenda view on mobile",
+          "viewSwitcherAria": "Calendar view",
+          "views": {
+            "day": "Day",
+            "week": "Week",
+            "month": "Month",
+            "year": "Year",
+            "agenda": "Agenda"
+          }
+        },
+        "kpis": {
+          "regionAria": "Interview indicators",
+          "total": "Total in range",
+          "scheduled": "Scheduled",
+          "completed": "Completed",
+          "cancelled": "Cancelled"
+        },
+        "eventDetail": {
+          "title": "Interview detail",
+          "openInPortal": "Open in HR portal →",
+          "close": "Close",
+          "when": "When",
+          "duration": "Duration",
+          "timezone": "Time zone",
+          "vacancy": "Vacancy",
+          "recruiter": "Recruiter",
+          "type": "Tipo",
+          "modality": "Modality",
+          "interviewer": "Interviewer",
+          "googleMeet": "Google Meet",
+          "googleCalendar": "Google Calendar",
+          "minutes": "{minutes} min",
+          "dash": "—"
+        },
+        "eventChip": {
+          "interview": "Interview",
+          "with": "con",
+          "for": "para"
+        },
+        "agenda": {
+          "time": "Time",
+          "candidate": "Candidate",
+          "vacancy": "Vacancy",
+          "company": "Company",
+          "recruiter": "Recruiter",
+          "type": "Tipo",
+          "modality": "Modality",
+          "status": "Status",
+          "aria": "Agenda {dateKey}"
+        },
+        "month": {
+          "weekdays": {
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat",
+            "sun": "Sun"
+          },
+          "dayAria": "Day {day}",
+          "overflowMore": "++{count} more"
+        },
+        "year": {
+          "months": {
+            "jan": "Jan",
+            "feb": "Feb",
+            "mar": "Tue",
+            "apr": "Apr",
+            "may": "May",
+            "jun": "Jun",
+            "jul": "Jul",
+            "aug": "Aug",
+            "sep": "Sep",
+            "oct": "Oct",
+            "nov": "Nov",
+            "dec": "Dec"
+          },
+          "dayTitle": "{day}: {count, plural, one {# interview} other {# interviews}}",
+          "dayAria": "{day} de {month}, {count, plural, one {# interview} other {# interviews}}"
+        }
+      }
+    },
+    "configuration": {
+      "regionAria": "Impostazioni del portale admin",
+      "title": "Impostazioni",
+      "description": "Questa vista è pronta per centralizzare le impostazioni del portale admin."
+    },
+    "shell": {
+      "userFallback": "Usuario",
+      "roleFallback": "Administrador"
+    }
+  },
+  "PublicOpportunities": {
+    "page": {
+      "portalTitle": "Portale opportunità",
+      "heroTitle": "Trova opportunità con una lettura chiara fin dal primo sguardo",
+      "heroBody": "Esplora le offerte pubbliche con filtri per dipartimento, modalità e ubicazione.",
+      "exploreCta": "Esplora opportunità",
+      "explorerLabel": "Esplorazione pubblica",
+      "listTitle": "Opportunità disponibili",
+      "searchLabel": "Cerca offerte",
+      "searchPlaceholder": "Cerca offerte per nome",
+      "filterDepartment": "Dipartimento",
+      "filterModality": "Modalità",
+      "filterCountry": "Paese",
+      "preparingList": "Preparazione dell'elenco con ricerca e filtri attivi.",
+      "tableDepartment": "Dipartimento",
+      "tableLocation": "Ubicazione",
+      "tableAction": "Azione",
+      "viewDetail": "Vedi dettaglio",
+      "vacancy": "Offerta",
+      "retry": "Riprova",
+      "emptyTitle": "Nessuna offerta trovata con questi filtri.",
+      "emptyBody": "Prova a modificare i filtri o visualizza di nuovo tutte le opportunità disponibili.",
+      "viewAll": "Vedi tutte le offerte",
+      "pageSummary": "Pagina {page} di {total}",
+      "prev": "Precedente",
+      "next": "Successivo",
+      "loadFailed": "Impossibile caricare le opportunità.",
+      "opportunityCount": "{count, plural, one {# opportunità} other {# opportunità}}",
+      "fallbackDepartment": "Dipartimento non specificato",
+      "fallbackModality": "Modalità non specificata",
+      "fallbackLocation": "Ubicazione non specificata",
+      "companyLogoAlt": "Logo di {company}",
+      "companyLogoGeneric": "Logo aziendale",
+      "resultsShowing": "Visualizzazione {from}-{to} di {total}",
+      "resultsFilterQuote": "per \"{query}\"",
+      "resultsPage": "nella pagina {page}",
+      "locationMobileLabel": "Ubicazione",
+      "resultsFilterDepartment": "nel dipartimento {department}",
+      "resultsFilterModality": "con modalità {modality}",
+      "resultsFilterCountry": "in {country}",
+      "activeProcessesSubtitle": "Processi attivi attualmente"
+    },
+    "detail": {
+      "notFound": "Non abbiamo trovato l'offerta richiesta.",
+      "loadFailed": "Impossibile caricare l'offerta.",
+      "viewAll": "Vedi tutte le opportunità",
+      "back": "Torna alle opportunità",
+      "apply": "Candidati",
+      "activeBadge": "Offerta attiva",
+      "unspecified": "Non specificato",
+      "published": "Pubblicata {date}",
+      "keyBlock": "Blocco chiave",
+      "roleContext": "Contesto del ruolo",
+      "jobDescription": "Descrizione del lavoro",
+      "moreAboutRole": "Più sul ruolo",
+      "additionalDetails": "Dettagli aggiuntivi",
+      "whatWeOffer": "Cosa offriamo",
+      "benefits": "Vantaggi e benefit",
+      "responsibilities": "Responsabilità",
+      "requirements": "Requisiti",
+      "sidebarTitle": "Dettagli dell'offerta",
+      "company": "Azienda",
+      "department": "Dipartimento",
+      "modality": "Modalità",
+      "location": "Ubicazione",
+      "salary": "Stipendio",
+      "publishedLabel": "Pubblicazione",
+      "documentTitle": "ApplicanTree | Portale opportunità | {title}"
+    },
+    "applicationForm": {
+      "sources": {
+        "social": "Social media",
+        "friends": "Amici",
+        "jobFair": "Fiera del lavoro",
+        "other": "Altro"
+      },
+      "steps": {
+        "creation": "Creazione",
+        "analysis": "Analisi",
+        "application": "Candidatura",
+        "saved": "Salvato",
+        "success": "Successo",
+        "ready": "Pronto",
+        "processingTitle": "Elaborazione della candidatura",
+        "processingHint": "Stiamo convalidando i tuoi dati e preparando l'invio. Potrebbero volerci alcuni secondi.",
+        "processingLongWait": "Se l'attesa si prolunga, non chiudere questa finestra. Stiamo ancora elaborando la tua candidatura."
+      },
+      "validation": {
+        "fileType": "Sono accettati solo file PDF o DOCX.",
+        "firstNameRequired": "Inserisci il tuo nome.",
+        "lastNameRequired": "Inserisci il tuo cognome.",
+        "emailRequired": "Inserisci la tua email.",
+        "emailInvalid": "Inserisci un'email valida.",
+        "cvRequired": "Allega il tuo CV in PDF o DOCX.",
+        "reviewFields": "Controlla i campi indicati.",
+        "documentTypeRequiresNumber": "Se selezioni un tipo di documento, devi inserire il numero.",
+        "documentNumberRequiresType": "Se inserisci un numero di documento, devi selezionare il tipo."
+      },
+      "fields": {
+        "firstName": "Nome *",
+        "lastName": "Cognome *",
+        "email": "Email *",
+        "phone": "Telefono",
+        "documentType": "Tipo di documento",
+        "documentNumber": "Numero di documento",
+        "source": "Come hai conosciuto questa offerta?",
+        "linkedin": "Profilo LinkedIn",
+        "website": "Sito web o portfolio",
+        "notes": "Note",
+        "resume": "Curriculum (PDF) *"
+      },
+      "placeholders": {
+        "loadingDocTypes": "Caricamento tipi di documento...",
+        "noDocTypes": "Nessun tipo disponibile",
+        "selectDocType": "Seleziona un tipo",
+        "selectOption": "Seleziona un'opzione",
+        "documentNumber": "Inserisci il numero del documento"
+      },
+      "file": {
+        "selectPdf": "Seleziona PDF",
+        "helper": "È accettato solo il formato PDF o DOCX."
+      },
+      "actions": {
+        "submitting": "Invio candidatura…",
+        "submit": "Invia candidatura",
+        "backToVacancy": "Torna all'offerta",
+        "backToList": "Torna alle offerte",
+        "close": "Chiudi"
+      },
+      "aria": {
+        "submitStatus": "Stato dell'invio"
+      },
+      "toasts": {
+        "submitSuccess": "Candidatura inviata",
+        "submitFailed": "Errore nell'invio della candidatura"
+      }
+    },
+    "confirmation": {
+      "title": "Conferma la tua email di contatto",
+      "closeAria": "Chiudi finestra",
+      "contactEmail": "Email di contatto:",
+      "body1": "Useremo questa email per comunicare riguardo alla tua candidatura.",
+      "body2": "Verifica che sia corretta prima di inviare.",
+      "warning": "Se l'email non è valida, potresti non ricevere aggiornamenti sul processo.",
+      "cancel": "Annulla",
+      "confirm": "Conferma e invia candidatura"
+    },
+    "privacy": {
+      "title": "INFORMATIVA SULLA PRIVACY E PROTEZIONE DEI DATI PERSONALI",
+      "decline": "No, grazie",
+      "accept": "Accetto",
+      "intro": "I tuoi dati personali saranno inseriti nel database di Applican Tree e trattati esclusivamente da professionisti autorizzati dell'area Risorse Umane nel contesto dei processi di selezione e gestione del personale.",
+      "dataTreatmentHeading": "Trattamento dei dati:",
+      "purposeItem": "Finalità: Valutazione dei candidati e gestione dei processi di reclutamento",
+      "accessItem": "Accesso: Solo personale HR autorizzato",
+      "confidentialityItem": "Riservatezza: I tuoi dati saranno trattati secondo rigorosi standard di riservatezza e sicurezza delle informazioni",
+      "rightsItem": "Diritti: Hai il diritto di accedere, rettificare o richiedere la cancellazione dei tuoi dati personali",
+      "compliance": "Questo sistema è conforme alla normativa vigente sulla protezione dei dati personali.",
+      "contactPrefix": "Se desideri eliminare o rettificare i tuoi dati personali nel nostro database, scrivi a"
+    },
+    "actions": {
+      "applyToVacancy": "Candidati a questa offerta"
+    },
+    "fallbacks": {
+      "unspecified": "Non specificato"
+    },
+    "navbar": {
+      "ariaMain": "Navigazione principale del portale opportunità",
+      "ariaGoToPortal": "Vai al portale opportunità",
+      "logoIconAlt": "Icona logo Applican Tree",
+      "portalSubtitle": "Portale opportunità",
+      "ariaGoToSelection": "Vai alla selezione del portale",
+      "changePortal": "Cambia portale",
+      "portalsShort": "Portali"
+    },
+    "tips": {
+      "title": "Suggerimento per la tua candidatura",
+      "tip1": "Verifica che email e telefono siano aggiornati.",
+      "tip2": "Carica il tuo curriculum in formato PDF.",
+      "tip3": "Verifica che tutti i tuoi dati siano corretti prima di inviare.",
+      "tip4": "Assicurati di soddisfare i requisiti principali dell'offerta.",
+      "tip5": "Resta attento a email e telefonate dopo aver inviato la candidatura.",
+      "tip6": "Usa un nome file professionale per il tuo CV.",
+      "tip7": "Controlla l'ortografia delle tue informazioni prima di continuare.",
+      "tip8": "Allega tutti i documenti richiesti.",
+      "tip9": "Non dimenticare di includere la tua esperienza lavorativa più recente.",
+      "tip10": "Conferma che la tua disponibilità corrisponda a quanto richiesto nell'offerta."
+    },
+    "apply": {
+      "vacancyNotFound": "Non abbiamo trovato l'offerta per questa candidatura.",
+      "loadFailed": "Impossibile caricare il modulo di candidatura.",
+      "backToDetail": "Torna al dettaglio dell'offerta",
+      "applyBadge": "Candidati",
+      "beforeSubmit": "Prima di inviare",
+      "checklistCv": "Tieni pronto il tuo CV in PDF da allegare.",
+      "checklistEmail": "Usa la stessa email associata al tuo account candidato.",
+      "checklistData": "Completa nome, cognome ed email con dati reali.",
+      "formSectionLabel": "Modulo di candidatura",
+      "formTitle": "Invia la tua candidatura",
+      "formBody": "Completa i dati e allega il tuo CV. Le informazioni vengono inviate in modo sicuro al team di recruiting.",
+      "documentTitle": "ApplicanTree | Portale opportunità | Candidati a {title}"
+    }
+  }
+}

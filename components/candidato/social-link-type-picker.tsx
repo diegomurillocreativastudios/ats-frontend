@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useId, useRef, useState } from "react"
+import { useTranslations } from "next-intl"
 import { ChevronDown } from "lucide-react"
 import {
   SOCIAL_LINK_PRESET_OTHER_ID,
@@ -30,10 +31,13 @@ export function SocialLinkTypePicker({
   platformValue,
   onPlatformChange,
   disabled,
-  label = "Tipo de enlace",
+  label,
   required,
-  emptyTriggerLabel = "Seleccionar tipo de enlace",
+  emptyTriggerLabel,
 }: SocialLinkTypePickerProps) {
+  const t = useTranslations("CandidatePortal.profile")
+  const resolvedLabel = label ?? t("socialLink.typeLabel")
+  const resolvedEmptyTriggerLabel = emptyTriggerLabel ?? t("socialLink.selectPlaceholder")
   const listboxId = useId()
   const containerRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
@@ -93,11 +97,11 @@ export function SocialLinkTypePicker({
   const selectedPreset = effectivePresetId ? getPresetById(effectivePresetId) : undefined
 
   const triggerLabel = (() => {
-    if (!effectivePresetId) return emptyTriggerLabel
+    if (!effectivePresetId) return resolvedEmptyTriggerLabel
     if (effectivePresetId === SOCIAL_LINK_PRESET_OTHER_ID) {
-      const t = platformValue.trim()
-      if (!t) return "Otro — indicá el nombre"
-      return t.length > 40 ? `${t.slice(0, 38)}…` : t
+      const value = platformValue.trim()
+      if (!value) return t("socialLink.otherPrompt")
+      return value.length > 40 ? `${value.slice(0, 38)}…` : value
     }
     return selectedPreset?.label ?? platformValue
   })()
@@ -107,7 +111,7 @@ export function SocialLinkTypePicker({
   return (
     <div ref={containerRef} className="relative flex flex-col gap-1.5">
       <span className={labelClass} id={`${id}-label`}>
-        {label}
+        {resolvedLabel}
         {required ? <span className="text-destructive"> *</span> : null}
       </span>
       <button
@@ -189,7 +193,7 @@ export function SocialLinkTypePicker({
       {showOtherNameField ? (
         <div className="mt-1 flex flex-col gap-1.5">
           <label htmlFor={`${id}-other`} className={labelClass}>
-            Nombre de la plataforma
+            {t("socialLink.otherNameLabel")}
             {required ? <span className="text-destructive"> *</span> : null}
           </label>
           <input
@@ -200,7 +204,7 @@ export function SocialLinkTypePicker({
             }
             onChange={(e) => onPlatformChange(e.target.value)}
             disabled={disabled}
-            placeholder="Ej. Portfolio, Behance…"
+            placeholder={t("socialLink.otherNamePlaceholder")}
             className={inputClass}
           />
         </div>

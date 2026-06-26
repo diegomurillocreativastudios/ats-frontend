@@ -3,6 +3,7 @@
 import { useMemo } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { ArrowLeft } from "lucide-react"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
@@ -10,6 +11,8 @@ import { TechnicalSheetPanel } from "@/components/rrhh/technical-sheet/technical
 import { useRecruiterVacancySummary } from "@/hooks/use-recruiter-vacancy-summary"
 
 export default function VacancyCandidateTechnicalSheetPage() {
+  const t = useTranslations("RecruiterPortal.technicalSheet")
+  const tVacancies = useTranslations("RecruiterPortal.vacancies")
   const params = useParams()
   const rawVacancy = params?.id
   const rawCandidate = params?.candidateProfileId
@@ -37,16 +40,16 @@ export default function VacancyCandidateTechnicalSheetPage() {
   const trail =
     vacancyId !== ""
       ? [
-          { label: "Vacantes", href: "/portal-rrhh/vacantes" },
+          { label: tVacancies("breadcrumb"), href: "/portal-rrhh/vacantes" },
           {
             label: vacancySummary.loading
               ? "…"
-              : vacancySummary.title?.trim() || "Vacante",
+              : vacancySummary.title?.trim() || tVacancies("results.page.vacancyFallback"),
             href: backHref,
           },
-          { label: "Ficha técnica" },
+          { label: t("page.breadcrumb") },
         ]
-      : [{ label: "Vacantes", href: "/portal-rrhh/vacantes" }]
+      : [{ label: tVacancies("breadcrumb"), href: "/portal-rrhh/vacantes" }]
 
   if (!vacancyId || !candidateProfileId) {
     return (
@@ -56,7 +59,7 @@ export default function VacancyCandidateTechnicalSheetPage() {
           <RRHHTopbar breadcrumbLabel="RRHH" breadcrumbTrail={trail} />
           <main className="min-w-0 flex-1 overflow-auto p-8">
             <p className="font-sans text-sm text-destructive" role="alert">
-              Faltan parámetros de vacante o candidato en la URL.
+              {t("errors.missingParams")}
             </p>
           </main>
         </div>
@@ -76,7 +79,7 @@ export default function VacancyCandidateTechnicalSheetPage() {
               className="inline-flex w-fit items-center gap-2 font-sans text-sm font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
-              Volver a la vacante
+              {t("actions.backToVacancy")}
             </Link>
             <TechnicalSheetPanel
               enabled

@@ -1,54 +1,60 @@
-import { Users, Briefcase, Calendar, UserCheck } from "lucide-react";
+"use client"
 
-const STAT_CONFIG = [
-  {
-    value: "245",
-    label: "Candidatos Activos",
-    icon: Users,
-    iconBg: "bg-[#F3E8FF]",
-    iconColor: "text-vo-purple",
-  },
-  {
-    value: "12",
-    label: "Vacantes Abiertas",
-    icon: Briefcase,
-    iconBg: "bg-[#F3E8FF]",
-    iconColor: "text-vo-purple",
-  },
-  {
-    value: "8",
-    label: "Entrevistas Hoy",
-    icon: Calendar,
-    iconBg: "bg-[#F3E8FF]",
-    iconColor: "text-vo-purple",
-  },
-  {
-    value: "23",
-    label: "Contrataciones Mes",
-    icon: UserCheck,
-    iconBg: "bg-[#F3E8FF]",
-    iconColor: "text-vo-purple",
-  },
-];
+import { Users, Briefcase, Calendar, UserCheck } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function RRHHDashboardStats({
   compact = false,
   responsiveGrid = false,
 }) {
+  const t = useTranslations("RecruiterPortal.dashboard")
+
+  const statConfig = [
+    {
+      value: "245",
+      labelKey: "activeCandidates" as const,
+      icon: Users,
+      iconBg: "bg-ats-arena/70",
+      iconColor: "text-vo-purple",
+    },
+    {
+      value: "12",
+      labelKey: "openVacancies" as const,
+      icon: Briefcase,
+      iconBg: "bg-ats-arena/70",
+      iconColor: "text-vo-purple",
+    },
+    {
+      value: "8",
+      labelKey: "interviewsToday" as const,
+      icon: Calendar,
+      iconBg: "bg-ats-arena/70",
+      iconColor: "text-vo-purple",
+    },
+    {
+      value: "23",
+      labelKey: "hiresThisMonth" as const,
+      icon: UserCheck,
+      iconBg: "bg-ats-arena/70",
+      iconColor: "text-vo-purple",
+    },
+  ]
+
   const gridClass = responsiveGrid
     ? "grid-cols-2 md:grid-cols-4"
-    : "sm:grid-cols-2 lg:grid-cols-4";
+    : "sm:grid-cols-2 lg:grid-cols-4"
 
   return (
     <div
       className={`grid w-full gap-4 ${gridClass} ${compact ? "gap-3" : "gap-4 md:gap-4"}`}
-      aria-label="Estadísticas del dashboard"
+      aria-label={t("statsAria")}
     >
-      {STAT_CONFIG.map((stat) => {
-        const Icon = stat.icon;
+      {statConfig.map((stat) => {
+        const Icon = stat.icon
+        const label = t(stat.labelKey)
         return (
           <div
-            key={stat.label}
+            key={stat.labelKey}
             className={`rounded-lg border border-border bg-card flex flex-col gap-2 ${
               compact ? "p-3" : "p-4 md:p-4 lg:p-6"
             }`}
@@ -71,11 +77,11 @@ export default function RRHHDashboardStats({
               {stat.value}
             </span>
             <span className="font-sans text-xs text-muted-foreground md:text-sm">
-              {stat.label}
+              {label}
             </span>
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }

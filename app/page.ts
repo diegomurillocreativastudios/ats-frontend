@@ -1,9 +1,10 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { APP_NAME } from "@/lib/app-brand"
 import { AUTH_COOKIES } from "@/lib/auth"
 
 export const metadata = {
-  title: { absolute: "ATS | Inicio" },
+  title: { absolute: `${APP_NAME} | Inicio` },
   description: "Portal de reclutamiento",
 }
 

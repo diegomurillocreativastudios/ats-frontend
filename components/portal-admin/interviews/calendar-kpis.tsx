@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import type { AdminCalendarEvent } from "@/lib/api/admin-interviews-calendar"
 
 export interface CalendarKpisProps {
@@ -28,6 +29,7 @@ function KpiCard({
 }
 
 export function CalendarKpis({ events }: CalendarKpisProps) {
+  const t = useTranslations("AdminPortal.interviews.calendar.kpis")
   const total = events.length
   const scheduled = events.filter((e) => e.status === "Scheduled").length
   const completed = events.filter((e) => e.status === "Completed").length
@@ -36,21 +38,21 @@ export function CalendarKpis({ events }: CalendarKpisProps) {
   return (
     <section
       className="grid grid-cols-2 gap-3 sm:grid-cols-4"
-      aria-label="Indicadores de entrevistas"
+      aria-label={t("regionAria")}
     >
-      <KpiCard label="Total en rango" value={total} accentClass="" />
+      <KpiCard label={t("total")} value={total} accentClass="" />
       <KpiCard
-        label="Programadas"
+        label={t("scheduled")}
         value={scheduled}
         accentClass="border-l-4 border-l-vo-sky"
       />
       <KpiCard
-        label="Completadas"
+        label={t("completed")}
         value={completed}
         accentClass="border-l-4 border-l-vo-navy"
       />
       <KpiCard
-        label="Canceladas"
+        label={t("cancelled")}
         value={cancelled}
         accentClass="border-l-4 border-l-vo-pink"
       />

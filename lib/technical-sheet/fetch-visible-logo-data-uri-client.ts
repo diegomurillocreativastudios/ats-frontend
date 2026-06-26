@@ -1,10 +1,12 @@
+import { APP_LOGO_SVG_SRC } from "@/lib/app-brand"
+
 /**
- * Carga `visible-icon.png` como data URI en el navegador (misma apariencia local y en Vercel).
+ * Carga el icono de Applican Tree como data URI en el navegador.
  */
 export async function fetchVisibleLogoDataUriClient(origin: string): Promise<string> {
   const base = origin.replace(/\/$/, "")
   if (!base) return ""
-  const url = `${base}/visible-icon.png`
+  const url = `${base}${APP_LOGO_SVG_SRC}`
   try {
     const res = await fetch(url, { credentials: "same-origin", cache: "force-cache" })
     if (!res.ok) return url

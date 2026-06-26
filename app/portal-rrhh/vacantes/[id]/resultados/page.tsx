@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { AlertTriangle, ArrowLeft, Calendar, Loader2, Tag } from "lucide-react"
 import { RrhhInterviewsShell } from "@/components/rrhh/interviews/rrhh-interviews-shell"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
@@ -41,6 +42,8 @@ const defaultFilters: VacancyResultadosCandidateFiltersState = {
 export default function VacancyResultadosPage() {
   const params = useParams()
   const router = useRouter()
+  const t = useTranslations("RecruiterPortal.vacancies.results")
+  const tVacancies = useTranslations("RecruiterPortal.vacancies")
   const raw = params?.id
   const vacancyId = Array.isArray(raw) ? raw[0] : raw ?? ""
 
@@ -59,7 +62,7 @@ export default function VacancyResultadosPage() {
   const load = useCallback(async () => {
     if (!vacancyId) {
       setLoading(false)
-      setFetchError("Falta el identificador de la vacante.")
+      setFetchError(t("errors.missingId"))
       setModel(null)
       return
     }
@@ -70,13 +73,13 @@ export default function VacancyResultadosPage() {
       setModel(data)
     } catch (err: unknown) {
       setFetchError(
-        getApiErrorMessage(err) || "No se pudieron cargar los resultados de la vacante."
+        getApiErrorMessage(err) || t("errors.loadFailed")
       )
       setModel(null)
     } finally {
       setLoading(false)
     }
-  }, [vacancyId])
+  }, [vacancyId, t])
 
   useEffect(() => {
     void load()
@@ -111,14 +114,14 @@ export default function VacancyResultadosPage() {
   const trail =
     vacancyId.length > 0
       ? [
-          { label: "Vacantes", href: "/portal-rrhh/vacantes" },
+          { label: tVacancies("breadcrumb"), href: "/portal-rrhh/vacantes" },
           {
-            label: loading ? "…" : model?.title?.trim() || "Vacante",
+            label: loading ? "…" : model?.title?.trim() || t("page.vacancyFallback"),
             href: `/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}`,
           },
-          { label: "Resultados" },
+          { label: t("page.breadcrumbResults") },
         ]
-      : [{ label: "Vacantes", href: "/portal-rrhh/vacantes" }]
+      : [{ label: tVacancies("breadcrumb"), href: "/portal-rrhh/vacantes" }]
 
   const handleScheduleFromResultados = (candidateProfileId: string) => {
     router.push(
@@ -132,11 +135,11 @@ export default function VacancyResultadosPage() {
   const hasApplicants = Boolean(model && model.applicants.length > 0)
 
   return (
-    <RrhhInterviewsShell breadcrumbLabel="Vacantes" breadcrumbTrail={trail}>
+    <RrhhInterviewsShell breadcrumbLabel={tVacancies("breadcrumb")} breadcrumbTrail={trail}>
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {!vacancyId ? (
           <p className="font-sans text-sm text-destructive" role="alert">
-            Falta el identificador de la vacante.
+            {t("errors.missingId")}
           </p>
         ) : loading ? (
           <div
@@ -145,7 +148,9 @@ export default function VacancyResultadosPage() {
             aria-live="polite"
           >
             <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
-            <p className="font-sans text-sm text-muted-foreground">Cargando resultados…</p>
+            <p className="font-sans text-sm text-muted-foreground">
+              {t("loadingStates.loading")}
+            </p>
           </div>
         ) : fetchError ? (
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3">
@@ -157,7 +162,7 @@ export default function VacancyResultadosPage() {
               onClick={() => void load()}
               className="mt-3 inline-flex items-center rounded-md border border-border bg-background px-3 py-2 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
             >
-              Reintentar
+              {tVacancies("actions.retry")}
             </button>
           </div>
         ) : model ? (
@@ -165,10 +170,10 @@ export default function VacancyResultadosPage() {
             <header className="flex flex-col gap-4 border-b border-border pb-6 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between">
               <div className="min-w-0 flex-1">
                 <p className="font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Resultados de la vacante
+                  {t("page.eyebrow")}
                 </p>
                 <h1 className="mt-1 wrap-break-word font-sans text-2xl font-bold text-foreground sm:text-3xl">
-                  {model.title?.trim() || "Vacante sin título"}
+                  {model.title?.trim() || t("page.untitledVacancy")}
                 </h1>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {model.meta.status ? (
@@ -185,12 +190,13 @@ export default function VacancyResultadosPage() {
                   {model.meta.needsRematch ? (
                     <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 font-sans text-xs font-medium text-amber-900">
                       <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                      Requiere re-match
+                      {t("page.needsRematch")}
                     </span>
                   ) : null}
                   {createdLabel ? (
                     <span className="font-sans text-xs text-muted-foreground">
-                      Creada: <span className="text-foreground">{createdLabel}</span>
+                      {t("page.createdPrefix")}{" "}
+                      <span className="text-foreground">{createdLabel}</span>
                     </span>
                   ) : null}
                 </div>
@@ -200,27 +206,27 @@ export default function VacancyResultadosPage() {
                   <Link
                     href={`/portal-rrhh/entrevistas/${encodeURIComponent(vacancyId)}?nueva=1`}
                     className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                    aria-label="Agendar una nueva entrevista para esta vacante"
+                    aria-label={t("actions.scheduleInterviewAria")}
                   >
                     <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-                    Agendar entrevista
+                    {t("actions.scheduleInterview")}
                   </Link>
                 ) : null}
                 <Link
                   href={`/portal-rrhh/entrevistas/${encodeURIComponent(vacancyId)}`}
                   className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label="Ir a entrevistas de esta vacante"
+                  aria-label={t("actions.interviewsAria")}
                 >
                   <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-                  Entrevistas
+                  {t("actions.interviews")}
                 </Link>
                 <Link
                   href={`/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}`}
                   className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label="Volver al detalle de la vacante"
+                  aria-label={t("actions.backToVacancyAria")}
                 >
                   <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
-                  Volver a la vacante
+                  {t("actions.backToVacancy")}
                 </Link>
               </div>
             </header>

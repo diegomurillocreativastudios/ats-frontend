@@ -1,8 +1,12 @@
+import { getTranslations } from "next-intl/server"
 import AdminEmpresasContent from "@/components/portal-admin/AdminEmpresasContent"
 
-export const metadata = {
-  title: "Empresas",
-  description: "Gestión de empresas cliente (tenants) de la plataforma",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.adminPortal.companies")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function PortalAdminEmpresasPage() {

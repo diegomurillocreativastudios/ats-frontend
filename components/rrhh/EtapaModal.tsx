@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Modal from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { buildRecruiterStagePutPayload } from "@/lib/recruiterStagePayload";
 import Snackbar from "@/components/ui/Snackbar";
 
@@ -16,6 +18,8 @@ export default function EtapaModal({
   companyId,
   setAsDefaultOnCreate = false,
 }) {
+  const t = useTranslations("AdminPortal.stages.modal");
+  const tCommon = useTranslations("Common");
   const [name, setName] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -54,7 +58,7 @@ export default function EtapaModal({
   const validate = () => {
     const nextErrors: Record<string, string> = {};
     if (!name.trim()) {
-      nextErrors.name = "El nombre es requerido";
+      nextErrors.name = t("validationNameRequired");
     }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -79,7 +83,7 @@ export default function EtapaModal({
           `/api/recruiter/companies/${companyId}/stages/${editingStage.id}`,
           payload
         );
-        showSnackbar("Etapa actualizada correctamente.", "success");
+        showSnackbar(t("toastUpdated"), "success");
         handleClose();
         onSubmit?.(false);
       } else {
@@ -87,13 +91,12 @@ export default function EtapaModal({
           `/api/recruiter/companies/${companyId}/stages`,
           { name: name.trim(), isDefault: Boolean(setAsDefaultOnCreate) }
         );
-        showSnackbar("Etapa creada correctamente.", "success");
+        showSnackbar(t("toastCreated"), "success");
         handleClose();
         onSubmit?.(true, created);
       }
     } catch (err) {
-      const msg =
-        err?.message || err?.detail || `No se pudo ${isEditing ? "actualizar" : "crear"} la etapa. Intenta de nuevo.`
+      const msg = getApiErrorMessage(err) || t("toastSaveFailed");
       setSubmitError(msg);
       showSnackbar(msg, "error");
     } finally {
@@ -115,18 +118,18 @@ export default function EtapaModal({
         variant="outline"
         onClick={handleClose}
         disabled={loading}
-        aria-label="Cancelar"
+        aria-label={t("cancelAria")}
       >
-        Cancelar
+        {tCommon("cancel")}
       </Button>
       <Button
         type="submit"
         form="etapa-form"
-        aria-label={isEditing ? "Actualizar etapa" : "Crear etapa"}
+        aria-label={isEditing ? t("submitAriaUpdate") : t("submitAriaCreate")}
         disabled={loading}
         loading={loading}
       >
-        {isEditing ? "Actualizar etapa" : "Crear etapa"}
+        {isEditing ? t("update") : t("create")}
       </Button>
     </>
   );
@@ -136,7 +139,7 @@ export default function EtapaModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={isEditing ? "Editar etapa" : "Nueva etapa"}
+      title={isEditing ? t("editTitle") : t("createTitle")}
       footer={footer}
       size="md"
       closeOnOverlayClick
@@ -152,14 +155,14 @@ export default function EtapaModal({
             htmlFor="etapa-name"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Nombre de la etapa <span className="text-vo-pink">*</span>
+            {t("nameLabel")} <span className="text-vo-pink">*</span>
           </label>
           <input
             id="etapa-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ej: Entrevista técnica"
+            placeholder={t("namePlaceholder")}
             className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? "name-error" : undefined}

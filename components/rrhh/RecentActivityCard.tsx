@@ -1,4 +1,7 @@
-import { UserCheck, Calendar, ClipboardList } from "lucide-react";
+"use client"
+
+import { UserCheck, Calendar, ClipboardList } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const ACTIVITY_ITEMS = [
   {
@@ -19,20 +22,22 @@ const ACTIVITY_ITEMS = [
     icon: ClipboardList,
     iconBg: "bg-vo-yellow",
   },
-];
+]
 
 export default function RecentActivityCard() {
+  const t = useTranslations("RecruiterPortal.dashboard")
+
   return (
     <div
       className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6"
-      aria-label="Actividad reciente"
+      aria-label={t("recentActivityAria")}
     >
       <h2 className="font-sans text-base font-semibold text-foreground">
-        Actividad Reciente
+        {t("recentActivityTitle")}
       </h2>
       <ul className="flex flex-col gap-4">
         {ACTIVITY_ITEMS.map((item) => {
-          const Icon = item.icon;
+          const Icon = item.icon
           return (
             <li key={item.text} className="flex items-start gap-3">
               <div
@@ -50,9 +55,9 @@ export default function RecentActivityCard() {
                 </p>
               </div>
             </li>
-          );
+          )
         })}
       </ul>
     </div>
-  );
+  )
 }

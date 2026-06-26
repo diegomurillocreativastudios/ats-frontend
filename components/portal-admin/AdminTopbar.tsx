@@ -3,10 +3,13 @@
 import { Fragment, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { ChevronRight, Bell, Menu, LogOut } from "lucide-react"
 import ProductBrand from "@/components/branding/ProductBrand"
+import LanguageSwitcher from "@/components/language-switcher"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { getInitials } from "@/lib/getInitials"
+import { resolveAdminPortalNavLabelKey } from "@/lib/admin-portal-nav"
 import { segmentToTitle } from "@/lib/pageTitles"
 
 const DESKTOP_PADDING = "px-8"
@@ -24,16 +27,25 @@ interface AdminTopbarProps {
   breadcrumbTrail?: BreadcrumbSegment[] | null
 }
 
-function defaultBreadcrumbLabel(pathname: string): string {
+function defaultBreadcrumbLabel(
+  pathname: string,
+  homeLabel: string,
+  adminShortcutLabel: string,
+  tNav: (key: string) => string,
+): string {
   const normalized =
     pathname.endsWith("/") && pathname.length > 1
       ? pathname.slice(0, -1)
       : pathname
-  if (normalized === "/portal-admin") return "Inicio"
+  if (normalized === "/portal-admin") return homeLabel
+
+  const navLabelKey = resolveAdminPortalNavLabelKey(pathname)
+  if (navLabelKey) return tNav(navLabelKey)
+
   const segments = normalized.split("/").filter(Boolean)
   const last = segments[segments.length - 1]
-  if (!last) return "Administración"
-  if (last === "portal-admin") return "Inicio"
+  if (!last) return adminShortcutLabel
+  if (last === "portal-admin") return homeLabel
   return segmentToTitle(last)
 }
 
@@ -42,6 +54,9 @@ export default function AdminTopbar({
   breadcrumbLabel: breadcrumbLabelProp,
   breadcrumbTrail = null,
 }: AdminTopbarProps) {
+  const t = useTranslations("Topbar")
+  const tNav = useTranslations("Navigation")
+  const tActions = useTranslations("Actions")
   const pathname = usePathname()
   const isDesktop = variant === "desktop"
   const isTablet = variant === "tablet"
@@ -53,7 +68,8 @@ export default function AdminTopbar({
   const router = useRouter()
 
   const breadcrumbLabel =
-    breadcrumbLabelProp ?? defaultBreadcrumbLabel(pathname)
+    breadcrumbLabelProp ??
+    defaultBreadcrumbLabel(pathname, tNav("home"), t("adminShortcut"), tNav)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -93,11 +109,12 @@ export default function AdminTopbar({
         : MOBILE_PADDING
 
   const hasTrail = Array.isArray(breadcrumbTrail) && breadcrumbTrail.length > 0
+  const portalLabel = t("portalAdmin")
   const breadcrumbScreenReaderText = hasTrail
-    ? ["Portal Admin", ...breadcrumbTrail.map((s) => s.label)].join(
+    ? [portalLabel, ...breadcrumbTrail.map((s) => s.label)].join(
         " > ",
       )
-    : `Portal Admin > ${breadcrumbLabel}`
+    : `${portalLabel} > ${breadcrumbLabel}`
 
   const heightClass =
     variant === "mobile"
@@ -108,7 +125,7 @@ export default function AdminTopbar({
 
   return (
     <header
-      className={`flex shrink-0 items-center justify-between border-b border-border bg-card ${heightClass} ${paddingClass}`}
+      className={`glass-navbar flex shrink-0 items-center justify-between ${heightClass} ${paddingClass}`}
       role="banner"
     >
       <div className="flex items-center gap-4">
@@ -116,7 +133,7 @@ export default function AdminTopbar({
           <button
             type="button"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-muted md:h-10 md:w-10"
-            aria-label="Abrir menú"
+            aria-label={t("openMenu")}
           >
             <Menu className="h-6 w-6 text-foreground md:h-6" aria-hidden />
           </button>
@@ -125,7 +142,7 @@ export default function AdminTopbar({
           {isDesktop && (
             <>
               <span className="font-sans text-sm text-muted-foreground">
-                Portal Admin
+                {portalLabel}
               </span>
               <ChevronRight
                 className="h-4 w-4 shrink-0 text-muted-foreground"
@@ -134,7 +151,7 @@ export default function AdminTopbar({
               {hasTrail ? (
                 <nav
                   className="flex min-w-0 flex-wrap items-center gap-2"
-                  aria-label="Migas de pan"
+                  aria-label={t("breadcrumb")}
                 >
                   {breadcrumbTrail.map((segment, index) => {
                     const isLast = index === breadcrumbTrail.length - 1
@@ -191,10 +208,11 @@ export default function AdminTopbar({
         </div>
       </div>
       <div className="flex items-center gap-3">
+        <LanguageSwitcher />
         <button
           type="button"
           className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-muted"
-          aria-label="Notificaciones"
+          aria-label={t("notifications")}
         >
           <Bell className="h-5 w-5 text-muted-foreground" aria-hidden />
         </button>
@@ -202,8 +220,8 @@ export default function AdminTopbar({
           <button
             type="button"
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="flex h-8 w-8 items-center justify-center rounded-2xl bg-vo-navy font-sans text-[10px] font-semibold text-white hover:opacity-90 focus:outline-none md:h-8 md:w-8 md:text-[11px]"
-            aria-label="Menú de usuario"
+            className="flex h-8 w-8 items-center justify-center rounded-2xl bg-gradient-to-br from-vo-purple to-vo-magenta font-sans text-[10px] font-semibold text-white shadow-sm hover:opacity-90 focus:outline-none md:h-8 md:w-8 md:text-[11px]"
+            aria-label={t("userMenu")}
             aria-expanded={menuOpen}
             aria-haspopup="true"
           >
@@ -211,7 +229,7 @@ export default function AdminTopbar({
           </button>
           {menuOpen && (
             <div
-              className="absolute right-0 top-full z-50 mt-2 min-w-[160px] rounded-lg border border-border bg-card py-1 shadow-lg"
+              className="glass-panel absolute right-0 top-full z-50 mt-2 min-w-[160px] rounded-xl py-1"
               role="menu"
             >
               <button
@@ -221,7 +239,7 @@ export default function AdminTopbar({
                 role="menuitem"
               >
                 <LogOut className="h-4 w-4 shrink-0" aria-hidden />
-                Cerrar sesión
+                {tActions("logout")}
               </button>
             </div>
           )}

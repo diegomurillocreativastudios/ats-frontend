@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useTranslations } from "next-intl"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import ReportesFiltersPlaceholder, {
   ReportesFilterControl,
@@ -41,10 +42,12 @@ const pdfDownloadButtonClass =
   "inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 
 export default function ReporteResumenPage() {
+  const t = useTranslations("RecruiterPortal.reports.summary")
+  const tReports = useTranslations("RecruiterPortal.reports")
   const pdfRef = useRef<HTMLElement | null>(null)
   const trail = [
-    { label: "Reportes", href: "/portal-rrhh/reportes" },
-    { label: "Resumen" },
+    { label: tReports("breadcrumb"), href: "/portal-rrhh/reportes" },
+    { label: t("breadcrumb") },
   ]
 
   const initialRange = defaultMonthDateRange()
@@ -85,7 +88,7 @@ export default function ReporteResumenPage() {
       })
       setSummary(data)
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err) || "No se pudo cargar el resumen.")
+      setError(getApiErrorMessage(err) || t("errors.loadFailed"))
       setSummary(null)
     } finally {
       setLoading(false)
@@ -102,7 +105,11 @@ export default function ReporteResumenPage() {
     setAppliedDateTo(draftDateTo)
   }
 
-  const statusText = loading ? "Cargando indicadores…" : error ? "" : "Datos actualizados"
+  const statusText = loading
+    ? t("loadingStates.loading")
+    : error
+      ? ""
+      : t("loadingStates.updated")
 
   const pdfFilters = useMemo(() => {
     const clientName = appliedClientId
@@ -122,15 +129,15 @@ export default function ReporteResumenPage() {
 
   const mainContent = (
     <div className="min-w-0 flex flex-col gap-6 pb-10">
-      <section className="px-4 pt-6 md:px-8" aria-label="Encabezado del reporte">
+      <section className="px-4 pt-6 md:px-8" aria-label={t("headerAria")}>
         <PortalPageHeader
-          title="Resumen ejecutivo de reportes"
-          description="Vista general del estado de clientes, vacantes, candidatos, entrevistas, evaluaciones y fuentes de reclutamiento."
+          title={t("title")}
+          description={t("description")}
           actions={
             <DownloadPdfButton
               targetRef={pdfRef}
               fileName="reporte-resumen-ejecutivo.pdf"
-              label="Descargar PDF"
+              label={t("actions.downloadPdf")}
               disabled={loading || !summary}
               orientation="landscape"
               format="a4"
@@ -141,19 +148,19 @@ export default function ReporteResumenPage() {
           }
         />
       </section>
-      <section className="space-y-4 px-4 md:px-8" aria-label="Filtros y panel ejecutivo">
+      <section className="space-y-4 px-4 md:px-8" aria-label={t("filtersAria")}>
         <ReportesFiltersPlaceholder
-          hintText="Filtra los indicadores por cliente y rango de fechas."
+          hintText={tReports("filters.hint")}
           controlsClassName={filterGridClass}
         >
-          <ReportesFilterControl label="Cliente" controlId="filtro-cliente-sum">
+          <ReportesFilterControl label={t("filters.client")} controlId="filtro-cliente-sum">
             <select
               id="filtro-cliente-sum"
               className={controlClass}
               value={draftClientId}
               onChange={(e) => setDraftClientId(e.target.value)}
             >
-              <option value="">Todos</option>
+              <option value="">{t("filters.all")}</option>
               {companies.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -161,22 +168,22 @@ export default function ReporteResumenPage() {
               ))}
             </select>
           </ReportesFilterControl>
-          <ReportesFilterControl label="Desde" controlId="filtro-desde-sum">
+          <ReportesFilterControl label={t("filters.from")} controlId="filtro-desde-sum">
             <DatePicker
               id="filtro-desde-sum"
               value={draftDateFrom}
               onChange={setDraftDateFrom}
-              ariaLabel="Desde"
+              ariaLabel={t("filters.from")}
               buttonClassName={datePickerFilterButtonClass}
               wrapperClassName="relative w-full"
             />
           </ReportesFilterControl>
-          <ReportesFilterControl label="Hasta" controlId="filtro-hasta-sum">
+          <ReportesFilterControl label={t("filters.to")} controlId="filtro-hasta-sum">
             <DatePicker
               id="filtro-hasta-sum"
               value={draftDateTo}
               onChange={setDraftDateTo}
-              ariaLabel="Hasta"
+              ariaLabel={t("filters.to")}
               buttonClassName={datePickerFilterButtonClass}
               wrapperClassName="relative w-full"
             />
@@ -188,7 +195,7 @@ export default function ReporteResumenPage() {
               className={applyButtonClass}
               disabled={loading}
             >
-              Aplicar filtros
+              {t("filters.apply")}
             </button>
           </div>
         </ReportesFiltersPlaceholder>
@@ -209,7 +216,7 @@ export default function ReporteResumenPage() {
   )
 
   return (
-    <RrhhReportsShell breadcrumbLabel="Reportes" breadcrumbTrail={trail}>
+    <RrhhReportsShell breadcrumbLabel={tReports("breadcrumb")} breadcrumbTrail={trail}>
       {mainContent}
       {pdfData && !loading && !error ? (
         <div className="fixed left-[-10000px] top-0 z-[-1]" aria-hidden>

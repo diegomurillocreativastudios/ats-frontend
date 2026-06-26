@@ -70,7 +70,7 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
             const ghost = doc.createElement("div")
             ghost.setAttribute(
               "style",
-              `position:absolute;left:-99999px;top:0;width:${TECH_SHEET_INNER_W}px;visibility:hidden;pointer-events:none;font-size:13.5px;line-height:1.42;color:#111827`
+              `position:absolute;left:-99999px;top:0;width:${TECH_SHEET_INNER_W}px;visibility:hidden;pointer-events:none;font-size:13.5px;line-height:1.42;color:#256D35`
             )
             ghost.innerHTML = `<div style="width:${TECH_SHEET_INNER_W}px;box-sizing:border-box">${html}</div>`
             doc.body.appendChild(ghost)

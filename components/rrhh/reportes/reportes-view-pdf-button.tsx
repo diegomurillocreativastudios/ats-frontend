@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useState } from "react"
+import { useTranslations } from "next-intl"
 import { FileDown, Loader2 } from "lucide-react"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { downloadReportViewAsPdf } from "@/lib/pdf/download-report-view-as-pdf"
@@ -20,6 +21,7 @@ export function ReportesViewPdfButton({
   filenameBase,
   className = "",
 }: ReportesViewPdfButtonProps) {
+  const t = useTranslations("RecruiterPortal.reports")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -30,11 +32,11 @@ export function ReportesViewPdfButton({
     try {
       await downloadReportViewAsPdf(filenameBase)
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err) || "No se pudo generar el PDF.")
+      setError(getApiErrorMessage(err) || t("errors.pdfFailed"))
     } finally {
       setBusy(false)
     }
-  }, [busy, disabled, filenameBase])
+  }, [busy, disabled, filenameBase, t])
 
   return (
     <div className="flex flex-col items-start gap-1" data-report-pdf-exclude>
@@ -46,15 +48,15 @@ export function ReportesViewPdfButton({
         disabled={disabled || busy}
         className={[baseButtonClass, className].filter(Boolean).join(" ")}
         aria-busy={busy || undefined}
-        aria-label="Descargar PDF del reporte"
-        title="Captura el reporte visible en pantalla y lo descarga como PDF en tu navegador."
+        aria-label={t("actions.downloadPdfAria")}
+        title={t("actions.downloadPdfTooltip")}
       >
         {busy ? (
           <Loader2 className="h-4 w-4 shrink-0 animate-spin text-vo-purple" aria-hidden />
         ) : (
           <FileDown className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
         )}
-        {busy ? "Generando PDF…" : "Descargar PDF"}
+        {busy ? t("actions.downloadingPdf") : t("actions.downloadPdf")}
       </button>
       {error ? (
         <p className="max-w-xs font-sans text-xs text-destructive" role="alert">

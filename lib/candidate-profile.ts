@@ -327,31 +327,50 @@ const compareCalendarParts = (
 }
 
 /**
- * Valida el valor `YYYY-MM-DD` del DatePicker para fecha de nacimiento:
- * calendario válido, no futura y al menos 18 años cumplidos (día civil local).
+ * Códigos de error de validación de fecha de nacimiento, agnósticos al idioma.
+ *
+ * Etapa 5E (i18n): permiten traducir el mensaje cerca del componente con `t()`
+ * sin acoplar la lógica de validación a textos en español. El cálculo (calendario
+ * válido, no futura, 18+ años cumplidos) NO cambia.
  */
-export function getBirthDateInputValidationError(yyyyMmDd: string): string | null {
+export type BirthDateValidationErrorCode = "invalid" | "futureDate" | "tooYoung"
+
+/**
+ * Valida el valor `YYYY-MM-DD` del DatePicker para fecha de nacimiento y devuelve
+ * un código de error (o `null` si es válido): calendario válido, no futura y al
+ * menos 18 años cumplidos (día civil local).
+ */
+export function getBirthDateInputValidationErrorCode(
+  yyyyMmDd: string
+): BirthDateValidationErrorCode | null {
   const trimmed = yyyyMmDd.trim()
   if (!trimmed) return null
 
   const parts = birthDateCalendarPartsFromUnknown(trimmed)
-  if (!parts) return BIRTH_DATE_INPUT_INVALID_MESSAGE
+  if (!parts) return "invalid"
 
   const today = getLocalCalendarToday()
-  if (compareCalendarParts(parts, today) > 0) {
-    return BIRTH_DATE_INPUT_INVALID_MESSAGE
-  }
+  if (compareCalendarParts(parts, today) > 0) return "futureDate"
 
   const eighteenthBirthday = {
     year: today.year - 18,
     month: today.month,
     day: today.day,
   }
-  if (compareCalendarParts(parts, eighteenthBirthday) > 0) {
-    return BIRTH_DATE_INPUT_INVALID_MESSAGE
-  }
+  if (compareCalendarParts(parts, eighteenthBirthday) > 0) return "tooYoung"
 
   return null
+}
+
+/**
+ * Variante con mensaje fijo en español. Se conserva para consumers que aún no
+ * tienen acceso a `t()` (p. ej. el hook compartido con RRHH). Reusa la lógica de
+ * códigos para no duplicar reglas de negocio.
+ */
+export function getBirthDateInputValidationError(yyyyMmDd: string): string | null {
+  return getBirthDateInputValidationErrorCode(yyyyMmDd)
+    ? BIRTH_DATE_INPUT_INVALID_MESSAGE
+    : null
 }
 
 const optStr = (s: string) => {

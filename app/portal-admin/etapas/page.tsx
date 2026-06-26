@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Nestable from "react-nestable";
 import {
   Plus,
@@ -16,6 +17,7 @@ import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { buildRecruiterStagePutPayload } from "@/lib/recruiterStagePayload";
 import "react-nestable/dist/styles/index.css";
 import "./nestable-custom.css";
@@ -64,7 +66,7 @@ const persistStageOrdersSequential = async (orderedStages) => {
   }
 };
 
-const DefaultStageSwitch = ({ stage, onActivate, disabled, isUpdating }) => {
+const DefaultStageSwitch = ({ stage, onActivate, disabled, isUpdating, tStages }) => {
   const isOn = Boolean(stage.isDefault);
   const handleClick = () => {
     if (disabled || isUpdating) return;
@@ -87,8 +89,8 @@ const DefaultStageSwitch = ({ stage, onActivate, disabled, isUpdating }) => {
         aria-checked={isOn}
         aria-label={
           isOn
-            ? `${stage.name}: Etapa por defecto activa`
-            : `Marcar ${stage.name} como etapa por defecto`
+            ? tStages("switches.defaultActive", { name: stage.name })
+            : tStages("switches.markDefault", { name: stage.name })
         }
         disabled={disabled || isUpdating}
         onClick={handleClick}
@@ -102,7 +104,7 @@ const DefaultStageSwitch = ({ stage, onActivate, disabled, isUpdating }) => {
         }`}
       >
         <span
-          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background transition-[transform,box-shadow] duration-200 ease-out ${
             isOn
               ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
               : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
@@ -122,7 +124,7 @@ const DefaultStageSwitch = ({ stage, onActivate, disabled, isUpdating }) => {
   );
 };
 
-const FinalStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
+const FinalStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) => {
   const isOn = Boolean(stage.final);
   const handleClick = () => {
     if (disabled || isUpdating) return;
@@ -143,22 +145,22 @@ const FinalStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
         aria-checked={isOn}
         aria-label={
           isOn
-            ? `${stage.name}: Etapa final activa`
-            : `Marcar ${stage.name} como etapa final`
+            ? tStages("switches.finalActive", { name: stage.name })
+            : tStages("switches.markFinal", { name: stage.name })
         }
         disabled={disabled || isUpdating}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
+        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
           isUpdating ? "opacity-60" : "opacity-100"
         } ${
           isOn
-            ? "bg-emerald-600 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
+            ? "bg-vo-purple shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
             : "border border-slate-300/80 bg-slate-100 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)]"
         }`}
       >
         <span
-          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background transition-[transform,box-shadow] duration-200 ease-out ${
             isOn
               ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
               : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
@@ -169,7 +171,7 @@ const FinalStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
       {isUpdating && (
         <div className="absolute -right-6 top-1/2 -translate-y-1/2">
           <div
-            className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"
+            className="h-3 w-3 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
             aria-hidden
           />
         </div>
@@ -178,7 +180,7 @@ const FinalStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
   );
 };
 
-const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
+const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) => {
   const isOn = Boolean(stage.isHiredStage);
   const handleClick = () => {
     if (disabled || isUpdating) return;
@@ -199,8 +201,8 @@ const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
         aria-checked={isOn}
         aria-label={
           isOn
-            ? `${stage.name}: Etapa de contratación activa`
-            : `Marcar ${stage.name} como etapa de contratación`
+            ? tStages("switches.hiredActive", { name: stage.name })
+            : tStages("switches.markHired", { name: stage.name })
         }
         disabled={disabled || isUpdating}
         onClick={handleClick}
@@ -214,7 +216,7 @@ const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
         }`}
       >
         <span
-          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-[transform,box-shadow] duration-200 ease-out ${
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background transition-[transform,box-shadow] duration-200 ease-out ${
             isOn
               ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
               : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
@@ -234,14 +236,14 @@ const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating }) => {
   );
 };
 
-const renderStageItem = ({ item, collapseIcon, handler }) => {
+const renderStageItem = ({ item, handler, tStages }) => {
   return (
     <div className="flex w-full flex-col gap-4 rounded-xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-1 items-center gap-4">
         <div
           {...handler}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-vo-purple/10 cursor-grab active:cursor-grabbing"
-          aria-label="Arrastrar para reordenar"
+          aria-label={tStages("actions.dragAria")}
         >
           <GripVertical className="h-6 w-6 text-vo-purple" aria-hidden />
         </div>
@@ -259,40 +261,43 @@ const renderStageItem = ({ item, collapseIcon, handler }) => {
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-col gap-1.5">
           <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
-            Etapa por defecto
+            {tStages("fields.defaultStage")}
           </span>
           <DefaultStageSwitch
             stage={item}
             onActivate={item.onDefaultActivate}
             disabled={item.defaultSwitchDisabled}
             isUpdating={item.defaultSwitchUpdating}
+            tStages={tStages}
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
-            Etapa final
+            {tStages("fields.finalStage")}
           </span>
           <FinalStageSwitch
             stage={item}
             onToggle={item.onFinalToggle}
             disabled={item.finalSwitchDisabled}
             isUpdating={item.finalSwitchUpdating}
+            tStages={tStages}
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
-            Etapa de contratación
+            {tStages("fields.hiredStage")}
           </span>
           <HiredStageSwitch
             stage={item}
             onToggle={item.onHiredToggle}
             disabled={item.hiredSwitchDisabled}
             isUpdating={item.hiredSwitchUpdating}
+            tStages={tStages}
           />
         </div>
         <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
           <span className="font-sans text-xs text-muted-foreground">
-            Orden:
+            {tStages("fields.order")}
           </span>
           <span className="font-sans text-sm font-semibold text-foreground">
             {item.orderIndex}
@@ -302,19 +307,19 @@ const renderStageItem = ({ item, collapseIcon, handler }) => {
           type="button"
           onClick={() => item.onEdit(item)}
           className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-          aria-label={`Editar etapa ${item.name}`}
+          aria-label={tStages("aria.editStage", { name: item.name })}
         >
           <Pencil className="h-4 w-4" aria-hidden />
-          Editar
+          {tStages("actions.edit")}
         </button>
         <button
           type="button"
           onClick={() => item.onDelete(item)}
           className="inline-flex items-center justify-center gap-2 rounded-md border border-destructive/30 bg-background px-4 py-2.5 font-sans text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2"
-          aria-label={`Eliminar etapa ${item.name}`}
+          aria-label={tStages("aria.deleteStage", { name: item.name })}
         >
           <Trash2 className="h-4 w-4" aria-hidden />
-          Eliminar
+          {tStages("actions.delete")}
         </button>
       </div>
     </div>
@@ -322,6 +327,8 @@ const renderStageItem = ({ item, collapseIcon, handler }) => {
 };
 
 export default function EtapasPage() {
+  const tStages = useTranslations("AdminPortal.stages");
+  const tCommon = useTranslations("Common");
   const [stages, setStages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -361,7 +368,7 @@ export default function EtapasPage() {
       setStages([...mapped].sort(sortStagesStable));
     } catch (err) {
       setFetchError(
-        err?.message || err?.detail || "No se pudieron cargar las etapas."
+        getApiErrorMessage(err) || tStages("errors.loadFailed")
       );
       setStages([]);
     } finally {
@@ -412,8 +419,8 @@ export default function EtapasPage() {
       open: true,
       variant: "success",
       message: wasCreating
-        ? "Etapa creada correctamente."
-        : "Etapa actualizada correctamente.",
+        ? tStages("toasts.created")
+        : tStages("toasts.updated"),
     });
   };
 
@@ -459,7 +466,7 @@ export default function EtapasPage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Etapa por defecto actualizada.",
+        message: tStages("toasts.defaultUpdated"),
       });
     } catch (err) {
       // Revertir el cambio optimista en caso de error
@@ -470,9 +477,7 @@ export default function EtapasPage() {
         open: true,
         variant: "error",
         message:
-          err?.message ||
-          err?.detail ||
-          "No se pudo actualizar la etapa por defecto. Intenta de nuevo.",
+          getApiErrorMessage(err) || tStages("errors.defaultUpdateFailed"),
       });
     } finally {
       setUpdatingDefaultStageId(null);
@@ -510,7 +515,9 @@ export default function EtapasPage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: `Etapa ${newValue ? "marcada" : "desmarcada"} como final.`,
+        message: newValue
+          ? tStages("toasts.finalMarked")
+          : tStages("toasts.finalUnmarked"),
       });
     } catch (err) {
       // Revertir el cambio optimista en caso de error
@@ -524,9 +531,7 @@ export default function EtapasPage() {
         open: true,
         variant: "error",
         message:
-          err?.message ||
-          err?.detail ||
-          "No se pudo actualizar la etapa. Intenta de nuevo.",
+          getApiErrorMessage(err) || tStages("errors.updateFailed"),
       });
     } finally {
       setUpdatingFinalStageId(null);
@@ -569,7 +574,9 @@ export default function EtapasPage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: `Etapa ${newValue ? "marcada" : "desmarcada"} como etapa de contratación.`,
+        message: newValue
+          ? tStages("toasts.hiredMarked")
+          : tStages("toasts.hiredUnmarked"),
       });
     } catch (err) {
       // Revertir el cambio optimista en caso de error
@@ -580,18 +587,15 @@ export default function EtapasPage() {
       );
       
       // Manejar errores específicos
-      let errorMessage = "No se pudo actualizar la etapa de contratación. Intenta de nuevo.";
+      let errorMessage = tStages("errors.hiredUpdateFailed");
       
       if (err?.status === 403 || err?.response?.status === 403) {
-        errorMessage = "No tienes permisos para cambiar esta etapa.";
+        errorMessage = tStages("errors.forbidden");
       } else if (err?.status === 404 || err?.response?.status === 404) {
-        errorMessage = "La etapa ya no existe. Recargando lista...";
-        // Recargar la lista si la etapa no existe
+        errorMessage = tStages("errors.notFound");
         setTimeout(() => fetchStages(), 1000);
-      } else if (err?.message) {
-        errorMessage = err.message;
-      } else if (err?.detail) {
-        errorMessage = err.detail;
+      } else if (getApiErrorMessage(err)) {
+        errorMessage = getApiErrorMessage(err);
       }
       
       setSnackbar({
@@ -654,16 +658,14 @@ export default function EtapasPage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Etapa eliminada correctamente.",
+        message: tStages("toasts.deleted"),
       });
     } catch (err) {
       setSnackbar({
         open: true,
         variant: "error",
         message:
-          err?.message ||
-          err?.detail ||
-          "No se pudo eliminar la etapa. Intenta de nuevo.",
+          getApiErrorMessage(err) || tStages("errors.deleteFailed"),
       });
     } finally {
       setDeleteLoading(false);
@@ -689,8 +691,7 @@ export default function EtapasPage() {
       setSnackbar({
         open: true,
         variant: "warning",
-        message:
-          "Para guardar el orden, muestra todas las etapas (sin filtrar la búsqueda).",
+        message: tStages("errors.reorderFilterHint"),
       });
       await fetchStages();
       return;
@@ -709,16 +710,14 @@ export default function EtapasPage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Orden guardado correctamente.",
+        message: tStages("toasts.orderSaved"),
       });
     } catch (err) {
       setSnackbar({
         open: true,
         variant: "error",
         message:
-          err?.message ||
-          err?.detail ||
-          "No se pudo reordenar las etapas. Intenta de nuevo.",
+          getApiErrorMessage(err) || tStages("errors.reorderFailed"),
       });
       await fetchStages();
     } finally {
@@ -762,34 +761,34 @@ export default function EtapasPage() {
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background font-sans text-foreground">
       <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
         <div className="min-w-0 flex flex-col">
-              <section className="px-8 py-6" aria-label="Encabezado de etapas">
+              <section className="px-8 py-6" aria-label={tStages("page.headerAria")}>
                 <PortalPageHeader
-                  title="Etapas"
-                  description="Gestiona las etapas del proceso de reclutamiento"
+                  title={tStages("page.title")}
+                  description={tStages("page.description")}
                   actions={
                     <>
                       <button
                         type="button"
                         onClick={() => setIsEstadosModalOpen(true)}
                         className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-6 py-3 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                        aria-label="Gestionar estados"
+                        aria-label={tStages("actions.statusesAria")}
                       >
-                        Estados
+                        {tStages("actions.statuses")}
                       </button>
                       <button
                         type="button"
                         onClick={handleNewStage}
                         className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                        aria-label="Crear nueva etapa"
+                        aria-label={tStages("actions.newStageAria")}
                       >
                         <Plus className="h-4 w-4" aria-hidden />
-                        Nueva Etapa
+                        {tStages("actions.newStage")}
                       </button>
                     </>
                   }
                 />
               </section>
-              <section className="flex flex-col gap-6 p-8" aria-label="Lista de etapas">
+              <section className="flex flex-col gap-6 p-8" aria-label={tStages("page.listAria")}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="relative w-full max-w-[320px]">
                     <Search
@@ -800,16 +799,16 @@ export default function EtapasPage() {
                       type="search"
                       value={searchQuery}
                       onChange={handleSearchChange}
-                      placeholder="Buscar etapas..."
+                      placeholder={tStages("page.searchPlaceholder")}
                       className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                      aria-label="Buscar etapas"
+                      aria-label={tStages("page.searchAria")}
                     />
                   </div>
                   {reorderLoading && (
                     <div className="flex items-center gap-2 text-vo-purple">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
                       <span className="font-sans text-sm font-medium">
-                        Guardando orden...
+                        {tStages("loadingStates.savingOrder")}
                       </span>
                     </div>
                   )}
@@ -819,7 +818,7 @@ export default function EtapasPage() {
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
                       <div className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
                       <p className="font-sans text-sm text-muted-foreground">
-                        Cargando etapas...
+                        {tStages("loadingStates.loading")}
                       </p>
                     </div>
                   ) : fetchError ? (
@@ -832,14 +831,14 @@ export default function EtapasPage() {
                         onClick={fetchStages}
                         className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                       >
-                        Reintentar
+                        {tStages("actions.retry")}
                       </button>
                     </div>
                   ) : sortedStages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
                       <ListOrdered className="h-12 w-12 text-muted-foreground" aria-hidden />
                       <p className="font-sans text-sm text-muted-foreground">
-                        No se encontraron etapas
+                        {tStages("emptyStates.notFound")}
                       </p>
                       <button
                         type="button"
@@ -847,13 +846,13 @@ export default function EtapasPage() {
                         className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                       >
                         <Plus className="h-4 w-4" aria-hidden />
-                        Crear etapa
+                        {tStages("actions.createStage")}
                       </button>
                     </div>
                   ) : (
                     <Nestable
                       items={nestableItems}
-                      renderItem={renderStageItem}
+                      renderItem={(props) => renderStageItem({ ...props, tStages })}
                       onChange={handleReorder}
                       maxDepth={1}
                     />
@@ -881,10 +880,14 @@ export default function EtapasPage() {
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
         onConfirm={handleConfirmDelete}
-        title="Eliminar etapa"
-        message={`¿Estás seguro de eliminar la etapa "${stageToDelete?.name}"?`}
-        confirmText="Aceptar"
-        cancelText="Cancelar"
+        title={tStages("deleteConfirm.title")}
+        message={
+          stageToDelete
+            ? tStages("deleteConfirm.message", { name: stageToDelete.name })
+            : ""
+        }
+        confirmText={tStages("actions.accept")}
+        cancelText={tCommon("cancel")}
         loading={deleteLoading}
       />
 

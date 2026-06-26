@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { renderWithIntl as render } from '@/tests/helpers/render-with-intl'
 import PlantillaModal from '@/components/rrhh/PlantillaModal'
 import { apiClient } from '@/lib/api'
 import { fetchReportsCatalog } from '@/lib/api/recruiter-reports-catalog'

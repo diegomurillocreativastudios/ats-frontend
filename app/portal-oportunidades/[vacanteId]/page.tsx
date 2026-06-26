@@ -1,13 +1,17 @@
 import { Suspense } from "react"
+import { getTranslations } from "next-intl/server"
 import { PublicVacancyDetailPage } from "@/components/public/PublicVacancyDetailPage"
 
-export const metadata = {
-  title: { absolute: "ATS | Oportunidades | Vacante" },
-  description: "Detalle público de una vacante activa",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.publicOpportunities.detail")
+  return {
+    title: { absolute: t("title") },
+    description: t("description"),
+  }
 }
 
 function OpportunityDetailPageFallback() {
-  return <div className="min-h-screen bg-[#0b1224]" aria-hidden />
+  return <div className="min-h-screen bg-ats-warm-white" aria-hidden />
 }
 
 export default async function OpportunityDetailRoute({

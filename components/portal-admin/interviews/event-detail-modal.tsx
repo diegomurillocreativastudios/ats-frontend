@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { ExternalLink } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import type { AdminCalendarEvent } from "@/lib/api/admin-interviews-calendar"
 import { formatInterviewLocalDateTime } from "@/lib/interview-datetime"
@@ -13,11 +14,14 @@ export interface EventDetailModalProps {
   onClose: () => void
 }
 
-function formatTimeRange(event: AdminCalendarEvent): string {
+function formatTimeRange(
+  event: AdminCalendarEvent,
+  dash: string,
+): string {
   const start = formatInterviewLocalDateTime(event.startUtc)
   const end = formatInterviewLocalDateTime(event.endUtc)
-  if (start === "—") return "—"
-  if (end === "—" || start === end) return start
+  if (start === dash) return dash
+  if (end === dash || start === end) return start
   return `${start} – ${end}`
 }
 
@@ -31,13 +35,16 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalProps) {
+  const t = useTranslations("AdminPortal.interviews.calendar.eventDetail")
+
   if (!event) return null
 
+  const dash = t("dash")
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
   const durationLabel =
     event.durationMinutes != null && event.durationMinutes > 0
-      ? `${event.durationMinutes} min`
-      : "—"
+      ? t("minutes", { minutes: event.durationMinutes })
+      : dash
 
   const googleCalendarUrl = event.googleCalendarEventId
     ? `https://calendar.google.com/calendar/event?eid=${encodeURIComponent(event.googleCalendarEventId)}`
@@ -47,7 +54,7 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Detalle de entrevista"
+      title={t("title")}
       size="lg"
       closeOnOverlayClick
       footer={
@@ -56,14 +63,14 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
             href={`/portal-rrhh/entrevistas/${encodeURIComponent(event.vacancy.id)}`}
             className="font-sans text-sm font-medium text-vo-purple hover:underline"
           >
-            Abrir en portal RRHH →
+            {t("openInPortal")}
           </Link>
           <button
             type="button"
             onClick={onClose}
             className="rounded-md border border-border px-4 py-2 font-sans text-sm font-medium hover:bg-muted"
           >
-            Cerrar
+            {t("close")}
           </button>
         </div>
       }
@@ -87,15 +94,15 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
         </div>
 
         <dl className="rounded-lg border border-border bg-muted/20 px-3">
-          <DetailRow label="Cuándo" value={formatTimeRange(event)} />
-          <DetailRow label="Duración" value={durationLabel} />
-          <DetailRow label="Zona horaria" value={tz} />
+          <DetailRow label={t("when")} value={formatTimeRange(event, dash)} />
+          <DetailRow label={t("duration")} value={durationLabel} />
+          <DetailRow label={t("timezone")} value={tz} />
           <DetailRow
-            label="Vacante"
+            label={t("vacancy")}
             value={`${event.vacancy.title}${event.vacancy.companyName ? ` · ${event.vacancy.companyName}` : ""}`}
           />
           <DetailRow
-            label="Reclutador"
+            label={t("recruiter")}
             value={
               event.recruiter.email
                 ? `${event.recruiter.userName} · ${event.recruiter.email}`
@@ -103,16 +110,16 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
             }
           />
           <DetailRow
-            label="Tipo"
-            value={event.interviewType?.displayName ?? "—"}
+            label={t("type")}
+            value={event.interviewType?.displayName ?? dash}
           />
           <DetailRow
-            label="Modalidad"
-            value={event.interviewModality?.displayName ?? "—"}
+            label={t("modality")}
+            value={event.interviewModality?.displayName ?? dash}
           />
           <DetailRow
-            label="Entrevistador"
-            value={event.interviewerName?.trim() || "—"}
+            label={t("interviewer")}
+            value={event.interviewerName?.trim() || dash}
           />
         </dl>
 
@@ -125,7 +132,7 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 font-sans text-sm font-medium hover:bg-muted"
               >
-                Google Meet
+                {t("googleMeet")}
                 <ExternalLink className="h-4 w-4" aria-hidden />
               </a>
             ) : null}
@@ -136,7 +143,7 @@ export function EventDetailModal({ event, isOpen, onClose }: EventDetailModalPro
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 font-sans text-sm font-medium hover:bg-muted"
               >
-                Google Calendar
+                {t("googleCalendar")}
                 <ExternalLink className="h-4 w-4" aria-hidden />
               </a>
             ) : null}

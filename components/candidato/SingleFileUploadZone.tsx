@@ -8,6 +8,7 @@ import {
   type DragEvent,
   type KeyboardEvent,
 } from "react"
+import { useTranslations } from "next-intl"
 import { Upload, X, FileText } from "lucide-react"
 
 const DEFAULT_MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10 MB
@@ -20,28 +21,24 @@ const formatFileSize = (bytes: number) => {
 
 interface ValidationResult {
   valid: boolean
-  error?: string
+  reason?: "type" | "size"
 }
 
 const validateSingleFile = (
   file: File,
   allowedTypes: string[],
   allowedExtensions: string[],
-  maxSizeBytes: number,
-  typeErrorMessage: string
+  maxSizeBytes: number
 ): ValidationResult => {
   const extension = "." + (file.name.split(".").pop()?.toLowerCase() ?? "")
   const typeOk =
     (allowedTypes.length === 0 || allowedTypes.includes(file.type)) ||
     allowedExtensions.includes(extension)
   if (!typeOk) {
-    return { valid: false, error: typeErrorMessage }
+    return { valid: false, reason: "type" }
   }
   if (file.size > maxSizeBytes) {
-    return {
-      valid: false,
-      error: `El archivo supera ${formatFileSize(maxSizeBytes)} (${formatFileSize(file.size)}).`,
-    }
+    return { valid: false, reason: "size" }
   }
   return { valid: true }
 }
@@ -85,13 +82,17 @@ export default function SingleFileUploadZone({
   acceptedExtensions = [],
   accept,
   helperText,
-  primaryText = "Arrastra el archivo aquí o haz clic para subir",
-  ariaLabel = "Arrastra un archivo o haz clic para subir",
+  primaryText,
+  ariaLabel,
   maxSizeBytes = DEFAULT_MAX_SIZE_BYTES,
-  typeErrorMessage = "Tipo de archivo no permitido.",
+  typeErrorMessage,
   disabled = false,
   inputId,
 }: SingleFileUploadZoneProps) {
+  const t = useTranslations("CandidatePortal.documents.singleUpload")
+  const resolvedPrimaryText = primaryText ?? t("dropPrompt")
+  const resolvedAriaLabel = ariaLabel ?? t("dropzoneAria")
+  const resolvedTypeErrorMessage = typeErrorMessage ?? t("typeNotAllowed")
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -102,15 +103,23 @@ export default function SingleFileUploadZone({
       const list = Array.from(incoming)
       if (list.length === 0) return
       const next = list[0]
-      const { valid, error: msg } = validateSingleFile(
+      const { valid, reason } = validateSingleFile(
         next,
         acceptedTypes,
         acceptedExtensions,
-        maxSizeBytes,
-        typeErrorMessage
+        maxSizeBytes
       )
       if (!valid) {
-        setError(msg ?? "Archivo no válido.")
+        if (reason === "size") {
+          setError(
+            t("tooLarge", {
+              max: formatFileSize(maxSizeBytes),
+              size: formatFileSize(next.size),
+            })
+          )
+          return
+        }
+        setError(resolvedTypeErrorMessage)
         return
       }
       setError(null)
@@ -121,7 +130,8 @@ export default function SingleFileUploadZone({
       acceptedExtensions,
       maxSizeBytes,
       onFileChange,
-      typeErrorMessage,
+      resolvedTypeErrorMessage,
+      t,
     ]
   )
 
@@ -181,10 +191,10 @@ export default function SingleFileUploadZone({
         role="button"
         tabIndex={disabled ? -1 : 0}
         aria-disabled={disabled || undefined}
-        aria-label={ariaLabel}
+        aria-label={resolvedAriaLabel}
         className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed bg-muted p-5 transition-colors md:gap-3 md:p-6 ${
           isDragging
-            ? "border-vo-purple bg-[#F3E8FF]"
+            ? "border-vo-purple bg-ats-arena/70"
             : "border-border hover:border-muted-foreground/30"
         } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
         onClick={handleClick}
@@ -210,7 +220,7 @@ export default function SingleFileUploadZone({
           />
         </div>
         <p className="text-center font-sans text-sm font-medium text-muted-foreground md:text-base">
-          {isDragging ? "Suelta el archivo aquí" : primaryText}
+          {isDragging ? t("dropActive") : resolvedPrimaryText}
         </p>
         {helperText ? (
           <p className="text-center font-sans text-xs text-muted-foreground">
@@ -243,7 +253,7 @@ export default function SingleFileUploadZone({
             onClick={handleRemove}
             disabled={disabled}
             className="shrink-0 rounded-md p-1 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label={`Quitar ${file.name}`}
+            aria-label={t("removeFileAria", { fileName: file.name })}
           >
             <X className="h-4 w-4 text-muted-foreground" aria-hidden />
           </button>

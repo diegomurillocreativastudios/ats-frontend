@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Briefcase } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
@@ -39,6 +40,8 @@ function VacancyListSection({
   onRefresh: () => void;
   onSnackbar: (message: string, variant?: "success" | "error") => void;
 }) {
+  const t = useTranslations("RecruiterPortal.vacancies");
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
@@ -46,7 +49,7 @@ function VacancyListSection({
           className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
           aria-hidden
         />
-        <p className="font-sans text-sm text-muted-foreground">Cargando vacantes...</p>
+        <p className="font-sans text-sm text-muted-foreground">{t("loadingStates.loading")}</p>
       </div>
     );
   }
@@ -62,25 +65,27 @@ function VacancyListSection({
           onClick={onRetry}
           className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
         >
-          Reintentar
+          {t("actions.retry")}
         </button>
       </div>
     );
   }
 
   if (filteredVacancies.length === 0) {
+    const hasActiveFilters = Boolean(
+      filters.titleQuery.trim() ||
+        filters.companyId ||
+        filters.modalityId ||
+        filters.countryCode ||
+        filters.departmentId
+    );
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
         <Briefcase className="h-12 w-12 text-muted-foreground" aria-hidden />
         <p className="font-sans text-sm text-muted-foreground">
-          No se encontraron vacantes
-          {filters.titleQuery.trim() ||
-          filters.companyId ||
-          filters.modalityId ||
-          filters.countryCode ||
-          filters.departmentId
-            ? " con los filtros aplicados"
-            : ""}
+          {hasActiveFilters
+            ? t("emptyStates.noVacanciesFiltered")
+            : t("emptyStates.noVacancies")}
         </p>
         <button
           type="button"
@@ -88,7 +93,7 @@ function VacancyListSection({
           className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
         >
           <Plus className="h-4 w-4" aria-hidden />
-          Crear vacante
+          {t("actions.createVacancy")}
         </button>
       </div>
     );
@@ -110,6 +115,7 @@ function VacancyListSection({
 }
 
 export default function VacantesPage() {
+  const t = useTranslations("RecruiterPortal.vacancies");
   const [vacancies, setVacancies] = useState<VacancyListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -147,13 +153,13 @@ export default function VacantesPage() {
       const message =
         (err as { message?: string })?.message ||
         (err as { detail?: string })?.detail ||
-        "No se pudieron cargar las vacantes.";
+        t("errors.loadFailed");
       setFetchError(message);
       setVacancies([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchVacancies();
@@ -164,7 +170,7 @@ export default function VacantesPage() {
     setSnackbar({
       open: true,
       variant: "success",
-      message: "Vacante creada correctamente.",
+      message: t("toasts.created"),
     });
   };
 
@@ -183,28 +189,28 @@ export default function VacantesPage() {
       <div className="hidden h-full lg:flex">
         <RRHHSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar variant="desktop" breadcrumbLabel="Vacantes" />
+          <RRHHTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col">
-              <section className="px-8 pt-6" aria-label="Encabezado de vacantes">
+              <section className="px-8 pt-6" aria-label={t("page.headerRegionLabel")}>
                 <PortalPageHeader
                   className="flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-                  title="Vacantes"
-                  description="Gestiona las posiciones abiertas"
+                  title={t("page.title")}
+                  description={t("page.description")}
                   actions={
                     <button
                       type="button"
                       onClick={() => setIsNuevaVacanteOpen(true)}
                       className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                      aria-label="Crear nueva vacante"
+                      aria-label={t("actions.createAria")}
                     >
                       <Plus className="h-4 w-4" aria-hidden />
-                      Nueva Vacante
+                      {t("actions.create")}
                     </button>
                   }
                 />
               </section>
-              <section className="flex flex-col gap-5 px-8 pb-8 pt-5" aria-label="Lista de vacantes">
+              <section className="flex flex-col gap-5 px-8 pb-8 pt-5" aria-label={t("page.listRegionLabel")}>
                 <VacancyListFilters
                   value={filters}
                   onChange={setFilters}
@@ -227,29 +233,29 @@ export default function VacantesPage() {
       </div>
 
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar variant="tablet" breadcrumbLabel="Vacantes" />
+        <RRHHTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
             <PortalPageHeader
               className="flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-              title="Vacantes"
-              description="Gestiona las posiciones abiertas"
+              title={t("page.title")}
+              description={t("page.description")}
               actions={
                 <button
                   type="button"
                   onClick={() => setIsNuevaVacanteOpen(true)}
                   className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label="Crear nueva vacante"
+                  aria-label={t("actions.createAria")}
                 >
                   <Plus className="h-4 w-4" aria-hidden />
-                  <span className="hidden sm:inline">Nueva Vacante</span>
+                  <span className="hidden sm:inline">{t("actions.create")}</span>
                   <span className="sm:hidden" aria-hidden>
-                    Nueva
+                    {t("actions.createShort")}
                   </span>
                 </button>
               }
             />
-            <section className="flex flex-col gap-5" aria-label="Filtros y lista">
+            <section className="flex flex-col gap-5" aria-label={t("page.filtersAndListRegionLabel")}>
               <VacancyListFilters
                 value={filters}
                 onChange={setFilters}

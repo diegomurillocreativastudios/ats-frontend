@@ -1,9 +1,10 @@
 "use client"
 
 import type { ReactNode } from "react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
-import { Button } from "@/components/ui/Button";
-import { AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/Button"
+import { AlertTriangle } from "lucide-react"
 
 export default function DeleteConfirmModal({
   isOpen,
@@ -11,8 +12,8 @@ export default function DeleteConfirmModal({
   onConfirm,
   title,
   message,
-  confirmText = "Eliminar",
-  cancelText = "Cancelar",
+  confirmText,
+  cancelText,
   loading = false,
   overlayZIndexClass,
 }: {
@@ -26,9 +27,13 @@ export default function DeleteConfirmModal({
   loading?: boolean
   overlayZIndexClass?: string
 }) {
+  const tCommon = useTranslations("Common")
+  const resolvedConfirmText = confirmText ?? tCommon("delete")
+  const resolvedCancelText = cancelText ?? tCommon("cancel")
+
   const handleConfirm = () => {
-    onConfirm?.();
-  };
+    onConfirm?.()
+  }
 
   const footer = (
     <>
@@ -37,9 +42,9 @@ export default function DeleteConfirmModal({
         variant="outline"
         onClick={onClose}
         disabled={loading}
-        aria-label={cancelText}
+        aria-label={resolvedCancelText}
       >
-        {cancelText}
+        {resolvedCancelText}
       </Button>
       <Button
         type="button"
@@ -47,12 +52,12 @@ export default function DeleteConfirmModal({
         disabled={loading}
         loading={loading}
         className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive"
-        aria-label={confirmText}
+        aria-label={resolvedConfirmText}
       >
-        {confirmText}
+        {resolvedConfirmText}
       </Button>
     </>
-  );
+  )
 
   return (
     <Modal
@@ -70,11 +75,9 @@ export default function DeleteConfirmModal({
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10">
             <AlertTriangle className="h-5 w-5 text-destructive" aria-hidden />
           </div>
-          <p className="flex-1 font-sans text-sm text-foreground">
-            {message}
-          </p>
+          <p className="flex-1 font-sans text-sm text-foreground">{message}</p>
         </div>
       </div>
     </Modal>
-  );
+  )
 }

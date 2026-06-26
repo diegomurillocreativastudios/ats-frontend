@@ -1,8 +1,12 @@
 import type { ReactNode } from "react"
+import { getTranslations } from "next-intl/server"
 
-export const metadata = {
-  title: "Plantillas",
-  description: "Gestión de plantillas de notificaciones y documentos",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.adminPortal.templates")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function PortalAdminPlantillasLayout({

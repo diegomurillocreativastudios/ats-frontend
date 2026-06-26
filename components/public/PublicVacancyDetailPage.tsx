@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useTranslations } from "next-intl"
 import {
   ArrowLeft,
   Briefcase,
@@ -23,9 +24,9 @@ import {
 import { PublicOpportunitiesNavbar } from "@/components/public/PublicOpportunitiesNavbar"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
+import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
 
-const darkPanelClassName =
-  "border border-white/10 bg-[linear-gradient(180deg,rgba(35,45,76,0.94)_0%,rgba(19,27,50,0.96)_100%)] shadow-[0_24px_80px_rgba(7,12,27,0.42)] backdrop-blur"
+const panelClassName = publicOpportunitiesTheme.panel
 
 function formatPublishedLabel(publishedAt?: string): string | null {
   if (!publishedAt) return null
@@ -51,7 +52,7 @@ function getCompanyInitials(companyName: string): string {
 
 function DetailPill({ value }: { value: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/7 px-3 py-1.5 text-xs font-medium text-white/82">
+    <span className={publicOpportunitiesTheme.detailPill}>
       {value}
     </span>
   )
@@ -65,9 +66,9 @@ function DetailRow({
   value: ReactNode
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-white/10 py-3 last:border-b-0 last:pb-0">
-      <dt className="text-sm font-medium text-white/48">{label}</dt>
-      <dd className="max-w-[60%] text-right text-sm font-medium text-white">{value}</dd>
+    <div className="flex items-start justify-between gap-4 border-b border-border py-3 last:border-b-0 last:pb-0">
+      <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
+      <dd className="max-w-[60%] text-right text-sm font-medium text-foreground">{value}</dd>
     </div>
   )
 }
@@ -75,21 +76,23 @@ function DetailRow({
 function BulletList({
   title,
   items,
+  keyBlockLabel,
 }: {
   title: string
   items: string[]
+  keyBlockLabel: string
 }) {
   if (!items.length) return null
 
   return (
-    <section className={`rounded-[30px] p-6 sm:p-7 ${darkPanelClassName}`}>
+    <section className={`rounded-[30px] p-6 sm:p-7 ${panelClassName}`}>
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/6 text-[#f0a7ff]">
+        <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-border bg-muted/35 text-ats-cobre">
           <CheckCircle2 className="h-5 w-5" aria-hidden />
         </div>
         <div>
-          <p className="text-[11px] uppercase tracking-[0.24em] text-white/46">Bloque clave</p>
-          <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">{keyBlockLabel}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
         </div>
       </div>
 
@@ -97,9 +100,9 @@ function BulletList({
         {items.map((item) => (
           <li
             key={item}
-            className="flex items-start gap-3 rounded-[22px] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-7 text-white/72"
+            className="flex items-start gap-3 rounded-[22px] border border-border bg-muted/25 px-4 py-3 text-sm leading-7 text-muted-foreground"
           >
-            <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#f0a7ff]" aria-hidden />
+            <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-ats-cobre" aria-hidden />
             <span>{item}</span>
           </li>
         ))}
@@ -131,20 +134,20 @@ function VacancyTextSection({
     : []
 
   return (
-    <section className={`rounded-[30px] p-6 sm:p-7 ${darkPanelClassName}`}>
+    <section className={`rounded-[30px] p-6 sm:p-7 ${panelClassName}`}>
       <div className="flex items-center gap-3">
         <div
-          className={`flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/6 ${iconColorClassName}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-[18px] border border-border bg-muted/35 ${iconColorClassName}`}
         >
           {icon}
         </div>
         <div>
-          <p className="text-[11px] uppercase tracking-[0.24em] text-white/46">{eyebrow}</p>
-          <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">{eyebrow}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
         </div>
       </div>
 
-      <div className="mt-5 space-y-4 text-sm leading-8 text-white/72">
+      <div className="mt-5 space-y-4 text-sm leading-8 text-muted-foreground">
         {paragraphs.length ? (
           paragraphs.map((paragraph, index) => (
             <p key={`${index}-${paragraph}`}>{paragraph}</p>
@@ -157,14 +160,21 @@ function VacancyTextSection({
   )
 }
 
-function VacancyDescription({ description }: { description?: string }) {
+function VacancyDescription({
+  description,
+  t,
+}: {
+  description?: string
+  t: ReturnType<typeof useTranslations<"PublicOpportunities.detail">>
+}) {
   return (
     <VacancyTextSection
       icon={<Compass className="h-5 w-5" aria-hidden />}
-      iconColorClassName="text-[#8dd8ff]"
-      eyebrow="Contexto del rol"
-      title="Descripción del puesto"
+      iconColorClassName="text-ats-terracotta"
+      eyebrow={t("roleContext")}
+      title={t("jobDescription")}
       content={description}
+      emptyLabel={t("unspecified")}
     />
   )
 }
@@ -173,32 +183,32 @@ function VacancySkeleton() {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="space-y-6">
-        <div className="animate-pulse rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,42,71,0.9)_0%,rgba(18,25,44,0.94)_100%)] p-8">
-          <div className="h-6 w-32 rounded-full bg-white/10" />
-          <div className="mt-5 h-10 w-2/3 rounded-2xl bg-white/10" />
-          <div className="mt-4 h-5 w-1/2 rounded-xl bg-white/10" />
+        <div className={`animate-pulse rounded-[34px] p-8 ${panelClassName}`}>
+          <div className="h-6 w-32 rounded-full bg-muted/50" />
+          <div className="mt-5 h-10 w-2/3 rounded-2xl bg-muted/50" />
+          <div className="mt-4 h-5 w-1/2 rounded-xl bg-muted/50" />
           <div className="mt-5 flex gap-2">
-            <div className="h-8 w-28 rounded-full bg-white/10" />
-            <div className="h-8 w-24 rounded-full bg-white/10" />
-            <div className="h-8 w-20 rounded-full bg-white/10" />
+            <div className="h-8 w-28 rounded-full bg-muted/50" />
+            <div className="h-8 w-24 rounded-full bg-muted/50" />
+            <div className="h-8 w-20 rounded-full bg-muted/50" />
           </div>
         </div>
-        <div className="animate-pulse rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,42,71,0.9)_0%,rgba(18,25,44,0.94)_100%)] p-8">
-          <div className="h-6 w-48 rounded-xl bg-white/10" />
+        <div className={`animate-pulse rounded-[30px] p-8 ${panelClassName}`}>
+          <div className="h-6 w-48 rounded-xl bg-muted/50" />
           <div className="mt-5 space-y-3">
-            <div className="h-4 w-full rounded bg-white/10" />
-            <div className="h-4 w-[94%] rounded bg-white/10" />
-            <div className="h-4 w-[76%] rounded bg-white/10" />
+            <div className="h-4 w-full rounded bg-muted/50" />
+            <div className="h-4 w-[94%] rounded bg-muted/50" />
+            <div className="h-4 w-[76%] rounded bg-muted/50" />
           </div>
         </div>
       </div>
 
-      <div className="animate-pulse rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,42,71,0.9)_0%,rgba(18,25,44,0.94)_100%)] p-8">
-        <div className="h-6 w-32 rounded-xl bg-white/10" />
+      <div className={`animate-pulse rounded-[30px] p-8 ${panelClassName}`}>
+        <div className="h-6 w-32 rounded-xl bg-muted/50" />
         <div className="mt-5 space-y-4">
-          <div className="h-4 w-full rounded bg-white/10" />
-          <div className="h-4 w-[85%] rounded bg-white/10" />
-          <div className="h-4 w-[72%] rounded bg-white/10" />
+          <div className="h-4 w-full rounded bg-muted/50" />
+          <div className="h-4 w-[85%] rounded bg-muted/50" />
+          <div className="h-4 w-[72%] rounded bg-muted/50" />
         </div>
       </div>
     </div>
@@ -210,6 +220,8 @@ export function PublicVacancyDetailPage({
 }: {
   vacancyId: string
 }) {
+  const t = useTranslations("PublicOpportunities.detail")
+  const tPage = useTranslations("PublicOpportunities.page")
   const searchParams = useSearchParams()
   const [vacancy, setVacancy] = useState<OpportunityVacancyDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -233,7 +245,7 @@ export function PublicVacancyDetailPage({
         if (isCancelled) return
         if (!nextVacancy) {
           setVacancy(null)
-          setErrorMessage("No encontramos la vacante solicitada.")
+          setErrorMessage(t("notFound"))
           return
         }
 
@@ -243,7 +255,7 @@ export function PublicVacancyDetailPage({
         const message =
           error instanceof Error && error.message.trim() !== ""
             ? error.message
-            : "No se pudo cargar la vacante."
+            : t("loadFailed")
         setVacancy(null)
         setErrorMessage(message)
       } finally {
@@ -262,23 +274,26 @@ export function PublicVacancyDetailPage({
 
   useEffect(() => {
     if (!vacancy?.title) return
-    document.title = `ATS | Oportunidades | ${vacancy.title}`
-  }, [vacancy?.title])
+    document.title = t("documentTitle", { title: vacancy.title })
+  }, [vacancy?.title, t])
 
   const publishedLabel = formatPublishedLabel(vacancy?.publishedAt)
   const companyName = vacancy?.company.name?.trim() ?? ""
   const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy?.company.logo ?? null)
-  const companyLogoAlt = companyName ? `Logo de ${companyName}` : "Logo de la empresa"
+  const companyLogoAlt = companyName
+    ? tPage("companyLogoAlt", { company: companyName })
+    : tPage("companyLogoGeneric")
+  const unspecified = t("unspecified")
   const applyHref = queryString
     ? `/portal-oportunidades/${vacancyId}/aplicar?${queryString}`
     : `/portal-oportunidades/${vacancyId}/aplicar`
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0b1224] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-ats-warm-white text-foreground">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-[linear-gradient(180deg,#5b2b86_0%,#25365d_38%,#0b1224_100%)]" />
-        <div className="absolute left-[-8%] top-6 h-72 w-72 rounded-full bg-[#c73277]/26 blur-3xl" />
-        <div className="absolute right-[10%] top-16 h-80 w-80 rounded-full bg-[#71bced]/16 blur-3xl" />
+        <div className={publicOpportunitiesTheme.heroGradientShort} />
+        <div className={`absolute left-[-8%] top-6 h-72 w-72 ${publicOpportunitiesTheme.orbTerracotta}`} />
+        <div className={`absolute right-[10%] top-16 h-80 w-80 ${publicOpportunitiesTheme.orbCobre}`} />
       </div>
 
       <PublicOpportunitiesNavbar className="mb-5" />
@@ -288,24 +303,24 @@ export function PublicVacancyDetailPage({
           <div className="mb-5">
             <Link
               href={backHref}
-              className="inline-flex items-center gap-2 text-sm font-medium text-white/76 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+              className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-background"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
-              Volver a oportunidades
+              {t("back")}
             </Link>
           </div>
 
           {errorMessage ? (
-            <div className={`rounded-[30px] p-8 ${darkPanelClassName}`}>
-              <p className="text-sm text-[#ffd0e7]" role="alert">
+            <div className={`rounded-[30px] p-8 ${panelClassName}`}>
+              <p className="text-sm text-ats-terracotta-soft" role="alert">
                 {errorMessage}
               </p>
               <div className="mt-5">
                 <Link
                   href="/portal-oportunidades"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-[#ffd0e7]"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:text-ats-terracotta-soft"
                 >
-                  Ver todas las oportunidades
+                  {t("viewAll")}
                 </Link>
               </div>
             </div>
@@ -314,39 +329,39 @@ export function PublicVacancyDetailPage({
           ) : vacancy ? (
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
               <div className="space-y-6">
-              <section className={`relative overflow-hidden rounded-[34px] px-6 py-7 sm:px-8 sm:py-8 ${darkPanelClassName}`}>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(199,50,119,0.35),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(113,188,237,0.16),transparent_24%)]" />
+              <section className={`relative overflow-hidden rounded-[34px] px-6 py-7 sm:px-8 sm:py-8 ${panelClassName}`}>
+                <div className={publicOpportunitiesTheme.heroCardOverlay} />
 
                 <div className="relative flex flex-col gap-7">
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-4">
-                      <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/7 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-white/76">
-                        <Sparkles className="h-3.5 w-3.5 text-[#f5b0ff]" aria-hidden />
-                        Vacante activa
+                      <p className={publicOpportunitiesTheme.activeBadge}>
+                        <Sparkles className="h-3.5 w-3.5 text-ats-terracotta" aria-hidden />
+                        {t("activeBadge")}
                       </p>
 
                       <div className="space-y-3">
-                        <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
+                        <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
                           {vacancy.title}
                         </h1>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/68">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
                           {companyName ? (
                             <span className="inline-flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-[#8dd8ff]" aria-hidden />
+                              <Building2 className="h-4 w-4 text-ats-terracotta" aria-hidden />
                               {companyName}
                             </span>
                           ) : null}
                           <span className="inline-flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-[#f6c482]" aria-hidden />
+                            <MapPin className="h-4 w-4 text-ats-terracotta" aria-hidden />
                             <VacancyLocationLabel
                               countryCode={vacancy.countryCode}
                               stateCode={vacancy.stateCode}
-                              emptyLabel="Ubicación no especificada"
+                              emptyLabel={tPage("fallbackLocation")}
                             />
                           </span>
                           <span className="inline-flex items-center gap-2">
-                            <Briefcase className="h-4 w-4 text-[#f5b0ff]" aria-hidden />
-                            {vacancy.modality?.displayName ?? "No especificado"}
+                            <Briefcase className="h-4 w-4 text-ats-cobre" aria-hidden />
+                            {vacancy.modality?.displayName ?? unspecified}
                           </span>
                         </div>
                       </div>
@@ -354,7 +369,7 @@ export function PublicVacancyDetailPage({
 
                     {companyLogoSrc ? (
                       <div
-                        className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-white/12 bg-white/8"
+                        className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-border bg-muted/45"
                         aria-label={companyLogoAlt}
                       >
                         <img
@@ -365,53 +380,55 @@ export function PublicVacancyDetailPage({
                         />
                       </div>
                     ) : companyName ? (
-                      <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-[24px] border border-white/12 bg-white/8 text-base font-semibold text-white/88 sm:flex">
+                      <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-[24px] border border-border bg-muted/45 text-base font-semibold text-foreground/88 sm:flex">
                         {getCompanyInitials(companyName) || "AT"}
                       </div>
                     ) : null}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <DetailPill value={vacancy.department?.displayName ?? "No especificado"} />
-                    <DetailPill value={vacancy.modality?.displayName ?? "No especificado"} />
+                    <DetailPill value={vacancy.department?.displayName ?? unspecified} />
+                    <DetailPill value={vacancy.modality?.displayName ?? unspecified} />
                     <DetailPill
                       value={
                         <VacancyLocationLabel
                           countryCode={vacancy.countryCode}
                           stateCode={vacancy.stateCode}
-                          emptyLabel="No especificado"
+                          emptyLabel={unspecified}
                         />
                       }
                     />
-                    {publishedLabel ? <DetailPill value={`Publicada ${publishedLabel}`} /> : null}
+                    {publishedLabel ? (
+                      <DetailPill value={t("published", { date: publishedLabel })} />
+                    ) : null}
                     <Link
                       href={applyHref}
-                      className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-medium text-[#18213d] shadow-sm transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+                      className={publicOpportunitiesTheme.cta}
                     >
-                      Postularme
+                      {t("apply")}
                     </Link>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">Departamento</p>
-                      <p className="mt-2 text-lg font-semibold text-white">
-                        {vacancy.department?.displayName ?? "No especificado"}
+                    <div className="rounded-[24px] border border-border bg-muted/20 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{t("department")}</p>
+                      <p className="mt-2 text-lg font-semibold text-foreground">
+                        {vacancy.department?.displayName ?? unspecified}
                       </p>
                     </div>
-                    <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">Modalidad</p>
-                      <p className="mt-2 text-lg font-semibold text-white">
-                        {vacancy.modality?.displayName ?? "No especificado"}
+                    <div className="rounded-[24px] border border-border bg-muted/20 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{t("modality")}</p>
+                      <p className="mt-2 text-lg font-semibold text-foreground">
+                        {vacancy.modality?.displayName ?? unspecified}
                       </p>
                     </div>
-                    <div className="rounded-[24px] border border-white/10 bg-black/10 p-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/44">Ubicación</p>
-                      <p className="mt-2 text-lg font-semibold text-white">
+                    <div className="rounded-[24px] border border-border bg-muted/20 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{t("location")}</p>
+                      <p className="mt-2 text-lg font-semibold text-foreground">
                         <VacancyLocationLabel
                           countryCode={vacancy.countryCode}
                           stateCode={vacancy.stateCode}
-                          emptyLabel="No especificado"
+                          emptyLabel={unspecified}
                         />
                       </p>
                     </div>
@@ -419,14 +436,14 @@ export function PublicVacancyDetailPage({
                 </div>
               </section>
 
-              <VacancyDescription description={vacancy.description} />
+              <VacancyDescription description={vacancy.description} t={t} />
 
               {vacancy.details ? (
                 <VacancyTextSection
                   icon={<Info className="h-5 w-5" aria-hidden />}
-                  iconColorClassName="text-[#f6c482]"
-                  eyebrow="Más sobre el puesto"
-                  title="Detalles adicionales"
+                  iconColorClassName="text-ats-terracotta"
+                  eyebrow={t("moreAboutRole")}
+                  title={t("additionalDetails")}
                   content={vacancy.details}
                 />
               ) : null}
@@ -434,31 +451,31 @@ export function PublicVacancyDetailPage({
               {vacancy.advantages ? (
                 <VacancyTextSection
                   icon={<Gift className="h-5 w-5" aria-hidden />}
-                  iconColorClassName="text-[#f0a7ff]"
-                  eyebrow="Lo que ofrecemos"
-                  title="Ventajas y beneficios"
+                  iconColorClassName="text-ats-cobre"
+                  eyebrow={t("whatWeOffer")}
+                  title={t("benefits")}
                   content={vacancy.advantages}
                 />
               ) : null}
 
-              <BulletList title="Responsabilidades" items={vacancy.responsibilities ?? []} />
-              <BulletList title="Requisitos" items={vacancy.requirements ?? []} />
-              <BulletList title="Beneficios" items={vacancy.benefits ?? []} />
+              <BulletList title={t("responsibilities")} items={vacancy.responsibilities ?? []} keyBlockLabel={t("keyBlock")} />
+              <BulletList title={t("requirements")} items={vacancy.requirements ?? []} keyBlockLabel={t("keyBlock")} />
+              <BulletList title={t("benefits")} items={vacancy.benefits ?? []} keyBlockLabel={t("keyBlock")} />
             </div>
 
               <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-                <section className={`rounded-[30px] p-6 ${darkPanelClassName}`}>
-                  <h2 className="text-xl font-semibold text-white">Detalles de la vacante</h2>
+                <section className={`rounded-[30px] p-6 ${panelClassName}`}>
+                  <h2 className="text-xl font-semibold text-foreground">{t("sidebarTitle")}</h2>
 
                   <dl className="mt-4">
                     {companyName ? (
                       <DetailRow
-                        label="Empresa"
+                        label={t("company")}
                         value={
                           <span className="inline-flex items-center justify-end gap-2">
                             {companyLogoSrc ? (
                               <span
-                                className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/6"
+                                className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/35"
                                 aria-hidden
                               >
                                 <img
@@ -475,45 +492,45 @@ export function PublicVacancyDetailPage({
                       />
                     ) : null}
                     <DetailRow
-                      label="Departamento"
-                      value={vacancy.department?.displayName ?? "No especificado"}
+                      label={t("department")}
+                      value={vacancy.department?.displayName ?? unspecified}
                     />
                     <DetailRow
-                      label="Modalidad"
-                      value={vacancy.modality?.displayName ?? "No especificado"}
+                      label={t("modality")}
+                      value={vacancy.modality?.displayName ?? unspecified}
                     />
                     <DetailRow
-                      label="Ubicación"
+                      label={t("location")}
                       value={
                         <VacancyLocationLabel
                           countryCode={vacancy.countryCode}
                           stateCode={vacancy.stateCode}
-                          emptyLabel="No especificado"
+                          emptyLabel={unspecified}
                         />
                       }
                     />
                     {vacancy.salary ? (
                       <DetailRow
-                        label="Salario"
+                        label={t("salary")}
                         value={
                           <span className="inline-flex items-center justify-end gap-2">
-                            <DollarSign className="h-3.5 w-3.5 text-[#8dd8ff]" aria-hidden />
+                            <DollarSign className="h-3.5 w-3.5 text-ats-terracotta" aria-hidden />
                             <span className="whitespace-pre-wrap">{vacancy.salary}</span>
                           </span>
                         }
                       />
                     ) : null}
                     {publishedLabel ? (
-                      <DetailRow label="Publicación" value={publishedLabel} />
+                      <DetailRow label={t("publishedLabel")} value={publishedLabel} />
                     ) : null}
                   </dl>
 
                   <div className="mt-6">
                     <Link
                       href={applyHref}
-                      className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-[#18213d] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#161d34]"
+                      className={`inline-flex w-full items-center justify-center ${publicOpportunitiesTheme.cta}`}
                     >
-                      Postularme
+                      {t("apply")}
                     </Link>
                   </div>
                 </section>

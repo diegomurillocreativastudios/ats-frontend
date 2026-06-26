@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
@@ -18,27 +19,27 @@ import {
   pickEmbeddedCanonicalProfile,
 } from "@/lib/recruiter-canonical-profile-merge"
 
-const mapSaveError = (err: unknown): string => {
+const mapSaveError = (
+  err: unknown,
+  t: (key: string) => string,
+): string => {
   const status =
     typeof err === "object" && err !== null && "status" in err
       ? Number((err as { status: number }).status)
       : 0
   let message = getApiErrorMessage(err)
   if (status === 400) {
-    message = message || "Revisá los datos: hay campos inválidos."
+    message = message || t("errors.saveInvalidFields")
   } else if (status === 403) {
-    message =
-      message ||
-      "Tu cuenta no tiene permiso para editar este perfil."
+    message = message || t("errors.saveForbidden")
   } else if (status === 409) {
-    message =
-      message ||
-      "Ese documento de identidad ya está asociado a otro perfil."
+    message = message || t("errors.saveDuplicateNationalId")
   }
   return message
 }
 
 export function useRecruiterCandidateProfile(candidateId: string | null) {
+  const t = useTranslations("RecruiterPortal.candidateDetail")
   const [profile, setProfile] = useState<RecruiterCandidateDetailState | null>(null)
   const [canonicalProfile, setCanonicalProfile] = useState<CandidateProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -49,7 +50,7 @@ export function useRecruiterCandidateProfile(candidateId: string | null) {
   const load = useCallback(async () => {
     if (!candidateId) {
       setLoading(false)
-      setFetchError("Falta el identificador del candidato.")
+      setFetchError(t("errors.missingCandidateId"))
       setProfile(null)
       setCanonicalProfile(null)
       return
@@ -83,21 +84,21 @@ export function useRecruiterCandidateProfile(candidateId: string | null) {
       )
     } catch (err: unknown) {
       setFetchError(
-        getApiErrorMessage(err) || "No se pudo cargar el perfil del candidato."
+        getApiErrorMessage(err) || t("errors.loadProfileFailed")
       )
       setProfile(null)
       setCanonicalProfile(null)
     } finally {
       setLoading(false)
     }
-  }, [candidateId])
+  }, [candidateId, t])
 
   const clearSaveError = useCallback(() => setSaveError(null), [])
 
   const save = useCallback(
     async (body: CandidateProfileSaveBody) => {
       if (!candidateId) {
-        throw new Error("Falta el identificador del candidato.")
+        throw new Error(t("errors.missingCandidateId"))
       }
       setSaving(true)
       setSaveError(null)
@@ -110,14 +111,14 @@ export function useRecruiterCandidateProfile(candidateId: string | null) {
         )
         await load()
       } catch (err: unknown) {
-        const msg = mapSaveError(err)
+        const msg = mapSaveError(err, t)
         setSaveError(msg)
         throw err
       } finally {
         setSaving(false)
       }
     },
-    [candidateId, profile?.normalizedData, load]
+    [candidateId, profile?.normalizedData, load, t]
   )
 
   useEffect(() => {

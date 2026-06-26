@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export function Input({
   label,
@@ -16,6 +17,7 @@ export function Input({
   className = '',
   ...props
 }) {
+  const t = useTranslations('Common');
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
   const inputType = isPassword && showPassword ? 'text' : type;
@@ -25,7 +27,7 @@ export function Input({
       {label && (
         <label
           htmlFor={id}
-          className="text-sm font-medium text-black"
+          className="text-sm font-medium text-foreground"
         >
           {label}
           {required && <span className="text-vo-pink ml-1">*</span>}
@@ -44,10 +46,10 @@ export function Input({
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${id}-error` : undefined}
           className={`
-            w-full h-10 px-3 py-2 text-sm rounded-md border border-input
-            bg-white text-black
+            glass-input
+            w-full h-10 px-3 py-2 text-sm rounded-md
+            text-foreground
             placeholder:text-gray-500
-            focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent
             disabled:cursor-not-allowed disabled:opacity-50
             ${error ? 'border-vo-pink focus:ring-vo-pink' : ''}
             ${isPassword ? 'pr-10' : ''}
@@ -58,8 +60,8 @@ export function Input({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none focus:text-black"
-            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-foreground focus:outline-none focus:text-foreground"
+            aria-label={showPassword ? t('hidePassword') : t('showPassword')}
             tabIndex={-1}
           >
             {showPassword ? (

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useTranslations } from "next-intl"
 import { Search } from "lucide-react"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
 import { listRecruiterCompanies, type RecruiterCompanyOption } from "@/lib/api/recruiter-companies"
@@ -28,6 +29,7 @@ export function VacancyListFilters({
   onChange,
   disabled = false,
 }: VacancyListFiltersProps) {
+  const t = useTranslations("RecruiterPortal.vacancies.filters")
   const [companyOptions, setCompanyOptions] = useState<RecruiterCompanyOption[]>([])
   const [departmentOptions, setDepartmentOptions] = useState<
     { id: string; displayName: string }[]
@@ -82,10 +84,10 @@ export function VacancyListFilters({
   return (
     <div
       className="rounded-xl border border-border bg-card p-4 md:p-5"
-      aria-label="Filtros de vacantes"
+      aria-label={t("regionLabel")}
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <FilterField id="vacancy-filter-search" label="Nombre">
+        <FilterField id="vacancy-filter-search" label={t("name")}>
           <div className="relative">
             <Search
               className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -96,7 +98,7 @@ export function VacancyListFilters({
               type="search"
               value={value.titleQuery}
               onChange={(e) => patch({ titleQuery: e.target.value })}
-              placeholder="Buscar vacante..."
+              placeholder={t("searchPlaceholder")}
               disabled={disabled}
               className={`${controlClassName} pl-9 pr-3`}
             />
@@ -105,19 +107,23 @@ export function VacancyListFilters({
 
         <FilterSelect
           id="vacancy-filter-company"
-          label="Empresa"
+          label={t("company")}
+          ariaLabel={t("filterByAria", { label: t("company") })}
           value={value.companyId}
           onChange={(companyId) => patch({ companyId })}
           disabled={disabled || loadingOptions}
+          emptyLabel={t("allFemale")}
           options={companyOptions.map((c) => ({ value: c.id, label: c.name }))}
         />
 
         <FilterSelect
           id="vacancy-filter-modality"
-          label="Modalidad"
+          label={t("modality")}
+          ariaLabel={t("filterByAria", { label: t("modality") })}
           value={value.modalityId}
           onChange={(modalityId) => patch({ modalityId })}
           disabled={disabled || loadingOptions}
+          emptyLabel={t("allFemale")}
           options={modalityOptions.map((m) => ({
             value: m.id,
             label: m.displayName,
@@ -126,8 +132,9 @@ export function VacancyListFilters({
 
         <FilterSelect
           id="vacancy-filter-country"
-          label="País"
-          emptyLabel="Todos"
+          label={t("country")}
+          ariaLabel={t("filterByAria", { label: t("country") })}
+          emptyLabel={t("allMale")}
           value={value.countryCode}
           onChange={(countryCode) => patch({ countryCode })}
           disabled={disabled}
@@ -136,10 +143,12 @@ export function VacancyListFilters({
 
         <FilterSelect
           id="vacancy-filter-department"
-          label="Departamento"
+          label={t("department")}
+          ariaLabel={t("filterByAria", { label: t("department") })}
           value={value.departmentId}
           onChange={(departmentId) => patch({ departmentId })}
           disabled={disabled || loadingOptions}
+          emptyLabel={t("allFemale")}
           options={departmentOptions.map((d) => ({
             value: d.id,
             label: d.displayName,
@@ -155,7 +164,7 @@ export function VacancyListFilters({
             disabled={disabled}
             className="font-sans text-sm font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
           >
-            Limpiar filtros
+            {t("clearFilters")}
           </button>
         </div>
       ) : null}
@@ -185,20 +194,22 @@ function FilterField({
 interface FilterSelectProps {
   id: string
   label: string
+  ariaLabel: string
   value: string
   onChange: (value: string) => void
   disabled?: boolean
-  emptyLabel?: string
+  emptyLabel: string
   options: { value: string; label: string }[]
 }
 
 function FilterSelect({
   id,
   label,
+  ariaLabel,
   value,
   onChange,
   disabled,
-  emptyLabel = "Todas",
+  emptyLabel,
   options,
 }: FilterSelectProps) {
   return (
@@ -209,7 +220,7 @@ function FilterSelect({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         className={`${controlClassName} px-3`}
-        aria-label={`Filtrar por ${label.toLowerCase()}`}
+        aria-label={ariaLabel}
       >
         <option value="">{emptyLabel}</option>
         {options.map((option) => (

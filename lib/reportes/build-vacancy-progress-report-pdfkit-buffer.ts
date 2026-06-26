@@ -41,14 +41,14 @@ const FOOTER_DEBUG_MARKER_PREFIX = "PDFKit v2 · "
  */
 const FOOTER_RESERVE = 28
 
-const COLOR_INK = "#111827"
-const COLOR_INK_SOFT = "#374151"
-const COLOR_MUTED = "#6b7280"
-const COLOR_BORDER = "#d1d5db"
-const COLOR_HEADER_BG = "#111827"
+const COLOR_INK = "#256D35"
+const COLOR_INK_SOFT = "#454648"
+const COLOR_MUTED = "#57585B"
+const COLOR_BORDER = "#E8F5E0"
+const COLOR_HEADER_BG = "#256D35"
 const COLOR_HEADER_INK = "#ffffff"
-const COLOR_FILL_LIGHT = "#f9fafb"
-const COLOR_PROGRESS_TRACK = "#e5e7eb"
+const COLOR_FILL_LIGHT = "#FFFFFF"
+const COLOR_PROGRESS_TRACK = "#E8F5E0"
 
 export interface VacancyProgressReportPdfKitInput {
   rows: VacancyProgressByClientRow[]
@@ -451,8 +451,8 @@ function drawKpiCard(
   help?: string
 ): void {
   doc.save()
-  doc.lineWidth(0.6).strokeColor(COLOR_BORDER).fillColor("#ffffff")
-  doc.roundedRect(x, y, w, h, 6).fillAndStroke("#ffffff", COLOR_BORDER)
+  doc.lineWidth(0.6).strokeColor(COLOR_BORDER).fillColor("#FFFFFF")
+  doc.roundedRect(x, y, w, h, 6).fillAndStroke("#FFFFFF", COLOR_BORDER)
   doc.restore()
 
   const pad = 8
@@ -591,8 +591,8 @@ function drawInsightsSection(
     const x = left + i * (cardW + gap)
     const card = topCards[i]
     doc.save()
-    doc.lineWidth(0.6).strokeColor(COLOR_BORDER).fillColor("#ffffff")
-    doc.roundedRect(x, cardsTop, cardW, cardH, 6).fillAndStroke("#ffffff", COLOR_BORDER)
+    doc.lineWidth(0.6).strokeColor(COLOR_BORDER).fillColor("#FFFFFF")
+    doc.roundedRect(x, cardsTop, cardW, cardH, 6).fillAndStroke("#FFFFFF", COLOR_BORDER)
     doc.restore()
 
     doc.font("Helvetica-Bold").fontSize(7).fillColor(COLOR_MUTED)
@@ -730,7 +730,7 @@ function drawTableBodyRow(
   }
 
   doc.save()
-  doc.lineWidth(0.35).strokeColor("#e5e7eb")
+  doc.lineWidth(0.35).strokeColor("#E8F5E0")
   doc.rect(left, rowTop, totalWidth, rowHeight).stroke()
   doc.restore()
 
@@ -1099,7 +1099,7 @@ function drawVacancyDetailCard(doc: PdfDoc, formatted: FormattedVacancyRow): voi
 
   const cardTop = doc.y
   doc.save()
-  doc.lineWidth(0.75).strokeColor(COLOR_BORDER).fillColor("#ffffff")
+  doc.lineWidth(0.75).strokeColor(COLOR_BORDER).fillColor("#FFFFFF")
   doc.roundedRect(left, cardTop, width, cardHeight, 8).stroke()
   doc.restore()
 
@@ -1245,10 +1245,10 @@ function drawVacancyDetailCard(doc: PdfDoc, formatted: FormattedVacancyRow): voi
         pillY += 16
       }
       doc.save()
-      doc.lineWidth(0.5).strokeColor(COLOR_BORDER).fillColor("#ffffff")
+      doc.lineWidth(0.5).strokeColor(COLOR_BORDER).fillColor("#FFFFFF")
       doc
         .roundedRect(pillX, pillY, pillW, 14, 7)
-        .fillAndStroke("#ffffff", COLOR_BORDER)
+        .fillAndStroke("#FFFFFF", COLOR_BORDER)
       doc.restore()
       doc.font("Helvetica").fontSize(7).fillColor(COLOR_INK_SOFT)
       doc.text(pillText, pillX + 6, pillY + 3, { lineBreak: false })
