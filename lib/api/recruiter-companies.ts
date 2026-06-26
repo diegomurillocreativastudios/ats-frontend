@@ -27,6 +27,7 @@ export interface RecruiterStageOption {
 export interface RecruiterApplicantStatusOption {
   id: string
   name: string
+  final?: boolean
 }
 
 function parseListPayload(raw: unknown, keys: string[]): unknown[] {
@@ -164,5 +165,6 @@ export async function listCompanyApplicantStatuses(
   return (list as Record<string, unknown>[]).map((item, i) => ({
     id: String(item?.id ?? item?.uuid ?? i),
     name: String(item?.name ?? item?.status_name ?? "—"),
+    final: Boolean(item?.final ?? item?.isFinal ?? item?.is_final ?? false),
   }))
 }

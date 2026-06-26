@@ -11,6 +11,7 @@ import {
   Shield,
   UserPlus,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
@@ -57,6 +58,7 @@ function formatDateUtc(value: string | null): string {
 }
 
 export default function AdminUsuariosContent() {
+  const t = useTranslations("AdminPortal.users")
   const [items, setItems] = useState<AdminUserListItem[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [page, setPage] = useState(1)
@@ -120,17 +122,13 @@ export default function AdminUsuariosContent() {
     } catch (err: unknown) {
       const rec = err as { status?: number }
       const msg = getApiErrorMessage(err)
-      setListError(
-        rec.status === 403
-          ? "No tenés permisos para listar usuarios (se requiere rol Admin en el API)."
-          : msg
-      )
+      setListError(rec.status === 403 ? t("errors.listForbidden") : msg)
       setItems([])
       setTotalCount(0)
     } finally {
       setLoading(false)
     }
-  }, [page, pageSize, appliedEmail, appliedRole, appliedLockedOnly])
+  }, [page, pageSize, appliedEmail, appliedRole, appliedLockedOnly, t])
 
   useEffect(() => {
     void loadList()
@@ -193,11 +191,11 @@ export default function AdminUsuariosContent() {
         )
       )
       if (patch.lockoutEnabled === true) {
-        showSnackbar("success", "Usuario bloqueado.")
+        showSnackbar("success", t("toasts.locked"))
       } else if (patch.lockoutEnabled === false) {
-        showSnackbar("success", "Usuario desbloqueado.")
+        showSnackbar("success", t("toasts.unlocked"))
       } else {
-        showSnackbar("success", "Usuario actualizado.")
+        showSnackbar("success", t("toasts.updated"))
       }
       void loadList()
     } catch (err: unknown) {
@@ -225,7 +223,7 @@ export default function AdminUsuariosContent() {
       )
       showSnackbar(
         "success",
-        lockoutEnabled ? "Usuario bloqueado." : "Usuario desbloqueado."
+        lockoutEnabled ? t("toasts.locked") : t("toasts.unlocked")
       )
       void loadList()
     } catch (err: unknown) {
@@ -239,7 +237,7 @@ export default function AdminUsuariosContent() {
     if (!detailId) return
     const names = ASSIGNABLE_ROLES.filter((r) => addRolesSelection[r])
     if (names.length === 0) {
-      showSnackbar("error", "Seleccioná al menos un rol para añadir.")
+      showSnackbar("error", t("validation.selectRole"))
       return
     }
     setDetailBusy(true)
@@ -247,7 +245,7 @@ export default function AdminUsuariosContent() {
       const u = await postAdminUserRoles(detailId, [...names])
       setDetail(u)
       setAddRolesSelection({ Admin: false, Recruiter: false, Candidate: false })
-      showSnackbar("success", "Roles actualizados.")
+      showSnackbar("success", t("toasts.rolesUpdated"))
       void loadList()
     } catch (err: unknown) {
       showSnackbar("error", getApiErrorMessage(err))
@@ -263,7 +261,7 @@ export default function AdminUsuariosContent() {
       const u = await deleteAdminUserRole(detailId, removeRoleTarget)
       setDetail(u)
       setRemoveRoleTarget(null)
-      showSnackbar("success", "Rol quitado.")
+      showSnackbar("success", t("toasts.roleRemoved"))
       void loadList()
     } catch (err: unknown) {
       showSnackbar("error", getApiErrorMessage(err))
@@ -277,10 +275,7 @@ export default function AdminUsuariosContent() {
     setDetailBusy(true)
     try {
       const res = await postAdminUserSendPasswordReset(detailId)
-      showSnackbar(
-        "success",
-        res.message || "Se enviaron las instrucciones si el correo es válido."
-      )
+      showSnackbar("success", res.message || t("toasts.resetSent"))
     } catch (err: unknown) {
       showSnackbar("error", getApiErrorMessage(err))
     } finally {
@@ -292,7 +287,7 @@ export default function AdminUsuariosContent() {
     e.preventDefault()
     const email = createEmail.trim()
     if (!email) {
-      showSnackbar("error", "El correo es obligatorio.")
+      showSnackbar("error", t("validation.emailRequired"))
       return
     }
     const roleNames = ASSIGNABLE_ROLES.filter((r) => createRoles[r])
@@ -307,7 +302,7 @@ export default function AdminUsuariosContent() {
       setCreateEmail("")
       setCreatePassword("")
       setCreateRoles({ Admin: false, Recruiter: false, Candidate: true })
-      showSnackbar("success", "Usuario creado.")
+      showSnackbar("success", t("toasts.created"))
       void loadList()
     } catch (err: unknown) {
       showSnackbar("error", getApiErrorMessage(err))
@@ -331,8 +326,8 @@ export default function AdminUsuariosContent() {
     >
       <PortalPageHeader
         id="portal-admin-usuarios-heading"
-        title="Usuarios"
-        description="Listado y administración de cuentas del portal."
+        title={t("page.title")}
+        description={t("page.description")}
         className="mb-6"
         contentClassName="max-w-3xl"
         actions={
@@ -342,35 +337,35 @@ export default function AdminUsuariosContent() {
             onClick={() => setCreateOpen(true)}
           >
             <UserPlus className="h-4 w-4" aria-hidden />
-            Nuevo usuario
+            {t("actions.create")}
           </Button>
         }
       />
 
       <section
         className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm"
-        aria-label="Filtros"
+        aria-label={t("filters.regionAria")}
       >
         <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end">
           <div className="min-w-[200px] flex-1">
             <Input
               id="filter-email"
               name="filterEmail"
-              label="Correo (contiene)"
+              label={t("filters.emailLabel")}
               value={filterEmail}
               error=""
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFilterEmail(e.target.value)
               }
-              placeholder="ej. @empresa.com"
+              placeholder={t("filters.emailPlaceholder")}
             />
           </div>
           <div className="w-full min-w-[160px] md:w-48">
             <label
               htmlFor="filter-role"
-              className="mb-2 block text-sm font-medium text-black"
+              className="mb-2 block text-sm font-medium text-foreground"
             >
-              Rol
+              {t("filters.roleLabel")}
             </label>
             <select
               id="filter-role"
@@ -378,7 +373,7 @@ export default function AdminUsuariosContent() {
               onChange={(e) => setFilterRole(e.target.value)}
               className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
             >
-              <option value="">Todos</option>
+              <option value="">{t("filters.allRoles")}</option>
               {ASSIGNABLE_ROLES.map((r) => (
                 <option key={r} value={r}>
                   {r}
@@ -393,11 +388,11 @@ export default function AdminUsuariosContent() {
               onChange={(e) => setFilterLockedOnly(e.target.checked)}
               className="h-4 w-4 rounded border-border text-vo-purple focus:ring-vo-purple"
             />
-            Solo bloqueados
+            {t("filters.lockedOnly")}
           </label>
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="primary" onClick={applyFilters}>
-              Aplicar filtros
+              {t("filters.apply")}
             </Button>
             <Button
               type="button"
@@ -412,7 +407,7 @@ export default function AdminUsuariosContent() {
                 setPage(1)
               }}
             >
-              Limpiar
+              {t("filters.clear")}
             </Button>
           </div>
         </div>
@@ -429,13 +424,11 @@ export default function AdminUsuariosContent() {
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="font-sans text-sm text-muted-foreground">
-          {loading
-            ? "Cargando…"
-            : `${totalCount} usuario${totalCount === 1 ? "" : "s"}`}
+          {loading ? t("count.loading") : t("count.summary", { count: totalCount })}
         </p>
         <div className="flex items-center gap-2">
           <span className="font-sans text-xs text-muted-foreground">
-            Por página
+            {t("pagination.perPage")}
           </span>
           <select
             value={pageSize}
@@ -456,7 +449,7 @@ export default function AdminUsuariosContent() {
             variant="ghost"
             className="h-9 px-3"
             onClick={() => void loadList()}
-            aria-label="Refrescar listado"
+            aria-label={t("pagination.refreshAria")}
           >
             <RefreshCw className="h-4 w-4" aria-hidden />
           </Button>
@@ -467,12 +460,24 @@ export default function AdminUsuariosContent() {
         <table className="w-full min-w-[720px] font-sans text-left text-sm">
           <thead className="border-b border-border bg-muted/50">
             <tr>
-              <th className="px-4 py-3 font-medium text-foreground">Correo</th>
-              <th className="px-4 py-3 font-medium text-foreground">Usuario</th>
-              <th className="px-4 py-3 font-medium text-foreground">Roles</th>
-              <th className="px-4 py-3 font-medium text-foreground">Email OK</th>
-              <th className="px-4 py-3 font-medium text-foreground">Bloqueo</th>
-              <th className="px-4 py-3 font-medium text-foreground">Acciones</th>
+              <th className="px-4 py-3 font-medium text-foreground">
+                {t("table.email")}
+              </th>
+              <th className="px-4 py-3 font-medium text-foreground">
+                {t("table.userName")}
+              </th>
+              <th className="px-4 py-3 font-medium text-foreground">
+                {t("table.roles")}
+              </th>
+              <th className="px-4 py-3 font-medium text-foreground">
+                {t("table.emailOk")}
+              </th>
+              <th className="px-4 py-3 font-medium text-foreground">
+                {t("table.lockout")}
+              </th>
+              <th className="px-4 py-3 font-medium text-foreground">
+                {t("table.actions")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -485,7 +490,7 @@ export default function AdminUsuariosContent() {
             ) : items.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                  No hay usuarios con los filtros actuales.
+                  {t("emptyStates.noResults")}
                 </td>
               </tr>
             ) : (
@@ -515,16 +520,16 @@ export default function AdminUsuariosContent() {
                   </td>
                   <td className="px-4 py-3 align-middle">
                     {row.emailConfirmed ? (
-                      <span className="text-emerald-600">Sí</span>
+                      <span className="text-emerald-600">{t("values.yes")}</span>
                     ) : (
-                      <span className="text-muted-foreground">No</span>
+                      <span className="text-muted-foreground">{t("values.no")}</span>
                     )}
                   </td>
                   <td className="px-4 py-3 align-middle">
                     {row.lockoutActive ? (
-                      <span className="text-emerald-600">Sí</span>
+                      <span className="text-emerald-600">{t("values.yes")}</span>
                     ) : (
-                      <span className="text-muted-foreground">No</span>
+                      <span className="text-muted-foreground">{t("values.no")}</span>
                     )}
                   </td>
                   <td className="px-4 py-3 align-middle">
@@ -534,7 +539,7 @@ export default function AdminUsuariosContent() {
                       className="h-8 px-3 py-0 text-xs"
                       onClick={() => void openDetail(row.id)}
                     >
-                      Gestionar
+                      {t("actions.manage")}
                     </Button>
                   </td>
                 </tr>
@@ -546,10 +551,10 @@ export default function AdminUsuariosContent() {
 
       <nav
         className="mt-6 flex flex-wrap items-center justify-between gap-3"
-        aria-label="Paginación"
+        aria-label={t("pagination.regionAria")}
       >
         <p className="font-sans text-sm text-muted-foreground">
-          Página {page} de {totalPages}
+          {t("pagination.summary", { page, total: totalPages })}
         </p>
         <div className="flex gap-2">
           <Button
@@ -560,7 +565,7 @@ export default function AdminUsuariosContent() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
             <ChevronLeft className="h-4 w-4" aria-hidden />
-            Anterior
+            {t("actions.prev")}
           </Button>
           <Button
             type="button"
@@ -569,7 +574,7 @@ export default function AdminUsuariosContent() {
             disabled={page >= totalPages || loading}
             onClick={() => setPage((p) => p + 1)}
           >
-            Siguiente
+            {t("actions.next")}
             <ChevronRight className="h-4 w-4" aria-hidden />
           </Button>
         </div>
@@ -578,7 +583,7 @@ export default function AdminUsuariosContent() {
       <Modal
         isOpen={createOpen}
         onClose={() => !createSubmitting && setCreateOpen(false)}
-        title="Nuevo usuario"
+        title={t("createModal.title")}
         size="lg"
         footer={
           <div className="flex justify-end gap-2">
@@ -588,7 +593,7 @@ export default function AdminUsuariosContent() {
               disabled={createSubmitting}
               onClick={() => setCreateOpen(false)}
             >
-              Cancelar
+              {t("createModal.cancel")}
             </Button>
             <Button
               type="submit"
@@ -597,7 +602,7 @@ export default function AdminUsuariosContent() {
               loading={createSubmitting}
             >
               <Plus className="h-4 w-4" aria-hidden />
-              Crear
+              {t("createModal.create")}
             </Button>
           </div>
         }
@@ -606,7 +611,7 @@ export default function AdminUsuariosContent() {
           <Input
             id="create-email"
             name="email"
-            label="Correo"
+            label={t("createModal.emailLabel")}
             type="email"
             required
             value={createEmail}
@@ -614,23 +619,23 @@ export default function AdminUsuariosContent() {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setCreateEmail(e.target.value)
             }
-            placeholder="usuario@empresa.com"
+            placeholder={t("createModal.emailPlaceholder")}
           />
           <Input
             id="create-password"
             name="password"
-            label="Contraseña (opcional)"
+            label={t("createModal.passwordLabel")}
             type="password"
             value={createPassword}
             error=""
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setCreatePassword(e.target.value)
             }
-            placeholder="Vacío = el usuario define clave por correo"
+            placeholder={t("createModal.passwordPlaceholder")}
           />
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-black">
-              Roles iniciales
+            <legend className="mb-2 text-sm font-medium text-foreground">
+              {t("createModal.rolesLegend")}
             </legend>
             <div className="flex flex-col gap-2">
               {ASSIGNABLE_ROLES.map((r) => (
@@ -665,12 +670,12 @@ export default function AdminUsuariosContent() {
       <Modal
         isOpen={detailId != null}
         onClose={() => !detailBusy && closeDetail()}
-        title="Detalle del usuario"
+        title={t("detail.title")}
         size="lg"
         bodyClassName="space-y-4"
         footer={
           <Button type="button" variant="outline" onClick={closeDetail}>
-            Cerrar
+            {t("detail.close")}
           </Button>
         }
       >
@@ -688,7 +693,7 @@ export default function AdminUsuariosContent() {
               <Input
                 id="detail-email"
                 name="email"
-                label="Correo"
+                label={t("detail.emailLabel")}
                 type="email"
                 value={detail.email}
                 error=""
@@ -699,7 +704,7 @@ export default function AdminUsuariosContent() {
               <Input
                 id="detail-userName"
                 name="userName"
-                label="Nombre de usuario"
+                label={t("detail.userNameLabel")}
                 value={detail.userName ?? ""}
                 error=""
                 placeholder=""
@@ -717,7 +722,7 @@ export default function AdminUsuariosContent() {
                   disabled={detailBusy}
                   onChange={(e) => void handleToggleLockout(e.target.checked)}
                 />
-                Cuenta bloqueada
+                {t("detail.lockedCheckbox")}
               </label>
               <div className="flex items-center gap-2.5 font-sans text-sm text-foreground">
                 <input
@@ -729,29 +734,29 @@ export default function AdminUsuariosContent() {
                   tabIndex={-1}
                   onChange={() => {}}
                 />
-                <span>Correo confirmado</span>
-                <span className="sr-only">Solo lectura</span>
+                <span>{t("detail.emailConfirmed")}</span>
+                <span className="sr-only">{t("detail.readOnly")}</span>
               </div>
             </div>
             <p className="font-sans text-xs text-muted-foreground">
-              Activalo para bloquear manualmente al usuario y desactivalo para quitar el bloqueo.
+              {t("detail.lockoutHint")}
             </p>
             <p className="font-sans text-xs text-muted-foreground">
-              Lockout activo:{" "}
+              {t("detail.lockoutActiveLabel")}{" "}
               {detail.lockoutActive ? (
-                <strong className="text-vo-magenta">Sí</strong>
+                <strong className="text-vo-magenta">{t("values.yes")}</strong>
               ) : (
-                <strong>No</strong>
+                <strong>{t("values.no")}</strong>
               )}
               {detail.lockoutEnd ? (
-                <> · Fin: {formatDateUtc(detail.lockoutEnd)}</>
+                <> · {t("detail.lockoutEndPrefix")} {formatDateUtc(detail.lockoutEnd)}</>
               ) : null}
             </p>
 
             <div>
               <h3 className="mb-3 flex items-center gap-2 font-sans text-sm font-semibold text-vo-purple">
                 <Shield className="h-4 w-4 text-vo-purple" aria-hidden />
-                Roles
+                {t("detail.rolesHeading")}
               </h3>
               <div className="mb-3 flex flex-wrap gap-2">
                 {detail.roles.map((r) => (
@@ -765,18 +770,20 @@ export default function AdminUsuariosContent() {
                       className="ml-0.5 rounded-md px-1 text-vo-navy/70 transition hover:bg-vo-pink/15 hover:text-vo-pink"
                       disabled={detailBusy}
                       onClick={() => setRemoveRoleTarget(r)}
-                      aria-label={`Quitar rol ${r}`}
+                      aria-label={t("detail.removeRoleAria", { role: r })}
                     >
                       ×
                     </button>
                   </span>
                 ))}
                 {detail.roles.length === 0 ? (
-                  <span className="text-muted-foreground">Sin roles</span>
+                  <span className="text-muted-foreground">
+                    {t("detail.noRoles")}
+                  </span>
                 ) : null}
               </div>
               <p className="mb-2 font-sans text-xs text-muted-foreground">
-                Añadir roles (solo los marcados):
+                {t("detail.addRolesPrompt")}
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 {ASSIGNABLE_ROLES.filter((r) => !detail.roles.includes(r)).map(
@@ -808,7 +815,7 @@ export default function AdminUsuariosContent() {
                 )}
                 {ASSIGNABLE_ROLES.every((r) => detail.roles.includes(r)) ? (
                   <span className="text-xs text-muted-foreground">
-                    Ya tiene todos los roles asignables.
+                    {t("detail.allRolesAssigned")}
                   </span>
                 ) : (
                   <Button
@@ -818,7 +825,7 @@ export default function AdminUsuariosContent() {
                     disabled={detailBusy}
                     onClick={() => void handleAddRoles()}
                   >
-                    Añadir roles
+                    {t("detail.addRoles")}
                   </Button>
                 )}
               </div>
@@ -833,7 +840,7 @@ export default function AdminUsuariosContent() {
                 onClick={() => void handleSendReset()}
               >
                 <Mail className="h-4 w-4" aria-hidden />
-                Enviar recuperación de contraseña
+                {t("detail.sendReset")}
               </Button>
             </div>
           </div>
@@ -843,7 +850,7 @@ export default function AdminUsuariosContent() {
       <Modal
         isOpen={removeRoleTarget != null}
         onClose={() => !detailBusy && setRemoveRoleTarget(null)}
-        title="Quitar rol"
+        title={t("removeRole.title")}
         size="sm"
         footer={
           <div className="flex flex-wrap justify-end gap-2">
@@ -853,7 +860,7 @@ export default function AdminUsuariosContent() {
               disabled={detailBusy}
               onClick={() => setRemoveRoleTarget(null)}
             >
-              Cancelar
+              {t("removeRole.cancel")}
             </Button>
             <Button
               type="button"
@@ -862,14 +869,13 @@ export default function AdminUsuariosContent() {
               disabled={detailBusy || removeRoleTarget == null}
               onClick={() => void confirmRemoveRole()}
             >
-              Quitar rol
+              {t("removeRole.confirm")}
             </Button>
           </div>
         }
       >
         <p className="font-sans text-sm text-foreground">
-          ¿Quitar el rol «{removeRoleTarget ?? ""}» de este usuario? La
-          operación se aplica de inmediato en el servidor.
+          {t("removeRole.message", { role: removeRoleTarget ?? "" })}
         </p>
       </Modal>
 

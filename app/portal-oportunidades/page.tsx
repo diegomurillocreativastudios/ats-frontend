@@ -1,19 +1,22 @@
-import { Suspense } from "react"
+import { getTranslations } from "next-intl/server"
 import { PublicVacanciesPage } from "@/components/public/PublicVacanciesPage"
+import { buildPublicOpportunitiesQueryString } from "@/lib/public-opportunities-query"
 
-export const metadata = {
-  title: { absolute: "ATS | Oportunidades" },
-  description: "Explorá vacantes activas por departamento y modalidad",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.publicOpportunities.list")
+  return {
+    title: { absolute: t("title") },
+    description: t("description"),
+  }
 }
 
-function OpportunitiesPageFallback() {
-  return <div className="min-h-screen bg-[#0b1224]" aria-hidden />
-}
+export default async function OpportunitiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const query = await searchParams
+  const initialQueryString = buildPublicOpportunitiesQueryString(query)
 
-export default function OpportunitiesPage() {
-  return (
-    <Suspense fallback={<OpportunitiesPageFallback />}>
-      <PublicVacanciesPage />
-    </Suspense>
-  )
+  return <PublicVacanciesPage initialQueryString={initialQueryString} />
 }

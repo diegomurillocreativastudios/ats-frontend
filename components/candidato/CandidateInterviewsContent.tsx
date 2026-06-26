@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 import type { LucideIcon } from "lucide-react"
 import {
   Calendar,
@@ -42,39 +43,44 @@ function partitionByUpcoming(list: Interview[]) {
   return { upcoming, history }
 }
 
-function vacancyLabel(row: Interview) {
+type InterviewsTranslator = ReturnType<typeof useTranslations<"CandidatePortal.interviews">>
+
+function vacancyLabel(row: Interview, t: InterviewsTranslator) {
   const title = row.jobTitle?.trim()
   if (title) return title
-  if (row.vacancyId) return `Vacante · ${row.vacancyId.slice(0, 8)}…`
-  return "Proceso de selección"
+  if (row.vacancyId) return t("vacancyShort", { id: row.vacancyId.slice(0, 8) })
+  return t("defaultVacancyLabel")
 }
 
-function formatDuration(minutes: number | null) {
+function formatDuration(minutes: number | null, t: InterviewsTranslator) {
   if (minutes == null || !Number.isFinite(minutes) || minutes <= 0)
     return null
-  if (minutes < 60) return `${minutes} min`
+  if (minutes < 60) return t("durationMinutes", { minutes })
   const h = Math.floor(minutes / 60)
   const m = minutes % 60
-  return m > 0 ? `${h} h ${m} min` : `${h} h`
+  return m > 0
+    ? t("durationHoursMinutes", { hours: h, minutes: m })
+    : t("durationHours", { hours: h })
 }
 
 function InterviewCandidateCard({ row }: { row: Interview }) {
+  const t = useTranslations("CandidatePortal.interviews")
   const typeLine =
     row.interviewTypeLabel?.trim() ||
     row.interviewType?.trim() ||
-    "Entrevista"
-  const durationLine = formatDuration(row.durationMinutes)
+    t("defaultType")
+  const durationLine = formatDuration(row.durationMinutes, t)
 
   return (
     <article
       className="rounded-xl border border-border bg-card p-4 shadow-sm md:p-5"
-      aria-label={`Entrevista: ${vacancyLabel(row)}`}
+      aria-label={t("cardAria", { label: vacancyLabel(row, t) })}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-sans text-base font-semibold text-foreground md:text-lg">
-              {vacancyLabel(row)}
+              {vacancyLabel(row, t)}
             </h2>
             <InterviewStatusBadge
               status={row.status}
@@ -102,7 +108,7 @@ function InterviewCandidateCard({ row }: { row: Interview }) {
               <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <UserRound className="h-4 w-4 shrink-0" aria-hidden />
                 <span>
-                  Contacto:{" "}
+                  {t("contactPrefix")}{" "}
                   <span className="font-medium text-foreground">
                     {row.interviewerName.trim()}
                   </span>
@@ -118,7 +124,7 @@ function InterviewCandidateCard({ row }: { row: Interview }) {
                   rel="noreferrer noopener"
                   className="font-medium text-vo-purple hover:underline"
                 >
-                  Unirse a Google Meet
+                  {t("joinGoogleMeet")}
                 </a>
               </p>
             ) : null}
@@ -128,7 +134,7 @@ function InterviewCandidateCard({ row }: { row: Interview }) {
       {row.descripcion?.trim() ? (
         <div className="mt-4 rounded-lg border border-border/80 bg-muted/40 px-3 py-2.5">
           <p className="font-sans text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Descripción
+            {t("descriptionLabel")}
           </p>
           <p className="mt-1 whitespace-pre-wrap font-sans text-sm text-foreground">
             {row.descripcion.trim()}
@@ -138,7 +144,7 @@ function InterviewCandidateCard({ row }: { row: Interview }) {
       {row.notes?.trim() ? (
         <div className="mt-4 rounded-lg border border-border/80 bg-muted/40 px-3 py-2.5">
           <p className="font-sans text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Indicaciones
+            {t("instructionsLabel")}
           </p>
           <p className="mt-1 whitespace-pre-wrap font-sans text-sm text-foreground">
             {row.notes.trim()}
@@ -172,6 +178,7 @@ function SectionTitle({
 }
 
 export default function CandidateInterviewsContent() {
+  const t = useTranslations("CandidatePortal.interviews")
   const { items, loading, error } = useCandidateSelfInterviews()
   const { upcoming, history } = useMemo(
     () => partitionByUpcoming(items),
@@ -199,28 +206,27 @@ export default function CandidateInterviewsContent() {
             aria-hidden
           />
           <p className="font-sans text-sm text-muted-foreground">
-            Cargando tus entrevistas…
+            {t("loading")}
           </p>
         </div>
       ) : !error && items.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center">
           <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
           <p className="max-w-md font-sans text-sm text-muted-foreground">
-            Todavía no hay entrevistas agendadas para tu perfil. Cuando RRHH
-            programe una cita, la verás aquí con fecha, modalidad e indicaciones.
+            {t("empty")}
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-10">
-          <section aria-label="Entrevistas próximas">
+          <section aria-label={t("upcomingAria")}>
             <SectionTitle
               icon={CalendarClock}
-              title="Próximas entrevistas"
-              description="Confirmá fecha y hora; si algo cambia, el equipo de selección te contactará."
+              title={t("upcomingTitle")}
+              description={t("upcomingDescription")}
             />
             {upcoming.length === 0 ? (
               <p className="rounded-lg border border-border bg-muted/30 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
-                No tenés entrevistas programadas en este momento.
+                {t("upcomingEmpty")}
               </p>
             ) : (
               <ul className="flex flex-col gap-4">
@@ -233,15 +239,15 @@ export default function CandidateInterviewsContent() {
             )}
           </section>
 
-          <section aria-label="Historial de entrevistas">
+          <section aria-label={t("historyAria")}>
             <SectionTitle
               icon={History}
-              title="Historial"
-              description="Entrevistas ya realizadas, canceladas o reprogramadas."
+              title={t("historyTitle")}
+              description={t("historyDescription")}
             />
             {history.length === 0 ? (
               <p className="rounded-lg border border-border bg-muted/30 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
-                Sin entrevistas anteriores registradas.
+                {t("historyEmpty")}
               </p>
             ) : (
               <ul className="flex flex-col gap-4">
@@ -263,12 +269,12 @@ export default function CandidateInterviewsContent() {
       <div className="hidden h-full lg:flex">
         <CandidateSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <CandidateTopbar variant="desktop" breadcrumbLabel="Entrevistas" />
+          <CandidateTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col gap-8 p-8">
               <PortalPageHeader
-                title="Tus entrevistas"
-                description="Vista pensada para vos: próximas citas, datos del contacto y el detalle que comparte la empresa, sin pasos de edición."
+                title={t("headerTitle")}
+                description={t("headerDescription")}
                 className="pb-0"
               />
               {mainSections}
@@ -278,12 +284,12 @@ export default function CandidateInterviewsContent() {
       </div>
 
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <CandidateTopbar variant="tablet" breadcrumbLabel="Entrevistas" />
+        <CandidateTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
             <PortalPageHeader
-              title="Tus entrevistas"
-              description="Próximas citas e historial de tu proceso."
+              title={t("headerTitle")}
+              description={t("headerDescriptionShort")}
               className="pb-0"
               descriptionClassName="text-sm leading-6 md:text-base"
             />

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import ProductBrand from "@/components/branding/ProductBrand"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 import {
   Briefcase,
   Building2,
@@ -17,58 +18,55 @@ import {
 } from "lucide-react"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { getInitials } from "@/lib/getInitials"
+import {
+  ADMIN_PORTAL_NAV_LINKS,
+  ADMIN_SETTINGS_NAV_LINK,
+} from "@/lib/admin-portal-nav"
 
-const navItems = [
-  { href: "/portal-admin/etapas", label: "Etapas", icon: ClipboardList },
-  { href: "/portal-admin/plantillas", label: "Plantillas", icon: FileText },
-  { href: "/portal-admin/entrevistas", label: "Entrevistas — Catálogos", icon: Calendar },
-  {
-    href: "/portal-admin/entrevistas/general",
-    label: "Entrevistas — Calendario",
-    icon: CalendarDays,
-  },
-  { href: "/portal-admin/usuarios", label: "Usuarios", icon: Users },
-  { href: "/portal-admin/empresas", label: "Empresas", icon: Landmark },
-  {
-    href: "/portal-admin/departamentos",
-    label: "Departamentos",
-    icon: Building2,
-  },
-  {
-    href: "/portal-admin/modalidades",
-    label: "Modalidades",
-    icon: Briefcase,
-  },
-  {
-    href: "/portal-admin/tipos-de-documento",
-    label: "Tipos de Documento",
-    icon: IdCard,
-  },
-]
+const NAV_ICONS = {
+  stages: ClipboardList,
+  templates: FileText,
+  interviewsCatalog: Calendar,
+  interviewsCalendar: CalendarDays,
+  users: Users,
+  companies: Landmark,
+  departments: Building2,
+  modalities: Briefcase,
+  documentTypes: IdCard,
+  settings: Cog,
+} as const
+
+const navItems = ADMIN_PORTAL_NAV_LINKS.map((item) => ({
+  ...item,
+  icon: NAV_ICONS[item.labelKey],
+}))
 
 const settingsNavItem = {
-  href: "/portal-admin/configuracion",
-  label: "Configuracion",
-  icon: Cog,
+  ...ADMIN_SETTINGS_NAV_LINK,
+  icon: NAV_ICONS[ADMIN_SETTINGS_NAV_LINK.labelKey],
 }
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const t = useTranslations("Navigation")
+  const tSidebar = useTranslations("Sidebar")
+  const tCommon = useTranslations("Common")
+  const tShell = useTranslations("AdminPortal.shell")
   const { user, loading } = useCurrentUser()
-  const displayName = user?.name || user?.email || "Usuario"
+  const displayName = user?.name || user?.email || tShell("userFallback")
   const initials = getInitials(user?.name, user?.email)
-  const roleLabel = user?.role || "Administrador"
+  const roleLabel = user?.role || tShell("roleFallback")
 
   return (
     <aside
-      className="flex w-[260px] shrink-0 flex-col justify-between border-r border-border bg-card py-6 pl-6 pr-0"
-      aria-label="Navegación Portal administración"
+      className="glass-sidebar flex w-[260px] shrink-0 flex-col justify-between py-6 pl-6 pr-0"
+      aria-label={tSidebar("ariaAdmin")}
     >
       <div className="flex flex-col gap-6">
         <Link
           href="/"
           className="flex min-w-0 items-center gap-3 px-5 transition-opacity hover:opacity-90 focus:outline-none"
-          aria-label="Ir al inicio - Visible"
+          aria-label={tSidebar("goHome")}
         >
           <ProductBrand
             layout="inline"
@@ -77,7 +75,7 @@ export default function AdminSidebar() {
             className="min-w-0"
           />
         </Link>
-        <nav className="flex flex-col gap-1 px-3" aria-label="Menú administración">
+        <nav className="flex flex-col gap-1 px-3" aria-label={tSidebar("menuAdmin")}>
           {[...navItems, settingsNavItem].map((item) => {
             const Icon = item.icon
             const isActive =
@@ -88,8 +86,8 @@ export default function AdminSidebar() {
             const baseClasses =
               "flex items-center gap-3 rounded-md px-4 py-3 font-sans text-sm transition-colors"
             const enabledClasses = isActive
-              ? "bg-[#F3E8FF] text-vo-purple font-medium"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              ? "bg-ats-arena/70 text-vo-purple font-medium"
+              : "text-gray-600 hover:bg-muted hover:text-foreground"
 
             return (
               <Link
@@ -99,23 +97,23 @@ export default function AdminSidebar() {
                 aria-current={isActive ? "page" : undefined}
               >
                 <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             )
           })}
         </nav>
       </div>
       <div className="mt-4 px-3 pb-3">
-        <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+        <div className="glass-panel flex items-center gap-3 rounded-xl p-3">
           <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-vo-navy font-sans text-xs font-semibold text-white"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-vo-purple to-vo-magenta font-sans text-xs font-semibold text-white shadow-sm"
             aria-hidden
           >
             {loading ? "..." : initials}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate font-sans text-sm font-medium text-foreground">
-              {loading ? "Cargando..." : displayName}
+              {loading ? tCommon("loading") : displayName}
             </p>
             <p className="font-sans text-xs text-muted-foreground">
               {roleLabel}

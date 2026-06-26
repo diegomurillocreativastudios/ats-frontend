@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useTranslations } from "next-intl"
 import type { AdminCalendarEvent } from "@/lib/api/admin-interviews-calendar"
 import {
   eventOverlapsLocalDay,
@@ -10,7 +11,7 @@ import {
 } from "@/lib/admin/interviews-calendar-layout"
 import { CalendarEventChip } from "@/components/portal-admin/interviews/calendar-event-chip"
 
-const WEEKDAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const
 const MAX_VISIBLE = 3
 
 export interface ViewMonthProps {
@@ -26,6 +27,7 @@ export function ViewMonth({
   onSelectEvent,
   onDayClick,
 }: ViewMonthProps) {
+  const t = useTranslations("AdminPortal.interviews.calendar.month")
   const [expandedDay, setExpandedDay] = useState<string | null>(null)
   const days = useMemo(() => getMonthGridDays(anchorDate), [anchorDate])
   const byDay = useMemo(() => groupEventsByLocalDateKey(events), [events])
@@ -34,12 +36,12 @@ export function ViewMonth({
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card">
       <div className="grid min-w-[640px] grid-cols-7 border-b border-border bg-muted/40">
-        {WEEKDAY_LABELS.map((label) => (
+        {WEEKDAY_KEYS.map((key) => (
           <div
-            key={label}
+            key={key}
             className="px-2 py-2 text-center font-sans text-xs font-semibold text-muted-foreground"
           >
-            {label}
+            {t(`weekdays.${key}`)}
           </div>
         ))}
       </div>
@@ -69,7 +71,7 @@ export function ViewMonth({
                     ? "bg-vo-purple text-white"
                     : "text-foreground hover:bg-muted"
                 }`}
-                aria-label={`Día ${day.getDate()}`}
+                aria-label={t("dayAria", { day: day.getDate() })}
               >
                 {day.getDate()}
               </button>
@@ -90,7 +92,7 @@ export function ViewMonth({
                     }
                     className="rounded px-1 py-0.5 text-left font-sans text-[10px] font-medium text-vo-purple hover:underline"
                   >
-                    +{overflow} más
+                    {t("overflowMore", { count: overflow })}
                   </button>
                 ) : null}
               </div>

@@ -1,3 +1,4 @@
+import { APP_NAME, APP_TAGLINE } from "@/lib/app-brand"
 import { escapeHtmlForTechnicalSheet } from "@/lib/technical-sheet/template-interpolate"
 import {
   TECHNICAL_SHEET_CONTENT_BOTTOM_PX,
@@ -30,39 +31,39 @@ export function buildTechnicalSheetPageHtml(options: TechnicalSheetPageShellOpti
   const address = escapeHtmlForTechnicalSheet(options.header.address)
   const englishLevel = escapeHtmlForTechnicalSheet(options.header.englishLevel)
 
-  return `<section class="technical-sheet-page" style="width:${TECHNICAL_SHEET_PAGE_WIDTH_PX}px;height:${TECHNICAL_SHEET_PAGE_HEIGHT_PX}px;max-width:100%;margin:0 auto 16px;position:relative;overflow:hidden;box-sizing:border-box;background:#ffffff;box-shadow:0 14px 40px rgba(0,0,0,0.16);page-break-after:always;">
+  return `<section class="technical-sheet-page" style="width:${TECHNICAL_SHEET_PAGE_WIDTH_PX}px;height:${TECHNICAL_SHEET_PAGE_HEIGHT_PX}px;max-width:100%;margin:0 auto 16px;position:relative;overflow:hidden;box-sizing:border-box;background:#FFFFFF;box-shadow:0 14px 40px rgba(0,0,0,0.16);page-break-after:always;">
   <div class="technical-sheet-page__decor" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;">
-    <div style="position:absolute;top:0;left:365px;width:76px;height:28px;background:#6F12FF;"></div>
-    <div style="position:absolute;top:0;right:0;width:86px;height:152px;background:#6F12FF;"></div>
-    <div style="position:absolute;top:0;right:0;width:54px;height:45px;background:#67DFFC;"></div>
-    <div style="position:absolute;top:139px;right:0;width:15px;height:47px;background:#67DFFC;"></div>
-    <div style="position:absolute;top:762px;right:0;width:28px;height:78px;background:#6F12FF;"></div>
-    <div style="position:absolute;bottom:58px;left:0;width:78px;height:126px;background:#6F12FF;"></div>
-    <div style="position:absolute;bottom:58px;left:0;width:50px;height:46px;background:#67DFFC;"></div>
+    <div style="position:absolute;top:0;left:365px;width:76px;height:28px;background:#6EB940;"></div>
+    <div style="position:absolute;top:0;right:0;width:86px;height:152px;background:#6EB940;"></div>
+    <div style="position:absolute;top:0;right:0;width:54px;height:45px;background:#438C39;"></div>
+    <div style="position:absolute;top:139px;right:0;width:15px;height:47px;background:#438C39;"></div>
+    <div style="position:absolute;top:762px;right:0;width:28px;height:78px;background:#6EB940;"></div>
+    <div style="position:absolute;bottom:58px;left:0;width:78px;height:126px;background:#6EB940;"></div>
+    <div style="position:absolute;bottom:58px;left:0;width:50px;height:46px;background:#438C39;"></div>
     <div style="position:absolute;bottom:76px;right:12px;display:grid;grid-template-columns:repeat(4,10px);gap:18px 16px;">
       ${Array(16)
         .fill(
-          '<span style="width:7px;height:7px;border-radius:50%;background:#6F12FF;display:block;"></span>'
+          '<span style="width:7px;height:7px;border-radius:50%;background:#6EB940;display:block;"></span>'
         )
         .join("")}
     </div>
-    <div style="position:absolute;bottom:0;left:0;right:0;height:58px;background:#2C1240;"></div>
+    <div style="position:absolute;bottom:0;left:0;right:0;height:58px;background:#256D35;"></div>
   </div>
-  <header class="technical-sheet-page__header" style="position:relative;z-index:5;display:grid;grid-template-columns:430px 1fr;column-gap:35px;align-items:start;padding:62px 72px 0 20px;box-sizing:border-box;background:#ffffff;">
+  <header class="technical-sheet-page__header" style="position:relative;z-index:5;display:grid;grid-template-columns:430px 1fr;column-gap:35px;align-items:start;padding:62px 72px 0 20px;box-sizing:border-box;background:#FFFFFF;">
     <div style="display:flex;align-items:center;gap:14px;">
       <img src="${logo}" alt="" width="105" style="width:105px;height:auto;display:block;object-fit:contain;" />
       <div style="line-height:1;">
-        <div style="font-size:40px;font-weight:800;letter-spacing:-2px;color:#4C4C4C;font-family:Arial,Helvetica,sans-serif;">visible</div>
-        <div style="font-size:12px;color:#7A7A7A;margin-top:2px;letter-spacing:-0.2px;font-family:Arial,Helvetica,sans-serif;">transforming businesses with talent</div>
+        <div style="font-size:34px;font-weight:800;letter-spacing:-1px;color:#454648;font-family:Arial,Helvetica,sans-serif;">${escapeHtmlForTechnicalSheet(APP_NAME)}</div>
+        <div style="font-size:12px;color:#7A7A7A;margin-top:2px;letter-spacing:-0.2px;font-family:Arial,Helvetica,sans-serif;">${escapeHtmlForTechnicalSheet(APP_TAGLINE)}</div>
       </div>
     </div>
-    <div style="font-size:12px;line-height:1.45;color:#111827;white-space:nowrap;padding-top:13px;">
+    <div style="font-size:12px;line-height:1.45;color:#256D35;white-space:nowrap;padding-top:13px;">
       <div><strong>Nombre:</strong> ${fullName}</div>
       <div><strong>Dirección:</strong> ${address}</div>
       <div><strong>Nivel de inglés:</strong> ${englishLevel}</div>
     </div>
   </header>
-  <div class="technical-sheet-content" style="position:absolute;z-index:5;box-sizing:border-box;top:${TECHNICAL_SHEET_CONTENT_TOP_PX}px;left:${TECHNICAL_SHEET_CONTENT_LEFT_PX}px;right:${TECHNICAL_SHEET_CONTENT_RIGHT_PX}px;bottom:${TECHNICAL_SHEET_CONTENT_BOTTOM_PX}px;font-size:13.5px;line-height:1.42;color:#111827;overflow:visible;">
+  <div class="technical-sheet-content" style="position:absolute;z-index:5;box-sizing:border-box;top:${TECHNICAL_SHEET_CONTENT_TOP_PX}px;left:${TECHNICAL_SHEET_CONTENT_LEFT_PX}px;right:${TECHNICAL_SHEET_CONTENT_RIGHT_PX}px;bottom:${TECHNICAL_SHEET_CONTENT_BOTTOM_PX}px;font-size:13.5px;line-height:1.42;color:#256D35;overflow:visible;">
     ${options.bodyHtml}
   </div>
 </section>`
@@ -105,7 +106,7 @@ article.ts-article table,
 @media print {
   .technical-sheet-doc {
     padding: 0;
-    background: #ffffff;
+    background: #FFFFFF;
   }
   .technical-sheet-page {
     margin: 0 !important;

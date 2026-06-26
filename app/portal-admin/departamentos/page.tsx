@@ -1,8 +1,12 @@
+import { getTranslations } from "next-intl/server"
 import { AdminVacancyCatalogContent } from "@/components/portal-admin/AdminVacancyCatalogContent"
 
-export const metadata = {
-  title: "Departamentos",
-  description: "Gestión del catálogo global de departamentos de vacantes",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.adminPortal.departments")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function PortalAdminDepartmentCatalogPage() {

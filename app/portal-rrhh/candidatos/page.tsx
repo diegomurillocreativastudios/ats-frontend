@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Search, Eye, Users, Plus, ClipboardList } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
@@ -33,7 +34,7 @@ const emptyToDash = (value) => (value && String(value).trim() ? String(value).tr
  * Maps API candidate document to table row shape.
  * New API shape: { id, document: { id, uploadedAt }, personalInfo: { name, email, phone, country }, profile: { headline, summary }, recruitment: { hired, evaluations } }
  */
-const mapCandidateFromApi = (item, index = 0) => {
+const mapCandidateFromApi = (item, index = 0, noNameLabel = "Sin nombre") => {
   // Handle both old and new format
   const id = String(
     item?.id ?? item?.profileId ?? item?.documentId ?? item?.uuid ?? index
@@ -45,7 +46,9 @@ const mapCandidateFromApi = (item, index = 0) => {
   const document = item?.document ?? {};
   const recruitment = item?.recruitment ?? {};
   
-  const name = emptyToDash(personalInfo?.name ?? item?.name) === "—" ? "Sin nombre" : (personalInfo?.name ?? item?.name ?? "Sin nombre").trim();
+  // Etapa 10: `noNameLabel` es un fallback frontend controlado (no es data del
+  // backend). Solo se aplica cuando el nombre real llega vacío.
+  const name = emptyToDash(personalInfo?.name ?? item?.name) === "—" ? noNameLabel : (personalInfo?.name ?? item?.name ?? noNameLabel).trim();
   const email = emptyToDash(personalInfo?.email ?? item?.email);
   const phone = formatPhoneSvDisplay(personalInfo?.phone ?? item?.phone);
   const country = resolveCountryDisplay(personalInfo?.country ?? item?.country, phone);
@@ -86,15 +89,16 @@ const mapCandidateFromApi = (item, index = 0) => {
 };
 
 const CandidateRow = ({ candidate, onFollowUpClick }) => {
+  const t = useTranslations("RecruiterPortal.candidates");
   const detailHref = `/portal-rrhh/candidatos/${candidate.id}`;
   const isHired = candidate.hired === true;
   const followUpDisabled = !isHired; // Invertido: solo contratados pueden tener seguimiento
-  const tooltipText = isHired ? "Contratado" : "No Contratado";
+  const tooltipText = isHired ? t("hired") : t("notHired");
 
   return (
     <tr
       className="border-b border-border last:border-b-0"
-      aria-label={`Candidato ${candidate.name}`}
+      aria-label={t("rowAriaLabel", { name: candidate.name })}
     >
       <td className="px-5 py-4 align-middle">
         <div className="flex items-center gap-3">
@@ -138,7 +142,7 @@ const CandidateRow = ({ candidate, onFollowUpClick }) => {
                   ? "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
                   : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               }`}
-              aria-label={followUpDisabled ? tooltipText : `Seguimiento de ${candidate.name}`}
+              aria-label={followUpDisabled ? tooltipText : t("followUpAriaLabel", { name: candidate.name })}
             >
               <ClipboardList className="h-4 w-4" aria-hidden />
             </button>
@@ -153,7 +157,7 @@ const CandidateRow = ({ candidate, onFollowUpClick }) => {
           <Link
             href={detailHref}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            aria-label={`Ver detalle de ${candidate.name}`}
+            aria-label={t("viewDetailAriaLabel", { name: candidate.name })}
           >
             <Eye className="h-4 w-4" aria-hidden />
           </Link>
@@ -164,6 +168,7 @@ const CandidateRow = ({ candidate, onFollowUpClick }) => {
 };
 
 export default function CandidatosPage() {
+  const t = useTranslations("RecruiterPortal.candidates");
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -203,7 +208,7 @@ export default function CandidatosPage() {
           : c
       )
     );
-    handleSnackbar("Seguimiento guardado exitosamente", "success");
+    handleSnackbar(t("followUpSaved"), "success");
   };
 
   const fetchCandidates = useCallback(async () => {
@@ -214,16 +219,17 @@ export default function CandidatosPage() {
       const list = Array.isArray(data)
         ? data
         : data?.candidates ?? data?.items ?? data?.data ?? [];
-      setCandidates(list.map((item, i) => mapCandidateFromApi(item, i)));
+      const noNameLabel = t("noName");
+      setCandidates(list.map((item, i) => mapCandidateFromApi(item, i, noNameLabel)));
     } catch (err) {
       setFetchError(
-        err?.message ?? err?.detail ?? "No se pudieron cargar los candidatos."
+        err?.message ?? err?.detail ?? t("loadError")
       );
       setCandidates([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchCandidates();
@@ -245,7 +251,7 @@ export default function CandidatosPage() {
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
   const mainContent = (
-    <section className="flex flex-col gap-6" aria-label="Lista de candidatos">
+    <section className="flex flex-col gap-6" aria-label={t("regionLabel")}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="relative w-full max-w-[320px]">
           <Search
@@ -256,9 +262,9 @@ export default function CandidatosPage() {
             type="search"
             value={searchQuery}
             onChange={handleSearchChange}
-            placeholder="Buscar candidatos..."
+            placeholder={t("searchPlaceholder")}
             className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            aria-label="Buscar candidatos"
+            aria-label={t("searchAriaLabel")}
           />
         </div>
         <button
@@ -267,7 +273,7 @@ export default function CandidatosPage() {
           className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
         >
           <Plus className="h-4 w-4" aria-hidden />
-          <span>Agregar candidato</span>
+          <span>{t("addCandidate")}</span>
         </button>
       </div>
       <div className="overflow-hidden rounded-lg border border-border bg-card">
@@ -278,7 +284,7 @@ export default function CandidatosPage() {
               aria-hidden
             />
             <p className="font-sans text-sm text-muted-foreground">
-              Cargando candidatos...
+              {t("loading")}
             </p>
           </div>
         ) : fetchError ? (
@@ -291,14 +297,14 @@ export default function CandidatosPage() {
               onClick={fetchCandidates}
               className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
             >
-              Reintentar
+              {t("retry")}
             </button>
           </div>
         ) : filteredCandidates.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
             <p className="font-sans text-sm text-muted-foreground">
-              No hay candidatos
+              {t("empty")}
             </p>
           </div>
         ) : (
@@ -310,37 +316,37 @@ export default function CandidatosPage() {
                     className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
-                    Candidato
+                    {t("table.candidate")}
                   </th>
                   <th
                     className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
-                    Teléfono
+                    {t("table.phone")}
                   </th>
                   <th
                     className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
-                    País
+                    {t("table.country")}
                   </th>
                   <th
                     className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
-                    Título
+                    {t("table.headline")}
                   </th>
                   <th
                     className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
-                    Fecha subida
+                    {t("table.uploadedAt")}
                   </th>
                   <th
                     className="px-5 py-4 text-left font-sans text-[13px] font-semibold text-foreground"
                     scope="col"
                   >
-                    Acciones
+                    {t("table.actions")}
                   </th>
                 </tr>
               </thead>
@@ -366,16 +372,16 @@ export default function CandidatosPage() {
       <div className="hidden h-full lg:flex">
         <RRHHSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar variant="desktop" breadcrumbLabel="Candidatos" />
+          <RRHHTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
             <div className="min-w-0 flex flex-col">
-              <section className="px-8 py-6" aria-label="Encabezado de candidatos">
+              <section className="px-8 py-6" aria-label={t("headerRegionLabel")}>
                 <PortalPageHeader
-                  title="Candidatos"
-                  description="Revisa y gestiona todos los candidatos"
+                  title={t("title")}
+                  description={t("description")}
                 />
               </section>
-              <section className="p-8" aria-label="Contenido de candidatos">
+              <section className="p-8" aria-label={t("contentRegionLabel")}>
                 {mainContent}
               </section>
             </div>
@@ -385,12 +391,12 @@ export default function CandidatosPage() {
 
       {/* Tablet & Mobile — fixed height so only main scrolls */}
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar variant="tablet" breadcrumbLabel="Candidatos" />
+        <RRHHTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
             <PortalPageHeader
-              title="Candidatos"
-              description="Revisa y gestiona todos los candidatos"
+              title={t("title")}
+              description={t("description")}
             />
             {mainContent}
           </div>

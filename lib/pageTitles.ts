@@ -12,15 +12,17 @@ export const segmentToTitle = (segment) => {
     .join(" ")
 }
 
-const BASE_TITLE = "ATS"
+import { APP_NAME } from "@/lib/app-brand"
+
+const BASE_TITLE = APP_NAME
 
 const PORTAL_RRHH = "Portal RRHH"
 const PORTAL_CANDIDATO = "Portal Candidato"
 const PORTAL_ADMIN = "Portal Admin"
 const CUENTA = "Cuenta"
-const OPORTUNIDADES = "Oportunidades"
+const OPORTUNIDADES = "Portal Oportunidades"
 
-/** Une partes con " | " (siempre incluye el prefijo ATS). */
+/** Une partes con " | " (siempre incluye el prefijo ApplicanTree). */
 function joinDocumentTitle(...parts) {
   return parts.filter((p) => p != null && String(p).trim() !== "").join(" | ")
 }
@@ -157,7 +159,7 @@ export function getOpportunityDetailStaticTitle() {
   return joinDocumentTitle(BASE_TITLE, OPORTUNIDADES, "Vacante")
 }
 
-/** Sufijo (puede incluir ` | `) que se antepone a `ATS | …` para rutas exactas. */
+/** Sufijo (puede incluir ` | `) que se antepone a `ApplicanTree | …` para rutas exactas. */
 const EXACT_PATH_SUFFIX = {
   "/": joinDocumentTitle(PORTAL_CANDIDATO, "Inicio"),
   "/mi-perfil": joinDocumentTitle(CUENTA, "Mi perfil"),
@@ -245,8 +247,8 @@ function titlePortalAdmin(normalizedPath) {
 }
 
 /**
- * Título del documento según la ruta: `ATS | [portal o Cuenta] | [pantalla …]`;
- * rutas bajo `/auth/` usan `ATS | <pantalla>` sin segmento «Cuenta».
+ * Título del documento según la ruta: `ApplicanTree | [portal o Cuenta] | [pantalla …]`;
+ * rutas bajo `/auth/` usan `ApplicanTree | <pantalla>` sin segmento «Cuenta».
  * @param {string} pathname - Ruta actual (ej: "/portal-rrhh/entrevistas")
  * @returns {string}
  */

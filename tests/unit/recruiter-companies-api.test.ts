@@ -19,7 +19,7 @@ vi.mock("@/lib/api", () => ({
 
 describe("resolveVacancyCompanyId", () => {
   const companies: RecruiterCompanyOption[] = [
-    { id: "00000000-0000-0000-0000-000000000001", name: "Visible Outsource" },
+    { id: "00000000-0000-0000-0000-000000000001", name: "Applican Tree" },
     { id: "company-b-id", name: "Acme Corp" },
   ]
 
@@ -53,7 +53,7 @@ describe("resolveVacancyCompanyId", () => {
       resolveVacancyCompanyId(
         {
           companyId: "00000000-0000-0000-0000-000000000001",
-          company: "Visible Outsource",
+          company: "Applican Tree",
         },
         companies,
         "vac-99"

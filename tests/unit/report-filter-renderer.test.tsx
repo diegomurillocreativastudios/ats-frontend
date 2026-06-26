@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, screen } from "@testing-library/react"
+import { renderWithIntl as render } from "@/tests/helpers/render-with-intl"
 import { ReportFilterRenderer } from "@/components/rrhh/reportes/report-filter-renderer"
 
 vi.mock("@/lib/api/recruiter-reports", () => ({

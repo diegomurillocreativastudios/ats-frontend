@@ -1,4 +1,7 @@
+"use client"
+
 import type { ReactNode } from "react"
+import { useTranslations } from "next-intl"
 
 interface ReportesFiltersPlaceholderProps {
   children: ReactNode
@@ -20,14 +23,15 @@ interface ReportesFiltersPlaceholderProps {
 export default function ReportesFiltersPlaceholder({
   children,
   disabled = false,
-  legendLabel = "Filtros",
+  legendLabel,
   surfaceClassName = "rounded-xl border border-border/80 bg-muted/10 p-4 shadow-sm md:p-5",
   hintText,
   controlsClassName = "mt-4 flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end",
 }: ReportesFiltersPlaceholderProps) {
+  const t = useTranslations("RecruiterPortal.reports")
   const helpId = "reportes-filtros-ayuda"
-  const defaultHint =
-    "Los valores se envían como query params al API de reportes."
+  const resolvedLegend = legendLabel ?? t("filters.legend")
+  const defaultHint = t("filters.hint")
 
   return (
     <fieldset
@@ -37,7 +41,7 @@ export default function ReportesFiltersPlaceholder({
       aria-describedby={helpId}
     >
       <legend className="px-1 font-sans text-sm font-semibold text-foreground">
-        {legendLabel}
+        {resolvedLegend}
       </legend>
       <p id={helpId} className="mt-1.5 font-sans text-xs leading-relaxed text-muted-foreground">
         {hintText ?? defaultHint}

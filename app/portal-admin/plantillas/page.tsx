@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   Plus,
   Search,
@@ -13,6 +14,7 @@ import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 const mapTemplateFromApi = (item, index = 0) => {
   const id = item?.id ?? index;
@@ -42,11 +44,18 @@ const mapTemplateFromApi = (item, index = 0) => {
   };
 };
 
-const TemplateCard = ({ template, onEdit, onDelete }) => {
+const TemplateCard = ({ template, onEdit, onDelete, t }) => {
+  const typeLabel =
+    template.type === "Notification"
+      ? t("types.notification")
+      : template.type === "Document"
+        ? t("types.document")
+        : t("types.questionnaire");
+
   return (
     <article
       className="flex w-full flex-col gap-4 rounded-xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
-      aria-label={`Plantilla: ${template.name}`}
+      aria-label={t("card.templateAria", { name: template.name })}
     >
       <div className="flex flex-1 items-center gap-4">
         <div
@@ -64,17 +73,16 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
                 template.type === 'Document' ? 'bg-emerald-100 text-emerald-700' :
                   'bg-amber-100 text-amber-700'
               }`}>
-              {template.type === 'Notification' ? 'Notificación' :
-                template.type === 'Document' ? 'Documento' : 'Cuestionario'}
+              {typeLabel}
             </span>
             {template.type === 'Document' && template.isTechnicalSheet && (
               <span className="rounded-full bg-slate-200 px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider text-slate-700">
-                Ficha técnica
+                {t("types.technicalSheet")}
               </span>
             )}
             {template.type === 'Document' && template.isReport && (
               <span className="rounded-full bg-violet-100 px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider text-violet-800">
-                Reporte
+                {t("types.report")}
               </span>
             )}
           </div>
@@ -82,7 +90,7 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
             <>
               {template.subject && (
                 <p className="font-sans text-sm text-muted-foreground line-clamp-1">
-                  <span className="font-semibold">Asunto:</span> {template.subject}
+                  <span className="font-semibold">{t("card.subject")}</span> {template.subject}
                 </p>
               )}
               {template.body && (
@@ -94,12 +102,12 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
           )}
           {template.type === 'Document' && (
             <p className="font-sans text-sm text-muted-foreground line-clamp-2">
-              <span className="font-semibold">Formato:</span> {template.outputFormat}
+              <span className="font-semibold">{t("card.format")}</span> {template.outputFormat}
             </p>
           )}
           {template.type === 'Questionnaire' && (
             <p className="font-sans text-sm text-muted-foreground line-clamp-2">
-              {template.description} {template.isMandatory && <span className="text-vo-pink">(Obligatorio)</span>}
+              {template.description} {template.isMandatory && <span className="text-vo-pink">{t("card.required")}</span>}
             </p>
           )}
         </div>
@@ -109,19 +117,19 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
           type="button"
           onClick={() => onEdit(template)}
           className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-          aria-label={`Editar plantilla ${template.name}`}
+          aria-label={t("actions.editAria", { name: template.name })}
         >
           <Pencil className="h-4 w-4" aria-hidden />
-          Editar
+          {t("actions.edit")}
         </button>
         <button
           type="button"
           onClick={() => onDelete(template)}
           className="inline-flex items-center justify-center gap-2 rounded-md border border-destructive/30 bg-background px-4 py-2.5 font-sans text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2"
-          aria-label={`Eliminar plantilla ${template.name}`}
+          aria-label={t("actions.deleteAria", { name: template.name })}
         >
           <Trash2 className="h-4 w-4" aria-hidden />
-          Eliminar
+          {t("actions.delete")}
         </button>
       </div>
     </article>
@@ -129,6 +137,8 @@ const TemplateCard = ({ template, onEdit, onDelete }) => {
 };
 
 export default function PlantillasPage() {
+  const t = useTranslations("AdminPortal.templates");
+  const tCommon = useTranslations("Common");
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -157,7 +167,7 @@ export default function PlantillasPage() {
       setTemplates(list.map((item, i) => mapTemplateFromApi(item, i)));
     } catch (err) {
       setFetchError(
-        err?.message || err?.detail || "No se pudieron cargar las plantillas."
+        getApiErrorMessage(err) || t("errors.loadFailed")
       );
       setTemplates([]);
     } finally {
@@ -198,11 +208,11 @@ export default function PlantillasPage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Plantilla eliminada correctamente.",
+        message: t("toasts.deleted"),
       });
     } catch (err) {
       const msg =
-        err?.message || err?.detail || "No se pudo eliminar la plantilla. Intenta de nuevo.";
+        getApiErrorMessage(err) || t("errors.deleteFailed");
       setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
       setDeleteLoading(false);
@@ -244,24 +254,24 @@ export default function PlantillasPage() {
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background font-sans text-foreground">
       <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
         <div className="min-w-0 flex flex-col">
-              <section className="px-8 py-6" aria-label="Encabezado de plantillas">
+              <section className="px-8 py-6" aria-label={t("page.headerAria")}>
                 <PortalPageHeader
-                  title="Plantillas"
-                  description="Gestiona las plantillas de notificaciones"
+                  title={t("page.title")}
+                  description={t("page.description")}
                   actions={
                     <button
                       type="button"
                       onClick={handleNewTemplate}
                       className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                      aria-label="Crear nueva plantilla"
+                      aria-label={t("page.newTemplateAria")}
                     >
                       <Plus className="h-4 w-4" aria-hidden />
-                      Nueva Plantilla
+                      {t("page.newTemplate")}
                     </button>
                   }
                 />
               </section>
-              <section className="flex flex-col gap-6 p-8" aria-label="Lista de plantillas">
+              <section className="flex flex-col gap-6 p-8" aria-label={t("page.listAria")}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
                   <div className="relative w-full max-w-[320px]">
                     <Search
@@ -272,9 +282,9 @@ export default function PlantillasPage() {
                       type="search"
                       value={searchQuery}
                       onChange={handleSearchChange}
-                      placeholder="Buscar plantillas..."
+                      placeholder={t("page.searchPlaceholder")}
                       className="h-10 w-full rounded-lg border-0 bg-muted py-2.5 pl-10 pr-3.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                      aria-label="Buscar plantillas"
+                      aria-label={t("page.searchAria")}
                     />
                   </div>
                 </div>
@@ -283,7 +293,7 @@ export default function PlantillasPage() {
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
                       <div className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent" aria-hidden />
                       <p className="font-sans text-sm text-muted-foreground">
-                        Cargando plantillas...
+                        {t("loadingStates.loading")}
                       </p>
                     </div>
                   ) : fetchError ? (
@@ -296,14 +306,14 @@ export default function PlantillasPage() {
                         onClick={fetchTemplates}
                         className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                       >
-                        Reintentar
+                        {t("actions.retry")}
                       </button>
                     </div>
                   ) : filteredTemplates.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
                       <FileText className="h-12 w-12 text-muted-foreground" aria-hidden />
                       <p className="font-sans text-sm text-muted-foreground">
-                        No se encontraron plantillas
+                        {t("emptyStates.notFound")}
                       </p>
                       <button
                         type="button"
@@ -311,7 +321,7 @@ export default function PlantillasPage() {
                         className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                       >
                         <Plus className="h-4 w-4" aria-hidden />
-                        Crear plantilla
+                        {t("actions.create")}
                       </button>
                     </div>
                   ) : (
@@ -321,6 +331,7 @@ export default function PlantillasPage() {
                         template={template}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        t={t}
                       />
                     ))
                   )}
@@ -345,10 +356,14 @@ export default function PlantillasPage() {
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
         onConfirm={handleConfirmDelete}
-        title="Eliminar plantilla"
-        message={`¿Estás seguro de eliminar la plantilla "${templateToDelete?.name}"?`}
-        confirmText="Aceptar"
-        cancelText="Cancelar"
+        title={t("deleteConfirm.title")}
+        message={
+          templateToDelete
+            ? t("deleteConfirm.message", { name: templateToDelete.name })
+            : ""
+        }
+        confirmText={t("actions.accept")}
+        cancelText={tCommon("cancel")}
         loading={deleteLoading}
       />
 

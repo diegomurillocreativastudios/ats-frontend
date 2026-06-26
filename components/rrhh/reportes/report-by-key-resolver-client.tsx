@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { AlertCircle, Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import { ReportDataViewClient } from "@/components/rrhh/reportes/report-data-view-client"
 import { ReportTemplateDetailClient } from "@/components/rrhh/reportes/report-template-detail-client"
@@ -11,7 +12,7 @@ import {
   fetchReportsCatalog,
   type ReportCatalogItem,
 } from "@/lib/api/recruiter-reports-catalog"
-import { reportTemplateMessages as m } from "@/lib/messages/report-template"
+import { getReportTemplateMessages } from "@/lib/messages/report-template"
 
 interface ReportByKeyResolverClientProps {
   reportKey: string
@@ -56,9 +57,11 @@ function ResolverShell({
 function ResolverErrorCard({
   title,
   description,
+  backLabel,
 }: {
   title: string
   description: string
+  backLabel: string
 }) {
   return (
     <div
@@ -76,7 +79,7 @@ function ResolverErrorCard({
         href="/portal-rrhh/reportes"
         className="inline-flex w-fit items-center justify-center rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
       >
-        Volver a reportes
+        {backLabel}
       </Link>
     </div>
   )
@@ -85,13 +88,16 @@ function ResolverErrorCard({
 export function ReportByKeyResolverClient({
   reportKey,
 }: ReportByKeyResolverClientProps) {
+  const tReport = useTranslations("RecruiterPortal.reports.templateDetail")
+  const tResolver = useTranslations("RecruiterPortal.reports.resolver")
+  const m = useMemo(() => getReportTemplateMessages(tReport), [tReport])
   const [resolution, setResolution] = useState<ResolveResult>({ status: "loading" })
 
   const resolve = useCallback(
     async (signal: AbortSignal) => {
       const segment = reportKey.trim()
       if (!segment) {
-        setResolution({ status: "not-found", message: m.resolverNotFound })
+        setResolution({ status: "not-found", message: tResolver("notFoundDetail") })
         return
       }
 
@@ -112,7 +118,7 @@ export function ReportByKeyResolverClient({
           return
         }
 
-        setResolution({ status: "not-found", message: m.resolverNotFound })
+        setResolution({ status: "not-found", message: tResolver("notFoundDetail") })
       } catch (err: unknown) {
         if (signal.aborted) return
         setResolution({
@@ -121,7 +127,7 @@ export function ReportByKeyResolverClient({
         })
       }
     },
-    [reportKey]
+    [m.errorGeneric, reportKey, tResolver]
   )
 
   useEffect(() => {
@@ -132,14 +138,14 @@ export function ReportByKeyResolverClient({
 
   if (resolution.status === "loading") {
     return (
-      <ResolverShell breadcrumbLabel="Reporte">
+      <ResolverShell breadcrumbLabel={tReport("breadcrumbReport")}>
         <div
           className="flex items-center gap-2 font-sans text-sm text-muted-foreground"
           role="status"
           aria-live="polite"
         >
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-          {m.resolverLoading}
+          {tResolver("loading")}
         </div>
       </ResolverShell>
     )
@@ -155,20 +161,22 @@ export function ReportByKeyResolverClient({
 
   if (resolution.status === "not-found") {
     return (
-      <ResolverShell breadcrumbLabel="Reporte">
+      <ResolverShell breadcrumbLabel={tReport("breadcrumbReport")}>
         <ResolverErrorCard
-          title="Reporte no encontrado"
+          title={tResolver("notFound")}
           description={resolution.message}
+          backLabel={tResolver("backToReports")}
         />
       </ResolverShell>
     )
   }
 
   return (
-    <ResolverShell breadcrumbLabel="Reporte">
+    <ResolverShell breadcrumbLabel={tReport("breadcrumbReport")}>
       <ResolverErrorCard
-        title="No se pudo abrir el reporte"
+        title={tResolver("openFailed")}
         description={resolution.message}
+        backLabel={tResolver("backToReports")}
       />
     </ResolverShell>
   )

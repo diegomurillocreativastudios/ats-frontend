@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { AlertCircle, RefreshCw } from "lucide-react"
 import { ReportHubCatalogCard } from "@/components/rrhh/reportes/report-hub-catalog-card"
 import { getApiErrorMessage } from "@/lib/api-error"
@@ -12,12 +13,6 @@ import {
   buildReportKeyHubHref,
   getReportCatalogIcon,
 } from "@/lib/reportes/report-links"
-
-const CATALOG_DESCRIPTION_FALLBACK =
-  "Reporte disponible. Aplicá filtros y descargá el resultado."
-
-const CATALOG_UNLINKED_HINT =
-  "Vinculá una plantilla de tipo Documento marcada como reporte desde administración."
 
 function ReportHubCardSkeleton() {
   return (
@@ -38,6 +33,7 @@ function ReportHubCardSkeleton() {
 }
 
 export function ReportsHubClient() {
+  const t = useTranslations("RecruiterPortal.reports")
   const [catalog, setCatalog] = useState<ReportCatalogItem[]>([])
   const [catalogLoading, setCatalogLoading] = useState(true)
   const [catalogError, setCatalogError] = useState<string | null>(null)
@@ -57,20 +53,17 @@ export function ReportsHubClient() {
           ? Number((err as { status?: number }).status)
           : 0
       if (status === 401 || status === 403) {
-        setCatalogError(
-          "No tenés permisos para ver el catálogo de reportes."
-        )
+        setCatalogError(t("errors.catalogForbidden"))
       } else {
         setCatalogError(
-          getApiErrorMessage(err) ||
-            "No se pudo cargar el catálogo de reportes."
+          getApiErrorMessage(err) || t("errors.catalogLoadFailed")
         )
       }
       setCatalog([])
     } finally {
       if (!signal.aborted) setCatalogLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -90,17 +83,16 @@ export function ReportsHubClient() {
           id="catalog-reports-heading"
           className="font-sans text-sm font-semibold text-foreground"
         >
-          Reportes
+          {t("catalog.heading")}
         </h2>
         <p className="mt-1 font-sans text-sm text-muted-foreground">
-          Reportes oficiales del sistema. Abrí cualquiera para aplicar filtros
-          y descargar el PDF cuando tenga una plantilla vinculada.
+          {t("catalog.description")}
         </p>
       </section>
 
       <section
         className="grid gap-4 px-4 pb-8 md:grid-cols-2 md:px-8"
-        aria-label="Reportes disponibles para descargar"
+        aria-label={t("catalog.regionLabel")}
         aria-busy={catalogLoading}
       >
         {catalogLoading ? (
@@ -122,7 +114,7 @@ export function ReportsHubClient() {
               />
               <div className="space-y-1">
                 <p className="font-sans text-sm font-medium text-foreground">
-                  No se pudo cargar el catálogo de reportes
+                  {t("errors.catalogLoadTitle")}
                 </p>
                 <p className="font-sans text-sm text-muted-foreground">
                   {catalogError}
@@ -133,10 +125,10 @@ export function ReportsHubClient() {
               type="button"
               onClick={handleRetryCatalog}
               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              aria-label="Reintentar reportes"
+              aria-label={t("actions.retry")}
             >
               <RefreshCw className="h-4 w-4" aria-hidden />
-              Reintentar reportes
+              {t("actions.retry")}
             </button>
           </div>
         ) : null}
@@ -146,7 +138,7 @@ export function ReportsHubClient() {
             className="col-span-full font-sans text-sm text-muted-foreground md:col-span-2"
             role="status"
           >
-            El catálogo de reportes aún no devuelve resultados.
+            {t("emptyStates.noCatalog")}
           </p>
         ) : null}
 
@@ -154,13 +146,13 @@ export function ReportsHubClient() {
           ? catalog.map((item) => {
               const Icon = getReportCatalogIcon(item.reportKey)
               const description =
-                item.description?.trim() || CATALOG_DESCRIPTION_FALLBACK
+                item.description?.trim() || t("catalog.descriptionFallback")
               const linkedTemplateId = item.linkedTemplate?.templateId?.trim()
               const href = linkedTemplateId
                 ? buildReportKeyHubHref(item.reportKey)
                 : undefined
               const badge = item.linkedTemplate?.name
-                ? `Plantilla: ${item.linkedTemplate.name}`
+                ? t("cards.templateBadge", { name: item.linkedTemplate.name })
                 : undefined
               return (
                 <ReportHubCatalogCard
@@ -170,7 +162,7 @@ export function ReportsHubClient() {
                   icon={Icon}
                   href={href}
                   badge={badge}
-                  unlinkedHint={CATALOG_UNLINKED_HINT}
+                  unlinkedHint={t("catalog.unlinkedHint")}
                 />
               )
             })

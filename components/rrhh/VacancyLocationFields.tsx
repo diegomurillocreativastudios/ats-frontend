@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useTranslations } from "next-intl"
 import {
   getCountries,
   getStatesOfCountry,
@@ -42,6 +43,9 @@ export interface VacancyLocationFieldsProps {
   countryLabel?: string
   stateLabel?: string
   helperText?: string
+  unspecifiedLabel?: string
+  loadCountriesErrorLabel?: string
+  loadStatesErrorLabel?: string
 }
 
 export function VacancyLocationFields({
@@ -51,17 +55,28 @@ export function VacancyLocationFields({
   disabled = false,
   countrySelectId = "vacancy-location-country",
   stateSelectId = "vacancy-location-state",
-  countryLabel = "País",
-  stateLabel = "Estado / provincia",
-  helperText = "Opcional. Elige país y estado o provincia donde aplica la vacante.",
+  countryLabel,
+  stateLabel,
+  helperText,
+  unspecifiedLabel,
+  loadCountriesErrorLabel,
+  loadStatesErrorLabel,
 }: VacancyLocationFieldsProps) {
+  const tLocation = useTranslations("RecruiterPortal.vacancies.location")
+  const resolvedCountryLabel = countryLabel ?? tLocation("countryLabel")
+  const resolvedStateLabel = stateLabel ?? tLocation("stateLabel")
+  const resolvedHelperText = helperText ?? tLocation("helperText")
+  const resolvedUnspecifiedLabel = unspecifiedLabel ?? tLocation("unspecified")
+  const resolvedLoadCountriesError =
+    loadCountriesErrorLabel ?? tLocation("loadCountriesError")
+  const resolvedLoadStatesError = loadStatesErrorLabel ?? tLocation("loadStatesError")
   const [useGeoNamesApi, setUseGeoNamesApi] = useState(false)
   const [countryOptions, setCountryOptions] = useState<CountryOption[]>([])
   const [stateOptions, setStateOptions] = useState<StateOption[]>([])
   const [legacyStates, setLegacyStates] = useState<IState[]>([])
   const [loadingCountries, setLoadingCountries] = useState(true)
   const [loadingStates, setLoadingStates] = useState(false)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<"countries" | "states" | null>(null)
 
   const normalizedCountryCode = useMemo(() => normalizeCountryCode(countryCode) ?? "", [countryCode])
   const normalizedStateCode = useMemo(() => normalizeStateCode(stateCode) ?? "", [stateCode])
@@ -110,7 +125,7 @@ export function VacancyLocationFields({
         } catch {
           if (cancelled) return
           setCountryOptions([])
-          setLoadError("No se pudieron cargar los países.")
+          setLoadError("countries")
         }
       } finally {
         if (!cancelled) setLoadingCountries(false)
@@ -165,7 +180,7 @@ export function VacancyLocationFields({
         if (cancelled) return
         setStateOptions([])
         setLegacyStates([])
-        setLoadError("No se pudieron cargar los estados o provincias.")
+        setLoadError("states")
       } finally {
         if (!cancelled) setLoadingStates(false)
       }
@@ -229,22 +244,29 @@ export function VacancyLocationFields({
     return stateOptions
   }, [stateOptions, legacyStates, normalizedCountryCode, normalizedStateCode])
 
+  const loadErrorLabel =
+    loadError === "countries"
+      ? resolvedLoadCountriesError
+      : loadError === "states"
+        ? resolvedLoadStatesError
+        : null
+
   return (
     <div className="flex flex-col gap-2">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor={countrySelectId} className="font-sans text-sm font-medium text-foreground">
-            {countryLabel}
+            {resolvedCountryLabel}
           </label>
           <select
             id={countrySelectId}
             value={normalizedCountryCode}
             onChange={(event) => handleCountryChange(event.target.value)}
             className={selectClassName}
-            aria-label={countryLabel}
+            aria-label={resolvedCountryLabel}
             disabled={disabled || loadingCountries}
           >
-            <option value="">Sin especificar</option>
+            <option value="">{resolvedUnspecifiedLabel}</option>
             {countryOptionsWithSelection.map((country) => (
               <option key={country.iso2} value={country.iso2}>
                 {country.label}
@@ -255,17 +277,17 @@ export function VacancyLocationFields({
 
         <div className="flex flex-col gap-2">
           <label htmlFor={stateSelectId} className="font-sans text-sm font-medium text-foreground">
-            {stateLabel}
+            {resolvedStateLabel}
           </label>
           <select
             id={stateSelectId}
             value={normalizedStateCode}
             onChange={(event) => handleStateChange(event.target.value)}
             className={selectClassName}
-            aria-label={stateLabel}
+            aria-label={resolvedStateLabel}
             disabled={disabled || !normalizedCountryCode || loadingStates}
           >
-            <option value="">Sin especificar</option>
+            <option value="">{resolvedUnspecifiedLabel}</option>
             {stateOptionsWithSelection.map((state) => (
               <option key={state.code} value={state.code}>
                 {state.label}
@@ -275,13 +297,13 @@ export function VacancyLocationFields({
         </div>
       </div>
 
-      {helperText ? (
-        <p className="font-sans text-xs text-muted-foreground">{helperText}</p>
+      {resolvedHelperText ? (
+        <p className="font-sans text-xs text-muted-foreground">{resolvedHelperText}</p>
       ) : null}
 
-      {loadError ? (
+      {loadErrorLabel ? (
         <p className="font-sans text-xs text-amber-700" role="status">
-          {loadError}
+          {loadErrorLabel}
         </p>
       ) : null}
     </div>

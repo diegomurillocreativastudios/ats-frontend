@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import {
   createInterview,
   fetchInterviewTypes,
@@ -39,6 +40,8 @@ export type InterviewFormProps =
 
 export function InterviewForm(props: InterviewFormProps) {
   const { vacancyId } = props
+  const t = useTranslations("RecruiterPortal.interviews.form")
+  const tCommon = useTranslations("Common")
   const { status: calendarStatus } = useGoogleCalendar()
   const isModal = props.mode === "modal"
   const backHref = props.mode === "page" ? props.backHref : ""
@@ -168,17 +171,17 @@ export function InterviewForm(props: InterviewFormProps) {
     setFieldErrors({})
     const nextErrors: Record<string, string> = {}
     if (!candidateProfileId.trim()) {
-      nextErrors.candidateProfileId = "Selecciona un candidato"
+      nextErrors.candidateProfileId = t("validation.selectCandidate")
     }
     if (!scheduledLocal.trim()) {
-      nextErrors.scheduledLocal = "Indica fecha y hora"
+      nextErrors.scheduledLocal = t("validation.indicateDateTime")
     }
     let scheduledAtUtc = ""
     if (scheduledLocal.trim()) {
       try {
         scheduledAtUtc = localDatetimeInputToUtcIso(scheduledLocal)
       } catch {
-        nextErrors.scheduledLocal = "Fecha u hora no válida"
+        nextErrors.scheduledLocal = t("validation.invalidDateTime")
       }
     }
     if (Object.keys(nextErrors).length > 0) {
@@ -257,9 +260,9 @@ export function InterviewForm(props: InterviewFormProps) {
             href={backHref}
             className="w-fit font-sans text-sm text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
           >
-            ← Volver al listado
+            {t("backToList")}
           </Link>
-          <PortalPageHeader title="Nueva entrevista" className="pb-0" />
+          <PortalPageHeader title={t("pageTitle")} className="pb-0" />
         </div>
       ) : null}
 
@@ -270,26 +273,25 @@ export function InterviewForm(props: InterviewFormProps) {
             ? "flex w-full max-w-none flex-col gap-5 rounded-xl border border-border bg-card p-6"
             : "flex max-w-xl flex-col gap-5 rounded-xl border border-border bg-card p-6"
         }
-        aria-label="Formulario nueva entrevista"
+        aria-label={t("ariaLabel")}
       >
         {loadingOptions ? (
           <div className="flex items-center gap-2 font-sans text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            Cargando candidatos de la vacante...
+            {t("loadingCandidates")}
           </div>
         ) : options.length === 0 ? (
           <p
             className="rounded-md border border-yellow-500 bg-yellow-50 px-3 py-2 font-sans text-sm font-medium leading-relaxed text-yellow-500"
             role="status"
           >
-            Esta vacante aún no tiene candidatos. Primero añade candidatos a la
-            vacante; después podrás agendar una entrevista.
+            {t("noCandidates")}
           </p>
         ) : null}
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="interview-candidate" className="font-sans text-sm font-medium">
-            Candidato <span className="text-vo-pink">*</span>
+            {t("fields.candidate")} <span className="text-vo-pink">*</span>
           </label>
           <select
             id="interview-candidate"
@@ -302,7 +304,7 @@ export function InterviewForm(props: InterviewFormProps) {
               fieldErrors.candidateProfileId ? "err-candidate" : undefined
             }
           >
-            <option value="">Seleccionar…</option>
+            <option value="">{t("placeholders.select")}</option>
             {options.map((o) => (
               <option key={o.candidateProfileId} value={o.candidateProfileId}>
                 {o.label}
@@ -318,7 +320,7 @@ export function InterviewForm(props: InterviewFormProps) {
 
         <div className="flex flex-col gap-1.5">
           <span id="interview-when-label" className="font-sans text-sm font-medium">
-            Fecha y hora <span className="text-vo-pink">*</span>
+            {t("fields.dateTime")} <span className="text-vo-pink">*</span>
           </span>
           <InterviewScheduleRow
             scheduledLocal={scheduledLocal}
@@ -341,20 +343,17 @@ export function InterviewForm(props: InterviewFormProps) {
             role="status"
           >
             {calendarStatus.isConnected ? (
-              <span>
-                Esta entrevista se sincronizará con Google Calendar al guardar
-                (si el servidor lo soporta).
-              </span>
+              <span>{t("calendar.willSync")}</span>
             ) : (
               <span>
-                Google Calendar no está conectado.{" "}
+                {t("calendar.notConnected")}{" "}
                 <Link
                   href="/portal-rrhh/configuracion/calendario"
                   className="font-medium text-vo-purple underline-offset-2 hover:underline"
                 >
-                  Conectar en configuración
+                  {t("calendar.connectLink")}
                 </Link>{" "}
-                para invitaciones y eventos automáticos.
+                {t("calendar.notConnectedSuffix")}
               </span>
             )}
           </div>
@@ -362,12 +361,12 @@ export function InterviewForm(props: InterviewFormProps) {
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="interview-type" className="font-sans text-sm font-medium">
-            Tipo
+            {t("fields.type")}
           </label>
           {loadingInterviewTypes ? (
             <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-              Cargando tipos de entrevista…
+              {t("loadingTypes")}
             </div>
           ) : (
             <select
@@ -376,7 +375,7 @@ export function InterviewForm(props: InterviewFormProps) {
               onChange={(e) => setInterviewType(e.target.value)}
               className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm"
             >
-              <option value="">Ej: Técnica, cultural…</option>
+              <option value="">{t("placeholders.typeExample")}</option>
               {interviewTypeOptions.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
@@ -391,12 +390,12 @@ export function InterviewForm(props: InterviewFormProps) {
             htmlFor="interview-modality"
             className="font-sans text-sm font-medium"
           >
-            Modalidad
+            {t("fields.modality")}
           </label>
           {loadingModalities ? (
             <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-              Cargando modalidades…
+              {t("loadingModalities")}
             </div>
           ) : (
             <select
@@ -405,7 +404,7 @@ export function InterviewForm(props: InterviewFormProps) {
               onChange={(e) => setInterviewModalityId(e.target.value)}
               className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm"
             >
-              <option value="">Selecciona una modalidad…</option>
+              <option value="">{t("placeholders.selectModality")}</option>
               {modalityOptions.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.displayName}
@@ -419,21 +418,17 @@ export function InterviewForm(props: InterviewFormProps) {
               role="status"
             >
               {calendarStatus.isConnected ? (
-                <span>
-                  Se generará un enlace de Google Meet al guardar (vía Google
-                  Calendar).
-                </span>
+                <span>{t("calendar.meetWillGenerate")}</span>
               ) : (
                 <span>
-                  Esta modalidad genera un enlace de Google Meet, pero Google
-                  Calendar no está conectado.{" "}
+                  {t("calendar.meetNotConnected")}{" "}
                   <Link
                     href="/portal-rrhh/configuracion/calendario"
                     className="font-medium text-vo-purple underline-offset-2 hover:underline"
                   >
-                    Conectar en configuración
+                    {t("calendar.connectLink")}
                   </Link>{" "}
-                  para que se cree automáticamente.
+                  {t("calendar.meetNotConnectedSuffix")}
                 </span>
               )}
             </div>
@@ -442,12 +437,13 @@ export function InterviewForm(props: InterviewFormProps) {
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="interview-interviewer" className="font-sans text-sm font-medium">
-            Entrevistador(a)
+            {t("fields.interviewer")}
           </label>
           <InterviewerRecruiterSelect
             id="interview-interviewer"
             value={interviewerName}
             onChange={setInterviewerName}
+            emptyLabel={t("placeholders.select")}
           />
         </div>
 
@@ -456,7 +452,7 @@ export function InterviewForm(props: InterviewFormProps) {
             htmlFor="interview-descripcion"
             className="font-sans text-sm font-medium"
           >
-            Descripcion
+            {t("fields.description")}
           </label>
           <textarea
             id="interview-descripcion"
@@ -482,7 +478,7 @@ export function InterviewForm(props: InterviewFormProps) {
             {submitting ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             ) : null}
-            {submitting ? "Guardando..." : "Agendar entrevista"}
+            {submitting ? t("actions.scheduling") : t("actions.schedule")}
           </button>
           {isModal ? (
             <button
@@ -491,14 +487,14 @@ export function InterviewForm(props: InterviewFormProps) {
               disabled={submitting}
               className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-sans text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
             >
-              Cancelar
+              {tCommon("cancel")}
             </button>
           ) : (
             <Link
               href={backHref}
               className="inline-flex items-center rounded-md border border-border px-5 py-2.5 font-sans text-sm font-medium text-foreground hover:bg-muted"
             >
-              Cancelar
+              {tCommon("cancel")}
             </Link>
           )}
         </div>

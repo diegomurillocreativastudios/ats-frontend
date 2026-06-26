@@ -1,8 +1,14 @@
-export const metadata = {
-  title: { absolute: "ATS | Portal RRHH | Candidato" },
-  description: "Perfil detallado del candidato en el portal RRHH",
-};
+import { getTranslations } from "next-intl/server"
+
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.recruiterCandidateDetail")
+
+  return {
+    title: { absolute: t("title") },
+    description: t("description"),
+  }
+}
 
 export default function CandidatoDetalleLayout({ children }) {
-  return children;
+  return children
 }

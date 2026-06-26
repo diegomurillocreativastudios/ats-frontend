@@ -1,6 +1,7 @@
 "use client"
 
 import { Building2, MapPin, Video } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
 import type { AdminCalendarEvent } from "@/lib/api/admin-interviews-calendar"
 import type { InterviewStatus } from "@/lib/api/interviews"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
@@ -19,10 +20,10 @@ const STATUS_BG: Record<InterviewStatus, string> = {
   NoShow: "bg-vo-yellow/15 hover:bg-vo-yellow/25",
 }
 
-function formatChipTime(iso: string): string {
+function formatChipTime(iso: string, locale: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ""
-  return d.toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })
+  return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })
 }
 
 function ModalityIcon({ event }: { event: AdminCalendarEvent }) {
@@ -52,17 +53,19 @@ export function CalendarEventChip({
   onClick,
   className = "",
 }: CalendarEventChipProps) {
-  const time = formatChipTime(event.startUtc)
+  const t = useTranslations("AdminPortal.interviews.calendar.eventChip")
+  const locale = useLocale()
+  const time = formatChipTime(event.startUtc, locale)
   const subtitle = [event.vacancy.companyName, event.recruiter.userName]
     .filter(Boolean)
     .join(" · ")
 
   const ariaLabel = [
-    "Entrevista",
+    t("interview"),
     time,
-    "con",
+    t("with"),
     event.candidate.name,
-    "para",
+    t("for"),
     event.vacancy.title,
     event.statusDisplayName ?? event.status,
   ].join(" ")

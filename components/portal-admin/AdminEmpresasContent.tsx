@@ -20,6 +20,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
@@ -96,15 +97,19 @@ function buildPayload(state: CompanyFormState): AdminCompanyFormValues {
   }
 }
 
-function validateForm(state: CompanyFormState): CompanyFormErrors {
+function validateForm(
+  state: CompanyFormState,
+  nameRequiredMessage: string
+): CompanyFormErrors {
   const errors: CompanyFormErrors = {}
   if (!state.name.trim()) {
-    errors.name = "El nombre es obligatorio."
+    errors.name = nameRequiredMessage
   }
   return errors
 }
 
 export default function AdminEmpresasContent() {
+  const t = useTranslations("AdminPortal.companies")
   const [items, setItems] = useState<AdminCompany[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [page, setPage] = useState(1)
@@ -158,17 +163,13 @@ export default function AdminEmpresasContent() {
     } catch (err: unknown) {
       const rec = err as { status?: number }
       const msg = getApiErrorMessage(err)
-      setListError(
-        rec.status === 403
-          ? "No tenés permisos para listar empresas (se requiere rol Admin en el API)."
-          : msg
-      )
+      setListError(rec.status === 403 ? t("errors.listForbidden") : msg)
       setItems([])
       setTotalCount(0)
     } finally {
       setLoading(false)
     }
-  }, [page, pageSize])
+  }, [page, pageSize, t])
 
   useEffect(() => {
     void loadList()
@@ -199,12 +200,12 @@ export default function AdminEmpresasContent() {
       return
     }
     if (!file.type.startsWith("image/")) {
-      setLogoError("Solo se permiten archivos de imagen.")
+      setLogoError(t("errors.logoType"))
       event.target.value = ""
       return
     }
     if (file.size > MAX_LOGO_BYTES) {
-      setLogoError("El logo no puede superar los 5 MB.")
+      setLogoError(t("errors.logoSize"))
       event.target.value = ""
       return
     }
@@ -261,7 +262,7 @@ export default function AdminEmpresasContent() {
       setFormState(companyToFormState(company))
       setCurrentLogo(company.logo)
     } catch (err: unknown) {
-      setFormLoadError(getApiErrorMessage(err) || "No se pudo cargar la empresa.")
+      setFormLoadError(getApiErrorMessage(err) || t("errors.loadFailed"))
     } finally {
       setFormLoading(false)
     }
@@ -279,7 +280,7 @@ export default function AdminEmpresasContent() {
     event.preventDefault()
     if (formSubmitting || formLoading) return
 
-    const validationErrors = validateForm(formState)
+    const validationErrors = validateForm(formState, t("validation.nameRequired"))
     if (Object.keys(validationErrors).length > 0) {
       setFormErrors(validationErrors)
       return
@@ -293,7 +294,7 @@ export default function AdminEmpresasContent() {
         const created = logoFile
           ? await createAdminCompanyWithLogo(payload, logoFile)
           : await createAdminCompany(payload)
-        showSnackbar("success", `Empresa creada. ID: ${created.companyId}`)
+        showSnackbar("success", t("toasts.created", { id: created.companyId }))
       } else if (editingCompanyId) {
         if (logoFile) {
           await updateAdminCompanyWithLogo(editingCompanyId, payload, logoFile)
@@ -303,17 +304,14 @@ export default function AdminEmpresasContent() {
             await deleteAdminCompanyLogo(editingCompanyId)
           }
         }
-        showSnackbar("success", "Empresa actualizada.")
+        showSnackbar("success", t("toasts.updated"))
       }
 
       setFormOpen(false)
       resetLogoState()
       await loadList()
     } catch (err: unknown) {
-      showSnackbar(
-        "error",
-        getApiErrorMessage(err) || "No se pudo guardar la empresa."
-      )
+      showSnackbar("error", getApiErrorMessage(err) || t("errors.saveFailed"))
     } finally {
       setFormSubmitting(false)
     }
@@ -342,13 +340,13 @@ export default function AdminEmpresasContent() {
       })
       showSnackbar(
         "success",
-        nextIsActive ? "Empresa activada." : "Empresa desactivada."
+        nextIsActive ? t("toasts.activated") : t("toasts.deactivated")
       )
       await loadList()
     } catch (err: unknown) {
       showSnackbar(
         "error",
-        getApiErrorMessage(err) || "No se pudo actualizar el estado."
+        getApiErrorMessage(err) || t("errors.statusUpdateFailed")
       )
     } finally {
       setRowToggling(company.companyId, false)
@@ -372,14 +370,14 @@ export default function AdminEmpresasContent() {
     >
       <PortalPageHeader
         id="portal-admin-empresas-heading"
-        title="Empresas"
-        description="Gestión de clientes (tenants). Al crear una empresa se siembran estados y etapas de pipeline automáticamente."
+        title={t("page.title")}
+        description={t("page.description")}
         className="mb-6"
         contentClassName="max-w-3xl"
         actions={
           <Button type="button" variant="primary" onClick={handleOpenCreate}>
             <Plus className="h-4 w-4" aria-hidden />
-            Crear empresa
+            {t("actions.create")}
           </Button>
         }
       />
@@ -397,7 +395,7 @@ export default function AdminEmpresasContent() {
               className="h-9"
               onClick={() => void loadList()}
             >
-              Reintentar
+              {t("actions.retry")}
             </Button>
           </div>
         </div>
@@ -405,13 +403,11 @@ export default function AdminEmpresasContent() {
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="font-sans text-sm text-muted-foreground">
-          {loading
-            ? "Cargando…"
-            : `${totalCount} empresa${totalCount === 1 ? "" : "s"}`}
+          {loading ? t("count.loading") : t("count.summary", { count: totalCount })}
         </p>
         <div className="flex items-center gap-2">
           <span className="font-sans text-xs text-muted-foreground">
-            Por página
+            {t("pagination.perPage")}
           </span>
           <select
             value={pageSize}
@@ -420,7 +416,7 @@ export default function AdminEmpresasContent() {
               setPage(1)
             }}
             className="h-9 rounded-md border border-border bg-card px-2 text-sm"
-            aria-label="Tamaño de página"
+            aria-label={t("pagination.pageSizeAria")}
           >
             {[20, 50, 100].map((n) => (
               <option key={n} value={n}>
@@ -433,7 +429,7 @@ export default function AdminEmpresasContent() {
             variant="ghost"
             className="h-9 px-3"
             onClick={() => void loadList()}
-            aria-label="Refrescar listado"
+            aria-label={t("pagination.refreshAria")}
             disabled={loading}
           >
             <RefreshCw className="h-4 w-4" aria-hidden />
@@ -449,28 +445,39 @@ export default function AdminEmpresasContent() {
             </div>
             <div className="space-y-2">
               <h2 className="font-sans text-lg font-semibold text-foreground">
-                Aún no hay empresas
+                {t("emptyStates.title")}
               </h2>
               <p className="max-w-lg font-sans text-sm text-muted-foreground">
-                Todavía no se registró ninguna empresa. Creá la primera para
-                comenzar.
+                {t("emptyStates.description")}
               </p>
             </div>
             <Button type="button" variant="primary" onClick={handleOpenCreate}>
               <Plus className="h-4 w-4" aria-hidden />
-              Crear empresa
+              {t("actions.create")}
             </Button>
           </div>
         ) : (
           <table className="w-full min-w-[880px] font-sans text-left text-sm">
             <thead className="border-b border-border bg-muted/50">
               <tr>
-                <th className="w-20 px-4 py-3 font-medium text-foreground">Logo</th>
-                <th className="px-4 py-3 font-medium text-foreground">Nombre</th>
-                <th className="px-4 py-3 font-medium text-foreground">Industria</th>
-                <th className="px-4 py-3 font-medium text-foreground">Estado</th>
-                <th className="px-4 py-3 font-medium text-foreground">Creada</th>
-                <th className="px-4 py-3 font-medium text-foreground">Acciones</th>
+                <th className="w-20 px-4 py-3 font-medium text-foreground">
+                  {t("table.logo")}
+                </th>
+                <th className="px-4 py-3 font-medium text-foreground">
+                  {t("table.name")}
+                </th>
+                <th className="px-4 py-3 font-medium text-foreground">
+                  {t("table.industry")}
+                </th>
+                <th className="px-4 py-3 font-medium text-foreground">
+                  {t("table.status")}
+                </th>
+                <th className="px-4 py-3 font-medium text-foreground">
+                  {t("table.createdAt")}
+                </th>
+                <th className="px-4 py-3 font-medium text-foreground">
+                  {t("table.actions")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -490,13 +497,15 @@ export default function AdminEmpresasContent() {
                         <div
                           className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border border-border bg-background"
                           aria-label={
-                            rowLogoSrc ? `Logo de ${row.name}` : "Sin logo"
+                            rowLogoSrc
+                              ? t("logoCell.withName", { name: row.name })
+                              : t("logoCell.none")
                           }
                         >
                           {rowLogoSrc ? (
                             <img
                               src={rowLogoSrc}
-                              alt={`Logo de ${row.name}`}
+                              alt={t("logoCell.withName", { name: row.name })}
                               className="h-full w-full object-contain"
                               loading="lazy"
                             />
@@ -517,11 +526,11 @@ export default function AdminEmpresasContent() {
                       <td className="px-4 py-3 align-middle">
                         {row.isActive ? (
                           <span className="inline-flex rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                            Activa
+                            {t("status.active")}
                           </span>
                         ) : (
                           <span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                            Inactiva
+                            {t("status.inactive")}
                           </span>
                         )}
                       </td>
@@ -538,7 +547,7 @@ export default function AdminEmpresasContent() {
                             disabled={isRowToggling}
                           >
                             <Pencil className="h-3.5 w-3.5" aria-hidden />
-                            Editar
+                            {t("actions.edit")}
                           </Button>
                           <Button
                             type="button"
@@ -551,7 +560,9 @@ export default function AdminEmpresasContent() {
                             {isRowToggling ? (
                               <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" aria-hidden />
                             ) : null}
-                            {row.isActive ? "Desactivar" : "Activar"}
+                            {row.isActive
+                              ? t("actions.deactivate")
+                              : t("actions.activate")}
                           </Button>
                         </div>
                       </td>
@@ -564,9 +575,12 @@ export default function AdminEmpresasContent() {
         )}
       </div>
 
-      <nav className="mt-6 flex flex-wrap items-center justify-between gap-3" aria-label="Paginación">
+      <nav
+        className="mt-6 flex flex-wrap items-center justify-between gap-3"
+        aria-label={t("pagination.regionAria")}
+      >
         <p className="font-sans text-sm text-muted-foreground">
-          Página {page} de {totalPages}
+          {t("pagination.summary", { page, total: totalPages })}
         </p>
         <div className="flex gap-2">
           <Button
@@ -577,7 +591,7 @@ export default function AdminEmpresasContent() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
             <ChevronLeft className="h-4 w-4" aria-hidden />
-            Anterior
+            {t("actions.prev")}
           </Button>
           <Button
             type="button"
@@ -586,7 +600,7 @@ export default function AdminEmpresasContent() {
             disabled={page >= totalPages || loading}
             onClick={() => setPage((p) => p + 1)}
           >
-            Siguiente
+            {t("actions.next")}
             <ChevronRight className="h-4 w-4" aria-hidden />
           </Button>
         </div>
@@ -595,14 +609,16 @@ export default function AdminEmpresasContent() {
       <Modal
         isOpen={formOpen}
         onClose={handleCloseForm}
-        title={formMode === "create" ? "Nueva empresa" : "Editar empresa"}
+        title={
+          formMode === "create" ? t("form.createTitle") : t("form.editTitle")
+        }
         size="lg"
         closeOnEscape={!formSubmitting && !formLoading}
         closeOnOverlayClick={!formSubmitting && !formLoading}
         footer={
           <div className="flex flex-wrap justify-end gap-2">
             <Button type="button" variant="outline" onClick={handleCloseForm} disabled={formSubmitting || formLoading}>
-              Cancelar
+              {t("form.cancel")}
             </Button>
             <Button
               type="submit"
@@ -611,7 +627,7 @@ export default function AdminEmpresasContent() {
               loading={formSubmitting}
               disabled={formSubmitting || formLoading}
             >
-              {formMode === "create" ? "Guardar" : "Actualizar"}
+              {formMode === "create" ? t("form.save") : t("form.update")}
             </Button>
           </div>
         }
@@ -619,13 +635,13 @@ export default function AdminEmpresasContent() {
         {formLoading ? (
           <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-            Cargando empresa…
+            {t("loadingStates.company")}
           </div>
         ) : formLoadError ? (
           <div className="space-y-4">
             <p className="text-sm text-destructive" role="alert">{formLoadError}</p>
             <Button type="button" variant="outline" onClick={() => editingCompanyId && void handleOpenEdit(editingCompanyId)}>
-              Reintentar
+              {t("actions.retry")}
             </Button>
           </div>
         ) : (
@@ -633,7 +649,7 @@ export default function AdminEmpresasContent() {
             <Input
               id="company-name"
               name="name"
-              label="Nombre"
+              label={t("form.nameLabel")}
               required
               value={formState.name}
               error={formErrors.name || ""}
@@ -641,28 +657,27 @@ export default function AdminEmpresasContent() {
                 setFormState((c) => ({ ...c, name: event.target.value }))
                 setFormErrors((c) => ({ ...c, name: undefined }))
               }}
-              placeholder="Nombre de la empresa"
+              placeholder={t("form.namePlaceholder")}
               disabled={formSubmitting}
             />
             <Input
               id="company-industry"
               name="industry"
-              label="Industria (opcional)"
+              label={t("form.industryLabel")}
               value={formState.industry}
               error=""
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
                 setFormState((c) => ({ ...c, industry: event.target.value }))
               }
-              placeholder="ej. Tecnología, Retail"
+              placeholder={t("form.industryPlaceholder")}
               disabled={formSubmitting}
             />
             <fieldset className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
               <legend className="px-1 font-sans text-sm font-medium text-foreground">
-                Logo
+                {t("form.logoLegend")}
               </legend>
               <p className="text-xs text-muted-foreground">
-                PNG, JPG, WEBP o SVG. Máximo 5 MB. El logo se sube como blob al
-                guardar.
+                {t("form.logoHelper")}
               </p>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -671,14 +686,14 @@ export default function AdminEmpresasContent() {
                   aria-hidden={logoPreviewSrc ? undefined : true}
                   aria-label={
                     logoPreviewSrc
-                      ? "Vista previa del logo"
-                      : "Sin logo"
+                      ? t("form.logoPreviewAria")
+                      : t("form.logoNoneAria")
                   }
                 >
                   {logoPreviewSrc ? (
                     <img
                       src={logoPreviewSrc}
-                      alt="Logo de la empresa"
+                      alt={t("form.logoAlt")}
                       className="h-full w-full object-contain"
                     />
                   ) : (
@@ -699,7 +714,9 @@ export default function AdminEmpresasContent() {
                       disabled={formSubmitting}
                     >
                       <Upload className="h-3.5 w-3.5" aria-hidden />
-                      {hasExistingLogoVisible ? "Cambiar logo" : "Subir logo"}
+                      {hasExistingLogoVisible
+                        ? t("form.changeLogo")
+                        : t("form.uploadLogo")}
                     </Button>
 
                     {logoFile ? (
@@ -710,7 +727,7 @@ export default function AdminEmpresasContent() {
                         onClick={handleCancelLogoChange}
                         disabled={formSubmitting}
                       >
-                        Cancelar selección
+                        {t("form.cancelSelection")}
                       </Button>
                     ) : null}
 
@@ -723,7 +740,7 @@ export default function AdminEmpresasContent() {
                         disabled={formSubmitting}
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                        Quitar logo
+                        {t("form.removeLogo")}
                       </Button>
                     ) : null}
 
@@ -735,7 +752,7 @@ export default function AdminEmpresasContent() {
                         onClick={handleUndoRemoveLogo}
                         disabled={formSubmitting}
                       >
-                        Deshacer
+                        {t("form.undo")}
                       </Button>
                     ) : null}
                   </div>
@@ -757,7 +774,7 @@ export default function AdminEmpresasContent() {
 
                   {logoRemoved ? (
                     <p className="text-xs text-destructive">
-                      Se eliminará el logo actual al guardar.
+                      {t("form.logoWillBeRemoved")}
                     </p>
                   ) : null}
 
@@ -777,10 +794,10 @@ export default function AdminEmpresasContent() {
                 className={checkboxVoClass}
                 disabled={formSubmitting}
               />
-              Empresa activa
+              {t("form.activeCheckbox")}
             </label>
             <p className="text-xs text-muted-foreground">
-              Para dar de baja una empresa en el producto, desactivala en lugar de eliminarla.
+              {t("form.deactivateHint")}
             </p>
           </form>
         )}

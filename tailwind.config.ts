@@ -9,71 +9,101 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'vo-purple': {
-          DEFAULT: '#6E3385',
-          hover: '#5A2A6D',
-          foreground: '#FFFFFF',
+        "ats-grafito": "#57585B",
+        "ats-terracotta": {
+          DEFAULT: "#6EB940",
+          hover: "#549E3C",
+          foreground: "#FFFFFF",
         },
-        'vo-magenta': {
-          DEFAULT: '#9C2B82',
-          hover: '#7D2168',
-          foreground: '#FFFFFF',
+        "ats-cobre": {
+          DEFAULT: "#438C39",
+          hover: "#337C37",
+          light: "#A8D98A",
+          foreground: "#FFFFFF",
         },
-        'vo-navy': {
-          DEFAULT: '#496FB3',
-          foreground: '#FFFFFF',
+        "ats-arena": "#E8F5E0",
+        "ats-cobre-light": "#A8D98A",
+        "ats-terracotta-soft": "#D4EDCC",
+        "vo-purple": {
+          DEFAULT: "#6EB940",
+          hover: "#549E3C",
+          foreground: "#FFFFFF",
         },
-        'vo-sky': {
-          DEFAULT: '#71BCED',
-          foreground: '#FFFFFF',
+        "vo-magenta": {
+          DEFAULT: "#438C39",
+          hover: "#337C37",
+          foreground: "#FFFFFF",
         },
-        'vo-pink': {
-          DEFAULT: '#C73277',
-          hover: '#A02961',
-          foreground: '#FFFFFF',
+        "vo-navy": {
+          DEFAULT: "#57585B",
+          foreground: "#FFFFFF",
         },
-        'vo-yellow': {
-          DEFAULT: '#E6AC4B',
-          foreground: '#1F2937',
+        "vo-sky": {
+          DEFAULT: "#E8F5E0",
+          foreground: "#57585B",
         },
-        border: '#E5E7EB',
-        input: '#E5E7EB',
-        ring: '#6E3385',
-        background: '#FFFFFF',
-        foreground: '#0D0D0D',
+        "vo-pink": {
+          DEFAULT: "#6EB940",
+          hover: "#549E3C",
+          foreground: "#FFFFFF",
+        },
+        "vo-yellow": {
+          DEFAULT: "#438C39",
+          foreground: "#57585B",
+        },
+        "vo-cobre": {
+          DEFAULT: "#438C39",
+          hover: "#337C37",
+          foreground: "#FFFFFF",
+        },
+        border: "#E8F5E0",
+        input: "#E8F5E0",
+        ring: "#6EB940",
+        background: "#FFFFFF",
+        foreground: "#57585B",
+        card: {
+          DEFAULT: "#FFFFFF",
+          foreground: "#57585B",
+        },
         muted: {
-          DEFAULT: '#F9FAFB',
-          foreground: '#6B7280',
+          DEFAULT: "#E8F5E0",
+          foreground: "#75767A",
         },
         destructive: {
-          DEFAULT: '#C73277',
-          foreground: '#FFFFFF',
+          DEFAULT: "#DC2626",
+          foreground: "#FFFFFF",
         },
         success: {
-          DEFAULT: '#22C55E',
-          foreground: '#FFFFFF',
+          DEFAULT: "#6EB940",
+          foreground: "#FFFFFF",
         },
       },
       fontFamily: {
-        sans: [
-          "var(--font-montserrat)",
-          "ui-sans-serif",
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        brand: [
+          "var(--font-manrope)",
+          "var(--font-inter)",
           "system-ui",
           "sans-serif",
         ],
-        montserrat: ["var(--font-montserrat)", "sans-serif"],
+        display: [
+          "var(--font-manrope)",
+          "var(--font-inter)",
+          "system-ui",
+          "sans-serif",
+        ],
       },
       borderRadius: {
-        DEFAULT: '6px',
+        DEFAULT: "6px",
       },
       keyframes: {
-        'apply-shimmer': {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(400%)' },
+        "apply-shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(400%)" },
         },
       },
       animation: {
-        'apply-shimmer': 'apply-shimmer 1.45s ease-in-out infinite',
+        "apply-shimmer": "apply-shimmer 1.45s ease-in-out infinite",
       },
     },
   },

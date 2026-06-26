@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import {
   fetchAdminUsersAllByRole,
   type AdminUserListItem,
@@ -29,8 +30,10 @@ export function InterviewerRecruiterSelect({
   value,
   onChange,
   disabled = false,
-  emptyLabel = "Seleccionar…",
+  emptyLabel,
 }: InterviewerRecruiterSelectProps) {
+  const t = useTranslations("RecruiterPortal.interviews.interviewerSelect")
+  const resolvedEmptyLabel = emptyLabel ?? t("select")
   const [recruiters, setRecruiters] = useState<AdminUserListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -78,7 +81,7 @@ export function InterviewerRecruiterSelect({
     return (
       <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-        Cargando reclutadores…
+        {t("loading")}
       </div>
     )
   }
@@ -87,7 +90,7 @@ export function InterviewerRecruiterSelect({
     return (
       <div className="flex flex-col gap-1.5">
         <p className="text-sm text-muted-foreground" role="status">
-          {loadError} Podés escribir el nombre manualmente.
+          {loadError} {t("manualHint")}
         </p>
         <input
           id={id}
@@ -109,7 +112,7 @@ export function InterviewerRecruiterSelect({
       disabled={disabled}
       className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
     >
-      <option value="">{emptyLabel}</option>
+      <option value="">{resolvedEmptyLabel}</option>
       {sorted.map((u) => {
         const lab = recruiterOptionLabel(u)
         return (

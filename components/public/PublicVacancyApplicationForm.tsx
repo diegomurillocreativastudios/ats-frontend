@@ -4,11 +4,13 @@ import Link from "next/link"
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
 } from "react"
+import { useTranslations } from "next-intl"
 import { CheckCircle2, LoaderCircle, Mail, Paperclip } from "lucide-react"
 import {
   getPublicApplyErrorMessage,
@@ -32,12 +34,7 @@ import {
 
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
 
-const SOURCE_OPTIONS = [
-  { value: "Redes sociales", label: "Redes sociales" },
-  { value: "Amigos", label: "Amigos" },
-  { value: "Feria de empleo", label: "Feria de empleo" },
-  { value: "Otros", label: "Otros" },
-] as const
+const SOURCE_OPTION_KEYS = ["social", "friends", "jobFair", "other"] as const
 
 interface PublicVacancyApplicationFormState {
   firstName: string
@@ -69,42 +66,34 @@ const initialState: PublicVacancyApplicationFormState = {
 
 function themeFieldClass(theme: PublicVacancyApplicationFormTheme): string {
   if (theme === "dark") {
-    return "h-11 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-sm text-white outline-none transition placeholder:text-white/38 focus:ring-2 focus:ring-[#f0a7ff]"
+    return "h-11 w-full rounded-2xl border border-border bg-muted/35 px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-cobre"
   }
-  return "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-vo-purple"
+  return "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-terracotta"
 }
 
 function themeLabelClass(theme: PublicVacancyApplicationFormTheme): string {
-  if (theme === "dark") return "text-sm font-medium text-white/82"
+  if (theme === "dark") return "text-sm font-medium text-foreground"
   return "text-sm font-medium text-foreground"
 }
 
 function themeErrorClass(theme: PublicVacancyApplicationFormTheme): string {
-  if (theme === "dark") return "text-xs text-[#ffd0e7]"
+  if (theme === "dark") return "text-xs text-ats-terracotta-soft"
   return "text-xs text-destructive"
 }
 
 function themeSelectClass(theme: PublicVacancyApplicationFormTheme): string {
   if (theme === "dark") {
-    return "h-11 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-sm text-white outline-none transition focus:ring-2 focus:ring-[#f0a7ff] [&>option]:bg-[#1a2238] [&>option]:text-white"
+    return "h-11 w-full rounded-2xl border border-border bg-muted/35 px-4 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ats-cobre [&>option]:bg-[#2A2B2E] [&>option]:text-foreground"
   }
-  return "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-vo-purple"
+  return "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ats-terracotta"
 }
 
 function themeTextareaClass(theme: PublicVacancyApplicationFormTheme): string {
   if (theme === "dark") {
-    return "min-h-[120px] w-full rounded-[22px] border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/38 focus:ring-2 focus:ring-[#f0a7ff]"
+    return "min-h-[120px] w-full rounded-[22px] border border-border bg-muted/35 px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-cobre"
   }
-  return "min-h-[120px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-vo-purple"
+  return "min-h-[120px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-terracotta"
 }
-
-const APPLY_PROGRESS_STEPS = [
-  { step: 1, label: "Creación" },
-  { step: 2, label: "Análisis" },
-  { step: 3, label: "Postulación" },
-  { step: 4, label: "Guardado" },
-  { step: 5, label: "Éxito" },
-] as const
 
 function getLoadingStepFromPercent(percent: number): 1 | 2 | 3 | 4 {
   if (percent < 24) return 1
@@ -119,9 +108,9 @@ function applySubmitProgressPanelClass(
 ): string {
   const position = opts.absolute ? "absolute inset-0 z-20 " : ""
   if (theme === "dark") {
-    return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-[inherit] border border-[#f0a7ff]/25 bg-[linear-gradient(180deg,rgba(18,24,44,0.97)_0%,rgba(12,17,32,0.99)_100%)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl ring-1 ring-white/10`
+    return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-[inherit] border border-ats-cobre/25 bg-[linear-gradient(180deg,rgba(32,33,36,0.97)_0%,rgba(32,33,36,0.99)_100%)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl ring-1 ring-white/10`
   }
-  return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-lg border border-border bg-background/97 p-6 shadow-xl backdrop-blur-md ring-1 ring-vo-purple/15`
+  return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-lg border border-border bg-white/97 p-6 shadow-xl backdrop-blur-md ring-1 ring-ats-terracotta/15`
 }
 
 function PublicApplicationSubmitProgress({
@@ -136,11 +125,18 @@ function PublicApplicationSubmitProgress({
   loadingBarPercent?: number
   showLongWaitHint?: boolean
 }) {
+  const t = useTranslations("PublicOpportunities.applicationForm")
   const isDark = theme === "dark"
   const isSuccess = mode === "success"
   const currentStep = isSuccess ? 5 : getLoadingStepFromPercent(loadingBarPercent)
-  const activeLabel =
-    APPLY_PROGRESS_STEPS.find((s) => s.step === currentStep)?.label ?? ""
+  const stepLabels = [
+    t("steps.creation"),
+    t("steps.analysis"),
+    t("steps.application"),
+    t("steps.saved"),
+    t("steps.success"),
+  ]
+  const activeLabel = stepLabels[currentStep - 1] ?? ""
 
   return (
     <div
@@ -154,7 +150,7 @@ function PublicApplicationSubmitProgress({
         <div
           className={
             isDark
-              ? "flex h-14 w-14 items-center justify-center rounded-2xl border border-white/14 bg-white/8 shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
+              ? "flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-muted/45 shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
               : "flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-muted/60 shadow-sm"
           }
           aria-hidden
@@ -162,15 +158,15 @@ function PublicApplicationSubmitProgress({
           {isSuccess ? (
             <CheckCircle2
               className={
-                isDark ? "h-8 w-8 text-[#7ee0c0]" : "h-8 w-8 text-emerald-600"
+                isDark ? "h-8 w-8 text-ats-cobre" : "h-8 w-8 text-ats-cobre"
               }
             />
           ) : (
             <LoaderCircle
               className={
                 isDark
-                  ? "h-7 w-7 animate-spin text-[#f0a7ff]"
-                  : "h-7 w-7 animate-spin text-vo-purple"
+                  ? "h-7 w-7 animate-spin text-ats-cobre"
+                  : "h-7 w-7 animate-spin text-ats-terracotta"
               }
             />
           )}
@@ -178,16 +174,16 @@ function PublicApplicationSubmitProgress({
         <p
           className={
             isDark
-              ? "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-white/50"
+              ? "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-foreground/50"
               : "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
           }
         >
-          {isSuccess ? "Listo" : "Procesando tu postulación"}
+          {isSuccess ? t("steps.ready") : t("steps.processingTitle")}
         </p>
         <p
           className={
             isDark
-              ? "mt-2 text-lg font-semibold text-white"
+              ? "mt-2 text-lg font-semibold text-foreground"
               : "mt-2 text-lg font-semibold text-foreground"
           }
         >
@@ -197,53 +193,53 @@ function PublicApplicationSubmitProgress({
           <p
             className={
               isDark
-                ? "mt-2 max-w-md text-sm leading-relaxed text-white/64"
+                ? "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
                 : "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
             }
           >
-            El procesamiento de tu CV suele tardar alrededor de un minuto. No cierres esta pestaña;
-            seguimos trabajando en tu postulación.
+            {t("steps.processingLongWait")}
           </p>
         ) : null}
       </div>
 
       <ApplyStyleProgressBar
-        theme={isDark ? "dark" : "light"}
+        theme="light"
         mode={isSuccess ? "success" : "loading"}
         percent={isSuccess ? 100 : loadingBarPercent}
       />
 
-      <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-5 sm:gap-2" aria-label="Estado del envío">
-        {APPLY_PROGRESS_STEPS.map((item) => {
-          const isComplete = currentStep > item.step
-          const isCurrent = currentStep === item.step
-          const isSuccessStep = item.step === 5
+      <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-5 sm:gap-2" aria-label={t("aria.submitStatus")}>
+        {[1, 2, 3, 4, 5].map((step) => {
+          const isComplete = currentStep > step
+          const isCurrent = currentStep === step
+          const isSuccessStep = step === 5
+          const label = stepLabels[step - 1] ?? ""
           return (
             <li
-              key={item.step}
+              key={step}
               className={
                 isDark
                   ? `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
                       isCurrent
                         ? isSuccessStep
-                          ? "border-[#7ee0c0]/60 bg-[#7ee0c0]/12 text-[#7ee0c0]"
-                          : "border-[#f0a7ff]/50 bg-white/8 text-white"
+                          ? "border-ats-cobre/60 bg-ats-cobre/12 text-ats-cobre"
+                          : "border-ats-cobre/50 bg-muted/45 text-foreground"
                         : isComplete
-                          ? "border-white/12 bg-white/4 text-white/60"
-                          : "border-white/8 bg-white/3 text-white/40"
+                          ? "border-border bg-white/4 text-muted-foreground"
+                          : "border-white/8 bg-muted/20 text-muted-foreground"
                     }`
                   : `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
                       isCurrent
                         ? isSuccessStep
-                          ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-800"
-                          : "border-vo-purple/50 bg-vo-purple/8 text-foreground"
+                          ? "border-ats-cobre/50 bg-ats-cobre/10 text-ats-cobre"
+                          : "border-ats-terracotta/50 bg-ats-terracotta/8 text-foreground"
                         : isComplete
                           ? "border-border bg-muted/50 text-muted-foreground"
                           : "border-border/60 bg-background text-muted-foreground/60"
                     }`
               }
             >
-              {item.label}
+              {label}
             </li>
           )
         })}
@@ -254,7 +250,7 @@ function PublicApplicationSubmitProgress({
 
 export function PublicVacancyApplicationForm({
   vacancyId,
-  theme = "dark",
+  theme = "light",
   backToVacancyHref,
   onRequestClose,
 }: {
@@ -265,6 +261,7 @@ export function PublicVacancyApplicationForm({
   /** Tras éxito o al cerrar desde el modal. */
   onRequestClose?: () => void
 }) {
+  const t = useTranslations("PublicOpportunities.applicationForm")
   const [values, setValues] = useState<PublicVacancyApplicationFormState>(initialState)
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
@@ -345,37 +342,37 @@ export function PublicVacancyApplicationForm({
     if (file && !isAllowedCvFile(file)) {
       event.target.value = ""
       setCvFile(null)
-      setErrors((prev) => ({ ...prev, cvFile: "Solo se aceptan archivos PDF o DOCX." }))
+      setErrors((prev) => ({ ...prev, cvFile: t("validation.fileType") }))
       setServerError(null)
       return
     }
     setCvFile(file)
     setErrors((prev) => ({ ...prev, cvFile: undefined }))
     setServerError(null)
-  }, [])
+  }, [t])
 
   const validateClient = useCallback((): Partial<Record<FieldKey, string>> => {
     const next: Partial<Record<FieldKey, string>> = {}
-    if (!values.firstName.trim()) next.firstName = "Ingresa tu nombre."
-    if (!values.lastName.trim()) next.lastName = "Ingresa tu apellido."
-    if (!values.email.trim()) next.email = "Ingresa tu correo."
-    else if (!isValidEmailFormat(values.email)) next.email = "Ingresa un correo válido."
-    if (!cvFile) next.cvFile = "Adjunta tu CV en PDF o DOCX."
+    if (!values.firstName.trim()) next.firstName = t("validation.firstNameRequired")
+    if (!values.lastName.trim()) next.lastName = t("validation.lastNameRequired")
+    if (!values.email.trim()) next.email = t("validation.emailRequired")
+    else if (!isValidEmailFormat(values.email)) next.email = t("validation.emailInvalid")
+    if (!cvFile) next.cvFile = t("validation.cvRequired")
     else if (!isAllowedCvFile(cvFile))
-      next.cvFile = "Solo se aceptan archivos PDF o DOCX."
+      next.cvFile = t("validation.fileType")
     
     const hasDocumentType = values.documentTypeId.trim() !== ""
     const hasNationalId = values.nationalId.trim() !== ""
     
     if (hasDocumentType && !hasNationalId) {
-      next.nationalId = "Si seleccionas un tipo de documento, debes ingresar el número."
+      next.nationalId = t("validation.documentTypeRequiresNumber")
     }
     if (hasNationalId && !hasDocumentType) {
-      next.documentTypeId = "Si ingresas un número de documento, debes seleccionar el tipo."
+      next.documentTypeId = t("validation.documentNumberRequiresType")
     }
     
     return next
-  }, [values.firstName, values.lastName, values.email, values.documentTypeId, values.nationalId, cvFile])
+  }, [values.firstName, values.lastName, values.email, values.documentTypeId, values.nationalId, cvFile, t])
 
   const executeSubmit = useCallback(async () => {
     if (!cvFile) return
@@ -420,14 +417,14 @@ export function PublicVacancyApplicationForm({
         const fieldMap = parsePublicApplyFieldErrors(body)
         if (Object.keys(fieldMap).length > 0) {
           setErrors(fieldMap as Partial<Record<FieldKey, string>>)
-          setServerError("Revisa los datos indicados.")
+          setServerError(t("validation.reviewFields"))
           return
         }
       }
 
       setServerError(getPublicApplyErrorMessage(status, body))
     }
-  }, [cvFile, values, vacancyId])
+  }, [cvFile, values, vacancyId, t])
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -462,22 +459,22 @@ export function PublicVacancyApplicationForm({
               href={backToVacancyHref}
               className={
                 theme === "dark"
-                  ? "inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/16"
+                  ? "inline-flex items-center justify-center rounded-full border border-border bg-muted/50 px-5 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted/60"
                   : "inline-flex items-center justify-center rounded-lg border border-border bg-muted px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted/80"
               }
             >
-              Volver a la vacante
+              {t("actions.backToVacancy")}
             </Link>
           ) : null}
           <Link
             href="/portal-oportunidades"
             className={
               theme === "dark"
-                ? "inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-medium text-[#18213d] transition hover:opacity-95"
-                : "inline-flex items-center justify-center rounded-lg bg-vo-purple px-5 py-2.5 text-sm font-medium text-white hover:opacity-95"
+                ? "inline-flex items-center justify-center rounded-full bg-ats-warm-white px-5 py-2.5 text-sm font-medium text-ats-grafito transition hover:opacity-95"
+                : "inline-flex items-center justify-center rounded-lg bg-ats-terracotta px-5 py-2.5 text-sm font-medium text-ats-warm-white hover:opacity-95"
             }
           >
-            Volver a vacantes
+            {t("actions.backToList")}
           </Link>
           {onRequestClose ? (
             <button
@@ -485,11 +482,11 @@ export function PublicVacancyApplicationForm({
               onClick={onRequestClose}
               className={
                 theme === "dark"
-                  ? "inline-flex items-center justify-center rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/88 hover:bg-white/8"
+                  ? "inline-flex items-center justify-center rounded-full border border-border px-5 py-2.5 text-sm font-medium text-foreground/88 hover:bg-muted/45"
                   : "inline-flex items-center justify-center rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
               }
             >
-              Cerrar
+              {t("actions.close")}
             </button>
           ) : null}
         </div>
@@ -525,7 +522,7 @@ export function PublicVacancyApplicationForm({
 
       <div className="space-y-2">
           <label htmlFor="apply-firstName" className={labelClass}>
-            Nombre *
+            {t("fields.firstName")}
           </label>
           <input
             id="apply-firstName"
@@ -546,7 +543,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-lastName" className={labelClass}>
-            Apellido *
+            {t("fields.lastName")}
           </label>
           <input
             id="apply-lastName"
@@ -567,7 +564,7 @@ export function PublicVacancyApplicationForm({
         </div>
       <div className="space-y-2">
           <label htmlFor="apply-email" className={labelClass}>
-            Correo electrónico *
+            {t("fields.email")}
           </label>
           <input
             id="apply-email"
@@ -589,7 +586,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-phone" className={labelClass}>
-            Teléfono
+            {t("fields.phone")}
           </label>
           <input
             id="apply-phone"
@@ -604,7 +601,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-documentTypeId" className={labelClass}>
-            Tipo de documento
+            {t("fields.documentType")}
           </label>
           <select
             id="apply-documentTypeId"
@@ -618,10 +615,10 @@ export function PublicVacancyApplicationForm({
           >
             <option value="">
               {isLoadingDocumentTypes
-                ? "Cargando tipos de documento..."
+                ? t("placeholders.loadingDocTypes")
                 : documentTypes.length === 0
-                  ? "No hay tipos disponibles"
-                  : "Seleccioná un tipo"}
+                  ? t("placeholders.noDocTypes")
+                  : t("placeholders.selectDocType")}
             </option>
             {documentTypes.map((docType) => (
               <option key={docType.id} value={docType.id}>
@@ -637,7 +634,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-nationalId" className={labelClass}>
-            Número de documento
+            {t("fields.documentNumber")}
           </label>
           <input
             id="apply-nationalId"
@@ -646,7 +643,7 @@ export function PublicVacancyApplicationForm({
             onChange={handleChange}
             className={inputClass}
             disabled={disabled}
-            placeholder="Ingresá tu número de documento"
+            placeholder={t("placeholders.documentNumber")}
             aria-invalid={Boolean(errors.nationalId)}
             aria-describedby={errors.nationalId ? "apply-nationalId-err" : undefined}
           />
@@ -658,7 +655,7 @@ export function PublicVacancyApplicationForm({
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-source" className={labelClass}>
-            ¿Cómo supiste de esta vacante?
+            {t("fields.source")}
           </label>
           <select
             id="apply-source"
@@ -670,10 +667,10 @@ export function PublicVacancyApplicationForm({
             aria-invalid={Boolean(errors.source)}
             aria-describedby={errors.source ? "apply-source-err" : undefined}
           >
-            <option value="">Seleccioná una opción</option>
-            {SOURCE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
+            <option value="">{t("placeholders.selectOption")}</option>
+            {SOURCE_OPTION_KEYS.map((key) => (
+              <option key={key} value={t(`sources.${key}`)}>
+                {t(`sources.${key}`)}
               </option>
             ))}
           </select>
@@ -685,7 +682,7 @@ export function PublicVacancyApplicationForm({
         </div>
       <div className="space-y-2">
           <label htmlFor="apply-linkedin" className={labelClass}>
-            Perfil de LinkedIn
+            {t("fields.linkedin")}
           </label>
           <input
             id="apply-linkedin"
@@ -699,7 +696,7 @@ export function PublicVacancyApplicationForm({
         </div>
       <div className="space-y-2">
           <label htmlFor="apply-website" className={labelClass}>
-            Sitio web o portafolio
+            {t("fields.website")}
           </label>
           <input
             id="apply-website"
@@ -713,7 +710,7 @@ export function PublicVacancyApplicationForm({
         </div>
       <div className="space-y-2">
         <label htmlFor="apply-notes" className={labelClass}>
-          Notas
+          {t("fields.notes")}
         </label>
         <textarea
           id="apply-notes"
@@ -733,12 +730,12 @@ export function PublicVacancyApplicationForm({
 
       <div className="col-span-2 space-y-2">
         <label htmlFor="apply-cv" className={labelClass}>
-          Currículum (PDF) *
+          {t("fields.resume")}
         </label>
         <div
           className={
             theme === "dark"
-              ? "rounded-[22px] border border-dashed border-white/10 bg-white/6 p-4"
+              ? "rounded-[22px] border border-dashed border-border bg-muted/35 p-4"
               : "rounded-lg border border-dashed border-border bg-muted/40 p-4"
           }
         >
@@ -746,12 +743,12 @@ export function PublicVacancyApplicationForm({
             htmlFor="apply-cv"
             className={
               theme === "dark"
-                ? "inline-flex cursor-pointer items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-[#18213d]"
-                : "inline-flex cursor-pointer items-center gap-2 rounded-lg bg-vo-purple px-4 py-2 text-sm font-medium text-white"
+                ? "inline-flex cursor-pointer items-center gap-2 rounded-full bg-ats-warm-white px-4 py-2 text-sm font-medium text-ats-grafito"
+                : "inline-flex cursor-pointer items-center gap-2 rounded-lg bg-ats-terracotta px-4 py-2 text-sm font-medium text-ats-warm-white"
             }
           >
             <Paperclip className="h-4 w-4 shrink-0" aria-hidden />
-            Seleccionar PDF
+            {t("file.selectPdf")}
           </label>
           <input
             id="apply-cv"
@@ -765,16 +762,16 @@ export function PublicVacancyApplicationForm({
           <p
             className={
               theme === "dark"
-                ? "mt-3 text-xs text-white/56"
+                ? "mt-3 text-xs text-muted-foreground"
                 : "mt-3 text-xs text-muted-foreground"
             }
           >
-            Solo se acepta formato PDF o DOCX.
+            {t("file.helper")}
           </p>
           {cvFile ? (
             <p
               className={
-                theme === "dark" ? "mt-2 text-sm text-white/78" : "mt-2 text-sm text-foreground"
+                theme === "dark" ? "mt-2 text-sm text-muted-foreground" : "mt-2 text-sm text-foreground"
               }
             >
               {cvFile.name}
@@ -790,7 +787,7 @@ export function PublicVacancyApplicationForm({
 
       <div
         className={`col-span-2 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center ${
-          theme === "dark" ? "border-white/10" : "border-border"
+          theme === "dark" ? "border-border" : "border-border"
         }`}
       >
         <button
@@ -798,8 +795,8 @@ export function PublicVacancyApplicationForm({
           disabled={disabled}
           className={
             theme === "dark"
-              ? "inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-[#18213d] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-              : "inline-flex w-full items-center justify-center gap-2 rounded-lg bg-vo-purple px-6 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              ? "inline-flex w-full items-center justify-center gap-2 rounded-full bg-ats-warm-white px-6 py-3 text-sm font-medium text-ats-grafito disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              : "inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ats-terracotta px-6 py-3 text-sm font-medium text-ats-warm-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           }
           aria-live="polite"
         >
@@ -808,20 +805,19 @@ export function PublicVacancyApplicationForm({
           ) : (
             <Mail className="h-4 w-4 shrink-0" aria-hidden />
           )}
-          {disabled ? "Enviando postulación…" : "Enviar postulación"}
+          {disabled ? t("actions.submitting") : t("actions.submit")}
         </button>
         {disabled ? (
           <p
             className={
               theme === "dark"
-                ? "text-xs text-white/72 sm:ml-1"
+                ? "text-xs text-muted-foreground sm:ml-1"
                 : "text-xs text-muted-foreground sm:ml-1"
             }
             role="status"
             aria-live="polite"
           >
-            Estamos validando tu información y procesando tu CV. Suele tardar alrededor de un
-            minuto; no cierres esta pestaña.
+            {t("steps.processingHint")}
           </p>
         ) : null}
       </div>

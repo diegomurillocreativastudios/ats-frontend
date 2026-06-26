@@ -1,4 +1,7 @@
+"use client"
+
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { BarChart3, FileWarning, type LucideIcon } from "lucide-react"
 
 export interface ReportHubCatalogCardProps {
@@ -34,6 +37,7 @@ export function ReportHubCatalogCard({
   badge,
   unlinkedHint,
 }: ReportHubCatalogCardProps) {
+  const t = useTranslations("RecruiterPortal.reports")
   const hasLink = !!href
 
   const content = (
@@ -66,13 +70,13 @@ export function ReportHubCatalogCard({
       {hasLink ? (
         <span className="inline-flex items-center gap-2 font-sans text-sm font-medium text-vo-purple">
           <BarChart3 className="h-4 w-4 shrink-0" aria-hidden />
-          Abrir y descargar
+          {t("cards.openAndDownload")}
         </span>
       ) : (
         <div className="flex flex-col gap-2">
           <span className={unlinkedBadgeClasses}>
             <FileWarning className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            Sin plantilla vinculada
+            {t("cards.unlinkedBadge")}
           </span>
           {unlinkedHint ? (
             <p className="font-sans text-xs text-muted-foreground">
@@ -88,7 +92,7 @@ export function ReportHubCatalogCard({
     return (
       <Link
         href={href!}
-        aria-label={`Abrir reporte: ${title}`}
+        aria-label={t("cards.openReportAria", { title })}
         className={`${baseCardClasses} ${linkExtraClasses}`}
       >
         {content}
@@ -98,7 +102,7 @@ export function ReportHubCatalogCard({
 
   return (
     <article
-      aria-label={`Reporte sin plantilla: ${title}`}
+      aria-label={t("cards.unlinkedReportAria", { title })}
       className={`${baseCardClasses} ${unlinkedExtraClasses}`}
     >
       {content}

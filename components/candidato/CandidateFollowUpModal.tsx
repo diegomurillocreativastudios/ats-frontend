@@ -1,18 +1,15 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Loader2, Plus, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import {
   updateCandidateEvaluations,
   type CandidateEvaluation,
 } from "@/lib/api/candidates"
 
-const FOLLOW_UP_OPTIONS = [
-  { value: 3, label: "3 meses post-contratación" },
-  { value: 6, label: "6 meses post-contratación" },
-  { value: 12, label: "12 meses post-contratación" },
-]
+const FOLLOW_UP_VALUES = [3, 6, 12] as const
 
 export interface CandidateProfile {
   id: string
@@ -38,6 +35,21 @@ export default function CandidateFollowUpModal({
   onClose,
   onUpdated,
 }: CandidateFollowUpModalProps) {
+  const t = useTranslations("RecruiterPortal.candidateDetail.followUp")
+  const tCommon = useTranslations("Common")
+  const followUpOptions = useMemo(
+    () =>
+      FOLLOW_UP_VALUES.map((value) => ({
+        value,
+        label:
+          value === 3
+            ? t("period3")
+            : value === 6
+              ? t("period6")
+              : t("period12"),
+      })),
+    [t]
+  )
   const [evaluations, setEvaluations] = useState<CandidateEvaluation[]>([
     { evalMonth: null, evalComments: "" },
   ])
@@ -68,13 +80,16 @@ export default function CandidateFollowUpModal({
     setError(null)
   }, [open, candidate])
 
-  const getAvailableOptions = useCallback((currentIndex: number) => {
-    const usedValues = evaluations
-      .map((ev, index) => (index !== currentIndex ? ev.evalMonth : null))
-      .filter((val): val is number => val !== null && val !== undefined)
-    
-    return FOLLOW_UP_OPTIONS.filter(option => !usedValues.includes(option.value))
-  }, [evaluations])
+  const getAvailableOptions = useCallback(
+    (currentIndex: number) => {
+      const usedValues = evaluations
+        .map((ev, index) => (index !== currentIndex ? ev.evalMonth : null))
+        .filter((val): val is number => val !== null && val !== undefined)
+
+      return followUpOptions.filter((option) => !usedValues.includes(option.value))
+    },
+    [evaluations, followUpOptions]
+  )
 
   const handleAddEvaluation = useCallback(() => {
     const availableOptions = getAvailableOptions(-1)
@@ -109,7 +124,7 @@ export default function CandidateFollowUpModal({
     if (!candidate) return
     const candidateId = candidate.profileId || candidate.id
     if (!candidateId) {
-      setError("ID de candidato no disponible")
+      setError(t("errors.missingCandidateId"))
       return
     }
 
@@ -120,9 +135,7 @@ export default function CandidateFollowUpModal({
     })
 
     if (validEvaluations.length === 0) {
-      setError(
-        "Debes completar al menos un seguimiento con un período o comentarios."
-      )
+      setError(t("errors.emptyFollowUp"))
       return
     }
 
@@ -130,10 +143,10 @@ export default function CandidateFollowUpModal({
       (ev) =>
         ev.evalMonth !== null &&
         ev.evalMonth !== undefined &&
-        ![3, 6, 12].includes(ev.evalMonth)
+        !FOLLOW_UP_VALUES.includes(ev.evalMonth as (typeof FOLLOW_UP_VALUES)[number])
     )
     if (invalidMonth) {
-      setError("Debes seleccionar un período de seguimiento válido.")
+      setError(t("errors.invalidPeriod"))
       return
     }
 
@@ -163,16 +176,16 @@ export default function CandidateFollowUpModal({
       const message =
         err && typeof err === "object" && "message" in err
           ? String(err.message)
-          : "No se pudo guardar el seguimiento."
+          : t("errors.saveFailed")
       setError(message)
     } finally {
       setSaving(false)
     }
-  }, [candidate, evaluations, onClose, onUpdated])
+  }, [candidate, evaluations, onClose, onUpdated, t])
 
   if (!candidate) return null
 
-  const modalTitle = `Seguimiento | ${candidate.name}`
+  const modalTitle = t("title", { name: candidate.name })
   const canRemove = evaluations.length > 1
   const canAddMore = getAvailableOptions(-1).length > 0
 
@@ -194,7 +207,7 @@ export default function CandidateFollowUpModal({
             className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
           >
             <Plus className="h-4 w-4" aria-hidden />
-            Agregar
+            {t("add")}
           </button>
           <div className="flex gap-3">
             <button
@@ -203,7 +216,7 @@ export default function CandidateFollowUpModal({
               disabled={saving}
               className="inline-flex items-center rounded-md border border-border px-4 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
             >
-              Cancelar
+              {tCommon("cancel")}
             </button>
             <button
               type="button"
@@ -214,7 +227,7 @@ export default function CandidateFollowUpModal({
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
               ) : null}
-              {saving ? "Guardando…" : "Guardar seguimiento"}
+              {saving ? t("saving") : t("save")}
             </button>
           </div>
         </div>
@@ -234,7 +247,7 @@ export default function CandidateFollowUpModal({
           >
             <div className="flex items-center justify-between">
               <h3 className="font-sans text-base font-semibold text-foreground">
-                Seguimiento {index + 1}
+                {t("sectionTitle", { index: index + 1 })}
               </h3>
               {canRemove && (
                 <button
@@ -242,7 +255,7 @@ export default function CandidateFollowUpModal({
                   onClick={() => handleRemoveEvaluation(index)}
                   disabled={saving}
                   className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-destructive disabled:opacity-50"
-                  aria-label={`Eliminar seguimiento ${index + 1}`}
+                  aria-label={t("deleteAria", { index: index + 1 })}
                 >
                   <Trash2 className="h-4 w-4" aria-hidden />
                 </button>
@@ -254,7 +267,7 @@ export default function CandidateFollowUpModal({
                 htmlFor={`eval-month-select-${index}`}
                 className="font-sans text-sm font-medium text-foreground"
               >
-                Período de seguimiento
+                {t("periodLabel")}
               </label>
               <select
                 id={`eval-month-select-${index}`}
@@ -270,17 +283,21 @@ export default function CandidateFollowUpModal({
                 disabled={saving}
                 className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
               >
-                <option value="">Seleccionar período</option>
+                <option value="">{t("selectPeriod")}</option>
                 {getAvailableOptions(index).map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
-                {evaluation.evalMonth && !getAvailableOptions(index).find(opt => opt.value === evaluation.evalMonth) && (
+                {evaluation.evalMonth &&
+                !getAvailableOptions(index).find(
+                  (opt) => opt.value === evaluation.evalMonth
+                ) ? (
                   <option key={evaluation.evalMonth} value={evaluation.evalMonth}>
-                    {FOLLOW_UP_OPTIONS.find(opt => opt.value === evaluation.evalMonth)?.label || `${evaluation.evalMonth} meses`}
+                    {followUpOptions.find((opt) => opt.value === evaluation.evalMonth)
+                      ?.label || t("periodMonths", { months: evaluation.evalMonth })}
                   </option>
-                )}
+                ) : null}
               </select>
             </div>
 
@@ -289,7 +306,7 @@ export default function CandidateFollowUpModal({
                 htmlFor={`eval-comments-textarea-${index}`}
                 className="font-sans text-sm font-medium text-foreground"
               >
-                Comentarios de evaluación
+                {t("commentsLabel")}
               </label>
               <textarea
                 id={`eval-comments-textarea-${index}`}
@@ -299,7 +316,7 @@ export default function CandidateFollowUpModal({
                 }
                 rows={4}
                 disabled={saving}
-                placeholder="Escribe comentarios sobre el seguimiento del candidato..."
+                placeholder={t("commentsPlaceholder")}
                 className="resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
               />
             </div>

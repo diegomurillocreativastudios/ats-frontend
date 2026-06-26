@@ -374,14 +374,68 @@ export const AVAILABILITY_OPTIONS: SelectOption[] = [
 ]
 
 /**
+ * Traductor acotado para labels de opciones del formulario de perfil.
+ *
+ * Etapa 5D (i18n): solo se traduce el LABEL visible. El `value` canónico en
+ * español (el que persiste el backend) NO cambia, por lo que el payload y las
+ * validaciones de negocio quedan intactos.
+ */
+export type ProfileOptionTranslator = (key: string) => string
+
+/** Estado civil con label traducible; `value` canónico (es) preservado. */
+export function getMaritalStatusOptions(t: ProfileOptionTranslator): SelectOption[] {
+  return [
+    { value: "Soltero/a", label: t("options.maritalStatus.single") },
+    { value: "Casado/a", label: t("options.maritalStatus.married") },
+    { value: "Unión libre", label: t("options.maritalStatus.freeUnion") },
+    { value: "Divorciado/a", label: t("options.maritalStatus.divorced") },
+    { value: "Viudo/a", label: t("options.maritalStatus.widowed") },
+    { value: "Separado/a", label: t("options.maritalStatus.separated") },
+  ]
+}
+
+/** Género con label traducible; `value` canónico (es) preservado. */
+export function getGenderOptions(t: ProfileOptionTranslator): SelectOption[] {
+  return [
+    { value: "Masculino", label: t("options.gender.male") },
+    { value: "Femenino", label: t("options.gender.female") },
+  ]
+}
+
+/** Disponibilidad con label traducible; `value` canónico (es) preservado. */
+export function getAvailabilityOptions(t: ProfileOptionTranslator): SelectOption[] {
+  return [
+    { value: "Inmediata", label: t("options.availability.immediate") },
+    { value: "En 15 días o menos", label: t("options.availability.within15Days") },
+    { value: "En 1 mes", label: t("options.availability.within1Month") },
+    { value: "En 2 meses o más", label: t("options.availability.within2MonthsOrMore") },
+    { value: "A convenir", label: t("options.availability.toBeAgreed") },
+    { value: "Según propuesta", label: t("options.availability.perProposal") },
+  ]
+}
+
+/**
+ * Formatea el label visible de una opción legacy a partir de su valor crudo.
+ * Etapa 5E (i18n): permite traducir el sufijo «(valor actual)» con `t()` sin
+ * tocar el `value` canónico. Por defecto mantiene el texto en español para
+ * consumers no migrados.
+ */
+export type LegacyOptionLabelFormatter = (value: string) => string
+
+const defaultLegacyOptionLabel: LegacyOptionLabelFormatter = (value) =>
+  `${value} (valor actual)`
+
+/**
  * Si el valor guardado no coincide con ninguna opción (texto libre previo), mostrarlo como opción extra.
+ * El `value` permanece intacto (canónico); solo el `label` es traducible vía `formatLegacyLabel`.
  */
 export function mergeLegacySelectOption(
   options: SelectOption[],
-  currentValue: string
+  currentValue: string,
+  formatLegacyLabel: LegacyOptionLabelFormatter = defaultLegacyOptionLabel
 ): SelectOption[] {
   const t = currentValue.trim()
   if (!t) return options
   if (options.some((o) => o.value === t)) return options
-  return [{ value: t, label: `${t} (valor actual)` }, ...options]
+  return [{ value: t, label: formatLegacyLabel(t) }, ...options]
 }

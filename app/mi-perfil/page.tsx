@@ -1,8 +1,13 @@
+import { getTranslations } from "next-intl/server"
 import MiPerfilContent from "./MiPerfilContent"
 
-export const metadata = {
-  title: { absolute: "ATS | Mi perfil" },
-  description: "Consultá y gestioná los datos de tu cuenta en el portal del candidato",
+export async function generateMetadata() {
+  const t = await getTranslations("Metadata.candidateProfile")
+
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function MiPerfilPage() {

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { AlertCircle, FileDown, Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { ExecutiveSummaryReportPdfTemplate } from "@/components/recruiter/reports/executive-summary-report-pdf-template"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import { ReportFilterRenderer } from "@/components/rrhh/reportes/report-filter-renderer"
@@ -10,6 +11,7 @@ import ReportesFiltersPlaceholder from "@/components/rrhh/reportes/reportes-filt
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { APP_LOGO_SVG_SRC } from "@/lib/app-brand"
 import {
   fetchReportTemplateConfig,
   generateReportDocumentPreview,
@@ -21,7 +23,7 @@ import {
   type RecruiterCompanyOption,
   type ReportsRecruiterSummary,
 } from "@/lib/api/recruiter-reports"
-import { reportTemplateMessages as m } from "@/lib/messages/report-template"
+import { getReportTemplateMessages } from "@/lib/messages/report-template"
 import { captureElementAsPdfBlob } from "@/lib/pdf/download-element-as-pdf"
 import { resolveReportPdfCaptureElement } from "@/lib/pdf/resolve-report-preview-pdf-element"
 import {
@@ -81,6 +83,8 @@ function hasPreviewContext(ctx: Record<string, unknown> | null): boolean {
 }
 
 export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailClientProps) {
+  const tReport = useTranslations("RecruiterPortal.reports.templateDetail")
+  const m = useMemo(() => getReportTemplateMessages(tReport), [tReport])
   const pdfCaptureRef = useRef<HTMLDivElement>(null)
   const initialPreviewDoneRef = useRef(false)
 
@@ -131,7 +135,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   const resolveClientName = useCallback(
     (clientId: string) => {
       if (!clientId.trim()) return "Todos"
-      return companies.find((c) => c.id === clientId)?.name?.trim() || "Cliente"
+      return companies.find((c) => c.id === clientId)?.name?.trim() || m.clientFallback
     },
     [companies]
   )
@@ -260,7 +264,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
           const windowOrigin =
             typeof window !== "undefined" ? window.location.origin.replace(/\/$/, "") : ""
           const origin = publicBase || windowOrigin
-          const logoUrl = origin ? `${origin}/visible-icon.png` : ""
+          const logoUrl = origin ? `${origin}${APP_LOGO_SVG_SRC}` : ""
           const pdfFilters = {
             clientName: resolveClientName(String(filters.clientId ?? "")),
             from: formatIsoDateForPdf(String(filters.dateFrom ?? "")),
@@ -474,10 +478,10 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   ])
 
   const trail = template
-    ? [{ label: "Reportes", href: "/portal-rrhh/reportes" }, { label: template.name }]
-    : [{ label: "Reportes", href: "/portal-rrhh/reportes" }, { label: "Reporte" }]
+    ? [{ label: m.breadcrumbReports, href: "/portal-rrhh/reportes" }, { label: template.name }]
+    : [{ label: m.breadcrumbReports, href: "/portal-rrhh/reportes" }, { label: m.breadcrumbReport }]
 
-  const breadcrumbLabel = template?.name ?? "Reporte"
+  const breadcrumbLabel = template?.name ?? m.breadcrumbReport
   const busy = loadingTemplate || loadingConfig || generatingPreview
   const hasPreviewData = hasPreviewContext(previewContext)
   const hasPdfCaptureSource =
@@ -527,14 +531,14 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
               href="/portal-rrhh/reportes"
               className="inline-flex w-fit items-center justify-center rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
             >
-              Volver a reportes
+              {m.backToReports}
             </Link>
           </div>
         ) : null}
 
         {!loadingTemplate && !templateError && template ? (
           <>
-            <section aria-label="Encabezado del reporte">
+            <section aria-label={m.headerAria}>
               <PortalPageHeader
                 title={template.name}
                 titleClassName="text-2xl font-bold tracking-tight text-foreground md:text-3xl"
@@ -611,7 +615,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             ) : null}
 
             {!loadingConfig && !configError && reportConfig ? (
-              <section className="space-y-4" aria-label="Filtros del reporte" data-report-pdf-exclude>
+              <section className="space-y-4" aria-label={m.filtersAria} data-report-pdf-exclude>
                 <ReportesFiltersPlaceholder hintText={m.filtersHint} controlsClassName={filterGridClass}>
                   <ReportFilterRenderer
                     schema={reportConfig.filterSchema}
@@ -636,7 +640,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             {generatingPreview ? (
               <div className="flex items-center gap-2 font-sans text-sm text-muted-foreground" role="status">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                Cargando datos del reporte…
+                {m.loadingData}
               </div>
             ) : null}
 
@@ -662,7 +666,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
                       title={m.previewTitle}
                       sandbox="allow-same-origin"
                       srcDoc={previewSrcDoc}
-                      className="min-h-[480px] w-full flex-1 border-0 bg-white"
+                      className="min-h-[480px] w-full flex-1 border-0 bg-background"
                     />
                   </div>
                 ) : (
@@ -684,7 +688,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
               className="inline-flex w-fit items-center justify-center rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
               data-html2canvas-ignore="true"
             >
-              Volver a reportes
+              {m.backToReports}
             </Link>
           </>
         ) : null}
@@ -693,7 +697,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
       {!loadingTemplate && !templateError && template && hasPreviewData && !previewError ? (
         <div
           ref={pdfCaptureRef}
-          className="pointer-events-none fixed left-[-12000px] top-0 z-[-1] overflow-visible bg-white"
+          className="pointer-events-none fixed left-[-12000px] top-0 z-[-1] overflow-visible bg-background"
           aria-hidden
         >
           {useReactPreview && pdfData ? (
@@ -704,7 +708,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             />
           ) : previewInnerHtml ? (
             <main
-              className="report-preview-doc w-[1600px] bg-white px-8 py-7 text-slate-950"
+              className="report-preview-doc w-[1600px] bg-background px-8 py-7 text-slate-950"
               style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
               dangerouslySetInnerHTML={{ __html: previewInnerHtml }}
             />

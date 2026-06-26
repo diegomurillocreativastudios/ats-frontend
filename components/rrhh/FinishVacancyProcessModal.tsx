@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
 import { StarRating } from "@/components/ui/StarRating"
@@ -19,6 +20,7 @@ export function FinishVacancyProcessModal({
   onConfirm,
   loading = false,
 }: FinishVacancyProcessModalProps) {
+  const t = useTranslations("RecruiterPortal.vacancies.detail.finishModal")
   const [calification, setCalification] = useState(5)
   const [comments, setComments] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +29,7 @@ export function FinishVacancyProcessModal({
     setError(null)
 
     if (calification < 1 || calification > 5) {
-      setError("La calificación debe estar entre 1 y 5 estrellas.")
+      setError(t("validationRating"))
       return
     }
 
@@ -37,7 +39,7 @@ export function FinishVacancyProcessModal({
       setComments("")
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Error al finalizar el proceso"
+        err instanceof Error ? err.message : t("errorFallback")
       setError(errorMessage)
     }
   }
@@ -58,9 +60,9 @@ export function FinishVacancyProcessModal({
         variant="outline"
         onClick={handleClose}
         disabled={loading}
-        aria-label="Cancelar"
+        aria-label={t("cancelAria")}
       >
-        Cancelar
+        {t("cancelAria")}
       </Button>
       <Button
         type="button"
@@ -68,9 +70,9 @@ export function FinishVacancyProcessModal({
         disabled={loading}
         loading={loading}
         className="bg-vo-purple text-white hover:bg-vo-purple-hover focus-visible:ring-vo-purple"
-        aria-label="Confirmar finalización"
+        aria-label={t("confirmAria")}
       >
-        Finalizar proceso
+        {t("confirm")}
       </Button>
     </>
   )
@@ -79,7 +81,7 @@ export function FinishVacancyProcessModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Finalizar proceso de la vacante"
+      title={t("title")}
       footer={footer}
       size="md"
       closeOnOverlayClick={!loading}
@@ -92,12 +94,10 @@ export function FinishVacancyProcessModal({
           </div>
           <div className="min-w-0 space-y-1">
             <p className="font-sans text-sm font-semibold text-sky-900">
-              Proceso completado
+              {t("completedTitle")}
             </p>
             <p className="font-sans text-sm text-sky-800">
-              Al finalizar el proceso, la vacante quedará inactiva y en estado de solo
-              lectura. Podrás consultar toda la información, pero no realizar
-              cambios.
+              {t("completedBody")}
             </p>
           </div>
         </div>
@@ -107,8 +107,8 @@ export function FinishVacancyProcessModal({
             htmlFor="vacancy-calification"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Calificación del proceso
-            <span className="ml-1 text-destructive" aria-label="requerido">
+            {t("ratingLabel")}
+            <span className="ml-1 text-destructive" aria-label={t("requiredAria")}>
               *
             </span>
           </label>
@@ -119,12 +119,13 @@ export function FinishVacancyProcessModal({
               size="lg"
             />
             <span className="font-sans text-sm text-muted-foreground">
-              {calification} de 5 estrella{calification !== 1 ? "s" : ""}
+              {calification === 1
+                ? t("ratingValueSingular", { rating: calification })
+                : t("ratingValue", { rating: calification })}
             </span>
           </div>
           <p className="font-sans text-xs text-muted-foreground">
-            Selecciona entre 1 y 5 estrellas para calificar el proceso de
-            reclutamiento.
+            {t("ratingHelper")}
           </p>
         </div>
 
@@ -133,7 +134,7 @@ export function FinishVacancyProcessModal({
             htmlFor="vacancy-comments"
             className="font-sans text-sm font-medium text-foreground"
           >
-            Comentarios (opcional)
+            {t("commentsLabel")}
           </label>
           <textarea
             id="vacancy-comments"
@@ -142,11 +143,11 @@ export function FinishVacancyProcessModal({
             disabled={loading}
             rows={4}
             className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-            placeholder="Agrega tus comentarios sobre el proceso de reclutamiento..."
-            aria-label="Comentarios sobre el proceso"
+            placeholder={t("commentsPlaceholder")}
+            aria-label={t("commentsAria")}
           />
           <p className="font-sans text-xs text-muted-foreground">
-            Puedes agregar observaciones o notas sobre cómo fue el proceso.
+            {t("commentsHelper")}
           </p>
         </div>
 

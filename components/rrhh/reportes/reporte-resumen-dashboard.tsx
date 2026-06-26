@@ -1,6 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
+import { useTranslations } from "next-intl"
 import type { LucideIcon } from "lucide-react"
 import {
   AlertCircle,
@@ -324,11 +325,15 @@ function CandidateFlowRow({
   count,
   total,
   icon: Icon,
+  percentLabel,
+  emptyPeriodLabel,
 }: {
   label: string
   count: number
   total: number
   icon: LucideIcon
+  percentLabel: (pct: number) => string
+  emptyPeriodLabel: string
 }) {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0
   return (
@@ -348,15 +353,16 @@ function CandidateFlowRow({
         barClassName="bg-vo-purple/70"
       />
       <span className="font-sans text-[11px] text-muted-foreground">
-        {total > 0 ? `${pct}% del total de candidatos` : "Sin candidatos en el periodo"}
+        {total > 0 ? percentLabel(pct) : emptyPeriodLabel}
       </span>
     </div>
   )
 }
 
 export function ReporteResumenDashboardSkeleton() {
+  const t = useTranslations("RecruiterPortal.reports.summary.dashboard")
   return (
-    <div className="flex flex-col gap-6" aria-busy="true" aria-label="Cargando resumen">
+    <div className="flex flex-col gap-6" aria-busy="true" aria-label={t("loading")}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
           <div
@@ -383,6 +389,7 @@ export function ReporteResumenDashboardSkeleton() {
 }
 
 export function ReporteResumenEmptyState() {
+  const t = useTranslations("RecruiterPortal.reports.summary")
   return (
     <div
       className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/10 px-6 py-14 text-center"
@@ -390,7 +397,7 @@ export function ReporteResumenEmptyState() {
     >
       <Sparkles className="mb-3 h-10 w-10 text-vo-purple/50" aria-hidden />
       <p className="font-sans text-base font-medium text-foreground">
-        Sin datos para mostrar
+        {t("emptyStates.noData")}
       </p>
       <p className="mt-2 max-w-md font-sans text-sm text-muted-foreground">
         No se recibieron indicadores con los filtros actuales. Prueba ampliando el rango de
@@ -401,6 +408,7 @@ export function ReporteResumenEmptyState() {
 }
 
 export function ReporteResumenErrorState({ message }: { message: string }) {
+  const t = useTranslations("RecruiterPortal.reports.summary.dashboard")
   return (
     <div
       className="flex gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-4"
@@ -409,7 +417,7 @@ export function ReporteResumenErrorState({ message }: { message: string }) {
       <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" aria-hidden />
       <div>
         <p className="font-sans text-sm font-semibold text-destructive">
-          No se pudo cargar el resumen
+          {t("loadFailed")}
         </p>
         <p className="mt-1 font-sans text-sm text-destructive/90">{message}</p>
       </div>
@@ -418,6 +426,7 @@ export function ReporteResumenErrorState({ message }: { message: string }) {
 }
 
 export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProps) {
+  const t = useTranslations("RecruiterPortal.reports.summary.dashboard")
   const totalClients = pickNumber(summary, "totalClients")
   const totalVacancies = pickNumber(summary, "totalVacancies")
   const openVacancies = pickNumber(summary, "openVacancies")
@@ -461,45 +470,45 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
     <div className="flex flex-col gap-6">
       <div
         className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
-        aria-label="Indicadores principales"
+        aria-label={t("kpisAria")}
       >
         <ExecutiveKpiCard
           icon={Building2}
-          title="Clientes"
+          title={t("clients")}
           value={formatInt(totalClients)}
-          subtitle="Clientes registrados en el periodo"
+          subtitle={t("clientsRegistered")}
         />
         <ExecutiveKpiCard
           icon={Briefcase}
-          title="Vacantes"
+          title={t("vacancies")}
           value={formatInt(totalVacancies)}
-          subtitle="Vacantes creadas"
+          subtitle={t("vacanciesCreated")}
         />
         <ExecutiveKpiCard
           icon={TrendingUp}
-          title="Vacantes abiertas"
+          title={t("openVacancies")}
           value={formatInt(openVacancies)}
-          subtitle="Procesos activos actualmente"
+          subtitle={t("activeProcessesSubtitle")}
         />
         <ExecutiveKpiCard
           icon={Users}
-          title="Candidatos"
+          title={t("candidates")}
           value={formatInt(totalCandidates)}
-          subtitle="Candidatos registrados"
+          subtitle={t("candidatesRegistered")}
         />
         <ExecutiveKpiCard
           icon={UserCheck}
-          title="Contratados"
+          title={t("hired")}
           value={formatInt(candidatesHired)}
-          subtitle="Candidatos finalizados como contratados"
+          subtitle={t("candidatesHired")}
         />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <SectionCard
           headingId="resumen-estado-vacantes"
-          title="Estado de vacantes"
-          description="Distribución entre vacantes abiertas y cerradas en el periodo."
+          title={t("vacancyStatus")}
+          description={t("vacanciesDistribution")}
         >
           <StackedVacancyBar
             open={openVacancies}
@@ -510,7 +519,7 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
 
         <SectionCard
           headingId="resumen-progreso-vacantes"
-          title="Progreso promedio de vacantes"
+          title={t("avgProgress")}
           description="Avance promedio general de los procesos activos."
         >
           {progressValue != null ? (
@@ -556,7 +565,7 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
       <div className="grid gap-4 lg:grid-cols-2">
         <SectionCard
           headingId="resumen-match"
-          title="Emparejamiento preliminar medio"
+          title={t("avgMatch")}
           description="Score promedio de coincidencia preliminar entre candidatos y vacantes."
           className={
             matchValue != null && matchValue >= 75
@@ -614,27 +623,33 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
 
         <SectionCard
           headingId="resumen-flujo-candidatos"
-          title="Flujo de candidatos"
+          title={t("candidateFlow")}
           description="Registrados, en entrevista y contratados."
         >
           <div className="flex flex-col gap-3">
             <CandidateFlowRow
-              label="Registrados"
+              label={t("registered")}
               count={totalCandidates}
               total={totalCandidates}
               icon={Users}
+              percentLabel={(pct) => `${pct}${t("percentOfTotal")}`}
+              emptyPeriodLabel={t("noCandidatesInPeriod")}
             />
             <CandidateFlowRow
-              label="En entrevista"
+              label={t("inInterview")}
               count={inInterview}
               total={totalCandidates}
               icon={ClipboardCheck}
+              percentLabel={(pct) => `${pct}${t("percentOfTotal")}`}
+              emptyPeriodLabel={t("noCandidatesInPeriod")}
             />
             <CandidateFlowRow
-              label="Contratados"
+              label={t("hired")}
               count={candidatesHired}
               total={totalCandidates}
               icon={UserCheck}
+              percentLabel={(pct) => `${pct}${t("percentOfTotal")}`}
+              emptyPeriodLabel={t("noCandidatesInPeriod")}
             />
             {inInterview === 0 && candidatesHired === 0 ? (
               <p className="rounded-lg border border-border bg-muted/30 px-3 py-2 font-sans text-xs text-muted-foreground">
@@ -648,7 +663,7 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
       <div className="grid gap-4 lg:grid-cols-2">
         <SectionCard
           headingId="resumen-evaluaciones"
-          title="Evaluaciones técnicas"
+          title={t("technicalEvaluations")}
           description="Seguimiento de evaluaciones completadas y tasa de aprobación."
         >
           {techCompleted > 0 ? (
@@ -685,7 +700,7 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
 
         <SectionCard
           headingId="resumen-fuente"
-          title="Fuente principal de captación"
+          title={t("mainSource")}
           description="Canal con mayor actividad registrada en el periodo seleccionado."
         >
           <div className="flex flex-col gap-3">
@@ -698,7 +713,7 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
               </p>
             ) : (
               <p className="font-sans text-sm text-muted-foreground">
-                Sin datos suficientes para determinar la fuente principal.
+                {t("insufficientData")}
               </p>
             )}
           </div>
@@ -712,7 +727,7 @@ export function ReporteResumenDashboard({ summary }: ReporteResumenDashboardProp
         <div className="mb-4 flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-vo-purple" aria-hidden />
           <h2 id="resumen-insights" className="font-sans text-base font-semibold text-foreground">
-            Hallazgos del período
+            {t("periodFindings")}
           </h2>
         </div>
         <ul className="grid gap-3 md:grid-cols-3" role="list">

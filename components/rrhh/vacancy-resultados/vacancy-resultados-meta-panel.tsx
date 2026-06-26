@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { AlertTriangle, Building2, Calendar, Globe2, Tag } from "lucide-react"
 import type { VacancyResultadosVacancyMeta } from "@/lib/api/vacancy-resultados"
 
@@ -21,6 +22,7 @@ function formatDisplayDate(iso: string | null): string | null {
 }
 
 function WeightsVisual({ weights }: { weights: unknown }) {
+  const t = useTranslations("RecruiterPortal.vacancies.results.meta")
   const o = weights && typeof weights === "object" && !Array.isArray(weights)
     ? (weights as Record<string, unknown>)
     : null
@@ -40,7 +42,7 @@ function WeightsVisual({ weights }: { weights: unknown }) {
   if (semantic == null && attrEntries.length === 0) {
     return (
       <p className="font-sans text-sm text-muted-foreground">
-        No hay pesos de emparejamiento estructurados en la respuesta del API.
+        {t("noStructuredWeights")}
       </p>
     )
   }
@@ -52,7 +54,7 @@ function WeightsVisual({ weights }: { weights: unknown }) {
       {semanticPct != null ? (
         <div>
           <div className="mb-1 flex items-center justify-between font-sans text-xs text-muted-foreground">
-            <span>Peso similitud semántica</span>
+            <span>{t("semanticWeight")}</span>
             <span className="tabular-nums font-medium text-foreground">{semanticPct}%</span>
           </div>
           <div className="h-3 overflow-hidden rounded-full bg-muted">
@@ -66,7 +68,7 @@ function WeightsVisual({ weights }: { weights: unknown }) {
       {attrEntries.length > 0 ? (
         <div>
           <p className="mb-2 font-sans text-xs font-medium text-muted-foreground">
-            Pesos por atributo
+            {t("attributeWeights")}
           </p>
           <ul className="space-y-2">
             {attrEntries.map(([key, val]) => {
@@ -82,7 +84,7 @@ function WeightsVisual({ weights }: { weights: unknown }) {
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-[#496FB3]"
+                      className="h-full rounded-full bg-ats-cobre"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -93,7 +95,7 @@ function WeightsVisual({ weights }: { weights: unknown }) {
         </div>
       ) : semanticPct != null ? (
         <p className="font-sans text-xs text-muted-foreground">
-          Sin pesos adicionales por atributos en esta vacante.
+          {t("noAdditionalAttributeWeights")}
         </p>
       ) : null}
     </div>
@@ -101,9 +103,10 @@ function WeightsVisual({ weights }: { weights: unknown }) {
 }
 
 function RequirementsBlock({ requirements }: { requirements: unknown }) {
+  const t = useTranslations("RecruiterPortal.vacancies.results.meta")
   if (requirements == null) {
     return (
-      <p className="font-sans text-sm text-muted-foreground">Sin requisitos en el payload.</p>
+      <p className="font-sans text-sm text-muted-foreground">{t("noRequirements")}</p>
     )
   }
   if (typeof requirements === "object" && !Array.isArray(requirements)) {
@@ -111,8 +114,7 @@ function RequirementsBlock({ requirements }: { requirements: unknown }) {
     if (keys.length === 0) {
       return (
         <p className="font-sans text-sm text-muted-foreground">
-          Requisitos vacíos (objeto sin claves). El emparejamiento puede basarse solo en texto libre de la
-          descripción.
+          {t("emptyRequirements")}
         </p>
       )
     }
@@ -134,8 +136,10 @@ export function VacancyResultadosMetaPanel({
   meta,
   hideVacancyHeading = false,
 }: VacancyResultadosMetaPanelProps) {
+  const tMeta = useTranslations("RecruiterPortal.vacancies.results.meta")
+  const tPage = useTranslations("RecruiterPortal.vacancies.results.page")
   const created = formatDisplayDate(meta.createdAt)
-  const title = vacancyTitle?.trim() || "Vacante"
+  const title = vacancyTitle?.trim() || tPage("vacancyFallback")
 
   return (
     <section
@@ -167,14 +171,14 @@ export function VacancyResultadosMetaPanel({
                 {meta.needsRematch ? (
                   <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 font-sans text-xs font-medium text-amber-900">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                    Requiere re-match
+                    {tPage("needsRematch")}
                   </span>
                 ) : null}
               </div>
             </>
           ) : (
             <h2 id="vacancy-resultados-meta-heading" className="sr-only">
-              Contexto de la vacante: {title}
+              {tMeta("srOnlyContext", { title })}
             </h2>
           )}
           <dl className="mt-4 grid gap-3 font-sans text-sm sm:grid-cols-2">
@@ -182,7 +186,7 @@ export function VacancyResultadosMetaPanel({
               <div className="flex gap-2 rounded-lg border border-border/60 bg-background/60 px-3 py-2">
                 <Building2 className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                 <div>
-                  <dt className="text-xs text-muted-foreground">Empresa</dt>
+                  <dt className="text-xs text-muted-foreground">{tMeta("company")}</dt>
                   <dd className="font-medium text-foreground">{meta.company}</dd>
                 </div>
               </div>
@@ -191,20 +195,20 @@ export function VacancyResultadosMetaPanel({
               <div className="flex gap-2 rounded-lg border border-border/60 bg-background/60 px-3 py-2">
                 <Globe2 className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                 <div>
-                  <dt className="text-xs text-muted-foreground">País (código)</dt>
+                  <dt className="text-xs text-muted-foreground">{tMeta("countryCode")}</dt>
                   <dd className="font-medium text-foreground">{meta.countryCode}</dd>
                 </div>
               </div>
             ) : null}
             {meta.vacancyDepartmentLabel ? (
               <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2">
-                <dt className="text-xs text-muted-foreground">Departamento</dt>
+                <dt className="text-xs text-muted-foreground">{tMeta("department")}</dt>
                 <dd className="font-medium text-foreground">{meta.vacancyDepartmentLabel}</dd>
               </div>
             ) : null}
             {meta.vacancyModalityLabel ? (
               <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2">
-                <dt className="text-xs text-muted-foreground">Modalidad</dt>
+                <dt className="text-xs text-muted-foreground">{tMeta("modality")}</dt>
                 <dd className="font-medium text-foreground">{meta.vacancyModalityLabel}</dd>
               </div>
             ) : null}
@@ -212,7 +216,7 @@ export function VacancyResultadosMetaPanel({
               <div className="flex gap-2 rounded-lg border border-border/60 bg-background/60 px-3 py-2 sm:col-span-2">
                 <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                 <div>
-                  <dt className="text-xs text-muted-foreground">Creada</dt>
+                  <dt className="text-xs text-muted-foreground">{tMeta("created")}</dt>
                   <dd className="font-medium text-foreground">{created}</dd>
                 </div>
               </div>
@@ -220,7 +224,9 @@ export function VacancyResultadosMetaPanel({
           </dl>
         </div>
         <div className="w-full shrink-0 rounded-xl border border-border bg-card/80 p-4 shadow-inner lg:max-w-sm">
-          <h3 className="font-sans text-sm font-semibold text-foreground">Pesos del modelo</h3>
+          <h3 className="font-sans text-sm font-semibold text-foreground">
+            {tMeta("modelWeightsHeading")}
+          </h3>
           <div className="mt-3">
             <WeightsVisual weights={meta.weights} />
           </div>
@@ -231,9 +237,9 @@ export function VacancyResultadosMetaPanel({
         <details className="group mt-6 rounded-lg border border-border bg-background/50">
           <summary className="cursor-pointer list-none px-4 py-3 font-sans text-sm font-semibold text-foreground marker:hidden [&::-webkit-details-marker]:hidden">
             <span className="inline-flex items-center gap-2">
-              Ver descripción completa
+              {tMeta("viewFullDescription")}
               <span className="text-xs font-normal text-muted-foreground group-open:hidden">
-                (click para expandir)
+                {tMeta("expandHint")}
               </span>
             </span>
           </summary>
@@ -247,24 +253,24 @@ export function VacancyResultadosMetaPanel({
 
       <details className="group mt-6 rounded-lg border border-border bg-muted/15">
         <summary className="cursor-pointer list-none px-4 py-3 font-sans text-sm font-semibold text-foreground marker:hidden [&::-webkit-details-marker]:hidden">
-          Detalles técnicos
+          {tMeta("technicalDetails")}
           <span className="ml-2 text-xs font-normal text-muted-foreground group-open:hidden">
-            (requisitos, sugerencias de IA)
+            {tMeta("technicalDetailsHint")}
           </span>
         </summary>
         <div className="space-y-4 border-t border-border px-4 py-4">
           <div>
             <h3 className="font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Requisitos (payload)
+              {tMeta("requirementsPayload")}
             </h3>
             <div className="mt-2">
               <RequirementsBlock requirements={meta.requirements} />
             </div>
           </div>
           {meta.aiMatchSuggestions.length > 0 ? (
-            <div role="region" aria-label="Sugerencias de IA">
+            <div role="region" aria-label={tMeta("aiSuggestionsAria")}>
               <h3 className="font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Sugerencias de IA ({meta.aiMatchSuggestions.length})
+                {tMeta("aiSuggestionsHeading", { count: meta.aiMatchSuggestions.length })}
               </h3>
               <pre className="mt-2 max-h-56 overflow-auto rounded-md border border-border bg-background/80 p-3 font-mono text-xs text-foreground">
                 {JSON.stringify(meta.aiMatchSuggestions, null, 2)}

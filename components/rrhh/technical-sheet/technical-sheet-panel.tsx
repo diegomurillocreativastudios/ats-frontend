@@ -3,7 +3,8 @@
 import type { ReactNode } from "react"
 import { useCallback, useEffect, useId, useRef, useState } from "react"
 import { FileDown, Loader2 } from "lucide-react"
-import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
+import { useTranslations } from "next-intl"
+import { getApiErrorMessage } from "@/lib/api-error"
 import {
   downloadTechnicalSheetPdfFromNextRoute,
   fetchTechnicalSheetJson,
@@ -54,6 +55,7 @@ export function TechnicalSheetPanel({
   className = "",
   headerEnd = null,
 }: TechnicalSheetPanelProps) {
+  const t = useTranslations("RecruiterPortal.technicalSheet")
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const previewScrollRef = useRef<HTMLDivElement>(null)
@@ -80,7 +82,7 @@ export function TechnicalSheetPanel({
       const picked = findTechnicalSheetDocumentTemplate(list)
       const rawTemplate = picked?.contentTemplate?.trim() ?? ""
       if (!picked || rawTemplate === "") {
-        setError(m.errorNoTechnicalSheetTemplate)
+        setError(t("errors.noTemplate"))
         return
       }
       const windowOrigin =
@@ -108,20 +110,16 @@ export function TechnicalSheetPanel({
           ? Number((err as { status?: number }).status)
           : 0
       if (status === 404) {
-        setError(m.errorNotPosted)
+        setError(t("errors.notPosted"))
       } else if (status === 403) {
-        setError(m.errorForbidden)
+        setError(t("errors.forbidden"))
       } else {
-        const msg =
-          typeof err === "object" && err !== null && "message" in err
-            ? String((err as { message?: unknown }).message)
-            : ""
-        setError(msg.trim() || m.errorGeneric)
+        setError(getApiErrorMessage(err) || t("errors.generic"))
       }
     } finally {
       setLoading(false)
     }
-  }, [vacancyId, candidateProfileId, vacancyTitle])
+  }, [vacancyId, candidateProfileId, vacancyTitle, t])
 
   useEffect(() => {
     if (!enabled) return
@@ -204,12 +202,12 @@ export function TechnicalSheetPanel({
           previewHtml: paginatedSrcDoc,
         })
       } catch {
-        setPdfActionError(m.pdfExportFailed)
+        setPdfActionError(t("errors.pdfExportFailed"))
       }
     } finally {
       setPdfBusy(false)
     }
-  }, [vacancyId, candidateProfileId, paginatedSrcDoc, vacancyTitle])
+  }, [vacancyId, candidateProfileId, paginatedSrcDoc, vacancyTitle, t])
 
   const busy = loading
   const iframeDoc = paginatedSrcDoc ?? templateHtml
@@ -236,7 +234,7 @@ export function TechnicalSheetPanel({
         <div className="flex items-start justify-between gap-3 px-5 py-4">
           <div className="min-w-0 flex-1 pr-2">
             <h2 id={titleId} className="font-sans text-xl font-semibold tracking-tight text-foreground">
-              {m.modalTitle}
+              {t("title")}
             </h2>
             {candidateLine ? (
               <p className="mt-1.5 line-clamp-2 font-sans text-sm text-muted-foreground">{candidateLine}</p>
@@ -258,7 +256,7 @@ export function TechnicalSheetPanel({
                 ) : (
                   <FileDown className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
                 )}
-                {pdfBusy ? m.downloadingPdf : m.downloadPdf}
+                {pdfBusy ? t("loadingStates.downloadingPdf") : t("actions.downloadPdf")}
               </button>
             ) : null}
             {headerEnd ? <div className="shrink-0">{headerEnd}</div> : null}
@@ -278,7 +276,7 @@ export function TechnicalSheetPanel({
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16" role="status">
             <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
-            <p className="font-sans text-sm text-muted-foreground">{m.loading}</p>
+            <p className="font-sans text-sm text-muted-foreground">{t("loadingStates.loading")}</p>
           </div>
         ) : error ? (
           <p className="font-sans text-sm text-destructive" role="alert">
@@ -288,7 +286,7 @@ export function TechnicalSheetPanel({
           <div className="flex min-h-0 w-full flex-1 flex-col items-center gap-6">
             <div className="flex min-h-0 w-full max-w-[816px] flex-1 flex-col overflow-hidden rounded-lg border border-border bg-transparent">
               <iframe
-                title={m.modalTitle}
+                title={t("title")}
                 sandbox="allow-same-origin"
                 srcDoc={iframeDoc}
                 className="min-h-0 w-full flex-1 border-0 bg-transparent"

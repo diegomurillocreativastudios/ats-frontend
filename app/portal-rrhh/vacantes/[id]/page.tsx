@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeft,
   ArrowRight,
@@ -55,7 +56,6 @@ import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProces
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
-import { technicalSheetMessages } from "@/lib/messages/technical-sheet"
 import {
   AiDisclosureBadge,
   AiDisclosureNotice,
@@ -72,6 +72,7 @@ import {
   normalizeKanbanStage,
   resolveOrderedStageNames,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
+import { validateStageMove } from "@/lib/recruiter/stage-move-validation"
 import { getAccessToken } from "@/lib/auth";
 import { getInitials } from "@/lib/getInitials";
 import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api";
@@ -97,12 +98,23 @@ import {
   mapActiveCatalogItemsToOptions,
   mergeCatalogOption,
 } from "@/lib/vacancy-catalogs";
+import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels";
+import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles";
 
-const formatDate = (value) => {
+const LOCALE_DATE_MAP = {
+  es: "es-CL",
+  en: "en-US",
+  it: "it-IT",
+  de: "de-DE",
+  fr: "fr-FR",
+};
+
+const formatDate = (value, locale = "es") => {
   if (!value) return "—";
   const d = typeof value === "string" ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("es-CL", {
+  const dateLocale = LOCALE_DATE_MAP[locale] ?? locale;
+  return d.toLocaleDateString(dateLocale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -136,8 +148,8 @@ const extractApiErrorMessage = (err) => {
  * El API de move-to-stage exige un "estado de postulación por defecto" en la empresa.
  * Si falta, el backend devuelve un mensaje en inglés; aquí lo traducimos y damos contexto.
  */
-const normalizeMoveStageError = (err) => {
-  const fallback = "No se pudo mover el candidato de etapa."
+const normalizeMoveStageError = (err, t) => {
+  const fallback = t("errors.moveStageFailed")
   const raw = extractApiErrorMessage(err) ?? fallback
   const lower = raw.toLowerCase()
   const isDefaultStatusMissing =
@@ -145,17 +157,30 @@ const normalizeMoveStageError = (err) => {
     lower.includes("missing default application status")
   if (isDefaultStatusMissing) {
     return {
-      text: "Falta el estado de postulación por defecto de la empresa. El servidor lo necesita al mover candidatos entre etapas. Configúralo en Etapas (estados) o pide a un administrador que lo haga.",
+      text: t("errors.missingDefaultApplicationStatus"),
       showEstadosLink: true,
     }
   }
   return { text: raw, showEstadosLink: false }
 }
 
-const normalizeApplicationStatusError = (err) => {
-  const fallback = "No se pudo actualizar el estado de la postulación."
+const normalizeApplicationStatusError = (err, t) => {
+  const fallback = t("errors.updateApplicationStatusFailed")
   const raw = extractApiErrorMessage(err) ?? fallback
   return { text: raw, showEstadosLink: false }
+}
+
+const normalizeStageMoveValidationError = (code, t) => {
+  if (code === "final_status_required") {
+    return {
+      text: t("errors.finalStatusRequiredForStageMove"),
+      showEstadosLink: true,
+    }
+  }
+  return {
+    text: t("errors.stageSkipNotAllowed"),
+    showEstadosLink: false,
+  }
 }
 
 /** Converts any value to a string safe for React (never render an object). */
@@ -218,10 +243,11 @@ const ScoreBarRow = ({
   barTrackClass = "bg-slate-200/90",
   isTotalRow = false,
   hideLabel = false,
+  getScoreLabel,
 }) => {
   const pct = typeof val === "number" ? (val * 100).toFixed(1) : null;
   const barWidth = typeof val === "number" ? Math.min(val * 100, 100) : 0;
-  const labelText = formatScoreKey(scoreKey);
+  const labelText = getScoreLabel(scoreKey);
   return (
     <li
       className={
@@ -269,45 +295,55 @@ const ScoreTooltip = ({ text, accentClass = "text-slate-500" }) => (
     </button>
     <span
       role="tooltip"
-      className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-md border border-border bg-white px-3 py-2 text-left font-sans text-xs font-normal leading-relaxed text-slate-700 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+      className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-md border border-border bg-background px-3 py-2 text-left font-sans text-xs font-normal leading-relaxed text-slate-700 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
     >
       {text}
     </span>
   </span>
 );
 
-const STATUS_LABELS = {
-  activa: { label: "Activa", bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
-  cerrada: { label: "Cerrada", bgClass: "bg-muted", textClass: "text-muted-foreground" },
-  pausada: { label: "Pausada", bgClass: "bg-amber-100", textClass: "text-amber-800" },
-  open: { label: "Abierta", bgClass: "bg-[#DCFCE7]", textClass: "text-[#166534]" },
-  closed: { label: "Cerrada", bgClass: "bg-muted", textClass: "text-muted-foreground" },
-  paused: { label: "Pausada", bgClass: "bg-amber-100", textClass: "text-amber-800" },
-};
+const STATUS_STYLES = VACANCY_STATUS_STYLES;
 
-const AI_EFFICIENCY_KPIS = [
-  {
-    label: "Búsqueda preliminar",
-    value: "De horas a segundos en la primera exploracion",
-    helper: "Priorización inicial asistida por IA",
-  },
-  {
-    label: "Emparejamiento preliminar",
-    value: "Precision observada de 75% a 80%",
-    helper: "Objetivo de calibración: 90%",
-  },
-  {
-    label: "Cobertura de resultados",
-    value: "Shortlist inicial con candidatos sugeridos",
-    helper: "Punto de partida para validación de RRHH",
-  },
-];
-
-const getStatusConfig = (status) => {
-  if (!status) return STATUS_LABELS.activa;
+const normalizeVacancyStatusKey = (status) => {
+  if (!status) return "activa";
   const key = String(status).toLowerCase();
-  return STATUS_LABELS[key] ?? STATUS_LABELS.activa;
+  if (key === "open") return "activa";
+  if (key === "closed") return "cerrada";
+  if (key === "paused") return "pausada";
+  return key;
 };
+
+const getStatusStyleKey = (status) => {
+  if (!status) return "activa";
+  const key = String(status).toLowerCase();
+  return STATUS_STYLES[key] ? key : "activa";
+};
+
+const getStatusConfig = (status, t) => {
+  const styleKey = getStatusStyleKey(status);
+  const styles = STATUS_STYLES[styleKey] ?? STATUS_STYLES.activa;
+  const mapperKey = normalizeVacancyStatusKey(status);
+  const label = getVacancyStatusLabel(mapperKey, t) || String(status ?? "");
+  return { ...styles, label };
+};
+
+const AI_EFFICIENCY_KPI_KEYS = [
+  {
+    titleKey: "kpis.preliminarySearchTitle",
+    valueKey: "kpis.preliminarySearchSubtitle",
+    helperKey: "kpis.prioritizationTitle",
+  },
+  {
+    titleKey: "kpis.preliminaryMatchTitle",
+    valueKey: "kpis.preliminaryMatchSubtitle",
+    helperKey: "kpis.preliminaryMatchGoal",
+  },
+  {
+    titleKey: "kpis.coverageTitle",
+    valueKey: "kpis.coverageSubtitle",
+    helperKey: "kpis.coverageHint",
+  },
+] as const;
 
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
@@ -327,36 +363,36 @@ const createEmptyRequirement = () => ({
 });
 
 /** Converts a raw score/attribute key into a natural human-readable label. */
-const formatScoreKey = (key) => {
+const formatScoreKey = (key, t) => {
   const k = String(key).trim();
   const map = {
-    QualitativeScore: "Puntaje cualitativo",
-    qualitativeScore: "Puntaje cualitativo",
-    qualitative_score: "Puntaje cualitativo",
-    VectorSimilarity: "Similitud semántica",
-    vectorSimilarity: "Similitud semántica",
-    vector_similarity: "Similitud semántica",
-    SemanticScore: "Puntaje semántico",
-    semanticScore: "Puntaje semántico",
-    semantic_score: "Puntaje semántico",
-    TotalScore: "Puntaje total",
-    totalScore: "Puntaje total",
-    total_score: "Puntaje total",
-    attribute_aggregate: "Atributos en conjunto",
-    AttributeAggregate: "Atributos en conjunto",
-    attributeAggregate: "Atributos en conjunto",
-    KeywordScore: "Coincidencia de palabras clave",
-    keywordScore: "Coincidencia de palabras clave",
-    keyword_score: "Coincidencia de palabras clave",
-    ExperienceScore: "Experiencia",
-    experienceScore: "Experiencia",
-    experience_score: "Experiencia",
-    EducationScore: "Educación",
-    educationScore: "Educación",
-    education_score: "Educación",
-    SkillsScore: "Habilidades",
-    skillsScore: "Habilidades",
-    skills_score: "Habilidades",
+    QualitativeScore: t("scoreKeys.qualitative"),
+    qualitativeScore: t("scoreKeys.qualitative"),
+    qualitative_score: t("scoreKeys.qualitative"),
+    VectorSimilarity: t("scoreKeys.semanticSimilarity"),
+    vectorSimilarity: t("scoreKeys.semanticSimilarity"),
+    vector_similarity: t("scoreKeys.semanticSimilarity"),
+    SemanticScore: t("scoreKeys.semanticScore"),
+    semanticScore: t("scoreKeys.semanticScore"),
+    semantic_score: t("scoreKeys.semanticScore"),
+    TotalScore: t("scoreKeys.total"),
+    totalScore: t("scoreKeys.total"),
+    total_score: t("scoreKeys.total"),
+    attribute_aggregate: t("scoreKeys.attributesCombined"),
+    AttributeAggregate: t("scoreKeys.attributesCombined"),
+    attributeAggregate: t("scoreKeys.attributesCombined"),
+    KeywordScore: t("scoreKeys.keywordMatch"),
+    keywordScore: t("scoreKeys.keywordMatch"),
+    keyword_score: t("scoreKeys.keywordMatch"),
+    ExperienceScore: t("scoreKeys.experience"),
+    experienceScore: t("scoreKeys.experience"),
+    experience_score: t("scoreKeys.experience"),
+    EducationScore: t("scoreKeys.education"),
+    educationScore: t("scoreKeys.education"),
+    education_score: t("scoreKeys.education"),
+    SkillsScore: t("scoreKeys.skills"),
+    skillsScore: t("scoreKeys.skills"),
+    skills_score: t("scoreKeys.skills"),
   };
   if (map[k]) return map[k];
 
@@ -447,14 +483,14 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
               key={key}
               className="flex flex-wrap items-center gap-2"
             >
-              <span className="requirement_key inline-flex items-center gap-1.5 rounded-md bg-vo-purple/10 px-2.5 py-1 font-medium text-vo-purple">
+              <span className="requirement_key inline-flex items-center gap-1.5 rounded-md bg-vo-purple/15 px-2.5 py-1 font-semibold text-vo-purple">
                 {formatRequirementKey(key)}
               </span>
-              <span className="requirement_value inline-flex items-center rounded-md bg-vo-sky/10 px-2.5 py-1 text-vo-sky">
+              <span className="requirement_value inline-flex items-center rounded-md bg-ats-arena/70 px-2.5 py-1 font-medium text-gray-700">
                 {levelText}
               </span>
               {weight != null && (
-                <span className="requirement_weight inline-flex items-center gap-1.5 rounded-md bg-vo-pink/10 px-2.5 py-1 text-vo-pink">
+                <span className="requirement_weight inline-flex items-center gap-1.5 rounded-md bg-amber-100 px-2.5 py-1 font-semibold text-amber-800">
                   <Scale className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   {weight * 10}
                 </span>
@@ -510,6 +546,11 @@ const RequirementsDisplay = ({ value, attributeWeights }) => {
 };
 
 const CandidateProfileModal = ({ match, candidateId, onClose }) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
+  const tModal = useTranslations("RecruiterPortal.vacancies.matching.profileModal");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
+  const getScoreLabel = (key) => formatScoreKey(key, tMatching);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(null);
 
@@ -533,7 +574,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
         method: "GET",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error("No se pudo descargar el CV.");
+      if (!res.ok) throw new Error(tMatching("errors.downloadCvFailed"));
       const blob = await res.blob();
       const objUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -544,7 +585,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
       document.body.removeChild(a);
       URL.revokeObjectURL(objUrl);
     } catch (err) {
-      setDownloadError(err?.message ?? "Error al descargar.");
+      setDownloadError(err?.message ?? tMatching("errors.downloadCvFailed"));
     } finally {
       setDownloading(false);
     }
@@ -634,10 +675,10 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
-      aria-label={`Perfil de ${emptyToDash(match.name)}`}
+      aria-label={tModal("profileAria", { name: emptyToDash(match.name) })}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-white text-slate-900 shadow-xl">
+      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-background text-slate-900 shadow-xl">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-border p-6">
           <div className="flex items-center gap-4">
@@ -664,11 +705,11 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 )}
               </div>
               <p className="font-sans text-xs text-slate-600">
-                Subido: {formatDate(match.uploadedAt)}
+                {tMatching("uploadedPrefix")} {formatDate(match.uploadedAt, locale)}
               </p>
               {totalScorePercent != null && (
                 <p className="font-sans text-xs font-semibold text-vo-purple">
-                  Puntaje total del emparejamiento: {totalScorePercent}%
+                  {tModal("totalMatchScore")} {totalScorePercent}%
                 </p>
               )}
             </div>
@@ -677,7 +718,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
             type="button"
             onClick={onClose}
             className="rounded-md p-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            aria-label="Cerrar modal"
+            aria-label={tCommon("closeModal")}
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
@@ -689,32 +730,34 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
             <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
               <User className="h-10 w-10 text-slate-400" aria-hidden />
               <p className="font-sans text-sm text-slate-600">
-                No hay información adicional disponible.
+                {tModal("noAdditionalInfo")}
               </p>
             </div>
           ) : (
             <div className="flex flex-col gap-6">
-              <div className="rounded-xl border border-vo-purple/25 bg-vo-purple/5 p-4 shadow-sm">
+              <div className="rounded-xl border border-vo-purple/35 bg-vo-purple/10 p-4 shadow-sm">
                 <h3 className="font-sans text-sm font-semibold text-vo-purple">
-                  Análisis procesado con IA
+                  {tModal("aiProcessed")}
                 </h3>
                 <p className="mt-2 font-sans text-sm text-slate-700">
-                  Esta evaluación fue procesada con IA para acelerar la lectura inicial del perfil.
+                  {tModal("aiIntro")}
                 </p>
                 <p className="mt-1 font-sans text-sm text-slate-700">
-                  Un análisis manual puede tomar entre <strong>2 horas y 1 día</strong>, mientras que con IA este resultado se genera en <strong>segundos</strong>.
+                  {tModal.rich("aiTiming", {
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                  })}
                 </p>
                 <p className="mt-1 font-sans text-xs text-slate-600">
-                  Usa estos resultados como apoyo y valida la decisión final desde RRHH.
+                  {tModal("aiValidationHint")}
                 </p>
               </div>
               {/* Component Scores */}
               {componentScores.length > 0 && (
                 <div className="flex flex-col gap-5">
                   {hasAttributeBlock && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-sky-200/60">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-sky-200/60">
                       <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900">
-                        Atributos
+                        {tModal("attributes")}
                       </h3>
                       <ul className="flex flex-col gap-3" role="list">
                         {attributeIndividuals.map(([key, val]) => (
@@ -722,6 +765,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                             key={key}
                             scoreKey={key}
                             val={val}
+                            getScoreLabel={getScoreLabel}
                             labelClass="text-slate-800"
                             barClass="bg-sky-500"
                             valueClass="text-slate-900"
@@ -732,6 +776,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           <ScoreBarRow
                             scoreKey={aggregateEntry[0]}
                             val={aggregateEntry[1]}
+                            getScoreLabel={getScoreLabel}
                             labelClass="text-slate-800"
                             barClass="bg-sky-600"
                             valueClass="text-slate-900"
@@ -744,13 +789,13 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   )}
 
                   {qualitativeEntry != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-amber-200/70">
                       <div className="mb-3.5 flex items-center gap-1.5">
                         <h3 className="font-sans text-sm font-semibold text-amber-950">
-                          Puntaje cualitativo
+                          {tModal("qualitativeScore")}
                         </h3>
                         <ScoreTooltip
-                          text="Evalua la compatibilidad del candidato en aspectos cualitativos como experiencia, habilidades y contexto del perfil respecto a la vacante."
+                          text={tMatching("scoreTooltips.qualitativeScore")}
                           accentClass="text-amber-800"
                         />
                       </div>
@@ -758,6 +803,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                         <ScoreBarRow
                           scoreKey={qualitativeEntry[0]}
                           val={qualitativeEntry[1]}
+                          getScoreLabel={getScoreLabel}
                           labelClass="text-amber-900"
                           barClass="bg-amber-500"
                           valueClass="text-amber-950"
@@ -769,13 +815,13 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                   )}
 
                   {semanticEntry != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-vo-purple/25">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-vo-purple/25">
                       <div className="mb-3.5 flex items-center gap-1.5">
                         <h3 className="font-sans text-sm font-semibold text-vo-purple">
-                          Similitud semántica
+                          {tModal("semanticSimilarity")}
                         </h3>
                         <ScoreTooltip
-                          text="Mide qué tan alineado está el contenido del CV con la descripción de la vacante, usando comparación semántica de texto."
+                          text={tMatching("scoreTooltips.semanticSimilarity")}
                           accentClass="text-vo-purple"
                         />
                       </div>
@@ -783,6 +829,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                         <ScoreBarRow
                           scoreKey={semanticEntry[0]}
                           val={semanticEntry[1]}
+                          getScoreLabel={getScoreLabel}
                           labelClass="text-vo-purple"
                           barClass="bg-vo-purple"
                           valueClass="text-violet-900"
@@ -797,9 +844,9 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
 
               {/* Coincidencia de atributos (CV vs vacante) */}
               {hasMatchedAttributesBlock && (
-                <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/70">
+                <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/70">
                   <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
-                    Coincidencia de atributos
+                    {tModal("attributeMatch")}
                   </h3>
                   <ul className="flex flex-col gap-2.5 font-sans text-sm text-slate-700" role="list">
                     {matchedAttributesEntries.map(([attrKey, attrVal]) => {
@@ -815,7 +862,7 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                           <span className="text-slate-700">{emptyToDash(String(attrVal ?? ""))}</span>
                           {pathVal != null && pathVal !== "" && (
                             <span className="font-sans text-xs text-slate-500">
-                              Ruta: {pathVal}
+                              {tModal("routePrefix")} {pathVal}
                             </span>
                           )}
                         </li>
@@ -829,9 +876,9 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
               {hasSplitQualitative ? (
                 <div className="flex flex-col gap-4">
                   {qualitativeReasoningPositive != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-emerald-200/50">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/50">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">
-                        Fortalezas
+                        {tModal("strengths")}
                       </h3>
                       <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
                         {qualitativeReasoningPositive}
@@ -839,9 +886,9 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                     </div>
                   )}
                   {qualitativeReasoningNegative != null && (
-                    <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-amber-200/70">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-amber-200/70">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-amber-950">
-                        Aspectos a considerar
+                        {tModal("considerations")}
                       </h3>
                       <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
                         {qualitativeReasoningNegative}
@@ -851,9 +898,9 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 </div>
               ) : (
                 qualitativeReasoningLegacy != null && (
-                  <div className="rounded-xl border border-border bg-white p-4 shadow-sm ring-1 ring-border/60">
+                  <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-border/60">
                     <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
-                      Razonamiento cualitativo
+                      {tModal("qualitativeReasoning")}
                     </h3>
                     <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
                       {qualitativeReasoningLegacy}
@@ -880,15 +927,15 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 type="button"
                 onClick={handleDownloadCV}
                 disabled={downloading}
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-white px-4 py-2.5 font-sans text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Descargar CV del candidato"
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={tModal("downloadCvAria")}
               >
                 {downloading ? (
                   <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                 ) : (
                   <Download className="h-4 w-4 shrink-0" aria-hidden />
                 )}
-                {downloading ? "Descargando..." : "Descargar CV"}
+                {downloading ? tModal("downloading") : tModal("downloadCv")}
               </button>
             )}
             {profileHref != null && (
@@ -896,20 +943,20 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
                 href={profileHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-md border border-vo-purple/40 bg-white px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                aria-label="Abrir perfil del candidato en una nueva pestaña"
+                className="inline-flex items-center gap-2 rounded-md border border-vo-purple/40 bg-background px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                aria-label={tMatching("errors.openProfileAria")}
               >
                 <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
-                Ver perfil completo
+                {tModal("viewFullProfile")}
               </Link>
             )}
             <button
               type="button"
               onClick={onClose}
               className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              aria-label="Cerrar perfil"
+              aria-label={tModal("closeProfileAria")}
             >
-              Cerrar
+              {tModal("close")}
             </button>
           </div>
         </div>
@@ -927,6 +974,8 @@ const MatchCard = ({
   aiLabel,
   readOnly = false,
 }) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
+  const locale = useLocale();
   const [showModal, setShowModal] = useState(false);
   const initials = getInitials(
     emptyToDash(match.name) !== "—" ? match.name : "",
@@ -944,14 +993,14 @@ const MatchCard = ({
     <>
       <article
         className="rounded-xl border border-border bg-card p-5"
-        aria-label={`Candidato ${emptyToDash(match.name)}`}
+        aria-label={tMatching("aria.candidateCard", { name: emptyToDash(match.name) })}
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 flex-1 items-start gap-4">
             <div className="flex shrink-0 items-start gap-3">
               <label
                 className={`flex items-center justify-center rounded ${readOnly ? "cursor-not-allowed opacity-60" : "cursor-pointer focus-within:ring-2 focus-within:ring-vo-purple focus-within:ring-offset-2"}`}
-                aria-label={`Seleccionar ${emptyToDash(match.name)}`}
+                aria-label={tMatching("aria.selectCandidate", { name: emptyToDash(match.name) })}
               >
                 <input
                   type="checkbox"
@@ -959,7 +1008,7 @@ const MatchCard = ({
                   onChange={handleCheckboxChange}
                   disabled={readOnly}
                   className="h-4 w-4 rounded border-border text-vo-purple focus:ring-vo-purple focus:ring-offset-0 disabled:cursor-not-allowed"
-                  aria-label={`Seleccionar candidato ${emptyToDash(match.name)}`}
+                  aria-label={tMatching("aria.selectCandidate", { name: emptyToDash(match.name) })}
                 />
               </label>
               <div
@@ -991,7 +1040,7 @@ const MatchCard = ({
                 )}
               </div>
               <p className="font-sans text-xs text-muted-foreground">
-                Subido: {formatDate(match.uploadedAt)}
+                {tMatching("uploadedPrefix")} {formatDate(match.uploadedAt, locale)}
               </p>
             </div>
           </div>
@@ -1003,7 +1052,7 @@ const MatchCard = ({
                   : "—"}
               </span>
               <span className="font-sans text-xs text-muted-foreground">
-                Puntaje
+                {tMatching("score")}
               </span>
             </div>
             {showVerPerfil && (
@@ -1011,10 +1060,10 @@ const MatchCard = ({
                 type="button"
                 onClick={handleOpenModal}
                 className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                aria-label={`Ver perfil de ${emptyToDash(match.name)}`}
+                aria-label={tMatching("aria.viewCandidate", { name: emptyToDash(match.name) })}
               >
                 <User className="h-4 w-4" aria-hidden />
-                Ver perfil
+                {tMatching("viewProfile")}
               </button>
             )}
           </div>
@@ -1030,7 +1079,8 @@ const MatchCard = ({
 const mapStatusFromApi = (item, index = 0) => {
   const id = String(item?.id ?? item?.uuid ?? index);
   const name = item?.name ?? item?.status_name ?? "";
-  return { id, name };
+  const final = Boolean(item?.final ?? item?.isFinal ?? item?.is_final);
+  return { id, name, final };
 };
 
 const KanbanCard = ({
@@ -1045,6 +1095,8 @@ const KanbanCard = ({
   vacancyTitle = null,
   readOnly = false,
 }) => {
+  const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
   const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false);
   const sheetCandidateProfileId =
     match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
@@ -1098,7 +1150,7 @@ const KanbanCard = ({
         className={`flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md ${readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"}`}
         role={readOnly ? undefined : "button"}
         tabIndex={readOnly ? undefined : 0}
-        aria-label={readOnly ? undefined : `Mover ${displayName} a otra etapa`}
+        aria-label={readOnly ? undefined : tMatching("kanban.moveStageAria", { name: displayName })}
         aria-describedby={`kanban-card-${candidateId}`}
       >
         <div className="flex items-center gap-2.5" id={`kanban-card-${candidateId}`}>
@@ -1123,7 +1175,7 @@ const KanbanCard = ({
               }}
               onMouseDown={(e) => e.stopPropagation()}
               className="shrink-0 rounded-md border border-border bg-background p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              aria-label={technicalSheetMessages.viewSheet}
+              aria-label={tTechnicalSheet("aria.viewSheet")}
             >
               <FileText className="h-4 w-4" aria-hidden />
             </button>
@@ -1132,7 +1184,7 @@ const KanbanCard = ({
 
         <div className="flex items-center justify-between gap-2">
           <div className="inline-flex items-center gap-1 font-sans text-xs">
-            <span className="text-muted-foreground">Puntaje</span>
+            <span className="text-muted-foreground">{tMatching("kanban.score")}</span>
             <span className="font-semibold tabular-nums text-foreground">{score}</span>
           </div>
           <span className="inline-flex shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-foreground">
@@ -1148,7 +1200,7 @@ const KanbanCard = ({
             onClick={handleSelectClick}
             disabled={statusSelectDisabled || readOnly}
             className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-            aria-label={`Estado de ${displayName}`}
+            aria-label={tMatching("kanban.statusAria", { name: displayName })}
           >
             {statuses.map((s) => (
               <option key={s.id} value={s.id}>
@@ -1173,6 +1225,7 @@ const KanbanCard = ({
 };
 
 const MoveStageErrorBanner = ({ error }) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
   if (!error) return null
   return (
     <div
@@ -1184,9 +1237,9 @@ const MoveStageErrorBanner = ({ error }) => {
         <Link
           href="/portal-admin/etapas"
           className="font-sans text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
-          aria-label="Ir a la sección Etapas para administrar estados de postulación"
+          aria-label={tMatching("errors.goToStagesAria")}
         >
-          Ir a Etapas y administrar estados
+          {tMatching("goToStagesLink")}
         </Link>
       ) : null}
     </div>
@@ -1208,6 +1261,7 @@ const KanbanColumn = ({
   vacancyTitle = null,
   readOnly = false,
 }) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
   const handleDragOver = (e) => {
     if (readOnly) return;
     e.preventDefault();
@@ -1264,7 +1318,7 @@ const KanbanColumn = ({
   return (
     <div
       className={`flex min-h-[320px] flex-col rounded-xl border border-border bg-muted/30 ${widthClasses}`}
-      aria-label={`Columna ${stage}`}
+      aria-label={tMatching("kanban.columnAria", { stage })}
     >
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <h3 className="font-sans text-sm font-semibold text-foreground">
@@ -1306,6 +1360,9 @@ const KanbanColumn = ({
 };
 
 export default function VacanteDetallePage() {
+  const t = useTranslations("RecruiterPortal.vacancies");
+  const tDetail = useTranslations("RecruiterPortal.vacancies.detail");
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
   const params = useParams();
   const id = params?.id ?? null;
   const [vacancy, setVacancy] = useState(null);
@@ -1356,7 +1413,6 @@ export default function VacanteDetallePage() {
   const [statuses, setStatuses] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
-  const [moveStageError, setMoveStageError] = useState(null);
   const [loadingMoveStage, setLoadingMoveStage] = useState(false);
   const [applicationStatusError, setApplicationStatusError] = useState(null);
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
@@ -1534,18 +1590,18 @@ export default function VacanteDetallePage() {
       setModalityOptions([])
       setVacancyCatalogsError(
         getApiErrorMessage(err) ||
-          "No se pudieron cargar departamentos y modalidades."
+          t("form.errors.catalogsLoadFailed")
       )
     } finally {
       setLoadingVacancyCatalogs(false)
     }
-  }, [])
+  }, [t])
 
   const fetchVacancy = useCallback(async (silentFlag?: unknown) => {
     const silent = silentFlag === true
     if (!id) {
       if (!silent) setLoading(false);
-      if (!silent) setFetchError("Falta el ID de la vacante.");
+      if (!silent) setFetchError(tDetail("errors.missingId"));
       return;
     }
     if (!silent) {
@@ -1566,14 +1622,14 @@ export default function VacanteDetallePage() {
     } catch (err: unknown) {
       if (!silent) {
         setFetchError(
-          getApiErrorMessage(err) || "No se pudo cargar la vacante."
+          getApiErrorMessage(err) || tDetail("errors.loadFailed")
         );
         setVacancy(null);
       }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [id]);
+  }, [id, tDetail]);
 
   useEffect(() => {
     fetchVacancy();
@@ -1662,19 +1718,19 @@ export default function VacanteDetallePage() {
 
   const validateEditForm = useCallback(() => {
     const nextErrors: Record<string, string> = {};
-    if (!String(editTitle ?? "").trim()) nextErrors.title = "El nombre es requerido";
-    if (!String(editDescription ?? "").trim()) nextErrors.description = "La descripción es requerida";
+    if (!String(editTitle ?? "").trim()) nextErrors.title = t("form.validation.nameRequired");
+    if (!String(editDescription ?? "").trim()) nextErrors.description = t("form.validation.descriptionRequired");
 
     editRequirements.forEach((req) => {
       const hasName = !!String(req.requirementName ?? "").trim();
       const hasValue = !!String(req.requirementValue ?? "").trim();
-      if (hasName && !hasValue) nextErrors[`req-value-${req.id}`] = "Valor requerido";
-      if (!hasName && hasValue) nextErrors[`req-name-${req.id}`] = "Nombre requerido";
+      if (hasName && !hasValue) nextErrors[`req-value-${req.id}`] = t("form.validation.requirementValueRequired");
+      if (!hasName && hasValue) nextErrors[`req-name-${req.id}`] = t("form.validation.requirementNameRequired");
     });
 
     setEditErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
-  }, [editTitle, editDescription, editRequirements]);
+  }, [editTitle, editDescription, editRequirements, t]);
 
   const handleEditVacancy = useCallback(() => {
     if (!vacancy || !readVacancyIsActive(vacancy)) return;
@@ -1727,7 +1783,7 @@ export default function VacanteDetallePage() {
     if (!vacancyId || !vacancy || !readVacancyIsActive(vacancy)) return;
     if (!validateEditForm()) return;
     if (!editCompanyId.trim()) {
-      setSaveVacancyError("Selecciona una empresa cliente.");
+      setSaveVacancyError(tDetail("errors.companyRequired"));
       return;
     }
 
@@ -1910,12 +1966,12 @@ export default function VacanteDetallePage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Cambios guardados correctamente.",
+        message: tDetail("toasts.saved"),
       });
     } catch (err) {
       const msg = companyChanged
         ? mapVacancyCompanyPatchError(err)
-        : getApiErrorMessage(err) || "No se pudo guardar la vacante.";
+        : getApiErrorMessage(err) || tDetail("errors.saveFailed");
       setSaveVacancyError(msg);
       setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
@@ -1941,13 +1997,15 @@ export default function VacanteDetallePage() {
     mergedModalityOptions,
     createCatalogSummary,
     companySelectOptions,
+    t,
+    tDetail,
   ]);
 
   const handleFinishProcess = useCallback(
     async (data: { calification: number; comments: string }) => {
       const vacancyId = Array.isArray(id) ? id[0] : id
       if (!vacancyId) {
-        throw new Error("Falta el ID de la vacante.")
+        throw new Error(tDetail("errors.missingId"))
       }
 
       setFinishingProcess(true)
@@ -1978,19 +2036,19 @@ export default function VacanteDetallePage() {
         setSnackbar({
           open: true,
           variant: "success",
-          message: "Proceso finalizado correctamente.",
+          message: tDetail("toasts.finishSuccess"),
         })
       } catch (error) {
         const message =
           error instanceof Error
             ? error.message
-            : "No se pudo finalizar el proceso."
+            : tDetail("errors.finishFailed")
         throw new Error(message)
       } finally {
         setFinishingProcess(false)
       }
     },
-    [id, fetchVacancy]
+    [id, fetchVacancy, tDetail]
   )
 
   useEffect(() => {
@@ -2085,7 +2143,7 @@ export default function VacanteDetallePage() {
           });
         }
       } catch (err) {
-        const msg = err?.message ?? err?.detail ?? "No se pudo cargar el emparejamiento.";
+        const msg = err?.message ?? err?.detail ?? tMatching("toasts.loadMatchFailed");
         setSmartError(msg);
         setSmartCandidates([]);
         if (!options?.silent) {
@@ -2095,7 +2153,7 @@ export default function VacanteDetallePage() {
         setLoadingSmart(false);
       }
     },
-    [id, isVacancyReadOnly]
+    [id, isVacancyReadOnly, tMatching]
   );
 
   const handleSearchSmartRecommendations = useCallback(() => {
@@ -2117,7 +2175,7 @@ export default function VacanteDetallePage() {
     );
   }, [id, loading, vacancy?.title]);
 
-  const statusConfig = vacancy ? getStatusConfig(vacancy.status) : STATUS_LABELS.activa;
+  const statusConfig = vacancy ? getStatusConfig(vacancy.status, t) : getStatusConfig("activa", t);
   /** AI match suggestions from vacancy (for "Posibles candidatos" container). */
   const vacancyCandidates = Array.isArray(vacancy?.aiMatchSuggestions)
     ? vacancy.aiMatchSuggestions
@@ -2220,12 +2278,51 @@ export default function VacanteDetallePage() {
   const handleKanbanStageDrop = useCallback(
     async (candidateId, newStage) => {
       if (isVacancyReadOnly) return;
-      setMoveStageError(null);
       setApplicationStatusError(null);
       const applicant = applicants.find(
         (m, i) => getCandidateId(m, i) === candidateId
       );
       const applicationId = applicant?.applicationId ?? applicant?.application_id;
+      const currentStage =
+        candidateStageOverrides[candidateId] ??
+        normalizeKanbanStage(
+          applicant?.applicationStage ?? applicant?.stage,
+          kanbanStageNames
+        );
+      const currentStatusId =
+        candidateStatusOverrides[candidateId] ??
+        applicant?.applicationStatusId ??
+        applicant?.statusId ??
+        statuses.find(
+          (status) =>
+            (status.name || "").toLowerCase() ===
+            String(
+              applicant?.applicationStatus ?? applicant?.status ?? ""
+            ).toLowerCase()
+        )?.id ??
+        statuses[0]?.id ??
+        "";
+      const validation = validateStageMove(
+        currentStage,
+        newStage,
+        stages,
+        currentStatusId,
+        statuses
+      );
+
+      if (!validation.allowed) {
+        const normalized = normalizeStageMoveValidationError(
+          validation.code,
+          tMatching
+        );
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: normalized.text,
+        });
+        return;
+      }
+
       const stageObj = stages.find(
         (s) => (s.name || "").trim() === (newStage || "").trim()
       );
@@ -2243,7 +2340,7 @@ export default function VacanteDetallePage() {
           setSnackbar({
             open: true,
             variant: "success",
-            message: "Candidato movido de etapa.",
+            message: tMatching("errors.candidateMovedStage"),
           });
           /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
           try {
@@ -2262,8 +2359,7 @@ export default function VacanteDetallePage() {
             /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
           }
         } catch (err) {
-          const normalized = normalizeMoveStageError(err);
-          setMoveStageError(normalized);
+          const normalized = normalizeMoveStageError(err, tMatching);
           setSnackbar({
             open: true,
             variant: "error",
@@ -2279,7 +2375,7 @@ export default function VacanteDetallePage() {
         }
       }
     },
-    [applicants, stages, fetchVacancy, isVacancyReadOnly]
+    [applicants, stages, statuses, kanbanStageNames, candidateStageOverrides, candidateStatusOverrides, fetchVacancy, isVacancyReadOnly, tMatching]
   );
 
   const handleKanbanDragEnter = useCallback((stage) => {
@@ -2294,14 +2390,13 @@ export default function VacanteDetallePage() {
     async (candidateId, statusId) => {
       if (isVacancyReadOnly) return;
       setApplicationStatusError(null);
-      setMoveStageError(null);
       const applicant = applicants.find(
         (m, i) => getCandidateId(m, i) === candidateId
       );
       const applicationId = applicant?.applicationId ?? applicant?.application_id;
       if (!applicationId) {
         setApplicationStatusError({
-          text: "No se encontró el ID de la postulación para actualizar el estado.",
+          text: tMatching("errors.missingApplicationId"),
           showEstadosLink: false,
         });
         return;
@@ -2317,7 +2412,7 @@ export default function VacanteDetallePage() {
         setSnackbar({
           open: true,
           variant: "success",
-          message: "Estado de postulación actualizado.",
+          message: tMatching("errors.applicationStatusUpdated"),
         });
         try {
           await fetchVacancy(true);
@@ -2330,7 +2425,7 @@ export default function VacanteDetallePage() {
           /* El estado ya se guardó; si falla recargar la vacante, el override mantiene la UI coherente. */
         }
       } catch (err) {
-        const normalized = normalizeApplicationStatusError(err);
+        const normalized = normalizeApplicationStatusError(err, tMatching);
         setApplicationStatusError(normalized);
         setSnackbar({
           open: true,
@@ -2346,7 +2441,7 @@ export default function VacanteDetallePage() {
         setUpdatingStatusCandidateId(null);
       }
     },
-    [applicants, fetchVacancy, isVacancyReadOnly]
+    [applicants, fetchVacancy, isVacancyReadOnly, tMatching]
   );
 
   const handleToggleCandidate = useCallback((id, checked) => {
@@ -2396,7 +2491,7 @@ export default function VacanteDetallePage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Proceso iniciado para los candidatos seleccionados.",
+        message: tMatching("toasts.processStarted"),
       });
       scrollToEtapas();
     } catch (err) {
@@ -2427,7 +2522,7 @@ export default function VacanteDetallePage() {
       setSnackbar({
         open: true,
         variant: "success",
-        message: "Emparejamiento ejecutado correctamente.",
+        message: tMatching("toasts.matchSuccess"),
       });
       scrollToPossibleCandidates();
     } catch (err) {
@@ -2441,14 +2536,14 @@ export default function VacanteDetallePage() {
 
   const selectedCount = selectedCandidateIds.size;
 
-  const breadcrumbLabel = vacancy?.title ? vacancy.title : "Detalle de vacante";
+  const breadcrumbLabel = vacancy?.title ? vacancy.title : tDetail("page.fallbackTitle");
 
   const breadcrumbTrail = useMemo(
     () => [
-      { label: "Vacantes", href: "/portal-rrhh/vacantes" },
+      { label: t("breadcrumb"), href: "/portal-rrhh/vacantes" },
       { label: breadcrumbLabel },
     ],
-    [breadcrumbLabel]
+    [breadcrumbLabel, t]
   );
 
   return (
@@ -2474,7 +2569,7 @@ export default function VacanteDetallePage() {
                     aria-hidden
                   />
                   <p className="font-sans text-sm text-muted-foreground">
-                    Cargando vacante...
+                    {tDetail("loadingStates.loading")}
                   </p>
                 </div>
               ) : fetchError ? (
@@ -2490,14 +2585,14 @@ export default function VacanteDetallePage() {
                     className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                   >
                     <ArrowLeft className="h-4 w-4" aria-hidden />
-                    Volver a vacantes
+                    {tDetail("actions.backToVacancies")}
                   </Link>
                   <button
                     type="button"
                     onClick={fetchVacancy}
                     className="font-sans text-sm text-vo-purple hover:underline"
                   >
-                    Reintentar
+                    {t("actions.retry")}
                   </button>
                 </div>
               ) : vacancy ? (
@@ -2505,11 +2600,11 @@ export default function VacanteDetallePage() {
                   <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <Link
                       href="/portal-rrhh/vacantes"
-                      className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                      aria-label="Volver a vacantes"
+                      className="inline-flex w-fit items-center gap-2 font-sans text-sm text-gray-600 transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                      aria-label={tDetail("actions.backToVacanciesAria")}
                     >
                       <ArrowLeft className="h-4 w-4" aria-hidden />
-                      Volver a vacantes
+                      {tDetail("actions.backToVacancies")}
                     </Link>
                   </div>
 
@@ -2530,7 +2625,7 @@ export default function VacanteDetallePage() {
 
                   <section
                     className="mb-8 rounded-xl border border-border bg-card p-6"
-                    aria-label="Información de la vacante"
+                    aria-label={tDetail("page.vacancyInfoAria")}
                   >
                     <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                       <div className="flex min-w-0 flex-1 items-start gap-4">
@@ -2538,7 +2633,7 @@ export default function VacanteDetallePage() {
                           <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background">
                             <img
                               src={companyLogoSrc}
-                              alt={`Logo de ${vacancyCompanyDisplayName}`}
+                              alt={tDetail("page.logoAlt", { company: vacancyCompanyDisplayName })}
                               className="h-full w-full object-contain"
                               loading="lazy"
                             />
@@ -2559,7 +2654,7 @@ export default function VacanteDetallePage() {
                             <div className="flex flex-col gap-4">
                               <div className="flex flex-col gap-2">
                                 <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-desktop">
-                                  Nombre de la vacante <span className="text-vo-pink">*</span>
+                                  {t("form.fields.name.label")} <span className="text-vo-pink">*</span>
                                 </label>
                                 <input
                                   id="edit-vacancy-title-desktop"
@@ -2569,7 +2664,7 @@ export default function VacanteDetallePage() {
                                   className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                   aria-invalid={!!editErrors.title}
                                   aria-describedby={editErrors.title ? "edit-title-error-desktop" : undefined}
-                                  placeholder="Ej: Frontend Developer"
+                                  placeholder={t("form.fields.name.placeholder")}
                                 />
                                 {editErrors.title && (
                                   <p id="edit-title-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
@@ -2582,14 +2677,14 @@ export default function VacanteDetallePage() {
                                   className="font-sans text-sm font-medium text-foreground"
                                   htmlFor="edit-vacancy-company-desktop"
                                 >
-                                  Cliente / compañía
+                                  {t("form.fields.client.label")}
                                 </label>
                                 <select
                                   id="edit-vacancy-company-desktop"
                                   value={editCompanyId}
                                   onChange={(e) => setEditCompanyId(e.target.value)}
                                   className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                  aria-label="Cliente o compañía de la vacante"
+                                  aria-label={t("form.fields.client.ariaLabel")}
                                   disabled={loadingCompanies || companySelectOptions.length === 0}
                                 >
                                   {companySelectOptions.map((company) => (
@@ -2599,7 +2694,7 @@ export default function VacanteDetallePage() {
                                   ))}
                                 </select>
                                 <p className="font-sans text-xs text-muted-foreground">
-                                  Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes.
+                                  {tDetail("actions.companyChangeHint")}
                                 </p>
                               </div>
                               <VacancyLocationFields
@@ -2611,24 +2706,24 @@ export default function VacanteDetallePage() {
                                 }}
                                 countrySelectId="edit-vacancy-country-desktop"
                                 stateSelectId="edit-vacancy-state-desktop"
-                                countryLabel="País al que aplica la vacante"
-                                stateLabel="Estado / provincia"
+                                countryLabel={t("form.fields.country.label")}
+                                stateLabel={t("form.fields.state.label")}
                                 disabled={savingVacancy}
                               />
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-desktop">
-                                    Área (catálogo)
+                                    {t("form.fields.department.label")}
                                   </label>
                                   <select
                                     id="edit-vacancy-department-desktop"
                                     value={editVacancyDepartmentId}
                                     onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Área de la vacante en catálogo"
+                                    aria-label={t("form.fields.department.ariaLabel")}
                                     disabled={loadingVacancyCatalogs}
                                   >
-                                    <option value="">Sin especificar</option>
+                                    <option value="">{t("form.fields.unspecifiedOption")}</option>
                                     {mergedDepartmentOptions.map((option) => (
                                       <option key={option.id} value={option.id}>
                                         {option.displayName}
@@ -2638,17 +2733,17 @@ export default function VacanteDetallePage() {
                                 </div>
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-desktop">
-                                    Modalidad
+                                    {t("form.fields.modality.label")}
                                   </label>
                                   <select
                                     id="edit-vacancy-modality-desktop"
                                     value={editVacancyModalityId}
                                     onChange={(e) => setEditVacancyModalityId(e.target.value)}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Modalidad de la vacante"
+                                    aria-label={t("form.fields.modality.ariaLabel")}
                                     disabled={loadingVacancyCatalogs}
                                   >
-                                    <option value="">Sin especificar</option>
+                                    <option value="">{t("form.fields.unspecifiedOption")}</option>
                                     {mergedModalityOptions.map((option) => (
                                       <option key={option.id} value={option.id}>
                                         {option.displayName}
@@ -2668,7 +2763,7 @@ export default function VacanteDetallePage() {
                               {emptyToDash(vacancy.title)}
                             </h1>
                           )}
-                          <div className="flex flex-wrap items-center gap-4 font-sans text-sm text-muted-foreground">
+                          <div className="flex flex-wrap items-center gap-4 font-sans text-sm text-gray-600">
                             {!isEditing ? (
                               <span className="flex min-w-0 items-center gap-1.5">
                                 <Building2 className="h-4 w-4 shrink-0" aria-hidden />
@@ -2695,7 +2790,7 @@ export default function VacanteDetallePage() {
                             ) : null}
                             <span className="flex items-center gap-1.5">
                               <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-                              Creada: {formatDate(vacancy.createdAt)}
+                              {tDetail("page.createdPrefix")} {formatDate(vacancy.createdAt)}
                             </span>
                           </div>
                           <span
@@ -2723,9 +2818,9 @@ export default function VacanteDetallePage() {
                                 type="button"
                                 onClick={() => setFinishProcessModalOpen(true)}
                                 className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
-                                aria-label="Finalizar proceso de la vacante"
+                                aria-label={tDetail("actions.finishProcessAria")}
                               >
-                                Finalizar proceso
+                                {tDetail("actions.finishProcess")}
                               </button>
                             ) : null}
                             {!isVacancyReadOnly ? (
@@ -2733,24 +2828,24 @@ export default function VacanteDetallePage() {
                                 type="button"
                                 onClick={handleEditVacancy}
                                 className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                                aria-label="Editar vacante"
+                                aria-label={tDetail("actions.editVacancyAria")}
                               >
-                                Editar vacante
+                                {tDetail("actions.editVacancy")}
                               </button>
                             ) : null}
                             <Link
                               href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                              aria-label="Ver entrevistas de esta vacante"
+                              aria-label={tDetail("actions.interviewsAria")}
                             >
-                              Entrevistas
+                              {tDetail("actions.interviews")}
                             </Link>
                             <Link
                               href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                              aria-label="Ver resultados y métricas de esta vacante"
+                              aria-label={tDetail("actions.resultsAria")}
                             >
-                              Resultados
+                              {tDetail("actions.results")}
                             </Link>
                           </>
                         ) : (
@@ -2759,12 +2854,12 @@ export default function VacanteDetallePage() {
                             onClick={handleSaveVacancy}
                             disabled={savingVacancy}
                             className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label="Guardar vacante"
+                                aria-label={tDetail("actions.saveAria")}
                           >
                             {savingVacancy ? (
                               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                             ) : null}
-                            {savingVacancy ? "Guardando..." : "Guardar"}
+                            {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
                           </button>
                         )}
                       </div>
@@ -2780,10 +2875,10 @@ export default function VacanteDetallePage() {
                         {(vacancy.description || isEditing) && (
                           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                             <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-sky/10 text-vo-sky">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ats-arena/80 text-gray-700">
                                 <FileText className="h-4 w-4" aria-hidden />
                               </span>
-                              Descripción de la vacante
+                              {tDetail("sections.description")}
                             </h2>
                             {isEditing ? (
                               <div className="flex flex-col gap-2">
@@ -2792,10 +2887,10 @@ export default function VacanteDetallePage() {
                                   onChange={(e) => setEditDescription(e.target.value)}
                                   rows={5}
                                   className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
-                                  aria-label="Editar descripción de la vacante"
+                                  aria-label={t("form.fields.description.label")}
                                   aria-invalid={!!editErrors.description}
                                   aria-describedby={editErrors.description ? "edit-description-error-desktop" : undefined}
-                                  placeholder="Explicacion del rol de la vacante"
+                                  placeholder={t("form.fields.description.placeholder")}
                                 />
                                 {editErrors.description && (
                                   <p id="edit-description-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
@@ -2814,20 +2909,20 @@ export default function VacanteDetallePage() {
                           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                               <h2 className="flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-purple/10 text-vo-purple">
+                                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-purple/15 text-vo-purple">
                                   <CheckSquare className="h-4 w-4" aria-hidden />
                                 </span>
-                                Requisitos
+                                {tDetail("sections.requirements")}
                               </h2>
                               {isEditing && (
                                 <button
                                   type="button"
                                   onClick={handleAddRequirement}
                                   className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                                  aria-label="Agregar requerimiento"
+                                  aria-label={tDetail("actions.addRequirementAria")}
                                 >
                                   <Plus className="h-4 w-4" aria-hidden />
-                                  Agregar
+                                  {tDetail("actions.addRequirement")}
                                 </button>
                               )}
                             </div>
@@ -2837,7 +2932,7 @@ export default function VacanteDetallePage() {
                                   {editRequirements.map((req, index) => (
                                     <div
                                       key={req.id}
-                                      className="flex flex-col gap-2 rounded-lg border border-border bg-white p-3"
+                                      className="flex flex-col gap-2 rounded-lg border border-border bg-background p-3"
                                     >
                                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
                                         <div className="flex-1 space-y-1">
@@ -2847,7 +2942,7 @@ export default function VacanteDetallePage() {
                                             onChange={(e) =>
                                               handleUpdateRequirement(req.id, "requirementName", e.target.value)
                                             }
-                                            placeholder="Nombre (ej: Licencia de conducir)"
+                                            placeholder={t("form.fields.requirements.namePlaceholder")}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Nombre`}
                                             aria-invalid={!!editErrors[`req-name-${req.id}`]}
@@ -2865,7 +2960,7 @@ export default function VacanteDetallePage() {
                                             onChange={(e) =>
                                               handleUpdateRequirement(req.id, "requirementValue", e.target.value)
                                             }
-                                            placeholder="Valor (ej: Pesada)"
+                                            placeholder={t("form.fields.requirements.valuePlaceholder")}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Valor`}
                                             aria-invalid={!!editErrors[`req-value-${req.id}`]}
@@ -2882,7 +2977,7 @@ export default function VacanteDetallePage() {
                                               htmlFor={`edit-scale-desktop-${req.id}`}
                                               className="font-sans text-xs text-muted-foreground"
                                             >
-                                              Importancia (1-10)
+                                              {t("form.fields.requirements.importanceLabel")}
                                             </label>
                                             <span className="font-sans text-xs font-medium text-foreground tabular-nums">
                                               {req.scale}
@@ -2914,7 +3009,7 @@ export default function VacanteDetallePage() {
                                   ))}
                                 </div>
                                 <p className="font-sans text-xs text-muted-foreground">
-                                  Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
+                                  {t("form.fields.requirements.helper")}
                                 </p>
                               </div>
                             ) : (
@@ -2933,16 +3028,16 @@ export default function VacanteDetallePage() {
                               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
                                 <Info className="h-4 w-4" aria-hidden />
                               </span>
-                              Detalles de la vacante
+                              {tDetail("sections.details")}
                             </h2>
                             {isEditing ? (
                               <textarea
                                 value={editDetails}
                                 onChange={(e) => setEditDetails(e.target.value)}
                                 rows={4}
-                                placeholder="Datos especificos de la vacante"
+                                placeholder={t("form.fields.details.placeholder")}
                                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label="Editar detalles de la vacante"
+                                aria-label={t("form.fields.details.label")}
                               />
                             ) : vacancy.details ? (
                               (() => {
@@ -2955,7 +3050,7 @@ export default function VacanteDetallePage() {
                                           key={`${key}-${value}`}
                                           className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0 sm:last:border-b sm:nth-last-[-n+2]:border-b-0"
                                         >
-                                          <dt className="font-sans text-xs font-medium uppercase tracking-wide text-muted-foreground/80">
+                                          <dt className="font-sans text-xs font-medium uppercase tracking-wide text-gray-600">
                                             {key}
                                           </dt>
                                           <dd className="font-sans text-sm text-foreground">
@@ -2973,8 +3068,8 @@ export default function VacanteDetallePage() {
                                 );
                               })()
                             ) : (
-                              <p className="font-sans text-sm italic text-muted-foreground/70">
-                                No especificado
+                              <p className="font-sans text-sm italic text-gray-600">
+                                {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
@@ -2988,24 +3083,24 @@ export default function VacanteDetallePage() {
                                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
                                     <DollarSign className="h-4 w-4" aria-hidden />
                                   </span>
-                                  Salario
+                                  {tDetail("sections.salary")}
                                 </h2>
                                 {isEditing ? (
                                   <input
                                     type="text"
                                     value={editSalary}
                                     onChange={(e) => setEditSalary(e.target.value)}
-                                    placeholder="Ej: US$1,200 - US$1,800 / mes"
+                                    placeholder={t("form.fields.salary.placeholder")}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Editar salario de la vacante"
+                                    aria-label={t("form.fields.salary.ariaLabel")}
                                   />
                                 ) : vacancy.salary ? (
                                   <p className="font-sans text-lg font-semibold text-foreground">
                                     {safeString(vacancy.salary)}
                                   </p>
                                 ) : (
-                                  <p className="font-sans text-sm italic text-muted-foreground/70">
-                                    No especificado
+                                  <p className="font-sans text-sm italic text-gray-600">
+                                    {tDetail("fallbacks.unspecified")}
                                   </p>
                                 )}
                               </div>
@@ -3017,24 +3112,24 @@ export default function VacanteDetallePage() {
                                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-pink/10 text-vo-pink">
                                     <Gift className="h-4 w-4" aria-hidden />
                                   </span>
-                                  Ventajas y beneficios de la vacante
+                                  {tDetail("sections.advantages")}
                                 </h2>
                                 {isEditing ? (
                                   <textarea
                                     value={editAdvantages}
                                     onChange={(e) => setEditAdvantages(e.target.value)}
                                     rows={4}
-                                    placeholder="Ej: Seguro médico, bono anual, home office, capacitación..."
+                                    placeholder={t("form.fields.advantages.placeholder")}
                                     className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                    aria-label="Editar ventajas y beneficios de la vacante"
+                                    aria-label={t("form.fields.advantages.label")}
                                   />
                                 ) : vacancy.advantages ? (
                                   <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
                                     {safeString(vacancy.advantages)}
                                   </p>
                                 ) : (
-                                  <p className="font-sans text-sm italic text-muted-foreground/70">
-                                    No especificado
+                                  <p className="font-sans text-sm italic text-gray-600">
+                                    {tDetail("fallbacks.unspecified")}
                                   </p>
                                 )}
                               </div>
@@ -3047,19 +3142,19 @@ export default function VacanteDetallePage() {
 
                   <section
                     className="flex flex-col gap-4"
-                    aria-label="Candidatos con emparejamiento"
+                    aria-label={tMatching("aria.matchedCandidates")}
                   >
                   <AiDisclosureNotice
-                    title="Búsqueda y análisis preliminar con IA"
-                    description="La IA prioriza coincidencias iniciales y genera análisis preliminar. RRHH valida la decisión final."
+                    title={tMatching("sectionTitle")}
+                    description={tMatching("sectionDescription")}
                   />
                   <div className="grid gap-2 sm:grid-cols-3">
-                    {AI_EFFICIENCY_KPIS.map((item) => (
+                    {AI_EFFICIENCY_KPI_KEYS.map((item) => (
                       <AiKpiCard
-                        key={item.label}
-                        label={item.label}
-                        value={item.value}
-                        helper={item.helper}
+                        key={item.titleKey}
+                        label={tMatching(item.titleKey)}
+                        value={tMatching(item.valueKey)}
+                        helper={tMatching(item.helperKey)}
                       />
                     ))}
                   </div>
@@ -3068,8 +3163,8 @@ export default function VacanteDetallePage() {
                         type="button"
                         onClick={handleSearchSmartRecommendations}
                         disabled={loadingSmart || isVacancyReadOnly}
-                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        aria-label="Búsqueda preliminar"
+                        className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple/50 bg-vo-purple/10 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/15 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label={tMatching("aria.preliminarySearch")}
                         title={vacancyReadOnlyTitle}
                       >
                         {loadingSmart ? (
@@ -3078,8 +3173,8 @@ export default function VacanteDetallePage() {
                           <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                         )}
                         {loadingSmart
-                          ? "Actualizando busqueda con IA..."
-                          : "Búsqueda preliminar"}
+                          ? tMatching("updatingSearch")
+                          : tMatching("preliminarySearch")}
                       </button>
                       {displayCandidates.length > 0 && (
                         <button
@@ -3087,7 +3182,7 @@ export default function VacanteDetallePage() {
                           onClick={handleMatch}
                           disabled={loadingMatch || selectedDocumentIds.length === 0 || isVacancyReadOnly}
                           className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          aria-label="Análisis preliminar"
+                          aria-label={tMatching("aria.preliminaryAnalysis")}
                           title={vacancyReadOnlyTitle}
                         >
                           {loadingMatch ? (
@@ -3095,7 +3190,7 @@ export default function VacanteDetallePage() {
                           ) : (
                             <Scale className="h-4 w-4 shrink-0" aria-hidden />
                           )}
-                          {loadingMatch ? "Reanalizando con IA..." : "Análisis preliminar"}
+                          {loadingMatch ? tMatching("reanalyzing") : tMatching("preliminaryAnalysis")}
                         </button>
                       )}
                     </div>
@@ -3117,7 +3212,7 @@ export default function VacanteDetallePage() {
                           className="w-full max-w-2xl space-y-2"
                           role="status"
                           aria-live="polite"
-                          aria-label="Reanalizando con IA"
+                          aria-label={tMatching("reanalyzingEllipsis")}
                         >
                           <AiDisclosurePillProgress
                             percent={null}
@@ -3126,16 +3221,16 @@ export default function VacanteDetallePage() {
                             )}
                             preliminaryMatchStepLabels
                             className="mt-0!"
-                            aria-label="Progreso del análisis preliminar con IA"
+                            aria-label={tMatching("aria.analysisProgress")}
                           />
                           <p className="font-sans text-sm text-muted-foreground">
-                            Reanalizando con IA…
+                            {tMatching("reanalyzingEllipsis")}
                           </p>
                         </div>
                       ) : null}
                       <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
                         <Sparkles className="h-5 w-5" aria-hidden />
-                        Resultados de búsqueda
+                        {tMatching("searchResults")}
                         {smartCandidates !== null && (
                           <span className="font-sans text-sm font-normal text-muted-foreground">
                             ({searchResultsToDisplay.length})
@@ -3144,7 +3239,7 @@ export default function VacanteDetallePage() {
                       </h2>
                       <div
                         className="rounded-xl border border-border bg-card p-6"
-                        aria-label="Resultados de búsqueda"
+                        aria-label={tMatching("aria.searchResults")}
                       >
                         {loadingSmart && smartCandidates === null ? (
                           <div className="flex flex-col items-center justify-center gap-4 py-10 text-center">
@@ -3153,21 +3248,21 @@ export default function VacanteDetallePage() {
                                 percent={null}
                                 timeBasedTypicalMs={VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS}
                                 className="mt-0!"
-                                aria-label="Progreso de la búsqueda preliminar con IA"
+                                aria-label={tMatching("aria.searchProgress")}
                               />
                             </div>
                             <p
                               className="font-sans text-sm text-muted-foreground"
                               aria-live="polite"
                             >
-                              Actualizando búsqueda con IA…
+                              {tMatching("updatingSearchEllipsis")}
                             </p>
                           </div>
                         ) : smartCandidates === null ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Sparkles className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
-                              Ejecuta la busqueda preliminar para ver coincidencias asistidas por IA.
+                              {tMatching("emptySearch")}
                             </p>
                           </div>
                         ) : searchResultsToDisplay.length === 0 ? (
@@ -3175,8 +3270,8 @@ export default function VacanteDetallePage() {
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
                               {smartCandidates.length === 0
-                                ? "No se encontraron candidatos en la búsqueda."
-                                : "Los candidatos encontrados ya están en Posibles candidatos o en Etapas."}
+                                ? tMatching("errors.searchNoResults")
+                                : tMatching("errors.searchAlreadyInPipeline")}
                             </p>
                           </div>
                         ) : (
@@ -3187,22 +3282,22 @@ export default function VacanteDetallePage() {
                                 onClick={handleSelectAllCandidates}
                                 disabled={isVacancyReadOnly}
                                 className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-                                aria-label="Seleccionar todos los candidatos"
+                                aria-label={tMatching("aria.selectAll")}
                               >
-                                Seleccionar todos
+                                {tMatching("selectAll")}
                               </button>
                               <button
                                 type="button"
                                 onClick={handleDeselectAllCandidates}
                                 disabled={isVacancyReadOnly}
                                 className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-                                aria-label="Desmarcar todos los candidatos"
+                                aria-label={tMatching("aria.deselectAll")}
                               >
-                                Desmarcar todos
+                                {tMatching("deselectAll")}
                               </button>
                               {selectedCount > 0 && (
                                 <span className="font-sans text-sm text-muted-foreground" aria-live="polite">
-                                  {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
+                                  {tMatching("selectedCount", { count: selectedCount })}
                                 </span>
                               )}
                             </div>
@@ -3216,7 +3311,7 @@ export default function VacanteDetallePage() {
                                       candidateId={candidateId}
                                       isSelected={selectedCandidateIds.has(candidateId)}
                                       onToggle={handleToggleCandidate}
-                                      aiLabel="Coincidencia preliminar IA"
+                                      aiLabel={tMatching("preliminaryMatchBadge")}
                                       readOnly={isVacancyReadOnly}
                                     />
                                   </li>
@@ -3236,12 +3331,12 @@ export default function VacanteDetallePage() {
                       <div className="flex flex-wrap items-center gap-3">
                         <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
                           <Users className="h-5 w-5" aria-hidden />
-                          Posibles candidatos
+                          {tMatching("possibleCandidates")}
                           <span className="font-sans text-sm font-normal text-muted-foreground">
                             ({vacancyCandidates.length})
                           </span>
                         </h2>
-                        <AiDisclosureBadge label="Análisis preliminar IA" />
+                        <AiDisclosureBadge label={tMatching("preliminaryAnalysisBadge")} />
                         <button
                           type="button"
                           disabled={
@@ -3250,7 +3345,7 @@ export default function VacanteDetallePage() {
                             loadingStartProcess
                           }
                           className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
-                          aria-label="Incluir al proceso con candidatos seleccionados"
+                          aria-label={tMatching("includeSelectedHint")}
                           onClick={handleStartProcess}
                         >
                           {loadingStartProcess ? (
@@ -3258,7 +3353,7 @@ export default function VacanteDetallePage() {
                           ) : (
                             <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                           )}
-                          {loadingStartProcess ? "Incluyendo..." : "Incluir al proceso"}
+                          {loadingStartProcess ? tMatching("including") : tMatching("includeInProcess")}
                         </button>
                       </div>
                       {startProcessError && (
@@ -3268,13 +3363,13 @@ export default function VacanteDetallePage() {
                       )}
                       <div
                         className="rounded-xl border border-border bg-card p-6"
-                        aria-label="Posibles candidatos"
+                        aria-label={tMatching("aria.possibleCandidates")}
                       >
                         {vacancyCandidates.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
-                              No hay sugerencias de emparejamiento para esta vacante.
+                              {tMatching("noSuggestions")}
                             </p>
                           </div>
                         ) : (
@@ -3289,7 +3384,7 @@ export default function VacanteDetallePage() {
                                     isSelected={selectedPossibleCandidateIds.has(candidateId)}
                                     onToggle={handleTogglePossibleCandidate}
                                     showVerPerfil
-                                    aiLabel="Sugerencia IA"
+                                    aiLabel={tMatching("aiSuggestionBadge")}
                                     readOnly={isVacancyReadOnly}
                                   />
                                 </li>
@@ -3307,29 +3402,28 @@ export default function VacanteDetallePage() {
                     >
                       <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
                         <Users className="h-5 w-5" aria-hidden />
-                        Etapas
+                        {tMatching("stagesTitle")}
                         <span className="font-sans text-sm font-normal text-muted-foreground">
                           ({applicants.length})
                         </span>
                       </h2>
-                      <MoveStageErrorBanner error={moveStageError} />
                       <MoveStageErrorBanner error={applicationStatusError} />
                       <div
                         className="rounded-xl border border-border bg-card p-6"
-                        aria-label="Contenedor del tablero Kanban"
+                        aria-label={tMatching("kanbanBoardAria")}
                       >
                         {applicants.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
-                              Aún no hay postulantes en esta vacante.
+                              {tMatching("emptyApplicants")}
                             </p>
                           </div>
                         ) : (
                           <div
                             className="flex gap-4 overflow-x-auto pb-2"
                             role="region"
-                            aria-label="Etapas de candidatos"
+                            aria-label={tMatching("kanbanStagesAria")}
                           >
                             {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
                               <KanbanColumn
@@ -3380,7 +3474,7 @@ export default function VacanteDetallePage() {
                   aria-hidden
                 />
                 <p className="font-sans text-sm text-muted-foreground">
-                  Cargando vacante...
+                  {tDetail("loadingStates.loading")}
                 </p>
               </div>
             ) : fetchError ? (
@@ -3396,7 +3490,7 @@ export default function VacanteDetallePage() {
                   className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
                 >
                   <ArrowLeft className="h-4 w-4" aria-hidden />
-                  Volver a vacantes
+                  {tDetail("actions.backToVacancies")}
                 </Link>
                 <button
                   type="button"
@@ -3411,11 +3505,11 @@ export default function VacanteDetallePage() {
                 <div className="mb-4">
                   <Link
                     href="/portal-rrhh/vacantes"
-                    className="inline-flex w-fit items-center gap-2 font-sans text-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                    aria-label="Volver a vacantes"
+                    className="inline-flex w-fit items-center gap-2 font-sans text-sm text-gray-600 transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                    aria-label={tDetail("actions.backToVacanciesAria")}
                   >
                     <ArrowLeft className="h-4 w-4" aria-hidden />
-                    Volver a vacantes
+                    {tDetail("actions.backToVacancies")}
                   </Link>
                 </div>
 
@@ -3427,7 +3521,7 @@ export default function VacanteDetallePage() {
 
                 <section
                   className="mb-6 rounded-xl border border-border bg-card p-5"
-                  aria-label="Información de la vacante"
+                  aria-label={tDetail("page.vacancyInfoAria")}
                 >
                   <div className="flex flex-col gap-4">
                     <div className="flex items-start gap-3">
@@ -3435,7 +3529,7 @@ export default function VacanteDetallePage() {
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background">
                           <img
                             src={companyLogoSrc}
-                            alt={`Logo de ${vacancyCompanyDisplayName}`}
+                            alt={tDetail("page.logoAlt", { company: vacancyCompanyDisplayName })}
                             className="h-full w-full object-contain"
                             loading="lazy"
                           />
@@ -3456,7 +3550,7 @@ export default function VacanteDetallePage() {
                           <div className="flex flex-col gap-4">
                             <div className="flex flex-col gap-2">
                               <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-title-mobile">
-                                Nombre de la vacante <span className="text-vo-pink">*</span>
+                                {t("form.fields.name.label")} <span className="text-vo-pink">*</span>
                               </label>
                               <input
                                 id="edit-vacancy-title-mobile"
@@ -3466,7 +3560,7 @@ export default function VacanteDetallePage() {
                                 className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-invalid={!!editErrors.title}
                                 aria-describedby={editErrors.title ? "edit-title-error-mobile" : undefined}
-                                placeholder="Ej: Frontend Developer"
+                                placeholder={t("form.fields.name.placeholder")}
                               />
                               {editErrors.title && (
                                 <p id="edit-title-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
@@ -3479,14 +3573,14 @@ export default function VacanteDetallePage() {
                                 className="font-sans text-sm font-medium text-foreground"
                                 htmlFor="edit-vacancy-company-mobile"
                               >
-                                Cliente / compañía
+                                {t("form.fields.client.label")}
                               </label>
                               <select
                                 id="edit-vacancy-company-mobile"
                                 value={editCompanyId}
                                 onChange={(e) => setEditCompanyId(e.target.value)}
                                 className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label="Cliente o compañía de la vacante"
+                                aria-label={t("form.fields.client.ariaLabel")}
                                 disabled={loadingCompanies || companySelectOptions.length === 0}
                               >
                                 {companySelectOptions.map((company) => (
@@ -3496,7 +3590,7 @@ export default function VacanteDetallePage() {
                                 ))}
                               </select>
                               <p className="font-sans text-xs text-muted-foreground">
-                                Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes.
+                                {tDetail("actions.companyChangeHint")}
                               </p>
                             </div>
                             <VacancyLocationFields
@@ -3508,24 +3602,24 @@ export default function VacanteDetallePage() {
                                 }}
                                 countrySelectId="edit-vacancy-country-mobile"
                                 stateSelectId="edit-vacancy-state-mobile"
-                                countryLabel="País al que aplica la vacante"
-                                stateLabel="Estado / provincia"
+                                countryLabel={t("form.fields.country.label")}
+                                stateLabel={t("form.fields.state.label")}
                                 disabled={savingVacancy}
                               />
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-mobile">
-                                    Área (catálogo)
+                                    {t("form.fields.department.label")}
                                   </label>
                                   <select
                                     id="edit-vacancy-department-mobile"
                                     value={editVacancyDepartmentId}
                                     onChange={(e) => setEditVacancyDepartmentId(e.target.value)}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Área de la vacante en catálogo"
+                                    aria-label={t("form.fields.department.ariaLabel")}
                                     disabled={loadingVacancyCatalogs}
                                   >
-                                    <option value="">Sin especificar</option>
+                                    <option value="">{t("form.fields.unspecifiedOption")}</option>
                                     {mergedDepartmentOptions.map((option) => (
                                       <option key={option.id} value={option.id}>
                                         {option.displayName}
@@ -3535,17 +3629,17 @@ export default function VacanteDetallePage() {
                                 </div>
                                 <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-modality-mobile">
-                                    Modalidad
+                                    {t("form.fields.modality.label")}
                                   </label>
                                   <select
                                     id="edit-vacancy-modality-mobile"
                                     value={editVacancyModalityId}
                                     onChange={(e) => setEditVacancyModalityId(e.target.value)}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label="Modalidad de la vacante"
+                                    aria-label={t("form.fields.modality.ariaLabel")}
                                     disabled={loadingVacancyCatalogs}
                                   >
-                                    <option value="">Sin especificar</option>
+                                    <option value="">{t("form.fields.unspecifiedOption")}</option>
                                     {mergedModalityOptions.map((option) => (
                                       <option key={option.id} value={option.id}>
                                         {option.displayName}
@@ -3565,7 +3659,7 @@ export default function VacanteDetallePage() {
                             {emptyToDash(vacancy.title)}
                           </h1>
                         )}
-                        <div className="flex flex-wrap items-center gap-3 font-sans text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-3 font-sans text-sm text-gray-600">
                           {!isEditing ? (
                             <span className="flex min-w-0 items-center gap-1">
                               <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -3592,7 +3686,7 @@ export default function VacanteDetallePage() {
                           ) : null}
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                            {formatDate(vacancy.createdAt)}
+                            {tDetail("page.createdPrefix")} {formatDate(vacancy.createdAt)}
                           </span>
                         </div>
                         <span
@@ -3610,24 +3704,24 @@ export default function VacanteDetallePage() {
                             type="button"
                             onClick={handleEditVacancy}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                            aria-label="Editar vacante"
+                            aria-label={tDetail("actions.editVacancyAria")}
                           >
-                            Editar vacante
+                            {tDetail("actions.editVacancy")}
                           </button>
                           ) : null}
                           <Link
                             href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                            aria-label="Ver entrevistas de esta vacante"
+                            aria-label={tDetail("actions.interviewsAria")}
                           >
-                            Entrevistas
+                            {tDetail("actions.interviews")}
                           </Link>
                           <Link
                             href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                            aria-label="Ver resultados y métricas de esta vacante"
+                            aria-label={tDetail("actions.resultsAria")}
                           >
-                            Resultados
+                            {tDetail("actions.results")}
                           </Link>
                         </>
                       ) : (
@@ -3636,12 +3730,12 @@ export default function VacanteDetallePage() {
                           onClick={handleSaveVacancy}
                           disabled={savingVacancy}
                           className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          aria-label="Guardar vacante"
+                                aria-label={tDetail("actions.saveAria")}
                         >
                           {savingVacancy ? (
                             <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                           ) : null}
-                          {savingVacancy ? "Guardando..." : "Guardar"}
+                          {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
                         </button>
                       )}
                     </div>
@@ -3655,10 +3749,10 @@ export default function VacanteDetallePage() {
                         {(vacancy.description || isEditing) && (
                           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
                             <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-sky/10 text-vo-sky">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ats-arena/80 text-gray-700">
                                 <FileText className="h-3.5 w-3.5" aria-hidden />
                               </span>
-                              Descripción de la vacante
+                              {tDetail("sections.description")}
                             </h2>
                             {isEditing ? (
                               <div className="flex flex-col gap-2">
@@ -3667,10 +3761,10 @@ export default function VacanteDetallePage() {
                                   onChange={(e) => setEditDescription(e.target.value)}
                                   rows={5}
                                   className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
-                                  aria-label="Editar descripción de la vacante"
+                                  aria-label={t("form.fields.description.label")}
                                   aria-invalid={!!editErrors.description}
                                   aria-describedby={editErrors.description ? "edit-description-error-mobile" : undefined}
-                                  placeholder="Explicacion del rol de la vacante"
+                                  placeholder={t("form.fields.description.placeholder")}
                                 />
                                 {editErrors.description && (
                                   <p id="edit-description-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
@@ -3689,20 +3783,20 @@ export default function VacanteDetallePage() {
                           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
                             <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
                               <h2 className="flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-purple/10 text-vo-purple">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-purple/15 text-vo-purple">
                                   <CheckSquare className="h-3.5 w-3.5" aria-hidden />
                                 </span>
-                                Requisitos
+                                {tDetail("sections.requirements")}
                               </h2>
                               {isEditing && (
                                 <button
                                   type="button"
                                   onClick={handleAddRequirement}
                                   className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                                  aria-label="Agregar requerimiento"
+                                  aria-label={tDetail("actions.addRequirementAria")}
                                 >
                                   <Plus className="h-4 w-4" aria-hidden />
-                                  Agregar
+                                  {tDetail("actions.addRequirement")}
                                 </button>
                               )}
                             </div>
@@ -3712,7 +3806,7 @@ export default function VacanteDetallePage() {
                                   {editRequirements.map((req, index) => (
                                     <div
                                       key={req.id}
-                                      className="flex flex-col gap-2 rounded-lg border border-border bg-white p-3"
+                                      className="flex flex-col gap-2 rounded-lg border border-border bg-background p-3"
                                     >
                                       <div className="flex flex-col gap-2">
                                         <div className="space-y-1">
@@ -3722,7 +3816,7 @@ export default function VacanteDetallePage() {
                                             onChange={(e) =>
                                               handleUpdateRequirement(req.id, "requirementName", e.target.value)
                                             }
-                                            placeholder="Nombre (ej: Licencia de conducir)"
+                                            placeholder={t("form.fields.requirements.namePlaceholder")}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Nombre`}
                                             aria-invalid={!!editErrors[`req-name-${req.id}`]}
@@ -3740,7 +3834,7 @@ export default function VacanteDetallePage() {
                                             onChange={(e) =>
                                               handleUpdateRequirement(req.id, "requirementValue", e.target.value)
                                             }
-                                            placeholder="Valor (ej: Pesada)"
+                                            placeholder={t("form.fields.requirements.valuePlaceholder")}
                                             className="h-9 w-full rounded-md border border-input bg-background px-2.5 py-1.5 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
                                             aria-label={`Requerimiento ${index + 1} - Valor`}
                                             aria-invalid={!!editErrors[`req-value-${req.id}`]}
@@ -3757,7 +3851,7 @@ export default function VacanteDetallePage() {
                                               htmlFor={`edit-scale-mobile-${req.id}`}
                                               className="font-sans text-xs text-muted-foreground"
                                             >
-                                              Importancia (1-10)
+                                              {t("form.fields.requirements.importanceLabel")}
                                             </label>
                                             <span className="font-sans text-xs font-medium text-foreground tabular-nums">
                                               {req.scale}
@@ -3790,7 +3884,7 @@ export default function VacanteDetallePage() {
                                   ))}
                                 </div>
                                 <p className="font-sans text-xs text-muted-foreground">
-                                  Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.
+                                  {t("form.fields.requirements.helper")}
                                 </p>
                               </div>
                             ) : (
@@ -3807,16 +3901,16 @@ export default function VacanteDetallePage() {
                               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 text-amber-600">
                                 <Info className="h-3.5 w-3.5" aria-hidden />
                               </span>
-                              Detalles de la vacante
+                              {tDetail("sections.details")}
                             </h2>
                             {isEditing ? (
                               <textarea
                                 value={editDetails}
                                 onChange={(e) => setEditDetails(e.target.value)}
                                 rows={4}
-                                placeholder="Datos especificos de la vacante"
+                                placeholder={t("form.fields.details.placeholder")}
                                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label="Editar detalles de la vacante"
+                                aria-label={t("form.fields.details.label")}
                               />
                             ) : vacancy.details ? (
                               (() => {
@@ -3829,7 +3923,7 @@ export default function VacanteDetallePage() {
                                           key={`${key}-${value}`}
                                           className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0"
                                         >
-                                          <dt className="font-sans text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">
+                                          <dt className="font-sans text-[11px] font-medium uppercase tracking-wide text-gray-600">
                                             {key}
                                           </dt>
                                           <dd className="font-sans text-sm text-foreground">
@@ -3847,8 +3941,8 @@ export default function VacanteDetallePage() {
                                 );
                               })()
                             ) : (
-                              <p className="font-sans text-sm italic text-muted-foreground/70">
-                                No especificado
+                              <p className="font-sans text-sm italic text-gray-600">
+                                {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
@@ -3860,24 +3954,24 @@ export default function VacanteDetallePage() {
                               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600">
                                 <DollarSign className="h-3.5 w-3.5" aria-hidden />
                               </span>
-                              Salario
+                              {tDetail("sections.salary")}
                             </h2>
                             {isEditing ? (
                               <input
                                 type="text"
                                 value={editSalary}
                                 onChange={(e) => setEditSalary(e.target.value)}
-                                placeholder="Ej: US$1,200 - US$1,800 / mes"
+                                placeholder={t("form.fields.salary.placeholder")}
                                 className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label="Editar salario de la vacante"
+                                aria-label={t("form.fields.salary.ariaLabel")}
                               />
                             ) : vacancy.salary ? (
                               <p className="font-sans text-lg font-semibold text-foreground">
                                 {safeString(vacancy.salary)}
                               </p>
                             ) : (
-                              <p className="font-sans text-sm italic text-muted-foreground/70">
-                                No especificado
+                              <p className="font-sans text-sm italic text-gray-600">
+                                {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
@@ -3889,24 +3983,24 @@ export default function VacanteDetallePage() {
                               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-pink/10 text-vo-pink">
                                 <Gift className="h-3.5 w-3.5" aria-hidden />
                               </span>
-                              Ventajas y beneficios de la vacante
+                              {tDetail("sections.advantages")}
                             </h2>
                             {isEditing ? (
                               <textarea
                                 value={editAdvantages}
                                 onChange={(e) => setEditAdvantages(e.target.value)}
                                 rows={4}
-                                placeholder="Ej: Seguro médico, bono anual, home office, capacitación..."
+                                placeholder={t("form.fields.advantages.placeholder")}
                                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label="Editar ventajas y beneficios de la vacante"
+                                aria-label={t("form.fields.advantages.label")}
                               />
                             ) : vacancy.advantages ? (
                               <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
                                 {safeString(vacancy.advantages)}
                               </p>
                             ) : (
-                              <p className="font-sans text-sm italic text-muted-foreground/70">
-                                No especificado
+                              <p className="font-sans text-sm italic text-gray-600">
+                                {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
@@ -3921,16 +4015,16 @@ export default function VacanteDetallePage() {
                   aria-label="Candidatos con emparejamiento"
                 >
                   <AiDisclosureNotice
-                    title="Búsqueda y análisis preliminar con IA"
-                    description="La IA prioriza coincidencias iniciales y genera análisis preliminar. RRHH valida la decisión final."
+                    title={tMatching("sectionTitle")}
+                    description={tMatching("sectionDescription")}
                   />
                   <div className="grid gap-2 sm:grid-cols-3">
-                    {AI_EFFICIENCY_KPIS.map((item) => (
+                    {AI_EFFICIENCY_KPI_KEYS.map((item) => (
                       <AiKpiCard
-                        key={item.label}
-                        label={item.label}
-                        value={item.value}
-                        helper={item.helper}
+                        key={item.titleKey}
+                        label={tMatching(item.titleKey)}
+                        value={tMatching(item.valueKey)}
+                        helper={tMatching(item.helperKey)}
                       />
                     ))}
                   </div>
@@ -3939,8 +4033,8 @@ export default function VacanteDetallePage() {
                       type="button"
                       onClick={handleSearchSmartRecommendations}
                       disabled={loadingSmart || isVacancyReadOnly}
-                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple/5 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      aria-label="Búsqueda preliminar"
+                      className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple/50 bg-vo-purple/10 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/15 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      aria-label={tMatching("aria.preliminarySearch")}
                       title={vacancyReadOnlyTitle}
                     >
                       {loadingSmart ? (
@@ -3949,8 +4043,8 @@ export default function VacanteDetallePage() {
                         <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                       )}
                       {loadingSmart
-                        ? "Actualizando busqueda con IA..."
-                        : "Búsqueda preliminar"}
+                        ? tMatching("updatingSearch")
+                        : tMatching("preliminarySearch")}
                     </button>
                     {displayCandidates.length > 0 && (
                       <button
@@ -3962,7 +4056,7 @@ export default function VacanteDetallePage() {
                           selectedDocumentIds.length === 0
                         }
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        aria-label="Análisis preliminar"
+                        aria-label={tMatching("aria.preliminaryAnalysis")}
                         title={vacancyReadOnlyTitle}
                       >
                         {loadingMatch ? (
@@ -3970,7 +4064,7 @@ export default function VacanteDetallePage() {
                         ) : (
                           <Scale className="h-4 w-4 shrink-0" aria-hidden />
                         )}
-                        {loadingMatch ? "Reanalizando con IA..." : "Análisis preliminar"}
+                        {loadingMatch ? tMatching("reanalyzing") : tMatching("preliminaryAnalysis")}
                       </button>
                     )}
                   </div>
@@ -4010,7 +4104,7 @@ export default function VacanteDetallePage() {
                     ) : null}
                     <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
                       <Sparkles className="h-4 w-4" aria-hidden />
-                      Resultados de búsqueda
+                      {tMatching("searchResults")}
                       {smartCandidates !== null && (
                         <span className="font-sans text-sm font-normal text-muted-foreground">
                           ({searchResultsToDisplay.length})
@@ -4019,7 +4113,7 @@ export default function VacanteDetallePage() {
                     </h2>
                     <div
                       className="rounded-xl border border-border bg-card p-5"
-                      aria-label="Resultados de búsqueda"
+                      aria-label={tMatching("aria.searchResults")}
                     >
                       {loadingSmart && smartCandidates === null ? (
                         <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
@@ -4035,14 +4129,14 @@ export default function VacanteDetallePage() {
                             className="font-sans text-sm text-muted-foreground"
                             aria-live="polite"
                           >
-                            Actualizando búsqueda con IA…
+                            {tMatching("updatingSearchEllipsis")}
                           </p>
                         </div>
                       ) : smartCandidates === null ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Sparkles className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
-                            Ejecuta la busqueda preliminar para ver coincidencias asistidas por IA.
+                            {tMatching("emptySearch")}
                           </p>
                         </div>
                       ) : searchResultsToDisplay.length === 0 ? (
@@ -4050,8 +4144,8 @@ export default function VacanteDetallePage() {
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
                             {smartCandidates.length === 0
-                              ? "No se encontraron candidatos en la búsqueda."
-                              : "Los candidatos encontrados ya están en Posibles candidatos o en Etapas."}
+                              ? tMatching("errors.searchNoResults")
+                              : tMatching("errors.searchAlreadyInPipeline")}
                           </p>
                         </div>
                       ) : (
@@ -4062,22 +4156,22 @@ export default function VacanteDetallePage() {
                               onClick={handleSelectAllCandidates}
                               disabled={isVacancyReadOnly}
                               className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-                              aria-label="Seleccionar todos los candidatos"
+                              aria-label={tMatching("aria.selectAll")}
                             >
-                              Seleccionar todos
+                              {tMatching("selectAll")}
                             </button>
                             <button
                               type="button"
                               onClick={handleDeselectAllCandidates}
                               disabled={isVacancyReadOnly}
                               className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-                              aria-label="Desmarcar todos los candidatos"
+                              aria-label={tMatching("aria.deselectAll")}
                             >
-                              Desmarcar todos
+                              {tMatching("deselectAll")}
                             </button>
                             {selectedCount > 0 && (
                               <span className="font-sans text-sm text-muted-foreground" aria-live="polite">
-                                {selectedCount} seleccionado{selectedCount !== 1 ? "s" : ""}
+                                {tMatching("selectedCount", { count: selectedCount })}
                               </span>
                             )}
                           </div>
@@ -4091,7 +4185,7 @@ export default function VacanteDetallePage() {
                                     candidateId={candidateId}
                                     isSelected={selectedCandidateIds.has(candidateId)}
                                     onToggle={handleToggleCandidate}
-                                    aiLabel="Coincidencia preliminar IA"
+                                    aiLabel={tMatching("preliminaryMatchBadge")}
                                     readOnly={isVacancyReadOnly}
                                   />
                                 </li>
@@ -4111,12 +4205,12 @@ export default function VacanteDetallePage() {
                     <div className="flex flex-wrap items-center gap-3">
                       <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
                         <Users className="h-4 w-4" aria-hidden />
-                        Posibles candidatos
+                        {tMatching("possibleCandidates")}
                         <span className="font-sans text-sm font-normal text-muted-foreground">
                           ({vacancyCandidates.length})
                         </span>
                       </h2>
-                      <AiDisclosureBadge label="Análisis preliminar IA" />
+                      <AiDisclosureBadge label={tMatching("preliminaryAnalysisBadge")} />
                       <button
                         type="button"
                         disabled={
@@ -4125,7 +4219,7 @@ export default function VacanteDetallePage() {
                           loadingStartProcess
                         }
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-vo-purple"
-                        aria-label="Iniciar proceso con candidatos seleccionados"
+                        aria-label={tMatching("includeSelectedHint")}
                         onClick={handleStartProcess}
                       >
                         {loadingStartProcess ? (
@@ -4133,7 +4227,7 @@ export default function VacanteDetallePage() {
                         ) : (
                           <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                         )}
-                        {loadingStartProcess ? "Iniciando..." : "Iniciar proceso"}
+                        {loadingStartProcess ? tMatching("starting") : tMatching("startProcess")}
                       </button>
                     </div>
                     {startProcessError && (
@@ -4143,13 +4237,13 @@ export default function VacanteDetallePage() {
                     )}
                     <div
                       className="rounded-xl border border-border bg-card p-5"
-                      aria-label="Posibles candidatos"
+                      aria-label={tMatching("aria.possibleCandidates")}
                     >
                       {vacancyCandidates.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
-                            No hay sugerencias de emparejamiento para esta vacante.
+                            {tMatching("noSuggestions")}
                           </p>
                         </div>
                       ) : (
@@ -4187,24 +4281,23 @@ export default function VacanteDetallePage() {
                         ({applicants.length})
                       </span>
                     </h2>
-                    <MoveStageErrorBanner error={moveStageError} />
                     <MoveStageErrorBanner error={applicationStatusError} />
                     <div
                       className="rounded-xl border border-border bg-card p-5"
-                      aria-label="Contenedor del tablero Kanban"
+                      aria-label={tMatching("kanbanBoardAria")}
                     >
                       {applicants.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
-                            Aún no hay postulantes en esta vacante.
+                            {tMatching("emptyApplicants")}
                           </p>
                         </div>
                       ) : (
                         <div
                           className="flex gap-3 overflow-x-auto pb-2"
                           role="region"
-                          aria-label="Etapas de candidatos"
+                          aria-label={tMatching("kanbanStagesAria")}
                         >
                           {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
                             <KanbanColumn

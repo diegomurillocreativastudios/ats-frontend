@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Calendar, FileText, Loader2, Plus, Users } from "lucide-react"
 import {
@@ -12,6 +13,7 @@ import {
   type ListInterviewsQuery,
 } from "@/lib/api/interviews"
 import type { UseRecruiterVacancySummaryResult } from "@/hooks/use-recruiter-vacancy-summary"
+import { getInterviewStatusLabel } from "@/lib/interviews/interview-status-labels"
 import { formatInterviewLocalDateTime } from "@/lib/interview-datetime"
 import { InterviewCreateModal } from "@/components/rrhh/interviews/interview-create-modal"
 import { InterviewDetailModal } from "@/components/rrhh/interviews/interview-detail-modal"
@@ -21,16 +23,14 @@ import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-sta
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
-import { technicalSheetMessages } from "@/lib/messages/technical-sheet"
 
-const STATUS_FILTER_OPTIONS: { value: "" | InterviewStatus; label: string }[] =
-  [
-    { value: "", label: "Todos los estados" },
-    { value: "Scheduled", label: "Programada" },
-    { value: "Completed", label: "Completada" },
-    { value: "Cancelled", label: "Cancelada" },
-    { value: "NoShow", label: "No asistió" },
-  ]
+const STATUS_FILTER_VALUES: ("" | InterviewStatus)[] = [
+  "",
+  "Scheduled",
+  "Completed",
+  "Cancelled",
+  "NoShow",
+]
 
 export interface InterviewListProps {
   vacancyId: string
@@ -39,12 +39,13 @@ export interface InterviewListProps {
 
 function formatCandidateLabel(
   profileId: string,
-  labelById: Map<string, string>
+  labelById: Map<string, string>,
+  t: (key: string, values?: Record<string, string>) => string
 ): string {
   if (!profileId) return "—"
   const label = labelById.get(profileId)
   if (label) return label
-  return `Candidato (${profileId.slice(0, 8)}…)`
+  return t("cards.candidateFallback", { id: profileId.slice(0, 8) })
 }
 
 function formatDurationCell(minutes: number | null): string {
@@ -53,6 +54,8 @@ function formatDurationCell(minutes: number | null): string {
 }
 
 export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps) {
+  const t = useTranslations("RecruiterPortal.interviews")
+  const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -155,7 +158,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
     setSnackbar({
       open: true,
       variant: "success",
-      message: "Entrevista creada correctamente.",
+      message: t("toasts.created"),
     })
     load().catch(() => {})
   }
@@ -180,15 +183,15 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8">
       <PortalPageHeader
-        title="Entrevistas"
+        title={t("page.title")}
         description={
           vacancySummary.loading
-            ? "Cargando datos de la vacante…"
+            ? t("page.descriptionLoading")
             : vacancyTitle?.trim()
-              ? `Vacante: ${vacancyTitle.trim()}`
+              ? t("page.descriptionWithVacancy", { title: vacancyTitle.trim() })
               : vacancySummary.error
-                ? "No se pudo cargar el título de la vacante."
-                : "Gestión de entrevistas de la vacante"
+                ? t("page.descriptionLoadError")
+                : t("page.descriptionDefault")
         }
         actions={
           <>
@@ -196,10 +199,10 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               href={`/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}/resultados`}
               className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-5 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
               data-testid="interviews-prep-drawer-open"
-              aria-label="Ir a resultados de la vacante para revisar candidatos antes de agendar una entrevista"
+              aria-label={t("actions.reviewCandidatesAria")}
             >
               <Users className="h-4 w-4 shrink-0" aria-hidden />
-              Revisar candidatos
+              {t("actions.reviewCandidates")}
             </Link>
             <button
               type="button"
@@ -208,7 +211,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               data-testid="interviews-new-button"
             >
               <Plus className="h-4 w-4 shrink-0" aria-hidden />
-              Nueva entrevista
+              {t("actions.newInterview")}
             </button>
           </>
         }
@@ -216,7 +219,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
 
       <section
         className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
-        aria-label="Filtros de entrevistas"
+        aria-label={t("filters.regionLabel")}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           <div className="flex min-w-[200px] flex-col gap-1.5">
@@ -224,7 +227,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               htmlFor="interview-filter-status"
               className="font-sans text-sm font-medium text-foreground"
             >
-              Estado
+              {t("filters.status")}
             </label>
             <select
               id="interview-filter-status"
@@ -232,9 +235,11 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               onChange={handleStatusChange}
               className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
             >
-              {STATUS_FILTER_OPTIONS.map((o) => (
-                <option key={o.label} value={o.value}>
-                  {o.label}
+              {STATUS_FILTER_VALUES.map((value) => (
+                <option key={value || "all"} value={value}>
+                  {value === ""
+                    ? t("filters.allStatuses")
+                    : getInterviewStatusLabel(value, t)}
                 </option>
               ))}
             </select>
@@ -244,7 +249,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               id="interview-filter-from-label"
               className="font-sans text-sm font-medium text-foreground"
             >
-              Desde (local)
+              {t("filters.from")}
             </span>
             <InterviewSingleDatetimeRow
               value={draftFrom}
@@ -257,7 +262,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               id="interview-filter-to-label"
               className="font-sans text-sm font-medium text-foreground"
             >
-              Hasta (local)
+              {t("filters.to")}
             </span>
             <InterviewSingleDatetimeRow
               value={draftTo}
@@ -270,15 +275,15 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
             onClick={handleApplyFilters}
             className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
           >
-            Aplicar filtros
+            {t("filters.apply")}
           </button>
         </div>
         <p className="font-sans text-xs text-muted-foreground">
-          Los filtros de rango usan la zona horaria del navegador; el API recibe UTC.
+          {t("filters.timezoneHelper")}
         </p>
       </section>
 
-      <section aria-label="Listado de entrevistas">
+      <section aria-label={t("list.regionLabel")}>
         {loading ? (
           <div
             className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16"
@@ -289,7 +294,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               aria-hidden
             />
             <p className="font-sans text-sm text-muted-foreground">
-              Cargando entrevistas...
+              {t("loadingStates.loadingInterviews")}
             </p>
           </div>
         ) : error ? (
@@ -304,14 +309,14 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               }}
               className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
             >
-              Reintentar
+              {t("actions.retry")}
             </button>
           </div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16">
             <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
             <p className="font-sans text-sm text-muted-foreground">
-              No hay entrevistas para esta vacante.
+              {t("emptyStates.noInterviews")}
             </p>
             <button
               type="button"
@@ -320,7 +325,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               data-testid="interviews-first-create-button"
             >
               <Plus className="h-4 w-4" aria-hidden />
-              Crear primera entrevista
+              {t("actions.createFirst")}
             </button>
           </div>
         ) : (
@@ -329,25 +334,25 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th scope="col" className="px-4 py-3 font-semibold text-foreground">
-                    Fecha y hora
+                    {t("list.table.dateTime")}
                   </th>
                   <th scope="col" className="px-4 py-3 font-semibold text-foreground">
-                    Candidato
+                    {t("list.table.candidate")}
                   </th>
                   <th scope="col" className="px-4 py-3 font-semibold text-foreground">
-                    Tipo
+                    {t("list.table.type")}
                   </th>
                   <th scope="col" className="px-4 py-3 font-semibold text-foreground">
-                    Duración
+                    {t("list.table.duration")}
                   </th>
                   <th scope="col" className="px-4 py-3 font-semibold text-foreground">
-                    Entrevistador
+                    {t("list.table.interviewer")}
                   </th>
                   <th scope="col" className="px-4 py-3 font-semibold text-foreground">
-                    Estado
+                    {t("list.table.status")}
                   </th>
                   <th scope="col" className="px-4 py-3 font-semibold text-foreground">
-                    Acciones
+                    {t("list.table.actions")}
                   </th>
                 </tr>
               </thead>
@@ -360,10 +365,11 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                     <td className="px-4 py-3 tabular-nums text-foreground">
                       {formatInterviewLocalDateTime(row.scheduledAtUtc)}
                     </td>
-                    <td className="max-w-[240px] truncate px-4 py-3 text-foreground" title={formatCandidateLabel(row.candidateProfileId, applicantLabelByProfileId)}>
+                    <td className="max-w-[240px] truncate px-4 py-3 text-foreground" title={formatCandidateLabel(row.candidateProfileId, applicantLabelByProfileId, t)}>
                       {formatCandidateLabel(
                         row.candidateProfileId,
-                        applicantLabelByProfileId
+                        applicantLabelByProfileId,
+                        t
                       )}
                     </td>
                     <td className="max-w-[160px] truncate px-4 py-3 text-muted-foreground">
@@ -389,7 +395,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                           className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
                           data-testid={`interview-open-detail-${row.id}`}
                         >
-                          Administrar
+                          {t("actions.manage")}
                         </button>
                         <button
                           type="button"
@@ -397,7 +403,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                           className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
                           data-testid={`interview-open-notes-${row.id}`}
                         >
-                          Notas
+                          {t("actions.notes")}
                         </button>
                         <button
                           type="button"
@@ -405,11 +411,11 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                             setTechnicalSheetProfileId(row.candidateProfileId)
                           }
                           className="inline-flex items-center gap-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
-                          aria-label={technicalSheetMessages.viewSheet}
+                          aria-label={tTechnicalSheet("aria.viewSheet")}
                           data-testid={`interview-open-technical-sheet-${row.id}`}
                         >
                           <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                          Ficha técnica
+                          {t("actions.technicalSheet")}
                         </button>
                       </div>
                     </td>
@@ -439,7 +445,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           setSnackbar({
             open: true,
             variant: "success",
-            message: "Cambios guardados.",
+            message: t("toasts.saved"),
           })
         }}
         onDeleted={(id) => {
@@ -448,7 +454,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           setSnackbar({
             open: true,
             variant: "success",
-            message: "Entrevista eliminada.",
+            message: t("toasts.deleted"),
           })
         }}
       />
@@ -462,7 +468,8 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           vacancyTitle={vacancyTitle}
           candidateLabel={formatCandidateLabel(
             technicalSheetProfileId,
-            applicantLabelByProfileId
+            applicantLabelByProfileId,
+            t
           )}
         />
       ) : null}
@@ -481,7 +488,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
             ? (() => {
                 const r = items.find((i) => i.id === notesInterviewId)
                 if (!r) return null
-                return `${formatCandidateLabel(r.candidateProfileId, applicantLabelByProfileId)} · ${formatInterviewLocalDateTime(r.scheduledAtUtc)}`
+                return `${formatCandidateLabel(r.candidateProfileId, applicantLabelByProfileId, t)} · ${formatInterviewLocalDateTime(r.scheduledAtUtc)}`
               })()
             : null
         }
@@ -490,7 +497,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           setSnackbar({
             open: true,
             variant: "success",
-            message: "Notas guardadas.",
+            message: t("toasts.notesSaved"),
           })
         }}
       />

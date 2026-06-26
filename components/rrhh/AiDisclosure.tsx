@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ApplyStyleProgressBar } from "@/components/public/apply-style-progress-bar";
 import {
   APPLY_LOADING_TICK_MS,
@@ -36,17 +37,19 @@ export interface AiDisclosurePillProgressProps {
 }
 
 /**
- * Mismos colores que la barra en overlay oscuro de aplicar (gradiente #f0a7ff → #8dd8ff + resplandor).
+ * Mismos colores que la barra en overlay oscuro de aplicar (gradiente #6EB940 → #438C39 + resplandor).
  */
 export function AiDisclosurePillProgress({
   percent,
-  "aria-label": ariaLabel = "Progreso del procesamiento con IA",
+  "aria-label": ariaLabel,
   timeBasedTypicalMs = RECRUITER_ADD_CANDIDATE_TYPICAL_MS,
   className = "",
   ingestStepLabels = false,
   preliminaryMatchStepLabels = false,
   isCompleted = false,
 }: AiDisclosurePillProgressProps) {
+  const t = useTranslations("RecruiterPortal.aiDisclosure");
+  const resolvedAriaLabel = ariaLabel ?? t("progressAria");
   const isTimeBased = percent === null && !isCompleted
   const [simulatedPercent, setSimulatedPercent] = useState(0)
 
@@ -89,8 +92,8 @@ export function AiDisclosurePillProgress({
 
   const rounded = Math.round(displayPercent)
   const ariaValueText = stepLabel
-    ? `${stepLabel}. ${rounded} por ciento`
-    : `${rounded} por ciento`
+    ? `${stepLabel}. ${t("percentComplete", { percent: rounded })}`
+    : t("percentComplete", { percent: rounded })
 
   const isBusy = !isCompleted && rounded < 100
 
@@ -99,8 +102,8 @@ export function AiDisclosurePillProgress({
     : getAiIngestStepIndexFromPercent(displayPercent)
 
   const stepperNavAriaLabel = showVacancyMatchStepper
-    ? "Etapas del análisis preliminar"
-    : "Estados del procesamiento"
+    ? t("preliminaryStepsAria")
+    : t("processingStepsAria")
 
   const classNames = (...classes: Array<string | boolean>) =>
     classes.filter(Boolean).join(" ")
@@ -114,7 +117,7 @@ export function AiDisclosurePillProgress({
       aria-valuenow={rounded}
       aria-valuetext={ariaValueText}
       aria-busy={isBusy}
-      aria-label={ariaLabel}
+      aria-label={resolvedAriaLabel}
     >
       {showStepper ? (
         <div className="space-y-2">
@@ -153,12 +156,12 @@ export function AiDisclosurePillProgress({
                       <>
                         <div aria-hidden className="absolute inset-0 flex items-center">
                           <div className="h-0.5 w-full bg-muted-foreground/30 overflow-hidden">
-                            <span className="block h-full w-1/2 animate-apply-shimmer bg-[linear-gradient(90deg,transparent,#8c52ff,transparent)]" />
+                            <span className="block h-full w-1/2 animate-apply-shimmer bg-[linear-gradient(90deg,transparent,#438C39,transparent)]" />
                           </div>
                         </div>
                         <div
                           aria-current="step"
-                          className="relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-vo-purple bg-white"
+                          className="relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-vo-purple bg-background"
                         >
                           <span
                             aria-hidden
@@ -173,7 +176,7 @@ export function AiDisclosurePillProgress({
                         <div aria-hidden className="absolute inset-0 flex items-center">
                           <div className="h-0.5 w-full bg-muted-foreground/30" />
                         </div>
-                        <div className="group relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-muted-foreground/40 bg-white">
+                        <div className="group relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-muted-foreground/40 bg-background">
                           <span
                             aria-hidden
                             className={classNames(
@@ -214,28 +217,30 @@ export function AiDisclosurePillProgress({
   );
 }
 
-export function AiDisclosureBadge({ label = "Asistido por IA" }) {
+export function AiDisclosureBadge({ label }: { label?: string }) {
+  const t = useTranslations("RecruiterPortal.aiDisclosure");
+  const resolvedLabel = label ?? t("assistedByAi");
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-vo-purple/30 bg-vo-purple/10 px-2.5 py-1 font-sans text-xs font-semibold text-vo-purple">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-vo-purple/40 bg-vo-purple/15 px-2.5 py-1 font-sans text-xs font-semibold text-vo-purple">
       <Sparkles className="h-3.5 w-3.5" aria-hidden />
-      {label}
+      {resolvedLabel}
     </span>
   );
 }
 
 export function AiDisclosureNotice({ title, description }) {
   return (
-    <div className="rounded-lg border border-vo-purple/20 bg-vo-purple/5 p-3">
+    <div className="rounded-lg border border-vo-purple/35 bg-vo-purple/10 p-3">
       <div className="flex flex-wrap items-center gap-2">
         <AiDisclosureBadge />
         {title ? (
-          <p className="font-sans text-sm font-medium text-foreground">
+          <p className="font-sans text-sm font-semibold text-foreground">
             {title}
           </p>
         ) : null}
       </div>
       {description ? (
-        <p className="mt-1.5 font-sans text-xs text-muted-foreground">
+        <p className="mt-1.5 font-sans text-xs text-gray-600">
           {description}
         </p>
       ) : null}
@@ -246,14 +251,14 @@ export function AiDisclosureNotice({ title, description }) {
 export function AiKpiCard({ label, value, helper }) {
   return (
     <article className="rounded-lg border border-border bg-card px-3 py-2.5">
-      <p className="font-sans text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+      <p className="font-sans text-[11px] font-medium uppercase tracking-wide text-gray-600">
         {label}
       </p>
       <p className="mt-1 font-sans text-base font-semibold text-foreground">
         {value}
       </p>
       {helper ? (
-        <p className="mt-0.5 font-sans text-[11px] text-muted-foreground">
+        <p className="mt-0.5 font-sans text-[11px] text-gray-600">
           {helper}
         </p>
       ) : null}

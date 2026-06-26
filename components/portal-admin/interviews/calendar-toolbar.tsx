@@ -1,18 +1,19 @@
 "use client"
 
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useTranslations } from "next-intl"
 import {
   formatCalendarRangeTitle,
   getBrowserTimeZoneLabel,
   type CalendarViewMode,
 } from "@/lib/admin/interviews-calendar-layout"
 
-const VIEW_OPTIONS: { id: CalendarViewMode; label: string }[] = [
-  { id: "day", label: "Día" },
-  { id: "week", label: "Semana" },
-  { id: "month", label: "Mes" },
-  { id: "year", label: "Año" },
-  { id: "agenda", label: "Agenda" },
+const VIEW_OPTION_IDS: CalendarViewMode[] = [
+  "day",
+  "week",
+  "month",
+  "year",
+  "agenda",
 ]
 
 export interface CalendarToolbarProps {
@@ -32,6 +33,7 @@ export function CalendarToolbar({
   onToday,
   hideViewSwitcher = false,
 }: CalendarToolbarProps) {
+  const t = useTranslations("AdminPortal.interviews.calendar.toolbar")
   const title = formatCalendarRangeTitle(view, anchorDate)
   const tz = getBrowserTimeZoneLabel()
 
@@ -61,14 +63,14 @@ export function CalendarToolbar({
           onClick={onToday}
           className="rounded-md border border-border bg-background px-3 py-2 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
         >
-          Hoy
+          {t("today")}
         </button>
         <div className="flex items-center rounded-md border border-border">
           <button
             type="button"
             onClick={handlePrev}
             className="flex h-9 w-9 items-center justify-center text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
-            aria-label="Periodo anterior"
+            aria-label={t("prevPeriodAria")}
           >
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </button>
@@ -76,7 +78,7 @@ export function CalendarToolbar({
             type="button"
             onClick={handleNext}
             className="flex h-9 w-9 items-center justify-center border-l border-border text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
-            aria-label="Periodo siguiente"
+            aria-label={t("nextPeriodAria")}
           >
             <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
@@ -91,30 +93,30 @@ export function CalendarToolbar({
 
       {hideViewSwitcher ? (
         <span className="font-sans text-xs text-muted-foreground">
-          Vista agenda en móvil
+          {t("mobileAgendaHint")}
         </span>
       ) : (
         <div
           className="inline-flex flex-wrap rounded-lg border border-border bg-muted/40 p-1"
           role="tablist"
-          aria-label="Vista del calendario"
+          aria-label={t("viewSwitcherAria")}
         >
-          {VIEW_OPTIONS.map((opt) => {
-            const isActive = view === opt.id
+          {VIEW_OPTION_IDS.map((viewId) => {
+            const isActive = view === viewId
             return (
               <button
-                key={opt.id}
+                key={viewId}
                 type="button"
                 role="tab"
                 aria-selected={isActive}
-                onClick={() => onViewChange(opt.id)}
+                onClick={() => onViewChange(viewId)}
                 className={`rounded-md px-3 py-1.5 font-sans text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-vo-purple ${
                   isActive
                     ? "bg-vo-purple text-white shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {opt.label}
+                {t(`views.${viewId}`)}
               </button>
             )
           })}

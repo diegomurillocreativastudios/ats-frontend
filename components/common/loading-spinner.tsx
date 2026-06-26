@@ -1,4 +1,7 @@
+"use client"
+
 import { Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg"
@@ -17,6 +20,8 @@ export function LoadingSpinner({
   fullHeight = false,
   className = "",
 }: LoadingSpinnerProps) {
+  const t = useTranslations("Common")
+
   return (
     <div
       className={
@@ -25,7 +30,7 @@ export function LoadingSpinner({
           : `inline-flex items-center justify-center ${className}`.trim()
       }
       role="status"
-      aria-label="Cargando"
+      aria-label={t("loading")}
     >
       <Loader2
         className={`${sizeClasses[size]} animate-spin text-vo-purple`}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { Calendar, Loader2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { CalendarFilters } from "@/components/portal-admin/interviews/calendar-filters"
 import { CalendarKpis } from "@/components/portal-admin/interviews/calendar-kpis"
@@ -29,6 +30,7 @@ function useIsMobileAgendaDefault(): boolean {
 }
 
 export function AdminInterviewsCalendarContent() {
+  const t = useTranslations("AdminPortal.interviews.calendar")
   const isMobile = useIsMobileAgendaDefault()
   const [view, setView] = useState<CalendarViewMode>("month")
   const [anchorDate, setAnchorDate] = useState(() => new Date())
@@ -76,8 +78,8 @@ export function AdminInterviewsCalendarContent() {
   return (
     <div className="flex min-w-0 flex-col gap-6 p-4 md:p-8">
       <PortalPageHeader
-        title="Calendario de entrevistas"
-        description="Vista general de todas las entrevistas agendadas. Los horarios se muestran en tu zona horaria; el API opera en UTC."
+        title={t("page.title")}
+        description={t("page.description")}
         contentClassName="max-w-4xl"
       />
 
@@ -107,7 +109,7 @@ export function AdminInterviewsCalendarContent() {
         >
           <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
           <p className="font-sans text-sm text-muted-foreground">
-            Cargando entrevistas…
+            {t("loadingStates.loading")}
           </p>
         </div>
       ) : error ? (
@@ -120,14 +122,14 @@ export function AdminInterviewsCalendarContent() {
             onClick={() => void reload()}
             className="rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
           >
-            Reintentar
+            {t("actions.retry")}
           </button>
         </div>
       ) : visibleEvents.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16">
           <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
           <p className="font-sans text-sm text-muted-foreground">
-            No hay entrevistas en este rango con los filtros actuales.
+            {t("emptyStates.noEvents")}
           </p>
         </div>
       ) : (

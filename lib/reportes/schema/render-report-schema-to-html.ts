@@ -45,7 +45,7 @@ export function getReportPreviewBaseCss(): string {
       min-height: 11in;
       margin: 0 auto 24px auto;
       padding: 0.64in;
-      background: #ffffff;
+      background: #FFFFFF;
       box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
       page-break-after: always;
     }
@@ -59,7 +59,7 @@ export function getReportPreviewBaseCss(): string {
       grid-template-columns: 1fr 245px;
       gap: 36px;
       padding-bottom: 28px;
-      border-bottom: 2px solid #d1d5db;
+      border-bottom: 2px solid #E8F5E0;
     }
 
     .eyebrow {
@@ -67,14 +67,14 @@ export function getReportPreviewBaseCss(): string {
       font-size: 11px;
       font-weight: 800;
       letter-spacing: 3px;
-      color: #6b7280;
+      color: #57585B;
     }
 
     h1 {
       margin: 0;
       font-size: 31px;
       line-height: 1.05;
-      color: #111827;
+      color: #256D35;
     }
 
     .hero-description {
@@ -87,9 +87,9 @@ export function getReportPreviewBaseCss(): string {
 
     .report-meta-card {
       padding: 18px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #E8F5E0;
       border-radius: 8px;
-      background: #f9fafb;
+      background: #FFFFFF;
     }
 
     .report-meta-card div + div {
@@ -103,13 +103,13 @@ export function getReportPreviewBaseCss(): string {
       font-size: 10px;
       font-weight: 800;
       letter-spacing: 1.8px;
-      color: #6b7280;
+      color: #57585B;
     }
 
     .report-meta-card strong {
       display: block;
       font-size: 14px;
-      color: #111827;
+      color: #256D35;
     }
 
     .report-section {
@@ -119,10 +119,10 @@ export function getReportPreviewBaseCss(): string {
     .report-section h2 {
       margin: 0 0 12px 0;
       padding-bottom: 9px;
-      border-bottom: 4px solid #111827;
+      border-bottom: 4px solid #256D35;
       font-size: 21px;
       line-height: 1.2;
-      color: #111827;
+      color: #256D35;
     }
 
     .section-description {
@@ -141,7 +141,7 @@ export function getReportPreviewBaseCss(): string {
     .metric-card {
       min-height: 84px;
       padding: 14px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #E8F5E0;
       border-radius: 8px;
       background: #fbfbfc;
     }
@@ -151,19 +151,19 @@ export function getReportPreviewBaseCss(): string {
       margin-bottom: 4px;
       font-size: 25px;
       line-height: 1;
-      color: #111827;
+      color: #256D35;
     }
 
     .metric-card small {
       font-size: 11px;
-      color: #6b7280;
+      color: #57585B;
     }
 
     .findings-box {
       padding: 16px 18px;
-      border: 1px solid #d1d5db;
+      border: 1px solid #E8F5E0;
       border-radius: 8px;
-      background: #f9fafb;
+      background: #FFFFFF;
     }
 
     .findings-box ul {
@@ -175,7 +175,7 @@ export function getReportPreviewBaseCss(): string {
       margin: 8px 0;
       font-size: 12px;
       line-height: 1.45;
-      color: #374151;
+      color: #454648;
     }
 
     .report-table {
@@ -187,8 +187,8 @@ export function getReportPreviewBaseCss(): string {
 
     .report-table th {
       padding: 10px 9px;
-      background: #111827;
-      border: 1px solid #374151;
+      background: #256D35;
+      border: 1px solid #454648;
       color: #ffffff;
       font-weight: 800;
       text-align: left;
@@ -196,8 +196,8 @@ export function getReportPreviewBaseCss(): string {
 
     .report-table td {
       padding: 10px 9px;
-      border: 1px solid #e5e7eb;
-      color: #374151;
+      border: 1px solid #E8F5E0;
+      color: #454648;
       vertical-align: top;
       line-height: 1.35;
       word-break: break-word;
@@ -244,9 +244,9 @@ export function getReportPreviewBaseCss(): string {
 
     .vacancy-card {
       padding: 16px;
-      border: 1px solid #d1d5db;
+      border: 1px solid #E8F5E0;
       border-radius: 10px;
-      background: #ffffff;
+      background: #FFFFFF;
       page-break-inside: avoid;
     }
 
@@ -255,19 +255,19 @@ export function getReportPreviewBaseCss(): string {
       justify-content: space-between;
       gap: 16px;
       padding-bottom: 12px;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid #E8F5E0;
     }
 
     .vacancy-card h3 {
       margin: 0;
       font-size: 18px;
-      color: #111827;
+      color: #256D35;
     }
 
     .client-name {
       margin: 4px 0 0 0;
       font-size: 12px;
-      color: #6b7280;
+      color: #57585B;
     }
 
     .status-pill {
@@ -292,8 +292,8 @@ export function getReportPreviewBaseCss(): string {
     .vacancy-metric {
       padding: 10px;
       border-radius: 7px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
+      background: #FFFFFF;
+      border: 1px solid #E8F5E0;
     }
 
     .vacancy-metric span {
@@ -302,12 +302,12 @@ export function getReportPreviewBaseCss(): string {
       font-size: 9px;
       font-weight: 800;
       letter-spacing: 1.2px;
-      color: #6b7280;
+      color: #57585B;
     }
 
     .vacancy-metric strong {
       font-size: 14px;
-      color: #111827;
+      color: #256D35;
     }
 
     .progress-block {
@@ -319,45 +319,45 @@ export function getReportPreviewBaseCss(): string {
       justify-content: space-between;
       margin-bottom: 6px;
       font-size: 11px;
-      color: #374151;
+      color: #454648;
     }
 
     .progress-track {
       height: 8px;
       border-radius: 999px;
-      background: #e5e7eb;
+      background: #E8F5E0;
       overflow: hidden;
     }
 
     .progress-bar {
       height: 100%;
       border-radius: 999px;
-      background: #111827;
+      background: #256D35;
     }
 
     .pipeline-box {
       margin-top: 14px;
       padding: 12px;
       border-radius: 8px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
+      background: #FFFFFF;
+      border: 1px solid #E8F5E0;
     }
 
     .pipeline-box.subtle {
-      background: #ffffff;
+      background: #FFFFFF;
     }
 
     .pipeline-box h4 {
       margin: 0 0 8px 0;
       font-size: 10px;
       letter-spacing: 1.4px;
-      color: #6b7280;
+      color: #57585B;
     }
 
     .pipeline-box p {
       margin: 0;
       font-size: 11px;
-      color: #374151;
+      color: #454648;
     }
 
     .stage-list {
@@ -372,14 +372,14 @@ export function getReportPreviewBaseCss(): string {
       gap: 6px;
       padding: 5px 8px;
       border-radius: 999px;
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
+      background: #FFFFFF;
+      border: 1px solid #E8F5E0;
       font-size: 11px;
-      color: #374151;
+      color: #454648;
     }
 
     .stage-list strong {
-      color: #111827;
+      color: #256D35;
     }
   `
 }

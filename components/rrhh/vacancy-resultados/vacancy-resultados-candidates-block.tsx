@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Calendar, FileText, Search, User } from "lucide-react"
 import Modal from "@/components/ui/Modal"
 import type { Interview } from "@/lib/api/interviews"
@@ -39,6 +40,8 @@ export function VacancyResultadosCandidateFiltersBar({
   filterState,
   onFilterChange,
 }: VacancyResultadosCandidateFiltersBarProps) {
+  const t = useTranslations("RecruiterPortal.vacancies.results.filters")
+  const tActions = useTranslations("RecruiterPortal.vacancies.results.actions")
   const handleClearFilters = useCallback(() => {
     onFilterChange({ search: "", statusId: "all", scoreTier: "all" })
   }, [onFilterChange])
@@ -59,15 +62,15 @@ export function VacancyResultadosCandidateFiltersBar({
         id="vacancy-resultados-filters-heading"
         className="font-sans text-sm font-semibold text-foreground"
       >
-        Filtros de postulantes
+        {t("heading")}
       </h2>
       <p className="mt-1 font-sans text-xs text-muted-foreground">
-        Aplican al listado principal debajo de las gráficas.
+        {t("description")}
       </p>
       <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
         <div className="min-w-0 flex-1">
           <label htmlFor="vacancy-candidates-search" className="sr-only">
-            Buscar por nombre o correo
+            {t("searchAria")}
           </label>
           <div className="relative">
             <Search
@@ -79,7 +82,7 @@ export function VacancyResultadosCandidateFiltersBar({
               type="search"
               value={filterState.search}
               onChange={(e) => handleFilterField({ search: e.target.value })}
-              placeholder="Buscar por nombre o correo…"
+              placeholder={t("searchPlaceholder")}
               className="w-full rounded-md border border-input bg-background py-2.5 pl-10 pr-3 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
             />
           </div>
@@ -90,7 +93,7 @@ export function VacancyResultadosCandidateFiltersBar({
               htmlFor="vacancy-candidates-status"
               className="font-sans text-xs text-muted-foreground"
             >
-              Estado de postulación
+              {t("applicationStatus")}
             </label>
             <select
               id="vacancy-candidates-status"
@@ -98,7 +101,7 @@ export function VacancyResultadosCandidateFiltersBar({
               onChange={(e) => handleFilterField({ statusId: e.target.value })}
               className="rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
             >
-              <option value="all">Todos</option>
+              <option value="all">{t("all")}</option>
               {companyStatuses.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -111,7 +114,7 @@ export function VacancyResultadosCandidateFiltersBar({
               htmlFor="vacancy-candidates-score"
               className="font-sans text-xs text-muted-foreground"
             >
-              Puntaje
+              {t("score")}
             </label>
             <select
               id="vacancy-candidates-score"
@@ -119,13 +122,13 @@ export function VacancyResultadosCandidateFiltersBar({
               onChange={(e) => handleFilterField({ scoreTier: e.target.value })}
               className="rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
             >
-              <option value="all">Todos</option>
-              <option value="scored">Con puntaje</option>
-              <option value="unscored">Sin puntaje</option>
-              <option value="p0_40">0% – 40%</option>
-              <option value="p40_60">40% – 60%</option>
-              <option value="p60_80">60% – 80%</option>
-              <option value="p80_100">80% – 100%</option>
+              <option value="all">{t("all")}</option>
+              <option value="scored">{t("scored")}</option>
+              <option value="unscored">{t("unscored")}</option>
+              <option value="p0_40">{t("tierP0_40")}</option>
+              <option value="p40_60">{t("tierP40_60")}</option>
+              <option value="p60_80">{t("tierP60_80")}</option>
+              <option value="p80_100">{t("tierP80_100")}</option>
             </select>
           </div>
           <button
@@ -133,7 +136,7 @@ export function VacancyResultadosCandidateFiltersBar({
             onClick={handleClearFilters}
             className="h-10 shrink-0 rounded-md border border-border bg-background px-3 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
           >
-            Limpiar filtros
+            {tActions("clearFilters")}
           </button>
         </div>
       </div>
@@ -260,6 +263,7 @@ function VacancyResultadosCandidateCard({
   onOpenTechnicalSheet,
   onOpenDetail,
 }: CandidateCardProps) {
+  const t = useTranslations("RecruiterPortal.vacancies.results")
   const profileId = match.candidateProfileId?.trim()
   const displayName = pickApplicantDisplayName(match, 0)
   const email = match.email?.trim() ?? ""
@@ -301,19 +305,19 @@ function VacancyResultadosCandidateCard({
             </p>
           ) : null}
           <p className="mt-2 font-sans text-[11px] text-muted-foreground">
-            Etapa:{" "}
+            {t("candidates.stageLabel")}{" "}
             <span className="font-medium text-foreground">
               {stageColumnName}
             </span>
           </p>
           <p className="mt-0.5 font-sans text-[11px] text-muted-foreground">
-            Estado:{" "}
+            {t("candidates.statusLabel")}{" "}
             <span className="font-medium text-foreground">{statusLabel}</span>
           </p>
         </div>
         <div className="shrink-0 text-right">
           <p className="font-sans text-[10px] uppercase tracking-wide text-muted-foreground">
-            Emparejamiento
+            {t("candidates.matchLabel")}
           </p>
           <p className="font-sans text-2xl font-bold tabular-nums leading-none text-vo-purple">
             {formatScorePercent(total01)}
@@ -322,10 +326,10 @@ function VacancyResultadosCandidateCard({
       </div>
 
       <div className="mt-3 space-y-1.5">
-        <MiniBar label="Cualitativo" value01={comps.qualitative} barClass="bg-emerald-500" />
-        <MiniBar label="Similitud vectorial" value01={comps.vector} barClass="bg-[#496FB3]" />
+        <MiniBar label={t("fields.qualitative")} value01={comps.qualitative} barClass="bg-emerald-500" />
+        <MiniBar label={t("fields.vectorSimilarity")} value01={comps.vector} barClass="bg-ats-cobre" />
         <MiniBar
-          label="Atributos (agregado)"
+          label={t("fields.attributeAggregate")}
           value01={comps.attributeAggregate}
           barClass="bg-amber-500"
         />
@@ -336,7 +340,7 @@ function VacancyResultadosCandidateCard({
           {pos ? (
             <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-2">
               <p className="font-sans text-[10px] font-semibold uppercase tracking-wide text-emerald-800">
-                Fortalezas
+                {t("sections.strengths")}
               </p>
               <p className="mt-1 line-clamp-3 font-sans text-xs leading-relaxed text-foreground">
                 {pos}
@@ -346,7 +350,7 @@ function VacancyResultadosCandidateCard({
           {neg ? (
             <div className="rounded-lg border border-rose-500/20 bg-rose-500/5 px-2.5 py-2">
               <p className="font-sans text-[10px] font-semibold uppercase tracking-wide text-rose-800">
-                Aspectos a considerar
+                {t("sections.considerations")}
               </p>
               <p className="mt-1 line-clamp-3 font-sans text-xs leading-relaxed text-foreground">
                 {neg}
@@ -362,7 +366,7 @@ function VacancyResultadosCandidateCard({
           onClick={() => onOpenDetail(match, prep)}
           className="mt-2 self-start font-sans text-xs font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
         >
-          Ver más contexto
+          {t("actions.viewMoreContext")}
         </button>
       ) : null}
 
@@ -375,7 +379,7 @@ function VacancyResultadosCandidateCard({
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-vo-purple bg-vo-purple px-2.5 py-2 font-sans text-xs font-medium text-white hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:flex-none"
             >
               <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Agendar entrevista
+              {t("actions.scheduleInterview")}
             </button>
             <button
               type="button"
@@ -383,19 +387,19 @@ function VacancyResultadosCandidateCard({
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-2 font-sans text-xs font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:flex-none"
             >
               <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Ficha técnica
+              {t("actions.technicalSheet")}
             </button>
             <Link
               href={`/portal-rrhh/candidatos/${encodeURIComponent(profileId)}`}
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-2 font-sans text-xs font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:flex-none"
             >
               <User className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Ver perfil
+              {t("actions.viewProfile")}
             </Link>
           </>
         ) : (
           <p className="font-sans text-xs text-muted-foreground">
-            Sin perfil vinculado para acciones.
+            {t("candidates.noLinkedProfile")}
           </p>
         )}
       </div>
@@ -414,6 +418,8 @@ export function VacancyResultadosCandidatesBlock({
   onScheduleInterview,
   onOpenTechnicalSheet,
 }: VacancyResultadosCandidatesBlockProps) {
+  const t = useTranslations("RecruiterPortal.vacancies.results")
+  const tActions = useTranslations("RecruiterPortal.vacancies.results.actions")
   const [activeStageIdx, setActiveStageIdx] = useState(0)
   const [detail, setDetail] = useState<{
     match: VacancyApplicantLike
@@ -472,10 +478,10 @@ export function VacancyResultadosCandidatesBlock({
           id="vacancy-resultados-candidates-heading"
           className="font-sans text-lg font-semibold text-foreground"
         >
-          Postulantes por etapa
+          {t("candidates.heading")}
         </h2>
         <p className="mt-1 font-sans text-sm text-muted-foreground">
-          Listado principal por etapa del tablero. Los filtros de la sección anterior aplican aquí.
+          {t("candidates.description")}
         </p>
       </div>
 
@@ -483,7 +489,7 @@ export function VacancyResultadosCandidatesBlock({
         <div
           className="flex gap-1 overflow-x-auto pb-2"
           role="tablist"
-          aria-label="Etapas del proceso"
+          aria-label={t("candidates.stagesTablistAria")}
         >
           {applicantsByStageFull.map((sec, idx) => {
             const count = sec.applicants.length
@@ -511,27 +517,27 @@ export function VacancyResultadosCandidatesBlock({
 
       <div className="px-4 py-6 sm:px-6">
         {!activeSection ? (
-          <p className="font-sans text-sm text-muted-foreground">Sin datos de etapas.</p>
+          <p className="font-sans text-sm text-muted-foreground">{t("candidates.noStageData")}</p>
         ) : activeSection.applicants.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-muted/20 px-4 py-8 text-center">
             <p className="font-sans text-sm font-medium text-foreground">
-              Sin postulantes en esta etapa
+              {t("candidates.emptyStageTitle")}
             </p>
             <p className="mt-1 font-sans text-xs text-muted-foreground">
-              Cuando se muevan candidatos al tablero, aparecerán aquí.
+              {t("candidates.emptyStageBody")}
             </p>
           </div>
         ) : filteredApplicants.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-muted/20 px-4 py-8 text-center">
             <p className="font-sans text-sm font-medium text-foreground">
-              Ningún candidato coincide con los filtros
+              {t("candidates.noFilterMatch")}
             </p>
             <button
               type="button"
               onClick={handleClearFilters}
               className="mt-3 font-sans text-xs font-medium text-vo-purple underline-offset-2 hover:underline"
             >
-              Limpiar filtros
+              {tActions("clearFilters")}
             </button>
           </div>
         ) : (
@@ -569,10 +575,10 @@ export function VacancyResultadosCandidatesBlock({
           <div className="space-y-4 font-sans text-sm text-foreground">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Entrevista
+                {t("sections.interview")}
               </p>
               <p className="mt-1 whitespace-pre-wrap leading-relaxed">
-                {detail.prep?.interviewSummaryLabel ?? "Sin datos de entrevista."}
+                {detail.prep?.interviewSummaryLabel ?? t("fallbacks.noInterviewData")}
               </p>
             </div>
             {(detail.prep?.strengths ??
@@ -580,7 +586,7 @@ export function VacancyResultadosCandidatesBlock({
               detail.match.qualitative_reasoning_positive) ? (
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
-                  Fortalezas
+                  {t("sections.strengths")}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap leading-relaxed">
                   {detail.prep?.strengths ??
@@ -594,7 +600,7 @@ export function VacancyResultadosCandidatesBlock({
               detail.match.qualitative_reasoning_negative) ? (
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-rose-800">
-                  Aspectos a considerar
+                  {t("sections.considerations")}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap leading-relaxed">
                   {detail.prep?.considerations ??
@@ -606,7 +612,7 @@ export function VacancyResultadosCandidatesBlock({
             {detail.prep?.relevantComments ? (
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Comentarios
+                  {t("sections.comments")}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap leading-relaxed">
                   {detail.prep.relevantComments}

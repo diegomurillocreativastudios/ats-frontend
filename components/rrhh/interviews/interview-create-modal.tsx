@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
 import { InterviewForm } from "@/components/rrhh/interviews/interview-form"
 
@@ -19,12 +20,13 @@ export function InterviewCreateModal({
   onCreated,
   initialCandidateProfileId = null,
 }: InterviewCreateModalProps) {
+  const t = useTranslations("RecruiterPortal.interviews.modals")
   const presetKey = initialCandidateProfileId?.trim() || "none"
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Nueva entrevista"
+      title={t("createTitle")}
       size="lg"
       closeOnOverlayClick={false}
     >

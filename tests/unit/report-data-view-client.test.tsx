@@ -1,6 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
+import {
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+    within,
+    type RenderResult,
+} from "@testing-library/react"
+import { NextIntlClientProvider } from "next-intl"
 import { ReportDataViewClient } from "@/components/rrhh/reportes/report-data-view-client"
+import esMessages from "@/messages/es.json"
 import { fetchTemplateById } from "@/lib/templates/technical-sheet-template"
 import { fetchRecruiterReportForCatalogItem } from "@/lib/api/recruiter-report-runtime"
 import {
@@ -59,6 +68,18 @@ const baseItem: ReportCatalogItem = {
     linkedTemplate: null,
 }
 
+// Etapa 12: el view consume componentes compartidos migrados a next-intl
+// (botón de PDF y contenedor de filtros), por lo que el render necesita el
+// contexto de `NextIntlClientProvider`. Solo se envuelve el render; no se
+// modifica el comportamiento ni las aserciones de este test fuera de scope.
+function renderDataView(item: ReportCatalogItem = baseItem): RenderResult {
+    return render(
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+            <ReportDataViewClient catalogItem={item} />
+        </NextIntlClientProvider>
+    )
+}
+
 describe("ReportDataViewClient", () => {
     beforeEach(() => {
         vi.mocked(fetchRecruiterReportForCatalogItem).mockReset()
@@ -80,7 +101,7 @@ describe("ReportDataViewClient", () => {
             extras: null,
         })
 
-        render(<ReportDataViewClient catalogItem={baseItem} />)
+        renderDataView()
 
         await waitFor(() => {
             expect(fetchRecruiterReportForCatalogItem).toHaveBeenCalledWith(
@@ -99,7 +120,7 @@ describe("ReportDataViewClient", () => {
             extras: null,
         })
 
-        render(<ReportDataViewClient catalogItem={baseItem} />)
+        renderDataView()
 
         const select = await screen.findByLabelText(/Cliente/i)
         await waitFor(() => {
@@ -128,7 +149,7 @@ describe("ReportDataViewClient", () => {
             extras: null,
         })
 
-        render(<ReportDataViewClient catalogItem={baseItem} />)
+        renderDataView()
 
         expect(
             await screen.findByText(
@@ -142,7 +163,7 @@ describe("ReportDataViewClient", () => {
             Object.assign(new Error("boom"), { status: 500 })
         )
 
-        render(<ReportDataViewClient catalogItem={baseItem} />)
+        renderDataView()
 
         expect(
             await screen.findByText(/No se pudo cargar el reporte/i)

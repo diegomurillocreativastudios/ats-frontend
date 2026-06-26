@@ -1,33 +1,32 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Lightbulb } from "lucide-react"
-
-const APPLICATION_TIPS = [
-  "Revisa que tu correo electrónico y teléfono estén actualizados.",
-  "Sube tu hoja de vida en formato PDF.",
-  "Verifica que todos tus datos estén correctos antes de enviar.",
-  "Asegúrate de cumplir con los requisitos principales de la vacante.",
-  "Mantente pendiente de tu correo y teléfono después de postularte.",
-  "Utiliza un nombre de archivo profesional para tu CV.",
-  "Revisa la ortografía de tu información antes de continuar.",
-  "Adjunta todos los documentos solicitados.",
-  "No olvides incluir tu experiencia laboral más reciente.",
-  "Confirma que tu disponibilidad coincida con lo solicitado en la vacante.",
-]
+import { useTranslations } from "next-intl"
+import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
 
 const TIP_ROTATION_INTERVAL = 7000
 
-function getRandomTip(excludeIndex?: number): { tip: string; index: number } {
-  const availableIndices = APPLICATION_TIPS.map((_, i) => i).filter(
+const TIP_KEYS = [
+  "tip1",
+  "tip2",
+  "tip3",
+  "tip4",
+  "tip5",
+  "tip6",
+  "tip7",
+  "tip8",
+  "tip9",
+  "tip10",
+] as const
+
+function getRandomTipIndex(excludeIndex?: number, total: number = TIP_KEYS.length): number {
+  const availableIndices = Array.from({ length: total }, (_, i) => i).filter(
     (i) => i !== excludeIndex
   )
-  const randomIndex =
-    availableIndices[Math.floor(Math.random() * availableIndices.length)]
-  return {
-    tip: APPLICATION_TIPS[randomIndex] ?? APPLICATION_TIPS[0] ?? "",
-    index: randomIndex ?? 0,
-  }
+  return (
+    availableIndices[Math.floor(Math.random() * availableIndices.length)] ?? 0
+  )
 }
 
 interface ApplicationTipsWidgetProps {
@@ -37,7 +36,11 @@ interface ApplicationTipsWidgetProps {
 export function ApplicationTipsWidget({
   position = "left",
 }: ApplicationTipsWidgetProps = {}) {
-  const [currentTipData, setCurrentTipData] = useState(() => getRandomTip())
+  const t = useTranslations("PublicOpportunities.tips")
+  const tips = useMemo(() => TIP_KEYS.map((key) => t(key)), [t])
+  const [currentTipIndex, setCurrentTipIndex] = useState(() =>
+    getRandomTipIndex(undefined, tips.length)
+  )
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
@@ -45,16 +48,16 @@ export function ApplicationTipsWidget({
       setIsVisible(false)
 
       setTimeout(() => {
-        setCurrentTipData((prev) => getRandomTip(prev.index))
+        setCurrentTipIndex((prev) => getRandomTipIndex(prev, tips.length))
         setIsVisible(true)
       }, 300)
     }, TIP_ROTATION_INTERVAL)
 
     return () => clearInterval(intervalId)
-  }, [])
+  }, [tips.length])
 
-  const positionClassName =
-    position === "right" ? "right-6" : "left-6"
+  const positionClassName = position === "right" ? "right-6" : "left-6"
+  const currentTip = tips[currentTipIndex] ?? tips[0] ?? ""
 
   return (
     <aside
@@ -63,27 +66,25 @@ export function ApplicationTipsWidget({
       aria-atomic="true"
     >
       <div
-        className="overflow-hidden rounded-[26px] border border-white/20 bg-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-opacity duration-300"
+        className={`${publicOpportunitiesTheme.tipsWidget} backdrop-blur-xl transition-opacity duration-300`}
         style={{ opacity: isVisible ? 1 : 0 }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/8 via-transparent to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-ats-terracotta/6 via-transparent to-transparent" />
 
         <div className="relative p-5">
           <div className="flex items-start gap-3.5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[#ffd966]/30 bg-linear-to-br from-[#ffd966]/20 to-[#ffb84d]/20">
+            <div className={publicOpportunitiesTheme.tipsIconSurface}>
               <Lightbulb
-                className="h-5 w-5 text-[#ffd966]"
+                className="h-5 w-5 text-ats-terracotta"
                 aria-hidden="true"
               />
             </div>
 
             <div className="flex-1 space-y-1.5">
-              <h3 className="text-sm font-semibold tracking-tight text-white">
-                Consejo para tu postulación
+              <h3 className="text-sm font-semibold tracking-tight text-foreground">
+                {t("title")}
               </h3>
-              <p className="text-sm leading-relaxed text-white/84">
-                {currentTipData.tip}
-              </p>
+              <p className="text-sm leading-relaxed text-muted-foreground">{currentTip}</p>
             </div>
           </div>
         </div>
