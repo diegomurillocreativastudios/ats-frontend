@@ -318,8 +318,12 @@ export default function RestablecerContrasenaContent() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-background px-6 py-6 md:max-w-[448px] md:px-10 md:py-0 lg:max-w-[560px] lg:px-16">
-        <div className="w-full md:max-w-[360px] lg:max-w-[400px]">
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-background px-6 py-6 md:max-w-[448px] md:px-10 md:py-0 lg:max-w-[560px] lg:px-16">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+          <div className="ambient-orb ambient-orb--green right-[-120px] top-[-80px] h-[360px] w-[360px]" />
+          <div className="ambient-orb ambient-orb--violet bottom-[-120px] left-[-100px] h-[340px] w-[340px]" />
+        </div>
+        <div className="glass-iridescent-card glass-edge-highlight w-full rounded-2xl p-6 md:max-w-[360px] md:p-8 lg:max-w-[400px]">
           <div className="mb-6 flex w-full justify-center md:hidden">
             <AuthBrand size="mobile-login" variant="light-navy" />
           </div>

@@ -26,7 +26,7 @@ export function Button({
     secondary:
       "bg-vo-magenta text-white hover:bg-vo-magenta focus-visible:ring-vo-magenta",
     outline:
-      "border border-border bg-background text-foreground hover:bg-muted focus-visible:ring-vo-purple",
+      "glass-button text-foreground focus-visible:ring-vo-purple",
     ghost: "text-muted-foreground hover:bg-muted focus-visible:ring-vo-purple",
   }
 

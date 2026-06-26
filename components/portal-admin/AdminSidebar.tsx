@@ -59,7 +59,7 @@ export default function AdminSidebar() {
 
   return (
     <aside
-      className="flex w-[260px] shrink-0 flex-col justify-between border-r border-border bg-card py-6 pl-6 pr-0"
+      className="glass-sidebar flex w-[260px] shrink-0 flex-col justify-between py-6 pl-6 pr-0"
       aria-label={tSidebar("ariaAdmin")}
     >
       <div className="flex flex-col gap-6">
@@ -104,9 +104,9 @@ export default function AdminSidebar() {
         </nav>
       </div>
       <div className="mt-4 px-3 pb-3">
-        <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+        <div className="glass-panel flex items-center gap-3 rounded-xl p-3">
           <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-vo-navy font-sans text-xs font-semibold text-white"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-vo-purple to-vo-magenta font-sans text-xs font-semibold text-white shadow-sm"
             aria-hidden
           >
             {loading ? "..." : initials}

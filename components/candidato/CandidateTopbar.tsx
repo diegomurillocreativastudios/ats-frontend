@@ -75,7 +75,7 @@ export default function CandidateTopbar({
 
   return (
     <header
-      className={`flex shrink-0 items-center justify-between border-b border-border bg-card ${heightClass} ${paddingClass}`}
+      className={`glass-navbar flex shrink-0 items-center justify-between ${heightClass} ${paddingClass}`}
       role="banner"
     >
       <div className="flex items-center gap-4">
@@ -133,7 +133,7 @@ export default function CandidateTopbar({
           <button
             type="button"
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="flex h-8 w-8 items-center justify-center rounded-2xl bg-vo-navy font-sans text-[10px] font-semibold text-white md:h-8 md:w-8 md:text-[11px] hover:opacity-90 focus:outline-none"
+            className="flex h-8 w-8 items-center justify-center rounded-2xl bg-gradient-to-br from-vo-purple to-vo-magenta font-sans text-[10px] font-semibold text-white shadow-sm md:h-8 md:w-8 md:text-[11px] hover:opacity-90 focus:outline-none"
             aria-label={t("userMenu")}
             aria-expanded={menuOpen}
             aria-haspopup="true"
@@ -142,7 +142,7 @@ export default function CandidateTopbar({
           </button>
           {menuOpen && (
             <div
-              className="absolute right-0 top-full z-50 mt-2 min-w-[160px] rounded-lg border border-border bg-card py-1 shadow-lg"
+              className="glass-panel absolute right-0 top-full z-50 mt-2 min-w-[160px] rounded-xl py-1"
               role="menu"
             >
               {showAdminShortcut && (

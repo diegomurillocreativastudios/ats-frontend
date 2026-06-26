@@ -21,11 +21,16 @@ export default async function SeleccionPortalPage() {
   const t = await getTranslations("PortalSelection")
 
   return (
-    <div className="relative min-h-screen bg-muted/40 font-sans text-foreground">
+    <div className="app-premium-bg relative min-h-screen overflow-hidden font-sans text-foreground">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+        <div className="ambient-orb ambient-orb--green left-[-120px] top-[-60px] h-[440px] w-[440px]" />
+        <div className="ambient-orb ambient-orb--violet right-[-140px] top-[10%] h-[460px] w-[460px]" />
+        <div className="ambient-orb ambient-orb--blue bottom-[-160px] left-1/3 h-[420px] w-[420px]" />
+      </div>
       <div className="absolute right-3 top-3 z-50 md:right-4 md:top-4">
         <LanguageSwitcher />
       </div>
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-4 py-12 md:px-6">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-4 py-12 md:px-6">
         <header className="mb-10 text-center">
           <div className="flex justify-center">
             <ProductBrand
@@ -52,7 +57,7 @@ export default async function SeleccionPortalPage() {
           <Link
             href="/portal-candidato"
             data-testid="portal-selector-candidato"
-            className="group flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-colors hover:border-vo-purple/40 hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+            className="group glass-iridescent-card glass-card-hover iridescent-hover flex flex-col rounded-2xl p-6 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             aria-label={t("candidateAria")}
           >
             <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-vo-sky/15 text-vo-navy">
@@ -72,7 +77,7 @@ export default async function SeleccionPortalPage() {
           <Link
             href="/portal-oportunidades"
             data-testid="portal-selector-oportunidades"
-            className="group flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-colors hover:border-vo-purple/40 hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+            className="group glass-iridescent-card glass-card-hover iridescent-hover flex flex-col rounded-2xl p-6 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             aria-label={t("opportunitiesAria")}
           >
             <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-vo-cobre/10 text-vo-cobre dark:text-emerald-400">
@@ -92,7 +97,7 @@ export default async function SeleccionPortalPage() {
           <Link
             href="/portal-rrhh"
             data-testid="portal-selector-rrhh"
-            className="group flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-colors hover:border-vo-purple/40 hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+            className="group glass-iridescent-card glass-card-hover iridescent-hover flex flex-col rounded-2xl p-6 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             aria-label={t("rrhhAria")}
           >
             <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-vo-purple/10 text-vo-purple">
@@ -113,7 +118,7 @@ export default async function SeleccionPortalPage() {
             <Link
               href="/portal-admin/usuarios"
               data-testid="portal-selector-admin"
-              className="group flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-colors hover:border-vo-purple/40 hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+              className="group glass-iridescent-card glass-card-hover iridescent-hover flex flex-col rounded-2xl p-6 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               aria-label={t("adminAria")}
             >
               <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-vo-navy/10 text-vo-navy">

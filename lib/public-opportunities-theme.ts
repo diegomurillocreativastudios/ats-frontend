@@ -15,7 +15,7 @@ export const publicOpportunitiesTheme = {
   orbCobre: "rounded-full bg-ats-cobre/10 blur-3xl",
   orbBottom: "rounded-full bg-ats-terracotta/8 blur-3xl",
   panel:
-    "border border-border bg-card shadow-[0_24px_80px_rgba(87,88,91,0.07)]",
+    "glass-iridescent-border border border-border bg-card backdrop-blur-xl shadow-[0_24px_80px_rgba(87,88,91,0.10)]",
   panelSoft:
     "border border-border bg-ats-warm-white shadow-[0_16px_48px_rgba(87,88,91,0.05)]",
   panelAccent:
@@ -40,7 +40,7 @@ export const publicOpportunitiesTheme = {
   surface: "bg-muted/30",
   surfaceStrong: "bg-muted/45",
   surfaceHover: "hover:bg-muted/50",
-  tableWrap: "overflow-hidden rounded-[28px] border border-border bg-card",
+  tableWrap: "overflow-hidden rounded-[28px] border border-border bg-card backdrop-blur-xl",
   chip:
     "inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/55 focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-background",
   badge:

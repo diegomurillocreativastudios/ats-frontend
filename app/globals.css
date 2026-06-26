@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
+
   /* Applican Tree — paleta verde */
   --color-green-primary: #6EB940;
   --color-green-light: #549E3C;
@@ -10,6 +12,17 @@
   --color-text-gray: #57585B;
   --color-white: #FFFFFF;
   --color-black: #000000;
+
+  /* Apple Glass — superficies claras translúcidas (tema claro premium) */
+  --glass-bg-1: rgba(255, 255, 255, 0.55);
+  --glass-bg-2: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.70);
+  --glass-border-strong: rgba(110, 185, 64, 0.40);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-hairline: rgba(87, 88, 91, 0.10);
+  --glass-shadow: 0 10px 30px rgba(87, 88, 91, 0.10);
+  --glass-shadow-lg: 0 24px 70px rgba(87, 88, 91, 0.16);
+  --glass-blur: 16px;
 
   --ats-grafito: var(--color-text-gray);
   --ats-terracotta: var(--color-green-primary);
@@ -21,9 +34,9 @@
   --ats-warm-white: var(--color-white);
   --ats-terracotta-soft: #D4EDCC;
 
-  --background: var(--color-white);
+  --background: #F4F7F2;
   --foreground: var(--color-text-gray);
-  --card: var(--color-white);
+  --card: rgba(255, 255, 255, 0.72);
   --card-foreground: var(--color-text-gray);
 
   /* Legacy vo-* aliases (used across the codebase) */
@@ -302,9 +315,21 @@
 }
 
 body {
-  background: var(--background);
+  min-height: 100vh;
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
+  background-color: var(--background);
+  background-image:
+    radial-gradient(1100px 620px at 8% -8%, rgba(110, 185, 64, 0.10), transparent 58%),
+    radial-gradient(1000px 700px at 100% 4%, rgba(120, 170, 235, 0.07), transparent 55%),
+    radial-gradient(900px 760px at 52% 118%, rgba(168, 217, 138, 0.12), transparent 60%),
+    linear-gradient(180deg, #F8FAF6 0%, #EEF4EC 100%);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgba(110, 185, 64, 0.22);
+  color: var(--color-text-gray);
 }
 
 .font-brand {
@@ -385,5 +410,303 @@ h6 {
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* ===================================================================
+     APPLE GLASS UI — sistema visual reutilizable
+     =================================================================== */
+
+  /* Fondos premium claros ------------------------------------------ */
+  .app-premium-bg,
+  .page-gradient-bg,
+  .premium-gradient-bg {
+    position: relative;
+    background-color: #F4F7F3;
+    background-image:
+      radial-gradient(1100px 620px at 8% -8%, rgba(110, 185, 64, 0.12), transparent 58%),
+      radial-gradient(1000px 700px at 100% 4%, rgba(120, 170, 235, 0.09), transparent 55%),
+      radial-gradient(900px 760px at 52% 118%, rgba(168, 217, 138, 0.16), transparent 60%),
+      linear-gradient(180deg, #F8FAF6 0%, #EEF4EC 100%);
+  }
+
+  .glass-background {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(244, 247, 243, 0.85));
+  }
+
+  .apple-section {
+    position: relative;
+    border-radius: 24px;
+    background: var(--glass-bg-1);
+    border: 1px solid var(--glass-hairline);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* Orbs ambientales difuminados (delicados sobre fondo claro) ------ */
+  .ambient-orb,
+  .soft-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(80px);
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .ambient-orb--green,
+  .soft-orb--green {
+    background: radial-gradient(circle, rgba(110, 185, 64, 0.32), transparent 70%);
+  }
+  .ambient-orb--blue {
+    background: radial-gradient(circle, rgba(120, 170, 235, 0.26), transparent 70%);
+  }
+  .ambient-orb--violet {
+    background: radial-gradient(circle, rgba(168, 150, 225, 0.22), transparent 70%);
+  }
+
+  /* Superficies de vidrio claras ----------------------------------- */
+  .glass-panel {
+    background: var(--glass-bg-2);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    border: 1px solid var(--glass-hairline);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  }
+
+  .glass-card {
+    position: relative;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.58));
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--glass-hairline);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  }
+
+  .glass-card-hover {
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+    will-change: transform;
+  }
+  .glass-card-hover:hover {
+    transform: translateY(-2px);
+    border-color: var(--glass-border-strong);
+    box-shadow: var(--glass-shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .glass-navbar {
+    background: rgba(255, 255, 255, 0.66);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+    border-bottom: 1px solid var(--glass-hairline);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 24px rgba(87, 88, 91, 0.06);
+  }
+
+  .glass-sidebar {
+    background: rgba(255, 255, 255, 0.62);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+    border-right: 1px solid var(--glass-hairline);
+  }
+
+  .glass-modal {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.86));
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--glass-border-strong);
+    box-shadow: var(--glass-shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .glass-input {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--glass-hairline);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .glass-input:hover {
+    border-color: rgba(110, 185, 64, 0.35);
+  }
+  .glass-input:focus,
+  .glass-input:focus-visible {
+    outline: none;
+    border-color: rgba(110, 185, 64, 0.7);
+    box-shadow: 0 0 0 3px rgba(110, 185, 64, 0.18);
+  }
+
+  .glass-button {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid var(--glass-hairline);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+  .glass-button:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: var(--glass-border-strong);
+  }
+
+  .glass-border {
+    border: 1px solid var(--glass-hairline);
+  }
+
+  .glass-highlight {
+    box-shadow: inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* ===================================================================
+     GLASS AUTOMÁTICO PARA SUPERFICIES SEMÁNTICAS
+     Toda superficie .bg-card de la app adopta vidrio translúcido (color
+     translúcido vía token --card + realce/sombra suaves) sin reescribir
+     cada componente. NO usamos backdrop-filter aquí a propósito: crearía
+     un containing block para descendientes position:fixed (modales que se
+     montan inline) y rompería su posicionamiento. El blur real se reserva
+     a superficies de nivel superior (.glass-navbar/sidebar/modal/card).
+     Las utilidades Tailwind (shadow-*) van después de esta capa, así una
+     card concreta puede reforzar su sombra sin que aquí se lo impidamos.
+     =================================================================== */
+  .bg-card {
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* Reflejo de luz interno (esquina superior) ---------------------- */
+  .glass-edge-highlight {
+    position: relative;
+  }
+  .glass-edge-highlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 32%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .glass-sun-reflection {
+    position: relative;
+    overflow: hidden;
+  }
+  .glass-sun-reflection::after {
+    content: "";
+    position: absolute;
+    top: -40%;
+    left: -20%;
+    width: 60%;
+    height: 180%;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.10) 45%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0.10) 55%,
+      transparent 100%
+    );
+    transform: rotate(8deg);
+    pointer-events: none;
+    opacity: 0.6;
+    z-index: 1;
+  }
+
+  /* =====================================================================
+     BORDE TORNASOL / IRIDISCENTE SUTIL (reflejo de vidrio a la luz)
+     Pseudo-elemento con conic-gradient enmascarado solo al borde.
+     ===================================================================== */
+  .glass-iridescent-border,
+  .glass-iridescent-card,
+  .subtle-rainbow-border,
+  .iridescent-hover {
+    position: relative;
+  }
+  .glass-iridescent-border::before,
+  .glass-iridescent-card::before,
+  .subtle-rainbow-border::before,
+  .iridescent-hover::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+      from 200deg at 50% 50%,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(186, 222, 255, 0.42) 12%,
+      rgba(201, 184, 255, 0.36) 30%,
+      rgba(255, 198, 228, 0.32) 50%,
+      rgba(255, 236, 191, 0.36) 68%,
+      rgba(190, 255, 226, 0.32) 85%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.55;
+    transition: opacity 0.45s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .glass-iridescent-card {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.58));
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--glass-hairline);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  }
+  .iridescent-hover::before {
+    opacity: 0;
+  }
+  .iridescent-hover:hover::before,
+  .glass-card-hover.glass-iridescent-card:hover::before {
+    opacity: 0.85;
+  }
+
+  /* Animaciones premium suaves ------------------------------------- */
+  .animate-fade-in {
+    animation: glass-fade-in 0.5s ease both;
+  }
+  .animate-slide-up {
+    animation: glass-slide-up 0.55s cubic-bezier(0.2, 0.8, 0.18, 1) both;
+  }
+}
+
+@keyframes glass-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes glass-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Rendimiento / accesibilidad ------------------------------------- */
+@media (max-width: 768px) {
+  .glass-panel,
+  .glass-card,
+  .glass-iridescent-card,
+  .glass-navbar,
+  .glass-sidebar {
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    backdrop-filter: blur(10px) saturate(150%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card-hover,
+  .animate-fade-in,
+  .animate-slide-up {
+    transition: none !important;
+    animation: none !important;
   }
 }

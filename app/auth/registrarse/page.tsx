@@ -152,8 +152,12 @@ export default function Registrarse() {
         <p className="text-sm text-white/80">{t("tabletTitle")}</p>
       </div>
 
-      <div className="flex-1 flex items-center justify-center bg-background px-6 md:px-10 lg:px-12 py-6 md:py-40 lg:py-0 md:max-w-full lg:max-w-[560px]">
-        <div className="w-full md:max-w-[500px] lg:max-w-[420px]">
+      <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-background px-6 md:px-10 lg:px-12 py-6 md:py-40 lg:py-0 md:max-w-full lg:max-w-[560px]">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+          <div className="ambient-orb ambient-orb--green right-[-120px] top-[-80px] h-[360px] w-[360px]" />
+          <div className="ambient-orb ambient-orb--violet bottom-[-120px] left-[-100px] h-[340px] w-[340px]" />
+        </div>
+        <div className="glass-iridescent-card glass-edge-highlight w-full rounded-2xl p-6 md:max-w-[500px] md:p-8 lg:max-w-[420px]">
           <div className="md:hidden w-full flex justify-center mb-5">
             <AuthBrand size="mobile-register" variant="light-secondary" />
           </div>

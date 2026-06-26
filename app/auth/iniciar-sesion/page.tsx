@@ -226,8 +226,12 @@ export default function IniciarSesion() {
       </div>
 
       {/* Right Panel: Form */}
-      <div className="flex-1 flex items-center justify-center bg-background px-6 md:px-10 lg:px-16 py-6 md:py-0 md:max-w-[448px] lg:max-w-[560px]">
-        <div className="w-full md:max-w-[360px] lg:max-w-[400px]">
+      <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-background px-6 md:px-10 lg:px-16 py-6 md:py-0 md:max-w-[448px] lg:max-w-[560px]">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+          <div className="ambient-orb ambient-orb--green right-[-120px] top-[-80px] h-[360px] w-[360px]" />
+          <div className="ambient-orb ambient-orb--violet bottom-[-120px] left-[-100px] h-[340px] w-[340px]" />
+        </div>
+        <div className="glass-iridescent-card glass-edge-highlight w-full rounded-2xl p-6 md:max-w-[400px] md:p-8 lg:max-w-[440px]">
           <div className="md:hidden w-full flex justify-center mb-6">
             <AuthBrand size="mobile-login" variant="light-primary" />
           </div>
