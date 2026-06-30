@@ -7,6 +7,7 @@ import {
 import {
   adaptedProfileToFormState,
   formStateToDisplayProfile,
+  getVersionDisplayTitle,
   normalizeTailorToVacancyResult,
 } from "@/lib/candidate-profile-version"
 
@@ -100,6 +101,29 @@ describe("normalizeTailorToVacancyResult", () => {
     expect(form.headline).toBe("Senior Dev")
     expect(form.summary).toBe("Adapted summary")
     expect(form.skillsText).toContain("TypeScript")
+  })
+})
+
+describe("getVersionDisplayTitle", () => {
+  it("prefers custom label over vacancy title and fallback", () => {
+    const version = {
+      label: "Perfil backend",
+      vacancyTitle: "Senior Developer",
+      versionNumber: 2,
+    }
+    expect(getVersionDisplayTitle(version, "Versión 2")).toBe("Perfil backend")
+  })
+
+  it("falls back to vacancy title then version number", () => {
+    expect(
+      getVersionDisplayTitle(
+        { label: null, vacancyTitle: "QA Lead", versionNumber: 1 },
+        "Versión 1"
+      )
+    ).toBe("QA Lead")
+    expect(
+      getVersionDisplayTitle({ label: null, vacancyTitle: null, versionNumber: 3 }, "Versión 3")
+    ).toBe("Versión 3")
   })
 })
 

@@ -174,3 +174,10 @@ export interface ProfileVersionPatchBody {
   label?: string | null
   profileSnapshot?: CandidateProfileSaveBody
 }
+
+export function getVersionDisplayTitle(
+  version: Pick<ProfileVersionSummary, "label" | "vacancyTitle" | "versionNumber">,
+  fallbackLabel: string
+): string {
+  return version.label?.trim() || version.vacancyTitle?.trim() || fallbackLabel
+}

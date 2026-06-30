@@ -615,6 +615,8 @@
         "downloadCvAria": "Download your latest uploaded CV",
         "manageDocuments": "Manage documents",
         "manageDocumentsAria": "Go to documents to manage files",
+        "viewVersions": "View profile versions",
+        "viewVersionsAria": "Go to your profile version history",
         "cancel": "Cancel",
         "cancelAria": "Cancel editing without saving",
         "save": "Save changes",
@@ -903,9 +905,11 @@
       },
       "comparison": {
         "title": "Profile comparison",
-        "subtitle": "Your original profile on the left; the vacancy-tailored version on the right.",
+        "subtitle": "Compare your original profile with the AI-tailored version for the selected job.",
         "vacancyContext": "Job: {title}",
-        "estimatedScore": "Estimated fit: {score}",
+        "vacancyLabel": "Job",
+        "scoreLabel": "Estimated fit",
+        "estimatedScore": "{score}",
         "summaryTitle": "Adaptation summary",
         "highlightsTitle": "Highlighted changes",
         "currentTitle": "Initial profile",
@@ -915,6 +919,14 @@
         "insightsToggle": "View summary and highlighted changes",
         "editToggle": "Edit tailored profile",
         "splitAria": "Side-by-side comparison of initial and tailored profiles",
+        "mobileTabsAria": "Select profile to view",
+        "mobileTabInitial": "Initial",
+        "mobileTabAdapted": "Tailored",
+        "sectionChanged": "Optimized",
+        "emptyValue": "No information on file",
+        "skillsShowMore": "Show {count} more",
+        "skillsShowLess": "Show less",
+        "experienceEnhanced": "Description enriched for this job",
         "panel": {
           "hero": "Professional identity",
           "headline": "Headline",
@@ -946,6 +958,14 @@
         "listAria": "Listado de versiones",
         "versionFallback": "Version {number}",
         "meta": "Version {number} · {date}",
+        "latestBadge": "Latest",
+        "labelEdit": {
+          "editAria": "Edit name of {title}",
+          "inputLabel": "Version name",
+          "placeholder": "e.g. Version {number}",
+          "saveAria": "Save name",
+          "cancelAria": "Cancel editing"
+        },
         "actions": {
           "view": "View",
           "delete": "Delete"
@@ -953,6 +973,8 @@
         "toasts": {
           "saved": "Version updated.",
           "saveError": "Could not save the version.",
+          "renamed": "Version name updated.",
+          "renameError": "Could not update the name.",
           "deleted": "Version deleted.",
           "deleteError": "Could not delete the version."
         },
