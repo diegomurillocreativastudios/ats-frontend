@@ -49,7 +49,8 @@
     "companies": "Companies",
     "departments": "Departments",
     "modalities": "Modalities",
-    "documentTypes": "Document types"
+    "documentTypes": "Document types",
+    "tailorProfile": "Tailor my Profile"
   },
   "Topbar": {
     "portalCandidate": "Candidate Portal",
@@ -296,6 +297,14 @@
       "interviews": {
         "title": "ApplicanTree | Portal Candidate | Interviews",
         "description": "View tus interviews agendadas e historial en el portal del candidate"
+      },
+      "profileTailoring": {
+        "title": "ApplicanTree | Candidate Portal | Tailor profile",
+        "description": "Adapt your professional profile to a job posting with AI assistance"
+      },
+      "profileVersions": {
+        "title": "ApplicanTree | My profile | Versions",
+        "description": "History of profile versions generated when tailoring to job postings"
       }
     },
     "recruiterPortal": {
@@ -836,6 +845,121 @@
       "fallbacks": {
         "dash": "—",
         "linkPlatform": "Link"
+      }
+    },
+    "profileTailoring": {
+      "title": "Tailor my profile",
+      "description": "Enter a job posting, process your profile with AI, and compare the result with your current profile before saving.",
+      "historyLink": "View version history",
+      "aiBadge": "Asistido por IA",
+      "processForVacancy": "Process my profile for this job",
+      "processLoading": "Processing…",
+      "vacancyInput": {
+        "title": "Target job",
+        "description": "Choose one source: file, pasted text, or a job published on the platform.",
+        "tabsAria": "Fuente de la vacante",
+        "tabs": {
+          "file": "File",
+          "text": "Text",
+          "platform": "System job"
+        },
+        "fileHelper": "PDF, DOCX or MD up to 10 MB",
+        "textLabel": "Job description",
+        "textPlaceholder": "Paste the job content here…",
+        "charCount": "{count} / {max} characters"
+      },
+      "validation": {
+        "none": "Select a job source to continue.",
+        "multiple": "You can only use one source at a time (file, text, or system job).",
+        "empty_text": "Job text cannot be empty.",
+        "text_too_long": "Text exceeds the allowed limit.",
+        "missing_vacancy": "Select a system job.",
+        "generic": "Check the job source and try again."
+      },
+      "tabConfirm": {
+        "title": "Change job source",
+        "message": "You have content in another tab. If you continue, that draft will be discarded.",
+        "cancel": "Cancel",
+        "confirm": "Continue"
+      },
+      "applyConfirm": {
+        "title": "Apply to main profile",
+        "message": "Adapted profile changes will replace your main profile. Continue?",
+        "cancel": "Cancel",
+        "confirm": "Apply to my profile"
+      },
+      "toasts": {
+        "processSuccess": "Profile processed. Review the comparison and save if needed.",
+        "versionSaved": "Version saved successfully.",
+        "versionSaveError": "Could not save the version.",
+        "applySuccess": "Your main profile was updated.",
+        "applyError": "Could not update your main profile."
+      },
+      "actions": {
+        "saveVersion": "Save to this version",
+        "savingVersion": "Saving version…",
+        "applyToProfile": "Apply to my profile",
+        "applying": "Applying…"
+      },
+      "comparison": {
+        "title": "Profile comparison",
+        "subtitle": "Your original profile on the left; the vacancy-tailored version on the right.",
+        "vacancyContext": "Job: {title}",
+        "estimatedScore": "Estimated fit: {score}",
+        "summaryTitle": "Adaptation summary",
+        "highlightsTitle": "Highlighted changes",
+        "currentTitle": "Initial profile",
+        "adaptedTitle": "Vacancy-tailored profile",
+        "initialBadge": "Original",
+        "adaptedBadge": "AI tailored",
+        "insightsToggle": "View summary and highlighted changes",
+        "editToggle": "Edit tailored profile",
+        "splitAria": "Side-by-side comparison of initial and tailored profiles",
+        "panel": {
+          "hero": "Professional identity",
+          "headline": "Headline",
+          "summary": "Summary",
+          "contact": "Contact"
+        }
+      },
+      "editor": {
+        "hint": "You can edit the tailored profile before saving the version or applying it to your main profile."
+      },
+      "vacancyPicker": {
+        "searchLabel": "Search jobs",
+        "searchPlaceholder": "Title, company or keyword…",
+        "searchAria": "Buscar vacantes publicadas",
+        "searchError": "Could not load jobs.",
+        "loading": "Searching jobs…",
+        "empty": "No jobs match your search.",
+        "resultsAria": "Resultados de vacantes",
+        "selectedFallback": "Selected job",
+        "clear": "Remove"
+      },
+      "history": {
+        "title": "Version history",
+        "description": "Versions of your profile generated when tailoring to different jobs.",
+        "backToTailoring": "Tailor profile",
+        "loading": "Loading versions…",
+        "empty": "You have no saved versions yet.",
+        "emptyCta": "Process my profile for a job",
+        "listAria": "Listado de versiones",
+        "versionFallback": "Version {number}",
+        "meta": "Version {number} · {date}",
+        "actions": {
+          "view": "View",
+          "delete": "Delete"
+        },
+        "toasts": {
+          "saved": "Version updated.",
+          "saveError": "Could not save the version.",
+          "deleted": "Version deleted.",
+          "deleteError": "Could not delete the version."
+        },
+        "deleteConfirm": {
+          "title": "Delete version",
+          "message": "This version will be removed from history. Your main profile will not change."
+        }
       }
     }
   },
@@ -2202,7 +2326,8 @@
       "preliminaryStepsAria": "Preliminary analysis steps",
       "processingStepsAria": "Processing states",
       "percentComplete": "{percent} percent",
-      "assistedByAi": "AI-assisted"
+      "assistedByAi": "AI-assisted",
+      "tailoringStepsAria": "Profile tailoring steps"
     }
   },
   "AdminPortal": {

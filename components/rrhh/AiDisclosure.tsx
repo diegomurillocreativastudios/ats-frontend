@@ -16,6 +16,12 @@ import {
   getAiIngestStatusLabelFromPercent,
 } from "@/lib/ai-ingest-progress-status";
 import {
+  PROFILE_TAILORING_PROGRESS_STEPS,
+  PROFILE_TAILORING_PROGRESS_COMPLETED_LABEL,
+  getProfileTailoringStepIndexFromPercent,
+  getProfileTailoringStatusLabelFromPercent,
+} from "@/lib/profile-tailoring-progress-status";
+import {
   VACANCY_PRELIMINARY_MATCH_PROGRESS_STEPS,
   getVacancyPreliminaryMatchStepIndexFromPercent,
   getVacancyPreliminaryMatchStatusLabelFromPercent,
@@ -32,6 +38,8 @@ export interface AiDisclosurePillProgressProps {
   ingestStepLabels?: boolean
   /** Vacante RRHH — análisis preliminar (POST match): stepper con etapas propias */
   preliminaryMatchStepLabels?: boolean
+  /** Portal candidato — adecuación de perfil a vacante */
+  profileTailoringStepLabels?: boolean
   /** Pulso final al 100% con animación de éxito */
   isCompleted?: boolean
 }
@@ -46,6 +54,7 @@ export function AiDisclosurePillProgress({
   className = "",
   ingestStepLabels = false,
   preliminaryMatchStepLabels = false,
+  profileTailoringStepLabels = false,
   isCompleted = false,
 }: AiDisclosurePillProgressProps) {
   const t = useTranslations("RecruiterPortal.aiDisclosure");
@@ -75,19 +84,27 @@ export function AiDisclosurePillProgress({
       : simulatedPercent
 
   const showVacancyMatchStepper = preliminaryMatchStepLabels
-  const showIngestStepper = ingestStepLabels && !showVacancyMatchStepper
-  const showStepper = showIngestStepper || showVacancyMatchStepper
+  const showTailoringStepper = profileTailoringStepLabels && !showVacancyMatchStepper
+  const showIngestStepper =
+    ingestStepLabels && !showVacancyMatchStepper && !showTailoringStepper
+  const showStepper = showIngestStepper || showVacancyMatchStepper || showTailoringStepper
 
   const steps = showVacancyMatchStepper
     ? VACANCY_PRELIMINARY_MATCH_PROGRESS_STEPS
-    : AI_INGEST_PROGRESS_STEPS
+    : showTailoringStepper
+      ? PROFILE_TAILORING_PROGRESS_STEPS
+      : AI_INGEST_PROGRESS_STEPS
 
   const stepLabel = showStepper
     ? showIngestStepper && isCompleted
       ? AI_INGEST_PROGRESS_COMPLETED_LABEL
-      : showVacancyMatchStepper
-        ? getVacancyPreliminaryMatchStatusLabelFromPercent(displayPercent)
-        : getAiIngestStatusLabelFromPercent(displayPercent)
+      : showTailoringStepper && isCompleted
+        ? PROFILE_TAILORING_PROGRESS_COMPLETED_LABEL
+        : showVacancyMatchStepper
+          ? getVacancyPreliminaryMatchStatusLabelFromPercent(displayPercent)
+          : showTailoringStepper
+            ? getProfileTailoringStatusLabelFromPercent(displayPercent)
+            : getAiIngestStatusLabelFromPercent(displayPercent)
     : null
 
   const rounded = Math.round(displayPercent)
@@ -99,11 +116,15 @@ export function AiDisclosurePillProgress({
 
   const currentStepIndex = showVacancyMatchStepper
     ? getVacancyPreliminaryMatchStepIndexFromPercent(displayPercent)
-    : getAiIngestStepIndexFromPercent(displayPercent)
+    : showTailoringStepper
+      ? getProfileTailoringStepIndexFromPercent(displayPercent)
+      : getAiIngestStepIndexFromPercent(displayPercent)
 
   const stepperNavAriaLabel = showVacancyMatchStepper
     ? t("preliminaryStepsAria")
-    : t("processingStepsAria")
+    : showTailoringStepper
+      ? t("tailoringStepsAria")
+      : t("processingStepsAria")
 
   const classNames = (...classes: Array<string | boolean>) =>
     classes.filter(Boolean).join(" ")

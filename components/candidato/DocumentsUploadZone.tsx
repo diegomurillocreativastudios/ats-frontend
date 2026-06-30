@@ -96,6 +96,12 @@ interface DocumentsUploadZoneProps {
   leftActions?:
     | ReactNode
     | ((context: DocumentsUploadZoneLeftContext) => ReactNode)
+  /** Solo staging: oculta botones de procesar con IA del componente */
+  stagingOnly?: boolean
+  /** Límite de archivos en cola (p. ej. 1 para vacante) */
+  maxFiles?: number
+  /** Notifica al padre cuando cambia la lista de archivos staged */
+  onFilesChange?: (files: File[]) => void
 }
 
 export default function DocumentsUploadZone({
@@ -108,6 +114,9 @@ export default function DocumentsUploadZone({
   helperText,
   processAllAcceptedFiles = false,
   leftActions,
+  stagingOnly = false,
+  maxFiles,
+  onFilesChange,
 }: DocumentsUploadZoneProps = {}) {
   const t = useTranslations("CandidatePortal.documents.upload")
   const inputRef = useRef<HTMLInputElement>(null)
@@ -150,9 +159,15 @@ export default function DocumentsUploadZone({
     }
     if (firstError) setError(firstError)
     if (newFiles.length > 0) {
-      setFiles((prev) => [...prev, ...newFiles])
+      setFiles((prev) => {
+        const limit = maxFiles != null && maxFiles > 0 ? maxFiles : null
+        const merged = limit === 1 ? newFiles.slice(0, 1) : [...prev, ...newFiles]
+        const next = limit != null ? merged.slice(-limit) : merged
+        onFilesChange?.(next)
+        return next
+      })
     }
-  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions, t])
+  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions, maxFiles, onFilesChange, t])
 
   const handleClick = () => {
     setError(null);
@@ -195,7 +210,11 @@ export default function DocumentsUploadZone({
   };
 
   const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setFiles((prev) => {
+      const next = prev.filter((_, i) => i !== index)
+      onFilesChange?.(next)
+      return next
+    });
     setError(null);
     setProcessedIndices((prev) => {
       const next = new Set<number>()
@@ -215,6 +234,7 @@ export default function DocumentsUploadZone({
     setError(null);
     setProcessedIndices(new Set());
     setProcessingIndex(null);
+    onFilesChange?.([]);
   };
 
   const resolvedLeftActions =
@@ -222,7 +242,9 @@ export default function DocumentsUploadZone({
       ? leftActions({ files, clearStagedFiles: clearAll })
       : leftActions
 
-  const processableFiles = processAllAcceptedFiles
+  const processableFiles = stagingOnly
+    ? []
+    : processAllAcceptedFiles
     ? files.map((file, index) => ({ file, index }))
     : files
         .map((file, index) => ({ file, index }))
@@ -395,7 +417,9 @@ export default function DocumentsUploadZone({
           >
             <ul className="flex flex-col gap-2">
             {files.map((file, index) => {
-              const showProcessButton = processAllAcceptedFiles || isResumeLikeFile(file.name);
+              const showProcessButton =
+                !stagingOnly &&
+                (processAllAcceptedFiles || isResumeLikeFile(file.name));
               return (
                 <li
                   key={`${file.name}-${index}`}
