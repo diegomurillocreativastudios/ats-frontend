@@ -10,7 +10,6 @@ import {
   Building2,
   CheckCircle2,
   Compass,
-  DollarSign,
   Gift,
   Info,
   MapPin,
@@ -509,17 +508,6 @@ export function PublicVacancyDetailPage({
                         />
                       }
                     />
-                    {vacancy.salary ? (
-                      <DetailRow
-                        label={t("salary")}
-                        value={
-                          <span className="inline-flex items-center justify-end gap-2">
-                            <DollarSign className="h-3.5 w-3.5 text-ats-terracotta" aria-hidden />
-                            <span className="whitespace-pre-wrap">{vacancy.salary}</span>
-                          </span>
-                        }
-                      />
-                    ) : null}
                     {publishedLabel ? (
                       <DetailRow label={t("publishedLabel")} value={publishedLabel} />
                     ) : null}

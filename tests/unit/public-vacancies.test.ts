@@ -104,4 +104,17 @@ describe("public vacancies API helpers", () => {
     expect(detail?.benefits).toEqual(["Horario flexible"])
   })
 
+  it("does not expose salary in public opportunity detail", () => {
+    const detail = normalizeOpportunityDetail({
+      id: "vac-1",
+      title: "Backend Engineer",
+      companyName: "Creativa Studios",
+      salary: "$2,500 - $3,500",
+      salaryRange: "$2,500 - $3,500",
+    })
+
+    expect(detail).not.toBeNull()
+    expect(detail).not.toHaveProperty("salary")
+  })
+
 })

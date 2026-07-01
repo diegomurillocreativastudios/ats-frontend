@@ -51,6 +51,9 @@ const RRHH_PATH_LABEL = {
 const CANDIDATO_PATH_LABEL = {
   documentos: "Documentos",
   entrevistas: "Entrevistas",
+  "adecuar-perfil": "Adecuar perfil",
+  "mi-perfil": "Mi perfil",
+  versiones: "Versiones",
 }
 
 const ADMIN_PATH_LABEL = {
@@ -162,7 +165,6 @@ export function getOpportunityDetailStaticTitle() {
 /** Sufijo (puede incluir ` | `) que se antepone a `ApplicanTree | …` para rutas exactas. */
 const EXACT_PATH_SUFFIX = {
   "/": joinDocumentTitle(PORTAL_CANDIDATO, "Inicio"),
-  "/mi-perfil": joinDocumentTitle(CUENTA, "Mi perfil"),
   "/seleccion-portal": joinDocumentTitle(CUENTA, "Elegí un portal"),
   "/recuperar-contrasena": joinDocumentTitle(CUENTA, "Recuperar contraseña"),
   "/restablecer-contrasena": joinDocumentTitle(CUENTA, "Restablecer contraseña"),

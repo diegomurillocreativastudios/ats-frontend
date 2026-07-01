@@ -49,7 +49,8 @@
     "companies": "Aziende",
     "departments": "Reparti",
     "modalities": "Modalità",
-    "documentTypes": "Tipi di documento"
+    "documentTypes": "Tipi di documento",
+    "tailorProfile": "Adatta il mio profilo"
   },
   "Topbar": {
     "portalCandidate": "Portale candidato",
@@ -296,6 +297,14 @@
       "interviews": {
         "title": "ApplicanTree | Portal Candidate | Interviews",
         "description": "View tus interviews agendadas e historial en el portal del candidate"
+      },
+      "profileTailoring": {
+        "title": "ApplicanTree | Portale candidato | Adatta profilo",
+        "description": "Adatta il tuo profilo professionale ai requisiti di una vacante con IA"
+      },
+      "profileVersions": {
+        "title": "ApplicanTree | Il mio profilo | Versioni",
+        "description": "Cronologia delle versioni del profilo generate adattando il profilo alle vacanti"
       }
     },
     "recruiterPortal": {
@@ -489,6 +498,9 @@
       "modal": {
         "cancel": "Annulla",
         "processing": "Elaborazione...",
+        "processingPanelAria": "Stato dell'elaborazione con IA",
+        "processingCurrentCvSingle": "Elaborazione: {fileName}",
+        "processingCurrentCvBatch": "Elaborazione CV {current} di {total}: {fileName}",
         "documentTypeRequired": "Devi selezionare il tipo di documento.",
         "identityRequired": "Devi caricare il documento d'identità.",
         "documentTypesLoadError": "Impossibile caricare i tipi di documento.",
@@ -509,8 +521,10 @@
         "identityDescription": "Carica il documento d'identità del candidato in formato PDF.",
         "cvPrimaryText": "Trascina il CV qui o fai clic per caricare",
         "cvHelperText": "PDF, DOCX o TXT fino a 10 MB",
+        "cvHelperTextPdfOnly": "Solo file PDF fino a 10 MB",
         "cvAria": "Trascina il CV o fai clic per caricare",
         "cvTypeError": "Tipo non consentito. Solo PDF, DOCX o TXT.",
+        "cvTypeErrorPdfOnly": "Tipo non consentito. Solo file PDF.",
         "identityPrimaryText": "Trascina il documento qui o fai clic per caricare",
         "identityHelperText": "Solo file PDF fino a 10 MB",
         "identityAria": "Trascina il documento d'identità o fai clic per caricare",
@@ -544,8 +558,9 @@
         },
         "recruiter": {
           "title": "Aggiungi candidato",
-          "submit": "Crea candidato",
+          "submit": "Elabora",
           "success": "Candidato creato ed elaborato correttamente.",
+          "successMany": "{count} candidati elaborati correttamente.",
           "errorPrefix": "Errore durante la creazione del candidato",
           "cvRequired": "Devi caricare il CV del candidato.",
           "cvHeading": "CV del candidato",
@@ -606,6 +621,8 @@
         "downloadCvAria": "Scarica il tuo ultimo CV caricato",
         "manageDocuments": "Gestisci documenti",
         "manageDocumentsAria": "Vai ai documenti per gestire i file",
+        "viewVersions": "Visualizza versioni del profilo",
+        "viewVersionsAria": "Vai alla cronologia delle versioni del profilo",
         "cancel": "Annulla",
         "cancelAria": "Annulla la modifica senza salvare",
         "save": "Salva modifiche",
@@ -836,6 +853,141 @@
       "fallbacks": {
         "dash": "—",
         "linkPlatform": "Link"
+      }
+    },
+    "profileTailoring": {
+      "title": "Adatta il mio profilo",
+      "description": "Enter a job posting, process your profile with AI, and compare the result with your current profile before saving.",
+      "historyLink": "View version history",
+      "aiBadge": "Asistido por IA",
+      "processForVacancy": "Process my profile for this job",
+      "processLoading": "Processing…",
+      "vacancyInput": {
+        "title": "Target job",
+        "description": "Choose one source: file, pasted text, or a job published on the platform.",
+        "tabsAria": "Fuente de la vacante",
+        "tabs": {
+          "file": "File",
+          "text": "Text",
+          "platform": "System job"
+        },
+        "fileHelper": "PDF, DOCX or MD up to 10 MB",
+        "textLabel": "Job description",
+        "textPlaceholder": "Paste the job content here…",
+        "charCount": "{count} / {max} characters"
+      },
+      "validation": {
+        "none": "Select a job source to continue.",
+        "multiple": "You can only use one source at a time (file, text, or system job).",
+        "empty_text": "Job text cannot be empty.",
+        "text_too_long": "Text exceeds the allowed limit.",
+        "missing_vacancy": "Select a system job.",
+        "generic": "Check the job source and try again."
+      },
+      "tabConfirm": {
+        "title": "Change job source",
+        "message": "You have content in another tab. If you continue, that draft will be discarded.",
+        "cancel": "Cancel",
+        "confirm": "Continue"
+      },
+      "applyConfirm": {
+        "title": "Apply to main profile",
+        "message": "Adapted profile changes will replace your main profile. Continue?",
+        "cancel": "Cancel",
+        "confirm": "Apply to my profile"
+      },
+      "toasts": {
+        "processSuccess": "Profile processed. Review the comparison and save if needed.",
+        "versionSaved": "Version saved successfully.",
+        "versionSaveError": "Could not save the version.",
+        "applySuccess": "Your main profile was updated.",
+        "applyError": "Could not update your main profile."
+      },
+      "actions": {
+        "saveVersion": "Save to this version",
+        "savingVersion": "Saving version…",
+        "applyToProfile": "Apply to my profile",
+        "applying": "Applying…"
+      },
+      "comparison": {
+        "title": "Confronto profilo",
+        "subtitle": "Confronta il tuo profilo originale con la versione adattata dall'IA per la posizione selezionata.",
+        "vacancyContext": "Posizione: {title}",
+        "vacancyLabel": "Posizione",
+        "scoreLabel": "Corrispondenza stimata",
+        "estimatedScore": "{score}",
+        "summaryTitle": "Riepilogo dell'adattamento",
+        "highlightsTitle": "Modifiche in evidenza",
+        "currentTitle": "Profilo iniziale",
+        "adaptedTitle": "Profilo adattato alla posizione",
+        "initialBadge": "Originale",
+        "adaptedBadge": "Adattato con IA",
+        "insightsToggle": "Vedi riepilogo e modifiche",
+        "editToggle": "Modifica profilo adattato",
+        "splitAria": "Confronto affiancato tra profilo iniziale e adattato",
+        "mobileTabsAria": "Seleziona profilo da visualizzare",
+        "mobileTabInitial": "Iniziale",
+        "mobileTabAdapted": "Adattato",
+        "sectionChanged": "Ottimizzato",
+        "emptyValue": "Nessuna informazione registrata",
+        "skillsShowMore": "Mostra altre {count}",
+        "skillsShowLess": "Mostra meno",
+        "experienceEnhanced": "Descrizione arricchita per la posizione",
+        "panel": {
+          "hero": "Professional identity",
+          "headline": "Headline",
+          "summary": "Summary",
+          "contact": "Contact"
+        }
+      },
+      "editor": {
+        "hint": "You can edit the tailored profile before saving the version or applying it to your main profile."
+      },
+      "vacancyPicker": {
+        "searchLabel": "Search jobs",
+        "searchPlaceholder": "Title, company or keyword…",
+        "searchAria": "Buscar vacantes publicadas",
+        "searchError": "Could not load jobs.",
+        "loading": "Searching jobs…",
+        "empty": "No jobs match your search.",
+        "resultsAria": "Resultados de vacantes",
+        "selectedFallback": "Selected job",
+        "clear": "Remove"
+      },
+      "history": {
+        "title": "Version history",
+        "description": "Versions of your profile generated when tailoring to different jobs.",
+        "backToTailoring": "Tailor profile",
+        "loading": "Loading versions…",
+        "empty": "You have no saved versions yet.",
+        "emptyCta": "Process my profile for a job",
+        "listAria": "Listado de versiones",
+        "versionFallback": "Version {number}",
+        "meta": "Version {number} · {date}",
+        "latestBadge": "Più recente",
+        "labelEdit": {
+          "editAria": "Edit name of {title}",
+          "inputLabel": "Version name",
+          "placeholder": "e.g. Version {number}",
+          "saveAria": "Save name",
+          "cancelAria": "Cancel editing"
+        },
+        "actions": {
+          "view": "View",
+          "delete": "Delete"
+        },
+        "toasts": {
+          "saved": "Version updated.",
+          "saveError": "Could not save the version.",
+          "renamed": "Version name updated.",
+          "renameError": "Could not update the name.",
+          "deleted": "Version deleted.",
+          "deleteError": "Could not delete the version."
+        },
+        "deleteConfirm": {
+          "title": "Delete version",
+          "message": "This version will be removed from history. Your main profile will not change."
+        }
       }
     }
   },
@@ -2202,7 +2354,8 @@
       "preliminaryStepsAria": "Fasi dell'analisi preliminare",
       "processingStepsAria": "Stati dell'elaborazione",
       "percentComplete": "{percent} per cento",
-      "assistedByAi": "Assistito da IA"
+      "assistedByAi": "Assistito da IA",
+      "tailoringStepsAria": "Fasi di adattamento del profilo"
     }
   },
   "AdminPortal": {

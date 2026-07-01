@@ -35,6 +35,7 @@
   "Navigation": {
     "home": "Inicio",
     "myProfile": "Mi perfil",
+    "tailorProfile": "Adecuar mi Perfil",
     "documents": "Documentos",
     "interviews": "Entrevistas",
     "candidates": "Candidatos",
@@ -296,6 +297,14 @@
       "interviews": {
         "title": "ApplicanTree | Portal Candidato | Entrevistas",
         "description": "Consultá tus entrevistas agendadas e historial en el portal del candidato"
+      },
+      "profileTailoring": {
+        "title": "ApplicanTree | Portal Candidato | Adecuar perfil",
+        "description": "Adaptá tu perfil profesional a los requisitos de una vacante con asistencia de IA"
+      },
+      "profileVersions": {
+        "title": "ApplicanTree | Mi perfil | Versiones",
+        "description": "Historial de versiones de tu perfil generadas al adecuarlo a vacantes"
       }
     },
     "recruiterPortal": {
@@ -489,6 +498,9 @@
       "modal": {
         "cancel": "Cancelar",
         "processing": "Procesando...",
+        "processingPanelAria": "Estado del procesamiento con IA",
+        "processingCurrentCvSingle": "Procesando: {fileName}",
+        "processingCurrentCvBatch": "Procesando CV {current} de {total}: {fileName}",
         "documentTypeRequired": "Debes seleccionar el tipo de documento.",
         "identityRequired": "Debes subir el documento de identidad.",
         "documentTypesLoadError": "No se pudieron cargar los tipos de documento.",
@@ -509,8 +521,10 @@
         "identityDescription": "Sube el documento de identidad del candidato en formato PDF.",
         "cvPrimaryText": "Arrastra el CV aquí o haz clic para subir",
         "cvHelperText": "PDF, DOCX o TXT hasta 10 MB",
+        "cvHelperTextPdfOnly": "Solo archivos PDF hasta 10 MB",
         "cvAria": "Arrastra el CV o haz clic para subir",
         "cvTypeError": "Tipo no permitido. Solo PDF, DOCX o TXT.",
+        "cvTypeErrorPdfOnly": "Tipo no permitido. Solo archivos PDF.",
         "identityPrimaryText": "Arrastra el documento aquí o haz clic para subir",
         "identityHelperText": "Solo archivos PDF hasta 10 MB",
         "identityAria": "Arrastra el documento de identidad o haz clic para subir",
@@ -544,13 +558,149 @@
         },
         "recruiter": {
           "title": "Agregar candidato",
-          "submit": "Crear candidato",
+          "submit": "Procesar",
           "success": "Candidato creado y procesado correctamente.",
+          "successMany": "Se procesaron {count} candidatos correctamente.",
           "errorPrefix": "Error al crear el candidato",
           "cvRequired": "Debes subir el CV del candidato.",
           "cvHeading": "CV del candidato",
           "cvDescription": "Sube el CV del candidato para crear su perfil automáticamente.",
           "aiNote": "Resultado generado por IA. Requiere validación de RRHH."
+        }
+      }
+    },
+    "profileTailoring": {
+      "title": "Adecuar mi perfil",
+      "description": "Ingresá una vacante, procesá tu perfil con IA y compará el resultado con tu ficha actual antes de guardar.",
+      "historyLink": "Ver historial de versiones",
+      "aiBadge": "Asistido por IA",
+      "processForVacancy": "Procesar mi perfil para esta vacante",
+      "processLoading": "Procesando…",
+      "vacancyInput": {
+        "title": "Vacante objetivo",
+        "description": "Elegí una sola fuente: archivo, texto pegado o vacante publicada en la plataforma.",
+        "tabsAria": "Fuente de la vacante",
+        "tabs": {
+          "file": "Archivo",
+          "text": "Texto",
+          "platform": "Vacante del sistema"
+        },
+        "fileHelper": "PDF, DOCX o MD hasta 10 MB",
+        "textLabel": "Descripción de la vacante",
+        "textPlaceholder": "Pegá aquí el contenido de la vacante…",
+        "charCount": "{count} / {max} caracteres"
+      },
+      "validation": {
+        "none": "Seleccioná una fuente de vacante para continuar.",
+        "multiple": "Solo podés usar una fuente a la vez (archivo, texto o vacante del sistema).",
+        "empty_text": "El texto de la vacante no puede estar vacío.",
+        "text_too_long": "El texto supera el límite permitido.",
+        "missing_vacancy": "Seleccioná una vacante del sistema.",
+        "generic": "Revisá la fuente de vacante e intentá de nuevo."
+      },
+      "tabConfirm": {
+        "title": "Cambiar fuente de vacante",
+        "message": "Tenés contenido en otra pestaña. Si continuás, se descartará ese borrador.",
+        "cancel": "Cancelar",
+        "confirm": "Continuar"
+      },
+      "applyConfirm": {
+        "title": "Aplicar al perfil principal",
+        "message": "Los cambios del perfil adecuado reemplazarán tu ficha principal. ¿Querés continuar?",
+        "cancel": "Cancelar",
+        "confirm": "Aplicar a mi perfil"
+      },
+      "toasts": {
+        "processSuccess": "Perfil procesado. Revisá la comparación y guardá si corresponde.",
+        "versionSaved": "Versión guardada correctamente.",
+        "versionSaveError": "No se pudo guardar la versión.",
+        "applySuccess": "Tu perfil principal fue actualizado.",
+        "applyError": "No se pudo actualizar tu perfil principal."
+      },
+      "actions": {
+        "saveVersion": "Guardar en esta versión",
+        "savingVersion": "Guardando versión…",
+        "applyToProfile": "Aplicar a mi perfil",
+        "applying": "Aplicando…"
+      },
+      "comparison": {
+        "title": "Comparación de perfil",
+        "subtitle": "Compará tu perfil original con la versión adaptada por IA a la vacante seleccionada.",
+        "vacancyContext": "Vacante: {title}",
+        "vacancyLabel": "Vacante",
+        "scoreLabel": "Encaje estimado",
+        "estimatedScore": "{score}",
+        "summaryTitle": "Resumen de adaptación",
+        "highlightsTitle": "Cambios destacados",
+        "currentTitle": "Perfil inicial",
+        "adaptedTitle": "Perfil adecuado a la vacante",
+        "initialBadge": "Original",
+        "adaptedBadge": "Adaptado con IA",
+        "insightsToggle": "Ver resumen y cambios destacados",
+        "editToggle": "Editar perfil adecuado",
+        "splitAria": "Comparación lado a lado del perfil inicial y el perfil adaptado",
+        "mobileTabsAria": "Seleccionar perfil a visualizar",
+        "mobileTabInitial": "Inicial",
+        "mobileTabAdapted": "Adaptado",
+        "sectionChanged": "Optimizado",
+        "emptyValue": "Sin información registrada",
+        "skillsShowMore": "Ver {count} más",
+        "skillsShowLess": "Ver menos",
+        "experienceEnhanced": "Descripción enriquecida para la vacante",
+        "panel": {
+          "hero": "Identidad profesional",
+          "headline": "Titular",
+          "summary": "Resumen",
+          "contact": "Contacto"
+        }
+      },
+      "editor": {
+        "hint": "Podés editar el perfil adecuado antes de guardar la versión o aplicarlo a tu ficha principal."
+      },
+      "vacancyPicker": {
+        "searchLabel": "Buscar vacante",
+        "searchPlaceholder": "Título, empresa o palabra clave…",
+        "searchAria": "Buscar vacantes publicadas",
+        "searchError": "No se pudieron cargar las vacantes.",
+        "loading": "Buscando vacantes…",
+        "empty": "No hay vacantes que coincidan con tu búsqueda.",
+        "resultsAria": "Resultados de vacantes",
+        "selectedFallback": "Vacante seleccionada",
+        "clear": "Quitar"
+      },
+      "history": {
+        "title": "Historial de versiones",
+        "description": "Versiones de tu perfil generadas al adecuarlo a distintas vacantes.",
+        "backToTailoring": "Adecuar perfil",
+        "loading": "Cargando versiones…",
+        "empty": "Todavía no tenés versiones guardadas.",
+        "emptyCta": "Procesar mi perfil para una vacante",
+        "listAria": "Listado de versiones",
+        "versionFallback": "Versión {number}",
+        "meta": "Versión {number} · {date}",
+        "latestBadge": "Más reciente",
+        "labelEdit": {
+          "editAria": "Editar nombre de {title}",
+          "inputLabel": "Nombre de la versión",
+          "placeholder": "Ej. Versión {number}",
+          "saveAria": "Guardar nombre",
+          "cancelAria": "Cancelar edición"
+        },
+        "actions": {
+          "view": "Ver",
+          "delete": "Eliminar"
+        },
+        "toasts": {
+          "saved": "Versión actualizada.",
+          "saveError": "No se pudo guardar la versión.",
+          "renamed": "Nombre de la versión actualizado.",
+          "renameError": "No se pudo actualizar el nombre.",
+          "deleted": "Versión eliminada.",
+          "deleteError": "No se pudo eliminar la versión."
+        },
+        "deleteConfirm": {
+          "title": "Eliminar versión",
+          "message": "Esta versión se eliminará del historial. Tu perfil principal no se modifica."
         }
       }
     },
@@ -606,6 +756,8 @@
         "downloadCvAria": "Descargar tu último CV subido",
         "manageDocuments": "Gestionar documentos",
         "manageDocumentsAria": "Ir a documentos para gestionar archivos",
+        "viewVersions": "Ver versiones de perfil",
+        "viewVersionsAria": "Ir al historial de versiones de tu perfil",
         "cancel": "Cancelar",
         "cancelAria": "Cancelar edición sin guardar",
         "save": "Guardar cambios",
@@ -2200,6 +2352,7 @@
     "aiDisclosure": {
       "progressAria": "Progreso del procesamiento con IA",
       "preliminaryStepsAria": "Etapas del análisis preliminar",
+      "tailoringStepsAria": "Etapas de adecuación de perfil",
       "processingStepsAria": "Estados del procesamiento",
       "percentComplete": "{percent} por ciento",
       "assistedByAi": "Asistido por IA"

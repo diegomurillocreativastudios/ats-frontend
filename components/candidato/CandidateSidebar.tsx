@@ -4,13 +4,14 @@ import Link from "next/link";
 import ProductBrand from "@/components/branding/ProductBrand";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Home, User, FileText, Calendar } from "lucide-react";
+import { Sparkles, Home, User, FileText, Calendar } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getInitials } from "@/lib/getInitials";
 
 const navItems = [
   { href: "/portal-candidato", labelKey: "home", icon: Home },
-  { href: "/mi-perfil", labelKey: "myProfile", icon: User },
+  { href: "/portal-candidato/mi-perfil", labelKey: "myProfile", icon: User },
+  { href: "/portal-candidato/adecuar-perfil", labelKey: "tailorProfile", icon: Sparkles },
   { href: "/portal-candidato/documentos", labelKey: "documents", icon: FileText },
   { href: "/portal-candidato/entrevistas", labelKey: "interviews", icon: Calendar },
 ] as const;

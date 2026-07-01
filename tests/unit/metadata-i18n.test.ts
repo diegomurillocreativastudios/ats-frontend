@@ -64,7 +64,7 @@ import { generateMetadata as forgotPasswordMetadata } from "@/app/auth/forgot-pa
 import { generateMetadata as resetPasswordMetadata } from "@/app/restablecer-contrasena/page"
 import { generateMetadata as authResetPasswordMetadata } from "@/app/auth/restablecer-contrasena/page"
 import { generateMetadata as portalSelectionMetadata } from "@/app/seleccion-portal/page"
-import { generateMetadata as candidateProfileMetadata } from "@/app/mi-perfil/page"
+import { generateMetadata as candidateProfileMetadata } from "@/app/portal-candidato/mi-perfil/page"
 
 const allMessages: Record<Locale, Record<string, unknown>> = {
   es: esMessages,
@@ -136,7 +136,7 @@ describe("Metadata auth/acceso (Etapa 5A)", () => {
     expect(en.description).toBe(enMessages.Metadata.portalSelection.description)
   })
 
-  it("genera la metadata de /mi-perfil desde next-intl en es y en (Etapa 5E)", async () => {
+  it("genera la metadata de /portal-candidato/mi-perfil desde next-intl en es y en (Etapa 5E)", async () => {
     hoisted.locale = "es"
     const es = await candidateProfileMetadata()
     expect(es.title).toBe(esMessages.Metadata.candidateProfile.title)
