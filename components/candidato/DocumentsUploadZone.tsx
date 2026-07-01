@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useCallback, type ReactNode, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
+import { useRef, useState, useCallback, useEffect, type ReactNode, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
 import { useTranslations } from "next-intl"
 import { Upload, X, Sparkles, Loader2, Check } from "lucide-react"
 import { getApiErrorMessage, isSilentError } from "@/lib/api-error"
@@ -102,6 +102,8 @@ interface DocumentsUploadZoneProps {
   maxFiles?: number
   /** Notifica al padre cuando cambia la lista de archivos staged */
   onFilesChange?: (files: File[]) => void
+  /** Índice del archivo que un padre está procesando (p. ej. ingest en modal RRHH) */
+  externalProcessingIndex?: number | null
 }
 
 export default function DocumentsUploadZone({
@@ -117,6 +119,7 @@ export default function DocumentsUploadZone({
   stagingOnly = false,
   maxFiles,
   onFilesChange,
+  externalProcessingIndex = null,
 }: DocumentsUploadZoneProps = {}) {
   const t = useTranslations("CandidatePortal.documents.upload")
   const inputRef = useRef<HTMLInputElement>(null)
@@ -126,6 +129,15 @@ export default function DocumentsUploadZone({
   const [processingIndex, setProcessingIndex] = useState<number | null>(null)
   const [isProcessingAll, setIsProcessingAll] = useState(false)
   const [processedIndices, setProcessedIndices] = useState(() => new Set<number>())
+  const onFilesChangeRef = useRef(onFilesChange)
+
+  useEffect(() => {
+    onFilesChangeRef.current = onFilesChange
+  }, [onFilesChange])
+
+  useEffect(() => {
+    onFilesChangeRef.current?.(files)
+  }, [files])
 
   const effectiveAcceptedTypes =
     Array.isArray(acceptedTypes) && acceptedTypes.length > 0
@@ -162,12 +174,10 @@ export default function DocumentsUploadZone({
       setFiles((prev) => {
         const limit = maxFiles != null && maxFiles > 0 ? maxFiles : null
         const merged = limit === 1 ? newFiles.slice(0, 1) : [...prev, ...newFiles]
-        const next = limit != null ? merged.slice(-limit) : merged
-        onFilesChange?.(next)
-        return next
+        return limit != null ? merged.slice(-limit) : merged
       })
     }
-  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions, maxFiles, onFilesChange, t])
+  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions, maxFiles, t])
 
   const handleClick = () => {
     setError(null);
@@ -210,11 +220,7 @@ export default function DocumentsUploadZone({
   };
 
   const removeFile = (index: number) => {
-    setFiles((prev) => {
-      const next = prev.filter((_, i) => i !== index)
-      onFilesChange?.(next)
-      return next
-    });
+    setFiles((prev) => prev.filter((_, i) => i !== index));
     setError(null);
     setProcessedIndices((prev) => {
       const next = new Set<number>()
@@ -234,7 +240,6 @@ export default function DocumentsUploadZone({
     setError(null);
     setProcessedIndices(new Set());
     setProcessingIndex(null);
-    onFilesChange?.([]);
   };
 
   const resolvedLeftActions =
@@ -420,10 +425,22 @@ export default function DocumentsUploadZone({
               const showProcessButton =
                 !stagingOnly &&
                 (processAllAcceptedFiles || isResumeLikeFile(file.name));
+              const isExternallyProcessing = externalProcessingIndex === index
+              const isExternallyCompleted =
+                externalProcessingIndex != null && index < externalProcessingIndex
+              const showExternalStatus =
+                externalProcessingIndex != null &&
+                (isExternallyProcessing || isExternallyCompleted)
               return (
                 <li
                   key={`${file.name}-${index}`}
-                  className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3"
+                  className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${
+                    isExternallyProcessing
+                      ? "border-vo-purple bg-vo-purple/5 ring-1 ring-vo-purple/30"
+                      : isExternallyCompleted
+                        ? "border-success/40 bg-success/5"
+                        : "border-border bg-card"
+                  }`}
                 >
                   <span className="min-w-0 flex-1 truncate font-sans text-sm text-foreground">
                     {file.name}
@@ -431,6 +448,26 @@ export default function DocumentsUploadZone({
                   <span className="shrink-0 font-sans text-xs text-muted-foreground">
                     {formatFileSize(file.size)}
                   </span>
+                  {showExternalStatus ? (
+                    isExternallyCompleted ? (
+                      <span
+                        className="flex shrink-0 items-center gap-1.5 rounded-md border border-success bg-success/10 px-2.5 py-1.5 font-sans text-xs font-medium text-success"
+                        aria-label={t("processedAria", { fileName: file.name })}
+                      >
+                        <Check className="h-3.5 w-3.5 text-success" aria-hidden />
+                        {t("done")}
+                      </span>
+                    ) : (
+                      <span
+                        className="flex shrink-0 items-center gap-1.5 rounded-md border border-vo-purple bg-vo-purple/10 px-2.5 py-1.5 font-sans text-xs font-medium text-vo-purple"
+                        aria-busy
+                        aria-label={t("processingAria", { fileName: file.name })}
+                      >
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-vo-purple" aria-hidden />
+                        {t("processing")}
+                      </span>
+                    )
+                  ) : null}
                   {showProcessButton && (
                     <>
                       {processedIndices.has(index) ? (
@@ -467,7 +504,8 @@ export default function DocumentsUploadZone({
                   <button
                     type="button"
                     onClick={() => removeFile(index)}
-                    className="shrink-0 rounded-md p-1 hover:bg-muted"
+                    disabled={externalProcessingIndex !== null}
+                    className="shrink-0 rounded-md p-1 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                     aria-label={t("removeFileAria", { fileName: file.name })}
                   >
                     <X className="h-4 w-4 text-muted-foreground" aria-hidden />
