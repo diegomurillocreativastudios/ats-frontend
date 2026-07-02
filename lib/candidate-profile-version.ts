@@ -6,6 +6,16 @@ import {
   type FullProfileFormInput,
 } from "@/lib/candidate-profile"
 import { buildFullFormStateFromSources } from "@/lib/candidate-profile-hydrate"
+import {
+  normalizeAtsComplianceChecklist,
+  type AtsComplianceChecklistItem,
+} from "@/lib/ats-compliance-checklist"
+
+export type {
+  AtsComplianceChecklistItem,
+  AtsComplianceStatus,
+  AtsGapType,
+} from "@/lib/ats-compliance-checklist"
 
 export type ProfileVacancySource = "platform" | "text" | "file"
 
@@ -31,6 +41,7 @@ export interface ProfileVersionDetail extends ProfileVersionSummary {
   vacancyId: string | null
   adaptationSummary: string | null
   changeHighlights: ProfileChangeHighlight[]
+  atsComplianceChecklist: AtsComplianceChecklistItem[]
   profileSnapshot: CandidateProfile
 }
 
@@ -45,6 +56,7 @@ export interface TailorToVacancyResult {
   adaptedProfile: CandidateProfile
   adaptationSummary: string | null
   changeHighlights: ProfileChangeHighlight[]
+  atsComplianceChecklist: AtsComplianceChecklistItem[]
 }
 
 const toTrimmedString = (value: unknown): string => {
@@ -133,6 +145,7 @@ export function normalizeProfileVersionDetail(raw: unknown): ProfileVersionDetai
     vacancyId: toNullableString(o.vacancyId),
     adaptationSummary: toNullableString(o.adaptationSummary),
     changeHighlights: normalizeChangeHighlights(o.changeHighlights),
+    atsComplianceChecklist: normalizeAtsComplianceChecklist(o.atsComplianceChecklist),
     profileSnapshot: normalizeCandidateProfileFromApi(snapshotRaw),
   }
 }
@@ -153,6 +166,7 @@ export function normalizeTailorToVacancyResult(raw: unknown): TailorToVacancyRes
     adaptedProfile: normalizeCandidateProfileFromApi(o.adaptedProfile),
     adaptationSummary: toNullableString(o.adaptationSummary),
     changeHighlights: normalizeChangeHighlights(o.changeHighlights),
+    atsComplianceChecklist: normalizeAtsComplianceChecklist(o.atsComplianceChecklist),
   }
 }
 

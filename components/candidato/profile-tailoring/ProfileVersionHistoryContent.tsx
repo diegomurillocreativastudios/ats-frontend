@@ -292,6 +292,8 @@ export default function ProfileVersionHistoryContent() {
             changeHighlights={selectedVersion.changeHighlights}
             estimatedMatchScore={selectedVersion.estimatedMatchScore}
             vacancyTitle={selectedVersion.vacancyTitle}
+            promptVersion={selectedVersion.promptVersion}
+            atsComplianceChecklist={selectedVersion.atsComplianceChecklist}
           />
           <details className="rounded-2xl border border-border bg-card">
             <summary className="cursor-pointer list-none px-4 py-3 font-sans text-sm font-medium text-foreground marker:content-none [&::-webkit-details-marker]:hidden">

@@ -84,7 +84,16 @@ export function useProfileTailoring() {
         loadFromTailorResult(data)
         return data
       } catch (err: unknown) {
-        const message = getApiErrorMessage(err) || "No se pudo procesar el perfil para la vacante."
+        const status =
+          typeof err === "object" && err !== null && "status" in err
+            ? (err as { status?: number }).status
+            : undefined
+        const serverMessage = getApiErrorMessage(err)
+        const message =
+          status === 422
+            ? serverMessage ||
+              "La IA no pudo generar un perfil adaptado válido. No se creó ninguna versión."
+            : serverMessage || "No se pudo procesar el perfil para la vacante."
         setError(message)
         return null
       } finally {
