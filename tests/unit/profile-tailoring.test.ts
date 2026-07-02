@@ -8,6 +8,7 @@ import {
   adaptedProfileToFormState,
   formStateToDisplayProfile,
   getVersionDisplayTitle,
+  normalizeProfileVersionDetail,
   normalizeTailorToVacancyResult,
 } from "@/lib/candidate-profile-version"
 
@@ -91,16 +92,63 @@ describe("normalizeTailorToVacancyResult", () => {
       changeHighlights: [
         { field: "headline", before: "Dev", after: "Senior Dev", reason: "Closer match" },
       ],
+      promptVersion: "v2",
+      atsComplianceChecklist: [
+        {
+          id: "readable_format",
+          label: "Formato legible",
+          status: "Met",
+          gapType: "NotApplicable",
+          note: "OK",
+        },
+      ],
     }
 
     const result = normalizeTailorToVacancyResult(raw)
     expect(result?.versionId).toBe("ver-1")
+    expect(result?.promptVersion).toBe("v2")
+    expect(result?.atsComplianceChecklist).toHaveLength(1)
+    expect(result?.atsComplianceChecklist[0]?.id).toBe("readable_format")
     expect(result?.adaptedProfile.headline).toBe("Senior Dev")
 
     const form = adaptedProfileToFormState(result!.adaptedProfile)
     expect(form.headline).toBe("Senior Dev")
     expect(form.summary).toBe("Adapted summary")
     expect(form.skillsText).toContain("TypeScript")
+  })
+
+  it("defaults atsComplianceChecklist to an empty array", () => {
+    const result = normalizeTailorToVacancyResult({
+      versionId: "ver-2",
+      versionNumber: 1,
+      currentProfile: { headline: "Dev" },
+      adaptedProfile: { headline: "Senior Dev" },
+      changeHighlights: [],
+    })
+    expect(result?.atsComplianceChecklist).toEqual([])
+  })
+})
+
+describe("normalizeProfileVersionDetail", () => {
+  it("maps atsComplianceChecklist from version detail", () => {
+    const detail = normalizeProfileVersionDetail({
+      id: "ver-3",
+      versionNumber: 2,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      promptVersion: "v2",
+      adaptedProfile: { headline: "Senior Dev" },
+      atsComplianceChecklist: [
+        {
+          id: "title_match",
+          label: "Match de cargo",
+          status: "Partial",
+          gapType: "WritingGap",
+          note: "Titular mejorable",
+        },
+      ],
+    })
+    expect(detail?.atsComplianceChecklist).toHaveLength(1)
+    expect(detail?.atsComplianceChecklist[0]?.status).toBe("Partial")
   })
 })
 

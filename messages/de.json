@@ -909,6 +909,27 @@
         "applyToProfile": "Apply to my profile",
         "applying": "Applying…"
       },
+      "atsCompliance": {
+        "title": "ATS-Konformität",
+        "sectionAria": "ATS-Konformitäts-Checkliste",
+        "summary": "{met}/{total} Kriterien erfüllt",
+        "legacyMessage": "Diese Version enthält keine ATS-Bewertung.",
+        "partialEvaluationBanner": "Teilweise Bewertung — einige Kriterien konnten nicht analysiert werden.",
+        "minimumExperienceTooltip": "Dieser Filter wird im Auswahlprozess geprüft, nicht bei der CV-Anpassung.",
+        "status": {
+          "Met": "Erfüllt",
+          "Partial": "Teilweise",
+          "Missing": "Nicht erfüllt",
+          "NotApplicable": "N/A"
+        },
+        "gapType": {
+          "writingGap": "Im CV verbesserbar",
+          "realGap": "Profil vervollständigen"
+        }
+      },
+      "errors": {
+        "unprocessable": "Die KI konnte kein gültiges angepasstes Profil erzeugen. Es wurde keine Version erstellt."
+      },
       "comparison": {
         "title": "Profilvergleich",
         "subtitle": "Vergleichen Sie Ihr Originalprofil mit der KI-angepassten Version für die ausgewählte Stelle.",
@@ -938,6 +959,95 @@
           "headline": "Headline",
           "summary": "Summary",
           "contact": "Contact"
+        },
+        "dashboard": {
+          "subtitle": "Vorher vs. nachher: CV-Anpassung an die Stelle",
+          "targetVacancyLabel": "Zielstelle:",
+          "targetVacancyFallback": "Zielstelle nicht angegeben",
+          "estimatedScoreNote": "Ausrichtungswerte sind geschätzt, wenn das Backend sie nicht liefert.",
+          "currentBadge": "Aktuelles Profil",
+          "adaptedBadge": "Angepasstes Profil",
+          "estimatedAlignment": "Geschätzte Ausrichtung",
+          "noHeadline": "Keine Überschrift",
+          "yearsExperience": "{years} Jahre Full-Stack-Entwicklung",
+          "experienceSince": "Erfahrung seit {year}",
+          "englishLevel": "Englisch {level}",
+          "profileByCategory": "Profil nach Kategorie",
+          "topSkills": "Top-Fähigkeiten",
+          "noSkills": "Keine Fähigkeiten hinterlegt",
+          "strengthsTitle": "Stärken",
+          "opportunitiesTitle": "Verbesserungsmöglichkeiten",
+          "recentExperience": "Aktuelle Erfahrung",
+          "noExperience": "Keine Erfahrung hinterlegt",
+          "noRole": "Keine Rolle",
+          "adaptationSummaryTitle": "Anpassungszusammenfassung",
+          "checklistProgress": "{met} von {total} Kriterien erfüllt",
+          "conclusionTitle": "Fazit",
+          "criteriaComparisonTitle": "ATS-Kriterienvergleich",
+          "criteriaComparisonSubtitle": "Visueller Vergleich zwischen aktuellem und angepasstem Profil",
+          "criteriaColumn": "Kriterium",
+          "currentColumn": "Aktuelles Profil",
+          "adaptedColumn": "Angepasstes Profil",
+          "resultColumn": "Ergebnis",
+          "resultPending": "Ausstehend",
+          "resultTie": "Unentschieden",
+          "resultAdapted": "Angepasstes Profil",
+          "resultCurrent": "Aktuelles Profil",
+          "checklistTitle": "ATS-Checkliste",
+          "changesTitle": "Vorgenommene Änderungen",
+          "beforeLabel": "Vorher",
+          "afterLabel": "Nachher",
+          "reasonLabel": "Grund",
+          "showMore": "Mehr anzeigen",
+          "showLess": "Weniger anzeigen",
+          "emptySummary": "Keine professionelle Zusammenfassung",
+          "notDefined": "Nicht definiert",
+          "viewOriginalCv": "Original-CV anzeigen",
+          "viewAdaptedCv": "Angepassten CV anzeigen",
+          "exportComparison": "Vergleich exportieren",
+          "applyAdaptedVersion": "Angepasste Version anwenden",
+          "applying": "Wird angewendet…",
+          "categories": {
+            "titleMatch": "Rollen-Match",
+            "dotnetSkills": ".NET-Fähigkeiten",
+            "frontend": "Frontend",
+            "cloudDevops": "Cloud/DevOps",
+            "english": "Englisch",
+            "atsKeywords": "ATS-Schlüsselwörter"
+          },
+          "criteria": {
+            "titleMatch": "Rollen-Match",
+            "vacancyKeywords": "Stellen-Schlüsselwörter",
+            "requiredSkills": "Erforderliche technische Fähigkeiten",
+            "language": "Sprache",
+            "recentExperience": "Aktuelle Erfahrung",
+            "measurableAchievements": "Messbare Erfolge"
+          },
+          "insights": {
+            "targetVacancy": "Zielstelle",
+            "topImprovement": "Größte Verbesserung",
+            "professionalSummary": "Professionelle Zusammenfassung",
+            "integratedKeywords": "Integrierte Schlüsselwörter",
+            "atsChecklist": "ATS-Checkliste",
+            "pending": "Ausstehend"
+          },
+          "strengths": {
+            "completeTechnicalProfile": "Sehr vollständiges technisches Profil",
+            "strongFrontend": "Stark im modernen Frontend",
+            "cloudDevops": "Cloud- und DevOps-Erfahrung",
+            "englishLevel": "Gutes Englischniveau",
+            "clearSummary": "Klare und fokussierte Zusammenfassung",
+            "alignedHeadline": "Rolle an die Stelle angepasst",
+            "integratedKeywords": "Gut integrierte technische Schlüsselwörter"
+          },
+          "opportunities": {
+            "misalignedHeadline": "Überschrift nicht an die Stelle angepasst",
+            "emptySummary": "Leere professionelle Zusammenfassung",
+            "unfocusedKeywords": "Schlüsselwörter weniger auf die Rolle fokussiert",
+            "noMeasurableAchievements": "Keine messbaren Erfolge angegeben",
+            "addImpactMetrics": "Impact-Metriken hinzufügen",
+            "quantifyResults": "Ergebnisse pro Projekt quantifizieren"
+          }
         }
       },
       "editor": {

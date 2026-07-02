@@ -909,6 +909,27 @@
         "applyToProfile": "Apply to my profile",
         "applying": "Applying…"
       },
+      "atsCompliance": {
+        "title": "Conformità ATS",
+        "sectionAria": "Checklist conformità ATS",
+        "summary": "{met}/{total} criteri soddisfatti",
+        "legacyMessage": "Questa versione non include la valutazione ATS.",
+        "partialEvaluationBanner": "Valutazione parziale — alcuni criteri non hanno potuto essere analizzati.",
+        "minimumExperienceTooltip": "Questo filtro viene validato nel processo di selezione, non nell'adattamento del CV.",
+        "status": {
+          "Met": "Soddisfatto",
+          "Partial": "Parziale",
+          "Missing": "Non soddisfatto",
+          "NotApplicable": "N/A"
+        },
+        "gapType": {
+          "writingGap": "Migliorabile nel CV",
+          "realGap": "Completa il tuo profilo"
+        }
+      },
+      "errors": {
+        "unprocessable": "L'IA non ha potuto generare un profilo adattato valido. Nessuna versione è stata creata."
+      },
       "comparison": {
         "title": "Confronto profilo",
         "subtitle": "Confronta il tuo profilo originale con la versione adattata dall'IA per la posizione selezionata.",
@@ -938,6 +959,95 @@
           "headline": "Headline",
           "summary": "Summary",
           "contact": "Contact"
+        },
+        "dashboard": {
+          "subtitle": "Prima vs dopo l'adattamento del CV all'offerta",
+          "targetVacancyLabel": "Offerta target:",
+          "targetVacancyFallback": "Offerta target non specificata",
+          "estimatedScoreNote": "I punteggi di allineamento sono stimati quando il backend non li fornisce.",
+          "currentBadge": "Profilo attuale",
+          "adaptedBadge": "Profilo adattato",
+          "estimatedAlignment": "Allineamento stimato",
+          "noHeadline": "Nessun titolo",
+          "yearsExperience": "{years} anni nello sviluppo full stack",
+          "experienceSince": "Esperienza dal {year}",
+          "englishLevel": "Inglese {level}",
+          "profileByCategory": "Profilo per categoria",
+          "topSkills": "Competenze principali",
+          "noSkills": "Nessuna competenza registrata",
+          "strengthsTitle": "Punti di forza",
+          "opportunitiesTitle": "Opportunità di miglioramento",
+          "recentExperience": "Esperienza recente",
+          "noExperience": "Nessuna esperienza registrata",
+          "noRole": "Nessun ruolo",
+          "adaptationSummaryTitle": "Riepilogo adattamento",
+          "checklistProgress": "{met} criteri soddisfatti su {total}",
+          "conclusionTitle": "Conclusione",
+          "criteriaComparisonTitle": "Confronto criteri ATS",
+          "criteriaComparisonSubtitle": "Confronto visivo tra profilo attuale e profilo adattato",
+          "criteriaColumn": "Criterio",
+          "currentColumn": "Profilo attuale",
+          "adaptedColumn": "Profilo adattato",
+          "resultColumn": "Risultato",
+          "resultPending": "In sospeso",
+          "resultTie": "Pareggio",
+          "resultAdapted": "Profilo adattato",
+          "resultCurrent": "Profilo attuale",
+          "checklistTitle": "Checklist ATS",
+          "changesTitle": "Modifiche effettuate",
+          "beforeLabel": "Prima",
+          "afterLabel": "Dopo",
+          "reasonLabel": "Motivo",
+          "showMore": "Mostra di più",
+          "showLess": "Mostra di meno",
+          "emptySummary": "Nessun riepilogo professionale",
+          "notDefined": "Non definito",
+          "viewOriginalCv": "Vedi CV originale",
+          "viewAdaptedCv": "Vedi CV adattato",
+          "exportComparison": "Esporta confronto",
+          "applyAdaptedVersion": "Applica versione adattata",
+          "applying": "Applicazione…",
+          "categories": {
+            "titleMatch": "Corrispondenza ruolo",
+            "dotnetSkills": "Competenze .NET",
+            "frontend": "Frontend",
+            "cloudDevops": "Cloud/DevOps",
+            "english": "Inglese",
+            "atsKeywords": "Parole chiave ATS"
+          },
+          "criteria": {
+            "titleMatch": "Corrispondenza ruolo",
+            "vacancyKeywords": "Parole chiave dell'offerta",
+            "requiredSkills": "Competenze tecniche obbligatorie",
+            "language": "Lingua",
+            "recentExperience": "Esperienza recente",
+            "measurableAchievements": "Risultati misurabili"
+          },
+          "insights": {
+            "targetVacancy": "Offerta target",
+            "topImprovement": "Miglioramento principale",
+            "professionalSummary": "Riepilogo professionale",
+            "integratedKeywords": "Parole chiave integrate",
+            "atsChecklist": "Checklist ATS",
+            "pending": "In sospeso"
+          },
+          "strengths": {
+            "completeTechnicalProfile": "Profilo tecnico molto completo",
+            "strongFrontend": "Forte nel frontend moderno",
+            "cloudDevops": "Esperienza cloud e DevOps",
+            "englishLevel": "Buon livello di inglese",
+            "clearSummary": "Riepilogo chiaro e mirato",
+            "alignedHeadline": "Ruolo allineato all'offerta",
+            "integratedKeywords": "Parole chiave tecniche ben integrate"
+          },
+          "opportunities": {
+            "misalignedHeadline": "Titolo poco allineato all'offerta",
+            "emptySummary": "Riepilogo professionale vuoto",
+            "unfocusedKeywords": "Parole chiave meno mirate al ruolo",
+            "noMeasurableAchievements": "Nessun risultato misurabile",
+            "addImpactMetrics": "Aggiungere metriche di impatto",
+            "quantifyResults": "Quantificare i risultati per progetto"
+          }
         }
       },
       "editor": {

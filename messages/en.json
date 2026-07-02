@@ -909,6 +909,27 @@
         "applyToProfile": "Apply to my profile",
         "applying": "Applying…"
       },
+      "atsCompliance": {
+        "title": "ATS compliance",
+        "sectionAria": "ATS compliance checklist",
+        "summary": "{met}/{total} criteria met",
+        "legacyMessage": "This version does not include ATS evaluation.",
+        "partialEvaluationBanner": "Partial evaluation — some criteria could not be analyzed.",
+        "minimumExperienceTooltip": "This filter is validated during the selection process, not when tailoring the CV.",
+        "status": {
+          "Met": "Met",
+          "Partial": "Partial",
+          "Missing": "Missing",
+          "NotApplicable": "N/A"
+        },
+        "gapType": {
+          "writingGap": "Improvable in CV",
+          "realGap": "Complete your profile"
+        }
+      },
+      "errors": {
+        "unprocessable": "AI could not generate a valid tailored profile. No version was created."
+      },
       "comparison": {
         "title": "Profile comparison",
         "subtitle": "Compare your original profile with the AI-tailored version for the selected job.",
@@ -938,6 +959,95 @@
           "headline": "Headline",
           "summary": "Summary",
           "contact": "Contact"
+        },
+        "dashboard": {
+          "subtitle": "Before vs after tailoring your CV to the job",
+          "targetVacancyLabel": "Target job:",
+          "targetVacancyFallback": "Target job not specified",
+          "estimatedScoreNote": "Alignment scores are estimated when the backend does not provide them.",
+          "currentBadge": "Current profile",
+          "adaptedBadge": "Adapted profile",
+          "estimatedAlignment": "Estimated alignment",
+          "noHeadline": "No headline",
+          "yearsExperience": "{years} years in full stack development",
+          "experienceSince": "Experience since {year}",
+          "englishLevel": "English {level}",
+          "profileByCategory": "Profile by category",
+          "topSkills": "Top skills",
+          "noSkills": "No skills listed",
+          "strengthsTitle": "Strengths",
+          "opportunitiesTitle": "Improvement opportunities",
+          "recentExperience": "Recent experience",
+          "noExperience": "No experience listed",
+          "noRole": "No role",
+          "adaptationSummaryTitle": "Adaptation summary",
+          "checklistProgress": "{met} criteria met out of {total}",
+          "conclusionTitle": "Conclusion",
+          "criteriaComparisonTitle": "ATS criteria comparison",
+          "criteriaComparisonSubtitle": "Visual comparison between current and adapted profile",
+          "criteriaColumn": "Criterion",
+          "currentColumn": "Current profile",
+          "adaptedColumn": "Adapted profile",
+          "resultColumn": "Result",
+          "resultPending": "Pending",
+          "resultTie": "Tie",
+          "resultAdapted": "Adapted profile",
+          "resultCurrent": "Current profile",
+          "checklistTitle": "ATS checklist",
+          "changesTitle": "Changes made",
+          "beforeLabel": "Before",
+          "afterLabel": "After",
+          "reasonLabel": "Reason",
+          "showMore": "Show more",
+          "showLess": "Show less",
+          "emptySummary": "No professional summary",
+          "notDefined": "Not defined",
+          "viewOriginalCv": "View original CV",
+          "viewAdaptedCv": "View adapted CV",
+          "exportComparison": "Export comparison",
+          "applyAdaptedVersion": "Apply adapted version",
+          "applying": "Applying…",
+          "categories": {
+            "titleMatch": "Role match",
+            "dotnetSkills": ".NET skills",
+            "frontend": "Frontend",
+            "cloudDevops": "Cloud/DevOps",
+            "english": "English",
+            "atsKeywords": "ATS keywords"
+          },
+          "criteria": {
+            "titleMatch": "Role match",
+            "vacancyKeywords": "Job keywords",
+            "requiredSkills": "Required technical skills",
+            "language": "Language",
+            "recentExperience": "Recent experience",
+            "measurableAchievements": "Measurable achievements"
+          },
+          "insights": {
+            "targetVacancy": "Target job",
+            "topImprovement": "Top improvement",
+            "professionalSummary": "Professional summary",
+            "integratedKeywords": "Integrated keywords",
+            "atsChecklist": "ATS checklist",
+            "pending": "Pending"
+          },
+          "strengths": {
+            "completeTechnicalProfile": "Very complete technical profile",
+            "strongFrontend": "Strong in modern frontend",
+            "cloudDevops": "Cloud and DevOps experience",
+            "englishLevel": "Good English level",
+            "clearSummary": "Clear and focused summary",
+            "alignedHeadline": "Role aligned to the job",
+            "integratedKeywords": "Well-integrated technical keywords"
+          },
+          "opportunities": {
+            "misalignedHeadline": "Headline not aligned to the job",
+            "emptySummary": "Empty professional summary",
+            "unfocusedKeywords": "Keywords less focused on the role",
+            "noMeasurableAchievements": "No measurable achievements shown",
+            "addImpactMetrics": "Add impact metrics",
+            "quantifyResults": "Quantify results per project"
+          }
         }
       },
       "editor": {

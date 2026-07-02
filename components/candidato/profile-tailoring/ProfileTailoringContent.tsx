@@ -194,213 +194,224 @@ export default function ProfileTailoringContent() {
         : "text-muted-foreground hover:bg-muted hover:text-foreground"
     }`
 
-  return (
-    <div className="flex min-h-screen bg-background">
-      <CandidateSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <CandidateTopbar />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div
-            className={`mx-auto flex flex-col gap-8 ${result && adaptedForm ? "max-w-[90rem]" : "max-w-6xl"}`}
+  const pageContent = (
+    <div
+      className={`mx-auto flex flex-col gap-8 ${result && adaptedForm ? "max-w-[90rem]" : "max-w-6xl"}`}
+    >
+      <PortalPageHeader
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <Link
+            href="/portal-candidato/mi-perfil/versiones"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
-            <PortalPageHeader
-              title={t("title")}
-              description={t("description")}
-              actions={
-                <Link
-                  href="/portal-candidato/mi-perfil/versiones"
-                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted"
-                >
-                  <History className="h-4 w-4" aria-hidden />
-                  {t("historyLink")}
-                </Link>
-              }
+            <History className="h-4 w-4" aria-hidden />
+            {t("historyLink")}
+          </Link>
+        }
+      />
+
+      <section className="rounded-2xl border border-border bg-card p-4 md:p-6">
+        <h2 className="font-sans text-base font-semibold text-foreground">
+          {t("vacancyInput.title")}
+        </h2>
+        <p className="mt-1 font-sans text-sm text-muted-foreground">
+          {t("vacancyInput.description")}
+        </p>
+
+        <div
+          className="mt-4 flex flex-col gap-2 sm:flex-row"
+          role="tablist"
+          aria-label={t("vacancyInput.tabsAria")}
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "file"}
+            className={tabButtonClass("file")}
+            onClick={() => handleTabRequest("file")}
+          >
+            <Upload className="h-4 w-4" aria-hidden />
+            {t("vacancyInput.tabs.file")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "text"}
+            className={tabButtonClass("text")}
+            onClick={() => handleTabRequest("text")}
+          >
+            <FileText className="h-4 w-4" aria-hidden />
+            {t("vacancyInput.tabs.text")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "platform"}
+            className={tabButtonClass("platform")}
+            onClick={() => handleTabRequest("platform")}
+          >
+            <Sparkles className="h-4 w-4" aria-hidden />
+            {t("vacancyInput.tabs.platform")}
+          </button>
+        </div>
+
+        <div className="mt-4" role="tabpanel">
+          {activeTab === "file" ? (
+            <DocumentsUploadZone
+              stagingOnly
+              maxFiles={1}
+              acceptedTypes={VACANCY_FILE_TYPES}
+              acceptedExtensions={VACANCY_FILE_EXTENSIONS}
+              accept=".pdf,.docx,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain"
+              helperText={t("vacancyInput.fileHelper")}
+              onFilesChange={(files) => setStagedFile(files[0] ?? null)}
             />
+          ) : null}
 
-            <section className="rounded-2xl border border-border bg-card p-4 md:p-6">
-              <h2 className="font-sans text-base font-semibold text-foreground">
-                {t("vacancyInput.title")}
-              </h2>
-              <p className="mt-1 font-sans text-sm text-muted-foreground">
-                {t("vacancyInput.description")}
+          {activeTab === "text" ? (
+            <div className="flex flex-col gap-2">
+              <label htmlFor="vacancy-text-input" className="font-sans text-sm font-medium">
+                {t("vacancyInput.textLabel")}
+              </label>
+              <textarea
+                id="vacancy-text-input"
+                value={vacancyText}
+                onChange={(e) => setVacancyText(e.target.value)}
+                rows={10}
+                maxLength={MAX_VACANCY_TEXT_LENGTH}
+                placeholder={t("vacancyInput.textPlaceholder")}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 font-sans text-sm text-foreground outline-none ring-vo-purple/30 focus:ring-2"
+              />
+              <p className="font-sans text-xs text-muted-foreground">
+                {t("vacancyInput.charCount", {
+                  count: vacancyText.length,
+                  max: MAX_VACANCY_TEXT_LENGTH,
+                })}
               </p>
+            </div>
+          ) : null}
 
-              <div
-                className="mt-4 flex flex-col gap-2 sm:flex-row"
-                role="tablist"
-                aria-label={t("vacancyInput.tabsAria")}
-              >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === "file"}
-                  className={tabButtonClass("file")}
-                  onClick={() => handleTabRequest("file")}
-                >
-                  <Upload className="h-4 w-4" aria-hidden />
-                  {t("vacancyInput.tabs.file")}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === "text"}
-                  className={tabButtonClass("text")}
-                  onClick={() => handleTabRequest("text")}
-                >
-                  <FileText className="h-4 w-4" aria-hidden />
-                  {t("vacancyInput.tabs.text")}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === "platform"}
-                  className={tabButtonClass("platform")}
-                  onClick={() => handleTabRequest("platform")}
-                >
-                  <Sparkles className="h-4 w-4" aria-hidden />
-                  {t("vacancyInput.tabs.platform")}
-                </button>
-              </div>
+          {activeTab === "platform" ? (
+            <VacancySystemPicker
+              selectedId={selectedVacancyId}
+              selectedTitle={selectedVacancyTitle}
+              onSelect={(vacancy) => {
+                setSelectedVacancyId(vacancy.id)
+                setSelectedVacancyTitle(vacancy.title)
+              }}
+              onClear={() => {
+                setSelectedVacancyId(null)
+                setSelectedVacancyTitle(null)
+              }}
+            />
+          ) : null}
+        </div>
 
-              <div className="mt-4" role="tabpanel">
-                {activeTab === "file" ? (
-                  <DocumentsUploadZone
-                    stagingOnly
-                    maxFiles={1}
-                    acceptedTypes={VACANCY_FILE_TYPES}
-                    acceptedExtensions={VACANCY_FILE_EXTENSIONS}
-                    accept=".pdf,.docx,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain"
-                    helperText={t("vacancyInput.fileHelper")}
-                    onFilesChange={(files) => setStagedFile(files[0] ?? null)}
-                  />
-                ) : null}
-
-                {activeTab === "text" ? (
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="vacancy-text-input" className="font-sans text-sm font-medium">
-                      {t("vacancyInput.textLabel")}
-                    </label>
-                    <textarea
-                      id="vacancy-text-input"
-                      value={vacancyText}
-                      onChange={(e) => setVacancyText(e.target.value)}
-                      rows={10}
-                      maxLength={MAX_VACANCY_TEXT_LENGTH}
-                      placeholder={t("vacancyInput.textPlaceholder")}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2.5 font-sans text-sm text-foreground outline-none ring-vo-purple/30 focus:ring-2"
-                    />
-                    <p className="font-sans text-xs text-muted-foreground">
-                      {t("vacancyInput.charCount", {
-                        count: vacancyText.length,
-                        max: MAX_VACANCY_TEXT_LENGTH,
-                      })}
-                    </p>
-                  </div>
-                ) : null}
-
-                {activeTab === "platform" ? (
-                  <VacancySystemPicker
-                    selectedId={selectedVacancyId}
-                    selectedTitle={selectedVacancyTitle}
-                    onSelect={(vacancy) => {
-                      setSelectedVacancyId(vacancy.id)
-                      setSelectedVacancyTitle(vacancy.title)
-                    }}
-                    onClear={() => {
-                      setSelectedVacancyId(null)
-                      setSelectedVacancyTitle(null)
-                    }}
-                  />
-                ) : null}
-              </div>
-
-              <div className="mt-6 flex flex-col gap-4 border-t border-border pt-6">
-                <div className="flex flex-wrap items-center gap-3">
-                  <AiDisclosureBadge label={t("aiBadge")} />
-                </div>
-                <Button
-                  type="button"
-                  onClick={() => void handleProcess()}
-                  disabled={!canProcess}
-                  className="w-full sm:w-auto"
-                  aria-busy={processing}
-                >
-                  {processing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                      {t("processLoading")}
-                    </>
-                  ) : (
-                    t("processForVacancy")
-                  )}
-                </Button>
-                {processing || processingComplete ? (
-                  <AiDisclosurePillProgress
-                    percent={null}
-                    profileTailoringStepLabels
-                    isCompleted={processingComplete}
-                    timeBasedTypicalMs={TAILORING_TYPICAL_MS}
-                  />
-                ) : null}
-                {validationMessage ? (
-                  <p className="font-sans text-sm text-destructive" role="alert">
-                    {validationMessage}
-                  </p>
-                ) : null}
-                {error ? (
-                  <p className="font-sans text-sm text-destructive" role="alert">
-                    {error}
-                  </p>
-                ) : null}
-              </div>
-            </section>
-
-            {result && adaptedForm && adaptedDisplayProfile ? (
-              <section className="flex flex-col gap-6">
-                <ProfileComparisonPanel
-                  currentProfile={result.currentProfile}
-                  adaptedProfile={adaptedDisplayProfile}
-                  adaptationSummary={result.adaptationSummary}
-                  changeHighlights={result.changeHighlights}
-                  estimatedMatchScore={result.estimatedMatchScore}
-                  vacancyTitle={result.vacancyTitle ?? selectedVacancyTitle}
-                />
-
-                <details className="rounded-2xl border border-border bg-card">
-                  <summary className="cursor-pointer list-none px-4 py-3 font-sans text-sm font-medium text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
-                    {t("comparison.editToggle")}
-                  </summary>
-                  <div className="border-t border-border p-4">
-                    <AdaptedProfileEditor
-                      form={adaptedForm}
-                      setForm={setAdaptedFormState}
-                      patch={patchAdaptedForm}
-                      saving={savingVersion}
-                    />
-                  </div>
-                </details>
-
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => void handleSaveVersion()}
-                    disabled={savingVersion}
-                    aria-busy={savingVersion}
-                  >
-                    {savingVersion ? t("actions.savingVersion") : t("actions.saveVersion")}
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => setShowApplyConfirm(true)}
-                    disabled={savingMainProfile}
-                  >
-                    {t("actions.applyToProfile")}
-                  </Button>
-                </div>
-              </section>
-            ) : null}
+        <div className="mt-6 flex flex-col gap-4 border-t border-border pt-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <AiDisclosureBadge label={t("aiBadge")} />
           </div>
+          <Button
+            type="button"
+            onClick={() => void handleProcess()}
+            disabled={!canProcess}
+            className="w-full sm:w-auto"
+            aria-busy={processing}
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                {t("processLoading")}
+              </>
+            ) : (
+              t("processForVacancy")
+            )}
+          </Button>
+          {processing || processingComplete ? (
+            <AiDisclosurePillProgress
+              percent={null}
+              profileTailoringStepLabels
+              isCompleted={processingComplete}
+              timeBasedTypicalMs={TAILORING_TYPICAL_MS}
+            />
+          ) : null}
+          {validationMessage ? (
+            <p className="font-sans text-sm text-destructive" role="alert">
+              {validationMessage}
+            </p>
+          ) : null}
+          {error ? (
+            <p className="font-sans text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </div>
+      </section>
+
+      {result && adaptedForm && adaptedDisplayProfile ? (
+        <section className="flex flex-col gap-6">
+          <ProfileComparisonPanel
+            currentProfile={result.currentProfile}
+            adaptedProfile={adaptedDisplayProfile}
+            adaptationSummary={result.adaptationSummary}
+            changeHighlights={result.changeHighlights}
+            estimatedMatchScore={result.estimatedMatchScore}
+            vacancyTitle={result.vacancyTitle ?? selectedVacancyTitle}
+            promptVersion={result.promptVersion}
+            atsComplianceChecklist={result.atsComplianceChecklist}
+            showActions
+            onApplyAdapted={() => setShowApplyConfirm(true)}
+            applying={savingMainProfile}
+          />
+
+          <details className="rounded-2xl border border-border bg-card">
+            <summary className="cursor-pointer list-none px-4 py-3 font-sans text-sm font-medium text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
+              {t("comparison.editToggle")}
+            </summary>
+            <div className="border-t border-border p-4">
+              <AdaptedProfileEditor
+                form={adaptedForm}
+                setForm={setAdaptedFormState}
+                patch={patchAdaptedForm}
+                saving={savingVersion}
+              />
+            </div>
+          </details>
+
+          <div className="flex flex-wrap gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void handleSaveVersion()}
+              disabled={savingVersion}
+              aria-busy={savingVersion}
+            >
+              {savingVersion ? t("actions.savingVersion") : t("actions.saveVersion")}
+            </Button>
+          </div>
+        </section>
+      ) : null}
+    </div>
+  )
+
+  return (
+    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
+      <div className="hidden h-full lg:flex">
+        <CandidateSidebar />
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <CandidateTopbar variant="desktop" breadcrumbLabel={t("title")} />
+          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="min-w-0 p-8">{pageContent}</div>
+          </main>
+        </div>
+      </div>
+
+      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
+        <CandidateTopbar variant="tablet" breadcrumbLabel={t("title")} />
+        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="min-w-0 p-4 md:p-6">{pageContent}</div>
         </main>
       </div>
 
