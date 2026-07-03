@@ -1002,6 +1002,14 @@
           "showLess": "Show less",
           "emptySummary": "No professional summary",
           "notDefined": "Not defined",
+          "changeFields": {
+            "headline": "Headline",
+            "summary": "Professional summary",
+            "skills": "Skills",
+            "jobPreferences": "Job preferences",
+            "workExperienceItem": "Work experience {index}",
+            "fallback": "Field"
+          },
           "viewOriginalCv": "View original CV",
           "viewAdaptedCv": "View adapted CV",
           "exportComparison": "Export comparison",

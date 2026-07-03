@@ -1002,6 +1002,14 @@
           "showLess": "Weniger anzeigen",
           "emptySummary": "Keine professionelle Zusammenfassung",
           "notDefined": "Nicht definiert",
+          "changeFields": {
+            "headline": "Titel",
+            "summary": "Berufliche Zusammenfassung",
+            "skills": "Fähigkeiten",
+            "jobPreferences": "Arbeitspräferenzen",
+            "workExperienceItem": "Berufserfahrung {index}",
+            "fallback": "Feld"
+          },
           "viewOriginalCv": "Original-CV anzeigen",
           "viewAdaptedCv": "Angepassten CV anzeigen",
           "exportComparison": "Vergleich exportieren",

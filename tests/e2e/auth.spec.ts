@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test"
 import { fillLoginForm, loginAsDemoUser } from "./helpers/auth"
+import { readE2EAuthState } from "./helpers/e2e-auth-state"
+
+const e2eAuth = readE2EAuthState()
 
 test.describe("@smoke Auth", () => {
   test("muestra el formulario de iniciar sesión", async ({ page }) => {
@@ -36,6 +39,7 @@ test.describe("@smoke Auth", () => {
   test("login demo completa sesión (selector o portal según rol)", async ({
     page,
   }) => {
+    test.skip(!e2eAuth.isAuthAvailable, e2eAuth.message)
     await loginAsDemoUser(page)
     const pathname = new URL(page.url()).pathname
     if (pathname.startsWith("/seleccion-portal")) {
@@ -43,6 +47,6 @@ test.describe("@smoke Auth", () => {
       await expect(page.getByTestId("portal-selector-rrhh")).toBeVisible()
       return
     }
-    await expect(page).toHaveURL(/\/portal-(rrhh|candidato)/)
+    await expect(page).toHaveURL(/\/portal-(rrhh|candidato|admin)/)
   })
 })

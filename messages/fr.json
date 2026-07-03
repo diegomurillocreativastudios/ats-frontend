@@ -1002,6 +1002,14 @@
           "showLess": "Voir moins",
           "emptySummary": "Sans résumé professionnel",
           "notDefined": "Non défini",
+          "changeFields": {
+            "headline": "Titre",
+            "summary": "Résumé professionnel",
+            "skills": "Compétences",
+            "jobPreferences": "Préférences professionnelles",
+            "workExperienceItem": "Expérience professionnelle {index}",
+            "fallback": "Champ"
+          },
           "viewOriginalCv": "Voir le CV original",
           "viewAdaptedCv": "Voir le CV adapté",
           "exportComparison": "Exporter la comparaison",

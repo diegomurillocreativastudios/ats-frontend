@@ -1,10 +1,14 @@
 import { test, expect } from "@playwright/test"
-import { loginAsDemoUser, openRRHHPortalFromSelector } from "./helpers/auth"
+import { loginAsDemoUser, openAdminPortalFromSelector } from "./helpers/auth"
+import { readE2EAuthState } from "./helpers/e2e-auth-state"
+
+const e2eAuth = readE2EAuthState()
 
 test.describe("Template Management E2E", () => {
   test.beforeEach(async ({ page }) => {
+    test.skip(!e2eAuth.isAuthAvailable, e2eAuth.message)
     await loginAsDemoUser(page)
-    await openRRHHPortalFromSelector(page)
+    await openAdminPortalFromSelector(page)
   })
 
   test("should allow a user to create and delete a Notification template", async ({

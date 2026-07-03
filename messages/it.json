@@ -1002,6 +1002,14 @@
           "showLess": "Mostra di meno",
           "emptySummary": "Nessun riepilogo professionale",
           "notDefined": "Non definito",
+          "changeFields": {
+            "headline": "Titolo",
+            "summary": "Riepilogo professionale",
+            "skills": "Competenze",
+            "jobPreferences": "Preferenze lavorative",
+            "workExperienceItem": "Esperienza lavorativa {index}",
+            "fallback": "Campo"
+          },
           "viewOriginalCv": "Vedi CV originale",
           "viewAdaptedCv": "Vedi CV adattato",
           "exportComparison": "Esporta confronto",

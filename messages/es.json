@@ -716,6 +716,14 @@
           "showLess": "Ver menos",
           "emptySummary": "Sin resumen profesional",
           "notDefined": "No definido",
+          "changeFields": {
+            "headline": "Titular",
+            "summary": "Resumen profesional",
+            "skills": "Habilidades",
+            "jobPreferences": "Preferencias laborales",
+            "workExperienceItem": "Experiencia laboral {index}",
+            "fallback": "Campo"
+          },
           "viewOriginalCv": "Ver CV original",
           "viewAdaptedCv": "Ver CV adaptado",
           "exportComparison": "Exportar comparación",

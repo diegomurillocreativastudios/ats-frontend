@@ -6,10 +6,12 @@ import {
   buildComparisonCriteria,
   formatCandidateName,
   formatChangeDisplayValue,
+  formatChangeFieldName,
   getChecklistSummary,
   getProfileScoreEstimate,
   getTopSkillsForProfile,
   resolveVacancyDisplayTitle,
+  type ChangeDisplayLabels,
 } from "@/lib/profile-comparison-helpers"
 
 const sampleProfile: CandidateProfile = {
@@ -40,6 +42,22 @@ const adaptedProfile: CandidateProfile = {
   summary: "Desarrollador Full Stack con experiencia en C# y ASP.NET Core.",
   skills: ["C#", "ASP.NET Core", "Entity Framework", "React.js", "SQL Server", "AWS"],
   jobPreferences: { DesiredRole: "Desarrollador Full Stack .NET" },
+}
+
+const displayLabels: ChangeDisplayLabels = {
+  emptySummary: "Sin resumen",
+  notDefined: "No definido",
+  yes: "Sí",
+  no: "No",
+  jobPreferenceFields: {
+    sectors: "Sectores",
+    desiredRole: "Rol deseado",
+    minSalary: "Salario mínimo",
+    educationLevel: "Nivel educativo",
+    desiredCity: "Ciudad deseada",
+    availability: "Disponibilidad",
+    disability: "Discapacidad",
+  },
 }
 
 const changeHighlights = [
@@ -129,9 +147,23 @@ describe("getChecklistSummary", () => {
 
 describe("formatChangeDisplayValue", () => {
   it("maps empty summary to placeholder", () => {
-    expect(formatChangeDisplayValue("", "Summary", "Sin resumen", "No definido")).toBe(
-      "Sin resumen"
+    expect(formatChangeDisplayValue("", "Summary", displayLabels)).toBe("Sin resumen")
+  })
+
+  it("formats job preferences JSON as readable text", () => {
+    const raw =
+      '{"Sectors":[],"DesiredRole":"Desarrollador Full Stack .NET","MinSalary":"","EducationLevel":"","DesiredCity":"","Availability":"","Disability":false}'
+    expect(formatChangeDisplayValue(raw, "JobPreferences", displayLabels)).toBe(
+      "Rol deseado: Desarrollador Full Stack .NET\nDiscapacidad: No"
     )
+  })
+})
+
+describe("formatChangeFieldName", () => {
+  it("maps technical field names to readable labels", () => {
+    expect(formatChangeFieldName("JobPreferences")).toBe("Preferencias laborales")
+    expect(formatChangeFieldName("WorkExperience[0]")).toBe("Experiencia laboral 1")
+    expect(formatChangeFieldName("Headline")).toBe("Titular")
   })
 })
 
