@@ -30,6 +30,10 @@ vi.mock("@/lib/api/identity-document-types", () => ({
   listIdentityDocumentTypes: vi.fn(async () => []),
 }))
 
+vi.mock("@/hooks/useCurrentUser", () => ({
+  useCurrentUser: () => ({ user: null, loading: false }),
+}))
+
 const messagesByLocale: Record<Locale, Record<string, unknown>> = {
   es: esMessages,
   en: enMessages,
@@ -120,6 +124,36 @@ describe("AgregarCandidatoModal i18n (Etapa 5C)", () => {
     )
     expect(await screen.findByText("Complete information")).toBeInTheDocument()
     expect(screen.getByText("Cancel")).toBeInTheDocument()
+  })
+
+  it("oculta tipo y documento de identidad en la variante recruiter", async () => {
+    renderWithIntl(
+      <AgregarCandidatoModal variant="recruiter" isOpen onClose={vi.fn()} />,
+      "es",
+    )
+    expect(await screen.findByText("Agregar candidato")).toBeInTheDocument()
+    expect(
+      screen.queryByText("Tipo de documento de identidad"),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText("Documento de identidad")).not.toBeInTheDocument()
+    expect(
+      screen.getByText("Solo archivos PDF hasta 10 MB"),
+    ).toBeInTheDocument()
+  })
+
+  it("muestra tipo y documento de identidad en la variante self", async () => {
+    renderWithIntl(
+      <AgregarCandidatoModal variant="self" isOpen onClose={vi.fn()} />,
+      "es",
+    )
+    expect(await screen.findByText("Completar información")).toBeInTheDocument()
+    expect(
+      screen.getByText("Tipo de documento de identidad"),
+    ).toBeInTheDocument()
+    expect(screen.getByText("Documento de identidad")).toBeInTheDocument()
+    expect(
+      screen.getByText("PDF, DOCX o TXT hasta 10 MB"),
+    ).toBeInTheDocument()
   })
 })
 

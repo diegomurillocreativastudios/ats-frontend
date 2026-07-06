@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, Sparkles } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import SingleFileUploadZone from "@/components/candidato/SingleFileUploadZone";
+import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone";
 import {
   AiDisclosureBadge,
   AiDisclosurePillProgress,
@@ -16,6 +17,8 @@ import {
 } from "@/lib/api/identity-document-types";
 import { apiClient } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { canStaffBulkPdfCvUpload } from "@/lib/roles";
 
 const CV_ACCEPTED_TYPES = [
   "application/pdf",
@@ -27,6 +30,10 @@ const CV_ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".doc", ".txt"];
 const CV_ACCEPT_ATTR =
   ".pdf,.docx,.doc,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain";
 
+const STAFF_CV_ACCEPTED_TYPES = ["application/pdf"];
+const STAFF_CV_ACCEPTED_EXTENSIONS = [".pdf"];
+const STAFF_CV_ACCEPT_ATTR = "application/pdf,.pdf";
+
 const IDENTITY_DOC_ACCEPTED_TYPES = ["application/pdf"];
 const IDENTITY_DOC_ACCEPTED_EXTENSIONS = [".pdf"];
 const IDENTITY_DOC_ACCEPT_ATTR = "application/pdf,.pdf";
@@ -37,7 +44,19 @@ interface AiBarState {
   active: boolean;
   cycleKey: string | null;
   isCompleted: boolean;
+  currentFileName: string | null;
+  batchIndex: number;
+  batchTotal: number;
 }
+
+const initialAiProcessingBar = (): AiBarState => ({
+  active: false,
+  cycleKey: null,
+  isCompleted: false,
+  currentFileName: null,
+  batchIndex: 0,
+  batchTotal: 0,
+});
 
 const createIngestCycleKey = (): string => {
   if (
@@ -67,6 +86,12 @@ export default function AgregarCandidatoModal({
   onSnackbar,
   variant = "recruiter",
 }: AgregarCandidatoModalProps) {
+  const { user } = useCurrentUser();
+  const allowsStaffCvUpload = canStaffBulkPdfCvUpload({
+    variant,
+    role: user?.role,
+  });
+  const requiresIdentityDocuments = !allowsStaffCvUpload;
   const t = useTranslations("CandidatePortal.documents.modal");
   const copy = {
     title: t(`${variant}.title`),
@@ -97,6 +122,7 @@ export default function AgregarCandidatoModal({
     },
   ];
   const [cvFile, setCvFile] = useState<File | null>(null);
+  const [cvFiles, setCvFiles] = useState<File[]>([]);
   const [identityFile, setIdentityFile] = useState<File | null>(null);
   const [identityDocumentTypeId, setIdentityDocumentTypeId] = useState("");
   const [identityDocumentTypes, setIdentityDocumentTypes] = useState<
@@ -108,18 +134,33 @@ export default function AgregarCandidatoModal({
   );
   const [isSubmittingCandidate, setIsSubmittingCandidate] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [aiProcessingBar, setAiProcessingBar] = useState<AiBarState>({
-    active: false,
-    cycleKey: null,
-    isCompleted: false,
-  });
+  const [aiProcessingBar, setAiProcessingBar] = useState<AiBarState>(
+    initialAiProcessingBar
+  );
+  const processingPanelRef = useRef<HTMLDivElement>(null);
+
+  const scrollToProcessingPanel = useCallback(() => {
+    const node = processingPanelRef.current;
+    if (!node) return;
+
+    const behavior =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth";
+
+    window.requestAnimationFrame(() => {
+      node.scrollIntoView({ behavior, block: "end" });
+    });
+  }, []);
 
   const resetUploadForm = useCallback(() => {
     setCvFile(null);
+    setCvFiles([]);
     setIdentityFile(null);
     setIdentityDocumentTypeId("");
     setSubmitError(null);
-    setAiProcessingBar({ active: false, cycleKey: null, isCompleted: false });
+    setAiProcessingBar(initialAiProcessingBar());
   }, []);
 
   const handleCloseModal = () => {
@@ -145,55 +186,107 @@ export default function AgregarCandidatoModal({
   }, [t]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !requiresIdentityDocuments) return;
     void fetchIdentityDocumentTypes();
-  }, [isOpen, fetchIdentityDocumentTypes]);
+  }, [isOpen, requiresIdentityDocuments, fetchIdentityDocumentTypes]);
+
+  useEffect(() => {
+    if (!aiProcessingBar.active || !aiProcessingBar.cycleKey) return;
+    scrollToProcessingPanel();
+  }, [
+    aiProcessingBar.active,
+    aiProcessingBar.cycleKey,
+    aiProcessingBar.batchIndex,
+    scrollToProcessingPanel,
+  ]);
+
+  const hasCvSelected = allowsStaffCvUpload
+    ? cvFiles.length > 0
+    : Boolean(cvFile);
 
   const isSubmitDisabled =
     isSubmittingCandidate ||
-    !cvFile ||
-    !identityFile ||
-    !identityDocumentTypeId.trim();
+    !hasCvSelected ||
+    (requiresIdentityDocuments &&
+      (!identityFile || !identityDocumentTypeId.trim()));
 
   const handleCreateCandidate = async () => {
     if (isSubmittingCandidate) return;
 
-    if (!cvFile) {
+    const filesToProcess = allowsStaffCvUpload
+      ? cvFiles
+      : cvFile
+        ? [cvFile]
+        : [];
+
+    if (filesToProcess.length === 0) {
       setSubmitError(copy.cvRequiredError);
       return;
     }
-    if (!identityDocumentTypeId.trim()) {
-      setSubmitError(t("documentTypeRequired"));
-      return;
-    }
-    if (!identityFile) {
-      setSubmitError(t("identityRequired"));
-      return;
+    if (requiresIdentityDocuments) {
+      if (!identityDocumentTypeId.trim()) {
+        setSubmitError(t("documentTypeRequired"));
+        return;
+      }
+      if (!identityFile) {
+        setSubmitError(t("identityRequired"));
+        return;
+      }
     }
 
     setSubmitError(null);
-    const cycleKey = createIngestCycleKey();
-    setAiProcessingBar({ active: true, cycleKey, isCompleted: false });
     setIsSubmittingCandidate(true);
 
-    const formData = new FormData();
-    formData.append("CvFile", cvFile);
-    formData.append("IdentityDocumentFile", identityFile);
-    formData.append("IdentityDocumentTypeId", identityDocumentTypeId.trim());
-    formData.append("EntityType", "Candidate");
-
     try {
-      await apiClient.postFormData("/Ingest/upload", formData);
+      for (let index = 0; index < filesToProcess.length; index++) {
+        const file = filesToProcess[index];
+        const cycleKey = createIngestCycleKey();
+        setAiProcessingBar({
+          active: true,
+          cycleKey,
+          isCompleted: false,
+          currentFileName: file.name,
+          batchIndex: index + 1,
+          batchTotal: filesToProcess.length,
+        });
 
-      setAiProcessingBar({ active: true, cycleKey, isCompleted: true });
-      await new Promise((resolve) =>
-        setTimeout(resolve, AI_INGEST_COMPLETED_HOLD_MS)
-      );
+        const formData = new FormData();
+        formData.append("CvFile", file);
+        if (requiresIdentityDocuments && identityFile) {
+          formData.append("IdentityDocumentFile", identityFile);
+          formData.append(
+            "IdentityDocumentTypeId",
+            identityDocumentTypeId.trim()
+          );
+        }
+        formData.append("EntityType", "Candidate");
+
+        await apiClient.postFormData("/Ingest/upload", formData);
+
+        const isLastFile = index === filesToProcess.length - 1;
+        if (isLastFile) {
+          setAiProcessingBar({
+            active: true,
+            cycleKey,
+            isCompleted: true,
+            currentFileName: file.name,
+            batchIndex: index + 1,
+            batchTotal: filesToProcess.length,
+          });
+          await new Promise((resolve) =>
+            setTimeout(resolve, AI_INGEST_COMPLETED_HOLD_MS)
+          );
+        }
+      }
 
       onSuccess?.();
       onClose();
       resetUploadForm();
-      onSnackbar?.(copy.successMessage, "success");
+      const successMessage =
+        allowsStaffCvUpload && filesToProcess.length > 1
+          ? t("recruiter.successMany", { count: filesToProcess.length })
+          : copy.successMessage;
+      onSnackbar?.(successMessage, "success");
     } catch (err: unknown) {
       const message =
         getApiErrorMessage(err) ||
@@ -201,7 +294,7 @@ export default function AgregarCandidatoModal({
           ? t("processErrorSelf")
           : t("processErrorRecruiter"));
       setSubmitError(message);
-      setAiProcessingBar({ active: false, cycleKey: null, isCompleted: false });
+      setAiProcessingBar(initialAiProcessingBar());
       onSnackbar?.(`${copy.errorPrefix}: ${message}`, "error");
     } finally {
       setIsSubmittingCandidate(false);
@@ -212,6 +305,24 @@ export default function AgregarCandidatoModal({
     () => identityDocumentTypes,
     [identityDocumentTypes]
   );
+
+  const externalProcessingIndex =
+    aiProcessingBar.active && !aiProcessingBar.isCompleted
+      ? aiProcessingBar.batchIndex - 1
+      : null;
+
+  const processingStatusLabel =
+    aiProcessingBar.currentFileName && aiProcessingBar.batchTotal > 1
+      ? t("processingCurrentCvBatch", {
+          fileName: aiProcessingBar.currentFileName,
+          current: aiProcessingBar.batchIndex,
+          total: aiProcessingBar.batchTotal,
+        })
+      : aiProcessingBar.currentFileName
+        ? t("processingCurrentCvSingle", {
+            fileName: aiProcessingBar.currentFileName,
+          })
+        : null;
 
   return (
     <Modal
@@ -261,14 +372,6 @@ export default function AgregarCandidatoModal({
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-2 rounded-lg border border-vo-purple/20 bg-vo-purple/5 p-3">
           <AiDisclosureBadge />
-          {aiProcessingBar.active && aiProcessingBar.cycleKey ? (
-            <AiDisclosurePillProgress
-              key={aiProcessingBar.cycleKey}
-              percent={null}
-              isCompleted={aiProcessingBar.isCompleted}
-              ingestStepLabels
-            />
-          ) : null}
           <p className="font-sans text-sm text-foreground">
             {t("aiIntro")}
           </p>
@@ -309,138 +412,182 @@ export default function AgregarCandidatoModal({
                 {copy.cvDescription}
               </p>
           </div>
-          <SingleFileUploadZone
-            file={cvFile}
-            onFileChange={setCvFile}
-            acceptedTypes={CV_ACCEPTED_TYPES}
-            acceptedExtensions={CV_ACCEPTED_EXTENSIONS}
-            accept={CV_ACCEPT_ATTR}
-            primaryText={t("cvPrimaryText")}
-            helperText={t("cvHelperText")}
-            ariaLabel={t("cvAria")}
-            typeErrorMessage={t("cvTypeError")}
-            disabled={isSubmittingCandidate}
-            inputId="candidato-cv-input"
-          />
+          {!allowsStaffCvUpload ? (
+            <SingleFileUploadZone
+              file={cvFile}
+              onFileChange={setCvFile}
+              acceptedTypes={CV_ACCEPTED_TYPES}
+              acceptedExtensions={CV_ACCEPTED_EXTENSIONS}
+              accept={CV_ACCEPT_ATTR}
+              primaryText={t("cvPrimaryText")}
+              helperText={t("cvHelperText")}
+              ariaLabel={t("cvAria")}
+              typeErrorMessage={t("cvTypeError")}
+              disabled={isSubmittingCandidate}
+              inputId="candidato-cv-input"
+            />
+          ) : (
+            <DocumentsUploadZone
+              acceptedTypes={STAFF_CV_ACCEPTED_TYPES}
+              acceptedExtensions={STAFF_CV_ACCEPTED_EXTENSIONS}
+              accept={STAFF_CV_ACCEPT_ATTR}
+              helperText={t("cvHelperTextPdfOnly")}
+              stagingOnly
+              processAllAcceptedFiles
+              onFilesChange={setCvFiles}
+              externalProcessingIndex={externalProcessingIndex}
+            />
+          )}
         </section>
 
-        <section
-          className="flex flex-col gap-2"
-          aria-labelledby="candidato-document-type-heading"
-        >
-          <div className="flex flex-col gap-1">
-            <h3
-              id="candidato-document-type-heading"
-              className="font-sans text-sm font-semibold text-foreground"
+        {requiresIdentityDocuments ? (
+          <>
+            <section
+              className="flex flex-col gap-2"
+              aria-labelledby="candidato-document-type-heading"
             >
-              {t("documentTypeHeading")}
-              <span className="text-vo-pink ml-1" aria-hidden>
-                *
-              </span>
-            </h3>
-            <p className="font-sans text-xs text-muted-foreground">
-              {t("documentTypeDescription")}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2">
-            <select
-              id="candidato-document-type-select"
-              aria-label={t("documentTypeAria")}
-              value={identityDocumentTypeId}
-              onChange={(event) =>
-                setIdentityDocumentTypeId(event.target.value)
-              }
-              disabled={
-                isSubmittingCandidate ||
-                isLoadingDocumentTypes ||
-                Boolean(documentTypesError) ||
-                documentTypeSelectOptions.length === 0
-              }
-              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <option value="">
-                {isLoadingDocumentTypes
-                  ? t("selectLoading")
-                  : documentTypesError
-                    ? t("selectLoadError")
-                    : documentTypeSelectOptions.length === 0
-                      ? t("selectEmpty")
-                      : t("selectPlaceholder")}
-              </option>
-              {documentTypeSelectOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
-            {isLoadingDocumentTypes ? (
-              <p
-                className="flex items-center gap-2 font-sans text-xs text-muted-foreground"
-                aria-live="polite"
-              >
-                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                {t("selectLoading")}
-              </p>
-            ) : null}
-            {documentTypesError ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <p
-                  className="font-sans text-xs text-destructive"
-                  role="alert"
+              <div className="flex flex-col gap-1">
+                <h3
+                  id="candidato-document-type-heading"
+                  className="font-sans text-sm font-semibold text-foreground"
                 >
-                  {documentTypesError}
+                  {t("documentTypeHeading")}
+                  <span className="text-vo-pink ml-1" aria-hidden>
+                    *
+                  </span>
+                </h3>
+                <p className="font-sans text-xs text-muted-foreground">
+                  {t("documentTypeDescription")}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => void fetchIdentityDocumentTypes()}
-                  className="font-sans text-xs font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                >
-                  {t("retry")}
-                </button>
               </div>
-            ) : null}
-            {!isLoadingDocumentTypes &&
-            !documentTypesError &&
-            documentTypeSelectOptions.length === 0 ? (
-              <p className="font-sans text-xs text-muted-foreground">
-                {t("noTypesConfigured")}
+              <div className="flex flex-col gap-2">
+                <select
+                  id="candidato-document-type-select"
+                  aria-label={t("documentTypeAria")}
+                  value={identityDocumentTypeId}
+                  onChange={(event) =>
+                    setIdentityDocumentTypeId(event.target.value)
+                  }
+                  disabled={
+                    isSubmittingCandidate ||
+                    isLoadingDocumentTypes ||
+                    Boolean(documentTypesError) ||
+                    documentTypeSelectOptions.length === 0
+                  }
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <option value="">
+                    {isLoadingDocumentTypes
+                      ? t("selectLoading")
+                      : documentTypesError
+                        ? t("selectLoadError")
+                        : documentTypeSelectOptions.length === 0
+                          ? t("selectEmpty")
+                          : t("selectPlaceholder")}
+                  </option>
+                  {documentTypeSelectOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+                {isLoadingDocumentTypes ? (
+                  <p
+                    className="flex items-center gap-2 font-sans text-xs text-muted-foreground"
+                    aria-live="polite"
+                  >
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                    {t("selectLoading")}
+                  </p>
+                ) : null}
+                {documentTypesError ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p
+                      className="font-sans text-xs text-destructive"
+                      role="alert"
+                    >
+                      {documentTypesError}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => void fetchIdentityDocumentTypes()}
+                      className="font-sans text-xs font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                    >
+                      {t("retry")}
+                    </button>
+                  </div>
+                ) : null}
+                {!isLoadingDocumentTypes &&
+                !documentTypesError &&
+                documentTypeSelectOptions.length === 0 ? (
+                  <p className="font-sans text-xs text-muted-foreground">
+                    {t("noTypesConfigured")}
+                  </p>
+                ) : null}
+              </div>
+            </section>
+
+            <section
+              className="flex flex-col gap-2"
+              aria-labelledby="candidato-identity-heading"
+            >
+              <div className="flex flex-col gap-1">
+                <h3
+                  id="candidato-identity-heading"
+                  className="font-sans text-sm font-semibold text-foreground"
+                >
+                  {t("identityHeading")}
+                  <span className="text-vo-pink ml-1" aria-hidden>
+                    *
+                  </span>
+                </h3>
+                <p className="font-sans text-xs text-muted-foreground">
+                  {t("identityDescription")}
+                </p>
+              </div>
+              <SingleFileUploadZone
+                file={identityFile}
+                onFileChange={setIdentityFile}
+                acceptedTypes={IDENTITY_DOC_ACCEPTED_TYPES}
+                acceptedExtensions={IDENTITY_DOC_ACCEPTED_EXTENSIONS}
+                accept={IDENTITY_DOC_ACCEPT_ATTR}
+                primaryText={t("identityPrimaryText")}
+                helperText={t("identityHelperText")}
+                ariaLabel={t("identityAria")}
+                typeErrorMessage={t("identityTypeError")}
+                disabled={isSubmittingCandidate}
+                inputId="candidato-identity-input"
+              />
+            </section>
+          </>
+        ) : null}
+
+        {aiProcessingBar.active && aiProcessingBar.cycleKey ? (
+          <div
+            ref={processingPanelRef}
+            className="flex flex-col gap-2 rounded-lg border border-vo-purple/20 bg-vo-purple/5 p-3 scroll-mt-4"
+            role="status"
+            aria-live="polite"
+            aria-label={t("processingPanelAria")}
+          >
+            <AiDisclosureBadge />
+            <AiDisclosurePillProgress
+              key={aiProcessingBar.cycleKey}
+              percent={null}
+              isCompleted={aiProcessingBar.isCompleted}
+              ingestStepLabels
+              className="mt-0!"
+            />
+            {processingStatusLabel ? (
+              <p className="font-sans text-sm font-medium text-foreground">
+                {processingStatusLabel}
               </p>
             ) : null}
-          </div>
-        </section>
-
-        <section
-          className="flex flex-col gap-2"
-          aria-labelledby="candidato-identity-heading"
-        >
-          <div className="flex flex-col gap-1">
-            <h3
-              id="candidato-identity-heading"
-              className="font-sans text-sm font-semibold text-foreground"
-            >
-              {t("identityHeading")}
-              <span className="text-vo-pink ml-1" aria-hidden>
-                *
-              </span>
-            </h3>
             <p className="font-sans text-xs text-muted-foreground">
-              {t("identityDescription")}
+              {copy.aiValidationNote}
             </p>
           </div>
-          <SingleFileUploadZone
-            file={identityFile}
-            onFileChange={setIdentityFile}
-            acceptedTypes={IDENTITY_DOC_ACCEPTED_TYPES}
-            acceptedExtensions={IDENTITY_DOC_ACCEPTED_EXTENSIONS}
-            accept={IDENTITY_DOC_ACCEPT_ATTR}
-            primaryText={t("identityPrimaryText")}
-            helperText={t("identityHelperText")}
-            ariaLabel={t("identityAria")}
-            typeErrorMessage={t("identityTypeError")}
-            disabled={isSubmittingCandidate}
-            inputId="candidato-identity-input"
-          />
-        </section>
+        ) : null}
       </div>
     </Modal>
   );

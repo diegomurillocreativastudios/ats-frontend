@@ -59,6 +59,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth/registrarse", request.url))
   }
 
+  if (pathname === "/mi-perfil" || pathname.startsWith("/mi-perfil/")) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace(/^\/mi-perfil/, `${CANDIDATE_HOME}/mi-perfil`)
+    return NextResponse.redirect(url)
+  }
+
   const isAuthPage =
     pathname === "/auth/iniciar-sesion" ||
     pathname === "/auth/registrarse" ||
@@ -103,9 +109,6 @@ export function proxy(request: NextRequest) {
     pathname === CANDIDATE_HOME || pathname.startsWith(`${CANDIDATE_HOME}/`)
   const isPortalRecruiterRoute =
     pathname === RECRUITER_HOME || pathname.startsWith(`${RECRUITER_HOME}/`)
-  const isMiPerfilRoute =
-    pathname === "/mi-perfil" || pathname.startsWith("/mi-perfil/")
-
   if (isPortalCandidateRoute && role === "recruiter") {
     const url = request.nextUrl.clone()
     url.pathname = RECRUITER_HOME
@@ -116,13 +119,6 @@ export function proxy(request: NextRequest) {
   if (isPortalRecruiterRoute && role === "candidate") {
     const url = request.nextUrl.clone()
     url.pathname = CANDIDATE_HOME
-    url.search = ""
-    return NextResponse.redirect(url)
-  }
-
-  if (isMiPerfilRoute && role === "recruiter") {
-    const url = request.nextUrl.clone()
-    url.pathname = RECRUITER_HOME
     url.search = ""
     return NextResponse.redirect(url)
   }

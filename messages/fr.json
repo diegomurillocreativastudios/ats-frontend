@@ -49,7 +49,8 @@
     "companies": "Entreprises",
     "departments": "Départements",
     "modalities": "Modalités",
-    "documentTypes": "Types de document"
+    "documentTypes": "Types de document",
+    "tailorProfile": "Adapter mon profil"
   },
   "Topbar": {
     "portalCandidate": "Portail candidat",
@@ -296,6 +297,14 @@
       "interviews": {
         "title": "ApplicanTree | Portal Candidate | Interviews",
         "description": "View tus interviews agendadas e historial en el portal del candidate"
+      },
+      "profileTailoring": {
+        "title": "ApplicanTree | Portail candidat | Adapter le profil",
+        "description": "Adaptez votre profil professionnel à une offre avec l'assistance de l'IA"
+      },
+      "profileVersions": {
+        "title": "ApplicanTree | Mon profil | Versions",
+        "description": "Historique des versions de profil générées lors de l'adaptation aux offres"
       }
     },
     "recruiterPortal": {
@@ -489,6 +498,9 @@
       "modal": {
         "cancel": "Annuler",
         "processing": "Traitement...",
+        "processingPanelAria": "État du traitement par IA",
+        "processingCurrentCvSingle": "Traitement : {fileName}",
+        "processingCurrentCvBatch": "Traitement du CV {current} sur {total} : {fileName}",
         "documentTypeRequired": "Vous devez sélectionner le type de document.",
         "identityRequired": "Vous devez téléverser la pièce d'identité.",
         "documentTypesLoadError": "Les types de document n'ont pas pu être chargés.",
@@ -509,8 +521,10 @@
         "identityDescription": "Téléversez la pièce d'identité du candidat au format PDF.",
         "cvPrimaryText": "Glissez le CV ici ou cliquez pour téléverser",
         "cvHelperText": "PDF, DOCX ou TXT jusqu'à 10 Mo",
+        "cvHelperTextPdfOnly": "Fichiers PDF uniquement, jusqu'à 10 Mo",
         "cvAria": "Glissez le CV ou cliquez pour téléverser",
         "cvTypeError": "Type non autorisé. Uniquement PDF, DOCX ou TXT.",
+        "cvTypeErrorPdfOnly": "Type non autorisé. Fichiers PDF uniquement.",
         "identityPrimaryText": "Glissez le document ici ou cliquez pour téléverser",
         "identityHelperText": "Fichiers PDF uniquement, jusqu'à 10 Mo",
         "identityAria": "Glissez la pièce d'identité ou cliquez pour téléverser",
@@ -544,8 +558,9 @@
         },
         "recruiter": {
           "title": "Ajouter un candidat",
-          "submit": "Créer le candidat",
+          "submit": "Traiter",
           "success": "Candidat créé et traité avec succès.",
+          "successMany": "{count} candidats traités avec succès.",
           "errorPrefix": "Erreur lors de la création du candidat",
           "cvRequired": "Vous devez téléverser le CV du candidat.",
           "cvHeading": "CV du candidat",
@@ -606,6 +621,8 @@
         "downloadCvAria": "Télécharger votre dernier CV téléversé",
         "manageDocuments": "Gérer les documents",
         "manageDocumentsAria": "Aller aux documents pour gérer les fichiers",
+        "viewVersions": "Voir les versions du profil",
+        "viewVersionsAria": "Aller à l'historique des versions de votre profil",
         "cancel": "Annuler",
         "cancelAria": "Annuler la modification sans enregistrer",
         "save": "Enregistrer les modifications",
@@ -836,6 +853,259 @@
       "fallbacks": {
         "dash": "—",
         "linkPlatform": "Lien"
+      }
+    },
+    "profileTailoring": {
+      "title": "Adapter mon profil",
+      "description": "Enter a job posting, process your profile with AI, and compare the result with your current profile before saving.",
+      "historyLink": "View version history",
+      "aiBadge": "Asistido por IA",
+      "processForVacancy": "Process my profile for this job",
+      "processLoading": "Processing…",
+      "vacancyInput": {
+        "title": "Target job",
+        "description": "Choose one source: file, pasted text, or a job published on the platform.",
+        "tabsAria": "Fuente de la vacante",
+        "tabs": {
+          "file": "File",
+          "text": "Text",
+          "platform": "System job"
+        },
+        "fileHelper": "PDF, DOCX or MD up to 10 MB",
+        "textLabel": "Job description",
+        "textPlaceholder": "Paste the job content here…",
+        "charCount": "{count} / {max} characters"
+      },
+      "validation": {
+        "none": "Select a job source to continue.",
+        "multiple": "You can only use one source at a time (file, text, or system job).",
+        "empty_text": "Job text cannot be empty.",
+        "text_too_long": "Text exceeds the allowed limit.",
+        "missing_vacancy": "Select a system job.",
+        "generic": "Check the job source and try again."
+      },
+      "tabConfirm": {
+        "title": "Change job source",
+        "message": "You have content in another tab. If you continue, that draft will be discarded.",
+        "cancel": "Cancel",
+        "confirm": "Continue"
+      },
+      "applyConfirm": {
+        "title": "Apply to main profile",
+        "message": "Adapted profile changes will replace your main profile. Continue?",
+        "cancel": "Cancel",
+        "confirm": "Apply to my profile"
+      },
+      "toasts": {
+        "processSuccess": "Profile processed. Review the comparison and save if needed.",
+        "versionSaved": "Version saved successfully.",
+        "versionSaveError": "Could not save the version.",
+        "applySuccess": "Your main profile was updated.",
+        "applyError": "Could not update your main profile."
+      },
+      "actions": {
+        "saveVersion": "Save to this version",
+        "savingVersion": "Saving version…",
+        "applyToProfile": "Apply to my profile",
+        "applying": "Applying…"
+      },
+      "atsCompliance": {
+        "title": "Conformité ATS",
+        "sectionAria": "Liste de contrôle de conformité ATS",
+        "summary": "{met}/{total} critères respectés",
+        "legacyMessage": "Cette version n'inclut pas d'évaluation ATS.",
+        "partialEvaluationBanner": "Évaluation partielle — certains critères n'ont pas pu être analysés.",
+        "minimumExperienceTooltip": "Ce filtre est validé lors du processus de sélection, pas lors de l'adaptation du CV.",
+        "status": {
+          "Met": "Conforme",
+          "Partial": "Partiel",
+          "Missing": "Non conforme",
+          "NotApplicable": "N/A"
+        },
+        "gapType": {
+          "writingGap": "Améliorable dans le CV",
+          "realGap": "Compléter votre profil"
+        }
+      },
+      "errors": {
+        "unprocessable": "L'IA n'a pas pu générer un profil adapté valide. Aucune version n'a été créée."
+      },
+      "comparison": {
+        "title": "Comparaison de profil",
+        "subtitle": "Comparez votre profil d'origine avec la version adaptée par l'IA pour le poste sélectionné.",
+        "vacancyContext": "Poste : {title}",
+        "vacancyLabel": "Poste",
+        "scoreLabel": "Adéquation estimée",
+        "estimatedScore": "{score}",
+        "summaryTitle": "Résumé de l'adaptation",
+        "highlightsTitle": "Modifications mises en avant",
+        "currentTitle": "Profil initial",
+        "adaptedTitle": "Profil adapté au poste",
+        "initialBadge": "Original",
+        "adaptedBadge": "Adapté par IA",
+        "insightsToggle": "Voir le résumé et les changements",
+        "editToggle": "Modifier le profil adapté",
+        "splitAria": "Comparaison côte à côte du profil initial et adapté",
+        "mobileTabsAria": "Sélectionner le profil à afficher",
+        "mobileTabInitial": "Initial",
+        "mobileTabAdapted": "Adapté",
+        "sectionChanged": "Optimisé",
+        "emptyValue": "Aucune information enregistrée",
+        "skillsShowMore": "Voir {count} de plus",
+        "skillsShowLess": "Voir moins",
+        "experienceEnhanced": "Description enrichie pour ce poste",
+        "panel": {
+          "hero": "Professional identity",
+          "headline": "Headline",
+          "summary": "Summary",
+          "contact": "Contact"
+        },
+        "dashboard": {
+          "subtitle": "Avant vs après l'adaptation du CV à l'offre",
+          "targetVacancyLabel": "Offre cible :",
+          "targetVacancyFallback": "Offre cible non spécifiée",
+          "estimatedScoreNote": "Les scores d'alignement sont estimés lorsque le backend ne les fournit pas.",
+          "currentBadge": "Profil actuel",
+          "adaptedBadge": "Profil adapté",
+          "estimatedAlignment": "Alignement estimé",
+          "noHeadline": "Sans titre",
+          "yearsExperience": "{years} ans en développement full stack",
+          "experienceSince": "Expérience depuis {year}",
+          "englishLevel": "Anglais {level}",
+          "profileByCategory": "Profil par catégorie",
+          "topSkills": "Compétences principales",
+          "noSkills": "Aucune compétence enregistrée",
+          "strengthsTitle": "Points forts",
+          "opportunitiesTitle": "Opportunités d'amélioration",
+          "recentExperience": "Expérience récente",
+          "noExperience": "Aucune expérience enregistrée",
+          "noRole": "Sans poste",
+          "adaptationSummaryTitle": "Résumé de l'adaptation",
+          "checklistProgress": "{met} critères remplis sur {total}",
+          "conclusionTitle": "Conclusion",
+          "criteriaComparisonTitle": "Comparaison des critères ATS",
+          "criteriaComparisonSubtitle": "Comparaison visuelle entre profil actuel et profil adapté",
+          "criteriaColumn": "Critère",
+          "currentColumn": "Profil actuel",
+          "adaptedColumn": "Profil adapté",
+          "resultColumn": "Résultat",
+          "resultPending": "En attente",
+          "resultTie": "Égalité",
+          "resultAdapted": "Profil adapté",
+          "resultCurrent": "Profil actuel",
+          "checklistTitle": "Checklist ATS",
+          "changesTitle": "Modifications effectuées",
+          "beforeLabel": "Avant",
+          "afterLabel": "Après",
+          "reasonLabel": "Raison",
+          "showMore": "Voir plus",
+          "showLess": "Voir moins",
+          "emptySummary": "Sans résumé professionnel",
+          "notDefined": "Non défini",
+          "changeFields": {
+            "headline": "Titre",
+            "summary": "Résumé professionnel",
+            "skills": "Compétences",
+            "jobPreferences": "Préférences professionnelles",
+            "workExperienceItem": "Expérience professionnelle {index}",
+            "fallback": "Champ"
+          },
+          "viewOriginalCv": "Voir le CV original",
+          "viewAdaptedCv": "Voir le CV adapté",
+          "exportComparison": "Exporter la comparaison",
+          "applyAdaptedVersion": "Appliquer la version adaptée",
+          "applying": "Application…",
+          "categories": {
+            "titleMatch": "Correspondance du poste",
+            "dotnetSkills": "Compétences .NET",
+            "frontend": "Frontend",
+            "cloudDevops": "Cloud/DevOps",
+            "english": "Anglais",
+            "atsKeywords": "Mots-clés ATS"
+          },
+          "criteria": {
+            "titleMatch": "Correspondance du poste",
+            "vacancyKeywords": "Mots-clés de l'offre",
+            "requiredSkills": "Compétences techniques requises",
+            "language": "Langue",
+            "recentExperience": "Expérience récente",
+            "measurableAchievements": "Réalisations mesurables"
+          },
+          "insights": {
+            "targetVacancy": "Offre cible",
+            "topImprovement": "Meilleure amélioration",
+            "professionalSummary": "Résumé professionnel",
+            "integratedKeywords": "Mots-clés intégrés",
+            "atsChecklist": "Checklist ATS",
+            "pending": "En attente"
+          },
+          "strengths": {
+            "completeTechnicalProfile": "Profil technique très complet",
+            "strongFrontend": "Fort en frontend moderne",
+            "cloudDevops": "Expérience cloud et DevOps",
+            "englishLevel": "Bon niveau d'anglais",
+            "clearSummary": "Résumé clair et ciblé",
+            "alignedHeadline": "Poste aligné à l'offre",
+            "integratedKeywords": "Mots-clés techniques bien intégrés"
+          },
+          "opportunities": {
+            "misalignedHeadline": "Titre peu aligné à l'offre",
+            "emptySummary": "Résumé professionnel vide",
+            "unfocusedKeywords": "Mots-clés moins ciblés sur le poste",
+            "noMeasurableAchievements": "Aucune réalisation mesurable",
+            "addImpactMetrics": "Ajouter des métriques d'impact",
+            "quantifyResults": "Quantifier les résultats par projet"
+          }
+        }
+      },
+      "editor": {
+        "hint": "You can edit the tailored profile before saving the version or applying it to your main profile."
+      },
+      "vacancyPicker": {
+        "searchLabel": "Search jobs",
+        "searchPlaceholder": "Title, company or keyword…",
+        "searchAria": "Buscar vacantes publicadas",
+        "searchError": "Could not load jobs.",
+        "loading": "Searching jobs…",
+        "empty": "No jobs match your search.",
+        "resultsAria": "Resultados de vacantes",
+        "selectedFallback": "Selected job",
+        "clear": "Remove"
+      },
+      "history": {
+        "title": "Version history",
+        "description": "Versions of your profile generated when tailoring to different jobs.",
+        "backToTailoring": "Tailor profile",
+        "loading": "Loading versions…",
+        "empty": "You have no saved versions yet.",
+        "emptyCta": "Process my profile for a job",
+        "listAria": "Listado de versiones",
+        "versionFallback": "Version {number}",
+        "meta": "Version {number} · {date}",
+        "latestBadge": "Plus récente",
+        "labelEdit": {
+          "editAria": "Edit name of {title}",
+          "inputLabel": "Version name",
+          "placeholder": "e.g. Version {number}",
+          "saveAria": "Save name",
+          "cancelAria": "Cancel editing"
+        },
+        "actions": {
+          "view": "View",
+          "delete": "Delete"
+        },
+        "toasts": {
+          "saved": "Version updated.",
+          "saveError": "Could not save the version.",
+          "renamed": "Version name updated.",
+          "renameError": "Could not update the name.",
+          "deleted": "Version deleted.",
+          "deleteError": "Could not delete the version."
+        },
+        "deleteConfirm": {
+          "title": "Delete version",
+          "message": "This version will be removed from history. Your main profile will not change."
+        }
       }
     }
   },
@@ -2202,7 +2472,8 @@
       "preliminaryStepsAria": "Étapes de l'analyse préliminaire",
       "processingStepsAria": "États du traitement",
       "percentComplete": "{percent} pour cent",
-      "assistedByAi": "Assisté par IA"
+      "assistedByAi": "Assisté par IA",
+      "tailoringStepsAria": "Étapes d'adaptation du profil"
     }
   },
   "AdminPortal": {

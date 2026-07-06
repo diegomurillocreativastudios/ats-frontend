@@ -18,6 +18,7 @@ import {
   Download,
   FileText,
   GraduationCap,
+  History,
   Languages,
   Loader2,
   Pencil,
@@ -558,6 +559,15 @@ export function CandidateSelfProfileView({
                 {t("actions.manageDocuments")}
                 <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
               </Link>
+              <Link
+                href="/portal-candidato/mi-perfil/versiones"
+                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
+                aria-label={t("actions.viewVersionsAria")}
+              >
+                <History className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
+                {t("actions.viewVersions")}
+                <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+              </Link>
               <button
                 type="button"
                 onClick={handleCancelEdit}
@@ -629,6 +639,15 @@ export function CandidateSelfProfileView({
               >
                 <FileText className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
                 {t("actions.manageDocuments")}
+                <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+              </Link>
+              <Link
+                href="/portal-candidato/mi-perfil/versiones"
+                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
+                aria-label={t("actions.viewVersionsAria")}
+              >
+                <History className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
+                {t("actions.viewVersions")}
                 <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
               </Link>
             </div>

@@ -1,12 +1,13 @@
-import type { Page } from "@playwright/test"
+import { expect, type Page } from "@playwright/test"
 
 /**
  * Credenciales demo para E2E (validación client-side + API `/login`).
- * El primer campo acepta usuario `admin` (no hace falta formato de correo) con contraseña `admin`.
- * Requiere backend accesible vía `NEXT_PUBLIC_API_URL` si el login remoto falla.
+ * Configurables con `E2E_DEMO_EMAIL` y `E2E_DEMO_PASSWORD` (p. ej. secrets de GitHub Actions).
  */
-export const E2E_DEMO_EMAIL = "admin"
-export const E2E_DEMO_PASSWORD = "admin"
+export const E2E_DEMO_EMAIL = process.env.E2E_DEMO_EMAIL?.trim() || "admin"
+export const E2E_DEMO_PASSWORD = process.env.E2E_DEMO_PASSWORD ?? "admin"
+
+const LOGIN_REDIRECT_TIMEOUT_MS = process.env.CI ? 90_000 : 30_000
 
 /**
  * Completa el formulario de iniciar sesión y envía.
@@ -28,10 +29,28 @@ export async function fillLoginForm(
 export async function loginAsDemoUser(page: Page): Promise<void> {
   await page.goto("/auth/iniciar-sesion")
   await fillLoginForm(page, E2E_DEMO_EMAIL, E2E_DEMO_PASSWORD)
-  await page.waitForURL(
-    /\/(seleccion-portal|portal-rrhh|portal-candidato)/,
-    { timeout: 30_000 }
+
+  const redirectPattern =
+    /\/(seleccion-portal|portal-rrhh|portal-candidato|portal-admin)/
+  const loginError = page.getByText(
+    /credenciales|contraseña|bloqueada|error al iniciar|connection/i
   )
+
+  await Promise.race([
+    page.waitForURL(redirectPattern, { timeout: LOGIN_REDIRECT_TIMEOUT_MS }),
+    loginError
+      .waitFor({ state: "visible", timeout: LOGIN_REDIRECT_TIMEOUT_MS })
+      .then(async () => {
+        const message = (await loginError.first().textContent())?.trim()
+        throw new Error(
+          message
+            ? `Login demo falló: ${message}`
+            : "Login demo falló: el API rechazó las credenciales configuradas."
+        )
+      }),
+  ])
+
+  await expect(page).toHaveURL(redirectPattern)
 }
 
 /**
@@ -43,4 +62,15 @@ export async function openRRHHPortalFromSelector(page: Page): Promise<void> {
 
   await page.getByTestId("portal-selector-rrhh").click()
   await page.waitForURL(/\/portal-rrhh(\/|$)/, { timeout: 15_000 })
+}
+
+/**
+ * Desde `/seleccion-portal`, entra al portal Admin. Si el login ya dejó al usuario en Admin, no hace nada.
+ */
+export async function openAdminPortalFromSelector(page: Page): Promise<void> {
+  const pathname = new URL(page.url()).pathname
+  if (/^\/portal-admin(\/|$)/.test(pathname)) return
+
+  await page.getByTestId("portal-selector-admin").click()
+  await page.waitForURL(/\/portal-admin(\/|$)/, { timeout: 15_000 })
 }
