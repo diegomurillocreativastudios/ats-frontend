@@ -332,6 +332,10 @@
         "title": "ApplicanTree | Portal Oportunidades | Aplicar",
         "description": "Formulario público para aplicar a una vacante activa"
       }
+    },
+    "privacyPolicy": {
+      "title": "Política de privacidad | Applicantree ATS",
+      "description": "Política de privacidad de Applicantree ATS."
     }
   },
   "PortalSelection": {
@@ -3408,6 +3412,86 @@
       "formTitle": "Enviá tu postulación",
       "formBody": "Completá los datos y adjuntá tu CV. La información se envía de forma segura al equipo de reclutamiento.",
       "documentTitle": "ApplicanTree | Portal Oportunidades | Aplicar a {title}"
+    }
+  },
+  "PrivacyPolicy": {
+    "header": {
+      "homeAriaLabel": "Inicio de Applicantree ATS"
+    },
+    "footer": {
+      "copyright": "Todos los derechos reservados."
+    },
+    "page": {
+      "eyebrow": "Legal",
+      "title": "Política de privacidad",
+      "intro": "Esta Política de Privacidad describe cómo {productName} (\"nosotros\" o \"nuestro\") recopila, usa y protege la información personal cuando utilizás nuestra plataforma de seguimiento de candidatos y reclutamiento.",
+      "lastUpdated": "Última actualización: 6 de julio de 2026"
+    },
+    "sections": {
+      "informationWeCollect": {
+        "title": "Información que recopilamos",
+        "p1": "Podemos recopilar información que proporcionás directamente, información generada por tu uso del servicio e información limitada del perfil de proveedores de inicio de sesión de terceros cuando elegís autenticarte con ellos.",
+        "p2": "Esto puede incluir:",
+        "items": {
+          "nameEmail": "Nombre y dirección de correo electrónico",
+          "profilePicture": "Foto de perfil, cuando esté disponible desde un proveedor de inicio de sesión",
+          "accountIdentifiers": "Identificadores de cuenta e información del proveedor de autenticación",
+          "professionalInfo": "Información profesional o relacionada con la postulación que enviás a través de la plataforma",
+          "technicalUsage": "Información técnica y de uso, como tipo de navegador, información del dispositivo y datos de registro relacionados con tus interacciones con el servicio"
+        }
+      },
+      "howWeUse": {
+        "title": "Cómo usamos tu información",
+        "p1": "Usamos la información personal para:",
+        "items": {
+          "operate": "Proporcionar, operar y mantener la plataforma",
+          "authenticate": "Autenticar usuarios y gestionar el acceso a las cuentas",
+          "recruitment": "Apoyar flujos de reclutamiento, incluidas postulaciones de candidatos y procesos de contratación habilitados por tu organización",
+          "support": "Responder solicitudes de soporte y consultas relacionadas con el servicio",
+          "improve": "Mejorar la confiabilidad, seguridad y rendimiento del servicio",
+          "legal": "Cumplir con obligaciones legales aplicables"
+        },
+        "p2": "Procesamos información personal solo para fines legítimos relacionados con la operación de {productName} y la prestación de las funciones que elijas utilizar."
+      },
+      "linkedInSignIn": {
+        "title": "Inicio de sesión con LinkedIn",
+        "p1": "Si elegís iniciar sesión con LinkedIn, podemos recibir información básica del perfil de LinkedIn para crear o autenticar tu cuenta. Según tu configuración de LinkedIn y los permisos que apruebes, esto puede incluir:",
+        "items": {
+          "name": "Nombre",
+          "email": "Dirección de correo electrónico",
+          "profilePicture": "Foto de perfil",
+          "linkedInId": "Identificador de cuenta de LinkedIn",
+          "authProvider": "Información del proveedor de autenticación"
+        },
+        "p2": "Usamos esta información para identificarte, establecer tu sesión y mostrar tu perfil dentro de la plataforma cuando corresponda. No controlamos las prácticas de privacidad de LinkedIn. Revisá la política de privacidad de LinkedIn para entender cómo LinkedIn maneja tu información."
+      },
+      "dataSharing": {
+        "title": "Compartición de datos",
+        "p1": "No vendemos tu información personal. Podemos compartir información solo en circunstancias limitadas, como:",
+        "items": {
+          "serviceProviders": "Con proveedores de servicios que nos ayudan a operar la plataforma, bajo obligaciones adecuadas de confidencialidad y seguridad",
+          "organization": "Con tu organización o usuarios autorizados cuando sea necesario para apoyar flujos de reclutamiento y contratación",
+          "legal": "Cuando lo exija la ley, una regulación, un proceso legal o una solicitud gubernamental",
+          "protection": "Para proteger los derechos, la seguridad y la integridad de los usuarios, nuestro servicio u otras personas"
+        }
+      },
+      "dataSecurity": {
+        "title": "Seguridad de los datos",
+        "p1": "Adoptamos medidas administrativas, técnicas y organizativas razonables diseñadas para proteger la información personal contra acceso no autorizado, pérdida, uso indebido o alteración. Sin embargo, ningún método de transmisión por internet o almacenamiento electrónico es completamente seguro, y no podemos garantizar seguridad absoluta."
+      },
+      "dataRetention": {
+        "title": "Retención de datos",
+        "p1": "Conservamos la información personal durante el tiempo razonablemente necesario para prestar el servicio, cumplir los fines descritos en esta política, satisfacer obligaciones legales, resolver disputas y hacer cumplir nuestros acuerdos. Los períodos de retención pueden variar según el tipo de información y su uso dentro de la plataforma."
+      },
+      "yourRights": {
+        "title": "Tus derechos",
+        "p1": "Según tu ubicación y la ley aplicable, podés tener derechos respecto de tu información personal, que pueden incluir el acceso, la corrección, la eliminación o la restricción de ciertos tratamientos de tus datos, u oponerte a ciertos usos.",
+        "p2": "Para ejercer estos derechos o enviar una solicitud relacionada con la privacidad, contactanos usando los datos indicados abajo. Es posible que necesitemos verificar tu identidad antes de responder a ciertas solicitudes."
+      },
+      "contact": {
+        "title": "Contacto",
+        "p1": "Si tenés preguntas sobre esta Política de Privacidad o nuestras prácticas de datos, contactanos en:"
+      }
     }
   }
 }

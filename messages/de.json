@@ -332,6 +332,10 @@
         "title": "ApplicanTree | Stellenportal | Bewerben",
         "description": "Öffentliches Formular zur Bewerbung auf eine aktive Stelle"
       }
+    },
+    "privacyPolicy": {
+      "title": "Datenschutzerklärung | Applicantree ATS",
+      "description": "Datenschutzerklärung für Applicantree ATS."
     }
   },
   "PortalSelection": {
@@ -3408,6 +3412,86 @@
       "formTitle": "Bewerbung senden",
       "formBody": "Füllen Sie die Daten aus und hängen Sie Ihren Lebenslauf an. Die Informationen werden sicher an das Recruiting-Team gesendet.",
       "documentTitle": "ApplicanTree | Stellenportal | Bewerbung für {title}"
+    }
+  },
+  "PrivacyPolicy": {
+    "header": {
+      "homeAriaLabel": "Applicantree ATS Startseite"
+    },
+    "footer": {
+      "copyright": "Alle Rechte vorbehalten."
+    },
+    "page": {
+      "eyebrow": "Rechtliches",
+      "title": "Datenschutzerklärung",
+      "intro": "Diese Datenschutzerklärung beschreibt, wie {productName} (\"wir\" oder \"unser\") personenbezogene Daten erhebt, verwendet und schützt, wenn Sie unsere Applicant-Tracking- und Recruiting-Plattform nutzen.",
+      "lastUpdated": "Zuletzt aktualisiert: 6. Juli 2026"
+    },
+    "sections": {
+      "informationWeCollect": {
+        "title": "Welche Informationen wir erheben",
+        "p1": "Wir können Informationen erheben, die Sie direkt bereitstellen, Informationen, die durch Ihre Nutzung des Dienstes entstehen, sowie begrenzte Profilinformationen von Drittanbieter-Anmeldungen, wenn Sie sich damit authentifizieren.",
+        "p2": "Dazu können gehören:",
+        "items": {
+          "nameEmail": "Name und E-Mail-Adresse",
+          "profilePicture": "Profilbild, sofern vom Anmeldeanbieter verfügbar",
+          "accountIdentifiers": "Kontokennungen und Informationen zum Authentifizierungsanbieter",
+          "professionalInfo": "Berufs- oder bewerbungsbezogene Informationen, die Sie über die Plattform einreichen",
+          "technicalUsage": "Technische und Nutzungsinformationen wie Browsertyp, Geräteinformationen und Protokolldaten zu Ihren Interaktionen mit dem Dienst"
+        }
+      },
+      "howWeUse": {
+        "title": "Wie wir Ihre Informationen verwenden",
+        "p1": "Wir verwenden personenbezogene Daten, um:",
+        "items": {
+          "operate": "die Plattform bereitzustellen, zu betreiben und zu warten",
+          "authenticate": "Nutzer zu authentifizieren und den Kontozugang zu verwalten",
+          "recruitment": "Recruiting-Abläufe zu unterstützen, einschließlich Bewerbungen und Einstellungsprozesse Ihrer Organisation",
+          "support": "Supportanfragen und servicebezogene Anfragen zu beantworten",
+          "improve": "Zuverlässigkeit, Sicherheit und Leistung des Dienstes zu verbessern",
+          "legal": "geltende rechtliche Verpflichtungen zu erfüllen"
+        },
+        "p2": "Wir verarbeiten personenbezogene Daten nur für legitime Zwecke im Zusammenhang mit dem Betrieb von {productName} und der Bereitstellung der von Ihnen genutzten Funktionen."
+      },
+      "linkedInSignIn": {
+        "title": "LinkedIn-Anmeldung",
+        "p1": "Wenn Sie sich mit LinkedIn anmelden, können wir grundlegende Profilinformationen von LinkedIn erhalten, um Ihr Konto zu erstellen oder zu authentifizieren. Je nach LinkedIn-Einstellungen und genehmigten Berechtigungen kann dies Folgendes umfassen:",
+        "items": {
+          "name": "Name",
+          "email": "E-Mail-Adresse",
+          "profilePicture": "Profilbild",
+          "linkedInId": "LinkedIn-Kontokennung",
+          "authProvider": "Informationen zum Authentifizierungsanbieter"
+        },
+        "p2": "Wir verwenden diese Informationen, um Sie zu identifizieren, Ihre Sitzung einzurichten und Ihr Profil in der Plattform anzuzeigen, sofern zutreffend. Wir kontrollieren nicht die Datenschutzpraktiken von LinkedIn. Bitte lesen Sie die Datenschutzrichtlinie von LinkedIn."
+      },
+      "dataSharing": {
+        "title": "Weitergabe von Daten",
+        "p1": "Wir verkaufen Ihre personenbezogenen Daten nicht. Wir können Informationen nur in begrenzten Fällen weitergeben, z. B.:",
+        "items": {
+          "serviceProviders": "an Dienstleister, die uns beim Betrieb der Plattform unter angemessenen Vertraulichkeits- und Sicherheitspflichten unterstützen",
+          "organization": "an Ihre Organisation oder autorisierte Nutzer, wenn dies für Recruiting- und Einstellungsprozesse erforderlich ist",
+          "legal": "wenn dies gesetzlich, durch Vorschriften, ein Gerichtsverfahren oder eine behördliche Anfrage erforderlich ist",
+          "protection": "zum Schutz der Rechte, Sicherheit und Integrität von Nutzern, unserem Dienst oder anderen"
+        }
+      },
+      "dataSecurity": {
+        "title": "Datensicherheit",
+        "p1": "Wir treffen angemessene administrative, technische und organisatorische Maßnahmen, um personenbezogene Daten vor unbefugtem Zugriff, Verlust, Missbrauch oder Veränderung zu schützen. Keine Übertragungsmethode im Internet oder elektronische Speicherung ist jedoch vollständig sicher, und wir können keine absolute Sicherheit garantieren."
+      },
+      "dataRetention": {
+        "title": "Datenspeicherung",
+        "p1": "Wir speichern personenbezogene Daten so lange, wie es vernünftigerweise erforderlich ist, um den Dienst bereitzustellen, die in dieser Erklärung beschriebenen Zwecke zu erfüllen, rechtliche Verpflichtungen einzuhalten, Streitigkeiten beizulegen und unsere Vereinbarungen durchzusetzen. Die Speicherdauer kann je nach Art der Information und Nutzung innerhalb der Plattform variieren."
+      },
+      "yourRights": {
+        "title": "Ihre Rechte",
+        "p1": "Je nach Ihrem Standort und geltendem Recht können Sie Rechte in Bezug auf Ihre personenbezogenen Daten haben, einschließlich des Rechts auf Auskunft, Berichtigung, Löschung oder Einschränkung bestimmter Verarbeitungen oder Widerspruch gegen bestimmte Nutzungen.",
+        "p2": "Um diese Rechte auszuüben oder eine datenschutzbezogene Anfrage zu stellen, kontaktieren Sie uns über die unten angegebenen Angaben. Wir müssen möglicherweise Ihre Identität überprüfen, bevor wir auf bestimmte Anfragen reagieren."
+      },
+      "contact": {
+        "title": "Kontakt",
+        "p1": "Bei Fragen zu dieser Datenschutzerklärung oder unseren Datenpraktiken kontaktieren Sie uns unter:"
+      }
     }
   }
 }
