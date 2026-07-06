@@ -332,6 +332,10 @@
         "title": "ApplicanTree | Portail opportunités | Postuler",
         "description": "Formulaire public pour postuler à une offre active"
       }
+    },
+    "privacyPolicy": {
+      "title": "Politique de confidentialité | Applicantree ATS",
+      "description": "Politique de confidentialité d'Applicantree ATS."
     }
   },
   "PortalSelection": {
@@ -3408,6 +3412,86 @@
       "formTitle": "Envoyez votre candidature",
       "formBody": "Complétez les informations et joignez votre CV. Les données sont envoyées en toute sécurité à l'équipe de recrutement.",
       "documentTitle": "ApplicanTree | Portail opportunités | Postuler à {title}"
+    }
+  },
+  "PrivacyPolicy": {
+    "header": {
+      "homeAriaLabel": "Accueil Applicantree ATS"
+    },
+    "footer": {
+      "copyright": "Tous droits réservés."
+    },
+    "page": {
+      "eyebrow": "Juridique",
+      "title": "Politique de confidentialité",
+      "intro": "La présente Politique de confidentialité décrit comment {productName} (« nous » ou « notre ») collecte, utilise et protège les informations personnelles lorsque vous utilisez notre plateforme de suivi des candidatures et de recrutement.",
+      "lastUpdated": "Dernière mise à jour : 6 juillet 2026"
+    },
+    "sections": {
+      "informationWeCollect": {
+        "title": "Informations que nous collectons",
+        "p1": "Nous pouvons collecter les informations que vous fournissez directement, les informations générées par votre utilisation du service et des informations de profil limitées provenant de fournisseurs de connexion tiers lorsque vous choisissez de vous authentifier avec eux.",
+        "p2": "Cela peut inclure :",
+        "items": {
+          "nameEmail": "Nom et adresse e-mail",
+          "profilePicture": "Photo de profil, lorsqu'elle est disponible via un fournisseur de connexion",
+          "accountIdentifiers": "Identifiants de compte et informations sur le fournisseur d'authentification",
+          "professionalInfo": "Informations professionnelles ou liées à la candidature que vous soumettez via la plateforme",
+          "technicalUsage": "Informations techniques et d'utilisation, telles que le type de navigateur, les informations sur l'appareil et les données de journal liées à vos interactions avec le service"
+        }
+      },
+      "howWeUse": {
+        "title": "Comment nous utilisons vos informations",
+        "p1": "Nous utilisons les informations personnelles pour :",
+        "items": {
+          "operate": "Fournir, exploiter et maintenir la plateforme",
+          "authenticate": "Authentifier les utilisateurs et gérer l'accès aux comptes",
+          "recruitment": "Soutenir les flux de recrutement, y compris les candidatures et les processus d'embauche activés par votre organisation",
+          "support": "Répondre aux demandes d'assistance et aux questions liées au service",
+          "improve": "Améliorer la fiabilité, la sécurité et les performances du service",
+          "legal": "Respecter les obligations légales applicables"
+        },
+        "p2": "Nous traitons les informations personnelles uniquement à des fins légitimes liées à l'exploitation de {productName} et à la fourniture des fonctionnalités que vous choisissez d'utiliser."
+      },
+      "linkedInSignIn": {
+        "title": "Connexion LinkedIn",
+        "p1": "Si vous choisissez de vous connecter avec LinkedIn, nous pouvons recevoir des informations de profil de base de LinkedIn pour créer ou authentifier votre compte. Selon vos paramètres LinkedIn et les autorisations approuvées, cela peut inclure :",
+        "items": {
+          "name": "Nom",
+          "email": "Adresse e-mail",
+          "profilePicture": "Photo de profil",
+          "linkedInId": "Identifiant de compte LinkedIn",
+          "authProvider": "Informations sur le fournisseur d'authentification"
+        },
+        "p2": "Nous utilisons ces informations pour vous identifier, établir votre session et afficher votre profil sur la plateforme le cas échéant. Nous ne contrôlons pas les pratiques de confidentialité de LinkedIn. Veuillez consulter la politique de confidentialité de LinkedIn."
+      },
+      "dataSharing": {
+        "title": "Partage des données",
+        "p1": "Nous ne vendons pas vos informations personnelles. Nous pouvons partager des informations uniquement dans des circonstances limitées, par exemple :",
+        "items": {
+          "serviceProviders": "Avec des prestataires qui nous aident à exploiter la plateforme, sous des obligations appropriées de confidentialité et de sécurité",
+          "organization": "Avec votre organisation ou des utilisateurs autorisés lorsque cela est nécessaire pour soutenir le recrutement et l'embauche",
+          "legal": "Lorsque la loi, une réglementation, une procédure judiciaire ou une demande gouvernementale l'exige",
+          "protection": "Pour protéger les droits, la sécurité et l'intégrité des utilisateurs, de notre service ou d'autres personnes"
+        }
+      },
+      "dataSecurity": {
+        "title": "Sécurité des données",
+        "p1": "Nous prenons des mesures administratives, techniques et organisationnelles raisonnables pour protéger les informations personnelles contre l'accès non autorisé, la perte, l'utilisation abusive ou l'altération. Cependant, aucune méthode de transmission sur Internet ou de stockage électronique n'est totalement sécurisée, et nous ne pouvons garantir une sécurité absolue."
+      },
+      "dataRetention": {
+        "title": "Conservation des données",
+        "p1": "Nous conservons les informations personnelles aussi longtemps que raisonnablement nécessaire pour fournir le service, atteindre les objectifs décrits dans cette politique, respecter les obligations légales, résoudre les litiges et faire respecter nos accords. Les durées de conservation peuvent varier selon le type d'information et son utilisation sur la plateforme."
+      },
+      "yourRights": {
+        "title": "Vos droits",
+        "p1": "Selon votre localisation et la loi applicable, vous pouvez disposer de droits concernant vos informations personnelles, notamment l'accès, la rectification, la suppression ou la limitation de certains traitements, ou l'opposition à certains usages.",
+        "p2": "Pour exercer ces droits ou soumettre une demande liée à la confidentialité, contactez-nous via les coordonnées ci-dessous. Nous pouvons devoir vérifier votre identité avant de répondre à certaines demandes."
+      },
+      "contact": {
+        "title": "Contact",
+        "p1": "Pour toute question concernant cette Politique de confidentialité ou nos pratiques en matière de données, contactez-nous à :"
+      }
     }
   }
 }

@@ -332,6 +332,10 @@
         "title": "ApplicanTree | Opportunities Portal | Apply",
         "description": "Public form to apply for an active vacancy"
       }
+    },
+    "privacyPolicy": {
+      "title": "Privacy Policy | Applicantree ATS",
+      "description": "Privacy Policy for Applicantree ATS."
     }
   },
   "PortalSelection": {
@@ -3408,6 +3412,86 @@
       "formTitle": "Submit your application",
       "formBody": "Complete the information and attach your CV. The data is sent securely to the recruitment team.",
       "documentTitle": "ApplicanTree | Opportunities Portal | Apply to {title}"
+    }
+  },
+  "PrivacyPolicy": {
+    "header": {
+      "homeAriaLabel": "Applicantree ATS home"
+    },
+    "footer": {
+      "copyright": "All rights reserved."
+    },
+    "page": {
+      "eyebrow": "Legal",
+      "title": "Privacy Policy",
+      "intro": "This Privacy Policy describes how {productName} (\"we\", \"us\", or \"our\") collects, uses, and protects personal information when you use our applicant tracking and recruitment platform.",
+      "lastUpdated": "Last updated: July 6, 2026"
+    },
+    "sections": {
+      "informationWeCollect": {
+        "title": "Information We Collect",
+        "p1": "We may collect information that you provide directly, information generated through your use of the service, and limited profile information from third-party sign-in providers when you choose to authenticate with them.",
+        "p2": "This may include:",
+        "items": {
+          "nameEmail": "Name and email address",
+          "profilePicture": "Profile picture, when available from a sign-in provider",
+          "accountIdentifiers": "Account identifiers and authentication provider information",
+          "professionalInfo": "Professional or application-related information you submit through the platform",
+          "technicalUsage": "Technical and usage information, such as browser type, device information, and log data related to your interactions with the service"
+        }
+      },
+      "howWeUse": {
+        "title": "How We Use Your Information",
+        "p1": "We use personal information to:",
+        "items": {
+          "operate": "Provide, operate, and maintain the platform",
+          "authenticate": "Authenticate users and manage account access",
+          "recruitment": "Support recruitment workflows, including candidate applications and hiring processes enabled by your organization",
+          "support": "Respond to support requests and service-related inquiries",
+          "improve": "Improve reliability, security, and performance of the service",
+          "legal": "Comply with applicable legal obligations"
+        },
+        "p2": "We process personal information only for legitimate purposes related to operating {productName} and providing the features you choose to use."
+      },
+      "linkedInSignIn": {
+        "title": "LinkedIn Sign-In",
+        "p1": "If you choose to sign in with LinkedIn, we may receive basic profile information from LinkedIn to create or authenticate your account. Depending on your LinkedIn settings and the permissions you approve, this may include:",
+        "items": {
+          "name": "Name",
+          "email": "Email address",
+          "profilePicture": "Profile picture",
+          "linkedInId": "LinkedIn account identifier",
+          "authProvider": "Authentication provider information"
+        },
+        "p2": "We use this information to identify you, establish your session, and display your profile within the platform where applicable. We do not control LinkedIn's own privacy practices. Please review LinkedIn's privacy policy to understand how LinkedIn handles your information."
+      },
+      "dataSharing": {
+        "title": "Data Sharing",
+        "p1": "We do not sell your personal information. We may share information only in limited circumstances, such as:",
+        "items": {
+          "serviceProviders": "With service providers that help us operate the platform, under appropriate confidentiality and security obligations",
+          "organization": "With your organization or authorized users when needed to support recruitment and hiring workflows",
+          "legal": "When required by law, regulation, legal process, or governmental request",
+          "protection": "To protect the rights, safety, and security of users, our service, or others"
+        }
+      },
+      "dataSecurity": {
+        "title": "Data Security",
+        "p1": "We take reasonable administrative, technical, and organizational measures designed to protect personal information against unauthorized access, loss, misuse, or alteration. However, no method of transmission over the internet or electronic storage is completely secure, and we cannot guarantee absolute security."
+      },
+      "dataRetention": {
+        "title": "Data Retention",
+        "p1": "We retain personal information for as long as reasonably necessary to provide the service, fulfill the purposes described in this policy, comply with legal obligations, resolve disputes, and enforce our agreements. Retention periods may vary depending on the type of information and how it is used within the platform."
+      },
+      "yourRights": {
+        "title": "Your Rights",
+        "p1": "Depending on your location and applicable law, you may have rights regarding your personal information, which may include the right to access, correct, delete, or restrict certain processing of your data, or to object to certain uses.",
+        "p2": "To exercise these rights or submit a privacy-related request, please contact us using the details below. We may need to verify your identity before responding to certain requests."
+      },
+      "contact": {
+        "title": "Contact",
+        "p1": "If you have questions about this Privacy Policy or our data practices, contact us at:"
+      }
     }
   }
 }
