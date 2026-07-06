@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { getPageTitle } from "@/lib/pageTitles";
 
 /**
@@ -23,22 +24,30 @@ const getCurrentPath = (pathname) => {
  */
 export default function PageTitle() {
   const pathname = usePathname();
+  const tPrivacyPolicy = useTranslations("Metadata.privacyPolicy");
+
+  const resolveTitle = (path: string) => {
+    if (path === "/privacy-policy") {
+      return tPrivacyPolicy("title");
+    }
+    return getPageTitle(path);
+  };
 
   useLayoutEffect(() => {
     const path = getCurrentPath(pathname ?? undefined);
-    document.title = getPageTitle(path);
-  }, [pathname]);
+    document.title = resolveTitle(path);
+  }, [pathname, tPrivacyPolicy]);
 
   useEffect(() => {
     const path = getCurrentPath(pathname ?? undefined);
-    const expected = getPageTitle(path);
+    const expected = resolveTitle(path);
     const apply = () => {
       if (document.title !== expected) document.title = expected;
     };
     apply();
     const t = setTimeout(apply, 0);
     return () => clearTimeout(t);
-  }, [pathname]);
+  }, [pathname, tPrivacyPolicy]);
 
   return null;
 }

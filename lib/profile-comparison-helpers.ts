@@ -619,14 +619,103 @@ export function buildAdaptationConclusion(
   return "La versión adaptada mejora el encaje con la vacante según los criterios ATS evaluados."
 }
 
-export function formatChangeFieldName(field: string): string {
+export interface ChangeFieldLabels {
+  headline: string
+  summary: string
+  skills: string
+  jobPreferences: string
+  workExperience: (index: number) => string
+  fallback: string
+}
+
+export interface ChangeDisplayLabels {
+  emptySummary: string
+  notDefined: string
+  yes: string
+  no: string
+  jobPreferenceFields: {
+    sectors: string
+    desiredRole: string
+    minSalary: string
+    educationLevel: string
+    desiredCity: string
+    availability: string
+    disability: string
+  }
+}
+
+const formatJobPreferencesAsText = (
+  raw: unknown,
+  labels: ChangeDisplayLabels
+): string | null => {
+  const parsed = parseJsonObjectIfString(raw)
+  if (!parsed || typeof parsed !== "object") return null
+
+  const obj = parsed as Record<string, unknown>
+  const rows: string[] = []
+  const sectors = Array.isArray(obj.Sectors)
+    ? obj.Sectors
+    : Array.isArray(obj.sectors)
+      ? obj.sectors
+      : []
+  if (sectors.length > 0) {
+    rows.push(
+      `${labels.jobPreferenceFields.sectors}: ${sectors.map((entry) => String(entry).trim()).filter(Boolean).join(", ")}`
+    )
+  }
+
+  const scalarFields: Array<{ key: keyof ChangeDisplayLabels["jobPreferenceFields"]; value: unknown }> = [
+    { key: "desiredRole", value: obj.DesiredRole ?? obj.desiredRole },
+    { key: "minSalary", value: obj.MinSalary ?? obj.minSalary },
+    { key: "educationLevel", value: obj.EducationLevel ?? obj.educationLevel },
+    { key: "desiredCity", value: obj.DesiredCity ?? obj.desiredCity },
+    { key: "availability", value: obj.Availability ?? obj.availability },
+  ]
+
+  for (const { key, value } of scalarFields) {
+    const text = str(value)
+    if (text) rows.push(`${labels.jobPreferenceFields[key]}: ${text}`)
+  }
+
+  const disability = obj.Disability ?? obj.disability
+  if (disability === true) {
+    rows.push(`${labels.jobPreferenceFields.disability}: ${labels.yes}`)
+  } else if (disability === false) {
+    rows.push(`${labels.jobPreferenceFields.disability}: ${labels.no}`)
+  }
+
+  return rows.length > 0 ? rows.join("\n") : null
+}
+
+const formatWorkExperienceAsText = (raw: unknown): string | null => {
+  const parsed = parseJsonObjectIfString(raw)
+  if (!parsed || typeof parsed !== "object") return null
+
+  const obj = parsed as Record<string, unknown>
+  const description = str(obj.Description ?? obj.description)
+  if (description) return description
+
+  const role = str(obj.Role ?? obj.role)
+  const company = str(obj.Company ?? obj.company)
+  const period = formatDateRange(obj.StartDate ?? obj.startDate, obj.EndDate ?? obj.endDate)
+  const parts = [role, company, period].filter(Boolean)
+  return parts.length > 0 ? parts.join(" · ") : null
+}
+
+export function formatChangeFieldName(field: string, labels?: ChangeFieldLabels): string {
   const normalized = field.trim()
-  if (!normalized) return "Campo"
-  if (/^headline$/i.test(normalized)) return "Headline"
-  if (/^summary$/i.test(normalized)) return "Summary"
-  if (/jobpreferences/i.test(normalized)) return "JobPreferences"
-  const workMatch = normalized.match(/workexperience\[(\d+)\]/i)
-  if (workMatch) return `WorkExperience[${workMatch[1]}]`
+  if (!normalized) return labels?.fallback ?? "Campo"
+  if (/^headline$/i.test(normalized)) return labels?.headline ?? "Titular"
+  if (/^summary$/i.test(normalized)) return labels?.summary ?? "Resumen profesional"
+  if (/^skills$/i.test(normalized)) return labels?.skills ?? "Habilidades"
+  if (/jobpreferences/i.test(normalized)) return labels?.jobPreferences ?? "Preferencias laborales"
+  const workMatch = normalized.match(/workexperience(?:\[(\d+)\]|\.(\d+))?/i)
+  if (workMatch) {
+    const index = Number(workMatch[1] ?? workMatch[2] ?? 0) + 1
+    return labels?.workExperience
+      ? labels.workExperience(index)
+      : `Experiencia laboral ${index}`
+  }
   return normalized
 }
 
@@ -642,14 +731,24 @@ export function isEmptyChangeValue(value: string, field: string): boolean {
 export function formatChangeDisplayValue(
   value: string,
   field: string,
-  emptySummaryLabel: string,
-  notDefinedLabel: string
+  labels: ChangeDisplayLabels
 ): string {
   if (isEmptyChangeValue(value, field)) {
-    if (/summary/i.test(field)) return emptySummaryLabel
-    if (/jobpreferences/i.test(field)) return notDefinedLabel
+    if (/summary/i.test(field)) return labels.emptySummary
+    if (/jobpreferences/i.test(field)) return labels.notDefined
     return "—"
   }
+
+  if (/jobpreferences/i.test(field)) {
+    const formatted = formatJobPreferencesAsText(value, labels)
+    if (formatted) return formatted
+  }
+
+  if (/workexperience/i.test(field)) {
+    const formatted = formatWorkExperienceAsText(value)
+    if (formatted) return formatted
+  }
+
   return value.trim()
 }
 

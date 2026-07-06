@@ -3,6 +3,11 @@
 import { useTranslations } from "next-intl"
 import { Sparkles } from "lucide-react"
 import type { ProfileChangeHighlight } from "@/lib/candidate-profile-version"
+import {
+  formatChangeDisplayValue,
+  formatChangeFieldName,
+} from "@/lib/profile-comparison-helpers"
+import { useChangeDisplayLabels } from "@/components/candidato/profile-tailoring/comparison/use-change-display-labels"
 
 interface ComparisonInsightsProps {
   adaptationSummary: string | null
@@ -14,6 +19,7 @@ export function ComparisonInsights({
   changeHighlights,
 }: ComparisonInsightsProps) {
   const t = useTranslations("CandidatePortal.profileTailoring.comparison")
+  const { displayLabels, fieldLabels } = useChangeDisplayLabels()
 
   return (
     <details className="group overflow-hidden rounded-2xl border border-border/80 bg-white shadow-sm motion-safe:transition-shadow hover:shadow-md">
@@ -49,16 +55,18 @@ export function ComparisonInsights({
                   className="rounded-xl border border-border/60 bg-muted/15 px-3.5 py-3"
                 >
                   <p className="font-sans text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {item.field}
+                    {formatChangeFieldName(item.field, fieldLabels)}
                   </p>
                   <p className="mt-1.5 font-sans text-sm text-foreground">
                     <span className="text-muted-foreground line-through decoration-muted-foreground/50">
-                      {item.before || "—"}
+                      {formatChangeDisplayValue(item.before, item.field, displayLabels) || "—"}
                     </span>
                     <span className="mx-2 text-muted-foreground" aria-hidden>
                       →
                     </span>
-                    <span className="font-medium text-vo-purple">{item.after || "—"}</span>
+                    <span className="font-medium text-vo-purple">
+                      {formatChangeDisplayValue(item.after, item.field, displayLabels) || "—"}
+                    </span>
                   </p>
                   {item.reason ? (
                     <p className="mt-1.5 font-sans text-xs leading-relaxed text-muted-foreground">

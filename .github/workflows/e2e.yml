@@ -1,26 +1,32 @@
-# .github/workflows/e2e.yml
-# Frontend-only repo: Playwright starts Next (`npm run dev`); tests call the API on Render.
+# Frontend-only repo: build + `next start`; tests call the API on Render.
 name: E2E Integration Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      NEXT_PUBLIC_API_URL: ${{ vars.E2E_API_URL || 'https://backend-7eop.onrender.com' }}
+      API_URL: ${{ vars.E2E_API_URL || 'https://backend-7eop.onrender.com' }}
+      E2E_DEMO_EMAIL: ${{ secrets.E2E_DEMO_EMAIL || 'admin' }}
+      E2E_DEMO_PASSWORD: ${{ secrets.E2E_DEMO_PASSWORD || 'admin' }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "24"
+          cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
@@ -29,17 +35,21 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Build Next.js
+        run: npm run build
+
       - name: Run Playwright E2E
         run: npm run test:e2e
         env:
           CI: true
-          # No trailing slash. Optional repo variable E2E_API_URL overrides the default.
-          NEXT_PUBLIC_API_URL: ${{ vars.E2E_API_URL || 'https://backend-7eop.onrender.com' }}
 
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
-        if: always()
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: playwright-report/
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 30
+          if-no-files-found: ignore

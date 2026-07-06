@@ -8,6 +8,7 @@ import {
   formatChangeDisplayValue,
   formatChangeFieldName,
 } from "@/lib/profile-comparison-helpers"
+import { useChangeDisplayLabels } from "@/components/candidato/profile-tailoring/comparison/use-change-display-labels"
 
 interface ChangeHighlightsDiffProps {
   changeHighlights: ProfileChangeHighlight[]
@@ -53,27 +54,18 @@ function DiffText({ text, expanded, onToggle, showToggleLabel }: {
 
 function ChangeDiffCard({ item }: { item: ProfileChangeHighlight }) {
   const t = useTranslations("CandidatePortal.profileTailoring.comparison.dashboard")
+  const { displayLabels, fieldLabels } = useChangeDisplayLabels()
   const [beforeExpanded, setBeforeExpanded] = useState(false)
   const [afterExpanded, setAfterExpanded] = useState(false)
 
-  const beforeText = formatChangeDisplayValue(
-    item.before,
-    item.field,
-    t("emptySummary"),
-    t("notDefined")
-  )
-  const afterText = formatChangeDisplayValue(
-    item.after,
-    item.field,
-    t("emptySummary"),
-    t("notDefined")
-  )
+  const beforeText = formatChangeDisplayValue(item.before, item.field, displayLabels)
+  const afterText = formatChangeDisplayValue(item.after, item.field, displayLabels)
 
   return (
     <article className="overflow-hidden rounded-xl border border-border/70 bg-white shadow-sm">
       <div className="border-b border-border/60 bg-muted/15 px-4 py-3">
         <p className="font-sans text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          {formatChangeFieldName(item.field)}
+          {formatChangeFieldName(item.field, fieldLabels)}
         </p>
       </div>
       <div className="grid grid-cols-1 gap-0 md:grid-cols-2">

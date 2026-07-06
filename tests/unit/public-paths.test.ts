@@ -13,4 +13,8 @@ describe("isPublicPath", () => {
   it("requires auth for recruiter portal routes", () => {
     expect(isPublicPath("/portal-rrhh")).toBe(false)
   })
+
+  it("allows privacy policy without auth", () => {
+    expect(isPublicPath("/privacy-policy")).toBe(true)
+  })
 })
