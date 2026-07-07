@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  Suspense,
   type ChangeEvent,
   type FormEvent,
 } from "react"
@@ -17,6 +18,7 @@ import ProductBrand from "@/components/branding/ProductBrand"
 import LanguageSwitcher from "@/components/language-switcher"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { LinkedInLoginButton } from "@/components/auth/LinkedInLoginButton"
 
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : "";
@@ -318,17 +320,19 @@ export default function IniciarSesion() {
                   {loading ? t("login.submitting") : t("login.submit")}
                 </Button>
 
-                {/* <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-3 md:gap-4">
-                    <div className="flex-1 h-px bg-border"></div>
-                    <span className="text-xs text-muted-foreground">o</span>
-                    <div className="flex-1 h-px bg-border"></div>
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs text-muted-foreground">
+                      {t("login.orContinueWith")}
+                    </span>
+                    <div className="flex-1 h-px bg-border" />
                   </div>
 
-                  <Button variant="outline">
-                    Continuar con Google
-                  </Button>
-                </div> */}
+                  <Suspense fallback={null}>
+                    <LinkedInLoginButton disabled={loading} />
+                  </Suspense>
+                </div>
               </div>
             </form>
 

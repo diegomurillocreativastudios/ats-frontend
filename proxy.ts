@@ -3,6 +3,7 @@ import { AUTH_COOKIES } from "@/lib/auth"
 import { isPublicPath } from "@/lib/auth/public-paths"
 
 const AUTH_ROUTE = "/auth/iniciar-sesion"
+const SSO_SUCCESS_PATH = "/auth/sso/success"
 const CANDIDATE_HOME = "/portal-candidato"
 const RECRUITER_HOME = "/portal-rrhh"
 const PORTAL_SELECTOR = "/seleccion-portal"
@@ -63,6 +64,13 @@ export function proxy(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace(/^\/mi-perfil/, `${CANDIDATE_HOME}/mi-perfil`)
     return NextResponse.redirect(url)
+  }
+
+  if (
+    pathname === SSO_SUCCESS_PATH ||
+    pathname.startsWith(`${SSO_SUCCESS_PATH}/`)
+  ) {
+    return NextResponse.next()
   }
 
   const isAuthPage =

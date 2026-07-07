@@ -97,7 +97,24 @@
       "toastPasswordReset": "La tua password è stata aggiornata correttamente. Accedi con la nuova password.",
       "toastLogoutSuccess": "Disconnessione effettuata correttamente.",
       "toastLogoutError": "Non abbiamo potuto confermare la disconnessione, ma ti abbiamo reindirizzato alla pagina di accesso.",
-      "toastInvalidCredentials": "Credenziali non valide. Verifica email e password."
+      "toastInvalidCredentials": "Credenziali non valide. Verifica email e password.",
+      "continueWithLinkedIn": "Continua con LinkedIn",
+      "orContinueWith": "O continua con"
+    },
+    "sso": {
+      "validating": "Validazione accesso in corso…",
+      "errorTitle": "Non siamo riusciti a completare l'accesso",
+      "errorDescription": "Non siamo riusciti a completare l'accesso con LinkedIn. Riprova.",
+      "backToSignIn": "Torna all'accesso",
+      "errors": {
+        "missing_code": "Manca il codice di accesso. Riprova.",
+        "linkedin_sso_failed": "Non siamo riusciti a completare l'accesso con LinkedIn. Riprova.",
+        "account_banned": "Il tuo account non può accedere. Contatta l'amministratore.",
+        "email_not_verified": "Non abbiamo potuto verificare l'email di LinkedIn. Prova un altro metodo di accesso.",
+        "exchange_code_expired": "La sessione di accesso è scaduta. Riprova.",
+        "exchange_code_used": "Questo link di accesso è già stato utilizzato. Riprova.",
+        "network_error": "Impossibile connettersi al server. Riprova."
+      }
     },
     "forgot": {
       "brandTitle": "Recupera l'accesso<br></br>al tuo account",

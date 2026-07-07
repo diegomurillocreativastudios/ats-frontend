@@ -17,4 +17,8 @@ describe("isPublicPath", () => {
   it("allows privacy policy without auth", () => {
     expect(isPublicPath("/privacy-policy")).toBe(true)
   })
+
+  it("allows linkedin sso success without auth", () => {
+    expect(isPublicPath("/auth/sso/success")).toBe(true)
+  })
 })

@@ -97,7 +97,24 @@
       "toastPasswordReset": "Your password was updated successfully. Sign in with your new password.",
       "toastLogoutSuccess": "Signed out successfully.",
       "toastLogoutError": "We couldn't confirm the sign-out, but we redirected you to the access page.",
-      "toastInvalidCredentials": "Invalid credentials. Please check your email and password."
+      "toastInvalidCredentials": "Invalid credentials. Please check your email and password.",
+      "continueWithLinkedIn": "Continue with LinkedIn",
+      "orContinueWith": "Or continue with"
+    },
+    "sso": {
+      "validating": "Validating sign-in…",
+      "errorTitle": "We couldn't complete sign-in",
+      "errorDescription": "We couldn't complete your LinkedIn sign-in. Please try again.",
+      "backToSignIn": "Back to sign in",
+      "errors": {
+        "missing_code": "The sign-in code is missing. Please try again.",
+        "linkedin_sso_failed": "We couldn't complete your LinkedIn sign-in. Please try again.",
+        "account_banned": "Your account cannot sign in. Contact your administrator.",
+        "email_not_verified": "We couldn't verify your LinkedIn email. Try another sign-in method.",
+        "exchange_code_expired": "The sign-in session expired. Please try again.",
+        "exchange_code_used": "This sign-in link was already used. Please try again.",
+        "network_error": "We couldn't connect to the server. Please try again."
+      }
     },
     "forgot": {
       "brandTitle": "Recover access<br></br>to your account",

@@ -97,7 +97,24 @@
       "toastPasswordReset": "Tu contraseña se actualizó correctamente. Iniciá sesión con tu nueva clave.",
       "toastLogoutSuccess": "Sesión cerrada correctamente.",
       "toastLogoutError": "No pudimos confirmar el cierre de sesión, pero te redirigimos al acceso.",
-      "toastInvalidCredentials": "Credenciales inválidas. Por favor, verifica tu email y contraseña."
+      "toastInvalidCredentials": "Credenciales inválidas. Por favor, verifica tu email y contraseña.",
+      "continueWithLinkedIn": "Continuar con LinkedIn",
+      "orContinueWith": "O continúa con"
+    },
+    "sso": {
+      "validating": "Validando inicio de sesión…",
+      "errorTitle": "No pudimos completar el inicio de sesión",
+      "errorDescription": "No pudimos completar el inicio de sesión con LinkedIn. Intenta nuevamente.",
+      "backToSignIn": "Volver al inicio de sesión",
+      "errors": {
+        "missing_code": "Falta el código de inicio de sesión. Intenta nuevamente.",
+        "linkedin_sso_failed": "No pudimos completar el inicio de sesión con LinkedIn. Intenta nuevamente.",
+        "account_banned": "Tu cuenta no puede iniciar sesión. Contacta al administrador.",
+        "email_not_verified": "No pudimos verificar el correo de LinkedIn. Intenta con otro método de inicio de sesión.",
+        "exchange_code_expired": "La sesión de inicio expiró. Intenta nuevamente.",
+        "exchange_code_used": "Este enlace de inicio ya fue utilizado. Intenta nuevamente.",
+        "network_error": "No pudimos conectar con el servidor. Intenta nuevamente."
+      }
     },
     "forgot": {
       "brandTitle": "Recuperá el acceso<br></br>a tu cuenta",
