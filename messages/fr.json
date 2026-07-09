@@ -97,7 +97,24 @@
       "toastPasswordReset": "Votre mot de passe a été mis à jour avec succès. Connectez-vous avec votre nouveau mot de passe.",
       "toastLogoutSuccess": "Déconnexion réussie.",
       "toastLogoutError": "Nous n'avons pas pu confirmer la déconnexion, mais nous vous avons redirigé vers la page d'accès.",
-      "toastInvalidCredentials": "Identifiants invalides. Veuillez vérifier votre e-mail et votre mot de passe."
+      "toastInvalidCredentials": "Identifiants invalides. Veuillez vérifier votre e-mail et votre mot de passe.",
+      "continueWithLinkedIn": "Continuer avec LinkedIn",
+      "orContinueWith": "Ou continuer avec"
+    },
+    "sso": {
+      "validating": "Validation de la connexion…",
+      "errorTitle": "Nous n'avons pas pu terminer la connexion",
+      "errorDescription": "Nous n'avons pas pu terminer votre connexion LinkedIn. Veuillez réessayer.",
+      "backToSignIn": "Retour à la connexion",
+      "errors": {
+        "missing_code": "Le code de connexion est manquant. Veuillez réessayer.",
+        "linkedin_sso_failed": "Nous n'avons pas pu terminer votre connexion LinkedIn. Veuillez réessayer.",
+        "account_banned": "Votre compte ne peut pas se connecter. Contactez l'administrateur.",
+        "email_not_verified": "Nous n'avons pas pu vérifier l'e-mail LinkedIn. Essayez une autre méthode de connexion.",
+        "exchange_code_expired": "La session de connexion a expiré. Veuillez réessayer.",
+        "exchange_code_used": "Ce lien de connexion a déjà été utilisé. Veuillez réessayer.",
+        "network_error": "Impossible de se connecter au serveur. Veuillez réessayer."
+      }
     },
     "forgot": {
       "brandTitle": "Récupérez l'accès<br></br>à votre compte",

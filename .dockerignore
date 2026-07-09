@@ -1,0 +1,46 @@
+# Dependencies & build output
+node_modules
+.next
+out
+build
+coverage
+
+# Git / IDE
+.git
+.gitignore
+.cursor
+.github
+.vscode
+.idea
+*.md
+!README_DEPLOY_GCP.md
+
+# Env & secrets (never bake into the image)
+.env
+.env.*
+!.env.example
+
+# Tests & tooling
+tests
+test-results
+playwright-report
+blob-report
+playwright
+vitest.config.mjs
+vitest.setup.ts
+playwright.config.ts
+cspell.json
+cspell-project-words.txt
+eslint.config.mjs
+
+# Misc
+.DS_Store
+*.pem
+*.log
+.vercel
+design.pen
+docs
+avance-de-vacantes-*.pdf
+public/chromium-pack.tar
+tsconfig.tsbuildinfo
+next-env.d.ts

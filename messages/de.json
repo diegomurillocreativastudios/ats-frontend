@@ -97,7 +97,24 @@
       "toastPasswordReset": "Ihr Passwort wurde erfolgreich aktualisiert. Melden Sie sich mit Ihrem neuen Passwort an.",
       "toastLogoutSuccess": "Erfolgreich abgemeldet.",
       "toastLogoutError": "Wir konnten die Abmeldung nicht bestätigen, haben Sie aber zur Anmeldeseite weitergeleitet.",
-      "toastInvalidCredentials": "Ungültige Anmeldedaten. Bitte überprüfen Sie E-Mail und Passwort."
+      "toastInvalidCredentials": "Ungültige Anmeldedaten. Bitte überprüfen Sie E-Mail und Passwort.",
+      "continueWithLinkedIn": "Mit LinkedIn fortfahren",
+      "orContinueWith": "Oder fortfahren mit"
+    },
+    "sso": {
+      "validating": "Anmeldung wird überprüft…",
+      "errorTitle": "Anmeldung konnte nicht abgeschlossen werden",
+      "errorDescription": "Die Anmeldung mit LinkedIn konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+      "backToSignIn": "Zurück zur Anmeldung",
+      "errors": {
+        "missing_code": "Der Anmeldecode fehlt. Bitte versuchen Sie es erneut.",
+        "linkedin_sso_failed": "Die Anmeldung mit LinkedIn konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+        "account_banned": "Ihr Konto kann sich nicht anmelden. Wenden Sie sich an den Administrator.",
+        "email_not_verified": "Die LinkedIn-E-Mail konnte nicht verifiziert werden. Versuchen Sie eine andere Anmeldemethode.",
+        "exchange_code_expired": "Die Anmeldesitzung ist abgelaufen. Bitte versuchen Sie es erneut.",
+        "exchange_code_used": "Dieser Anmeldelink wurde bereits verwendet. Bitte versuchen Sie es erneut.",
+        "network_error": "Verbindung zum Server fehlgeschlagen. Bitte versuchen Sie es erneut."
+      }
     },
     "forgot": {
       "brandTitle": "Zugang zu Ihrem<br></br>Konto wiederherstellen",

@@ -9,6 +9,8 @@ const pdfRouteTraceAssets = [
 ]
 
 const nextConfig = {
+  // Required for Docker / Cloud Run (copies a minimal Node server under .next/standalone)
+  output: "standalone",
   serverExternalPackages: ["pdfkit", "puppeteer-core", "@sparticuz/chromium"],
   /**
    * @sparticuz/chromium brotli binaries + logos must ship inside the PDF serverless trace on Vercel.
