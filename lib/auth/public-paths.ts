@@ -3,6 +3,7 @@ export const CHROMIUM_PACK_PATH = "/chromium-pack.tar"
 
 export const authPublicPaths = [
   "/auth/iniciar-sesion",
+  "/auth/iniciar-sesion-neo",
   "/auth/sso/success",
   "/auth/registrarse",
   "/auth/forgot-password",
