@@ -1,96 +1,53 @@
-# Cloud Build: build Next.js image → Artifact Registry → Cloud Run
-#
-# Required substitutions (or defaults below):
-#   _REGION, _REPO, _SERVICE, _IMAGE, _TAG
-#   _NEXT_PUBLIC_API_URL, _NEXT_PUBLIC_APP_URL
-# Optional:
-#   _NEXT_PUBLIC_GOOGLE_CALENDAR_SUCCESS_URL
-#   _NEXT_PUBLIC_GOOGLE_CALENDAR_ERROR_URL
-#   _API_URL, _BACKEND_URL  (server-side; prefer Secret Manager for secrets)
-#
-# Example:
-#   gcloud builds submit --config=cloudbuild.yaml \
-#     --substitutions=_SERVICE=ats-frontend-staging,_TAG=abc1234,_NEXT_PUBLIC_API_URL=https://api.example.com,_NEXT_PUBLIC_APP_URL=https://app.example.com
-
 substitutions:
   _REGION: us-west2
-  _REPO: ats-frontend
-  _SERVICE: ats-frontend-staging
-  _IMAGE: ats-frontend
-  _TAG: latest
-  _NEXT_PUBLIC_API_URL: ""
-  _NEXT_PUBLIC_APP_URL: ""
-  _NEXT_PUBLIC_GOOGLE_CALENDAR_SUCCESS_URL: ""
-  _NEXT_PUBLIC_GOOGLE_CALENDAR_ERROR_URL: ""
-  _API_URL: ""
-  _BACKEND_URL: ""
-  _MEMORY: 1Gi
-  _CPU: "1"
-  _CONCURRENCY: "80"
-  _MAX_INSTANCES: "10"
-  _PORT: "8080"
-
-options:
-  logging: CLOUD_LOGGING_ONLY
-  substitutionOption: ALLOW_LOOSE
+  _SERVICE_NAME: ats-frontend-staging
+  _AR_REPOSITORY: ats-frontend
+  _IMAGE_NAME: ats-frontend
+  _NEXT_PUBLIC_API_URL: https://ats-backend-api-718325001678.us-west2.run.app
+  _NEXT_PUBLIC_APP_URL: https://ats-frontend-staging-temp.run.app
 
 steps:
-  # 1) Build Docker image (NEXT_PUBLIC_* baked at build time)
   - name: gcr.io/cloud-builders/docker
-    id: build
+    id: Build image
     args:
       - build
       - --build-arg
       - NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}
       - --build-arg
       - NEXT_PUBLIC_APP_URL=${_NEXT_PUBLIC_APP_URL}
-      - --build-arg
-      - NEXT_PUBLIC_GOOGLE_CALENDAR_SUCCESS_URL=${_NEXT_PUBLIC_GOOGLE_CALENDAR_SUCCESS_URL}
-      - --build-arg
-      - NEXT_PUBLIC_GOOGLE_CALENDAR_ERROR_URL=${_NEXT_PUBLIC_GOOGLE_CALENDAR_ERROR_URL}
       - -t
-      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
       - -t
-      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:latest
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:latest
       - .
 
-  # 2) Push tags to Artifact Registry
   - name: gcr.io/cloud-builders/docker
-    id: push-tag
+    id: Push image
     args:
       - push
-      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}
-    waitFor: [build]
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}
 
-  - name: gcr.io/cloud-builders/docker
-    id: push-latest
-    args:
-      - push
-      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:latest
-    waitFor: [build]
-
-  # 3) Deploy to Cloud Run
-  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
-    id: deploy
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: Deploy to Cloud Run
     entrypoint: gcloud
     args:
       - run
       - deploy
-      - ${_SERVICE}
-      - --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}
-      - --region=${_REGION}
-      - --platform=managed
-      - --port=${_PORT}
-      - --memory=${_MEMORY}
-      - --cpu=${_CPU}
-      - --concurrency=${_CONCURRENCY}
-      - --max-instances=${_MAX_INSTANCES}
+      - ${_SERVICE_NAME}
+      - --image
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+      - --region
+      - ${_REGION}
+      - --platform
+      - managed
       - --allow-unauthenticated
-      - --set-env-vars=NODE_ENV=production,PORT=${_PORT},HOSTNAME=0.0.0.0,NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL},NEXT_PUBLIC_APP_URL=${_NEXT_PUBLIC_APP_URL},API_URL=${_API_URL},BACKEND_URL=${_BACKEND_URL}
-    waitFor: [push-tag]
+      - --set-env-vars
+      - NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL},NEXT_PUBLIC_APP_URL=${_NEXT_PUBLIC_APP_URL},NODE_ENV=production
 
 images:
-  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}
-  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:latest
 
-timeout: 1800s
+options:
+  logging: CLOUD_LOGGING_ONLY

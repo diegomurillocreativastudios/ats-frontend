@@ -164,7 +164,7 @@ Flujo equivalente sin script:
 gcloud builds submit \
   --project="$GCP_PROJECT_ID" \
   --config=cloudbuild.yaml \
-  --substitutions=_SERVICE=ats-frontend-staging,_TAG=$(git rev-parse --short HEAD),_NEXT_PUBLIC_API_URL=https://TU_BACKEND,_NEXT_PUBLIC_APP_URL=https://TU_FRONTEND \
+  --substitutions=_SERVICE_NAME=ats-frontend-staging,_AR_REPOSITORY=ats-frontend,_IMAGE_NAME=ats-frontend,SHORT_SHA=$(git rev-parse --short HEAD),_NEXT_PUBLIC_API_URL=https://TU_BACKEND,_NEXT_PUBLIC_APP_URL=https://TU_FRONTEND \
   .
 ```
 

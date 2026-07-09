@@ -1,0 +1,45 @@
+# Dependencies & build artifacts (Cloud Build runs npm ci inside Docker)
+node_modules/
+.next/
+out/
+build/
+coverage/
+
+# Git / IDE
+.git/
+.gitignore
+.cursor/
+.github/
+.vscode/
+.idea/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Tests & local tooling (not needed for production image)
+tests/
+test-results/
+playwright-report/
+blob-report/
+playwright/
+vitest.config.mjs
+vitest.setup.ts
+playwright.config.ts
+cspell.json
+cspell-project-words.txt
+eslint.config.mjs
+
+# Docs & misc
+*.md
+!README_DEPLOY_GCP.md
+docs/
+.DS_Store
+*.pem
+*.log
+.vercel/
+design.pen
+avance-de-vacantes-*.pdf
+public/chromium-pack.tar
+tsconfig.tsbuildinfo
