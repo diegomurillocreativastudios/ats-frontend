@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  canChangePortal,
   canStaffBulkPdfCvUpload,
   isAdminRole,
   isRecruiterRole,
@@ -24,5 +25,14 @@ describe("roles", () => {
     expect(
       canStaffBulkPdfCvUpload({ variant: "self", role: "candidate" }),
     ).toBe(false)
+  })
+
+  it("permite cambiar de portal solo a Admin o Recruiter con sesión", () => {
+    expect(canChangePortal(null)).toBe(false)
+    expect(canChangePortal(undefined)).toBe(false)
+    expect(canChangePortal("Candidate")).toBe(false)
+    expect(canChangePortal("Admin")).toBe(true)
+    expect(canChangePortal("Recruiter")).toBe(true)
+    expect(canChangePortal("Human Resources")).toBe(true)
   })
 })
