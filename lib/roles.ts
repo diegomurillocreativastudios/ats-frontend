@@ -36,3 +36,11 @@ export function canStaffBulkPdfCvUpload({
   if (variant === "recruiter") return true
   return isAdminRole(role) || isRecruiterRole(role)
 }
+
+/**
+ * True if the user may see the "Cambiar portal" action.
+ * Requires Admin or Recruiter; Candidates are excluded.
+ */
+export function canChangePortal(role: string | null | undefined): boolean {
+  return isAdminRole(role) || isRecruiterRole(role)
+}

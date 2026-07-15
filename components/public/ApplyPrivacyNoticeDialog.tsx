@@ -169,9 +169,9 @@ export function ApplyPrivacyNoticeDialog({
             {t("contactPrefix")}{" "}
             <a
               className="font-medium text-ats-terracotta underline decoration-border underline-offset-2 transition-colors hover:text-ats-terracotta-hover hover:decoration-ats-terracotta/40 focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-background"
-              href="mailto:info@visibleo.us"
+              href="mailto:info@applicantree.com"
             >
-              info@visibleo.us
+              info@applicantree.com
             </a>
           </p>
         </div>

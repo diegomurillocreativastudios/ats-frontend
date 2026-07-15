@@ -65,10 +65,6 @@ export default function IniciarSesionNeo() {
               ))}
             </ul>
           </div>
-
-          <span className="text-xs font-bold uppercase tracking-widest text-black/60">
-            Creativa Studios
-          </span>
         </div>
 
         {/* Panel derecho: formulario */}

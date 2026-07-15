@@ -5,7 +5,9 @@ import { Grid3x3 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { ApplicanTreeLogo } from "@/components/branding/ApplicanTreeLogo"
 import LanguageSwitcher from "@/components/language-switcher"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { publicOpportunitiesTheme as theme } from "@/lib/public-opportunities-theme"
+import { canChangePortal } from "@/lib/roles"
 
 interface PublicOpportunitiesNavbarProps {
   className?: string
@@ -15,6 +17,9 @@ export function PublicOpportunitiesNavbar({
   className = "",
 }: PublicOpportunitiesNavbarProps) {
   const t = useTranslations("PublicOpportunities.navbar")
+  const { user, loading } = useCurrentUser()
+  const showChangePortal =
+    !loading && Boolean(user) && canChangePortal(user?.role)
 
   return (
     <nav
@@ -42,15 +47,17 @@ export function PublicOpportunitiesNavbar({
 
         <div className="relative flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher triggerClassName={theme.navAction} />
-          <Link
-            href="/seleccion-portal"
-            className={theme.navAction}
-            aria-label={t("ariaGoToSelection")}
-          >
-            <Grid3x3 className="h-4 w-4" aria-hidden />
-            <span className="hidden sm:inline">{t("changePortal")}</span>
-            <span className="sm:hidden">{t("portalsShort")}</span>
-          </Link>
+          {showChangePortal ? (
+            <Link
+              href="/seleccion-portal"
+              className={theme.navAction}
+              aria-label={t("ariaGoToSelection")}
+            >
+              <Grid3x3 className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">{t("changePortal")}</span>
+              <span className="sm:hidden">{t("portalsShort")}</span>
+            </Link>
+          ) : null}
         </div>
       </div>
     </nav>
