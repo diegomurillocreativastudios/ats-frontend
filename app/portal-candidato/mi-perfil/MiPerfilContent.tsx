@@ -1,14 +1,24 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import CandidateSidebar from "@/components/candidato/CandidateSidebar"
 import CandidateTopbar from "@/components/candidato/CandidateTopbar"
 import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
 import { CandidateSelfProfileView } from "@/components/candidato/candidate-self-profile-view"
+import {
+  ConsentAuthorizationModal,
+  type ConsentAuthorizationSubmitPayload,
+} from "@/components/candidato/consent-authorization-modal"
 import { useCandidateProfile } from "@/hooks/useCandidateProfile"
 import { useCandidateSelfProfile } from "@/hooks/useCandidateSelfProfile"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
+import {
+  fetchCandidateAuthConsentStatus,
+  mapCandidateAuthConsentError,
+  submitCandidateAuthConsent,
+  type CandidateAuthConsentStatus,
+} from "@/lib/candidate-auth-consent"
 import type { CandidateProfileSaveBody } from "@/lib/candidate-profile"
 import { AlertCircle, UserCircle } from "lucide-react"
 
@@ -32,6 +42,42 @@ export default function MiPerfilContent() {
   const { profile: selfDto, loading: selfLoading, refetch: refetchSelf } =
     useCandidateSelfProfile()
   const { showSnackbar } = useCandidateSnackbar()
+  const [isConsentOpen, setIsConsentOpen] = useState(false)
+  const [consentStatus, setConsentStatus] =
+    useState<CandidateAuthConsentStatus | null>(null)
+
+  useEffect(() => {
+    if (apiLoading) return
+    if (notFound || apiProfile == null) {
+      setIsConsentOpen(false)
+      return
+    }
+
+    let cancelled = false
+    const loadConsentStatus = async () => {
+      try {
+        const status = await fetchCandidateAuthConsentStatus()
+        if (cancelled) return
+        setConsentStatus(status)
+        setIsConsentOpen(status.requiresReacceptance === true)
+      } catch {
+        if (cancelled) return
+        // Fallback: profile flag from GET /api/candidate/profile
+        setConsentStatus(null)
+        setIsConsentOpen(apiProfile.authAndConsentVerification !== true)
+      }
+    }
+
+    void loadConsentStatus()
+    return () => {
+      cancelled = true
+    }
+  }, [
+    apiLoading,
+    notFound,
+    apiProfile?.id,
+    apiProfile?.authAndConsentVerification,
+  ])
 
   const handleSaveProfile = useCallback(
     async (body: CandidateProfileSaveBody) => {
@@ -50,6 +96,61 @@ export default function MiPerfilContent() {
     void refetchApiProfile()
     void refetchSelf()
   }, [refetchApiProfile, refetchSelf])
+
+  const handleCloseConsent = useCallback(() => {
+    // Consent is required until verified; allow dismiss only if already verified.
+    if (
+      apiProfile?.authAndConsentVerification === true &&
+      consentStatus?.requiresReacceptance !== true
+    ) {
+      setIsConsentOpen(false)
+    }
+  }, [apiProfile?.authAndConsentVerification, consentStatus?.requiresReacceptance])
+
+  const handleAcceptConsent = useCallback(
+    async (payload: ConsentAuthorizationSubmitPayload) => {
+      try {
+        const result = await submitCandidateAuthConsent(payload)
+        setConsentStatus({
+          authAndConsentVerification: result.authAndConsentVerification,
+          authAndConsentVerifiedAt: result.authAndConsentVerifiedAt,
+          currentDocumentVersion: result.documentVersion,
+          acceptedDocumentVersion: result.documentVersion,
+          requiresReacceptance: !result.authAndConsentVerification,
+        })
+        setIsConsentOpen(false)
+        await Promise.all([refetchApiProfile(), refetchSelf()])
+        showSnackbar(t("consent.toasts.submitSuccess"), "success")
+      } catch (err) {
+        const mapped = mapCandidateAuthConsentError(err)
+        if (mapped.code === "AUTH_CONSENT_VERSION_MISMATCH") {
+          showSnackbar(t("consent.toasts.versionMismatch"), "error")
+          return
+        }
+        if (mapped.code === "AUTH_CONSENT_NATIONAL_ID_CONFLICT") {
+          showSnackbar(t("consent.toasts.nationalIdConflict"), "error")
+          return
+        }
+        if (mapped.code === "AUTH_CONSENT_PROFILE_NOT_FOUND") {
+          showSnackbar(t("consent.toasts.profileNotFound"), "error")
+          return
+        }
+        if (mapped.code === "AUTH_CONSENT_FORBIDDEN") {
+          showSnackbar(t("consent.toasts.forbidden"), "error")
+          return
+        }
+        if (mapped.code === "AUTH_CONSENT_VALIDATION") {
+          showSnackbar(
+            mapped.message || t("consent.toasts.validation"),
+            "error"
+          )
+          return
+        }
+        showSnackbar(mapped.message || t("consent.toasts.submitError"), "error")
+      }
+    },
+    [refetchApiProfile, refetchSelf, showSnackbar, t]
+  )
 
   const sessionCard = (
     <section
@@ -112,9 +213,13 @@ export default function MiPerfilContent() {
 
   const showFatalError = apiError != null
   const showView = !apiLoading && !showFatalError && (notFound || apiProfile != null)
+  const isConsentRequired =
+    apiProfile != null &&
+    (consentStatus?.requiresReacceptance === true ||
+      apiProfile.authAndConsentVerification !== true)
 
   const mainInner = (
-    <div className="mx-auto w-full max-w-5xl pb-10">
+    <div className="mx-auto w-full max-w-7xl pb-10">
       <header className="mb-6 md:mb-8">
         <h1 className="font-sans text-2xl font-bold tracking-tight text-foreground md:text-3xl">
           {t("page.title")}
@@ -215,6 +320,14 @@ export default function MiPerfilContent() {
           <div className="min-w-0 px-4 py-5 md:px-6 md:py-6">{mainInner}</div>
         </main>
       </div>
+
+      <ConsentAuthorizationModal
+        isOpen={isConsentOpen}
+        onClose={handleCloseConsent}
+        onAccept={handleAcceptConsent}
+        initialEmail={user?.email ?? apiProfile?.email}
+        isDismissible={!isConsentRequired}
+      />
     </div>
   )
 }

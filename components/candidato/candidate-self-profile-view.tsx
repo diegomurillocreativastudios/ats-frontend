@@ -12,6 +12,7 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 import {
   Award,
+  BadgeCheck,
   Briefcase,
   Building2,
   ChevronRight,
@@ -692,12 +693,26 @@ export function CandidateSelfProfileView({
                 </>
               ) : (
                 <>
-                  <h2
-                    id="perfil-resumen-titulo"
-                    className="font-sans text-xl font-bold leading-tight text-foreground md:text-2xl"
-                  >
-                    {displayName}
-                  </h2>
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <h2
+                      id="perfil-resumen-titulo"
+                      className="font-sans text-xl font-bold leading-tight text-foreground md:text-2xl"
+                    >
+                      {displayName}
+                    </h2>
+                    {candidateProfile?.authAndConsentVerification ? (
+                      <span
+                        className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 font-sans text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-500/30"
+                        title={t("consent.verifiedBadgeTitle")}
+                      >
+                        <BadgeCheck
+                          className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+                          aria-hidden
+                        />
+                        <span>{t("consent.verifiedBadge")}</span>
+                      </span>
+                    ) : null}
+                  </div>
                   {headlineDisplay ? (
                     <p className="mt-2 font-sans text-base font-medium text-vo-purple md:text-lg">
                       {headlineDisplay}
