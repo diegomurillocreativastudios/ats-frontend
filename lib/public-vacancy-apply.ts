@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import type { CandidateAuthConsentSubmitBody } from "@/lib/candidate-auth-consent"
 
 export interface PublicVacancyApplyValues {
   firstName: string
@@ -12,6 +13,8 @@ export interface PublicVacancyApplyValues {
   source?: string
   notes?: string
   cvFile: File
+  /** Evidencia de consent and auth aceptada antes de postular (misma forma que POST auth-consent). */
+  authConsent?: CandidateAuthConsentSubmitBody
 }
 
 export interface PublicVacancyApplySuccess {
@@ -68,12 +71,25 @@ export function parsePublicApplyFieldErrors(body: unknown): Record<string, strin
 }
 
 export function getPublicApplyErrorMessage(status: number, body: unknown): string {
+  const record = getRecord(body)
+  const code =
+    record && typeof record.code === "string" ? record.code.trim() : ""
+
+  if (code === "AUTH_CONSENT_VERSION_MISMATCH") {
+    return "El documento de autorización se actualizó. Recarga la página e intenta de nuevo."
+  }
+  if (code === "AUTH_CONSENT_NATIONAL_ID_CONFLICT") {
+    return "Ese documento de identidad ya está asociado a otro perfil. Usa otro valor o contacta soporte."
+  }
+  if (code === "AUTH_CONSENT_VALIDATION") {
+    return "Revisa la autorización y consentimiento e intenta de nuevo."
+  }
+
   if (status === 403) {
     return "El correo ingresado debe coincidir con tu cuenta de candidato."
   }
   if (status === 404) return "La vacante ya no está disponible."
   if (status === 422) {
-    const record = getRecord(body)
     const fromApi =
       record &&
       typeof record.message === "string" &&
@@ -86,7 +102,6 @@ export function getPublicApplyErrorMessage(status: number, body: unknown): strin
     )
   }
   if (status === 415) {
-    const record = getRecord(body)
     const fromApi =
       record &&
       typeof record.message === "string" &&
@@ -138,6 +153,9 @@ export function buildPublicApplyFormData(
   fd.append("vacancyId", vacancyId.trim())
   fd.append("cvFile", values.cvFile)
   fd.append("candidate", JSON.stringify(candidate))
+  if (values.authConsent) {
+    fd.append("authConsent", JSON.stringify(values.authConsent))
+  }
   return fd
 }
 

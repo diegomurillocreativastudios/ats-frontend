@@ -54,6 +54,20 @@ describe("public vacancy apply helpers", () => {
     expect(getPublicApplyErrorMessage(422, {})).toContain("procesar")
   })
 
+  it("maps AUTH_CONSENT error codes from personal-appliance", () => {
+    expect(
+      getPublicApplyErrorMessage(400, { code: "AUTH_CONSENT_VALIDATION" })
+    ).toContain("autorización")
+    expect(
+      getPublicApplyErrorMessage(409, { code: "AUTH_CONSENT_VERSION_MISMATCH" })
+    ).toContain("actualizó")
+    expect(
+      getPublicApplyErrorMessage(409, {
+        code: "AUTH_CONSENT_NATIONAL_ID_CONFLICT",
+      })
+    ).toContain("documento de identidad")
+  })
+
   it("prefers backend message on 422 when present", () => {
     expect(
       getPublicApplyErrorMessage(422, {
@@ -94,5 +108,37 @@ describe("public vacancy apply helpers", () => {
     expect(candidate.email).toBe("a@b.co")
     expect(candidate.source).toBe("linkedin")
     expect(candidate.notes).toBe("hola")
+  })
+
+  it("appends authConsent JSON when provided", () => {
+    const file = new File(["%PDF"], "x.pdf", { type: "application/pdf" })
+    const authConsent = {
+      documentVersion: "v1",
+      documentLocale: "es",
+      sectionsAccepted: {
+        profileUse: true,
+        personalData: true,
+        confidentiality: true,
+        communications: true,
+        nonExclusivity: true,
+        electronicSignature: true,
+        acceptance: true,
+      },
+      firstNames: "Ana",
+      lastNames: "López",
+      signature: "Ana López",
+      identityDocument: "123",
+      phoneCountryIso2: "SV",
+      phoneNationalNumber: "77778888",
+      clientDeclaredDate: "2026-08-07",
+    }
+    const fd = buildPublicApplyFormData("vacancy-123", {
+      firstName: "Ana",
+      lastName: "López",
+      email: "a@b.co",
+      cvFile: file,
+      authConsent,
+    })
+    expect(JSON.parse(String(fd.get("authConsent") ?? "{}"))).toEqual(authConsent)
   })
 })

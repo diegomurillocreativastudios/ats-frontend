@@ -5,6 +5,7 @@ import {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react"
@@ -38,18 +39,48 @@ interface ConsentSignatureFields {
 
 export type ConsentAuthorizationSubmitPayload = CandidateAuthConsentSubmitBody
 
+export interface ConsentAuthorizationInitialValues {
+  firstNames?: string | null
+  lastNames?: string | null
+  documentId?: string | null
+  email?: string | null
+  phone?: string | null
+  phoneCountryIso2?: string | null
+}
+
 interface ConsentAuthorizationModalProps {
   isOpen: boolean
   onClose: () => void
   /** Called with the API payload; may be async (modal shows submitting state). */
   onAccept: (payload: ConsentAuthorizationSubmitPayload) => void | Promise<void>
+  /** @deprecated Prefer `initialValues.email`. Kept for mi-perfil callers. */
   initialEmail?: string | null
+  /** Prefill signature fields (e.g. from public vacancy apply form). */
+  initialValues?: ConsentAuthorizationInitialValues | null
+  /** Visual accents: candidate portal (VO) vs public opportunities. */
+  variant?: "candidate" | "public"
   /** When true, overlay/cancel close is disabled (e.g. consent required). */
   isDismissible?: boolean
 }
 
-const checkboxClassName =
-  "h-4 w-4 shrink-0 rounded border border-input accent-vo-purple text-vo-purple focus:outline-none focus:ring-2 focus:ring-vo-purple/50 focus:ring-offset-1 disabled:opacity-50"
+const VARIANT_STYLES = {
+  candidate: {
+    checkbox:
+      "h-4 w-4 shrink-0 rounded border border-input accent-vo-purple text-vo-purple focus:outline-none focus:ring-2 focus:ring-vo-purple/50 focus:ring-offset-1 disabled:opacity-50",
+    progressText: "font-sans text-xs font-medium text-vo-purple",
+    focusRing:
+      "focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2",
+    requiredMark: "ml-1 text-vo-pink",
+  },
+  public: {
+    checkbox:
+      "h-4 w-4 shrink-0 rounded border border-input accent-ats-terracotta text-ats-terracotta focus:outline-none focus:ring-2 focus:ring-ats-cobre/50 focus:ring-offset-1 disabled:opacity-50",
+    progressText: "font-sans text-xs font-medium text-ats-terracotta",
+    focusRing:
+      "focus:outline-none focus-visible:ring-2 focus-visible:ring-ats-cobre focus-visible:ring-offset-2",
+    requiredMark: "ml-1 text-ats-terracotta",
+  },
+} as const
 
 const fieldClassName =
   "glass-input h-10 w-full rounded-md px-3 py-2 font-sans text-sm disabled:cursor-not-allowed disabled:opacity-70"
@@ -57,11 +88,37 @@ const fieldClassName =
 const fieldLabelClassName =
   "font-sans text-xs font-medium text-muted-foreground"
 
-function RequiredFieldLabel({ children }: { children: ReactNode }) {
+function resolveInitialSignature(
+  initialValues: ConsentAuthorizationInitialValues | null | undefined,
+  initialEmail: string | null | undefined
+): ConsentSignatureFields {
+  const emailFromValues = initialValues?.email?.trim() ?? ""
+  const emailFallback = initialEmail?.trim() ?? ""
+  return {
+    firstNames: initialValues?.firstNames?.trim() ?? "",
+    lastNames: initialValues?.lastNames?.trim() ?? "",
+    signature: "",
+    documentId: initialValues?.documentId?.trim() ?? "",
+    date: getLocalDateIso(),
+    email: emailFromValues || emailFallback,
+    phone: initialValues?.phone?.trim() ?? "",
+    phoneCountryIso2:
+      initialValues?.phoneCountryIso2?.trim().toUpperCase() ||
+      DEFAULT_COUNTRY_ISO2,
+  }
+}
+
+function RequiredFieldLabel({
+  children,
+  requiredMarkClassName,
+}: {
+  children: ReactNode
+  requiredMarkClassName: string
+}) {
   return (
     <span className={fieldLabelClassName}>
       {children}
-      <span className="ml-1 text-vo-pink" aria-hidden>
+      <span className={requiredMarkClassName} aria-hidden>
         *
       </span>
     </span>
@@ -114,11 +171,14 @@ export function ConsentAuthorizationModal({
   onClose,
   onAccept,
   initialEmail = "",
+  initialValues = null,
+  variant = "candidate",
   isDismissible = true,
 }: ConsentAuthorizationModalProps) {
   const t = useTranslations("CandidatePortal.profile.consent")
   const locale = useLocale()
   const baseId = useId()
+  const styles = VARIANT_STYLES[variant]
 
   const [expandedId, setExpandedId] = useState<SectionId | null>("profileUse")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -128,19 +188,16 @@ export function ConsentAuthorizationModal({
       boolean
     >
   )
-  const [signature, setSignature] = useState<ConsentSignatureFields>({
-    firstNames: "",
-    lastNames: "",
-    signature: "",
-    documentId: "",
-    date: "",
-    email: "",
-    phone: "",
-    phoneCountryIso2: DEFAULT_COUNTRY_ISO2,
-  })
+  const [signature, setSignature] = useState<ConsentSignatureFields>(() =>
+    resolveInitialSignature(initialValues, initialEmail)
+  )
+  const wasOpenRef = useRef(false)
 
   useEffect(() => {
-    if (!isOpen) return
+    const justOpened = isOpen && !wasOpenRef.current
+    wasOpenRef.current = isOpen
+    if (!justOpened) return
+
     setIsSubmitting(false)
     setExpandedId("profileUse")
     setAccepted(
@@ -149,25 +206,8 @@ export function ConsentAuthorizationModal({
         boolean
       >
     )
-    setSignature({
-      firstNames: "",
-      lastNames: "",
-      signature: "",
-      documentId: "",
-      date: getLocalDateIso(),
-      email: initialEmail?.trim() ?? "",
-      phone: "",
-      phoneCountryIso2: DEFAULT_COUNTRY_ISO2,
-    })
-  }, [isOpen])
-
-  useEffect(() => {
-    if (!isOpen) return
-    const nextEmail = initialEmail?.trim() ?? ""
-    setSignature((prev) =>
-      prev.email === nextEmail ? prev : { ...prev, email: nextEmail }
-    )
-  }, [isOpen, initialEmail])
+    setSignature(resolveInitialSignature(initialValues, initialEmail))
+  }, [isOpen, initialValues, initialEmail])
 
   useEffect(() => {
     if (!isOpen) return
@@ -315,7 +355,7 @@ export function ConsentAuthorizationModal({
         <p className="font-sans text-sm text-muted-foreground">{t("subtitle")}</p>
 
         <div>
-          <p className="font-sans text-xs font-medium text-vo-purple">
+          <p className={styles.progressText}>
             {t("progress", { accepted: acceptedCount, total: totalSections })}
           </p>
           <div
@@ -360,7 +400,7 @@ export function ConsentAuthorizationModal({
                     <input
                       id={`${baseId}-${id}-check`}
                       type="checkbox"
-                      className={`mt-1 ${checkboxClassName}`}
+                      className={`mt-1 ${styles.checkbox}`}
                       checked={isAccepted}
                       disabled={isAcceptance && !formComplete}
                       onChange={(e) =>
@@ -376,7 +416,7 @@ export function ConsentAuthorizationModal({
                     <button
                       type="button"
                       id={headerId}
-                      className="flex min-w-0 flex-1 items-start gap-2 rounded-md text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                      className={`flex min-w-0 flex-1 items-start gap-2 rounded-md text-left ${styles.focusRing}`}
                       aria-expanded={isExpanded}
                       aria-controls={panelId}
                       onClick={() => handleToggleExpanded(id)}
@@ -433,7 +473,9 @@ export function ConsentAuthorizationModal({
                           {isAcceptance ? (
                             <div className="mt-4 grid gap-3 sm:grid-cols-2">
                               <label className="flex flex-col gap-1.5">
-                                <RequiredFieldLabel>
+                                <RequiredFieldLabel
+                                  requiredMarkClassName={styles.requiredMark}
+                                >
                                   {t("signature.firstNames")}
                                 </RequiredFieldLabel>
                                 <input
@@ -451,7 +493,9 @@ export function ConsentAuthorizationModal({
                                 />
                               </label>
                               <label className="flex flex-col gap-1.5">
-                                <RequiredFieldLabel>
+                                <RequiredFieldLabel
+                                  requiredMarkClassName={styles.requiredMark}
+                                >
                                   {t("signature.lastNames")}
                                 </RequiredFieldLabel>
                                 <input
@@ -469,7 +513,9 @@ export function ConsentAuthorizationModal({
                                 />
                               </label>
                               <label className="flex flex-col gap-1.5 sm:col-span-2">
-                                <RequiredFieldLabel>
+                                <RequiredFieldLabel
+                                  requiredMarkClassName={styles.requiredMark}
+                                >
                                   {t("signature.signature")}
                                 </RequiredFieldLabel>
                                 <input
@@ -483,7 +529,9 @@ export function ConsentAuthorizationModal({
                                 />
                               </label>
                               <label className="flex flex-col gap-1.5">
-                                <RequiredFieldLabel>
+                                <RequiredFieldLabel
+                                  requiredMarkClassName={styles.requiredMark}
+                                >
                                   {t("signature.documentId")}
                                 </RequiredFieldLabel>
                                 <input
@@ -500,7 +548,9 @@ export function ConsentAuthorizationModal({
                                 />
                               </label>
                               <label className="flex flex-col gap-1.5">
-                                <RequiredFieldLabel>
+                                <RequiredFieldLabel
+                                  requiredMarkClassName={styles.requiredMark}
+                                >
                                   {t("signature.date")}
                                 </RequiredFieldLabel>
                                 <input
@@ -513,7 +563,9 @@ export function ConsentAuthorizationModal({
                                 />
                               </label>
                               <label className="flex flex-col gap-1.5 sm:col-span-2">
-                                <RequiredFieldLabel>
+                                <RequiredFieldLabel
+                                  requiredMarkClassName={styles.requiredMark}
+                                >
                                   {t("signature.email")}
                                 </RequiredFieldLabel>
                                 <input
@@ -527,7 +579,9 @@ export function ConsentAuthorizationModal({
                                 />
                               </label>
                               <label className="flex flex-col gap-1.5 sm:col-span-2">
-                                <RequiredFieldLabel>
+                                <RequiredFieldLabel
+                                  requiredMarkClassName={styles.requiredMark}
+                                >
                                   {t("signature.phone")}
                                 </RequiredFieldLabel>
                                 <PhoneCountryInput

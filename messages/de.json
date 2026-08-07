@@ -3323,6 +3323,10 @@
         "emailInvalid": "Geben Sie eine gültige E-Mail ein.",
         "cvRequired": "Fügen Sie Ihren Lebenslauf als PDF oder DOCX bei.",
         "reviewFields": "Überprüfen Sie die angegebenen Felder.",
+        "consentSubmitFailed": "Wir konnten Ihre Autorisierung und Einwilligung nicht speichern. Bitte versuchen Sie es erneut.",
+        "consentValidation": "Bitte überprüfen Sie die Autorisierung und Einwilligung und versuchen Sie es erneut.",
+        "consentVersionMismatch": "Das Autorisierungsdokument wurde aktualisiert. Laden Sie die Seite neu und versuchen Sie es erneut.",
+        "consentNationalIdConflict": "Dieses Ausweisdokument ist bereits mit einem anderen Profil verknüpft. Verwenden Sie einen anderen Wert oder kontaktieren Sie den Support.",
         "documentTypeRequiresNumber": "Wenn Sie einen Dokumenttyp wählen, müssen Sie die Nummer eingeben.",
         "documentNumberRequiresType": "Wenn Sie eine Dokumentnummer eingeben, müssen Sie den Typ wählen."
       },

@@ -28,6 +28,12 @@ import {
 import { ApplyStyleProgressBar } from "@/components/public/apply-style-progress-bar"
 import { ApplyEmailConfirmationModal } from "@/components/public/ApplyEmailConfirmationModal"
 import {
+  ConsentAuthorizationModal,
+  type ConsentAuthorizationInitialValues,
+  type ConsentAuthorizationSubmitPayload,
+} from "@/components/candidato/consent-authorization-modal"
+import { getApiErrorCode } from "@/lib/candidate-auth-consent"
+import {
   listIdentityDocumentTypes,
   type IdentityDocumentTypeOptionDto,
 } from "@/lib/api/identity-document-types"
@@ -35,6 +41,22 @@ import {
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
 
 const SOURCE_OPTION_KEYS = ["social", "friends", "jobFair", "other"] as const
+
+function buildApplyConsentSnapshot(values: {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  nationalId: string
+}): string {
+  return JSON.stringify({
+    firstName: values.firstName.trim(),
+    lastName: values.lastName.trim(),
+    email: values.email.trim().toLowerCase(),
+    phone: values.phone.trim(),
+    nationalId: values.nationalId.trim(),
+  })
+}
 
 interface PublicVacancyApplicationFormState {
   firstName: string
@@ -269,6 +291,11 @@ export function PublicVacancyApplicationForm({
   const [submitPhase, setSubmitPhase] = useState<"idle" | "loading" | "success">("idle")
   const [loadingOverlay, setLoadingOverlay] = useState({ percent: 0, longWait: false })
   const [isConfirmEmailModalOpen, setIsConfirmEmailModalOpen] = useState(false)
+  const [isConsentModalOpen, setIsConsentModalOpen] = useState(false)
+  const [acceptedConsent, setAcceptedConsent] = useState<{
+    payload: ConsentAuthorizationSubmitPayload
+    snapshot: string
+  } | null>(null)
   const loadingStartedAtRef = useRef(0)
   const [documentTypes, setDocumentTypes] = useState<IdentityDocumentTypeOptionDto[]>([])
   const [isLoadingDocumentTypes, setIsLoadingDocumentTypes] = useState(true)
@@ -375,7 +402,7 @@ export function PublicVacancyApplicationForm({
   }, [values.firstName, values.lastName, values.email, values.documentTypeId, values.nationalId, cvFile, t])
 
   const executeSubmit = useCallback(async () => {
-    if (!cvFile) return
+    if (!cvFile || !acceptedConsent) return
 
     setSubmitPhase("loading")
     setLoadingOverlay({ percent: 0, longWait: false })
@@ -395,12 +422,14 @@ export function PublicVacancyApplicationForm({
       source: values.source,
       notes: values.notes,
       cvFile,
+      authConsent: acceptedConsent.payload,
     }
 
     try {
       await submitPublicVacancyApplication(vacancyId, payload)
       setValues(initialState)
       setCvFile(null)
+      setAcceptedConsent(null)
       setSubmitPhase("success")
     } catch (err: unknown) {
       setSubmitPhase("idle")
@@ -413,6 +442,20 @@ export function PublicVacancyApplicationForm({
           ? (err as { body?: unknown }).body
           : undefined
 
+      const consentCode = getApiErrorCode(err)
+      if (consentCode === "AUTH_CONSENT_VERSION_MISMATCH") {
+        setServerError(t("validation.consentVersionMismatch"))
+        return
+      }
+      if (consentCode === "AUTH_CONSENT_NATIONAL_ID_CONFLICT") {
+        setServerError(t("validation.consentNationalIdConflict"))
+        return
+      }
+      if (consentCode === "AUTH_CONSENT_VALIDATION") {
+        setServerError(t("validation.consentValidation"))
+        return
+      }
+
       if (status === 400) {
         const fieldMap = parsePublicApplyFieldErrors(body)
         if (Object.keys(fieldMap).length > 0) {
@@ -424,7 +467,7 @@ export function PublicVacancyApplicationForm({
 
       setServerError(getPublicApplyErrorMessage(status, body))
     }
-  }, [cvFile, values, vacancyId, t])
+  }, [cvFile, values, vacancyId, t, acceptedConsent])
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -438,9 +481,62 @@ export function PublicVacancyApplicationForm({
         return
       }
 
+      const snapshot = buildApplyConsentSnapshot(values)
+      if (acceptedConsent?.snapshot === snapshot) {
+        setIsConfirmEmailModalOpen(true)
+        return
+      }
+
+      setIsConsentModalOpen(true)
+    },
+    [submitPhase, validateClient, values, acceptedConsent]
+  )
+
+  const consentInitialValues = useMemo<ConsentAuthorizationInitialValues>(
+    () => ({
+      firstNames: values.firstName,
+      lastNames: values.lastName,
+      documentId: values.nationalId,
+      email: values.email,
+      phone: values.phone,
+      phoneCountryIso2: "SV",
+    }),
+    [
+      values.firstName,
+      values.lastName,
+      values.nationalId,
+      values.email,
+      values.phone,
+    ]
+  )
+
+  const handleCloseConsent = useCallback(() => {
+    setIsConsentModalOpen(false)
+  }, [])
+
+  const handleAcceptConsent = useCallback(
+    async (payload: ConsentAuthorizationSubmitPayload) => {
+      setValues((prev) => ({
+        ...prev,
+        firstName: payload.firstNames,
+        lastName: payload.lastNames,
+        nationalId: payload.identityDocument || prev.nationalId,
+        phone: payload.phoneNationalNumber || prev.phone,
+      }))
+      setAcceptedConsent({
+        payload,
+        snapshot: buildApplyConsentSnapshot({
+          firstName: payload.firstNames,
+          lastName: payload.lastNames,
+          email: values.email,
+          phone: payload.phoneNationalNumber || values.phone,
+          nationalId: payload.identityDocument || values.nationalId,
+        }),
+      })
+      setIsConsentModalOpen(false)
       setIsConfirmEmailModalOpen(true)
     },
-    [submitPhase, validateClient]
+    [values.email, values.phone, values.nationalId]
   )
 
   if (submitPhase === "success") {
@@ -830,6 +926,14 @@ export function PublicVacancyApplicationForm({
       email={values.email}
       theme={theme}
       isSubmitting={submitPhase === "loading"}
+    />
+    <ConsentAuthorizationModal
+      isOpen={isConsentModalOpen}
+      onClose={handleCloseConsent}
+      onAccept={handleAcceptConsent}
+      initialValues={consentInitialValues}
+      variant="public"
+      isDismissible
     />
     </div>
   )

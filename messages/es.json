@@ -3391,6 +3391,10 @@
         "emailInvalid": "Ingresa un correo válido.",
         "cvRequired": "Adjunta tu CV en PDF o DOCX.",
         "reviewFields": "Revisa los datos indicados.",
+        "consentSubmitFailed": "No pudimos guardar tu autorización y consentimiento. Intenta nuevamente.",
+        "consentValidation": "Revisa la autorización y consentimiento e intenta de nuevo.",
+        "consentVersionMismatch": "El documento de autorización se actualizó. Recarga la página e intenta de nuevo.",
+        "consentNationalIdConflict": "Ese documento de identidad ya está asociado a otro perfil. Usa otro valor o contacta soporte.",
         "documentTypeRequiresNumber": "Si seleccionas un tipo de documento, debes ingresar el número.",
         "documentNumberRequiresType": "Si ingresas un número de documento, debes seleccionar el tipo."
       },

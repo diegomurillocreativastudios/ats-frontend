@@ -3391,6 +3391,10 @@
         "emailInvalid": "Enter a valid email.",
         "cvRequired": "Attach your CV in PDF or DOCX.",
         "reviewFields": "Review the indicated fields.",
+        "consentSubmitFailed": "We could not save your authorization and consent. Please try again.",
+        "consentValidation": "Please review the authorization and consent and try again.",
+        "consentVersionMismatch": "The authorization document was updated. Reload the page and try again.",
+        "consentNationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support.",
         "documentTypeRequiresNumber": "If you select a document type, you must enter the number.",
         "documentNumberRequiresType": "If you enter a document number, you must select the type."
       },

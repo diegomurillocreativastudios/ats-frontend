@@ -3323,6 +3323,10 @@
         "emailInvalid": "Inserisci un'email valida.",
         "cvRequired": "Allega il tuo CV in PDF o DOCX.",
         "reviewFields": "Controlla i campi indicati.",
+        "consentSubmitFailed": "Non siamo riusciti a salvare la tua autorizzazione e il consenso. Riprova.",
+        "consentValidation": "Controlla l'autorizzazione e il consenso e riprova.",
+        "consentVersionMismatch": "Il documento di autorizzazione è stato aggiornato. Ricarica la pagina e riprova.",
+        "consentNationalIdConflict": "Quel documento di identità è già collegato a un altro profilo. Usa un altro valore o contatta l'assistenza.",
         "documentTypeRequiresNumber": "Se selezioni un tipo di documento, devi inserire il numero.",
         "documentNumberRequiresType": "Se inserisci un numero di documento, devi selezionare il tipo."
       },
