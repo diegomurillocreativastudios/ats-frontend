@@ -1,6 +1,12 @@
 "use client"
 
-import { useEffect, useCallback, type MouseEvent } from "react"
+import {
+  useEffect,
+  useCallback,
+  useSyncExternalStore,
+  type MouseEvent,
+} from "react"
+import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { X, Mail } from "lucide-react"
 import type { PublicVacancyApplicationFormTheme } from "@/components/public/PublicVacancyApplicationForm"
@@ -26,6 +32,11 @@ export function ApplyEmailConfirmationModal({
   const t = useTranslations("PublicOpportunities.confirmation")
   const tCommon = useTranslations("Common")
   const isDark = theme === "dark"
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
 
   const handleEscape = useCallback(
     (e: Event) => {
@@ -52,11 +63,11 @@ export function ApplyEmailConfirmationModal({
     }
   }, [isOpen, handleEscape])
 
-  if (!isOpen) return null
+  if (!isClient || !isOpen) return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/25 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-200 flex items-center justify-center bg-foreground/25 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-email-title"
@@ -211,6 +222,7 @@ export function ApplyEmailConfirmationModal({
           </button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

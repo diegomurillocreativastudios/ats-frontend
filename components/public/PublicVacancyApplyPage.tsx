@@ -242,7 +242,6 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
                   <PublicVacancyApplicationForm
                     vacancyId={vacancyId}
                     theme="light"
-                    backToVacancyHref={backToDetailHref}
                   />
                 </div>
               </section>

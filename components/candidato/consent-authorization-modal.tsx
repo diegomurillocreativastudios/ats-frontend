@@ -324,6 +324,7 @@ export function ConsentAuthorizationModal({
       size="lg"
       closeOnOverlayClick={false}
       closeOnEscape={false}
+      overlayZIndexClass="z-200"
       footer={
         <>
           <p className="mr-auto hidden max-w-56 font-sans text-xs text-muted-foreground sm:block">

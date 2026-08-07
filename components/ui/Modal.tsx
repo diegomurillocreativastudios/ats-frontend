@@ -1,6 +1,13 @@
 "use client"
 
-import { useEffect, useCallback, type ReactNode, type MouseEvent } from "react"
+import {
+  useEffect,
+  useCallback,
+  useSyncExternalStore,
+  type ReactNode,
+  type MouseEvent,
+} from "react"
+import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import { useTranslations } from "next-intl"
 
@@ -14,13 +21,13 @@ const MODAL_STYLES = {
   body: "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 py-5",
   footer:
     "shrink-0 flex items-center justify-end gap-3 border-t border-border px-6 py-4",
-};
+}
 
 const SIZE_CLASSES = {
   sm: "max-w-sm",
   md: "max-w-lg",
   lg: "max-w-2xl",
-};
+}
 
 interface ModalProps {
   isOpen: boolean
@@ -37,6 +44,10 @@ interface ModalProps {
   overlayZIndexClass?: string
 }
 
+/**
+ * Modal de pantalla completa vía portal a `document.body`, para no quedar
+ * recortado por contenedores con `overflow-hidden` / stacking contexts.
+ */
 export default function Modal({
   isOpen,
   onClose,
@@ -51,6 +62,11 @@ export default function Modal({
 }: ModalProps) {
   const t = useTranslations("Common")
   const sizeClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
   const handleEscape = useCallback(
     (e: Event) => {
       if (!closeOnEscape || !(e instanceof KeyboardEvent) || e.key !== "Escape") return
@@ -67,18 +83,18 @@ export default function Modal({
 
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", handleEscape)
+      document.body.style.overflow = "hidden"
     }
     return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "";
-    };
-  }, [isOpen, handleEscape]);
+      document.removeEventListener("keydown", handleEscape)
+      document.body.style.overflow = ""
+    }
+  }, [isOpen, handleEscape])
 
-  if (!isOpen) return null;
+  if (!isClient || !isOpen) return null
 
-  return (
+  return createPortal(
     <div
       className={`${MODAL_STYLES.overlayBase} ${overlayZIndexClass}`.trim()}
       role="dialog"
@@ -110,6 +126,7 @@ export default function Modal({
         <div className={`${MODAL_STYLES.body} ${bodyClassName}`.trim()}>{children}</div>
         {footer && <footer className={MODAL_STYLES.footer}>{footer}</footer>}
       </div>
-    </div>
-  );
+    </div>,
+    document.body
+  )
 }
