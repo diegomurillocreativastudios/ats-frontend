@@ -118,35 +118,29 @@
     },
     "forgot": {
       "brandTitle": "Zugang zu Ihrem<br></br>Konto wiederherstellen",
-      "brandSubtitle": "Wir überprüfen Ihre E-Mail und im nächsten Schritt legen Sie ein neues Passwort fest.",
-      "brandSubtitleSm": "Wir überprüfen Ihre E-Mail und Sie fahren mit Ihrem neuen Passwort fort.",
-      "feature1": "E-Mail im System verifiziert",
+      "brandSubtitle": "Wenn Ihre E-Mail registriert ist, senden wir Ihnen einen Link zum Zurücksetzen des Passworts.",
+      "brandSubtitleSm": "Wir senden Ihnen einen Link per E-Mail, wenn das Konto existiert.",
+      "feature1": "Einmaliger sicherer Link",
       "feature2": "Sicheres Passwort (mind. 8 Zeichen)",
       "title": "Passwort vergessen?",
-      "subtitle": "Geben Sie die E-Mail Ihres Kontos ein. Wenn sie registriert ist, fahren Sie fort, um ein neues Passwort zu wählen.",
+      "subtitle": "Geben Sie die E-Mail Ihres Kontos ein. Wenn sie registriert ist, senden wir Ihnen einen Link zum Zurücksetzen des Passworts.",
       "emailLabel": "E-Mail",
       "emailPlaceholder": "name@firma.com",
       "submit": "Anweisungen senden",
       "submitting": "Senden...",
       "retryIn": "Erneut versuchen in {seconds}s",
       "backToLogin": "Zurück zur Anmeldung",
-      "toastSuccess": "Wir haben Ihnen eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts gesendet.",
-      "toastNoAccount": "Mit dieser E-Mail ist kein Konto registriert. Überprüfen Sie die Angabe oder registrieren Sie sich.",
+      "toastSuccess": "Wenn ein Konto mit dieser E-Mail existiert, haben wir Ihnen einen Link zum Zurücksetzen des Passworts gesendet.",
       "toastRequestFailed": "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
     },
     "reset": {
       "brandTitle": "Neues Passwort",
       "brandSubtitle": "Wählen Sie ein sicheres Passwort, das Sie nicht auf anderen Seiten verwenden.",
-      "brandSubtitleEmailFlow": "Ihre E-Mail ist bereits verifiziert. Wählen Sie ein sicheres Passwort.",
       "brandSubtitleSm": "Wählen Sie ein sicheres Passwort.",
-      "brandSubtitleSmEmailFlow": "E-Mail verifiziert. Vervollständigen Sie Ihr neues Passwort.",
       "feature1": "Wählen Sie ein Passwort, das Sie sich merken",
-      "featureEmailVerified": "E-Mail verifiziert",
       "featureRecoveryLink": "Wiederherstellungslink",
       "title": "Passwort zurücksetzen",
       "subtitle": "Geben Sie Ihr neues Passwort ein und bestätigen Sie es.",
-      "subtitleEmailFlow": "Ihre E-Mail wurde verifiziert. Geben Sie Ihr neues Passwort ein und bestätigen Sie es.",
-      "emailLabel": "E-Mail",
       "newPasswordLabel": "Neues Passwort",
       "newPasswordPlaceholder": "Ihr neues Passwort",
       "minChars": "Mindestens 8 Zeichen",
@@ -161,7 +155,7 @@
       "invalidBrandTitle": "Ungültiger Link",
       "invalidBrandSubtitle": "Starten Sie das Zurücksetzen über \"Passwort vergessen?\".",
       "invalidCardTitle": "Wir konnten das Zurücksetzen nicht öffnen",
-      "invalidCardBody": "Eine verifizierte E-Mail oder ein gültiger Token fehlt. Gehen Sie zurück zu \"Passwort vergessen?\" und schließen Sie den vorherigen Schritt ab.",
+      "invalidCardBody": "Der Link ist ungültig oder abgelaufen. Gehen Sie zurück zu \"Passwort vergessen?\", um einen neuen anzufordern.",
       "invalidGoForgot": "Zu Passwort vergessen"
     },
     "loadingFallback": "Laden…",
@@ -220,7 +214,7 @@
       },
       "resetPassword": {
         "title": "Passwort zurücksetzen",
-        "description": "Legen Sie ein neues Passwort fest, nachdem Sie Ihre E-Mail verifiziert haben, oder über den Wiederherstellungslink"
+        "description": "Legen Sie ein neues Passwort über den Wiederherstellungslink fest, den Sie per E-Mail erhalten haben"
       },
       "register": {
         "title": "Registrarse",

@@ -118,35 +118,29 @@
     },
     "forgot": {
       "brandTitle": "Recuperá el acceso<br></br>a tu cuenta",
-      "brandSubtitle": "Verificamos tu correo y en el siguiente paso definís una nueva contraseña.",
-      "brandSubtitleSm": "Verificamos tu correo y seguís con tu nueva contraseña.",
-      "feature1": "Correo verificado en el sistema",
+      "brandSubtitle": "Si tu correo está registrado, te enviamos un enlace para restablecer la contraseña.",
+      "brandSubtitleSm": "Te enviamos un enlace por correo si la cuenta existe.",
+      "feature1": "Enlace seguro de un solo uso",
       "feature2": "Contraseña segura (mín. 8 caracteres)",
       "title": "¿Olvidaste tu contraseña?",
-      "subtitle": "Ingresá el correo de tu cuenta. Si está registrado, continuás para elegir una nueva contraseña.",
+      "subtitle": "Ingresá el correo de tu cuenta. Si está registrado, te enviamos un enlace para restablecer la contraseña.",
       "emailLabel": "Correo electrónico",
       "emailPlaceholder": "nombre@empresa.com",
       "submit": "Enviar instrucciones",
       "submitting": "Enviando...",
       "retryIn": "Reintentá en {seconds}s",
       "backToLogin": "Volver a iniciar sesión",
-      "toastSuccess": "Te enviamos un correo con un enlace para restablecer tu contraseña.",
-      "toastNoAccount": "No hay una cuenta registrada con este correo. Verificá el dato o registrate.",
+      "toastSuccess": "Si existe una cuenta con ese correo, te enviamos un enlace para restablecer la contraseña.",
       "toastRequestFailed": "No se pudo enviar la solicitud. Intenta de nuevo."
     },
     "reset": {
       "brandTitle": "Nueva contraseña",
       "brandSubtitle": "Elegí una contraseña segura que no uses en otros sitios.",
-      "brandSubtitleEmailFlow": "Tu correo ya está verificado. Elegí una contraseña segura.",
       "brandSubtitleSm": "Elegí una contraseña segura.",
-      "brandSubtitleSmEmailFlow": "Correo verificado. Completá tu nueva clave.",
       "feature1": "Elegí una contraseña que recuerdes",
-      "featureEmailVerified": "Correo verificado",
       "featureRecoveryLink": "Enlace de recuperación",
       "title": "Restablecer contraseña",
       "subtitle": "Ingresá tu nueva contraseña y confirmala.",
-      "subtitleEmailFlow": "Tu correo ya fue verificado. Ingresá y confirmá tu nueva contraseña.",
-      "emailLabel": "Correo electrónico",
       "newPasswordLabel": "Nueva contraseña",
       "newPasswordPlaceholder": "Tu nueva contraseña",
       "minChars": "Mínimo 8 caracteres",
@@ -161,7 +155,7 @@
       "invalidBrandTitle": "Enlace inválido",
       "invalidBrandSubtitle": "Iniciá el restablecimiento desde \"¿Olvidaste tu contraseña?\".",
       "invalidCardTitle": "No pudimos abrir el restablecimiento",
-      "invalidCardBody": "Falta un correo verificado o un token válido. Volvé a \"¿Olvidaste tu contraseña?\" y completá el paso anterior.",
+      "invalidCardBody": "El enlace es inválido o expiró. Volvé a \"¿Olvidaste tu contraseña?\" para solicitar uno nuevo.",
       "invalidGoForgot": "Ir a olvidé mi contraseña"
     },
     "loadingFallback": "Cargando…",
@@ -220,7 +214,7 @@
       },
       "resetPassword": {
         "title": "Restablecer contraseña",
-        "description": "Definí una nueva contraseña tras verificar tu correo o con el enlace de recuperación"
+        "description": "Definí una nueva contraseña con el enlace de recuperación que recibiste por correo"
       },
       "register": {
         "title": "Registrarse",

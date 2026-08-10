@@ -22,7 +22,7 @@ test.describe("@smoke Auth", () => {
     await expect(page).toHaveURL(/\/auth\/iniciar-sesion/)
   })
 
-  test("restablecer contraseña sin email ni token muestra aviso", async ({
+  test("restablecer contraseña sin token muestra aviso", async ({
     page,
   }) => {
     await page.goto("/restablecer-contrasena")
@@ -34,6 +34,14 @@ test.describe("@smoke Auth", () => {
   }) => {
     await page.goto("/auth/restablecer-contrasena")
     await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
+  })
+
+  test("restablecer solo con ?email= no abre el formulario (token-only)", async ({
+    page,
+  }) => {
+    await page.goto("/restablecer-contrasena?email=usuario@ejemplo.com")
+    await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
+    await expect(page.getByTestId("auth-reset-form")).toHaveCount(0)
   })
 
   test("login demo completa sesión (selector o portal según rol)", async ({

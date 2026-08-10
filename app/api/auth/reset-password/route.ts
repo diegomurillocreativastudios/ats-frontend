@@ -7,24 +7,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const token =
       typeof body.token === "string" ? body.token.trim() : ""
-    const email =
-      typeof body.email === "string" ? body.email.trim() : ""
     const password =
       typeof body.password === "string" ? body.password : ""
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    const hasValidEmail = email.length > 0 && emailRegex.test(email)
-
-    /**
-     * Misma regla que el API: con token no vacío → solo { password, token } (email no se envía).
-     * Sin token → { password, email } (flujo solo correo; el backend no exige token previo en BD).
-     * Nunca mezclar ambos en el mismo payload: si llegaran, el API priorizaría token.
-     */
-    if (!token && !hasValidEmail) {
+    if (!token) {
       return NextResponse.json(
         {
           message:
-            "Debés indicar un correo verificado o un token de recuperación válido.",
+            "Se requiere un token de recuperación válido.",
         },
         { status: 400 }
       )
@@ -48,14 +38,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const payload = token
-      ? { password, token, email: null }
-      : { password, email }
-
     const res = await fetch(`${baseUrl}/auth/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ password, token }),
       cache: "no-store",
     })
 

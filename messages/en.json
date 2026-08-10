@@ -118,35 +118,29 @@
     },
     "forgot": {
       "brandTitle": "Recover access<br></br>to your account",
-      "brandSubtitle": "We verify your email and in the next step you set a new password.",
-      "brandSubtitleSm": "We verify your email and you continue with your new password.",
-      "feature1": "Email verified in the system",
+      "brandSubtitle": "If your email is registered, we'll send you a link to reset your password.",
+      "brandSubtitleSm": "We'll email you a link if the account exists.",
+      "feature1": "One-time secure link",
       "feature2": "Secure password (min. 8 characters)",
       "title": "Forgot your password?",
-      "subtitle": "Enter your account email. If it's registered, you'll continue to choose a new password.",
+      "subtitle": "Enter your account email. If it's registered, we'll send you a link to reset your password.",
       "emailLabel": "Email",
       "emailPlaceholder": "name@company.com",
       "submit": "Send instructions",
       "submitting": "Sending...",
       "retryIn": "Retry in {seconds}s",
       "backToLogin": "Back to sign in",
-      "toastSuccess": "We sent you an email with a link to reset your password.",
-      "toastNoAccount": "There's no account registered with this email. Check it or sign up.",
+      "toastSuccess": "If an account exists with that email, we sent you a link to reset your password.",
       "toastRequestFailed": "The request could not be sent. Please try again."
     },
     "reset": {
       "brandTitle": "New password",
       "brandSubtitle": "Choose a secure password that you don't use on other sites.",
-      "brandSubtitleEmailFlow": "Your email is already verified. Choose a secure password.",
       "brandSubtitleSm": "Choose a secure password.",
-      "brandSubtitleSmEmailFlow": "Email verified. Complete your new password.",
       "feature1": "Choose a password you'll remember",
-      "featureEmailVerified": "Email verified",
       "featureRecoveryLink": "Recovery link",
       "title": "Reset password",
       "subtitle": "Enter your new password and confirm it.",
-      "subtitleEmailFlow": "Your email has been verified. Enter and confirm your new password.",
-      "emailLabel": "Email",
       "newPasswordLabel": "New password",
       "newPasswordPlaceholder": "Your new password",
       "minChars": "Minimum 8 characters",
@@ -161,7 +155,7 @@
       "invalidBrandTitle": "Invalid link",
       "invalidBrandSubtitle": "Start the reset from \"Forgot your password?\".",
       "invalidCardTitle": "We couldn't open the reset",
-      "invalidCardBody": "A verified email or a valid token is missing. Go back to \"Forgot your password?\" and complete the previous step.",
+      "invalidCardBody": "The link is invalid or has expired. Go back to \"Forgot your password?\" to request a new one.",
       "invalidGoForgot": "Go to forgot my password"
     },
     "loadingFallback": "Loading…",
@@ -220,7 +214,7 @@
       },
       "resetPassword": {
         "title": "Reset password",
-        "description": "Set a new password after verifying your email or with the recovery link"
+        "description": "Set a new password using the recovery link you received by email"
       },
       "register": {
         "title": "Registrarse",

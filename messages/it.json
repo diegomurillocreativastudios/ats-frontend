@@ -118,35 +118,29 @@
     },
     "forgot": {
       "brandTitle": "Recupera l'accesso<br></br>al tuo account",
-      "brandSubtitle": "Verifichiamo la tua email e nel passaggio successivo imposti una nuova password.",
-      "brandSubtitleSm": "Verifichiamo la tua email e prosegui con la nuova password.",
-      "feature1": "Email verificata nel sistema",
+      "brandSubtitle": "Se la tua email è registrata, ti inviamo un link per reimpostare la password.",
+      "brandSubtitleSm": "Ti inviamo un link via email se l'account esiste.",
+      "feature1": "Link sicuro monouso",
       "feature2": "Password sicura (min. 8 caratteri)",
       "title": "Hai dimenticato la password?",
-      "subtitle": "Inserisci l'email del tuo account. Se è registrata, prosegui per scegliere una nuova password.",
+      "subtitle": "Inserisci l'email del tuo account. Se è registrata, ti inviamo un link per reimpostare la password.",
       "emailLabel": "Email",
       "emailPlaceholder": "nome@azienda.com",
       "submit": "Invia istruzioni",
       "submitting": "Invio in corso...",
       "retryIn": "Riprova tra {seconds}s",
       "backToLogin": "Torna all'accesso",
-      "toastSuccess": "Ti abbiamo inviato un'email con un link per reimpostare la password.",
-      "toastNoAccount": "Non esiste un account registrato con questa email. Verifica il dato o registrati.",
+      "toastSuccess": "Se esiste un account con quella email, ti abbiamo inviato un link per reimpostare la password.",
       "toastRequestFailed": "Impossibile inviare la richiesta. Riprova."
     },
     "reset": {
       "brandTitle": "Nuova password",
       "brandSubtitle": "Scegli una password sicura che non usi su altri siti.",
-      "brandSubtitleEmailFlow": "La tua email è già verificata. Scegli una password sicura.",
       "brandSubtitleSm": "Scegli una password sicura.",
-      "brandSubtitleSmEmailFlow": "Email verificata. Completa la tua nuova password.",
       "feature1": "Scegli una password che ricordi",
-      "featureEmailVerified": "Email verificata",
       "featureRecoveryLink": "Link di recupero",
       "title": "Reimposta password",
       "subtitle": "Inserisci la nuova password e confermala.",
-      "subtitleEmailFlow": "La tua email è stata verificata. Inserisci e conferma la nuova password.",
-      "emailLabel": "Email",
       "newPasswordLabel": "Nuova password",
       "newPasswordPlaceholder": "La tua nuova password",
       "minChars": "Minimo 8 caratteri",
@@ -161,7 +155,7 @@
       "invalidBrandTitle": "Link non valido",
       "invalidBrandSubtitle": "Avvia la reimpostazione da \"Hai dimenticato la password?\".",
       "invalidCardTitle": "Non siamo riusciti ad aprire la reimpostazione",
-      "invalidCardBody": "Manca un'email verificata o un token valido. Torna a \"Hai dimenticato la password?\" e completa il passaggio precedente.",
+      "invalidCardBody": "Il link non è valido o è scaduto. Torna a \"Hai dimenticato la password?\" per richiederne uno nuovo.",
       "invalidGoForgot": "Vai a password dimenticata"
     },
     "loadingFallback": "Caricamento…",
@@ -220,7 +214,7 @@
       },
       "resetPassword": {
         "title": "Reimposta password",
-        "description": "Imposta una nuova password dopo aver verificato la tua email o con il link di recupero"
+        "description": "Imposta una nuova password con il link di recupero ricevuto via email"
       },
       "register": {
         "title": "Registrarse",

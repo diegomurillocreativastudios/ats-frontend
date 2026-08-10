@@ -118,35 +118,29 @@
     },
     "forgot": {
       "brandTitle": "Récupérez l'accès<br></br>à votre compte",
-      "brandSubtitle": "Nous vérifions votre e-mail et à l'étape suivante vous définissez un nouveau mot de passe.",
-      "brandSubtitleSm": "Nous vérifions votre e-mail et vous continuez avec votre nouveau mot de passe.",
-      "feature1": "E-mail vérifié dans le système",
+      "brandSubtitle": "Si votre e-mail est enregistré, nous vous envoyons un lien pour réinitialiser le mot de passe.",
+      "brandSubtitleSm": "Nous vous envoyons un lien par e-mail si le compte existe.",
+      "feature1": "Lien sécurisé à usage unique",
       "feature2": "Mot de passe sécurisé (min. 8 caractères)",
       "title": "Mot de passe oublié ?",
-      "subtitle": "Saisissez l'e-mail de votre compte. S'il est enregistré, vous continuez pour choisir un nouveau mot de passe.",
+      "subtitle": "Saisissez l'e-mail de votre compte. S'il est enregistré, nous vous envoyons un lien pour réinitialiser le mot de passe.",
       "emailLabel": "E-mail",
       "emailPlaceholder": "nom@entreprise.com",
       "submit": "Envoyer les instructions",
       "submitting": "Envoi...",
       "retryIn": "Réessayez dans {seconds}s",
       "backToLogin": "Retour à la connexion",
-      "toastSuccess": "Nous vous avons envoyé un e-mail avec un lien pour réinitialiser votre mot de passe.",
-      "toastNoAccount": "Aucun compte n'est enregistré avec cet e-mail. Vérifiez l'information ou inscrivez-vous.",
+      "toastSuccess": "Si un compte existe avec cet e-mail, nous vous avons envoyé un lien pour réinitialiser le mot de passe.",
       "toastRequestFailed": "Impossible d'envoyer la demande. Veuillez réessayer."
     },
     "reset": {
       "brandTitle": "Nouveau mot de passe",
       "brandSubtitle": "Choisissez un mot de passe sécurisé que vous n'utilisez pas sur d'autres sites.",
-      "brandSubtitleEmailFlow": "Votre e-mail est déjà vérifié. Choisissez un mot de passe sécurisé.",
       "brandSubtitleSm": "Choisissez un mot de passe sécurisé.",
-      "brandSubtitleSmEmailFlow": "E-mail vérifié. Complétez votre nouveau mot de passe.",
       "feature1": "Choisissez un mot de passe dont vous vous souviendrez",
-      "featureEmailVerified": "E-mail vérifié",
       "featureRecoveryLink": "Lien de récupération",
       "title": "Réinitialiser le mot de passe",
       "subtitle": "Saisissez votre nouveau mot de passe et confirmez-le.",
-      "subtitleEmailFlow": "Votre e-mail a été vérifié. Saisissez et confirmez votre nouveau mot de passe.",
-      "emailLabel": "E-mail",
       "newPasswordLabel": "Nouveau mot de passe",
       "newPasswordPlaceholder": "Votre nouveau mot de passe",
       "minChars": "Minimum 8 caractères",
@@ -161,7 +155,7 @@
       "invalidBrandTitle": "Lien invalide",
       "invalidBrandSubtitle": "Lancez la réinitialisation depuis « Mot de passe oublié ? ».",
       "invalidCardTitle": "Nous n'avons pas pu ouvrir la réinitialisation",
-      "invalidCardBody": "Un e-mail vérifié ou un jeton valide est manquant. Revenez à « Mot de passe oublié ? » et complétez l'étape précédente.",
+      "invalidCardBody": "Le lien est invalide ou a expiré. Revenez à « Mot de passe oublié ? » pour en demander un nouveau.",
       "invalidGoForgot": "Aller à mot de passe oublié"
     },
     "loadingFallback": "Chargement…",
@@ -220,7 +214,7 @@
       },
       "resetPassword": {
         "title": "Réinitialiser le mot de passe",
-        "description": "Définissez un nouveau mot de passe après avoir vérifié votre e-mail ou avec le lien de récupération"
+        "description": "Définissez un nouveau mot de passe avec le lien de récupération reçu par e-mail"
       },
       "register": {
         "title": "Registrarse",
