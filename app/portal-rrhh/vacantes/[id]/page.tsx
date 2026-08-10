@@ -73,7 +73,10 @@ import {
   resolveOrderedStageNames,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
 import { validateStageMove } from "@/lib/recruiter/stage-move-validation"
-import { getAccessToken } from "@/lib/auth";
+import {
+  downloadRecruiterCandidateCv,
+  isRecruiterCandidateCvError,
+} from "@/lib/api/recruiter-candidate-cv"
 import { getInitials } from "@/lib/getInitials";
 import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api";
 import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active";
@@ -563,33 +566,27 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
   }, [onClose]);
 
   const handleDownloadCV = async () => {
-    if (!match.storagePath) return;
-    setDownloading(true);
-    setDownloadError(null);
+    const profileId =
+      match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
+        ? String(match.candidateProfileId).trim()
+        : null
+    if (!profileId) return
+    setDownloading(true)
+    setDownloadError(null)
     try {
-      const token = getAccessToken();
-      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-      const url = `${baseUrl}/api/Storage/files/${encodeURIComponent(match.storagePath)}`;
-      const res = await fetch(url, {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error(tMatching("errors.downloadCvFailed"));
-      const blob = await res.blob();
-      const objUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objUrl;
-      a.download = match.storagePath.split("/").pop() || "cv.pdf";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objUrl);
+      await downloadRecruiterCandidateCv(profileId)
     } catch (err) {
-      setDownloadError(err?.message ?? tMatching("errors.downloadCvFailed"));
+      if (isRecruiterCandidateCvError(err) && err.code === "unavailable") {
+        setDownloadError(tMatching("errors.downloadCvUnavailable"))
+      } else {
+        setDownloadError(
+          err?.message ?? tMatching("errors.downloadCvFailed")
+        )
+      }
     } finally {
-      setDownloading(false);
+      setDownloading(false)
     }
-  };
+  }
 
   const componentScores =
     match.componentScores && typeof match.componentScores === "object" && !Array.isArray(match.componentScores)
@@ -922,7 +919,8 @@ const CandidateProfileModal = ({ match, candidateId, onClose }) => {
             )}
           </div>
           <div className="flex flex-wrap items-center justify-end gap-3">
-            {match.storagePath && (
+            {match.candidateProfileId != null &&
+              String(match.candidateProfileId).trim() !== "" && (
               <button
                 type="button"
                 onClick={handleDownloadCV}

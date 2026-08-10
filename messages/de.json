@@ -1424,9 +1424,11 @@
       },
       "errors": {
         "loadProfileFailed": "Das Kandidatenprofil konnte nicht geladen werden.",
+        "candidateUnavailable": "Dieser Kandidat ist nicht verfügbar oder Sie haben keinen Zugriff.",
         "missingCandidateId": "Die Kandidatenkennung fehlt.",
         "downloadFailed": "Fehler beim Herunterladen.",
         "downloadCvFailed": "Der Lebenslauf konnte nicht heruntergeladen werden.",
+        "downloadCvUnavailable": "Der Lebenslauf ist nicht verfügbar.",
         "saveInvalidFields": "Bitte prüfen Sie die Daten: einige Felder sind ungültig.",
         "saveForbidden": "Ihr Konto hat keine Berechtigung, dieses Profil zu bearbeiten.",
         "saveDuplicateNationalId": "Dieses Ausweisdokument ist bereits mit einem anderen Profil verknüpft."
@@ -2120,6 +2122,7 @@
           "applicationStatusUpdated": "Bewerbungsstatus aktualisiert.",
           "missingApplicationId": "Die Bewerbungs-ID zum Aktualisieren des Status wurde nicht gefunden.",
           "downloadCvFailed": "Der Lebenslauf konnte nicht heruntergeladen werden.",
+          "downloadCvUnavailable": "Der Lebenslauf ist nicht verfügbar.",
           "searchNoResults": "In der Suche wurden keine Kandidaten gefunden.",
           "searchAlreadyInPipeline": "Die gefundenen Kandidaten befinden sich bereits unter Mögliche Kandidaten oder Phasen.",
           "goToStagesAria": "Zum Bereich Phasen gehen, um Bewerbungsstatus zu verwalten",

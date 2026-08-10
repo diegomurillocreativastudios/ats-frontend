@@ -1492,9 +1492,11 @@
       },
       "errors": {
         "loadProfileFailed": "The candidate profile could not be loaded.",
+        "candidateUnavailable": "This candidate is not available or you do not have access.",
         "missingCandidateId": "The candidate identifier is missing.",
         "downloadFailed": "Download failed.",
         "downloadCvFailed": "The CV could not be downloaded.",
+        "downloadCvUnavailable": "The CV is not available.",
         "saveInvalidFields": "Please review the data: some fields are invalid.",
         "saveForbidden": "Your account does not have permission to edit this profile.",
         "saveDuplicateNationalId": "That ID document is already associated with another profile."
@@ -2188,6 +2190,7 @@
           "applicationStatusUpdated": "Application status updated.",
           "missingApplicationId": "The application ID to update the status was not found.",
           "downloadCvFailed": "The CV could not be downloaded.",
+          "downloadCvUnavailable": "The CV is not available.",
           "searchNoResults": "No candidates were found in the search.",
           "searchAlreadyInPipeline": "The candidates found are already in Possible candidates or Stages.",
           "goToStagesAria": "Go to the Stages section to manage application statuses",

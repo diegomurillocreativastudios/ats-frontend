@@ -57,16 +57,26 @@ describe("parseNormalizedDataField", () => {
 })
 
 describe("extractRecruiterCandidateDetail", () => {
-  it("extracts id, storagePath and normalizedData from wrapped response", () => {
+  it("extracts id and normalizedData from wrapped response", () => {
     const result = extractRecruiterCandidateDetail({
       data: {
         id: "abc-123",
-        storagePath: "cvs/file.pdf",
         normalizedData: { FirstName: "Diego" },
       },
     })
     expect(result.id).toBe("abc-123")
-    expect(result.storagePath).toBe("cvs/file.pdf")
+    expect(result).not.toHaveProperty("storagePath")
+    expect(result.normalizedData).toEqual({ FirstName: "Diego" })
+  })
+
+  it("ignores storagePath if present in API payload", () => {
+    const result = extractRecruiterCandidateDetail({
+      id: "abc-123",
+      storagePath: "cvs/file.pdf",
+      normalizedData: { FirstName: "Diego" },
+    })
+    expect(result.id).toBe("abc-123")
+    expect(result).not.toHaveProperty("storagePath")
     expect(result.normalizedData).toEqual({ FirstName: "Diego" })
   })
 })
@@ -102,11 +112,11 @@ describe("buildRecruiterCandidateProfilePutPayload", () => {
   it("does not include id or storagePath in the body", () => {
     const payload = buildRecruiterCandidateProfilePutPayload(
       buildCandidateProfileSaveBody(minimalForm()),
-      { id: "x", storagePath: "y" }
+      { id: "x", LegacyField: "keep" }
     )
     expect(payload).not.toHaveProperty("id")
     expect(payload).not.toHaveProperty("storagePath")
     expect(payload.normalizedData?.id).toBe("x")
-    expect(payload.normalizedData?.storagePath).toBe("y")
+    expect(payload.normalizedData?.LegacyField).toBe("keep")
   })
 })

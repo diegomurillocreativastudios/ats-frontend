@@ -1424,9 +1424,11 @@
       },
       "errors": {
         "loadProfileFailed": "Impossible de charger le profil du candidat.",
+        "candidateUnavailable": "Ce candidat n'est pas disponible ou vous n'y avez pas accès.",
         "missingCandidateId": "L'identifiant du candidat est manquant.",
         "downloadFailed": "Erreur lors du téléchargement.",
         "downloadCvFailed": "Impossible de télécharger le CV.",
+        "downloadCvUnavailable": "Le CV n'est pas disponible.",
         "saveInvalidFields": "Vérifiez les données : certains champs sont invalides.",
         "saveForbidden": "Votre compte n'a pas la permission de modifier ce profil.",
         "saveDuplicateNationalId": "Cette pièce d'identité est déjà associée à un autre profil."
@@ -2120,6 +2122,7 @@
           "applicationStatusUpdated": "Statut de candidature mis à jour.",
           "missingApplicationId": "L'identifiant de candidature pour mettre à jour le statut est introuvable.",
           "downloadCvFailed": "Impossible de télécharger le CV.",
+          "downloadCvUnavailable": "Le CV n'est pas disponible.",
           "searchNoResults": "Aucun candidat trouvé dans la recherche.",
           "searchAlreadyInPipeline": "Les candidats trouvés sont déjà dans Candidats potentiels ou Étapes.",
           "goToStagesAria": "Aller à la section Étapes pour gérer les statuts de candidature",

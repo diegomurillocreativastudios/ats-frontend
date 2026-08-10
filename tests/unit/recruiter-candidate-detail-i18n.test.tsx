@@ -110,7 +110,6 @@ vi.mock("@/components/ui/Snackbar", () => ({
 
 const profileFixture = {
   id: "cand-42",
-  storagePath: null,
   normalizedData: {
     FirstName: "María",
     LastName: "García",

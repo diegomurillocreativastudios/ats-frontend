@@ -65,7 +65,10 @@ import {
 } from "@/lib/candidate-profile"
 import { resolveHeadlineForDisplay } from "@/lib/candidate-profile-hydrate"
 import type { RecruiterCandidateDetailState } from "@/lib/recruiter-candidate-profile-api"
-import { getAccessToken } from "@/lib/auth"
+import {
+  downloadRecruiterCandidateCv,
+  isRecruiterCandidateCvError,
+} from "@/lib/api/recruiter-candidate-cv"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv"
 import { getInitials } from "@/lib/getInitials"
@@ -257,7 +260,12 @@ export function RecruiterCandidateProfileView({
   const [downloading, setDownloading] = useState(false)
   const [downloadError, setDownloadError] = useState<string | null>(null)
 
-  const storagePath = profile?.storagePath ?? null
+  const cvCandidateId =
+    candidateId != null && String(candidateId).trim() !== ""
+      ? String(candidateId).trim()
+      : profile?.id != null && String(profile.id).trim() !== ""
+        ? String(profile.id).trim()
+        : null
 
   const contactItems = useMemo(
     () => [
@@ -302,30 +310,17 @@ export function RecruiterCandidateProfileView({
   )
 
   const handleDownloadCv = async () => {
-    const path = storagePath
-    if (!path) return
+    if (!cvCandidateId) return
     setDownloading(true)
     setDownloadError(null)
     try {
-      const token = getAccessToken()
-      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "")
-      const url = `${baseUrl}/api/Storage/files/${encodeURIComponent(path)}`
-      const res = await fetch(url, {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
-      if (!res.ok) throw new Error(t("errors.downloadCvFailed"))
-      const blob = await res.blob()
-      const objUrl = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = objUrl
-      a.download = path.split("/").pop() || "cv.pdf"
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(objUrl)
+      await downloadRecruiterCandidateCv(cvCandidateId)
     } catch (err: unknown) {
-      setDownloadError(getApiErrorMessage(err) || t("errors.downloadFailed"))
+      if (isRecruiterCandidateCvError(err) && err.code === "unavailable") {
+        setDownloadError(t("errors.downloadCvUnavailable"))
+      } else {
+        setDownloadError(getApiErrorMessage(err) || t("errors.downloadCvFailed"))
+      }
     } finally {
       setDownloading(false)
     }
@@ -388,7 +383,7 @@ export function RecruiterCandidateProfileView({
               aria-label={t("actions.toolbarEditingAria")}
               className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3"
             >
-              {storagePath ? (
+              {cvCandidateId ? (
                 <button
                   type="button"
                   onClick={handleDownloadCv}
@@ -439,7 +434,7 @@ export function RecruiterCandidateProfileView({
               {t("hero.editHint")}
             </p>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-              {storagePath ? (
+              {cvCandidateId ? (
                 <button
                   type="button"
                   onClick={handleDownloadCv}

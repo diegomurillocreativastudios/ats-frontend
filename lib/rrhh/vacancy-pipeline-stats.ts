@@ -21,7 +21,6 @@ export interface VacancyApplicantLike {
   applicationId?: string | null
   applicationStageId?: string | null
   applicationSource?: number | null
-  storagePath?: string | null
   applicationStatusId?: string | null
   application_status_id?: string | null
   statusId?: string | null

@@ -1492,9 +1492,11 @@
       },
       "errors": {
         "loadProfileFailed": "No se pudo cargar el perfil del candidato.",
+        "candidateUnavailable": "Este candidato no está disponible o no tenés acceso.",
         "missingCandidateId": "Falta el identificador del candidato.",
         "downloadFailed": "Error al descargar.",
         "downloadCvFailed": "No se pudo descargar el CV.",
+        "downloadCvUnavailable": "El CV no está disponible.",
         "saveInvalidFields": "Revisá los datos: hay campos inválidos.",
         "saveForbidden": "Tu cuenta no tiene permiso para editar este perfil.",
         "saveDuplicateNationalId": "Ese documento de identidad ya está asociado a otro perfil."
@@ -2188,6 +2190,7 @@
           "applicationStatusUpdated": "Estado de postulación actualizado.",
           "missingApplicationId": "No se encontró el ID de la postulación para actualizar el estado.",
           "downloadCvFailed": "No se pudo descargar el CV.",
+          "downloadCvUnavailable": "El CV no está disponible.",
           "searchNoResults": "No se encontraron candidatos en la búsqueda.",
           "searchAlreadyInPipeline": "Los candidatos encontrados ya están en Posibles candidatos o en Etapas.",
           "goToStagesAria": "Ir a la sección Etapas para administrar estados de postulación",
