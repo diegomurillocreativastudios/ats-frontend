@@ -1,3 +1,5 @@
+import { sanitizeTemplateHtml } from "@/lib/html/sanitize-template-html"
+
 const REPORT_PREVIEW_BASE_STYLES = `
   * { box-sizing: border-box; }
   body {
@@ -35,15 +37,16 @@ function buildPreviewStyles(options?: WrapReportPreviewHtmlOptions): string {
 
 /**
  * Wraps partial template HTML in a document suitable for iframe preview / PDF capture.
+ * Body HTML is sanitized (allowlist) before wrapping or returning a full document.
  */
 export function wrapReportPreviewHtml(
   bodyHtml: string,
   options?: WrapReportPreviewHtmlOptions
 ): string {
-  const trimmed = bodyHtml.trim()
+  const sanitized = sanitizeTemplateHtml(bodyHtml.trim())
   const styles = buildPreviewStyles(options)
-  if (/^<!DOCTYPE/i.test(trimmed) || /<html[\s>]/i.test(trimmed)) {
-    return trimmed
+  if (/^<!DOCTYPE/i.test(sanitized) || /<html[\s>]/i.test(sanitized)) {
+    return sanitized
   }
-  return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>${styles}</style></head><body><main class="report-preview-doc">${trimmed}</main></body></html>`
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>${styles}</style></head><body><main class="report-preview-doc">${sanitized}</main></body></html>`
 }

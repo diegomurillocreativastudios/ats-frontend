@@ -108,7 +108,6 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   const [previewError, setPreviewError] = useState<string | null>(null)
 
   const [previewSrcDoc, setPreviewSrcDoc] = useState<string | null>(null)
-  const [previewInnerHtml, setPreviewInnerHtml] = useState<string | null>(null)
   const [useReactPreview, setUseReactPreview] = useState(false)
 
   const [downloadingPdf, setDownloadingPdf] = useState(false)
@@ -247,7 +246,6 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
       setLegacySummary(null)
       setPreviewHistoryId(null)
       setPreviewSrcDoc(null)
-      setPreviewInnerHtml(null)
       setUseReactPreview(false)
 
       try {
@@ -359,7 +357,6 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   useEffect(() => {
     if (!template || !previewContext) {
       setPreviewSrcDoc(null)
-      setPreviewInnerHtml(null)
       setUseReactPreview(false)
       return
     }
@@ -367,13 +364,11 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
     const rawTemplate = template.contentTemplate?.trim() ?? ""
     if (!rawTemplate) {
       setPreviewSrcDoc(null)
-      setPreviewInnerHtml(null)
       setUseReactPreview(true)
       return
     }
 
     const rendered = renderTechnicalSheetHtml(rawTemplate, previewContext)
-    setPreviewInnerHtml(rendered)
     setPreviewSrcDoc(wrapReportPreviewHtml(rendered))
     setUseReactPreview(false)
   }, [template, previewContext])
@@ -385,13 +380,29 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
     void generatePreview(controller.signal, next, { notifyOnSuccess: true })
   }
 
+  const waitForCaptureIframe = async (captureRoot: HTMLElement | null) => {
+    if (!captureRoot) return
+    const iframe = captureRoot.querySelector("iframe")
+    if (!(iframe instanceof HTMLIFrameElement)) return
+
+    const doc = iframe.contentDocument
+    if (doc?.body && doc.body.childNodes.length > 0) return
+
+    await new Promise<void>((resolve) => {
+      const done = () => resolve()
+      iframe.addEventListener("load", done, { once: true })
+      window.setTimeout(done, 2000)
+    })
+  }
+
   const waitForCaptureReady = async (captureTarget: HTMLElement) => {
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
     })
 
-    if (document.fonts?.ready) {
-      await document.fonts.ready
+    const ownerDoc = captureTarget.ownerDocument
+    if (ownerDoc?.fonts?.ready) {
+      await ownerDoc.fonts.ready
     }
 
     const images = captureTarget.querySelectorAll("img")
@@ -422,6 +433,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
     const fileName = `${baseName}-${String(templateId).slice(0, 8)}.pdf`
 
     try {
+      await waitForCaptureIframe(pdfCaptureRef.current)
       const captureTarget = resolveReportPdfCaptureElement(pdfCaptureRef.current)
       if (!captureTarget) {
         setPdfActionError(m.pdfExportFailed)
@@ -486,7 +498,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   const hasPreviewData = hasPreviewContext(previewContext)
   const hasPdfCaptureSource =
     (useReactPreview && pdfData != null) ||
-    (previewInnerHtml != null && previewInnerHtml.trim() !== "")
+    (previewSrcDoc != null && previewSrcDoc.trim() !== "")
   const canDownload =
     !busy &&
     !templateError &&
@@ -706,11 +718,12 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
               filters={pdfFilters}
               generatedAt={formatGeneratedAtForPdf()}
             />
-          ) : previewInnerHtml ? (
-            <main
-              className="report-preview-doc w-[1600px] bg-background px-8 py-7 text-slate-950"
-              style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
-              dangerouslySetInnerHTML={{ __html: previewInnerHtml }}
+          ) : previewSrcDoc ? (
+            <iframe
+              title={`${m.previewTitle} PDF`}
+              sandbox="allow-same-origin"
+              srcDoc={previewSrcDoc}
+              className="h-[1200px] w-[1600px] border-0 bg-background"
             />
           ) : null}
         </div>

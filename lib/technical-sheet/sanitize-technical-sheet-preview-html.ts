@@ -1,12 +1,9 @@
+import { sanitizeTemplateHtml } from "@/lib/html/sanitize-template-html"
+
 /**
- * Quita vectores obvios del HTML de vista previa antes de validar/rasterizar en el servidor.
+ * Sanitizes technical-sheet preview HTML before validate/rasterize on the server.
+ * Uses the shared template allowlist (scripts, handlers, javascript: URIs stripped).
  */
 export function sanitizeTechnicalSheetPreviewHtml(html: string): string {
-  let out = html
-  out = out.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
-  out = out.replace(/\s+on\w+\s*=\s*("(?:[^"]*)"|'(?:[^']*)'|[^\s>]+)/gi, "")
-  out = out.replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, "")
-  out = out.replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, "")
-  out = out.replace(/<embed\b[^>]*>/gi, "")
-  return out
+  return sanitizeTemplateHtml(html)
 }
