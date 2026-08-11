@@ -210,5 +210,16 @@ tecnolog
 topbars
 uppercased
 workexperience
+Applicantree
+applicantree
+blockedbyclient
+Brutalista
+brutalista
+CTYPE
+FONTCONFIG
+phonecode
+Reacceptance
+Reducí
+Resetea
 áéíóúñü
 ÁÉÍÓÚÑÜ
