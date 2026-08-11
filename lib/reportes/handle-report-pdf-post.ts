@@ -10,6 +10,7 @@ import {
   renderReportPdfBuffer,
   ReportPdfError,
 } from "@/lib/reportes/render-report-pdf-buffer"
+import { REPORT_PDF_MAX_ROWS } from "@/lib/technical-sheet/pdf-chromium-limits"
 import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for-server"
 import {
   findReportDocumentTemplate,
@@ -132,6 +133,13 @@ export async function handleReportPdfPost(
       return jsonError(
         "No hay filas para generar el PDF. Aplicá filtros con resultados.",
         400
+      )
+    }
+
+    if (rows.length > REPORT_PDF_MAX_ROWS) {
+      return jsonError(
+        `El PDF no puede incluir más de ${REPORT_PDF_MAX_ROWS} filas. Reducí el resultado con filtros.`,
+        413
       )
     }
 

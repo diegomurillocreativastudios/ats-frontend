@@ -6,11 +6,18 @@ import {
   resolveSetContentTimeoutMs,
   waitForTechnicalSheetPdfDocumentAssets,
 } from "@/lib/technical-sheet/html-to-pdf-chromium"
+import { TECHNICAL_SHEET_PDF_SET_CONTENT_TIMEOUT_MS } from "@/lib/technical-sheet/pdf-chromium-limits"
 
 describe("applyTechnicalSheetPdfPipeline", () => {
-  it("calls emulateMediaType, setContent, evaluate, then pdf with Letter and zero margins", async () => {
+  it("applies network policy, then emulateMediaType, setContent, evaluate, pdf", async () => {
     const order: string[] = []
     const page = {
+      setRequestInterception: vi.fn(async () => {
+        order.push("setRequestInterception")
+      }),
+      on: vi.fn(() => {
+        order.push("onRequest")
+      }),
       emulateMediaType: vi.fn(async () => {
         order.push("emulateMediaType")
       }),
@@ -28,11 +35,19 @@ describe("applyTechnicalSheetPdfPipeline", () => {
 
     const buf = await applyTechnicalSheetPdfPipeline(page, "<html><body>x</body></html>", "print")
 
-    expect(order).toEqual(["emulateMediaType", "setContent", "evaluate", "pdf"])
+    expect(order).toEqual([
+      "setRequestInterception",
+      "onRequest",
+      "emulateMediaType",
+      "setContent",
+      "evaluate",
+      "pdf",
+    ])
+    expect(page.setRequestInterception).toHaveBeenCalledWith(true)
     expect(page.emulateMediaType).toHaveBeenCalledWith("print")
     expect(page.setContent).toHaveBeenCalledWith("<html><body>x</body></html>", {
       waitUntil: "load",
-      timeout: 60_000,
+      timeout: TECHNICAL_SHEET_PDF_SET_CONTENT_TIMEOUT_MS,
     })
     expect(page.pdf).toHaveBeenCalledWith(getTechnicalSheetPdfPageOptions())
     expect(buf.subarray(0, 4).toString("utf8")).toBe("%PDF")
@@ -52,10 +67,16 @@ describe("waitForTechnicalSheetPdfDocumentAssets", () => {
 })
 
 describe("resolveSetContentTimeoutMs", () => {
-  it("extends timeout for large HTML payloads", () => {
-    expect(resolveSetContentTimeoutMs("x".repeat(50_000))).toBe(60_000)
-    expect(resolveSetContentTimeoutMs("x".repeat(200_000))).toBe(120_000)
-    expect(resolveSetContentTimeoutMs("x".repeat(500_000))).toBe(180_000)
+  it("returns the fixed budget timeout", () => {
+    expect(resolveSetContentTimeoutMs("x".repeat(50_000))).toBe(
+      TECHNICAL_SHEET_PDF_SET_CONTENT_TIMEOUT_MS
+    )
+    expect(resolveSetContentTimeoutMs("x".repeat(200_000))).toBe(
+      TECHNICAL_SHEET_PDF_SET_CONTENT_TIMEOUT_MS
+    )
+    expect(resolveSetContentTimeoutMs("x".repeat(500_000))).toBe(
+      TECHNICAL_SHEET_PDF_SET_CONTENT_TIMEOUT_MS
+    )
   })
 })
 
