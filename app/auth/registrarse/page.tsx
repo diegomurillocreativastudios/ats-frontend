@@ -3,6 +3,7 @@
 import {
   useState,
   useCallback,
+  useEffect,
   type ChangeEvent,
   type FormEvent,
 } from "react"
@@ -15,7 +16,7 @@ import AuthBrand from "@/components/auth/AuthBrand"
 import ProductBrand from "@/components/branding/ProductBrand"
 import Snackbar from "@/components/ui/Snackbar"
 import { apiClient } from "@/lib/api"
-import { getApiErrorMessage } from "@/lib/api-error"
+import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
 
 interface RegisterFormState {
   email: string
@@ -28,16 +29,22 @@ interface SnackbarState {
   text: string
 }
 
+interface ApiClientErrorShape {
+  status?: number
+  retryAfter?: number
+}
+
+/** Mensaje neutro: no revelar si el correo ya existe (anti-enumeración). */
 const getRegisterErrorMessage = (
   err: unknown,
   t: ReturnType<typeof useTranslations<"Auth.register">>
 ) => {
   if (typeof err === "object" && err !== null) {
-    const e = err as Record<string, unknown>
-    if (e.status === 409) return t("errors.emailTaken")
+    const e = err as ApiClientErrorShape
+    if (e.status === 429) return t("errors.rateLimited")
     if (typeof e.status === "number" && e.status >= 500) return t("errors.server")
   }
-  return getApiErrorMessage(err) || t("errors.generic")
+  return t("errors.generic")
 }
 
 export default function Registrarse() {
@@ -52,6 +59,7 @@ export default function Registrarse() {
   const [showPasswords, setShowPasswords] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<SnackbarState | null>(null)
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0)
   const [errors, setErrors] = useState<
     Partial<Record<keyof RegisterFormState, string>>
   >({})
@@ -59,6 +67,14 @@ export default function Registrarse() {
   const handleCloseSnackbar = useCallback(() => {
     setMessage(null)
   }, [])
+
+  useEffect(() => {
+    if (rateLimitSecondsLeft <= 0) return
+    const id = window.setInterval(() => {
+      setRateLimitSecondsLeft((s) => (s <= 1 ? 0 : s - 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [rateLimitSecondsLeft])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target
@@ -73,35 +89,50 @@ export default function Registrarse() {
     setMessage(null)
   }
 
+  const isSubmitBlocked = loading || rateLimitSecondsLeft > 0
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setMessage(null);
-    setErrors({});
+    e.preventDefault()
+    setMessage(null)
+    setErrors({})
 
     if (formData.password !== formData.confirmPassword) {
-      setErrors((prev) => ({ ...prev, confirmPassword: tValidation("passwordsDontMatch") }));
-      return;
+      setErrors((prev) => ({
+        ...prev,
+        confirmPassword: tValidation("passwordsDontMatch"),
+      }))
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
     try {
       await apiClient.post("/register", {
         email: formData.email,
-        password: formData.password
-      });
-      setMessage({ type: "success", text: t("toastSuccess") });
+        password: formData.password,
+      })
+      setMessage({ type: "success", text: t("toastSuccess") })
       setTimeout(() => {
-        router.push("/auth/iniciar-sesion");
-      }, 2000);
+        router.push("/auth/iniciar-sesion")
+      }, 2000)
     } catch (err: unknown) {
+      if (typeof err === "object" && err !== null) {
+        const e = err as ApiClientErrorShape
+        if (e.status === 429) {
+          setRateLimitSecondsLeft(
+            parseRetryAfterSeconds(
+              e.retryAfter != null ? String(e.retryAfter) : null
+            )
+          )
+        }
+      }
       setMessage({
         type: "error",
         text: getRegisterErrorMessage(err, t),
       })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex font-sans">
@@ -184,7 +215,7 @@ export default function Registrarse() {
                   value={formData.email}
                   onChange={handleChange}
                   error={errors.email}
-                  disabled={loading}
+                  disabled={isSubmitBlocked}
                 />
 
                 <Input
@@ -196,7 +227,7 @@ export default function Registrarse() {
                   value={formData.password}
                   onChange={handleChange}
                   error={errors.password}
-                  disabled={loading}
+                  disabled={isSubmitBlocked}
                 />
 
                 <Input
@@ -208,7 +239,7 @@ export default function Registrarse() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   error={errors.confirmPassword}
-                  disabled={loading}
+                  disabled={isSubmitBlocked}
                 />
 
                 <div className="flex items-center gap-2">
@@ -217,7 +248,7 @@ export default function Registrarse() {
                     id="showPasswords"
                     checked={showPasswords}
                     onChange={(e) => setShowPasswords(e.target.checked)}
-                    disabled={loading}
+                    disabled={isSubmitBlocked}
                     className="h-4 w-4 rounded border-input accent-vo-magenta focus:ring-vo-magenta"
                     aria-label={t("showPasswordsAria")}
                   />
@@ -230,8 +261,17 @@ export default function Registrarse() {
                 </div>
               </div>
 
-              <Button type="submit" variant="secondary" disabled={loading}>
-                {loading ? t("submitting") : t("submit")}
+              <Button
+                type="submit"
+                variant="secondary"
+                disabled={isSubmitBlocked}
+                data-testid="auth-register-submit"
+              >
+                {loading
+                  ? t("submitting")
+                  : rateLimitSecondsLeft > 0
+                    ? t("retryIn", { seconds: rateLimitSecondsLeft })
+                    : t("submit")}
               </Button>
             </form>
 

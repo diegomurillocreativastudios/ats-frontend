@@ -16,10 +16,15 @@ test.describe("@smoke Auth", () => {
     await expect(page.getByTestId("auth-login-submit")).toBeVisible()
   })
 
-  test("credenciales inválidas no redirigen al portal", async ({ page }) => {
+  test("credenciales inválidas muestran un mensaje de error y no redirigen", async ({
+    page,
+  }) => {
     await page.goto("/auth/iniciar-sesion")
     await fillLoginForm(page, "no-existe@test.invalid", "WrongPass123!")
     await expect(page).toHaveURL(/\/auth\/iniciar-sesion/)
+    const alert = page.getByRole("alert")
+    await expect(alert).toBeVisible()
+    await expect(alert).toContainText(/correo o contraseña|incorrect|credencial|inválid|invalid/i)
   })
 
   test("restablecer contraseña sin token muestra aviso", async ({

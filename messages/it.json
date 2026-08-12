@@ -97,7 +97,9 @@
       "toastPasswordReset": "La tua password è stata aggiornata correttamente. Accedi con la nuova password.",
       "toastLogoutSuccess": "Disconnessione effettuata correttamente.",
       "toastLogoutError": "Non abbiamo potuto confermare la disconnessione, ma ti abbiamo reindirizzato alla pagina di accesso.",
-      "toastInvalidCredentials": "Credenziali non valide. Verifica email e password.",
+      "toastInvalidCredentials": "Email o password non corretti.",
+      "toastRateLimited": "Troppi tentativi. Attendi un momento e riprova.",
+      "retryIn": "Riprova tra {seconds}s",
       "continueWithLinkedIn": "Continua con LinkedIn",
       "orContinueWith": "O continua con"
     },
@@ -181,12 +183,13 @@
       "showPasswordsAria": "Mostrar contraseñas",
       "submit": "Crear Cuenta",
       "submitting": "Creando cuenta...",
+      "retryIn": "Riprova tra {seconds}s",
       "hasAccount": "¿Ya tienes cuenta?",
       "loginLink": "Inicia sesión",
       "toastSuccess": "Cuenta creada correctamente. Ya puedes iniciar sesión.",
       "errors": {
-        "generic": "Error al crear la cuenta. Intenta de nuevo.",
-        "emailTaken": "Este correo ya está registrado.",
+        "generic": "No se pudo completar el registro. Revisá los datos e intentá de nuevo.",
+        "rateLimited": "Demasiados intentos. Esperá un momento e intentá de nuevo.",
         "server": "Error del servidor. Intenta más tarde."
       }
     }
