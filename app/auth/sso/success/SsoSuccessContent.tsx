@@ -10,7 +10,10 @@ import {
   DEFAULT_AUTH_REDIRECT,
   resolveAuthRedirectDestination,
 } from "@/lib/auth/internal-path"
-import { getSsoErrorTranslationKey } from "@/lib/auth/sso-errors"
+import {
+  getSsoErrorTranslationKey,
+  resolveSsoQueryErrorCode,
+} from "@/lib/auth/sso-errors"
 
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : ""
@@ -21,7 +24,10 @@ export default function SsoSuccessContent() {
   const t = useTranslations("Auth.sso")
   const exchangedRef = useRef(false)
 
-  const oauthError = searchParams.get("error")
+  const oauthError = resolveSsoQueryErrorCode(
+    searchParams.get("error"),
+    searchParams.get("reason")
+  )
   const code = searchParams.get("code")?.trim() ?? ""
   const queryReturnUrl = searchParams.get("returnUrl")
   const queryFrom = searchParams.get("from")

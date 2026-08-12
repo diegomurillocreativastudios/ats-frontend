@@ -112,9 +112,11 @@
         "missing_code": "The sign-in code is missing. Please try again.",
         "linkedin_sso_failed": "We couldn't complete your LinkedIn sign-in. Please try again.",
         "account_banned": "Your account cannot sign in. Contact your administrator.",
+        "account_exists": "An account already exists with this email. Sign in with your email and password.",
         "email_not_verified": "We couldn't verify your LinkedIn email. Try another sign-in method.",
         "exchange_code_expired": "The sign-in session expired. Please try again.",
         "exchange_code_used": "This sign-in link was already used. Please try again.",
+        "invalid_state": "The LinkedIn sign-in session is invalid. Please try again.",
         "network_error": "We couldn't connect to the server. Please try again."
       }
     },
@@ -3385,6 +3387,9 @@
       },
       "validation": {
         "fileType": "Only PDF or DOCX files are accepted.",
+        "fileInvalid": "The file is not a valid PDF or DOCX.",
+        "fileTooLarge": "The CV cannot exceed 15 MB.",
+        "rateLimited": "Too many attempts. Please try again later.",
         "firstNameRequired": "Enter your first name.",
         "lastNameRequired": "Enter your last name.",
         "emailRequired": "Enter your email.",
@@ -3420,11 +3425,12 @@
       },
       "file": {
         "selectPdf": "Select PDF",
-        "helper": "Only PDF or DOCX format is accepted."
+        "helper": "Only PDF or DOCX format is accepted (max. 15 MB)."
       },
       "actions": {
         "submitting": "Submitting application…",
         "submit": "Submit application",
+        "retryIn": "Retry in {seconds}s",
         "backToVacancy": "Back to vacancy",
         "backToList": "Back to vacancies",
         "close": "Close"

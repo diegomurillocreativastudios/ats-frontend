@@ -92,6 +92,13 @@ export default function IniciarSesion() {
     const params = new URLSearchParams(window.location.search)
     const passwordReset = params.get("passwordReset")
     const logout = params.get("logout")
+    const ssoCode = (
+      params.get("reason") ||
+      params.get("error") ||
+      ""
+    )
+      .trim()
+      .toLowerCase()
 
     if (passwordReset === "success") {
       setMessage({
@@ -108,6 +115,11 @@ export default function IniciarSesion() {
         type: "error",
         text: t("login.toastLogoutError"),
       })
+    } else if (ssoCode === "account_exists") {
+      setMessage({
+        type: "error",
+        text: t("sso.errors.account_exists"),
+      })
     } else {
       return
     }
@@ -115,6 +127,8 @@ export default function IniciarSesion() {
     const url = new URL(window.location.href)
     url.searchParams.delete("passwordReset")
     url.searchParams.delete("logout")
+    url.searchParams.delete("reason")
+    url.searchParams.delete("error")
     const qs = url.searchParams.toString()
     window.history.replaceState(
       {},

@@ -112,9 +112,11 @@
         "missing_code": "Der Anmeldecode fehlt. Bitte versuchen Sie es erneut.",
         "linkedin_sso_failed": "Die Anmeldung mit LinkedIn konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
         "account_banned": "Ihr Konto kann sich nicht anmelden. Wenden Sie sich an den Administrator.",
+        "account_exists": "Mit dieser E-Mail existiert bereits ein Konto. Melden Sie sich mit E-Mail und Passwort an.",
         "email_not_verified": "Die LinkedIn-E-Mail konnte nicht verifiziert werden. Versuchen Sie eine andere Anmeldemethode.",
         "exchange_code_expired": "Die Anmeldesitzung ist abgelaufen. Bitte versuchen Sie es erneut.",
         "exchange_code_used": "Dieser Anmeldelink wurde bereits verwendet. Bitte versuchen Sie es erneut.",
+        "invalid_state": "Die LinkedIn-Anmeldesitzung ist ungültig. Bitte versuchen Sie es erneut.",
         "network_error": "Verbindung zum Server fehlgeschlagen. Bitte versuchen Sie es erneut."
       }
     },
@@ -3317,6 +3319,9 @@
       },
       "validation": {
         "fileType": "Es werden nur PDF- oder DOCX-Dateien akzeptiert.",
+        "fileInvalid": "Die Datei ist kein gültiges PDF oder DOCX.",
+        "fileTooLarge": "Der Lebenslauf darf 15 MB nicht überschreiten.",
+        "rateLimited": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
         "firstNameRequired": "Geben Sie Ihren Vornamen ein.",
         "lastNameRequired": "Geben Sie Ihren Nachnamen ein.",
         "emailRequired": "Geben Sie Ihre E-Mail ein.",
@@ -3352,11 +3357,12 @@
       },
       "file": {
         "selectPdf": "PDF auswählen",
-        "helper": "Es wird nur PDF- oder DOCX-Format akzeptiert."
+        "helper": "Es wird nur PDF- oder DOCX-Format akzeptiert (max. 15 MB)."
       },
       "actions": {
         "submitting": "Bewerbung wird gesendet…",
         "submit": "Bewerbung senden",
+        "retryIn": "Erneut in {seconds}s",
         "backToVacancy": "Zurück zur Stelle",
         "backToList": "Zurück zu Stellen",
         "close": "Schließen"

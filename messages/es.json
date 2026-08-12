@@ -112,9 +112,11 @@
         "missing_code": "Falta el código de inicio de sesión. Intenta nuevamente.",
         "linkedin_sso_failed": "No pudimos completar el inicio de sesión con LinkedIn. Intenta nuevamente.",
         "account_banned": "Tu cuenta no puede iniciar sesión. Contacta al administrador.",
+        "account_exists": "Ya existe una cuenta con este correo. Inicia sesión con tu correo y contraseña.",
         "email_not_verified": "No pudimos verificar el correo de LinkedIn. Intenta con otro método de inicio de sesión.",
         "exchange_code_expired": "La sesión de inicio expiró. Intenta nuevamente.",
         "exchange_code_used": "Este enlace de inicio ya fue utilizado. Intenta nuevamente.",
+        "invalid_state": "La sesión de LinkedIn no es válida. Intenta nuevamente.",
         "network_error": "No pudimos conectar con el servidor. Intenta nuevamente."
       }
     },
@@ -3385,6 +3387,9 @@
       },
       "validation": {
         "fileType": "Solo se aceptan archivos PDF o DOCX.",
+        "fileInvalid": "El archivo no es un PDF o DOCX válido.",
+        "fileTooLarge": "El CV no puede superar 15 MB.",
+        "rateLimited": "Demasiados intentos. Intenta de nuevo más tarde.",
         "firstNameRequired": "Ingresa tu nombre.",
         "lastNameRequired": "Ingresa tu apellido.",
         "emailRequired": "Ingresa tu correo.",
@@ -3420,11 +3425,12 @@
       },
       "file": {
         "selectPdf": "Seleccionar PDF",
-        "helper": "Solo se acepta formato PDF o DOCX."
+        "helper": "Solo se acepta formato PDF o DOCX (máx. 15 MB)."
       },
       "actions": {
         "submitting": "Enviando postulación…",
         "submit": "Enviar postulación",
+        "retryIn": "Reintentá en {seconds}s",
         "backToVacancy": "Volver a la vacante",
         "backToList": "Volver a vacantes",
         "close": "Cerrar"

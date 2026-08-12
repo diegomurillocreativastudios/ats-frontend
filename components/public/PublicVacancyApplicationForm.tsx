@@ -15,11 +15,13 @@ import { CheckCircle2, LoaderCircle, Mail, Paperclip } from "lucide-react"
 import {
   getPublicApplyErrorMessage,
   isAllowedCvFile,
+  isCvFileWithinSizeLimit,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
   submitPublicVacancyApplication,
   type PublicVacancyApplyValues,
 } from "@/lib/public-vacancy-apply"
+import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
 import {
   APPLY_LOADING_TICK_MS,
   APPLY_LONG_WAIT_HINT_MS,
@@ -285,6 +287,7 @@ export function PublicVacancyApplicationForm({
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [serverError, setServerError] = useState<string | null>(null)
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0)
   const [submitPhase, setSubmitPhase] = useState<"idle" | "loading" | "success">("idle")
   const [loadingOverlay, setLoadingOverlay] = useState({ percent: 0, longWait: false })
   const [isConfirmEmailModalOpen, setIsConfirmEmailModalOpen] = useState(false)
@@ -346,6 +349,14 @@ export function PublicVacancyApplicationForm({
     return () => window.clearInterval(id)
   }, [submitPhase])
 
+  useEffect(() => {
+    if (rateLimitSecondsLeft <= 0) return
+    const id = window.setInterval(() => {
+      setRateLimitSecondsLeft((s) => (s <= 1 ? 0 : s - 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [rateLimitSecondsLeft])
+
   const handleChange = useCallback(
     (
       event: ChangeEvent<
@@ -370,6 +381,13 @@ export function PublicVacancyApplicationForm({
       setServerError(null)
       return
     }
+    if (file && !isCvFileWithinSizeLimit(file)) {
+      event.target.value = ""
+      setCvFile(null)
+      setErrors((prev) => ({ ...prev, cvFile: t("validation.fileTooLarge") }))
+      setServerError(null)
+      return
+    }
     setCvFile(file)
     setErrors((prev) => ({ ...prev, cvFile: undefined }))
     setServerError(null)
@@ -382,8 +400,8 @@ export function PublicVacancyApplicationForm({
     if (!values.email.trim()) next.email = t("validation.emailRequired")
     else if (!isValidEmailFormat(values.email)) next.email = t("validation.emailInvalid")
     if (!cvFile) next.cvFile = t("validation.cvRequired")
-    else if (!isAllowedCvFile(cvFile))
-      next.cvFile = t("validation.fileType")
+    else if (!isAllowedCvFile(cvFile)) next.cvFile = t("validation.fileType")
+    else if (!isCvFileWithinSizeLimit(cvFile)) next.cvFile = t("validation.fileTooLarge")
     
     const hasDocumentType = values.documentTypeId.trim() !== ""
     const hasNationalId = values.nationalId.trim() !== ""
@@ -438,6 +456,10 @@ export function PublicVacancyApplicationForm({
         typeof err === "object" && err !== null && "body" in err
           ? (err as { body?: unknown }).body
           : undefined
+      const retryAfter =
+        typeof err === "object" && err !== null && "retryAfter" in err
+          ? Number((err as { retryAfter?: number }).retryAfter)
+          : undefined
 
       const consentCode = getApiErrorCode(err)
       if (consentCode === "AUTH_CONSENT_VERSION_MISMATCH") {
@@ -453,6 +475,30 @@ export function PublicVacancyApplicationForm({
         return
       }
 
+      if (status === 429) {
+        const seconds = parseRetryAfterSeconds(
+          retryAfter != null && Number.isFinite(retryAfter)
+            ? String(retryAfter)
+            : null
+        )
+        setRateLimitSecondsLeft(seconds)
+        const apiMessage = getPublicApplyErrorMessage(status, body)
+        setServerError(
+          apiMessage ||
+            t("validation.rateLimited", { seconds: String(seconds) })
+        )
+        return
+      }
+
+      if (status === 415) {
+        setErrors((prev) => ({
+          ...prev,
+          cvFile: t("validation.fileInvalid"),
+        }))
+        setServerError(getPublicApplyErrorMessage(status, body))
+        return
+      }
+
       if (status === 400) {
         const fieldMap = parsePublicApplyFieldErrors(body)
         if (Object.keys(fieldMap).length > 0) {
@@ -460,6 +506,8 @@ export function PublicVacancyApplicationForm({
           setServerError(t("validation.reviewFields"))
           return
         }
+        setServerError(getPublicApplyErrorMessage(status, body))
+        return
       }
 
       setServerError(getPublicApplyErrorMessage(status, body))
@@ -469,7 +517,7 @@ export function PublicVacancyApplicationForm({
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault()
-      if (submitPhase === "loading") return
+      if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
 
       const clientErrors = validateClient()
       if (Object.keys(clientErrors).length > 0) {
@@ -486,7 +534,7 @@ export function PublicVacancyApplicationForm({
 
       setIsConsentModalOpen(true)
     },
-    [submitPhase, validateClient, values, acceptedConsent]
+    [submitPhase, rateLimitSecondsLeft, validateClient, values, acceptedConsent]
   )
 
   const consentInitialValues = useMemo<ConsentAuthorizationInitialValues>(
@@ -575,7 +623,7 @@ export function PublicVacancyApplicationForm({
     )
   }
 
-  const disabled = submitPhase === "loading"
+  const disabled = submitPhase === "loading" || rateLimitSecondsLeft > 0
   const showProgressOverlay = submitPhase === "loading"
 
   return (
@@ -881,14 +929,18 @@ export function PublicVacancyApplicationForm({
           }
           aria-live="polite"
         >
-          {disabled ? (
+          {disabled && submitPhase === "loading" ? (
             <LoaderCircle className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
           ) : (
             <Mail className="h-4 w-4 shrink-0" aria-hidden />
           )}
-          {disabled ? t("actions.submitting") : t("actions.submit")}
+          {submitPhase === "loading"
+            ? t("actions.submitting")
+            : rateLimitSecondsLeft > 0
+              ? t("actions.retryIn", { seconds: String(rateLimitSecondsLeft) })
+              : t("actions.submit")}
         </button>
-        {disabled ? (
+        {submitPhase === "loading" ? (
           <p
             className={
               theme === "dark"

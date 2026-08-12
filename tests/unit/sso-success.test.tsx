@@ -50,6 +50,20 @@ describe("SsoSuccessContent", () => {
     expect(fetch).not.toHaveBeenCalled()
   })
 
+  it("shows account_exists message when reason query is present", async () => {
+    searchParamsValue = new URLSearchParams("reason=account_exists")
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByTestId("auth-sso-error")).toBeInTheDocument()
+    })
+    expect(
+      screen.getByText(
+        "Ya existe una cuenta con este correo. Inicia sesión con tu correo y contraseña."
+      )
+    ).toBeInTheDocument()
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
   it("calls local exchange route once and redirects", async () => {
     searchParamsValue = new URLSearchParams("code=abc123")
     renderPage()

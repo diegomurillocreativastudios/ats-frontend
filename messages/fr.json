@@ -112,9 +112,11 @@
         "missing_code": "Le code de connexion est manquant. Veuillez réessayer.",
         "linkedin_sso_failed": "Nous n'avons pas pu terminer votre connexion LinkedIn. Veuillez réessayer.",
         "account_banned": "Votre compte ne peut pas se connecter. Contactez l'administrateur.",
+        "account_exists": "Un compte existe déjà avec cet e-mail. Connectez-vous avec votre e-mail et votre mot de passe.",
         "email_not_verified": "Nous n'avons pas pu vérifier l'e-mail LinkedIn. Essayez une autre méthode de connexion.",
         "exchange_code_expired": "La session de connexion a expiré. Veuillez réessayer.",
         "exchange_code_used": "Ce lien de connexion a déjà été utilisé. Veuillez réessayer.",
+        "invalid_state": "La session LinkedIn n'est pas valide. Veuillez réessayer.",
         "network_error": "Impossible de se connecter au serveur. Veuillez réessayer."
       }
     },
@@ -3317,6 +3319,9 @@
       },
       "validation": {
         "fileType": "Seuls les fichiers PDF ou DOCX sont acceptés.",
+        "fileInvalid": "Le fichier n'est pas un PDF ou DOCX valide.",
+        "fileTooLarge": "Le CV ne peut pas dépasser 15 Mo.",
+        "rateLimited": "Trop de tentatives. Réessayez plus tard.",
         "firstNameRequired": "Saisissez votre prénom.",
         "lastNameRequired": "Saisissez votre nom.",
         "emailRequired": "Saisissez votre e-mail.",
@@ -3352,11 +3357,12 @@
       },
       "file": {
         "selectPdf": "Sélectionner un PDF",
-        "helper": "Seuls les formats PDF ou DOCX sont acceptés."
+        "helper": "Seuls les formats PDF ou DOCX sont acceptés (max. 15 Mo)."
       },
       "actions": {
         "submitting": "Envoi de la candidature…",
         "submit": "Envoyer la candidature",
+        "retryIn": "Réessayez dans {seconds}s",
         "backToVacancy": "Retour à l'offre",
         "backToList": "Retour aux offres",
         "close": "Fermer"

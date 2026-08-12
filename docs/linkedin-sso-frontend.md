@@ -59,8 +59,10 @@ Registradas en `lib/auth/public-paths.ts`.
 
 ## Errores
 
-- `?error=...` en `/auth/sso/success` → mensaje amigable, sin exchange.
+- `?error=...` o `?reason=...` en `/auth/sso/success` → mensaje amigable, sin exchange.
 - Códigos conocidos del backend mapeados en `lib/auth/sso-errors.ts`.
+- `account_exists`: la cuenta local ya existe y LinkedIn **no** se auto-vincula; el usuario debe entrar con correo/contraseña.
+- Si el backend redirige a `/auth/iniciar-sesion?reason=account_exists` (o `error=`), el login muestra el mismo mensaje.
 - Traducciones en `Auth.sso.*` (`messages/*.json`).
 
 ## Cómo probar local
@@ -70,10 +72,12 @@ Registradas en `lib/auth/public-paths.ts`.
 3. Probar login LinkedIn completo.
 4. Probar `?from=/portal-rrhh`.
 5. Probar `/auth/sso/success?error=access_denied`.
-6. Confirmar que login email/password sigue funcionando.
+6. Probar `/auth/sso/success?reason=account_exists` y `/auth/iniciar-sesion?reason=account_exists`.
+7. Confirmar que login email/password sigue funcionando.
 
 ## Dependencia backend
 
 - `GET /api/auth/linkedin/login`
 - `POST /api/auth/sso/exchange`
 - Redirect final del backend hacia `/auth/sso/success?code=...`
+- Redirect de error hacia `/auth/sso/success?error=...` o `?reason=...` (p. ej. `account_exists`)

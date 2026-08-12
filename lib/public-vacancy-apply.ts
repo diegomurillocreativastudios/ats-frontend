@@ -1,6 +1,9 @@
 import { apiClient } from "@/lib/api"
 import type { CandidateAuthConsentSubmitBody } from "@/lib/candidate-auth-consent"
 
+/** Límite alineado con backend security-hardening (CV ≤ 15 MB). */
+export const PUBLIC_CV_MAX_BYTES = 15 * 1024 * 1024
+
 export interface PublicVacancyApplyValues {
   firstName: string
   lastName: string
@@ -39,6 +42,12 @@ function getRecord(value: unknown): Record<string, unknown> | null {
   return value as Record<string, unknown>
 }
 
+function getApiMessage(record: Record<string, unknown> | null): string | null {
+  if (!record || typeof record.message !== "string") return null
+  const trimmed = record.message.trim()
+  return trimmed !== "" ? trimmed : null
+}
+
 /** Extrae mapa campo → mensaje desde cuerpos típicos de validación .NET / ASP.NET. */
 export function parsePublicApplyFieldErrors(body: unknown): Record<string, string> {
   const record = getRecord(body)
@@ -74,6 +83,7 @@ export function getPublicApplyErrorMessage(status: number, body: unknown): strin
   const record = getRecord(body)
   const code =
     record && typeof record.code === "string" ? record.code.trim() : ""
+  const fromApi = getApiMessage(record)
 
   if (code === "AUTH_CONSENT_VERSION_MISMATCH") {
     return "El documento de autorización se actualizó. Recarga la página e intenta de nuevo."
@@ -89,28 +99,22 @@ export function getPublicApplyErrorMessage(status: number, body: unknown): strin
     return "El correo ingresado debe coincidir con tu cuenta de candidato."
   }
   if (status === 404) return "La vacante ya no está disponible."
+  if (status === 429) {
+    return fromApi ?? "Demasiados intentos. Intenta de nuevo más tarde."
+  }
   if (status === 422) {
-    const fromApi =
-      record &&
-      typeof record.message === "string" &&
-      record.message.trim() !== ""
-        ? record.message.trim()
-        : null
     return (
       fromApi ??
       "No pudimos procesar el CV para esta vacante. Verifica el archivo e intenta nuevamente."
     )
   }
   if (status === 415) {
-    const fromApi =
-      record &&
-      typeof record.message === "string" &&
-      record.message.trim() !== ""
-        ? record.message.trim()
-        : null
-    return fromApi ?? "El archivo debe estar en formato PDF o DOCX."
+    return fromApi ?? "El archivo no es un PDF o DOCX válido."
   }
-  return "No pudimos procesar tu postulación en este momento. Intenta nuevamente."
+  if (status === 400) {
+    return fromApi ?? "El CV no puede superar 15 MB. Revisa el formulario e intenta nuevamente."
+  }
+  return "Ocurrió un error inesperado. Intenta de nuevo."
 }
 
 export function isValidEmailFormat(email: string): boolean {
@@ -123,7 +127,19 @@ export function isAllowedCvFile(file: File): boolean {
   const name = (file.name ?? "").toLowerCase()
   if (name.endsWith(".pdf")) return true
   if (name.endsWith(".docx")) return true
-  return file.type === "application/pdf"
+  if (file.type === "application/pdf") return true
+  return (
+    file.type ===
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  )
+}
+
+/** True si el archivo no supera el límite de tamaño del portal público. */
+export function isCvFileWithinSizeLimit(
+  file: File,
+  maxBytes = PUBLIC_CV_MAX_BYTES
+): boolean {
+  return Number.isFinite(file.size) && file.size <= maxBytes
 }
 
 export function buildPublicApplyFormData(
@@ -145,7 +161,7 @@ export function buildPublicApplyFormData(
   if (values.documentTypeId?.trim()) {
     candidate.documentTypeId = values.documentTypeId.trim()
   }
-  
+
   if (values.nationalId?.trim()) {
     candidate.nationalId = values.nationalId.trim()
   }
