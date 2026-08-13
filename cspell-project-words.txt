@@ -209,6 +209,7 @@ spanish
 tecnolog
 topbars
 uppercased
+userinfo
 workexperience
 Applicantree
 applicantree

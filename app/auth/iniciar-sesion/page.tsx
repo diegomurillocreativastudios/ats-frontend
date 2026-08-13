@@ -19,6 +19,11 @@ import LanguageSwitcher from "@/components/language-switcher"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
+import {
+  getSsoErrorTranslationKey,
+  isKnownSsoErrorCode,
+  resolveSsoQueryErrorCode,
+} from "@/lib/auth/sso-errors"
 import { LinkedInLoginButton } from "@/components/auth/LinkedInLoginButton"
 
 const getOrigin = () =>
@@ -92,13 +97,12 @@ export default function IniciarSesion() {
     const params = new URLSearchParams(window.location.search)
     const passwordReset = params.get("passwordReset")
     const logout = params.get("logout")
-    const ssoCode = (
-      params.get("reason") ||
-      params.get("error") ||
-      ""
-    )
-      .trim()
-      .toLowerCase()
+    /**
+     * Prefer `reason` over generic `error=linkedin_sso_failed` so dedicated copy shows.
+     * resolveSsoQueryErrorCode prefers `error`; here we invert for login landing.
+     */
+    const ssoCode =
+      resolveSsoQueryErrorCode(params.get("reason"), params.get("error")) ?? ""
 
     if (passwordReset === "success") {
       setMessage({
@@ -115,10 +119,19 @@ export default function IniciarSesion() {
         type: "error",
         text: t("login.toastLogoutError"),
       })
-    } else if (ssoCode === "account_exists") {
+    } else if (ssoCode && isKnownSsoErrorCode(ssoCode)) {
+      const ssoKey = getSsoErrorTranslationKey(ssoCode)
       setMessage({
         type: "error",
-        text: t("sso.errors.account_exists"),
+        text:
+          ssoKey === "errorDescription"
+            ? t("sso.errorDescription")
+            : t(`sso.${ssoKey}` as "sso.errors.account_exists"),
+      })
+    } else if (ssoCode) {
+      setMessage({
+        type: "error",
+        text: t("sso.errorDescription"),
       })
     } else {
       return

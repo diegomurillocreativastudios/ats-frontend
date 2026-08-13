@@ -110,14 +110,22 @@
       "backToSignIn": "Zurück zur Anmeldung",
       "errors": {
         "missing_code": "Der Anmeldecode fehlt. Bitte versuchen Sie es erneut.",
+        "missing_code_or_state": "Daten der LinkedIn-Anmeldesitzung fehlen. Bitte versuchen Sie es erneut.",
         "linkedin_sso_failed": "Die Anmeldung mit LinkedIn konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
         "account_banned": "Ihr Konto kann sich nicht anmelden. Wenden Sie sich an den Administrator.",
         "account_exists": "Mit dieser E-Mail existiert bereits ein Konto. Melden Sie sich mit E-Mail und Passwort an.",
+        "account_link_failed": "Ihr LinkedIn-Konto konnte nicht verknüpft werden. Bitte versuchen Sie es erneut.",
         "email_not_verified": "Die LinkedIn-E-Mail konnte nicht verifiziert werden. Versuchen Sie eine andere Anmeldemethode.",
+        "email_required": "LinkedIn hat keine E-Mail-Adresse geteilt. Versuchen Sie eine andere Anmeldemethode.",
         "exchange_code_expired": "Die Anmeldesitzung ist abgelaufen. Bitte versuchen Sie es erneut.",
         "exchange_code_used": "Dieser Anmeldelink wurde bereits verwendet. Bitte versuchen Sie es erneut.",
+        "id_token_invalid": "Ihre LinkedIn-Identität konnte nicht validiert werden. Bitte versuchen Sie es erneut.",
         "invalid_state": "Die LinkedIn-Anmeldesitzung ist ungültig. Bitte versuchen Sie es erneut.",
-        "network_error": "Verbindung zum Server fehlgeschlagen. Bitte versuchen Sie es erneut."
+        "network_error": "Verbindung zum Server fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "not_configured": "Die Anmeldung mit LinkedIn ist nicht verfügbar. Wenden Sie sich an den Administrator.",
+        "token_exchange_failed": "Der Token-Austausch mit LinkedIn ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "user_creation_failed": "Ihr Konto konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+        "userinfo_failed": "Ihr LinkedIn-Profil konnte nicht geladen werden. Bitte versuchen Sie es erneut."
       }
     },
     "forgot": {

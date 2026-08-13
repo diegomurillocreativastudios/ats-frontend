@@ -6,13 +6,21 @@ const OAUTH_ERROR_ALIASES: Record<string, string> = {
 const KNOWN_SSO_ERROR_CODES = new Set([
   "account_banned",
   "account_exists",
+  "account_link_failed",
   "email_not_verified",
+  "email_required",
   "exchange_code_expired",
   "exchange_code_used",
+  "id_token_invalid",
   "invalid_state",
   "linkedin_sso_failed",
   "missing_code",
+  "missing_code_or_state",
   "network_error",
+  "not_configured",
+  "token_exchange_failed",
+  "user_creation_failed",
+  "userinfo_failed",
 ])
 
 /**
@@ -30,13 +38,28 @@ export function resolveSsoQueryErrorCode(
   return null
 }
 
+/** Normalize backend/query codes (aliases) before translation lookup. */
+export function normalizeSsoErrorCode(
+  code: string | null | undefined
+): string | null {
+  if (!code) return null
+  const normalized = code.trim().toLowerCase()
+  if (!normalized) return null
+  return OAUTH_ERROR_ALIASES[normalized] ?? normalized
+}
+
+/** True when the code maps to a dedicated Auth.sso.errors.* message. */
+export function isKnownSsoErrorCode(code: string | null | undefined): boolean {
+  const mapped = normalizeSsoErrorCode(code)
+  return mapped != null && KNOWN_SSO_ERROR_CODES.has(mapped)
+}
+
 /** Map backend/query error codes to Auth.sso.errors.* translation keys. */
 export function getSsoErrorTranslationKey(
   code: string | null | undefined
 ): "errorDescription" | `errors.${string}` {
-  if (!code) return "errorDescription"
-  const normalized = code.trim().toLowerCase()
-  const mapped = OAUTH_ERROR_ALIASES[normalized] ?? normalized
+  const mapped = normalizeSsoErrorCode(code)
+  if (!mapped) return "errorDescription"
   if (KNOWN_SSO_ERROR_CODES.has(mapped)) {
     return `errors.${mapped}` as `errors.${string}`
   }

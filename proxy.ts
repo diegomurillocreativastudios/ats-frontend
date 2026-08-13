@@ -53,8 +53,10 @@ export function proxy(request: NextRequest) {
   const hasToken = Boolean(request.cookies.get(AUTH_COOKIES.access)?.value)
   const role = getSessionRole(request)
 
-  if (pathname === "/iniciar-sesion") {
-    return NextResponse.redirect(new URL("/auth/iniciar-sesion", request.url))
+  if (pathname === "/iniciar-sesion" || pathname === "/login") {
+    const dest = new URL("/auth/iniciar-sesion", request.url)
+    dest.search = request.nextUrl.search
+    return NextResponse.redirect(dest)
   }
   if (pathname === "/crear-cuenta") {
     return NextResponse.redirect(new URL("/auth/registrarse", request.url))

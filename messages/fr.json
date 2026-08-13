@@ -110,14 +110,22 @@
       "backToSignIn": "Retour à la connexion",
       "errors": {
         "missing_code": "Le code de connexion est manquant. Veuillez réessayer.",
+        "missing_code_or_state": "Des données de session LinkedIn sont manquantes. Veuillez réessayer.",
         "linkedin_sso_failed": "Nous n'avons pas pu terminer votre connexion LinkedIn. Veuillez réessayer.",
         "account_banned": "Votre compte ne peut pas se connecter. Contactez l'administrateur.",
         "account_exists": "Un compte existe déjà avec cet e-mail. Connectez-vous avec votre e-mail et votre mot de passe.",
+        "account_link_failed": "Nous n'avons pas pu lier votre compte LinkedIn. Veuillez réessayer.",
         "email_not_verified": "Nous n'avons pas pu vérifier l'e-mail LinkedIn. Essayez une autre méthode de connexion.",
+        "email_required": "LinkedIn n'a pas partagé d'adresse e-mail. Essayez une autre méthode de connexion.",
         "exchange_code_expired": "La session de connexion a expiré. Veuillez réessayer.",
         "exchange_code_used": "Ce lien de connexion a déjà été utilisé. Veuillez réessayer.",
+        "id_token_invalid": "Nous n'avons pas pu valider votre identité LinkedIn. Veuillez réessayer.",
         "invalid_state": "La session LinkedIn n'est pas valide. Veuillez réessayer.",
-        "network_error": "Impossible de se connecter au serveur. Veuillez réessayer."
+        "network_error": "Impossible de se connecter au serveur. Veuillez réessayer.",
+        "not_configured": "La connexion LinkedIn n'est pas disponible. Contactez l'administrateur.",
+        "token_exchange_failed": "Nous n'avons pas pu terminer l'échange avec LinkedIn. Veuillez réessayer.",
+        "user_creation_failed": "Nous n'avons pas pu créer votre compte. Veuillez réessayer.",
+        "userinfo_failed": "Nous n'avons pas pu charger votre profil LinkedIn. Veuillez réessayer."
       }
     },
     "forgot": {

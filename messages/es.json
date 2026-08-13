@@ -110,14 +110,22 @@
       "backToSignIn": "Volver al inicio de sesión",
       "errors": {
         "missing_code": "Falta el código de inicio de sesión. Intenta nuevamente.",
+        "missing_code_or_state": "Faltan datos de la sesión de LinkedIn. Intenta nuevamente.",
         "linkedin_sso_failed": "No pudimos completar el inicio de sesión con LinkedIn. Intenta nuevamente.",
         "account_banned": "Tu cuenta no puede iniciar sesión. Contacta al administrador.",
         "account_exists": "Ya existe una cuenta con este correo. Inicia sesión con tu correo y contraseña.",
+        "account_link_failed": "No pudimos vincular tu cuenta de LinkedIn. Intenta nuevamente.",
         "email_not_verified": "No pudimos verificar el correo de LinkedIn. Intenta con otro método de inicio de sesión.",
+        "email_required": "LinkedIn no compartió un correo electrónico. Intenta con otro método de inicio de sesión.",
         "exchange_code_expired": "La sesión de inicio expiró. Intenta nuevamente.",
         "exchange_code_used": "Este enlace de inicio ya fue utilizado. Intenta nuevamente.",
+        "id_token_invalid": "No pudimos validar la identidad de LinkedIn. Intenta nuevamente.",
         "invalid_state": "La sesión de LinkedIn no es válida. Intenta nuevamente.",
-        "network_error": "No pudimos conectar con el servidor. Intenta nuevamente."
+        "network_error": "No pudimos conectar con el servidor. Intenta nuevamente.",
+        "not_configured": "El inicio de sesión con LinkedIn no está disponible. Contacta al administrador.",
+        "token_exchange_failed": "No pudimos completar el intercambio con LinkedIn. Intenta nuevamente.",
+        "user_creation_failed": "No pudimos crear tu cuenta. Intenta nuevamente.",
+        "userinfo_failed": "No pudimos obtener tu perfil de LinkedIn. Intenta nuevamente."
       }
     },
     "forgot": {

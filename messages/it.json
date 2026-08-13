@@ -110,14 +110,22 @@
       "backToSignIn": "Torna all'accesso",
       "errors": {
         "missing_code": "Manca il codice di accesso. Riprova.",
+        "missing_code_or_state": "Mancano i dati della sessione LinkedIn. Riprova.",
         "linkedin_sso_failed": "Non siamo riusciti a completare l'accesso con LinkedIn. Riprova.",
         "account_banned": "Il tuo account non può accedere. Contatta l'amministratore.",
         "account_exists": "Esiste già un account con questa email. Accedi con email e password.",
+        "account_link_failed": "Non siamo riusciti a collegare il tuo account LinkedIn. Riprova.",
         "email_not_verified": "Non abbiamo potuto verificare l'email di LinkedIn. Prova un altro metodo di accesso.",
+        "email_required": "LinkedIn non ha condiviso un indirizzo email. Prova un altro metodo di accesso.",
         "exchange_code_expired": "La sessione di accesso è scaduta. Riprova.",
         "exchange_code_used": "Questo link di accesso è già stato utilizzato. Riprova.",
+        "id_token_invalid": "Non siamo riusciti a convalidare la tua identità LinkedIn. Riprova.",
         "invalid_state": "La sessione di LinkedIn non è valida. Riprova.",
-        "network_error": "Impossibile connettersi al server. Riprova."
+        "network_error": "Impossibile connettersi al server. Riprova.",
+        "not_configured": "L'accesso con LinkedIn non è disponibile. Contatta l'amministratore.",
+        "token_exchange_failed": "Non siamo riusciti a completare lo scambio con LinkedIn. Riprova.",
+        "user_creation_failed": "Non siamo riusciti a creare il tuo account. Riprova.",
+        "userinfo_failed": "Non siamo riusciti a caricare il tuo profilo LinkedIn. Riprova."
       }
     },
     "forgot": {

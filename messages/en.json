@@ -110,14 +110,22 @@
       "backToSignIn": "Back to sign in",
       "errors": {
         "missing_code": "The sign-in code is missing. Please try again.",
+        "missing_code_or_state": "LinkedIn sign-in session data is missing. Please try again.",
         "linkedin_sso_failed": "We couldn't complete your LinkedIn sign-in. Please try again.",
         "account_banned": "Your account cannot sign in. Contact your administrator.",
         "account_exists": "An account already exists with this email. Sign in with your email and password.",
+        "account_link_failed": "We couldn't link your LinkedIn account. Please try again.",
         "email_not_verified": "We couldn't verify your LinkedIn email. Try another sign-in method.",
+        "email_required": "LinkedIn did not share an email address. Try another sign-in method.",
         "exchange_code_expired": "The sign-in session expired. Please try again.",
         "exchange_code_used": "This sign-in link was already used. Please try again.",
+        "id_token_invalid": "We couldn't validate your LinkedIn identity. Please try again.",
         "invalid_state": "The LinkedIn sign-in session is invalid. Please try again.",
-        "network_error": "We couldn't connect to the server. Please try again."
+        "network_error": "We couldn't connect to the server. Please try again.",
+        "not_configured": "LinkedIn sign-in is not available. Contact your administrator.",
+        "token_exchange_failed": "We couldn't complete the LinkedIn token exchange. Please try again.",
+        "user_creation_failed": "We couldn't create your account. Please try again.",
+        "userinfo_failed": "We couldn't load your LinkedIn profile. Please try again."
       }
     },
     "forgot": {
