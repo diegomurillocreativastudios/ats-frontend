@@ -19,24 +19,28 @@ import { apiClient } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { canStaffBulkPdfCvUpload } from "@/lib/roles";
+import {
+  PDF_DOCX_TXT_ACCEPT,
+  PDF_DOCX_TXT_EXTENSIONS,
+  PDF_DOCX_TXT_TYPES,
+  PDF_ONLY_ACCEPT,
+  PDF_ONLY_EXTENSIONS,
+  PDF_ONLY_TYPES,
+  UPLOAD_MAX_BYTES_15_MB,
+  getUploadApiErrorMessage,
+} from "@/lib/upload-constraints";
 
-const CV_ACCEPTED_TYPES = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/plain",
-];
-const CV_ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".doc", ".txt"];
-const CV_ACCEPT_ATTR =
-  ".pdf,.docx,.doc,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain";
+const CV_ACCEPTED_TYPES = [...PDF_DOCX_TXT_TYPES];
+const CV_ACCEPTED_EXTENSIONS = [...PDF_DOCX_TXT_EXTENSIONS];
+const CV_ACCEPT_ATTR = PDF_DOCX_TXT_ACCEPT;
 
-const STAFF_CV_ACCEPTED_TYPES = ["application/pdf"];
-const STAFF_CV_ACCEPTED_EXTENSIONS = [".pdf"];
-const STAFF_CV_ACCEPT_ATTR = "application/pdf,.pdf";
+const STAFF_CV_ACCEPTED_TYPES = [...PDF_ONLY_TYPES];
+const STAFF_CV_ACCEPTED_EXTENSIONS = [...PDF_ONLY_EXTENSIONS];
+const STAFF_CV_ACCEPT_ATTR = PDF_ONLY_ACCEPT;
 
-const IDENTITY_DOC_ACCEPTED_TYPES = ["application/pdf"];
-const IDENTITY_DOC_ACCEPTED_EXTENSIONS = [".pdf"];
-const IDENTITY_DOC_ACCEPT_ATTR = "application/pdf,.pdf";
+const IDENTITY_DOC_ACCEPTED_TYPES = [...PDF_ONLY_TYPES];
+const IDENTITY_DOC_ACCEPTED_EXTENSIONS = [...PDF_ONLY_EXTENSIONS];
+const IDENTITY_DOC_ACCEPT_ATTR = PDF_ONLY_ACCEPT;
 
 const AI_INGEST_COMPLETED_HOLD_MS = 550;
 
@@ -289,6 +293,7 @@ export default function AgregarCandidatoModal({
       onSnackbar?.(successMessage, "success");
     } catch (err: unknown) {
       const message =
+        getUploadApiErrorMessage(err) ||
         getApiErrorMessage(err) ||
         (variant === "self"
           ? t("processErrorSelf")
@@ -423,6 +428,7 @@ export default function AgregarCandidatoModal({
               helperText={t("cvHelperText")}
               ariaLabel={t("cvAria")}
               typeErrorMessage={t("cvTypeError")}
+              maxSizeBytes={UPLOAD_MAX_BYTES_15_MB}
               disabled={isSubmittingCandidate}
               inputId="candidato-cv-input"
             />
@@ -434,6 +440,7 @@ export default function AgregarCandidatoModal({
               helperText={t("cvHelperTextPdfOnly")}
               stagingOnly
               processAllAcceptedFiles
+              maxSizeBytes={UPLOAD_MAX_BYTES_15_MB}
               onFilesChange={setCvFiles}
               externalProcessingIndex={externalProcessingIndex}
             />
@@ -555,6 +562,7 @@ export default function AgregarCandidatoModal({
                 helperText={t("identityHelperText")}
                 ariaLabel={t("identityAria")}
                 typeErrorMessage={t("identityTypeError")}
+                maxSizeBytes={UPLOAD_MAX_BYTES_15_MB}
                 disabled={isSubmittingCandidate}
                 inputId="candidato-identity-input"
               />

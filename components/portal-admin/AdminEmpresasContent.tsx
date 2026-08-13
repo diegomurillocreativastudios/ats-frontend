@@ -28,6 +28,14 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
+  LOGO_ACCEPT,
+  LOGO_EXTENSIONS,
+  LOGO_TYPES,
+  UPLOAD_MAX_BYTES_5_MB,
+  getUploadApiErrorMessage,
+  validateUploadFile,
+} from "@/lib/upload-constraints"
+import {
   buildLogoDataUri,
   createAdminCompany,
   createAdminCompanyWithLogo,
@@ -41,8 +49,8 @@ import {
   type AdminCompanyLogo,
 } from "@/lib/api/admin-companies"
 
-const MAX_LOGO_BYTES = 5 * 1024 * 1024
-const ACCEPTED_LOGO_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml"
+const MAX_LOGO_BYTES = UPLOAD_MAX_BYTES_5_MB
+const ACCEPTED_LOGO_TYPES = LOGO_ACCEPT
 
 interface CompanyFormState {
   name: string
@@ -199,13 +207,17 @@ export default function AdminEmpresasContent() {
       setLogoFile(null)
       return
     }
-    if (!file.type.startsWith("image/")) {
-      setLogoError(t("errors.logoType"))
-      event.target.value = ""
-      return
-    }
-    if (file.size > MAX_LOGO_BYTES) {
-      setLogoError(t("errors.logoSize"))
+    const validation = validateUploadFile(file, {
+      types: LOGO_TYPES,
+      extensions: LOGO_EXTENSIONS,
+      maxBytes: MAX_LOGO_BYTES,
+    })
+    if (!validation.valid) {
+      if (validation.reason === "size") {
+        setLogoError(t("errors.logoSize"))
+      } else {
+        setLogoError(t("errors.logoType"))
+      }
       event.target.value = ""
       return
     }
@@ -311,7 +323,12 @@ export default function AdminEmpresasContent() {
       resetLogoState()
       await loadList()
     } catch (err: unknown) {
-      showSnackbar("error", getApiErrorMessage(err) || t("errors.saveFailed"))
+      showSnackbar(
+        "error",
+        getUploadApiErrorMessage(err) ||
+          getApiErrorMessage(err) ||
+          t("errors.saveFailed")
+      )
     } finally {
       setFormSubmitting(false)
     }

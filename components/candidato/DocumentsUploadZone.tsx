@@ -4,6 +4,14 @@ import { useRef, useState, useCallback, useEffect, type ReactNode, type ChangeEv
 import { useTranslations } from "next-intl"
 import { Upload, X, Sparkles, Loader2, Check } from "lucide-react"
 import { getApiErrorMessage, isSilentError } from "@/lib/api-error"
+import {
+  PDF_DOCX_ACCEPT,
+  PDF_DOCX_EXTENSIONS,
+  PDF_DOCX_TYPES,
+  UPLOAD_MAX_BYTES_15_MB,
+  getUploadApiErrorMessage,
+  validateUploadFile,
+} from "@/lib/upload-constraints"
 
 const CV_KEYWORDS = ["cv", "curriculum", "curriculum vitae", "resume", "hoja de vida", "hojadevida"]
 
@@ -12,13 +20,8 @@ const isResumeLikeFile = (fileName: string) => {
   return CV_KEYWORDS.some((keyword) => lower.includes(keyword));
 };
 
-const ACCEPTED_TYPES = [
-  "application/pdf",
-  "application/msword", // .doc
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-];
-const ACCEPTED_EXTENSIONS = [".pdf", ".doc", ".docx"];
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+const ACCEPTED_TYPES = [...PDF_DOCX_TYPES]
+const ACCEPTED_EXTENSIONS = [...PDF_DOCX_EXTENSIONS]
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -28,23 +31,29 @@ const formatFileSize = (bytes: number) => {
 
 interface UploadValidationResult {
   valid: boolean
-  reason?: "type" | "size"
+  reason?: "type" | "size" | "empty"
   size?: string
 }
 
 const validateFile = (
   file: File,
   allowedTypes: string[],
-  allowedExtensions: string[]
+  allowedExtensions: string[],
+  maxSizeBytes: number
 ): UploadValidationResult => {
-  const extension = "." + file.name.split(".").pop()?.toLowerCase();
-  const typeOk =
-    allowedTypes.includes(file.type) || allowedExtensions.includes(extension);
-  const sizeOk = file.size <= MAX_SIZE_BYTES;
-  if (!typeOk) return { valid: false, reason: "type" };
-  if (!sizeOk)
-    return { valid: false, reason: "size", size: formatFileSize(file.size) };
-  return { valid: true };
+  const result = validateUploadFile(file, {
+    types: allowedTypes,
+    extensions: allowedExtensions,
+    maxBytes: maxSizeBytes,
+  })
+  if (!result.valid && result.reason === "size") {
+    return {
+      valid: false,
+      reason: "size",
+      size: formatFileSize(file.size),
+    }
+  }
+  return result
 };
 
 function createIngestCycleKey(): string {
@@ -104,6 +113,8 @@ interface DocumentsUploadZoneProps {
   onFilesChange?: (files: File[]) => void
   /** Índice del archivo que un padre está procesando (p. ej. ingest en modal RRHH) */
   externalProcessingIndex?: number | null
+  /** Tamaño máximo por archivo. Por defecto 15 MB (BE-SEC-016). */
+  maxSizeBytes?: number
 }
 
 export default function DocumentsUploadZone({
@@ -120,6 +131,7 @@ export default function DocumentsUploadZone({
   maxFiles,
   onFilesChange,
   externalProcessingIndex = null,
+  maxSizeBytes = UPLOAD_MAX_BYTES_15_MB,
 }: DocumentsUploadZoneProps = {}) {
   const t = useTranslations("CandidatePortal.documents.upload")
   const inputRef = useRef<HTMLInputElement>(null)
@@ -158,7 +170,8 @@ export default function DocumentsUploadZone({
       const { valid, reason, size } = validateFile(
         file,
         effectiveAcceptedTypes,
-        effectiveAcceptedExtensions
+        effectiveAcceptedExtensions,
+        maxSizeBytes
       );
       if (valid) {
         newFiles.push(file);
@@ -177,7 +190,7 @@ export default function DocumentsUploadZone({
         return limit != null ? merged.slice(-limit) : merged
       })
     }
-  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions, maxFiles, t])
+  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions, maxFiles, maxSizeBytes, t])
 
   const handleClick = () => {
     setError(null);
@@ -281,7 +294,7 @@ export default function DocumentsUploadZone({
       setProcessedIndices((prev) => new Set([...prev, index]));
     } catch (err: unknown) {
       if (isSilentError(err)) return
-      const detail = getApiErrorMessage(err) || t("processError")
+      const detail = getUploadApiErrorMessage(err) || getApiErrorMessage(err) || t("processError")
       setError(t("processErrorSingle", { fileName: file.name, detail }))
     } finally {
       setProcessingIndex(null);
@@ -323,7 +336,8 @@ export default function DocumentsUploadZone({
       }
     } catch (err: unknown) {
       if (isSilentError(err)) return
-      const detail = getApiErrorMessage(err) || t("processErrorMany")
+      const detail =
+        getUploadApiErrorMessage(err) || getApiErrorMessage(err) || t("processErrorMany")
       const label = lastTriedFile?.name ?? t("fileFallback")
       setError(t("processErrorSingle", { fileName: label, detail }))
     } finally {
@@ -353,10 +367,7 @@ export default function DocumentsUploadZone({
         <input
           ref={inputRef}
           type="file"
-          accept={
-            accept ||
-            ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          }
+          accept={accept || PDF_DOCX_ACCEPT}
           multiple
           className="sr-only"
           aria-hidden

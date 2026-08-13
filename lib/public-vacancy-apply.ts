@@ -1,8 +1,13 @@
 import { apiClient } from "@/lib/api"
 import type { CandidateAuthConsentSubmitBody } from "@/lib/candidate-auth-consent"
+import {
+  MIME_DOCX,
+  MIME_PDF,
+  UPLOAD_MAX_BYTES_15_MB,
+} from "@/lib/upload-constraints"
 
 /** Límite alineado con backend security-hardening (CV ≤ 15 MB). */
-export const PUBLIC_CV_MAX_BYTES = 15 * 1024 * 1024
+export const PUBLIC_CV_MAX_BYTES = UPLOAD_MAX_BYTES_15_MB
 
 export interface PublicVacancyApplyValues {
   firstName: string
@@ -108,11 +113,20 @@ export function getPublicApplyErrorMessage(status: number, body: unknown): strin
       "No pudimos procesar el CV para esta vacante. Verifica el archivo e intenta nuevamente."
     )
   }
+  if (status === 413) {
+    return fromApi ?? "El CV no puede superar 15 MB."
+  }
   if (status === 415) {
-    return fromApi ?? "El archivo no es un PDF o DOCX válido."
+    return (
+      fromApi ??
+      "El archivo no coincide con el tipo declarado o no es un PDF o DOCX válido."
+    )
   }
   if (status === 400) {
-    return fromApi ?? "El CV no puede superar 15 MB. Revisa el formulario e intenta nuevamente."
+    return (
+      fromApi ??
+      "Formato de archivo no soportado. Revisa el formulario e intenta nuevamente."
+    )
   }
   return "Ocurrió un error inesperado. Intenta de nuevo."
 }
@@ -125,13 +139,9 @@ export function isValidEmailFormat(email: string): boolean {
 
 export function isAllowedCvFile(file: File): boolean {
   const name = (file.name ?? "").toLowerCase()
-  if (name.endsWith(".pdf")) return true
-  if (name.endsWith(".docx")) return true
-  if (file.type === "application/pdf") return true
-  return (
-    file.type ===
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  )
+  if (name.endsWith(".pdf") || name.endsWith(".docx")) return true
+  if (file.type === MIME_PDF || file.type === MIME_DOCX) return true
+  return false
 }
 
 /** True si el archivo no supera el límite de tamaño del portal público. */

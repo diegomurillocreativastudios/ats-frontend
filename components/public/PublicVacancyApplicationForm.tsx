@@ -490,6 +490,15 @@ export function PublicVacancyApplicationForm({
         return
       }
 
+      if (status === 413) {
+        setErrors((prev) => ({
+          ...prev,
+          cvFile: t("validation.fileTooLarge"),
+        }))
+        setServerError(getPublicApplyErrorMessage(status, body))
+        return
+      }
+
       if (status === 415) {
         setErrors((prev) => ({
           ...prev,

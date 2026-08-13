@@ -72,10 +72,11 @@ describe("public vacancy apply helpers", () => {
     expect(isCvFileWithinSizeLimit(ok)).toBe(true)
   })
 
-  it("returns specific messages for 403, 404, 415, 422 and 429", () => {
+  it("returns specific messages for 403, 404, 413, 415, 422 and 429", () => {
     expect(getPublicApplyErrorMessage(403, {})).toContain("coincidir")
     expect(getPublicApplyErrorMessage(404, {})).toContain("disponible")
-    expect(getPublicApplyErrorMessage(415, {})).toContain("PDF o DOCX válido")
+    expect(getPublicApplyErrorMessage(413, {})).toContain("15 MB")
+    expect(getPublicApplyErrorMessage(415, {})).toMatch(/PDF o DOCX|coincide/)
     expect(getPublicApplyErrorMessage(422, {})).toContain("procesar")
     expect(getPublicApplyErrorMessage(429, {})).toContain("Demasiados intentos")
     expect(
@@ -85,12 +86,15 @@ describe("public vacancy apply helpers", () => {
     ).toBe("Demasiados intentos. Probá de nuevo más tarde.")
   })
 
-  it("falls back to generic unexpected error for unknown statuses", () => {
-    expect(getPublicApplyErrorMessage(500, {})).toContain("error inesperado")
+  it("maps 400 to unsupported format fallback instead of size", () => {
+    expect(getPublicApplyErrorMessage(400, {})).toContain("Formato")
+    expect(
+      getPublicApplyErrorMessage(400, { message: "SVG no permitido" })
+    ).toBe("SVG no permitido")
   })
 
-  it("returns size guidance for 400 without field errors", () => {
-    expect(getPublicApplyErrorMessage(400, {})).toContain("15 MB")
+  it("falls back to generic unexpected error for unknown statuses", () => {
+    expect(getPublicApplyErrorMessage(500, {})).toContain("error inesperado")
   })
 
   it("maps AUTH_CONSENT error codes from personal-appliance", () => {

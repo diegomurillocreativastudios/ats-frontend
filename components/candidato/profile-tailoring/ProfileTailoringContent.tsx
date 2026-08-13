@@ -26,14 +26,13 @@ import {
   type VacancyInputTab,
 } from "@/lib/profile-tailoring-vacancy-source"
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  UPLOAD_MAX_BYTES_10_MB,
+  VACANCY_FILE_ACCEPT,
+  VACANCY_FILE_EXTENSIONS,
+  VACANCY_FILE_TYPES,
+} from "@/lib/upload-constraints"
 
-const VACANCY_FILE_TYPES = [
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/markdown",
-  "text/plain",
-]
-const VACANCY_FILE_EXTENSIONS = [".pdf", ".docx", ".md"]
 const TAILORING_TYPICAL_MS = 55_000
 
 type TabId = VacancyInputTab
@@ -262,9 +261,10 @@ export default function ProfileTailoringContent() {
             <DocumentsUploadZone
               stagingOnly
               maxFiles={1}
-              acceptedTypes={VACANCY_FILE_TYPES}
-              acceptedExtensions={VACANCY_FILE_EXTENSIONS}
-              accept=".pdf,.docx,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain"
+              acceptedTypes={[...VACANCY_FILE_TYPES]}
+              acceptedExtensions={[...VACANCY_FILE_EXTENSIONS]}
+              accept={VACANCY_FILE_ACCEPT}
+              maxSizeBytes={UPLOAD_MAX_BYTES_10_MB}
               helperText={t("vacancyInput.fileHelper")}
               onFilesChange={(files) => setStagedFile(files[0] ?? null)}
             />

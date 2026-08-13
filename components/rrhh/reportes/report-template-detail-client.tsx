@@ -11,6 +11,10 @@ import ReportesFiltersPlaceholder from "@/components/rrhh/reportes/reportes-filt
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  UPLOAD_MAX_BYTES_20_MB,
+  getUploadApiErrorMessage,
+} from "@/lib/upload-constraints"
 import { APP_LOGO_SVG_SRC } from "@/lib/app-brand"
 import {
   fetchReportTemplateConfig,
@@ -461,15 +465,34 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
       if (previewHistoryId) {
         setSavingPdf(true)
         try {
-          await uploadReportDocumentPdf({
-            historyId: previewHistoryId,
-            file: blob,
-            fileName,
+          if (blob.size > UPLOAD_MAX_BYTES_20_MB) {
+            const tooLargeMessage =
+              "El PDF supera 20 MB y no se pudo guardar en el historial. El archivo local sí se descargó."
+            setPdfWarning(tooLargeMessage)
+            showSnackbar("warning", tooLargeMessage)
+          } else {
+            await uploadReportDocumentPdf({
+              historyId: previewHistoryId,
+              file: blob,
+              fileName,
+            })
+            showSnackbar("success", "PDF guardado en el historial correctamente.")
+          }
+        } catch (err: unknown) {
+          const uploadMessage = getUploadApiErrorMessage(err, {
+            tooLarge:
+              "El PDF es demasiado grande para guardarlo en el historial (máximo 20 MB).",
+            typeMismatch:
+              "El PDF generado no coincide con el tipo esperado y no se pudo guardar en el historial.",
+            unsupported:
+              "No se pudo guardar el PDF en el historial por un formato no soportado.",
+            generic: m.pdfHistoryWarning,
           })
-          showSnackbar("success", "PDF guardado en el historial correctamente.")
-        } catch {
-          setPdfWarning(m.pdfHistoryWarning)
-          showSnackbar("warning", m.pdfHistoryWarning)
+          setPdfWarning(uploadMessage || getApiErrorMessage(err) || m.pdfHistoryWarning)
+          showSnackbar(
+            "warning",
+            uploadMessage || getApiErrorMessage(err) || m.pdfHistoryWarning
+          )
         } finally {
           setSavingPdf(false)
         }
@@ -481,6 +504,8 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
       setDownloadingPdf(false)
     }
   }, [
+    m.pdfExportFailed,
+    m.pdfHistoryWarning,
     previewHistoryId,
     reportConfig?.pdfFormat,
     reportConfig?.pdfOrientation,
