@@ -14,6 +14,7 @@ import { ChevronDown } from "lucide-react"
 import Modal from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
 import { PhoneCountryInput } from "@/components/ui/PhoneCountryInput"
+import { getCompanyName } from "@/lib/app-brand"
 import {
   CANDIDATE_AUTH_CONSENT_DOCUMENT_VERSION,
   CANDIDATE_AUTH_CONSENT_SECTION_IDS,
@@ -177,6 +178,7 @@ export function ConsentAuthorizationModal({
 }: ConsentAuthorizationModalProps) {
   const t = useTranslations("CandidatePortal.profile.consent")
   const locale = useLocale()
+  const companyName = getCompanyName()
   const baseId = useId()
   const styles = VARIANT_STYLES[variant]
 
@@ -459,7 +461,9 @@ export function ConsentAuthorizationModal({
                       <div className="border-t border-border/70 px-3 pb-3 pt-3 sm:px-4">
                         <div className="rounded-lg border border-border/60 bg-background px-3 py-3 sm:px-4">
                           <div className="flex flex-col gap-3">
-                            {splitParagraphs(t(`sections.${id}.body`)).map(
+                            {splitParagraphs(
+                              t(`sections.${id}.body`, { companyName })
+                            ).map(
                               (paragraph, index) => (
                                 <p
                                   key={`${id}-p-${index}`}
