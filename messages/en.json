@@ -1888,6 +1888,20 @@
           "salary": "Salary",
           "advantages": "Vacancy benefits and perks"
         },
+        "requirementsList": {
+          "skill": "Skill",
+          "expectedLevel": "Expected level",
+          "importance": "Importance",
+          "importanceValue": "{value}/10",
+          "importanceAria": "Importance {value} out of 10",
+          "unspecified": "—"
+        },
+        "headerMeta": {
+          "department": "Department",
+          "modality": "Work mode",
+          "location": "Location",
+          "created": "Created {date}"
+        },
         "actions": {
           "backToVacancies": "Back to vacancies",
           "backToVacanciesAria": "Back to vacancies",
@@ -2186,7 +2200,7 @@
           "preliminarySearchTitle": "Preliminary search",
           "preliminarySearchSubtitle": "From hours to seconds on first exploration",
           "preliminaryMatchTitle": "Preliminary matching",
-          "preliminaryMatchSubtitle": "Observed accuracy of 75% to 80%",
+          "preliminaryMatchSubtitle": "Observed accuracy of 90% to 95%",
           "preliminaryMatchGoal": "Calibration target: 90%",
           "coverageTitle": "Results coverage",
           "coverageSubtitle": "Initial shortlist with suggested candidates",

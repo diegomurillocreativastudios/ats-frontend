@@ -1888,6 +1888,20 @@
           "salary": "Salario",
           "advantages": "Ventajas y beneficios de la vacante"
         },
+        "requirementsList": {
+          "skill": "Habilidad",
+          "expectedLevel": "Nivel esperado",
+          "importance": "Importancia",
+          "importanceValue": "{value}/10",
+          "importanceAria": "Importancia {value} de 10",
+          "unspecified": "—"
+        },
+        "headerMeta": {
+          "department": "Departamento",
+          "modality": "Modalidad",
+          "location": "Ubicación",
+          "created": "Creada el {date}"
+        },
         "actions": {
           "backToVacancies": "Volver a vacantes",
           "backToVacanciesAria": "Volver a vacantes",
@@ -2186,7 +2200,7 @@
           "preliminarySearchTitle": "Búsqueda preliminar",
           "preliminarySearchSubtitle": "De horas a segundos en la primera exploracion",
           "preliminaryMatchTitle": "Emparejamiento preliminar",
-          "preliminaryMatchSubtitle": "Precision observada de 75% a 80%",
+          "preliminaryMatchSubtitle": "Precision observada de 90% a 95%",
           "preliminaryMatchGoal": "Objetivo de calibración: 90%",
           "coverageTitle": "Cobertura de resultados",
           "coverageSubtitle": "Shortlist inicial con candidatos sugeridos",

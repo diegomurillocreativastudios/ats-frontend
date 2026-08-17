@@ -1820,6 +1820,20 @@
           "salary": "Gehalt",
           "advantages": "Vorteile und Benefits der Stelle"
         },
+        "requirementsList": {
+          "skill": "Fähigkeit",
+          "expectedLevel": "Erwartetes Niveau",
+          "importance": "Wichtigkeit",
+          "importanceValue": "{value}/10",
+          "importanceAria": "Wichtigkeit {value} von 10",
+          "unspecified": "—"
+        },
+        "headerMeta": {
+          "department": "Abteilung",
+          "modality": "Arbeitsmodell",
+          "location": "Standort",
+          "created": "Erstellt am {date}"
+        },
         "actions": {
           "backToVacancies": "Zurück zu Stellen",
           "backToVacanciesAria": "Zurück zu Stellen",
@@ -2118,7 +2132,7 @@
           "preliminarySearchTitle": "Vorabrecherche",
           "preliminarySearchSubtitle": "Von Stunden auf Sekunden bei der ersten Erkundung",
           "preliminaryMatchTitle": "Vorläufiges Matching",
-          "preliminaryMatchSubtitle": "Beobachtete Genauigkeit von 75 % bis 80 %",
+          "preliminaryMatchSubtitle": "Beobachtete Genauigkeit von 90 % bis 95 %",
           "preliminaryMatchGoal": "Kalibrierungsziel: 90 %",
           "coverageTitle": "Ergebnisabdeckung",
           "coverageSubtitle": "Erste Shortlist mit vorgeschlagenen Kandidaten",

@@ -1820,6 +1820,20 @@
           "salary": "Salaire",
           "advantages": "Avantages et bénéfices du poste"
         },
+        "requirementsList": {
+          "skill": "Compétence",
+          "expectedLevel": "Niveau attendu",
+          "importance": "Importance",
+          "importanceValue": "{value}/10",
+          "importanceAria": "Importance {value} sur 10",
+          "unspecified": "—"
+        },
+        "headerMeta": {
+          "department": "Département",
+          "modality": "Modalité",
+          "location": "Lieu",
+          "created": "Créée le {date}"
+        },
         "actions": {
           "backToVacancies": "Retour aux postes",
           "backToVacanciesAria": "Retour aux postes",
@@ -2118,7 +2132,7 @@
           "preliminarySearchTitle": "Recherche préliminaire",
           "preliminarySearchSubtitle": "De plusieurs heures à quelques secondes pour la première exploration",
           "preliminaryMatchTitle": "Correspondance préliminaire",
-          "preliminaryMatchSubtitle": "Précision observée de 75 % à 80 %",
+          "preliminaryMatchSubtitle": "Précision observée de 90 % à 95 %",
           "preliminaryMatchGoal": "Objectif de calibration : 90 %",
           "coverageTitle": "Couverture des résultats",
           "coverageSubtitle": "Liste restreinte initiale avec candidats suggérés",

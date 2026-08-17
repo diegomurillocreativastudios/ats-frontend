@@ -8,8 +8,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Briefcase,
-  Building2,
-  Calendar,
   CheckSquare,
   DollarSign,
   Download,
@@ -27,7 +25,6 @@ import {
   User,
   Users,
   X,
-  MapPin,
 } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
@@ -54,7 +51,10 @@ import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
 import { VacancyFinishedSummary } from "@/components/rrhh/VacancyFinishedSummary"
 import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProcessModal"
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
-import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
+import { RequirementsDisplay } from "@/components/rrhh/requirements-display"
+import { VacancyDelimitedText } from "@/components/rrhh/vacancy-delimited-text"
+import { VacancyReadOnlyIdentity } from "@/components/rrhh/vacancy-read-only-identity"
+import { formatRequirementKey } from "@/lib/vacancies/format-requirement-key"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
 import {
   AiDisclosureBadge,
@@ -123,6 +123,18 @@ const formatDate = (value, locale = "es") => {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  });
+};
+
+const formatShortDate = (value, locale = "es") => {
+  if (!value) return "—";
+  const d = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(d.getTime())) return "—";
+  const dateLocale = LOCALE_DATE_MAP[locale] ?? locale;
+  return d.toLocaleDateString(dateLocale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 };
 
@@ -419,22 +431,6 @@ const formatScoreKey = (key, t) => {
   return words.charAt(0).toUpperCase() + words.slice(1);
 };
 
-/** Formats requirement key for display (e.g. reactjs -> React.js). */
-const formatRequirementKey = (key) => {
-  const k = String(key).trim().toLowerCase();
-  const map = {
-    reactjs: "React.js",
-    nextjs: "Next.js",
-    tailwindcss: "Tailwind CSS",
-    javascript: "JavaScript",
-    typescript: "TypeScript",
-    html: "HTML",
-    css: "CSS",
-    dotnet: ".NET",
-  };
-  return map[k] ?? k.charAt(0).toUpperCase() + k.slice(1);
-};
-
 /** Parses lines like "Clave: Valor" into structured pairs. Returns null if any line lacks the pattern. */
 const parseKeyValueLines = (text) => {
   if (!text || typeof text !== "string") return null;
@@ -455,97 +451,23 @@ const parseKeyValueLines = (text) => {
   return pairs;
 };
 
-/** Renders requirements as string (list/paragraphs), object (key -> level), or array (bullet list). attributeWeights optional: key -> weight to show next to each requirement value. */
-const RequirementsDisplay = ({ value, attributeWeights }) => {
-  if (value == null) return null;
-
-  if (typeof value === "object" && !Array.isArray(value)) {
-    const entries = Object.entries(value).filter(
-      ([k]) => k != null && !String(k).startsWith("additionalProp")
-    );
-    if (entries.length === 0) return null;
-    const weights =
-      attributeWeights && typeof attributeWeights === "object"
-        ? attributeWeights
-        : {};
+const VacancyDetailsReadout = ({ value }) => {
+  const text = String(value ?? "").trim();
+  if (!text) return null;
+  const pairs = parseKeyValueLines(text);
+  if (pairs && pairs.length > 0) {
     return (
-      <ul className="flex flex-col gap-2 font-sans text-sm text-muted-foreground" role="list">
-        {entries.map(([key, val]) => {
-          const levelText =
-            typeof val === "object" && val !== null
-              ? Object.entries(val)
-                  .map(([k, v]) => `${k}: ${v}`)
-                  .join(", ")
-              : String(val ?? "—");
-          const weight =
-            typeof weights[key] === "number" && Number.isFinite(weights[key])
-              ? weights[key]
-              : null;
-          return (
-            <li
-              key={key}
-              className="flex flex-wrap items-center gap-2"
-            >
-              <span className="requirement_key inline-flex items-center gap-1.5 rounded-md bg-vo-purple/15 px-2.5 py-1 font-semibold text-vo-purple">
-                {formatRequirementKey(key)}
-              </span>
-              <span className="requirement_value inline-flex items-center rounded-md bg-ats-arena/70 px-2.5 py-1 font-medium text-gray-700">
-                {levelText}
-              </span>
-              {weight != null && (
-                <span className="requirement_weight inline-flex items-center gap-1.5 rounded-md bg-amber-100 px-2.5 py-1 font-semibold text-amber-800">
-                  <Scale className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                  {weight * 10}
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    );
-  }
-
-  if (Array.isArray(value)) {
-    const items = value.filter((item) => item != null && String(item).trim() !== "");
-    if (items.length === 0) return null;
-    return (
-      <ul className="list-inside list-disc space-y-1.5 font-sans text-sm text-muted-foreground" role="list">
-        {items.map((item, i) => (
-          <li key={i}>{typeof item === "object" ? safeString(item) : String(item)}</li>
+      <dl className="flex flex-col gap-2">
+        {pairs.map(({ key, value: pairValue }) => (
+          <div key={`${key}-${pairValue}`} className="flex flex-col gap-0.5">
+            <dt className="font-sans text-xs font-medium text-muted-foreground">{key}</dt>
+            <dd className="font-sans text-sm text-foreground">{pairValue}</dd>
+          </div>
         ))}
-      </ul>
+      </dl>
     );
   }
-
-  const text = typeof value === "string" ? value.trim() : String(value);
-  if (text === "") return null;
-
-  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-  const looksLikeList = lines.length > 1 && lines.some(
-    (line) => /^[-*•]\s/.test(line) || /^\d+[.)]\s/.test(line)
-  );
-
-  if (looksLikeList) {
-    return (
-      <ul className="list-inside space-y-1.5 font-sans text-sm text-muted-foreground" role="list">
-        {lines.map((line, i) => (
-          <li key={i} className="pl-0">
-            {line.replace(/^[-*•]\s/, "").replace(/^\d+[.)]\s/, "")}
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
-  return (
-    <div className="space-y-2 font-sans text-sm text-muted-foreground">
-      {lines.map((line, i) => (
-        <p key={i} className="whitespace-pre-wrap">
-          {line}
-        </p>
-      ))}
-    </div>
-  );
+  return <VacancyDelimitedText value={text} variant="chips" />;
 };
 
 const CandidateProfileModal = ({ match, candidateId, onClose }) => {
@@ -1361,6 +1283,7 @@ export default function VacanteDetallePage() {
   const t = useTranslations("RecruiterPortal.vacancies");
   const tDetail = useTranslations("RecruiterPortal.vacancies.detail");
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
+  const locale = useLocale();
   const params = useParams();
   const id = params?.id ?? null;
   const [vacancy, setVacancy] = useState(null);
@@ -2757,45 +2680,21 @@ export default function VacanteDetallePage() {
                               ) : null}
                             </div>
                           ) : (
-                            <h1 className="font-sans text-2xl font-bold text-foreground">
-                              {emptyToDash(vacancy.title)}
-                            </h1>
+                            <VacancyReadOnlyIdentity
+                              title={emptyToDash(vacancy.title)}
+                              companyName={vacancyCompanyDisplayName}
+                              department={getVacancyDepartmentLabel(vacancy)}
+                              modality={getVacancyModalityLabel(vacancy)}
+                              countryCode={vacancy.countryCode ?? vacancy.country_code}
+                              stateCode={vacancy.stateCode ?? vacancy.state_code}
+                              createdAtLabel={tDetail("headerMeta.created", {
+                                date: formatShortDate(vacancy.createdAt, locale),
+                              })}
+                              statusLabel={statusConfig.label}
+                              statusClassName={`${statusConfig.bgClass} ${statusConfig.textClass}`}
+                              titleClassName="text-2xl"
+                            />
                           )}
-                          <div className="flex flex-wrap items-center gap-4 font-sans text-sm text-gray-600">
-                            {!isEditing ? (
-                              <span className="flex min-w-0 items-center gap-1.5">
-                                <Building2 className="h-4 w-4 shrink-0" aria-hidden />
-                                <span className="min-w-0 font-medium text-foreground">
-                                  {vacancyCompanyDisplayName}
-                                </span>
-                              </span>
-                            ) : null}
-                            <span className="flex items-center gap-1.5">
-                              <Briefcase className="h-4 w-4 shrink-0" aria-hidden />
-                              {getVacancyDepartmentLabel(vacancy)}
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <Users className="h-4 w-4 shrink-0" aria-hidden />
-                              {getVacancyModalityLabel(vacancy)}
-                            </span>
-                            {!isEditing ? (
-                              <span className="flex min-w-0 items-center gap-1.5">
-                                <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-                                <span className="min-w-0">
-                                  <VacancyLocationLabel countryCode={vacancy.countryCode ?? vacancy.country_code} stateCode={vacancy.stateCode ?? vacancy.state_code} />
-                                </span>
-                              </span>
-                            ) : null}
-                            <span className="flex items-center gap-1.5">
-                              <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-                              {tDetail("page.createdPrefix")} {formatDate(vacancy.createdAt)}
-                            </span>
-                          </div>
-                          <span
-                            className={`inline-flex w-fit rounded-xl px-2.5 py-1 font-sans text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
-                          >
-                            {statusConfig.label}
-                          </span>
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
@@ -2869,7 +2768,15 @@ export default function VacanteDetallePage() {
                     )}
                     {(vacancy.description || vacancy.requirements || vacancy.details || vacancy.salary || vacancy.advantages || isEditing) && (
                       <div className="mt-6 flex flex-col gap-4 border-t border-border pt-6">
-                        <div className="grid gap-4 md:grid-cols-2">
+                        {(vacancy.description || vacancy.salary || vacancy.details || isEditing) && (
+                        <div
+                          className={`grid items-start gap-4${
+                            (vacancy.description || isEditing) &&
+                            (vacancy.salary || vacancy.details || isEditing)
+                              ? " lg:grid-cols-[minmax(0,1.5fr)_minmax(16rem,22rem)]"
+                              : ""
+                          }`}
+                        >
                         {(vacancy.description || isEditing) && (
                           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                             <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
@@ -2902,6 +2809,66 @@ export default function VacanteDetallePage() {
                               </p>
                             )}
                           </div>
+                        )}
+                        {(vacancy.salary || vacancy.details || isEditing) && (
+                          <div className="flex flex-col gap-4">
+                            {(vacancy.salary || isEditing) && (
+                              <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/50 p-5 shadow-sm">
+                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+                                    <DollarSign className="h-4 w-4" aria-hidden />
+                                  </span>
+                                  {tDetail("sections.salary")}
+                                </h2>
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editSalary}
+                                    onChange={(e) => setEditSalary(e.target.value)}
+                                    placeholder={t("form.fields.salary.placeholder")}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label={t("form.fields.salary.ariaLabel")}
+                                  />
+                                ) : vacancy.salary ? (
+                                  <p className="font-sans text-lg font-semibold text-foreground">
+                                    {safeString(vacancy.salary)}
+                                  </p>
+                                ) : (
+                                  <p className="font-sans text-sm italic text-gray-600">
+                                    {tDetail("fallbacks.unspecified")}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                            {(vacancy.details || isEditing) && (
+                              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+                                    <Info className="h-4 w-4" aria-hidden />
+                                  </span>
+                                  {tDetail("sections.details")}
+                                </h2>
+                                {isEditing ? (
+                                  <textarea
+                                    value={editDetails}
+                                    onChange={(e) => setEditDetails(e.target.value)}
+                                    rows={4}
+                                    placeholder={t("form.fields.details.placeholder")}
+                                    className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                    aria-label={t("form.fields.details.label")}
+                                  />
+                                ) : vacancy.details ? (
+                                  <VacancyDetailsReadout value={vacancy.details} />
+                                ) : (
+                                  <p className="font-sans text-sm italic text-gray-600">
+                                    {tDetail("fallbacks.unspecified")}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        </div>
                         )}
                         {(vacancy.requirements || isEditing) && (
                           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
@@ -3018,119 +2985,30 @@ export default function VacanteDetallePage() {
                             )}
                           </div>
                         )}
-                        </div>
 
-                        {(vacancy.details || isEditing) && (
+                        {(vacancy.advantages || isEditing) && (
                           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                             <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
-                                <Info className="h-4 w-4" aria-hidden />
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-pink/10 text-vo-pink">
+                                <Gift className="h-4 w-4" aria-hidden />
                               </span>
-                              {tDetail("sections.details")}
+                              {tDetail("sections.advantages")}
                             </h2>
                             {isEditing ? (
                               <textarea
-                                value={editDetails}
-                                onChange={(e) => setEditDetails(e.target.value)}
+                                value={editAdvantages}
+                                onChange={(e) => setEditAdvantages(e.target.value)}
                                 rows={4}
-                                placeholder={t("form.fields.details.placeholder")}
+                                placeholder={t("form.fields.advantages.placeholder")}
                                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label={t("form.fields.details.label")}
+                                aria-label={t("form.fields.advantages.label")}
                               />
-                            ) : vacancy.details ? (
-                              (() => {
-                                const pairs = parseKeyValueLines(vacancy.details);
-                                if (pairs && pairs.length > 0) {
-                                  return (
-                                    <dl className="grid gap-x-8 gap-y-2.5 sm:grid-cols-2">
-                                      {pairs.map(({ key, value }) => (
-                                        <div
-                                          key={`${key}-${value}`}
-                                          className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0 sm:last:border-b sm:nth-last-[-n+2]:border-b-0"
-                                        >
-                                          <dt className="font-sans text-xs font-medium uppercase tracking-wide text-gray-600">
-                                            {key}
-                                          </dt>
-                                          <dd className="font-sans text-sm text-foreground">
-                                            {value}
-                                          </dd>
-                                        </div>
-                                      ))}
-                                    </dl>
-                                  );
-                                }
-                                return (
-                                  <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                    {safeString(vacancy.details)}
-                                  </p>
-                                );
-                              })()
+                            ) : vacancy.advantages ? (
+                              <VacancyDelimitedText value={vacancy.advantages} variant="list" />
                             ) : (
                               <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
                               </p>
-                            )}
-                          </div>
-                        )}
-
-                        {(vacancy.salary || vacancy.advantages || isEditing) && (
-                          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-                            {(vacancy.salary || isEditing) && (
-                              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
-                                    <DollarSign className="h-4 w-4" aria-hidden />
-                                  </span>
-                                  {tDetail("sections.salary")}
-                                </h2>
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editSalary}
-                                    onChange={(e) => setEditSalary(e.target.value)}
-                                    placeholder={t("form.fields.salary.placeholder")}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label={t("form.fields.salary.ariaLabel")}
-                                  />
-                                ) : vacancy.salary ? (
-                                  <p className="font-sans text-lg font-semibold text-foreground">
-                                    {safeString(vacancy.salary)}
-                                  </p>
-                                ) : (
-                                  <p className="font-sans text-sm italic text-gray-600">
-                                    {tDetail("fallbacks.unspecified")}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-
-                            {(vacancy.advantages || isEditing) && (
-                              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-pink/10 text-vo-pink">
-                                    <Gift className="h-4 w-4" aria-hidden />
-                                  </span>
-                                  {tDetail("sections.advantages")}
-                                </h2>
-                                {isEditing ? (
-                                  <textarea
-                                    value={editAdvantages}
-                                    onChange={(e) => setEditAdvantages(e.target.value)}
-                                    rows={4}
-                                    placeholder={t("form.fields.advantages.placeholder")}
-                                    className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                    aria-label={t("form.fields.advantages.label")}
-                                  />
-                                ) : vacancy.advantages ? (
-                                  <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                    {safeString(vacancy.advantages)}
-                                  </p>
-                                ) : (
-                                  <p className="font-sans text-sm italic text-gray-600">
-                                    {tDetail("fallbacks.unspecified")}
-                                  </p>
-                                )}
-                              </div>
                             )}
                           </div>
                         )}
@@ -3653,45 +3531,21 @@ export default function VacanteDetallePage() {
                             ) : null}
                           </div>
                         ) : (
-                          <h1 className="font-sans text-xl font-bold text-foreground">
-                            {emptyToDash(vacancy.title)}
-                          </h1>
+                          <VacancyReadOnlyIdentity
+                            title={emptyToDash(vacancy.title)}
+                            companyName={vacancyCompanyDisplayName}
+                            department={getVacancyDepartmentLabel(vacancy)}
+                            modality={getVacancyModalityLabel(vacancy)}
+                            countryCode={vacancy.countryCode ?? vacancy.country_code}
+                            stateCode={vacancy.stateCode ?? vacancy.state_code}
+                            createdAtLabel={tDetail("headerMeta.created", {
+                              date: formatShortDate(vacancy.createdAt, locale),
+                            })}
+                            statusLabel={statusConfig.label}
+                            statusClassName={`${statusConfig.bgClass} ${statusConfig.textClass}`}
+                            titleClassName="text-xl"
+                          />
                         )}
-                        <div className="flex flex-wrap items-center gap-3 font-sans text-sm text-gray-600">
-                          {!isEditing ? (
-                            <span className="flex min-w-0 items-center gap-1">
-                              <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                              <span className="min-w-0 font-medium text-foreground">
-                                {vacancyCompanyDisplayName}
-                              </span>
-                            </span>
-                          ) : null}
-                          <span className="flex items-center gap-1">
-                            <Briefcase className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                            {getVacancyDepartmentLabel(vacancy)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                            {getVacancyModalityLabel(vacancy)}
-                          </span>
-                          {!isEditing ? (
-                            <span className="flex min-w-0 items-center gap-1">
-                              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                              <span className="min-w-0">
-                                <VacancyLocationLabel countryCode={vacancy.countryCode ?? vacancy.country_code} stateCode={vacancy.stateCode ?? vacancy.state_code} />
-                              </span>
-                            </span>
-                          ) : null}
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                            {tDetail("page.createdPrefix")} {formatDate(vacancy.createdAt)}
-                          </span>
-                        </div>
-                        <span
-                          className={`inline-flex w-fit rounded-xl px-2.5 py-1 font-sans text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
-                        >
-                          {statusConfig.label}
-                        </span>
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -3773,6 +3627,60 @@ export default function VacanteDetallePage() {
                             ) : (
                               <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
                                 {safeString(vacancy.description)}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {(vacancy.salary || isEditing) && (
+                          <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/50 p-4 shadow-sm">
+                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600">
+                                <DollarSign className="h-3.5 w-3.5" aria-hidden />
+                              </span>
+                              {tDetail("sections.salary")}
+                            </h2>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editSalary}
+                                onChange={(e) => setEditSalary(e.target.value)}
+                                placeholder={t("form.fields.salary.placeholder")}
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={t("form.fields.salary.ariaLabel")}
+                              />
+                            ) : vacancy.salary ? (
+                              <p className="font-sans text-lg font-semibold text-foreground">
+                                {safeString(vacancy.salary)}
+                              </p>
+                            ) : (
+                              <p className="font-sans text-sm italic text-gray-600">
+                                {tDetail("fallbacks.unspecified")}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {(vacancy.details || isEditing) && (
+                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 text-amber-600">
+                                <Info className="h-3.5 w-3.5" aria-hidden />
+                              </span>
+                              {tDetail("sections.details")}
+                            </h2>
+                            {isEditing ? (
+                              <textarea
+                                value={editDetails}
+                                onChange={(e) => setEditDetails(e.target.value)}
+                                rows={4}
+                                placeholder={t("form.fields.details.placeholder")}
+                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                aria-label={t("form.fields.details.label")}
+                              />
+                            ) : vacancy.details ? (
+                              <VacancyDetailsReadout value={vacancy.details} />
+                            ) : (
+                              <p className="font-sans text-sm italic text-gray-600">
+                                {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
@@ -3893,87 +3801,6 @@ export default function VacanteDetallePage() {
                             )}
                           </div>
                         )}
-                        {(vacancy.details || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 text-amber-600">
-                                <Info className="h-3.5 w-3.5" aria-hidden />
-                              </span>
-                              {tDetail("sections.details")}
-                            </h2>
-                            {isEditing ? (
-                              <textarea
-                                value={editDetails}
-                                onChange={(e) => setEditDetails(e.target.value)}
-                                rows={4}
-                                placeholder={t("form.fields.details.placeholder")}
-                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label={t("form.fields.details.label")}
-                              />
-                            ) : vacancy.details ? (
-                              (() => {
-                                const pairs = parseKeyValueLines(vacancy.details);
-                                if (pairs && pairs.length > 0) {
-                                  return (
-                                    <dl className="flex flex-col gap-2">
-                                      {pairs.map(({ key, value }) => (
-                                        <div
-                                          key={`${key}-${value}`}
-                                          className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0"
-                                        >
-                                          <dt className="font-sans text-[11px] font-medium uppercase tracking-wide text-gray-600">
-                                            {key}
-                                          </dt>
-                                          <dd className="font-sans text-sm text-foreground">
-                                            {value}
-                                          </dd>
-                                        </div>
-                                      ))}
-                                    </dl>
-                                  );
-                                }
-                                return (
-                                  <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                    {safeString(vacancy.details)}
-                                  </p>
-                                );
-                              })()
-                            ) : (
-                              <p className="font-sans text-sm italic text-gray-600">
-                                {tDetail("fallbacks.unspecified")}
-                              </p>
-                            )}
-                          </div>
-                        )}
-
-                        {(vacancy.salary || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600">
-                                <DollarSign className="h-3.5 w-3.5" aria-hidden />
-                              </span>
-                              {tDetail("sections.salary")}
-                            </h2>
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                value={editSalary}
-                                onChange={(e) => setEditSalary(e.target.value)}
-                                placeholder={t("form.fields.salary.placeholder")}
-                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label={t("form.fields.salary.ariaLabel")}
-                              />
-                            ) : vacancy.salary ? (
-                              <p className="font-sans text-lg font-semibold text-foreground">
-                                {safeString(vacancy.salary)}
-                              </p>
-                            ) : (
-                              <p className="font-sans text-sm italic text-gray-600">
-                                {tDetail("fallbacks.unspecified")}
-                              </p>
-                            )}
-                          </div>
-                        )}
 
                         {(vacancy.advantages || isEditing) && (
                           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -3993,9 +3820,7 @@ export default function VacanteDetallePage() {
                                 aria-label={t("form.fields.advantages.label")}
                               />
                             ) : vacancy.advantages ? (
-                              <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                {safeString(vacancy.advantages)}
-                              </p>
+                              <VacancyDelimitedText value={vacancy.advantages} variant="list" />
                             ) : (
                               <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}

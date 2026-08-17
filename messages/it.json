@@ -1820,6 +1820,20 @@
           "salary": "Retribuzione",
           "advantages": "Vantaggi e benefit della posizione"
         },
+        "requirementsList": {
+          "skill": "Competenza",
+          "expectedLevel": "Livello atteso",
+          "importance": "Importanza",
+          "importanceValue": "{value}/10",
+          "importanceAria": "Importanza {value} su 10",
+          "unspecified": "—"
+        },
+        "headerMeta": {
+          "department": "Dipartimento",
+          "modality": "Modalità",
+          "location": "Sede",
+          "created": "Creata il {date}"
+        },
         "actions": {
           "backToVacancies": "Torna alle posizioni",
           "backToVacanciesAria": "Torna alle posizioni",
@@ -2118,7 +2132,7 @@
           "preliminarySearchTitle": "Ricerca preliminare",
           "preliminarySearchSubtitle": "Da ore a secondi nella prima esplorazione",
           "preliminaryMatchTitle": "Corrispondenza preliminare",
-          "preliminaryMatchSubtitle": "Precisione osservata dal 75% all'80%",
+          "preliminaryMatchSubtitle": "Precisione osservata dal 90% al 95%",
           "preliminaryMatchGoal": "Obiettivo di calibrazione: 90%",
           "coverageTitle": "Copertura dei risultati",
           "coverageSubtitle": "Shortlist iniziale con candidati suggeriti",
