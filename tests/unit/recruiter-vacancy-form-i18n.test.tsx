@@ -104,6 +104,7 @@ describe("NuevaVacanteModal i18n (Etapa 8)", () => {
       screen.getByRole("button", { name: "Crear vacante" }),
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument()
+    expect(screen.getByText("Pegar")).toBeInTheDocument()
     // Labels de ubicación traducidos pasados por props al campo de ubicación.
     expect(
       screen.getByText("País al que aplica la vacante"),
@@ -127,19 +128,20 @@ describe("NuevaVacanteModal i18n (Etapa 8)", () => {
       screen.getByRole("button", { name: "Create vacancy" }),
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
+    expect(screen.getByText("Paste")).toBeInTheDocument()
     expect(
       screen.getByText("Country the vacancy applies to"),
     ).toBeInTheDocument()
   })
 
   it("muestra validaciones frontend estáticas desde el diccionario (es)", async () => {
-    const { container } = renderWithIntl(
+    renderWithIntl(
       <NuevaVacanteModal isOpen onClose={noop} onSubmit={noop} onSnackbar={noop} />,
       "es",
     )
 
     await screen.findByText("Nueva vacante")
-    const form = container.querySelector("#nueva-vacante-form") as HTMLFormElement
+    const form = document.querySelector("#nueva-vacante-form") as HTMLFormElement
     fireEvent.submit(form)
 
     expect(await screen.findByText("El nombre es requerido")).toBeInTheDocument()
@@ -147,13 +149,13 @@ describe("NuevaVacanteModal i18n (Etapa 8)", () => {
   })
 
   it("muestra validaciones frontend estáticas desde el diccionario (en)", async () => {
-    const { container } = renderWithIntl(
+    renderWithIntl(
       <NuevaVacanteModal isOpen onClose={noop} onSubmit={noop} onSnackbar={noop} />,
       "en",
     )
 
     await screen.findByText("New vacancy")
-    const form = container.querySelector("#nueva-vacante-form") as HTMLFormElement
+    const form = document.querySelector("#nueva-vacante-form") as HTMLFormElement
     fireEvent.submit(form)
 
     expect(await screen.findByText("Name is required")).toBeInTheDocument()

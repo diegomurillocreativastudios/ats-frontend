@@ -1789,7 +1789,18 @@
           "add": "Aggiungi",
           "addRequirementAria": "Aggiungi requisito",
           "cancel": "Annulla",
-          "submit": "Crea posizione"
+          "submit": "Crea posizione",
+          "paste": "Incolla",
+          "pasteAria": "Incolla la posizione copiata",
+          "pasteDisabledAria": "Non c'è una posizione copiata."
+        },
+        "toasts": {
+          "pasted": "Posizione incollata."
+        },
+        "pasteConfirm": {
+          "title": "Incollare la posizione copiata?",
+          "message": "Questo sostituirà i campi attuali del modulo.",
+          "confirm": "Incolla"
         },
         "validation": {
           "nameRequired": "Il nome è obbligatorio",
@@ -1848,6 +1859,8 @@
           "interviewsAria": "Vedi i colloqui di questa posizione",
           "results": "Risultati",
           "resultsAria": "Vedi risultati e metriche di questa posizione",
+          "copy": "Copia",
+          "copyAria": "Copia questa posizione",
           "addRequirement": "Aggiungi",
           "addRequirementAria": "Aggiungi requisito",
           "companyChangeHint": "Cambiare il cliente non modifica lo stato della posizione né le candidature esistenti."
@@ -1867,7 +1880,8 @@
         },
         "toasts": {
           "saved": "Modifiche salvate correttamente.",
-          "finishSuccess": "Processo concluso correttamente."
+          "finishSuccess": "Processo concluso correttamente.",
+          "copied": "Posizione copiata."
         },
         "readOnlyBanner": {
           "vacancy": {

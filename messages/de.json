@@ -1789,7 +1789,18 @@
           "add": "Hinzufügen",
           "addRequirementAria": "Anforderung hinzufügen",
           "cancel": "Abbrechen",
-          "submit": "Stelle erstellen"
+          "submit": "Stelle erstellen",
+          "paste": "Einfügen",
+          "pasteAria": "Kopierte Stelle einfügen",
+          "pasteDisabledAria": "Es wurde keine Stelle kopiert."
+        },
+        "toasts": {
+          "pasted": "Stelle eingefügt."
+        },
+        "pasteConfirm": {
+          "title": "Kopierte Stelle einfügen?",
+          "message": "Dadurch werden die aktuellen Formularfelder ersetzt.",
+          "confirm": "Einfügen"
         },
         "validation": {
           "nameRequired": "Der Name ist erforderlich",
@@ -1848,6 +1859,8 @@
           "interviewsAria": "Vorstellungsgespräche dieser Stelle anzeigen",
           "results": "Ergebnisse",
           "resultsAria": "Ergebnisse und Kennzahlen dieser Stelle anzeigen",
+          "copy": "Kopieren",
+          "copyAria": "Diese Stelle kopieren",
           "addRequirement": "Hinzufügen",
           "addRequirementAria": "Anforderung hinzufügen",
           "companyChangeHint": "Das Ändern des Kunden ändert weder den Stellenstatus noch bestehende Bewerbungen."
@@ -1867,7 +1880,8 @@
         },
         "toasts": {
           "saved": "Änderungen erfolgreich gespeichert.",
-          "finishSuccess": "Prozess erfolgreich abgeschlossen."
+          "finishSuccess": "Prozess erfolgreich abgeschlossen.",
+          "copied": "Stelle kopiert."
         },
         "readOnlyBanner": {
           "vacancy": {

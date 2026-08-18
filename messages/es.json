@@ -1857,7 +1857,18 @@
           "add": "Agregar",
           "addRequirementAria": "Agregar requerimiento",
           "cancel": "Cancelar",
-          "submit": "Crear vacante"
+          "submit": "Crear vacante",
+          "paste": "Pegar",
+          "pasteAria": "Pegar vacante copiada",
+          "pasteDisabledAria": "No hay una vacante copiada."
+        },
+        "toasts": {
+          "pasted": "Vacante pegada."
+        },
+        "pasteConfirm": {
+          "title": "¿Pegar vacante copiada?",
+          "message": "Esto reemplazará los campos actuales del formulario.",
+          "confirm": "Pegar"
         },
         "validation": {
           "nameRequired": "El nombre es requerido",
@@ -1916,6 +1927,8 @@
           "interviewsAria": "Ver entrevistas de esta vacante",
           "results": "Resultados",
           "resultsAria": "Ver resultados y métricas de esta vacante",
+          "copy": "Copiar",
+          "copyAria": "Copiar esta vacante",
           "addRequirement": "Agregar",
           "addRequirementAria": "Agregar requerimiento",
           "companyChangeHint": "Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes."
@@ -1935,7 +1948,8 @@
         },
         "toasts": {
           "saved": "Cambios guardados correctamente.",
-          "finishSuccess": "Proceso finalizado correctamente."
+          "finishSuccess": "Proceso finalizado correctamente.",
+          "copied": "Vacante copiada."
         },
         "readOnlyBanner": {
           "vacancy": {

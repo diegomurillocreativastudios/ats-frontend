@@ -1789,7 +1789,18 @@
           "add": "Ajouter",
           "addRequirementAria": "Ajouter une exigence",
           "cancel": "Annuler",
-          "submit": "Créer le poste"
+          "submit": "Créer le poste",
+          "paste": "Coller",
+          "pasteAria": "Coller le poste copié",
+          "pasteDisabledAria": "Aucun poste n'a été copié."
+        },
+        "toasts": {
+          "pasted": "Poste collé."
+        },
+        "pasteConfirm": {
+          "title": "Coller le poste copié ?",
+          "message": "Cela remplacera les champs actuels du formulaire.",
+          "confirm": "Coller"
         },
         "validation": {
           "nameRequired": "Le nom est requis",
@@ -1848,6 +1859,8 @@
           "interviewsAria": "Voir les entretiens de ce poste",
           "results": "Résultats",
           "resultsAria": "Voir les résultats et métriques de ce poste",
+          "copy": "Copier",
+          "copyAria": "Copier ce poste",
           "addRequirement": "Ajouter",
           "addRequirementAria": "Ajouter une exigence",
           "companyChangeHint": "Changer le client ne modifie pas le statut du poste ni les candidatures existantes."
@@ -1867,7 +1880,8 @@
         },
         "toasts": {
           "saved": "Modifications enregistrées avec succès.",
-          "finishSuccess": "Processus terminé avec succès."
+          "finishSuccess": "Processus terminé avec succès.",
+          "copied": "Poste copié."
         },
         "readOnlyBanner": {
           "vacancy": {

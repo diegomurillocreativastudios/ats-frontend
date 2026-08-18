@@ -1857,7 +1857,18 @@
           "add": "Add",
           "addRequirementAria": "Add requirement",
           "cancel": "Cancel",
-          "submit": "Create vacancy"
+          "submit": "Create vacancy",
+          "paste": "Paste",
+          "pasteAria": "Paste copied vacancy",
+          "pasteDisabledAria": "No vacancy has been copied."
+        },
+        "toasts": {
+          "pasted": "Vacancy pasted."
+        },
+        "pasteConfirm": {
+          "title": "Paste copied vacancy?",
+          "message": "This will replace the current form fields.",
+          "confirm": "Paste"
         },
         "validation": {
           "nameRequired": "Name is required",
@@ -1916,6 +1927,8 @@
           "interviewsAria": "View interviews for this vacancy",
           "results": "Results",
           "resultsAria": "View results and metrics for this vacancy",
+          "copy": "Copy",
+          "copyAria": "Copy this vacancy",
           "addRequirement": "Add",
           "addRequirementAria": "Add requirement",
           "companyChangeHint": "Changing the client does not modify the vacancy status or existing applications."
@@ -1935,7 +1948,8 @@
         },
         "toasts": {
           "saved": "Changes saved successfully.",
-          "finishSuccess": "Process finished successfully."
+          "finishSuccess": "Process finished successfully.",
+          "copied": "Vacancy copied."
         },
         "readOnlyBanner": {
           "vacancy": {

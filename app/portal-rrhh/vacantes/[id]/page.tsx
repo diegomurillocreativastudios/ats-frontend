@@ -47,6 +47,7 @@ import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
 import { VacancyFinishedSummary } from "@/components/rrhh/VacancyFinishedSummary"
 import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProcessModal"
+import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confirm-modal"
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
 import { RequirementsDisplay } from "@/components/rrhh/requirements-display"
 import { VacancyDelimitedText } from "@/components/rrhh/vacancy-delimited-text"
@@ -100,6 +101,13 @@ import {
 } from "@/lib/vacancy-catalogs";
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels";
 import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles";
+import {
+  buildVacancyClipboardPayload,
+  clipboardPayloadToRequirementRows,
+  hasVacancyClipboard,
+  readVacancyClipboard,
+  writeVacancyClipboard,
+} from "@/lib/vacancies/vacancy-clipboard";
 
 const LOCALE_DATE_MAP = {
   es: "es-CL",
@@ -712,6 +720,7 @@ const KanbanColumn = ({
 export default function VacanteDetallePage() {
   const t = useTranslations("RecruiterPortal.vacancies");
   const tDetail = useTranslations("RecruiterPortal.vacancies.detail");
+  const tForm = useTranslations("RecruiterPortal.vacancies.form");
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
   const locale = useLocale();
   const params = useParams();
@@ -769,6 +778,8 @@ export default function VacanteDetallePage() {
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
   const [finishProcessModalOpen, setFinishProcessModalOpen] = useState(false);
   const [finishingProcess, setFinishingProcess] = useState(false);
+  const [clipboardAvailable, setClipboardAvailable] = useState(false);
+  const [pasteConfirmOpen, setPasteConfirmOpen] = useState(false);
 
   const possibleCandidatesSectionDesktopRef = useRef(null);
   const possibleCandidatesSectionMobileRef = useRef(null);
@@ -1096,8 +1107,57 @@ export default function VacanteDetallePage() {
     originalCompanyIdAtEditRef.current = resolvedCompanyId;
     setEditCompanyId(resolvedCompanyId);
     hydrateEditFormFromVacancy(vacancy);
+    setClipboardAvailable(hasVacancyClipboard());
     setIsEditing(true);
   }, [vacancy, hydrateEditFormFromVacancy, companies, vacancyRouteId]);
+
+  const handleCopyVacancy = useCallback(() => {
+    if (!vacancy || typeof vacancy !== "object") return;
+    const companyId = resolveVacancyCompanyId(
+      vacancy,
+      companies,
+      vacancyRouteId
+    );
+    const payload = buildVacancyClipboardPayload(vacancy, companyId);
+    if (!writeVacancyClipboard(payload)) return;
+    setClipboardAvailable(true);
+    setSnackbar({
+      open: true,
+      variant: "success",
+      message: tDetail("toasts.copied"),
+    });
+  }, [vacancy, companies, vacancyRouteId, tDetail]);
+
+  const applyClipboardToEditForm = useCallback((payload) => {
+    setEditTitle(payload.title);
+    setEditDescription(payload.description);
+    setEditDetails(payload.details);
+    setEditSalary(payload.salary);
+    setEditAdvantages(payload.advantages);
+    setEditCountryCode(payload.countryCode);
+    setEditStateCode(payload.stateCode);
+    setEditVacancyDepartmentId(payload.vacancyDepartmentId);
+    setEditVacancyModalityId(payload.vacancyModalityId);
+    setEditRequirements(clipboardPayloadToRequirementRows(payload.requirements));
+    setEditErrors({});
+  }, []);
+
+  const handleRequestPaste = useCallback(() => {
+    if (!readVacancyClipboard()) return;
+    setPasteConfirmOpen(true);
+  }, []);
+
+  const handleConfirmPaste = useCallback(() => {
+    const payload = readVacancyClipboard();
+    setPasteConfirmOpen(false);
+    if (!payload) return;
+    applyClipboardToEditForm(payload);
+    setSnackbar({
+      open: true,
+      variant: "success",
+      message: tForm("toasts.pasted"),
+    });
+  }, [applyClipboardToEditForm, tForm]);
 
   const handleAddRequirement = useCallback(() => {
     setEditRequirements((prev) => [...prev, createEmptyRequirement()]);
@@ -2174,20 +2234,43 @@ export default function VacanteDetallePage() {
                             >
                               {tDetail("actions.results")}
                             </Link>
+                            <button
+                              type="button"
+                              onClick={handleCopyVacancy}
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              aria-label={tDetail("actions.copyAria")}
+                            >
+                              {tDetail("actions.copy")}
+                            </button>
                           </>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={handleSaveVacancy}
-                            disabled={savingVacancy}
-                            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleRequestPaste}
+                              disabled={savingVacancy || !clipboardAvailable}
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              aria-label={
+                                clipboardAvailable
+                                  ? tForm("actions.pasteAria")
+                                  : tForm("actions.pasteDisabledAria")
+                              }
+                            >
+                              {tForm("actions.paste")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSaveVacancy}
+                              disabled={savingVacancy}
+                              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={tDetail("actions.saveAria")}
-                          >
-                            {savingVacancy ? (
-                              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                            ) : null}
-                            {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
-                          </button>
+                            >
+                              {savingVacancy ? (
+                                <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                              ) : null}
+                              {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -3005,20 +3088,43 @@ export default function VacanteDetallePage() {
                           >
                             {tDetail("actions.results")}
                           </Link>
+                          <button
+                            type="button"
+                            onClick={handleCopyVacancy}
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            aria-label={tDetail("actions.copyAria")}
+                          >
+                            {tDetail("actions.copy")}
+                          </button>
                         </>
                       ) : (
-                        <button
-                          type="button"
-                          onClick={handleSaveVacancy}
-                          disabled={savingVacancy}
-                          className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        <>
+                          <button
+                            type="button"
+                            onClick={handleRequestPaste}
+                            disabled={savingVacancy || !clipboardAvailable}
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={
+                              clipboardAvailable
+                                ? tForm("actions.pasteAria")
+                                : tForm("actions.pasteDisabledAria")
+                            }
+                          >
+                            {tForm("actions.paste")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleSaveVacancy}
+                            disabled={savingVacancy}
+                            className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={tDetail("actions.saveAria")}
-                        >
-                          {savingVacancy ? (
-                            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                          ) : null}
-                          {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
-                        </button>
+                          >
+                            {savingVacancy ? (
+                              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                            ) : null}
+                            {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
+                          </button>
+                        </>
                       )}
                     </div>
                     {saveVacancyError && (
@@ -3593,6 +3699,12 @@ export default function VacanteDetallePage() {
         onClose={() => setFinishProcessModalOpen(false)}
         onConfirm={handleFinishProcess}
         loading={finishingProcess}
+      />
+
+      <VacancyPasteConfirmModal
+        isOpen={pasteConfirmOpen}
+        onClose={() => setPasteConfirmOpen(false)}
+        onConfirm={handleConfirmPaste}
       />
     </div>
   );
