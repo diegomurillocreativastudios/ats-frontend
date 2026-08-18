@@ -182,7 +182,15 @@
           "downloading": "Downloading…",
           "downloadCv": "Download CV",
           "viewFullProfile": "View full profile",
-          "close": "Close"
+          "close": "Close",
+          "aiProcessedShort": "AI evaluation · support for the HR decision",
+          "attributesDetail": "Attribute details ({count})",
+          "attributesZeroHint": "A 0% does not always lower the combined score: recency or relevant years are measured separately.",
+          "totalMatchScoreShort": "Match",
+          "heroAria": "Matching score summary",
+          "attributeColumn": "Attribute",
+          "levelColumn": "Level",
+          "scoreColumn": "Score"
         },
         "scoreKeys": {
           "qualitative": "Qualitative score",
@@ -193,7 +201,9 @@
           "keywordMatch": "Keyword match",
           "experience": "Experience",
           "education": "Education",
-          "skills": "Skills"
+          "skills": "Skills",
+          "recency": "Recency",
+          "relevantYears": "Relevant years"
         },
         "kanban": {
           "score": "Score",
@@ -554,7 +564,15 @@
           "downloading": "Téléchargement…",
           "downloadCv": "Télécharger le CV",
           "viewFullProfile": "Voir le profil complet",
-          "close": "Fermer"
+          "close": "Fermer",
+          "aiProcessedShort": "Évaluation par IA · appui à la décision RH",
+          "attributesDetail": "Détail des attributs ({count})",
+          "attributesZeroHint": "Un 0 % ne baisse pas toujours le score combiné : récence ou années pertinentes sont mesurées à part.",
+          "totalMatchScoreShort": "Correspondance",
+          "heroAria": "Résumé des scores de correspondance",
+          "attributeColumn": "Attribut",
+          "levelColumn": "Niveau",
+          "scoreColumn": "Score"
         },
         "scoreKeys": {
           "qualitative": "Score qualitatif",
@@ -565,7 +583,9 @@
           "keywordMatch": "Correspondance de mots-clés",
           "experience": "Expérience",
           "education": "Formation",
-          "skills": "Compétences"
+          "skills": "Compétences",
+          "recency": "Récence",
+          "relevantYears": "Années pertinentes"
         },
         "kanban": {
           "score": "Score",
@@ -926,7 +946,15 @@
           "downloading": "Wird heruntergeladen…",
           "downloadCv": "Lebenslauf herunterladen",
           "viewFullProfile": "Vollständiges Profil anzeigen",
-          "close": "Schließen"
+          "close": "Schließen",
+          "aiProcessedShort": "KI-Bewertung · Unterstützung für die HR-Entscheidung",
+          "attributesDetail": "Attributdetails ({count})",
+          "attributesZeroHint": "Ein Wert von 0 % senkt nicht immer den Gesamtwert: Aktualität oder relevante Jahre werden getrennt gemessen.",
+          "totalMatchScoreShort": "Abgleich",
+          "heroAria": "Zusammenfassung der Matching-Punktzahlen",
+          "attributeColumn": "Attribut",
+          "levelColumn": "Niveau",
+          "scoreColumn": "Punktzahl"
         },
         "scoreKeys": {
           "qualitative": "Qualitative Punktzahl",
@@ -937,7 +965,9 @@
           "keywordMatch": "Schlüsselwortübereinstimmung",
           "experience": "Berufserfahrung",
           "education": "Ausbildung",
-          "skills": "Fähigkeiten"
+          "skills": "Fähigkeiten",
+          "recency": "Aktualität",
+          "relevantYears": "Relevante Jahre"
         },
         "kanban": {
           "score": "Punktzahl",
@@ -1298,7 +1328,15 @@
           "downloading": "Download in corso…",
           "downloadCv": "Scarica CV",
           "viewFullProfile": "Vedi profilo completo",
-          "close": "Chiudi"
+          "close": "Chiudi",
+          "aiProcessedShort": "Valutazione con IA · supporto per la decisione HR",
+          "attributesDetail": "Dettaglio attributi ({count})",
+          "attributesZeroHint": "Uno 0% non sempre abbassa il punteggio combinato: attualità o anni pertinenti si misurano a parte.",
+          "totalMatchScoreShort": "Corrispondenza",
+          "heroAria": "Riepilogo dei punteggi di corrispondenza",
+          "attributeColumn": "Attributo",
+          "levelColumn": "Livello",
+          "scoreColumn": "Punteggio"
         },
         "scoreKeys": {
           "qualitative": "Punteggio qualitativo",
@@ -1309,7 +1347,9 @@
           "keywordMatch": "Corrispondenza parole chiave",
           "experience": "Esperienza",
           "education": "Formazione",
-          "skills": "Competenze"
+          "skills": "Competenze",
+          "recency": "Attualità",
+          "relevantYears": "Anni pertinenti"
         },
         "kanban": {
           "score": "Punteggio",
