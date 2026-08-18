@@ -179,6 +179,10 @@ describe("vacancy clipboard sessionStorage", () => {
   afterEach(() => {
     sessionStorage.clear()
     vi.restoreAllMocks()
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: undefined,
+    })
   })
 
   it("round-trips a payload through sessionStorage", async () => {
@@ -215,13 +219,27 @@ describe("vacancy clipboard sessionStorage", () => {
     expect(hasVacancyClipboard()).toBe(true)
   })
 
-  it("prefers sessionStorage over the system clipboard", async () => {
+  it("prefers the system clipboard over a stale sessionStorage copy", async () => {
     const sessionPayload = validPayload()
     const clipboardPayload = {
       ...validPayload(),
       title: "Otra vacante",
     }
     installClipboardMock(JSON.stringify(clipboardPayload))
+    sessionStorage.setItem(
+      VACANCY_CLIPBOARD_STORAGE_KEY,
+      JSON.stringify(sessionPayload)
+    )
+
+    expect(await readVacancyClipboard()).toEqual(clipboardPayload)
+    expect(JSON.parse(sessionStorage.getItem(VACANCY_CLIPBOARD_STORAGE_KEY) ?? "")).toEqual(
+      clipboardPayload
+    )
+  })
+
+  it("falls back to sessionStorage when the system clipboard is not a vacancy", async () => {
+    const sessionPayload = validPayload()
+    installClipboardMock("texto suelto")
     sessionStorage.setItem(
       VACANCY_CLIPBOARD_STORAGE_KEY,
       JSON.stringify(sessionPayload)

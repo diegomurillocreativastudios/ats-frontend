@@ -368,25 +368,30 @@ export function readVacancyClipboardFromSession(): VacancyClipboardPayload | nul
   }
 }
 
-/**
- * Reads the vacancy clipboard. Prefers sessionStorage, then the system clipboard.
- * A valid system-clipboard payload is persisted to sessionStorage for later pastes in this tab.
- */
-export async function readVacancyClipboard(): Promise<VacancyClipboardPayload | null> {
-  const fromSession = readVacancyClipboardFromSession()
-  if (fromSession) return fromSession
-
+async function readVacancyClipboardFromSystem(): Promise<VacancyClipboardPayload | null> {
   try {
     if (typeof navigator === "undefined" || !navigator.clipboard?.readText) {
       return null
     }
-    const parsed = parseVacancyClipboardFromText(await navigator.clipboard.readText())
-    if (!parsed) return null
-    persistPayloadToSession(parsed)
-    return parsed
+    return parseVacancyClipboardFromText(await navigator.clipboard.readText())
   } catch {
     return null
   }
+}
+
+/**
+ * Reads the vacancy clipboard. Prefers the system clipboard (last Copy, including
+ * another origin) and falls back to sessionStorage when the OS clipboard is empty,
+ * invalid, or blocked.
+ */
+export async function readVacancyClipboard(): Promise<VacancyClipboardPayload | null> {
+  const fromSystem = await readVacancyClipboardFromSystem()
+  if (fromSystem) {
+    persistPayloadToSession(fromSystem)
+    return fromSystem
+  }
+
+  return readVacancyClipboardFromSession()
 }
 
 /** Returns whether a valid vacancy clipboard payload is in sessionStorage. */
