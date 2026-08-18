@@ -1,6 +1,11 @@
-import { describe, it, expect } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import {
+  SSO_EXCHANGE_CODE_STORAGE_KEY,
+  clearPersistedSsoExchangeCode,
+  persistSsoExchangeCode,
+  readPersistedSsoExchangeCode,
   readSsoExchangeCodeFromHash,
+  resolveSsoExchangeCode,
   stripSsoCodeFromLocationUrl,
 } from "@/lib/auth/sso-exchange-code"
 
@@ -30,6 +35,37 @@ describe("readSsoExchangeCodeFromHash", () => {
 
   it("trims whitespace around the code value", () => {
     expect(readSsoExchangeCodeFromHash("#code=%20token%20")).toBe("token")
+  })
+})
+
+describe("resolveSsoExchangeCode", () => {
+  afterEach(() => {
+    sessionStorage.clear()
+  })
+
+  it("persists a hash code and returns it", () => {
+    expect(resolveSsoExchangeCode("#code=abc123")).toBe("abc123")
+    expect(readPersistedSsoExchangeCode()).toBe("abc123")
+    expect(sessionStorage.getItem(SSO_EXCHANGE_CODE_STORAGE_KEY)).toBe("abc123")
+  })
+
+  it("recovers a persisted code when the hash is empty", () => {
+    persistSsoExchangeCode("from-storage")
+    expect(resolveSsoExchangeCode("")).toBe("from-storage")
+    expect(resolveSsoExchangeCode("#")).toBe("from-storage")
+  })
+
+  it("prefers the hash over a stale persisted code", () => {
+    persistSsoExchangeCode("stale")
+    expect(resolveSsoExchangeCode("#code=fresh")).toBe("fresh")
+    expect(readPersistedSsoExchangeCode()).toBe("fresh")
+  })
+
+  it("clears the persisted code", () => {
+    persistSsoExchangeCode("abc123")
+    clearPersistedSsoExchangeCode()
+    expect(readPersistedSsoExchangeCode()).toBe("")
+    expect(resolveSsoExchangeCode("")).toBe("")
   })
 })
 

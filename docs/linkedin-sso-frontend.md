@@ -39,6 +39,8 @@ Ver `lib/server-backend-url.ts`.
 5. Backend redirige a LinkedIn y vuelve al frontend en:
    `/auth/sso/success#code={exchangeCode}`
    (`returnUrl` opcional en query: `/auth/sso/success?returnUrl=/portal#code=...`)
+   El path **no** debe llevar slash final: `/auth/sso/success/#code=` dispara un 308
+   de Vercel/Next y puede perder el fragmento.
 6. La página `/auth/sso/success` lee el `code` **solo del fragmento** (`window.location.hash`),
    limpia el hash con `history.replaceState` (y cualquier `?code=` legado sin usarlo),
    y llama a `POST /api/auth/sso/exchange` (route handler local).

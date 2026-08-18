@@ -18,6 +18,7 @@ describe("SsoSuccessContent", () => {
     replaceMock.mockReset()
     replaceStateMock.mockReset()
     searchParamsValue = new URLSearchParams()
+    sessionStorage.clear()
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -159,6 +160,28 @@ describe("SsoSuccessContent", () => {
       "",
       "http://localhost/auth/sso/success"
     )
+    expect(sessionStorage.getItem("ats.sso.exchangeCode")).toBeNull()
+  })
+
+  it("exchanges a persisted code after the hash was already stripped", async () => {
+    sessionStorage.setItem("ats.sso.exchangeCode", "abc123")
+    setLocation({ href: "http://localhost/auth/sso/success", hash: "" })
+    renderPage()
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/auth/sso/exchange"),
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({ code: "abc123" }),
+        })
+      )
+    })
+
+    await waitFor(() => {
+      expect(replaceMock).toHaveBeenCalledWith("/seleccion-portal")
+    })
+    expect(sessionStorage.getItem("ats.sso.exchangeCode")).toBeNull()
   })
 
   it("clears hash while keeping returnUrl query", async () => {

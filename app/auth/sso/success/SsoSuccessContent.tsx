@@ -15,7 +15,8 @@ import {
   resolveSsoQueryErrorCode,
 } from "@/lib/auth/sso-errors"
 import {
-  readSsoExchangeCodeFromHash,
+  clearPersistedSsoExchangeCode,
+  resolveSsoExchangeCode,
   stripSsoCodeFromLocationUrl,
 } from "@/lib/auth/sso-exchange-code"
 
@@ -42,7 +43,7 @@ export default function SsoSuccessContent() {
   useEffect(() => {
     if (typeof window === "undefined") return
 
-    const codeFromHash = readSsoExchangeCodeFromHash(window.location.hash)
+    const codeFromHash = resolveSsoExchangeCode(window.location.hash)
     setHashCode(codeFromHash)
 
     const cleaned = stripSsoCodeFromLocationUrl(
@@ -83,6 +84,7 @@ export default function SsoSuccessContent() {
         >
 
         if (!res.ok) {
+          clearPersistedSsoExchangeCode()
           const errorCode =
             (typeof data.code === "string" && data.code) ||
             (typeof data.error === "string" && data.error) ||
@@ -99,8 +101,10 @@ export default function SsoSuccessContent() {
           DEFAULT_AUTH_REDIRECT
         )
 
+        clearPersistedSsoExchangeCode()
         router.replace(destination)
       } catch {
+        clearPersistedSsoExchangeCode()
         setAsyncErrorCode("network_error")
       }
     }

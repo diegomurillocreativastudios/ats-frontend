@@ -72,6 +72,16 @@ export function proxy(request: NextRequest) {
     pathname === SSO_SUCCESS_PATH ||
     pathname.startsWith(`${SSO_SUCCESS_PATH}/`)
   ) {
+    /**
+     * `/auth/sso/success/` would otherwise 308 to the canonical path.
+     * A trailing-slash redirect can drop `#code=` (the hash never reaches
+     * the server; Refresh/Location fallbacks often omit it).
+     */
+    if (pathname !== SSO_SUCCESS_PATH) {
+      const dest = new URL(SSO_SUCCESS_PATH, request.nextUrl.origin)
+      dest.search = request.nextUrl.search
+      return NextResponse.rewrite(dest)
+    }
     return NextResponse.next()
   }
 
