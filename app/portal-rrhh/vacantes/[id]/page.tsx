@@ -104,9 +104,10 @@ import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles";
 import {
   buildVacancyClipboardPayload,
   clipboardPayloadToRequirementRows,
-  hasVacancyClipboard,
   readVacancyClipboard,
+  resolveClipboardCatalogId,
   writeVacancyClipboard,
+  type VacancyClipboardPayload,
 } from "@/lib/vacancies/vacancy-clipboard";
 
 const LOCALE_DATE_MAP = {
@@ -778,13 +779,13 @@ export default function VacanteDetallePage() {
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
   const [finishProcessModalOpen, setFinishProcessModalOpen] = useState(false);
   const [finishingProcess, setFinishingProcess] = useState(false);
-  const [clipboardAvailable, setClipboardAvailable] = useState(false);
   const [pasteConfirmOpen, setPasteConfirmOpen] = useState(false);
 
   const possibleCandidatesSectionDesktopRef = useRef(null);
   const possibleCandidatesSectionMobileRef = useRef(null);
   const etapasSectionDesktopRef = useRef(null);
   const etapasSectionMobileRef = useRef(null);
+  const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
   const originalCompanyIdAtEditRef = useRef(DEFAULT_RECRUITER_COMPANY_ID);
   const pipelineCompanyCapturedForVacancyRef = useRef<string | null>(null);
   const [pipelineCompanyId, setPipelineCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
@@ -1107,26 +1108,34 @@ export default function VacanteDetallePage() {
     originalCompanyIdAtEditRef.current = resolvedCompanyId;
     setEditCompanyId(resolvedCompanyId);
     hydrateEditFormFromVacancy(vacancy);
-    setClipboardAvailable(hasVacancyClipboard());
     setIsEditing(true);
   }, [vacancy, hydrateEditFormFromVacancy, companies, vacancyRouteId]);
 
-  const handleCopyVacancy = useCallback(() => {
+  const handleCopyVacancy = useCallback(async () => {
     if (!vacancy || typeof vacancy !== "object") return;
     const companyId = resolveVacancyCompanyId(
       vacancy,
       companies,
       vacancyRouteId
     );
-    const payload = buildVacancyClipboardPayload(vacancy, companyId);
-    if (!writeVacancyClipboard(payload)) return;
-    setClipboardAvailable(true);
+    const companyName =
+      vacancyCompanyDisplayName === "—" ? "" : vacancyCompanyDisplayName;
+    const payload = buildVacancyClipboardPayload(vacancy, companyId, companyName);
+    const wrote = await writeVacancyClipboard(payload);
+    if (!wrote) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tDetail("toasts.copyFailed"),
+      });
+      return;
+    }
     setSnackbar({
       open: true,
       variant: "success",
       message: tDetail("toasts.copied"),
     });
-  }, [vacancy, companies, vacancyRouteId, tDetail]);
+  }, [vacancy, companies, vacancyRouteId, vacancyCompanyDisplayName, tDetail]);
 
   const applyClipboardToEditForm = useCallback((payload) => {
     setEditTitle(payload.title);
@@ -1136,19 +1145,43 @@ export default function VacanteDetallePage() {
     setEditAdvantages(payload.advantages);
     setEditCountryCode(payload.countryCode);
     setEditStateCode(payload.stateCode);
-    setEditVacancyDepartmentId(payload.vacancyDepartmentId);
-    setEditVacancyModalityId(payload.vacancyModalityId);
+    setEditVacancyDepartmentId(
+      resolveClipboardCatalogId(
+        payload.vacancyDepartmentId,
+        payload.vacancyDepartmentCode,
+        payload.vacancyDepartmentName,
+        mergedDepartmentOptions
+      )
+    );
+    setEditVacancyModalityId(
+      resolveClipboardCatalogId(
+        payload.vacancyModalityId,
+        payload.vacancyModalityCode,
+        payload.vacancyModalityName,
+        mergedModalityOptions
+      )
+    );
     setEditRequirements(clipboardPayloadToRequirementRows(payload.requirements));
     setEditErrors({});
-  }, []);
+  }, [mergedDepartmentOptions, mergedModalityOptions]);
 
-  const handleRequestPaste = useCallback(() => {
-    if (!readVacancyClipboard()) return;
+  const handleRequestPaste = useCallback(async () => {
+    const payload = await readVacancyClipboard();
+    if (!payload) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tForm("toasts.pasteEmpty"),
+      });
+      return;
+    }
+    pendingPastePayloadRef.current = payload;
     setPasteConfirmOpen(true);
-  }, []);
+  }, [tForm]);
 
   const handleConfirmPaste = useCallback(() => {
-    const payload = readVacancyClipboard();
+    const payload = pendingPastePayloadRef.current;
+    pendingPastePayloadRef.current = null;
     setPasteConfirmOpen(false);
     if (!payload) return;
     applyClipboardToEditForm(payload);
@@ -1158,6 +1191,11 @@ export default function VacanteDetallePage() {
       message: tForm("toasts.pasted"),
     });
   }, [applyClipboardToEditForm, tForm]);
+
+  const handleCancelPaste = useCallback(() => {
+    pendingPastePayloadRef.current = null;
+    setPasteConfirmOpen(false);
+  }, []);
 
   const handleAddRequirement = useCallback(() => {
     setEditRequirements((prev) => [...prev, createEmptyRequirement()]);
@@ -2248,13 +2286,9 @@ export default function VacanteDetallePage() {
                             <button
                               type="button"
                               onClick={handleRequestPaste}
-                              disabled={savingVacancy || !clipboardAvailable}
+                              disabled={savingVacancy}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              aria-label={
-                                clipboardAvailable
-                                  ? tForm("actions.pasteAria")
-                                  : tForm("actions.pasteDisabledAria")
-                              }
+                              aria-label={tForm("actions.pasteAria")}
                             >
                               {tForm("actions.paste")}
                             </button>
@@ -3102,13 +3136,9 @@ export default function VacanteDetallePage() {
                           <button
                             type="button"
                             onClick={handleRequestPaste}
-                            disabled={savingVacancy || !clipboardAvailable}
+                            disabled={savingVacancy}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label={
-                              clipboardAvailable
-                                ? tForm("actions.pasteAria")
-                                : tForm("actions.pasteDisabledAria")
-                            }
+                            aria-label={tForm("actions.pasteAria")}
                           >
                             {tForm("actions.paste")}
                           </button>
@@ -3703,7 +3733,7 @@ export default function VacanteDetallePage() {
 
       <VacancyPasteConfirmModal
         isOpen={pasteConfirmOpen}
-        onClose={() => setPasteConfirmOpen(false)}
+        onClose={handleCancelPaste}
         onConfirm={handleConfirmPaste}
       />
     </div>

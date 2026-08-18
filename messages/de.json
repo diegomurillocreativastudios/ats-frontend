@@ -1795,7 +1795,8 @@
           "pasteDisabledAria": "Es wurde keine Stelle kopiert."
         },
         "toasts": {
-          "pasted": "Stelle eingefügt."
+          "pasted": "Stelle eingefügt.",
+          "pasteEmpty": "Es wurde keine Stelle kopiert."
         },
         "pasteConfirm": {
           "title": "Kopierte Stelle einfügen?",
@@ -1881,7 +1882,8 @@
         "toasts": {
           "saved": "Änderungen erfolgreich gespeichert.",
           "finishSuccess": "Prozess erfolgreich abgeschlossen.",
-          "copied": "Stelle kopiert."
+          "copied": "Stelle kopiert.",
+          "copyFailed": "Die Stelle konnte nicht kopiert werden."
         },
         "readOnlyBanner": {
           "vacancy": {

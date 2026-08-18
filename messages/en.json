@@ -1863,7 +1863,8 @@
           "pasteDisabledAria": "No vacancy has been copied."
         },
         "toasts": {
-          "pasted": "Vacancy pasted."
+          "pasted": "Vacancy pasted.",
+          "pasteEmpty": "No vacancy has been copied."
         },
         "pasteConfirm": {
           "title": "Paste copied vacancy?",
@@ -1949,7 +1950,8 @@
         "toasts": {
           "saved": "Changes saved successfully.",
           "finishSuccess": "Process finished successfully.",
-          "copied": "Vacancy copied."
+          "copied": "Vacancy copied.",
+          "copyFailed": "Could not copy the vacancy."
         },
         "readOnlyBanner": {
           "vacancy": {

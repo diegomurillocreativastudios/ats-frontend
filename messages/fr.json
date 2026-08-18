@@ -1795,7 +1795,8 @@
           "pasteDisabledAria": "Aucun poste n'a été copié."
         },
         "toasts": {
-          "pasted": "Poste collé."
+          "pasted": "Poste collé.",
+          "pasteEmpty": "Aucun poste n'a été copié."
         },
         "pasteConfirm": {
           "title": "Coller le poste copié ?",
@@ -1881,7 +1882,8 @@
         "toasts": {
           "saved": "Modifications enregistrées avec succès.",
           "finishSuccess": "Processus terminé avec succès.",
-          "copied": "Poste copié."
+          "copied": "Poste copié.",
+          "copyFailed": "Impossible de copier le poste."
         },
         "readOnlyBanner": {
           "vacancy": {

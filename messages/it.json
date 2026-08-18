@@ -1795,7 +1795,8 @@
           "pasteDisabledAria": "Non c'è una posizione copiata."
         },
         "toasts": {
-          "pasted": "Posizione incollata."
+          "pasted": "Posizione incollata.",
+          "pasteEmpty": "Non c'è una posizione copiata."
         },
         "pasteConfirm": {
           "title": "Incollare la posizione copiata?",
@@ -1881,7 +1882,8 @@
         "toasts": {
           "saved": "Modifiche salvate correttamente.",
           "finishSuccess": "Processo concluso correttamente.",
-          "copied": "Posizione copiata."
+          "copied": "Posizione copiata.",
+          "copyFailed": "Impossibile copiare la posizione."
         },
         "readOnlyBanner": {
           "vacancy": {

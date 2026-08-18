@@ -18,8 +18,9 @@ import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confir
 import { appendVacancyLocationToPayload } from "@/lib/vacancies/vacancy-location";
 import {
   clipboardPayloadToRequirementRows,
-  hasVacancyClipboard,
   readVacancyClipboard,
+  resolveClipboardCatalogId,
+  resolveClipboardCompanyId,
   type VacancyClipboardPayload,
 } from "@/lib/vacancies/vacancy-clipboard";
 import { mapActiveCatalogItemsToOptions } from "@/lib/vacancy-catalogs";
@@ -65,9 +66,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [clipboardAvailable, setClipboardAvailable] = useState(false);
   const [pasteConfirmOpen, setPasteConfirmOpen] = useState(false);
   const companyTouchedRef = useRef(false);
+  const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
 
   useEffect(() => {
     if (!isOpen) return
@@ -145,9 +146,8 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   useEffect(() => {
     if (!isOpen) {
       setPasteConfirmOpen(false)
-      return
+      pendingPastePayloadRef.current = null
     }
-    setClipboardAvailable(hasVacancyClipboard())
   }, [isOpen])
 
   const handleAddRequirement = () => {
@@ -294,7 +294,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     setSubmitError(null);
     companyTouchedRef.current = false;
     setPasteConfirmOpen(false);
-    setClipboardAvailable(false);
+    pendingPastePayloadRef.current = null;
     onClose?.();
   };
 
@@ -321,21 +321,44 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     setVentajas(payload.advantages)
     setCountryCode(payload.countryCode)
     setStateCode(payload.stateCode)
-    setVacancyDepartmentId(payload.vacancyDepartmentId)
-    setVacancyModalityId(payload.vacancyModalityId)
-    if (payload.companyId.trim() !== "") {
+    setVacancyDepartmentId(
+      resolveClipboardCatalogId(
+        payload.vacancyDepartmentId,
+        payload.vacancyDepartmentCode,
+        payload.vacancyDepartmentName,
+        departmentOptions
+      )
+    )
+    setVacancyModalityId(
+      resolveClipboardCatalogId(
+        payload.vacancyModalityId,
+        payload.vacancyModalityCode,
+        payload.vacancyModalityName,
+        modalityOptions
+      )
+    )
+    const resolvedCompanyId = resolveClipboardCompanyId(
+      payload.companyId,
+      payload.companyName,
+      companyOptions
+    )
+    if (resolvedCompanyId) {
       companyTouchedRef.current = true
-      setSelectedCompanyId(payload.companyId)
+      setSelectedCompanyId(resolvedCompanyId)
     }
     setRequerimientos(clipboardPayloadToRequirementRows(payload.requirements))
     setErrors({})
     onSnackbar?.(t("toasts.pasted"), "success")
   }
 
-  const handleRequestPaste = () => {
-    const payload = readVacancyClipboard()
-    if (!payload) return
+  const handleRequestPaste = async () => {
+    const payload = await readVacancyClipboard()
+    if (!payload) {
+      onSnackbar?.(t("toasts.pasteEmpty"), "error")
+      return
+    }
     if (isCreateFormDirty()) {
+      pendingPastePayloadRef.current = payload
       setPasteConfirmOpen(true)
       return
     }
@@ -343,10 +366,16 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   }
 
   const handleConfirmPaste = () => {
-    const payload = readVacancyClipboard()
+    const payload = pendingPastePayloadRef.current
+    pendingPastePayloadRef.current = null
     setPasteConfirmOpen(false)
     if (!payload) return
     applyClipboardPayload(payload)
+  }
+
+  const handleCancelPaste = () => {
+    pendingPastePayloadRef.current = null
+    setPasteConfirmOpen(false)
   }
 
   const footer = (
@@ -355,10 +384,8 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         type="button"
         variant="outline"
         onClick={handleRequestPaste}
-        disabled={loading || !clipboardAvailable}
-        aria-label={
-          clipboardAvailable ? t("actions.pasteAria") : t("actions.pasteDisabledAria")
-        }
+        disabled={loading}
+        aria-label={t("actions.pasteAria")}
         className="mr-auto"
       >
         {t("actions.paste")}
@@ -744,7 +771,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     </Modal>
     <VacancyPasteConfirmModal
       isOpen={pasteConfirmOpen}
-      onClose={() => setPasteConfirmOpen(false)}
+      onClose={handleCancelPaste}
       onConfirm={handleConfirmPaste}
       overlayZIndexClass="z-[100]"
     />

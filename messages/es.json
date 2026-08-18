@@ -1863,7 +1863,8 @@
           "pasteDisabledAria": "No hay una vacante copiada."
         },
         "toasts": {
-          "pasted": "Vacante pegada."
+          "pasted": "Vacante pegada.",
+          "pasteEmpty": "No hay una vacante copiada."
         },
         "pasteConfirm": {
           "title": "¿Pegar vacante copiada?",
@@ -1949,7 +1950,8 @@
         "toasts": {
           "saved": "Cambios guardados correctamente.",
           "finishSuccess": "Proceso finalizado correctamente.",
-          "copied": "Vacante copiada."
+          "copied": "Vacante copiada.",
+          "copyFailed": "No se pudo copiar la vacante."
         },
         "readOnlyBanner": {
           "vacancy": {
