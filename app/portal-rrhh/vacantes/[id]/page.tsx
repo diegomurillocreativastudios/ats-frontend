@@ -41,6 +41,11 @@ import {
   patchVacancyClientCompany,
 } from "@/lib/api/recruiter-vacancies"
 import { finishVacancyProcess } from "@/lib/api/recruiter-vacancy-finish"
+import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
+import {
+  QUERY_SEARCH_CANDIDATES_LIMIT,
+  clampSearchLimit,
+} from "@/lib/api/query-paging"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
@@ -971,7 +976,8 @@ export default function VacanteDetallePage() {
     }
     try {
       const data = await apiClient.get(`/api/recruiter/vacancies/${id}`);
-      setVacancy(normalizeVacancyDetailFromApi(data) ?? data);
+      const withApplicants = await overlayVacancyApplicants(String(id), data);
+      setVacancy(normalizeVacancyDetailFromApi(withApplicants) ?? withApplicants);
       const record =
         data && typeof data === "object" && !Array.isArray(data)
           ? (data as Record<string, unknown>)
@@ -1573,7 +1579,7 @@ export default function VacanteDetallePage() {
       }
 
       try {
-        const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=20&minScore=0.7`;
+        const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=${clampSearchLimit(QUERY_SEARCH_CANDIDATES_LIMIT)}&minScore=0.7`;
         const data = await apiClient.post(url, {});
         const list = Array.isArray(data) ? data : data?.candidates ?? data?.results ?? [];
         setSmartCandidates(list);

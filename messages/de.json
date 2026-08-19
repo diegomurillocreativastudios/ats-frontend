@@ -1345,6 +1345,15 @@
         "headline": "Titel",
         "uploadedAt": "Upload-Datum",
         "actions": "Aktionen"
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Paginierung",
+        "summary": "Seite {page} von {total}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Kandidat} other {# Kandidaten}}"
       }
     },
     "candidateDetail": {
@@ -1728,6 +1737,15 @@
       },
       "toasts": {
         "created": "Stelle erfolgreich erstellt."
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Paginierung",
+        "summary": "Seite {page} von {total}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Stelle} other {# Stellen}}"
       },
       "form": {
         "title": "Neue Stelle",
@@ -2277,6 +2295,15 @@
       "loadingStates": {
         "loadingVacancies": "Stellen werden geladen…",
         "loadingInterviews": "Vorstellungsgespräche werden geladen..."
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Paginierung",
+        "summary": "Seite {page} von {total}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Stelle} other {# Stellen}}"
       },
       "errors": {
         "loadVacanciesFailed": "Die Stellen konnten nicht geladen werden.",
@@ -2918,6 +2945,15 @@
       },
       "toasts": {
         "deleted": "Vorlage erfolgreich gelöscht."
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Paginierung",
+        "summary": "Seite {page} von {total}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Vorlage} other {# Vorlagen}}"
       },
       "deleteConfirm": {
         "title": "Vorlage löschen",

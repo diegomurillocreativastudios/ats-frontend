@@ -49,12 +49,17 @@ const tryRefresh = async () => {
   }
 }
 
+export interface ApiResponseMeta<T = unknown> {
+  data: T
+  headers: Headers
+}
+
 export const apiClient = {
-  async request(
+  async requestWithMeta(
     endpoint: string,
     options: ApiRequestOptions = {},
     isRetry = false
-  ) {
+  ): Promise<ApiResponseMeta> {
     const baseUrl = getBaseUrl().replace(/\/$/, '');
     const url = endpoint.startsWith('http')
       ? endpoint
@@ -86,7 +91,7 @@ export const apiClient = {
     if (res.status === 401 && !isRetry && typeof window !== "undefined") {
       const refreshed = await tryRefresh()
       if (refreshed) {
-        return this.request(endpoint, options, true)
+        return this.requestWithMeta(endpoint, options, true)
       }
       window.location.href = "/auth/iniciar-sesion"
       const err = new Error("Sesión expirada") as ApiClientError
@@ -115,10 +120,24 @@ export const apiClient = {
       }
       throw err
     }
+    return { data, headers: res.headers }
+  },
+  async request(
+    endpoint: string,
+    options: ApiRequestOptions = {},
+    isRetry = false
+  ) {
+    const { data } = await this.requestWithMeta(endpoint, options, isRetry)
     return data
   },
   get(endpoint: string) {
     return this.request(endpoint, { method: "GET" })
+  },
+  /**
+   * GET that keeps response headers (paging: X-Total-Count, X-Page, X-Page-Size).
+   */
+  getWithHeaders(endpoint: string) {
+    return this.requestWithMeta(endpoint, { method: "GET" })
   },
   post(endpoint: string, body: unknown) {
     return this.request(endpoint, {

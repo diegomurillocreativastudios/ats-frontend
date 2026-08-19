@@ -1413,6 +1413,15 @@
         "headline": "Title",
         "uploadedAt": "Upload date",
         "actions": "Actions"
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# candidate} other {# candidates}}"
       }
     },
     "candidateDetail": {
@@ -1796,6 +1805,15 @@
       },
       "toasts": {
         "created": "Vacancy created successfully."
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# vacancy} other {# vacancies}}"
       },
       "form": {
         "title": "New vacancy",
@@ -2345,6 +2363,15 @@
       "loadingStates": {
         "loadingVacancies": "Loading vacancies…",
         "loadingInterviews": "Loading interviews..."
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# vacancy} other {# vacancies}}"
       },
       "errors": {
         "loadVacanciesFailed": "Vacancies could not be loaded.",
@@ -2986,6 +3013,15 @@
       },
       "toasts": {
         "deleted": "Template deleted successfully."
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# template} other {# templates}}"
       },
       "deleteConfirm": {
         "title": "Delete template",

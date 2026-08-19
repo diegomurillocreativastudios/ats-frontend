@@ -39,6 +39,29 @@ describe("apiClient auth hardening", () => {
     expect(headers.Authorization).toBe("Bearer test-access-token")
   })
 
+  it("expone headers de paging en getWithHeaders", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: {
+        get: (name: string) => {
+          const key = name.toLowerCase()
+          if (key === "content-type") return "application/json"
+          if (key === "x-total-count") return "80"
+          if (key === "x-page") return "1"
+          if (key === "x-page-size") return "50"
+          return null
+        },
+      },
+      json: async () => [{ id: 1 }],
+    })
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    const result = await apiClient.getWithHeaders("/api/recruiter/candidates/all")
+    expect(result.data).toEqual([{ id: 1 }])
+    expect(result.headers.get("X-Total-Count")).toBe("80")
+  })
+
   it("expone retryAfter en errores 429", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,

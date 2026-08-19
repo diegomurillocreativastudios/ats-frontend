@@ -1345,6 +1345,15 @@
         "headline": "Titre",
         "uploadedAt": "Date de téléversement",
         "actions": "Actions"
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "pageSizeAria": "Taille de page",
+        "regionAria": "Pagination",
+        "summary": "Page {page} sur {total}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "count": "{count, plural, one {# candidat} other {# candidats}}"
       }
     },
     "candidateDetail": {
@@ -1728,6 +1737,15 @@
       },
       "toasts": {
         "created": "Poste créé avec succès."
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "pageSizeAria": "Taille de page",
+        "regionAria": "Pagination",
+        "summary": "Page {page} sur {total}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "count": "{count, plural, one {# poste} other {# postes}}"
       },
       "form": {
         "title": "Nouveau poste",
@@ -2277,6 +2295,15 @@
       "loadingStates": {
         "loadingVacancies": "Chargement des postes…",
         "loadingInterviews": "Chargement des entretiens..."
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "pageSizeAria": "Taille de page",
+        "regionAria": "Pagination",
+        "summary": "Page {page} sur {total}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "count": "{count, plural, one {# poste} other {# postes}}"
       },
       "errors": {
         "loadVacanciesFailed": "Impossible de charger les postes.",
@@ -2918,6 +2945,15 @@
       },
       "toasts": {
         "deleted": "Modèle supprimé avec succès."
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "pageSizeAria": "Taille de page",
+        "regionAria": "Pagination",
+        "summary": "Page {page} sur {total}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "count": "{count, plural, one {# modèle} other {# modèles}}"
       },
       "deleteConfirm": {
         "title": "Supprimer le modèle",

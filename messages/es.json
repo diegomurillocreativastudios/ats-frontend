@@ -1413,6 +1413,15 @@
         "headline": "Título",
         "uploadedAt": "Fecha subida",
         "actions": "Acciones"
+      },
+      "pagination": {
+        "perPage": "Por página",
+        "pageSizeAria": "Tamaño de página",
+        "regionAria": "Paginación",
+        "summary": "Página {page} de {total}",
+        "prev": "Anterior",
+        "next": "Siguiente",
+        "count": "{count, plural, one {# candidato} other {# candidatos}}"
       }
     },
     "candidateDetail": {
@@ -1796,6 +1805,15 @@
       },
       "toasts": {
         "created": "Vacante creada correctamente."
+      },
+      "pagination": {
+        "perPage": "Por página",
+        "pageSizeAria": "Tamaño de página",
+        "regionAria": "Paginación",
+        "summary": "Página {page} de {total}",
+        "prev": "Anterior",
+        "next": "Siguiente",
+        "count": "{count, plural, one {# vacante} other {# vacantes}}"
       },
       "form": {
         "title": "Nueva vacante",
@@ -2345,6 +2363,15 @@
       "loadingStates": {
         "loadingVacancies": "Cargando vacantes…",
         "loadingInterviews": "Cargando entrevistas..."
+      },
+      "pagination": {
+        "perPage": "Por página",
+        "pageSizeAria": "Tamaño de página",
+        "regionAria": "Paginación",
+        "summary": "Página {page} de {total}",
+        "prev": "Anterior",
+        "next": "Siguiente",
+        "count": "{count, plural, one {# vacante} other {# vacantes}}"
       },
       "errors": {
         "loadVacanciesFailed": "No se pudieron cargar las vacantes.",
@@ -2986,6 +3013,15 @@
       },
       "toasts": {
         "deleted": "Plantilla eliminada correctamente."
+      },
+      "pagination": {
+        "perPage": "Por página",
+        "pageSizeAria": "Tamaño de página",
+        "regionAria": "Paginación",
+        "summary": "Página {page} de {total}",
+        "prev": "Anterior",
+        "next": "Siguiente",
+        "count": "{count, plural, one {# plantilla} other {# plantillas}}"
       },
       "deleteConfirm": {
         "title": "Eliminar plantilla",

@@ -25,6 +25,14 @@ import frMessages from "@/messages/fr.json"
 vi.mock("@/lib/api", () => ({
   apiClient: {
     get: vi.fn(async () => []),
+    getWithHeaders: vi.fn(async () => ({
+      data: [],
+      headers: new Headers({
+        "X-Total-Count": "0",
+        "X-Page": "1",
+        "X-Page-Size": "50",
+      }),
+    })),
     post: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),

@@ -8,11 +8,13 @@ import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
+import { ListPaginationBar } from "@/components/ui/list-pagination-bar";
 import AgregarCandidatoModal from "@/components/candidato/AgregarCandidatoModal";
 import CandidateFollowUpModal, {
   type CandidateProfile,
 } from "@/components/candidato/CandidateFollowUpModal";
-import { apiClient } from "@/lib/api";
+import { listRecruiterCandidatesAll } from "@/lib/api/recruiter-candidates";
+import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging";
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
 import { resolveCountryDisplay } from "@/lib/normalizeCountryDisplay";
@@ -172,6 +174,9 @@ export default function CandidatosPage() {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(QUERY_PAGE_SIZE_DEFAULT);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
@@ -215,21 +220,22 @@ export default function CandidatosPage() {
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await apiClient.get("/api/recruiter/candidates/all");
-      const list = Array.isArray(data)
-        ? data
-        : data?.candidates ?? data?.items ?? data?.data ?? [];
+      const result = await listRecruiterCandidatesAll({ page, pageSize });
       const noNameLabel = t("noName");
-      setCandidates(list.map((item, i) => mapCandidateFromApi(item, i, noNameLabel)));
+      setCandidates(
+        result.items.map((item, i) => mapCandidateFromApi(item, i, noNameLabel))
+      );
+      setTotalCount(result.totalCount);
     } catch (err) {
       setFetchError(
         err?.message ?? err?.detail ?? t("loadError")
       );
       setCandidates([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, page, pageSize]);
 
   useEffect(() => {
     fetchCandidates();
@@ -249,6 +255,32 @@ export default function CandidatosPage() {
   });
 
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
+
+  const handlePageChange = (nextPage) => setPage(nextPage);
+
+  const handlePageSizeChange = (nextSize) => {
+    setPageSize(nextSize);
+    setPage(1);
+  };
+
+  const handleCandidatesMutated = () => {
+    if (page !== 1) {
+      setPage(1);
+      return;
+    }
+    void fetchCandidates();
+  };
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1);
+  const paginationLabels = {
+    perPage: t("pagination.perPage"),
+    pageSizeAria: t("pagination.pageSizeAria"),
+    regionAria: t("pagination.regionAria"),
+    summary: t("pagination.summary", { page, total: totalPages }),
+    prev: t("pagination.prev"),
+    next: t("pagination.next"),
+    count: t("pagination.count", { count: totalCount }),
+  };
 
   const mainContent = (
     <section className="flex flex-col gap-6" aria-label={t("regionLabel")}>
@@ -363,6 +395,17 @@ export default function CandidatosPage() {
           </div>
         )}
       </div>
+      {!loading && !fetchError ? (
+        <ListPaginationBar
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          loading={loading}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          labels={paginationLabels}
+        />
+      ) : null}
     </section>
   );
 
@@ -406,7 +449,7 @@ export default function CandidatosPage() {
       <AgregarCandidatoModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        onSuccess={fetchCandidates}
+        onSuccess={handleCandidatesMutated}
         onSnackbar={handleSnackbar}
       />
 

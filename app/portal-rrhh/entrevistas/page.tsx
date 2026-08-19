@@ -7,7 +7,9 @@ import { Briefcase, Calendar, Loader2, MapPin, Users } from "lucide-react"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
-import { apiClient } from "@/lib/api"
+import { ListPaginationBar } from "@/components/ui/list-pagination-bar"
+import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging"
+import { listRecruiterVacanciesPage } from "@/lib/api/recruiter-vacancies"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
 import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles"
@@ -80,35 +82,32 @@ export default function EntrevistasHubPage() {
   const [vacancies, setVacancies] = useState<VacancyRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(QUERY_PAGE_SIZE_DEFAULT)
+  const [totalCount, setTotalCount] = useState(0)
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const data = await apiClient.get("/api/recruiter/vacancies")
-      const list = Array.isArray(data)
-        ? data
-        : (data as { vacancies?: unknown })?.vacancies ??
-          (data as { items?: unknown })?.items ??
-          (data as { data?: unknown })?.data ??
-          []
-      if (!Array.isArray(list)) {
-        setVacancies([])
-        return
-      }
-      const mapped: VacancyRow[] = list.map((item: Record<string, unknown>, i: number) => {
-        const id = String(item?.id ?? item?.uuid ?? i)
-        const title = String(item?.title ?? item?.name ?? "—")
-        const ccRaw = item?.countryCode ?? item?.country_code
+      const result = await listRecruiterVacanciesPage({ page, pageSize })
+      const mapped: VacancyRow[] = result.items.map((item: unknown, i: number) => {
+        const record =
+          item != null && typeof item === "object"
+            ? (item as Record<string, unknown>)
+            : {}
+        const id = String(record.id ?? record.uuid ?? i)
+        const title = String(record.title ?? record.name ?? "—")
+        const ccRaw = record.countryCode ?? record.country_code
         const countryCode =
           ccRaw != null && String(ccRaw).trim() !== ""
             ? String(ccRaw).trim().toUpperCase()
             : null
         const candidatesRaw =
-          item?.candidatesAmount ??
-          item?.candidates ??
-          item?.candidates_count ??
-          item?.applicants_count
+          record.candidatesAmount ??
+          record.candidates ??
+          record.candidates_count ??
+          record.applicants_count
         const candidatesAmount =
           typeof candidatesRaw === "number" && !Number.isNaN(candidatesRaw)
             ? candidatesRaw
@@ -117,25 +116,45 @@ export default function EntrevistasHubPage() {
           id,
           title,
           countryLabel: formatCountryCodeLabel(countryCode),
-          statusKey: mapStatusKey(item),
+          statusKey: mapStatusKey(record),
           candidatesAmount,
           createdAtLabel: formatCreatedAtLabel(
-            item?.createdAt ?? item?.created_at
+            record.createdAt ?? record.created_at
           ),
         }
       })
       setVacancies(mapped)
+      setTotalCount(result.totalCount)
     } catch (err: unknown) {
       setError(getApiErrorMessage(err) || t("errors.loadVacanciesFailed"))
       setVacancies([])
+      setTotalCount(0)
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, page, pageSize])
 
   useEffect(() => {
     load()
   }, [load])
+
+  const handlePageChange = (nextPage: number) => setPage(nextPage)
+
+  const handlePageSizeChange = (nextSize: number) => {
+    setPageSize(nextSize)
+    setPage(1)
+  }
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1)
+  const paginationLabels = {
+    perPage: t("pagination.perPage"),
+    pageSizeAria: t("pagination.pageSizeAria"),
+    regionAria: t("pagination.regionAria"),
+    summary: t("pagination.summary", { page, total: totalPages }),
+    prev: t("pagination.prev"),
+    next: t("pagination.next"),
+    count: t("pagination.count", { count: totalCount }),
+  }
 
   const mainContent = (
     <div className="min-w-0 flex flex-col">
@@ -252,6 +271,17 @@ export default function EntrevistasHubPage() {
             })}
           </ul>
         )}
+        {!loading && !error ? (
+          <ListPaginationBar
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            loading={loading}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            labels={paginationLabels}
+          />
+        ) : null}
       </section>
     </div>
   )

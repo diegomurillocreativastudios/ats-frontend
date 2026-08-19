@@ -1345,6 +1345,15 @@
         "headline": "Titolo",
         "uploadedAt": "Data di caricamento",
         "actions": "Azioni"
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# candidato} other {# candidati}}"
       }
     },
     "candidateDetail": {
@@ -1728,6 +1737,15 @@
       },
       "toasts": {
         "created": "Posizione creata con successo."
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# posizione} other {# posizioni}}"
       },
       "form": {
         "title": "Nuova posizione",
@@ -2277,6 +2295,15 @@
       "loadingStates": {
         "loadingVacancies": "Caricamento delle posizioni…",
         "loadingInterviews": "Caricamento dei colloqui..."
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# posizione} other {# posizioni}}"
       },
       "errors": {
         "loadVacanciesFailed": "Impossibile caricare le posizioni.",
@@ -2918,6 +2945,15 @@
       },
       "toasts": {
         "deleted": "Modello eliminato correttamente."
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# modello} other {# modelli}}"
       },
       "deleteConfirm": {
         "title": "Elimina modello",

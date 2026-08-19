@@ -4,6 +4,7 @@ import {
   normalizeInterview,
   type InterviewStatus,
 } from "@/lib/api/interviews"
+import { listAllRecruiterVacancies } from "@/lib/api/recruiter-vacancies"
 
 export interface AdminCalendarCandidate {
   profileId: string
@@ -378,14 +379,7 @@ export interface RecruiterVacancyOption {
 }
 
 export async function fetchRecruiterVacancyOptions(): Promise<RecruiterVacancyOption[]> {
-  const data = await apiClient.get("/api/recruiter/vacancies")
-  const list = Array.isArray(data)
-    ? data
-    : (data as { vacancies?: unknown })?.vacancies ??
-      (data as { items?: unknown })?.items ??
-      (data as { data?: unknown })?.data ??
-      []
-  if (!Array.isArray(list)) return []
+  const list = await listAllRecruiterVacancies()
   const out: RecruiterVacancyOption[] = []
   list.forEach((item: unknown, i: number) => {
     const o = asRecord(item)

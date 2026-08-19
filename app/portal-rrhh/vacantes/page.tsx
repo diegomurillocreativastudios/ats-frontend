@@ -10,7 +10,9 @@ import { VacancyListCard } from "@/components/rrhh/VacancyListCard";
 import { VacancyListFilters } from "@/components/rrhh/VacancyListFilters";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
-import { apiClient } from "@/lib/api";
+import { ListPaginationBar } from "@/components/ui/list-pagination-bar";
+import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging";
+import { listRecruiterVacanciesPage } from "@/lib/api/recruiter-vacancies";
 import {
   EMPTY_VACANCY_LIST_FILTERS,
   filterVacancyList,
@@ -119,6 +121,9 @@ export default function VacantesPage() {
   const [vacancies, setVacancies] = useState<VacancyListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(QUERY_PAGE_SIZE_DEFAULT);
+  const [totalCount, setTotalCount] = useState(0);
   const [filters, setFilters] = useState<VacancyFiltersState>(EMPTY_VACANCY_LIST_FILTERS);
   const [statusFilter] = useState("todas");
   const [isNuevaVacanteOpen, setIsNuevaVacanteOpen] = useState(false);
@@ -140,15 +145,13 @@ export default function VacantesPage() {
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await apiClient.get("/api/recruiter/vacancies");
-      const list = Array.isArray(data)
-        ? data
-        : data?.vacancies ?? data?.items ?? data?.data ?? [];
+      const result = await listRecruiterVacanciesPage({ page, pageSize });
       setVacancies(
-        list.map((item, i) =>
+        result.items.map((item, i) =>
           mapVacancyFromApi(item as Record<string, unknown>, i)
         )
       );
+      setTotalCount(result.totalCount);
     } catch (err: unknown) {
       const message =
         (err as { message?: string })?.message ||
@@ -156,22 +159,45 @@ export default function VacantesPage() {
         t("errors.loadFailed");
       setFetchError(message);
       setVacancies([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, page, pageSize]);
 
   useEffect(() => {
     fetchVacancies();
   }, [fetchVacancies]);
 
   const handleNuevaVacanteSubmit = () => {
-    fetchVacancies();
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      fetchVacancies();
+    }
     setSnackbar({
       open: true,
       variant: "success",
       message: t("toasts.created"),
     });
+  };
+
+  const handlePageChange = (nextPage: number) => setPage(nextPage);
+
+  const handlePageSizeChange = (nextSize: number) => {
+    setPageSize(nextSize);
+    setPage(1);
+  };
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1);
+  const paginationLabels = {
+    perPage: t("pagination.perPage"),
+    pageSizeAria: t("pagination.pageSizeAria"),
+    regionAria: t("pagination.regionAria"),
+    summary: t("pagination.summary", { page, total: totalPages }),
+    prev: t("pagination.prev"),
+    next: t("pagination.next"),
+    count: t("pagination.count", { count: totalCount }),
   };
 
   const filteredVacancies = useMemo(() => {
@@ -226,6 +252,17 @@ export default function VacantesPage() {
                   onRefresh={fetchVacancies}
                   onSnackbar={handleSnackbar}
                 />
+                {!loading && !fetchError ? (
+                  <ListPaginationBar
+                    page={page}
+                    pageSize={pageSize}
+                    totalCount={totalCount}
+                    loading={loading}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    labels={paginationLabels}
+                  />
+                ) : null}
               </section>
             </div>
           </main>
@@ -271,6 +308,17 @@ export default function VacantesPage() {
                   onRefresh={fetchVacancies}
                   onSnackbar={handleSnackbar}
                 />
+              {!loading && !fetchError ? (
+                <ListPaginationBar
+                  page={page}
+                  pageSize={pageSize}
+                  totalCount={totalCount}
+                  loading={loading}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                  labels={paginationLabels}
+                />
+              ) : null}
             </section>
           </div>
         </main>

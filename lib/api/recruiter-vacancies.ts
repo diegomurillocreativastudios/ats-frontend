@@ -1,5 +1,27 @@
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  QUERY_FETCH_ALL_PAGE_SIZE,
+  fetchAllHeaderPagedList,
+  fetchHeaderPagedList,
+  type HeaderPagedResult,
+} from "@/lib/api/query-paging"
+
+const RECRUITER_VACANCIES_PATH = "/api/recruiter/vacancies"
+
+export async function listRecruiterVacanciesPage(params: {
+  page?: number
+  pageSize?: number
+} = {}): Promise<HeaderPagedResult<unknown>> {
+  return fetchHeaderPagedList(RECRUITER_VACANCIES_PATH, params)
+}
+
+export async function listAllRecruiterVacancies(): Promise<unknown[]> {
+  return fetchAllHeaderPagedList(
+    RECRUITER_VACANCIES_PATH,
+    QUERY_FETCH_ALL_PAGE_SIZE
+  )
+}
 
 /** User-facing message for company PATCH failures. */
 export function mapVacancyCompanyPatchError(payload: unknown): string {

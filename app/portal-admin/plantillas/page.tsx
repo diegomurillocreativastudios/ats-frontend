@@ -13,7 +13,9 @@ import PlantillaModal from "@/components/rrhh/PlantillaModal";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
+import { ListPaginationBar } from "@/components/ui/list-pagination-bar";
 import { apiClient } from "@/lib/api";
+import { QUERY_PAGE_SIZE_DEFAULT, fetchHeaderPagedList } from "@/lib/api/query-paging";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 const mapTemplateFromApi = (item, index = 0) => {
@@ -142,6 +144,9 @@ export default function PlantillasPage() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(QUERY_PAGE_SIZE_DEFAULT);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
@@ -162,25 +167,33 @@ export default function PlantillasPage() {
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await apiClient.get("/api/Templates");
-      const list = Array.isArray(data) ? data : data?.templates ?? data?.items ?? data?.data ?? [];
-      setTemplates(list.map((item, i) => mapTemplateFromApi(item, i)));
+      const result = await fetchHeaderPagedList("/api/Templates", {
+        page,
+        pageSize,
+      });
+      setTemplates(result.items.map((item, i) => mapTemplateFromApi(item, i)));
+      setTotalCount(result.totalCount);
     } catch (err) {
       setFetchError(
         getApiErrorMessage(err) || t("errors.loadFailed")
       );
       setTemplates([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, pageSize, t]);
 
   useEffect(() => {
     fetchTemplates();
   }, [fetchTemplates]);
 
   const handleModalSubmit = () => {
-    fetchTemplates();
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      fetchTemplates();
+    }
     setEditingTemplate(null);
   };
 
@@ -249,6 +262,24 @@ export default function PlantillasPage() {
   });
 
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
+
+  const handlePageChange = (nextPage) => setPage(nextPage);
+
+  const handlePageSizeChange = (nextSize) => {
+    setPageSize(nextSize);
+    setPage(1);
+  };
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1);
+  const paginationLabels = {
+    perPage: t("pagination.perPage"),
+    pageSizeAria: t("pagination.pageSizeAria"),
+    regionAria: t("pagination.regionAria"),
+    summary: t("pagination.summary", { page, total: totalPages }),
+    prev: t("pagination.prev"),
+    next: t("pagination.next"),
+    count: t("pagination.count", { count: totalCount }),
+  };
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background font-sans text-foreground">
@@ -336,6 +367,17 @@ export default function PlantillasPage() {
                     ))
                   )}
                 </div>
+                {!loading && !fetchError ? (
+                  <ListPaginationBar
+                    page={page}
+                    pageSize={pageSize}
+                    totalCount={totalCount}
+                    loading={loading}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    labels={paginationLabels}
+                  />
+                ) : null}
               </section>
             </div>
           </main>

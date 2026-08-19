@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
 import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api"
 import {
   listCompanyApplicantStatuses,
@@ -129,7 +130,11 @@ export async function fetchVacancyResultadosPayload(
   const vacancyData = await apiClient.get(
     `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}`
   )
-  const vacancyRecord = normalizeVacancyDetailFromApi(vacancyData)
+  const vacancyWithApplicants = await overlayVacancyApplicants(
+    vacancyId,
+    vacancyData
+  )
+  const vacancyRecord = normalizeVacancyDetailFromApi(vacancyWithApplicants)
   const directCompanyId = vacancyRecord?.companyId ?? vacancyRecord?.company_id
   if (directCompanyId != null && String(directCompanyId).trim() !== "") {
     persistVacancyCompanyId(vacancyId, String(directCompanyId).trim())
@@ -146,9 +151,9 @@ export async function fetchVacancyResultadosPayload(
   const kanbanStageNames = kanbanStageNamesFromApiStages(
     stageRows.map((s) => ({ name: s.name, order: s.order }))
   )
-  const applicants = applicantsFromVacancyPayload(vacancyData)
-  const title = titleFromVacancyPayload(vacancyData)
-  const meta = vacancyMetaFromPayload(vacancyData)
+  const applicants = applicantsFromVacancyPayload(vacancyWithApplicants)
+  const title = titleFromVacancyPayload(vacancyWithApplicants)
+  const meta = vacancyMetaFromPayload(vacancyWithApplicants)
   const orderedStageNames = resolveOrderedStageNames(kanbanStageNames, applicants)
 
   const byStage = buildStageCounts(applicants, orderedStageNames)

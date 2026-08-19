@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
 import {
   parseVacancyInterviewPrepPayload,
   type VacancyInterviewPrepParseResult,
@@ -46,7 +47,8 @@ export function useVacancyInterviewPrep(
       const raw = await apiClient.get(
         `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}`
       )
-      setData(parseVacancyInterviewPrepPayload(raw))
+      const withApplicants = await overlayVacancyApplicants(vacancyId, raw)
+      setData(parseVacancyInterviewPrepPayload(withApplicants))
     } catch (err: unknown) {
       setData(null)
       setError(
