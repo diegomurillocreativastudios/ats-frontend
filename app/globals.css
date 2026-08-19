@@ -312,6 +312,8 @@
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-brand: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
   --font-display: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
+
+  --animate-apply-shimmer: apply-shimmer 1.45s ease-in-out infinite;
 }
 
 body {
@@ -668,6 +670,18 @@ h6 {
   .animate-slide-up {
     animation: glass-slide-up 0.55s cubic-bezier(0.2, 0.8, 0.18, 1) both;
   }
+  .animate-apply-shimmer {
+    animation: apply-shimmer 1.45s ease-in-out infinite;
+  }
+}
+
+@keyframes apply-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
 }
 
 @keyframes glass-fade-in {
@@ -705,7 +719,8 @@ h6 {
 @media (prefers-reduced-motion: reduce) {
   .glass-card-hover,
   .animate-fade-in,
-  .animate-slide-up {
+  .animate-slide-up,
+  .animate-apply-shimmer {
     transition: none !important;
     animation: none !important;
   }

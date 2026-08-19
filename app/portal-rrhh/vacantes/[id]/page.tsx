@@ -60,10 +60,8 @@ import {
   AiDisclosurePillProgress,
   AiKpiCard,
 } from "@/components/rrhh/AiDisclosure"
-import {
-  getVacancyPreliminaryMatchTypicalMsForDocCount,
-  VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS,
-} from "@/lib/apply-loading-bar"
+import { VacancyAiSearchLoadingState } from "@/components/rrhh/vacancy-ai-search-loading-state"
+import { getVacancyPreliminaryMatchTypicalMsForDocCount } from "@/lib/apply-loading-bar"
 import {
   FALLBACK_KANBAN_STAGES,
   getCandidateId,
@@ -2588,10 +2586,11 @@ export default function VacanteDetallePage() {
                         disabled={loadingSmart || isVacancyReadOnly}
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple/50 bg-vo-purple/10 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/15 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label={tMatching("aria.preliminarySearch")}
+                        aria-busy={loadingSmart}
                         title={vacancyReadOnlyTitle}
                       >
                         {loadingSmart ? (
-                          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                          <Loader2 className="h-4 w-4 shrink-0 motion-safe:animate-spin" aria-hidden />
                         ) : (
                           <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                         )}
@@ -2665,22 +2664,7 @@ export default function VacanteDetallePage() {
                         aria-label={tMatching("aria.searchResults")}
                       >
                         {loadingSmart && smartCandidates === null ? (
-                          <div className="flex flex-col items-center justify-center gap-4 py-10 text-center">
-                            <div className="w-full max-w-md px-1">
-                              <AiDisclosurePillProgress
-                                percent={null}
-                                timeBasedTypicalMs={VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS}
-                                className="mt-0!"
-                                aria-label={tMatching("aria.searchProgress")}
-                              />
-                            </div>
-                            <p
-                              className="font-sans text-sm text-muted-foreground"
-                              aria-live="polite"
-                            >
-                              {tMatching("updatingSearchEllipsis")}
-                            </p>
-                          </div>
+                          <VacancyAiSearchLoadingState />
                         ) : smartCandidates === null ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Sparkles className="h-12 w-12 text-muted-foreground" aria-hidden />
@@ -3424,10 +3408,11 @@ export default function VacanteDetallePage() {
                       disabled={loadingSmart || isVacancyReadOnly}
                       className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple/50 bg-vo-purple/10 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/15 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label={tMatching("aria.preliminarySearch")}
+                      aria-busy={loadingSmart}
                       title={vacancyReadOnlyTitle}
                     >
                       {loadingSmart ? (
-                        <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                        <Loader2 className="h-4 w-4 shrink-0 motion-safe:animate-spin" aria-hidden />
                       ) : (
                         <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                       )}
@@ -3505,22 +3490,7 @@ export default function VacanteDetallePage() {
                       aria-label={tMatching("aria.searchResults")}
                     >
                       {loadingSmart && smartCandidates === null ? (
-                        <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
-                          <div className="w-full max-w-md px-1">
-                            <AiDisclosurePillProgress
-                              percent={null}
-                              timeBasedTypicalMs={VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS}
-                              className="mt-0!"
-                              aria-label="Progreso de la búsqueda preliminar con IA"
-                            />
-                          </div>
-                          <p
-                            className="font-sans text-sm text-muted-foreground"
-                            aria-live="polite"
-                          >
-                            {tMatching("updatingSearchEllipsis")}
-                          </p>
-                        </div>
+                        <VacancyAiSearchLoadingState compact />
                       ) : smartCandidates === null ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Sparkles className="h-10 w-10 text-muted-foreground" aria-hidden />

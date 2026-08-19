@@ -29,20 +29,21 @@ export function ApplyStyleProgressBar({
 }: ApplyStyleProgressBarProps) {
   const isGradientTheme = theme === "dark" || theme === "onLight"
   const isSuccess = mode === "success"
-  const pct = isSuccess ? 100 : Math.max(2, percent)
+  const pct = isSuccess ? 100 : Math.max(18, percent)
 
-  const trackClass =
-    theme === "dark"
-      ? "bg-muted/50"
-      : theme === "onLight"
-        ? "bg-ats-grafito/10"
-        : "bg-muted"
+  const trackClass = theme === "dark" ? "bg-muted/50" : "bg-muted"
 
   return (
     <div
-      className={`relative overflow-hidden rounded-full ${trackClass} ${className}`.trim()}
+      className={`relative h-2.5 overflow-hidden rounded-full ${trackClass} ${className}`.trim()}
       aria-hidden
     >
+      {!isSuccess ? (
+        <span
+          className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-[linear-gradient(90deg,transparent,rgba(110,185,64,0.45),transparent)] motion-safe:animate-apply-shimmer"
+          aria-hidden
+        />
+      ) : null}
       <div
         className={
           isGradientTheme
@@ -58,7 +59,7 @@ export function ApplyStyleProgressBar({
       >
         {!isSuccess ? (
           <span
-            className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.38),transparent)] animate-apply-shimmer"
+            className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.38),transparent)] motion-safe:animate-apply-shimmer"
             aria-hidden
           />
         ) : null}
