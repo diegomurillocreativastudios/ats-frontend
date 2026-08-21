@@ -52,6 +52,8 @@ export function unwrapListArray(data: unknown): unknown[] {
       record.templates ??
       record.applications ??
       record.applicants ??
+      record.stages ??
+      record.statuses ??
       record.data ??
       record.results ??
       record.Items ??
@@ -59,7 +61,9 @@ export function unwrapListArray(data: unknown): unknown[] {
       record.Vacancies ??
       record.Templates ??
       record.Applications ??
-      record.Applicants
+      record.Applicants ??
+      record.Stages ??
+      record.Statuses
     if (Array.isArray(nested)) return nested
   }
   return []

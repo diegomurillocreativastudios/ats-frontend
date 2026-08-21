@@ -17,6 +17,7 @@ import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api";
+import { unwrapListArray } from "@/lib/api/query-paging";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { buildRecruiterStagePutPayload } from "@/lib/recruiterStagePayload";
 import "react-nestable/dist/styles/index.css";
@@ -363,7 +364,7 @@ export default function EtapasPage() {
       const data = await apiClient.get(
         `/api/recruiter/companies/${COMPANY_ID}/stages`
       );
-      const list = Array.isArray(data) ? data : data?.stages ?? data?.items ?? data?.data ?? [];
+      const list = unwrapListArray(data);
       const mapped = list.map((item, i) => mapStageFromApi(item, i));
       setStages([...mapped].sort(sortStagesStable));
     } catch (err) {
@@ -389,7 +390,7 @@ export default function EtapasPage() {
         const data = await apiClient.get(
           `/api/recruiter/companies/${COMPANY_ID}/stages`
         );
-        const list = Array.isArray(data) ? data : data?.stages ?? data?.items ?? data?.data ?? [];
+        const list = unwrapListArray(data);
         const mappedStages = list.map((item, i) => mapStageFromApi(item, i));
         
         const createdId = String(createdStage?.id ?? createdStage?.uuid ?? "");
@@ -635,7 +636,7 @@ export default function EtapasPage() {
         const data = await apiClient.get(
           `/api/recruiter/companies/${COMPANY_ID}/stages`
         );
-        const list = Array.isArray(data) ? data : data?.stages ?? data?.items ?? data?.data ?? [];
+        const list = unwrapListArray(data);
         const mappedStages = list.map((item, i) => mapStageFromApi(item, i));
         
         // Sort by current order and reassign sequential order

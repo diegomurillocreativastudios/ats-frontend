@@ -44,6 +44,8 @@ describe("query paging helpers", () => {
     expect(unwrapListArray([{ id: 1 }])).toEqual([{ id: 1 }])
     expect(unwrapListArray({ candidates: [{ id: 2 }] })).toEqual([{ id: 2 }])
     expect(unwrapListArray({ vacancies: [{ id: 3 }] })).toEqual([{ id: 3 }])
+    expect(unwrapListArray({ stages: [{ id: 4 }] })).toEqual([{ id: 4 }])
+    expect(unwrapListArray({ statuses: [{ id: 5 }] })).toEqual([{ id: 5 }])
     expect(unwrapListArray(null)).toEqual([])
   })
 

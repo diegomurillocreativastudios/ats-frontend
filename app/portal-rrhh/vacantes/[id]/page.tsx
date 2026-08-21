@@ -43,6 +43,7 @@ import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
 import {
   QUERY_SEARCH_CANDIDATES_LIMIT,
   clampSearchLimit,
+  unwrapListArray,
 } from "@/lib/api/query-paging"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
@@ -1320,8 +1321,10 @@ export default function VacanteDetallePage() {
           `/api/recruiter/vacancies/${vacancyId}`,
           payload
         );
-        const updatedRecord =
-          updated && typeof updated === "object" && !Array.isArray(updated) ? updated : {};
+        const updatedRecord: Record<string, unknown> =
+          updated && typeof updated === "object" && !Array.isArray(updated)
+            ? (updated as Record<string, unknown>)
+            : {};
 
         const selectedDepartment = mergedDepartmentOptions.find(
           (option) => option.id === editVacancyDepartmentId
@@ -1331,18 +1334,12 @@ export default function VacanteDetallePage() {
         );
 
         const nextDepartmentSummary =
-          updatedRecord.vacancyDepartment ??
-          updatedRecord.vacancy_department ??
-          updatedRecord.department ??
+          getVacancyDepartmentSummary(updatedRecord) ??
           createCatalogSummary(selectedDepartment) ??
           null;
 
         const nextModalitySummary =
-          updatedRecord.vacancyModality ??
-          updatedRecord.vacancy_modality ??
-          updatedRecord.modality ??
-          updatedRecord.workArrangement ??
-          updatedRecord.work_arrangement ??
+          getVacancyModalitySummary(updatedRecord) ??
           createCatalogSummary(selectedModality) ??
           null;
 
@@ -1371,26 +1368,14 @@ export default function VacanteDetallePage() {
           vacancy_department_id: editVacancyDepartmentId || null,
           vacancyDepartment: nextDepartmentSummary,
           vacancy_department: nextDepartmentSummary,
-          department:
-            nextDepartmentSummary && typeof nextDepartmentSummary === "object"
-              ? nextDepartmentSummary.displayName
-              : nextDepartmentSummary,
+          department: nextDepartmentSummary?.displayName ?? null,
           vacancyModalityId: editVacancyModalityId || null,
           vacancy_modality_id: editVacancyModalityId || null,
           vacancyModality: nextModalitySummary,
           vacancy_modality: nextModalitySummary,
-          modality:
-            nextModalitySummary && typeof nextModalitySummary === "object"
-              ? nextModalitySummary.displayName
-              : nextModalitySummary,
-          workArrangement:
-            nextModalitySummary && typeof nextModalitySummary === "object"
-              ? nextModalitySummary.displayName
-              : nextModalitySummary,
-          work_arrangement:
-            nextModalitySummary && typeof nextModalitySummary === "object"
-              ? nextModalitySummary.displayName
-              : nextModalitySummary,
+          modality: nextModalitySummary?.displayName ?? null,
+          workArrangement: nextModalitySummary?.displayName ?? null,
+          work_arrangement: nextModalitySummary?.displayName ?? null,
         }));
 
         if (companyChanged) {
@@ -1564,7 +1549,7 @@ export default function VacanteDetallePage() {
       try {
         const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=${clampSearchLimit(QUERY_SEARCH_CANDIDATES_LIMIT)}&minScore=0.7`;
         const data = await apiClient.post(url, {});
-        const list = Array.isArray(data) ? data : data?.candidates ?? data?.results ?? [];
+        const list = unwrapListArray(data);
         setSmartCandidates(list);
 
         if (!options?.silent) {
