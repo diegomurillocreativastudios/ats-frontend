@@ -1850,6 +1850,12 @@
           "salary": "Retribuzione",
           "advantages": "Vantaggi e benefit della posizione"
         },
+        "detailsItemCount": "{count, plural, one {# criterio} other {# criteri}}",
+        "salaryDisplay": {
+          "monthly": "Mensile",
+          "hourly": "Oraria",
+          "yearly": "Annuale"
+        },
         "requirementsList": {
           "skill": "Competenza",
           "expectedLevel": "Livello atteso",

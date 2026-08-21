@@ -42,16 +42,13 @@ export function VacancyDelimitedText({ value, variant }: VacancyDelimitedTextPro
   }
 
   return (
-    <ul className="flex flex-col gap-2" role="list">
+    <ul className="list-outside list-disc space-y-2 pl-5 marker:text-vo-purple">
       {items.map((item, index) => (
-        <li key={`${item}-${index}`} className="flex items-start gap-2.5">
-          <span
-            className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-vo-purple"
-            aria-hidden
-          />
-          <span className="font-sans text-sm leading-relaxed text-muted-foreground">
-            {item}
-          </span>
+        <li
+          key={`${item}-${index}`}
+          className="ps-1 font-sans text-sm leading-relaxed text-muted-foreground"
+        >
+          {item}
         </li>
       ))}
     </ul>

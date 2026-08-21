@@ -27,6 +27,20 @@ describe("normalizeVacancyDetailFromApi", () => {
     expect((normalized?.applicants as { name: string }[])[0]?.name).toBe("María")
   })
 
+  it("maps perks and benefits aliases onto advantages", () => {
+    const fromPerks = normalizeVacancyDetailFromApi({
+      id: "v3",
+      perks: "Seguro médico y bono anual",
+    })
+    expect(fromPerks?.advantages).toBe("Seguro médico y bono anual")
+
+    const fromBenefitsText = normalizeVacancyDetailFromApi({
+      id: "v4",
+      benefitsText: "Home office",
+    })
+    expect(fromBenefitsText?.advantages).toBe("Home office")
+  })
+
   it("keeps camelCase applicants from flat payload", () => {
     const normalized = normalizeVacancyDetailFromApi({
       id: "v2",

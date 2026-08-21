@@ -1850,6 +1850,12 @@
           "salary": "Salaire",
           "advantages": "Avantages et bénéfices du poste"
         },
+        "detailsItemCount": "{count, plural, one {# critère} other {# critères}}",
+        "salaryDisplay": {
+          "monthly": "Mensuel",
+          "hourly": "Horaire",
+          "yearly": "Annuel"
+        },
         "requirementsList": {
           "skill": "Compétence",
           "expectedLevel": "Niveau attendu",

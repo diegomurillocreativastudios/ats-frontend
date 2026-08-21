@@ -1918,6 +1918,12 @@
           "salary": "Salario",
           "advantages": "Ventajas y beneficios de la vacante"
         },
+        "detailsItemCount": "{count, plural, one {# criterio} other {# criterios}}",
+        "salaryDisplay": {
+          "monthly": "Mensual",
+          "hourly": "Por hora",
+          "yearly": "Anual"
+        },
         "requirementsList": {
           "skill": "Habilidad",
           "expectedLevel": "Nivel esperado",

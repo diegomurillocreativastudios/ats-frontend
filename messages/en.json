@@ -1918,6 +1918,12 @@
           "salary": "Salary",
           "advantages": "Vacancy benefits and perks"
         },
+        "detailsItemCount": "{count, plural, one {# item} other {# items}}",
+        "salaryDisplay": {
+          "monthly": "Monthly",
+          "hourly": "Hourly",
+          "yearly": "Yearly"
+        },
         "requirementsList": {
           "skill": "Skill",
           "expectedLevel": "Expected level",

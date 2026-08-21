@@ -1850,6 +1850,12 @@
           "salary": "Gehalt",
           "advantages": "Vorteile und Benefits der Stelle"
         },
+        "detailsItemCount": "{count, plural, one {# Kriterium} other {# Kriterien}}",
+        "salaryDisplay": {
+          "monthly": "Monatlich",
+          "hourly": "Stündlich",
+          "yearly": "Jährlich"
+        },
         "requirementsList": {
           "skill": "Fähigkeit",
           "expectedLevel": "Erwartetes Niveau",

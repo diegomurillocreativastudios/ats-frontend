@@ -9,10 +9,8 @@ import {
   ArrowRight,
   Briefcase,
   CheckSquare,
-  DollarSign,
   FileText,
   Gift,
-  Info,
   Loader2,
   Mail,
   Plus,
@@ -56,6 +54,8 @@ import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confir
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
 import { RequirementsDisplay } from "@/components/rrhh/requirements-display"
 import { VacancyDelimitedText } from "@/components/rrhh/vacancy-delimited-text"
+import { VacancyDetailsCard } from "@/components/rrhh/vacancy-details-readout"
+import { VacancySalaryCard } from "@/components/rrhh/vacancy-salary-card"
 import { VacancyReadOnlyIdentity } from "@/components/rrhh/vacancy-read-only-identity"
 import { CandidateProfileModal } from "@/components/rrhh/candidate-profile-modal"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
@@ -283,44 +283,27 @@ const createEmptyRequirement = () => ({
   scale: 5,
 });
 
-/** Parses lines like "Clave: Valor" into structured pairs. Returns null if any line lacks the pattern. */
-const parseKeyValueLines = (text) => {
-  if (!text || typeof text !== "string") return null;
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length === 0) return null;
-  const pairs = [];
-  for (const line of lines) {
-    const colonIndex = line.indexOf(":");
-    if (colonIndex <= 0 || colonIndex >= line.length - 1) return null;
-    const key = line.slice(0, colonIndex).trim();
-    const value = line.slice(colonIndex + 1).trim();
-    if (!key || !value) return null;
-    pairs.push({ key, value });
-  }
-  return pairs;
-};
+const vacancyInfoCardClass =
+  "flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm";
+const vacancyInfoCardBodyClass =
+  "min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1";
 
-const VacancyDetailsReadout = ({ value }) => {
-  const text = String(value ?? "").trim();
-  if (!text) return null;
-  const pairs = parseKeyValueLines(text);
-  if (pairs && pairs.length > 0) {
-    return (
-      <dl className="flex flex-col gap-2">
-        {pairs.map(({ key, value: pairValue }) => (
-          <div key={`${key}-${pairValue}`} className="flex flex-col gap-0.5">
-            <dt className="font-sans text-xs font-medium text-muted-foreground">{key}</dt>
-            <dd className="font-sans text-sm text-foreground">{pairValue}</dd>
-          </div>
-        ))}
-      </dl>
-    );
+function vacancyHasRequirements(value: unknown): boolean {
+  if (value == null) return false
+  if (typeof value === "string") return value.trim() !== ""
+  if (Array.isArray(value)) {
+    return value.some((item) => item != null && String(item).trim() !== "")
   }
-  return <VacancyDelimitedText value={text} variant="chips" />;
-};
+  if (typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>).some(
+      ([key, entryValue]) =>
+        !String(key).startsWith("additionalProp") &&
+        entryValue != null &&
+        String(entryValue).trim() !== ""
+    )
+  }
+  return false
+}
 
 const MatchCard = ({
   match,
@@ -1999,6 +1982,19 @@ export default function VacanteDetallePage() {
     [breadcrumbLabel, t]
   );
 
+  const showVacancyInfo = Boolean(vacancy)
+  const showTopRow = showVacancyInfo
+  const showNarrativeRow = showVacancyInfo
+  const showSalaryBlock = showVacancyInfo
+  const showRequirementsBlock = showVacancyInfo
+  const showDescriptionBlock = showVacancyInfo
+  const showDetailsBlock = showVacancyInfo
+  const showAdvantagesBlock = showVacancyInfo
+  const topRowGridClass = " grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+  const narrativeGridClass = " grid-cols-1 lg:grid-cols-3"
+  const mobileTopRowGridClass = " sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+  const mobileNarrativeGridClass = " sm:grid-cols-3"
+
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
       {/* Desktop: sidebar + main — fixed height so only main scrolls */}
@@ -2317,113 +2313,21 @@ export default function VacanteDetallePage() {
                         {saveVacancyError}
                       </p>
                     )}
-                    {(vacancy.description || vacancy.requirements || vacancy.details || vacancy.salary || vacancy.advantages || isEditing) && (
+                    {showVacancyInfo && (
                       <div className="mt-6 flex flex-col gap-4 border-t border-border pt-6">
-                        {(vacancy.description || vacancy.salary || vacancy.details || isEditing) && (
-                        <div
-                          className={`grid items-start gap-4${
-                            (vacancy.description || isEditing) &&
-                            (vacancy.salary || vacancy.details || isEditing)
-                              ? " lg:grid-cols-[minmax(0,1.5fr)_minmax(16rem,22rem)]"
-                              : ""
-                          }`}
-                        >
-                        {(vacancy.description || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                            <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ats-arena/80 text-gray-700">
-                                <FileText className="h-4 w-4" aria-hidden />
-                              </span>
-                              {tDetail("sections.description")}
-                            </h2>
-                            {isEditing ? (
-                              <div className="flex flex-col gap-2">
-                                <textarea
-                                  value={editDescription}
-                                  onChange={(e) => setEditDescription(e.target.value)}
-                                  rows={5}
-                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
-                                  aria-label={t("form.fields.description.label")}
-                                  aria-invalid={!!editErrors.description}
-                                  aria-describedby={editErrors.description ? "edit-description-error-desktop" : undefined}
-                                  placeholder={t("form.fields.description.placeholder")}
-                                />
-                                {editErrors.description && (
-                                  <p id="edit-description-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
-                                    {editErrors.description}
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                {safeString(vacancy.description)}
-                              </p>
-                            )}
-                          </div>
+                        {showTopRow && (
+                        <div className={`grid items-stretch gap-4${topRowGridClass}`}>
+                        {showSalaryBlock && (
+                          <VacancySalaryCard
+                            isEditing={isEditing}
+                            salary={vacancy.salary}
+                            editValue={editSalary}
+                            onEditChange={setEditSalary}
+                          />
                         )}
-                        {(vacancy.salary || vacancy.details || isEditing) && (
-                          <div className="flex flex-col gap-4">
-                            {(vacancy.salary || isEditing) && (
-                              <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/50 p-5 shadow-sm">
-                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
-                                    <DollarSign className="h-4 w-4" aria-hidden />
-                                  </span>
-                                  {tDetail("sections.salary")}
-                                </h2>
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editSalary}
-                                    onChange={(e) => setEditSalary(e.target.value)}
-                                    placeholder={t("form.fields.salary.placeholder")}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label={t("form.fields.salary.ariaLabel")}
-                                  />
-                                ) : vacancy.salary ? (
-                                  <p className="font-sans text-lg font-semibold text-foreground">
-                                    {safeString(vacancy.salary)}
-                                  </p>
-                                ) : (
-                                  <p className="font-sans text-sm italic text-gray-600">
-                                    {tDetail("fallbacks.unspecified")}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                            {(vacancy.details || isEditing) && (
-                              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
-                                    <Info className="h-4 w-4" aria-hidden />
-                                  </span>
-                                  {tDetail("sections.details")}
-                                </h2>
-                                {isEditing ? (
-                                  <textarea
-                                    value={editDetails}
-                                    onChange={(e) => setEditDetails(e.target.value)}
-                                    rows={4}
-                                    placeholder={t("form.fields.details.placeholder")}
-                                    className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                    aria-label={t("form.fields.details.label")}
-                                  />
-                                ) : vacancy.details ? (
-                                  <VacancyDetailsReadout value={vacancy.details} />
-                                ) : (
-                                  <p className="font-sans text-sm italic text-gray-600">
-                                    {tDetail("fallbacks.unspecified")}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        </div>
-                        )}
-                        {(vacancy.requirements || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                        {showRequirementsBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-96 p-5`}>
+                            <div className="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
                               <h2 className="flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
                                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-purple/15 text-vo-purple">
                                   <CheckSquare className="h-4 w-4" aria-hidden />
@@ -2443,8 +2347,8 @@ export default function VacanteDetallePage() {
                               )}
                             </div>
                             {isEditing ? (
-                              <div className="flex flex-col gap-3">
-                                <div className="flex flex-col gap-3 max-h-[320px] overflow-y-auto pr-1">
+                              <div className={`${vacancyInfoCardBodyClass} flex flex-col gap-3`}>
+                                <div className="flex flex-col gap-3">
                                   {editRequirements.map((req, index) => (
                                     <div
                                       key={req.id}
@@ -2529,17 +2433,75 @@ export default function VacanteDetallePage() {
                                 </p>
                               </div>
                             ) : (
-                              <RequirementsDisplay
-                                value={vacancy.requirements}
-                                attributeWeights={vacancy.weights?.attributes}
-                              />
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                {vacancyHasRequirements(vacancy.requirements) ? (
+                                  <RequirementsDisplay
+                                    value={vacancy.requirements}
+                                    attributeWeights={vacancy.weights?.attributes}
+                                  />
+                                ) : (
+                                  <p className="font-sans text-sm italic text-gray-600">
+                                    {tDetail("fallbacks.unspecified")}
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
-
-                        {(vacancy.advantages || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                            <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                        </div>
+                        )}
+                        {showNarrativeRow && (
+                        <div className={`grid items-stretch gap-4${narrativeGridClass}`}>
+                        {showDescriptionBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-96 p-5`}>
+                            <h2 className="mb-3 flex shrink-0 items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ats-arena/80 text-gray-700">
+                                <FileText className="h-4 w-4" aria-hidden />
+                              </span>
+                              {tDetail("sections.description")}
+                            </h2>
+                            {isEditing ? (
+                              <div className={`${vacancyInfoCardBodyClass} flex flex-col gap-2`}>
+                                <textarea
+                                  value={editDescription}
+                                  onChange={(e) => setEditDescription(e.target.value)}
+                                  rows={5}
+                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
+                                  aria-label={t("form.fields.description.label")}
+                                  aria-invalid={!!editErrors.description}
+                                  aria-describedby={editErrors.description ? "edit-description-error-desktop" : undefined}
+                                  placeholder={t("form.fields.description.placeholder")}
+                                />
+                                {editErrors.description && (
+                                  <p id="edit-description-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
+                                    {editErrors.description}
+                                  </p>
+                                )}
+                              </div>
+                            ) : vacancy.description ? (
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                                  {safeString(vacancy.description)}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="font-sans text-sm italic text-gray-600">
+                                {tDetail("fallbacks.unspecified")}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {showDetailsBlock && (
+                          <VacancyDetailsCard
+                            isEditing={isEditing}
+                            details={vacancy.details}
+                            editValue={editDetails}
+                            onEditChange={setEditDetails}
+                          />
+                        )}
+                        {showAdvantagesBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-96 p-5`}>
+                            <h2 className="mb-3 flex shrink-0 items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
                               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-pink/10 text-vo-pink">
                                 <Gift className="h-4 w-4" aria-hidden />
                               </span>
@@ -2551,17 +2513,21 @@ export default function VacanteDetallePage() {
                                 onChange={(e) => setEditAdvantages(e.target.value)}
                                 rows={4}
                                 placeholder={t("form.fields.advantages.placeholder")}
-                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                className="min-h-0 w-full flex-1 resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={t("form.fields.advantages.label")}
                               />
                             ) : vacancy.advantages ? (
-                              <VacancyDelimitedText value={vacancy.advantages} variant="list" />
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                <VacancyDelimitedText value={vacancy.advantages} variant="list" />
+                              </div>
                             ) : (
                               <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
+                        )}
+                        </div>
                         )}
                       </div>
                     )}
@@ -3152,98 +3118,22 @@ export default function VacanteDetallePage() {
                         {saveVacancyError}
                       </p>
                     )}
-                    {(vacancy.description || vacancy.requirements || vacancy.details || vacancy.salary || vacancy.advantages || isEditing) && (
+                    {showVacancyInfo && (
                       <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
-                        {(vacancy.description || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ats-arena/80 text-gray-700">
-                                <FileText className="h-3.5 w-3.5" aria-hidden />
-                              </span>
-                              {tDetail("sections.description")}
-                            </h2>
-                            {isEditing ? (
-                              <div className="flex flex-col gap-2">
-                                <textarea
-                                  value={editDescription}
-                                  onChange={(e) => setEditDescription(e.target.value)}
-                                  rows={5}
-                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
-                                  aria-label={t("form.fields.description.label")}
-                                  aria-invalid={!!editErrors.description}
-                                  aria-describedby={editErrors.description ? "edit-description-error-mobile" : undefined}
-                                  placeholder={t("form.fields.description.placeholder")}
-                                />
-                                {editErrors.description && (
-                                  <p id="edit-description-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
-                                    {editErrors.description}
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                {safeString(vacancy.description)}
-                              </p>
-                            )}
-                          </div>
+                        {showTopRow && (
+                        <div className={`grid items-stretch gap-3${mobileTopRowGridClass}`}>
+                        {showSalaryBlock && (
+                          <VacancySalaryCard
+                            isEditing={isEditing}
+                            salary={vacancy.salary}
+                            editValue={editSalary}
+                            onEditChange={setEditSalary}
+                            compact
+                          />
                         )}
-                        {(vacancy.salary || isEditing) && (
-                          <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/50 p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600">
-                                <DollarSign className="h-3.5 w-3.5" aria-hidden />
-                              </span>
-                              {tDetail("sections.salary")}
-                            </h2>
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                value={editSalary}
-                                onChange={(e) => setEditSalary(e.target.value)}
-                                placeholder={t("form.fields.salary.placeholder")}
-                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label={t("form.fields.salary.ariaLabel")}
-                              />
-                            ) : vacancy.salary ? (
-                              <p className="font-sans text-lg font-semibold text-foreground">
-                                {safeString(vacancy.salary)}
-                              </p>
-                            ) : (
-                              <p className="font-sans text-sm italic text-gray-600">
-                                {tDetail("fallbacks.unspecified")}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                        {(vacancy.details || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 text-amber-600">
-                                <Info className="h-3.5 w-3.5" aria-hidden />
-                              </span>
-                              {tDetail("sections.details")}
-                            </h2>
-                            {isEditing ? (
-                              <textarea
-                                value={editDetails}
-                                onChange={(e) => setEditDetails(e.target.value)}
-                                rows={4}
-                                placeholder={t("form.fields.details.placeholder")}
-                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label={t("form.fields.details.label")}
-                              />
-                            ) : vacancy.details ? (
-                              <VacancyDetailsReadout value={vacancy.details} />
-                            ) : (
-                              <p className="font-sans text-sm italic text-gray-600">
-                                {tDetail("fallbacks.unspecified")}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                        {(vacancy.requirements || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+                        {showRequirementsBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-80 p-4`}>
+                            <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-3">
                               <h2 className="flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
                                 <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-purple/15 text-vo-purple">
                                   <CheckSquare className="h-3.5 w-3.5" aria-hidden />
@@ -3263,8 +3153,8 @@ export default function VacanteDetallePage() {
                               )}
                             </div>
                             {isEditing ? (
-                              <div className="flex flex-col gap-3">
-                                <div className="flex flex-col gap-3 max-h-[320px] overflow-y-auto pr-1">
+                              <div className={`${vacancyInfoCardBodyClass} flex flex-col gap-3`}>
+                                <div className="flex flex-col gap-3">
                                   {editRequirements.map((req, index) => (
                                     <div
                                       key={req.id}
@@ -3350,17 +3240,76 @@ export default function VacanteDetallePage() {
                                 </p>
                               </div>
                             ) : (
-                              <RequirementsDisplay
-                                value={vacancy.requirements}
-                                attributeWeights={vacancy.weights?.attributes}
-                              />
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                {vacancyHasRequirements(vacancy.requirements) ? (
+                                  <RequirementsDisplay
+                                    value={vacancy.requirements}
+                                    attributeWeights={vacancy.weights?.attributes}
+                                  />
+                                ) : (
+                                  <p className="font-sans text-sm italic text-gray-600">
+                                    {tDetail("fallbacks.unspecified")}
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
-
-                        {(vacancy.advantages || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                        </div>
+                        )}
+                        {showNarrativeRow && (
+                        <div className={`grid items-stretch gap-3${mobileNarrativeGridClass}`}>
+                        {showDescriptionBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-80 p-4`}>
+                            <h2 className="mb-2 flex shrink-0 items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ats-arena/80 text-gray-700">
+                                <FileText className="h-3.5 w-3.5" aria-hidden />
+                              </span>
+                              {tDetail("sections.description")}
+                            </h2>
+                            {isEditing ? (
+                              <div className={`${vacancyInfoCardBodyClass} flex flex-col gap-2`}>
+                                <textarea
+                                  value={editDescription}
+                                  onChange={(e) => setEditDescription(e.target.value)}
+                                  rows={5}
+                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
+                                  aria-label={t("form.fields.description.label")}
+                                  aria-invalid={!!editErrors.description}
+                                  aria-describedby={editErrors.description ? "edit-description-error-mobile" : undefined}
+                                  placeholder={t("form.fields.description.placeholder")}
+                                />
+                                {editErrors.description && (
+                                  <p id="edit-description-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
+                                    {editErrors.description}
+                                  </p>
+                                )}
+                              </div>
+                            ) : vacancy.description ? (
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                                  {safeString(vacancy.description)}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="font-sans text-sm italic text-gray-600">
+                                {tDetail("fallbacks.unspecified")}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {showDetailsBlock && (
+                          <VacancyDetailsCard
+                            isEditing={isEditing}
+                            details={vacancy.details}
+                            editValue={editDetails}
+                            onEditChange={setEditDetails}
+                            compact
+                          />
+                        )}
+                        {showAdvantagesBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-80 p-4`}>
+                            <h2 className="mb-2 flex shrink-0 items-center gap-2 font-sans text-sm font-semibold text-foreground">
                               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-pink/10 text-vo-pink">
                                 <Gift className="h-3.5 w-3.5" aria-hidden />
                               </span>
@@ -3372,17 +3321,21 @@ export default function VacanteDetallePage() {
                                 onChange={(e) => setEditAdvantages(e.target.value)}
                                 rows={4}
                                 placeholder={t("form.fields.advantages.placeholder")}
-                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                className="min-h-0 w-full flex-1 resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={t("form.fields.advantages.label")}
                               />
                             ) : vacancy.advantages ? (
-                              <VacancyDelimitedText value={vacancy.advantages} variant="list" />
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                <VacancyDelimitedText value={vacancy.advantages} variant="list" />
+                              </div>
                             ) : (
                               <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
+                        )}
+                        </div>
                         )}
                       </div>
                     )}
