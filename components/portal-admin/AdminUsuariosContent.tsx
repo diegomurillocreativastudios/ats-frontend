@@ -320,8 +320,8 @@ export default function AdminUsuariosContent() {
   }
 
   return (
-    <main
-      className="flex min-h-0 flex-1 flex-col overflow-auto p-6 md:p-8"
+    <div
+      className="flex min-w-0 flex-col p-6 md:p-8"
       aria-labelledby="portal-admin-usuarios-heading"
     >
       <PortalPageHeader
@@ -885,6 +885,6 @@ export default function AdminUsuariosContent() {
         message={snackbar.message}
         variant={snackbar.variant}
       />
-    </main>
+    </div>
   )
 }

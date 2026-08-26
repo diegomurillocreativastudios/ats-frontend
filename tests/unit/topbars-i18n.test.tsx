@@ -46,7 +46,7 @@ describe("Topbars i18n (Etapa 3)", () => {
     renderWithIntl(<CandidateTopbar />, "es")
     expect(screen.getByText("Portal Candidato")).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Notificaciones" }),
+      screen.getByRole("button", { name: "Idioma" }),
     ).toBeInTheDocument()
   })
 
@@ -54,7 +54,7 @@ describe("Topbars i18n (Etapa 3)", () => {
     renderWithIntl(<CandidateTopbar />, "en")
     expect(screen.getByText("Candidate Portal")).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Notifications" }),
+      screen.getByRole("button", { name: "Language" }),
     ).toBeInTheDocument()
   })
 
@@ -67,11 +67,34 @@ describe("Topbars i18n (Etapa 3)", () => {
     expect(screen.getByText("HR Portal")).toBeInTheDocument()
   })
 
+  it("no duplica Portal RRHH cuando el trail ya lo incluye", () => {
+    renderWithIntl(
+      <RRHHTopbar
+        breadcrumbLabel="Configuración"
+        breadcrumbTrail={[
+          { label: "Portal RRHH", href: "/portal-rrhh/entrevistas" },
+          { label: "Configuración" },
+        ]}
+      />,
+      "es",
+    )
+
+    expect(screen.getAllByText("Portal RRHH")).toHaveLength(1)
+    expect(screen.getByRole("link", { name: "Portal RRHH" })).toHaveAttribute(
+      "href",
+      "/portal-rrhh/candidatos",
+    )
+    expect(screen.getByText("Configuración")).toHaveAttribute(
+      "aria-current",
+      "page",
+    )
+  })
+
   it("AdminTopbar muestra la acción de cerrar sesión traducida desde next-intl", () => {
     renderWithIntl(<AdminTopbar />, "en")
     expect(screen.getByText("Admin Portal")).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole("button", { name: "User menu" }))
+    fireEvent.click(screen.getByRole("button", { name: /User menu/ }))
     const menu = screen.getByRole("menu")
     expect(within(menu).getByText("Log out")).toBeInTheDocument()
   })

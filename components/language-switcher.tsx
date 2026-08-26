@@ -94,7 +94,7 @@ export default function LanguageSwitcher({
     triggerClassName ??
     (isOnDark
       ? defaultOnDarkTriggerClass
-      : "flex h-10 items-center gap-2 rounded-md px-2 text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2")
+      : "inline-flex h-9 items-center gap-2 rounded-lg px-2.5 font-sans text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2")
 
   return (
     <div className={`relative ${className ?? ""}`} ref={containerRef}>
@@ -107,18 +107,17 @@ export default function LanguageSwitcher({
         aria-expanded={open}
       >
         <Globe
-          className={`h-4 w-4 shrink-0 ${isOnDark ? "text-white/70" : "h-5 w-5 text-muted-foreground"}`}
+          className={`h-4.5 w-4.5 shrink-0 ${isOnDark ? "text-white/70" : "text-muted-foreground"}`}
+          strokeWidth={1.75}
           aria-hidden
         />
         <span className={isOnDark ? "hidden sm:inline" : "hidden font-sans text-sm font-medium sm:inline"}>
           {activeEndonym}
         </span>
-        {isOnDark ? (
-          <ChevronDown
-            className={`h-3.5 w-3.5 shrink-0 text-white/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-            aria-hidden
-          />
-        ) : null}
+        <ChevronDown
+          className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""} ${isOnDark ? "text-white/50" : "text-muted-foreground"}`}
+          aria-hidden
+        />
       </button>
       {open && (
         <ul

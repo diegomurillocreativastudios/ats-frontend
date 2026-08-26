@@ -308,8 +308,8 @@ export function AdminIdentityDocumentTypesContent() {
   const notUpdatedLabel = t("fallbacks.notUpdated")
 
   return (
-    <main
-      className="flex min-h-0 flex-1 flex-col overflow-auto p-6 md:p-8"
+    <div
+      className="flex min-w-0 flex-col p-6 md:p-8"
       aria-labelledby="portal-admin-identity-document-types-heading"
     >
       <PortalPageHeader
@@ -608,6 +608,6 @@ export function AdminIdentityDocumentTypesContent() {
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </main>
+    </div>
   )
 }

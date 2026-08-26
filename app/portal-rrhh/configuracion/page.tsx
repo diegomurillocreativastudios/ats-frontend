@@ -15,10 +15,7 @@ export async function generateMetadata() {
 
 export default async function RRHHConfiguracionPage() {
   const t = await getTranslations("RecruiterPortal.settings")
-  const trail = [
-    { label: t("portalCrumb"), href: "/portal-rrhh/entrevistas" },
-    { label: t("breadcrumb") },
-  ]
+  const trail = [{ label: t("breadcrumb") }]
 
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">

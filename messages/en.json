@@ -56,7 +56,6 @@
     "portalCandidate": "Candidate Portal",
     "portalRRHH": "HR Portal",
     "portalAdmin": "Admin Portal",
-    "notifications": "Notifications",
     "openMenu": "Open menu",
     "userMenu": "User menu",
     "breadcrumb": "Breadcrumb",
@@ -64,12 +63,17 @@
   },
   "Sidebar": {
     "goHome": "Go to home",
+    "goToPortalSelection": "Go to portal selection",
     "ariaCandidate": "Main navigation",
     "ariaRRHH": "HR Portal navigation",
     "ariaAdmin": "Admin Portal navigation",
     "menuCandidate": "Candidate menu",
     "menuRRHH": "HR menu",
-    "menuAdmin": "Admin menu"
+    "menuAdmin": "Admin menu",
+    "accountMenu": "Account menu",
+    "roleAdmin": "Administrator",
+    "roleRecruiter": "Recruiter",
+    "roleCandidate": "Candidate"
   },
   "Auth": {
     "login": {

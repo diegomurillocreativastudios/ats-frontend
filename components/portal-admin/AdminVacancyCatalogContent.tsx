@@ -397,8 +397,8 @@ export function AdminVacancyCatalogContent({
   const tableMinWidthClassName = "min-w-[640px]"
 
   return (
-    <main
-      className="flex min-h-0 flex-1 flex-col overflow-auto p-6 md:p-8"
+    <div
+      className="flex min-w-0 flex-col p-6 md:p-8"
       aria-labelledby={`portal-admin-${catalog}-heading`}
     >
       <PortalPageHeader
@@ -755,6 +755,6 @@ export function AdminVacancyCatalogContent({
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </main>
+    </div>
   )
 }

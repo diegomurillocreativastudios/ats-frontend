@@ -1,39 +1,28 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { isPublicPath } from "@/lib/auth/public-paths"
+import {
+  PORTAL_HOME_HREF,
+  PORTAL_SELECTION_PATH,
+  resolvePostAuthPath,
+  resolveSolePortalHref,
+} from "@/lib/portal-access"
+import { isCandidateRole, isRecruiterRole } from "@/lib/roles"
 
 const AUTH_ROUTE = "/auth/iniciar-sesion"
 const SSO_SUCCESS_PATH = "/auth/sso/success"
-const CANDIDATE_HOME = "/portal-candidato"
-const RECRUITER_HOME = "/portal-rrhh"
-const PORTAL_SELECTOR = "/seleccion-portal"
+const CANDIDATE_HOME = PORTAL_HOME_HREF.candidate
+const RECRUITER_HOME = PORTAL_HOME_HREF.rrhh
 
-function normalizeRole(rawRole: string | null): "candidate" | "recruiter" | null {
-  if (!rawRole) return null
-  const role = rawRole.trim().toLowerCase()
-
-  if (role.includes("candidate") || role.includes("candidato")) return "candidate"
-  if (
-    role.includes("recruiter") ||
-    role.includes("rrhh") ||
-    role.includes("human resources") ||
-    role.includes("human_resources")
-  ) {
-    return "recruiter"
-  }
-
-  return null
-}
-
-function getSessionRole(request: NextRequest): "candidate" | "recruiter" | null {
+function getSessionRoleRaw(request: NextRequest): string | null {
   const userCookie = request.cookies.get(AUTH_COOKIES.user)?.value
   if (!userCookie) return null
 
   try {
     const parsed = JSON.parse(userCookie) as { role?: unknown; roles?: unknown }
-    if (typeof parsed.role === "string") return normalizeRole(parsed.role)
+    if (typeof parsed.role === "string") return parsed.role
     if (Array.isArray(parsed.roles) && typeof parsed.roles[0] === "string") {
-      return normalizeRole(parsed.roles[0])
+      return parsed.roles[0]
     }
   } catch {
     return null
@@ -42,16 +31,12 @@ function getSessionRole(request: NextRequest): "candidate" | "recruiter" | null 
   return null
 }
 
-function getRoleHomePath(role: "candidate" | "recruiter" | null): string {
-  if (role === "candidate") return CANDIDATE_HOME
-  if (role === "recruiter") return RECRUITER_HOME
-  return PORTAL_SELECTOR
-}
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const hasToken = Boolean(request.cookies.get(AUTH_COOKIES.access)?.value)
-  const role = getSessionRole(request)
+  const rawRole = getSessionRoleRaw(request)
+  const isCandidate = isCandidateRole(rawRole)
+  const isRecruiter = isRecruiterRole(rawRole)
 
   if (pathname === "/iniciar-sesion" || pathname === "/login") {
     const dest = new URL("/auth/iniciar-sesion", request.url)
@@ -97,20 +82,26 @@ export function proxy(request: NextRequest) {
    * y nunca ve el formulario de nueva contraseña).
    */
   if (hasToken && isAuthPage) {
-    const dest = getRoleHomePath(role)
-    return NextResponse.redirect(new URL(dest, request.url))
+    return NextResponse.redirect(
+      new URL(resolvePostAuthPath(rawRole), request.url),
+    )
   }
 
   if (pathname === "/" && hasToken) {
-    const dest = getRoleHomePath(role)
-    return NextResponse.redirect(new URL(dest, request.url))
+    return NextResponse.redirect(
+      new URL(resolvePostAuthPath(rawRole), request.url),
+    )
   }
 
-  if (pathname === PORTAL_SELECTOR && hasToken && role) {
-    const url = request.nextUrl.clone()
-    url.pathname = getRoleHomePath(role)
-    url.search = ""
-    return NextResponse.redirect(url)
+  if (pathname === PORTAL_SELECTION_PATH && hasToken) {
+    const solePortalHref = resolveSolePortalHref(rawRole)
+    if (solePortalHref) {
+      const url = request.nextUrl.clone()
+      url.pathname = solePortalHref
+      url.search = ""
+      return NextResponse.redirect(url)
+    }
+    return NextResponse.next()
   }
 
   if (isPublicPath(pathname)) {
@@ -129,14 +120,14 @@ export function proxy(request: NextRequest) {
     pathname === CANDIDATE_HOME || pathname.startsWith(`${CANDIDATE_HOME}/`)
   const isPortalRecruiterRoute =
     pathname === RECRUITER_HOME || pathname.startsWith(`${RECRUITER_HOME}/`)
-  if (isPortalCandidateRoute && role === "recruiter") {
+  if (isPortalCandidateRoute && isRecruiter) {
     const url = request.nextUrl.clone()
     url.pathname = RECRUITER_HOME
     url.search = ""
     return NextResponse.redirect(url)
   }
 
-  if (isPortalRecruiterRoute && role === "candidate") {
+  if (isPortalRecruiterRoute && isCandidate) {
     const url = request.nextUrl.clone()
     url.pathname = CANDIDATE_HOME
     url.search = ""

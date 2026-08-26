@@ -282,9 +282,8 @@ export default function PlantillasPage() {
   };
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background font-sans text-foreground">
-      <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-        <div className="min-w-0 flex flex-col">
+    <>
+      <div className="min-w-0 flex flex-col">
               <section className="px-8 py-6" aria-label={t("page.headerAria")}>
                 <PortalPageHeader
                   title={t("page.title")}
@@ -379,10 +378,7 @@ export default function PlantillasPage() {
                   />
                 ) : null}
               </section>
-            </div>
-          </main>
-
-
+      </div>
 
       <PlantillaModal
         isOpen={isModalOpen}
@@ -415,6 +411,6 @@ export default function PlantillasPage() {
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </div>
+    </>
   );
 }

@@ -56,7 +56,6 @@
     "portalCandidate": "Portal Candidato",
     "portalRRHH": "Portal RRHH",
     "portalAdmin": "Portal Admin",
-    "notifications": "Notificaciones",
     "openMenu": "Abrir menú",
     "userMenu": "Menú de usuario",
     "breadcrumb": "Migas de pan",
@@ -64,12 +63,17 @@
   },
   "Sidebar": {
     "goHome": "Ir al inicio",
+    "goToPortalSelection": "Ir a selección de portal",
     "ariaCandidate": "Navegación principal",
     "ariaRRHH": "Navegación Portal RRHH",
     "ariaAdmin": "Navegación Portal administración",
     "menuCandidate": "Menú candidato",
     "menuRRHH": "Menú RRHH",
-    "menuAdmin": "Menú administración"
+    "menuAdmin": "Menú administración",
+    "accountMenu": "Menú de cuenta",
+    "roleAdmin": "Administrador",
+    "roleRecruiter": "Reclutador",
+    "roleCandidate": "Candidato"
   },
   "Auth": {
     "login": {
@@ -1699,9 +1703,9 @@
       }
     },
     "settings": {
-      "breadcrumb": "Configuracion",
+      "breadcrumb": "Configuración",
       "portalCrumb": "Portal RRHH",
-      "title": "Configuracion",
+      "title": "Configuración",
       "description": "Centraliza aquí las configuraciones funcionales del portal RRHH.",
       "googleCalendar": {
         "title": "Calendario Google",

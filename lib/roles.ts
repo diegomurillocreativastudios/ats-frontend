@@ -23,6 +23,15 @@ export function isRecruiterRole(role: string | null | undefined): boolean {
   )
 }
 
+/**
+ * True if session role is candidate (portal candidato).
+ */
+export function isCandidateRole(role: string | null | undefined): boolean {
+  if (role == null) return false
+  const s = String(role).trim().toLowerCase()
+  return s.includes("candidate") || s.includes("candidato")
+}
+
 interface StaffCvUploadOptions {
   variant?: "recruiter" | "self"
   role?: string | null

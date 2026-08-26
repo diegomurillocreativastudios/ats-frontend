@@ -759,9 +759,8 @@ export default function EtapasPage() {
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background font-sans text-foreground">
-      <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-        <div className="min-w-0 flex flex-col">
+    <>
+      <div className="min-w-0 flex flex-col">
               <section className="px-8 py-6" aria-label={tStages("page.headerAria")}>
                 <PortalPageHeader
                   title={tStages("page.title")}
@@ -860,10 +859,7 @@ export default function EtapasPage() {
                   )}
                 </div>
               </section>
-            </div>
-          </main>
-
-
+      </div>
 
       <EtapaModal
         isOpen={isModalOpen}
@@ -906,6 +902,6 @@ export default function EtapasPage() {
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </div>
+    </>
   );
 }

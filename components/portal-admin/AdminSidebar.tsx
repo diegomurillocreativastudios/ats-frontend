@@ -1,7 +1,5 @@
 "use client"
 
-import Link from "next/link"
-import ProductBrand from "@/components/branding/ProductBrand"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import {
@@ -16,8 +14,11 @@ import {
   Landmark,
   Users,
 } from "lucide-react"
-import { useCurrentUser } from "@/hooks/useCurrentUser"
-import { getInitials } from "@/lib/getInitials"
+import {
+  PortalSidebarFrame,
+  SidebarNavItem,
+  SidebarUserFooter,
+} from "@/components/navigation/portal-sidebar"
 import {
   ADMIN_PORTAL_NAV_LINKS,
   ADMIN_SETTINGS_NAV_LINK,
@@ -46,81 +47,46 @@ const settingsNavItem = {
   icon: NAV_ICONS[ADMIN_SETTINGS_NAV_LINK.labelKey],
 }
 
+function isAdminNavActive(pathname: string, href: string): boolean {
+  if (href === "/portal-admin/entrevistas") return pathname === href
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
+
 export default function AdminSidebar() {
   const pathname = usePathname()
   const t = useTranslations("Navigation")
   const tSidebar = useTranslations("Sidebar")
-  const tCommon = useTranslations("Common")
-  const tShell = useTranslations("AdminPortal.shell")
-  const { user, loading } = useCurrentUser()
-  const displayName = user?.name || user?.email || tShell("userFallback")
-  const initials = getInitials(user?.name, user?.email)
-  const roleLabel = user?.role || tShell("roleFallback")
 
   return (
-    <aside
-      className="glass-sidebar flex w-[260px] shrink-0 flex-col justify-between py-6 pl-6 pr-0"
-      aria-label={tSidebar("ariaAdmin")}
+    <PortalSidebarFrame
+      ariaLabel={tSidebar("ariaAdmin")}
+      brandAriaLabel={tSidebar("goToPortalSelection")}
+      footer={<SidebarUserFooter fallbackRoleKey="roleAdmin" />}
     >
-      <div className="flex flex-col gap-6">
-        <Link
-          href="/"
-          className="flex min-w-0 items-center gap-3 px-5 transition-opacity hover:opacity-90 focus:outline-none"
-          aria-label={tSidebar("goHome")}
-        >
-          <ProductBrand
-            layout="inline"
-            tone="onLight"
-            density="sidebar"
-            className="min-w-0"
-          />
-        </Link>
-        <nav className="flex flex-col gap-1 px-3" aria-label={tSidebar("menuAdmin")}>
-          {[...navItems, settingsNavItem].map((item) => {
-            const Icon = item.icon
-            const isActive =
-              item.href === "/portal-admin/entrevistas"
-                ? pathname === item.href
-                : pathname === item.href ||
-                  pathname.startsWith(`${item.href}/`)
-            const baseClasses =
-              "flex items-center gap-3 rounded-md px-4 py-3 font-sans text-sm transition-colors"
-            const enabledClasses = isActive
-              ? "bg-ats-arena/70 text-vo-purple font-medium"
-              : "text-gray-600 hover:bg-muted hover:text-foreground"
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`${baseClasses} ${enabledClasses}`}
-                aria-current={isActive ? "page" : undefined}
-              >
-                <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                {t(item.labelKey)}
-              </Link>
-            )
-          })}
-        </nav>
-      </div>
-      <div className="mt-4 px-3 pb-3">
-        <div className="glass-panel flex items-center gap-3 rounded-xl p-3">
-          <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-vo-purple to-vo-magenta font-sans text-xs font-semibold text-white shadow-sm"
-            aria-hidden
-          >
-            {loading ? "..." : initials}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-sans text-sm font-medium text-foreground">
-              {loading ? tCommon("loading") : displayName}
-            </p>
-            <p className="font-sans text-xs text-muted-foreground">
-              {roleLabel}
-            </p>
-          </div>
+      <nav
+        className="flex min-h-0 flex-1 flex-col"
+        aria-label={tSidebar("menuAdmin")}
+      >
+        <div className="flex flex-col gap-0.5">
+          {navItems.map((item) => (
+            <SidebarNavItem
+              key={item.href}
+              href={item.href}
+              icon={item.icon}
+              label={t(item.labelKey)}
+              isActive={isAdminNavActive(pathname, item.href)}
+            />
+          ))}
         </div>
-      </div>
-    </aside>
+        <div className="mt-auto flex flex-col gap-0.5 pt-4">
+          <SidebarNavItem
+            href={settingsNavItem.href}
+            icon={settingsNavItem.icon}
+            label={t(settingsNavItem.labelKey)}
+            isActive={isAdminNavActive(pathname, settingsNavItem.href)}
+          />
+        </div>
+      </nav>
+    </PortalSidebarFrame>
   )
 }
