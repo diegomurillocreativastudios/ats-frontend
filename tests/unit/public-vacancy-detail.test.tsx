@@ -28,7 +28,6 @@ vi.mock("@/lib/api/public-vacancies", async (importOriginal) => {
   return {
     ...actual,
     getPublicVacancyDetail: getPublicVacancyDetailMock,
-    buildOpportunityCompanyLogoDataUri: () => null,
   }
 })
 
@@ -50,7 +49,12 @@ describe("PublicVacancyDetailPage", () => {
     getPublicVacancyDetailMock.mockResolvedValue({
       id: "vac-1",
       title: "Ejecutivo de negocios y créditos",
-      company: { id: "c1", name: "Creativa", hasLogo: false, logo: null },
+      company: {
+        id: "c1",
+        name: "Creativa",
+        hasLogo: true,
+        logo: { contentType: "image/png", base64: "dGVzdA==" },
+      },
       countryCode: "SV",
       stateCode: "SS",
       department: { id: "dep-1", code: "career", displayName: "Estrategia de carrera" },
@@ -84,6 +88,10 @@ describe("PublicVacancyDetailPage", () => {
       name: "¿Estás preparado para esta oportunidad?",
     })
     expect(within(applyRail).getByText("Creativa")).toBeInTheDocument()
+    expect(applyRail.querySelector('img[src^="data:"]')).toBeNull()
+    expect(within(applyRail).getByText("Creativa").closest("div")?.className).toContain(
+      "grid-cols-[1rem_minmax(0,1fr)]"
+    )
     expect(within(applyRail).getByText("El Salvador, San Salvador")).toBeInTheDocument()
     expect(within(applyRail).getByText("Estrategia de carrera")).toBeInTheDocument()
     expect(within(applyRail).getByText("Presencial")).toBeInTheDocument()

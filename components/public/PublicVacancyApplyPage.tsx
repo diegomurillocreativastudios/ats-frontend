@@ -4,24 +4,16 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
-import {
-  ArrowLeft,
-  Briefcase,
-  Building,
-  Building2,
-  CheckCircle2,
-  MapPin,
-} from "lucide-react"
+import { ArrowLeft, CheckCircle2 } from "lucide-react"
 import { ApplyPrivacyNoticeDialog } from "@/components/public/ApplyPrivacyNoticeDialog"
 import { PublicVacancyApplicationForm } from "@/components/public/PublicVacancyApplicationForm"
 import { PublicOpportunitiesShell } from "@/components/public/PublicOpportunitiesShell"
 import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
+import { VacancyIdentityFacts } from "@/components/public/vacancy-identity-facts"
 import {
-  buildOpportunityCompanyLogoDataUri,
   getPublicVacancyDetail,
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
-import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import { hasVacancyFieldValue } from "@/lib/public-vacancy-content"
 import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
 
@@ -110,10 +102,6 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
   }, [t, vacancy?.title])
 
   const companyName = vacancy?.company.name?.trim() ?? ""
-  const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy?.company.logo ?? null)
-  const companyLogoAlt = companyName
-    ? tPage("companyLogoAlt", { company: companyName })
-    : tPage("companyLogoGeneric")
   const departmentLabel = vacancy?.department?.displayName
   const hasDepartment = hasVacancyFieldValue(departmentLabel)
 
@@ -181,48 +169,15 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
                   {t("applyBadge")}
                 </p>
 
-                <div className="space-y-2.5 text-sm text-muted-foreground">
-                  {companyName ? (
-                    <p className="flex items-start gap-2">
-                      {companyLogoSrc ? (
-                        <span
-                          className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/35"
-                          aria-label={companyLogoAlt}
-                        >
-                          <img
-                            src={companyLogoSrc}
-                            alt={companyLogoAlt}
-                            loading="lazy"
-                            className="h-full w-full object-cover"
-                          />
-                        </span>
-                      ) : (
-                        <Building2 className="mt-0.5 h-4 w-4 shrink-0 text-ats-terracotta" aria-hidden />
-                      )}
-                      <span>{companyName}</span>
-                    </p>
-                  ) : null}
-                  <p className="flex items-start gap-2">
-                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-ats-terracotta" aria-hidden />
-                    <span>
-                      <VacancyLocationLabel
-                        countryCode={vacancy.countryCode}
-                        stateCode={vacancy.stateCode}
-                        emptyLabel={tPage("fallbackLocation")}
-                      />
-                    </span>
-                  </p>
-                  {hasDepartment ? (
-                    <p className="flex items-start gap-2">
-                      <Building className="mt-0.5 h-4 w-4 shrink-0 text-ats-terracotta" aria-hidden />
-                      <span>{departmentLabel}</span>
-                    </p>
-                  ) : null}
-                  <p className="flex items-start gap-2">
-                    <Briefcase className="mt-0.5 h-4 w-4 shrink-0 text-ats-cobre" aria-hidden />
-                    <span>{vacancy.modality?.displayName ?? tDetail("unspecified")}</span>
-                  </p>
-                </div>
+                <VacancyIdentityFacts
+                  companyName={companyName}
+                  countryCode={vacancy.countryCode}
+                  stateCode={vacancy.stateCode}
+                  emptyLocationLabel={tPage("fallbackLocation")}
+                  showLocation
+                  departmentLabel={hasDepartment ? departmentLabel : null}
+                  modalityLabel={vacancy.modality?.displayName ?? tDetail("unspecified")}
+                />
 
                 <div className="border-t border-border pt-4">
                   <p className="text-sm font-medium text-foreground">

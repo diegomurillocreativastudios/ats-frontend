@@ -28,7 +28,6 @@ vi.mock("@/lib/api/public-vacancies", async (importOriginal) => {
   return {
     ...actual,
     getPublicVacancyDetail: getPublicVacancyDetailMock,
-    buildOpportunityCompanyLogoDataUri: () => null,
   }
 })
 
@@ -58,7 +57,12 @@ describe("PublicVacancyApplyPage", () => {
     getPublicVacancyDetailMock.mockResolvedValue({
       id: "vac-1",
       title: "Ejecutivo de negocios y créditos",
-      company: { id: "c1", name: "Creativa", hasLogo: false, logo: null },
+      company: {
+        id: "c1",
+        name: "Creativa",
+        hasLogo: true,
+        logo: { contentType: "image/png", base64: "dGVzdA==" },
+      },
       countryCode: "SV",
       stateCode: "SS",
       department: { id: "dep-1", code: "career", displayName: "Estrategia de carrera" },
@@ -84,6 +88,9 @@ describe("PublicVacancyApplyPage", () => {
       )
     ).not.toBeInTheDocument()
     expect(screen.getByText("Creativa")).toBeInTheDocument()
+    expect(screen.getByText("Creativa").closest("div")?.className).toContain(
+      "grid-cols-[1rem_minmax(0,1fr)]"
+    )
     expect(screen.getByText("Estrategia de carrera")).toBeInTheDocument()
     expect(screen.getByText("Presencial")).toBeInTheDocument()
     expect(screen.getByText("Tené tu CV en PDF listo para adjuntar.")).toBeInTheDocument()
@@ -91,6 +98,7 @@ describe("PublicVacancyApplyPage", () => {
       name: "Postularme",
     })
     expect(applyRail).toBeInTheDocument()
+    expect(applyRail.querySelector('img[src^="data:"]')).toBeNull()
     expect(applyRail.querySelector(".lucide-building")).not.toBeNull()
     expect(
       applyRail.querySelector("#apply-vacancy-title")

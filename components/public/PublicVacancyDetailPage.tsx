@@ -4,19 +4,18 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
-import { ArrowLeft, ArrowRight, Briefcase, Building, Building2, MapPin } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 import {
-  buildOpportunityCompanyLogoDataUri,
   getPublicVacancyDetail,
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
 import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
 import { PublicOpportunitiesShell } from "@/components/public/PublicOpportunitiesShell"
+import { VacancyIdentityFacts } from "@/components/public/vacancy-identity-facts"
 import {
   PublicVacancyOutline,
   VacancyContentBlocks,
 } from "@/components/public/PublicVacancyOutline"
-import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import {
   buildVacancyStory,
   hasVacancyFieldValue,
@@ -108,7 +107,6 @@ export function PublicVacancyDetailPage({
   }, [vacancy?.title, t])
 
   const companyName = vacancy?.company.name?.trim() ?? ""
-  const companyLogoSrc = buildOpportunityCompanyLogoDataUri(vacancy?.company.logo ?? null)
   const applyHref = queryString
     ? `/portal-oportunidades/${vacancyId}/aplicar?${queryString}`
     : `/portal-oportunidades/${vacancyId}/aplicar`
@@ -210,51 +208,15 @@ export function PublicVacancyDetailPage({
                   />
                 </div>
 
-                {companyName ? (
-                  <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                    {companyLogoSrc ? (
-                      <span
-                        className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/35"
-                        aria-hidden
-                      >
-                        <img
-                          src={companyLogoSrc}
-                          alt=""
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      </span>
-                    ) : (
-                      <Building2 className="h-4 w-4 text-ats-terracotta" aria-hidden />
-                    )}
-                    <span>{companyName}</span>
-                  </p>
-                ) : null}
-
-                <div className="space-y-2.5 text-sm text-muted-foreground">
-                  {hasLocation ? (
-                    <p className="flex items-start gap-2">
-                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-ats-terracotta" aria-hidden />
-                      <VacancyLocationLabel
-                        countryCode={vacancy.countryCode}
-                        stateCode={vacancy.stateCode}
-                        emptyLabel={tPage("fallbackLocation")}
-                      />
-                    </p>
-                  ) : null}
-                  {hasDepartment ? (
-                    <p className="flex items-start gap-2">
-                      <Building className="mt-0.5 h-4 w-4 shrink-0 text-ats-terracotta" aria-hidden />
-                      <span>{departmentLabel}</span>
-                    </p>
-                  ) : null}
-                  {hasModality ? (
-                    <p className="flex items-start gap-2">
-                      <Briefcase className="mt-0.5 h-4 w-4 shrink-0 text-ats-cobre" aria-hidden />
-                      <span>{modalityLabel}</span>
-                    </p>
-                  ) : null}
-                </div>
+                <VacancyIdentityFacts
+                  companyName={companyName}
+                  countryCode={vacancy.countryCode}
+                  stateCode={vacancy.stateCode}
+                  emptyLocationLabel={tPage("fallbackLocation")}
+                  showLocation={hasLocation}
+                  departmentLabel={hasDepartment ? departmentLabel : null}
+                  modalityLabel={hasModality ? modalityLabel : null}
+                />
 
                 <div className="border-t border-border pt-5">
                   <h2
