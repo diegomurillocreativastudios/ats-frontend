@@ -1,4 +1,4 @@
-import { Inter, Manrope } from "next/font/google";
+import { Inter, Manrope, Fraunces } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { APP_NAME } from "@/lib/app-brand";
@@ -17,6 +17,14 @@ const manrope = Manrope({
   variable: "--font-manrope",
 });
 
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: "700",
+  style: "italic",
+  display: "swap",
+  variable: "--font-fraunces",
+});
+
 export async function generateMetadata() {
   const t = await getTranslations("Metadata.root");
   return {
@@ -30,7 +38,7 @@ export default async function RootLayout({ children }) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${inter.variable} ${manrope.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${manrope.variable} ${fraunces.variable}`}>
       <body className="font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <PageTitle />

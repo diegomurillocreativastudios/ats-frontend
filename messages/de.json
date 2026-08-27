@@ -3332,16 +3332,22 @@
   "PublicOpportunities": {
     "page": {
       "portalTitle": "Stellenportal",
-      "heroTitle": "Finden Sie Stellenangebote mit klarer Übersicht auf einen Blick",
-      "heroBody": "Durchsuchen Sie öffentliche Stellen mit Filtern nach Abteilung, Arbeitsmodell und Standort.",
-      "exploreCta": "Stellen erkunden",
+      "heroTitle": "In unserem <portal>Stellenportal</portal> finden Sie das nächste Kapitel Ihrer Karriere",
+      "heroBody": "Ihre nächste Rolle wartet schon. Entdecken Sie die offenen Stellen und finden Sie die, die Sie weiterbringt.",
       "explorerLabel": "Öffentliche Suche",
       "listTitle": "Verfügbare Stellen",
       "searchLabel": "Stellen suchen",
-      "searchPlaceholder": "Stellen nach Namen suchen",
+      "searchPlaceholder": "Nach Stelle oder Unternehmen suchen",
       "filterDepartment": "Abteilung",
       "filterModality": "Arbeitsmodell",
       "filterCountry": "Land",
+      "filterAllDepartments": "Alle Abteilungen",
+      "filterAllModalities": "Alle Arbeitsmodelle",
+      "filterAllCountries": "Alle Länder",
+      "clearFilters": "Filter löschen",
+      "filtersHeading": "Filter",
+      "filtersAria": "Stellenfilter",
+      "rowAriaLabel": "Details zu {title} ansehen",
       "preparingList": "Die Liste wird mit aktiver Suche und Filtern vorbereitet.",
       "tableDepartment": "Abteilung",
       "tableLocation": "Standort",
@@ -3396,6 +3402,13 @@
       "location": "Standort",
       "salary": "Gehalt",
       "publishedLabel": "Veröffentlichung",
+      "requirementsHeading": "Anforderungen der Stelle",
+      "detailsHeading": "Details der Stelle",
+      "advantagesHeading": "Vorteile der Stelle",
+      "moreVacanciesBody": "Bei ApplicanTree gibt es viele weitere Stellen. Wenn dich diese Rolle oder ähnliche Angebote interessieren, kannst du dich ganz frei bewerben.",
+      "moreVacanciesLink": "Weitere Stellen ansehen",
+      "readyTitle": "Bist du bereit für diese Chance?",
+      "readyBody": "Schließe deine Bewerbung in wenigen Minuten ab. Das Recruiting-Team erhält dein Profil sicher.",
       "documentTitle": "ApplicanTree | Stellenportal | {title}"
     },
     "applicationForm": {
@@ -3417,30 +3430,31 @@
         "processingLongWait": "Wenn die Wartezeit länger dauert, schließen Sie dieses Fenster nicht. Wir verarbeiten Ihre Bewerbung weiter."
       },
       "validation": {
-        "fileType": "Es werden nur PDF- oder DOCX-Dateien akzeptiert.",
-        "fileInvalid": "Die Datei ist kein gültiges PDF oder DOCX.",
+        "fileType": "Es werden nur PDF-Dateien akzeptiert.",
+        "fileInvalid": "Die Datei ist kein gültiges PDF.",
         "fileTooLarge": "Der Lebenslauf darf 15 MB nicht überschreiten.",
         "rateLimited": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
-        "firstNameRequired": "Geben Sie Ihren Vornamen ein.",
-        "lastNameRequired": "Geben Sie Ihren Nachnamen ein.",
+        "firstNameRequired": "Geben Sie Ihre Vornamen ein.",
+        "lastNameRequired": "Geben Sie Ihre Nachnamen ein.",
         "emailRequired": "Geben Sie Ihre E-Mail ein.",
         "emailInvalid": "Geben Sie eine gültige E-Mail ein.",
-        "cvRequired": "Fügen Sie Ihren Lebenslauf als PDF oder DOCX bei.",
+        "phoneRequired": "Geben Sie Ihre Telefonnummer ein.",
+        "documentTypeRequired": "Wählen Sie einen Dokumenttyp.",
+        "documentNumberRequired": "Geben Sie Ihre Dokumentnummer ein.",
+        "cvRequired": "Fügen Sie Ihren Lebenslauf als PDF bei.",
         "reviewFields": "Überprüfen Sie die angegebenen Felder.",
         "consentSubmitFailed": "Wir konnten Ihre Autorisierung und Einwilligung nicht speichern. Bitte versuchen Sie es erneut.",
         "consentValidation": "Bitte überprüfen Sie die Autorisierung und Einwilligung und versuchen Sie es erneut.",
         "consentVersionMismatch": "Das Autorisierungsdokument wurde aktualisiert. Laden Sie die Seite neu und versuchen Sie es erneut.",
-        "consentNationalIdConflict": "Dieses Ausweisdokument ist bereits mit einem anderen Profil verknüpft. Verwenden Sie einen anderen Wert oder kontaktieren Sie den Support.",
-        "documentTypeRequiresNumber": "Wenn Sie einen Dokumenttyp wählen, müssen Sie die Nummer eingeben.",
-        "documentNumberRequiresType": "Wenn Sie eine Dokumentnummer eingeben, müssen Sie den Typ wählen."
+        "consentNationalIdConflict": "Dieses Ausweisdokument ist bereits mit einem anderen Profil verknüpft. Verwenden Sie einen anderen Wert oder kontaktieren Sie den Support."
       },
       "fields": {
-        "firstName": "Vorname *",
-        "lastName": "Nachname *",
+        "firstName": "Vornamen *",
+        "lastName": "Nachnamen *",
         "email": "E-Mail *",
-        "phone": "Telefon",
-        "documentType": "Dokumenttyp",
-        "documentNumber": "Dokumentnummer",
+        "phone": "Telefon *",
+        "documentType": "Dokumenttyp *",
+        "documentNumber": "Dokumentnummer *",
         "source": "Wie haben Sie von dieser Stelle erfahren?",
         "linkedin": "LinkedIn-Profil",
         "website": "Website oder Portfolio",
@@ -3452,11 +3466,21 @@
         "noDocTypes": "Keine Typen verfügbar",
         "selectDocType": "Typ auswählen",
         "selectOption": "Option auswählen",
-        "documentNumber": "Dokumentnummer eingeben"
+        "documentNumber": "Dokumentnummer eingeben",
+        "firstName": "z. B. Ana",
+        "lastName": "z. B. Martinez",
+        "email": "name@example.com",
+        "phone": "1234-5678",
+        "loadingCountries": "Länder werden geladen...",
+        "searchCountry": "Land, ISO oder Vorwahl suchen",
+        "noCountries": "Keine Länder gefunden"
       },
       "file": {
         "selectPdf": "PDF auswählen",
-        "helper": "Es wird nur PDF- oder DOCX-Format akzeptiert (max. 15 MB)."
+        "helper": "Es wird nur PDF-Format akzeptiert (max. 15 MB).",
+        "dropActive": "Datei hier ablegen",
+        "changeFile": "Klicken, um die Datei zu ändern",
+        "removeAria": "{fileName} entfernen"
       },
       "actions": {
         "submitting": "Bewerbung wird gesendet…",
@@ -3467,7 +3491,8 @@
         "close": "Schließen"
       },
       "aria": {
-        "submitStatus": "Sendestatus"
+        "submitStatus": "Sendestatus",
+        "phoneCountry": "Ländervorwahl"
       },
       "toasts": {
         "submitSuccess": "Bewerbung gesendet",
@@ -3506,8 +3531,6 @@
     "navbar": {
       "ariaMain": "Hauptnavigation des Stellenportals",
       "ariaGoToPortal": "Zum Stellenportal",
-      "logoIconAlt": "Applican Tree-Logo",
-      "portalSubtitle": "Stellenportal",
       "ariaGoToSelection": "Zur Portal-Auswahl",
       "changePortal": "Portal wechseln",
       "portalsShort": "Portale"
@@ -3533,10 +3556,8 @@
       "beforeSubmit": "Vor dem Absenden",
       "checklistCv": "Halten Sie Ihren Lebenslauf als PDF zum Anhängen bereit.",
       "checklistEmail": "Verwenden Sie dieselbe E-Mail wie bei Ihrem Kandidatenkonto.",
-      "checklistData": "Geben Sie Vorname, Nachname und E-Mail mit echten Daten an.",
+      "checklistData": "Geben Sie Vornamen, Nachnamen und E-Mail mit echten Daten an.",
       "formSectionLabel": "Bewerbungsformular",
-      "formTitle": "Bewerbung senden",
-      "formBody": "Füllen Sie die Daten aus und hängen Sie Ihren Lebenslauf an. Die Informationen werden sicher an das Recruiting-Team gesendet.",
       "documentTitle": "ApplicanTree | Stellenportal | Bewerbung für {title}"
     }
   },

@@ -2,11 +2,13 @@ import { BRAND_COLORS } from "@/lib/brand-colors"
 
 /** Clases reutilizables del portal público de oportunidades (tema verde Applican Tree). */
 export const publicOpportunitiesTheme = {
-  page: "relative min-h-screen overflow-hidden bg-ats-warm-white text-foreground",
+  page: "relative flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden overscroll-y-none bg-ats-warm-white text-foreground",
+  pageScroll:
+    "relative min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain",
   heroGradient:
     "absolute inset-x-0 top-0 h-[580px] bg-[linear-gradient(180deg,#E8F5E0_0%,#F0F7EC_38%,#FFFFFF_100%)]",
   heroGradientShort:
-    "absolute inset-x-0 top-0 h-[420px] bg-[linear-gradient(180deg,#E8F5E0_0%,#F0F7EC_38%,#FFFFFF_100%)]",
+    "absolute inset-x-0 top-0 h-[520px] bg-[linear-gradient(180deg,#E8F5E0_0%,#F0F7EC_38%,#FFFFFF_100%)]",
   heroGrid:
     "absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(rgba(87,88,91,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(87,88,91,0.04)_1px,transparent_1px)] bg-size-[42px_42px] mask-[linear-gradient(180deg,transparent,black_18%,black_100%)]",
   heroDivider:
@@ -14,6 +16,34 @@ export const publicOpportunitiesTheme = {
   orbTerracotta: "rounded-full bg-ats-terracotta/14 blur-3xl",
   orbCobre: "rounded-full bg-ats-cobre/10 blur-3xl",
   orbBottom: "rounded-full bg-ats-terracotta/8 blur-3xl",
+  shellInner: "mx-auto w-full max-w-6xl",
+  shellDirectory: "mx-auto w-full max-w-[1400px]",
+  directoryGrid:
+    "grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-10",
+  directoryRail:
+    "space-y-4 lg:sticky lg:top-6 lg:self-start lg:border-r lg:border-border lg:pr-8",
+  articleGrid:
+    "grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-12",
+  articleTitle:
+    "max-w-3xl font-display text-4xl font-bold leading-[1.08] tracking-tight text-balance text-foreground sm:text-5xl lg:text-6xl",
+  articleRail:
+    "space-y-5 lg:sticky lg:top-6 lg:self-start lg:border-l lg:border-border lg:pl-8",
+  articleRailIllustration:
+    "mx-auto hidden w-full max-w-[14rem] lg:block lg:max-w-none",
+  articleRailIllustrationImage:
+    "h-auto w-full max-h-48 object-contain object-center",
+  applyGrid:
+    "grid gap-10 lg:grid-cols-[24rem_minmax(0,1fr)] lg:items-start lg:gap-12",
+  applyIllustrationFrame:
+    "mx-auto w-full max-w-[10rem]",
+  applyIllustrationImage:
+    "h-auto w-full object-contain object-center",
+  storySection: "scroll-mt-8 border-t border-border pt-8",
+  filterLabel: "mb-1.5 block text-sm font-medium text-foreground",
+  filterInput:
+    "h-10 w-full rounded-lg border border-border bg-background pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ats-cobre",
+  filterSelect:
+    "h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ats-cobre disabled:cursor-not-allowed disabled:opacity-60",
   panel:
     "glass-iridescent-border border border-border bg-card backdrop-blur-xl shadow-[0_24px_80px_rgba(87,88,91,0.10)]",
   panelSoft:
@@ -40,13 +70,15 @@ export const publicOpportunitiesTheme = {
   surface: "bg-muted/30",
   surfaceStrong: "bg-muted/45",
   surfaceHover: "hover:bg-muted/50",
-  tableWrap: "overflow-hidden rounded-[28px] border border-border bg-card backdrop-blur-xl",
+  tableWrap: "overflow-hidden rounded-2xl border border-border bg-card backdrop-blur-xl",
   chip:
     "inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/55 focus:outline-none focus:ring-2 focus:ring-ats-cobre focus:ring-offset-2 focus:ring-offset-background",
   badge:
     "inline-flex items-center gap-2 rounded-full border border-border bg-muted/35 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.28em] text-muted-foreground",
   input:
-    "h-12 w-full rounded-full border border-border bg-card pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ats-cobre",
+    "h-11 w-full rounded-2xl border border-border bg-card pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ats-cobre",
+  select:
+    "h-11 w-full rounded-2xl border border-border bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ats-cobre disabled:cursor-not-allowed disabled:opacity-60",
   emptyState:
     "rounded-[30px] border border-dashed border-border bg-muted/20 px-6 py-12 text-center",
   errorPanel:
@@ -69,10 +101,12 @@ export const publicOpportunitiesTheme = {
     "overflow-hidden rounded-[26px] border border-border bg-card shadow-[0_16px_48px_rgba(87,88,91,0.08)] transition-opacity duration-300",
   heroCardOverlay:
     "absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(110,185,64,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(67,140,57,0.08),transparent_24%)]",
+  heroIllustrationFrame:
+    "hidden w-full max-w-[32rem] shrink-0 overflow-visible md:block md:w-[min(36rem,48%)] md:max-w-none",
+  heroIllustrationImage:
+    "block h-auto w-full max-h-[22rem] overflow-visible object-contain object-center lg:max-h-[28rem] [&_svg]:h-auto [&_svg]:w-full [&_svg]:max-h-[22rem] [&_svg]:overflow-visible lg:[&_svg]:max-h-[28rem]",
   activeBadge:
     "inline-flex items-center gap-2 rounded-full border border-ats-terracotta/25 bg-ats-terracotta/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-ats-cobre",
-  detailPill:
-    "inline-flex items-center rounded-full border border-ats-terracotta/15 bg-ats-terracotta/8 px-3 py-1.5 text-xs font-medium text-foreground",
   alertPanel:
     "rounded-[28px] border border-ats-terracotta/30 bg-ats-terracotta/10 px-5 py-6 text-sm text-ats-cobre",
   emptyStateIcon:

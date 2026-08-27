@@ -3400,16 +3400,22 @@
   "PublicOpportunities": {
     "page": {
       "portalTitle": "Portal de oportunidades",
-      "heroTitle": "Encontrá oportunidades con una lectura clara desde el primer vistazo",
-      "heroBody": "Explorá vacantes públicas con filtros por departamento, modalidad y ubicación.",
-      "exploreCta": "Explorar oportunidades",
+      "heroTitle": "En nuestro <portal>Portal de Oportunidades</portal> encontrarás el siguiente capítulo de tu carrera",
+      "heroBody": "Tu próximo rol ya está acá. Explorá las vacantes abiertas y encontrá el que te hace dar el salto.",
       "explorerLabel": "Exploración pública",
       "listTitle": "Oportunidades disponibles",
       "searchLabel": "Buscar vacantes",
-      "searchPlaceholder": "Buscar vacantes por nombre",
+      "searchPlaceholder": "Buscar por vacante o empresa",
       "filterDepartment": "Departamento",
       "filterModality": "Modalidad",
       "filterCountry": "País",
+      "filterAllDepartments": "Todos los departamentos",
+      "filterAllModalities": "Todas las modalidades",
+      "filterAllCountries": "Todos los países",
+      "clearFilters": "Limpiar filtros",
+      "filtersHeading": "Filtros",
+      "filtersAria": "Filtros de vacantes",
+      "rowAriaLabel": "Ver detalle de {title}",
       "preparingList": "Preparando el listado con la búsqueda y filtros activos.",
       "tableDepartment": "Departamento",
       "tableLocation": "Ubicación",
@@ -3464,6 +3470,13 @@
       "location": "Ubicación",
       "salary": "Salario",
       "publishedLabel": "Publicación",
+      "requirementsHeading": "Requisitos de la vacante",
+      "detailsHeading": "Detalles de la vacante",
+      "advantagesHeading": "Ventajas de la vacante",
+      "moreVacanciesBody": "En ApplicanTree hay muchas más vacantes disponibles. Si te interesa esta oportunidad u otras similares, podés postularte con total libertad.",
+      "moreVacanciesLink": "Ver más oportunidades",
+      "readyTitle": "¿Estás preparado para esta oportunidad?",
+      "readyBody": "Completá tu postulación en unos minutos. El equipo de reclutamiento recibe tu perfil de forma segura.",
       "documentTitle": "ApplicanTree | Portal Oportunidades | {title}"
     },
     "applicationForm": {
@@ -3485,30 +3498,31 @@
         "processingLongWait": "Si la espera se prolonga, no cierres esta ventana. Seguimos procesando tu postulación."
       },
       "validation": {
-        "fileType": "Solo se aceptan archivos PDF o DOCX.",
-        "fileInvalid": "El archivo no es un PDF o DOCX válido.",
+        "fileType": "Solo se aceptan archivos PDF.",
+        "fileInvalid": "El archivo no es un PDF válido.",
         "fileTooLarge": "El CV no puede superar 15 MB.",
         "rateLimited": "Demasiados intentos. Intenta de nuevo más tarde.",
-        "firstNameRequired": "Ingresa tu nombre.",
-        "lastNameRequired": "Ingresa tu apellido.",
+        "firstNameRequired": "Ingresa tus nombres.",
+        "lastNameRequired": "Ingresa tus apellidos.",
         "emailRequired": "Ingresa tu correo.",
         "emailInvalid": "Ingresa un correo válido.",
-        "cvRequired": "Adjunta tu CV en PDF o DOCX.",
+        "phoneRequired": "Ingresa tu teléfono.",
+        "documentTypeRequired": "Selecciona un tipo de documento.",
+        "documentNumberRequired": "Ingresa tu número de documento.",
+        "cvRequired": "Adjunta tu CV en PDF.",
         "reviewFields": "Revisa los datos indicados.",
         "consentSubmitFailed": "No pudimos guardar tu autorización y consentimiento. Intenta nuevamente.",
         "consentValidation": "Revisa la autorización y consentimiento e intenta de nuevo.",
         "consentVersionMismatch": "El documento de autorización se actualizó. Recarga la página e intenta de nuevo.",
-        "consentNationalIdConflict": "Ese documento de identidad ya está asociado a otro perfil. Usa otro valor o contacta soporte.",
-        "documentTypeRequiresNumber": "Si seleccionas un tipo de documento, debes ingresar el número.",
-        "documentNumberRequiresType": "Si ingresas un número de documento, debes seleccionar el tipo."
+        "consentNationalIdConflict": "Ese documento de identidad ya está asociado a otro perfil. Usa otro valor o contacta soporte."
       },
       "fields": {
-        "firstName": "Nombre *",
-        "lastName": "Apellido *",
+        "firstName": "Nombres *",
+        "lastName": "Apellidos *",
         "email": "Correo electrónico *",
-        "phone": "Teléfono",
-        "documentType": "Tipo de documento",
-        "documentNumber": "Número de documento",
+        "phone": "Teléfono *",
+        "documentType": "Tipo de documento *",
+        "documentNumber": "Número de documento *",
         "source": "¿Cómo supiste de esta vacante?",
         "linkedin": "Perfil de LinkedIn",
         "website": "Sitio web o portafolio",
@@ -3520,11 +3534,21 @@
         "noDocTypes": "No hay tipos disponibles",
         "selectDocType": "Seleccioná un tipo",
         "selectOption": "Seleccioná una opción",
-        "documentNumber": "Ingresá tu número de documento"
+        "documentNumber": "Ingresá tu número de documento",
+        "firstName": "Ej. Ana",
+        "lastName": "Ej. Martínez",
+        "email": "correo@ejemplo.com",
+        "phone": "1234-5678",
+        "loadingCountries": "Cargando países…",
+        "searchCountry": "Buscar país, ISO o código",
+        "noCountries": "No se encontraron países"
       },
       "file": {
         "selectPdf": "Seleccionar PDF",
-        "helper": "Solo se acepta formato PDF o DOCX (máx. 15 MB)."
+        "helper": "Solo se acepta formato PDF (máx. 15 MB).",
+        "dropActive": "Soltá el archivo aquí",
+        "changeFile": "Hacé clic para cambiar el archivo",
+        "removeAria": "Quitar {fileName}"
       },
       "actions": {
         "submitting": "Enviando postulación…",
@@ -3535,7 +3559,8 @@
         "close": "Cerrar"
       },
       "aria": {
-        "submitStatus": "Estado del envío"
+        "submitStatus": "Estado del envío",
+        "phoneCountry": "Código de país"
       },
       "toasts": {
         "submitSuccess": "Postulación enviada",
@@ -3574,8 +3599,6 @@
     "navbar": {
       "ariaMain": "Navegación principal de oportunidades",
       "ariaGoToPortal": "Ir al portal de oportunidades",
-      "logoIconAlt": "Logo icono Applican Tree",
-      "portalSubtitle": "Portal de oportunidades",
       "ariaGoToSelection": "Ir a selección de portal",
       "changePortal": "Cambiar portal",
       "portalsShort": "Portales"
@@ -3601,10 +3624,8 @@
       "beforeSubmit": "Antes de enviar",
       "checklistCv": "Tené tu CV en PDF listo para adjuntar.",
       "checklistEmail": "Usá el mismo correo asociado a tu cuenta de candidato.",
-      "checklistData": "Completá nombre, apellido y correo con datos reales.",
+      "checklistData": "Completá nombres, apellidos y correo con datos reales.",
       "formSectionLabel": "Formulario de postulación",
-      "formTitle": "Enviá tu postulación",
-      "formBody": "Completá los datos y adjuntá tu CV. La información se envía de forma segura al equipo de reclutamiento.",
       "documentTitle": "ApplicanTree | Portal Oportunidades | Aplicar a {title}"
     }
   },

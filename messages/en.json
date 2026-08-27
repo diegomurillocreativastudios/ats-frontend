@@ -3400,16 +3400,22 @@
   "PublicOpportunities": {
     "page": {
       "portalTitle": "Opportunities portal",
-      "heroTitle": "Find opportunities with a clear view from the first glance",
-      "heroBody": "Browse public vacancies with filters by department, work mode, and location.",
-      "exploreCta": "Explore opportunities",
+      "heroTitle": "In our <portal>Opportunities Portal</portal> you'll find the next chapter of your career",
+      "heroBody": "Your next role is already here. Browse the open vacancies and find the one that makes you take the leap.",
       "explorerLabel": "Public exploration",
       "listTitle": "Available opportunities",
       "searchLabel": "Search vacancies",
-      "searchPlaceholder": "Search vacancies by name",
+      "searchPlaceholder": "Search by vacancy or company",
       "filterDepartment": "Department",
       "filterModality": "Work mode",
       "filterCountry": "Country",
+      "filterAllDepartments": "All departments",
+      "filterAllModalities": "All work modes",
+      "filterAllCountries": "All countries",
+      "clearFilters": "Clear filters",
+      "filtersHeading": "Filters",
+      "filtersAria": "Vacancy filters",
+      "rowAriaLabel": "View details for {title}",
       "preparingList": "Preparing the list with active search and filters.",
       "tableDepartment": "Department",
       "tableLocation": "Location",
@@ -3464,6 +3470,13 @@
       "location": "Location",
       "salary": "Salary",
       "publishedLabel": "Published",
+      "requirementsHeading": "Vacancy requirements",
+      "detailsHeading": "Vacancy details",
+      "advantagesHeading": "Vacancy benefits",
+      "moreVacanciesBody": "ApplicanTree has many more vacancies available. If this role or a similar one interests you, you are free to apply.",
+      "moreVacanciesLink": "See more opportunities",
+      "readyTitle": "Are you ready for this opportunity?",
+      "readyBody": "Complete your application in a few minutes. The recruiting team receives your profile securely.",
       "documentTitle": "ApplicanTree | Opportunities Portal | {title}"
     },
     "applicationForm": {
@@ -3485,30 +3498,31 @@
         "processingLongWait": "If the wait takes longer, do not close this window. We are still processing your application."
       },
       "validation": {
-        "fileType": "Only PDF or DOCX files are accepted.",
-        "fileInvalid": "The file is not a valid PDF or DOCX.",
+        "fileType": "Only PDF files are accepted.",
+        "fileInvalid": "The file is not a valid PDF.",
         "fileTooLarge": "The CV cannot exceed 15 MB.",
         "rateLimited": "Too many attempts. Please try again later.",
-        "firstNameRequired": "Enter your first name.",
-        "lastNameRequired": "Enter your last name.",
+        "firstNameRequired": "Enter your first names.",
+        "lastNameRequired": "Enter your last names.",
         "emailRequired": "Enter your email.",
         "emailInvalid": "Enter a valid email.",
-        "cvRequired": "Attach your CV in PDF or DOCX.",
+        "phoneRequired": "Enter your phone number.",
+        "documentTypeRequired": "Select a document type.",
+        "documentNumberRequired": "Enter your document number.",
+        "cvRequired": "Attach your CV in PDF.",
         "reviewFields": "Review the indicated fields.",
         "consentSubmitFailed": "We could not save your authorization and consent. Please try again.",
         "consentValidation": "Please review the authorization and consent and try again.",
         "consentVersionMismatch": "The authorization document was updated. Reload the page and try again.",
-        "consentNationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support.",
-        "documentTypeRequiresNumber": "If you select a document type, you must enter the number.",
-        "documentNumberRequiresType": "If you enter a document number, you must select the type."
+        "consentNationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support."
       },
       "fields": {
-        "firstName": "First name *",
-        "lastName": "Last name *",
+        "firstName": "First names *",
+        "lastName": "Last names *",
         "email": "Email *",
-        "phone": "Phone",
-        "documentType": "Document type",
-        "documentNumber": "Document number",
+        "phone": "Phone *",
+        "documentType": "Document type *",
+        "documentNumber": "Document number *",
         "source": "How did you hear about this vacancy?",
         "linkedin": "LinkedIn profile",
         "website": "Website or portfolio",
@@ -3520,11 +3534,21 @@
         "noDocTypes": "No types available",
         "selectDocType": "Select a type",
         "selectOption": "Select an option",
-        "documentNumber": "Enter your document number"
+        "documentNumber": "Enter your document number",
+        "firstName": "e.g. Ana",
+        "lastName": "e.g. Martinez",
+        "email": "name@example.com",
+        "phone": "1234-5678",
+        "loadingCountries": "Loading countries…",
+        "searchCountry": "Search country, ISO or code",
+        "noCountries": "No countries found"
       },
       "file": {
         "selectPdf": "Select PDF",
-        "helper": "Only PDF or DOCX format is accepted (max. 15 MB)."
+        "helper": "Only PDF format is accepted (max. 15 MB).",
+        "dropActive": "Drop the file here",
+        "changeFile": "Click to change the file",
+        "removeAria": "Remove {fileName}"
       },
       "actions": {
         "submitting": "Submitting application…",
@@ -3535,7 +3559,8 @@
         "close": "Close"
       },
       "aria": {
-        "submitStatus": "Submission status"
+        "submitStatus": "Submission status",
+        "phoneCountry": "Country code"
       },
       "toasts": {
         "submitSuccess": "Application submitted",
@@ -3574,8 +3599,6 @@
     "navbar": {
       "ariaMain": "Main opportunities portal navigation",
       "ariaGoToPortal": "Go to opportunities portal",
-      "logoIconAlt": "Applican Tree logo icon",
-      "portalSubtitle": "Opportunities portal",
       "ariaGoToSelection": "Go to portal selection",
       "changePortal": "Change portal",
       "portalsShort": "Portals"
@@ -3601,10 +3624,8 @@
       "beforeSubmit": "Before submitting",
       "checklistCv": "Have your CV in PDF ready to attach.",
       "checklistEmail": "Use the same email associated with your candidate account.",
-      "checklistData": "Complete first name, last name, and email with real data.",
+      "checklistData": "Complete first names, last names, and email with real data.",
       "formSectionLabel": "Application form",
-      "formTitle": "Submit your application",
-      "formBody": "Complete the information and attach your CV. The data is sent securely to the recruitment team.",
       "documentTitle": "ApplicanTree | Opportunities Portal | Apply to {title}"
     }
   },

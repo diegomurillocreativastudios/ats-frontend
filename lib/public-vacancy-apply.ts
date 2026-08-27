@@ -1,10 +1,6 @@
 import { apiClient } from "@/lib/api"
 import type { CandidateAuthConsentSubmitBody } from "@/lib/candidate-auth-consent"
-import {
-  MIME_DOCX,
-  MIME_PDF,
-  UPLOAD_MAX_BYTES_15_MB,
-} from "@/lib/upload-constraints"
+import { MIME_PDF, UPLOAD_MAX_BYTES_15_MB } from "@/lib/upload-constraints"
 
 /** Límite alineado con backend security-hardening (CV ≤ 15 MB). */
 export const PUBLIC_CV_MAX_BYTES = UPLOAD_MAX_BYTES_15_MB
@@ -119,7 +115,7 @@ export function getPublicApplyErrorMessage(status: number, body: unknown): strin
   if (status === 415) {
     return (
       fromApi ??
-      "El archivo no coincide con el tipo declarado o no es un PDF o DOCX válido."
+      "El archivo no coincide con el tipo declarado o no es un PDF válido."
     )
   }
   if (status === 400) {
@@ -139,8 +135,8 @@ export function isValidEmailFormat(email: string): boolean {
 
 export function isAllowedCvFile(file: File): boolean {
   const name = (file.name ?? "").toLowerCase()
-  if (name.endsWith(".pdf") || name.endsWith(".docx")) return true
-  if (file.type === MIME_PDF || file.type === MIME_DOCX) return true
+  if (name.endsWith(".pdf")) return true
+  if (file.type === MIME_PDF) return true
   return false
 }
 

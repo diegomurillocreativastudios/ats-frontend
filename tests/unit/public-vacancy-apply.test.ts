@@ -43,17 +43,17 @@ describe("public vacancy apply helpers", () => {
     expect(isValidEmailFormat("")).toBe(false)
   })
 
-  it("accepts pdf/docx by extension or mime", () => {
+  it("accepts pdf by extension or mime and rejects docx", () => {
     expect(isAllowedCvFile(new File([], "cv.pdf", { type: "application/pdf" }))).toBe(true)
     expect(isAllowedCvFile(new File([], "cv.PDF", { type: "" }))).toBe(true)
-    expect(isAllowedCvFile(new File([], "cv.docx", { type: "" }))).toBe(true)
+    expect(isAllowedCvFile(new File([], "cv.docx", { type: "" }))).toBe(false)
     expect(
       isAllowedCvFile(
         new File([], "cv", {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         })
       )
-    ).toBe(true)
+    ).toBe(false)
     expect(isAllowedCvFile(new File([], "cv.doc", { type: "" }))).toBe(false)
   })
 
@@ -76,7 +76,7 @@ describe("public vacancy apply helpers", () => {
     expect(getPublicApplyErrorMessage(403, {})).toContain("coincidir")
     expect(getPublicApplyErrorMessage(404, {})).toContain("disponible")
     expect(getPublicApplyErrorMessage(413, {})).toContain("15 MB")
-    expect(getPublicApplyErrorMessage(415, {})).toMatch(/PDF o DOCX|coincide/)
+    expect(getPublicApplyErrorMessage(415, {})).toMatch(/PDF válido|coincide/)
     expect(getPublicApplyErrorMessage(422, {})).toContain("procesar")
     expect(getPublicApplyErrorMessage(429, {})).toContain("Demasiados intentos")
     expect(

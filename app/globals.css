@@ -63,6 +63,7 @@
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-brand: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
   --font-display: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
 }
 
 @theme inline {
@@ -312,6 +313,7 @@
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-brand: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
   --font-display: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
   --animate-apply-shimmer: apply-shimmer 1.45s ease-in-out infinite;
 }
@@ -336,6 +338,10 @@ body {
 
 .font-brand {
   font-family: var(--font-manrope), var(--font-inter), system-ui, sans-serif;
+}
+
+.font-serif {
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
 }
 
 h1,

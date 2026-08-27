@@ -605,6 +605,8 @@ export function ConsentAuthorizationModal({
                                   placeholder={t("signature.phonePlaceholder")}
                                   countryAriaLabel={t("signature.countryAria")}
                                   loadingLabel={t("signature.countryLoading")}
+                                  searchPlaceholder={t("signature.countrySearchPlaceholder")}
+                                  emptyResultsLabel={t("signature.countryNoResults")}
                                   required
                                 />
                               </label>
