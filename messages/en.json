@@ -42,14 +42,19 @@
     "reports": "Reports",
     "settings": "Settings",
     "stages": "Stages",
+    "stageStatuses": "Statuses",
     "templates": "Templates",
     "interviewsCatalog": "Interviews — Catalogs",
     "interviewsCalendar": "Interviews — Calendar",
     "users": "Users",
+    "administration": "Administration",
     "companies": "Companies",
     "departments": "Departments",
     "modalities": "Modalities",
     "documentTypes": "Document types",
+    "interviewTypes": "Types",
+    "interviewModalities": "Modalities",
+    "interviewStatuses": "Statuses",
     "tailorProfile": "Tailor my Profile"
   },
   "Topbar": {
@@ -70,6 +75,7 @@
     "menuCandidate": "Candidate menu",
     "menuRRHH": "HR menu",
     "menuAdmin": "Admin menu",
+    "toggleNavGroup": "Show or hide {label}",
     "accountMenu": "Account menu",
     "roleAdmin": "Administrator",
     "roleRecruiter": "Recruiter",
@@ -281,6 +287,10 @@
         "title": "Stages",
         "description": "Manage recruitment process stages and statuses"
       },
+      "stageStatuses": {
+        "title": "Stage statuses",
+        "description": "Manage the statuses used by vacancy pipeline stages"
+      },
       "templates": {
         "title": "Templates",
         "description": "Manage notification and document templates"
@@ -300,6 +310,18 @@
       "interviewsCatalog": {
         "title": "Interviews",
         "description": "Catalogs of interview types, modalities, and statuses"
+      },
+      "interviewTypes": {
+        "title": "Interview types",
+        "description": "Manage the interview type catalog"
+      },
+      "interviewModalities": {
+        "title": "Interview modalities",
+        "description": "Manage the interview modality catalog"
+      },
+      "interviewStatuses": {
+        "title": "Interview statuses",
+        "description": "Manage the interview status catalog"
       },
       "interviewsCalendar": {
         "title": "Interview calendar | Admin Portal",
@@ -2506,15 +2528,25 @@
           "no": "No",
           "editNameAria": "Edit type name",
           "editAria": "Edit {name}",
-          "deleteAria": "Delete {name}"
+          "deleteAria": "Delete {name}",
+          "refresh": "Refresh",
+          "edit": "Edit",
+          "retry": "Retry"
         },
         "types": {
           "title": "Interview types",
           "createAria": "Create interview type",
+          "createCta": "Create type",
+          "createTitle": "Create interview type",
+          "editTitle": "Edit interview type",
           "newLabel": "New type",
           "namePlaceholder": "Type name",
+          "code": "Code",
+          "listAria": "Interview types list",
+          "loadErrorAria": "Error loading interview types",
           "loading": "Loading types…",
-          "empty": "No types defined. Add the first one above.",
+          "empty": "No interview types have been created yet",
+          "emptyBody": "When you create a type, it will be available for scheduling interviews.",
           "created": "Interview type created successfully.",
           "updated": "Interview type updated successfully.",
           "deleted": "Interview type deleted successfully.",
@@ -2533,8 +2565,14 @@
           "terminal": "Terminal",
           "terminalAria": "Terminal status",
           "displayNameAria": "Display name",
+          "listAria": "Interview statuses list",
+          "loadErrorAria": "Error loading interview statuses",
+          "createCta": "Create status",
+          "createTitle": "Create interview status",
+          "editTitle": "Edit interview status",
           "loading": "Loading statuses…",
-          "empty": "No statuses defined. Add the first one above.",
+          "empty": "No interview statuses have been created yet",
+          "emptyBody": "When you create a status, it will be available for the interview cycle.",
           "created": "Interview status created successfully.",
           "updated": "Interview status updated successfully.",
           "deleted": "Interview status deleted successfully.",
@@ -2544,14 +2582,20 @@
         "modalities": {
           "title": "Interview modalities",
           "createAria": "Create interview modality",
+          "createCta": "Create modality",
+          "createTitle": "Create interview modality",
+          "editTitle": "Edit interview modality",
           "newLabel": "New modality",
           "namePlaceholder": "Display name",
           "googleMeet": "Google Meet",
           "meetLabel": "Meet",
           "meetAria": "Include Google Meet link",
           "editNameAria": "Edit modality name",
+          "listAria": "Interview modalities list",
+          "loadErrorAria": "Error loading interview modalities",
           "loading": "Loading modalities…",
-          "empty": "No modalities defined. Add the first one above.",
+          "empty": "No interview modalities have been created yet",
+          "emptyBody": "When you create a modality, it will be available for scheduling interviews.",
           "created": "Interview modality created successfully.",
           "updated": "Interview modality updated successfully.",
           "deleted": "Interview modality deleted successfully.",
@@ -2760,14 +2804,15 @@
         "roleLabel": "Role",
         "allRoles": "All",
         "lockedOnly": "Locked only",
+        "lockoutLabel": "Lockout",
         "apply": "Apply filters",
         "clear": "Clear"
       },
       "table": {
         "email": "Email",
-        "userName": "Username",
+        "userName": "User",
         "roles": "Roles",
-        "emailOk": "Email OK",
+        "emailOk": "Confirmed",
         "lockout": "Lockout",
         "actions": "Actions"
       },
@@ -2781,15 +2826,19 @@
       },
       "pagination": {
         "perPage": "Per page",
+        "pageSizeAria": "Users per page",
         "refreshAria": "Refresh list",
         "regionAria": "Pagination",
         "summary": "Page {page} of {total}"
       },
       "emptyStates": {
-        "noResults": "No users match the current filters."
+        "noResults": "No users match the current filters.",
+        "description": "Try adjusting the filters or create a new user."
       },
       "actions": {
         "create": "New user",
+        "refresh": "Refresh",
+        "retry": "Retry",
         "manage": "Manage",
         "prev": "Previous",
         "next": "Next"
@@ -2808,20 +2857,25 @@
         "title": "User detail",
         "emailLabel": "Email",
         "userNameLabel": "Username",
+        "accountHeading": "Account status",
         "lockedCheckbox": "Account locked",
         "emailConfirmed": "Email confirmed",
         "readOnly": "Read only",
-        "lockoutHint": "Enable it to manually lock the user and disable it to remove the lock.",
+        "lockAction": "Lock account",
+        "unlockAction": "Unlock account",
+        "lockoutHint": "The change is applied immediately.",
         "lockoutActiveLabel": "Lockout active:",
         "lockoutEndPrefix": "Ends:",
+        "lockoutUntil": "Until {date}.",
         "rolesHeading": "Roles",
         "noRoles": "No roles",
-        "addRolesPrompt": "Add roles (only the checked ones):",
+        "addRolesPrompt": "Add roles",
         "removeRoleAria": "Remove role {role}",
         "allRolesAssigned": "Already has all assignable roles.",
-        "addRoles": "Add roles",
+        "addRoles": "Add",
         "sendReset": "Send password recovery",
-        "close": "Close"
+        "close": "Close",
+        "loading": "Loading user…"
       },
       "removeRole": {
         "title": "Remove role",
@@ -2831,6 +2885,10 @@
       },
       "errors": {
         "listForbidden": "You don't have permission to list users (Admin role is required in the API)."
+      },
+      "aria": {
+        "list": "Users list",
+        "loadError": "Error loading users"
       },
       "validation": {
         "emailRequired": "Email is required.",
@@ -2851,9 +2909,7 @@
         "title": "Stages",
         "description": "Manage recruitment process stages",
         "headerAria": "Stages header",
-        "listAria": "Stages list",
-        "searchPlaceholder": "Search stages...",
-        "searchAria": "Search stages"
+        "listAria": "Stages list"
       },
       "actions": {
         "statuses": "Statuses",
@@ -2871,8 +2927,7 @@
       "fields": {
         "defaultStage": "Default stage",
         "finalStage": "Final stage",
-        "hiredStage": "Hiring stage",
-        "order": "Order:"
+        "hiredStage": "Hiring stage"
       },
       "switches": {
         "defaultActive": "{name}: default stage active",
@@ -2901,7 +2956,6 @@
         "forbidden": "You do not have permission to change this stage.",
         "notFound": "The stage no longer exists. Reloading list...",
         "deleteFailed": "Could not delete the stage. Please try again.",
-        "reorderFilterHint": "To save the order, show all stages (clear the search filter).",
         "reorderFailed": "Could not reorder stages. Please try again."
       },
       "toasts": {
@@ -2937,10 +2991,20 @@
       }
     },
     "statuses": {
+      "page": {
+        "title": "Stage statuses",
+        "description": "Define the statuses used by vacancy pipeline stages when moving candidates on the board.",
+        "regionAria": "Vacancy stage statuses",
+        "listAria": "Stage statuses list",
+        "newStatusAria": "Create new status"
+      },
       "modal": {
         "title": "Manage statuses",
         "close": "Close",
         "newStatus": "New status",
+        "createTitle": "New status",
+        "editTitle": "Edit status",
+        "createStatus": "Create status",
         "nameLabel": "Status name",
         "namePlaceholder": "E.g.: In progress",
         "cancel": "Cancel",
@@ -2983,8 +3047,6 @@
         "description": "Manage notification templates",
         "headerAria": "Templates header",
         "listAria": "Templates list",
-        "searchPlaceholder": "Search templates...",
-        "searchAria": "Search templates",
         "newTemplate": "New template",
         "newTemplateAria": "Create new template"
       },
@@ -3186,7 +3248,7 @@
       "page": {
         "title": "Document Types",
         "description": "Manage the document types available to candidates.",
-        "createCta": "New document type",
+        "createCta": "Create document type",
         "summaryHelper": "Manage document types available for candidates.",
         "countLoading": "Loading...",
         "countSummary": "{count, plural, one {# document type} other {# document types}}"
@@ -3232,7 +3294,7 @@
       },
       "emptyStates": {
         "noResults": "No results found",
-        "noItems": "No document types registered",
+        "noItems": "No document types created yet",
         "searchHint": "Try searching with other terms.",
         "createHint": "When you create a document type, it will be available to classify candidate identity documents."
       },
@@ -3267,6 +3329,17 @@
           "types": "Interview types",
           "modalities": "Interview modalities",
           "statuses": "Interview statuses"
+        },
+        "pages": {
+          "types": {
+            "description": "Define the interview types recruiters will use when scheduling."
+          },
+          "modalities": {
+            "description": "Define interview modalities and whether they include a Google Meet link."
+          },
+          "statuses": {
+            "description": "Define the statuses in an interview cycle, including terminal statuses."
+          }
         }
       },
       "calendar": {

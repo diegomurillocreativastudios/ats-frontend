@@ -43,14 +43,19 @@
     "reports": "Reportes",
     "settings": "Configuración",
     "stages": "Etapas",
+    "stageStatuses": "Estados",
     "templates": "Plantillas",
     "interviewsCatalog": "Entrevistas — Catálogos",
     "interviewsCalendar": "Entrevistas — Calendario",
     "users": "Usuarios",
+    "administration": "Administración",
     "companies": "Empresas",
     "departments": "Departamentos",
     "modalities": "Modalidades",
-    "documentTypes": "Tipos de documento"
+    "documentTypes": "Tipos de documento",
+    "interviewTypes": "Tipos",
+    "interviewModalities": "Modalidades",
+    "interviewStatuses": "Estados"
   },
   "Topbar": {
     "portalCandidate": "Portal Candidato",
@@ -70,6 +75,7 @@
     "menuCandidate": "Menú candidato",
     "menuRRHH": "Menú RRHH",
     "menuAdmin": "Menú administración",
+    "toggleNavGroup": "Mostrar u ocultar {label}",
     "accountMenu": "Menú de cuenta",
     "roleAdmin": "Administrador",
     "roleRecruiter": "Reclutador",
@@ -281,6 +287,10 @@
         "title": "Etapas",
         "description": "Gestión de etapas y estados del proceso de reclutamiento"
       },
+      "stageStatuses": {
+        "title": "Estados de etapa",
+        "description": "Gestión de los estados de las etapas del proceso de vacantes"
+      },
       "templates": {
         "title": "Plantillas",
         "description": "Gestión de plantillas de notificaciones y documentos"
@@ -300,6 +310,18 @@
       "interviewsCatalog": {
         "title": "Entrevistas",
         "description": "Catálogos de tipos, modalidades y estados de entrevista"
+      },
+      "interviewTypes": {
+        "title": "Tipos de entrevista",
+        "description": "Gestión del catálogo de tipos de entrevista"
+      },
+      "interviewModalities": {
+        "title": "Modalidades de entrevista",
+        "description": "Gestión del catálogo de modalidades de entrevista"
+      },
+      "interviewStatuses": {
+        "title": "Estados de entrevista",
+        "description": "Gestión del catálogo de estados de entrevista"
       },
       "interviewsCalendar": {
         "title": "Calendario de entrevistas | Portal Admin",
@@ -2506,15 +2528,25 @@
           "no": "No",
           "editNameAria": "Editar nombre del tipo",
           "editAria": "Editar {name}",
-          "deleteAria": "Eliminar {name}"
+          "deleteAria": "Eliminar {name}",
+          "refresh": "Refrescar",
+          "edit": "Editar",
+          "retry": "Reintentar"
         },
         "types": {
           "title": "Tipos de entrevista",
           "createAria": "Crear tipo de entrevista",
+          "createCta": "Crear tipo",
+          "createTitle": "Crear tipo de entrevista",
+          "editTitle": "Editar tipo de entrevista",
           "newLabel": "Nuevo tipo",
           "namePlaceholder": "Nombre del tipo",
+          "code": "Código",
+          "listAria": "Listado de tipos de entrevista",
+          "loadErrorAria": "Error al cargar tipos de entrevista",
           "loading": "Cargando tipos…",
-          "empty": "No hay tipos definidos. Añade el primero arriba.",
+          "empty": "Aún no hay tipos de entrevista creados",
+          "emptyBody": "Cuando crees un tipo, quedará disponible para agendar entrevistas.",
           "created": "Tipo de entrevista creado correctamente.",
           "updated": "Tipo de entrevista actualizado correctamente.",
           "deleted": "Tipo de entrevista eliminado correctamente.",
@@ -2533,8 +2565,14 @@
           "terminal": "Terminal",
           "terminalAria": "Estado terminal",
           "displayNameAria": "Nombre visible",
+          "listAria": "Listado de estados de entrevista",
+          "loadErrorAria": "Error al cargar estados de entrevista",
+          "createCta": "Crear estado",
+          "createTitle": "Crear estado de entrevista",
+          "editTitle": "Editar estado de entrevista",
           "loading": "Cargando estados…",
-          "empty": "No hay estados definidos. Añade el primero arriba.",
+          "empty": "Aún no hay estados de entrevista creados",
+          "emptyBody": "Cuando crees un estado, quedará disponible para el ciclo de entrevistas.",
           "created": "Estado de entrevista creado correctamente.",
           "updated": "Estado de entrevista actualizado correctamente.",
           "deleted": "Estado de entrevista eliminado correctamente.",
@@ -2544,14 +2582,20 @@
         "modalities": {
           "title": "Modalidades de entrevista",
           "createAria": "Crear modalidad de entrevista",
+          "createCta": "Crear modalidad",
+          "createTitle": "Crear modalidad de entrevista",
+          "editTitle": "Editar modalidad de entrevista",
           "newLabel": "Nueva modalidad",
           "namePlaceholder": "Nombre visible",
           "googleMeet": "Google Meet",
           "meetLabel": "Meet",
           "meetAria": "Incluir enlace de Google Meet",
           "editNameAria": "Editar nombre de la modalidad",
+          "listAria": "Listado de modalidades de entrevista",
+          "loadErrorAria": "Error al cargar modalidades de entrevista",
           "loading": "Cargando modalidades…",
-          "empty": "No hay modalidades definidas. Añade la primera arriba.",
+          "empty": "Aún no hay modalidades de entrevista creadas",
+          "emptyBody": "Cuando crees una modalidad, quedará disponible para agendar entrevistas.",
           "created": "Modalidad de entrevista creada correctamente.",
           "updated": "Modalidad de entrevista actualizada correctamente.",
           "deleted": "Modalidad de entrevista eliminada correctamente.",
@@ -2760,6 +2804,7 @@
         "roleLabel": "Rol",
         "allRoles": "Todos",
         "lockedOnly": "Solo bloqueados",
+        "lockoutLabel": "Bloqueo",
         "apply": "Aplicar filtros",
         "clear": "Limpiar"
       },
@@ -2767,7 +2812,7 @@
         "email": "Correo",
         "userName": "Usuario",
         "roles": "Roles",
-        "emailOk": "Email OK",
+        "emailOk": "Confirmado",
         "lockout": "Bloqueo",
         "actions": "Acciones"
       },
@@ -2781,15 +2826,19 @@
       },
       "pagination": {
         "perPage": "Por página",
+        "pageSizeAria": "Usuarios por página",
         "refreshAria": "Refrescar listado",
         "regionAria": "Paginación",
         "summary": "Página {page} de {total}"
       },
       "emptyStates": {
-        "noResults": "No hay usuarios con los filtros actuales."
+        "noResults": "No hay usuarios con los filtros actuales.",
+        "description": "Probá ajustar los filtros o creá un usuario nuevo."
       },
       "actions": {
         "create": "Nuevo usuario",
+        "refresh": "Refrescar",
+        "retry": "Reintentar",
         "manage": "Gestionar",
         "prev": "Anterior",
         "next": "Siguiente"
@@ -2808,20 +2857,25 @@
         "title": "Detalle del usuario",
         "emailLabel": "Correo",
         "userNameLabel": "Nombre de usuario",
+        "accountHeading": "Estado de la cuenta",
         "lockedCheckbox": "Cuenta bloqueada",
         "emailConfirmed": "Correo confirmado",
         "readOnly": "Solo lectura",
-        "lockoutHint": "Activalo para bloquear manualmente al usuario y desactivalo para quitar el bloqueo.",
-        "lockoutActiveLabel": "Lockout activo:",
+        "lockAction": "Bloquear cuenta",
+        "unlockAction": "Desbloquear cuenta",
+        "lockoutHint": "El cambio se aplica de inmediato.",
+        "lockoutActiveLabel": "Bloqueo activo:",
         "lockoutEndPrefix": "Fin:",
+        "lockoutUntil": "Hasta {date}.",
         "rolesHeading": "Roles",
         "noRoles": "Sin roles",
-        "addRolesPrompt": "Añadir roles (solo los marcados):",
+        "addRolesPrompt": "Añadir roles",
         "removeRoleAria": "Quitar rol {role}",
         "allRolesAssigned": "Ya tiene todos los roles asignables.",
-        "addRoles": "Añadir roles",
+        "addRoles": "Añadir",
         "sendReset": "Enviar recuperación de contraseña",
-        "close": "Cerrar"
+        "close": "Cerrar",
+        "loading": "Cargando usuario…"
       },
       "removeRole": {
         "title": "Quitar rol",
@@ -2831,6 +2885,10 @@
       },
       "errors": {
         "listForbidden": "No tenés permisos para listar usuarios (se requiere rol Admin en el API)."
+      },
+      "aria": {
+        "list": "Listado de usuarios",
+        "loadError": "Error al cargar usuarios"
       },
       "validation": {
         "emailRequired": "El correo es obligatorio.",
@@ -2851,9 +2909,7 @@
         "title": "Etapas",
         "description": "Gestiona las etapas del proceso de reclutamiento",
         "headerAria": "Encabezado de etapas",
-        "listAria": "Lista de etapas",
-        "searchPlaceholder": "Buscar etapas...",
-        "searchAria": "Buscar etapas"
+        "listAria": "Lista de etapas"
       },
       "actions": {
         "statuses": "Estados",
@@ -2871,8 +2927,7 @@
       "fields": {
         "defaultStage": "Etapa por defecto",
         "finalStage": "Etapa final",
-        "hiredStage": "Etapa de contratación",
-        "order": "Orden:"
+        "hiredStage": "Etapa de contratación"
       },
       "switches": {
         "defaultActive": "{name}: Etapa por defecto activa",
@@ -2901,7 +2956,6 @@
         "forbidden": "No tienes permisos para cambiar esta etapa.",
         "notFound": "La etapa ya no existe. Recargando lista...",
         "deleteFailed": "No se pudo eliminar la etapa. Intenta de nuevo.",
-        "reorderFilterHint": "Para guardar el orden, muestra todas las etapas (sin filtrar la búsqueda).",
         "reorderFailed": "No se pudo reordenar las etapas. Intenta de nuevo."
       },
       "toasts": {
@@ -2937,10 +2991,20 @@
       }
     },
     "statuses": {
+      "page": {
+        "title": "Estados de etapa",
+        "description": "Definí los estados que usan las etapas del proceso de vacantes al mover candidatos en el tablero.",
+        "regionAria": "Estados de etapa de vacantes",
+        "listAria": "Lista de estados de etapa",
+        "newStatusAria": "Crear nuevo estado"
+      },
       "modal": {
         "title": "Gestionar Estados",
         "close": "Cerrar",
         "newStatus": "Nuevo Estado",
+        "createTitle": "Nuevo estado",
+        "editTitle": "Editar estado",
+        "createStatus": "Crear estado",
         "nameLabel": "Nombre del estado",
         "namePlaceholder": "Ej: En proceso",
         "cancel": "Cancelar",
@@ -2983,8 +3047,6 @@
         "description": "Gestiona las plantillas de notificaciones",
         "headerAria": "Encabezado de plantillas",
         "listAria": "Lista de plantillas",
-        "searchPlaceholder": "Buscar plantillas...",
-        "searchAria": "Buscar plantillas",
         "newTemplate": "Nueva Plantilla",
         "newTemplateAria": "Crear nueva plantilla"
       },
@@ -3186,7 +3248,7 @@
       "page": {
         "title": "Tipos de Documento",
         "description": "Administra los tipos de documento disponibles para los candidatos.",
-        "createCta": "Nuevo tipo de documento",
+        "createCta": "Crear tipo de documento",
         "summaryHelper": "Gestiona tipos de documento disponibles para candidatos.",
         "countLoading": "Cargando...",
         "countSummary": "{count, plural, one {# tipo de documento} other {# tipos de documento}}"
@@ -3232,7 +3294,7 @@
       },
       "emptyStates": {
         "noResults": "No se encontraron resultados",
-        "noItems": "No hay tipos de documento registrados",
+        "noItems": "Aún no hay tipos de documento creados",
         "searchHint": "Intenta buscar con otros términos.",
         "createHint": "Cuando crees un tipo de documento, quedará disponible para clasificar documentos de identidad de candidatos."
       },
@@ -3267,6 +3329,17 @@
           "types": "Tipos de entrevista",
           "modalities": "Modalidades de entrevista",
           "statuses": "Estados de entrevista"
+        },
+        "pages": {
+          "types": {
+            "description": "Definí los tipos de entrevista que usarán los reclutadores al agendar."
+          },
+          "modalities": {
+            "description": "Definí las modalidades de entrevista y si incluyen enlace de Google Meet."
+          },
+          "statuses": {
+            "description": "Definí los estados del ciclo de una entrevista, incluidos los estados terminales."
+          }
         }
       },
       "calendar": {

@@ -42,14 +42,19 @@
     "reports": "Report",
     "settings": "Impostazioni",
     "stages": "Fasi",
+    "stageStatuses": "Stati",
     "templates": "Modelli",
     "interviewsCatalog": "Colloqui — Cataloghi",
     "interviewsCalendar": "Colloqui — Calendario",
     "users": "Utenti",
+    "administration": "Amministrazione",
     "companies": "Aziende",
     "departments": "Reparti",
     "modalities": "Modalità",
     "documentTypes": "Tipi di documento",
+    "interviewTypes": "Tipi",
+    "interviewModalities": "Modalità",
+    "interviewStatuses": "Stati",
     "tailorProfile": "Adatta il mio profilo"
   },
   "Topbar": {
@@ -70,6 +75,7 @@
     "menuCandidate": "Menu candidato",
     "menuRRHH": "Menu HR",
     "menuAdmin": "Menu amministrazione",
+    "toggleNavGroup": "Mostra o nascondi {label}",
     "accountMenu": "Menu account",
     "roleAdmin": "Amministratore",
     "roleRecruiter": "Recruiter",
@@ -281,6 +287,10 @@
         "title": "Fasi",
         "description": "Gestione delle fasi e degli stati del processo di selezione"
       },
+      "stageStatuses": {
+        "title": "Stati di fase",
+        "description": "Gestione degli stati delle fasi del processo delle posizioni"
+      },
       "templates": {
         "title": "Modelli",
         "description": "Gestione dei modelli di notifiche e documenti"
@@ -300,6 +310,18 @@
       "interviewsCatalog": {
         "title": "Colloqui",
         "description": "Cataloghi di tipi, modalità e stati dei colloqui"
+      },
+      "interviewTypes": {
+        "title": "Tipi di colloquio",
+        "description": "Gestione del catalogo dei tipi di colloquio"
+      },
+      "interviewModalities": {
+        "title": "Modalità di colloquio",
+        "description": "Gestione del catalogo delle modalità di colloquio"
+      },
+      "interviewStatuses": {
+        "title": "Stati di colloquio",
+        "description": "Gestione del catalogo degli stati di colloquio"
       },
       "interviewsCalendar": {
         "title": "Interview calendar | Admin Portal",
@@ -2438,15 +2460,25 @@
           "no": "No",
           "editNameAria": "Modifica nome del tipo",
           "editAria": "Modifica {name}",
-          "deleteAria": "Elimina {name}"
+          "deleteAria": "Elimina {name}",
+          "refresh": "Aggiorna",
+          "edit": "Modifica",
+          "retry": "Riprova"
         },
         "types": {
           "title": "Tipi di colloquio",
           "createAria": "Crea tipo di colloquio",
+          "createCta": "Crea tipo",
+          "createTitle": "Crea tipo di colloquio",
+          "editTitle": "Modifica tipo di colloquio",
           "newLabel": "Nuovo tipo",
           "namePlaceholder": "Nome del tipo",
+          "code": "Codice",
+          "listAria": "Elenco dei tipi di colloquio",
+          "loadErrorAria": "Errore nel caricamento dei tipi di colloquio",
           "loading": "Caricamento tipi…",
-          "empty": "Nessun tipo definito. Aggiungi il primo sopra.",
+          "empty": "Non ci sono ancora tipi di colloquio creati",
+          "emptyBody": "Quando crei un tipo, sarà disponibile per pianificare i colloqui.",
           "created": "Tipo di colloquio creato correttamente.",
           "updated": "Tipo di colloquio aggiornato correttamente.",
           "deleted": "Tipo di colloquio eliminato correttamente.",
@@ -2465,8 +2497,14 @@
           "terminal": "Terminale",
           "terminalAria": "Stato terminale",
           "displayNameAria": "Nome visibile",
+          "listAria": "Elenco degli stati dei colloqui",
+          "loadErrorAria": "Errore nel caricamento degli stati dei colloqui",
+          "createCta": "Crea stato",
+          "createTitle": "Crea stato del colloquio",
+          "editTitle": "Modifica stato del colloquio",
           "loading": "Caricamento stati…",
-          "empty": "Nessuno stato definito. Aggiungi il primo sopra.",
+          "empty": "Non ci sono ancora stati dei colloqui creati",
+          "emptyBody": "Quando crei uno stato, sarà disponibile per il ciclo dei colloqui.",
           "created": "Stato del colloquio creato correttamente.",
           "updated": "Stato del colloquio aggiornato correttamente.",
           "deleted": "Stato del colloquio eliminato correttamente.",
@@ -2476,14 +2514,20 @@
         "modalities": {
           "title": "Modalità di colloquio",
           "createAria": "Crea modalità di colloquio",
+          "createCta": "Crea modalità",
+          "createTitle": "Crea modalità di colloquio",
+          "editTitle": "Modifica modalità di colloquio",
           "newLabel": "Nuova modalità",
           "namePlaceholder": "Nome visibile",
           "googleMeet": "Google Meet",
           "meetLabel": "Meet",
           "meetAria": "Includi link Google Meet",
           "editNameAria": "Modifica nome della modalità",
+          "listAria": "Elenco delle modalità di colloquio",
+          "loadErrorAria": "Errore nel caricamento delle modalità di colloquio",
           "loading": "Caricamento modalità…",
-          "empty": "Nessuna modalità definita. Aggiungi la prima sopra.",
+          "empty": "Non ci sono ancora modalità di colloquio create",
+          "emptyBody": "Quando crei una modalità, sarà disponibile per pianificare i colloqui.",
           "created": "Modalità di colloquio creata correttamente.",
           "updated": "Modalità di colloquio aggiornata correttamente.",
           "deleted": "Modalità di colloquio eliminata correttamente.",
@@ -2692,6 +2736,7 @@
         "roleLabel": "Ruolo",
         "allRoles": "Tutti",
         "lockedOnly": "Solo bloccati",
+        "lockoutLabel": "Blocco",
         "apply": "Applica filtri",
         "clear": "Cancella"
       },
@@ -2699,7 +2744,7 @@
         "email": "Email",
         "userName": "Utente",
         "roles": "Ruoli",
-        "emailOk": "Email OK",
+        "emailOk": "Confermato",
         "lockout": "Blocco",
         "actions": "Azioni"
       },
@@ -2713,15 +2758,19 @@
       },
       "pagination": {
         "perPage": "Per pagina",
+        "pageSizeAria": "Utenti per pagina",
         "refreshAria": "Aggiorna elenco",
         "regionAria": "Paginazione",
         "summary": "Pagina {page} di {total}"
       },
       "emptyStates": {
-        "noResults": "Nessun utente corrisponde ai filtri attuali."
+        "noResults": "Nessun utente corrisponde ai filtri attuali.",
+        "description": "Prova a modificare i filtri o crea un nuovo utente."
       },
       "actions": {
         "create": "Nuovo utente",
+        "refresh": "Aggiorna",
+        "retry": "Riprova",
         "manage": "Gestisci",
         "prev": "Precedente",
         "next": "Successivo"
@@ -2740,20 +2789,25 @@
         "title": "Dettaglio utente",
         "emailLabel": "Email",
         "userNameLabel": "Nome utente",
+        "accountHeading": "Stato dell'account",
         "lockedCheckbox": "Account bloccato",
         "emailConfirmed": "Email confermata",
         "readOnly": "Sola lettura",
-        "lockoutHint": "Attivalo per bloccare manualmente l'utente e disattivalo per rimuovere il blocco.",
+        "lockAction": "Blocca account",
+        "unlockAction": "Sblocca account",
+        "lockoutHint": "La modifica viene applicata subito.",
         "lockoutActiveLabel": "Blocco attivo:",
         "lockoutEndPrefix": "Fine:",
+        "lockoutUntil": "Fino al {date}.",
         "rolesHeading": "Ruoli",
         "noRoles": "Nessun ruolo",
-        "addRolesPrompt": "Aggiungi ruoli (solo quelli selezionati):",
+        "addRolesPrompt": "Aggiungi ruoli",
         "removeRoleAria": "Rimuovi ruolo {role}",
         "allRolesAssigned": "Ha già tutti i ruoli assegnabili.",
-        "addRoles": "Aggiungi ruoli",
+        "addRoles": "Aggiungi",
         "sendReset": "Invia recupero password",
-        "close": "Chiudi"
+        "close": "Chiudi",
+        "loading": "Caricamento utente…"
       },
       "removeRole": {
         "title": "Rimuovi ruolo",
@@ -2763,6 +2817,10 @@
       },
       "errors": {
         "listForbidden": "Non hai i permessi per elencare gli utenti (è richiesto il ruolo Admin nell'API)."
+      },
+      "aria": {
+        "list": "Elenco utenti",
+        "loadError": "Errore nel caricamento degli utenti"
       },
       "validation": {
         "emailRequired": "L'email è obbligatoria.",
@@ -2783,9 +2841,7 @@
         "title": "Fasi",
         "description": "Gestisci le fasi del processo di selezione",
         "headerAria": "Intestazione fasi",
-        "listAria": "Elenco fasi",
-        "searchPlaceholder": "Cerca fasi...",
-        "searchAria": "Cerca fasi"
+        "listAria": "Elenco fasi"
       },
       "actions": {
         "statuses": "Stati",
@@ -2803,8 +2859,7 @@
       "fields": {
         "defaultStage": "Fase predefinita",
         "finalStage": "Fase finale",
-        "hiredStage": "Fase di assunzione",
-        "order": "Ordine:"
+        "hiredStage": "Fase di assunzione"
       },
       "switches": {
         "defaultActive": "{name}: fase predefinita attiva",
@@ -2833,7 +2888,6 @@
         "forbidden": "Non hai i permessi per modificare questa fase.",
         "notFound": "La fase non esiste più. Ricaricamento elenco...",
         "deleteFailed": "Impossibile eliminare la fase. Riprova.",
-        "reorderFilterHint": "Per salvare l'ordine, mostra tutte le fasi (senza filtro di ricerca).",
         "reorderFailed": "Impossibile riordinare le fasi. Riprova."
       },
       "toasts": {
@@ -2869,10 +2923,20 @@
       }
     },
     "statuses": {
+      "page": {
+        "title": "Stati di fase",
+        "description": "Definisci gli stati usati dalle fasi del processo delle posizioni quando sposti i candidati nella bacheca.",
+        "regionAria": "Stati di fase delle posizioni",
+        "listAria": "Elenco stati di fase",
+        "newStatusAria": "Crea nuovo stato"
+      },
       "modal": {
         "title": "Gestisci stati",
         "close": "Chiudi",
         "newStatus": "Nuovo stato",
+        "createTitle": "Nuovo stato",
+        "editTitle": "Modifica stato",
+        "createStatus": "Crea stato",
         "nameLabel": "Nome dello stato",
         "namePlaceholder": "Es.: In corso",
         "cancel": "Annulla",
@@ -2915,8 +2979,6 @@
         "description": "Gestisci i modelli di notifiche",
         "headerAria": "Intestazione modelli",
         "listAria": "Elenco modelli",
-        "searchPlaceholder": "Cerca modelli...",
-        "searchAria": "Cerca modelli",
         "newTemplate": "Nuovo modello",
         "newTemplateAria": "Crea nuovo modello"
       },
@@ -3118,7 +3180,7 @@
       "page": {
         "title": "Tipi di documento",
         "description": "Gestisci i tipi di documento disponibili per i candidati.",
-        "createCta": "Nuovo tipo di documento",
+        "createCta": "Crea tipo di documento",
         "summaryHelper": "Gestisci i tipi di documento disponibili per i candidati.",
         "countLoading": "Caricamento…",
         "countSummary": "{count, plural, one {# tipo di documento} other {# tipi di documento}}"
@@ -3164,7 +3226,7 @@
       },
       "emptyStates": {
         "noResults": "Nessun risultato trovato",
-        "noItems": "Nessun tipo di documento registrato",
+        "noItems": "Nessun tipo di documento creato",
         "searchHint": "Prova a cercare con altri termini.",
         "createHint": "Quando crei un tipo di documento, sarà disponibile per classificare i documenti di identità dei candidati."
       },
@@ -3199,6 +3261,17 @@
           "types": "Tipi di colloquio",
           "modalities": "Modalità di colloquio",
           "statuses": "Stati dei colloqui"
+        },
+        "pages": {
+          "types": {
+            "description": "Definisci i tipi di colloquio che i recruiter useranno in fase di pianificazione."
+          },
+          "modalities": {
+            "description": "Definisci le modalità di colloquio e se includono un link di Google Meet."
+          },
+          "statuses": {
+            "description": "Definisci gli stati del ciclo di un colloquio, inclusi gli stati terminali."
+          }
         }
       },
       "calendar": {

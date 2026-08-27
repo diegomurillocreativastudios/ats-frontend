@@ -42,14 +42,19 @@
     "reports": "Rapports",
     "settings": "Paramètres",
     "stages": "Étapes",
+    "stageStatuses": "Statuts",
     "templates": "Modèles",
     "interviewsCatalog": "Entretiens — Catalogues",
     "interviewsCalendar": "Entretiens — Calendrier",
     "users": "Utilisateurs",
+    "administration": "Administration",
     "companies": "Entreprises",
     "departments": "Départements",
     "modalities": "Modalités",
     "documentTypes": "Types de document",
+    "interviewTypes": "Types",
+    "interviewModalities": "Modalités",
+    "interviewStatuses": "Statuts",
     "tailorProfile": "Adapter mon profil"
   },
   "Topbar": {
@@ -70,6 +75,7 @@
     "menuCandidate": "Menu candidat",
     "menuRRHH": "Menu RH",
     "menuAdmin": "Menu administration",
+    "toggleNavGroup": "Afficher ou masquer {label}",
     "accountMenu": "Menu du compte",
     "roleAdmin": "Administrateur",
     "roleRecruiter": "Recruteur",
@@ -281,6 +287,10 @@
         "title": "Étapes",
         "description": "Gestion des étapes et des statuts du processus de recrutement"
       },
+      "stageStatuses": {
+        "title": "Statuts d'étape",
+        "description": "Gestion des statuts utilisés par les étapes des offres"
+      },
       "templates": {
         "title": "Modèles",
         "description": "Gestion des modèles de notifications et de documents"
@@ -300,6 +310,18 @@
       "interviewsCatalog": {
         "title": "Entretiens",
         "description": "Catalogues des types, modalités et statuts d'entretien"
+      },
+      "interviewTypes": {
+        "title": "Types d'entretien",
+        "description": "Gestion du catalogue des types d'entretien"
+      },
+      "interviewModalities": {
+        "title": "Modalités d'entretien",
+        "description": "Gestion du catalogue des modalités d'entretien"
+      },
+      "interviewStatuses": {
+        "title": "Statuts d'entretien",
+        "description": "Gestion du catalogue des statuts d'entretien"
       },
       "interviewsCalendar": {
         "title": "Interview calendar | Admin Portal",
@@ -2438,15 +2460,25 @@
           "no": "Non",
           "editNameAria": "Modifier le nom du type",
           "editAria": "Modifier {name}",
-          "deleteAria": "Supprimer {name}"
+          "deleteAria": "Supprimer {name}",
+          "refresh": "Actualiser",
+          "edit": "Modifier",
+          "retry": "Réessayer"
         },
         "types": {
           "title": "Types d'entretien",
           "createAria": "Créer un type d'entretien",
+          "createCta": "Créer un type",
+          "createTitle": "Créer un type d'entretien",
+          "editTitle": "Modifier le type d'entretien",
           "newLabel": "Nouveau type",
           "namePlaceholder": "Nom du type",
+          "code": "Code",
+          "listAria": "Liste des types d'entretien",
+          "loadErrorAria": "Erreur lors du chargement des types d'entretien",
           "loading": "Chargement des types…",
-          "empty": "Aucun type défini. Ajoutez le premier ci-dessus.",
+          "empty": "Aucun type d'entretien n'a encore été créé",
+          "emptyBody": "Lorsque vous créez un type, il sera disponible pour planifier des entretiens.",
           "created": "Type d'entretien créé avec succès.",
           "updated": "Type d'entretien mis à jour avec succès.",
           "deleted": "Type d'entretien supprimé avec succès.",
@@ -2465,8 +2497,14 @@
           "terminal": "Terminal",
           "terminalAria": "Statut terminal",
           "displayNameAria": "Nom visible",
+          "listAria": "Liste des statuts d'entretien",
+          "loadErrorAria": "Erreur lors du chargement des statuts d'entretien",
+          "createCta": "Créer un statut",
+          "createTitle": "Créer un statut d'entretien",
+          "editTitle": "Modifier le statut d'entretien",
           "loading": "Chargement des statuts…",
-          "empty": "Aucun statut défini. Ajoutez le premier ci-dessus.",
+          "empty": "Aucun statut d'entretien n'a encore été créé",
+          "emptyBody": "Lorsque vous créez un statut, il sera disponible pour le cycle des entretiens.",
           "created": "Statut d'entretien créé avec succès.",
           "updated": "Statut d'entretien mis à jour avec succès.",
           "deleted": "Statut d'entretien supprimé avec succès.",
@@ -2476,14 +2514,20 @@
         "modalities": {
           "title": "Modalités d'entretien",
           "createAria": "Créer une modalité d'entretien",
+          "createCta": "Créer une modalité",
+          "createTitle": "Créer une modalité d'entretien",
+          "editTitle": "Modifier la modalité d'entretien",
           "newLabel": "Nouvelle modalité",
           "namePlaceholder": "Nom visible",
           "googleMeet": "Google Meet",
           "meetLabel": "Meet",
           "meetAria": "Inclure un lien Google Meet",
           "editNameAria": "Modifier le nom de la modalité",
+          "listAria": "Liste des modalités d'entretien",
+          "loadErrorAria": "Erreur lors du chargement des modalités d'entretien",
           "loading": "Chargement des modalités…",
-          "empty": "Aucune modalité définie. Ajoutez la première ci-dessus.",
+          "empty": "Aucune modalité d'entretien n'a encore été créée",
+          "emptyBody": "Lorsque vous créez une modalité, elle sera disponible pour planifier des entretiens.",
           "created": "Modalité d'entretien créée avec succès.",
           "updated": "Modalité d'entretien mise à jour avec succès.",
           "deleted": "Modalité d'entretien supprimée avec succès.",
@@ -2692,6 +2736,7 @@
         "roleLabel": "Rôle",
         "allRoles": "Tous",
         "lockedOnly": "Verrouillés uniquement",
+        "lockoutLabel": "Verrouillage",
         "apply": "Appliquer les filtres",
         "clear": "Effacer"
       },
@@ -2699,7 +2744,7 @@
         "email": "E-mail",
         "userName": "Utilisateur",
         "roles": "Rôles",
-        "emailOk": "E-mail OK",
+        "emailOk": "Confirmé",
         "lockout": "Verrouillage",
         "actions": "Actions"
       },
@@ -2713,15 +2758,19 @@
       },
       "pagination": {
         "perPage": "Par page",
+        "pageSizeAria": "Utilisateurs par page",
         "refreshAria": "Actualiser la liste",
         "regionAria": "Pagination",
         "summary": "Page {page} sur {total}"
       },
       "emptyStates": {
-        "noResults": "Aucun utilisateur ne correspond aux filtres actuels."
+        "noResults": "Aucun utilisateur ne correspond aux filtres actuels.",
+        "description": "Essayez d'ajuster les filtres ou créez un nouvel utilisateur."
       },
       "actions": {
         "create": "Nouvel utilisateur",
+        "refresh": "Actualiser",
+        "retry": "Réessayer",
         "manage": "Gérer",
         "prev": "Précédent",
         "next": "Suivant"
@@ -2740,20 +2789,25 @@
         "title": "Détail de l'utilisateur",
         "emailLabel": "E-mail",
         "userNameLabel": "Nom d'utilisateur",
+        "accountHeading": "État du compte",
         "lockedCheckbox": "Compte verrouillé",
         "emailConfirmed": "E-mail confirmé",
         "readOnly": "Lecture seule",
-        "lockoutHint": "Activez-le pour verrouiller manuellement l'utilisateur et désactivez-le pour retirer le verrouillage.",
+        "lockAction": "Verrouiller le compte",
+        "unlockAction": "Déverrouiller le compte",
+        "lockoutHint": "Le changement s'applique immédiatement.",
         "lockoutActiveLabel": "Verrouillage actif :",
         "lockoutEndPrefix": "Fin :",
+        "lockoutUntil": "Jusqu'au {date}.",
         "rolesHeading": "Rôles",
         "noRoles": "Aucun rôle",
-        "addRolesPrompt": "Ajouter des rôles (uniquement ceux cochés) :",
+        "addRolesPrompt": "Ajouter des rôles",
         "removeRoleAria": "Retirer le rôle {role}",
         "allRolesAssigned": "Possède déjà tous les rôles attribuables.",
-        "addRoles": "Ajouter des rôles",
+        "addRoles": "Ajouter",
         "sendReset": "Envoyer la récupération du mot de passe",
-        "close": "Fermer"
+        "close": "Fermer",
+        "loading": "Chargement de l'utilisateur…"
       },
       "removeRole": {
         "title": "Retirer le rôle",
@@ -2763,6 +2817,10 @@
       },
       "errors": {
         "listForbidden": "Vous n'avez pas les autorisations pour lister les utilisateurs (rôle Admin requis dans l'API)."
+      },
+      "aria": {
+        "list": "Liste des utilisateurs",
+        "loadError": "Erreur lors du chargement des utilisateurs"
       },
       "validation": {
         "emailRequired": "L'e-mail est obligatoire.",
@@ -2783,9 +2841,7 @@
         "title": "Étapes",
         "description": "Gérez les étapes du processus de recrutement",
         "headerAria": "En-tête des étapes",
-        "listAria": "Liste des étapes",
-        "searchPlaceholder": "Rechercher des étapes...",
-        "searchAria": "Rechercher des étapes"
+        "listAria": "Liste des étapes"
       },
       "actions": {
         "statuses": "Statuts",
@@ -2803,8 +2859,7 @@
       "fields": {
         "defaultStage": "Étape par défaut",
         "finalStage": "Étape finale",
-        "hiredStage": "Étape d'embauche",
-        "order": "Ordre :"
+        "hiredStage": "Étape d'embauche"
       },
       "switches": {
         "defaultActive": "{name} : étape par défaut active",
@@ -2833,7 +2888,6 @@
         "forbidden": "Vous n'avez pas l'autorisation de modifier cette étape.",
         "notFound": "L'étape n'existe plus. Rechargement de la liste...",
         "deleteFailed": "Impossible de supprimer l'étape. Veuillez réessayer.",
-        "reorderFilterHint": "Pour enregistrer l'ordre, affichez toutes les étapes (sans filtre de recherche).",
         "reorderFailed": "Impossible de réordonner les étapes. Veuillez réessayer."
       },
       "toasts": {
@@ -2869,10 +2923,20 @@
       }
     },
     "statuses": {
+      "page": {
+        "title": "Statuts d'étape",
+        "description": "Définissez les statuts utilisés par les étapes des offres lors du déplacement des candidats sur le tableau.",
+        "regionAria": "Statuts d'étape des offres",
+        "listAria": "Liste des statuts d'étape",
+        "newStatusAria": "Créer un nouveau statut"
+      },
       "modal": {
         "title": "Gérer les statuts",
         "close": "Fermer",
         "newStatus": "Nouveau statut",
+        "createTitle": "Nouveau statut",
+        "editTitle": "Modifier le statut",
+        "createStatus": "Créer un statut",
         "nameLabel": "Nom du statut",
         "namePlaceholder": "Ex. : En cours",
         "cancel": "Annuler",
@@ -2915,8 +2979,6 @@
         "description": "Gérez les modèles de notifications",
         "headerAria": "En-tête des modèles",
         "listAria": "Liste des modèles",
-        "searchPlaceholder": "Rechercher des modèles...",
-        "searchAria": "Rechercher des modèles",
         "newTemplate": "Nouveau modèle",
         "newTemplateAria": "Créer un nouveau modèle"
       },
@@ -3118,7 +3180,7 @@
       "page": {
         "title": "Types de document",
         "description": "Gérez les types de document disponibles pour les candidats.",
-        "createCta": "Nouveau type de document",
+        "createCta": "Créer un type de document",
         "summaryHelper": "Gérez les types de document disponibles pour les candidats.",
         "countLoading": "Chargement…",
         "countSummary": "{count, plural, one {# type de document} other {# types de document}}"
@@ -3164,7 +3226,7 @@
       },
       "emptyStates": {
         "noResults": "Aucun résultat trouvé",
-        "noItems": "Aucun type de document enregistré",
+        "noItems": "Aucun type de document créé pour le moment",
         "searchHint": "Essayez de rechercher avec d'autres termes.",
         "createHint": "Lorsque vous créez un type de document, il sera disponible pour classer les documents d'identité des candidats."
       },
@@ -3199,6 +3261,17 @@
           "types": "Types d'entretien",
           "modalities": "Modalités d'entretien",
           "statuses": "Statuts d'entretien"
+        },
+        "pages": {
+          "types": {
+            "description": "Définissez les types d'entretien que les recruteurs utiliseront pour planifier."
+          },
+          "modalities": {
+            "description": "Définissez les modalités d'entretien et si elles incluent un lien Google Meet."
+          },
+          "statuses": {
+            "description": "Définissez les statuts du cycle d'un entretien, y compris les statuts terminaux."
+          }
         }
       },
       "calendar": {

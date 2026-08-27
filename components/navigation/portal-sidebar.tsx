@@ -10,7 +10,12 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { ChevronsUpDown, LogOut, Shield, type LucideIcon } from "lucide-react"
+import {
+  ChevronsUpDown,
+  LogOut,
+  Shield,
+  type LucideIcon,
+} from "lucide-react"
 import ProductBrand from "@/components/branding/ProductBrand"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { getInitials } from "@/lib/getInitials"
@@ -44,6 +49,14 @@ interface SidebarNavItemProps {
   icon: LucideIcon
   label: string
   isActive: boolean
+  nested?: boolean
+}
+
+interface SidebarNavGroupProps {
+  id: string
+  icon: LucideIcon
+  label: string
+  children: ReactNode
 }
 
 interface SidebarUserFooterProps {
@@ -95,11 +108,12 @@ export function SidebarNavItem({
   icon: Icon,
   label,
   isActive,
+  nested = false,
 }: SidebarNavItemProps) {
   return (
     <Link
       href={href}
-      className={`${NAV_ITEM_BASE_CLASS} ${isActive ? NAV_ITEM_ACTIVE_CLASS : NAV_ITEM_IDLE_CLASS}`}
+      className={`${NAV_ITEM_BASE_CLASS} ${nested ? "py-2" : ""} ${isActive ? NAV_ITEM_ACTIVE_CLASS : NAV_ITEM_IDLE_CLASS}`}
       aria-current={isActive ? "page" : undefined}
     >
       <span
@@ -110,6 +124,40 @@ export function SidebarNavItem({
       </span>
       {label}
     </Link>
+  )
+}
+
+/**
+ * Always-open section. The label is visual grouping only; destinations live in children.
+ */
+export function SidebarNavGroup({
+  id,
+  icon: Icon,
+  label,
+  children,
+}: SidebarNavGroupProps) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <div
+        className={`${NAV_ITEM_BASE_CLASS} cursor-default text-gray-600`}
+      >
+        <span
+          className="flex h-5 w-5 shrink-0 items-center justify-center"
+          aria-hidden
+        >
+          <Icon className="h-4.5 w-4.5" strokeWidth={1.75} />
+        </span>
+        <span className="min-w-0 truncate">{label}</span>
+      </div>
+      <div
+        id={id}
+        className="ml-4 flex flex-col gap-0.5 border-l border-(--glass-hairline) pl-2"
+        role="group"
+        aria-label={label}
+      >
+        {children}
+      </div>
+    </div>
   )
 }
 

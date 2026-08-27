@@ -100,12 +100,72 @@ describe("Topbars i18n (Etapa 3)", () => {
   })
 
   it("AdminTopbar traduce el breadcrumb de etapas con la misma clave que el sidebar", () => {
-    usePathnameMock.mockReturnValue("/portal-admin/etapas")
+    usePathnameMock.mockReturnValue("/portal-admin/vacantes/etapas")
     const { unmount } = renderWithIntl(<AdminTopbar />, "es")
-    expect(screen.getByText("Etapas")).toBeInTheDocument()
+    const crumbsEs = screen.getByRole("navigation", { name: "Migas de pan" })
+    expect(within(crumbsEs).getByRole("link", { name: "Vacantes" })).toHaveAttribute(
+      "href",
+      "/portal-admin/vacantes",
+    )
+    expect(within(crumbsEs).getByText("Etapas")).toHaveAttribute(
+      "aria-current",
+      "page",
+    )
     unmount()
 
     renderWithIntl(<AdminTopbar />, "en")
-    expect(screen.getByText("Stages")).toBeInTheDocument()
+    const crumbsEn = screen.getByRole("navigation", { name: "Breadcrumb" })
+    expect(within(crumbsEn).getByRole("link", { name: "Vacancies" })).toHaveAttribute(
+      "href",
+      "/portal-admin/vacantes",
+    )
+    expect(within(crumbsEn).getByText("Stages")).toHaveAttribute(
+      "aria-current",
+      "page",
+    )
+  })
+
+  it("AdminTopbar traduce el breadcrumb de estados de etapa", () => {
+    usePathnameMock.mockReturnValue("/portal-admin/vacantes/estados")
+    const { unmount } = renderWithIntl(<AdminTopbar />, "es")
+    const crumbsEs = screen.getByRole("navigation", { name: "Migas de pan" })
+    expect(within(crumbsEs).getByRole("link", { name: "Vacantes" })).toBeInTheDocument()
+    expect(within(crumbsEs).getByText("Estados")).toHaveAttribute(
+      "aria-current",
+      "page",
+    )
+    unmount()
+
+    renderWithIntl(<AdminTopbar />, "en")
+    const crumbsEn = screen.getByRole("navigation", { name: "Breadcrumb" })
+    expect(within(crumbsEn).getByText("Statuses")).toHaveAttribute(
+      "aria-current",
+      "page",
+    )
+  })
+
+  it("AdminTopbar anida entrevistas y administración en las migas", () => {
+    usePathnameMock.mockReturnValue("/portal-admin/entrevistas/tipos")
+    const { unmount } = renderWithIntl(<AdminTopbar />, "es")
+    const interviewCrumbs = screen.getByRole("navigation", { name: "Migas de pan" })
+    expect(
+      within(interviewCrumbs).getByRole("link", { name: "Entrevistas" }),
+    ).toHaveAttribute("href", "/portal-admin/entrevistas")
+    expect(within(interviewCrumbs).getByText("Tipos")).toHaveAttribute(
+      "aria-current",
+      "page",
+    )
+    unmount()
+
+    usePathnameMock.mockReturnValue("/portal-admin/administracion/usuarios")
+    renderWithIntl(<AdminTopbar />, "es")
+    const adminCrumbs = screen.getByRole("navigation", { name: "Migas de pan" })
+    expect(
+      within(adminCrumbs).getByRole("link", { name: "Administración" }),
+    ).toHaveAttribute("href", "/portal-admin/administracion")
+    expect(within(adminCrumbs).getByText("Usuarios")).toHaveAttribute(
+      "aria-current",
+      "page",
+    )
   })
 })

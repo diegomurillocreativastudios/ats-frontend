@@ -147,7 +147,7 @@ describe("AdminUsuariosContent i18n (Etapa 13)", () => {
     renderWithIntl(<AdminUsuariosContent />, "es")
 
     expect((await screen.findAllByText("Usuarios")).length).toBeGreaterThan(0)
-    expect(screen.getByText("Nuevo usuario")).toBeInTheDocument()
+    expect(screen.getAllByText("Nuevo usuario").length).toBeGreaterThan(0)
     expect(
       await screen.findByText("No hay usuarios con los filtros actuales."),
     ).toBeInTheDocument()
@@ -159,7 +159,7 @@ describe("AdminUsuariosContent i18n (Etapa 13)", () => {
     renderWithIntl(<AdminUsuariosContent />, "en")
 
     expect((await screen.findAllByText("Users")).length).toBeGreaterThan(0)
-    expect(screen.getByText("New user")).toBeInTheDocument()
+    expect(screen.getAllByText("New user").length).toBeGreaterThan(0)
     expect(
       await screen.findByText("No users match the current filters."),
     ).toBeInTheDocument()

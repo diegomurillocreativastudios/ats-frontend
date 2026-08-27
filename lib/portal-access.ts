@@ -19,7 +19,7 @@ export const PORTAL_HOME_HREF: Record<PortalKey, string> = {
   candidate: "/portal-candidato",
   opportunities: "/portal-oportunidades",
   rrhh: "/portal-rrhh",
-  admin: "/portal-admin/usuarios",
+  admin: "/portal-admin/administracion/usuarios",
 }
 
 /**

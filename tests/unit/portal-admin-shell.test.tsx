@@ -10,7 +10,7 @@ const { useCurrentUserMock, usePathnameMock } = vi.hoisted(() => ({
     user: { name: "admin", email: "admin@example.com", role: "admin" },
     loading: false,
   })),
-  usePathnameMock: vi.fn(() => "/portal-admin/usuarios"),
+  usePathnameMock: vi.fn(() => "/portal-admin/administracion/usuarios"),
 }))
 
 vi.mock("@/hooks/useCurrentUser", () => ({
@@ -34,7 +34,7 @@ function renderShell() {
 
 beforeEach(() => {
   useCurrentUserMock.mockClear()
-  usePathnameMock.mockReturnValue("/portal-admin/usuarios")
+  usePathnameMock.mockReturnValue("/portal-admin/administracion/usuarios")
 })
 
 describe("PortalAdminShell", () => {

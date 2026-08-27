@@ -6,50 +6,48 @@ import {
   Briefcase,
   Building2,
   Calendar,
-  CalendarDays,
+  CircleDot,
   ClipboardList,
-  Cog,
   FileText,
   IdCard,
-  Landmark,
+  ListChecks,
+  Shield,
+  Tags,
   Users,
+  Video,
+  type LucideIcon,
 } from "lucide-react"
 import {
   PortalSidebarFrame,
+  SidebarNavGroup,
   SidebarNavItem,
   SidebarUserFooter,
 } from "@/components/navigation/portal-sidebar"
 import {
-  ADMIN_PORTAL_NAV_LINKS,
-  ADMIN_SETTINGS_NAV_LINK,
+  ADMIN_PORTAL_NAV_ITEMS,
+  isAdminNavHrefActive,
+  type AdminPortalNavLabelKey,
 } from "@/lib/admin-portal-nav"
 
-const NAV_ICONS = {
+const NAV_ICONS: Record<
+  Exclude<AdminPortalNavLabelKey, "settings">,
+  LucideIcon
+> = {
+  administration: Shield,
+  vacancies: Briefcase,
   stages: ClipboardList,
-  templates: FileText,
-  interviewsCatalog: Calendar,
-  interviewsCalendar: CalendarDays,
-  users: Users,
-  companies: Landmark,
+  stageStatuses: CircleDot,
   departments: Building2,
   modalities: Briefcase,
+  templates: FileText,
+  interviews: Calendar,
+  interviewTypes: Tags,
+  interviewModalities: Video,
+  interviewStatuses: ListChecks,
+  users: Users,
   documentTypes: IdCard,
-  settings: Cog,
-} as const
-
-const navItems = ADMIN_PORTAL_NAV_LINKS.map((item) => ({
-  ...item,
-  icon: NAV_ICONS[item.labelKey],
-}))
-
-const settingsNavItem = {
-  ...ADMIN_SETTINGS_NAV_LINK,
-  icon: NAV_ICONS[ADMIN_SETTINGS_NAV_LINK.labelKey],
-}
-
-function isAdminNavActive(pathname: string, href: string): boolean {
-  if (href === "/portal-admin/entrevistas") return pathname === href
-  return pathname === href || pathname.startsWith(`${href}/`)
+  companies: Building2,
+  interviewsCalendar: Calendar,
 }
 
 export default function AdminSidebar() {
@@ -68,23 +66,39 @@ export default function AdminSidebar() {
         aria-label={tSidebar("menuAdmin")}
       >
         <div className="flex flex-col gap-0.5">
-          {navItems.map((item) => (
-            <SidebarNavItem
-              key={item.href}
-              href={item.href}
-              icon={item.icon}
-              label={t(item.labelKey)}
-              isActive={isAdminNavActive(pathname, item.href)}
-            />
-          ))}
-        </div>
-        <div className="mt-auto flex flex-col gap-0.5 pt-4">
-          <SidebarNavItem
-            href={settingsNavItem.href}
-            icon={settingsNavItem.icon}
-            label={t(settingsNavItem.labelKey)}
-            isActive={isAdminNavActive(pathname, settingsNavItem.href)}
-          />
+          {ADMIN_PORTAL_NAV_ITEMS.map((item) => {
+            if (item.kind === "link") {
+              return (
+                <SidebarNavItem
+                  key={item.href}
+                  href={item.href}
+                  icon={NAV_ICONS[item.labelKey]}
+                  label={t(item.labelKey)}
+                  isActive={isAdminNavHrefActive(pathname, item.href)}
+                />
+              )
+            }
+
+            return (
+              <SidebarNavGroup
+                key={item.id}
+                id={`admin-nav-${item.id}`}
+                icon={NAV_ICONS[item.labelKey]}
+                label={t(item.labelKey)}
+              >
+                {item.children.map((child) => (
+                  <SidebarNavItem
+                    key={child.href}
+                    href={child.href}
+                    icon={NAV_ICONS[child.labelKey]}
+                    label={t(child.labelKey)}
+                    isActive={isAdminNavHrefActive(pathname, child.href)}
+                    nested
+                  />
+                ))}
+              </SidebarNavGroup>
+            )
+          })}
         </div>
       </nav>
     </PortalSidebarFrame>

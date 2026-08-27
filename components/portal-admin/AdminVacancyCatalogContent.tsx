@@ -17,6 +17,17 @@ import {
   Trash2,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import {
+  ADMIN_TD_CLASS,
+  ADMIN_TH_CLASS,
+  ADMIN_THEAD_CLASS,
+  ADMIN_TR_CLASS,
+  AdminEmptyState,
+  AdminErrorPanel,
+  AdminPageFrame,
+  AdminSurface,
+  AdminTableSkeleton,
+} from "@/components/portal-admin/admin-page-chrome"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { Button } from "@/components/ui/Button"
@@ -392,131 +403,79 @@ export function AdminVacancyCatalogContent({
   }
 
   const isEmpty = !loading && !listError && sortedItems.length === 0
-  const loadingGridClassName =
-    "grid animate-pulse grid-cols-[1.8fr_2.4fr_180px] gap-3 rounded-lg border border-border/60 bg-muted/30 p-4"
-  const tableMinWidthClassName = "min-w-[640px]"
 
   return (
-    <div
-      className="flex min-w-0 flex-col p-6 md:p-8"
-      aria-labelledby={`portal-admin-${catalog}-heading`}
-    >
+    <AdminPageFrame labelledBy={`portal-admin-${catalog}-heading`}>
       <PortalPageHeader
         id={`portal-admin-${catalog}-heading`}
         title={tKind("title")}
         description={tKind("headingDescription")}
-        className="mb-6"
-        contentClassName="max-w-3xl"
+        layout="split"
         actions={
-          <Button
-            type="button"
-            variant="primary"
-            onClick={handleOpenCreate}
-          >
-            <Plus className="h-4 w-4" aria-hidden />
-            {tKind("createCta")}
-          </Button>
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void loadList()}
+              disabled={loading}
+            >
+              <RefreshCw className="h-4 w-4" aria-hidden />
+              {tShared("actions.refresh")}
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={handleOpenCreate}
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              {tKind("createCta")}
+            </Button>
+          </>
         }
       />
 
-      <section
-        className="mb-5 rounded-xl border border-border bg-card p-4 shadow-sm"
-        aria-label={tShared("aria.summary", { plural: kindValues.plural })}
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm text-foreground">
-              {loading
-                ? tShared("count.loading")
-                : tShared("count.summary", {
-                    count: sortedItems.length,
-                    plural: kindValues.plural,
-                  })}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {tShared("summaryHelper", { plural: kindValues.plural })}
-            </span>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="h-10 px-4"
-            onClick={() => void loadList()}
-            disabled={loading}
-          >
-            <RefreshCw className="h-4 w-4" aria-hidden />
-            {tShared("actions.refresh")}
-          </Button>
-        </div>
-      </section>
-
       {listError ? (
-        <section
-          className="rounded-xl border border-destructive/30 bg-destructive/5 p-6"
-          aria-label={tShared("aria.loadError", { plural: kindValues.plural })}
-        >
-          <p className="font-sans text-sm text-destructive" role="alert">
-            {listError || tShared("errors.loadCatalog")}
-          </p>
-          <div className="mt-4">
-            <Button type="button" variant="primary" onClick={() => void loadList()}>
-              {tShared("actions.retry")}
-            </Button>
-          </div>
-        </section>
+        <AdminErrorPanel
+          message={listError || tShared("errors.loadCatalog")}
+          onRetry={() => void loadList()}
+          retryLabel={tShared("actions.retry")}
+          ariaLabel={tShared("aria.loadError", { plural: kindValues.plural })}
+        />
       ) : null}
 
       {!listError ? (
-        <section
-          className="min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-          aria-label={tShared("aria.list", { plural: kindValues.plural })}
-        >
+        <AdminSurface aria-label={tShared("aria.list", { plural: kindValues.plural })}>
           {loading ? (
-            <div className="space-y-3 p-5">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <div
-                  key={index}
-                  className={loadingGridClassName}
-                >
-                  <div className="h-5 rounded bg-muted" />
-                  <div className="h-5 rounded bg-muted" />
-                  <div className="h-5 rounded bg-muted" />
-                </div>
-              ))}
-            </div>
+            <AdminTableSkeleton columns={3} />
           ) : isEmpty ? (
-            <div className="flex h-full min-h-[360px] flex-col items-center justify-center gap-4 p-8 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-vo-purple/10">
-                <CatalogIcon className="h-8 w-8 text-vo-purple" aria-hidden />
-              </div>
-              <div className="space-y-2">
-                <h2 className="font-sans text-lg font-semibold text-foreground">
-                  {tKind("emptyMessage")}
-                </h2>
-                <p className="max-w-lg font-sans text-sm text-muted-foreground">
-                  {tShared("emptyBody", { singular: kindValues.singular })}
-                </p>
-              </div>
-              <Button type="button" variant="primary" onClick={handleOpenCreate}>
-                <Plus className="h-4 w-4" aria-hidden />
-                {tKind("createCta")}
-              </Button>
-            </div>
+            <AdminEmptyState
+              icon={CatalogIcon}
+              title={tKind("emptyMessage")}
+              description={tShared("emptyBody", { singular: kindValues.singular })}
+              action={
+                <Button type="button" variant="primary" onClick={handleOpenCreate}>
+                  <Plus className="h-4 w-4" aria-hidden />
+                  {tKind("createCta")}
+                </Button>
+              }
+            />
           ) : (
             <div className="overflow-x-auto">
-              <table
-                className={`${tableMinWidthClassName} w-full text-left font-sans text-sm`}
-              >
-                <thead className="border-b border-border bg-muted/50">
+              <table className="w-full table-fixed border-collapse text-left font-sans text-sm">
+                <colgroup>
+                  <col />
+                  <col />
+                  <col className="w-72" />
+                </colgroup>
+                <thead className={ADMIN_THEAD_CLASS}>
                   <tr>
-                    <th className="px-4 py-3 font-medium text-foreground">
+                    <th className={ADMIN_TH_CLASS}>
                       {tShared("table.name")}
                     </th>
-                    <th className="px-4 py-3 font-medium text-foreground">
+                    <th className={ADMIN_TH_CLASS}>
                       {tShared("table.description")}
                     </th>
-                    <th className="px-4 py-3 font-medium text-foreground">
+                    <th className={`${ADMIN_TH_CLASS} text-right`}>
                       {tShared("table.actions")}
                     </th>
                   </tr>
@@ -525,9 +484,9 @@ export function AdminVacancyCatalogContent({
                   {sortedItems.map((item) => (
                     <tr
                       key={item.id}
-                      className="border-b border-border last:border-b-0"
+                      className={ADMIN_TR_CLASS}
                     >
-                      <td className="px-4 py-3 align-top">
+                      <td className={ADMIN_TD_CLASS}>
                         <div className="space-y-1">
                           <p className="font-medium text-foreground">
                             {item.displayName}
@@ -539,11 +498,11 @@ export function AdminVacancyCatalogContent({
                           ) : null}
                         </div>
                       </td>
-                      <td className="px-4 py-3 align-top text-muted-foreground">
+                      <td className={`${ADMIN_TD_CLASS} text-muted-foreground`}>
                         {item.description?.trim() || tShared("dash")}
                       </td>
-                      <td className="px-4 py-3 align-top">
-                        <div className="flex flex-wrap gap-2">
+                      <td className={`${ADMIN_TD_CLASS} whitespace-nowrap text-right`}>
+                        <div className="flex flex-nowrap items-center justify-end gap-2">
                           <Button
                             type="button"
                             variant="outline"
@@ -570,7 +529,7 @@ export function AdminVacancyCatalogContent({
               </table>
             </div>
           )}
-        </section>
+        </AdminSurface>
       ) : null}
 
       <Modal
@@ -755,6 +714,6 @@ export function AdminVacancyCatalogContent({
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </div>
+    </AdminPageFrame>
   )
 }

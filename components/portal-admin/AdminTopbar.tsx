@@ -9,8 +9,11 @@ import {
   PortalTopbarActions,
   PortalTopbarCrumbs,
 } from "@/components/navigation/portal-topbar"
-import { resolveAdminPortalNavLabelKey } from "@/lib/admin-portal-nav"
-import { PORTAL_SELECTION_PATH } from "@/lib/portal-access"
+import {
+  resolveAdminPortalBreadcrumbTrail,
+  resolveAdminPortalNavLabelKey,
+} from "@/lib/admin-portal-nav"
+import { PORTAL_HOME_HREF, PORTAL_SELECTION_PATH } from "@/lib/portal-access"
 import { segmentToTitle } from "@/lib/pageTitles"
 import {
   buildTopbarTrail,
@@ -20,7 +23,6 @@ import {
 
 const DESKTOP_PADDING = "px-8"
 const MOBILE_PADDING = "px-4"
-const ADMIN_HOME_HREF = "/portal-admin/usuarios"
 
 interface AdminTopbarProps {
   variant?: "desktop" | "tablet" | "mobile"
@@ -50,6 +52,17 @@ function defaultBreadcrumbLabel(
   return segmentToTitle(last)
 }
 
+function defaultAdminBreadcrumbTrail(
+  pathname: string,
+  tNav: (key: string) => string,
+): TopbarCrumb[] {
+  const trail = resolveAdminPortalBreadcrumbTrail(pathname)
+  return trail.map((item, index) => ({
+    label: tNav(item.labelKey),
+    href: index === trail.length - 1 ? undefined : item.href,
+  }))
+}
+
 export default function AdminTopbar({
   variant = "desktop",
   breadcrumbLabel: breadcrumbLabelProp,
@@ -63,8 +76,11 @@ export default function AdminTopbar({
   const isTablet = variant === "tablet"
   const isMobile = variant === "mobile"
 
+  const resolvedTrail =
+    breadcrumbTrail ?? defaultAdminBreadcrumbTrail(pathname, tNav)
   const breadcrumbLabel =
     breadcrumbLabelProp ??
+    resolvedTrail[resolvedTrail.length - 1]?.label ??
     defaultBreadcrumbLabel(pathname, tNav("home"), t("adminShortcut"), tNav)
 
   const paddingClass =
@@ -77,8 +93,8 @@ export default function AdminTopbar({
   const portalLabel = t("portalAdmin")
   const crumbs = buildTopbarTrail(
     portalLabel,
-    ADMIN_HOME_HREF,
-    breadcrumbTrail,
+    PORTAL_HOME_HREF.admin,
+    resolvedTrail,
     breadcrumbLabel,
   )
   const breadcrumbScreenReaderText = formatTopbarTrailText(crumbs)

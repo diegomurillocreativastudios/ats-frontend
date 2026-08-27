@@ -6,13 +6,22 @@ import {
   Pencil,
   Trash2,
   X,
+  CircleDot,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import {
+  AdminEmptyState,
+  AdminErrorPanel,
+  AdminLoadingState,
+  AdminSurface,
+} from "@/components/portal-admin/admin-page-chrome"
+import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import { Button } from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import PortalPageHeader from "@/components/ui/PortalPageHeader";
+import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
-import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
-import Snackbar from "@/components/ui/Snackbar";
 
 const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
 
@@ -46,33 +55,31 @@ const unwrapStatusResponse = (data, fallbackIndex = 0) => {
 
 const StatusItemSkeleton = () => (
   <div
-    className="flex w-full animate-pulse items-center justify-between gap-4 rounded-lg border border-border bg-background px-4 py-3.5"
+    className="flex w-full animate-pulse flex-col gap-4 rounded-xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
     aria-hidden
   >
-    <div className="h-4 w-28 rounded-md bg-muted" />
-    <div className="flex shrink-0 items-end gap-3">
-      <div className="flex flex-col items-center gap-1.5">
+    <div className="h-5 w-32 rounded-md bg-muted" />
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-1.5">
+        <div className="h-3 w-20 rounded bg-muted/80" />
+        <div className="h-5 w-10 rounded-full bg-muted" />
+      </div>
+      <div className="flex flex-col gap-1.5">
         <div className="h-3 w-16 rounded bg-muted/80" />
         <div className="h-5 w-10 rounded-full bg-muted" />
       </div>
-      <div className="flex flex-col items-center gap-1.5">
-        <div className="h-3 w-14 rounded bg-muted/80" />
-        <div className="h-5 w-10 rounded-full bg-muted" />
-      </div>
-      <div className="flex items-center gap-1.5 pb-0.5">
-        <div className="h-9 w-9 rounded-md bg-muted/70" />
-        <div className="h-9 w-9 rounded-md bg-muted/70" />
-      </div>
+      <div className="h-10 w-24 rounded-md bg-muted/70" />
+      <div className="h-10 w-28 rounded-md bg-muted/70" />
     </div>
   </div>
 );
 
 const StatusListSkeleton = () => (
-  <div className="flex flex-col gap-3" aria-busy="true" aria-live="polite">
-    <div className="flex flex-col gap-1">
-      <div className="h-3 w-full max-w-md animate-pulse rounded bg-muted/70" />
-      <div className="h-3 w-full max-w-sm animate-pulse rounded bg-muted/60" />
-    </div>
+  <div
+    className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm"
+    aria-busy="true"
+    aria-live="polite"
+  >
     <StatusItemSkeleton />
     <StatusItemSkeleton />
     <StatusItemSkeleton />
@@ -209,28 +216,28 @@ const StatusItem = ({
   markFinalAria,
   editAria,
   deleteAria,
+  editLabel,
+  deleteLabel,
   isRemoving,
 }) => {
   return (
     <div
-      className={`flex w-full items-center justify-between gap-4 overflow-hidden rounded-lg border border-border bg-background px-4 py-3.5 transition-all duration-300 ease-in-out motion-reduce:transition-none ${
+      className={`flex w-full flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-5 transition-all duration-300 ease-in-out motion-reduce:transition-none sm:flex-row sm:items-center sm:justify-between ${
         isRemoving
-          ? "pointer-events-none max-h-0 scale-[0.98] border-transparent py-0 opacity-0"
-          : "max-h-24 scale-100 opacity-100"
+          ? "pointer-events-none max-h-0 scale-[0.98] border-transparent p-0 opacity-0"
+          : "max-h-40 scale-100 opacity-100"
       }`}
     >
-      <p className="min-w-0 flex-1 font-sans text-sm font-medium leading-snug text-foreground transition-colors duration-300">
-        <span className="block truncate">{status.name}</span>
-      </p>
-      <div className="flex shrink-0 items-end gap-3">
-        <div className="flex flex-col items-center gap-1.5">
-          <span
-            className={`font-sans text-[11px] font-normal leading-none tracking-wide transition-colors duration-300 ${
-              status.isDefault
-                ? "text-vo-pink/90"
-                : "text-muted-foreground/70"
-            }`}
-          >
+      <div className="flex min-w-0 flex-1 items-center gap-4">
+        <div className="flex min-w-0 flex-col gap-1">
+          <h3 className="font-sans text-base font-semibold text-foreground">
+            {status.name}
+          </h3>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-1.5">
+          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
             {defaultStatusLabel}
           </span>
           <DefaultStatusSwitch
@@ -242,14 +249,8 @@ const StatusItem = ({
             markDefaultAria={markDefaultAria}
           />
         </div>
-        <div className="flex flex-col items-center gap-1.5">
-          <span
-            className={`font-sans text-[11px] font-normal leading-none tracking-wide transition-colors duration-300 ${
-              status.final
-                ? "text-vo-purple/90"
-                : "text-muted-foreground/70"
-            }`}
-          >
+        <div className="flex flex-col gap-1.5">
+          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
             {finalStatusLabel}
           </span>
           <FinalStatusSwitch
@@ -261,32 +262,46 @@ const StatusItem = ({
             markFinalAria={markFinalAria}
           />
         </div>
-        <div className="flex items-center gap-1.5 pb-0.5">
         <button
           type="button"
           onClick={() => onEdit(status)}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
           aria-label={editAria(status.name)}
         >
           <Pencil className="h-4 w-4" aria-hidden />
+          {editLabel}
         </button>
         <button
           type="button"
           onClick={() => onDelete(status)}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-destructive transition-colors hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-destructive"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-destructive/30 bg-background px-4 py-2.5 font-sans text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2"
           aria-label={deleteAria(status.name)}
         >
           <Trash2 className="h-4 w-4" aria-hidden />
+          {deleteLabel}
         </button>
-        </div>
       </div>
     </div>
   );
 };
 
-export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
+interface EstadosModalProps {
+  isOpen?: boolean
+  onClose?: () => void
+  onSnackbar?: (message: string, variant?: string) => void
+  variant?: "modal" | "inline"
+}
+
+export default function EstadosModal({
+  isOpen = false,
+  onClose,
+  onSnackbar,
+  variant = "modal",
+}: EstadosModalProps) {
   const t = useTranslations("AdminPortal.statuses.modal");
+  const tPage = useTranslations("AdminPortal.statuses.page");
   const tCommon = useTranslations("Common");
+  const isVisible = variant === "inline" || isOpen;
   const [statuses, setStatuses] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -327,7 +342,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
 
   const fetchStatuses = useCallback(async (options?: { silent?: boolean }) => {
     const silent = options?.silent === true;
-    if (!isOpen) return false;
+    if (!isVisible) return false;
 
     const showInitialLoader = !silent && !hasStatusesRef.current;
 
@@ -359,10 +374,10 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
       setInitialLoading(false);
       setIsSyncing(false);
     }
-  }, [isOpen, showSnackbar, t]);
+  }, [isVisible, showSnackbar, t]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isVisible) {
       hasStatusesRef.current = false;
       setInitialLoading(true);
       setIsSyncing(false);
@@ -375,7 +390,7 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
     }
 
     void fetchStatuses();
-  }, [isOpen, fetchStatuses]);
+  }, [isVisible, fetchStatuses]);
 
   const handleEdit = (status) => {
     setEditingStatus(status);
@@ -624,9 +639,249 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
   };
 
 
+  const statusFormFields = (
+    <form
+      id="status-form"
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-5"
+    >
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="status-name"
+          className="font-sans text-sm font-medium text-foreground"
+        >
+          {t("nameLabel")} <span className="text-vo-pink">*</span>
+        </label>
+        <input
+          id="status-name"
+          type="text"
+          value={formData.name}
+          onChange={(e) => setFormData({ name: e.target.value })}
+          placeholder={t("namePlaceholder")}
+          className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+          aria-invalid={!!formErrors.name}
+          aria-describedby={formErrors.name ? "name-error" : undefined}
+        />
+        {formErrors.name && (
+          <p id="name-error" className="font-sans text-sm text-vo-pink" role="alert">
+            {formErrors.name}
+          </p>
+        )}
+      </div>
+
+      {submitError && (
+        <div
+          className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
+          role="alert"
+        >
+          {submitError}
+        </div>
+      )}
+    </form>
+  )
+
+  const statusFormFooter = (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={handleCloseForm}
+        disabled={submitLoading}
+      >
+        {tCommon("cancel")}
+      </Button>
+      <Button
+        type="submit"
+        form="status-form"
+        disabled={submitLoading}
+        loading={submitLoading}
+      >
+        {editingStatus ? t("update") : t("create")}
+      </Button>
+    </>
+  )
+
+  const statusItems = statuses.map((status, index) => (
+    <div
+      key={status.id}
+      className="animate-in fade-in slide-in-from-bottom-1 duration-300 motion-reduce:animate-none"
+      style={{ animationDelay: `${Math.min(index, 6) * 40}ms` }}
+    >
+      <StatusItem
+        status={status}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onDefaultActivate={handleDefaultActivate}
+        onFinalToggle={handleFinalToggle}
+        updatingDefaultStatusId={updatingDefaultStatusId}
+        updatingFinalStatusId={updatingFinalStatusId}
+        isRemoving={removingStatusId === status.id}
+        defaultStatusLabel={t("defaultStatus")}
+        finalStatusLabel={t("finalStatus")}
+        defaultActiveAria={(name) => t("defaultActiveAria", { name })}
+        markDefaultAria={(name) => t("markDefaultAria", { name })}
+        finalActiveAria={(name) => t("finalActiveAria", { name })}
+        markFinalAria={(name) => t("markFinalAria", { name })}
+        editAria={(name) => t("editAria", { name })}
+        deleteAria={(name) => t("deleteAria", { name })}
+        editLabel={tCommon("edit")}
+        deleteLabel={tCommon("delete")}
+      />
+    </div>
+  ))
+
+  const statusList = (
+    <div
+      className={`flex flex-col gap-4 transition-opacity duration-300 ease-in-out motion-reduce:transition-none ${
+        isSyncing ? "opacity-80" : "opacity-100"
+      }`}
+    >
+      {initialLoading ? (
+        variant === "inline" ? (
+          <AdminSurface>
+            <AdminLoadingState label={t("loading")} />
+          </AdminSurface>
+        ) : (
+          <StatusListSkeleton />
+        )
+      ) : fetchError && statuses.length === 0 ? (
+        variant === "inline" ? (
+          <AdminErrorPanel
+            message={fetchError}
+            onRetry={() => void fetchStatuses()}
+            retryLabel={t("retry")}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 py-12 text-center">
+            <p className="font-sans text-sm text-destructive" role="alert">
+              {fetchError}
+            </p>
+            <button
+              type="button"
+              onClick={() => void fetchStatuses()}
+              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+            >
+              {t("retry")}
+            </button>
+          </div>
+        )
+      ) : statuses.length === 0 ? (
+        variant === "inline" ? (
+          <AdminSurface>
+            <AdminEmptyState
+              icon={CircleDot}
+              title={t("empty")}
+              action={
+                <Button type="button" variant="primary" onClick={handleNewStatus}>
+                  <Plus className="h-4 w-4" aria-hidden />
+                  {t("createStatus")}
+                </Button>
+              }
+            />
+          </AdminSurface>
+        ) : (
+          <div className="flex animate-in fade-in flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/30 py-12 text-center duration-300 motion-reduce:animate-none">
+            <p className="font-sans text-sm text-muted-foreground">
+              {t("empty")}
+            </p>
+          </div>
+        )
+      ) : (
+        <div
+          className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm"
+          role="region"
+          aria-label={tPage("listAria")}
+          aria-busy={isSyncing}
+        >
+          <div className="flex flex-col gap-4">{statusItems}</div>
+        </div>
+      )}
+    </div>
+  )
+
+  const listOrForm = isFormOpen ? (
+    <div className="flex animate-in fade-in slide-in-from-bottom-1 flex-col gap-4 duration-300 motion-reduce:animate-none">
+      {statusFormFields}
+      <div className="flex items-center justify-end gap-3 pt-2">
+        {statusFormFooter}
+      </div>
+    </div>
+  ) : (
+    statusList
+  )
+
+  const newStatusButton = (
+    <Button
+      type="button"
+      variant="primary"
+      onClick={handleNewStatus}
+      aria-label={tPage("newStatusAria")}
+    >
+      <Plus className="h-4 w-4" aria-hidden />
+      {t("newStatus")}
+    </Button>
+  )
+
+  const deleteModal = (
+    <DeleteConfirmModal
+      isOpen={isDeleteModalOpen}
+      onClose={handleCloseDeleteModal}
+      onConfirm={handleConfirmDelete}
+      title={t("deleteTitle")}
+      message={
+        statusToDelete
+          ? t("deleteMessage", { name: statusToDelete.name })
+          : ""
+      }
+      confirmText={t("accept")}
+      cancelText={tCommon("cancel")}
+      loading={deleteLoading}
+    />
+  )
+
+  const snackbarEl = !onSnackbar ? (
+    <Snackbar
+      open={snackbar.open}
+      onClose={handleSnackbarClose}
+      variant={snackbar.variant}
+      message={snackbar.message}
+    />
+  ) : null
+
+  const statusFormModal = (
+    <Modal
+      isOpen={isFormOpen}
+      onClose={handleCloseForm}
+      title={editingStatus ? t("editTitle") : t("createTitle")}
+      footer={statusFormFooter}
+      size="md"
+      closeOnOverlayClick
+      closeOnEscape
+    >
+      {statusFormFields}
+    </Modal>
+  )
+
+  if (variant === "inline") {
+    return (
+      <>
+        <PortalPageHeader
+          title={tPage("title")}
+          description={tPage("description")}
+          layout="split"
+          actions={newStatusButton}
+        />
+        {statusList}
+        {statusFormModal}
+        {isVisible ? deleteModal : null}
+        {snackbarEl}
+      </>
+    )
+  }
+
   return (
     <>
-      {isOpen && (
+      {isVisible ? (
       <div
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
         onClick={onClose}
@@ -635,7 +890,6 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
           className="relative max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-xl bg-background shadow-xl"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <h2 className="font-sans text-xl font-semibold text-foreground">
               {t("title")}
@@ -650,142 +904,14 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
             </button>
           </div>
 
-          {/* Body */}
           <div
             className="overflow-y-auto px-6 py-5 transition-opacity duration-300 ease-in-out"
             style={{ maxHeight: "calc(90vh - 140px)" }}
           >
-            {isFormOpen ? (
-              <form
-                onSubmit={handleSubmit}
-                className="flex animate-in fade-in slide-in-from-bottom-1 flex-col gap-4 duration-300 motion-reduce:animate-none"
-              >
-                <div className="flex flex-col gap-2">
-                  <label
-                    htmlFor="status-name"
-                    className="font-sans text-sm font-medium text-foreground"
-                  >
-                    {t("nameLabel")} <span className="text-vo-pink">*</span>
-                  </label>
-                  <input
-                    id="status-name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ name: e.target.value })}
-                    placeholder={t("namePlaceholder")}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                    aria-invalid={!!formErrors.name}
-                    aria-describedby={formErrors.name ? "name-error" : undefined}
-                  />
-                  {formErrors.name && (
-                    <p id="name-error" className="font-sans text-sm text-vo-pink" role="alert">
-                      {formErrors.name}
-                    </p>
-                  )}
-                </div>
-
-                {submitError && (
-                  <div
-                    className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
-                    role="alert"
-                  >
-                    {submitError}
-                  </div>
-                )}
-
-                <div className="flex items-center justify-end gap-3 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCloseForm}
-                    disabled={submitLoading}
-                  >
-                    {tCommon("cancel")}
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={submitLoading}
-                    loading={submitLoading}
-                  >
-                    {editingStatus ? t("update") : t("create")}
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <div
-                className={`flex flex-col gap-4 transition-opacity duration-300 ease-in-out motion-reduce:transition-none ${
-                  isSyncing ? "opacity-80" : "opacity-100"
-                }`}
-              >
-                {initialLoading ? (
-                  <StatusListSkeleton />
-                ) : fetchError && statuses.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 py-12 text-center">
-                    <p className="font-sans text-sm text-destructive" role="alert">
-                      {fetchError}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => void fetchStatuses()}
-                      className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
-                    >
-                      {t("retry")}
-                    </button>
-                  </div>
-                ) : statuses.length === 0 ? (
-                  <div className="flex animate-in fade-in flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/30 py-12 text-center duration-300 motion-reduce:animate-none">
-                    <p className="font-sans text-sm text-muted-foreground">
-                      {t("empty")}
-                    </p>
-                  </div>
-                ) : (
-                  <div
-                    className="flex animate-in fade-in flex-col gap-3 duration-300 motion-reduce:animate-none"
-                    role="group"
-                    aria-labelledby="estados-switches-legend"
-                    aria-busy={isSyncing}
-                  >
-                    <div
-                      id="estados-switches-legend"
-                      className="flex flex-col gap-1 font-sans text-[12px] leading-snug text-muted-foreground/75"
-                    >
-                      <p>{t("defaultLegend")}</p>
-                      <p>{t("finalLegend")}</p>
-                    </div>
-                    {statuses.map((status, index) => (
-                      <div
-                        key={status.id}
-                        className="animate-in fade-in slide-in-from-bottom-1 duration-300 motion-reduce:animate-none"
-                        style={{ animationDelay: `${Math.min(index, 6) * 40}ms` }}
-                      >
-                        <StatusItem
-                          status={status}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                          onDefaultActivate={handleDefaultActivate}
-                          onFinalToggle={handleFinalToggle}
-                          updatingDefaultStatusId={updatingDefaultStatusId}
-                          updatingFinalStatusId={updatingFinalStatusId}
-                          isRemoving={removingStatusId === status.id}
-                          defaultStatusLabel={t("defaultStatus")}
-                          finalStatusLabel={t("finalStatus")}
-                          defaultActiveAria={(name) => t("defaultActiveAria", { name })}
-                          markDefaultAria={(name) => t("markDefaultAria", { name })}
-                          finalActiveAria={(name) => t("finalActiveAria", { name })}
-                          markFinalAria={(name) => t("markFinalAria", { name })}
-                          editAria={(name) => t("editAria", { name })}
-                          deleteAria={(name) => t("deleteAria", { name })}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {listOrForm}
           </div>
 
-          {/* Footer */}
-          {!isFormOpen && (
+          {!isFormOpen ? (
             <div className="flex items-center justify-end gap-3 border-t border-border px-6 py-4">
               <Button
                 type="button"
@@ -794,44 +920,15 @@ export default function EstadosModal({ isOpen, onClose, onSnackbar }) {
               >
                 {t("close")}
               </Button>
-              <Button
-                type="button"
-                onClick={handleNewStatus}
-              >
-                <Plus className="h-4 w-4" aria-hidden />
-                {t("newStatus")}
-              </Button>
+              {newStatusButton}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
-      )}
+      ) : null}
 
-      {isOpen && (
-      <DeleteConfirmModal
-        isOpen={isDeleteModalOpen}
-        onClose={handleCloseDeleteModal}
-        onConfirm={handleConfirmDelete}
-        title={t("deleteTitle")}
-        message={
-          statusToDelete
-            ? t("deleteMessage", { name: statusToDelete.name })
-            : ""
-        }
-        confirmText={t("accept")}
-        cancelText={tCommon("cancel")}
-        loading={deleteLoading}
-      />
-      )}
-
-      {!onSnackbar && (
-        <Snackbar
-          open={snackbar.open}
-          onClose={handleSnackbarClose}
-          variant={snackbar.variant}
-          message={snackbar.message}
-        />
-      )}
+      {isVisible ? deleteModal : null}
+      {snackbarEl}
     </>
   );
 }

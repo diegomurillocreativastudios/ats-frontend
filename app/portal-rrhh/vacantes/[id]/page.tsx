@@ -581,7 +581,7 @@ const MoveStageErrorBanner = ({ error }) => {
       <p className="font-sans text-sm text-destructive">{error.text}</p>
       {error.showEstadosLink ? (
         <Link
-          href="/portal-admin/etapas"
+          href="/portal-admin/vacantes/etapas"
           className="font-sans text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
           aria-label={tMatching("errors.goToStagesAria")}
         >

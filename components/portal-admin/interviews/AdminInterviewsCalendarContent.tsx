@@ -1,9 +1,17 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { Calendar, Loader2 } from "lucide-react"
+import { Calendar } from "lucide-react"
 import { useTranslations } from "next-intl"
+import {
+  ADMIN_SURFACE_CLASS,
+  AdminEmptyState,
+  AdminErrorPanel,
+  AdminLoadingState,
+  AdminPageFrame,
+} from "@/components/portal-admin/admin-page-chrome"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import { Button } from "@/components/ui/Button"
 import { CalendarFilters } from "@/components/portal-admin/interviews/calendar-filters"
 import { CalendarKpis } from "@/components/portal-admin/interviews/calendar-kpis"
 import { CalendarToolbar } from "@/components/portal-admin/interviews/calendar-toolbar"
@@ -76,10 +84,11 @@ export function AdminInterviewsCalendarContent() {
   }, [isMobile])
 
   return (
-    <div className="flex min-w-0 flex-col gap-6 p-4 md:p-8">
+    <AdminPageFrame>
       <PortalPageHeader
         title={t("page.title")}
         description={t("page.description")}
+        layout="split"
         contentClassName="max-w-4xl"
       />
 
@@ -103,34 +112,25 @@ export function AdminInterviewsCalendarContent() {
       <CalendarKpis events={visibleEvents} />
 
       {loading ? (
-        <div
-          className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-20"
-          data-testid="admin-calendar-loading"
-        >
-          <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
-          <p className="font-sans text-sm text-muted-foreground">
-            {t("loadingStates.loading")}
-          </p>
+        <div className={ADMIN_SURFACE_CLASS}>
+          <AdminLoadingState
+            label={t("loadingStates.loading")}
+            className="py-20"
+            testId="admin-calendar-loading"
+          />
         </div>
       ) : error ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
-          <p className="font-sans text-sm text-destructive" role="alert">
-            {error}
-          </p>
-          <button
-            type="button"
-            onClick={() => void reload()}
-            className="rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
-          >
-            {t("actions.retry")}
-          </button>
-        </div>
+        <AdminErrorPanel
+          message={error}
+          onRetry={() => void reload()}
+          retryLabel={t("actions.retry")}
+        />
       ) : visibleEvents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16">
-          <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
-          <p className="font-sans text-sm text-muted-foreground">
-            {t("emptyStates.noEvents")}
-          </p>
+        <div className={`${ADMIN_SURFACE_CLASS} border-dashed bg-muted/30 shadow-none`}>
+          <AdminEmptyState
+            icon={Calendar}
+            title={t("emptyStates.noEvents")}
+          />
         </div>
       ) : (
         <>
@@ -174,6 +174,6 @@ export function AdminInterviewsCalendarContent() {
         isOpen={detailOpen}
         onClose={handleCloseDetail}
       />
-    </div>
+    </AdminPageFrame>
   )
 }
