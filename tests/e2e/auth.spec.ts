@@ -21,10 +21,12 @@ test.describe("@smoke Auth", () => {
   }) => {
     await page.goto("/auth/iniciar-sesion")
     await fillLoginForm(page, "no-existe@test.invalid", "WrongPass123!")
+    const snackbar = page.getByTestId("app-snackbar")
+    await expect(snackbar).toBeVisible()
+    await expect(snackbar).toContainText(
+      /correo o contraseña|incorrect|credencial|inválid|invalid/i,
+    )
     await expect(page).toHaveURL(/\/auth\/iniciar-sesion/)
-    const alert = page.getByRole("alert")
-    await expect(alert).toBeVisible()
-    await expect(alert).toContainText(/correo o contraseña|incorrect|credencial|inválid|invalid/i)
   })
 
   test("restablecer contraseña sin token muestra aviso", async ({
