@@ -538,10 +538,10 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   return (
     <>
     <RrhhReportsShell breadcrumbLabel={breadcrumbLabel} breadcrumbTrail={trail}>
-      <div className="min-w-0 flex flex-col gap-6 px-4 py-6 pb-10 md:px-8">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         {loadingTemplate ? (
           <div
-            className="flex items-center gap-2 font-sans text-sm text-muted-foreground"
+            className="flex items-center gap-2 px-4 pt-6 font-sans text-sm text-muted-foreground md:px-8"
             role="status"
             aria-live="polite"
           >
@@ -552,7 +552,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
 
         {!loadingTemplate && templateError ? (
           <div
-            className="flex max-w-lg flex-col gap-4 rounded-xl border border-destructive/30 bg-destructive/5 p-6"
+            className="flex max-w-lg flex-col gap-4 rounded-xl border border-destructive/30 bg-destructive/5 p-6 mx-4 mt-6 md:mx-8"
             role="alert"
           >
             <div className="flex items-start gap-2">
@@ -575,8 +575,12 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
 
         {!loadingTemplate && !templateError && template ? (
           <>
-            <section aria-label={m.headerAria}>
+            <section
+              className="shrink-0 px-4 pt-6 md:px-8"
+              aria-label={m.headerAria}
+            >
               <PortalPageHeader
+                className="shrink-0 gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between"
                 title={template.name}
                 titleClassName="text-2xl font-bold tracking-tight text-foreground md:text-3xl"
                 description="Vista previa del reporte con los datos del periodo seleccionado."
@@ -611,40 +615,41 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
               />
             </section>
 
+            <div className="flex min-h-0 flex-1 flex-col gap-3 px-4 pb-4 pt-2 md:px-8">
             {loadingConfig ? (
-              <div className="flex items-center gap-2 font-sans text-sm text-muted-foreground" role="status">
+              <div className="shrink-0 flex items-center gap-2 font-sans text-sm text-muted-foreground" role="status">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                 {m.loadingConfig}
               </div>
             ) : null}
 
             {configError ? (
-              <p className="font-sans text-sm text-destructive" role="alert">
+              <p className="shrink-0 font-sans text-sm text-destructive" role="alert">
                 {configError}
               </p>
             ) : null}
 
             {!loadingConfig && !configError && reportConfig?.filterSchema.fields.length === 0 ? (
-              <p className="font-sans text-sm text-amber-700 dark:text-amber-400" role="status">
+              <p className="shrink-0 font-sans text-sm text-amber-700 dark:text-amber-400" role="status">
                 {m.errorNoConfig}
               </p>
             ) : null}
 
             {isLegacyConfig ? (
-              <p className="font-sans text-xs text-muted-foreground" role="note">
+              <p className="shrink-0 font-sans text-xs text-muted-foreground" role="note">
                 {m.legacyModeHint}
               </p>
             ) : null}
 
             {pdfActionError ? (
-              <p className="font-sans text-sm text-destructive" role="alert">
+              <p className="shrink-0 font-sans text-sm text-destructive" role="alert">
                 {pdfActionError}
               </p>
             ) : null}
 
             {pdfWarning ? (
               <p
-                className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 font-sans text-sm text-amber-900 dark:text-amber-100"
+                className="shrink-0 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 font-sans text-sm text-amber-900 dark:text-amber-100"
                 role="status"
               >
                 {pdfWarning}
@@ -652,7 +657,7 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             ) : null}
 
             {!loadingConfig && !configError && reportConfig ? (
-              <section className="space-y-4" aria-label={m.filtersAria} data-report-pdf-exclude>
+              <section className="shrink-0" aria-label={m.filtersAria} data-report-pdf-exclude>
                 <ReportesFiltersPlaceholder hintText={m.filtersHint} controlsClassName={filterGridClass}>
                   <ReportFilterRenderer
                     schema={reportConfig.filterSchema}
@@ -675,35 +680,37 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             ) : null}
 
             {generatingPreview ? (
-              <div className="flex items-center gap-2 font-sans text-sm text-muted-foreground" role="status">
+              <div className="shrink-0 flex items-center gap-2 font-sans text-sm text-muted-foreground" role="status">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                 {m.loadingData}
               </div>
             ) : null}
 
             {previewError ? (
-              <p className="font-sans text-sm text-destructive" role="alert">
+              <p className="shrink-0 font-sans text-sm text-destructive" role="alert">
                 {previewError}
               </p>
             ) : null}
 
             {!generatingPreview && !previewError && hasPreviewData ? (
-              <section aria-label={m.previewTitle} className="flex min-h-0 flex-col gap-4">
+              <section aria-label={m.previewTitle} className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
                 {useReactPreview && pdfData ? (
-                  <div className="flex min-h-0 w-full justify-center overflow-x-auto rounded-lg border border-border bg-muted/15 p-4">
-                    <ExecutiveSummaryReportPdfTemplate
-                      data={pdfData}
-                      filters={pdfFilters}
-                      generatedAt={formatGeneratedAtForPdf()}
-                    />
+                  <div className="min-h-0 flex-1 overflow-auto overscroll-contain rounded-lg border border-border bg-muted/15 p-4">
+                    <div className="flex w-full justify-center">
+                      <ExecutiveSummaryReportPdfTemplate
+                        data={pdfData}
+                        filters={pdfFilters}
+                        generatedAt={formatGeneratedAtForPdf()}
+                      />
+                    </div>
                   </div>
                 ) : previewSrcDoc ? (
-                  <div className="flex min-h-[480px] w-full flex-col overflow-hidden rounded-lg border border-border bg-muted/15">
+                  <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border bg-muted/15">
                     <iframe
                       title={m.previewTitle}
                       sandbox="allow-same-origin"
                       srcDoc={previewSrcDoc}
-                      className="min-h-[480px] w-full flex-1 border-0 bg-background"
+                      className="h-full min-h-0 w-full border-0 bg-background"
                     />
                   </div>
                 ) : (
@@ -722,11 +729,12 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
 
             <Link
               href="/portal-rrhh/reportes"
-              className="inline-flex w-fit items-center justify-center rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+              className="inline-flex w-fit shrink-0 items-center justify-center rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
               data-html2canvas-ignore="true"
             >
               {m.backToReports}
             </Link>
+            </div>
           </>
         ) : null}
       </div>

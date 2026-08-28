@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react"
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "ghost"
+type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "strong"
 
 interface UiButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
@@ -18,16 +18,18 @@ export function Button({
   className = "",
   ...props
 }: UiButtonProps) {
-  const baseStyles = 'inline-flex items-center justify-center gap-2 rounded-md px-6 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+  const baseStyles = 'inline-flex items-center justify-center gap-2 rounded-md px-6 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none';
 
   const variants: Record<ButtonVariant, string> = {
     primary:
-      "bg-vo-purple text-white hover:bg-vo-purple focus-visible:ring-vo-purple",
+      "bg-vo-purple text-white hover:bg-vo-purple focus-visible:ring-vo-purple disabled:opacity-50",
     secondary:
-      "bg-vo-magenta text-white hover:bg-vo-magenta focus-visible:ring-vo-magenta",
+      "bg-vo-magenta text-white hover:bg-vo-magenta focus-visible:ring-vo-magenta disabled:opacity-50",
     outline:
-      "glass-button text-foreground focus-visible:ring-vo-purple",
-    ghost: "text-muted-foreground hover:bg-muted focus-visible:ring-vo-purple",
+      "glass-button text-foreground focus-visible:ring-vo-purple disabled:opacity-50",
+    ghost: "text-muted-foreground hover:bg-muted focus-visible:ring-vo-purple disabled:opacity-50",
+    strong:
+      "bg-emerald-800 text-white hover:bg-emerald-900 focus-visible:ring-emerald-800 disabled:bg-muted disabled:text-foreground",
   }
 
   return (

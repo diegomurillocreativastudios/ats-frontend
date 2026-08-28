@@ -28,11 +28,13 @@ export default function PortalPageHeader({
   layout = "stacked",
 }: PortalPageHeaderProps) {
   const isSplit = layout === "split"
+  const hasPaddingOverride = /\bpb-/.test(className ?? "")
 
   return (
     <header
       className={joinClasses(
-        "border-b border-border pb-6",
+        "border-b border-border",
+        !hasPaddingOverride && "pb-6",
         isSplit
           ? "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
           : "flex flex-col gap-5",

@@ -256,6 +256,7 @@ export function InterviewTypesCrudModal({
             }
             placeholder={t("namePlaceholder")}
             disabled={saving}
+            error=""
           />
         </form>
       </AdminCatalogFormModal>

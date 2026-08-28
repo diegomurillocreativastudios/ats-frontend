@@ -287,6 +287,7 @@ export function InterviewStatusesCrudModal({
             }
             placeholder={t("displayNamePlaceholder")}
             disabled={saving}
+            error=""
           />
           <AdminCatalogCheckboxField
             id="interview-status-terminal"

@@ -156,43 +156,48 @@ export default function EntrevistasHubPage() {
     count: t("pagination.count", { count: totalCount }),
   }
 
-  const mainContent = (
-    <div className="min-w-0 flex flex-col">
-      <section className="px-4 py-6 md:px-8" aria-label={t("hub.headerRegionLabel")}>
-        <PortalPageHeader
-          title={t("hub.title")}
-          description={t("hub.description")}
-        />
-      </section>
-      <section className="flex flex-col gap-4 p-4 md:p-8" aria-label={t("hub.vacanciesRegionLabel")}>
-        {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
-            <Loader2
-              className="h-8 w-8 animate-spin text-vo-purple"
-              aria-hidden
-            />
-            <p className="font-sans text-sm text-muted-foreground">
-              {t("loadingStates.loadingVacancies")}
-            </p>
-          </div>
-        ) : error ? (
-          <p className="font-sans text-sm text-destructive" role="alert">
-            {error}
+  const renderPageHeader = () => (
+    <PortalPageHeader
+      className="shrink-0 pb-2"
+      title={t("hub.title")}
+      description={t("hub.description")}
+    />
+  )
+
+  const renderMainContent = () => (
+    <section
+      className="flex min-h-0 flex-1 flex-col gap-3"
+      aria-label={t("hub.vacanciesRegionLabel")}
+    >
+      {loading ? (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
+          <Loader2
+            className="h-8 w-8 animate-spin text-vo-purple"
+            aria-hidden
+          />
+          <p className="font-sans text-sm text-muted-foreground">
+            {t("loadingStates.loadingVacancies")}
           </p>
-        ) : vacancies.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16 text-center">
-            <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
-            <p className="font-sans text-sm text-muted-foreground">
-              {t("emptyStates.noVacancies")}
-            </p>
-            <Link
-              href="/portal-rrhh/vacantes"
-              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
-            >
-              {t("actions.goToVacancies")}
-            </Link>
-          </div>
-        ) : (
+        </div>
+      ) : error ? (
+        <p className="font-sans text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : vacancies.length === 0 ? (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16 text-center">
+          <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
+          <p className="font-sans text-sm text-muted-foreground">
+            {t("emptyStates.noVacancies")}
+          </p>
+          <Link
+            href="/portal-rrhh/vacantes"
+            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
+          >
+            {t("actions.goToVacancies")}
+          </Link>
+        </div>
+      ) : (
+        <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
           <ul className="flex flex-col gap-3" role="list">
             {vacancies.map((v) => {
               const statusCfg =
@@ -270,8 +275,10 @@ export default function EntrevistasHubPage() {
               )
             })}
           </ul>
-        )}
-        {!loading && !error ? (
+        </div>
+      )}
+      {!loading && !error ? (
+        <div className="shrink-0">
           <ListPaginationBar
             page={page}
             pageSize={pageSize}
@@ -281,9 +288,9 @@ export default function EntrevistasHubPage() {
             onPageSizeChange={handlePageSizeChange}
             labels={paginationLabels}
           />
-        ) : null}
-      </section>
-    </div>
+        </div>
+      ) : null}
+    </section>
   )
 
   return (
@@ -292,15 +299,28 @@ export default function EntrevistasHubPage() {
         <RRHHSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <RRHHTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            {mainContent}
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+              <section
+                className="shrink-0 px-8 pt-6"
+                aria-label={t("hub.headerRegionLabel")}
+              >
+                {renderPageHeader()}
+              </section>
+              <section className="flex min-h-0 flex-1 flex-col px-8 pb-4 pt-2">
+                {renderMainContent()}
+              </section>
+            </div>
           </main>
         </div>
       </div>
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
         <RRHHTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          {mainContent}
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-4 md:p-6">
+            {renderPageHeader()}
+            {renderMainContent()}
+          </div>
         </main>
       </div>
     </div>

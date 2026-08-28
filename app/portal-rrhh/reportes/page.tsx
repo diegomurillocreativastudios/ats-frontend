@@ -17,14 +17,20 @@ export default function ReportesHubPage() {
   const t = useTranslations("RecruiterPortal.reports")
 
   const mainContent = (
-    <div className="min-w-0 flex flex-col">
-      <section className="px-4 py-6 md:px-8" aria-label={t("page.headerRegionLabel")}>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <section
+        className="shrink-0 px-4 pt-6 md:px-8"
+        aria-label={t("page.headerRegionLabel")}
+      >
         <PortalPageHeader
+          className="shrink-0 pb-2"
           title={t("page.title")}
           description={t("page.description")}
         />
       </section>
-      <ReportsHubClient />
+      <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-2 md:px-8">
+        <ReportsHubClient />
+      </div>
     </div>
   )
 

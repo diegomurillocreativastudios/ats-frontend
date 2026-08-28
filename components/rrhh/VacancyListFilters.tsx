@@ -83,10 +83,10 @@ export function VacancyListFilters({
 
   return (
     <div
-      className="rounded-xl border border-border bg-card p-4 md:p-5"
+      className="rounded-xl border border-border bg-card p-3 md:p-4"
       aria-label={t("regionLabel")}
     >
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <FilterField id="vacancy-filter-search" label={t("name")}>
           <div className="relative">
             <Search
@@ -157,7 +157,7 @@ export function VacancyListFilters({
       </div>
 
       {hasActiveVacancyListFilters(value) ? (
-        <div className="mt-4 flex justify-end border-t border-border pt-4">
+        <div className="mt-3 flex justify-end border-t border-border pt-3">
           <button
             type="button"
             onClick={handleClearFilters}
@@ -182,7 +182,7 @@ function FilterField({
   children: ReactNode
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-2">
+    <div className="flex min-w-0 flex-col gap-1.5">
       <label htmlFor={id} className={labelClassName}>
         {label}
       </label>

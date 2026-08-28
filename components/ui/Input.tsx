@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 export function Input({
   label,
-  error,
+  error = '',
   type = 'text',
   id,
   name,

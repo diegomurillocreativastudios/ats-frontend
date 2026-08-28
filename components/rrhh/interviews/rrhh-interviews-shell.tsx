@@ -35,7 +35,7 @@ export function RrhhInterviewsShell({
             breadcrumbLabel={breadcrumbLabel}
             breadcrumbTrail={breadcrumbTrail}
           />
-          <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-background">
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden overscroll-y-none bg-background">
             {children}
           </main>
         </div>
@@ -46,7 +46,7 @@ export function RrhhInterviewsShell({
           breadcrumbLabel={breadcrumbLabel}
           breadcrumbTrail={breadcrumbTrail}
         />
-        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-background">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden overscroll-y-none bg-background">
           {children}
         </main>
       </div>

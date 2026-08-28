@@ -268,6 +268,7 @@ export function InterviewModalitiesCrudModal({
             }
             placeholder={t("namePlaceholder")}
             disabled={saving}
+            error=""
           />
           <AdminCatalogCheckboxField
             id="interview-modality-google-meet"

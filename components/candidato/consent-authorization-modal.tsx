@@ -163,6 +163,28 @@ function areAllSectionsAccepted(accepted: Record<SectionId, boolean>): boolean {
 }
 
 /**
+ * High-contrast styles for the last-section confirmation control so the
+ * disabled, ready, and accepted states stay visually distinct.
+ */
+function getAcceptanceConfirmClassName(
+  formComplete: boolean,
+  isAccepted: boolean
+): string {
+  const base =
+    "mt-3 inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-center font-sans text-sm transition-colors"
+
+  if (!formComplete) {
+    return `${base} cursor-not-allowed border border-border bg-muted font-medium text-foreground/65`
+  }
+
+  if (isAccepted) {
+    return `${base} cursor-pointer border-2 border-emerald-800 bg-emerald-800 font-semibold text-white dark:border-emerald-600 dark:bg-emerald-700`
+  }
+
+  return `${base} cursor-pointer border-2 border-emerald-800 bg-white font-semibold text-emerald-950 shadow-sm hover:bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-950 dark:text-emerald-50 dark:hover:bg-emerald-900`
+}
+
+/**
  * Modal de autorización y consentimiento con secciones tipo accordion + checkbox.
  * El CTA final solo se habilita cuando las 7 secciones están aceptadas
  * y los datos de firma de la sección 8 están completos.
@@ -344,6 +366,7 @@ export function ConsentAuthorizationModal({
           ) : null}
           <Button
             type="button"
+            variant="strong"
             onClick={() => void handleAccept()}
             disabled={!canSubmit || isSubmitting}
             loading={isSubmitting}
@@ -403,7 +426,9 @@ export function ConsentAuthorizationModal({
                     <input
                       id={`${baseId}-${id}-check`}
                       type="checkbox"
-                      className={`mt-1 ${styles.checkbox}`}
+                      className={`mt-1 ${styles.checkbox}${
+                        isAcceptance ? " border-emerald-800 accent-emerald-800" : ""
+                      }`}
                       checked={isAccepted}
                       disabled={isAcceptance && !formComplete}
                       onChange={(e) =>
@@ -616,19 +641,36 @@ export function ConsentAuthorizationModal({
 
                         <label
                           htmlFor={`${baseId}-${id}-check`}
-                          className="mt-3 flex cursor-pointer items-center gap-2 font-sans text-sm text-foreground"
+                          className={
+                            isAcceptance
+                              ? getAcceptanceConfirmClassName(
+                                  formComplete,
+                                  isAccepted
+                                )
+                              : "mt-3 flex cursor-pointer items-center gap-2 font-sans text-sm text-foreground"
+                          }
+                          title={
+                            isAcceptance && !formComplete
+                              ? t("signature.completeFormFirst")
+                              : undefined
+                          }
+                          aria-disabled={
+                            isAcceptance && !formComplete ? true : undefined
+                          }
                         >
-                          <span
-                            className={
-                              isAccepted
-                                ? "text-emerald-800 dark:text-emerald-200"
-                                : "text-muted-foreground"
-                            }
-                          >
-                            {isAcceptance
-                              ? t("signature.finalConfirm")
-                              : t("acceptSection")}
-                          </span>
+                          {isAcceptance ? (
+                            t("signature.finalConfirm")
+                          ) : (
+                            <span
+                              className={
+                                isAccepted
+                                  ? "text-emerald-800 dark:text-emerald-200"
+                                  : "text-muted-foreground"
+                              }
+                            >
+                              {t("acceptSection")}
+                            </span>
+                          )}
                         </label>
                       </div>
                     </div>

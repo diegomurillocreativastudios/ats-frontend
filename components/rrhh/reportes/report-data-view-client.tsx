@@ -618,9 +618,13 @@ export function ReportDataViewClient({
 
   return (
     <RrhhReportsShell breadcrumbLabel={catalogItem.name} breadcrumbTrail={trail}>
-      <div className="min-w-0 flex flex-col gap-6 px-4 py-6 pb-10 md:px-8">
-        <section aria-label="Encabezado del reporte">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <section
+          className="shrink-0 px-4 pt-6 md:px-8"
+          aria-label="Encabezado del reporte"
+        >
           <PortalPageHeader
+            className="shrink-0 gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between"
             title={catalogItem.name}
             description={
               catalogItem.description?.trim() ||
@@ -657,139 +661,146 @@ export function ReportDataViewClient({
           />
         </section>
 
-        {pdfActionError ? (
-          <p className="font-sans text-sm text-destructive" role="alert">
-            {pdfActionError}
-          </p>
-        ) : null}
+        <div className="flex min-h-0 flex-1 flex-col gap-3 px-4 pb-4 pt-2 md:px-8">
+          {pdfActionError ? (
+            <p className="shrink-0 font-sans text-sm text-destructive" role="alert">
+              {pdfActionError}
+            </p>
+          ) : null}
 
-        {templateError ? (
-          <p className="font-sans text-sm text-amber-700 dark:text-amber-400" role="status">
-            {templateError}
-          </p>
-        ) : null}
-
-        {hasFilters ? (
-          <section aria-label="Filtros del reporte">
-            <ReportesFiltersPlaceholder
-              hintText={tReports("filters.hint")}
-              controlsClassName={filterGridClass}
+          {templateError ? (
+            <p
+              className="shrink-0 font-sans text-sm text-amber-700 dark:text-amber-400"
+              role="status"
             >
-              {catalogFilters.map((filter) => (
-                <FilterField
-                  key={filter.key}
-                  filter={filter}
-                  value={draftFilters[filter.key] ?? ""}
-                  onChange={(next) =>
-                    setDraftFilters((prev) => ({ ...prev, [filter.key]: next }))
-                  }
-                  disabled={loading}
-                  companies={companies}
-                  vacancies={vacancies}
-                  optionsLoading={optionsLoading}
-                />
-              ))}
-              <div className="flex w-full min-w-0 flex-col justify-end gap-2 sm:col-span-2 lg:col-span-1 lg:flex-row">
+              {templateError}
+            </p>
+          ) : null}
+
+          {hasFilters ? (
+            <section className="shrink-0" aria-label="Filtros del reporte">
+              <ReportesFiltersPlaceholder
+                hintText={tReports("filters.hint")}
+                controlsClassName={filterGridClass}
+              >
+                {catalogFilters.map((filter) => (
+                  <FilterField
+                    key={filter.key}
+                    filter={filter}
+                    value={draftFilters[filter.key] ?? ""}
+                    onChange={(next) =>
+                      setDraftFilters((prev) => ({ ...prev, [filter.key]: next }))
+                    }
+                    disabled={loading}
+                    companies={companies}
+                    vacancies={vacancies}
+                    optionsLoading={optionsLoading}
+                  />
+                ))}
+                <div className="flex w-full min-w-0 flex-col justify-end gap-2 sm:col-span-2 lg:col-span-1 lg:flex-row">
+                  <button
+                    type="button"
+                    onClick={handleApply}
+                    className={applyButtonClass}
+                    disabled={loading}
+                    aria-busy={loading || undefined}
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    ) : null}
+                    {t("applyFilters")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className={resetButtonClass}
+                    disabled={loading}
+                  >
+                    {t("clear")}
+                  </button>
+                </div>
+              </ReportesFiltersPlaceholder>
+            </section>
+          ) : null}
+
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {error ? (
+              <div
+                className="flex flex-col items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-5"
+                role="alert"
+              >
+                <div className="flex items-start gap-2">
+                  <AlertCircle
+                    className="mt-0.5 h-5 w-5 shrink-0 text-destructive"
+                    aria-hidden
+                  />
+                  <div className="space-y-1">
+                    <p className="font-sans text-sm font-medium text-foreground">
+                      {t("loadFailed")}
+                    </p>
+                    <p className="font-sans text-sm text-muted-foreground">{error}</p>
+                  </div>
+                </div>
                 <button
                   type="button"
-                  onClick={handleApply}
-                  className={applyButtonClass}
-                  disabled={loading}
-                  aria-busy={loading || undefined}
-                >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  ) : null}
-                  {t("applyFilters")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleReset}
+                  onClick={handleRetry}
                   className={resetButtonClass}
-                  disabled={loading}
+                  aria-label={t("retryAria")}
                 >
-                  {t("clear")}
+                  <RefreshCw className="h-4 w-4" aria-hidden />
+                  {t("retry")}
                 </button>
               </div>
-            </ReportesFiltersPlaceholder>
-          </section>
-        ) : null}
+            ) : null}
 
-        {error ? (
-          <div
-            className="flex flex-col items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-5"
-            role="alert"
-          >
-            <div className="flex items-start gap-2">
-              <AlertCircle
-                className="mt-0.5 h-5 w-5 shrink-0 text-destructive"
-                aria-hidden
-              />
-              <div className="space-y-1">
-                <p className="font-sans text-sm font-medium text-foreground">
-                  {t("loadFailed")}
-                </p>
-                <p className="font-sans text-sm text-muted-foreground">{error}</p>
+            {loading && !response ? (
+              <div
+                className="flex items-center gap-2 font-sans text-sm text-muted-foreground"
+                role="status"
+                aria-live="polite"
+              >
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                {t("loadingData")}
               </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleRetry}
-              className={resetButtonClass}
-              aria-label={t("retryAria")}
-            >
-              <RefreshCw className="h-4 w-4" aria-hidden />
-              {t("retry")}
-            </button>
+            ) : null}
+
+            {!loading && !error && response && !hasRows ? (
+              <p className="font-sans text-sm text-muted-foreground" role="status">
+                {emptyMessage}
+              </p>
+            ) : null}
+
+            {usesSchemaPipeline && (linkedTemplateId || template) && templateLoading ? (
+              <div
+                className="flex items-center gap-2 font-sans text-sm text-muted-foreground"
+                role="status"
+                aria-live="polite"
+              >
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                {t("loadingTemplate")}
+              </div>
+            ) : null}
+
+            {previewSrcDoc ? (
+              <section
+                aria-label={t("previewTitle")}
+                className="report-preview-wrapper flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+              >
+                <h2 className="shrink-0 font-sans text-sm font-semibold text-foreground">
+                  Vista previa
+                </h2>
+                <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border bg-muted/15">
+                  <iframe
+                    title="Vista previa del reporte"
+                    sandbox="allow-same-origin"
+                    srcDoc={previewSrcDoc}
+                    className="h-full min-h-0 w-full border-0 bg-background"
+                  />
+                </div>
+              </section>
+            ) : null}
           </div>
-        ) : null}
-
-        {loading && !response ? (
-          <div
-            className="flex items-center gap-2 font-sans text-sm text-muted-foreground"
-            role="status"
-            aria-live="polite"
-          >
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            {t("loadingData")}
-          </div>
-        ) : null}
-
-        {!loading && !error && response && !hasRows ? (
-          <p className="font-sans text-sm text-muted-foreground" role="status">
-            {emptyMessage}
-          </p>
-        ) : null}
-
-        {usesSchemaPipeline && (linkedTemplateId || template) && templateLoading ? (
-          <div
-            className="flex items-center gap-2 font-sans text-sm text-muted-foreground"
-            role="status"
-            aria-live="polite"
-          >
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            {t("loadingTemplate")}
-          </div>
-        ) : null}
-
-        {previewSrcDoc ? (
-          <section
-            aria-label={t("previewTitle")}
-            className="report-preview-wrapper flex min-h-0 flex-col gap-3"
-          >
-            <h2 className="font-sans text-sm font-semibold text-foreground">
-              Vista previa
-            </h2>
-            <div className="flex min-h-[480px] w-full flex-col overflow-hidden rounded-lg border border-border bg-muted/15">
-              <iframe
-                title="Vista previa del reporte"
-                sandbox="allow-same-origin"
-                srcDoc={previewSrcDoc}
-                className="min-h-[480px] w-full flex-1 border-0 bg-background"
-              />
-            </div>
-          </section>
-        ) : null}
+        </div>
       </div>
     </RrhhReportsShell>
   )
