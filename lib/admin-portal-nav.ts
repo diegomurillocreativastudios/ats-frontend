@@ -176,10 +176,8 @@ export function resolveAdminPortalBreadcrumbTrail(
     }
 
     if (normalized === item.href || normalized.startsWith(`${item.href}/`)) {
-      const legacy = ADMIN_PORTAL_LEGACY_NAV_LINKS.find(
-        (link) =>
-          link.labelKey !== item.labelKey &&
-          isAdminNavHrefActive(normalized, link.href),
+      const legacy = ADMIN_PORTAL_LEGACY_NAV_LINKS.find((link) =>
+        isAdminNavHrefActive(normalized, link.href),
       )
       if (legacy) {
         return [

@@ -168,5 +168,8 @@ describe("admin portal nav", () => {
         labelKey: "interviewsCalendar",
       },
     ])
+    expect(resolveAdminPortalBreadcrumbTrail("/portal-admin/empresas")).toEqual([
+      { href: "/portal-admin/empresas", labelKey: "companies" },
+    ])
   })
 })
