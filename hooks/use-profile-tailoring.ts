@@ -7,6 +7,7 @@ import {
   type TailorToVacancyResult,
 } from "@/lib/candidate-profile-version"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { getUploadApiErrorMessage } from "@/lib/upload-constraints"
 import type { FullProfileFormInput } from "@/lib/candidate-profile"
 import {
   resolveExclusiveVacancySource,
@@ -89,11 +90,14 @@ export function useProfileTailoring() {
             ? (err as { status?: number }).status
             : undefined
         const serverMessage = getApiErrorMessage(err)
+        const uploadMessage = getUploadApiErrorMessage(err)
         const message =
           status === 422
             ? serverMessage ||
               "La IA no pudo generar un perfil adaptado válido. No se creó ninguna versión."
-            : serverMessage || "No se pudo procesar el perfil para la vacante."
+            : status === 413 || status === 415 || status === 400
+              ? uploadMessage
+              : serverMessage || "No se pudo procesar el perfil para la vacante."
         setError(message)
         return null
       } finally {

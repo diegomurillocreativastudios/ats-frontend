@@ -25,6 +25,7 @@ import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
 vi.mock("@/lib/api", () => ({
   apiClient: {
     get: vi.fn(() => new Promise(() => {})),
+    getWithHeaders: vi.fn(() => new Promise(() => {})),
     post: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),

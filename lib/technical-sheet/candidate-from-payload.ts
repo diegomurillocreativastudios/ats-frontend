@@ -21,19 +21,6 @@ const isMeaningfulObjectRecord = (v: unknown): v is Record<string, unknown> => {
   })
 }
 
-const pickObject = (
-  p: TechnicalSheetPayload,
-  keys: (keyof TechnicalSheetPayload)[]
-): Record<string, unknown> | null => {
-  for (const k of keys) {
-    const v = p[k]
-    if (isMeaningfulObjectRecord(v)) {
-      return v
-    }
-  }
-  return null
-}
-
 const TECHNICAL_SHEET_SIBLING_KEYS = new Set([
   "generatedAtUtc",
   "vacancy",
@@ -78,12 +65,23 @@ const isRootCandidateProfileShape = (root: Record<string, unknown>): boolean => 
 
 /**
  * Objeto candidato: anidado (`candidate` / `personal`) o el propio root si ya viene plano.
+ * When several nested bags exist, merge them so header fields on `personal` do not
+ * hide profile arrays on `candidate` (workExperience, education, skills, etc.).
+ * Precedence (later wins): personalData → personal → candidate.
  */
 export function pickCandidateDisplayRecord(
   payload: TechnicalSheetPayload
 ): Record<string, unknown> | null {
-  const nested = pickObject(payload, ["personalData", "personal", "candidate"])
-  if (nested) return nested
+  const merged: Record<string, unknown> = {}
+  let found = false
+  for (const key of ["personalData", "personal", "candidate"] as const) {
+    const v = payload[key]
+    if (!isMeaningfulObjectRecord(v)) continue
+    Object.assign(merged, v)
+    found = true
+  }
+  if (found) return merged
+
   if (payload == null || typeof payload !== "object" || Array.isArray(payload)) return null
   const root = payload as Record<string, unknown>
   if (!isRootCandidateProfileShape(root)) return null

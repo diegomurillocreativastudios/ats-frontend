@@ -4,6 +4,7 @@ import {
   canChangePortal,
   canStaffBulkPdfCvUpload,
   isAdminRole,
+  isCandidateRole,
   isRecruiterRole,
 } from "@/lib/roles"
 
@@ -12,6 +13,9 @@ describe("roles", () => {
     expect(isAdminRole("Admin")).toBe(true)
     expect(isRecruiterRole("Recruiter")).toBe(true)
     expect(isRecruiterRole("Human Resources")).toBe(true)
+    expect(isCandidateRole("Candidate")).toBe(true)
+    expect(isCandidateRole("candidato")).toBe(true)
+    expect(isCandidateRole("admin")).toBe(false)
   })
 
   it("habilita CV múltiple PDF en portal RRHH o roles staff", () => {

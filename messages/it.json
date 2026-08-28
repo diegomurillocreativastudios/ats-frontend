@@ -42,21 +42,25 @@
     "reports": "Report",
     "settings": "Impostazioni",
     "stages": "Fasi",
+    "stageStatuses": "Stati",
     "templates": "Modelli",
     "interviewsCatalog": "Colloqui — Cataloghi",
     "interviewsCalendar": "Colloqui — Calendario",
     "users": "Utenti",
+    "administration": "Amministrazione",
     "companies": "Aziende",
     "departments": "Reparti",
     "modalities": "Modalità",
     "documentTypes": "Tipi di documento",
+    "interviewTypes": "Tipi",
+    "interviewModalities": "Modalità",
+    "interviewStatuses": "Stati",
     "tailorProfile": "Adatta il mio profilo"
   },
   "Topbar": {
     "portalCandidate": "Portale candidato",
     "portalRRHH": "Portale HR",
     "portalAdmin": "Portale amministrazione",
-    "notifications": "Notifiche",
     "openMenu": "Apri menu",
     "userMenu": "Menu utente",
     "breadcrumb": "Percorso di navigazione",
@@ -64,12 +68,18 @@
   },
   "Sidebar": {
     "goHome": "Vai alla home",
+    "goToPortalSelection": "Vai alla selezione del portale",
     "ariaCandidate": "Navigazione principale",
     "ariaRRHH": "Navigazione Portale HR",
     "ariaAdmin": "Navigazione Portale amministrazione",
     "menuCandidate": "Menu candidato",
     "menuRRHH": "Menu HR",
-    "menuAdmin": "Menu amministrazione"
+    "menuAdmin": "Menu amministrazione",
+    "toggleNavGroup": "Mostra o nascondi {label}",
+    "accountMenu": "Menu account",
+    "roleAdmin": "Amministratore",
+    "roleRecruiter": "Recruiter",
+    "roleCandidate": "Candidato"
   },
   "Auth": {
     "login": {
@@ -97,7 +107,9 @@
       "toastPasswordReset": "La tua password è stata aggiornata correttamente. Accedi con la nuova password.",
       "toastLogoutSuccess": "Disconnessione effettuata correttamente.",
       "toastLogoutError": "Non abbiamo potuto confermare la disconnessione, ma ti abbiamo reindirizzato alla pagina di accesso.",
-      "toastInvalidCredentials": "Credenziali non valide. Verifica email e password.",
+      "toastInvalidCredentials": "Email o password non corretti.",
+      "toastRateLimited": "Troppi tentativi. Attendi un momento e riprova.",
+      "retryIn": "Riprova tra {seconds}s",
       "continueWithLinkedIn": "Continua con LinkedIn",
       "orContinueWith": "O continua con"
     },
@@ -108,45 +120,49 @@
       "backToSignIn": "Torna all'accesso",
       "errors": {
         "missing_code": "Manca il codice di accesso. Riprova.",
+        "missing_code_or_state": "Mancano i dati della sessione LinkedIn. Riprova.",
         "linkedin_sso_failed": "Non siamo riusciti a completare l'accesso con LinkedIn. Riprova.",
         "account_banned": "Il tuo account non può accedere. Contatta l'amministratore.",
+        "account_exists": "Esiste già un account con questa email. Accedi con email e password.",
+        "account_link_failed": "Non siamo riusciti a collegare il tuo account LinkedIn. Riprova.",
         "email_not_verified": "Non abbiamo potuto verificare l'email di LinkedIn. Prova un altro metodo di accesso.",
+        "email_required": "LinkedIn non ha condiviso un indirizzo email. Prova un altro metodo di accesso.",
         "exchange_code_expired": "La sessione di accesso è scaduta. Riprova.",
         "exchange_code_used": "Questo link di accesso è già stato utilizzato. Riprova.",
-        "network_error": "Impossibile connettersi al server. Riprova."
+        "id_token_invalid": "Non siamo riusciti a convalidare la tua identità LinkedIn. Riprova.",
+        "invalid_state": "La sessione di LinkedIn non è valida. Riprova.",
+        "network_error": "Impossibile connettersi al server. Riprova.",
+        "not_configured": "L'accesso con LinkedIn non è disponibile. Contatta l'amministratore.",
+        "token_exchange_failed": "Non siamo riusciti a completare lo scambio con LinkedIn. Riprova.",
+        "user_creation_failed": "Non siamo riusciti a creare il tuo account. Riprova.",
+        "userinfo_failed": "Non siamo riusciti a caricare il tuo profilo LinkedIn. Riprova."
       }
     },
     "forgot": {
       "brandTitle": "Recupera l'accesso<br></br>al tuo account",
-      "brandSubtitle": "Verifichiamo la tua email e nel passaggio successivo imposti una nuova password.",
-      "brandSubtitleSm": "Verifichiamo la tua email e prosegui con la nuova password.",
-      "feature1": "Email verificata nel sistema",
+      "brandSubtitle": "Se la tua email è registrata, ti inviamo un link per reimpostare la password.",
+      "brandSubtitleSm": "Ti inviamo un link via email se l'account esiste.",
+      "feature1": "Link sicuro monouso",
       "feature2": "Password sicura (min. 8 caratteri)",
       "title": "Hai dimenticato la password?",
-      "subtitle": "Inserisci l'email del tuo account. Se è registrata, prosegui per scegliere una nuova password.",
+      "subtitle": "Inserisci l'email del tuo account. Se è registrata, ti inviamo un link per reimpostare la password.",
       "emailLabel": "Email",
       "emailPlaceholder": "nome@azienda.com",
       "submit": "Invia istruzioni",
       "submitting": "Invio in corso...",
       "retryIn": "Riprova tra {seconds}s",
       "backToLogin": "Torna all'accesso",
-      "toastSuccess": "Ti abbiamo inviato un'email con un link per reimpostare la password.",
-      "toastNoAccount": "Non esiste un account registrato con questa email. Verifica il dato o registrati.",
+      "toastSuccess": "Se esiste un account con quella email, ti abbiamo inviato un link per reimpostare la password.",
       "toastRequestFailed": "Impossibile inviare la richiesta. Riprova."
     },
     "reset": {
       "brandTitle": "Nuova password",
       "brandSubtitle": "Scegli una password sicura che non usi su altri siti.",
-      "brandSubtitleEmailFlow": "La tua email è già verificata. Scegli una password sicura.",
       "brandSubtitleSm": "Scegli una password sicura.",
-      "brandSubtitleSmEmailFlow": "Email verificata. Completa la tua nuova password.",
       "feature1": "Scegli una password che ricordi",
-      "featureEmailVerified": "Email verificata",
       "featureRecoveryLink": "Link di recupero",
       "title": "Reimposta password",
       "subtitle": "Inserisci la nuova password e confermala.",
-      "subtitleEmailFlow": "La tua email è stata verificata. Inserisci e conferma la nuova password.",
-      "emailLabel": "Email",
       "newPasswordLabel": "Nuova password",
       "newPasswordPlaceholder": "La tua nuova password",
       "minChars": "Minimo 8 caratteri",
@@ -161,7 +177,7 @@
       "invalidBrandTitle": "Link non valido",
       "invalidBrandSubtitle": "Avvia la reimpostazione da \"Hai dimenticato la password?\".",
       "invalidCardTitle": "Non siamo riusciti ad aprire la reimpostazione",
-      "invalidCardBody": "Manca un'email verificata o un token valido. Torna a \"Hai dimenticato la password?\" e completa il passaggio precedente.",
+      "invalidCardBody": "Il link non è valido o è scaduto. Torna a \"Hai dimenticato la password?\" per richiederne uno nuovo.",
       "invalidGoForgot": "Vai a password dimenticata"
     },
     "loadingFallback": "Caricamento…",
@@ -187,12 +203,13 @@
       "showPasswordsAria": "Mostrar contraseñas",
       "submit": "Crear Cuenta",
       "submitting": "Creando cuenta...",
+      "retryIn": "Riprova tra {seconds}s",
       "hasAccount": "¿Ya tienes cuenta?",
       "loginLink": "Inicia sesión",
       "toastSuccess": "Cuenta creada correctamente. Ya puedes iniciar sesión.",
       "errors": {
-        "generic": "Error al crear la cuenta. Intenta de nuevo.",
-        "emailTaken": "Este correo ya está registrado.",
+        "generic": "No se pudo completar el registro. Revisá los datos e intentá de nuevo.",
+        "rateLimited": "Demasiados intentos. Esperá un momento e intentá de nuevo.",
         "server": "Error del servidor. Intenta más tarde."
       }
     }
@@ -220,7 +237,7 @@
       },
       "resetPassword": {
         "title": "Reimposta password",
-        "description": "Imposta una nuova password dopo aver verificato la tua email o con il link di recupero"
+        "description": "Imposta una nuova password con il link di recupero ricevuto via email"
       },
       "register": {
         "title": "Registrarse",
@@ -270,6 +287,10 @@
         "title": "Fasi",
         "description": "Gestione delle fasi e degli stati del processo di selezione"
       },
+      "stageStatuses": {
+        "title": "Stati di fase",
+        "description": "Gestione degli stati delle fasi del processo delle posizioni"
+      },
       "templates": {
         "title": "Modelli",
         "description": "Gestione dei modelli di notifiche e documenti"
@@ -289,6 +310,18 @@
       "interviewsCatalog": {
         "title": "Colloqui",
         "description": "Cataloghi di tipi, modalità e stati dei colloqui"
+      },
+      "interviewTypes": {
+        "title": "Tipi di colloquio",
+        "description": "Gestione del catalogo dei tipi di colloquio"
+      },
+      "interviewModalities": {
+        "title": "Modalità di colloquio",
+        "description": "Gestione del catalogo delle modalità di colloquio"
+      },
+      "interviewStatuses": {
+        "title": "Stati di colloquio",
+        "description": "Gestione del catalogo degli stati di colloquio"
       },
       "interviewsCalendar": {
         "title": "Interview calendar | Admin Portal",
@@ -475,9 +508,9 @@
         "dropzoneAria": "Trascina i file o fai clic per caricare i documenti",
         "dropActive": "Rilascia i file qui",
         "dropPrompt": "Trascina i file qui o fai clic per caricare",
-        "helperDefault": "PDF, DOC, DOCX fino a 10 MB",
-        "errorTypeNotAllowed": "Tipo non consentito. Solo .PDF",
-        "errorTooLarge": "Il file supera 10 MB ({size}).",
+        "helperDefault": "PDF, DOCX fino a 15 MB",
+        "errorTypeNotAllowed": "Tipo non consentito. Solo PDF o DOCX.",
+        "errorTooLarge": "Il file supera 15 MB ({size}).",
         "selectedCount": "{count, plural, one {# file selezionato} other {# file selezionati}}",
         "selectedListAria": "Elenco dei file selezionati",
         "processAll": "Elabora tutti",
@@ -541,13 +574,13 @@
         "identityHeading": "Documento d'identità",
         "identityDescription": "Carica il documento d'identità del candidato in formato PDF.",
         "cvPrimaryText": "Trascina il CV qui o fai clic per caricare",
-        "cvHelperText": "PDF, DOCX o TXT fino a 10 MB",
-        "cvHelperTextPdfOnly": "Solo file PDF fino a 10 MB",
+        "cvHelperText": "PDF, DOCX o TXT fino a 15 MB",
+        "cvHelperTextPdfOnly": "Solo file PDF fino a 15 MB",
         "cvAria": "Trascina il CV o fai clic per caricare",
         "cvTypeError": "Tipo non consentito. Solo PDF, DOCX o TXT.",
         "cvTypeErrorPdfOnly": "Tipo non consentito. Solo file PDF.",
         "identityPrimaryText": "Trascina il documento qui o fai clic per caricare",
-        "identityHelperText": "Solo file PDF fino a 10 MB",
+        "identityHelperText": "Solo file PDF fino a 15 MB",
         "identityAria": "Trascina il documento d'identità o fai clic per caricare",
         "identityTypeError": "Tipo non consentito. Solo file PDF.",
         "kpis": {
@@ -1338,6 +1371,15 @@
         "headline": "Titolo",
         "uploadedAt": "Data di caricamento",
         "actions": "Azioni"
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# candidato} other {# candidati}}"
       }
     },
     "candidateDetail": {
@@ -1430,9 +1472,11 @@
       },
       "errors": {
         "loadProfileFailed": "Impossibile caricare il profilo del candidato.",
+        "candidateUnavailable": "Questo candidato non è disponibile oppure non hai accesso.",
         "missingCandidateId": "Manca l'identificatore del candidato.",
         "downloadFailed": "Errore durante il download.",
         "downloadCvFailed": "Impossibile scaricare il CV.",
+        "downloadCvUnavailable": "Il CV non è disponibile.",
         "saveInvalidFields": "Controlla i dati: alcuni campi non sono validi.",
         "saveForbidden": "Il tuo account non ha il permesso di modificare questo profilo.",
         "saveDuplicateNationalId": "Quel documento d'identità è già associato a un altro profilo."
@@ -1720,6 +1764,15 @@
       "toasts": {
         "created": "Posizione creata con successo."
       },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# posizione} other {# posizioni}}"
+      },
       "form": {
         "title": "Nuova posizione",
         "fields": {
@@ -1780,7 +1833,19 @@
           "add": "Aggiungi",
           "addRequirementAria": "Aggiungi requisito",
           "cancel": "Annulla",
-          "submit": "Crea posizione"
+          "submit": "Crea posizione",
+          "paste": "Incolla",
+          "pasteAria": "Incolla la posizione copiata",
+          "pasteDisabledAria": "Non c'è una posizione copiata."
+        },
+        "toasts": {
+          "pasted": "Posizione incollata.",
+          "pasteEmpty": "Non c'è una posizione copiata."
+        },
+        "pasteConfirm": {
+          "title": "Incollare la posizione copiata?",
+          "message": "Questo sostituirà i campi attuali del modulo.",
+          "confirm": "Incolla"
         },
         "validation": {
           "nameRequired": "Il nome è obbligatorio",
@@ -1811,6 +1876,26 @@
           "salary": "Retribuzione",
           "advantages": "Vantaggi e benefit della posizione"
         },
+        "detailsItemCount": "{count, plural, one {# criterio} other {# criteri}}",
+        "salaryDisplay": {
+          "monthly": "Mensile",
+          "hourly": "Oraria",
+          "yearly": "Annuale"
+        },
+        "requirementsList": {
+          "skill": "Competenza",
+          "expectedLevel": "Livello atteso",
+          "importance": "Importanza",
+          "importanceValue": "{value}/10",
+          "importanceAria": "Importanza {value} su 10",
+          "unspecified": "—"
+        },
+        "headerMeta": {
+          "department": "Dipartimento",
+          "modality": "Modalità",
+          "location": "Sede",
+          "created": "Creata il {date}"
+        },
         "actions": {
           "backToVacancies": "Torna alle posizioni",
           "backToVacanciesAria": "Torna alle posizioni",
@@ -1825,6 +1910,8 @@
           "interviewsAria": "Vedi i colloqui di questa posizione",
           "results": "Risultati",
           "resultsAria": "Vedi risultati e metriche di questa posizione",
+          "copy": "Copia",
+          "copyAria": "Copia questa posizione",
           "addRequirement": "Aggiungi",
           "addRequirementAria": "Aggiungi requisito",
           "companyChangeHint": "Cambiare il cliente non modifica lo stato della posizione né le candidature esistenti."
@@ -1844,7 +1931,9 @@
         },
         "toasts": {
           "saved": "Modifiche salvate correttamente.",
-          "finishSuccess": "Processo concluso correttamente."
+          "finishSuccess": "Processo concluso correttamente.",
+          "copied": "Posizione copiata.",
+          "copyFailed": "Impossibile copiare la posizione."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2023,6 +2112,11 @@
         "searchResults": "Risultati di ricerca",
         "reanalyzingEllipsis": "Rianalisi con IA…",
         "updatingSearchEllipsis": "Aggiornamento ricerca IA…",
+        "searchLoadingHint": "L'operazione può richiedere alcuni secondi. Non chiudere questa pagina.",
+        "searchLoadingStepScanning": "Esplorazione del bacino di talenti",
+        "searchLoadingStepMatching": "Confronto dei profili con i requisiti",
+        "searchLoadingStepRanking": "Ordinamento delle migliori corrispondenze",
+        "searchLoadingStepPreparing": "Preparazione dei risultati",
         "selectAll": "Seleziona tutti",
         "deselectAll": "Deseleziona tutti",
         "selectedCount": "{count} selezionato/i",
@@ -2044,19 +2138,27 @@
         "emptyDefault": "Nessun candidato da mostrare al momento.",
         "profileModal": {
           "aiProcessed": "Analisi elaborata con IA",
+          "aiProcessedShort": "Valutazione con IA · supporto per la decisione HR",
           "aiIntro": "Questa valutazione è stata elaborata con IA per accelerare la lettura iniziale del profilo.",
           "aiTiming": "Un'analisi manuale può richiedere tra <strong>2 ore e 1 giorno</strong>, mentre con l'IA questo risultato viene generato in <strong>secondi</strong>.",
           "aiValidationHint": "Usa questi risultati come supporto e convalida la decisione finale dal team HR.",
           "aiDisclosure": "Il contenuto seguente è stato generato da IA e viene mostrato senza modifiche.",
           "attributes": "Attributi",
+          "attributesDetail": "Dettaglio attributi ({count})",
+          "attributesZeroHint": "Uno 0% non sempre abbassa il punteggio combinato: attualità o anni pertinenti si misurano a parte.",
           "qualitativeScore": "Punteggio qualitativo",
           "semanticSimilarity": "Similarità semantica",
           "attributeMatch": "Corrispondenza attributi",
+          "attributeColumn": "Attributo",
+          "levelColumn": "Livello",
+          "scoreColumn": "Punteggio",
           "routePrefix": "Percorso:",
           "strengths": "Punti di forza",
           "considerations": "Aspetti da considerare",
           "qualitativeReasoning": "Ragionamento qualitativo",
           "totalMatchScore": "Punteggio totale di corrispondenza:",
+          "totalMatchScoreShort": "Corrispondenza",
+          "heroAria": "Riepilogo dei punteggi di corrispondenza",
           "noAdditionalInfo": "Nessuna informazione aggiuntiva disponibile.",
           "downloading": "Download in corso…",
           "downloadCv": "Scarica CV",
@@ -2075,7 +2177,9 @@
           "keywordMatch": "Corrispondenza parole chiave",
           "experience": "Esperienza",
           "education": "Formazione",
-          "skills": "Competenze"
+          "skills": "Competenze",
+          "recency": "Attualità",
+          "relevantYears": "Anni pertinenti"
         },
         "kanban": {
           "score": "Punteggio",
@@ -2109,7 +2213,7 @@
           "preliminarySearchTitle": "Ricerca preliminare",
           "preliminarySearchSubtitle": "Da ore a secondi nella prima esplorazione",
           "preliminaryMatchTitle": "Corrispondenza preliminare",
-          "preliminaryMatchSubtitle": "Precisione osservata dal 75% all'80%",
+          "preliminaryMatchSubtitle": "Precisione osservata dal 90% al 95%",
           "preliminaryMatchGoal": "Obiettivo di calibrazione: 90%",
           "coverageTitle": "Copertura dei risultati",
           "coverageSubtitle": "Shortlist iniziale con candidati suggeriti",
@@ -2126,6 +2230,7 @@
           "applicationStatusUpdated": "Stato candidatura aggiornato.",
           "missingApplicationId": "ID candidatura non trovato per aggiornare lo stato.",
           "downloadCvFailed": "Impossibile scaricare il CV.",
+          "downloadCvUnavailable": "Il CV non è disponibile.",
           "searchNoResults": "Nessun candidato trovato nella ricerca.",
           "searchAlreadyInPipeline": "I candidati trovati sono già in Candidati possibili o Fasi.",
           "goToStagesAria": "Vai alla sezione Fasi per gestire gli stati di candidatura",
@@ -2222,6 +2327,15 @@
       "loadingStates": {
         "loadingVacancies": "Caricamento delle posizioni…",
         "loadingInterviews": "Caricamento dei colloqui..."
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# posizione} other {# posizioni}}"
       },
       "errors": {
         "loadVacanciesFailed": "Impossibile caricare le posizioni.",
@@ -2346,15 +2460,25 @@
           "no": "No",
           "editNameAria": "Modifica nome del tipo",
           "editAria": "Modifica {name}",
-          "deleteAria": "Elimina {name}"
+          "deleteAria": "Elimina {name}",
+          "refresh": "Aggiorna",
+          "edit": "Modifica",
+          "retry": "Riprova"
         },
         "types": {
           "title": "Tipi di colloquio",
           "createAria": "Crea tipo di colloquio",
+          "createCta": "Crea tipo",
+          "createTitle": "Crea tipo di colloquio",
+          "editTitle": "Modifica tipo di colloquio",
           "newLabel": "Nuovo tipo",
           "namePlaceholder": "Nome del tipo",
+          "code": "Codice",
+          "listAria": "Elenco dei tipi di colloquio",
+          "loadErrorAria": "Errore nel caricamento dei tipi di colloquio",
           "loading": "Caricamento tipi…",
-          "empty": "Nessun tipo definito. Aggiungi il primo sopra.",
+          "empty": "Non ci sono ancora tipi di colloquio creati",
+          "emptyBody": "Quando crei un tipo, sarà disponibile per pianificare i colloqui.",
           "created": "Tipo di colloquio creato correttamente.",
           "updated": "Tipo di colloquio aggiornato correttamente.",
           "deleted": "Tipo di colloquio eliminato correttamente.",
@@ -2373,8 +2497,14 @@
           "terminal": "Terminale",
           "terminalAria": "Stato terminale",
           "displayNameAria": "Nome visibile",
+          "listAria": "Elenco degli stati dei colloqui",
+          "loadErrorAria": "Errore nel caricamento degli stati dei colloqui",
+          "createCta": "Crea stato",
+          "createTitle": "Crea stato del colloquio",
+          "editTitle": "Modifica stato del colloquio",
           "loading": "Caricamento stati…",
-          "empty": "Nessuno stato definito. Aggiungi il primo sopra.",
+          "empty": "Non ci sono ancora stati dei colloqui creati",
+          "emptyBody": "Quando crei uno stato, sarà disponibile per il ciclo dei colloqui.",
           "created": "Stato del colloquio creato correttamente.",
           "updated": "Stato del colloquio aggiornato correttamente.",
           "deleted": "Stato del colloquio eliminato correttamente.",
@@ -2384,14 +2514,20 @@
         "modalities": {
           "title": "Modalità di colloquio",
           "createAria": "Crea modalità di colloquio",
+          "createCta": "Crea modalità",
+          "createTitle": "Crea modalità di colloquio",
+          "editTitle": "Modifica modalità di colloquio",
           "newLabel": "Nuova modalità",
           "namePlaceholder": "Nome visibile",
           "googleMeet": "Google Meet",
           "meetLabel": "Meet",
           "meetAria": "Includi link Google Meet",
           "editNameAria": "Modifica nome della modalità",
+          "listAria": "Elenco delle modalità di colloquio",
+          "loadErrorAria": "Errore nel caricamento delle modalità di colloquio",
           "loading": "Caricamento modalità…",
-          "empty": "Nessuna modalità definita. Aggiungi la prima sopra.",
+          "empty": "Non ci sono ancora modalità di colloquio create",
+          "emptyBody": "Quando crei una modalità, sarà disponibile per pianificare i colloqui.",
           "created": "Modalità di colloquio creata correttamente.",
           "updated": "Modalità di colloquio aggiornata correttamente.",
           "deleted": "Modalità di colloquio eliminata correttamente.",
@@ -2554,7 +2690,7 @@
         "industryLabel": "Settore (facoltativo)",
         "industryPlaceholder": "es. Tecnologia, Retail",
         "logoLegend": "Logo",
-        "logoHelper": "PNG, JPG, WEBP o SVG. Massimo 5 MB. Il logo viene caricato come blob al salvataggio.",
+        "logoHelper": "PNG, JPG, JPEG, WEBP o GIF. Massimo 5 MB. Il logo viene caricato come blob al salvataggio.",
         "logoPreviewAria": "Anteprima del logo",
         "logoNoneAria": "Nessun logo",
         "logoAlt": "Logo dell'azienda",
@@ -2578,7 +2714,7 @@
         "loadFailed": "Impossibile caricare l'azienda.",
         "saveFailed": "Impossibile salvare l'azienda.",
         "statusUpdateFailed": "Impossibile aggiornare lo stato.",
-        "logoType": "Sono consentiti solo file immagine.",
+        "logoType": "Sono consentiti solo PNG, JPG, JPEG, WEBP o GIF (senza SVG).",
         "logoSize": "Il logo non può superare i 5 MB."
       },
       "toasts": {
@@ -2600,6 +2736,7 @@
         "roleLabel": "Ruolo",
         "allRoles": "Tutti",
         "lockedOnly": "Solo bloccati",
+        "lockoutLabel": "Blocco",
         "apply": "Applica filtri",
         "clear": "Cancella"
       },
@@ -2607,7 +2744,7 @@
         "email": "Email",
         "userName": "Utente",
         "roles": "Ruoli",
-        "emailOk": "Email OK",
+        "emailOk": "Confermato",
         "lockout": "Blocco",
         "actions": "Azioni"
       },
@@ -2621,15 +2758,19 @@
       },
       "pagination": {
         "perPage": "Per pagina",
+        "pageSizeAria": "Utenti per pagina",
         "refreshAria": "Aggiorna elenco",
         "regionAria": "Paginazione",
         "summary": "Pagina {page} di {total}"
       },
       "emptyStates": {
-        "noResults": "Nessun utente corrisponde ai filtri attuali."
+        "noResults": "Nessun utente corrisponde ai filtri attuali.",
+        "description": "Prova a modificare i filtri o crea un nuovo utente."
       },
       "actions": {
         "create": "Nuovo utente",
+        "refresh": "Aggiorna",
+        "retry": "Riprova",
         "manage": "Gestisci",
         "prev": "Precedente",
         "next": "Successivo"
@@ -2648,20 +2789,25 @@
         "title": "Dettaglio utente",
         "emailLabel": "Email",
         "userNameLabel": "Nome utente",
+        "accountHeading": "Stato dell'account",
         "lockedCheckbox": "Account bloccato",
         "emailConfirmed": "Email confermata",
         "readOnly": "Sola lettura",
-        "lockoutHint": "Attivalo per bloccare manualmente l'utente e disattivalo per rimuovere il blocco.",
+        "lockAction": "Blocca account",
+        "unlockAction": "Sblocca account",
+        "lockoutHint": "La modifica viene applicata subito.",
         "lockoutActiveLabel": "Blocco attivo:",
         "lockoutEndPrefix": "Fine:",
+        "lockoutUntil": "Fino al {date}.",
         "rolesHeading": "Ruoli",
         "noRoles": "Nessun ruolo",
-        "addRolesPrompt": "Aggiungi ruoli (solo quelli selezionati):",
+        "addRolesPrompt": "Aggiungi ruoli",
         "removeRoleAria": "Rimuovi ruolo {role}",
         "allRolesAssigned": "Ha già tutti i ruoli assegnabili.",
-        "addRoles": "Aggiungi ruoli",
+        "addRoles": "Aggiungi",
         "sendReset": "Invia recupero password",
-        "close": "Chiudi"
+        "close": "Chiudi",
+        "loading": "Caricamento utente…"
       },
       "removeRole": {
         "title": "Rimuovi ruolo",
@@ -2671,6 +2817,10 @@
       },
       "errors": {
         "listForbidden": "Non hai i permessi per elencare gli utenti (è richiesto il ruolo Admin nell'API)."
+      },
+      "aria": {
+        "list": "Elenco utenti",
+        "loadError": "Errore nel caricamento degli utenti"
       },
       "validation": {
         "emailRequired": "L'email è obbligatoria.",
@@ -2691,9 +2841,7 @@
         "title": "Fasi",
         "description": "Gestisci le fasi del processo di selezione",
         "headerAria": "Intestazione fasi",
-        "listAria": "Elenco fasi",
-        "searchPlaceholder": "Cerca fasi...",
-        "searchAria": "Cerca fasi"
+        "listAria": "Elenco fasi"
       },
       "actions": {
         "statuses": "Stati",
@@ -2711,8 +2859,7 @@
       "fields": {
         "defaultStage": "Fase predefinita",
         "finalStage": "Fase finale",
-        "hiredStage": "Fase di assunzione",
-        "order": "Ordine:"
+        "hiredStage": "Fase di assunzione"
       },
       "switches": {
         "defaultActive": "{name}: fase predefinita attiva",
@@ -2741,7 +2888,6 @@
         "forbidden": "Non hai i permessi per modificare questa fase.",
         "notFound": "La fase non esiste più. Ricaricamento elenco...",
         "deleteFailed": "Impossibile eliminare la fase. Riprova.",
-        "reorderFilterHint": "Per salvare l'ordine, mostra tutte le fasi (senza filtro di ricerca).",
         "reorderFailed": "Impossibile riordinare le fasi. Riprova."
       },
       "toasts": {
@@ -2777,10 +2923,20 @@
       }
     },
     "statuses": {
+      "page": {
+        "title": "Stati di fase",
+        "description": "Definisci gli stati usati dalle fasi del processo delle posizioni quando sposti i candidati nella bacheca.",
+        "regionAria": "Stati di fase delle posizioni",
+        "listAria": "Elenco stati di fase",
+        "newStatusAria": "Crea nuovo stato"
+      },
       "modal": {
         "title": "Gestisci stati",
         "close": "Chiudi",
         "newStatus": "Nuovo stato",
+        "createTitle": "Nuovo stato",
+        "editTitle": "Modifica stato",
+        "createStatus": "Crea stato",
         "nameLabel": "Nome dello stato",
         "namePlaceholder": "Es.: In corso",
         "cancel": "Annulla",
@@ -2823,8 +2979,6 @@
         "description": "Gestisci i modelli di notifiche",
         "headerAria": "Intestazione modelli",
         "listAria": "Elenco modelli",
-        "searchPlaceholder": "Cerca modelli...",
-        "searchAria": "Cerca modelli",
         "newTemplate": "Nuovo modello",
         "newTemplateAria": "Crea nuovo modello"
       },
@@ -2863,6 +3017,15 @@
       },
       "toasts": {
         "deleted": "Modello eliminato correttamente."
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione",
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# modello} other {# modelli}}"
       },
       "deleteConfirm": {
         "title": "Elimina modello",
@@ -3017,7 +3180,7 @@
       "page": {
         "title": "Tipi di documento",
         "description": "Gestisci i tipi di documento disponibili per i candidati.",
-        "createCta": "Nuovo tipo di documento",
+        "createCta": "Crea tipo di documento",
         "summaryHelper": "Gestisci i tipi di documento disponibili per i candidati.",
         "countLoading": "Caricamento…",
         "countSummary": "{count, plural, one {# tipo di documento} other {# tipi di documento}}"
@@ -3063,7 +3226,7 @@
       },
       "emptyStates": {
         "noResults": "Nessun risultato trovato",
-        "noItems": "Nessun tipo di documento registrato",
+        "noItems": "Nessun tipo di documento creato",
         "searchHint": "Prova a cercare con altri termini.",
         "createHint": "Quando crei un tipo di documento, sarà disponibile per classificare i documenti di identità dei candidati."
       },
@@ -3098,6 +3261,17 @@
           "types": "Tipi di colloquio",
           "modalities": "Modalità di colloquio",
           "statuses": "Stati dei colloqui"
+        },
+        "pages": {
+          "types": {
+            "description": "Definisci i tipi di colloquio che i recruiter useranno in fase di pianificazione."
+          },
+          "modalities": {
+            "description": "Definisci le modalità di colloquio e se includono un link di Google Meet."
+          },
+          "statuses": {
+            "description": "Definisci gli stati del ciclo di un colloquio, inclusi gli stati terminali."
+          }
         }
       },
       "calendar": {
@@ -3231,16 +3405,22 @@
   "PublicOpportunities": {
     "page": {
       "portalTitle": "Portale opportunità",
-      "heroTitle": "Trova opportunità con una lettura chiara fin dal primo sguardo",
-      "heroBody": "Esplora le offerte pubbliche con filtri per dipartimento, modalità e ubicazione.",
-      "exploreCta": "Esplora opportunità",
+      "heroTitle": "Nel nostro <portal>Portale delle opportunità</portal> troverai il prossimo capitolo della tua carriera",
+      "heroBody": "Il tuo prossimo ruolo è già qui. Esplora le offerte aperte e trova quello che ti fa fare il salto.",
       "explorerLabel": "Esplorazione pubblica",
       "listTitle": "Opportunità disponibili",
       "searchLabel": "Cerca offerte",
-      "searchPlaceholder": "Cerca offerte per nome",
+      "searchPlaceholder": "Cerca per offerta o azienda",
       "filterDepartment": "Dipartimento",
       "filterModality": "Modalità",
       "filterCountry": "Paese",
+      "filterAllDepartments": "Tutti i dipartimenti",
+      "filterAllModalities": "Tutte le modalità",
+      "filterAllCountries": "Tutti i paesi",
+      "clearFilters": "Cancella filtri",
+      "filtersHeading": "Filtri",
+      "filtersAria": "Filtri delle offerte",
+      "rowAriaLabel": "Vedi dettaglio di {title}",
       "preparingList": "Preparazione dell'elenco con ricerca e filtri attivi.",
       "tableDepartment": "Dipartimento",
       "tableLocation": "Ubicazione",
@@ -3295,6 +3475,13 @@
       "location": "Ubicazione",
       "salary": "Stipendio",
       "publishedLabel": "Pubblicazione",
+      "requirementsHeading": "Requisiti dell'offerta",
+      "detailsHeading": "Dettagli dell'offerta",
+      "advantagesHeading": "Vantaggi dell'offerta",
+      "moreVacanciesBody": "ApplicanTree ha molte altre offerte disponibili. Se questa posizione o altre simili ti interessano, puoi candidarti in piena libertà.",
+      "moreVacanciesLink": "Vedi altre opportunità",
+      "readyTitle": "Sei pronto per questa opportunità?",
+      "readyBody": "Completa la candidatura in pochi minuti. Il team di selezione riceve il tuo profilo in modo sicuro.",
       "documentTitle": "ApplicanTree | Portale opportunità | {title}"
     },
     "applicationForm": {
@@ -3316,23 +3503,31 @@
         "processingLongWait": "Se l'attesa si prolunga, non chiudere questa finestra. Stiamo ancora elaborando la tua candidatura."
       },
       "validation": {
-        "fileType": "Sono accettati solo file PDF o DOCX.",
-        "firstNameRequired": "Inserisci il tuo nome.",
-        "lastNameRequired": "Inserisci il tuo cognome.",
+        "fileType": "Sono accettati solo file PDF.",
+        "fileInvalid": "Il file non è un PDF valido.",
+        "fileTooLarge": "Il CV non può superare i 15 MB.",
+        "rateLimited": "Troppi tentativi. Riprova più tardi.",
+        "firstNameRequired": "Inserisci i tuoi nomi.",
+        "lastNameRequired": "Inserisci i tuoi cognomi.",
         "emailRequired": "Inserisci la tua email.",
         "emailInvalid": "Inserisci un'email valida.",
-        "cvRequired": "Allega il tuo CV in PDF o DOCX.",
+        "phoneRequired": "Inserisci il tuo telefono.",
+        "documentTypeRequired": "Seleziona un tipo di documento.",
+        "documentNumberRequired": "Inserisci il numero di documento.",
+        "cvRequired": "Allega il tuo CV in PDF.",
         "reviewFields": "Controlla i campi indicati.",
-        "documentTypeRequiresNumber": "Se selezioni un tipo di documento, devi inserire il numero.",
-        "documentNumberRequiresType": "Se inserisci un numero di documento, devi selezionare il tipo."
+        "consentSubmitFailed": "Non siamo riusciti a salvare la tua autorizzazione e il consenso. Riprova.",
+        "consentValidation": "Controlla l'autorizzazione e il consenso e riprova.",
+        "consentVersionMismatch": "Il documento di autorizzazione è stato aggiornato. Ricarica la pagina e riprova.",
+        "consentNationalIdConflict": "Quel documento di identità è già collegato a un altro profilo. Usa un altro valore o contatta l'assistenza."
       },
       "fields": {
-        "firstName": "Nome *",
-        "lastName": "Cognome *",
+        "firstName": "Nomi *",
+        "lastName": "Cognomi *",
         "email": "Email *",
-        "phone": "Telefono",
-        "documentType": "Tipo di documento",
-        "documentNumber": "Numero di documento",
+        "phone": "Telefono *",
+        "documentType": "Tipo di documento *",
+        "documentNumber": "Numero di documento *",
         "source": "Come hai conosciuto questa offerta?",
         "linkedin": "Profilo LinkedIn",
         "website": "Sito web o portfolio",
@@ -3344,21 +3539,33 @@
         "noDocTypes": "Nessun tipo disponibile",
         "selectDocType": "Seleziona un tipo",
         "selectOption": "Seleziona un'opzione",
-        "documentNumber": "Inserisci il numero del documento"
+        "documentNumber": "Inserisci il numero del documento",
+        "firstName": "Es. Ana",
+        "lastName": "Es. Martinez",
+        "email": "name@example.com",
+        "phone": "1234-5678",
+        "loadingCountries": "Caricamento paesi…",
+        "searchCountry": "Cerca paese, ISO o prefisso",
+        "noCountries": "Nessun paese trovato"
       },
       "file": {
         "selectPdf": "Seleziona PDF",
-        "helper": "È accettato solo il formato PDF o DOCX."
+        "helper": "È accettato solo il formato PDF (max. 15 MB).",
+        "dropActive": "Rilascia il file qui",
+        "changeFile": "Fai clic per cambiare il file",
+        "removeAria": "Rimuovi {fileName}"
       },
       "actions": {
         "submitting": "Invio candidatura…",
         "submit": "Invia candidatura",
+        "retryIn": "Riprova tra {seconds}s",
         "backToVacancy": "Torna all'offerta",
         "backToList": "Torna alle offerte",
         "close": "Chiudi"
       },
       "aria": {
-        "submitStatus": "Stato dell'invio"
+        "submitStatus": "Stato dell'invio",
+        "phoneCountry": "Prefisso internazionale"
       },
       "toasts": {
         "submitSuccess": "Candidatura inviata",
@@ -3397,8 +3604,6 @@
     "navbar": {
       "ariaMain": "Navigazione principale del portale opportunità",
       "ariaGoToPortal": "Vai al portale opportunità",
-      "logoIconAlt": "Icona logo Applican Tree",
-      "portalSubtitle": "Portale opportunità",
       "ariaGoToSelection": "Vai alla selezione del portale",
       "changePortal": "Cambia portale",
       "portalsShort": "Portali"
@@ -3424,10 +3629,8 @@
       "beforeSubmit": "Prima di inviare",
       "checklistCv": "Tieni pronto il tuo CV in PDF da allegare.",
       "checklistEmail": "Usa la stessa email associata al tuo account candidato.",
-      "checklistData": "Completa nome, cognome ed email con dati reali.",
+      "checklistData": "Completa nomi, cognomi ed email con dati reali.",
       "formSectionLabel": "Modulo di candidatura",
-      "formTitle": "Invia la tua candidatura",
-      "formBody": "Completa i dati e allega il tuo CV. Le informazioni vengono inviate in modo sicuro al team di recruiting.",
       "documentTitle": "ApplicanTree | Portale opportunità | Candidati a {title}"
     }
   },

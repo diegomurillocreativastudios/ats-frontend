@@ -186,4 +186,29 @@ describe("POST /api/recruiter/reportes/[reportKey]/pdf", () => {
 
     expect(response.status).toBe(404)
   })
+
+  it("returns 413 when rows exceed REPORT_PDF_MAX_ROWS", async () => {
+    const { REPORT_PDF_MAX_ROWS } = await import(
+      "@/lib/technical-sheet/pdf-chromium-limits"
+    )
+    const rows = Array.from({ length: REPORT_PDF_MAX_ROWS + 1 }, (_, i) => ({
+      candidateName: `C${i}`,
+      currentStageName: "Screening",
+    }))
+    const request = new NextRequest(
+      "http://localhost/api/recruiter/reportes/candidate-status-by-stage/pdf",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rows, totalCount: rows.length }),
+      }
+    )
+
+    const response = await POST(request, {
+      params: Promise.resolve({ reportKey: "candidate-status-by-stage" }),
+    })
+
+    expect(response.status).toBe(413)
+    expect(renderReportPdfBufferMock).not.toHaveBeenCalled()
+  })
 })

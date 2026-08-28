@@ -17,17 +17,17 @@ import {
 function ReportHubCardSkeleton() {
   return (
     <div
-      className="flex animate-pulse flex-col gap-3 rounded-xl border border-border bg-card p-5"
+      className="flex animate-pulse flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
       aria-hidden
     >
-      <div className="flex items-start gap-3">
-        <div className="h-11 w-11 rounded-lg bg-muted" />
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="h-10 w-10 shrink-0 rounded-lg bg-muted" />
         <div className="min-w-0 flex-1 space-y-2">
-          <div className="h-3 w-24 rounded bg-muted" />
-          <div className="h-4 w-40 rounded bg-muted" />
-          <div className="h-3 w-full rounded bg-muted" />
+          <div className="h-4 w-48 rounded bg-muted" />
+          <div className="h-3 w-full max-w-xl rounded bg-muted" />
         </div>
       </div>
+      <div className="h-4 w-32 shrink-0 rounded bg-muted" />
     </div>
   )
 }
@@ -74,37 +74,22 @@ export function ReportsHubClient() {
   const handleRetryCatalog = () => setCatalogRetryKey((k) => k + 1)
 
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col">
       <section
-        className="px-4 pb-2 md:px-8"
-        aria-labelledby="catalog-reports-heading"
-      >
-        <h2
-          id="catalog-reports-heading"
-          className="font-sans text-sm font-semibold text-foreground"
-        >
-          {t("catalog.heading")}
-        </h2>
-        <p className="mt-1 font-sans text-sm text-muted-foreground">
-          {t("catalog.description")}
-        </p>
-      </section>
-
-      <section
-        className="grid gap-4 px-4 pb-8 md:grid-cols-2 md:px-8"
+        className="min-h-0 flex-1 overflow-auto overscroll-contain"
         aria-label={t("catalog.regionLabel")}
         aria-busy={catalogLoading}
       >
         {catalogLoading ? (
-          <>
+          <div className="flex flex-col gap-3 pb-2">
             <ReportHubCardSkeleton />
             <ReportHubCardSkeleton />
-          </>
+          </div>
         ) : null}
 
         {!catalogLoading && catalogError ? (
           <div
-            className="col-span-full flex flex-col items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-5 md:col-span-2"
+            className="flex flex-col items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-5"
             role="alert"
           >
             <div className="flex items-start gap-2">
@@ -134,16 +119,14 @@ export function ReportsHubClient() {
         ) : null}
 
         {!catalogLoading && !catalogError && catalog.length === 0 ? (
-          <p
-            className="col-span-full font-sans text-sm text-muted-foreground md:col-span-2"
-            role="status"
-          >
+          <p className="font-sans text-sm text-muted-foreground" role="status">
             {t("emptyStates.noCatalog")}
           </p>
         ) : null}
 
-        {!catalogLoading && !catalogError
-          ? catalog.map((item) => {
+        {!catalogLoading && !catalogError && catalog.length > 0 ? (
+          <ul className="flex flex-col gap-3 pb-2" role="list">
+            {catalog.map((item) => {
               const Icon = getReportCatalogIcon(item.reportKey)
               const description =
                 item.description?.trim() || t("catalog.descriptionFallback")
@@ -155,19 +138,21 @@ export function ReportsHubClient() {
                 ? t("cards.templateBadge", { name: item.linkedTemplate.name })
                 : undefined
               return (
-                <ReportHubCatalogCard
-                  key={item.reportKey}
-                  title={item.name}
-                  description={description}
-                  icon={Icon}
-                  href={href}
-                  badge={badge}
-                  unlinkedHint={t("catalog.unlinkedHint")}
-                />
+                <li key={item.reportKey}>
+                  <ReportHubCatalogCard
+                    title={item.name}
+                    description={description}
+                    icon={Icon}
+                    href={href}
+                    badge={badge}
+                    unlinkedHint={t("catalog.unlinkedHint")}
+                  />
+                </li>
               )
-            })
-          : null}
+            })}
+          </ul>
+        ) : null}
       </section>
-    </>
+    </div>
   )
 }

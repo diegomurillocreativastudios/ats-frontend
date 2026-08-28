@@ -16,7 +16,6 @@ export async function generateMetadata() {
 export default async function CalendarSettingsPage() {
   const t = await getTranslations("RecruiterPortal.settings")
   const trail = [
-    { label: t("portalCrumb"), href: "/portal-rrhh/entrevistas" },
     { label: t("breadcrumb"), href: "/portal-rrhh/configuracion" },
     { label: t("calendarPage.title") },
   ]

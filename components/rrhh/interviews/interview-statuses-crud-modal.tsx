@@ -1,10 +1,32 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react"
+import { CircleDot } from "lucide-react"
 import { useTranslations } from "next-intl"
+import {
+  ADMIN_TD_CLASS,
+  ADMIN_TH_CLASS,
+  ADMIN_THEAD_CLASS,
+  ADMIN_TR_CLASS,
+} from "@/components/portal-admin/admin-page-chrome"
+import {
+  ADMIN_CATALOG_ACTIONS_TD_CLASS,
+  AdminCatalogCheckboxField,
+  AdminCatalogFixedTable,
+  AdminCatalogFormModal,
+  AdminCatalogListLayout,
+  AdminCatalogRowActions,
+} from "@/components/portal-admin/admin-catalog-list-layout"
 import Modal from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import Snackbar from "@/components/ui/Snackbar"
 import {
@@ -17,27 +39,40 @@ import {
 } from "@/lib/api/interviews"
 
 export interface InterviewStatusesCrudModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen?: boolean
+  onClose?: () => void
   onMutate?: () => void
+  variant?: "modal" | "inline"
+  headingId?: string
+  pageDescription?: string
+}
+
+function readErrorStatus(err: unknown): number {
+  if (typeof err === "object" && err !== null && "status" in err) {
+    return (err as { status?: number }).status ?? 0
+  }
+  return 0
 }
 
 export function InterviewStatusesCrudModal({
   isOpen,
   onClose,
   onMutate,
+  variant = "modal",
+  headingId = "portal-admin-interview-statuses-heading",
+  pageDescription,
 }: InterviewStatusesCrudModalProps) {
   const t = useTranslations("RecruiterPortal.interviews.crud.statuses")
   const tCommon = useTranslations("RecruiterPortal.interviews.crud.common")
   const [items, setItems] = useState<InterviewStatusAdmin[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(variant === "inline")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [newDisplayName, setNewDisplayName] = useState("")
-  const [newIsTerminal, setNewIsTerminal] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editDisplayName, setEditDisplayName] = useState("")
-  const [editIsTerminal, setEditIsTerminal] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [formMode, setFormMode] = useState<"create" | "edit">("create")
+  const [editingRow, setEditingRow] = useState<InterviewStatusAdmin | null>(null)
+  const [formDisplayName, setFormDisplayName] = useState("")
+  const [formIsTerminal, setFormIsTerminal] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<InterviewStatusAdmin | null>(
     null
   )
@@ -59,7 +94,6 @@ export function InterviewStatusesCrudModal({
     []
   )
 
-  /** Siguiente código = cantidad de filas + 1 (alta coherente con índices 1…n en tabla). */
   const nextSuggestedCode = useMemo(
     () => String(items.length + 1),
     [items.length]
@@ -72,96 +106,77 @@ export function InterviewStatusesCrudModal({
       const list = await listInterviewStatusesAdmin()
       setItems(list)
     } catch (err: unknown) {
-      const status =
-        typeof err === "object" && err !== null && "status" in err
-          ? (err as { status?: number }).status
-          : 0
-      setError(getInterviewHttpErrorMessage(status ?? 0, err))
+      setError(getInterviewHttpErrorMessage(readErrorStatus(err), err))
       setItems([])
     } finally {
       setLoading(false)
     }
   }, [])
 
+  const isVisible = variant === "inline" || Boolean(isOpen)
+
   useEffect(() => {
-    if (!isOpen) return
-    loadList()
-    setNewDisplayName("")
-    setNewIsTerminal(false)
-    setEditingId(null)
-    setEditIsTerminal(false)
-    setDeleteTarget(null)
-    setError(null)
-  }, [isOpen, loadList])
+    if (!isVisible) return
+    void loadList()
+  }, [isVisible, loadList])
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const code = nextSuggestedCode.trim()
-    const displayName = newDisplayName.trim()
-    const codeNum = parseInt(code, 10)
-    if (!displayName || !Number.isFinite(codeNum) || codeNum < 1) return
-    setSaving(true)
-    setError(null)
-    try {
-      await createInterviewStatus({
-        code,
-        displayName,
-        description: null,
-        isTerminal: newIsTerminal,
-        isActive: true,
-      })
-      setNewDisplayName("")
-      setNewIsTerminal(false)
-      await loadList()
-      onMutate?.()
-      showSnackbar("success", t("created"))
-    } catch (err: unknown) {
-      const status =
-        typeof err === "object" && err !== null && "status" in err
-          ? (err as { status?: number }).status
-          : 0
-      const message = getInterviewHttpErrorMessage(status ?? 0, err)
-      setError(message)
-      showSnackbar("error", message)
-    } finally {
-      setSaving(false)
+  const handleOpenCreate = () => {
+    setFormMode("create")
+    setEditingRow(null)
+    setFormDisplayName("")
+    setFormIsTerminal(false)
+    setIsFormOpen(true)
+  }
+
+  const handleOpenEdit = (row: InterviewStatusAdmin) => {
+    setFormMode("edit")
+    setEditingRow(row)
+    setFormDisplayName(row.displayName)
+    setFormIsTerminal(row.isTerminal)
+    setIsFormOpen(true)
+  }
+
+  const handleCloseForm = () => {
+    if (saving) return
+    setIsFormOpen(false)
+    setEditingRow(null)
+  }
+
+  const handleSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const displayName = formDisplayName.trim()
+    if (!displayName || saving) return
+
+    if (formMode === "create") {
+      const codeNum = parseInt(nextSuggestedCode.trim(), 10)
+      if (!Number.isFinite(codeNum) || codeNum < 1) return
     }
-  }
 
-  const handleStartEdit = (row: InterviewStatusAdmin) => {
-    setEditingId(row.id)
-    setEditDisplayName(row.displayName)
-    setEditIsTerminal(row.isTerminal)
-    setError(null)
-  }
-
-  const handleCancelEdit = () => {
-    setEditingId(null)
-  }
-
-  const handleSaveEdit = async () => {
-    if (!editingId) return
-    const displayName = editDisplayName.trim()
-    if (!displayName) return
     setSaving(true)
-    setError(null)
     try {
-      await updateInterviewStatus(editingId, {
-        displayName,
-        isTerminal: editIsTerminal,
-      })
-      setEditingId(null)
+      if (formMode === "create") {
+        await createInterviewStatus({
+          code: nextSuggestedCode.trim(),
+          displayName,
+          description: null,
+          isTerminal: formIsTerminal,
+          isActive: true,
+        })
+        showSnackbar("success", t("created"))
+      } else if (editingRow) {
+        await updateInterviewStatus(editingRow.id, {
+          displayName,
+          isTerminal: formIsTerminal,
+        })
+        showSnackbar("success", t("updated"))
+      }
+
+      setIsFormOpen(false)
+      setEditingRow(null)
       await loadList()
       onMutate?.()
-      showSnackbar("success", t("updated"))
     } catch (err: unknown) {
-      const status =
-        typeof err === "object" && err !== null && "status" in err
-          ? (err as { status?: number }).status
-          : 0
-      const message = getInterviewHttpErrorMessage(status ?? 0, err)
-      setError(message)
-      showSnackbar("error", message)
+      showSnackbar("error", getInterviewHttpErrorMessage(readErrorStatus(err), err))
     } finally {
       setSaving(false)
     }
@@ -170,7 +185,6 @@ export function InterviewStatusesCrudModal({
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return
     setDeleting(true)
-    setError(null)
     try {
       await deleteInterviewStatus(deleteTarget.id)
       setDeleteTarget(null)
@@ -178,246 +192,113 @@ export function InterviewStatusesCrudModal({
       onMutate?.()
       showSnackbar("success", t("deleted"))
     } catch (err: unknown) {
-      const status =
-        typeof err === "object" && err !== null && "status" in err
-          ? (err as { status?: number }).status
-          : 0
-      const message = getInterviewHttpErrorMessage(status ?? 0, err)
-      setError(message)
-      showSnackbar("error", message)
+      showSnackbar("error", getInterviewHttpErrorMessage(readErrorStatus(err), err))
     } finally {
       setDeleting(false)
     }
   }
 
-  const footer = (
-    <Button type="button" variant="outline" onClick={onClose}>
-      {tCommon("close")}
-    </Button>
+  const handleClose = () => {
+    onClose?.()
+  }
+
+  const isEmpty = !loading && !error && items.length === 0
+
+  const listBody = (
+    <AdminCatalogListLayout
+      headingId={headingId}
+      title={t("title")}
+      description={pageDescription}
+      loading={loading}
+      error={error}
+      onRetry={() => void loadList()}
+      retryLabel={tCommon("retry")}
+      errorAria={t("loadErrorAria")}
+      isEmpty={isEmpty}
+      emptyIcon={CircleDot}
+      emptyTitle={t("empty")}
+      emptyDescription={t("emptyBody")}
+      onCreate={handleOpenCreate}
+      createLabel={t("createCta")}
+      onRefresh={() => void loadList()}
+      refreshLabel={tCommon("refresh")}
+      listAria={t("listAria")}
+      showHeader={variant === "inline"}
+    >
+      <AdminCatalogFixedTable ariaLabel={t("listAria")}>
+        <thead className={ADMIN_THEAD_CLASS}>
+          <tr>
+            <th className={ADMIN_TH_CLASS}>{tCommon("name")}</th>
+            <th className={ADMIN_TH_CLASS}>{t("terminal")}</th>
+            <th className={`${ADMIN_TH_CLASS} text-right`}>
+              {tCommon("actions")}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((row) => (
+            <tr key={row.id} className={ADMIN_TR_CLASS}>
+              <td className={ADMIN_TD_CLASS}>
+                <p className="font-medium text-foreground">{row.displayName}</p>
+              </td>
+              <td className={`${ADMIN_TD_CLASS} text-muted-foreground`}>
+                {row.isTerminal ? tCommon("yes") : tCommon("no")}
+              </td>
+              <td className={ADMIN_CATALOG_ACTIONS_TD_CLASS}>
+                <AdminCatalogRowActions
+                  onEdit={() => handleOpenEdit(row)}
+                  onDelete={() => setDeleteTarget(row)}
+                  editLabel={tCommon("edit")}
+                  deleteLabel={tCommon("delete")}
+                  disabled={saving}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </AdminCatalogFixedTable>
+    </AdminCatalogListLayout>
   )
 
-  const canCreate =
-    newDisplayName.trim() !== "" &&
-    !loading &&
-    Number.isFinite(parseInt(nextSuggestedCode, 10)) &&
-    parseInt(nextSuggestedCode, 10) >= 1
-
-  return (
+  const overlays = (
     <>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title={t("title")}
-        footer={footer}
-        size="lg"
-        closeOnOverlayClick={!saving && !deleting}
-        closeOnEscape={!saving && !deleting}
-        bodyClassName="overflow-x-auto"
+      <AdminCatalogFormModal
+        isOpen={isFormOpen}
+        onClose={handleCloseForm}
+        title={formMode === "create" ? t("createTitle") : t("editTitle")}
+        formId="interview-statuses-form"
+        submitting={saving}
+        submitLabel={tCommon("save")}
+        cancelLabel={tCommon("cancel")}
       >
-        <div className="flex min-w-0 flex-col gap-5">
-          <form
-            onSubmit={handleCreate}
-            className="flex flex-col gap-3 rounded-lg border border-border bg-muted/20 p-4"
-            aria-label={t("createAria")}
-          >
-            <p className="font-sans text-sm font-medium text-foreground">
-              {t("newLabel")}
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                <label
-                  htmlFor="new-interview-status-display"
-                  className="font-sans text-sm font-medium text-foreground"
-                >
-                  {t("displayNameLabel")} <span className="text-vo-pink">*</span>
-                </label>
-                <input
-                  id="new-interview-status-display"
-                  type="text"
-                  value={newDisplayName}
-                  onChange={(e) => setNewDisplayName(e.target.value)}
-                  placeholder={t("displayNamePlaceholder")}
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm"
-                  disabled={saving || loading}
-                  autoComplete="off"
-                />
-              </div>
-              <Button
-                type="submit"
-                variant="primary"
-                loading={saving}
-                disabled={loading || !canCreate}
-                className="shrink-0 px-5 py-2.5"
-              >
-                <Plus className="h-4 w-4" aria-hidden />
-                {tCommon("add")}
-              </Button>
-            </div>
-            <div className="flex items-start gap-2">
-              <input
-                id="new-interview-status-terminal"
-                type="checkbox"
-                checked={newIsTerminal}
-                onChange={(e) => setNewIsTerminal(e.target.checked)}
-                disabled={saving || loading}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-input text-vo-purple focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              />
-              <label
-                htmlFor="new-interview-status-terminal"
-                className="font-sans text-sm leading-snug text-foreground"
-              >
-                {t("terminalLabel")}
-                <span className="mt-0.5 block font-sans text-xs font-normal text-muted-foreground">
-                  {t("terminalHint")}
-                </span>
-              </label>
-            </div>
-          </form>
-
-          {error ? (
-            <p className="font-sans text-sm text-destructive" role="alert">
-              {error}
-            </p>
-          ) : null}
-
-          {loading ? (
-            <div className="flex items-center justify-center gap-2 py-12 font-sans text-sm text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-              {t("loading")}
-            </div>
-          ) : items.length === 0 ? (
-            <p className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-8 text-center font-sans text-sm text-muted-foreground">
-              {t("empty")}
-            </p>
-          ) : (
-            <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full min-w-[420px] border-collapse text-left font-sans text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-muted/40">
-                    <th scope="col" className="px-3 py-2 font-semibold">
-                      {t("code")}
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-semibold">
-                      {tCommon("name")}
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-semibold">
-                      {t("terminal")}
-                    </th>
-                    <th scope="col" className="w-[1%] whitespace-nowrap px-3 py-2 font-semibold">
-                      {tCommon("actions")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((row, index) => (
-                    <tr
-                      key={row.id}
-                      className="border-b border-border last:border-b-0"
-                    >
-                      <td className="px-3 py-2 align-middle font-mono text-xs tabular-nums text-foreground">
-                        <span
-                          className={
-                            editingId === row.id ? "text-muted-foreground" : undefined
-                          }
-                        >
-                          {index + 1}
-                        </span>
-                      </td>
-                      <td className="max-w-[240px] px-3 py-2 align-middle">
-                        {editingId === row.id ? (
-                          <input
-                            type="text"
-                            value={editDisplayName}
-                            onChange={(e) => setEditDisplayName(e.target.value)}
-                            className="h-9 w-full min-w-40 rounded-md border border-input bg-background px-2 font-sans text-sm"
-                            disabled={saving}
-                            aria-label={t("displayNameAria")}
-                          />
-                        ) : (
-                          <span className="text-foreground">{row.displayName}</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2 align-middle">
-                        {editingId === row.id ? (
-                          <div className="flex items-center gap-2">
-                            <input
-                              id={`edit-interview-status-terminal-${row.id}`}
-                              type="checkbox"
-                              checked={editIsTerminal}
-                              onChange={(e) =>
-                                setEditIsTerminal(e.target.checked)
-                              }
-                              disabled={saving}
-                              className="h-4 w-4 shrink-0 rounded border-input text-vo-purple focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                              aria-label={t("terminalAria")}
-                            />
-                            <label
-                              htmlFor={`edit-interview-status-terminal-${row.id}`}
-                              className="font-sans text-xs text-muted-foreground"
-                            >
-                              {t("terminal")}
-                            </label>
-                          </div>
-                        ) : (
-                          <span className="text-foreground">
-                            {row.isTerminal ? tCommon("yes") : tCommon("no")}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2 align-middle">
-                        {editingId === row.id ? (
-                          <div className="ml-auto flex min-w-26 max-w-40 flex-col items-stretch gap-2">
-                            <button
-                              type="button"
-                              onClick={handleSaveEdit}
-                              disabled={
-                                saving || !editDisplayName.trim() || !editingId
-                              }
-                              className="w-full rounded-md bg-vo-purple px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
-                            >
-                              {tCommon("save")}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleCancelEdit}
-                              disabled={saving}
-                              className="w-full rounded-md border border-border px-3 py-1.5 text-center text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
-                            >
-                              {tCommon("cancel")}
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              type="button"
-                              onClick={() => handleStartEdit(row)}
-                              disabled={saving || !!editingId}
-                              className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-foreground hover:bg-muted disabled:opacity-50"
-                              aria-label={tCommon("editAria", { name: row.displayName })}
-                            >
-                              <Pencil className="h-4 w-4" aria-hidden />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setDeleteTarget(row)}
-                              disabled={saving || !!editingId}
-                              className="inline-flex items-center gap-1 rounded-md border border-border p-1.5 text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                              aria-label={tCommon("deleteAria", { name: row.displayName })}
-                            >
-                              <Trash2 className="h-4 w-4" aria-hidden />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </Modal>
-
+        <form
+          id="interview-statuses-form"
+          className="space-y-5"
+          onSubmit={handleSubmitForm}
+        >
+          <Input
+            id="interview-status-display-name"
+            name="displayName"
+            label={t("displayNameLabel")}
+            required
+            value={formDisplayName}
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              setFormDisplayName(event.target.value)
+            }
+            placeholder={t("displayNamePlaceholder")}
+            disabled={saving}
+            error=""
+          />
+          <AdminCatalogCheckboxField
+            id="interview-status-terminal"
+            checked={formIsTerminal}
+            onChange={setFormIsTerminal}
+            label={t("terminalLabel")}
+            hint={t("terminalHint")}
+            disabled={saving}
+          />
+        </form>
+      </AdminCatalogFormModal>
       <DeleteConfirmModal
         isOpen={!!deleteTarget}
         onClose={() => !deleting && setDeleteTarget(null)}
@@ -437,6 +318,37 @@ export function InterviewStatusesCrudModal({
         variant={snackbar.variant}
         message={snackbar.message}
       />
+    </>
+  )
+
+  if (variant === "inline") {
+    return (
+      <>
+        {listBody}
+        {overlays}
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Modal
+        isOpen={Boolean(isOpen)}
+        onClose={handleClose}
+        title={t("title")}
+        footer={
+          <Button type="button" variant="outline" onClick={handleClose}>
+            {tCommon("close")}
+          </Button>
+        }
+        size="lg"
+        closeOnOverlayClick={!saving && !deleting}
+        closeOnEscape={!saving && !deleting}
+        bodyClassName="overflow-x-auto"
+      >
+        {listBody}
+      </Modal>
+      {overlays}
     </>
   )
 }

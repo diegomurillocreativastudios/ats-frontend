@@ -8,17 +8,11 @@ import {
   ArrowLeft,
   ArrowRight,
   Briefcase,
-  Building2,
-  Calendar,
   CheckSquare,
-  DollarSign,
-  Download,
   FileText,
   Gift,
-  Info,
   Loader2,
   Mail,
-  ExternalLink,
   Plus,
   Phone,
   Scale,
@@ -26,8 +20,6 @@ import {
   Trash2,
   User,
   Users,
-  X,
-  MapPin,
 } from "lucide-react";
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
@@ -47,14 +39,26 @@ import {
   patchVacancyClientCompany,
 } from "@/lib/api/recruiter-vacancies"
 import { finishVacancyProcess } from "@/lib/api/recruiter-vacancy-finish"
+import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
+import {
+  QUERY_SEARCH_CANDIDATES_LIMIT,
+  clampSearchLimit,
+  unwrapListArray,
+} from "@/lib/api/query-paging"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
 import { VacancyFinishedSummary } from "@/components/rrhh/VacancyFinishedSummary"
 import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProcessModal"
+import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confirm-modal"
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
-import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
+import { RequirementsDisplay } from "@/components/rrhh/requirements-display"
+import { VacancyDelimitedText } from "@/components/rrhh/vacancy-delimited-text"
+import { VacancyDetailsCard } from "@/components/rrhh/vacancy-details-readout"
+import { VacancySalaryCard } from "@/components/rrhh/vacancy-salary-card"
+import { VacancyReadOnlyIdentity } from "@/components/rrhh/vacancy-read-only-identity"
+import { CandidateProfileModal } from "@/components/rrhh/candidate-profile-modal"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
 import {
   AiDisclosureBadge,
@@ -62,10 +66,8 @@ import {
   AiDisclosurePillProgress,
   AiKpiCard,
 } from "@/components/rrhh/AiDisclosure"
-import {
-  getVacancyPreliminaryMatchTypicalMsForDocCount,
-  VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS,
-} from "@/lib/apply-loading-bar"
+import { VacancyAiSearchLoadingState } from "@/components/rrhh/vacancy-ai-search-loading-state"
+import { getVacancyPreliminaryMatchTypicalMsForDocCount } from "@/lib/apply-loading-bar"
 import {
   FALLBACK_KANBAN_STAGES,
   getCandidateId,
@@ -73,7 +75,10 @@ import {
   resolveOrderedStageNames,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
 import { validateStageMove } from "@/lib/recruiter/stage-move-validation"
-import { getAccessToken } from "@/lib/auth";
+import {
+  downloadRecruiterCandidateCv,
+  isRecruiterCandidateCvError,
+} from "@/lib/api/recruiter-candidate-cv"
 import { getInitials } from "@/lib/getInitials";
 import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api";
 import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active";
@@ -100,6 +105,14 @@ import {
 } from "@/lib/vacancy-catalogs";
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels";
 import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles";
+import {
+  buildVacancyClipboardPayload,
+  clipboardPayloadToRequirementRows,
+  readVacancyClipboard,
+  resolveClipboardCatalogId,
+  writeVacancyClipboard,
+  type VacancyClipboardPayload,
+} from "@/lib/vacancies/vacancy-clipboard";
 
 const LOCALE_DATE_MAP = {
   es: "es-CL",
@@ -120,6 +133,18 @@ const formatDate = (value, locale = "es") => {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  });
+};
+
+const formatShortDate = (value, locale = "es") => {
+  if (!value) return "—";
+  const d = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(d.getTime())) return "—";
+  const dateLocale = LOCALE_DATE_MAP[locale] ?? locale;
+  return d.toLocaleDateString(dateLocale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 };
 
@@ -199,109 +224,6 @@ const safeString = (value) => {
   return "—";
 };
 
-const SCORE_KEYS_AGGREGATE = ["attribute_aggregate", "AttributeAggregate", "attributeAggregate"];
-const SCORE_KEYS_QUALITATIVE = ["QualitativeScore", "qualitativeScore", "qualitative_score"];
-const SCORE_KEYS_SEMANTIC = [
-  "VectorSimilarity",
-  "vectorSimilarity",
-  "vector_similarity",
-  "SemanticScore",
-  "semanticScore",
-  "semantic_score",
-];
-
-const findScoreEntry = (entries, keyList) => {
-  for (const key of keyList) {
-    const found = entries.find(([k]) => k === key);
-    if (found) return found;
-  }
-  return null;
-};
-
-const partitionComponentScores = (entries) => {
-  const isReserved = (k) =>
-    SCORE_KEYS_AGGREGATE.includes(k) ||
-    SCORE_KEYS_QUALITATIVE.includes(k) ||
-    SCORE_KEYS_SEMANTIC.includes(k);
-  const attributeIndividuals = entries
-    .filter(([k]) => !isReserved(k))
-    .sort(([a], [b]) => String(a).localeCompare(String(b)));
-  return {
-    attributeIndividuals,
-    aggregateEntry: findScoreEntry(entries, SCORE_KEYS_AGGREGATE),
-    qualitativeEntry: findScoreEntry(entries, SCORE_KEYS_QUALITATIVE),
-    semanticEntry: findScoreEntry(entries, SCORE_KEYS_SEMANTIC),
-  };
-};
-
-const ScoreBarRow = ({
-  scoreKey,
-  val,
-  labelClass,
-  barClass,
-  valueClass,
-  barTrackClass = "bg-slate-200/90",
-  isTotalRow = false,
-  hideLabel = false,
-  getScoreLabel,
-}) => {
-  const pct = typeof val === "number" ? (val * 100).toFixed(1) : null;
-  const barWidth = typeof val === "number" ? Math.min(val * 100, 100) : 0;
-  const labelText = getScoreLabel(scoreKey);
-  return (
-    <li
-      className={
-        isTotalRow
-          ? "flex flex-col gap-2.5 rounded-lg border border-sky-200/80 bg-sky-50/70 px-3 py-3 sm:flex-row sm:items-center sm:gap-3"
-          : "flex items-center gap-3"
-      }
-    >
-      {hideLabel ? (
-        <span className="sr-only">{labelText}</span>
-      ) : (
-        <span
-          className={`w-full shrink-0 font-sans text-xs sm:w-44 ${labelClass} ${isTotalRow ? "font-semibold" : ""}`}
-        >
-          {labelText}
-        </span>
-      )}
-      <div
-        className={`h-2.5 min-w-0 flex-1 overflow-hidden rounded-full ${barTrackClass}`}
-        role="presentation"
-      >
-        <div
-          className={`h-full rounded-full transition-all ${barClass}`}
-          style={{ width: `${barWidth}%` }}
-          aria-hidden
-        />
-      </div>
-      <span
-        className={`w-full shrink-0 text-left font-sans text-xs font-semibold tabular-nums sm:w-[3.25rem] sm:text-right ${valueClass}`}
-      >
-        {pct != null ? `${pct}%` : safeString(val)}
-      </span>
-    </li>
-  );
-};
-
-const ScoreTooltip = ({ text, accentClass = "text-slate-500" }) => (
-  <span className="group relative inline-flex items-center">
-    <button
-      type="button"
-      className={`inline-flex h-4 w-4 items-center justify-center rounded-full ${accentClass} transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2`}
-      aria-label={text}
-    >
-      <Info className="h-3.5 w-3.5" aria-hidden />
-    </button>
-    <span
-      role="tooltip"
-      className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-72 -translate-x-1/2 rounded-md border border-border bg-background px-3 py-2 text-left font-sans text-xs font-normal leading-relaxed text-slate-700 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
-    >
-      {text}
-    </span>
-  </span>
-);
-
 const STATUS_STYLES = VACANCY_STATUS_STYLES;
 
 const normalizeVacancyStatusKey = (status) => {
@@ -362,608 +284,27 @@ const createEmptyRequirement = () => ({
   scale: 5,
 });
 
-/** Converts a raw score/attribute key into a natural human-readable label. */
-const formatScoreKey = (key, t) => {
-  const k = String(key).trim();
-  const map = {
-    QualitativeScore: t("scoreKeys.qualitative"),
-    qualitativeScore: t("scoreKeys.qualitative"),
-    qualitative_score: t("scoreKeys.qualitative"),
-    VectorSimilarity: t("scoreKeys.semanticSimilarity"),
-    vectorSimilarity: t("scoreKeys.semanticSimilarity"),
-    vector_similarity: t("scoreKeys.semanticSimilarity"),
-    SemanticScore: t("scoreKeys.semanticScore"),
-    semanticScore: t("scoreKeys.semanticScore"),
-    semantic_score: t("scoreKeys.semanticScore"),
-    TotalScore: t("scoreKeys.total"),
-    totalScore: t("scoreKeys.total"),
-    total_score: t("scoreKeys.total"),
-    attribute_aggregate: t("scoreKeys.attributesCombined"),
-    AttributeAggregate: t("scoreKeys.attributesCombined"),
-    attributeAggregate: t("scoreKeys.attributesCombined"),
-    KeywordScore: t("scoreKeys.keywordMatch"),
-    keywordScore: t("scoreKeys.keywordMatch"),
-    keyword_score: t("scoreKeys.keywordMatch"),
-    ExperienceScore: t("scoreKeys.experience"),
-    experienceScore: t("scoreKeys.experience"),
-    experience_score: t("scoreKeys.experience"),
-    EducationScore: t("scoreKeys.education"),
-    educationScore: t("scoreKeys.education"),
-    education_score: t("scoreKeys.education"),
-    SkillsScore: t("scoreKeys.skills"),
-    skillsScore: t("scoreKeys.skills"),
-    skills_score: t("scoreKeys.skills"),
-  };
-  if (map[k]) return map[k];
+const vacancyInfoCardClass =
+  "flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm";
+const vacancyInfoCardBodyClass =
+  "min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1";
 
-  // Handle attr_* prefix (e.g. attr_reactjs -> React.js)
-  const attrMatch = k.match(/^attr_(.+)$/i);
-  if (attrMatch) {
-    const inner = attrMatch[1];
-    const knownAttr = {
-      reactjs: "React.js", nextjs: "Next.js", tailwindcss: "Tailwind CSS",
-      javascript: "JavaScript", typescript: "TypeScript", html: "HTML", css: "CSS",
-      dotnet: ".NET",
-    };
-    return knownAttr[inner.toLowerCase()] ?? (inner.charAt(0).toUpperCase() + inner.slice(1));
-  }
-
-  // Convert camelCase / snake_case to words
-  const words = k
-    .replace(/_/g, " ")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .toLowerCase();
-  return words.charAt(0).toUpperCase() + words.slice(1);
-};
-
-/** Formats requirement key for display (e.g. reactjs -> React.js). */
-const formatRequirementKey = (key) => {
-  const k = String(key).trim().toLowerCase();
-  const map = {
-    reactjs: "React.js",
-    nextjs: "Next.js",
-    tailwindcss: "Tailwind CSS",
-    javascript: "JavaScript",
-    typescript: "TypeScript",
-    html: "HTML",
-    css: "CSS",
-    dotnet: ".NET",
-  };
-  return map[k] ?? k.charAt(0).toUpperCase() + k.slice(1);
-};
-
-/** Parses lines like "Clave: Valor" into structured pairs. Returns null if any line lacks the pattern. */
-const parseKeyValueLines = (text) => {
-  if (!text || typeof text !== "string") return null;
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length === 0) return null;
-  const pairs = [];
-  for (const line of lines) {
-    const colonIndex = line.indexOf(":");
-    if (colonIndex <= 0 || colonIndex >= line.length - 1) return null;
-    const key = line.slice(0, colonIndex).trim();
-    const value = line.slice(colonIndex + 1).trim();
-    if (!key || !value) return null;
-    pairs.push({ key, value });
-  }
-  return pairs;
-};
-
-/** Renders requirements as string (list/paragraphs), object (key -> level), or array (bullet list). attributeWeights optional: key -> weight to show next to each requirement value. */
-const RequirementsDisplay = ({ value, attributeWeights }) => {
-  if (value == null) return null;
-
-  if (typeof value === "object" && !Array.isArray(value)) {
-    const entries = Object.entries(value).filter(
-      ([k]) => k != null && !String(k).startsWith("additionalProp")
-    );
-    if (entries.length === 0) return null;
-    const weights =
-      attributeWeights && typeof attributeWeights === "object"
-        ? attributeWeights
-        : {};
-    return (
-      <ul className="flex flex-col gap-2 font-sans text-sm text-muted-foreground" role="list">
-        {entries.map(([key, val]) => {
-          const levelText =
-            typeof val === "object" && val !== null
-              ? Object.entries(val)
-                  .map(([k, v]) => `${k}: ${v}`)
-                  .join(", ")
-              : String(val ?? "—");
-          const weight =
-            typeof weights[key] === "number" && Number.isFinite(weights[key])
-              ? weights[key]
-              : null;
-          return (
-            <li
-              key={key}
-              className="flex flex-wrap items-center gap-2"
-            >
-              <span className="requirement_key inline-flex items-center gap-1.5 rounded-md bg-vo-purple/15 px-2.5 py-1 font-semibold text-vo-purple">
-                {formatRequirementKey(key)}
-              </span>
-              <span className="requirement_value inline-flex items-center rounded-md bg-ats-arena/70 px-2.5 py-1 font-medium text-gray-700">
-                {levelText}
-              </span>
-              {weight != null && (
-                <span className="requirement_weight inline-flex items-center gap-1.5 rounded-md bg-amber-100 px-2.5 py-1 font-semibold text-amber-800">
-                  <Scale className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                  {weight * 10}
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    );
-  }
-
+function vacancyHasRequirements(value: unknown): boolean {
+  if (value == null) return false
+  if (typeof value === "string") return value.trim() !== ""
   if (Array.isArray(value)) {
-    const items = value.filter((item) => item != null && String(item).trim() !== "");
-    if (items.length === 0) return null;
-    return (
-      <ul className="list-inside list-disc space-y-1.5 font-sans text-sm text-muted-foreground" role="list">
-        {items.map((item, i) => (
-          <li key={i}>{typeof item === "object" ? safeString(item) : String(item)}</li>
-        ))}
-      </ul>
-    );
+    return value.some((item) => item != null && String(item).trim() !== "")
   }
-
-  const text = typeof value === "string" ? value.trim() : String(value);
-  if (text === "") return null;
-
-  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-  const looksLikeList = lines.length > 1 && lines.some(
-    (line) => /^[-*•]\s/.test(line) || /^\d+[.)]\s/.test(line)
-  );
-
-  if (looksLikeList) {
-    return (
-      <ul className="list-inside space-y-1.5 font-sans text-sm text-muted-foreground" role="list">
-        {lines.map((line, i) => (
-          <li key={i} className="pl-0">
-            {line.replace(/^[-*•]\s/, "").replace(/^\d+[.)]\s/, "")}
-          </li>
-        ))}
-      </ul>
-    );
+  if (typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>).some(
+      ([key, entryValue]) =>
+        !String(key).startsWith("additionalProp") &&
+        entryValue != null &&
+        String(entryValue).trim() !== ""
+    )
   }
-
-  return (
-    <div className="space-y-2 font-sans text-sm text-muted-foreground">
-      {lines.map((line, i) => (
-        <p key={i} className="whitespace-pre-wrap">
-          {line}
-        </p>
-      ))}
-    </div>
-  );
-};
-
-const CandidateProfileModal = ({ match, candidateId, onClose }) => {
-  const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
-  const tModal = useTranslations("RecruiterPortal.vacancies.matching.profileModal");
-  const tCommon = useTranslations("Common");
-  const locale = useLocale();
-  const getScoreLabel = (key) => formatScoreKey(key, tMatching);
-  const [downloading, setDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState(null);
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
-  const handleDownloadCV = async () => {
-    if (!match.storagePath) return;
-    setDownloading(true);
-    setDownloadError(null);
-    try {
-      const token = getAccessToken();
-      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-      const url = `${baseUrl}/api/Storage/files/${encodeURIComponent(match.storagePath)}`;
-      const res = await fetch(url, {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error(tMatching("errors.downloadCvFailed"));
-      const blob = await res.blob();
-      const objUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objUrl;
-      a.download = match.storagePath.split("/").pop() || "cv.pdf";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objUrl);
-    } catch (err) {
-      setDownloadError(err?.message ?? tMatching("errors.downloadCvFailed"));
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-  const componentScores =
-    match.componentScores && typeof match.componentScores === "object" && !Array.isArray(match.componentScores)
-      ? Object.entries(match.componentScores).filter(([k]) => !k.startsWith("additionalProp"))
-      : [];
-
-  const {
-    attributeIndividuals,
-    aggregateEntry,
-    qualitativeEntry,
-    semanticEntry,
-  } = partitionComponentScores(componentScores);
-
-  const hasAttributeBlock =
-    attributeIndividuals.length > 0 || aggregateEntry != null;
-
-  /** GET /api/recruiter/candidates/{id} usa profileId; mismo criterio que el listado de candidatos. */
-  const idForProfilePage =
-    match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
-      ? String(match.candidateProfileId).trim()
-      : match.candidateDocumentId != null && String(match.candidateDocumentId).trim() !== ""
-        ? String(match.candidateDocumentId).trim()
-        : candidateId != null &&
-            String(candidateId).trim() !== "" &&
-            !String(candidateId).startsWith("candidate-")
-          ? String(candidateId).trim()
-          : null;
-
-  const profileHref = idForProfilePage
-    ? `/portal-rrhh/candidatos/${encodeURIComponent(idForProfilePage)}`
-    : null;
-
-  const qualitativeReasoningLegacy =
-    match.qualitativeReasoning != null && String(match.qualitativeReasoning).trim() !== ""
-      ? String(match.qualitativeReasoning).trim()
-      : null;
-
-  const qualitativeReasoningPositive =
-    match.qualitativeReasoningPositive != null && String(match.qualitativeReasoningPositive).trim() !== ""
-      ? String(match.qualitativeReasoningPositive).trim()
-      : null;
-
-  const qualitativeReasoningNegative =
-    match.qualitativeReasoningNegative != null && String(match.qualitativeReasoningNegative).trim() !== ""
-      ? String(match.qualitativeReasoningNegative).trim()
-      : null;
-
-  const hasSplitQualitative =
-    qualitativeReasoningPositive != null || qualitativeReasoningNegative != null;
-
-  const hasQualitativeBlock =
-    qualitativeReasoningLegacy != null ||
-    qualitativeReasoningPositive != null ||
-    qualitativeReasoningNegative != null;
-
-  const matchedAttributesEntries =
-    match.matchedAttributes && typeof match.matchedAttributes === "object" && !Array.isArray(match.matchedAttributes)
-      ? Object.entries(match.matchedAttributes).filter(([k]) => !String(k).startsWith("additionalProp"))
-      : [];
-
-  const matchedAttributePaths =
-    match.matchedAttributePaths && typeof match.matchedAttributePaths === "object" && !Array.isArray(match.matchedAttributePaths)
-      ? match.matchedAttributePaths
-      : null;
-
-  const hasMatchedAttributesBlock = matchedAttributesEntries.length > 0;
-
-  const initials = getInitials(
-    emptyToDash(match.name) !== "—" ? match.name : "",
-    match.email ?? ""
-  );
-
-  const hasContent =
-    componentScores.length > 0 || hasQualitativeBlock || hasMatchedAttributesBlock;
-
-  const totalScorePercent =
-    typeof match.totalScore === "number" && Number.isFinite(match.totalScore)
-      ? (match.totalScore * 100).toFixed(1)
-      : null;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label={tModal("profileAria", { name: emptyToDash(match.name) })}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-background text-slate-900 shadow-xl">
-        {/* Header */}
-        <div className="flex items-start justify-between border-b border-border p-6">
-          <div className="flex items-center gap-4">
-            <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-base font-semibold text-white"
-              aria-hidden
-            >
-              {initials}
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <h2 className="font-sans text-lg font-semibold text-slate-900">
-                {emptyToDash(match.name)}
-              </h2>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 font-sans text-sm text-slate-600">
-                <span className="flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                  {emptyToDash(match.email)}
-                </span>
-                {match.phone != null && String(match.phone).trim() !== "" && (
-                  <span className="flex items-center gap-1.5">
-                    <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                    {emptyToDash(match.phone)}
-                  </span>
-                )}
-              </div>
-              <p className="font-sans text-xs text-slate-600">
-                {tMatching("uploadedPrefix")} {formatDate(match.uploadedAt, locale)}
-              </p>
-              {totalScorePercent != null && (
-                <p className="font-sans text-xs font-semibold text-vo-purple">
-                  {tModal("totalMatchScore")} {totalScorePercent}%
-                </p>
-              )}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md p-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-            aria-label={tCommon("closeModal")}
-          >
-            <X className="h-5 w-5" aria-hidden />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {!hasContent ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-              <User className="h-10 w-10 text-slate-400" aria-hidden />
-              <p className="font-sans text-sm text-slate-600">
-                {tModal("noAdditionalInfo")}
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-6">
-              <div className="rounded-xl border border-vo-purple/35 bg-vo-purple/10 p-4 shadow-sm">
-                <h3 className="font-sans text-sm font-semibold text-vo-purple">
-                  {tModal("aiProcessed")}
-                </h3>
-                <p className="mt-2 font-sans text-sm text-slate-700">
-                  {tModal("aiIntro")}
-                </p>
-                <p className="mt-1 font-sans text-sm text-slate-700">
-                  {tModal.rich("aiTiming", {
-                    strong: (chunks) => <strong>{chunks}</strong>,
-                  })}
-                </p>
-                <p className="mt-1 font-sans text-xs text-slate-600">
-                  {tModal("aiValidationHint")}
-                </p>
-              </div>
-              {/* Component Scores */}
-              {componentScores.length > 0 && (
-                <div className="flex flex-col gap-5">
-                  {hasAttributeBlock && (
-                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-sky-200/60">
-                      <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900">
-                        {tModal("attributes")}
-                      </h3>
-                      <ul className="flex flex-col gap-3" role="list">
-                        {attributeIndividuals.map(([key, val]) => (
-                          <ScoreBarRow
-                            key={key}
-                            scoreKey={key}
-                            val={val}
-                            getScoreLabel={getScoreLabel}
-                            labelClass="text-slate-800"
-                            barClass="bg-sky-500"
-                            valueClass="text-slate-900"
-                            barTrackClass="bg-slate-200/95"
-                          />
-                        ))}
-                        {aggregateEntry != null && (
-                          <ScoreBarRow
-                            scoreKey={aggregateEntry[0]}
-                            val={aggregateEntry[1]}
-                            getScoreLabel={getScoreLabel}
-                            labelClass="text-slate-800"
-                            barClass="bg-sky-600"
-                            valueClass="text-slate-900"
-                            barTrackClass="bg-slate-200/95"
-                            isTotalRow
-                          />
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
-                  {qualitativeEntry != null && (
-                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-amber-200/70">
-                      <div className="mb-3.5 flex items-center gap-1.5">
-                        <h3 className="font-sans text-sm font-semibold text-amber-950">
-                          {tModal("qualitativeScore")}
-                        </h3>
-                        <ScoreTooltip
-                          text={tMatching("scoreTooltips.qualitativeScore")}
-                          accentClass="text-amber-800"
-                        />
-                      </div>
-                      <ul className="flex flex-col gap-2.5" role="list">
-                        <ScoreBarRow
-                          scoreKey={qualitativeEntry[0]}
-                          val={qualitativeEntry[1]}
-                          getScoreLabel={getScoreLabel}
-                          labelClass="text-amber-900"
-                          barClass="bg-amber-500"
-                          valueClass="text-amber-950"
-                          barTrackClass="bg-amber-200/80"
-                          hideLabel
-                        />
-                      </ul>
-                    </div>
-                  )}
-
-                  {semanticEntry != null && (
-                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-vo-purple/25">
-                      <div className="mb-3.5 flex items-center gap-1.5">
-                        <h3 className="font-sans text-sm font-semibold text-vo-purple">
-                          {tModal("semanticSimilarity")}
-                        </h3>
-                        <ScoreTooltip
-                          text={tMatching("scoreTooltips.semanticSimilarity")}
-                          accentClass="text-vo-purple"
-                        />
-                      </div>
-                      <ul className="flex flex-col gap-2.5" role="list">
-                        <ScoreBarRow
-                          scoreKey={semanticEntry[0]}
-                          val={semanticEntry[1]}
-                          getScoreLabel={getScoreLabel}
-                          labelClass="text-vo-purple"
-                          barClass="bg-vo-purple"
-                          valueClass="text-violet-900"
-                          barTrackClass="bg-violet-200/80"
-                          hideLabel
-                        />
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Coincidencia de atributos (CV vs vacante) */}
-              {hasMatchedAttributesBlock && (
-                <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/70">
-                  <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
-                    {tModal("attributeMatch")}
-                  </h3>
-                  <ul className="flex flex-col gap-2.5 font-sans text-sm text-slate-700" role="list">
-                    {matchedAttributesEntries.map(([attrKey, attrVal]) => {
-                      const pathVal =
-                        matchedAttributePaths && matchedAttributePaths[attrKey] != null
-                          ? String(matchedAttributePaths[attrKey])
-                          : null;
-                      return (
-                        <li key={attrKey} className="flex flex-col gap-0.5 rounded-lg bg-emerald-50/80 px-3 py-2">
-                          <span className="font-medium text-emerald-950">
-                            {formatRequirementKey(attrKey)}
-                          </span>
-                          <span className="text-slate-700">{emptyToDash(String(attrVal ?? ""))}</span>
-                          {pathVal != null && pathVal !== "" && (
-                            <span className="font-sans text-xs text-slate-500">
-                              {tModal("routePrefix")} {pathVal}
-                            </span>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-
-              {/* Razonamiento cualitativo: API nuevo (positivo/negativo) o legado (texto único) */}
-              {hasSplitQualitative ? (
-                <div className="flex flex-col gap-4">
-                  {qualitativeReasoningPositive != null && (
-                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/50">
-                      <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">
-                        {tModal("strengths")}
-                      </h3>
-                      <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
-                        {qualitativeReasoningPositive}
-                      </p>
-                    </div>
-                  )}
-                  {qualitativeReasoningNegative != null && (
-                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-amber-200/70">
-                      <h3 className="mb-3 font-sans text-sm font-semibold text-amber-950">
-                        {tModal("considerations")}
-                      </h3>
-                      <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
-                        {qualitativeReasoningNegative}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                qualitativeReasoningLegacy != null && (
-                  <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-border/60">
-                    <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
-                      {tModal("qualitativeReasoning")}
-                    </h3>
-                    <p className="font-sans text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
-                      {qualitativeReasoningLegacy}
-                    </p>
-                  </div>
-                )
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-t border-border p-6">
-          <div>
-            {downloadError && (
-              <p className="font-sans text-xs text-destructive" role="alert">
-                {downloadError}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            {match.storagePath && (
-              <button
-                type="button"
-                onClick={handleDownloadCV}
-                disabled={downloading}
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label={tModal("downloadCvAria")}
-              >
-                {downloading ? (
-                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                ) : (
-                  <Download className="h-4 w-4 shrink-0" aria-hidden />
-                )}
-                {downloading ? tModal("downloading") : tModal("downloadCv")}
-              </button>
-            )}
-            {profileHref != null && (
-              <Link
-                href={profileHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-md border border-vo-purple/40 bg-background px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/10 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                aria-label={tMatching("errors.openProfileAria")}
-              >
-                <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
-                {tModal("viewFullProfile")}
-              </Link>
-            )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              aria-label={tModal("closeProfileAria")}
-            >
-              {tModal("close")}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+  return false
+}
 
 const MatchCard = ({
   match,
@@ -1070,7 +411,12 @@ const MatchCard = ({
         </div>
       </article>
       {showVerPerfil && showModal && (
-        <CandidateProfileModal match={match} candidateId={candidateId} onClose={handleCloseModal} />
+        <CandidateProfileModal
+          match={match}
+          candidateId={candidateId}
+          uploadedAtLabel={`${tMatching("uploadedPrefix")} ${formatDate(match.uploadedAt, locale)}`}
+          onClose={handleCloseModal}
+        />
       )}
     </>
   );
@@ -1235,7 +581,7 @@ const MoveStageErrorBanner = ({ error }) => {
       <p className="font-sans text-sm text-destructive">{error.text}</p>
       {error.showEstadosLink ? (
         <Link
-          href="/portal-admin/etapas"
+          href="/portal-admin/vacantes/etapas"
           className="font-sans text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
           aria-label={tMatching("errors.goToStagesAria")}
         >
@@ -1362,7 +708,9 @@ const KanbanColumn = ({
 export default function VacanteDetallePage() {
   const t = useTranslations("RecruiterPortal.vacancies");
   const tDetail = useTranslations("RecruiterPortal.vacancies.detail");
+  const tForm = useTranslations("RecruiterPortal.vacancies.form");
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
+  const locale = useLocale();
   const params = useParams();
   const id = params?.id ?? null;
   const [vacancy, setVacancy] = useState(null);
@@ -1418,11 +766,13 @@ export default function VacanteDetallePage() {
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
   const [finishProcessModalOpen, setFinishProcessModalOpen] = useState(false);
   const [finishingProcess, setFinishingProcess] = useState(false);
+  const [pasteConfirmOpen, setPasteConfirmOpen] = useState(false);
 
   const possibleCandidatesSectionDesktopRef = useRef(null);
   const possibleCandidatesSectionMobileRef = useRef(null);
   const etapasSectionDesktopRef = useRef(null);
   const etapasSectionMobileRef = useRef(null);
+  const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
   const originalCompanyIdAtEditRef = useRef(DEFAULT_RECRUITER_COMPANY_ID);
   const pipelineCompanyCapturedForVacancyRef = useRef<string | null>(null);
   const [pipelineCompanyId, setPipelineCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
@@ -1610,7 +960,8 @@ export default function VacanteDetallePage() {
     }
     try {
       const data = await apiClient.get(`/api/recruiter/vacancies/${id}`);
-      setVacancy(normalizeVacancyDetailFromApi(data) ?? data);
+      const withApplicants = await overlayVacancyApplicants(String(id), data);
+      setVacancy(normalizeVacancyDetailFromApi(withApplicants) ?? withApplicants);
       const record =
         data && typeof data === "object" && !Array.isArray(data)
           ? (data as Record<string, unknown>)
@@ -1748,6 +1099,92 @@ export default function VacanteDetallePage() {
     setIsEditing(true);
   }, [vacancy, hydrateEditFormFromVacancy, companies, vacancyRouteId]);
 
+  const handleCopyVacancy = useCallback(async () => {
+    if (!vacancy || typeof vacancy !== "object") return;
+    const companyId = resolveVacancyCompanyId(
+      vacancy,
+      companies,
+      vacancyRouteId
+    );
+    const companyName =
+      vacancyCompanyDisplayName === "—" ? "" : vacancyCompanyDisplayName;
+    const payload = buildVacancyClipboardPayload(vacancy, companyId, companyName);
+    const wrote = await writeVacancyClipboard(payload);
+    if (!wrote) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tDetail("toasts.copyFailed"),
+      });
+      return;
+    }
+    setSnackbar({
+      open: true,
+      variant: "success",
+      message: tDetail("toasts.copied"),
+    });
+  }, [vacancy, companies, vacancyRouteId, vacancyCompanyDisplayName, tDetail]);
+
+  const applyClipboardToEditForm = useCallback((payload) => {
+    setEditTitle(payload.title);
+    setEditDescription(payload.description);
+    setEditDetails(payload.details);
+    setEditSalary(payload.salary);
+    setEditAdvantages(payload.advantages);
+    setEditCountryCode(payload.countryCode);
+    setEditStateCode(payload.stateCode);
+    setEditVacancyDepartmentId(
+      resolveClipboardCatalogId(
+        payload.vacancyDepartmentId,
+        payload.vacancyDepartmentCode,
+        payload.vacancyDepartmentName,
+        mergedDepartmentOptions
+      )
+    );
+    setEditVacancyModalityId(
+      resolveClipboardCatalogId(
+        payload.vacancyModalityId,
+        payload.vacancyModalityCode,
+        payload.vacancyModalityName,
+        mergedModalityOptions
+      )
+    );
+    setEditRequirements(clipboardPayloadToRequirementRows(payload.requirements));
+    setEditErrors({});
+  }, [mergedDepartmentOptions, mergedModalityOptions]);
+
+  const handleRequestPaste = useCallback(async () => {
+    const payload = await readVacancyClipboard();
+    if (!payload) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tForm("toasts.pasteEmpty"),
+      });
+      return;
+    }
+    pendingPastePayloadRef.current = payload;
+    setPasteConfirmOpen(true);
+  }, [tForm]);
+
+  const handleConfirmPaste = useCallback(() => {
+    const payload = pendingPastePayloadRef.current;
+    pendingPastePayloadRef.current = null;
+    setPasteConfirmOpen(false);
+    if (!payload) return;
+    applyClipboardToEditForm(payload);
+    setSnackbar({
+      open: true,
+      variant: "success",
+      message: tForm("toasts.pasted"),
+    });
+  }, [applyClipboardToEditForm, tForm]);
+
+  const handleCancelPaste = useCallback(() => {
+    pendingPastePayloadRef.current = null;
+    setPasteConfirmOpen(false);
+  }, []);
+
   const handleAddRequirement = useCallback(() => {
     setEditRequirements((prev) => [...prev, createEmptyRequirement()]);
   }, []);
@@ -1884,8 +1321,10 @@ export default function VacanteDetallePage() {
           `/api/recruiter/vacancies/${vacancyId}`,
           payload
         );
-        const updatedRecord =
-          updated && typeof updated === "object" && !Array.isArray(updated) ? updated : {};
+        const updatedRecord: Record<string, unknown> =
+          updated && typeof updated === "object" && !Array.isArray(updated)
+            ? (updated as Record<string, unknown>)
+            : {};
 
         const selectedDepartment = mergedDepartmentOptions.find(
           (option) => option.id === editVacancyDepartmentId
@@ -1895,18 +1334,12 @@ export default function VacanteDetallePage() {
         );
 
         const nextDepartmentSummary =
-          updatedRecord.vacancyDepartment ??
-          updatedRecord.vacancy_department ??
-          updatedRecord.department ??
+          getVacancyDepartmentSummary(updatedRecord) ??
           createCatalogSummary(selectedDepartment) ??
           null;
 
         const nextModalitySummary =
-          updatedRecord.vacancyModality ??
-          updatedRecord.vacancy_modality ??
-          updatedRecord.modality ??
-          updatedRecord.workArrangement ??
-          updatedRecord.work_arrangement ??
+          getVacancyModalitySummary(updatedRecord) ??
           createCatalogSummary(selectedModality) ??
           null;
 
@@ -1935,26 +1368,14 @@ export default function VacanteDetallePage() {
           vacancy_department_id: editVacancyDepartmentId || null,
           vacancyDepartment: nextDepartmentSummary,
           vacancy_department: nextDepartmentSummary,
-          department:
-            nextDepartmentSummary && typeof nextDepartmentSummary === "object"
-              ? nextDepartmentSummary.displayName
-              : nextDepartmentSummary,
+          department: nextDepartmentSummary?.displayName ?? null,
           vacancyModalityId: editVacancyModalityId || null,
           vacancy_modality_id: editVacancyModalityId || null,
           vacancyModality: nextModalitySummary,
           vacancy_modality: nextModalitySummary,
-          modality:
-            nextModalitySummary && typeof nextModalitySummary === "object"
-              ? nextModalitySummary.displayName
-              : nextModalitySummary,
-          workArrangement:
-            nextModalitySummary && typeof nextModalitySummary === "object"
-              ? nextModalitySummary.displayName
-              : nextModalitySummary,
-          work_arrangement:
-            nextModalitySummary && typeof nextModalitySummary === "object"
-              ? nextModalitySummary.displayName
-              : nextModalitySummary,
+          modality: nextModalitySummary?.displayName ?? null,
+          workArrangement: nextModalitySummary?.displayName ?? null,
+          work_arrangement: nextModalitySummary?.displayName ?? null,
         }));
 
         if (companyChanged) {
@@ -2126,9 +1547,9 @@ export default function VacanteDetallePage() {
       }
 
       try {
-        const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=20&minScore=0.7`;
+        const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=${clampSearchLimit(QUERY_SEARCH_CANDIDATES_LIMIT)}&minScore=0.7`;
         const data = await apiClient.post(url, {});
-        const list = Array.isArray(data) ? data : data?.candidates ?? data?.results ?? [];
+        const list = unwrapListArray(data);
         setSmartCandidates(list);
 
         if (!options?.silent) {
@@ -2546,6 +1967,19 @@ export default function VacanteDetallePage() {
     [breadcrumbLabel, t]
   );
 
+  const showVacancyInfo = Boolean(vacancy)
+  const showTopRow = showVacancyInfo
+  const showNarrativeRow = showVacancyInfo
+  const showSalaryBlock = showVacancyInfo
+  const showRequirementsBlock = showVacancyInfo
+  const showDescriptionBlock = showVacancyInfo
+  const showDetailsBlock = showVacancyInfo
+  const showAdvantagesBlock = showVacancyInfo
+  const topRowGridClass = " grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+  const narrativeGridClass = " grid-cols-1 lg:grid-cols-3"
+  const mobileTopRowGridClass = " sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+  const mobileNarrativeGridClass = " sm:grid-cols-3"
+
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
       {/* Desktop: sidebar + main — fixed height so only main scrolls */}
@@ -2759,45 +2193,21 @@ export default function VacanteDetallePage() {
                               ) : null}
                             </div>
                           ) : (
-                            <h1 className="font-sans text-2xl font-bold text-foreground">
-                              {emptyToDash(vacancy.title)}
-                            </h1>
+                            <VacancyReadOnlyIdentity
+                              title={emptyToDash(vacancy.title)}
+                              companyName={vacancyCompanyDisplayName}
+                              department={getVacancyDepartmentLabel(vacancy)}
+                              modality={getVacancyModalityLabel(vacancy)}
+                              countryCode={vacancy.countryCode ?? vacancy.country_code}
+                              stateCode={vacancy.stateCode ?? vacancy.state_code}
+                              createdAtLabel={tDetail("headerMeta.created", {
+                                date: formatShortDate(vacancy.createdAt, locale),
+                              })}
+                              statusLabel={statusConfig.label}
+                              statusClassName={`${statusConfig.bgClass} ${statusConfig.textClass}`}
+                              titleClassName="text-2xl"
+                            />
                           )}
-                          <div className="flex flex-wrap items-center gap-4 font-sans text-sm text-gray-600">
-                            {!isEditing ? (
-                              <span className="flex min-w-0 items-center gap-1.5">
-                                <Building2 className="h-4 w-4 shrink-0" aria-hidden />
-                                <span className="min-w-0 font-medium text-foreground">
-                                  {vacancyCompanyDisplayName}
-                                </span>
-                              </span>
-                            ) : null}
-                            <span className="flex items-center gap-1.5">
-                              <Briefcase className="h-4 w-4 shrink-0" aria-hidden />
-                              {getVacancyDepartmentLabel(vacancy)}
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <Users className="h-4 w-4 shrink-0" aria-hidden />
-                              {getVacancyModalityLabel(vacancy)}
-                            </span>
-                            {!isEditing ? (
-                              <span className="flex min-w-0 items-center gap-1.5">
-                                <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-                                <span className="min-w-0">
-                                  <VacancyLocationLabel countryCode={vacancy.countryCode ?? vacancy.country_code} stateCode={vacancy.stateCode ?? vacancy.state_code} />
-                                </span>
-                              </span>
-                            ) : null}
-                            <span className="flex items-center gap-1.5">
-                              <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-                              {tDetail("page.createdPrefix")} {formatDate(vacancy.createdAt)}
-                            </span>
-                          </div>
-                          <span
-                            className={`inline-flex w-fit rounded-xl px-2.5 py-1 font-sans text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
-                          >
-                            {statusConfig.label}
-                          </span>
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
@@ -2847,20 +2257,39 @@ export default function VacanteDetallePage() {
                             >
                               {tDetail("actions.results")}
                             </Link>
+                            <button
+                              type="button"
+                              onClick={handleCopyVacancy}
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              aria-label={tDetail("actions.copyAria")}
+                            >
+                              {tDetail("actions.copy")}
+                            </button>
                           </>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={handleSaveVacancy}
-                            disabled={savingVacancy}
-                            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleRequestPaste}
+                              disabled={savingVacancy}
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              aria-label={tForm("actions.pasteAria")}
+                            >
+                              {tForm("actions.paste")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSaveVacancy}
+                              disabled={savingVacancy}
+                              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={tDetail("actions.saveAria")}
-                          >
-                            {savingVacancy ? (
-                              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                            ) : null}
-                            {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
-                          </button>
+                            >
+                              {savingVacancy ? (
+                                <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                              ) : null}
+                              {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -2869,45 +2298,21 @@ export default function VacanteDetallePage() {
                         {saveVacancyError}
                       </p>
                     )}
-                    {(vacancy.description || vacancy.requirements || vacancy.details || vacancy.salary || vacancy.advantages || isEditing) && (
+                    {showVacancyInfo && (
                       <div className="mt-6 flex flex-col gap-4 border-t border-border pt-6">
-                        <div className="grid gap-4 md:grid-cols-2">
-                        {(vacancy.description || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                            <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ats-arena/80 text-gray-700">
-                                <FileText className="h-4 w-4" aria-hidden />
-                              </span>
-                              {tDetail("sections.description")}
-                            </h2>
-                            {isEditing ? (
-                              <div className="flex flex-col gap-2">
-                                <textarea
-                                  value={editDescription}
-                                  onChange={(e) => setEditDescription(e.target.value)}
-                                  rows={5}
-                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
-                                  aria-label={t("form.fields.description.label")}
-                                  aria-invalid={!!editErrors.description}
-                                  aria-describedby={editErrors.description ? "edit-description-error-desktop" : undefined}
-                                  placeholder={t("form.fields.description.placeholder")}
-                                />
-                                {editErrors.description && (
-                                  <p id="edit-description-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
-                                    {editErrors.description}
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                {safeString(vacancy.description)}
-                              </p>
-                            )}
-                          </div>
+                        {showTopRow && (
+                        <div className={`grid items-stretch gap-4${topRowGridClass}`}>
+                        {showSalaryBlock && (
+                          <VacancySalaryCard
+                            isEditing={isEditing}
+                            salary={vacancy.salary}
+                            editValue={editSalary}
+                            onEditChange={setEditSalary}
+                          />
                         )}
-                        {(vacancy.requirements || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                        {showRequirementsBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-96 p-5`}>
+                            <div className="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
                               <h2 className="flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
                                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-purple/15 text-vo-purple">
                                   <CheckSquare className="h-4 w-4" aria-hidden />
@@ -2927,8 +2332,8 @@ export default function VacanteDetallePage() {
                               )}
                             </div>
                             {isEditing ? (
-                              <div className="flex flex-col gap-3">
-                                <div className="flex flex-col gap-3 max-h-[320px] overflow-y-auto pr-1">
+                              <div className={`${vacancyInfoCardBodyClass} flex flex-col gap-3`}>
+                                <div className="flex flex-col gap-3">
                                   {editRequirements.map((req, index) => (
                                     <div
                                       key={req.id}
@@ -3013,60 +2418,57 @@ export default function VacanteDetallePage() {
                                 </p>
                               </div>
                             ) : (
-                              <RequirementsDisplay
-                                value={vacancy.requirements}
-                                attributeWeights={vacancy.weights?.attributes}
-                              />
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                {vacancyHasRequirements(vacancy.requirements) ? (
+                                  <RequirementsDisplay
+                                    value={vacancy.requirements}
+                                    attributeWeights={vacancy.weights?.attributes}
+                                  />
+                                ) : (
+                                  <p className="font-sans text-sm italic text-gray-600">
+                                    {tDetail("fallbacks.unspecified")}
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
                         </div>
-
-                        {(vacancy.details || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                            <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
-                                <Info className="h-4 w-4" aria-hidden />
+                        )}
+                        {showNarrativeRow && (
+                        <div className={`grid items-stretch gap-4${narrativeGridClass}`}>
+                        {showDescriptionBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-96 p-5`}>
+                            <h2 className="mb-3 flex shrink-0 items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ats-arena/80 text-gray-700">
+                                <FileText className="h-4 w-4" aria-hidden />
                               </span>
-                              {tDetail("sections.details")}
+                              {tDetail("sections.description")}
                             </h2>
                             {isEditing ? (
-                              <textarea
-                                value={editDetails}
-                                onChange={(e) => setEditDetails(e.target.value)}
-                                rows={4}
-                                placeholder={t("form.fields.details.placeholder")}
-                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label={t("form.fields.details.label")}
-                              />
-                            ) : vacancy.details ? (
-                              (() => {
-                                const pairs = parseKeyValueLines(vacancy.details);
-                                if (pairs && pairs.length > 0) {
-                                  return (
-                                    <dl className="grid gap-x-8 gap-y-2.5 sm:grid-cols-2">
-                                      {pairs.map(({ key, value }) => (
-                                        <div
-                                          key={`${key}-${value}`}
-                                          className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0 sm:last:border-b sm:nth-last-[-n+2]:border-b-0"
-                                        >
-                                          <dt className="font-sans text-xs font-medium uppercase tracking-wide text-gray-600">
-                                            {key}
-                                          </dt>
-                                          <dd className="font-sans text-sm text-foreground">
-                                            {value}
-                                          </dd>
-                                        </div>
-                                      ))}
-                                    </dl>
-                                  );
-                                }
-                                return (
-                                  <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                    {safeString(vacancy.details)}
+                              <div className={`${vacancyInfoCardBodyClass} flex flex-col gap-2`}>
+                                <textarea
+                                  value={editDescription}
+                                  onChange={(e) => setEditDescription(e.target.value)}
+                                  rows={5}
+                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
+                                  aria-label={t("form.fields.description.label")}
+                                  aria-invalid={!!editErrors.description}
+                                  aria-describedby={editErrors.description ? "edit-description-error-desktop" : undefined}
+                                  placeholder={t("form.fields.description.placeholder")}
+                                />
+                                {editErrors.description && (
+                                  <p id="edit-description-error-desktop" className="font-sans text-sm text-vo-pink" role="alert">
+                                    {editErrors.description}
                                   </p>
-                                );
-                              })()
+                                )}
+                              </div>
+                            ) : vacancy.description ? (
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                                  {safeString(vacancy.description)}
+                                </p>
+                              </div>
                             ) : (
                               <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
@@ -3074,67 +2476,43 @@ export default function VacanteDetallePage() {
                             )}
                           </div>
                         )}
-
-                        {(vacancy.salary || vacancy.advantages || isEditing) && (
-                          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-                            {(vacancy.salary || isEditing) && (
-                              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
-                                    <DollarSign className="h-4 w-4" aria-hidden />
-                                  </span>
-                                  {tDetail("sections.salary")}
-                                </h2>
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editSalary}
-                                    onChange={(e) => setEditSalary(e.target.value)}
-                                    placeholder={t("form.fields.salary.placeholder")}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                    aria-label={t("form.fields.salary.ariaLabel")}
-                                  />
-                                ) : vacancy.salary ? (
-                                  <p className="font-sans text-lg font-semibold text-foreground">
-                                    {safeString(vacancy.salary)}
-                                  </p>
-                                ) : (
-                                  <p className="font-sans text-sm italic text-gray-600">
-                                    {tDetail("fallbacks.unspecified")}
-                                  </p>
-                                )}
+                        {showDetailsBlock && (
+                          <VacancyDetailsCard
+                            isEditing={isEditing}
+                            details={vacancy.details}
+                            editValue={editDetails}
+                            onEditChange={setEditDetails}
+                          />
+                        )}
+                        {showAdvantagesBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-96 p-5`}>
+                            <h2 className="mb-3 flex shrink-0 items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-pink/10 text-vo-pink">
+                                <Gift className="h-4 w-4" aria-hidden />
+                              </span>
+                              {tDetail("sections.advantages")}
+                            </h2>
+                            {isEditing ? (
+                              <textarea
+                                value={editAdvantages}
+                                onChange={(e) => setEditAdvantages(e.target.value)}
+                                rows={4}
+                                placeholder={t("form.fields.advantages.placeholder")}
+                                className="min-h-0 w-full flex-1 resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={t("form.fields.advantages.label")}
+                              />
+                            ) : vacancy.advantages ? (
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                <VacancyDelimitedText value={vacancy.advantages} variant="list" />
                               </div>
-                            )}
-
-                            {(vacancy.advantages || isEditing) && (
-                              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                                <h2 className="mb-3 flex items-center gap-2.5 font-sans text-sm font-semibold text-foreground">
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-vo-pink/10 text-vo-pink">
-                                    <Gift className="h-4 w-4" aria-hidden />
-                                  </span>
-                                  {tDetail("sections.advantages")}
-                                </h2>
-                                {isEditing ? (
-                                  <textarea
-                                    value={editAdvantages}
-                                    onChange={(e) => setEditAdvantages(e.target.value)}
-                                    rows={4}
-                                    placeholder={t("form.fields.advantages.placeholder")}
-                                    className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                    aria-label={t("form.fields.advantages.label")}
-                                  />
-                                ) : vacancy.advantages ? (
-                                  <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                    {safeString(vacancy.advantages)}
-                                  </p>
-                                ) : (
-                                  <p className="font-sans text-sm italic text-gray-600">
-                                    {tDetail("fallbacks.unspecified")}
-                                  </p>
-                                )}
-                              </div>
+                            ) : (
+                              <p className="font-sans text-sm italic text-gray-600">
+                                {tDetail("fallbacks.unspecified")}
+                              </p>
                             )}
                           </div>
+                        )}
+                        </div>
                         )}
                       </div>
                     )}
@@ -3165,10 +2543,11 @@ export default function VacanteDetallePage() {
                         disabled={loadingSmart || isVacancyReadOnly}
                         className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple/50 bg-vo-purple/10 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/15 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label={tMatching("aria.preliminarySearch")}
+                        aria-busy={loadingSmart}
                         title={vacancyReadOnlyTitle}
                       >
                         {loadingSmart ? (
-                          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                          <Loader2 className="h-4 w-4 shrink-0 motion-safe:animate-spin" aria-hidden />
                         ) : (
                           <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                         )}
@@ -3242,22 +2621,7 @@ export default function VacanteDetallePage() {
                         aria-label={tMatching("aria.searchResults")}
                       >
                         {loadingSmart && smartCandidates === null ? (
-                          <div className="flex flex-col items-center justify-center gap-4 py-10 text-center">
-                            <div className="w-full max-w-md px-1">
-                              <AiDisclosurePillProgress
-                                percent={null}
-                                timeBasedTypicalMs={VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS}
-                                className="mt-0!"
-                                aria-label={tMatching("aria.searchProgress")}
-                              />
-                            </div>
-                            <p
-                              className="font-sans text-sm text-muted-foreground"
-                              aria-live="polite"
-                            >
-                              {tMatching("updatingSearchEllipsis")}
-                            </p>
-                          </div>
+                          <VacancyAiSearchLoadingState />
                         ) : smartCandidates === null ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Sparkles className="h-12 w-12 text-muted-foreground" aria-hidden />
@@ -3655,45 +3019,21 @@ export default function VacanteDetallePage() {
                             ) : null}
                           </div>
                         ) : (
-                          <h1 className="font-sans text-xl font-bold text-foreground">
-                            {emptyToDash(vacancy.title)}
-                          </h1>
+                          <VacancyReadOnlyIdentity
+                            title={emptyToDash(vacancy.title)}
+                            companyName={vacancyCompanyDisplayName}
+                            department={getVacancyDepartmentLabel(vacancy)}
+                            modality={getVacancyModalityLabel(vacancy)}
+                            countryCode={vacancy.countryCode ?? vacancy.country_code}
+                            stateCode={vacancy.stateCode ?? vacancy.state_code}
+                            createdAtLabel={tDetail("headerMeta.created", {
+                              date: formatShortDate(vacancy.createdAt, locale),
+                            })}
+                            statusLabel={statusConfig.label}
+                            statusClassName={`${statusConfig.bgClass} ${statusConfig.textClass}`}
+                            titleClassName="text-xl"
+                          />
                         )}
-                        <div className="flex flex-wrap items-center gap-3 font-sans text-sm text-gray-600">
-                          {!isEditing ? (
-                            <span className="flex min-w-0 items-center gap-1">
-                              <Building2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                              <span className="min-w-0 font-medium text-foreground">
-                                {vacancyCompanyDisplayName}
-                              </span>
-                            </span>
-                          ) : null}
-                          <span className="flex items-center gap-1">
-                            <Briefcase className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                            {getVacancyDepartmentLabel(vacancy)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                            {getVacancyModalityLabel(vacancy)}
-                          </span>
-                          {!isEditing ? (
-                            <span className="flex min-w-0 items-center gap-1">
-                              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                              <span className="min-w-0">
-                                <VacancyLocationLabel countryCode={vacancy.countryCode ?? vacancy.country_code} stateCode={vacancy.stateCode ?? vacancy.state_code} />
-                              </span>
-                            </span>
-                          ) : null}
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                            {tDetail("page.createdPrefix")} {formatDate(vacancy.createdAt)}
-                          </span>
-                        </div>
-                        <span
-                          className={`inline-flex w-fit rounded-xl px-2.5 py-1 font-sans text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
-                        >
-                          {statusConfig.label}
-                        </span>
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -3723,20 +3063,39 @@ export default function VacanteDetallePage() {
                           >
                             {tDetail("actions.results")}
                           </Link>
+                          <button
+                            type="button"
+                            onClick={handleCopyVacancy}
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            aria-label={tDetail("actions.copyAria")}
+                          >
+                            {tDetail("actions.copy")}
+                          </button>
                         </>
                       ) : (
-                        <button
-                          type="button"
-                          onClick={handleSaveVacancy}
-                          disabled={savingVacancy}
-                          className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        <>
+                          <button
+                            type="button"
+                            onClick={handleRequestPaste}
+                            disabled={savingVacancy}
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={tForm("actions.pasteAria")}
+                          >
+                            {tForm("actions.paste")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleSaveVacancy}
+                            disabled={savingVacancy}
+                            className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={tDetail("actions.saveAria")}
-                        >
-                          {savingVacancy ? (
-                            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                          ) : null}
-                          {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
-                        </button>
+                          >
+                            {savingVacancy ? (
+                              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                            ) : null}
+                            {savingVacancy ? tDetail("actions.saving") : tDetail("actions.save")}
+                          </button>
+                        </>
                       )}
                     </div>
                     {saveVacancyError && (
@@ -3744,44 +3103,22 @@ export default function VacanteDetallePage() {
                         {saveVacancyError}
                       </p>
                     )}
-                    {(vacancy.description || vacancy.requirements || vacancy.details || vacancy.salary || vacancy.advantages || isEditing) && (
+                    {showVacancyInfo && (
                       <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
-                        {(vacancy.description || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ats-arena/80 text-gray-700">
-                                <FileText className="h-3.5 w-3.5" aria-hidden />
-                              </span>
-                              {tDetail("sections.description")}
-                            </h2>
-                            {isEditing ? (
-                              <div className="flex flex-col gap-2">
-                                <textarea
-                                  value={editDescription}
-                                  onChange={(e) => setEditDescription(e.target.value)}
-                                  rows={5}
-                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
-                                  aria-label={t("form.fields.description.label")}
-                                  aria-invalid={!!editErrors.description}
-                                  aria-describedby={editErrors.description ? "edit-description-error-mobile" : undefined}
-                                  placeholder={t("form.fields.description.placeholder")}
-                                />
-                                {editErrors.description && (
-                                  <p id="edit-description-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
-                                    {editErrors.description}
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                {safeString(vacancy.description)}
-                              </p>
-                            )}
-                          </div>
+                        {showTopRow && (
+                        <div className={`grid items-stretch gap-3${mobileTopRowGridClass}`}>
+                        {showSalaryBlock && (
+                          <VacancySalaryCard
+                            isEditing={isEditing}
+                            salary={vacancy.salary}
+                            editValue={editSalary}
+                            onEditChange={setEditSalary}
+                            compact
+                          />
                         )}
-                        {(vacancy.requirements || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+                        {showRequirementsBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-80 p-4`}>
+                            <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-3">
                               <h2 className="flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
                                 <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-purple/15 text-vo-purple">
                                   <CheckSquare className="h-3.5 w-3.5" aria-hidden />
@@ -3801,8 +3138,8 @@ export default function VacanteDetallePage() {
                               )}
                             </div>
                             {isEditing ? (
-                              <div className="flex flex-col gap-3">
-                                <div className="flex flex-col gap-3 max-h-[320px] overflow-y-auto pr-1">
+                              <div className={`${vacancyInfoCardBodyClass} flex flex-col gap-3`}>
+                                <div className="flex flex-col gap-3">
                                   {editRequirements.map((req, index) => (
                                     <div
                                       key={req.id}
@@ -3888,87 +3225,57 @@ export default function VacanteDetallePage() {
                                 </p>
                               </div>
                             ) : (
-                              <RequirementsDisplay
-                                value={vacancy.requirements}
-                                attributeWeights={vacancy.weights?.attributes}
-                              />
-                            )}
-                          </div>
-                        )}
-                        {(vacancy.details || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 text-amber-600">
-                                <Info className="h-3.5 w-3.5" aria-hidden />
-                              </span>
-                              {tDetail("sections.details")}
-                            </h2>
-                            {isEditing ? (
-                              <textarea
-                                value={editDetails}
-                                onChange={(e) => setEditDetails(e.target.value)}
-                                rows={4}
-                                placeholder={t("form.fields.details.placeholder")}
-                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                aria-label={t("form.fields.details.label")}
-                              />
-                            ) : vacancy.details ? (
-                              (() => {
-                                const pairs = parseKeyValueLines(vacancy.details);
-                                if (pairs && pairs.length > 0) {
-                                  return (
-                                    <dl className="flex flex-col gap-2">
-                                      {pairs.map(({ key, value }) => (
-                                        <div
-                                          key={`${key}-${value}`}
-                                          className="flex flex-col gap-0.5 border-b border-border/50 pb-2 last:border-b-0"
-                                        >
-                                          <dt className="font-sans text-[11px] font-medium uppercase tracking-wide text-gray-600">
-                                            {key}
-                                          </dt>
-                                          <dd className="font-sans text-sm text-foreground">
-                                            {value}
-                                          </dd>
-                                        </div>
-                                      ))}
-                                    </dl>
-                                  );
-                                }
-                                return (
-                                  <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                    {safeString(vacancy.details)}
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                {vacancyHasRequirements(vacancy.requirements) ? (
+                                  <RequirementsDisplay
+                                    value={vacancy.requirements}
+                                    attributeWeights={vacancy.weights?.attributes}
+                                  />
+                                ) : (
+                                  <p className="font-sans text-sm italic text-gray-600">
+                                    {tDetail("fallbacks.unspecified")}
                                   </p>
-                                );
-                              })()
-                            ) : (
-                              <p className="font-sans text-sm italic text-gray-600">
-                                {tDetail("fallbacks.unspecified")}
-                              </p>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
-
-                        {(vacancy.salary || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600">
-                                <DollarSign className="h-3.5 w-3.5" aria-hidden />
+                        </div>
+                        )}
+                        {showNarrativeRow && (
+                        <div className={`grid items-stretch gap-3${mobileNarrativeGridClass}`}>
+                        {showDescriptionBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-80 p-4`}>
+                            <h2 className="mb-2 flex shrink-0 items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ats-arena/80 text-gray-700">
+                                <FileText className="h-3.5 w-3.5" aria-hidden />
                               </span>
-                              {tDetail("sections.salary")}
+                              {tDetail("sections.description")}
                             </h2>
                             {isEditing ? (
-                              <input
-                                type="text"
-                                value={editSalary}
-                                onChange={(e) => setEditSalary(e.target.value)}
-                                placeholder={t("form.fields.salary.placeholder")}
-                                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label={t("form.fields.salary.ariaLabel")}
-                              />
-                            ) : vacancy.salary ? (
-                              <p className="font-sans text-lg font-semibold text-foreground">
-                                {safeString(vacancy.salary)}
-                              </p>
+                              <div className={`${vacancyInfoCardBodyClass} flex flex-col gap-2`}>
+                                <textarea
+                                  value={editDescription}
+                                  onChange={(e) => setEditDescription(e.target.value)}
+                                  rows={5}
+                                  className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
+                                  aria-label={t("form.fields.description.label")}
+                                  aria-invalid={!!editErrors.description}
+                                  aria-describedby={editErrors.description ? "edit-description-error-mobile" : undefined}
+                                  placeholder={t("form.fields.description.placeholder")}
+                                />
+                                {editErrors.description && (
+                                  <p id="edit-description-error-mobile" className="font-sans text-sm text-vo-pink" role="alert">
+                                    {editErrors.description}
+                                  </p>
+                                )}
+                              </div>
+                            ) : vacancy.description ? (
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                                  {safeString(vacancy.description)}
+                                </p>
+                              </div>
                             ) : (
                               <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
@@ -3976,10 +3283,18 @@ export default function VacanteDetallePage() {
                             )}
                           </div>
                         )}
-
-                        {(vacancy.advantages || isEditing) && (
-                          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                            <h2 className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold text-foreground">
+                        {showDetailsBlock && (
+                          <VacancyDetailsCard
+                            isEditing={isEditing}
+                            details={vacancy.details}
+                            editValue={editDetails}
+                            onEditChange={setEditDetails}
+                            compact
+                          />
+                        )}
+                        {showAdvantagesBlock && (
+                          <div className={`${vacancyInfoCardClass} max-h-80 p-4`}>
+                            <h2 className="mb-2 flex shrink-0 items-center gap-2 font-sans text-sm font-semibold text-foreground">
                               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-vo-pink/10 text-vo-pink">
                                 <Gift className="h-3.5 w-3.5" aria-hidden />
                               </span>
@@ -3991,19 +3306,21 @@ export default function VacanteDetallePage() {
                                 onChange={(e) => setEditAdvantages(e.target.value)}
                                 rows={4}
                                 placeholder={t("form.fields.advantages.placeholder")}
-                                className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                className="min-h-0 w-full flex-1 resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={t("form.fields.advantages.label")}
                               />
                             ) : vacancy.advantages ? (
-                              <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                                {safeString(vacancy.advantages)}
-                              </p>
+                              <div className={vacancyInfoCardBodyClass} tabIndex={0}>
+                                <VacancyDelimitedText value={vacancy.advantages} variant="list" />
+                              </div>
                             ) : (
                               <p className="font-sans text-sm italic text-gray-600">
                                 {tDetail("fallbacks.unspecified")}
                               </p>
                             )}
                           </div>
+                        )}
+                        </div>
                         )}
                       </div>
                     )}
@@ -4035,10 +3352,11 @@ export default function VacanteDetallePage() {
                       disabled={loadingSmart || isVacancyReadOnly}
                       className="inline-flex w-fit items-center gap-2 rounded-md border border-vo-purple/50 bg-vo-purple/10 px-4 py-2.5 font-sans text-sm font-medium text-vo-purple transition-colors hover:bg-vo-purple/15 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label={tMatching("aria.preliminarySearch")}
+                      aria-busy={loadingSmart}
                       title={vacancyReadOnlyTitle}
                     >
                       {loadingSmart ? (
-                        <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                        <Loader2 className="h-4 w-4 shrink-0 motion-safe:animate-spin" aria-hidden />
                       ) : (
                         <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                       )}
@@ -4116,22 +3434,7 @@ export default function VacanteDetallePage() {
                       aria-label={tMatching("aria.searchResults")}
                     >
                       {loadingSmart && smartCandidates === null ? (
-                        <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
-                          <div className="w-full max-w-md px-1">
-                            <AiDisclosurePillProgress
-                              percent={null}
-                              timeBasedTypicalMs={VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS}
-                              className="mt-0!"
-                              aria-label="Progreso de la búsqueda preliminar con IA"
-                            />
-                          </div>
-                          <p
-                            className="font-sans text-sm text-muted-foreground"
-                            aria-live="polite"
-                          >
-                            {tMatching("updatingSearchEllipsis")}
-                          </p>
-                        </div>
+                        <VacancyAiSearchLoadingState compact />
                       ) : smartCandidates === null ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Sparkles className="h-10 w-10 text-muted-foreground" aria-hidden />
@@ -4340,6 +3643,12 @@ export default function VacanteDetallePage() {
         onClose={() => setFinishProcessModalOpen(false)}
         onConfirm={handleFinishProcess}
         loading={finishingProcess}
+      />
+
+      <VacancyPasteConfirmModal
+        isOpen={pasteConfirmOpen}
+        onClose={handleCancelPaste}
+        onConfirm={handleConfirmPaste}
       />
     </div>
   );

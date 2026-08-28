@@ -12,8 +12,10 @@ El backend expone dos endpoints JSON (`Content-Type: application/json`):
 
 | Método | Ruta | Rol |
 |--------|------|-----|
-| `POST` | `/auth/forgot-password` | El usuario indica el correo; si existe cuenta, se gestiona recuperación (token en BD, envío de mail si aplica). |
-| `POST` | `/auth/reset-password` | Nueva contraseña. Identificación: **token** (enlace del mail) o **email** (flujo in-app / solo correo). |
+| `POST` | `/auth/forgot-password` | El usuario indica el correo. Si existe cuenta, se genera un token de un solo uso con expiración y se envía el enlace por mail. La respuesta **no revela** si el correo está registrado. |
+| `POST` | `/auth/reset-password` | Nueva contraseña. Solo con **token** del enlace de recuperación (`?token=...`). |
+
+Los endpoints legacy `/identity/forgotPassword` y `/identity/resetPassword` responden **410 Gone**. Usar solo `/auth/*` (vía BFF).
 
 ---
 
@@ -27,26 +29,23 @@ El backend expone dos endpoints JSON (`Content-Type: application/json`):
 
 **400** — correo vacío o formato inválido: `{ "message": "..." }`
 
-**200** — siempre que el formato sea válido:
+**429** — rate limit (mismo comportamiento que antes).
+
+**200** — siempre el mismo mensaje genérico, exista o no la cuenta:
 
 ```json
 {
-  "exists": true,
-  "success": true,
-  "message": "texto para mostrar al usuario"
+  "message": "Si existe una cuenta con ese correo, te enviamos un enlace para restablecer la contraseña."
 }
 ```
 
-`exists` y `success` son el mismo valor.
-
-- Si **no** hay cuenta: `exists: false`, `success: false`, mensaje acorde.
-- Si **sí** hay cuenta: `exists: true`, `success: true`, mensaje de confirmación (mail, avisos, etc.).
+No vienen `exists` ni `success`. El front **no** debe bifurcar la UI según existencia de cuenta ni redirigir a `/restablecer-contrasena?email=...`.
 
 ---
 
 ## 2) `POST /auth/reset-password`
 
-### Opción A — enlace del correo (flujo mail)
+**Body (único modo aceptado):**
 
 ```json
 {
@@ -55,22 +54,8 @@ El backend expone dos endpoints JSON (`Content-Type: application/json`):
 }
 ```
 
-No enviar `email`. El `token` es obligatorio en este modo. El backend valida el token guardado en BD.
-
-### Opción B — solo correo (`email` + `password`)
-
-```json
-{
-  "password": "TuNuevaClave123",
-  "email": "usuario@dominio.com"
-}
-```
-
-No enviar `token`, o enviarlo **vacío**. El backend busca el usuario por correo; si existe, genera el token interno de Identity y actualiza la contraseña (comportamiento actual del servicio). Tras un cambio correcto, marca como usados los tokens de recuperación pendientes de ese usuario.
-
-### Prioridad si llegan `token` y `email`
-
-El backend **prioriza `token`**. Si el token es viejo o inválido, **falla aunque el email sea válido**. En el front, para el flujo solo por correo: **no envíes `token`** en el body; solo `{ password, email }`.
+- `token` es **obligatorio**.
+- `email` **no** se acepta como forma de reset. Si se envía solo `{ password, email }` → **400**.
 
 **Contraseña:** mínimo 8 caracteres (validar en cliente; el backend puede rechazar con **400**).
 
@@ -80,41 +65,52 @@ El backend **prioriza `token`**. Si el token es viejo o inválido, **falla aunqu
 { "ok": true }
 ```
 
-**400** — token/correo inválidos, contraseña no válida, etc.: `{ "message": "..." }`.
+Tras un reset exitoso, las sesiones Bearer existentes dejan de valer (401). El usuario debe volver a iniciar sesión.
+
+**400** — token faltante/inválido/expirado/reusado, o password corta: `{ "message": "..." }`.
 
 **429** — rate limit.
 
 ---
 
+## Enlace del correo
+
+```
+{PublicAppBaseUrl}/auth/restablecer-contrasena?token=...
+```
+
+El front lee `token` de la query y lo envía en el body del reset. Sin token (o con enlace inválido/expirado en el backend), el formulario no debe permitir el cambio.
+
+---
+
 ## Comportamiento del BFF / app (implementado)
 
-| Caso | Cuerpo hacia `{API}/auth/reset-password` |
-|------|------------------------------------------|
-| URL con `?token=...` (no vacío) | `{ password, token }` — **sin** `email`. |
-| URL con `?email=...` y **sin** `token` | `{ password, email }` — **sin** `token`. |
-
-Así se evita mandar ambos campos y se respeta la prioridad del backend.
+| Caso | Comportamiento |
+|------|----------------|
+| Forgot `200` | BFF y UI muestran siempre el mensaje genérico; sin `exists`/`success`. |
+| Reset con `?token=...` | `POST` con `{ password, token }` — **sin** `email`. |
+| Reset sin `token` (p. ej. solo `?email=` o URL vacía) | Formulario bloqueado; UI de enlace inválido/expirado. |
 
 ---
 
 ## Seguridad (contexto de producto)
 
-Un endpoint que acepte solo `email` + `password` sin un segundo factor verificable implica que quien pueda invocar ese endpoint con un correo registrado podría intentar cambiar la contraseña **sin demostrar posesión del correo**, salvo controles en BFF (sesión, IP, captcha, etc.). Endurecer en el futuro implicaría volver a exigir token/OTP u otro paso verificable.
+El cambio de contraseña exige posesión del enlace con token de un solo uso. No es posible restablecer solo con correo + nueva contraseña. El backend invalida tokens reusados, aplica rate limiting e invalida sesiones existentes tras un reset exitoso.
 
 ---
 
 ## Checklist de integración (BFF / Next)
 
-- [ ] Forgot: `POST {API}/auth/forgot-password` con `{ email }`.
-- [ ] Redirección a `/restablecer-contrasena?email=...` tras `exists/success` (producto actual).
-- [ ] Reset por correo: `POST` con `{ password, email }` sin `token`.
-- [ ] Reset por mail: `POST` con `{ password, token }` sin `email`.
-- [ ] No enviar contraseña en `forgot-password`; solo en `reset-password`.
+- [x] Forgot: `POST {API}/auth/forgot-password` con `{ email }`.
+- [x] Forgot: UI uniforme (sin `exists`/`success`); sin redirect a `?email=`.
+- [x] Reset: `POST` con `{ password, token }` sin `email`.
+- [x] Sin token en la URL → bloquear el form y mostrar enlace inválido/expirado.
+- [x] No enviar contraseña en `forgot-password`; solo en `reset-password`.
 
 ---
 
 ## Errores frecuentes
 
-- Enviar **`token` y `email` a la vez** en el flujo “solo correo”: el backend usa el token; si es inválido, falla aunque el correo sea correcto. El BFF ya separa los dos flujos.
-- Token expirado o ya usado (flujo mail) → error genérico.
+- Enviar `{ password, email }` sin token → **400** (contrato endurecido).
+- Token expirado o ya usado → **400** con mensaje genérico.
 - `NEXT_PUBLIC_API_URL` mal configurada → 404 o CORS.

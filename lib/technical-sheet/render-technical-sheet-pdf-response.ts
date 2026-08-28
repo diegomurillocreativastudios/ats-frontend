@@ -10,7 +10,10 @@ import {
   buildTechnicalSheetTemplateContext,
   renderTechnicalSheetHtml,
 } from "@/lib/technical-sheet/template-interpolate"
-import { isValidTechnicalSheetPreviewHtml } from "@/lib/technical-sheet/validate-technical-sheet-preview-html"
+import {
+  assertTechnicalSheetPdfHtmlSize,
+  isValidTechnicalSheetPreviewHtml,
+} from "@/lib/technical-sheet/validate-technical-sheet-preview-html"
 import { ensureTechnicalSheetPdfDocument } from "@/lib/technical-sheet/wrap-technical-sheet-html-for-pdf"
 import type { TemplateListItem } from "@/lib/templates/technical-sheet-template"
 import { findTechnicalSheetDocumentTemplate } from "@/lib/templates/technical-sheet-template"
@@ -52,6 +55,7 @@ async function renderFromServerTemplate(
     logoUrl,
   })
   const innerHtml = renderTechnicalSheetHtml(rawTemplate, ctx)
+  assertTechnicalSheetPdfHtmlSize(innerHtml)
   const headerRecord = ctx.header as Record<string, unknown> | undefined
   const header = {
     fullName: String(headerRecord?.fullName ?? ""),
@@ -82,8 +86,10 @@ async function renderFromServerTemplate(
 
 async function renderFromPreviewHtml(previewHtml: string): Promise<Buffer> {
   const sanitized = sanitizeTechnicalSheetPreviewHtml(previewHtml)
+  assertTechnicalSheetPdfHtmlSize(sanitized)
   const withInlineLogo = await inlineVisibleLogoInPreviewHtml(sanitized)
   const documentHtml = ensureTechnicalSheetPdfDocument(withInlineLogo)
+  assertTechnicalSheetPdfHtmlSize(documentHtml)
   return renderHtmlToPdfBuffer(documentHtml, { mediaType: "screen" })
 }
 

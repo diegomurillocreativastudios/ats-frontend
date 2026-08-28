@@ -1,4 +1,5 @@
 import type { TechnicalSheetPayload } from "@/lib/api/technical-sheet"
+import { sanitizeTemplateHtml } from "@/lib/html/sanitize-template-html"
 import {
   getTechnicalSheetCandidateHeaderFacts,
   pickCandidateDisplayRecord,
@@ -83,14 +84,15 @@ export function expandEachBlocks(template: string, context: Record<string, unkno
 }
 
 /**
- * Full pipeline: `#each` loops, then `{{path}}` substitution.
+ * Full pipeline: `#each` loops, then `{{path}}` substitution, then XSS sanitize.
  */
 export function renderTechnicalSheetHtml(
   template: string,
   context: Record<string, unknown>
 ): string {
   const expanded = expandEachBlocks(template, context)
-  return interpolateTechnicalSheetTemplate(expanded, context)
+  const interpolated = interpolateTechnicalSheetTemplate(expanded, context)
+  return sanitizeTemplateHtml(interpolated)
 }
 
 export function escapeHtmlForTechnicalSheet(value: string): string {

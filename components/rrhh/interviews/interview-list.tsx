@@ -32,6 +32,10 @@ const STATUS_FILTER_VALUES: ("" | InterviewStatus)[] = [
   "NoShow",
 ]
 
+const TABLE_HEAD_CELL_CLASS =
+  "sticky top-0 z-10 border-b border-border bg-muted px-4 py-3 text-left font-semibold text-foreground"
+const TABLE_BODY_CELL_CLASS = "border-b border-border px-4 py-3"
+
 export interface InterviewListProps {
   vacancyId: string
   vacancySummary: UseRecruiterVacancySummaryResult
@@ -181,51 +185,55 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
   }
 
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-8">
-      <PortalPageHeader
-        title={t("page.title")}
-        description={
-          vacancySummary.loading
-            ? t("page.descriptionLoading")
-            : vacancyTitle?.trim()
-              ? t("page.descriptionWithVacancy", { title: vacancyTitle.trim() })
-              : vacancySummary.error
-                ? t("page.descriptionLoadError")
-                : t("page.descriptionDefault")
-        }
-        actions={
-          <>
-            <Link
-              href={`/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}/resultados`}
-              className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-5 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              data-testid="interviews-prep-drawer-open"
-              aria-label={t("actions.reviewCandidatesAria")}
-            >
-              <Users className="h-4 w-4 shrink-0" aria-hidden />
-              {t("actions.reviewCandidates")}
-            </Link>
-            <button
-              type="button"
-              onClick={handleOpenCreate}
-              className="inline-flex w-fit items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-              data-testid="interviews-new-button"
-            >
-              <Plus className="h-4 w-4 shrink-0" aria-hidden />
-              {t("actions.newInterview")}
-            </button>
-          </>
-        }
-      />
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <section className="shrink-0 px-4 pt-6 md:px-8">
+        <PortalPageHeader
+          className="shrink-0 gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between"
+          title={t("page.title")}
+          description={
+            vacancySummary.loading
+              ? t("page.descriptionLoading")
+              : vacancyTitle?.trim()
+                ? t("page.descriptionWithVacancy", { title: vacancyTitle.trim() })
+                : vacancySummary.error
+                  ? t("page.descriptionLoadError")
+                  : t("page.descriptionDefault")
+          }
+          actions={
+            <>
+              <Link
+                href={`/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}/resultados`}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-5 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:w-auto"
+                data-testid="interviews-prep-drawer-open"
+                aria-label={t("actions.reviewCandidatesAria")}
+              >
+                <Users className="h-4 w-4 shrink-0" aria-hidden />
+                {t("actions.reviewCandidates")}
+              </Link>
+              <button
+                type="button"
+                onClick={handleOpenCreate}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:w-auto"
+                data-testid="interviews-new-button"
+              >
+                <Plus className="h-4 w-4 shrink-0" aria-hidden />
+                {t("actions.newInterview")}
+              </button>
+            </>
+          }
+        />
+      </section>
 
+      <div className="flex min-h-0 flex-1 flex-col gap-3 px-4 pb-4 pt-2 md:px-8">
       <section
-        className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
+        className="shrink-0 rounded-xl border border-border bg-card p-3"
         aria-label={t("filters.regionLabel")}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-          <div className="flex min-w-[200px] flex-col gap-1.5">
+          <div className="flex min-w-[200px] flex-1 flex-col gap-1.5">
             <label
               htmlFor="interview-filter-status"
-              className="font-sans text-sm font-medium text-foreground"
+              className="font-sans text-xs font-medium leading-none text-muted-foreground"
             >
               {t("filters.status")}
             </label>
@@ -233,7 +241,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               id="interview-filter-status"
               value={draftStatus}
               onChange={handleStatusChange}
-              className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
+              className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
             >
               {STATUS_FILTER_VALUES.map((value) => (
                 <option key={value || "all"} value={value}>
@@ -244,10 +252,10 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               ))}
             </select>
           </div>
-          <div className="flex min-w-[220px] flex-col gap-1.5">
+          <div className="flex min-w-[220px] flex-1 flex-col gap-1.5">
             <span
               id="interview-filter-from-label"
-              className="font-sans text-sm font-medium text-foreground"
+              className="font-sans text-xs font-medium leading-none text-muted-foreground"
             >
               {t("filters.from")}
             </span>
@@ -257,10 +265,10 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
               ariaLabelledBy="interview-filter-from-label"
             />
           </div>
-          <div className="flex min-w-[220px] flex-col gap-1.5">
+          <div className="flex min-w-[220px] flex-1 flex-col gap-1.5">
             <span
               id="interview-filter-to-label"
-              className="font-sans text-sm font-medium text-foreground"
+              className="font-sans text-xs font-medium leading-none text-muted-foreground"
             >
               {t("filters.to")}
             </span>
@@ -278,15 +286,18 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
             {t("filters.apply")}
           </button>
         </div>
-        <p className="font-sans text-xs text-muted-foreground">
+        <p className="mt-3 font-sans text-xs text-muted-foreground">
           {t("filters.timezoneHelper")}
         </p>
       </section>
 
-      <section aria-label={t("list.regionLabel")}>
+      <section
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
+        aria-label={t("list.regionLabel")}
+      >
         {loading ? (
           <div
-            className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16"
+            className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16"
             data-testid="interviews-loading"
           >
             <Loader2
@@ -298,7 +309,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
             </p>
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
             <p className="font-sans text-sm text-destructive" role="alert">
               {error}
             </p>
@@ -313,7 +324,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
             </button>
           </div>
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16">
             <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
             <p className="font-sans text-sm text-muted-foreground">
               {t("emptyStates.noInterviews")}
@@ -329,29 +340,29 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-border bg-card">
-            <table className="w-full min-w-[880px] border-collapse text-left font-sans text-sm">
+          <div className="min-h-0 flex-1 overflow-auto overscroll-contain rounded-xl border border-border bg-card">
+            <table className="w-full min-w-[880px] border-separate border-spacing-0 font-sans text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                <tr>
+                  <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
                     {t("list.table.dateTime")}
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                  <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
                     {t("list.table.candidate")}
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                  <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
                     {t("list.table.type")}
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                  <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
                     {t("list.table.duration")}
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                  <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
                     {t("list.table.interviewer")}
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                  <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
                     {t("list.table.status")}
                   </th>
-                  <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                  <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
                     {t("list.table.actions")}
                   </th>
                 </tr>
@@ -360,34 +371,37 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                 {items.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-b border-border last:border-0 hover:bg-muted/20"
+                    className="hover:bg-muted/20"
                   >
-                    <td className="px-4 py-3 tabular-nums text-foreground">
+                    <td className={`${TABLE_BODY_CELL_CLASS} tabular-nums text-foreground`}>
                       {formatInterviewLocalDateTime(row.scheduledAtUtc)}
                     </td>
-                    <td className="max-w-[240px] truncate px-4 py-3 text-foreground" title={formatCandidateLabel(row.candidateProfileId, applicantLabelByProfileId, t)}>
+                    <td
+                      className={`${TABLE_BODY_CELL_CLASS} max-w-[240px] truncate text-foreground`}
+                      title={formatCandidateLabel(row.candidateProfileId, applicantLabelByProfileId, t)}
+                    >
                       {formatCandidateLabel(
                         row.candidateProfileId,
                         applicantLabelByProfileId,
                         t
                       )}
                     </td>
-                    <td className="max-w-[160px] truncate px-4 py-3 text-muted-foreground">
+                    <td className={`${TABLE_BODY_CELL_CLASS} max-w-[160px] truncate text-muted-foreground`}>
                       {row.interviewTypeLabel ?? row.interviewType ?? "—"}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 tabular-nums text-muted-foreground">
+                    <td className={`${TABLE_BODY_CELL_CLASS} whitespace-nowrap tabular-nums text-muted-foreground`}>
                       {formatDurationCell(row.durationMinutes)}
                     </td>
-                    <td className="max-w-[180px] truncate px-4 py-3 text-muted-foreground">
+                    <td className={`${TABLE_BODY_CELL_CLASS} max-w-[180px] truncate text-muted-foreground`}>
                       {row.interviewerName?.trim() ? row.interviewerName : "—"}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className={TABLE_BODY_CELL_CLASS}>
                       <InterviewStatusBadge
                         status={row.status}
                         label={row.statusDisplayName}
                       />
                     </td>
-                    <td className="px-4 py-3">
+                    <td className={TABLE_BODY_CELL_CLASS}>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                         <button
                           type="button"
@@ -426,6 +440,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           </div>
         )}
       </section>
+      </div>
 
       <InterviewCreateModal
         isOpen={isCreateOpen}

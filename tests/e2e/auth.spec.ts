@@ -16,13 +16,20 @@ test.describe("@smoke Auth", () => {
     await expect(page.getByTestId("auth-login-submit")).toBeVisible()
   })
 
-  test("credenciales inválidas no redirigen al portal", async ({ page }) => {
+  test("credenciales inválidas muestran un mensaje de error y no redirigen", async ({
+    page,
+  }) => {
     await page.goto("/auth/iniciar-sesion")
     await fillLoginForm(page, "no-existe@test.invalid", "WrongPass123!")
+    const snackbar = page.getByTestId("app-snackbar")
+    await expect(snackbar).toBeVisible()
+    await expect(snackbar).toContainText(
+      /correo o contraseña|incorrect|credencial|inválid|invalid/i,
+    )
     await expect(page).toHaveURL(/\/auth\/iniciar-sesion/)
   })
 
-  test("restablecer contraseña sin email ni token muestra aviso", async ({
+  test("restablecer contraseña sin token muestra aviso", async ({
     page,
   }) => {
     await page.goto("/restablecer-contrasena")
@@ -34,6 +41,14 @@ test.describe("@smoke Auth", () => {
   }) => {
     await page.goto("/auth/restablecer-contrasena")
     await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
+  })
+
+  test("restablecer solo con ?email= no abre el formulario (token-only)", async ({
+    page,
+  }) => {
+    await page.goto("/restablecer-contrasena?email=usuario@ejemplo.com")
+    await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
+    await expect(page.getByTestId("auth-reset-form")).toHaveCount(0)
   })
 
   test("login demo completa sesión (selector o portal según rol)", async ({

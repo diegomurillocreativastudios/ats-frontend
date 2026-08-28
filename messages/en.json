@@ -42,21 +42,25 @@
     "reports": "Reports",
     "settings": "Settings",
     "stages": "Stages",
+    "stageStatuses": "Statuses",
     "templates": "Templates",
     "interviewsCatalog": "Interviews — Catalogs",
     "interviewsCalendar": "Interviews — Calendar",
     "users": "Users",
+    "administration": "Administration",
     "companies": "Companies",
     "departments": "Departments",
     "modalities": "Modalities",
     "documentTypes": "Document types",
+    "interviewTypes": "Types",
+    "interviewModalities": "Modalities",
+    "interviewStatuses": "Statuses",
     "tailorProfile": "Tailor my Profile"
   },
   "Topbar": {
     "portalCandidate": "Candidate Portal",
     "portalRRHH": "HR Portal",
     "portalAdmin": "Admin Portal",
-    "notifications": "Notifications",
     "openMenu": "Open menu",
     "userMenu": "User menu",
     "breadcrumb": "Breadcrumb",
@@ -64,12 +68,18 @@
   },
   "Sidebar": {
     "goHome": "Go to home",
+    "goToPortalSelection": "Go to portal selection",
     "ariaCandidate": "Main navigation",
     "ariaRRHH": "HR Portal navigation",
     "ariaAdmin": "Admin Portal navigation",
     "menuCandidate": "Candidate menu",
     "menuRRHH": "HR menu",
-    "menuAdmin": "Admin menu"
+    "menuAdmin": "Admin menu",
+    "toggleNavGroup": "Show or hide {label}",
+    "accountMenu": "Account menu",
+    "roleAdmin": "Administrator",
+    "roleRecruiter": "Recruiter",
+    "roleCandidate": "Candidate"
   },
   "Auth": {
     "login": {
@@ -97,7 +107,9 @@
       "toastPasswordReset": "Your password was updated successfully. Sign in with your new password.",
       "toastLogoutSuccess": "Signed out successfully.",
       "toastLogoutError": "We couldn't confirm the sign-out, but we redirected you to the access page.",
-      "toastInvalidCredentials": "Invalid credentials. Please check your email and password.",
+      "toastInvalidCredentials": "Incorrect email or password.",
+      "toastRateLimited": "Too many attempts. Please wait a moment and try again.",
+      "retryIn": "Retry in {seconds}s",
       "continueWithLinkedIn": "Continue with LinkedIn",
       "orContinueWith": "Or continue with"
     },
@@ -108,45 +120,49 @@
       "backToSignIn": "Back to sign in",
       "errors": {
         "missing_code": "The sign-in code is missing. Please try again.",
+        "missing_code_or_state": "LinkedIn sign-in session data is missing. Please try again.",
         "linkedin_sso_failed": "We couldn't complete your LinkedIn sign-in. Please try again.",
         "account_banned": "Your account cannot sign in. Contact your administrator.",
+        "account_exists": "An account already exists with this email. Sign in with your email and password.",
+        "account_link_failed": "We couldn't link your LinkedIn account. Please try again.",
         "email_not_verified": "We couldn't verify your LinkedIn email. Try another sign-in method.",
+        "email_required": "LinkedIn did not share an email address. Try another sign-in method.",
         "exchange_code_expired": "The sign-in session expired. Please try again.",
         "exchange_code_used": "This sign-in link was already used. Please try again.",
-        "network_error": "We couldn't connect to the server. Please try again."
+        "id_token_invalid": "We couldn't validate your LinkedIn identity. Please try again.",
+        "invalid_state": "The LinkedIn sign-in session is invalid. Please try again.",
+        "network_error": "We couldn't connect to the server. Please try again.",
+        "not_configured": "LinkedIn sign-in is not available. Contact your administrator.",
+        "token_exchange_failed": "We couldn't complete the LinkedIn token exchange. Please try again.",
+        "user_creation_failed": "We couldn't create your account. Please try again.",
+        "userinfo_failed": "We couldn't load your LinkedIn profile. Please try again."
       }
     },
     "forgot": {
       "brandTitle": "Recover access<br></br>to your account",
-      "brandSubtitle": "We verify your email and in the next step you set a new password.",
-      "brandSubtitleSm": "We verify your email and you continue with your new password.",
-      "feature1": "Email verified in the system",
+      "brandSubtitle": "If your email is registered, we'll send you a link to reset your password.",
+      "brandSubtitleSm": "We'll email you a link if the account exists.",
+      "feature1": "One-time secure link",
       "feature2": "Secure password (min. 8 characters)",
       "title": "Forgot your password?",
-      "subtitle": "Enter your account email. If it's registered, you'll continue to choose a new password.",
+      "subtitle": "Enter your account email. If it's registered, we'll send you a link to reset your password.",
       "emailLabel": "Email",
       "emailPlaceholder": "name@company.com",
       "submit": "Send instructions",
       "submitting": "Sending...",
       "retryIn": "Retry in {seconds}s",
       "backToLogin": "Back to sign in",
-      "toastSuccess": "We sent you an email with a link to reset your password.",
-      "toastNoAccount": "There's no account registered with this email. Check it or sign up.",
+      "toastSuccess": "If an account exists with that email, we sent you a link to reset your password.",
       "toastRequestFailed": "The request could not be sent. Please try again."
     },
     "reset": {
       "brandTitle": "New password",
       "brandSubtitle": "Choose a secure password that you don't use on other sites.",
-      "brandSubtitleEmailFlow": "Your email is already verified. Choose a secure password.",
       "brandSubtitleSm": "Choose a secure password.",
-      "brandSubtitleSmEmailFlow": "Email verified. Complete your new password.",
       "feature1": "Choose a password you'll remember",
-      "featureEmailVerified": "Email verified",
       "featureRecoveryLink": "Recovery link",
       "title": "Reset password",
       "subtitle": "Enter your new password and confirm it.",
-      "subtitleEmailFlow": "Your email has been verified. Enter and confirm your new password.",
-      "emailLabel": "Email",
       "newPasswordLabel": "New password",
       "newPasswordPlaceholder": "Your new password",
       "minChars": "Minimum 8 characters",
@@ -161,7 +177,7 @@
       "invalidBrandTitle": "Invalid link",
       "invalidBrandSubtitle": "Start the reset from \"Forgot your password?\".",
       "invalidCardTitle": "We couldn't open the reset",
-      "invalidCardBody": "A verified email or a valid token is missing. Go back to \"Forgot your password?\" and complete the previous step.",
+      "invalidCardBody": "The link is invalid or has expired. Go back to \"Forgot your password?\" to request a new one.",
       "invalidGoForgot": "Go to forgot my password"
     },
     "loadingFallback": "Loading…",
@@ -187,12 +203,13 @@
       "showPasswordsAria": "Mostrar contraseñas",
       "submit": "Crear Cuenta",
       "submitting": "Creating account...",
+      "retryIn": "Retry in {seconds}s",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in",
       "toastSuccess": "Cuenta creada correctamente. Ya puedes iniciar sesión.",
       "errors": {
-        "generic": "Error al crear la cuenta. Intenta de nuevo.",
-        "emailTaken": "Este correo ya está registrado.",
+        "generic": "No se pudo completar el registro. Revisá los datos e intentá de nuevo.",
+        "rateLimited": "Too many attempts. Please wait a moment and try again.",
         "server": "Error del servidor. Intenta más tarde."
       }
     }
@@ -220,7 +237,7 @@
       },
       "resetPassword": {
         "title": "Reset password",
-        "description": "Set a new password after verifying your email or with the recovery link"
+        "description": "Set a new password using the recovery link you received by email"
       },
       "register": {
         "title": "Registrarse",
@@ -270,6 +287,10 @@
         "title": "Stages",
         "description": "Manage recruitment process stages and statuses"
       },
+      "stageStatuses": {
+        "title": "Stage statuses",
+        "description": "Manage the statuses used by vacancy pipeline stages"
+      },
       "templates": {
         "title": "Templates",
         "description": "Manage notification and document templates"
@@ -289,6 +310,18 @@
       "interviewsCatalog": {
         "title": "Interviews",
         "description": "Catalogs of interview types, modalities, and statuses"
+      },
+      "interviewTypes": {
+        "title": "Interview types",
+        "description": "Manage the interview type catalog"
+      },
+      "interviewModalities": {
+        "title": "Interview modalities",
+        "description": "Manage the interview modality catalog"
+      },
+      "interviewStatuses": {
+        "title": "Interview statuses",
+        "description": "Manage the interview status catalog"
       },
       "interviewsCalendar": {
         "title": "Interview calendar | Admin Portal",
@@ -475,9 +508,9 @@
         "dropzoneAria": "Drag files or click to upload documents",
         "dropActive": "Drop the files here",
         "dropPrompt": "Drag files here or click to upload",
-        "helperDefault": "PDF, DOC, DOCX up to 10 MB",
-        "errorTypeNotAllowed": "Type not allowed. PDF only.",
-        "errorTooLarge": "The file exceeds 10 MB ({size}).",
+        "helperDefault": "PDF, DOCX up to 15 MB",
+        "errorTypeNotAllowed": "Type not allowed. PDF or DOCX only.",
+        "errorTooLarge": "The file exceeds 15 MB ({size}).",
         "selectedCount": "{count, plural, one {# file selected} other {# files selected}}",
         "selectedListAria": "List of selected files",
         "processAll": "Process all",
@@ -541,13 +574,13 @@
         "identityHeading": "Identity document",
         "identityDescription": "Upload the candidate's identity document in PDF format.",
         "cvPrimaryText": "Drag the CV here or click to upload",
-        "cvHelperText": "PDF, DOCX or TXT up to 10 MB",
-        "cvHelperTextPdfOnly": "PDF files only, up to 10 MB",
+        "cvHelperText": "PDF, DOCX or TXT up to 15 MB",
+        "cvHelperTextPdfOnly": "PDF files only, up to 15 MB",
         "cvAria": "Drag the CV or click to upload",
         "cvTypeError": "Type not allowed. Only PDF, DOCX or TXT.",
         "cvTypeErrorPdfOnly": "Type not allowed. PDF files only.",
         "identityPrimaryText": "Drag the document here or click to upload",
-        "identityHelperText": "PDF files only, up to 10 MB",
+        "identityHelperText": "PDF files only, up to 15 MB",
         "identityAria": "Drag the identity document or click to upload",
         "identityTypeError": "Type not allowed. PDF files only.",
         "kpis": {
@@ -611,6 +644,74 @@
       "toasts": {
         "saveSuccess": "Changes saved successfully.",
         "saveError": "Changes could not be saved. Please try again."
+      },
+      "consent": {
+        "title": "Authorization and consent",
+        "subtitle": "You must accept each section to continue",
+        "progress": "Progress: {accepted} of {total} sections",
+        "acceptSection": "I have read and accept this section",
+        "verifiedBadge": "Authorized",
+        "verifiedBadgeTitle": "Authorization and consent submitted successfully",
+        "footerHint": "Check all 7 sections and complete every field to submit",
+        "footerReady": "Ready to submit the authorization",
+        "cancel": "Cancel",
+        "accept": "Submit authorization",
+        "toasts": {
+          "submitSuccess": "Authorization submitted successfully.",
+          "submitError": "Could not submit the authorization. Please try again.",
+          "validation": "Please review the form data and try again.",
+          "versionMismatch": "The authorization document was updated. Reload the page and try again.",
+          "nationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support.",
+          "profileNotFound": "You do not have a candidate profile yet. Complete your profile and try again.",
+          "forbidden": "Your account is not allowed to submit this authorization."
+        },
+        "sections": {
+          "profileUse": {
+            "title": "Authorization for profile use and presentation",
+            "body": "I freely and voluntarily authorize {companyName} to receive, review, store, analyze, process, and present my curriculum vitae, professional profile, work experience, academic background, skills, salary expectations, availability, references, and other information related to my candidacy.\n\nThis authorization applies to recruitment, selection, headhunting, outsourcing, staffing, professional services, temporary projects, and future job or professional opportunities.\n\nI authorize {companyName} to share my professional profile with current or potential clients, domestic or international, solely for purposes related to evaluation, interview, selection, hiring, project assignment, or provision of outsourced services.\n\nI understand that presenting my profile does not guarantee an interview, job offer, or hiring."
+          },
+          "personalData": {
+            "title": "Personal data protection",
+            "body": "I authorize {companyName} to process my personal and professional data exclusively for recruitment, selection, headhunting, outsourcing, staffing, talent administration, and presentation of job or professional opportunities.\n\n{companyName} commits to using my information confidentially, responsibly, and limited to the purposes stated above.\n\nI may request updating, correction, or deletion of my data by writing to the contact email indicated by {companyName}."
+          },
+          "confidentiality": {
+            "title": "Process confidentiality",
+            "body": "I commit to keeping confidential the information I receive during the process, including data about clients, vacancies, interviews, tests, conditions, proposals, methodologies, contacts, documents, or any information shared by {companyName} or its clients.\n\nThis information must be used only for my participation in the corresponding process."
+          },
+          "communications": {
+            "title": "Channeling of process-related communications",
+            "body": "I acknowledge that {companyName} performs professional management of search, contact, evaluation, selection, and presentation of candidates to its clients.\n\nTherefore, if during the process or within the months following my formal presentation to a client I receive a communication, interview, proposal, or direct offer related to the same vacancy, client, or process managed by {companyName}, I commit to informing {companyName} and channeling the corresponding communication through the company.\n\nThis provision does not limit my right to work, seek employment, participate in other processes, or accept job opportunities. Its purpose is to maintain process traceability, protect information confidentiality, and recognize the professional management performed by {companyName}."
+          },
+          "nonExclusivity": {
+            "title": "Non-exclusivity and freedom to work",
+            "body": "I declare that my participation as a candidate does not imply exclusivity, does not limit my right to work, does not prevent me from participating in other processes, and does not constitute an automatic employment relationship with {companyName} or its clients.\n\nAn employment, commercial, or service relationship will exist only if a contract, offer letter, service agreement, or corresponding onboarding document is later signed."
+          },
+          "electronicSignature": {
+            "title": "Electronic signature and acceptance",
+            "body": "I accept that this form may be signed physically or electronically through platforms such as DocuSign, PandaDoc, or other equivalent tools used by {companyName}.\n\nAn electronic signature, digitized signature, click acceptance, digital confirmation, or validation through an electronic platform will constitute a free and informed expression of my consent for the processing and presentation of my professional profile under this document.\n\n{companyName} may retain the electronic evidence generated by the platform used, including date, time, email address, IP address, audit log, signed document version, and other supporting technical elements.\n\nThis acceptance does not constitute an employment relationship, promise of employment, or hiring obligation."
+          },
+          "acceptance": {
+            "title": "Acceptance (candidate signature and details)",
+            "body": "I declare that I have read and understood this document, that I voluntarily participate in the processes managed by {companyName}, and that I authorize the processing and presentation of my information according to the stated purposes."
+          }
+        },
+        "signature": {
+          "firstNames": "First names",
+          "lastNames": "Last names",
+          "signature": "Signature",
+          "signaturePlaceholder": "Type your full name as your signature",
+          "documentId": "Identity document",
+          "date": "Date",
+          "email": "Email",
+          "phone": "Phone",
+          "phonePlaceholder": "1234-5678",
+          "countryAria": "Country code",
+          "countrySearchPlaceholder": "Search by country, ISO or code (+503)",
+          "countryNoResults": "No countries found",
+          "countryLoading": "Loading countries…",
+          "completeFormFirst": "Complete all form fields before checking this section",
+          "finalConfirm": "I confirm my final acceptance"
+        }
       },
       "nav": {
         "aria": "Go to profile section",
@@ -1338,6 +1439,15 @@
         "headline": "Title",
         "uploadedAt": "Upload date",
         "actions": "Actions"
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# candidate} other {# candidates}}"
       }
     },
     "candidateDetail": {
@@ -1430,9 +1540,11 @@
       },
       "errors": {
         "loadProfileFailed": "The candidate profile could not be loaded.",
+        "candidateUnavailable": "This candidate is not available or you do not have access.",
         "missingCandidateId": "The candidate identifier is missing.",
         "downloadFailed": "Download failed.",
         "downloadCvFailed": "The CV could not be downloaded.",
+        "downloadCvUnavailable": "The CV is not available.",
         "saveInvalidFields": "Please review the data: some fields are invalid.",
         "saveForbidden": "Your account does not have permission to edit this profile.",
         "saveDuplicateNationalId": "That ID document is already associated with another profile."
@@ -1720,6 +1832,15 @@
       "toasts": {
         "created": "Vacancy created successfully."
       },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# vacancy} other {# vacancies}}"
+      },
       "form": {
         "title": "New vacancy",
         "fields": {
@@ -1780,7 +1901,19 @@
           "add": "Add",
           "addRequirementAria": "Add requirement",
           "cancel": "Cancel",
-          "submit": "Create vacancy"
+          "submit": "Create vacancy",
+          "paste": "Paste",
+          "pasteAria": "Paste copied vacancy",
+          "pasteDisabledAria": "No vacancy has been copied."
+        },
+        "toasts": {
+          "pasted": "Vacancy pasted.",
+          "pasteEmpty": "No vacancy has been copied."
+        },
+        "pasteConfirm": {
+          "title": "Paste copied vacancy?",
+          "message": "This will replace the current form fields.",
+          "confirm": "Paste"
         },
         "validation": {
           "nameRequired": "Name is required",
@@ -1811,6 +1944,26 @@
           "salary": "Salary",
           "advantages": "Vacancy benefits and perks"
         },
+        "detailsItemCount": "{count, plural, one {# item} other {# items}}",
+        "salaryDisplay": {
+          "monthly": "Monthly",
+          "hourly": "Hourly",
+          "yearly": "Yearly"
+        },
+        "requirementsList": {
+          "skill": "Skill",
+          "expectedLevel": "Expected level",
+          "importance": "Importance",
+          "importanceValue": "{value}/10",
+          "importanceAria": "Importance {value} out of 10",
+          "unspecified": "—"
+        },
+        "headerMeta": {
+          "department": "Department",
+          "modality": "Work mode",
+          "location": "Location",
+          "created": "Created {date}"
+        },
         "actions": {
           "backToVacancies": "Back to vacancies",
           "backToVacanciesAria": "Back to vacancies",
@@ -1825,6 +1978,8 @@
           "interviewsAria": "View interviews for this vacancy",
           "results": "Results",
           "resultsAria": "View results and metrics for this vacancy",
+          "copy": "Copy",
+          "copyAria": "Copy this vacancy",
           "addRequirement": "Add",
           "addRequirementAria": "Add requirement",
           "companyChangeHint": "Changing the client does not modify the vacancy status or existing applications."
@@ -1844,7 +1999,9 @@
         },
         "toasts": {
           "saved": "Changes saved successfully.",
-          "finishSuccess": "Process finished successfully."
+          "finishSuccess": "Process finished successfully.",
+          "copied": "Vacancy copied.",
+          "copyFailed": "Could not copy the vacancy."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2023,6 +2180,11 @@
         "searchResults": "Search results",
         "reanalyzingEllipsis": "Re-analyzing with AI…",
         "updatingSearchEllipsis": "Updating AI search…",
+        "searchLoadingHint": "This can take a few seconds. Keep this page open.",
+        "searchLoadingStepScanning": "Exploring the talent pool",
+        "searchLoadingStepMatching": "Matching profiles to the requirements",
+        "searchLoadingStepRanking": "Ranking the best matches",
+        "searchLoadingStepPreparing": "Preparing the results",
         "selectAll": "Select all",
         "deselectAll": "Deselect all",
         "selectedCount": "{count} selected",
@@ -2044,19 +2206,27 @@
         "emptyDefault": "No candidates to display at this time.",
         "profileModal": {
           "aiProcessed": "Analysis processed with AI",
+          "aiProcessedShort": "AI evaluation · support for the HR decision",
           "aiIntro": "This evaluation was processed with AI to speed up the initial profile review.",
           "aiTiming": "Manual analysis can take between <strong>2 hours and 1 day</strong>, while AI generates this result in <strong>seconds</strong>.",
           "aiValidationHint": "Use these results as support and validate the final decision from HR.",
           "aiDisclosure": "The following content was generated by AI and is shown unmodified.",
           "attributes": "Attributes",
+          "attributesDetail": "Attribute details ({count})",
+          "attributesZeroHint": "A 0% does not always lower the combined score: recency or relevant years are measured separately.",
           "qualitativeScore": "Qualitative score",
           "semanticSimilarity": "Semantic similarity",
           "attributeMatch": "Attribute match",
+          "attributeColumn": "Attribute",
+          "levelColumn": "Level",
+          "scoreColumn": "Score",
           "routePrefix": "Route:",
           "strengths": "Strengths",
           "considerations": "Points to consider",
           "qualitativeReasoning": "Qualitative reasoning",
           "totalMatchScore": "Total matching score:",
+          "totalMatchScoreShort": "Match",
+          "heroAria": "Matching score summary",
           "noAdditionalInfo": "No additional information available.",
           "downloading": "Downloading…",
           "downloadCv": "Download CV",
@@ -2075,7 +2245,9 @@
           "keywordMatch": "Keyword match",
           "experience": "Experience",
           "education": "Education",
-          "skills": "Skills"
+          "skills": "Skills",
+          "recency": "Recency",
+          "relevantYears": "Relevant years"
         },
         "kanban": {
           "score": "Score",
@@ -2109,7 +2281,7 @@
           "preliminarySearchTitle": "Preliminary search",
           "preliminarySearchSubtitle": "From hours to seconds on first exploration",
           "preliminaryMatchTitle": "Preliminary matching",
-          "preliminaryMatchSubtitle": "Observed accuracy of 75% to 80%",
+          "preliminaryMatchSubtitle": "Observed accuracy of 90% to 95%",
           "preliminaryMatchGoal": "Calibration target: 90%",
           "coverageTitle": "Results coverage",
           "coverageSubtitle": "Initial shortlist with suggested candidates",
@@ -2126,6 +2298,7 @@
           "applicationStatusUpdated": "Application status updated.",
           "missingApplicationId": "The application ID to update the status was not found.",
           "downloadCvFailed": "The CV could not be downloaded.",
+          "downloadCvUnavailable": "The CV is not available.",
           "searchNoResults": "No candidates were found in the search.",
           "searchAlreadyInPipeline": "The candidates found are already in Possible candidates or Stages.",
           "goToStagesAria": "Go to the Stages section to manage application statuses",
@@ -2222,6 +2395,15 @@
       "loadingStates": {
         "loadingVacancies": "Loading vacancies…",
         "loadingInterviews": "Loading interviews..."
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# vacancy} other {# vacancies}}"
       },
       "errors": {
         "loadVacanciesFailed": "Vacancies could not be loaded.",
@@ -2346,15 +2528,25 @@
           "no": "No",
           "editNameAria": "Edit type name",
           "editAria": "Edit {name}",
-          "deleteAria": "Delete {name}"
+          "deleteAria": "Delete {name}",
+          "refresh": "Refresh",
+          "edit": "Edit",
+          "retry": "Retry"
         },
         "types": {
           "title": "Interview types",
           "createAria": "Create interview type",
+          "createCta": "Create type",
+          "createTitle": "Create interview type",
+          "editTitle": "Edit interview type",
           "newLabel": "New type",
           "namePlaceholder": "Type name",
+          "code": "Code",
+          "listAria": "Interview types list",
+          "loadErrorAria": "Error loading interview types",
           "loading": "Loading types…",
-          "empty": "No types defined. Add the first one above.",
+          "empty": "No interview types have been created yet",
+          "emptyBody": "When you create a type, it will be available for scheduling interviews.",
           "created": "Interview type created successfully.",
           "updated": "Interview type updated successfully.",
           "deleted": "Interview type deleted successfully.",
@@ -2373,8 +2565,14 @@
           "terminal": "Terminal",
           "terminalAria": "Terminal status",
           "displayNameAria": "Display name",
+          "listAria": "Interview statuses list",
+          "loadErrorAria": "Error loading interview statuses",
+          "createCta": "Create status",
+          "createTitle": "Create interview status",
+          "editTitle": "Edit interview status",
           "loading": "Loading statuses…",
-          "empty": "No statuses defined. Add the first one above.",
+          "empty": "No interview statuses have been created yet",
+          "emptyBody": "When you create a status, it will be available for the interview cycle.",
           "created": "Interview status created successfully.",
           "updated": "Interview status updated successfully.",
           "deleted": "Interview status deleted successfully.",
@@ -2384,14 +2582,20 @@
         "modalities": {
           "title": "Interview modalities",
           "createAria": "Create interview modality",
+          "createCta": "Create modality",
+          "createTitle": "Create interview modality",
+          "editTitle": "Edit interview modality",
           "newLabel": "New modality",
           "namePlaceholder": "Display name",
           "googleMeet": "Google Meet",
           "meetLabel": "Meet",
           "meetAria": "Include Google Meet link",
           "editNameAria": "Edit modality name",
+          "listAria": "Interview modalities list",
+          "loadErrorAria": "Error loading interview modalities",
           "loading": "Loading modalities…",
-          "empty": "No modalities defined. Add the first one above.",
+          "empty": "No interview modalities have been created yet",
+          "emptyBody": "When you create a modality, it will be available for scheduling interviews.",
           "created": "Interview modality created successfully.",
           "updated": "Interview modality updated successfully.",
           "deleted": "Interview modality deleted successfully.",
@@ -2554,7 +2758,7 @@
         "industryLabel": "Industry (optional)",
         "industryPlaceholder": "e.g. Technology, Retail",
         "logoLegend": "Logo",
-        "logoHelper": "PNG, JPG, WEBP or SVG. Max 5 MB. The logo is uploaded as a blob on save.",
+        "logoHelper": "PNG, JPG, JPEG, WEBP or GIF. Max 5 MB. The logo is uploaded as a blob on save.",
         "logoPreviewAria": "Logo preview",
         "logoNoneAria": "No logo",
         "logoAlt": "Company logo",
@@ -2578,7 +2782,7 @@
         "loadFailed": "Could not load the company.",
         "saveFailed": "Could not save the company.",
         "statusUpdateFailed": "Could not update the status.",
-        "logoType": "Only image files are allowed.",
+        "logoType": "Only PNG, JPG, JPEG, WEBP or GIF are allowed (no SVG).",
         "logoSize": "The logo cannot exceed 5 MB."
       },
       "toasts": {
@@ -2600,14 +2804,15 @@
         "roleLabel": "Role",
         "allRoles": "All",
         "lockedOnly": "Locked only",
+        "lockoutLabel": "Lockout",
         "apply": "Apply filters",
         "clear": "Clear"
       },
       "table": {
         "email": "Email",
-        "userName": "Username",
+        "userName": "User",
         "roles": "Roles",
-        "emailOk": "Email OK",
+        "emailOk": "Confirmed",
         "lockout": "Lockout",
         "actions": "Actions"
       },
@@ -2621,15 +2826,19 @@
       },
       "pagination": {
         "perPage": "Per page",
+        "pageSizeAria": "Users per page",
         "refreshAria": "Refresh list",
         "regionAria": "Pagination",
         "summary": "Page {page} of {total}"
       },
       "emptyStates": {
-        "noResults": "No users match the current filters."
+        "noResults": "No users match the current filters.",
+        "description": "Try adjusting the filters or create a new user."
       },
       "actions": {
         "create": "New user",
+        "refresh": "Refresh",
+        "retry": "Retry",
         "manage": "Manage",
         "prev": "Previous",
         "next": "Next"
@@ -2648,20 +2857,25 @@
         "title": "User detail",
         "emailLabel": "Email",
         "userNameLabel": "Username",
+        "accountHeading": "Account status",
         "lockedCheckbox": "Account locked",
         "emailConfirmed": "Email confirmed",
         "readOnly": "Read only",
-        "lockoutHint": "Enable it to manually lock the user and disable it to remove the lock.",
+        "lockAction": "Lock account",
+        "unlockAction": "Unlock account",
+        "lockoutHint": "The change is applied immediately.",
         "lockoutActiveLabel": "Lockout active:",
         "lockoutEndPrefix": "Ends:",
+        "lockoutUntil": "Until {date}.",
         "rolesHeading": "Roles",
         "noRoles": "No roles",
-        "addRolesPrompt": "Add roles (only the checked ones):",
+        "addRolesPrompt": "Add roles",
         "removeRoleAria": "Remove role {role}",
         "allRolesAssigned": "Already has all assignable roles.",
-        "addRoles": "Add roles",
+        "addRoles": "Add",
         "sendReset": "Send password recovery",
-        "close": "Close"
+        "close": "Close",
+        "loading": "Loading user…"
       },
       "removeRole": {
         "title": "Remove role",
@@ -2671,6 +2885,10 @@
       },
       "errors": {
         "listForbidden": "You don't have permission to list users (Admin role is required in the API)."
+      },
+      "aria": {
+        "list": "Users list",
+        "loadError": "Error loading users"
       },
       "validation": {
         "emailRequired": "Email is required.",
@@ -2691,9 +2909,7 @@
         "title": "Stages",
         "description": "Manage recruitment process stages",
         "headerAria": "Stages header",
-        "listAria": "Stages list",
-        "searchPlaceholder": "Search stages...",
-        "searchAria": "Search stages"
+        "listAria": "Stages list"
       },
       "actions": {
         "statuses": "Statuses",
@@ -2711,8 +2927,7 @@
       "fields": {
         "defaultStage": "Default stage",
         "finalStage": "Final stage",
-        "hiredStage": "Hiring stage",
-        "order": "Order:"
+        "hiredStage": "Hiring stage"
       },
       "switches": {
         "defaultActive": "{name}: default stage active",
@@ -2741,7 +2956,6 @@
         "forbidden": "You do not have permission to change this stage.",
         "notFound": "The stage no longer exists. Reloading list...",
         "deleteFailed": "Could not delete the stage. Please try again.",
-        "reorderFilterHint": "To save the order, show all stages (clear the search filter).",
         "reorderFailed": "Could not reorder stages. Please try again."
       },
       "toasts": {
@@ -2777,10 +2991,20 @@
       }
     },
     "statuses": {
+      "page": {
+        "title": "Stage statuses",
+        "description": "Define the statuses used by vacancy pipeline stages when moving candidates on the board.",
+        "regionAria": "Vacancy stage statuses",
+        "listAria": "Stage statuses list",
+        "newStatusAria": "Create new status"
+      },
       "modal": {
         "title": "Manage statuses",
         "close": "Close",
         "newStatus": "New status",
+        "createTitle": "New status",
+        "editTitle": "Edit status",
+        "createStatus": "Create status",
         "nameLabel": "Status name",
         "namePlaceholder": "E.g.: In progress",
         "cancel": "Cancel",
@@ -2823,8 +3047,6 @@
         "description": "Manage notification templates",
         "headerAria": "Templates header",
         "listAria": "Templates list",
-        "searchPlaceholder": "Search templates...",
-        "searchAria": "Search templates",
         "newTemplate": "New template",
         "newTemplateAria": "Create new template"
       },
@@ -2863,6 +3085,15 @@
       },
       "toasts": {
         "deleted": "Template deleted successfully."
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Pagination",
+        "summary": "Page {page} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# template} other {# templates}}"
       },
       "deleteConfirm": {
         "title": "Delete template",
@@ -3017,7 +3248,7 @@
       "page": {
         "title": "Document Types",
         "description": "Manage the document types available to candidates.",
-        "createCta": "New document type",
+        "createCta": "Create document type",
         "summaryHelper": "Manage document types available for candidates.",
         "countLoading": "Loading...",
         "countSummary": "{count, plural, one {# document type} other {# document types}}"
@@ -3063,7 +3294,7 @@
       },
       "emptyStates": {
         "noResults": "No results found",
-        "noItems": "No document types registered",
+        "noItems": "No document types created yet",
         "searchHint": "Try searching with other terms.",
         "createHint": "When you create a document type, it will be available to classify candidate identity documents."
       },
@@ -3098,6 +3329,17 @@
           "types": "Interview types",
           "modalities": "Interview modalities",
           "statuses": "Interview statuses"
+        },
+        "pages": {
+          "types": {
+            "description": "Define the interview types recruiters will use when scheduling."
+          },
+          "modalities": {
+            "description": "Define interview modalities and whether they include a Google Meet link."
+          },
+          "statuses": {
+            "description": "Define the statuses in an interview cycle, including terminal statuses."
+          }
         }
       },
       "calendar": {
@@ -3231,16 +3473,22 @@
   "PublicOpportunities": {
     "page": {
       "portalTitle": "Opportunities portal",
-      "heroTitle": "Find opportunities with a clear view from the first glance",
-      "heroBody": "Browse public vacancies with filters by department, work mode, and location.",
-      "exploreCta": "Explore opportunities",
+      "heroTitle": "In our <portal>Opportunities Portal</portal> you'll find the next chapter of your career",
+      "heroBody": "Your next role is already here. Browse the open vacancies and find the one that makes you take the leap.",
       "explorerLabel": "Public exploration",
       "listTitle": "Available opportunities",
       "searchLabel": "Search vacancies",
-      "searchPlaceholder": "Search vacancies by name",
+      "searchPlaceholder": "Search by vacancy or company",
       "filterDepartment": "Department",
       "filterModality": "Work mode",
       "filterCountry": "Country",
+      "filterAllDepartments": "All departments",
+      "filterAllModalities": "All work modes",
+      "filterAllCountries": "All countries",
+      "clearFilters": "Clear filters",
+      "filtersHeading": "Filters",
+      "filtersAria": "Vacancy filters",
+      "rowAriaLabel": "View details for {title}",
       "preparingList": "Preparing the list with active search and filters.",
       "tableDepartment": "Department",
       "tableLocation": "Location",
@@ -3295,6 +3543,13 @@
       "location": "Location",
       "salary": "Salary",
       "publishedLabel": "Published",
+      "requirementsHeading": "Vacancy requirements",
+      "detailsHeading": "Vacancy details",
+      "advantagesHeading": "Vacancy benefits",
+      "moreVacanciesBody": "ApplicanTree has many more vacancies available. If this role or a similar one interests you, you are free to apply.",
+      "moreVacanciesLink": "See more opportunities",
+      "readyTitle": "Are you ready for this opportunity?",
+      "readyBody": "Complete your application in a few minutes. The recruiting team receives your profile securely.",
       "documentTitle": "ApplicanTree | Opportunities Portal | {title}"
     },
     "applicationForm": {
@@ -3316,23 +3571,31 @@
         "processingLongWait": "If the wait takes longer, do not close this window. We are still processing your application."
       },
       "validation": {
-        "fileType": "Only PDF or DOCX files are accepted.",
-        "firstNameRequired": "Enter your first name.",
-        "lastNameRequired": "Enter your last name.",
+        "fileType": "Only PDF files are accepted.",
+        "fileInvalid": "The file is not a valid PDF.",
+        "fileTooLarge": "The CV cannot exceed 15 MB.",
+        "rateLimited": "Too many attempts. Please try again later.",
+        "firstNameRequired": "Enter your first names.",
+        "lastNameRequired": "Enter your last names.",
         "emailRequired": "Enter your email.",
         "emailInvalid": "Enter a valid email.",
-        "cvRequired": "Attach your CV in PDF or DOCX.",
+        "phoneRequired": "Enter your phone number.",
+        "documentTypeRequired": "Select a document type.",
+        "documentNumberRequired": "Enter your document number.",
+        "cvRequired": "Attach your CV in PDF.",
         "reviewFields": "Review the indicated fields.",
-        "documentTypeRequiresNumber": "If you select a document type, you must enter the number.",
-        "documentNumberRequiresType": "If you enter a document number, you must select the type."
+        "consentSubmitFailed": "We could not save your authorization and consent. Please try again.",
+        "consentValidation": "Please review the authorization and consent and try again.",
+        "consentVersionMismatch": "The authorization document was updated. Reload the page and try again.",
+        "consentNationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support."
       },
       "fields": {
-        "firstName": "First name *",
-        "lastName": "Last name *",
+        "firstName": "First names *",
+        "lastName": "Last names *",
         "email": "Email *",
-        "phone": "Phone",
-        "documentType": "Document type",
-        "documentNumber": "Document number",
+        "phone": "Phone *",
+        "documentType": "Document type *",
+        "documentNumber": "Document number *",
         "source": "How did you hear about this vacancy?",
         "linkedin": "LinkedIn profile",
         "website": "Website or portfolio",
@@ -3344,21 +3607,33 @@
         "noDocTypes": "No types available",
         "selectDocType": "Select a type",
         "selectOption": "Select an option",
-        "documentNumber": "Enter your document number"
+        "documentNumber": "Enter your document number",
+        "firstName": "e.g. Ana",
+        "lastName": "e.g. Martinez",
+        "email": "name@example.com",
+        "phone": "1234-5678",
+        "loadingCountries": "Loading countries…",
+        "searchCountry": "Search country, ISO or code",
+        "noCountries": "No countries found"
       },
       "file": {
         "selectPdf": "Select PDF",
-        "helper": "Only PDF or DOCX format is accepted."
+        "helper": "Only PDF format is accepted (max. 15 MB).",
+        "dropActive": "Drop the file here",
+        "changeFile": "Click to change the file",
+        "removeAria": "Remove {fileName}"
       },
       "actions": {
         "submitting": "Submitting application…",
         "submit": "Submit application",
+        "retryIn": "Retry in {seconds}s",
         "backToVacancy": "Back to vacancy",
         "backToList": "Back to vacancies",
         "close": "Close"
       },
       "aria": {
-        "submitStatus": "Submission status"
+        "submitStatus": "Submission status",
+        "phoneCountry": "Country code"
       },
       "toasts": {
         "submitSuccess": "Application submitted",
@@ -3397,8 +3672,6 @@
     "navbar": {
       "ariaMain": "Main opportunities portal navigation",
       "ariaGoToPortal": "Go to opportunities portal",
-      "logoIconAlt": "Applican Tree logo icon",
-      "portalSubtitle": "Opportunities portal",
       "ariaGoToSelection": "Go to portal selection",
       "changePortal": "Change portal",
       "portalsShort": "Portals"
@@ -3424,10 +3697,8 @@
       "beforeSubmit": "Before submitting",
       "checklistCv": "Have your CV in PDF ready to attach.",
       "checklistEmail": "Use the same email associated with your candidate account.",
-      "checklistData": "Complete first name, last name, and email with real data.",
+      "checklistData": "Complete first names, last names, and email with real data.",
       "formSectionLabel": "Application form",
-      "formTitle": "Submit your application",
-      "formBody": "Complete the information and attach your CV. The data is sent securely to the recruitment team.",
       "documentTitle": "ApplicanTree | Opportunities Portal | Apply to {title}"
     }
   },

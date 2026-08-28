@@ -1,0 +1,44 @@
+---
+description: Deployment pipeline (commit → dual push → GitHub Actions → Vercel) and CI gates that must pass before considering work done
+alwaysApply: true
+---
+
+# ATS frontend — deployment & CI
+
+## Pipeline (orden real)
+
+1. **Commit** en la rama de trabajo
+2. **Push dual** a `origin` (GitLab) y `mirror` (GitHub) — skills `push-ats-develop` / `push-ats-test` / `push-ats-prod`
+3. **GitHub Actions** en `mirror` (bloquea o alerta antes del deploy útil)
+4. **Vercel CI/CD** despliega desde el remoto conectado
+
+Un cambio “listo” no es solo que compile en local: debe sobrevivir Actions.
+
+## Gates de GitHub Actions
+
+| Workflow | Qué corre | Cuándo importa |
+|----------|-----------|----------------|
+| `spellcheck.yml` | `npm run spellcheck` (cspell en `app/`, `components/`, `lib/`) | Casi siempre al tocar TS/TSX ahí |
+| `e2e.yml` | `npm ci` → build → Playwright | Cambios de flujos críticos / auth / portal |
+
+Branches que disparan Actions: `main`, `develop` (push y PR).
+
+## Spellcheck (fallo más frecuente)
+
+- Comando: `npm run spellcheck`
+- Diccionario del proyecto: `cspell-project-words.txt` (vía `cspell.json`)
+- Idiomas: `en` + `es` (`@cspell/dict-es-es`)
+
+Si cspell marca **Unknown word** y el término es válido (marca, API, español de producto, constantes de sistema):
+
+1. Añadir la palabra a `cspell-project-words.txt` (una por línea, orden alfabético si el archivo ya lo está)
+2. Volver a correr `npm run spellcheck`
+3. Incluir ese archivo en el mismo commit/PR
+
+No “arreglar” ortografía inventando sinónimos solo para pasar CI si el copy/nombre de producto es intencional.
+
+## Checklist del agente al terminar cambios en `app|components|lib`
+
+1. Correr `npm run spellcheck` (o al menos no dejar palabras nuevas sin diccionario)
+2. No asumir que Vercel valida ortografía: **Actions es el gate**
+3. Al pedir push: recordar dual push (`origin` + `mirror`); el deploy en Vercel no sustituye Actions en GitHub

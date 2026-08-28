@@ -9,6 +9,7 @@ interface PortalPageHeaderProps {
   contentClassName?: string
   titleClassName?: string
   descriptionClassName?: string
+  layout?: "stacked" | "split"
 }
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
@@ -24,15 +25,23 @@ export default function PortalPageHeader({
   contentClassName,
   titleClassName,
   descriptionClassName,
+  layout = "stacked",
 }: PortalPageHeaderProps) {
+  const isSplit = layout === "split"
+  const hasPaddingOverride = /\bpb-/.test(className ?? "")
+
   return (
     <header
       className={joinClasses(
-        "flex flex-col gap-5 border-b border-border pb-6",
+        "border-b border-border",
+        !hasPaddingOverride && "pb-6",
+        isSplit
+          ? "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
+          : "flex flex-col gap-5",
         className
       )}
     >
-      <div className={joinClasses("min-w-0", contentClassName)}>
+      <div className={joinClasses("min-w-0 flex-1", contentClassName)}>
         <h1
           id={id}
           className={joinClasses(
@@ -55,7 +64,12 @@ export default function PortalPageHeader({
       </div>
 
       {actions ? (
-        <div className="flex flex-wrap items-center gap-3">
+        <div
+          className={joinClasses(
+            "flex flex-wrap items-center gap-3",
+            isSplit && "shrink-0 sm:pt-0.5"
+          )}
+        >
           {actions}
         </div>
       ) : null}

@@ -48,10 +48,7 @@ export async function POST(request: NextRequest) {
     >
 
     if (isDev) {
-      console.info("[forgot-password] backend HTTP", res.status, {
-        exists: data.exists ?? data.Exists,
-        success: data.success ?? data.Success,
-      })
+      console.info("[forgot-password] backend HTTP", res.status)
     }
 
     if (!res.ok) {
@@ -72,20 +69,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const exists = Boolean(data.exists ?? data.Exists)
-    const success = Boolean(data.success ?? data.Success)
     const message =
       typeof data.message === "string"
         ? data.message
         : typeof data.Message === "string"
           ? data.Message
-          : ""
+          : "Si existe una cuenta con ese correo, te enviamos un enlace para restablecer la contraseña."
 
-    return NextResponse.json({
-      exists,
-      success,
-      message,
-    })
+    return NextResponse.json({ message })
   } catch (err: unknown) {
     return NextResponse.json(
       {

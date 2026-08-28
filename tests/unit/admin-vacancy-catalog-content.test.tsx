@@ -89,6 +89,21 @@ describe("AdminVacancyCatalogContent", () => {
     })
 
     expect(await screen.findByText("Talento Humano")).toBeInTheDocument()
+    expect(
+      screen.queryByText(/disponibles para nuevas vacantes/i)
+    ).not.toBeInTheDocument()
+
+    const heading = screen.getByRole("heading", { name: "Departamentos" })
+    const header = heading.closest("header")
+    expect(header).toBeTruthy()
+    expect(
+      within(header as HTMLElement).getByRole("button", { name: "Refrescar" })
+    ).toBeInTheDocument()
+    expect(
+      within(header as HTMLElement).getByRole("button", {
+        name: /Crear departamento/i,
+      })
+    ).toBeInTheDocument()
   })
 
   it("shows the 409 conflict flow and offers deactivation", async () => {

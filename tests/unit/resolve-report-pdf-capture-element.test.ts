@@ -30,4 +30,24 @@ describe("resolveReportPdfCaptureElement", () => {
     expect(target?.classList.contains("report-preview-doc")).toBe(true)
     host.remove()
   })
+
+  it("resolves main.report-preview-doc from an isolated iframe srcDoc host", () => {
+    const host = document.createElement("div")
+    const iframe = document.createElement("iframe")
+    const previewDoc = document.implementation.createHTMLDocument("preview")
+    previewDoc.body.innerHTML =
+      '<main class="report-preview-doc"><p>Report</p></main>'
+
+    Object.defineProperty(iframe, "contentDocument", {
+      configurable: true,
+      get: () => previewDoc,
+    })
+
+    host.appendChild(iframe)
+
+    const target = resolveReportPdfCaptureElement(host)
+    expect(target?.tagName.toLowerCase()).toBe("main")
+    expect(target?.classList.contains("report-preview-doc")).toBe(true)
+    expect(target?.textContent).toContain("Report")
+  })
 })

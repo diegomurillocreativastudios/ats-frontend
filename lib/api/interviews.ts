@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
 
 export type InterviewStatus = "Scheduled" | "Completed" | "Cancelled" | "NoShow"
 
@@ -1279,7 +1280,8 @@ export async function fetchRecruiterVacancySummary(
   const data = await apiClient.get(
     `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}`
   )
-  return parseRecruiterVacancyPayload(data)
+  const withApplicants = await overlayVacancyApplicants(vacancyId, data)
+  return parseRecruiterVacancyPayload(withApplicants)
 }
 
 export async function fetchVacancyApplicantOptions(

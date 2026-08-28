@@ -31,10 +31,12 @@ function getRandomTipIndex(excludeIndex?: number, total: number = TIP_KEYS.lengt
 
 interface ApplicationTipsWidgetProps {
   position?: "left" | "right"
+  variant?: "floating" | "inline"
 }
 
 export function ApplicationTipsWidget({
   position = "left",
+  variant = "floating",
 }: ApplicationTipsWidgetProps = {}) {
   const t = useTranslations("PublicOpportunities.tips")
   const tips = useMemo(() => TIP_KEYS.map((key) => t(key)), [t])
@@ -56,8 +58,43 @@ export function ApplicationTipsWidget({
     return () => clearInterval(intervalId)
   }, [tips.length])
 
-  const positionClassName = position === "right" ? "right-6" : "left-6"
   const currentTip = tips[currentTipIndex] ?? tips[0] ?? ""
+  const card = (
+    <div
+      className={`${publicOpportunitiesTheme.tipsWidget} relative backdrop-blur-xl transition-opacity duration-300`}
+      style={{ opacity: isVisible ? 1 : 0 }}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-ats-terracotta/6 via-transparent to-transparent" />
+
+      <div className="relative p-5">
+        <div className="flex items-start gap-3.5">
+          <div className={publicOpportunitiesTheme.tipsIconSurface}>
+            <Lightbulb
+              className="h-5 w-5 text-ats-terracotta"
+              aria-hidden="true"
+            />
+          </div>
+
+          <div className="flex-1 space-y-1.5">
+            <h3 className="text-sm font-semibold tracking-tight text-foreground">
+              {t("title")}
+            </h3>
+            <p className="text-sm leading-relaxed text-muted-foreground">{currentTip}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (variant === "inline") {
+    return (
+      <div aria-live="polite" aria-atomic="true">
+        {card}
+      </div>
+    )
+  }
+
+  const positionClassName = position === "right" ? "right-6" : "left-6"
 
   return (
     <aside
@@ -65,30 +102,7 @@ export function ApplicationTipsWidget({
       aria-live="polite"
       aria-atomic="true"
     >
-      <div
-        className={`${publicOpportunitiesTheme.tipsWidget} backdrop-blur-xl transition-opacity duration-300`}
-        style={{ opacity: isVisible ? 1 : 0 }}
-      >
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-ats-terracotta/6 via-transparent to-transparent" />
-
-        <div className="relative p-5">
-          <div className="flex items-start gap-3.5">
-            <div className={publicOpportunitiesTheme.tipsIconSurface}>
-              <Lightbulb
-                className="h-5 w-5 text-ats-terracotta"
-                aria-hidden="true"
-              />
-            </div>
-
-            <div className="flex-1 space-y-1.5">
-              <h3 className="text-sm font-semibold tracking-tight text-foreground">
-                {t("title")}
-              </h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">{currentTip}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {card}
     </aside>
   )
 }

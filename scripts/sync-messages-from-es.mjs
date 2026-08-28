@@ -118,7 +118,7 @@ const ROUGH_EN_REPLACEMENTS = [
   [/No tienes permisos para realizar esta acción\./g, "You do not have permission to perform this action."],
   [/correctamente\./g, "successfully."],
   [/No se encontraron resultados/g, "No results found"],
-  [/No hay tipos de documento registrados/g, "No document types registered"],
+  [/Aún no hay tipos de documento creados/g, "No document types created yet"],
   [/Intenta buscar con otros términos\./g, "Try searching with other terms."],
   [/Cuando crees un tipo de documento, quedará disponible para clasificar documentos de identidad de candidatos\./g, "When you create a document type, it will be available to classify candidate identity documents."],
   [/¿Seguro que deseas eliminar este tipo de documento\? Esta acción lo ocultará de los listados activos\./g, "Are you sure you want to delete this document type? This action will hide it from active listings."],

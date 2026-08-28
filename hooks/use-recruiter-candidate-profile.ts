@@ -19,18 +19,33 @@ import {
   pickEmbeddedCanonicalProfile,
 } from "@/lib/recruiter-canonical-profile-merge"
 
+const getErrorStatus = (err: unknown): number => {
+  if (typeof err === "object" && err !== null && "status" in err) {
+    return Number((err as { status: number }).status)
+  }
+  return 0
+}
+
+const mapLoadError = (
+  err: unknown,
+  t: (key: string) => string,
+): string => {
+  const status = getErrorStatus(err)
+  if (status === 401 || status === 403 || status === 404) {
+    return t("errors.candidateUnavailable")
+  }
+  return getApiErrorMessage(err) || t("errors.loadProfileFailed")
+}
+
 const mapSaveError = (
   err: unknown,
   t: (key: string) => string,
 ): string => {
-  const status =
-    typeof err === "object" && err !== null && "status" in err
-      ? Number((err as { status: number }).status)
-      : 0
+  const status = getErrorStatus(err)
   let message = getApiErrorMessage(err)
   if (status === 400) {
     message = message || t("errors.saveInvalidFields")
-  } else if (status === 403) {
+  } else if (status === 403 || status === 404) {
     message = message || t("errors.saveForbidden")
   } else if (status === 409) {
     message = message || t("errors.saveDuplicateNationalId")
@@ -83,9 +98,7 @@ export function useRecruiterCandidateProfile(candidateId: string | null) {
         canonicalRaw != null ? normalizeCandidateProfileFromApi(canonicalRaw) : null
       )
     } catch (err: unknown) {
-      setFetchError(
-        getApiErrorMessage(err) || t("errors.loadProfileFailed")
-      )
+      setFetchError(mapLoadError(err, t))
       setProfile(null)
       setCanonicalProfile(null)
     } finally {

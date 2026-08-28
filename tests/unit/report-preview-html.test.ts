@@ -19,8 +19,21 @@ describe("wrapReportPreviewHtml", () => {
     expect(doc).toContain(`zoom: ${REPORT_PRINT_PREVIEW_SCREEN_ZOOM}`)
   })
 
-  it("returns full documents unchanged", () => {
-    const full = "<!DOCTYPE html><html><body><p>OK</p></body></html>"
-    expect(wrapReportPreviewHtml(full)).toBe(full)
+  it("returns sanitized full documents without re-wrapping", () => {
+    const full =
+      '<!DOCTYPE html><html><body><p onclick="alert(1)">OK</p><script>bad()</script></body></html>'
+    const out = wrapReportPreviewHtml(full)
+    expect(out).toMatch(/<html/i)
+    expect(out).toContain("OK")
+    expect(out).not.toMatch(/<script/i)
+    expect(out).not.toMatch(/onclick/i)
+    expect(out).not.toContain('class="report-preview-doc"')
+  })
+
+  it("strips XSS from partial HTML before wrapping", () => {
+    const out = wrapReportPreviewHtml('<p>Safe</p><script>evil()</script>')
+    expect(out).toContain('<main class="report-preview-doc">')
+    expect(out).toContain("<p>Safe</p>")
+    expect(out).not.toMatch(/<script/i)
   })
 })

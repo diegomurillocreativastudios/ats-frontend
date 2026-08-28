@@ -1,126 +1,106 @@
 "use client"
 
-import Link from "next/link"
-import ProductBrand from "@/components/branding/ProductBrand"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import {
   Briefcase,
   Building2,
   Calendar,
-  CalendarDays,
+  CircleDot,
   ClipboardList,
-  Cog,
   FileText,
   IdCard,
-  Landmark,
+  ListChecks,
+  Shield,
+  Tags,
   Users,
+  Video,
+  type LucideIcon,
 } from "lucide-react"
-import { useCurrentUser } from "@/hooks/useCurrentUser"
-import { getInitials } from "@/lib/getInitials"
 import {
-  ADMIN_PORTAL_NAV_LINKS,
-  ADMIN_SETTINGS_NAV_LINK,
+  PortalSidebarFrame,
+  SidebarNavGroup,
+  SidebarNavItem,
+  SidebarUserFooter,
+} from "@/components/navigation/portal-sidebar"
+import {
+  ADMIN_PORTAL_NAV_ITEMS,
+  isAdminNavHrefActive,
+  type AdminPortalNavLabelKey,
 } from "@/lib/admin-portal-nav"
 
-const NAV_ICONS = {
+const NAV_ICONS: Record<
+  Exclude<AdminPortalNavLabelKey, "settings">,
+  LucideIcon
+> = {
+  administration: Shield,
+  vacancies: Briefcase,
   stages: ClipboardList,
-  templates: FileText,
-  interviewsCatalog: Calendar,
-  interviewsCalendar: CalendarDays,
-  users: Users,
-  companies: Landmark,
+  stageStatuses: CircleDot,
   departments: Building2,
   modalities: Briefcase,
+  templates: FileText,
+  interviews: Calendar,
+  interviewTypes: Tags,
+  interviewModalities: Video,
+  interviewStatuses: ListChecks,
+  users: Users,
   documentTypes: IdCard,
-  settings: Cog,
-} as const
-
-const navItems = ADMIN_PORTAL_NAV_LINKS.map((item) => ({
-  ...item,
-  icon: NAV_ICONS[item.labelKey],
-}))
-
-const settingsNavItem = {
-  ...ADMIN_SETTINGS_NAV_LINK,
-  icon: NAV_ICONS[ADMIN_SETTINGS_NAV_LINK.labelKey],
+  companies: Building2,
+  interviewsCalendar: Calendar,
 }
 
 export default function AdminSidebar() {
   const pathname = usePathname()
   const t = useTranslations("Navigation")
   const tSidebar = useTranslations("Sidebar")
-  const tCommon = useTranslations("Common")
-  const tShell = useTranslations("AdminPortal.shell")
-  const { user, loading } = useCurrentUser()
-  const displayName = user?.name || user?.email || tShell("userFallback")
-  const initials = getInitials(user?.name, user?.email)
-  const roleLabel = user?.role || tShell("roleFallback")
 
   return (
-    <aside
-      className="glass-sidebar flex w-[260px] shrink-0 flex-col justify-between py-6 pl-6 pr-0"
-      aria-label={tSidebar("ariaAdmin")}
+    <PortalSidebarFrame
+      ariaLabel={tSidebar("ariaAdmin")}
+      brandAriaLabel={tSidebar("goToPortalSelection")}
+      footer={<SidebarUserFooter fallbackRoleKey="roleAdmin" />}
     >
-      <div className="flex flex-col gap-6">
-        <Link
-          href="/"
-          className="flex min-w-0 items-center gap-3 px-5 transition-opacity hover:opacity-90 focus:outline-none"
-          aria-label={tSidebar("goHome")}
-        >
-          <ProductBrand
-            layout="inline"
-            tone="onLight"
-            density="sidebar"
-            className="min-w-0"
-          />
-        </Link>
-        <nav className="flex flex-col gap-1 px-3" aria-label={tSidebar("menuAdmin")}>
-          {[...navItems, settingsNavItem].map((item) => {
-            const Icon = item.icon
-            const isActive =
-              item.href === "/portal-admin/entrevistas"
-                ? pathname === item.href
-                : pathname === item.href ||
-                  pathname.startsWith(`${item.href}/`)
-            const baseClasses =
-              "flex items-center gap-3 rounded-md px-4 py-3 font-sans text-sm transition-colors"
-            const enabledClasses = isActive
-              ? "bg-ats-arena/70 text-vo-purple font-medium"
-              : "text-gray-600 hover:bg-muted hover:text-foreground"
+      <nav
+        className="flex min-h-0 flex-1 flex-col"
+        aria-label={tSidebar("menuAdmin")}
+      >
+        <div className="flex flex-col gap-0.5">
+          {ADMIN_PORTAL_NAV_ITEMS.map((item) => {
+            if (item.kind === "link") {
+              return (
+                <SidebarNavItem
+                  key={item.href}
+                  href={item.href}
+                  icon={NAV_ICONS[item.labelKey]}
+                  label={t(item.labelKey)}
+                  isActive={isAdminNavHrefActive(pathname, item.href)}
+                />
+              )
+            }
 
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`${baseClasses} ${enabledClasses}`}
-                aria-current={isActive ? "page" : undefined}
+              <SidebarNavGroup
+                key={item.id}
+                id={`admin-nav-${item.id}`}
+                icon={NAV_ICONS[item.labelKey]}
+                label={t(item.labelKey)}
               >
-                <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                {t(item.labelKey)}
-              </Link>
+                {item.children.map((child) => (
+                  <SidebarNavItem
+                    key={child.href}
+                    href={child.href}
+                    icon={NAV_ICONS[child.labelKey]}
+                    label={t(child.labelKey)}
+                    isActive={isAdminNavHrefActive(pathname, child.href)}
+                    nested
+                  />
+                ))}
+              </SidebarNavGroup>
             )
           })}
-        </nav>
-      </div>
-      <div className="mt-4 px-3 pb-3">
-        <div className="glass-panel flex items-center gap-3 rounded-xl p-3">
-          <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-vo-purple to-vo-magenta font-sans text-xs font-semibold text-white shadow-sm"
-            aria-hidden
-          >
-            {loading ? "..." : initials}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-sans text-sm font-medium text-foreground">
-              {loading ? tCommon("loading") : displayName}
-            </p>
-            <p className="font-sans text-xs text-muted-foreground">
-              {roleLabel}
-            </p>
-          </div>
         </div>
-      </div>
-    </aside>
+      </nav>
+    </PortalSidebarFrame>
   )
 }

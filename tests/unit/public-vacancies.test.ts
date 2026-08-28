@@ -6,14 +6,19 @@ import {
 } from "@/lib/api/public-vacancies"
 describe("public vacancies API helpers", () => {
   it("builds a stable query string from active filters", () => {
-    expect(
-      buildPublicVacanciesQuery({
-        vacanteName: "react",
-        departmentId: "dep-1",
-        modalityId: "mod-1",
-        page: 2,
-      })
-    ).toBe("?departmentId=dep-1&modalityId=mod-1&vacanteName=react&page=2")
+    const query = buildPublicVacanciesQuery({
+      vacanteName: "react",
+      departmentId: "dep-1",
+      modalityId: "mod-1",
+      page: 2,
+    })
+    const params = new URLSearchParams(query.replace(/^\?/, ""))
+
+    expect(params.get("vacanteName")).toBe("react")
+    expect(params.get("search")).toBe("react")
+    expect(params.get("departmentId")).toBe("dep-1")
+    expect(params.get("modalityId")).toBe("mod-1")
+    expect(params.get("page")).toBe("2")
   })
 
   it("normalizes paginated vacancies and availableFilters", () => {
@@ -68,6 +73,7 @@ describe("public vacancies API helpers", () => {
     expect(response.items[0].countryCode).toBe("SV")
     expect(response.items[0].stateCode).toBe("SS")
     expect(response.availableFilters.departments[0].count).toBe(12)
+    expect(response.availableFilters.countries).toEqual([])
     expect(response.pagination.page).toBe(2)
     expect(response.pagination.totalPages).toBe(2)
   })

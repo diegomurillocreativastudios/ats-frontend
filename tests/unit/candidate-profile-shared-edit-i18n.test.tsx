@@ -34,7 +34,6 @@ const messagesByLocale: Record<Locale, Record<string, unknown>> = {
 
 const profileFixture = {
   id: "cand-42",
-  storagePath: null,
   normalizedData: {
     FirstName: "María",
     LastName: "García",

@@ -51,6 +51,10 @@ export interface CandidateProfile {
   cvDownloadUrl?: string | null
   /** Ruta en storage del CV (mismo criterio que GET `/api/Storage/files/{path}`). */
   storagePath?: string | null
+  /** True si el candidato ya envió consentimiento vigente (solo lectura; server-owned). */
+  authAndConsentVerification?: boolean
+  /** ISO-8601 UTC del consentimiento vigente, o null. */
+  authAndConsentVerifiedAt?: string | null
 }
 
 const toTrimmedString = (value: unknown): string => {
@@ -125,6 +129,8 @@ export function normalizeCandidateProfileFromApi(raw: unknown): CandidateProfile
     recognitions: o.recognitions ?? null,
     cvDownloadUrl: toNullableString(o.cvDownloadUrl),
     storagePath: toNullableString(o.storagePath),
+    authAndConsentVerification: o.authAndConsentVerification === true,
+    authAndConsentVerifiedAt: toNullableString(o.authAndConsentVerifiedAt),
   }
 }
 

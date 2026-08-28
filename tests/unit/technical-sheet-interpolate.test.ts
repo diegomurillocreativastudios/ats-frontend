@@ -106,7 +106,7 @@ describe("buildTechnicalSheetTemplateContext", () => {
     expect(ctx.logoUrl).toBe("https://app.example.com/Applican_Tree.svg")
     expect(
       renderTechnicalSheetHtml('<img src="{{logoUrl}}" alt="" />', ctx)
-    ).toBe('<img src="https://app.example.com/Applican_Tree.svg" alt="" />')
+    ).toBe('<img src="https://app.example.com/Applican_Tree.svg" alt="">')
   })
 
   it("fills responsibilities from Description when the API sends no bullet array", () => {
@@ -150,8 +150,20 @@ describe("expandEachBlocks & renderTechnicalSheetHtml", () => {
   })
 
   it("uses this as alias for primitive items in #each", () => {
-    const tpl = "{{#each items}}<x>{{this}}</x>{{/each}}"
-    expect(renderTechnicalSheetHtml(tpl, { items: ["p", "q"] })).toBe("<x>p</x><x>q</x>")
+    const tpl = "{{#each items}}<span>{{this}}</span>{{/each}}"
+    expect(renderTechnicalSheetHtml(tpl, { items: ["p", "q"] })).toBe(
+      "<span>p</span><span>q</span>"
+    )
+  })
+
+  it("sanitizes XSS from raw HTML placeholders after interpolate", () => {
+    const tpl = "<div>{{{payloadHtml}}}</div>"
+    const out = renderTechnicalSheetHtml(tpl, {
+      payloadHtml: '<p>ok</p><script>alert(1)</script><img src=x onerror=alert(2)>',
+    })
+    expect(out).toContain("<p>ok</p>")
+    expect(out).not.toMatch(/<script/i)
+    expect(out).not.toMatch(/onerror/i)
   })
 
   it("supports nested each for responsibilities", () => {

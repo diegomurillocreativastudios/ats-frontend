@@ -10,7 +10,9 @@ import { VacancyListCard } from "@/components/rrhh/VacancyListCard";
 import { VacancyListFilters } from "@/components/rrhh/VacancyListFilters";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
-import { apiClient } from "@/lib/api";
+import { ListPaginationBar } from "@/components/ui/list-pagination-bar";
+import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging";
+import { listRecruiterVacanciesPage } from "@/lib/api/recruiter-vacancies";
 import {
   EMPTY_VACANCY_LIST_FILTERS,
   filterVacancyList,
@@ -44,7 +46,7 @@ function VacancyListSection({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
         <div
           className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
           aria-hidden
@@ -56,7 +58,7 @@ function VacancyListSection({
 
   if (fetchError) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
         <p className="font-sans text-sm text-destructive" role="alert">
           {fetchError}
         </p>
@@ -80,7 +82,7 @@ function VacancyListSection({
         filters.departmentId
     );
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
         <Briefcase className="h-12 w-12 text-muted-foreground" aria-hidden />
         <p className="font-sans text-sm text-muted-foreground">
           {hasActiveFilters
@@ -100,17 +102,19 @@ function VacancyListSection({
   }
 
   return (
-    <ul className="flex flex-col gap-3" role="list">
-      {filteredVacancies.map((vacancy) => (
-        <li key={vacancy.id}>
-          <VacancyListCard
-            vacancy={vacancy}
-            onRefresh={onRefresh}
-            onSnackbar={onSnackbar}
-          />
-        </li>
-      ))}
-    </ul>
+    <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
+      <ul className="flex flex-col gap-3" role="list">
+        {filteredVacancies.map((vacancy) => (
+          <li key={vacancy.id}>
+            <VacancyListCard
+              vacancy={vacancy}
+              onRefresh={onRefresh}
+              onSnackbar={onSnackbar}
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -119,6 +123,9 @@ export default function VacantesPage() {
   const [vacancies, setVacancies] = useState<VacancyListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(QUERY_PAGE_SIZE_DEFAULT);
+  const [totalCount, setTotalCount] = useState(0);
   const [filters, setFilters] = useState<VacancyFiltersState>(EMPTY_VACANCY_LIST_FILTERS);
   const [statusFilter] = useState("todas");
   const [isNuevaVacanteOpen, setIsNuevaVacanteOpen] = useState(false);
@@ -140,15 +147,13 @@ export default function VacantesPage() {
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await apiClient.get("/api/recruiter/vacancies");
-      const list = Array.isArray(data)
-        ? data
-        : data?.vacancies ?? data?.items ?? data?.data ?? [];
+      const result = await listRecruiterVacanciesPage({ page, pageSize });
       setVacancies(
-        list.map((item, i) =>
+        result.items.map((item, i) =>
           mapVacancyFromApi(item as Record<string, unknown>, i)
         )
       );
+      setTotalCount(result.totalCount);
     } catch (err: unknown) {
       const message =
         (err as { message?: string })?.message ||
@@ -156,22 +161,45 @@ export default function VacantesPage() {
         t("errors.loadFailed");
       setFetchError(message);
       setVacancies([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, page, pageSize]);
 
   useEffect(() => {
     fetchVacancies();
   }, [fetchVacancies]);
 
   const handleNuevaVacanteSubmit = () => {
-    fetchVacancies();
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      fetchVacancies();
+    }
     setSnackbar({
       open: true,
       variant: "success",
       message: t("toasts.created"),
     });
+  };
+
+  const handlePageChange = (nextPage: number) => setPage(nextPage);
+
+  const handlePageSizeChange = (nextSize: number) => {
+    setPageSize(nextSize);
+    setPage(1);
+  };
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1);
+  const paginationLabels = {
+    perPage: t("pagination.perPage"),
+    pageSizeAria: t("pagination.pageSizeAria"),
+    regionAria: t("pagination.regionAria"),
+    summary: t("pagination.summary", { page, total: totalPages }),
+    prev: t("pagination.prev"),
+    next: t("pagination.next"),
+    count: t("pagination.count", { count: totalCount }),
   };
 
   const filteredVacancies = useMemo(() => {
@@ -184,48 +212,80 @@ export default function VacantesPage() {
     setSnackbar({ open: true, message, variant });
   };
 
+  const renderPageHeader = () => (
+    <PortalPageHeader
+      className="shrink-0 gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between"
+      title={t("page.title")}
+      description={t("page.description")}
+      actions={
+        <button
+          type="button"
+          onClick={() => setIsNuevaVacanteOpen(true)}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:w-auto"
+          aria-label={t("actions.createAria")}
+        >
+          <Plus className="h-4 w-4" aria-hidden />
+          <span className="hidden sm:inline">{t("actions.create")}</span>
+          <span className="sm:hidden">{t("actions.createShort")}</span>
+        </button>
+      }
+    />
+  );
+
+  const renderMainContent = () => (
+    <section
+      className="flex min-h-0 flex-1 flex-col gap-3"
+      aria-label={t("page.listRegionLabel")}
+    >
+      <div className="shrink-0">
+        <VacancyListFilters
+          value={filters}
+          onChange={setFilters}
+          disabled={loading}
+        />
+      </div>
+      <VacancyListSection
+        loading={loading}
+        fetchError={fetchError}
+        filteredVacancies={filteredVacancies}
+        filters={filters}
+        onRetry={fetchVacancies}
+        onCreate={() => setIsNuevaVacanteOpen(true)}
+        onRefresh={fetchVacancies}
+        onSnackbar={handleSnackbar}
+      />
+      {!loading && !fetchError ? (
+        <div className="shrink-0">
+          <ListPaginationBar
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            loading={loading}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            labels={paginationLabels}
+          />
+        </div>
+      ) : null}
+    </section>
+  );
+
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
       <div className="hidden h-full lg:flex">
         <RRHHSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <RRHHTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 flex flex-col">
-              <section className="px-8 pt-6" aria-label={t("page.headerRegionLabel")}>
-                <PortalPageHeader
-                  className="flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-                  title={t("page.title")}
-                  description={t("page.description")}
-                  actions={
-                    <button
-                      type="button"
-                      onClick={() => setIsNuevaVacanteOpen(true)}
-                      className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                      aria-label={t("actions.createAria")}
-                    >
-                      <Plus className="h-4 w-4" aria-hidden />
-                      {t("actions.create")}
-                    </button>
-                  }
-                />
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+              <section className="shrink-0 px-8 pt-6" aria-label={t("page.headerRegionLabel")}>
+                {renderPageHeader()}
               </section>
-              <section className="flex flex-col gap-5 px-8 pb-8 pt-5" aria-label={t("page.listRegionLabel")}>
-                <VacancyListFilters
-                  value={filters}
-                  onChange={setFilters}
-                  disabled={loading}
-                />
-                <VacancyListSection
-                  loading={loading}
-                  fetchError={fetchError}
-                  filteredVacancies={filteredVacancies}
-                  filters={filters}
-                  onRetry={fetchVacancies}
-                  onCreate={() => setIsNuevaVacanteOpen(true)}
-                  onRefresh={fetchVacancies}
-                  onSnackbar={handleSnackbar}
-                />
+              <section
+                className="flex min-h-0 flex-1 flex-col px-8 pb-4 pt-2"
+                aria-label={t("page.filtersAndListRegionLabel")}
+              >
+                {renderMainContent()}
               </section>
             </div>
           </main>
@@ -234,44 +294,10 @@ export default function VacantesPage() {
 
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
         <RRHHTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
-            <PortalPageHeader
-              className="flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-              title={t("page.title")}
-              description={t("page.description")}
-              actions={
-                <button
-                  type="button"
-                  onClick={() => setIsNuevaVacanteOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label={t("actions.createAria")}
-                >
-                  <Plus className="h-4 w-4" aria-hidden />
-                  <span className="hidden sm:inline">{t("actions.create")}</span>
-                  <span className="sm:hidden" aria-hidden>
-                    {t("actions.createShort")}
-                  </span>
-                </button>
-              }
-            />
-            <section className="flex flex-col gap-5" aria-label={t("page.filtersAndListRegionLabel")}>
-              <VacancyListFilters
-                value={filters}
-                onChange={setFilters}
-                disabled={loading}
-              />
-              <VacancyListSection
-                  loading={loading}
-                  fetchError={fetchError}
-                  filteredVacancies={filteredVacancies}
-                  filters={filters}
-                  onRetry={fetchVacancies}
-                  onCreate={() => setIsNuevaVacanteOpen(true)}
-                  onRefresh={fetchVacancies}
-                  onSnackbar={handleSnackbar}
-                />
-            </section>
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-4 md:p-6">
+            {renderPageHeader()}
+            {renderMainContent()}
           </div>
         </main>
       </div>

@@ -122,6 +122,7 @@ gcloud projects add-iam-policy-binding "$GCP_PROJECT_ID" \
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | **Build + runtime** | URL pública del backend (sin `/` final). Se incrusta en el bundle del cliente. |
 | `NEXT_PUBLIC_APP_URL` | **Build + runtime** | URL pública del frontend (Cloud Run / dominio custom). |
+| `NEXT_PUBLIC_COMPANY_NAME` | **Build + runtime** | Nombre de la empresa en el formulario de autorización y consentimiento. Si falta, se usa `Applican Tree`. |
 | `API_URL` | Runtime (server) | Base URL del backend vista desde Node (Route Handlers). Si no se define, se usa `NEXT_PUBLIC_API_URL`. |
 | `BACKEND_URL` | Runtime (server) | Alternativa a `API_URL`. |
 | `NEXT_PUBLIC_GOOGLE_CALENDAR_SUCCESS_URL` | Build (opcional) | Redirect OAuth Calendar éxito. |

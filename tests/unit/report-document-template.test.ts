@@ -13,6 +13,7 @@ import { apiClient } from "@/lib/api"
 vi.mock("@/lib/api", () => ({
   apiClient: {
     get: vi.fn(),
+    getWithHeaders: vi.fn(),
   },
 }))
 
@@ -171,14 +172,22 @@ describe("fetchTemplateById", () => {
   })
 
   it("falls back to list when GET by id fails", async () => {
-    vi.mocked(apiClient.get)
-      .mockRejectedValueOnce(new Error("not found"))
-      .mockResolvedValueOnce([
+    vi.mocked(apiClient.get).mockRejectedValueOnce(new Error("not found"))
+    vi.mocked(apiClient.getWithHeaders).mockResolvedValueOnce({
+      data: [
         { id: 9, type: "Document", name: "R", contentTemplate: "", isReport: true },
-      ])
+      ],
+      headers: new Headers({
+        "X-Total-Count": "1",
+        "X-Page": "1",
+        "X-Page-Size": "100",
+      }),
+    })
     const result = await fetchTemplateById(9)
     expect(apiClient.get).toHaveBeenNthCalledWith(1, "/api/Templates/9")
-    expect(apiClient.get).toHaveBeenNthCalledWith(2, "/api/Templates?type=Document")
+    expect(apiClient.getWithHeaders).toHaveBeenCalledWith(
+      "/api/Templates?type=Document&page=1&pageSize=100"
+    )
     expect(result?.id).toBe(9)
   })
 })

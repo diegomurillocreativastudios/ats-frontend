@@ -47,7 +47,7 @@ function ResolverShell({
 }) {
   return (
     <RrhhReportsShell breadcrumbLabel={breadcrumbLabel} breadcrumbTrail={trail ?? null}>
-      <div className="min-w-0 flex flex-col gap-6 px-4 pt-6 pb-10 md:px-8">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto overscroll-contain px-4 pb-4 pt-6 md:px-8">
         {children}
       </div>
     </RrhhReportsShell>

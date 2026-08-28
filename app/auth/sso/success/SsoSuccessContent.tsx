@@ -10,7 +10,15 @@ import {
   DEFAULT_AUTH_REDIRECT,
   resolveAuthRedirectDestination,
 } from "@/lib/auth/internal-path"
-import { getSsoErrorTranslationKey } from "@/lib/auth/sso-errors"
+import {
+  getSsoErrorTranslationKey,
+  resolveSsoQueryErrorCode,
+} from "@/lib/auth/sso-errors"
+import {
+  clearPersistedSsoExchangeCode,
+  resolveSsoExchangeCode,
+  stripSsoCodeFromLocationUrl,
+} from "@/lib/auth/sso-exchange-code"
 
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : ""
@@ -21,23 +29,43 @@ export default function SsoSuccessContent() {
   const t = useTranslations("Auth.sso")
   const exchangedRef = useRef(false)
 
-  const oauthError = searchParams.get("error")
-  const code = searchParams.get("code")?.trim() ?? ""
+  const oauthError = resolveSsoQueryErrorCode(
+    searchParams.get("error"),
+    searchParams.get("reason")
+  )
   const queryReturnUrl = searchParams.get("returnUrl")
   const queryFrom = searchParams.get("from")
 
+  /** Hash is client-only; null until mounted so SSR does not flash missing_code. */
+  const [hashCode, setHashCode] = useState<string | null>(null)
+  const [asyncErrorCode, setAsyncErrorCode] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const codeFromHash = resolveSsoExchangeCode(window.location.hash)
+    setHashCode(codeFromHash)
+
+    const cleaned = stripSsoCodeFromLocationUrl(
+      window.location.href,
+      window.location.pathname,
+      window.location.search
+    )
+    window.history.replaceState({}, "", cleaned)
+  }, [])
+
   const syncErrorCode = oauthError
     ? oauthError
-    : !code
+    : hashCode === ""
       ? "missing_code"
       : null
 
-  const [asyncErrorCode, setAsyncErrorCode] = useState<string | null>(null)
   const resolvedErrorCode = syncErrorCode ?? asyncErrorCode
-  const isLoading = !resolvedErrorCode && Boolean(code)
+  const isLoading = !resolvedErrorCode && (hashCode === null || Boolean(hashCode))
 
   useEffect(() => {
-    if (syncErrorCode || !code) return
+    if (oauthError) return
+    if (hashCode === null || !hashCode) return
     if (exchangedRef.current) return
     exchangedRef.current = true
 
@@ -47,7 +75,7 @@ export default function SsoSuccessContent() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({ code: hashCode }),
         })
 
         const data = (await res.json().catch(() => ({}))) as Record<
@@ -56,6 +84,7 @@ export default function SsoSuccessContent() {
         >
 
         if (!res.ok) {
+          clearPersistedSsoExchangeCode()
           const errorCode =
             (typeof data.code === "string" && data.code) ||
             (typeof data.error === "string" && data.error) ||
@@ -72,14 +101,16 @@ export default function SsoSuccessContent() {
           DEFAULT_AUTH_REDIRECT
         )
 
+        clearPersistedSsoExchangeCode()
         router.replace(destination)
       } catch {
+        clearPersistedSsoExchangeCode()
         setAsyncErrorCode("network_error")
       }
     }
 
     void runExchange()
-  }, [code, queryFrom, queryReturnUrl, router, syncErrorCode])
+  }, [hashCode, oauthError, queryFrom, queryReturnUrl, router])
 
   const errorKey = resolvedErrorCode
     ? getSsoErrorTranslationKey(resolvedErrorCode)

@@ -7,7 +7,9 @@ import { Briefcase, Calendar, Loader2, MapPin, Users } from "lucide-react"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
-import { apiClient } from "@/lib/api"
+import { ListPaginationBar } from "@/components/ui/list-pagination-bar"
+import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging"
+import { listRecruiterVacanciesPage } from "@/lib/api/recruiter-vacancies"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
 import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles"
@@ -80,35 +82,32 @@ export default function EntrevistasHubPage() {
   const [vacancies, setVacancies] = useState<VacancyRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(QUERY_PAGE_SIZE_DEFAULT)
+  const [totalCount, setTotalCount] = useState(0)
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const data = await apiClient.get("/api/recruiter/vacancies")
-      const list = Array.isArray(data)
-        ? data
-        : (data as { vacancies?: unknown })?.vacancies ??
-          (data as { items?: unknown })?.items ??
-          (data as { data?: unknown })?.data ??
-          []
-      if (!Array.isArray(list)) {
-        setVacancies([])
-        return
-      }
-      const mapped: VacancyRow[] = list.map((item: Record<string, unknown>, i: number) => {
-        const id = String(item?.id ?? item?.uuid ?? i)
-        const title = String(item?.title ?? item?.name ?? "—")
-        const ccRaw = item?.countryCode ?? item?.country_code
+      const result = await listRecruiterVacanciesPage({ page, pageSize })
+      const mapped: VacancyRow[] = result.items.map((item: unknown, i: number) => {
+        const record =
+          item != null && typeof item === "object"
+            ? (item as Record<string, unknown>)
+            : {}
+        const id = String(record.id ?? record.uuid ?? i)
+        const title = String(record.title ?? record.name ?? "—")
+        const ccRaw = record.countryCode ?? record.country_code
         const countryCode =
           ccRaw != null && String(ccRaw).trim() !== ""
             ? String(ccRaw).trim().toUpperCase()
             : null
         const candidatesRaw =
-          item?.candidatesAmount ??
-          item?.candidates ??
-          item?.candidates_count ??
-          item?.applicants_count
+          record.candidatesAmount ??
+          record.candidates ??
+          record.candidates_count ??
+          record.applicants_count
         const candidatesAmount =
           typeof candidatesRaw === "number" && !Number.isNaN(candidatesRaw)
             ? candidatesRaw
@@ -117,63 +116,88 @@ export default function EntrevistasHubPage() {
           id,
           title,
           countryLabel: formatCountryCodeLabel(countryCode),
-          statusKey: mapStatusKey(item),
+          statusKey: mapStatusKey(record),
           candidatesAmount,
           createdAtLabel: formatCreatedAtLabel(
-            item?.createdAt ?? item?.created_at
+            record.createdAt ?? record.created_at
           ),
         }
       })
       setVacancies(mapped)
+      setTotalCount(result.totalCount)
     } catch (err: unknown) {
       setError(getApiErrorMessage(err) || t("errors.loadVacanciesFailed"))
       setVacancies([])
+      setTotalCount(0)
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, page, pageSize])
 
   useEffect(() => {
     load()
   }, [load])
 
-  const mainContent = (
-    <div className="min-w-0 flex flex-col">
-      <section className="px-4 py-6 md:px-8" aria-label={t("hub.headerRegionLabel")}>
-        <PortalPageHeader
-          title={t("hub.title")}
-          description={t("hub.description")}
-        />
-      </section>
-      <section className="flex flex-col gap-4 p-4 md:p-8" aria-label={t("hub.vacanciesRegionLabel")}>
-        {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
-            <Loader2
-              className="h-8 w-8 animate-spin text-vo-purple"
-              aria-hidden
-            />
-            <p className="font-sans text-sm text-muted-foreground">
-              {t("loadingStates.loadingVacancies")}
-            </p>
-          </div>
-        ) : error ? (
-          <p className="font-sans text-sm text-destructive" role="alert">
-            {error}
+  const handlePageChange = (nextPage: number) => setPage(nextPage)
+
+  const handlePageSizeChange = (nextSize: number) => {
+    setPageSize(nextSize)
+    setPage(1)
+  }
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1)
+  const paginationLabels = {
+    perPage: t("pagination.perPage"),
+    pageSizeAria: t("pagination.pageSizeAria"),
+    regionAria: t("pagination.regionAria"),
+    summary: t("pagination.summary", { page, total: totalPages }),
+    prev: t("pagination.prev"),
+    next: t("pagination.next"),
+    count: t("pagination.count", { count: totalCount }),
+  }
+
+  const renderPageHeader = () => (
+    <PortalPageHeader
+      className="shrink-0 pb-2"
+      title={t("hub.title")}
+      description={t("hub.description")}
+    />
+  )
+
+  const renderMainContent = () => (
+    <section
+      className="flex min-h-0 flex-1 flex-col gap-3"
+      aria-label={t("hub.vacanciesRegionLabel")}
+    >
+      {loading ? (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16">
+          <Loader2
+            className="h-8 w-8 animate-spin text-vo-purple"
+            aria-hidden
+          />
+          <p className="font-sans text-sm text-muted-foreground">
+            {t("loadingStates.loadingVacancies")}
           </p>
-        ) : vacancies.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16 text-center">
-            <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
-            <p className="font-sans text-sm text-muted-foreground">
-              {t("emptyStates.noVacancies")}
-            </p>
-            <Link
-              href="/portal-rrhh/vacantes"
-              className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
-            >
-              {t("actions.goToVacancies")}
-            </Link>
-          </div>
-        ) : (
+        </div>
+      ) : error ? (
+        <p className="font-sans text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : vacancies.length === 0 ? (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 py-16 text-center">
+          <Calendar className="h-10 w-10 text-muted-foreground" aria-hidden />
+          <p className="font-sans text-sm text-muted-foreground">
+            {t("emptyStates.noVacancies")}
+          </p>
+          <Link
+            href="/portal-rrhh/vacantes"
+            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover"
+          >
+            {t("actions.goToVacancies")}
+          </Link>
+        </div>
+      ) : (
+        <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
           <ul className="flex flex-col gap-3" role="list">
             {vacancies.map((v) => {
               const statusCfg =
@@ -251,9 +275,22 @@ export default function EntrevistasHubPage() {
               )
             })}
           </ul>
-        )}
-      </section>
-    </div>
+        </div>
+      )}
+      {!loading && !error ? (
+        <div className="shrink-0">
+          <ListPaginationBar
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            loading={loading}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            labels={paginationLabels}
+          />
+        </div>
+      ) : null}
+    </section>
   )
 
   return (
@@ -262,15 +299,28 @@ export default function EntrevistasHubPage() {
         <RRHHSidebar />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <RRHHTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            {mainContent}
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+              <section
+                className="shrink-0 px-8 pt-6"
+                aria-label={t("hub.headerRegionLabel")}
+              >
+                {renderPageHeader()}
+              </section>
+              <section className="flex min-h-0 flex-1 flex-col px-8 pb-4 pt-2">
+                {renderMainContent()}
+              </section>
+            </div>
           </main>
         </div>
       </div>
       <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
         <RRHHTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          {mainContent}
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-4 md:p-6">
+            {renderPageHeader()}
+            {renderMainContent()}
+          </div>
         </main>
       </div>
     </div>

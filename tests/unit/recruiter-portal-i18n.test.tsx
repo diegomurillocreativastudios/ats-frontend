@@ -26,6 +26,14 @@ const hoisted = vi.hoisted(() => ({ locale: "es" }))
 vi.mock("@/lib/api", () => ({
   apiClient: {
     get: vi.fn(async () => []),
+    getWithHeaders: vi.fn(async () => ({
+      data: [],
+      headers: new Headers({
+        "X-Total-Count": "0",
+        "X-Page": "1",
+        "X-Page-Size": "50",
+      }),
+    })),
     post: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),
@@ -155,7 +163,7 @@ describe("RRHHConfiguracionPage i18n (Etapa 6)", () => {
     const ui = await RRHHConfiguracionPage()
     render(ui)
 
-    expect(screen.getAllByText("Configuracion").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Configuración").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Calendario Google").length).toBeGreaterThan(0)
     expect(
       screen.getByText(

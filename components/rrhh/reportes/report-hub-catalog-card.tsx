@@ -14,7 +14,7 @@ export interface ReportHubCatalogCardProps {
 }
 
 const baseCardClasses =
-  "flex flex-col gap-3 rounded-xl border border-border bg-card p-5"
+  "flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
 
 const linkExtraClasses =
   "group transition-colors hover:border-vo-purple/40 hover:bg-muted/30 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
@@ -22,12 +22,12 @@ const linkExtraClasses =
 const unlinkedExtraClasses = "opacity-90"
 
 const iconWrapperClasses =
-  "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-vo-purple/10 transition-colors"
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-vo-purple/10 transition-colors"
 
 const iconWrapperLinkedClasses = "group-hover:bg-vo-purple/15"
 
 const unlinkedBadgeClasses =
-  "inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 font-sans text-[11px] font-medium text-amber-700 dark:text-amber-300"
+  "inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 font-sans text-[11px] font-medium text-amber-700 dark:text-amber-300"
 
 export function ReportHubCatalogCard({
   title,
@@ -42,7 +42,7 @@ export function ReportHubCatalogCard({
 
   const content = (
     <>
-      <div className="flex items-start gap-3">
+      <div className="flex min-w-0 items-start gap-3">
         <div
           className={
             hasLink
@@ -54,36 +54,36 @@ export function ReportHubCatalogCard({
           <Icon className="h-5 w-5 text-vo-purple" />
         </div>
         <div className="min-w-0 space-y-1">
-          {badge ? (
-            <p className="font-sans text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              {badge}
-            </p>
-          ) : null}
-          <h3 className="font-sans text-base font-semibold text-foreground">
-            {title}
-          </h3>
+          <div className="flex flex-wrap items-center gap-2 gap-y-1">
+            <h3 className="font-sans text-base font-semibold text-foreground">
+              {title}
+            </h3>
+            {badge ? (
+              <p className="font-sans text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {badge}
+              </p>
+            ) : null}
+          </div>
           <p className="font-sans text-sm text-muted-foreground">
             {description}
           </p>
-        </div>
-      </div>
-      {hasLink ? (
-        <span className="inline-flex items-center gap-2 font-sans text-sm font-medium text-vo-purple">
-          <BarChart3 className="h-4 w-4 shrink-0" aria-hidden />
-          {t("cards.openAndDownload")}
-        </span>
-      ) : (
-        <div className="flex flex-col gap-2">
-          <span className={unlinkedBadgeClasses}>
-            <FileWarning className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            {t("cards.unlinkedBadge")}
-          </span>
-          {unlinkedHint ? (
+          {!hasLink && unlinkedHint ? (
             <p className="font-sans text-xs text-muted-foreground">
               {unlinkedHint}
             </p>
           ) : null}
         </div>
+      </div>
+      {hasLink ? (
+        <span className="inline-flex shrink-0 items-center gap-2 font-sans text-sm font-medium text-vo-purple">
+          <BarChart3 className="h-4 w-4 shrink-0" aria-hidden />
+          {t("cards.openAndDownload")}
+        </span>
+      ) : (
+        <span className={unlinkedBadgeClasses}>
+          <FileWarning className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {t("cards.unlinkedBadge")}
+        </span>
       )}
     </>
   )

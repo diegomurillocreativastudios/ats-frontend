@@ -1,4 +1,8 @@
 import { apiClient } from "@/lib/api"
+import {
+  QUERY_FETCH_ALL_PAGE_SIZE,
+  fetchAllHeaderPagedList,
+} from "@/lib/api/query-paging"
 
 /** Normalized row for template list operations (subset of admin plantillas fields). */
 export interface TemplateListItem {
@@ -193,6 +197,6 @@ export async function fetchTemplatesList(options?: {
   const path = options?.documentOnly
     ? "/api/Templates?type=Document"
     : "/api/Templates"
-  const data = await apiClient.get(path)
-  return mapTemplatesList(unwrapTemplatesResponse(data))
+  const list = await fetchAllHeaderPagedList(path, QUERY_FETCH_ALL_PAGE_SIZE)
+  return mapTemplatesList(list)
 }

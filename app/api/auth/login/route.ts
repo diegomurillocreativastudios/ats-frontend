@@ -29,8 +29,14 @@ export async function POST(request: NextRequest) {
     const data = (await res.json().catch(() => ({}))) as Record<string, unknown>
 
     if (!res.ok) {
-      const message = extractBackendErrorMessage(data, "Credenciales inválidas")
-      return NextResponse.json({ message }, { status: res.status })
+      const message = extractBackendErrorMessage(
+        data,
+        "Correo o contraseña incorrectos."
+      )
+      const headers = new Headers()
+      const retryAfter = res.headers.get("retry-after")
+      if (retryAfter) headers.set("retry-after", retryAfter)
+      return NextResponse.json({ message }, { status: res.status, headers })
     }
 
     return createAuthSessionResponse(baseUrl, data, {

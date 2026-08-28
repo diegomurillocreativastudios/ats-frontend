@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { render, screen, waitFor } from "@testing-library/react"
+import { NextIntlClientProvider } from "next-intl"
 import { ReportByKeyResolverClient } from "@/components/rrhh/reportes/report-by-key-resolver-client"
 import { fetchReportsCatalog } from "@/lib/api/recruiter-reports-catalog"
+import esMessages from "@/messages/es.json"
 
 vi.mock("@/lib/api/recruiter-reports-catalog", async (importOriginal) => {
     const actual = await importOriginal<
@@ -61,8 +63,16 @@ describe("ReportByKeyResolverClient", () => {
         vi.mocked(fetchReportsCatalog).mockResolvedValue(baseCatalog)
     })
 
+    function renderResolver(reportKey: string) {
+        return render(
+            <NextIntlClientProvider locale="es" messages={esMessages}>
+                <ReportByKeyResolverClient reportKey={reportKey} />
+            </NextIntlClientProvider>
+        )
+    }
+
     it("renders the data view when the reportKey matches a catalog entry", async () => {
-        render(<ReportByKeyResolverClient reportKey="vacancy-progress-by-client" />)
+        renderResolver("vacancy-progress-by-client")
 
         await waitFor(() => {
             expect(screen.getByTestId("report-data-view")).toHaveTextContent(
@@ -72,7 +82,7 @@ describe("ReportByKeyResolverClient", () => {
     })
 
     it("also renders the data view when the catalog entry has no linked template", async () => {
-        render(<ReportByKeyResolverClient reportKey="candidate-status-by-stage" />)
+        renderResolver("candidate-status-by-stage")
 
         await waitFor(() => {
             expect(screen.getByTestId("report-data-view")).toHaveTextContent(
@@ -82,7 +92,7 @@ describe("ReportByKeyResolverClient", () => {
     })
 
     it("shows the not-found state when the reportKey is unknown", async () => {
-        render(<ReportByKeyResolverClient reportKey="not-a-real-report" />)
+        renderResolver("not-a-real-report")
 
         expect(
             await screen.findByText(/Reporte no encontrado/i)
@@ -90,7 +100,7 @@ describe("ReportByKeyResolverClient", () => {
     })
 
     it("falls back to the template detail view for numeric segments", async () => {
-        render(<ReportByKeyResolverClient reportKey="42" />)
+        renderResolver("42")
 
         await waitFor(() => {
             expect(screen.getByTestId("report-template-detail")).toHaveTextContent(

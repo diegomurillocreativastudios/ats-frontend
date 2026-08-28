@@ -63,12 +63,14 @@ describe("ReportsHubClient i18n (Etapa 12)", () => {
     getMock.mockResolvedValue([])
   })
 
-  it("renderiza encabezado del catálogo y estado vacío en español", async () => {
+  it("renderiza la región del catálogo y estado vacío en español", async () => {
     renderWithIntl(<ReportsHubClient />, "es")
 
     expect(
-      (await screen.findAllByText("Reportes")).length
-    ).toBeGreaterThan(0)
+      await screen.findByRole("region", {
+        name: "Reportes disponibles para descargar",
+      })
+    ).toBeInTheDocument()
     expect(
       await screen.findByText(
         "El catálogo de reportes aún no devuelve resultados."
@@ -76,10 +78,14 @@ describe("ReportsHubClient i18n (Etapa 12)", () => {
     ).toBeInTheDocument()
   })
 
-  it("renderiza encabezado del catálogo y estado vacío en inglés", async () => {
+  it("renderiza la región del catálogo y estado vacío en inglés", async () => {
     renderWithIntl(<ReportsHubClient />, "en")
 
-    expect((await screen.findAllByText("Reports")).length).toBeGreaterThan(0)
+    expect(
+      await screen.findByRole("region", {
+        name: "Reports available to download",
+      })
+    ).toBeInTheDocument()
     expect(
       await screen.findByText(
         "The reports catalog does not return results yet."

@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import { listAllRecruiterVacancies } from "@/lib/api/recruiter-vacancies"
 
 export const REPORTS_PREFIX = "/api/recruiter/reports"
 
@@ -767,17 +768,16 @@ export interface RecruiterVacancyOption {
 export async function listRecruiterVacancies(): Promise<
   RecruiterVacancyOption[]
 > {
-  const raw = await apiClient.get("/api/recruiter/vacancies")
-  const list = Array.isArray(raw)
-    ? raw
-    : (raw as { vacancies?: unknown })?.vacancies ??
-      (raw as { items?: unknown })?.items ??
-      (raw as { data?: unknown })?.data ??
-      []
-  if (!Array.isArray(list)) return []
-  return list.map((item: Record<string, unknown>, i: number) => ({
-    id: String(item?.id ?? item?.uuid ?? i),
-    title: String(item?.title ?? item?.name ?? "—"),
-  }))
+  const list = await listAllRecruiterVacancies()
+  return list.map((item: unknown, i: number) => {
+    const record =
+      item != null && typeof item === "object"
+        ? (item as Record<string, unknown>)
+        : {}
+    return {
+      id: String(record.id ?? record.uuid ?? i),
+      title: String(record.title ?? record.name ?? "—"),
+    }
+  })
 }
 

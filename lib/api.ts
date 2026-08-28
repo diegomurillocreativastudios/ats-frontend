@@ -1,4 +1,5 @@
 import { getAccessToken } from "@/lib/auth"
+import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
 
 const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || ""
 
@@ -9,8 +10,14 @@ const getOrigin = () => {
 
 type ApiRequestOptions = RequestInit
 
+export type ApiClientError = Error & {
+  status: number
+  body?: unknown
+  retryAfter?: number
+}
+
 /** Attach Bearer token to request when available (client-side). */
-const buildHeaders = (
+export const buildHeaders = (
   options: ApiRequestOptions,
   omitContentType = false
 ) => {
@@ -42,12 +49,17 @@ const tryRefresh = async () => {
   }
 }
 
+export interface ApiResponseMeta<T = unknown> {
+  data: T
+  headers: Headers
+}
+
 export const apiClient = {
-  async request(
+  async requestWithMeta(
     endpoint: string,
     options: ApiRequestOptions = {},
     isRetry = false
-  ) {
+  ): Promise<ApiResponseMeta> {
     const baseUrl = getBaseUrl().replace(/\/$/, '');
     const url = endpoint.startsWith('http')
       ? endpoint
@@ -79,10 +91,10 @@ export const apiClient = {
     if (res.status === 401 && !isRetry && typeof window !== "undefined") {
       const refreshed = await tryRefresh()
       if (refreshed) {
-        return this.request(endpoint, options, true)
+        return this.requestWithMeta(endpoint, options, true)
       }
       window.location.href = "/auth/iniciar-sesion"
-      const err = new Error("Sesión expirada") as Error & { status: number }
+      const err = new Error("Sesión expirada") as ApiClientError
       err.status = 401
       throw err
     }
@@ -99,18 +111,33 @@ export const apiClient = {
         (typeof payload.error === "string" && payload.error.trim()) ||
         (typeof payload.detail === "string" && payload.detail.trim())
       const message = fromBody || fromText || `Solicitud fallida (${res.status})`
-      const err = new Error(message) as Error & {
-        status: number
-        body?: unknown
-      }
+      const err = new Error(message) as ApiClientError
       err.status = res.status
       err.body = data
+      const retryAfterHeader = res.headers.get("retry-after")
+      if (retryAfterHeader) {
+        err.retryAfter = parseRetryAfterSeconds(retryAfterHeader)
+      }
       throw err
     }
+    return { data, headers: res.headers }
+  },
+  async request(
+    endpoint: string,
+    options: ApiRequestOptions = {},
+    isRetry = false
+  ) {
+    const { data } = await this.requestWithMeta(endpoint, options, isRetry)
     return data
   },
   get(endpoint: string) {
     return this.request(endpoint, { method: "GET" })
+  },
+  /**
+   * GET that keeps response headers (paging: X-Total-Count, X-Page, X-Page-Size).
+   */
+  getWithHeaders(endpoint: string) {
+    return this.requestWithMeta(endpoint, { method: "GET" })
   },
   post(endpoint: string, body: unknown) {
     return this.request(endpoint, {

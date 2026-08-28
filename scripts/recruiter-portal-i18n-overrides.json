@@ -147,6 +147,11 @@
         "searchResults": "Search results",
         "reanalyzingEllipsis": "Re-analyzing with AI…",
         "updatingSearchEllipsis": "Updating AI search…",
+        "searchLoadingHint": "This can take a few seconds. Keep this page open.",
+        "searchLoadingStepScanning": "Exploring the talent pool",
+        "searchLoadingStepMatching": "Matching profiles to the requirements",
+        "searchLoadingStepRanking": "Ranking the best matches",
+        "searchLoadingStepPreparing": "Preparing the results",
         "selectAll": "Select all",
         "deselectAll": "Deselect all",
         "selectedCount": "{count} selected",
@@ -182,7 +187,15 @@
           "downloading": "Downloading…",
           "downloadCv": "Download CV",
           "viewFullProfile": "View full profile",
-          "close": "Close"
+          "close": "Close",
+          "aiProcessedShort": "AI evaluation · support for the HR decision",
+          "attributesDetail": "Attribute details ({count})",
+          "attributesZeroHint": "A 0% does not always lower the combined score: recency or relevant years are measured separately.",
+          "totalMatchScoreShort": "Match",
+          "heroAria": "Matching score summary",
+          "attributeColumn": "Attribute",
+          "levelColumn": "Level",
+          "scoreColumn": "Score"
         },
         "scoreKeys": {
           "qualitative": "Qualitative score",
@@ -193,7 +206,9 @@
           "keywordMatch": "Keyword match",
           "experience": "Experience",
           "education": "Education",
-          "skills": "Skills"
+          "skills": "Skills",
+          "recency": "Recency",
+          "relevantYears": "Relevant years"
         },
         "kanban": {
           "score": "Score",
@@ -225,7 +240,7 @@
           "preliminarySearchTitle": "Preliminary search",
           "preliminarySearchSubtitle": "From hours to seconds on first exploration",
           "preliminaryMatchTitle": "Preliminary matching",
-          "preliminaryMatchSubtitle": "Observed accuracy of 75% to 80%",
+          "preliminaryMatchSubtitle": "Observed accuracy of 90% to 95%",
           "preliminaryMatchGoal": "Calibration target: 90%",
           "coverageTitle": "Results coverage",
           "coverageSubtitle": "Initial shortlist with suggested candidates",
@@ -519,6 +534,11 @@
         "searchResults": "Résultats de recherche",
         "reanalyzingEllipsis": "Réanalyse par IA…",
         "updatingSearchEllipsis": "Mise à jour de la recherche IA…",
+        "searchLoadingHint": "Cela peut prendre quelques secondes. Ne fermez pas cette page.",
+        "searchLoadingStepScanning": "Exploration du vivier de talents",
+        "searchLoadingStepMatching": "Croisement des profils avec les exigences",
+        "searchLoadingStepRanking": "Classement des meilleures correspondances",
+        "searchLoadingStepPreparing": "Préparation des résultats",
         "selectAll": "Tout sélectionner",
         "deselectAll": "Tout désélectionner",
         "selectedCount": "{count} sélectionné(s)",
@@ -554,7 +574,15 @@
           "downloading": "Téléchargement…",
           "downloadCv": "Télécharger le CV",
           "viewFullProfile": "Voir le profil complet",
-          "close": "Fermer"
+          "close": "Fermer",
+          "aiProcessedShort": "Évaluation par IA · appui à la décision RH",
+          "attributesDetail": "Détail des attributs ({count})",
+          "attributesZeroHint": "Un 0 % ne baisse pas toujours le score combiné : récence ou années pertinentes sont mesurées à part.",
+          "totalMatchScoreShort": "Correspondance",
+          "heroAria": "Résumé des scores de correspondance",
+          "attributeColumn": "Attribut",
+          "levelColumn": "Niveau",
+          "scoreColumn": "Score"
         },
         "scoreKeys": {
           "qualitative": "Score qualitatif",
@@ -565,7 +593,9 @@
           "keywordMatch": "Correspondance de mots-clés",
           "experience": "Expérience",
           "education": "Formation",
-          "skills": "Compétences"
+          "skills": "Compétences",
+          "recency": "Récence",
+          "relevantYears": "Années pertinentes"
         },
         "kanban": {
           "score": "Score",
@@ -597,7 +627,7 @@
           "preliminarySearchTitle": "Recherche préliminaire",
           "preliminarySearchSubtitle": "De plusieurs heures à quelques secondes pour la première exploration",
           "preliminaryMatchTitle": "Correspondance préliminaire",
-          "preliminaryMatchSubtitle": "Précision observée de 75 % à 80 %",
+          "preliminaryMatchSubtitle": "Précision observée de 90 % à 95 %",
           "preliminaryMatchGoal": "Objectif de calibration : 90 %",
           "coverageTitle": "Couverture des résultats",
           "coverageSubtitle": "Liste restreinte initiale avec candidats suggérés",
@@ -891,6 +921,11 @@
         "searchResults": "Suchergebnisse",
         "reanalyzingEllipsis": "Neuanalyse mit KI…",
         "updatingSearchEllipsis": "KI-Suche wird aktualisiert…",
+        "searchLoadingHint": "Das kann ein paar Sekunden dauern. Bitte diese Seite geöffnet lassen.",
+        "searchLoadingStepScanning": "Talentpool wird durchsucht",
+        "searchLoadingStepMatching": "Profile werden mit den Anforderungen abgeglichen",
+        "searchLoadingStepRanking": "Beste Treffer werden sortiert",
+        "searchLoadingStepPreparing": "Ergebnisse werden vorbereitet",
         "selectAll": "Alle auswählen",
         "deselectAll": "Alle abwählen",
         "selectedCount": "{count} ausgewählt",
@@ -926,7 +961,15 @@
           "downloading": "Wird heruntergeladen…",
           "downloadCv": "Lebenslauf herunterladen",
           "viewFullProfile": "Vollständiges Profil anzeigen",
-          "close": "Schließen"
+          "close": "Schließen",
+          "aiProcessedShort": "KI-Bewertung · Unterstützung für die HR-Entscheidung",
+          "attributesDetail": "Attributdetails ({count})",
+          "attributesZeroHint": "Ein Wert von 0 % senkt nicht immer den Gesamtwert: Aktualität oder relevante Jahre werden getrennt gemessen.",
+          "totalMatchScoreShort": "Abgleich",
+          "heroAria": "Zusammenfassung der Matching-Punktzahlen",
+          "attributeColumn": "Attribut",
+          "levelColumn": "Niveau",
+          "scoreColumn": "Punktzahl"
         },
         "scoreKeys": {
           "qualitative": "Qualitative Punktzahl",
@@ -937,7 +980,9 @@
           "keywordMatch": "Schlüsselwortübereinstimmung",
           "experience": "Berufserfahrung",
           "education": "Ausbildung",
-          "skills": "Fähigkeiten"
+          "skills": "Fähigkeiten",
+          "recency": "Aktualität",
+          "relevantYears": "Relevante Jahre"
         },
         "kanban": {
           "score": "Punktzahl",
@@ -969,7 +1014,7 @@
           "preliminarySearchTitle": "Vorabrecherche",
           "preliminarySearchSubtitle": "Von Stunden auf Sekunden bei der ersten Erkundung",
           "preliminaryMatchTitle": "Vorläufiges Matching",
-          "preliminaryMatchSubtitle": "Beobachtete Genauigkeit von 75 % bis 80 %",
+          "preliminaryMatchSubtitle": "Beobachtete Genauigkeit von 90 % bis 95 %",
           "preliminaryMatchGoal": "Kalibrierungsziel: 90 %",
           "coverageTitle": "Ergebnisabdeckung",
           "coverageSubtitle": "Erste Shortlist mit vorgeschlagenen Kandidaten",
@@ -1263,6 +1308,11 @@
         "searchResults": "Risultati di ricerca",
         "reanalyzingEllipsis": "Rianalisi con IA…",
         "updatingSearchEllipsis": "Aggiornamento ricerca IA…",
+        "searchLoadingHint": "L'operazione può richiedere alcuni secondi. Non chiudere questa pagina.",
+        "searchLoadingStepScanning": "Esplorazione del bacino di talenti",
+        "searchLoadingStepMatching": "Confronto dei profili con i requisiti",
+        "searchLoadingStepRanking": "Ordinamento delle migliori corrispondenze",
+        "searchLoadingStepPreparing": "Preparazione dei risultati",
         "selectAll": "Seleziona tutti",
         "deselectAll": "Deseleziona tutti",
         "selectedCount": "{count} selezionato/i",
@@ -1298,7 +1348,15 @@
           "downloading": "Download in corso…",
           "downloadCv": "Scarica CV",
           "viewFullProfile": "Vedi profilo completo",
-          "close": "Chiudi"
+          "close": "Chiudi",
+          "aiProcessedShort": "Valutazione con IA · supporto per la decisione HR",
+          "attributesDetail": "Dettaglio attributi ({count})",
+          "attributesZeroHint": "Uno 0% non sempre abbassa il punteggio combinato: attualità o anni pertinenti si misurano a parte.",
+          "totalMatchScoreShort": "Corrispondenza",
+          "heroAria": "Riepilogo dei punteggi di corrispondenza",
+          "attributeColumn": "Attributo",
+          "levelColumn": "Livello",
+          "scoreColumn": "Punteggio"
         },
         "scoreKeys": {
           "qualitative": "Punteggio qualitativo",
@@ -1309,7 +1367,9 @@
           "keywordMatch": "Corrispondenza parole chiave",
           "experience": "Esperienza",
           "education": "Formazione",
-          "skills": "Competenze"
+          "skills": "Competenze",
+          "recency": "Attualità",
+          "relevantYears": "Anni pertinenti"
         },
         "kanban": {
           "score": "Punteggio",
@@ -1341,7 +1401,7 @@
           "preliminarySearchTitle": "Ricerca preliminare",
           "preliminarySearchSubtitle": "Da ore a secondi nella prima esplorazione",
           "preliminaryMatchTitle": "Corrispondenza preliminare",
-          "preliminaryMatchSubtitle": "Precisione osservata dal 75% all'80%",
+          "preliminaryMatchSubtitle": "Precisione osservata dal 90% al 95%",
           "preliminaryMatchGoal": "Obiettivo di calibrazione: 90%",
           "coverageTitle": "Copertura dei risultati",
           "coverageSubtitle": "Shortlist iniziale con candidati suggeriti",

@@ -8,18 +8,21 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type DragEvent,
   type FormEvent,
 } from "react"
 import { useTranslations } from "next-intl"
-import { CheckCircle2, LoaderCircle, Mail, Paperclip } from "lucide-react"
+import { CheckCircle2, FileText, LoaderCircle, Mail, X } from "lucide-react"
 import {
   getPublicApplyErrorMessage,
   isAllowedCvFile,
+  isCvFileWithinSizeLimit,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
   submitPublicVacancyApplication,
   type PublicVacancyApplyValues,
 } from "@/lib/public-vacancy-apply"
+import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
 import {
   APPLY_LOADING_TICK_MS,
   APPLY_LONG_WAIT_HINT_MS,
@@ -28,19 +31,48 @@ import {
 import { ApplyStyleProgressBar } from "@/components/public/apply-style-progress-bar"
 import { ApplyEmailConfirmationModal } from "@/components/public/ApplyEmailConfirmationModal"
 import {
+  ConsentAuthorizationModal,
+  type ConsentAuthorizationInitialValues,
+  type ConsentAuthorizationSubmitPayload,
+} from "@/components/candidato/consent-authorization-modal"
+import { getApiErrorCode } from "@/lib/candidate-auth-consent"
+import {
   listIdentityDocumentTypes,
   type IdentityDocumentTypeOptionDto,
 } from "@/lib/api/identity-document-types"
+import { PhoneCountryInput } from "@/components/ui/PhoneCountryInput"
+import { PDF_ONLY_ACCEPT } from "@/lib/upload-constraints"
+
+const DEFAULT_PHONE_COUNTRY_ISO2 = "SV"
 
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
 
 const SOURCE_OPTION_KEYS = ["social", "friends", "jobFair", "other"] as const
+
+function buildApplyConsentSnapshot(values: {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  phoneCountryIso2: string
+  nationalId: string
+}): string {
+  return JSON.stringify({
+    firstName: values.firstName.trim(),
+    lastName: values.lastName.trim(),
+    email: values.email.trim().toLowerCase(),
+    phone: values.phone.trim(),
+    phoneCountryIso2: values.phoneCountryIso2.trim().toUpperCase() || DEFAULT_PHONE_COUNTRY_ISO2,
+    nationalId: values.nationalId.trim(),
+  })
+}
 
 interface PublicVacancyApplicationFormState {
   firstName: string
   lastName: string
   email: string
   phone: string
+  phoneCountryIso2: string
   documentTypeId: string
   nationalId: string
   linkedinUrl: string
@@ -56,6 +88,7 @@ const initialState: PublicVacancyApplicationFormState = {
   lastName: "",
   email: "",
   phone: "",
+  phoneCountryIso2: DEFAULT_PHONE_COUNTRY_ISO2,
   documentTypeId: "",
   nationalId: "",
   linkedinUrl: "",
@@ -93,6 +126,71 @@ function themeTextareaClass(theme: PublicVacancyApplicationFormTheme): string {
     return "min-h-[120px] w-full rounded-[22px] border border-border bg-muted/35 px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-cobre"
   }
   return "min-h-[120px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ats-terracotta"
+}
+
+function formatCvFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function themeCvDropzoneClass(
+  theme: PublicVacancyApplicationFormTheme,
+  opts: {
+    isDragging: boolean
+    hasFile: boolean
+    hasError: boolean
+    disabled: boolean
+  }
+): string {
+  const radius = theme === "dark" ? "rounded-[22px]" : "rounded-lg"
+  const focusRing =
+    theme === "dark"
+      ? "focus-visible:outline-ats-cobre"
+      : "focus-visible:outline-ats-terracotta"
+  const surface = opts.hasError
+    ? "border-destructive bg-destructive/5"
+    : opts.isDragging
+      ? theme === "dark"
+        ? "border-ats-cobre bg-ats-cobre/10"
+        : "border-ats-terracotta bg-ats-terracotta/8"
+      : opts.hasFile
+        ? theme === "dark"
+          ? "border-ats-cobre/45 bg-muted/35"
+          : "border-ats-terracotta/40 bg-ats-terracotta/5"
+        : theme === "dark"
+          ? "border-border bg-muted/20 hover:border-foreground/30"
+          : "border-border bg-background hover:border-muted-foreground/45"
+  const interaction = opts.disabled
+    ? "cursor-not-allowed opacity-60"
+    : "cursor-pointer"
+
+  return `relative block w-full ${radius} border-2 border-dashed p-10 text-center transition focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 ${focusRing} ${surface} ${interaction}`
+}
+
+function CvDropzoneGlyph() {
+  return (
+    <svg
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+      className="mx-auto size-12 text-muted-foreground"
+    >
+      <path
+        d="M16 8h11.172a2 2 0 0 1 1.414.586l7.828 7.828A2 2 0 0 1 37 17.828V38a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2Z"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M27 8v8a2 2 0 0 0 2 2h8M24 26v10m-5-5h10"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
 function getLoadingStepFromPercent(percent: number): 1 | 2 | 3 | 4 {
@@ -251,13 +349,10 @@ function PublicApplicationSubmitProgress({
 export function PublicVacancyApplicationForm({
   vacancyId,
   theme = "light",
-  backToVacancyHref,
   onRequestClose,
 }: {
   vacancyId: string
   theme?: PublicVacancyApplicationFormTheme
-  /** En página completa: enlace “Volver a vacantes”. */
-  backToVacancyHref?: string
   /** Tras éxito o al cerrar desde el modal. */
   onRequestClose?: () => void
 }) {
@@ -266,10 +361,18 @@ export function PublicVacancyApplicationForm({
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [serverError, setServerError] = useState<string | null>(null)
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0)
   const [submitPhase, setSubmitPhase] = useState<"idle" | "loading" | "success">("idle")
   const [loadingOverlay, setLoadingOverlay] = useState({ percent: 0, longWait: false })
   const [isConfirmEmailModalOpen, setIsConfirmEmailModalOpen] = useState(false)
+  const [isConsentModalOpen, setIsConsentModalOpen] = useState(false)
+  const [acceptedConsent, setAcceptedConsent] = useState<{
+    payload: ConsentAuthorizationSubmitPayload
+    snapshot: string
+  } | null>(null)
   const loadingStartedAtRef = useRef(0)
+  const cvInputRef = useRef<HTMLInputElement>(null)
+  const [isCvDragging, setIsCvDragging] = useState(false)
   const [documentTypes, setDocumentTypes] = useState<IdentityDocumentTypeOptionDto[]>([])
   const [isLoadingDocumentTypes, setIsLoadingDocumentTypes] = useState(true)
 
@@ -322,6 +425,14 @@ export function PublicVacancyApplicationForm({
     return () => window.clearInterval(id)
   }, [submitPhase])
 
+  useEffect(() => {
+    if (rateLimitSecondsLeft <= 0) return
+    const id = window.setInterval(() => {
+      setRateLimitSecondsLeft((s) => (s <= 1 ? 0 : s - 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [rateLimitSecondsLeft])
+
   const handleChange = useCallback(
     (
       event: ChangeEvent<
@@ -337,19 +448,86 @@ export function PublicVacancyApplicationForm({
     []
   )
 
-  const handleFileChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] ?? null
-    if (file && !isAllowedCvFile(file)) {
-      event.target.value = ""
-      setCvFile(null)
-      setErrors((prev) => ({ ...prev, cvFile: t("validation.fileType") }))
-      setServerError(null)
-      return
-    }
-    setCvFile(file)
-    setErrors((prev) => ({ ...prev, cvFile: undefined }))
+  const handlePhoneChange = useCallback((phone: string) => {
+    setValues((prev) => ({ ...prev, phone }))
+    setErrors((prev) => ({ ...prev, phone: undefined }))
     setServerError(null)
-  }, [t])
+  }, [])
+
+  const handlePhoneCountryChange = useCallback((iso2: string) => {
+    setValues((prev) => ({ ...prev, phoneCountryIso2: iso2 }))
+    setServerError(null)
+  }, [])
+
+  const applyCvFile = useCallback(
+    (file: File | null, input?: HTMLInputElement | null) => {
+      if (file && !isAllowedCvFile(file)) {
+        if (input) input.value = ""
+        setCvFile(null)
+        setErrors((prev) => ({ ...prev, cvFile: t("validation.fileType") }))
+        setServerError(null)
+        return
+      }
+      if (file && !isCvFileWithinSizeLimit(file)) {
+        if (input) input.value = ""
+        setCvFile(null)
+        setErrors((prev) => ({ ...prev, cvFile: t("validation.fileTooLarge") }))
+        setServerError(null)
+        return
+      }
+      setCvFile(file)
+      setErrors((prev) => ({ ...prev, cvFile: undefined }))
+      setServerError(null)
+    },
+    [t]
+  )
+
+  const handleFileChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      applyCvFile(event.target.files?.[0] ?? null, event.target)
+    },
+    [applyCvFile]
+  )
+
+  const handleCvDropzoneClick = useCallback(() => {
+    if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+    cvInputRef.current?.click()
+  }, [rateLimitSecondsLeft, submitPhase])
+
+  const handleCvDragOver = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+      event.preventDefault()
+      event.stopPropagation()
+      setIsCvDragging(true)
+    },
+    [rateLimitSecondsLeft, submitPhase]
+  )
+
+  const handleCvDragLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const related = event.relatedTarget
+    if (related instanceof Node && event.currentTarget.contains(related)) return
+    setIsCvDragging(false)
+  }, [])
+
+  const handleCvDrop = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+      event.preventDefault()
+      event.stopPropagation()
+      setIsCvDragging(false)
+      applyCvFile(event.dataTransfer?.files?.[0] ?? null, cvInputRef.current)
+    },
+    [applyCvFile, rateLimitSecondsLeft, submitPhase]
+  )
+
+  const handleRemoveCvFile = useCallback(() => {
+    if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+    if (cvInputRef.current) cvInputRef.current.value = ""
+    applyCvFile(null)
+  }, [applyCvFile, rateLimitSecondsLeft, submitPhase])
 
   const validateClient = useCallback((): Partial<Record<FieldKey, string>> => {
     const next: Partial<Record<FieldKey, string>> = {}
@@ -357,25 +535,31 @@ export function PublicVacancyApplicationForm({
     if (!values.lastName.trim()) next.lastName = t("validation.lastNameRequired")
     if (!values.email.trim()) next.email = t("validation.emailRequired")
     else if (!isValidEmailFormat(values.email)) next.email = t("validation.emailInvalid")
+    if (!values.phone.trim()) next.phone = t("validation.phoneRequired")
+    if (!values.documentTypeId.trim()) {
+      next.documentTypeId = t("validation.documentTypeRequired")
+    }
+    if (!values.nationalId.trim()) {
+      next.nationalId = t("validation.documentNumberRequired")
+    }
     if (!cvFile) next.cvFile = t("validation.cvRequired")
-    else if (!isAllowedCvFile(cvFile))
-      next.cvFile = t("validation.fileType")
-    
-    const hasDocumentType = values.documentTypeId.trim() !== ""
-    const hasNationalId = values.nationalId.trim() !== ""
-    
-    if (hasDocumentType && !hasNationalId) {
-      next.nationalId = t("validation.documentTypeRequiresNumber")
-    }
-    if (hasNationalId && !hasDocumentType) {
-      next.documentTypeId = t("validation.documentNumberRequiresType")
-    }
-    
+    else if (!isAllowedCvFile(cvFile)) next.cvFile = t("validation.fileType")
+    else if (!isCvFileWithinSizeLimit(cvFile)) next.cvFile = t("validation.fileTooLarge")
+
     return next
-  }, [values.firstName, values.lastName, values.email, values.documentTypeId, values.nationalId, cvFile, t])
+  }, [
+    values.firstName,
+    values.lastName,
+    values.email,
+    values.phone,
+    values.documentTypeId,
+    values.nationalId,
+    cvFile,
+    t,
+  ])
 
   const executeSubmit = useCallback(async () => {
-    if (!cvFile) return
+    if (!cvFile || !acceptedConsent) return
 
     setSubmitPhase("loading")
     setLoadingOverlay({ percent: 0, longWait: false })
@@ -395,12 +579,14 @@ export function PublicVacancyApplicationForm({
       source: values.source,
       notes: values.notes,
       cvFile,
+      authConsent: acceptedConsent.payload,
     }
 
     try {
       await submitPublicVacancyApplication(vacancyId, payload)
       setValues(initialState)
       setCvFile(null)
+      setAcceptedConsent(null)
       setSubmitPhase("success")
     } catch (err: unknown) {
       setSubmitPhase("idle")
@@ -412,6 +598,57 @@ export function PublicVacancyApplicationForm({
         typeof err === "object" && err !== null && "body" in err
           ? (err as { body?: unknown }).body
           : undefined
+      const retryAfter =
+        typeof err === "object" && err !== null && "retryAfter" in err
+          ? Number((err as { retryAfter?: number }).retryAfter)
+          : undefined
+
+      const consentCode = getApiErrorCode(err)
+      if (consentCode === "AUTH_CONSENT_VERSION_MISMATCH") {
+        setServerError(t("validation.consentVersionMismatch"))
+        return
+      }
+      if (consentCode === "AUTH_CONSENT_NATIONAL_ID_CONFLICT") {
+        setServerError(t("validation.consentNationalIdConflict"))
+        return
+      }
+      if (consentCode === "AUTH_CONSENT_VALIDATION") {
+        setServerError(t("validation.consentValidation"))
+        return
+      }
+
+      if (status === 429) {
+        const seconds = parseRetryAfterSeconds(
+          retryAfter != null && Number.isFinite(retryAfter)
+            ? String(retryAfter)
+            : null
+        )
+        setRateLimitSecondsLeft(seconds)
+        const apiMessage = getPublicApplyErrorMessage(status, body)
+        setServerError(
+          apiMessage ||
+            t("validation.rateLimited", { seconds: String(seconds) })
+        )
+        return
+      }
+
+      if (status === 413) {
+        setErrors((prev) => ({
+          ...prev,
+          cvFile: t("validation.fileTooLarge"),
+        }))
+        setServerError(getPublicApplyErrorMessage(status, body))
+        return
+      }
+
+      if (status === 415) {
+        setErrors((prev) => ({
+          ...prev,
+          cvFile: t("validation.fileInvalid"),
+        }))
+        setServerError(getPublicApplyErrorMessage(status, body))
+        return
+      }
 
       if (status === 400) {
         const fieldMap = parsePublicApplyFieldErrors(body)
@@ -420,16 +657,18 @@ export function PublicVacancyApplicationForm({
           setServerError(t("validation.reviewFields"))
           return
         }
+        setServerError(getPublicApplyErrorMessage(status, body))
+        return
       }
 
       setServerError(getPublicApplyErrorMessage(status, body))
     }
-  }, [cvFile, values, vacancyId, t])
+  }, [cvFile, values, vacancyId, t, acceptedConsent])
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault()
-      if (submitPhase === "loading") return
+      if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
 
       const clientErrors = validateClient()
       if (Object.keys(clientErrors).length > 0) {
@@ -438,9 +677,67 @@ export function PublicVacancyApplicationForm({
         return
       }
 
+      const snapshot = buildApplyConsentSnapshot(values)
+      if (acceptedConsent?.snapshot === snapshot) {
+        setIsConfirmEmailModalOpen(true)
+        return
+      }
+
+      setIsConsentModalOpen(true)
+    },
+    [submitPhase, rateLimitSecondsLeft, validateClient, values, acceptedConsent]
+  )
+
+  const consentInitialValues = useMemo<ConsentAuthorizationInitialValues>(
+    () => ({
+      firstNames: values.firstName,
+      lastNames: values.lastName,
+      documentId: values.nationalId,
+      email: values.email,
+      phone: values.phone,
+      phoneCountryIso2: values.phoneCountryIso2,
+    }),
+    [
+      values.firstName,
+      values.lastName,
+      values.nationalId,
+      values.email,
+      values.phone,
+      values.phoneCountryIso2,
+    ]
+  )
+
+  const handleCloseConsent = useCallback(() => {
+    setIsConsentModalOpen(false)
+  }, [])
+
+  const handleAcceptConsent = useCallback(
+    async (payload: ConsentAuthorizationSubmitPayload) => {
+      setValues((prev) => ({
+        ...prev,
+        firstName: payload.firstNames,
+        lastName: payload.lastNames,
+        nationalId: payload.identityDocument || prev.nationalId,
+        phone: payload.phoneNationalNumber || prev.phone,
+        phoneCountryIso2:
+          payload.phoneCountryIso2 || prev.phoneCountryIso2,
+      }))
+      setAcceptedConsent({
+        payload,
+        snapshot: buildApplyConsentSnapshot({
+          firstName: payload.firstNames,
+          lastName: payload.lastNames,
+          email: values.email,
+          phone: payload.phoneNationalNumber || values.phone,
+          phoneCountryIso2:
+            payload.phoneCountryIso2 || values.phoneCountryIso2,
+          nationalId: payload.identityDocument || values.nationalId,
+        }),
+      })
+      setIsConsentModalOpen(false)
       setIsConfirmEmailModalOpen(true)
     },
-    [submitPhase, validateClient]
+    [values.email, values.phone, values.phoneCountryIso2, values.nationalId]
   )
 
   if (submitPhase === "success") {
@@ -454,18 +751,6 @@ export function PublicVacancyApplicationForm({
           <PublicApplicationSubmitProgress mode="success" theme={theme} />
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          {backToVacancyHref ? (
-            <Link
-              href={backToVacancyHref}
-              className={
-                theme === "dark"
-                  ? "inline-flex items-center justify-center rounded-full border border-border bg-muted/50 px-5 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted/60"
-                  : "inline-flex items-center justify-center rounded-lg border border-border bg-muted px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted/80"
-              }
-            >
-              {t("actions.backToVacancy")}
-            </Link>
-          ) : null}
           <Link
             href="/portal-oportunidades"
             className={
@@ -494,7 +779,7 @@ export function PublicVacancyApplicationForm({
     )
   }
 
-  const disabled = submitPhase === "loading"
+  const disabled = submitPhase === "loading" || rateLimitSecondsLeft > 0
   const showProgressOverlay = submitPhase === "loading"
 
   return (
@@ -532,6 +817,7 @@ export function PublicVacancyApplicationForm({
             className={inputClass}
             disabled={disabled}
             autoComplete="given-name"
+            placeholder={t("placeholders.firstName")}
             aria-invalid={Boolean(errors.firstName)}
             aria-describedby={errors.firstName ? "apply-firstName-err" : undefined}
           />
@@ -553,6 +839,7 @@ export function PublicVacancyApplicationForm({
             className={inputClass}
             disabled={disabled}
             autoComplete="family-name"
+            placeholder={t("placeholders.lastName")}
             aria-invalid={Boolean(errors.lastName)}
             aria-describedby={errors.lastName ? "apply-lastName-err" : undefined}
           />
@@ -575,6 +862,7 @@ export function PublicVacancyApplicationForm({
             className={inputClass}
             disabled={disabled}
             autoComplete="email"
+            placeholder={t("placeholders.email")}
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? "apply-email-err" : undefined}
           />
@@ -588,16 +876,28 @@ export function PublicVacancyApplicationForm({
           <label htmlFor="apply-phone" className={labelClass}>
             {t("fields.phone")}
           </label>
-          <input
+          <PhoneCountryInput
             id="apply-phone"
             name="phone"
-            type="tel"
-            value={values.phone}
-            onChange={handleChange}
-            className={inputClass}
+            phone={values.phone}
+            countryIso2={values.phoneCountryIso2}
+            onPhoneChange={handlePhoneChange}
+            onCountryChange={handlePhoneCountryChange}
             disabled={disabled}
-            autoComplete="tel"
+            placeholder={t("placeholders.phone")}
+            countryAriaLabel={t("aria.phoneCountry")}
+            loadingLabel={t("placeholders.loadingCountries")}
+            searchPlaceholder={t("placeholders.searchCountry")}
+            emptyResultsLabel={t("placeholders.noCountries")}
+            surface={theme === "dark" ? "public-dark" : "public-light"}
+            aria-invalid={Boolean(errors.phone)}
+            aria-describedby={errors.phone ? "apply-phone-err" : undefined}
           />
+          {errors.phone ? (
+            <p id="apply-phone-err" className={errClass} role="alert">
+              {errors.phone}
+            </p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <label htmlFor="apply-documentTypeId" className={labelClass}>
@@ -733,53 +1033,91 @@ export function PublicVacancyApplicationForm({
           {t("fields.resume")}
         </label>
         <div
-          className={
-            theme === "dark"
-              ? "rounded-[22px] border border-dashed border-border bg-muted/35 p-4"
-              : "rounded-lg border border-dashed border-border bg-muted/40 p-4"
-          }
+          className="relative"
+          onDragOver={handleCvDragOver}
+          onDragLeave={handleCvDragLeave}
+          onDrop={handleCvDrop}
         >
-          <label
-            htmlFor="apply-cv"
-            className={
-              theme === "dark"
-                ? "inline-flex cursor-pointer items-center gap-2 rounded-full bg-ats-warm-white px-4 py-2 text-sm font-medium text-ats-grafito"
-                : "inline-flex cursor-pointer items-center gap-2 rounded-lg bg-ats-terracotta px-4 py-2 text-sm font-medium text-ats-warm-white"
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={handleCvDropzoneClick}
+            aria-label={
+              isCvDragging
+                ? t("file.dropActive")
+                : cvFile
+                  ? cvFile.name
+                  : t("file.selectPdf")
             }
+            aria-describedby={
+              errors.cvFile ? "apply-cv-helper apply-cv-err" : "apply-cv-helper"
+            }
+            aria-invalid={Boolean(errors.cvFile)}
+            className={themeCvDropzoneClass(theme, {
+              isDragging: isCvDragging,
+              hasFile: Boolean(cvFile),
+              hasError: Boolean(errors.cvFile),
+              disabled,
+            })}
           >
-            <Paperclip className="h-4 w-4 shrink-0" aria-hidden />
-            {t("file.selectPdf")}
-          </label>
+            {cvFile ? (
+              <FileText
+                className={
+                  theme === "dark"
+                    ? "mx-auto size-12 text-ats-cobre"
+                    : "mx-auto size-12 text-ats-terracotta"
+                }
+                strokeWidth={1.5}
+                aria-hidden
+              />
+            ) : (
+              <CvDropzoneGlyph />
+            )}
+            <span className="mt-2 block text-sm font-semibold text-foreground">
+              {isCvDragging
+                ? t("file.dropActive")
+                : cvFile
+                  ? cvFile.name
+                  : t("file.selectPdf")}
+            </span>
+            <span
+              id="apply-cv-helper"
+              className="mt-1 block text-xs text-muted-foreground"
+            >
+              {cvFile
+                ? `${formatCvFileSize(cvFile.size)} · ${t("file.changeFile")}`
+                : t("file.helper")}
+            </span>
+          </button>
+          {cvFile ? (
+            <button
+              type="button"
+              onClick={handleRemoveCvFile}
+              disabled={disabled}
+              className={
+                theme === "dark"
+                  ? "absolute right-3 top-3 rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                  : "absolute right-3 top-3 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              }
+              aria-label={t("file.removeAria", { fileName: cvFile.name })}
+            >
+              <X className="size-4" aria-hidden />
+            </button>
+          ) : null}
           <input
+            ref={cvInputRef}
             id="apply-cv"
             name="cvFile"
             type="file"
-            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept={PDF_ONLY_ACCEPT}
             onChange={handleFileChange}
             className="sr-only"
+            tabIndex={-1}
             disabled={disabled}
           />
-          <p
-            className={
-              theme === "dark"
-                ? "mt-3 text-xs text-muted-foreground"
-                : "mt-3 text-xs text-muted-foreground"
-            }
-          >
-            {t("file.helper")}
-          </p>
-          {cvFile ? (
-            <p
-              className={
-                theme === "dark" ? "mt-2 text-sm text-muted-foreground" : "mt-2 text-sm text-foreground"
-              }
-            >
-              {cvFile.name}
-            </p>
-          ) : null}
         </div>
         {errors.cvFile ? (
-          <p className={errClass} role="alert">
+          <p id="apply-cv-err" className={errClass} role="alert">
             {errors.cvFile}
           </p>
         ) : null}
@@ -800,14 +1138,18 @@ export function PublicVacancyApplicationForm({
           }
           aria-live="polite"
         >
-          {disabled ? (
+          {disabled && submitPhase === "loading" ? (
             <LoaderCircle className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
           ) : (
             <Mail className="h-4 w-4 shrink-0" aria-hidden />
           )}
-          {disabled ? t("actions.submitting") : t("actions.submit")}
+          {submitPhase === "loading"
+            ? t("actions.submitting")
+            : rateLimitSecondsLeft > 0
+              ? t("actions.retryIn", { seconds: String(rateLimitSecondsLeft) })
+              : t("actions.submit")}
         </button>
-        {disabled ? (
+        {submitPhase === "loading" ? (
           <p
             className={
               theme === "dark"
@@ -830,6 +1172,14 @@ export function PublicVacancyApplicationForm({
       email={values.email}
       theme={theme}
       isSubmitting={submitPhase === "loading"}
+    />
+    <ConsentAuthorizationModal
+      isOpen={isConsentModalOpen}
+      onClose={handleCloseConsent}
+      onAccept={handleAcceptConsent}
+      initialValues={consentInitialValues}
+      variant="public"
+      isDismissible
     />
     </div>
   )

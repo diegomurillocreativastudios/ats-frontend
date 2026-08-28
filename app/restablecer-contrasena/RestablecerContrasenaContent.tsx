@@ -22,9 +22,6 @@ import { getApiErrorMessage } from "@/lib/api-error"
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : ""
 
-const isValidEmail = (value: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-
 interface SnackbarState {
   type: "success" | "error"
   text: string
@@ -42,17 +39,8 @@ export default function RestablecerContrasenaContent() {
   const tErrors = useTranslations("Errors")
   const searchParams = useSearchParams()
   const token = searchParams.get("token")?.trim() ?? ""
-  const emailFromQuery = searchParams.get("email")?.trim() ?? ""
-
   const hasToken = Boolean(token)
-  const emailValidForFlow =
-    Boolean(emailFromQuery) && isValidEmail(emailFromQuery)
-  /**
-   * Flujo in-app: email en query sin token (tras forgot-password con exists/success).
-   * Si hay token (enlace mail), el backend solo usa token — no mezclar con email en el body.
-   */
-  const isEmailFlow = emailValidForFlow && !hasToken
-  const canShowForm = hasToken || isEmailFlow
+  const canShowForm = hasToken
 
   const [formData, setFormData] = useState<FormState>({
     password: "",
@@ -110,14 +98,10 @@ export default function RestablecerContrasenaContent() {
 
     setLoading(true)
     try {
-      const body = hasToken
-        ? { password: formData.password, token }
-        : { password: formData.password, email: emailFromQuery }
-
       const res = await fetch(`${getOrigin()}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ password: formData.password, token }),
       })
 
       const data = await res.json().catch(() => ({}))
@@ -151,8 +135,6 @@ export default function RestablecerContrasenaContent() {
       setLoading(false)
     }
   }
-
-  const noopChange = () => {}
 
   if (!canShowForm) {
     return (
@@ -242,9 +224,7 @@ export default function RestablecerContrasenaContent() {
               {t("reset.brandTitle")}
             </h1>
             <p className="mt-6 text-lg leading-normal text-white/80">
-              {isEmailFlow
-                ? t("reset.brandSubtitleEmailFlow")
-                : t("reset.brandSubtitle")}
+              {t("reset.brandSubtitle")}
             </p>
           </div>
 
@@ -253,9 +233,7 @@ export default function RestablecerContrasenaContent() {
               {t("reset.brandTitle")}
             </h1>
             <p className="mt-6 text-sm leading-[1.4] text-white/80">
-              {isEmailFlow
-                ? t("reset.brandSubtitleSmEmailFlow")
-                : t("reset.brandSubtitleSm")}
+              {t("reset.brandSubtitleSm")}
             </p>
           </div>
         </div>
@@ -278,43 +256,23 @@ export default function RestablecerContrasenaContent() {
             </svg>
             <span className="text-base">{t("reset.feature1")}</span>
           </div>
-          {isEmailFlow ? (
-            <div className="flex items-center gap-3">
-              <svg
-                className="h-5 w-5 text-vo-cobre"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span className="text-base">{t("reset.featureEmailVerified")}</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <svg
-                className="h-5 w-5 text-vo-cobre"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span className="text-base">{t("reset.featureRecoveryLink")}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            <svg
+              className="h-5 w-5 text-vo-cobre"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              aria-hidden
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span className="text-base">{t("reset.featureRecoveryLink")}</span>
+          </div>
         </div>
       </div>
 
@@ -334,9 +292,7 @@ export default function RestablecerContrasenaContent() {
                 {t("reset.title")}
               </h2>
               <p className="text-sm text-muted-foreground md:text-sm lg:text-base">
-                {isEmailFlow
-                  ? t("reset.subtitleEmailFlow")
-                  : t("reset.subtitle")}
+                {t("reset.subtitle")}
               </p>
             </div>
 
@@ -347,19 +303,6 @@ export default function RestablecerContrasenaContent() {
               data-testid="auth-reset-form"
             >
               <div className="flex flex-col gap-4">
-                {isEmailFlow ? (
-                  <Input
-                    label={t("reset.emailLabel")}
-                    type="email"
-                    name="verifiedEmail"
-                    value={emailFromQuery}
-                    onChange={noopChange}
-                    disabled
-                    testId="auth-reset-email-verified"
-                    accent="navy"
-                  />
-                ) : null}
-
                 <div className="flex flex-col gap-1">
                   <Input
                     label={t("reset.newPasswordLabel")}

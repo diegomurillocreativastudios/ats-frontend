@@ -18,6 +18,12 @@ import ProductBrand from "@/components/branding/ProductBrand"
 import LanguageSwitcher from "@/components/language-switcher"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
+import {
+  getSsoErrorTranslationKey,
+  isKnownSsoErrorCode,
+  resolveSsoQueryErrorCode,
+} from "@/lib/auth/sso-errors"
 import { LinkedInLoginButton } from "@/components/auth/LinkedInLoginButton"
 
 const getOrigin = () =>
@@ -45,6 +51,7 @@ export default function IniciarSesion() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<SnackbarState | null>(null)
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0)
   const [errors, setErrors] = useState<
     Partial<Record<keyof LoginFormState, string>>
   >({})
@@ -78,10 +85,24 @@ export default function IniciarSesion() {
   }, [])
 
   useEffect(() => {
+    if (rateLimitSecondsLeft <= 0) return
+    const id = window.setInterval(() => {
+      setRateLimitSecondsLeft((s) => (s <= 1 ? 0 : s - 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [rateLimitSecondsLeft])
+
+  useEffect(() => {
     if (typeof window === "undefined") return
     const params = new URLSearchParams(window.location.search)
     const passwordReset = params.get("passwordReset")
     const logout = params.get("logout")
+    /**
+     * Prefer `reason` over generic `error=linkedin_sso_failed` so dedicated copy shows.
+     * resolveSsoQueryErrorCode prefers `error`; here we invert for login landing.
+     */
+    const ssoCode =
+      resolveSsoQueryErrorCode(params.get("reason"), params.get("error")) ?? ""
 
     if (passwordReset === "success") {
       setMessage({
@@ -98,6 +119,20 @@ export default function IniciarSesion() {
         type: "error",
         text: t("login.toastLogoutError"),
       })
+    } else if (ssoCode && isKnownSsoErrorCode(ssoCode)) {
+      const ssoKey = getSsoErrorTranslationKey(ssoCode)
+      setMessage({
+        type: "error",
+        text:
+          ssoKey === "errorDescription"
+            ? t("sso.errorDescription")
+            : t(`sso.${ssoKey}` as "sso.errors.account_exists"),
+      })
+    } else if (ssoCode) {
+      setMessage({
+        type: "error",
+        text: t("sso.errorDescription"),
+      })
     } else {
       return
     }
@@ -105,6 +140,8 @@ export default function IniciarSesion() {
     const url = new URL(window.location.href)
     url.searchParams.delete("passwordReset")
     url.searchParams.delete("logout")
+    url.searchParams.delete("reason")
+    url.searchParams.delete("error")
     const qs = url.searchParams.toString()
     window.history.replaceState(
       {},
@@ -122,6 +159,8 @@ export default function IniciarSesion() {
     }
     setMessage(null)
   }
+
+  const isSubmitBlocked = loading || rateLimitSecondsLeft > 0
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -143,13 +182,21 @@ export default function IniciarSesion() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        const text =
+        if (res.status === 429) {
+          setRateLimitSecondsLeft(
+            parseRetryAfterSeconds(res.headers.get("retry-after"))
+          )
+        }
+        const raw =
           data.message ||
           data.detail ||
-          t("login.toastInvalidCredentials");
+          (res.status === 429
+            ? t("login.toastRateLimited")
+            : t("login.toastInvalidCredentials"))
+        const text = Array.isArray(raw) ? raw[0] : raw
         setMessage({
           type: "error",
-          text: Array.isArray(text) ? text[0] : text
+          text: typeof text === "string" ? text : String(text),
         });
         return;
       }
@@ -266,7 +313,7 @@ export default function IniciarSesion() {
                   value={formData.email}
                   onChange={handleChange}
                   error={errors.email}
-                  disabled={loading}
+                  disabled={isSubmitBlocked}
                   testId="auth-login-email"
                 />
 
@@ -279,7 +326,7 @@ export default function IniciarSesion() {
                   value={formData.password}
                   onChange={handleChange}
                   error={errors.password}
-                  disabled={loading}
+                  disabled={isSubmitBlocked}
                   testId="auth-login-password"
                 />
 
@@ -289,7 +336,7 @@ export default function IniciarSesion() {
                     id="showPassword"
                     checked={showPassword}
                     onChange={(e) => setShowPassword(e.target.checked)}
-                    disabled={loading}
+                    disabled={isSubmitBlocked}
                     className="h-4 w-4 rounded border-input accent-vo-purple focus:ring-vo-purple focus:ring-2 focus:ring-offset-0"
                     aria-label={t("login.showPassword")}
                   />
@@ -314,10 +361,14 @@ export default function IniciarSesion() {
               <div className="flex flex-col gap-4">
                 <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={isSubmitBlocked}
                   data-testid="auth-login-submit"
                 >
-                  {loading ? t("login.submitting") : t("login.submit")}
+                  {loading
+                    ? t("login.submitting")
+                    : rateLimitSecondsLeft > 0
+                      ? t("login.retryIn", { seconds: rateLimitSecondsLeft })
+                      : t("login.submit")}
                 </Button>
 
                 <div className="flex flex-col gap-3">
@@ -330,7 +381,7 @@ export default function IniciarSesion() {
                   </div>
 
                   <Suspense fallback={null}>
-                    <LinkedInLoginButton disabled={loading} />
+                    <LinkedInLoginButton disabled={isSubmitBlocked} />
                   </Suspense>
                 </div>
               </div>

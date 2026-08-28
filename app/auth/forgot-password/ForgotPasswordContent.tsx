@@ -102,8 +102,6 @@ export default function ForgotPasswordContent() {
         return
       }
 
-      const exists = Boolean(data.exists ?? data.Exists)
-      const success = Boolean(data.success ?? data.Success)
       const serverMessage =
         typeof data.message === "string"
           ? data.message
@@ -111,17 +109,9 @@ export default function ForgotPasswordContent() {
             ? data.Message
             : ""
 
-      if (success && exists) {
-        setMessage({
-          type: "success",
-          text: serverMessage || t("forgot.toastSuccess"),
-        })
-        return
-      }
-
       setMessage({
-        type: "error",
-        text: serverMessage || t("forgot.toastNoAccount"),
+        type: "success",
+        text: serverMessage || t("forgot.toastSuccess"),
       })
     } catch (err: unknown) {
       setMessage({

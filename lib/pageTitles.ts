@@ -57,6 +57,7 @@ const CANDIDATO_PATH_LABEL = {
 }
 
 const ADMIN_PATH_LABEL = {
+  vacantes: "Vacantes",
   etapas: "Etapas",
   entrevistas: "Entrevistas",
   plantillas: "Plantillas",
@@ -65,6 +66,10 @@ const ADMIN_PATH_LABEL = {
   catalogos: "Catálogos",
   departamentos: "Departamentos",
   modalidades: "Modalidades",
+  tipos: "Tipos",
+  estados: "Estados",
+  administracion: "Administración",
+  "tipos-de-documento": "Tipos de documento",
 }
 
 /** Listado de entrevistas de una vacante: `/portal-rrhh/entrevistas/<vacancyId>`. */

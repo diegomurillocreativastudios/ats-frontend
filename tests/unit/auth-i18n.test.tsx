@@ -112,6 +112,13 @@ describe("Restablecer contraseña i18n (Etapa 4)", () => {
       screen.getByRole("heading", { name: "We couldn't open the reset" }),
     ).toBeInTheDocument()
   })
+
+  it("bloquea el formulario cuando solo hay email en la query (token-only)", () => {
+    searchParamsValue = new URLSearchParams("email=usuario@ejemplo.com")
+    renderWithIntl(<RestablecerContrasenaContent />, "es")
+    expect(screen.getByTestId("auth-reset-invalid-link")).toBeInTheDocument()
+    expect(screen.queryByTestId("auth-reset-form")).not.toBeInTheDocument()
+  })
 })
 
 describe("Diccionarios auth (Etapa 4)", () => {

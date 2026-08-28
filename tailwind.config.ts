@@ -92,6 +92,12 @@ const config: Config = {
           "system-ui",
           "sans-serif",
         ],
+        serif: [
+          "var(--font-fraunces)",
+          "Georgia",
+          "Times New Roman",
+          "serif",
+        ],
       },
       borderRadius: {
         DEFAULT: "6px",

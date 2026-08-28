@@ -2,13 +2,16 @@ import { describe, expect, it, vi, beforeEach } from "vitest"
 import {
   mapVacancyCompanyPatchError,
   patchVacancyClientCompany,
+  listRecruiterVacanciesPage,
 } from "@/lib/api/recruiter-vacancies"
 
 const apiPatch = vi.fn()
+const apiGetWithHeaders = vi.fn()
 
 vi.mock("@/lib/api", () => ({
   apiClient: {
     patch: (...args: unknown[]) => apiPatch(...args),
+    getWithHeaders: (...args: unknown[]) => apiGetWithHeaders(...args),
   },
 }))
 
@@ -45,5 +48,31 @@ describe("patchVacancyClientCompany", () => {
     await expect(patchVacancyClientCompany("", "co-2")).rejects.toThrow(
       "Faltan el id de la vacante o la empresa cliente."
     )
+  })
+})
+
+describe("listRecruiterVacanciesPage", () => {
+  beforeEach(() => {
+    apiGetWithHeaders.mockReset()
+  })
+
+  it("sends page and pageSize and reads X-Total-Count", async () => {
+    apiGetWithHeaders.mockResolvedValueOnce({
+      data: [{ id: "v1", title: "Dev" }],
+      headers: new Headers({
+        "X-Total-Count": "14",
+        "X-Page": "2",
+        "X-Page-Size": "50",
+      }),
+    })
+
+    const result = await listRecruiterVacanciesPage({ page: 2, pageSize: 50 })
+
+    expect(apiGetWithHeaders).toHaveBeenCalledWith(
+      "/api/recruiter/vacancies?page=2&pageSize=50"
+    )
+    expect(result.items).toHaveLength(1)
+    expect(result.totalCount).toBe(14)
+    expect(result.page).toBe(2)
   })
 })

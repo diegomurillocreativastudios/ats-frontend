@@ -76,6 +76,7 @@ export interface OpportunityPagination {
 export interface OpportunityAvailableFilters {
   departments: OpportunityFilterOption[]
   modalities: OpportunityFilterOption[]
+  countries: OpportunityFilterOption[]
 }
 
 export interface OpportunityListResponse {
@@ -287,6 +288,9 @@ export function normalizeOpportunityListResponse(payload: unknown): OpportunityL
   const modalities = normalizeFilterList(
     availableFiltersRecord?.modalities ?? availableFiltersRecord?.modalityOptions
   )
+  const countries = normalizeFilterList(
+    availableFiltersRecord?.countries ?? availableFiltersRecord?.countryOptions
+  )
 
   const page = Math.max(
     1,
@@ -313,6 +317,7 @@ export function normalizeOpportunityListResponse(payload: unknown): OpportunityL
     availableFilters: {
       departments,
       modalities,
+      countries,
     },
     pagination: {
       page,

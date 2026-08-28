@@ -2,6 +2,14 @@ import { existsSync } from "node:fs"
 import type { Browser, Page } from "puppeteer-core"
 import puppeteer from "puppeteer-core"
 import chromium from "@sparticuz/chromium"
+import { withTechnicalSheetPdfSlot } from "@/lib/technical-sheet/pdf-chromium-concurrency"
+import {
+  TECHNICAL_SHEET_PDF_IMAGE_WAIT_MS,
+  TECHNICAL_SHEET_PDF_MAX_IMAGES,
+  TECHNICAL_SHEET_PDF_SET_CONTENT_TIMEOUT_MS,
+} from "@/lib/technical-sheet/pdf-chromium-limits"
+import { buildPdfChromiumLaunchOptions } from "@/lib/technical-sheet/pdf-chromium-launch"
+import { applyPdfChromiumNetworkPolicy } from "@/lib/technical-sheet/pdf-chromium-network-policy"
 
 /**
  * Entorno PDF headless:
@@ -9,6 +17,8 @@ import chromium from "@sparticuz/chromium"
  * - `PUPPETEER_EXECUTABLE_PATH`: Chrome/Chromium locally o en Docker (GCP).
  * - `TECHNICAL_SHEET_PDF_MEDIA_TYPE`: solo afecta pruebas o llamadas directas a `applyTechnicalSheetPdfPipeline`;
  *   `renderHtmlToPdfBuffer` usa siempre `print` para aplicar `@media print` de la plantilla.
+ *
+ * Hardening: red deny-by-default, env mínimo, semáforo de concurrencia, timeouts acotados.
  */
 
 const LOCAL_CHROME_CANDIDATES = [
@@ -18,8 +28,6 @@ const LOCAL_CHROME_CANDIDATES = [
   "/usr/bin/chromium-browser",
   "/usr/bin/chromium",
 ] as const
-
-const PDF_IMAGE_WAIT_MS = 15_000
 
 function resolveLocalChromeExecutable(): string | null {
   const fromEnv = process.env.PUPPETEER_EXECUTABLE_PATH?.trim()
@@ -60,37 +68,43 @@ export function getTechnicalSheetPdfMediaType(): "screen" | "print" {
  * Exportada para pruebas unitarias con `Page` mockeado.
  */
 export async function waitForTechnicalSheetPdfDocumentAssets(page: Page): Promise<void> {
-  await page.evaluate(async (imageWaitMs: number) => {
-    if (document.fonts?.ready) await document.fonts.ready
+  await page.evaluate(
+    async (opts: { imageWaitMs: number; maxImages: number }) => {
+      if (document.fonts?.ready) await document.fonts.ready
 
-    const imgs = Array.from(document.images)
-    const waitOne = (img: HTMLImageElement) =>
-      new Promise<void>((resolve) => {
-        if (img.complete && img.naturalHeight !== 0) {
-          resolve()
-          return
-        }
-        const done = () => {
-          window.clearTimeout(tid)
-          resolve()
-        }
-        const tid = window.setTimeout(done, imageWaitMs)
-        img.addEventListener("load", done, { once: true })
-        img.addEventListener("error", done, { once: true })
-      })
+      const imgs = Array.from(document.images).slice(0, opts.maxImages)
+      const waitOne = (img: HTMLImageElement) =>
+        new Promise<void>((resolve) => {
+          if (img.complete && img.naturalHeight !== 0) {
+            resolve()
+            return
+          }
+          const done = () => {
+            window.clearTimeout(tid)
+            resolve()
+          }
+          const tid = window.setTimeout(done, opts.imageWaitMs)
+          img.addEventListener("load", done, { once: true })
+          img.addEventListener("error", done, { once: true })
+        })
 
-    await Promise.all(imgs.map((img) => waitOne(img)))
+      await Promise.all(imgs.map((img) => waitOne(img)))
 
-    await Promise.all(
-      imgs.map(async (img) => {
-        try {
-          if (typeof img.decode === "function") await img.decode()
-        } catch {
-          /* decode puede fallar en data URI corrupto; el PDF sigue */
-        }
-      })
-    )
-  }, PDF_IMAGE_WAIT_MS)
+      await Promise.all(
+        imgs.map(async (img) => {
+          try {
+            if (typeof img.decode === "function") await img.decode()
+          } catch {
+            /* decode puede fallar en data URI corrupto; el PDF sigue */
+          }
+        })
+      )
+    },
+    {
+      imageWaitMs: TECHNICAL_SHEET_PDF_IMAGE_WAIT_MS,
+      maxImages: TECHNICAL_SHEET_PDF_MAX_IMAGES,
+    }
+  )
 }
 
 const TECHNICAL_SHEET_PDF_OPTIONS = {
@@ -105,21 +119,24 @@ export function getTechnicalSheetPdfPageOptions(): typeof TECHNICAL_SHEET_PDF_OP
 }
 
 /**
- * Fidelity: `print` media para `@media print` de la plantilla, fuentes, imágenes, `page.pdf` Letter.
- * Exported for unit tests with a mocked `Page`.
+ * Timeout fijo de `setContent` (presupuesto acotado; no escala con el HTML).
+ * El argumento `html` se conserva por compatibilidad de API/tests.
  */
-export function resolveSetContentTimeoutMs(html: string): number {
-  const len = html.length
-  if (len > 400_000) return 180_000
-  if (len > 150_000) return 120_000
-  return 60_000
+export function resolveSetContentTimeoutMs(_html?: string): number {
+  return TECHNICAL_SHEET_PDF_SET_CONTENT_TIMEOUT_MS
 }
 
+/**
+ * Fidelity: `print` media para `@media print` de la plantilla, fuentes, imágenes, `page.pdf` Letter.
+ * Aplica política de red deny-by-default antes de cargar HTML.
+ * Exported for unit tests with a mocked `Page`.
+ */
 export async function applyTechnicalSheetPdfPipeline(
   page: Page,
   html: string,
   mediaType: "screen" | "print"
 ): Promise<Buffer> {
+  await applyPdfChromiumNetworkPolicy(page)
   await page.emulateMediaType(mediaType)
   await page.setContent(html, {
     waitUntil: "load",
@@ -133,30 +150,20 @@ export async function applyTechnicalSheetPdfPipeline(
 export interface RenderHtmlToPdfBufferOptions {
   /** Vista previa del panel usa estilos `screen`; GET servidor usa `print`. */
   mediaType?: "screen" | "print"
+  /** Si true, el caller ya reservó el slot de concurrencia. */
+  skipConcurrencySlot?: boolean
 }
 
-export async function renderHtmlToPdfBuffer(
+async function renderHtmlToPdfBufferUnlocked(
   html: string,
   options?: RenderHtmlToPdfBufferOptions
 ): Promise<Buffer> {
   const executablePath = await resolveChromiumExecutablePathForPdf()
-  const isVercel = isVercelRuntime()
-  if (isVercel) {
-    chromium.setGraphicsMode = false
-  }
-  const args = isVercel ? chromium.args : ["--no-sandbox", "--disable-setuid-sandbox"]
+  const launchOptions = buildPdfChromiumLaunchOptions(executablePath)
 
   let browser: Browser | undefined
   try {
-    browser = await puppeteer.launch({
-      // `chromium.args` already includes `--headless='shell'`; `headless: true` adds the new
-      // headless stack and breaks launch on Vercel (see @sparticuz/chromium + puppeteer docs).
-      headless: isVercel ? chromium.headless : true,
-      executablePath,
-      args,
-      defaultViewport: isVercel ? chromium.defaultViewport : { width: 1280, height: 1600 },
-      timeout: isVercel ? 120_000 : 30_000,
-    })
+    browser = await puppeteer.launch(launchOptions)
     const page = await browser.newPage()
     try {
       return await applyTechnicalSheetPdfPipeline(page, html, options?.mediaType ?? "print")
@@ -166,4 +173,14 @@ export async function renderHtmlToPdfBuffer(
   } finally {
     await browser?.close().catch(() => {})
   }
+}
+
+export async function renderHtmlToPdfBuffer(
+  html: string,
+  options?: RenderHtmlToPdfBufferOptions
+): Promise<Buffer> {
+  if (options?.skipConcurrencySlot) {
+    return renderHtmlToPdfBufferUnlocked(html, options)
+  }
+  return withTechnicalSheetPdfSlot(() => renderHtmlToPdfBufferUnlocked(html, options))
 }

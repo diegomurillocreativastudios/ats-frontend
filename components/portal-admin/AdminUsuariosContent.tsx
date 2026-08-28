@@ -1,18 +1,31 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, type ReactNode } from "react"
 import {
   ChevronLeft,
   ChevronRight,
-  Loader2,
   Mail,
   Plus,
   RefreshCw,
-  Shield,
+  Users,
   UserPlus,
+  X,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
+import {
+  ADMIN_TD_CLASS,
+  ADMIN_TH_CLASS,
+  ADMIN_THEAD_CLASS,
+  ADMIN_TR_CLASS,
+  AdminEmptyState,
+  AdminErrorPanel,
+  AdminLoadingState,
+  AdminPageFrame,
+  AdminStatusPill,
+  AdminSurface,
+  AdminTableSkeleton,
+} from "@/components/portal-admin/admin-page-chrome"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { Button } from "@/components/ui/Button"
@@ -23,7 +36,6 @@ import {
   deleteAdminUserRole,
   fetchAdminUserById,
   fetchAdminUsersList,
-  patchAdminUser,
   postAdminUserRoles,
   postAdminUserSendPasswordReset,
   setAdminUserLockout,
@@ -41,7 +53,7 @@ function rolePillClass(role: string): string {
     case "Recruiter":
       return "border-vo-magenta/40 bg-vo-magenta/10 text-vo-magenta"
     case "Candidate":
-      return "border-vo-sky/50 bg-vo-sky/15 text-vo-navy"
+      return "border-vo-sky/40 bg-vo-sky/20 text-vo-navy"
     default:
       return "border-border bg-muted text-foreground"
   }
@@ -49,6 +61,96 @@ function rolePillClass(role: string): string {
 
 const checkboxVoClass =
   "h-4 w-4 shrink-0 rounded border border-input accent-vo-purple text-vo-purple focus:outline-none focus:ring-2 focus:ring-vo-purple/50 focus:ring-offset-1 disabled:opacity-50"
+
+const FILTER_SELECT_CLASS =
+  "h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple"
+
+function isDistinctUserName(email: string, userName: string): boolean {
+  const name = userName.trim()
+  return name !== "" && name.toLowerCase() !== email.trim().toLowerCase()
+}
+
+function UserRolePills({ roles }: { roles: string[] }) {
+  if (roles.length === 0) {
+    return <span className="text-muted-foreground">—</span>
+  }
+
+  const visibleRoles = roles.slice(0, 2)
+  const extraCount = roles.length - visibleRoles.length
+
+  return (
+    <div
+      className="flex flex-nowrap items-center gap-1"
+      title={roles.join(", ")}
+    >
+      {visibleRoles.map((role) => (
+        <span
+          key={role}
+          className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium ${rolePillClass(role)}`}
+        >
+          {role}
+        </span>
+      ))}
+      {extraCount > 0 ? (
+        <span className="inline-flex shrink-0 items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+          +{extraCount}
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
+function UserDetailField({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) {
+  const display = value.trim() === "" ? "—" : value
+
+  return (
+    <div className="min-w-0">
+      <p className="font-sans text-sm font-medium text-foreground">{label}</p>
+      <p
+        className="mt-1 truncate font-sans text-sm text-muted-foreground"
+        title={display}
+      >
+        {display}
+      </p>
+    </div>
+  )
+}
+
+function UserDetailSection({
+  title,
+  children,
+}: {
+  title: string
+  children: ReactNode
+}) {
+  return (
+    <section className="space-y-3">
+      <h3 className="font-sans text-sm font-medium text-foreground">{title}</h3>
+      {children}
+    </section>
+  )
+}
+
+function UserStatusTile({
+  label,
+  children,
+}: {
+  label: string
+  children: ReactNode
+}) {
+  return (
+    <div className="flex min-h-12 items-center gap-3 rounded-lg border border-border px-3 py-2.5">
+      <span className="font-sans text-sm text-foreground">{label}</span>
+      <div className="flex shrink-0 items-center gap-2">{children}</div>
+    </div>
+  )
+}
 
 function formatDateUtc(value: string | null): string {
   if (!value) return "—"
@@ -141,6 +243,25 @@ export default function AdminUsuariosContent() {
     setPage(1)
   }
 
+  const handleApplyFilters = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    applyFilters()
+  }
+
+  const handleClearFilters = () => {
+    setFilterEmail("")
+    setFilterRole("")
+    setFilterLockedOnly(false)
+    setAppliedEmail("")
+    setAppliedRole("")
+    setAppliedLockedOnly(false)
+    setPage(1)
+  }
+
+  const hasAppliedFilters =
+    appliedEmail !== "" || appliedRole !== "" || appliedLockedOnly
+  const isEmpty = !loading && items.length === 0
+
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1)
 
   const openDetail = async (id: string) => {
@@ -167,42 +288,6 @@ export default function AdminUsuariosContent() {
     setDetailId(null)
     setDetail(null)
     setDetailError(null)
-  }
-
-  const handlePatch = async (
-    patch: { lockoutEnabled?: boolean; emailConfirmed?: boolean }
-  ) => {
-    if (!detailId) return
-    setDetailBusy(true)
-    try {
-      const u = await patchAdminUser(detailId, patch)
-      setDetail(u)
-      setItems((prev) =>
-        prev.map((row) =>
-          row.id === u.id
-            ? {
-                ...row,
-                emailConfirmed: u.emailConfirmed,
-                lockoutActive: u.lockoutActive,
-                roles: u.roles,
-                userName: u.userName,
-              }
-            : row
-        )
-      )
-      if (patch.lockoutEnabled === true) {
-        showSnackbar("success", t("toasts.locked"))
-      } else if (patch.lockoutEnabled === false) {
-        showSnackbar("success", t("toasts.unlocked"))
-      } else {
-        showSnackbar("success", t("toasts.updated"))
-      }
-      void loadList()
-    } catch (err: unknown) {
-      showSnackbar("error", getApiErrorMessage(err))
-    } finally {
-      setDetailBusy(false)
-    }
   }
 
   const handleToggleLockout = async (lockoutEnabled: boolean) => {
@@ -320,34 +405,42 @@ export default function AdminUsuariosContent() {
   }
 
   return (
-    <main
-      className="flex min-h-0 flex-1 flex-col overflow-auto p-6 md:p-8"
-      aria-labelledby="portal-admin-usuarios-heading"
-    >
+    <AdminPageFrame labelledBy="portal-admin-usuarios-heading">
       <PortalPageHeader
         id="portal-admin-usuarios-heading"
         title={t("page.title")}
         description={t("page.description")}
-        className="mb-6"
+        layout="split"
         contentClassName="max-w-3xl"
         actions={
-          <Button
-            type="button"
-            variant="primary"
-            onClick={() => setCreateOpen(true)}
-          >
-            <UserPlus className="h-4 w-4" aria-hidden />
-            {t("actions.create")}
-          </Button>
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void loadList()}
+              disabled={loading}
+            >
+              <RefreshCw className="h-4 w-4" aria-hidden />
+              {t("actions.refresh")}
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => setCreateOpen(true)}
+            >
+              <UserPlus className="h-4 w-4" aria-hidden />
+              {t("actions.create")}
+            </Button>
+          </>
         }
       />
 
-      <section
-        className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm"
-        aria-label={t("filters.regionAria")}
-      >
-        <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end">
-          <div className="min-w-[200px] flex-1">
+      <AdminSurface className="p-4" aria-label={t("filters.regionAria")}>
+        <form
+          className="flex flex-col gap-4 lg:flex-row lg:items-end"
+          onSubmit={handleApplyFilters}
+        >
+          <div className="min-w-0 flex-1">
             <Input
               id="filter-email"
               name="filterEmail"
@@ -360,10 +453,10 @@ export default function AdminUsuariosContent() {
               placeholder={t("filters.emailPlaceholder")}
             />
           </div>
-          <div className="w-full min-w-[160px] md:w-48">
+          <div className="flex w-full flex-col gap-2 lg:w-40">
             <label
               htmlFor="filter-role"
-              className="mb-2 block text-sm font-medium text-foreground"
+              className="text-sm font-medium text-foreground"
             >
               {t("filters.roleLabel")}
             </label>
@@ -371,7 +464,7 @@ export default function AdminUsuariosContent() {
               id="filter-role"
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent"
+              className={FILTER_SELECT_CLASS}
             >
               <option value="">{t("filters.allRoles")}</option>
               {ASSIGNABLE_ROLES.map((r) => (
@@ -381,204 +474,213 @@ export default function AdminUsuariosContent() {
               ))}
             </select>
           </div>
-          <label className="flex cursor-pointer items-center gap-2 pb-2 font-sans text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={filterLockedOnly}
-              onChange={(e) => setFilterLockedOnly(e.target.checked)}
-              className="h-4 w-4 rounded border-border text-vo-purple focus:ring-vo-purple"
-            />
-            {t("filters.lockedOnly")}
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="primary" onClick={applyFilters}>
+          <div className="flex w-full flex-col gap-2 lg:w-44">
+            <span className="text-sm font-medium text-foreground">
+              {t("filters.lockoutLabel")}
+            </span>
+            <label className="flex h-10 cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={filterLockedOnly}
+                onChange={(e) => setFilterLockedOnly(e.target.checked)}
+                className={checkboxVoClass}
+              />
+              {t("filters.lockedOnly")}
+            </label>
+          </div>
+          <div className="flex h-10 shrink-0 items-center gap-2">
+            <Button type="submit" variant="primary" className="h-10 py-0">
               {t("filters.apply")}
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                setFilterEmail("")
-                setFilterRole("")
-                setFilterLockedOnly(false)
-                setAppliedEmail("")
-                setAppliedRole("")
-                setAppliedLockedOnly(false)
-                setPage(1)
-              }}
+              className="h-10 py-0"
+              onClick={handleClearFilters}
             >
               {t("filters.clear")}
             </Button>
           </div>
-        </div>
-      </section>
+        </form>
+      </AdminSurface>
 
       {listError ? (
-        <div
-          className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
-          role="alert"
-        >
-          {listError}
-        </div>
+        <AdminErrorPanel
+          message={listError}
+          onRetry={() => void loadList()}
+          retryLabel={t("actions.retry")}
+          ariaLabel={t("aria.loadError")}
+        />
       ) : null}
 
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="font-sans text-sm text-muted-foreground">
-          {loading ? t("count.loading") : t("count.summary", { count: totalCount })}
-        </p>
-        <div className="flex items-center gap-2">
-          <span className="font-sans text-xs text-muted-foreground">
-            {t("pagination.perPage")}
-          </span>
-          <select
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value))
-              setPage(1)
-            }}
-            className="h-9 rounded-md border border-border bg-card px-2 text-sm"
-          >
-            {[10, 20, 50, 100].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-9 px-3"
-            onClick={() => void loadList()}
-            aria-label={t("pagination.refreshAria")}
-          >
-            <RefreshCw className="h-4 w-4" aria-hidden />
-          </Button>
-        </div>
-      </div>
-
-      <div className="min-w-0 flex-1 overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
-        <table className="w-full min-w-[720px] font-sans text-left text-sm">
-          <thead className="border-b border-border bg-muted/50">
-            <tr>
-              <th className="px-4 py-3 font-medium text-foreground">
-                {t("table.email")}
-              </th>
-              <th className="px-4 py-3 font-medium text-foreground">
-                {t("table.userName")}
-              </th>
-              <th className="px-4 py-3 font-medium text-foreground">
-                {t("table.roles")}
-              </th>
-              <th className="px-4 py-3 font-medium text-foreground">
-                {t("table.emailOk")}
-              </th>
-              <th className="px-4 py-3 font-medium text-foreground">
-                {t("table.lockout")}
-              </th>
-              <th className="px-4 py-3 font-medium text-foreground">
-                {t("table.actions")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-16 text-center text-muted-foreground">
-                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-vo-purple" aria-hidden />
-                </td>
-              </tr>
-            ) : items.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                  {t("emptyStates.noResults")}
-                </td>
-              </tr>
-            ) : (
-              items.map((row) => (
-                <tr key={row.id} className="border-b border-border last:border-0">
-                  <td className="px-4 py-3 align-middle">
-                    <span className="font-medium text-foreground">{row.email}</span>
-                  </td>
-                  <td className="px-4 py-3 align-middle text-muted-foreground">
-                    {row.userName || "—"}
-                  </td>
-                  <td className="px-4 py-3 align-middle">
-                    <div className="flex flex-wrap gap-1">
-                      {row.roles.length === 0 ? (
-                        <span className="text-muted-foreground">—</span>
-                      ) : (
-                        row.roles.map((r) => (
-                          <span
-                            key={r}
-                            className="inline-flex items-center rounded-full bg-vo-purple/10 px-2 py-0.5 text-xs font-medium text-vo-purple"
-                          >
-                            {r}
-                          </span>
-                        ))
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 align-middle">
-                    {row.emailConfirmed ? (
-                      <span className="text-emerald-600">{t("values.yes")}</span>
-                    ) : (
-                      <span className="text-muted-foreground">{t("values.no")}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 align-middle">
-                    {row.lockoutActive ? (
-                      <span className="text-emerald-600">{t("values.yes")}</span>
-                    ) : (
-                      <span className="text-muted-foreground">{t("values.no")}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 align-middle">
+      {!listError ? (
+        <AdminSurface aria-label={t("aria.list")}>
+          {loading ? (
+            <AdminTableSkeleton columns={5} />
+          ) : isEmpty ? (
+            <AdminEmptyState
+              icon={Users}
+              title={t("emptyStates.noResults")}
+              description={t("emptyStates.description")}
+              action={
+                <div className="flex flex-wrap justify-center gap-2">
+                  {hasAppliedFilters ? (
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-8 px-3 py-0 text-xs"
-                      onClick={() => void openDetail(row.id)}
+                      onClick={handleClearFilters}
                     >
-                      {t("actions.manage")}
+                      {t("filters.clear")}
                     </Button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                  ) : null}
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => setCreateOpen(true)}
+                  >
+                    <UserPlus className="h-4 w-4" aria-hidden />
+                    {t("actions.create")}
+                  </Button>
+                </div>
+              }
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full table-fixed border-collapse text-left font-sans text-sm">
+                <colgroup>
+                  <col />
+                  <col className="w-48" />
+                  <col className="w-28" />
+                  <col className="w-28" />
+                  <col className="w-36" />
+                </colgroup>
+                <thead className={ADMIN_THEAD_CLASS}>
+                  <tr>
+                    <th className={ADMIN_TH_CLASS}>{t("table.userName")}</th>
+                    <th className={ADMIN_TH_CLASS}>{t("table.roles")}</th>
+                    <th className={ADMIN_TH_CLASS}>{t("table.emailOk")}</th>
+                    <th className={ADMIN_TH_CLASS}>{t("table.lockout")}</th>
+                    <th className={`${ADMIN_TH_CLASS} text-right`}>
+                      {t("table.actions")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((row) => (
+                    <tr key={row.id} className={ADMIN_TR_CLASS}>
+                      <td className={ADMIN_TD_CLASS}>
+                        <p
+                          className="truncate font-medium text-foreground"
+                          title={row.email}
+                        >
+                          {row.email}
+                        </p>
+                        {isDistinctUserName(row.email, row.userName) ? (
+                          <p
+                            className="truncate text-xs text-muted-foreground"
+                            title={row.userName}
+                          >
+                            {row.userName}
+                          </p>
+                        ) : null}
+                      </td>
+                      <td className={ADMIN_TD_CLASS}>
+                        <UserRolePills roles={row.roles} />
+                      </td>
+                      <td className={ADMIN_TD_CLASS}>
+                        <AdminStatusPill
+                          tone={row.emailConfirmed ? "active" : "inactive"}
+                        >
+                          {row.emailConfirmed ? t("values.yes") : t("values.no")}
+                        </AdminStatusPill>
+                      </td>
+                      <td className={ADMIN_TD_CLASS}>
+                        <AdminStatusPill
+                          tone={row.lockoutActive ? "danger" : "inactive"}
+                        >
+                          {row.lockoutActive ? t("values.yes") : t("values.no")}
+                        </AdminStatusPill>
+                      </td>
+                      <td
+                        className={`${ADMIN_TD_CLASS} whitespace-nowrap text-right`}
+                      >
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-8 px-3 py-0 text-xs"
+                          onClick={() => void openDetail(row.id)}
+                        >
+                          {t("actions.manage")}
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-      <nav
-        className="mt-6 flex flex-wrap items-center justify-between gap-3"
-        aria-label={t("pagination.regionAria")}
-      >
-        <p className="font-sans text-sm text-muted-foreground">
-          {t("pagination.summary", { page, total: totalPages })}
-        </p>
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="h-9 px-3"
-            disabled={page <= 1 || loading}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden />
-            {t("actions.prev")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-9 px-3"
-            disabled={page >= totalPages || loading}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            {t("actions.next")}
-            <ChevronRight className="h-4 w-4" aria-hidden />
-          </Button>
-        </div>
-      </nav>
+          {!isEmpty ? (
+            <nav
+              className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              aria-label={t("pagination.regionAria")}
+            >
+              <p className="font-sans text-sm text-muted-foreground">
+                {loading
+                  ? t("count.loading")
+                  : t("count.summary", { count: totalCount })}
+                {loading
+                  ? null
+                  : ` · ${t("pagination.summary", { page, total: totalPages })}`}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <label
+                  htmlFor="users-page-size"
+                  className="font-sans text-xs text-muted-foreground"
+                >
+                  {t("pagination.perPage")}
+                </label>
+                <select
+                  id="users-page-size"
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value))
+                    setPage(1)
+                  }}
+                  className="h-9 rounded-md border border-border bg-card px-2 text-sm"
+                  aria-label={t("pagination.pageSizeAria")}
+                >
+                  {[10, 20, 50, 100].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 px-3"
+                  disabled={page <= 1 || loading}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" aria-hidden />
+                  {t("actions.prev")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 px-3"
+                  disabled={page >= totalPages || loading}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  {t("actions.next")}
+                  <ChevronRight className="h-4 w-4" aria-hidden />
+                </Button>
+              </div>
+            </nav>
+          ) : null}
+        </AdminSurface>
+      ) : null}
 
       <Modal
         isOpen={createOpen}
@@ -672,177 +774,165 @@ export default function AdminUsuariosContent() {
         onClose={() => !detailBusy && closeDetail()}
         title={t("detail.title")}
         size="lg"
-        bodyClassName="space-y-4"
         footer={
-          <Button type="button" variant="outline" onClick={closeDetail}>
-            {t("detail.close")}
-          </Button>
+          <div className="flex w-full flex-wrap items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={detailBusy || detailLoading || !detail}
+              onClick={() => void handleSendReset()}
+            >
+              <Mail className="h-4 w-4" aria-hidden />
+              {t("detail.sendReset")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={detailBusy}
+              onClick={closeDetail}
+            >
+              {t("detail.close")}
+            </Button>
+          </div>
         }
       >
         {detailLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
-          </div>
+          <AdminLoadingState label={t("detail.loading")} />
         ) : detailError ? (
-          <p className="text-sm text-destructive" role="alert">
-            {detailError}
-          </p>
+          <div className="space-y-4">
+            <p className="font-sans text-sm text-destructive" role="alert">
+              {detailError}
+            </p>
+            {detailId ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void openDetail(detailId)}
+              >
+                {t("actions.retry")}
+              </Button>
+            ) : null}
+          </div>
         ) : detail ? (
-          <div className="space-y-5">
-            <div className="flex flex-col gap-4">
-              <Input
-                id="detail-email"
-                name="email"
+          <div className="space-y-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <UserDetailField
                 label={t("detail.emailLabel")}
-                type="email"
                 value={detail.email}
-                error=""
-                placeholder=""
-                disabled
-                onChange={() => {}}
               />
-              <Input
-                id="detail-userName"
-                name="userName"
+              <UserDetailField
                 label={t("detail.userNameLabel")}
                 value={detail.userName ?? ""}
-                error=""
-                placeholder=""
-                disabled
-                onChange={() => {}}
               />
             </div>
 
-            <div className="flex flex-wrap gap-6 rounded-lg border border-vo-purple/20 bg-vo-purple/5 px-4 py-3">
-              <label className="flex cursor-pointer items-center gap-2.5 font-sans text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  className={checkboxVoClass}
-                  checked={detail.lockoutActive}
-                  disabled={detailBusy}
-                  onChange={(e) => void handleToggleLockout(e.target.checked)}
-                />
-                {t("detail.lockedCheckbox")}
-              </label>
-              <div className="flex items-center gap-2.5 font-sans text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  className={`${checkboxVoClass} cursor-default opacity-100 disabled:cursor-default disabled:opacity-100`}
-                  checked={detail.emailConfirmed}
-                  disabled
-                  aria-readonly="true"
-                  tabIndex={-1}
-                  onChange={() => {}}
-                />
-                <span>{t("detail.emailConfirmed")}</span>
-                <span className="sr-only">{t("detail.readOnly")}</span>
-              </div>
-            </div>
-            <p className="font-sans text-xs text-muted-foreground">
-              {t("detail.lockoutHint")}
-            </p>
-            <p className="font-sans text-xs text-muted-foreground">
-              {t("detail.lockoutActiveLabel")}{" "}
-              {detail.lockoutActive ? (
-                <strong className="text-vo-magenta">{t("values.yes")}</strong>
-              ) : (
-                <strong>{t("values.no")}</strong>
-              )}
-              {detail.lockoutEnd ? (
-                <> · {t("detail.lockoutEndPrefix")} {formatDateUtc(detail.lockoutEnd)}</>
-              ) : null}
-            </p>
-
-            <div>
-              <h3 className="mb-3 flex items-center gap-2 font-sans text-sm font-semibold text-vo-purple">
-                <Shield className="h-4 w-4 text-vo-purple" aria-hidden />
-                {t("detail.rolesHeading")}
-              </h3>
-              <div className="mb-3 flex flex-wrap gap-2">
-                {detail.roles.map((r) => (
-                  <span
-                    key={r}
-                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium ${rolePillClass(r)}`}
+            <UserDetailSection title={t("detail.accountHeading")}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <UserStatusTile label={t("table.emailOk")}>
+                  <AdminStatusPill
+                    tone={detail.emailConfirmed ? "active" : "inactive"}
                   >
-                    {r}
+                    {detail.emailConfirmed ? t("values.yes") : t("values.no")}
+                  </AdminStatusPill>
+                </UserStatusTile>
+                <UserStatusTile label={t("table.lockout")}>
+                  <AdminStatusPill
+                    tone={detail.lockoutActive ? "danger" : "inactive"}
+                  >
+                    {detail.lockoutActive ? t("values.yes") : t("values.no")}
+                  </AdminStatusPill>
+                </UserStatusTile>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={
+                    detail.lockoutActive
+                      ? "h-8 px-3 py-0 text-xs"
+                      : "h-8 px-3 py-0 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  }
+                  disabled={detailBusy}
+                  onClick={() => void handleToggleLockout(!detail.lockoutActive)}
+                >
+                  {detail.lockoutActive
+                    ? t("detail.unlockAction")
+                    : t("detail.lockAction")}
+                </Button>
+                <p className="font-sans text-xs text-muted-foreground">
+                  {t("detail.lockoutHint")}
+                  {detail.lockoutActive && detail.lockoutEnd
+                    ? ` ${t("detail.lockoutUntil", {
+                        date: formatDateUtc(detail.lockoutEnd),
+                      })}`
+                    : null}
+                </p>
+              </div>
+            </UserDetailSection>
+
+            <UserDetailSection title={t("detail.rolesHeading")}>
+              <div className="flex flex-wrap gap-2">
+                {detail.roles.map((role) => (
+                  <span
+                    key={role}
+                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium ${rolePillClass(role)}`}
+                  >
+                    {role}
                     <button
                       type="button"
-                      className="ml-0.5 rounded-md px-1 text-vo-navy/70 transition hover:bg-vo-pink/15 hover:text-vo-pink"
+                      className="inline-flex h-4 w-4 items-center justify-center rounded-full transition hover:bg-black/10"
                       disabled={detailBusy}
-                      onClick={() => setRemoveRoleTarget(r)}
-                      aria-label={t("detail.removeRoleAria", { role: r })}
+                      onClick={() => setRemoveRoleTarget(role)}
+                      aria-label={t("detail.removeRoleAria", { role })}
                     >
-                      ×
+                      <X className="h-3 w-3" aria-hidden />
                     </button>
                   </span>
                 ))}
                 {detail.roles.length === 0 ? (
-                  <span className="text-muted-foreground">
+                  <span className="font-sans text-sm text-muted-foreground">
                     {t("detail.noRoles")}
                   </span>
                 ) : null}
               </div>
-              <p className="mb-2 font-sans text-xs text-muted-foreground">
-                {t("detail.addRolesPrompt")}
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                {ASSIGNABLE_ROLES.filter((r) => !detail.roles.includes(r)).map(
-                  (r) => (
+              {ASSIGNABLE_ROLES.every((role) => detail.roles.includes(role)) ? (
+                <p className="font-sans text-xs text-muted-foreground">
+                  {t("detail.allRolesAssigned")}
+                </p>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="font-sans text-xs text-muted-foreground">
+                    {t("detail.addRolesPrompt")}
+                  </span>
+                  {ASSIGNABLE_ROLES.filter(
+                    (role) => !detail.roles.includes(role)
+                  ).map((role) => (
                     <label
-                      key={r}
+                      key={role}
                       className="flex cursor-pointer items-center gap-2 font-sans text-sm text-foreground"
                     >
                       <input
                         type="checkbox"
                         className={checkboxVoClass}
-                        checked={Boolean(addRolesSelection[r])}
+                        checked={Boolean(addRolesSelection[role])}
                         disabled={detailBusy}
-                        onChange={() => toggleAddRole(r)}
+                        onChange={() => toggleAddRole(role)}
                       />
-                      <span
-                        className={
-                          r === "Admin"
-                            ? "text-vo-purple"
-                            : r === "Recruiter"
-                              ? "text-vo-magenta"
-                              : "text-vo-navy"
-                        }
-                      >
-                        {r}
-                      </span>
+                      {role}
                     </label>
-                  )
-                )}
-                {ASSIGNABLE_ROLES.every((r) => detail.roles.includes(r)) ? (
-                  <span className="text-xs text-muted-foreground">
-                    {t("detail.allRolesAssigned")}
-                  </span>
-                ) : (
+                  ))}
                   <Button
                     type="button"
-                    variant="secondary"
-                    className="h-8 text-xs"
+                    variant="outline"
+                    className="h-8 px-3 py-0 text-xs"
                     disabled={detailBusy}
                     onClick={() => void handleAddRoles()}
                   >
                     {t("detail.addRoles")}
                   </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-9"
-                disabled={detailBusy}
-                onClick={() => void handleSendReset()}
-              >
-                <Mail className="h-4 w-4" aria-hidden />
-                {t("detail.sendReset")}
-              </Button>
-            </div>
+                </div>
+              )}
+            </UserDetailSection>
           </div>
         ) : null}
       </Modal>
@@ -852,6 +942,7 @@ export default function AdminUsuariosContent() {
         onClose={() => !detailBusy && setRemoveRoleTarget(null)}
         title={t("removeRole.title")}
         size="sm"
+        overlayZIndexClass="z-[100]"
         footer={
           <div className="flex flex-wrap justify-end gap-2">
             <Button
@@ -885,6 +976,6 @@ export default function AdminUsuariosContent() {
         message={snackbar.message}
         variant={snackbar.variant}
       />
-    </main>
+    </AdminPageFrame>
   )
 }

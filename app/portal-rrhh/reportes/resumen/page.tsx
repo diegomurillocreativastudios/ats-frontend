@@ -128,9 +128,10 @@ export default function ReporteResumenPage() {
   )
 
   const mainContent = (
-    <div className="min-w-0 flex flex-col gap-6 pb-10">
-      <section className="px-4 pt-6 md:px-8" aria-label={t("headerAria")}>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <section className="shrink-0 px-4 pt-6 md:px-8" aria-label={t("headerAria")}>
         <PortalPageHeader
+          className="shrink-0 gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between"
           title={t("title")}
           description={t("description")}
           actions={
@@ -148,70 +149,74 @@ export default function ReporteResumenPage() {
           }
         />
       </section>
-      <section className="space-y-4 px-4 md:px-8" aria-label={t("filtersAria")}>
-        <ReportesFiltersPlaceholder
-          hintText={tReports("filters.hint")}
-          controlsClassName={filterGridClass}
-        >
-          <ReportesFilterControl label={t("filters.client")} controlId="filtro-cliente-sum">
-            <select
-              id="filtro-cliente-sum"
-              className={controlClass}
-              value={draftClientId}
-              onChange={(e) => setDraftClientId(e.target.value)}
-            >
-              <option value="">{t("filters.all")}</option>
-              {companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </ReportesFilterControl>
-          <ReportesFilterControl label={t("filters.from")} controlId="filtro-desde-sum">
-            <DatePicker
-              id="filtro-desde-sum"
-              value={draftDateFrom}
-              onChange={setDraftDateFrom}
-              ariaLabel={t("filters.from")}
-              buttonClassName={datePickerFilterButtonClass}
-              wrapperClassName="relative w-full"
-            />
-          </ReportesFilterControl>
-          <ReportesFilterControl label={t("filters.to")} controlId="filtro-hasta-sum">
-            <DatePicker
-              id="filtro-hasta-sum"
-              value={draftDateTo}
-              onChange={setDraftDateTo}
-              ariaLabel={t("filters.to")}
-              buttonClassName={datePickerFilterButtonClass}
-              wrapperClassName="relative w-full"
-            />
-          </ReportesFilterControl>
-          <div className="flex w-full min-w-0 flex-col justify-end gap-1 sm:col-span-2 lg:col-span-1">
-            <button
-              type="button"
-              onClick={handleApplyFilters}
-              className={applyButtonClass}
-              disabled={loading}
-            >
-              {t("filters.apply")}
-            </button>
-          </div>
-        </ReportesFiltersPlaceholder>
-        <p
-          className="font-sans text-xs text-muted-foreground"
-          aria-live="polite"
-          data-report-pdf-exclude
-        >
-          {statusText}
-        </p>
-        {error ? <ReporteResumenErrorState message={error} /> : null}
-        {loading ? <ReporteResumenDashboardSkeleton /> : null}
-        {!loading && !error && summary ? (
-          <ReporteResumenDashboard summary={summary} />
-        ) : null}
-      </section>
+      <div className="flex min-h-0 flex-1 flex-col gap-3 px-4 pb-4 pt-2 md:px-8">
+        <section className="shrink-0 space-y-2" aria-label={t("filtersAria")}>
+          <ReportesFiltersPlaceholder
+            hintText={tReports("filters.hint")}
+            controlsClassName={filterGridClass}
+          >
+            <ReportesFilterControl label={t("filters.client")} controlId="filtro-cliente-sum">
+              <select
+                id="filtro-cliente-sum"
+                className={controlClass}
+                value={draftClientId}
+                onChange={(e) => setDraftClientId(e.target.value)}
+              >
+                <option value="">{t("filters.all")}</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </ReportesFilterControl>
+            <ReportesFilterControl label={t("filters.from")} controlId="filtro-desde-sum">
+              <DatePicker
+                id="filtro-desde-sum"
+                value={draftDateFrom}
+                onChange={setDraftDateFrom}
+                ariaLabel={t("filters.from")}
+                buttonClassName={datePickerFilterButtonClass}
+                wrapperClassName="relative w-full"
+              />
+            </ReportesFilterControl>
+            <ReportesFilterControl label={t("filters.to")} controlId="filtro-hasta-sum">
+              <DatePicker
+                id="filtro-hasta-sum"
+                value={draftDateTo}
+                onChange={setDraftDateTo}
+                ariaLabel={t("filters.to")}
+                buttonClassName={datePickerFilterButtonClass}
+                wrapperClassName="relative w-full"
+              />
+            </ReportesFilterControl>
+            <div className="flex w-full min-w-0 flex-col justify-end gap-1 sm:col-span-2 lg:col-span-1">
+              <button
+                type="button"
+                onClick={handleApplyFilters}
+                className={applyButtonClass}
+                disabled={loading}
+              >
+                {t("filters.apply")}
+              </button>
+            </div>
+          </ReportesFiltersPlaceholder>
+          <p
+            className="font-sans text-xs text-muted-foreground"
+            aria-live="polite"
+            data-report-pdf-exclude
+          >
+            {statusText}
+          </p>
+        </section>
+        <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
+          {error ? <ReporteResumenErrorState message={error} /> : null}
+          {loading ? <ReporteResumenDashboardSkeleton /> : null}
+          {!loading && !error && summary ? (
+            <ReporteResumenDashboard summary={summary} />
+          ) : null}
+        </div>
+      </div>
     </div>
   )
 

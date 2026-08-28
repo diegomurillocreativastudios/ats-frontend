@@ -7,7 +7,6 @@ import { candidateProfilePayloadToRecruiterNormalizedLayer } from "@/lib/recruit
 
 export interface RecruiterCandidateDetailState {
   id: string | number | null
-  storagePath: string | null
   normalizedData: Record<string, unknown>
   normalizedDataRaw: string | null
   normalizedDataParseFailed: boolean
@@ -63,11 +62,10 @@ export function parseNormalizedDataField(rawNd: unknown): {
   }
 }
 
-/** Respuesta de GET /api/recruiter/candidates/{id}: id, normalizedData, storagePath. */
+/** Respuesta de GET /api/recruiter/candidates/{id}: id, normalizedData (+ candidateProfile embebido). */
 export function extractRecruiterCandidateDetail(raw: unknown): RecruiterCandidateDetailState {
   const empty: RecruiterCandidateDetailState = {
     id: null,
-    storagePath: null,
     normalizedData: {},
     normalizedDataRaw: null,
     normalizedDataParseFailed: false,
@@ -77,7 +75,6 @@ export function extractRecruiterCandidateDetail(raw: unknown): RecruiterCandidat
   const top = raw as Record<string, unknown>
   const root = (top["data"] ?? top) as Record<string, unknown>
   const id = (root["id"] ?? root["documentId"] ?? null) as string | number | null
-  const storagePath = (root["storagePath"] ?? root["storage_path"] ?? null) as string | null
 
   const { normalizedData, rawString, parseFailed } = parseNormalizedDataField(
     root["normalizedData"]
@@ -86,7 +83,6 @@ export function extractRecruiterCandidateDetail(raw: unknown): RecruiterCandidat
   if (Object.keys(normalizedData).length > 0 || rawString != null) {
     return {
       id,
-      storagePath,
       normalizedData,
       normalizedDataRaw: rawString,
       normalizedDataParseFailed: parseFailed,
@@ -106,7 +102,6 @@ export function extractRecruiterCandidateDetail(raw: unknown): RecruiterCandidat
     })
     return {
       id,
-      storagePath,
       normalizedData: legacy,
       normalizedDataRaw: null,
       normalizedDataParseFailed: false,
@@ -115,7 +110,6 @@ export function extractRecruiterCandidateDetail(raw: unknown): RecruiterCandidat
 
   return {
     id,
-    storagePath,
     normalizedData: {},
     normalizedDataRaw: rawString,
     normalizedDataParseFailed: parseFailed,

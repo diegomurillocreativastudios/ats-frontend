@@ -15,6 +15,7 @@ import AgregarCandidatoModal from "@/components/candidato/AgregarCandidatoModal"
 import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage, createSilentError } from "@/lib/api-error"
+import { getUploadApiErrorMessage } from "@/lib/upload-constraints"
 import { useCandidateDocuments } from "@/hooks/useCandidateDocuments"
 
 const PROCESAR_ENDPOINT = "/Ingest/upload";
@@ -77,7 +78,9 @@ export default function DocumentosContent() {
       showSnackbar(t("toastProcessed"), "success")
     } catch (err: unknown) {
       const message =
-        getApiErrorMessage(err) || t("toastProcessError")
+        getUploadApiErrorMessage(err) ||
+        getApiErrorMessage(err) ||
+        t("toastProcessError")
       showSnackbar(message, "error")
       throw createSilentError(message)
     }
@@ -97,7 +100,9 @@ export default function DocumentosContent() {
       showSnackbar(t("toastProcessedMany", { count: total }), "success")
     } catch (err: unknown) {
       const message =
-        getApiErrorMessage(err) || t("toastProcessManyError")
+        getUploadApiErrorMessage(err) ||
+        getApiErrorMessage(err) ||
+        t("toastProcessManyError")
       showSnackbar(message, "error")
     }
   }
@@ -139,7 +144,9 @@ export default function DocumentosContent() {
         )
       } catch (err: unknown) {
         const message =
-          getApiErrorMessage(err) || t("toastGeneralUploadError")
+          getUploadApiErrorMessage(err) ||
+          getApiErrorMessage(err) ||
+          t("toastGeneralUploadError")
         showSnackbar(message, "error")
       } finally {
         setIsUploadingGeneralDocument(false)

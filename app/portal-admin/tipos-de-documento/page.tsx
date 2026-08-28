@@ -1,14 +1,5 @@
-import { getTranslations } from "next-intl/server"
-import { AdminIdentityDocumentTypesContent } from "@/components/portal-admin/AdminIdentityDocumentTypesContent"
+import { redirect } from "next/navigation"
 
-export async function generateMetadata() {
-  const t = await getTranslations("Metadata.adminPortal.documentTypes")
-  return {
-    title: t("title"),
-    description: t("description"),
-  }
-}
-
-export default function PortalAdminIdentityDocumentTypesPage() {
-  return <AdminIdentityDocumentTypesContent />
+export default function PortalAdminDocumentTypesRedirectPage() {
+  redirect("/portal-admin/administracion/tipos-de-documento")
 }

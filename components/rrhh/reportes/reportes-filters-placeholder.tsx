@@ -24,9 +24,9 @@ export default function ReportesFiltersPlaceholder({
   children,
   disabled = false,
   legendLabel,
-  surfaceClassName = "rounded-xl border border-border/80 bg-muted/10 p-4 shadow-sm md:p-5",
+  surfaceClassName = "rounded-xl border border-border/80 bg-muted/10 p-3 shadow-sm md:p-4",
   hintText,
-  controlsClassName = "mt-4 flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end",
+  controlsClassName = "mt-3 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end",
 }: ReportesFiltersPlaceholderProps) {
   const t = useTranslations("RecruiterPortal.reports")
   const helpId = "reportes-filtros-ayuda"

@@ -1,6 +1,8 @@
 /**
  * PDF de ficha técnica: Chromium (`page.pdf`) sobre el HTML de la vista previa (POST)
  * o reconstruido en servidor (GET). Rollback PDFKit: `?engine=pdfkit`.
+ *
+ * Hardening: cuota por usuario, semáforo Chromium (503), timeouts acotados.
  */
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
@@ -12,6 +14,11 @@ import {
   normalizeTechnicalSheetPayload,
 } from "@/lib/api/technical-sheet"
 import {
+  assertTechnicalSheetPdfRateLimit,
+  TechnicalSheetPdfBusyError,
+  TechnicalSheetPdfRateLimitError,
+} from "@/lib/technical-sheet/pdf-chromium-concurrency"
+import {
   buildTechnicalSheetPdfFilename,
   renderTechnicalSheetPdfBuffer,
   TechnicalSheetPdfError,
@@ -20,7 +27,8 @@ import { resolveTechnicalSheetPdfEngine } from "@/lib/technical-sheet/technical-
 import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for-server"
 
 export const runtime = "nodejs"
-export const maxDuration = 180
+/** Alineado al presupuesto Chromium (~45s setContent + margen). */
+export const maxDuration = 60
 
 interface PdfRouteContext {
   params: Promise<{ vacancyId: string; candidateProfileId: string }>
@@ -33,6 +41,20 @@ function readVacancyTitleFallback(request: Request): string | null {
   } catch {
     return null
   }
+}
+
+function resolvePdfQuotaKey(accessToken: string, userCookie: string | undefined): string {
+  if (userCookie) {
+    try {
+      const parsed = JSON.parse(userCookie) as { id?: unknown }
+      if (parsed?.id != null && String(parsed.id).trim() !== "") {
+        return `user:${String(parsed.id).trim()}`
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+  return `token:${accessToken.slice(0, 16)}`
 }
 
 async function handleTechnicalSheetPdf(
@@ -52,6 +74,10 @@ async function handleTechnicalSheetPdf(
   if (!accessToken) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 })
   }
+
+  assertTechnicalSheetPdfRateLimit(
+    resolvePdfQuotaKey(accessToken, cookieStore.get(AUTH_COOKIES.user)?.value)
+  )
 
   const baseUrl = getServerBackendBaseUrl()
   if (!baseUrl) {
@@ -113,6 +139,24 @@ async function handleTechnicalSheetPdf(
 
 function pdfErrorResponse(e: unknown) {
   console.error("[technical-sheet-pdf]", e instanceof Error ? e.stack ?? e.message : e)
+  if (e instanceof TechnicalSheetPdfRateLimitError) {
+    return NextResponse.json(
+      { message: e.message },
+      {
+        status: 429,
+        headers: { "Retry-After": String(e.retryAfterSec) },
+      }
+    )
+  }
+  if (e instanceof TechnicalSheetPdfBusyError) {
+    return NextResponse.json(
+      { message: e.message },
+      {
+        status: 503,
+        headers: { "Retry-After": "5" },
+      }
+    )
+  }
   if (e instanceof TechnicalSheetPdfError) {
     return NextResponse.json({ message: e.message }, { status: e.status })
   }

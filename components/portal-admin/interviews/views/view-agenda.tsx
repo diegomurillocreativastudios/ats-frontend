@@ -2,6 +2,14 @@
 
 import { useMemo } from "react"
 import { useTranslations } from "next-intl"
+import {
+  ADMIN_TABLE_CLASS,
+  ADMIN_TABLE_WRAP_CLASS,
+  ADMIN_TD_CLASS,
+  ADMIN_TH_CLASS,
+  ADMIN_THEAD_CLASS,
+  ADMIN_TR_CLASS,
+} from "@/components/portal-admin/admin-page-chrome"
 import type { AdminCalendarEvent } from "@/lib/api/admin-interviews-calendar"
 import { groupEventsByLocalDateKey } from "@/lib/admin/interviews-calendar-layout"
 import {
@@ -40,25 +48,25 @@ export function ViewAgenda({ events, onSelectEvent }: ViewAgendaProps) {
           <h3 className="sticky top-0 z-10 border-b border-border bg-background/95 py-2 font-sans text-sm font-semibold text-foreground backdrop-blur">
             {formatInterviewScheduleDateLabel(dateKey) || dateKey}
           </h3>
-          <div className="overflow-x-auto rounded-xl border border-border bg-card">
-            <table className="w-full min-w-[720px] border-collapse text-left font-sans text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="px-4 py-2 font-semibold">{tAgenda("time")}</th>
-                  <th className="px-4 py-2 font-semibold">{tAgenda("candidate")}</th>
-                  <th className="px-4 py-2 font-semibold">{tAgenda("vacancy")}</th>
-                  <th className="px-4 py-2 font-semibold">{tAgenda("company")}</th>
-                  <th className="px-4 py-2 font-semibold">{tAgenda("recruiter")}</th>
-                  <th className="px-4 py-2 font-semibold">{tAgenda("type")}</th>
-                  <th className="px-4 py-2 font-semibold">{tAgenda("modality")}</th>
-                  <th className="px-4 py-2 font-semibold">{tAgenda("status")}</th>
+          <div className={ADMIN_TABLE_WRAP_CLASS}>
+            <table className={`${ADMIN_TABLE_CLASS} min-w-[720px]`}>
+              <thead className={ADMIN_THEAD_CLASS}>
+                <tr>
+                  <th className={ADMIN_TH_CLASS}>{tAgenda("time")}</th>
+                  <th className={ADMIN_TH_CLASS}>{tAgenda("candidate")}</th>
+                  <th className={ADMIN_TH_CLASS}>{tAgenda("vacancy")}</th>
+                  <th className={ADMIN_TH_CLASS}>{tAgenda("company")}</th>
+                  <th className={ADMIN_TH_CLASS}>{tAgenda("recruiter")}</th>
+                  <th className={ADMIN_TH_CLASS}>{tAgenda("type")}</th>
+                  <th className={ADMIN_TH_CLASS}>{tAgenda("modality")}</th>
+                  <th className={ADMIN_TH_CLASS}>{tAgenda("status")}</th>
                 </tr>
               </thead>
               <tbody>
                 {dayEvents.map((ev) => (
                   <tr
                     key={`${ev.id}-${dateKey}`}
-                    className="cursor-pointer border-b border-border last:border-0 hover:bg-muted/30"
+                    className={`${ADMIN_TR_CLASS} cursor-pointer`}
                     onClick={() => onSelectEvent(ev)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -69,28 +77,28 @@ export function ViewAgenda({ events, onSelectEvent }: ViewAgendaProps) {
                     tabIndex={0}
                     role="button"
                   >
-                    <td className="whitespace-nowrap px-4 py-2 tabular-nums">
+                    <td className={`${ADMIN_TD_CLASS} whitespace-nowrap tabular-nums`}>
                       {formatInterviewLocalDateTime(ev.startUtc)}
                     </td>
-                    <td className="max-w-[160px] truncate px-4 py-2">
+                    <td className={`max-w-[160px] truncate ${ADMIN_TD_CLASS}`}>
                       {ev.candidate.name}
                     </td>
-                    <td className="max-w-[160px] truncate px-4 py-2">
+                    <td className={`max-w-[160px] truncate ${ADMIN_TD_CLASS}`}>
                       {ev.vacancy.title}
                     </td>
-                    <td className="max-w-[120px] truncate px-4 py-2 text-muted-foreground">
+                    <td className={`max-w-[120px] truncate ${ADMIN_TD_CLASS} text-muted-foreground`}>
                       {ev.vacancy.companyName ?? dash}
                     </td>
-                    <td className="max-w-[140px] truncate px-4 py-2 text-muted-foreground">
+                    <td className={`max-w-[140px] truncate ${ADMIN_TD_CLASS} text-muted-foreground`}>
                       {ev.recruiter.userName}
                     </td>
-                    <td className="px-4 py-2 text-muted-foreground">
+                    <td className={`${ADMIN_TD_CLASS} text-muted-foreground`}>
                       {ev.interviewType?.displayName ?? dash}
                     </td>
-                    <td className="px-4 py-2 text-muted-foreground">
+                    <td className={`${ADMIN_TD_CLASS} text-muted-foreground`}>
                       {ev.interviewModality?.displayName ?? dash}
                     </td>
-                    <td className="px-4 py-2">
+                    <td className={ADMIN_TD_CLASS}>
                       <InterviewStatusBadge
                         status={ev.status}
                         label={ev.statusDisplayName}

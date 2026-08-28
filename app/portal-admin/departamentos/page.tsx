@@ -1,14 +1,5 @@
-import { getTranslations } from "next-intl/server"
-import { AdminVacancyCatalogContent } from "@/components/portal-admin/AdminVacancyCatalogContent"
+import { redirect } from "next/navigation"
 
-export async function generateMetadata() {
-  const t = await getTranslations("Metadata.adminPortal.departments")
-  return {
-    title: t("title"),
-    description: t("description"),
-  }
-}
-
-export default function PortalAdminDepartmentCatalogPage() {
-  return <AdminVacancyCatalogContent catalog="departments" />
+export default function PortalAdminDepartamentosRedirectPage() {
+  redirect("/portal-admin/vacantes/departamentos")
 }

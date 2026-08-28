@@ -21,6 +21,14 @@ const apiGet = vi.fn()
 vi.mock("@/lib/api", () => ({
   apiClient: {
     get: (...args: unknown[]) => apiGet(...args),
+    getWithHeaders: async (...args: unknown[]) => ({
+      data: await apiGet(...args),
+      headers: new Headers({
+        "X-Total-Count": "2",
+        "X-Page": "1",
+        "X-Page-Size": "50",
+      }),
+    }),
     post: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),

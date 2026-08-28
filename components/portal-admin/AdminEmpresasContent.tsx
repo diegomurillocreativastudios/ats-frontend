@@ -21,12 +21,33 @@ import {
   Upload,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import {
+  ADMIN_TD_CLASS,
+  ADMIN_TH_CLASS,
+  ADMIN_THEAD_CLASS,
+  ADMIN_TR_CLASS,
+  AdminEmptyState,
+  AdminErrorPanel,
+  AdminLoadingState,
+  AdminPageFrame,
+  AdminRowActions,
+  AdminStatusPill,
+  AdminSurface,
+} from "@/components/portal-admin/admin-page-chrome"
 import Modal from "@/components/ui/Modal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  LOGO_ACCEPT,
+  LOGO_EXTENSIONS,
+  LOGO_TYPES,
+  UPLOAD_MAX_BYTES_5_MB,
+  getUploadApiErrorMessage,
+  validateUploadFile,
+} from "@/lib/upload-constraints"
 import {
   buildLogoDataUri,
   createAdminCompany,
@@ -41,8 +62,8 @@ import {
   type AdminCompanyLogo,
 } from "@/lib/api/admin-companies"
 
-const MAX_LOGO_BYTES = 5 * 1024 * 1024
-const ACCEPTED_LOGO_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml"
+const MAX_LOGO_BYTES = UPLOAD_MAX_BYTES_5_MB
+const ACCEPTED_LOGO_TYPES = LOGO_ACCEPT
 
 interface CompanyFormState {
   name: string
@@ -199,13 +220,17 @@ export default function AdminEmpresasContent() {
       setLogoFile(null)
       return
     }
-    if (!file.type.startsWith("image/")) {
-      setLogoError(t("errors.logoType"))
-      event.target.value = ""
-      return
-    }
-    if (file.size > MAX_LOGO_BYTES) {
-      setLogoError(t("errors.logoSize"))
+    const validation = validateUploadFile(file, {
+      types: LOGO_TYPES,
+      extensions: LOGO_EXTENSIONS,
+      maxBytes: MAX_LOGO_BYTES,
+    })
+    if (!validation.valid) {
+      if (validation.reason === "size") {
+        setLogoError(t("errors.logoSize"))
+      } else {
+        setLogoError(t("errors.logoType"))
+      }
       event.target.value = ""
       return
     }
@@ -311,7 +336,12 @@ export default function AdminEmpresasContent() {
       resetLogoState()
       await loadList()
     } catch (err: unknown) {
-      showSnackbar("error", getApiErrorMessage(err) || t("errors.saveFailed"))
+      showSnackbar(
+        "error",
+        getUploadApiErrorMessage(err) ||
+          getApiErrorMessage(err) ||
+          t("errors.saveFailed")
+      )
     } finally {
       setFormSubmitting(false)
     }
@@ -364,15 +394,12 @@ export default function AdminEmpresasContent() {
   const hasExistingLogoVisible = Boolean(logoPreviewSrc)
 
   return (
-    <main
-      className="flex min-h-0 flex-1 flex-col overflow-auto p-6 md:p-8"
-      aria-labelledby="portal-admin-empresas-heading"
-    >
+    <AdminPageFrame labelledBy="portal-admin-empresas-heading">
       <PortalPageHeader
         id="portal-admin-empresas-heading"
         title={t("page.title")}
         description={t("page.description")}
-        className="mb-6"
+        layout="split"
         contentClassName="max-w-3xl"
         actions={
           <Button type="button" variant="primary" onClick={handleOpenCreate}>
@@ -383,25 +410,14 @@ export default function AdminEmpresasContent() {
       />
 
       {listError ? (
-        <div
-          className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
-          role="alert"
-        >
-          {listError}
-          <div className="mt-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-9"
-              onClick={() => void loadList()}
-            >
-              {t("actions.retry")}
-            </Button>
-          </div>
-        </div>
+        <AdminErrorPanel
+          message={listError}
+          onRetry={() => void loadList()}
+          retryLabel={t("actions.retry")}
+        />
       ) : null}
 
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="font-sans text-sm text-muted-foreground">
           {loading ? t("count.loading") : t("count.summary", { count: totalCount })}
         </p>
@@ -437,45 +453,40 @@ export default function AdminEmpresasContent() {
         </div>
       </div>
 
-      <div className="min-w-0 flex-1 overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+      <AdminSurface>
         {isEmpty ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center gap-4 p-8 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-vo-purple/10">
-              <Landmark className="h-8 w-8 text-vo-purple" aria-hidden />
-            </div>
-            <div className="space-y-2">
-              <h2 className="font-sans text-lg font-semibold text-foreground">
-                {t("emptyStates.title")}
-              </h2>
-              <p className="max-w-lg font-sans text-sm text-muted-foreground">
-                {t("emptyStates.description")}
-              </p>
-            </div>
-            <Button type="button" variant="primary" onClick={handleOpenCreate}>
-              <Plus className="h-4 w-4" aria-hidden />
-              {t("actions.create")}
-            </Button>
-          </div>
+          <AdminEmptyState
+            icon={Landmark}
+            title={t("emptyStates.title")}
+            description={t("emptyStates.description")}
+            action={
+              <Button type="button" variant="primary" onClick={handleOpenCreate}>
+                <Plus className="h-4 w-4" aria-hidden />
+                {t("actions.create")}
+              </Button>
+            }
+          />
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full min-w-[880px] font-sans text-left text-sm">
-            <thead className="border-b border-border bg-muted/50">
+            <thead className={ADMIN_THEAD_CLASS}>
               <tr>
-                <th className="w-20 px-4 py-3 font-medium text-foreground">
+                <th className={`w-20 ${ADMIN_TH_CLASS}`}>
                   {t("table.logo")}
                 </th>
-                <th className="px-4 py-3 font-medium text-foreground">
+                <th className={ADMIN_TH_CLASS}>
                   {t("table.name")}
                 </th>
-                <th className="px-4 py-3 font-medium text-foreground">
+                <th className={ADMIN_TH_CLASS}>
                   {t("table.industry")}
                 </th>
-                <th className="px-4 py-3 font-medium text-foreground">
+                <th className={ADMIN_TH_CLASS}>
                   {t("table.status")}
                 </th>
-                <th className="px-4 py-3 font-medium text-foreground">
+                <th className={ADMIN_TH_CLASS}>
                   {t("table.createdAt")}
                 </th>
-                <th className="px-4 py-3 font-medium text-foreground">
+                <th className={ADMIN_TH_CLASS}>
                   {t("table.actions")}
                 </th>
               </tr>
@@ -483,8 +494,8 @@ export default function AdminEmpresasContent() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-16 text-center text-muted-foreground">
-                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-vo-purple" aria-hidden />
+                  <td colSpan={6}>
+                    <AdminLoadingState />
                   </td>
                 </tr>
               ) : (
@@ -492,8 +503,8 @@ export default function AdminEmpresasContent() {
                   const isRowToggling = togglingCompanyIds.has(row.companyId)
                   const rowLogoSrc = buildLogoDataUri(row.logo)
                   return (
-                    <tr key={row.companyId} className="border-b border-border last:border-0">
-                      <td className="px-4 py-3 align-middle">
+                    <tr key={row.companyId} className={ADMIN_TR_CLASS}>
+                      <td className={ADMIN_TD_CLASS}>
                         <div
                           className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border border-border bg-background"
                           aria-label={
@@ -517,28 +528,22 @@ export default function AdminEmpresasContent() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 align-middle font-medium text-foreground">
+                      <td className={`${ADMIN_TD_CLASS} font-medium text-foreground`}>
                         {row.name}
                       </td>
-                      <td className="px-4 py-3 align-middle text-muted-foreground">
+                      <td className={`${ADMIN_TD_CLASS} text-muted-foreground`}>
                         {row.industry?.trim() || "—"}
                       </td>
-                      <td className="px-4 py-3 align-middle">
-                        {row.isActive ? (
-                          <span className="inline-flex rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                            {t("status.active")}
-                          </span>
-                        ) : (
-                          <span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                            {t("status.inactive")}
-                          </span>
-                        )}
+                      <td className={ADMIN_TD_CLASS}>
+                        <AdminStatusPill tone={row.isActive ? "active" : "inactive"}>
+                          {row.isActive ? t("status.active") : t("status.inactive")}
+                        </AdminStatusPill>
                       </td>
-                      <td className="px-4 py-3 align-middle text-muted-foreground">
+                      <td className={`${ADMIN_TD_CLASS} text-muted-foreground`}>
                         {formatCreatedAt(row.createdAt)}
                       </td>
-                      <td className="px-4 py-3 align-middle">
-                        <div className="flex flex-wrap gap-2">
+                      <td className={ADMIN_TD_CLASS}>
+                        <AdminRowActions>
                           <Button
                             type="button"
                             variant="outline"
@@ -564,7 +569,7 @@ export default function AdminEmpresasContent() {
                               ? t("actions.deactivate")
                               : t("actions.activate")}
                           </Button>
-                        </div>
+                        </AdminRowActions>
                       </td>
                     </tr>
                   )
@@ -572,11 +577,12 @@ export default function AdminEmpresasContent() {
               )}
             </tbody>
           </table>
+          </div>
         )}
-      </div>
+      </AdminSurface>
 
       <nav
-        className="mt-6 flex flex-wrap items-center justify-between gap-3"
+        className="flex flex-wrap items-center justify-between gap-3"
         aria-label={t("pagination.regionAria")}
       >
         <p className="font-sans text-sm text-muted-foreground">
@@ -809,6 +815,6 @@ export default function AdminEmpresasContent() {
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </main>
+    </AdminPageFrame>
   )
 }

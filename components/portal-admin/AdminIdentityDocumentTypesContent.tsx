@@ -1,25 +1,29 @@
 "use client"
 
+import { useCallback, useEffect, useState, type ChangeEvent } from "react"
+import { FileText } from "lucide-react"
+import { useTranslations } from "next-intl"
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ChangeEvent,
-} from "react"
-import { FileText, Loader2, Pencil, Plus, RefreshCw, Search, Trash2 } from "lucide-react"
-import { useLocale, useTranslations } from "next-intl"
+  ADMIN_TD_CLASS,
+  ADMIN_TH_CLASS,
+  ADMIN_THEAD_CLASS,
+  ADMIN_TR_CLASS,
+  AdminPageFrame,
+} from "@/components/portal-admin/admin-page-chrome"
+import {
+  ADMIN_CATALOG_ACTIONS_TD_CLASS,
+  AdminCatalogFixedTable,
+  AdminCatalogFormModal,
+  AdminCatalogListLayout,
+  AdminCatalogRowActions,
+} from "@/components/portal-admin/admin-catalog-list-layout"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
-import PortalPageHeader from "@/components/ui/PortalPageHeader"
-import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import Modal from "@/components/ui/Modal"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
   createAdminIdentityDocumentType,
   deleteAdminIdentityDocumentType,
-  getAdminIdentityDocumentTypeById,
   listAdminIdentityDocumentTypes,
   updateAdminIdentityDocumentType,
   type IdentityDocumentTypeResponseDto,
@@ -33,17 +37,32 @@ interface IdentityDocumentTypeFormState {
 }
 
 interface IdentityDocumentTypeFormErrors {
-  code?: string
   name?: string
 }
 
 type DocumentTypeValidationTranslator = (
-  key: "codeRequired" | "codeMaxLength" | "nameRequired" | "nameMaxLength",
-  values?: { max?: number },
+  key: "nameRequired" | "nameMaxLength",
+  values?: { max?: number }
 ) => string
 
 const CODE_MAX_LENGTH = 60
 const NAME_MAX_LENGTH = 120
+
+/**
+ * Genera un `code` estable a partir del nombre visible (requerido por el API).
+ */
+function slugifyIdentityDocumentTypeCode(displayName: string): string {
+  const slug = displayName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .trim()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, CODE_MAX_LENGTH)
+
+  return slug || "DOCUMENT"
+}
 
 function createDefaultFormState(): IdentityDocumentTypeFormState {
   return {
@@ -63,17 +82,10 @@ function mapItemToFormState(
 
 function validateForm(
   values: IdentityDocumentTypeFormState,
-  tValidation: DocumentTypeValidationTranslator,
+  tValidation: DocumentTypeValidationTranslator
 ): IdentityDocumentTypeFormErrors {
   const errors: IdentityDocumentTypeFormErrors = {}
-  const normalizedCode = values.code.trim()
   const normalizedName = values.name.trim()
-
-  if (normalizedCode === "") {
-    errors.code = tValidation("codeRequired")
-  } else if (normalizedCode.length > CODE_MAX_LENGTH) {
-    errors.code = tValidation("codeMaxLength", { max: CODE_MAX_LENGTH })
-  }
 
   if (normalizedName === "") {
     errors.name = tValidation("nameRequired")
@@ -88,7 +100,7 @@ function buildCreatePayload(
   values: IdentityDocumentTypeFormState
 ): CreateIdentityDocumentTypeRequestDto {
   return {
-    code: values.code.trim().toUpperCase(),
+    code: slugifyIdentityDocumentTypeCode(values.name),
     name: values.name.trim(),
   }
 }
@@ -96,41 +108,21 @@ function buildCreatePayload(
 function buildUpdatePayload(
   values: IdentityDocumentTypeFormState
 ): UpdateIdentityDocumentTypeRequestDto {
-  return {
-    code: values.code.trim().toUpperCase(),
-    name: values.name.trim(),
-  }
-}
+  const existingCode = values.code.trim().toUpperCase()
 
-function formatDateTime(
-  dateString: string | null,
-  locale: string,
-  notUpdatedLabel: string,
-): string {
-  if (!dateString) return notUpdatedLabel
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString(locale, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  } catch {
-    return dateString
+  return {
+    code: existingCode || slugifyIdentityDocumentTypeCode(values.name),
+    name: values.name.trim(),
   }
 }
 
 export function AdminIdentityDocumentTypesContent() {
   const t = useTranslations("AdminPortal.documentTypes")
   const tCommon = useTranslations("Common")
-  const locale = useLocale()
 
   const [items, setItems] = useState<IdentityDocumentTypeResponseDto[]>([])
   const [loading, setLoading] = useState(true)
   const [listError, setListError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<"create" | "edit">("create")
@@ -139,9 +131,7 @@ export function AdminIdentityDocumentTypesContent() {
     createDefaultFormState()
   )
   const [formErrors, setFormErrors] = useState<IdentityDocumentTypeFormErrors>({})
-  const [formLoading, setFormLoading] = useState(false)
   const [formSubmitting, setFormSubmitting] = useState(false)
-  const [formLoadError, setFormLoadError] = useState<string | null>(null)
 
   const [deleteTarget, setDeleteTarget] =
     useState<IdentityDocumentTypeResponseDto | null>(null)
@@ -156,17 +146,6 @@ export function AdminIdentityDocumentTypesContent() {
     variant: "success",
     message: "",
   })
-
-  const filteredItems = useMemo(() => {
-    if (!searchTerm.trim()) return items
-
-    const lowerSearch = searchTerm.toLowerCase()
-    return items.filter(
-      (item) =>
-        item.code.toLowerCase().includes(lowerSearch) ||
-        item.name.toLowerCase().includes(lowerSearch)
-    )
-  }, [items, searchTerm])
 
   const showSnackbar = useCallback(
     (variant: "success" | "error" | "warning", message: string) => {
@@ -199,40 +178,22 @@ export function AdminIdentityDocumentTypesContent() {
     setEditingItemId(null)
     setFormState(createDefaultFormState())
     setFormErrors({})
-    setFormLoadError(null)
     setIsFormOpen(true)
   }
 
-  const handleOpenEdit = async (itemId: string) => {
+  const handleOpenEdit = (item: IdentityDocumentTypeResponseDto) => {
     setFormMode("edit")
-    setEditingItemId(itemId)
+    setEditingItemId(item.id)
+    setFormState(mapItemToFormState(item))
     setFormErrors({})
-    setFormLoadError(null)
-    setFormLoading(true)
     setIsFormOpen(true)
-
-    try {
-      const detail = await getAdminIdentityDocumentTypeById(itemId)
-      setFormState(mapItemToFormState(detail))
-    } catch (error) {
-      setFormLoadError(getApiErrorMessage(error) || t("errors.loadItem"))
-    } finally {
-      setFormLoading(false)
-    }
   }
 
   const handleCloseForm = () => {
-    if (formSubmitting || formLoading) return
+    if (formSubmitting) return
     setIsFormOpen(false)
     setEditingItemId(null)
-    setFormLoadError(null)
     setFormErrors({})
-  }
-
-  const handleCodeChange = (nextValue: string) => {
-    const uppercasedValue = nextValue.toUpperCase()
-    setFormState((current) => ({ ...current, code: uppercasedValue }))
-    setFormErrors((current) => ({ ...current, code: undefined }))
   }
 
   const handleNameChange = (nextValue: string) => {
@@ -301,295 +262,93 @@ export function AdminIdentityDocumentTypesContent() {
     }
   }
 
-  const isEmpty = !loading && !listError && filteredItems.length === 0
-  const loadingGridClassName =
-    "grid animate-pulse grid-cols-[1fr_1.5fr_180px_180px_120px] gap-3 rounded-lg border border-border/60 bg-muted/30 p-4"
-  const tableMinWidthClassName = "min-w-[800px]"
-  const notUpdatedLabel = t("fallbacks.notUpdated")
+  const isEmpty = !loading && !listError && items.length === 0
 
   return (
-    <main
-      className="flex min-h-0 flex-1 flex-col overflow-auto p-6 md:p-8"
-      aria-labelledby="portal-admin-identity-document-types-heading"
-    >
-      <PortalPageHeader
-        id="portal-admin-identity-document-types-heading"
+    <AdminPageFrame labelledBy="portal-admin-identity-document-types-heading">
+      <AdminCatalogListLayout
+        headingId="portal-admin-identity-document-types-heading"
         title={t("page.title")}
         description={t("page.description")}
-        className="mb-6"
-        contentClassName="max-w-3xl"
-        actions={
-          <Button type="button" variant="primary" onClick={handleOpenCreate}>
-            <Plus className="h-4 w-4" aria-hidden />
-            {t("page.createCta")}
-          </Button>
-        }
-      />
-
-      <section
-        className="mb-5 rounded-xl border border-border bg-card p-4 shadow-sm"
-        aria-label={t("aria.summary")}
+        loading={loading}
+        error={listError}
+        onRetry={() => void loadList()}
+        retryLabel={t("actions.retry")}
+        errorAria={t("aria.loadError")}
+        isEmpty={isEmpty}
+        emptyIcon={FileText}
+        emptyTitle={t("emptyStates.noItems")}
+        emptyDescription={t("emptyStates.createHint")}
+        onCreate={handleOpenCreate}
+        createLabel={t("page.createCta")}
+        onRefresh={() => void loadList()}
+        refreshLabel={t("actions.refresh")}
+        listAria={t("aria.list")}
       >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm text-foreground">
-              {loading
-                ? t("page.countLoading")
-                : t("page.countSummary", { count: filteredItems.length })}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {t("page.summaryHelper")}
-            </span>
-          </div>
+        <AdminCatalogFixedTable ariaLabel={t("aria.list")} dataColumns={1}>
+          <thead className={ADMIN_THEAD_CLASS}>
+            <tr>
+              <th className={ADMIN_TH_CLASS}>{t("table.name")}</th>
+              <th className={`${ADMIN_TH_CLASS} text-right`}>
+                {t("table.actions")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item) => (
+              <tr key={item.id} className={ADMIN_TR_CLASS}>
+                <td className={ADMIN_TD_CLASS}>
+                  <p className="font-medium text-foreground">{item.name}</p>
+                </td>
+                <td className={ADMIN_CATALOG_ACTIONS_TD_CLASS}>
+                  <AdminCatalogRowActions
+                    onEdit={() => handleOpenEdit(item)}
+                    onDelete={() => setDeleteTarget(item)}
+                    editLabel={t("actions.edit")}
+                    deleteLabel={t("actions.delete")}
+                    disabled={formSubmitting}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </AdminCatalogFixedTable>
+      </AdminCatalogListLayout>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="h-10 px-4"
-            onClick={() => void loadList()}
-            disabled={loading}
-          >
-            <RefreshCw className="h-4 w-4" aria-hidden />
-            {t("actions.refresh")}
-          </Button>
-        </div>
-      </section>
-
-      {!listError ? (
-        <section className="mb-4 rounded-xl border border-border bg-card p-4 shadow-sm">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder={t("filters.searchPlaceholder")}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-md border border-input bg-background py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-vo-purple"
-            />
-          </div>
-        </section>
-      ) : null}
-
-      {listError ? (
-        <section
-          className="rounded-xl border border-destructive/30 bg-destructive/5 p-6"
-          aria-label={t("aria.loadError")}
-        >
-          <p className="font-sans text-sm text-destructive" role="alert">
-            {listError || t("errors.loadCatalog")}
-          </p>
-          <div className="mt-4">
-            <Button type="button" variant="primary" onClick={() => void loadList()}>
-              {t("actions.retry")}
-            </Button>
-          </div>
-        </section>
-      ) : null}
-
-      {!listError ? (
-        <section
-          className="min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-          aria-label={t("aria.list")}
-        >
-          {loading ? (
-            <div className="space-y-3 p-5">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className={loadingGridClassName}>
-                  <div className="h-5 rounded bg-muted" />
-                  <div className="h-5 rounded bg-muted" />
-                  <div className="h-5 rounded bg-muted" />
-                  <div className="h-5 rounded bg-muted" />
-                  <div className="h-5 rounded bg-muted" />
-                </div>
-              ))}
-            </div>
-          ) : isEmpty ? (
-            <div className="flex h-full min-h-[360px] flex-col items-center justify-center gap-4 p-8 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-vo-purple/10">
-                <FileText className="h-8 w-8 text-vo-purple" aria-hidden />
-              </div>
-              <div className="space-y-2">
-                <h2 className="font-sans text-lg font-semibold text-foreground">
-                  {searchTerm
-                    ? t("emptyStates.noResults")
-                    : t("emptyStates.noItems")}
-                </h2>
-                <p className="max-w-lg font-sans text-sm text-muted-foreground">
-                  {searchTerm
-                    ? t("emptyStates.searchHint")
-                    : t("emptyStates.createHint")}
-                </p>
-              </div>
-              {!searchTerm ? (
-                <Button type="button" variant="primary" onClick={handleOpenCreate}>
-                  <Plus className="h-4 w-4" aria-hidden />
-                  {t("page.createCta")}
-                </Button>
-              ) : null}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table
-                className={`${tableMinWidthClassName} w-full text-left font-sans text-sm`}
-              >
-                <thead className="border-b border-border bg-muted/50">
-                  <tr>
-                    <th className="px-4 py-3 font-medium text-foreground">
-                      {t("table.code")}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground">
-                      {t("table.name")}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground">
-                      {t("table.createdAt")}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground">
-                      {t("table.updatedAt")}
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground">
-                      {t("table.actions")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-border last:border-b-0"
-                    >
-                      <td className="px-4 py-3 align-top">
-                        <span className="inline-flex items-center rounded-md bg-vo-purple/10 px-2.5 py-0.5 text-xs font-medium text-vo-purple">
-                          {item.code}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 align-top">
-                        <p className="font-medium text-foreground">{item.name}</p>
-                      </td>
-                      <td className="px-4 py-3 align-top text-muted-foreground">
-                        {formatDateTime(item.createdAtUtc, locale, notUpdatedLabel)}
-                      </td>
-                      <td className="px-4 py-3 align-top text-muted-foreground">
-                        {formatDateTime(item.updatedAtUtc, locale, notUpdatedLabel)}
-                      </td>
-                      <td className="px-4 py-3 align-top">
-                        <div className="flex flex-wrap gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-8 px-3 py-0 text-xs"
-                            onClick={() => void handleOpenEdit(item.id)}
-                          >
-                            <Pencil className="h-3.5 w-3.5" aria-hidden />
-                            {t("actions.edit")}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-8 px-3 py-0 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => setDeleteTarget(item)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                            {t("actions.delete")}
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      ) : null}
-
-      <Modal
+      <AdminCatalogFormModal
         isOpen={isFormOpen}
         onClose={handleCloseForm}
-        title={formMode === "create" ? t("form.createTitle") : t("form.editTitle")}
-        size="lg"
-        closeOnEscape={!formSubmitting && !formLoading}
-        closeOnOverlayClick={!formSubmitting && !formLoading}
-        footer={
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCloseForm}
-              disabled={formSubmitting || formLoading}
-            >
-              {tCommon("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              form="identity-document-type-form"
-              variant="primary"
-              loading={formSubmitting}
-              disabled={formSubmitting || formLoading}
-            >
-              {formMode === "create" ? t("form.save") : t("form.saveChanges")}
-            </Button>
-          </div>
+        title={
+          formMode === "create" ? t("form.createTitle") : t("form.editTitle")
         }
+        formId="identity-document-type-form"
+        submitting={formSubmitting}
+        submitLabel={
+          formMode === "create" ? t("form.save") : t("form.saveChanges")
+        }
+        cancelLabel={tCommon("cancel")}
       >
-        {formLoading ? (
-          <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-            {t("form.loading")}
-          </div>
-        ) : formLoadError ? (
-          <div className="space-y-4">
-            <p className="text-sm text-destructive" role="alert">
-              {formLoadError}
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                if (!editingItemId) return
-                void handleOpenEdit(editingItemId)
-              }}
-            >
-              {t("actions.retry")}
-            </Button>
-          </div>
-        ) : (
-          <form
-            id="identity-document-type-form"
-            className="space-y-5"
-            onSubmit={handleSubmitForm}
-          >
-            <Input
-              id="identity-document-type-code"
-              name="code"
-              label={t("form.codeLabel")}
-              required
-              value={formState.code}
-              error={formErrors.code || ""}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                handleCodeChange(event.target.value)
-              }
-              placeholder={t("form.codePlaceholder")}
-              disabled={formSubmitting}
-              maxLength={CODE_MAX_LENGTH}
-            />
-
-            <Input
-              id="identity-document-type-name"
-              name="name"
-              label={t("form.nameLabel")}
-              required
-              value={formState.name}
-              error={formErrors.name || ""}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                handleNameChange(event.target.value)
-              }
-              placeholder={t("form.namePlaceholder")}
-              disabled={formSubmitting}
-              maxLength={NAME_MAX_LENGTH}
-            />
-          </form>
-        )}
-      </Modal>
+        <form
+          id="identity-document-type-form"
+          className="space-y-5"
+          onSubmit={handleSubmitForm}
+        >
+          <Input
+            id="identity-document-type-name"
+            name="name"
+            label={t("form.nameLabel")}
+            required
+            value={formState.name}
+            error={formErrors.name || ""}
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              handleNameChange(event.target.value)
+            }
+            placeholder={t("form.namePlaceholder")}
+            disabled={formSubmitting}
+            maxLength={NAME_MAX_LENGTH}
+          />
+        </form>
+      </AdminCatalogFormModal>
 
       <DeleteConfirmModal
         isOpen={deleteTarget != null}
@@ -608,6 +367,6 @@ export function AdminIdentityDocumentTypesContent() {
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </main>
+    </AdminPageFrame>
   )
 }
