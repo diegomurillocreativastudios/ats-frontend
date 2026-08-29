@@ -21,7 +21,9 @@ export interface RecruiterStageOption {
   id: string
   name: string
   order: number
+  orderIndex: number
   final?: boolean
+  isHiredStage?: boolean
 }
 
 export interface RecruiterApplicantStatusOption {
@@ -72,7 +74,7 @@ export function readPersistedVacancyCompanyId(vacancyId: string): string | null 
 }
 
 /**
- * Resolves the tenant `companyId` for pipeline/catalog calls.
+ * Resolves the tenant `companyId` for vacancy create/edit (not pipeline catalogs).
  * Detail/list DTOs may only include `company` (display name).
  */
 export function resolveVacancyCompanyId(
@@ -100,6 +102,16 @@ export function resolveVacancyCompanyId(
   }
 
   return DEFAULT_RECRUITER_COMPANY_ID
+}
+
+export const ADMIN_STAGES_CATALOG_PATH = "/portal-admin/vacantes/etapas"
+
+/**
+ * Admin stages catalog (global platform pipeline).
+ * `companyId` is ignored when passed for call-site compatibility.
+ */
+export function adminStagesCatalogHref(_companyId?: string | null): string {
+  return ADMIN_STAGES_CATALOG_PATH
 }
 
 export async function listRecruiterCompanies(): Promise<RecruiterCompanyOption[]> {
@@ -131,36 +143,38 @@ export async function listCompanyVacancyStatuses(
   }))
 }
 
-export async function listRecruiterStages(
-  companyId: string
-): Promise<RecruiterStageOption[]> {
-  if (!companyId.trim()) return []
-  const raw = await apiClient.get(
-    `/api/recruiter/companies/${encodeURIComponent(companyId)}/stages`
-  )
+/** Global application-stage catalog (no company scope). */
+export async function listRecruiterStages(): Promise<RecruiterStageOption[]> {
+  const raw = await apiClient.get("/api/recruiter/stages")
   const list = parseListPayload(raw, ["stages", "items", "data"])
   return (list as Record<string, unknown>[])
-    .map((item, i) => ({
-      id: String(item?.id ?? item?.uuid ?? i),
-      name: String(item?.name ?? item?.stageName ?? "—"),
-      order:
+    .map((item, i) => {
+      const orderIndex =
         typeof item?.orderIndex === "number"
           ? item.orderIndex
           : typeof item?.order === "number"
             ? item.order
-            : i,
-      final: Boolean(item?.final ?? item?.isFinal ?? item?.is_final ?? false),
-    }))
-    .sort((a, b) => a.order - b.order)
+            : i
+      return {
+        id: String(item?.id ?? item?.uuid ?? i),
+        name: String(item?.name ?? item?.stageName ?? "—"),
+        order: orderIndex,
+        orderIndex,
+        final: Boolean(item?.final ?? false),
+        isHiredStage: Boolean(item?.isHiredStage ?? item?.is_hired_stage ?? false),
+      }
+    })
+    .sort((a, b) => {
+      if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex
+      return String(a.id).localeCompare(String(b.id))
+    })
 }
 
-export async function listCompanyApplicantStatuses(
-  companyId: string
-): Promise<RecruiterApplicantStatusOption[]> {
-  if (!companyId.trim()) return []
-  const raw = await apiClient.get(
-    `/api/recruiter/companies/${encodeURIComponent(companyId)}/statuses`
-  )
+/** Global application-status catalog (no company scope). */
+export async function listCompanyApplicantStatuses(): Promise<
+  RecruiterApplicantStatusOption[]
+> {
+  const raw = await apiClient.get("/api/recruiter/statuses")
   const list = parseListPayload(raw, ["statuses", "items", "data"])
   return (list as Record<string, unknown>[]).map((item, i) => ({
     id: String(item?.id ?? item?.uuid ?? i),

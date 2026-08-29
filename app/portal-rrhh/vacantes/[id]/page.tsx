@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeft,
   ArrowRight,
+  Ban,
   Briefcase,
   CheckSquare,
   FileText,
@@ -27,6 +28,7 @@ import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
 import {
+  adminStagesCatalogHref,
   DEFAULT_RECRUITER_COMPANY_ID,
   listCompanyApplicantStatuses,
   listRecruiterCompanies,
@@ -69,12 +71,17 @@ import {
 import { VacancyAiSearchLoadingState } from "@/components/rrhh/vacancy-ai-search-loading-state"
 import { getVacancyPreliminaryMatchTypicalMsForDocCount } from "@/lib/apply-loading-bar"
 import {
-  FALLBACK_KANBAN_STAGES,
   getCandidateId,
   normalizeKanbanStage,
+  parseFallbackKanbanStages,
   resolveOrderedStageNames,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
-import { validateStageMove } from "@/lib/recruiter/stage-move-validation"
+import {
+  isFinalApplicationStatus,
+  isHiredTerminalStage,
+  isRejectionShortcutStage,
+  validateStageMove,
+} from "@/lib/recruiter/stage-move-validation"
 import {
   downloadRecruiterCandidateCv,
   isRecruiterCandidateCvError,
@@ -186,6 +193,16 @@ const normalizeMoveStageError = (err, t) => {
       showEstadosLink: true,
     }
   }
+  const isSequentialConflict =
+    err?.status === 409 ||
+    lower.includes("adjacent pipeline stage") ||
+    lower.includes("final stage that is not the hiring")
+  if (isSequentialConflict) {
+    return {
+      text: t("errors.stageMoveConflict"),
+      showEstadosLink: false,
+    }
+  }
   return { text: raw, showEstadosLink: false }
 }
 
@@ -202,8 +219,14 @@ const normalizeStageMoveValidationError = (code, t) => {
       showEstadosLink: true,
     }
   }
+  if (code === "skip_not_allowed") {
+    return {
+      text: t("errors.stageSkipNotAllowed"),
+      showEstadosLink: false,
+    }
+  }
   return {
-    text: t("errors.stageSkipNotAllowed"),
+    text: t("errors.moveStageFailed"),
     showEstadosLink: false,
   }
 }
@@ -433,6 +456,7 @@ const KanbanCard = ({
   match,
   candidateId,
   stage,
+  stageId = null,
   statuses,
   currentStatusId,
   onStatusChange,
@@ -440,6 +464,10 @@ const KanbanCard = ({
   vacancyId = null,
   vacancyTitle = null,
   readOnly = false,
+  shortcutStages = [],
+  onMoveToStage,
+  onPipelineDragStart,
+  onPipelineDragEnd,
 }) => {
   const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
@@ -465,13 +493,22 @@ const KanbanCard = ({
       e.preventDefault();
       return;
     }
-    e.dataTransfer.setData("application/json", JSON.stringify({ candidateId, stage }));
-    e.dataTransfer.effectAllowed = "move";
+    onPipelineDragStart?.(stage, currentStatusId);
+    try {
+      e.dataTransfer.setData(
+        "application/json",
+        JSON.stringify({ candidateId, stage, stageId, statusId: currentStatusId })
+      );
+      e.dataTransfer.effectAllowed = "move";
+    } catch {
+      // Some browsers reject setData outside a user-initiated drag.
+    }
     e.currentTarget.setAttribute("data-dragging", "true");
   };
 
   const handleDragEnd = (e) => {
     e.currentTarget.removeAttribute("data-dragging");
+    onPipelineDragEnd?.();
   };
 
   const handleStatusChange = (e) => {
@@ -483,9 +520,25 @@ const KanbanCard = ({
   const handleSelectMouseDown = (e) => e.stopPropagation();
   const handleSelectClick = (e) => e.stopPropagation();
 
+  const handleMoveToShortcut = (targetStageName) => {
+    if (readOnly || !targetStageName) return;
+    onMoveToStage?.(candidateId, targetStageName);
+  };
+
+  const handleShortcutSelectChange = (e) => {
+    e.stopPropagation();
+    const value = e.target.value;
+    if (value) handleMoveToShortcut(value);
+    e.target.value = "";
+  };
+
   const displayName = emptyToDash(match.name);
   const showTechnicalSheetButton = Boolean(vacancyId && sheetCandidateProfileId);
   const hasStatuses = statuses.length > 0;
+  const visibleShortcutStages = Array.isArray(shortcutStages) ? shortcutStages : [];
+  const canLeaveStageByStatus = isFinalApplicationStatus(currentStatusId, statuses);
+  const showShortcutActions =
+    !readOnly && canLeaveStageByStatus && visibleShortcutStages.length > 0;
 
   return (
     <>
@@ -555,6 +608,49 @@ const KanbanCard = ({
             ))}
           </select>
         ) : null}
+
+        {showShortcutActions && visibleShortcutStages.length === 1 ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMoveToShortcut(visibleShortcutStages[0].name);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-2.5 py-1.5 font-sans text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={tMatching("kanban.moveToStageAria", {
+              name: displayName,
+              stageName: visibleShortcutStages[0].name,
+            })}
+          >
+            <Ban className="h-3.5 w-3.5" aria-hidden />
+            {tMatching("kanban.moveToStage", {
+              stageName: visibleShortcutStages[0].name,
+            })}
+          </button>
+        ) : null}
+
+        {showShortcutActions && visibleShortcutStages.length > 1 ? (
+          <select
+            defaultValue=""
+            onChange={handleShortcutSelectChange}
+            onMouseDown={handleSelectMouseDown}
+            onClick={handleSelectClick}
+            className="w-full rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-2.5 py-1.5 font-sans text-xs text-zinc-700 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={tMatching("kanban.moveToShortcutPlaceholder")}
+          >
+            <option value="" disabled>
+              {tMatching("kanban.moveToShortcutPlaceholder")}
+            </option>
+            {visibleShortcutStages.map((shortcutStage) => (
+              <option key={shortcutStage.id} value={shortcutStage.name}>
+                {tMatching("kanban.moveToStage", {
+                  stageName: shortcutStage.name,
+                })}
+              </option>
+            ))}
+          </select>
+        ) : null}
       </div>
       {vacancyId && sheetCandidateProfileId && technicalSheetOpen ? (
         <TechnicalSheetModal
@@ -581,7 +677,7 @@ const MoveStageErrorBanner = ({ error }) => {
       <p className="font-sans text-sm text-destructive">{error.text}</p>
       {error.showEstadosLink ? (
         <Link
-          href="/portal-admin/vacantes/etapas"
+          href={adminStagesCatalogHref()}
           className="font-sans text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
           aria-label={tMatching("errors.goToStagesAria")}
         >
@@ -592,13 +688,50 @@ const MoveStageErrorBanner = ({ error }) => {
   )
 }
 
+const KanbanStagesHeading = ({
+  applicantCount,
+  headingClassName,
+  iconClassName,
+}) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
+
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      <h2 className={headingClassName}>
+        <Users className={iconClassName} aria-hidden />
+        {tMatching("stagesTitle")}
+        <span className="font-sans text-sm font-normal text-muted-foreground">
+          ({applicantCount})
+        </span>
+      </h2>
+      <Link
+        href={adminStagesCatalogHref()}
+        className="shrink-0 font-sans text-sm font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+        aria-label={tMatching("manageStagesAria")}
+      >
+        {tMatching("manageStages")}
+      </Link>
+    </div>
+  )
+}
+
+const getKanbanColumnKind = (stageMeta) => {
+  if (isRejectionShortcutStage(stageMeta)) return "shortcut";
+  if (isHiredTerminalStage(stageMeta)) return "hired";
+  return "pipeline";
+};
+
 const KanbanColumn = ({
   stage,
+  stageMeta = null,
   candidates,
   onDrop,
   onDragEnter,
   onDragLeave,
   isOver,
+  dropAllowed = false,
+  dropBlockCode = null,
+  isDragActive = false,
   statuses,
   candidateStatusOverrides,
   onStatusChange,
@@ -606,18 +739,25 @@ const KanbanColumn = ({
   vacancyId = null,
   vacancyTitle = null,
   readOnly = false,
+  shortcutStages = [],
+  onPipelineDragStart,
+  onPipelineDragEnd,
 }) => {
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
+  const columnKind = getKanbanColumnKind(stageMeta);
+  const canAcceptDrop = !readOnly && dropAllowed;
+  const showInvalidDrop = !readOnly && isDragActive && !dropAllowed;
   const handleDragOver = (e) => {
-    if (readOnly) return;
+    if (readOnly || !isDragActive) return;
     e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+    e.dataTransfer.dropEffect = canAcceptDrop ? "move" : "none";
   };
 
   const handleDrop = (e) => {
     if (readOnly) return;
     e.preventDefault();
     onDragLeave?.();
+    if (!canAcceptDrop) return;
     try {
       const raw = e.dataTransfer.getData("application/json");
       const payload = raw ? JSON.parse(raw) : null;
@@ -660,15 +800,55 @@ const KanbanColumn = ({
   const widthClasses = hasCandidates
     ? "min-w-[320px] max-w-[420px] flex-1"
     : "min-w-[140px] max-w-[180px] flex-none";
+  const columnShellClass =
+    columnKind === "shortcut"
+      ? "border-dashed border-zinc-300 bg-zinc-100/80"
+      : columnKind === "hired"
+        ? "border-emerald-200 bg-emerald-50/50"
+        : "border-border bg-muted/30";
+  const columnAriaKey =
+    columnKind === "shortcut"
+      ? "kanban.shortcutColumnAria"
+      : columnKind === "hired"
+        ? "kanban.hiredColumnAria"
+        : "kanban.columnAria";
+  const dropZoneClass = [
+    "flex min-h-[260px] flex-1 flex-col gap-3 p-4 transition-colors",
+    isOver && canAcceptDrop
+      ? "bg-vo-purple/10 ring-2 ring-inset ring-vo-purple"
+      : isOver && showInvalidDrop
+        ? "cursor-not-allowed bg-destructive/5 ring-2 ring-inset ring-destructive/30"
+        : showInvalidDrop
+          ? "cursor-not-allowed"
+          : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
-      className={`flex min-h-[320px] flex-col rounded-xl border border-border bg-muted/30 ${widthClasses}`}
-      aria-label={tMatching("kanban.columnAria", { stage })}
+      className={`flex min-h-[320px] flex-col rounded-xl border ${columnShellClass} ${widthClasses}`}
+      aria-label={tMatching(columnAriaKey, { stage })}
+      data-column-kind={columnKind}
+      title={
+        isOver && showInvalidDrop
+          ? tMatching(
+              dropBlockCode === "final_status_required"
+                ? "kanban.finalStatusRequiredTooltip"
+                : "kanban.dropNotAllowedTooltip"
+            )
+          : undefined
+      }
     >
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <h3 className="font-sans text-sm font-semibold text-foreground">
-          {stage}
+      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <h3 className="flex min-w-0 items-center gap-1.5 font-sans text-sm font-semibold text-foreground">
+          {columnKind === "shortcut" ? (
+            <Ban className="h-3.5 w-3.5 shrink-0 text-zinc-500" aria-hidden />
+          ) : null}
+          {columnKind === "hired" ? (
+            <CheckSquare className="h-3.5 w-3.5 shrink-0 text-emerald-700" aria-hidden />
+          ) : null}
+          <span className="truncate">{stage}</span>
         </h3>
         <span
           className="rounded-full bg-muted px-2 py-0.5 font-sans text-xs text-muted-foreground"
@@ -682,8 +862,9 @@ const KanbanColumn = ({
         onDrop={handleDrop}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        className={`flex min-h-[260px] flex-1 flex-col gap-3 p-4 transition-colors ${isOver ? "bg-vo-purple/10" : ""}`}
+        className={dropZoneClass}
         data-stage={stage}
+        data-drop-allowed={isDragActive ? String(canAcceptDrop) : undefined}
       >
         {candidates.map(({ match, candidateId }) => (
           <KanbanCard
@@ -691,6 +872,7 @@ const KanbanColumn = ({
             match={match}
             candidateId={candidateId}
             stage={stage}
+            stageId={stageMeta?.id ?? null}
             statuses={statuses}
             currentStatusId={getCurrentStatusId(match, candidateId)}
             onStatusChange={onStatusChange}
@@ -698,6 +880,10 @@ const KanbanColumn = ({
             vacancyId={vacancyId}
             vacancyTitle={vacancyTitle}
             readOnly={readOnly}
+            shortcutStages={shortcutStages}
+            onMoveToStage={onDrop}
+            onPipelineDragStart={onPipelineDragStart}
+            onPipelineDragEnd={onPipelineDragEnd}
           />
         ))}
       </div>
@@ -757,6 +943,8 @@ export default function VacanteDetallePage() {
   const [candidateStageOverrides, setCandidateStageOverrides] = useState(() => ({}));
   const [candidateStatusOverrides, setCandidateStatusOverrides] = useState(() => ({}));
   const [dragOverStage, setDragOverStage] = useState(null);
+  const [dragFromStage, setDragFromStage] = useState(null);
+  const [dragFromStatusId, setDragFromStatusId] = useState(null);
   const [stages, setStages] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -774,8 +962,6 @@ export default function VacanteDetallePage() {
   const etapasSectionMobileRef = useRef(null);
   const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
   const originalCompanyIdAtEditRef = useRef(DEFAULT_RECRUITER_COMPANY_ID);
-  const pipelineCompanyCapturedForVacancyRef = useRef<string | null>(null);
-  const [pipelineCompanyId, setPipelineCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
 
   const vacancyDepartmentSummary = useMemo(
     () =>
@@ -840,24 +1026,6 @@ export default function VacanteDetallePage() {
 
   const vacancyRouteId = Array.isArray(id) ? id[0] : id;
 
-  useEffect(() => {
-    pipelineCompanyCapturedForVacancyRef.current = null;
-  }, [vacancyRouteId]);
-
-  useEffect(() => {
-    if (!vacancy || !vacancyRouteId) return;
-    const routeKey = String(vacancyRouteId);
-    if (pipelineCompanyCapturedForVacancyRef.current === routeKey) return;
-    pipelineCompanyCapturedForVacancyRef.current = routeKey;
-    setPipelineCompanyId(
-      resolveVacancyCompanyId(
-        vacancy && typeof vacancy === "object" ? vacancy : null,
-        companies,
-        vacancyRouteId
-      )
-    );
-  }, [vacancy, companies, vacancyRouteId]);
-
   const savedCompanyId = useMemo(
     () =>
       resolveVacancyCompanyId(
@@ -900,28 +1068,21 @@ export default function VacanteDetallePage() {
 
   const fetchStages = useCallback(async () => {
     try {
-      const list = await listRecruiterStages(pipelineCompanyId);
-      setStages(
-        list.map((item) => ({
-          id: item.id,
-          name: item.name,
-          order: item.order,
-          final: item.final ?? false,
-        }))
-      );
+      const list = await listRecruiterStages();
+      setStages(list);
     } catch {
       setStages([]);
     }
-  }, [pipelineCompanyId]);
+  }, []);
 
   const fetchStatuses = useCallback(async () => {
     try {
-      const list = await listCompanyApplicantStatuses(pipelineCompanyId);
+      const list = await listCompanyApplicantStatuses();
       setStatuses(list.map((item, i) => mapStatusFromApi(item, i)));
     } catch {
       setStatuses([]);
     }
-  }, [pipelineCompanyId]);
+  }, []);
 
   const fetchVacancyCatalogs = useCallback(async () => {
     setLoadingVacancyCatalogs(true)
@@ -1485,11 +1646,18 @@ export default function VacanteDetallePage() {
     void fetchVacancyCatalogs()
   }, [isEditing, fetchVacancyCatalogs]);
 
+  const fallbackKanbanStages = useMemo(
+    () => parseFallbackKanbanStages(tMatching.raw("fallbackKanbanStages")),
+    [tMatching]
+  );
+
   const kanbanStageNames = useMemo(
-    () =>
-      stages.length > 0
-        ? stages.map((s) => s.name).filter(Boolean)
-        : FALLBACK_KANBAN_STAGES,
+    () => stages.map((s) => s.name).filter(Boolean),
+    [stages]
+  );
+
+  const shortcutStages = useMemo(
+    () => stages.filter((stage) => isRejectionShortcutStage(stage)),
     [stages]
   );
 
@@ -1661,8 +1829,13 @@ export default function VacanteDetallePage() {
   const displayCandidates = searchResultsToDisplay;
 
   const orderedKanbanStageNames = useMemo(
-    () => resolveOrderedStageNames(kanbanStageNames, applicants),
-    [kanbanStageNames, applicants]
+    () =>
+      resolveOrderedStageNames(
+        kanbanStageNames,
+        applicants,
+        fallbackKanbanStages
+      ),
+    [kanbanStageNames, applicants, fallbackKanbanStages]
   );
 
   const candidatesByStage = useMemo(() => {
@@ -1708,8 +1881,21 @@ export default function VacanteDetallePage() {
         candidateStageOverrides[candidateId] ??
         normalizeKanbanStage(
           applicant?.applicationStage ?? applicant?.stage,
-          kanbanStageNames
+          orderedKanbanStageNames
         );
+      const currentRef = {
+        id: String(
+          applicant?.applicationStageId ?? applicant?.application_stage_id ?? ""
+        ).trim(),
+        name: currentStage,
+      };
+      const targetMeta = stages.find(
+        (s) => (s.name || "").trim() === (newStage || "").trim()
+      );
+      const targetRef = {
+        id: String(targetMeta?.id ?? "").trim(),
+        name: newStage,
+      };
       const currentStatusId =
         candidateStatusOverrides[candidateId] ??
         applicant?.applicationStatusId ??
@@ -1724,8 +1910,8 @@ export default function VacanteDetallePage() {
         statuses[0]?.id ??
         "";
       const validation = validateStageMove(
-        currentStage,
-        newStage,
+        currentRef,
+        targetRef,
         stages,
         currentStatusId,
         statuses
@@ -1744,60 +1930,110 @@ export default function VacanteDetallePage() {
         return;
       }
 
-      const stageObj = stages.find(
-        (s) => (s.name || "").trim() === (newStage || "").trim()
-      );
-      const stageId = stageObj?.id ?? stageObj?.uuid;
+      const currentName = String(currentStage ?? "").trim().toLowerCase();
+      const nextName = String(newStage ?? "").trim().toLowerCase();
+      if (currentName !== "" && currentName === nextName) return;
+
+      const stageId = targetMeta?.id ?? targetMeta?.uuid;
+      if (!applicationId || !stageId) {
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: tMatching("errors.moveStageFailed"),
+        });
+        return;
+      }
 
       setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
-
-      if (applicationId && stageId) {
-        setLoadingMoveStage(true);
+      setLoadingMoveStage(true);
+      try {
+        await apiClient.patch(
+          `/api/recruiter/applications/${applicationId}/move-to-stage`,
+          { stageId, notes: "" }
+        );
+        setSnackbar({
+          open: true,
+          variant: "success",
+          message: tMatching("errors.candidateMovedStage"),
+        });
+        /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
         try {
-          await apiClient.patch(
-            `/api/recruiter/applications/${applicationId}/move-to-stage`,
-            { stageId, notes: "" }
-          );
-          setSnackbar({
-            open: true,
-            variant: "success",
-            message: tMatching("errors.candidateMovedStage"),
-          });
-          /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
-          try {
-            await fetchVacancy(true);
-            setCandidateStageOverrides((prev) => {
-              const next = { ...prev };
-              delete next[candidateId];
-              return next;
-            });
-            setCandidateStatusOverrides((prev) => {
-              const next = { ...prev };
-              delete next[candidateId];
-              return next;
-            });
-          } catch {
-            /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
-          }
-        } catch (err) {
-          const normalized = normalizeMoveStageError(err, tMatching);
-          setSnackbar({
-            open: true,
-            variant: "error",
-            message: normalized.text,
-          });
+          await fetchVacancy(true);
           setCandidateStageOverrides((prev) => {
             const next = { ...prev };
             delete next[candidateId];
             return next;
           });
-        } finally {
-          setLoadingMoveStage(false);
+          setCandidateStatusOverrides((prev) => {
+            const next = { ...prev };
+            delete next[candidateId];
+            return next;
+          });
+        } catch {
+          /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
         }
+      } catch (err) {
+        const normalized = normalizeMoveStageError(err, tMatching);
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: normalized.text,
+        });
+        setCandidateStageOverrides((prev) => {
+          const next = { ...prev };
+          delete next[candidateId];
+          return next;
+        });
+      } finally {
+        setLoadingMoveStage(false);
       }
     },
-    [applicants, stages, statuses, kanbanStageNames, candidateStageOverrides, candidateStatusOverrides, fetchVacancy, isVacancyReadOnly, tMatching]
+    [applicants, stages, statuses, orderedKanbanStageNames, candidateStageOverrides, candidateStatusOverrides, fetchVacancy, isVacancyReadOnly, tMatching]
   );
+
+  const handleKanbanCardDragStart = useCallback((stage, statusId) => {
+    setDragFromStage(stage);
+    setDragFromStatusId(statusId ?? null);
+  }, []);
+
+  const handleKanbanCardDragEnd = useCallback(() => {
+    setDragFromStage(null);
+    setDragFromStatusId(null);
+    setDragOverStage(null);
+  }, []);
+
+  const getKanbanDropState = (stage) => {
+    const stageMeta =
+      stages.find(
+        (item) =>
+          String(item.name ?? "").trim().toLowerCase() ===
+          String(stage ?? "").trim().toLowerCase()
+      ) ?? null;
+    const isForeignDrag =
+      dragFromStage != null &&
+      String(dragFromStage).trim().toLowerCase() !==
+        String(stage).trim().toLowerCase();
+    const validation = isForeignDrag
+      ? validateStageMove(
+          dragFromStage,
+          stageMeta ?? stage,
+          stages,
+          dragFromStatusId,
+          statuses
+        )
+      : { allowed: false, code: "skip_not_allowed" };
+    return {
+      stageMeta,
+      dropAllowed: isForeignDrag && validation.allowed,
+      dropBlockCode: isForeignDrag && !validation.allowed ? validation.code : null,
+      isDragActive: isForeignDrag,
+      columnShortcutStages: shortcutStages.filter(
+        (item) =>
+          String(item.name ?? "").trim().toLowerCase() !==
+          String(stage ?? "").trim().toLowerCase()
+      ),
+    };
+  };
 
   const handleKanbanDragEnter = useCallback((stage) => {
     setDragOverStage(stage);
@@ -2764,13 +3000,11 @@ export default function VacanteDetallePage() {
                       ref={etapasSectionDesktopRef}
                       className="flex flex-col gap-3 scroll-mt-4"
                     >
-                      <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
-                        <Users className="h-5 w-5" aria-hidden />
-                        {tMatching("stagesTitle")}
-                        <span className="font-sans text-sm font-normal text-muted-foreground">
-                          ({applicants.length})
-                        </span>
-                      </h2>
+                      <KanbanStagesHeading
+                        applicantCount={applicants.length}
+                        headingClassName="flex items-center gap-2 font-sans text-lg font-semibold text-foreground"
+                        iconClassName="h-5 w-5"
+                      />
                       <MoveStageErrorBanner error={applicationStatusError} />
                       <div
                         className="rounded-xl border border-border bg-card p-6"
@@ -2789,15 +3023,21 @@ export default function VacanteDetallePage() {
                             role="region"
                             aria-label={tMatching("kanbanStagesAria")}
                           >
-                            {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
+                            {candidatesByStage.map(({ stage, candidates: stageCandidates }) => {
+                              const dropState = getKanbanDropState(stage);
+                              return (
                               <KanbanColumn
                                 key={stage}
                                 stage={stage}
+                                stageMeta={dropState.stageMeta}
                                 candidates={stageCandidates}
                                 onDrop={handleKanbanStageDrop}
                                 onDragEnter={handleKanbanDragEnter}
                                 onDragLeave={handleKanbanDragLeave}
                                 isOver={dragOverStage === stage}
+                                dropAllowed={dropState.dropAllowed}
+                                dropBlockCode={dropState.dropBlockCode}
+                                isDragActive={dropState.isDragActive}
                                 statuses={statuses}
                                 candidateStatusOverrides={candidateStatusOverrides}
                                 onStatusChange={handleStatusChange}
@@ -2805,8 +3045,12 @@ export default function VacanteDetallePage() {
                                 vacancyId={id != null ? String(id) : null}
                                 vacancyTitle={vacancy?.title ?? ""}
                                 readOnly={isVacancyReadOnly}
+                                shortcutStages={dropState.columnShortcutStages}
+                                onPipelineDragStart={handleKanbanCardDragStart}
+                                onPipelineDragEnd={handleKanbanCardDragEnd}
                               />
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -3577,13 +3821,11 @@ export default function VacanteDetallePage() {
                     ref={etapasSectionMobileRef}
                     className="flex flex-col gap-3 scroll-mt-4"
                   >
-                    <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
-                      <Users className="h-4 w-4" aria-hidden />
-                      Etapas
-                      <span className="font-sans text-sm font-normal text-muted-foreground">
-                        ({applicants.length})
-                      </span>
-                    </h2>
+                    <KanbanStagesHeading
+                      applicantCount={applicants.length}
+                      headingClassName="flex items-center gap-2 font-sans text-base font-semibold text-foreground"
+                      iconClassName="h-4 w-4"
+                    />
                     <MoveStageErrorBanner error={applicationStatusError} />
                     <div
                       className="rounded-xl border border-border bg-card p-5"
@@ -3602,15 +3844,21 @@ export default function VacanteDetallePage() {
                           role="region"
                           aria-label={tMatching("kanbanStagesAria")}
                         >
-                          {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
+                          {candidatesByStage.map(({ stage, candidates: stageCandidates }) => {
+                            const dropState = getKanbanDropState(stage);
+                            return (
                             <KanbanColumn
                               key={stage}
                               stage={stage}
+                              stageMeta={dropState.stageMeta}
                               candidates={stageCandidates}
                               onDrop={handleKanbanStageDrop}
                               onDragEnter={handleKanbanDragEnter}
                               onDragLeave={handleKanbanDragLeave}
                               isOver={dragOverStage === stage}
+                              dropAllowed={dropState.dropAllowed}
+                              dropBlockCode={dropState.dropBlockCode}
+                              isDragActive={dropState.isDragActive}
                               statuses={statuses}
                               candidateStatusOverrides={candidateStatusOverrides}
                               onStatusChange={handleStatusChange}
@@ -3618,8 +3866,12 @@ export default function VacanteDetallePage() {
                               vacancyId={id != null ? String(id) : null}
                               vacancyTitle={vacancy?.title ?? ""}
                               readOnly={isVacancyReadOnly}
+                              shortcutStages={dropState.columnShortcutStages}
+                              onPipelineDragStart={handleKanbanCardDragStart}
+                              onPipelineDragEnd={handleKanbanCardDragEnd}
                             />
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </div>

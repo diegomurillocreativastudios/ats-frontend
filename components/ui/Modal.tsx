@@ -38,6 +38,8 @@ interface ModalProps {
   size?: keyof typeof SIZE_CLASSES
   /** Clases extra para el cuerpo (p. ej. overflow-visible si hay menús absolutos). */
   bodyClassName?: string
+  /** Clases extra para el panel (p. ej. fondo sólido). */
+  contentClassName?: string
   closeOnOverlayClick?: boolean
   closeOnEscape?: boolean
   /** Por defecto z-50; use p. ej. z-[100] si este modal se abre encima de otro. */
@@ -56,6 +58,7 @@ export default function Modal({
   footer,
   size = "md",
   bodyClassName = "",
+  contentClassName = "",
   closeOnOverlayClick = true,
   closeOnEscape = true,
   overlayZIndexClass = "z-50",
@@ -103,7 +106,7 @@ export default function Modal({
       onClick={handleOverlayClick}
     >
       <div
-        className={MODAL_STYLES.getContent(sizeClass)}
+        className={`${MODAL_STYLES.getContent(sizeClass)} ${contentClassName}`.trim()}
         onClick={(e) => e.stopPropagation()}
         role="document"
       >

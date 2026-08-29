@@ -2185,7 +2185,14 @@
           "score": "Punktzahl",
           "columnAria": "Spalte {stage}",
           "moveStageAria": "{name} in eine andere Phase verschieben",
-          "statusAria": "Status von {name}"
+          "statusAria": "Status von {name}",
+          "dropNotAllowedTooltip": "Sie können nur eine Phase vor oder zurück, oder verwerfen",
+          "finalStatusRequiredTooltip": "Um vorzurücken oder in eine finale Phase zu wechseln, muss der Bewerbungsstatus als final markiert sein",
+          "moveToStage": "Zu {stageName} verschieben",
+          "moveToStageAria": "{name} zu {stageName} verschieben",
+          "moveToShortcutPlaceholder": "Verschieben nach…",
+          "shortcutColumnAria": "Verwerfen-Spalte {stage}",
+          "hiredColumnAria": "Einstellungsspalte {stage}"
         },
         "aria": {
           "matchedCandidates": "Gematchte Kandidaten",
@@ -2222,8 +2229,9 @@
         },
         "errors": {
           "moveStageFailed": "Der Kandidat konnte nicht in eine andere Phase verschoben werden.",
-          "stageSkipNotAllowed": "Sie können den Kandidaten nur in die unmittelbar vorherige oder nächste Phase verschieben. Überspringen ist nicht erlaubt.",
-          "finalStatusRequiredForStageMove": "Um zur nächsten Phase zu wechseln, muss der Kandidat einen Bewerbungsstatus mit Markierung „final“ haben.",
+          "stageSkipNotAllowed": "Sie können nur eine Phase vor oder zurück, oder verwerfen.",
+          "stageMoveConflict": "Kandidaten können nur in eine benachbarte Pipeline-Phase oder in eine finale Phase verschoben werden, die nicht die Einstellungsphase ist.",
+          "finalStatusRequiredForStageMove": "Um zur nächsten Phase oder zu einer finalen Phase zu wechseln, muss der Kandidat einen Bewerbungsstatus mit Markierung „final“ haben.",
           "missingDefaultApplicationStatus": "Der Standard-Bewerbungsstatus des Unternehmens fehlt. Der Server benötigt ihn beim Verschieben von Kandidaten zwischen Phasen. Konfigurieren Sie ihn unter Phasen (Status) oder bitten Sie einen Administrator, dies zu tun.",
           "updateApplicationStatusFailed": "Der Bewerbungsstatus konnte nicht aktualisiert werden.",
           "candidateMovedStage": "Kandidat in eine andere Phase verschoben.",
@@ -2244,7 +2252,18 @@
         "emptyApplicants": "Für diese Stelle gibt es noch keine Bewerber.",
         "kanbanBoardAria": "Kanban-Board-Container",
         "kanbanStagesAria": "Kandidatenphasen",
-        "goToStagesLink": "Zu Phasen gehen und Status verwalten"
+        "fallbackKanbanStages": [
+          "Sourced",
+          "Applied",
+          "Screening",
+          "Interview",
+          "Offer",
+          "Hired",
+          "Rejected"
+        ],
+        "goToStagesLink": "Zu Phasen gehen und Status verwalten",
+        "manageStagesAria": "Globalen Phasenkatalog verwalten",
+        "manageStages": "Phasen verwalten"
       },
       "rematch": {
         "ariaLabel": "Matching neu anpassen",
@@ -2727,18 +2746,36 @@
     "users": {
       "page": {
         "title": "Benutzer",
-        "description": "Auflistung und Verwaltung der Portalkonten."
+        "description": "Auflistung und Verwaltung der Portalkonten.",
+        "headerRegionLabel": "Benutzer-Kopfzeile",
+        "listRegionLabel": "Benutzerliste",
+        "filtersAndListRegionLabel": "Filter und Liste"
       },
       "filters": {
         "regionAria": "Filter",
-        "emailLabel": "E-Mail (enthält)",
-        "emailPlaceholder": "z. B. @unternehmen.com",
+        "regionLabel": "Benutzerfilter",
+        "emailLabel": "E-Mail",
+        "emailPlaceholder": "Nach E-Mail suchen...",
         "roleLabel": "Rolle",
         "allRoles": "Alle",
+        "allLockouts": "Alle",
         "lockedOnly": "Nur gesperrte",
         "lockoutLabel": "Sperrung",
         "apply": "Filter anwenden",
-        "clear": "Zurücksetzen"
+        "clear": "Zurücksetzen",
+        "clearFilters": "Filter zurücksetzen",
+        "filterByAria": "Filtern nach {label}"
+      },
+      "cards": {
+        "cardAria": "Benutzer: {email}",
+        "cardLockedAria": "Gesperrter Benutzer: {email}",
+        "rolesLabel": "Rollen",
+        "statusLabel": "Status",
+        "noRoles": "Keine Rollen",
+        "confirmed": "Bestätigt",
+        "unconfirmed": "Unbestätigt",
+        "locked": "Gesperrt",
+        "unlocked": "Aktiv"
       },
       "table": {
         "email": "E-Mail",
@@ -2761,17 +2798,28 @@
         "pageSizeAria": "Benutzer pro Seite",
         "refreshAria": "Liste aktualisieren",
         "regionAria": "Seitennummerierung",
-        "summary": "Seite {page} von {total}"
+        "summary": "Seite {page} von {total}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Benutzer} other {# Benutzer}}"
       },
       "emptyStates": {
         "noResults": "Keine Benutzer entsprechen den aktuellen Filtern.",
+        "noUsers": "Keine Benutzer gefunden",
+        "noUsersFiltered": "Keine Benutzer entsprechen den angewendeten Filtern",
         "description": "Passen Sie die Filter an oder erstellen Sie einen neuen Benutzer."
+      },
+      "loadingStates": {
+        "loading": "Benutzer werden geladen..."
       },
       "actions": {
         "create": "Neuer Benutzer",
+        "createShort": "Neu",
+        "createAria": "Neuen Benutzer erstellen",
         "refresh": "Aktualisieren",
         "retry": "Erneut versuchen",
         "manage": "Verwalten",
+        "manageAria": "Benutzer {email} verwalten",
         "prev": "Zurück",
         "next": "Weiter"
       },
@@ -2789,9 +2837,12 @@
         "title": "Benutzerdetails",
         "emailLabel": "E-Mail",
         "userNameLabel": "Benutzername",
+        "createdAtLabel": "Erstellt",
         "accountHeading": "Kontostatus",
         "lockedCheckbox": "Konto gesperrt",
         "emailConfirmed": "E-Mail bestätigt",
+        "emailConfirmedHint": "Diese E-Mail ist bereits bestätigt.",
+        "emailPendingHint": "Diese E-Mail ist noch nicht bestätigt.",
         "readOnly": "Schreibgeschützt",
         "lockAction": "Konto sperren",
         "unlockAction": "Konto entsperren",

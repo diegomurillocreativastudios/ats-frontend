@@ -45,23 +45,25 @@ describe("AdminUsuariosContent", () => {
     })
   })
 
-  it("places refresh next to create in the split header", async () => {
+  it("places create in the page header like the vacancy list", async () => {
     render(<AdminUsuariosContent />)
 
-    await screen.findByText("No hay usuarios con los filtros actuales.")
+    await screen.findByText("No se encontraron usuarios")
 
     const heading = screen.getByRole("heading", { name: "Usuarios" })
     const header = heading.closest("header")
     expect(header).toBeTruthy()
     expect(
-      within(header as HTMLElement).getByRole("button", { name: "Refrescar" })
-    ).toBeInTheDocument()
+      within(header as HTMLElement).queryByRole("button", { name: "Refrescar" })
+    ).not.toBeInTheDocument()
     expect(
-      within(header as HTMLElement).getByRole("button", { name: "Nuevo usuario" })
+      within(header as HTMLElement).getByRole("button", {
+        name: "Crear nuevo usuario",
+      })
     ).toBeInTheDocument()
   })
 
-  it("keeps one account column and does not repeat identical usernames", async () => {
+  it("renders each user as a card and does not repeat identical usernames", async () => {
     usersApiMocks.fetchAdminUsersList.mockResolvedValueOnce({
       items: [buildUser()],
       totalCount: 1,
@@ -75,15 +77,40 @@ describe("AdminUsuariosContent", () => {
     expect(
       screen.getAllByText("admin@matchengine.com")
     ).toHaveLength(1)
+    expect(screen.queryByRole("columnheader")).not.toBeInTheDocument()
     expect(
-      screen.queryByRole("columnheader", { name: "Correo" })
-    ).not.toBeInTheDocument()
-    expect(screen.getByRole("columnheader", { name: "Usuario" })).toBeInTheDocument()
-    expect(screen.getByRole("columnheader", { name: "Confirmado" })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Gestionar" })).toBeInTheDocument()
+      screen.getByRole("article", { name: "Usuario: admin@matchengine.com" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", {
+        name: "Gestionar usuario admin@matchengine.com",
+      })
+    ).toBeInTheDocument()
   })
 
-  it("opens a balanced detail modal with status actions in the footer", async () => {
+  it("shows every assigned role on the card without a leftover count", async () => {
+    usersApiMocks.fetchAdminUsersList.mockResolvedValueOnce({
+      items: [buildUser({ userName: "admin" })],
+      totalCount: 1,
+      page: 1,
+      pageSize: 20,
+    })
+
+    render(<AdminUsuariosContent />)
+
+    const card = await screen.findByRole("article", {
+      name: "Usuario: admin@matchengine.com",
+    })
+    expect(within(card).getByText("admin")).toBeInTheDocument()
+    expect(within(card).getByText("Admin")).toBeInTheDocument()
+    expect(within(card).getByText("Candidate")).toBeInTheDocument()
+    expect(within(card).getByText("Recruiter")).toBeInTheDocument()
+    expect(within(card).queryByText("+1")).not.toBeInTheDocument()
+    expect(within(card).getByText("Roles")).toBeInTheDocument()
+    expect(within(card).getByText("Estado")).toBeInTheDocument()
+  })
+
+  it("opens a balanced detail modal with lock in the status tile and recovery in the footer", async () => {
     const listUser = buildUser({ userName: "admin" })
     const detailUser: AdminUserDetail = {
       id: listUser.id,
@@ -107,7 +134,11 @@ describe("AdminUsuariosContent", () => {
 
     render(<AdminUsuariosContent />)
 
-    fireEvent.click(await screen.findByRole("button", { name: "Gestionar" }))
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Gestionar usuario admin@matchengine.com",
+      })
+    )
 
     const dialog = await screen.findByRole("dialog")
     expect(
@@ -116,6 +147,11 @@ describe("AdminUsuariosContent", () => {
     expect(within(dialog).getByText("admin@matchengine.com")).toBeInTheDocument()
     expect(within(dialog).queryByRole("textbox")).not.toBeInTheDocument()
     expect(within(dialog).getByText("Estado de la cuenta")).toBeInTheDocument()
+    expect(within(dialog).getByText("admin")).toBeInTheDocument()
+    expect(within(dialog).getByText("Creado")).toBeInTheDocument()
+    expect(
+      within(dialog).getByText("Este correo ya está verificado.")
+    ).toBeInTheDocument()
     expect(
       within(dialog).getByRole("button", { name: "Bloquear cuenta" })
     ).toBeInTheDocument()
@@ -134,9 +170,60 @@ describe("AdminUsuariosContent", () => {
     expect(
       within(footer as HTMLElement).getByRole("button", { name: "Cerrar" })
     ).toBeInTheDocument()
+    expect(
+      within(footer as HTMLElement).queryByRole("button", {
+        name: "Bloquear cuenta",
+      })
+    ).not.toBeInTheDocument()
 
     await waitFor(() => {
       expect(usersApiMocks.fetchAdminUserById).toHaveBeenCalledWith("user-1")
     })
+  })
+
+  it("keeps add-role controls on a single aligned row when roles are missing", async () => {
+    const listUser = buildUser({
+      userName: "admin",
+      roles: ["Admin", "Recruiter"],
+    })
+    const detailUser: AdminUserDetail = {
+      id: listUser.id,
+      email: listUser.email,
+      userName: "admin",
+      emailConfirmed: false,
+      lockoutEnabled: false,
+      lockoutEnd: null,
+      lockoutActive: false,
+      roles: ["Admin", "Recruiter"],
+      createdAtUtc: null,
+    }
+
+    usersApiMocks.fetchAdminUsersList.mockResolvedValueOnce({
+      items: [listUser],
+      totalCount: 1,
+      page: 1,
+      pageSize: 20,
+    })
+    usersApiMocks.fetchAdminUserById.mockResolvedValueOnce(detailUser)
+
+    render(<AdminUsuariosContent />)
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Gestionar usuario admin@matchengine.com",
+      })
+    )
+
+    const dialog = await screen.findByRole("dialog")
+    expect(
+      within(dialog).getByText("Este correo aún no está verificado.")
+    ).toBeInTheDocument()
+    expect(within(dialog).getByText("Añadir roles")).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole("checkbox", { name: "Candidate" })
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole("button", { name: "Añadir" })
+    ).toBeInTheDocument()
   })
 })

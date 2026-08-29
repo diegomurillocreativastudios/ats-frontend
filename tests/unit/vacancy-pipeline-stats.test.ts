@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildApplicantComponentScoreAverages,
   extractApplicantComponentScores01,
+  parseFallbackKanbanStages,
   resolveOrderedStageNames,
   type VacancyApplicantLike,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
@@ -24,6 +25,33 @@ describe("resolveOrderedStageNames", () => {
     const kanban = ["Applied", "applied", "Screening"]
     const ordered = resolveOrderedStageNames(kanban, [])
     expect(ordered).toEqual(["Applied", "Screening"])
+  })
+
+  it("uses applicant stage names when the company catalog is empty", () => {
+    const applicants: VacancyApplicantLike[] = [
+      { applicationStage: "Postulados", totalScore: 0.5 },
+      { applicationStage: "Entrevista", totalScore: 0.4 },
+    ]
+    const ordered = resolveOrderedStageNames([], applicants)
+    expect(ordered).toEqual(["Postulados", "Entrevista"])
+  })
+
+  it("uses localized fallback names only when catalog and applicants are empty", () => {
+    const ordered = resolveOrderedStageNames([], [], [
+      "Postulados",
+      "Filtrado",
+      "Entrevista",
+    ])
+    expect(ordered).toEqual(["Postulados", "Filtrado", "Entrevista"])
+  })
+})
+
+describe("parseFallbackKanbanStages", () => {
+  it("reads a non-empty string array from i18n", () => {
+    expect(parseFallbackKanbanStages(["Postulados", "Filtrado"])).toEqual([
+      "Postulados",
+      "Filtrado",
+    ])
   })
 })
 

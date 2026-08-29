@@ -125,7 +125,8 @@ export interface VacancyResultadosViewModel {
  * Cuando exista `GET .../vacancies/:id/resultados`, sustituir el cuerpo por esa llamada.
  */
 export async function fetchVacancyResultadosPayload(
-  vacancyId: string
+  vacancyId: string,
+  options?: { fallbackStageNames?: readonly string[] }
 ): Promise<VacancyResultadosViewModel> {
   const vacancyData = await apiClient.get(
     `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}`
@@ -144,8 +145,8 @@ export async function fetchVacancyResultadosPayload(
   const companyId = resolveVacancyCompanyId(vacancyRecord, companies, vacancyId)
 
   const [stageRows, companyStatuses] = await Promise.all([
-    listRecruiterStages(companyId).catch(() => []),
-    listCompanyApplicantStatuses(companyId).catch(() => []),
+    listRecruiterStages().catch(() => []),
+    listCompanyApplicantStatuses().catch(() => []),
   ])
 
   const kanbanStageNames = kanbanStageNamesFromApiStages(
@@ -154,7 +155,11 @@ export async function fetchVacancyResultadosPayload(
   const applicants = applicantsFromVacancyPayload(vacancyWithApplicants)
   const title = titleFromVacancyPayload(vacancyWithApplicants)
   const meta = vacancyMetaFromPayload(vacancyWithApplicants)
-  const orderedStageNames = resolveOrderedStageNames(kanbanStageNames, applicants)
+  const orderedStageNames = resolveOrderedStageNames(
+    kanbanStageNames,
+    applicants,
+    options?.fallbackStageNames
+  )
 
   const byStage = buildStageCounts(applicants, orderedStageNames)
   const applicantsByStageFull = buildApplicantsGroupedByStageFull(

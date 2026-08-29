@@ -523,6 +523,12 @@ h6 {
     box-shadow: var(--glass-shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
+  .glass-modal.modal-surface-solid {
+    background: #ffffff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
   .glass-input {
     background: rgba(255, 255, 255, 0.6);
     border: 1px solid var(--glass-hairline);

@@ -43,6 +43,7 @@ vi.mock("@/lib/api/recruiter-companies", () => ({
   listRecruiterStages: vi.fn(async () => []),
   persistVacancyCompanyId: vi.fn(),
   resolveVacancyCompanyId: () => "default-co",
+  adminStagesCatalogHref: () => "/portal-admin/vacantes/etapas",
 }))
 
 vi.mock("@/components/rrhh/RRHHSidebar", () => ({

@@ -21,7 +21,7 @@ export function PortalAdminShell({ children }: { children: ReactNode }) {
         <div className="lg:hidden">
           <AdminTopbar variant="tablet" />
         </div>
-        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-background">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain bg-background">
           {children}
         </main>
       </div>

@@ -149,7 +149,7 @@ describe("AdminUsuariosContent i18n (Etapa 13)", () => {
     expect((await screen.findAllByText("Usuarios")).length).toBeGreaterThan(0)
     expect(screen.getAllByText("Nuevo usuario").length).toBeGreaterThan(0)
     expect(
-      await screen.findByText("No hay usuarios con los filtros actuales."),
+      await screen.findByText("No se encontraron usuarios"),
     ).toBeInTheDocument()
     // Los roles asignables son valores del backend: se mantienen verbatim.
     expect(screen.getByRole("option", { name: "Admin" })).toBeInTheDocument()
@@ -161,7 +161,7 @@ describe("AdminUsuariosContent i18n (Etapa 13)", () => {
     expect((await screen.findAllByText("Users")).length).toBeGreaterThan(0)
     expect(screen.getAllByText("New user").length).toBeGreaterThan(0)
     expect(
-      await screen.findByText("No users match the current filters."),
+      await screen.findByText("No users found"),
     ).toBeInTheDocument()
     // Rol verbatim también en inglés (no se traduce).
     expect(screen.getByRole("option", { name: "Recruiter" })).toBeInTheDocument()

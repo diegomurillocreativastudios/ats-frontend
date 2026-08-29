@@ -3,9 +3,12 @@ import {
   DEFAULT_RECRUITER_COMPANY_ID,
   listRecruiterCompanies,
   listCompanyVacancyStatuses,
+  listRecruiterStages,
+  listCompanyApplicantStatuses,
   resolveVacancyCompanyId,
   persistVacancyCompanyId,
   readPersistedVacancyCompanyId,
+  adminStagesCatalogHref,
   type RecruiterCompanyOption,
 } from "@/lib/api/recruiter-companies"
 
@@ -19,8 +22,8 @@ vi.mock("@/lib/api", () => ({
 
 describe("resolveVacancyCompanyId", () => {
   const companies: RecruiterCompanyOption[] = [
-    { id: "00000000-0000-0000-0000-000000000001", name: "Applican Tree" },
-    { id: "company-b-id", name: "Acme Corp" },
+    { id: "00000000-0000-0000-0000-000000000001", name: "Applican Tree", isActive: true },
+    { id: "company-b-id", name: "Acme Corp", isActive: true },
   ]
 
   it("returns companyId from vacancy when present", () => {
@@ -62,6 +65,15 @@ describe("resolveVacancyCompanyId", () => {
   })
 })
 
+describe("adminStagesCatalogHref", () => {
+  it("returns the global stages admin path without company query", () => {
+    expect(adminStagesCatalogHref("company-b-id")).toBe(
+      "/portal-admin/vacantes/etapas"
+    )
+    expect(adminStagesCatalogHref()).toBe("/portal-admin/vacantes/etapas")
+  })
+})
+
 describe("listRecruiterCompanies", () => {
   beforeEach(() => {
     apiGet.mockReset()
@@ -77,9 +89,93 @@ describe("listRecruiterCompanies", () => {
 
     expect(apiGet).toHaveBeenCalledWith("/api/recruiter/companies")
     expect(result).toEqual([
-      { id: "a", name: "Alpha" },
-      { id: "b", name: "Default Company" },
+      { id: "a", name: "Alpha", isActive: true },
+      { id: "b", name: "Default Company", isActive: true },
     ])
+  })
+})
+
+describe("listRecruiterStages", () => {
+  beforeEach(() => {
+    apiGet.mockReset()
+  })
+
+  it("calls the global stages endpoint", async () => {
+    apiGet.mockResolvedValueOnce([
+      { id: "s1", name: "Applied", orderIndex: 1 },
+      { id: "s0", name: "Sourced", orderIndex: 0 },
+    ])
+
+    const result = await listRecruiterStages()
+
+    expect(apiGet).toHaveBeenCalledWith("/api/recruiter/stages")
+    expect(result.map((s) => s.name)).toEqual(["Sourced", "Applied"])
+  })
+
+  it("maps final and isHiredStage from the catalog payload", async () => {
+    apiGet.mockResolvedValueOnce([
+      {
+        id: "hired",
+        name: "Hired",
+        orderIndex: 1,
+        final: true,
+        isHiredStage: true,
+      },
+      {
+        id: "reject",
+        name: "No seleccionado",
+        orderIndex: 2,
+        final: true,
+        isHiredStage: false,
+      },
+    ])
+
+    const result = await listRecruiterStages()
+
+    expect(result).toEqual([
+      {
+        id: "hired",
+        name: "Hired",
+        order: 1,
+        orderIndex: 1,
+        final: true,
+        isHiredStage: true,
+      },
+      {
+        id: "reject",
+        name: "No seleccionado",
+        order: 2,
+        orderIndex: 2,
+        final: true,
+        isHiredStage: false,
+      },
+    ])
+  })
+
+  it("breaks orderIndex ties by id", async () => {
+    apiGet.mockResolvedValueOnce([
+      { id: "b", name: "Beta", orderIndex: 1, final: false, isHiredStage: false },
+      { id: "a", name: "Alpha", orderIndex: 1, final: false, isHiredStage: false },
+    ])
+
+    const result = await listRecruiterStages()
+
+    expect(result.map((s) => s.id)).toEqual(["a", "b"])
+  })
+})
+
+describe("listCompanyApplicantStatuses", () => {
+  beforeEach(() => {
+    apiGet.mockReset()
+  })
+
+  it("calls the global statuses endpoint", async () => {
+    apiGet.mockResolvedValueOnce([{ id: "st1", name: "Active" }])
+
+    const result = await listCompanyApplicantStatuses()
+
+    expect(apiGet).toHaveBeenCalledWith("/api/recruiter/statuses")
+    expect(result).toEqual([{ id: "st1", name: "Active", final: false }])
   })
 })
 

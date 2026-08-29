@@ -2185,7 +2185,14 @@
           "score": "Punteggio",
           "columnAria": "Colonna {stage}",
           "moveStageAria": "Sposta {name} in un'altra fase",
-          "statusAria": "Stato di {name}"
+          "statusAria": "Stato di {name}",
+          "dropNotAllowedTooltip": "Puoi solo avanzare o tornare indietro di una fase, o scartare",
+          "finalStatusRequiredTooltip": "Per avanzare o spostare a una fase finale, lo stato di candidatura deve essere contrassegnato come finale",
+          "moveToStage": "Sposta a {stageName}",
+          "moveToStageAria": "Sposta {name} a {stageName}",
+          "moveToShortcutPlaceholder": "Sposta a…",
+          "shortcutColumnAria": "Colonna di scarto {stage}",
+          "hiredColumnAria": "Colonna di assunzione {stage}"
         },
         "aria": {
           "matchedCandidates": "Candidati con corrispondenza",
@@ -2222,8 +2229,9 @@
         },
         "errors": {
           "moveStageFailed": "Impossibile spostare il candidato di fase.",
-          "stageSkipNotAllowed": "Puoi spostare il candidato solo alla fase consecutiva (precedente o successiva). Non sono ammessi salti.",
-          "finalStatusRequiredForStageMove": "Per passare alla fase successiva, il candidato deve essere in uno stato di candidatura contrassegnato come finale.",
+          "stageSkipNotAllowed": "Puoi solo avanzare o tornare indietro di una fase, o scartare.",
+          "stageMoveConflict": "I candidati possono passare solo a una fase adiacente della pipeline, o a una fase finale che non è quella di assunzione.",
+          "finalStatusRequiredForStageMove": "Per passare alla fase successiva o a una fase finale, il candidato deve essere in uno stato di candidatura contrassegnato come finale.",
           "missingDefaultApplicationStatus": "Manca lo stato di candidatura predefinito dell'azienda. Il server ne ha bisogno quando si spostano candidati tra le fasi. Configuralo in Fasi (stati) o chiedi a un amministratore di farlo.",
           "updateApplicationStatusFailed": "Impossibile aggiornare lo stato della candidatura.",
           "candidateMovedStage": "Candidato spostato di fase.",
@@ -2244,7 +2252,18 @@
         "emptyApplicants": "Non ci sono ancora candidati su questa posizione.",
         "kanbanBoardAria": "Contenitore della board Kanban",
         "kanbanStagesAria": "Fasi dei candidati",
-        "goToStagesLink": "Vai alle Fasi e gestisci gli stati"
+        "fallbackKanbanStages": [
+          "Sourced",
+          "Applied",
+          "Screening",
+          "Interview",
+          "Offer",
+          "Hired",
+          "Rejected"
+        ],
+        "goToStagesLink": "Vai alle Fasi e gestisci gli stati",
+        "manageStagesAria": "Gestisci il catalogo globale delle fasi",
+        "manageStages": "Gestisci le fasi"
       },
       "rematch": {
         "ariaLabel": "Ricalibra corrispondenze",
@@ -2727,18 +2746,36 @@
     "users": {
       "page": {
         "title": "Utenti",
-        "description": "Elenco e amministrazione degli account del portale."
+        "description": "Elenco e amministrazione degli account del portale.",
+        "headerRegionLabel": "Intestazione utenti",
+        "listRegionLabel": "Elenco utenti",
+        "filtersAndListRegionLabel": "Filtri ed elenco"
       },
       "filters": {
         "regionAria": "Filtri",
-        "emailLabel": "Email (contiene)",
-        "emailPlaceholder": "es. @azienda.com",
+        "regionLabel": "Filtri utenti",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Cerca per email...",
         "roleLabel": "Ruolo",
         "allRoles": "Tutti",
+        "allLockouts": "Tutti",
         "lockedOnly": "Solo bloccati",
         "lockoutLabel": "Blocco",
         "apply": "Applica filtri",
-        "clear": "Cancella"
+        "clear": "Cancella",
+        "clearFilters": "Cancella filtri",
+        "filterByAria": "Filtra per {label}"
+      },
+      "cards": {
+        "cardAria": "Utente: {email}",
+        "cardLockedAria": "Utente bloccato: {email}",
+        "rolesLabel": "Ruoli",
+        "statusLabel": "Stato",
+        "noRoles": "Nessun ruolo",
+        "confirmed": "Confermato",
+        "unconfirmed": "Non confermato",
+        "locked": "Bloccato",
+        "unlocked": "Attivo"
       },
       "table": {
         "email": "Email",
@@ -2761,17 +2798,28 @@
         "pageSizeAria": "Utenti per pagina",
         "refreshAria": "Aggiorna elenco",
         "regionAria": "Paginazione",
-        "summary": "Pagina {page} di {total}"
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successivo",
+        "count": "{count, plural, one {# utente} other {# utenti}}"
       },
       "emptyStates": {
         "noResults": "Nessun utente corrisponde ai filtri attuali.",
+        "noUsers": "Nessun utente trovato",
+        "noUsersFiltered": "Nessun utente corrisponde ai filtri applicati",
         "description": "Prova a modificare i filtri o crea un nuovo utente."
+      },
+      "loadingStates": {
+        "loading": "Caricamento utenti..."
       },
       "actions": {
         "create": "Nuovo utente",
+        "createShort": "Nuovo",
+        "createAria": "Crea nuovo utente",
         "refresh": "Aggiorna",
         "retry": "Riprova",
         "manage": "Gestisci",
+        "manageAria": "Gestisci utente {email}",
         "prev": "Precedente",
         "next": "Successivo"
       },
@@ -2789,9 +2837,12 @@
         "title": "Dettaglio utente",
         "emailLabel": "Email",
         "userNameLabel": "Nome utente",
+        "createdAtLabel": "Creato",
         "accountHeading": "Stato dell'account",
         "lockedCheckbox": "Account bloccato",
         "emailConfirmed": "Email confermata",
+        "emailConfirmedHint": "Questa email è già verificata.",
+        "emailPendingHint": "Questa email non è ancora verificata.",
         "readOnly": "Sola lettura",
         "lockAction": "Blocca account",
         "unlockAction": "Sblocca account",

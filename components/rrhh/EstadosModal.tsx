@@ -23,7 +23,13 @@ import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
 
-const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
+/**
+ * Global platform application-status catalog URL.
+ */
+const statusesUrl = (suffix = "") => {
+  const base = `/api/recruiter/statuses`;
+  return suffix ? `${base}/${suffix}` : base;
+};
 
 const mapStatusFromApi = (item, index = 0) => {
   const id = String(item?.id ?? item?.uuid ?? index);
@@ -301,6 +307,7 @@ export default function EstadosModal({
   const t = useTranslations("AdminPortal.statuses.modal");
   const tPage = useTranslations("AdminPortal.statuses.page");
   const tCommon = useTranslations("Common");
+  const statusesFetchGenerationRef = useRef(0);
   const isVisible = variant === "inline" || isOpen;
   const [statuses, setStatuses] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -344,6 +351,7 @@ export default function EstadosModal({
     const silent = options?.silent === true;
     if (!isVisible) return false;
 
+    const generation = ++statusesFetchGenerationRef.current;
     const showInitialLoader = !silent && !hasStatusesRef.current;
 
     if (showInitialLoader) {
@@ -354,14 +362,14 @@ export default function EstadosModal({
     setFetchError(null);
 
     try {
-      const data = await apiClient.get(
-        `/api/recruiter/companies/${COMPANY_ID}/statuses`
-      );
+      const data = await apiClient.get(statusesUrl());
+      if (generation !== statusesFetchGenerationRef.current) return false;
       const nextStatuses = parseStatusesResponse(data);
       setStatuses(nextStatuses);
       hasStatusesRef.current = nextStatuses.length > 0;
       return true;
     } catch (err: unknown) {
+      if (generation !== statusesFetchGenerationRef.current) return false;
       const msg =
         getApiErrorMessage(err) || t("loadFailed");
       setFetchError(msg);
@@ -371,8 +379,10 @@ export default function EstadosModal({
       showSnackbar(msg, "error");
       return false;
     } finally {
-      setInitialLoading(false);
-      setIsSyncing(false);
+      if (generation === statusesFetchGenerationRef.current) {
+        setInitialLoading(false);
+        setIsSyncing(false);
+      }
     }
   }, [isVisible, showSnackbar, t]);
 
@@ -389,8 +399,11 @@ export default function EstadosModal({
       return;
     }
 
+    hasStatusesRef.current = false;
+    setStatuses([]);
     void fetchStatuses();
   }, [isVisible, fetchStatuses]);
+
 
   const handleEdit = (status) => {
     setEditingStatus(status);
@@ -425,7 +438,7 @@ export default function EstadosModal({
       await Promise.all([
         (async () => {
           await apiClient.put(
-            `/api/recruiter/companies/${COMPANY_ID}/statuses/${target.id}`,
+            statusesUrl(target.id),
             {
               name: target.name,
               isDefault: true,
@@ -434,7 +447,7 @@ export default function EstadosModal({
           for (const s of statuses) {
             if (String(s.id) === targetId) continue;
             await apiClient.put(
-              `/api/recruiter/companies/${COMPANY_ID}/statuses/${s.id}`,
+              statusesUrl(s.id),
               {
                 name: s.name,
                 isDefault: false,
@@ -474,7 +487,7 @@ export default function EstadosModal({
 
     try {
       await apiClient.patch(
-        `/api/recruiter/companies/${COMPANY_ID}/statuses/${statusId}`,
+        statusesUrl(statusId),
         { final: newValue }
       );
 
@@ -502,7 +515,6 @@ export default function EstadosModal({
 
   const handleConfirmDelete = async () => {
     if (!statusToDelete) return;
-
     const deletedId = String(statusToDelete.id);
     const previousStatuses = statuses;
 
@@ -521,7 +533,7 @@ export default function EstadosModal({
       setRemovingStatusId(null);
 
       await apiClient.delete(
-        `/api/recruiter/companies/${COMPANY_ID}/statuses/${deletedId}`
+        statusesUrl(deletedId)
       );
 
       showSnackbar(t("deleted"), "success");
@@ -590,7 +602,7 @@ export default function EstadosModal({
     try {
       if (editingStatus) {
         const updated = await apiClient.put(
-          `/api/recruiter/companies/${COMPANY_ID}/statuses/${editingStatus.id}`,
+          statusesUrl(editingStatus.id),
           payload
         );
         const mapped =
@@ -607,7 +619,7 @@ export default function EstadosModal({
         );
       } else {
         const created = await apiClient.post(
-          `/api/recruiter/companies/${COMPANY_ID}/statuses`,
+          statusesUrl(),
           payload
         );
         const mapped =
@@ -815,6 +827,7 @@ export default function EstadosModal({
       type="button"
       variant="primary"
       onClick={handleNewStatus}
+      disabled={false}
       aria-label={tPage("newStatusAria")}
     >
       <Plus className="h-4 w-4" aria-hidden />
@@ -869,9 +882,13 @@ export default function EstadosModal({
           title={tPage("title")}
           description={tPage("description")}
           layout="split"
-          actions={newStatusButton}
+          actions={
+            <>
+                            {newStatusButton}
+            </>
+          }
         />
-        {statusList}
+                {statusList}
         {statusFormModal}
         {isVisible ? deleteModal : null}
         {snackbarEl}
@@ -890,25 +907,27 @@ export default function EstadosModal({
           className="relative max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-xl bg-background shadow-xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <div className="flex flex-col gap-3 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="font-sans text-xl font-semibold text-foreground">
               {t("title")}
             </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
-              aria-label={t("close")}
-            >
-              <X className="h-5 w-5" aria-hidden />
-            </button>
+            <div className="flex items-center gap-3">
+                            <button
+                type="button"
+                onClick={onClose}
+                className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple"
+                aria-label={t("close")}
+              >
+                <X className="h-5 w-5" aria-hidden />
+              </button>
+            </div>
           </div>
 
           <div
             className="overflow-y-auto px-6 py-5 transition-opacity duration-300 ease-in-out"
             style={{ maxHeight: "calc(90vh - 140px)" }}
           >
-            {listOrForm}
+                        {listOrForm}
           </div>
 
           {!isFormOpen ? (

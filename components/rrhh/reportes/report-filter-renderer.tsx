@@ -75,13 +75,9 @@ function recruiterLabel(user: AdminUserListItem): string {
   return user.id
 }
 
-function useFilterSourceOptions(field: ReportFilterField, value: Record<string, unknown>) {
+function useFilterSourceOptions(field: ReportFilterField, _value: Record<string, unknown>) {
   const [options, setOptions] = useState<ReportFilterFieldOption[]>(field.options ?? [])
   const [loading, setLoading] = useState(false)
-
-  const dependsOnValue = field.dependsOn
-    ? readString(value[field.dependsOn])
-    : ""
 
   const loadOptions = useCallback(async () => {
     if (field.source === "static" || (!field.source && field.options?.length)) {
@@ -117,11 +113,7 @@ function useFilterSourceOptions(field: ReportFilterField, value: Record<string, 
       }
 
       if (field.source === "stages") {
-        if (!dependsOnValue.trim()) {
-          setOptions(field.options ?? [])
-          return
-        }
-        const stages: RecruiterStageOption[] = await listRecruiterStages(dependsOnValue)
+        const stages: RecruiterStageOption[] = await listRecruiterStages()
         setOptions(stages.map((s) => ({ value: s.id, label: s.name })))
         return
       }
@@ -143,7 +135,7 @@ function useFilterSourceOptions(field: ReportFilterField, value: Record<string, 
     } finally {
       setLoading(false)
     }
-  }, [dependsOnValue, field])
+  }, [field])
 
   useEffect(() => {
     void loadOptions()

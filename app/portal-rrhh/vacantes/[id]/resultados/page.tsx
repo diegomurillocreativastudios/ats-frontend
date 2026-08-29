@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import { AlertTriangle, ArrowLeft, Calendar, Loader2, Tag } from "lucide-react"
 import { RrhhInterviewsShell } from "@/components/rrhh/interviews/rrhh-interviews-shell"
@@ -15,13 +15,11 @@ import {
   VacancyResultadosCandidatesBlock,
   type VacancyResultadosCandidateFiltersState,
 } from "@/components/rrhh/vacancy-resultados/vacancy-resultados-candidates-block"
-import {
-  fetchVacancyResultadosPayload,
-  type VacancyResultadosViewModel,
-} from "@/lib/api/vacancy-resultados"
+import { fetchVacancyResultadosPayload, type VacancyResultadosViewModel } from "@/lib/api/vacancy-resultados"
 import { getInterviewsByVacancy, type Interview } from "@/lib/api/interviews"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatVacancyResultadosDocumentTitle } from "@/lib/pageTitles"
+import { parseFallbackKanbanStages } from "@/lib/rrhh/vacancy-pipeline-stats"
 
 function formatDisplayDate(iso: string | null): string | null {
   if (!iso) return null
@@ -44,6 +42,11 @@ export default function VacancyResultadosPage() {
   const router = useRouter()
   const t = useTranslations("RecruiterPortal.vacancies.results")
   const tVacancies = useTranslations("RecruiterPortal.vacancies")
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
+  const fallbackKanbanStages = useMemo(
+    () => parseFallbackKanbanStages(tMatching.raw("fallbackKanbanStages")),
+    [tMatching]
+  )
   const raw = params?.id
   const vacancyId = Array.isArray(raw) ? raw[0] : raw ?? ""
 
@@ -69,7 +72,9 @@ export default function VacancyResultadosPage() {
     setLoading(true)
     setFetchError(null)
     try {
-      const data = await fetchVacancyResultadosPayload(vacancyId)
+      const data = await fetchVacancyResultadosPayload(vacancyId, {
+        fallbackStageNames: fallbackKanbanStages,
+      })
       setModel(data)
     } catch (err: unknown) {
       setFetchError(
@@ -79,7 +84,7 @@ export default function VacancyResultadosPage() {
     } finally {
       setLoading(false)
     }
-  }, [vacancyId, t])
+  }, [vacancyId, t, fallbackKanbanStages])
 
   useEffect(() => {
     void load()

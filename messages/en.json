@@ -2253,7 +2253,14 @@
           "score": "Score",
           "columnAria": "Column {stage}",
           "moveStageAria": "Move {name} to another stage",
-          "statusAria": "Status of {name}"
+          "statusAria": "Status of {name}",
+          "dropNotAllowedTooltip": "You can only move forward or back one stage, or discard",
+          "finalStatusRequiredTooltip": "To advance or move to a final stage, the application status must be marked as final",
+          "moveToStage": "Move to {stageName}",
+          "moveToStageAria": "Move {name} to {stageName}",
+          "moveToShortcutPlaceholder": "Move to…",
+          "shortcutColumnAria": "Discard column {stage}",
+          "hiredColumnAria": "Hiring column {stage}"
         },
         "aria": {
           "matchedCandidates": "Matched candidates",
@@ -2290,8 +2297,9 @@
         },
         "errors": {
           "moveStageFailed": "The candidate could not be moved to another stage.",
-          "stageSkipNotAllowed": "You can only move the candidate to the consecutive stage (previous or next). Skipping stages is not allowed.",
-          "finalStatusRequiredForStageMove": "To advance to the next stage, the candidate must be in an application status marked as final.",
+          "stageSkipNotAllowed": "You can only move forward or back one stage, or discard.",
+          "stageMoveConflict": "Candidates can only move to an adjacent pipeline stage, or to a final stage that is not the hiring stage.",
+          "finalStatusRequiredForStageMove": "To advance to the next stage or to a final stage, the candidate must be in an application status marked as final.",
           "missingDefaultApplicationStatus": "The company's default application status is missing. The server needs it when moving candidates between stages. Configure it in Stages (statuses) or ask an administrator to do so.",
           "updateApplicationStatusFailed": "The application status could not be updated.",
           "candidateMovedStage": "Candidate moved to another stage.",
@@ -2312,7 +2320,18 @@
         "emptyApplicants": "There are no applicants on this vacancy yet.",
         "kanbanBoardAria": "Kanban board container",
         "kanbanStagesAria": "Candidate stages",
-        "goToStagesLink": "Go to Stages and manage statuses"
+        "fallbackKanbanStages": [
+          "Sourced",
+          "Applied",
+          "Screening",
+          "Interview",
+          "Offer",
+          "Hired",
+          "Rejected"
+        ],
+        "goToStagesLink": "Go to Stages and manage statuses",
+        "manageStagesAria": "Manage the global stages catalog",
+        "manageStages": "Manage stages"
       },
       "rematch": {
         "ariaLabel": "Re-adjust matching",
@@ -2795,18 +2814,36 @@
     "users": {
       "page": {
         "title": "Users",
-        "description": "Listing and management of portal accounts."
+        "description": "Listing and management of portal accounts.",
+        "headerRegionLabel": "Users header",
+        "listRegionLabel": "Users list",
+        "filtersAndListRegionLabel": "Filters and list"
       },
       "filters": {
         "regionAria": "Filters",
-        "emailLabel": "Email (contains)",
-        "emailPlaceholder": "e.g. @company.com",
+        "regionLabel": "User filters",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Search by email...",
         "roleLabel": "Role",
         "allRoles": "All",
+        "allLockouts": "All",
         "lockedOnly": "Locked only",
         "lockoutLabel": "Lockout",
         "apply": "Apply filters",
-        "clear": "Clear"
+        "clear": "Clear",
+        "clearFilters": "Clear filters",
+        "filterByAria": "Filter by {label}"
+      },
+      "cards": {
+        "cardAria": "User: {email}",
+        "cardLockedAria": "Locked user: {email}",
+        "rolesLabel": "Roles",
+        "statusLabel": "Status",
+        "noRoles": "No roles",
+        "confirmed": "Confirmed",
+        "unconfirmed": "Unconfirmed",
+        "locked": "Locked",
+        "unlocked": "Active"
       },
       "table": {
         "email": "Email",
@@ -2829,17 +2866,28 @@
         "pageSizeAria": "Users per page",
         "refreshAria": "Refresh list",
         "regionAria": "Pagination",
-        "summary": "Page {page} of {total}"
+        "summary": "Page {page} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# user} other {# users}}"
       },
       "emptyStates": {
         "noResults": "No users match the current filters.",
+        "noUsers": "No users found",
+        "noUsersFiltered": "No users match the applied filters",
         "description": "Try adjusting the filters or create a new user."
+      },
+      "loadingStates": {
+        "loading": "Loading users..."
       },
       "actions": {
         "create": "New user",
+        "createShort": "New",
+        "createAria": "Create new user",
         "refresh": "Refresh",
         "retry": "Retry",
         "manage": "Manage",
+        "manageAria": "Manage user {email}",
         "prev": "Previous",
         "next": "Next"
       },
@@ -2857,9 +2905,12 @@
         "title": "User detail",
         "emailLabel": "Email",
         "userNameLabel": "Username",
+        "createdAtLabel": "Created",
         "accountHeading": "Account status",
         "lockedCheckbox": "Account locked",
         "emailConfirmed": "Email confirmed",
+        "emailConfirmedHint": "This email is already verified.",
+        "emailPendingHint": "This email is not verified yet.",
         "readOnly": "Read only",
         "lockAction": "Lock account",
         "unlockAction": "Unlock account",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import Nestable from "react-nestable";
 import {
@@ -30,7 +30,13 @@ import { buildRecruiterStagePutPayload } from "@/lib/recruiterStagePayload";
 import "react-nestable/dist/styles/index.css";
 import "./nestable-custom.css";
 
-const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
+/**
+ * Global platform stages catalog URL.
+ */
+const stagesUrl = (suffix = "") => {
+  const base = `/api/recruiter/stages`;
+  return suffix ? `${base}/${suffix}` : base;
+};
 
 /**
  * Orden de etapa: siempre `orderIndex` (mismo nombre y semántica que el API, 1…n).
@@ -68,7 +74,7 @@ const persistStageOrdersSequential = async (orderedStages) => {
   for (let i = 0; i < orderedStages.length; i++) {
     const stage = orderedStages[i];
     await apiClient.put(
-      `/api/recruiter/companies/${COMPANY_ID}/stages/${stage.id}`,
+      stagesUrl(stage.id),
       buildRecruiterStagePutPayload(stage)
     );
   }
@@ -329,6 +335,7 @@ const renderStageItem = ({ item, handler, tStages }) => {
 export default function EtapasPage() {
   const tStages = useTranslations("AdminPortal.stages");
   const tCommon = useTranslations("Common");
+  const stagesFetchGenerationRef = useRef(0);
   const [stages, setStages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -354,28 +361,33 @@ export default function EtapasPage() {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
+  const stagesLoadFailedMessage = tStages("errors.loadFailed");
+
   const fetchStages = useCallback(async () => {
+    const generation = ++stagesFetchGenerationRef.current;
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await apiClient.get(
-        `/api/recruiter/companies/${COMPANY_ID}/stages`
-      );
+      const data = await apiClient.get(stagesUrl());
+      if (generation !== stagesFetchGenerationRef.current) return;
       const list = unwrapListArray(data);
       const mapped = list.map((item, i) => mapStageFromApi(item, i));
       setStages([...mapped].sort(sortStagesStable));
     } catch (err) {
+      if (generation !== stagesFetchGenerationRef.current) return;
       setFetchError(
-        getApiErrorMessage(err) || tStages("errors.loadFailed")
+        getApiErrorMessage(err) || stagesLoadFailedMessage
       );
       setStages([]);
     } finally {
-      setLoading(false);
+      if (generation === stagesFetchGenerationRef.current) {
+        setLoading(false);
+      }
     }
-  }, []);
+  }, [stagesLoadFailedMessage]);
 
   useEffect(() => {
-    fetchStages();
+    void fetchStages();
   }, [fetchStages]);
 
   const handleModalSubmit = async (wasCreating, createdStage) => {
@@ -384,9 +396,7 @@ export default function EtapasPage() {
     // Si se creó una etapa, dejarla primera (orderIndex 1) y reenumerar el resto
     if (wasCreating && createdStage) {
       try {
-        const data = await apiClient.get(
-          `/api/recruiter/companies/${COMPANY_ID}/stages`
-        );
+        const data = await apiClient.get(stagesUrl());
         const list = unwrapListArray(data);
         const mappedStages = list.map((item, i) => mapStageFromApi(item, i));
         
@@ -425,7 +435,6 @@ export default function EtapasPage() {
   const handleDefaultStageActivate = async (targetStage) => {
     if (defaultStageSwitchLoading) return;
     if (targetStage.isDefault) return;
-
     const stageId = String(targetStage.id);
     
     // Actualización optimista: actualizar el estado local inmediatamente
@@ -445,7 +454,7 @@ export default function EtapasPage() {
         stages.find((s) => String(s.id) === stageId) ?? targetStage;
       
       await apiClient.put(
-        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageId}`,
+        stagesUrl(stageId),
         buildRecruiterStagePutPayload({ ...target, isDefault: true })
       );
       
@@ -453,7 +462,7 @@ export default function EtapasPage() {
       for (const s of stages) {
         if (String(s.id) === stageId) continue;
         await apiClient.put(
-          `/api/recruiter/companies/${COMPANY_ID}/stages/${s.id}`,
+          stagesUrl(s.id),
           buildRecruiterStagePutPayload({ ...s, isDefault: false })
         );
       }
@@ -485,7 +494,6 @@ export default function EtapasPage() {
 
   const handleFinalStageToggle = async (targetStage, newValue) => {
     if (finalStageSwitchLoading) return;
-
     const stageId = String(targetStage.id);
     
     // Actualización optimista: actualizar el estado local inmediatamente
@@ -503,7 +511,7 @@ export default function EtapasPage() {
         stages.find((s) => String(s.id) === stageId) ?? targetStage;
       
       await apiClient.put(
-        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageId}`,
+        stagesUrl(stageId),
         buildRecruiterStagePutPayload({ ...target, final: newValue })
       );
 
@@ -539,7 +547,6 @@ export default function EtapasPage() {
 
   const handleHiredStageToggle = async (targetStage, newValue) => {
     if (hiredStageSwitchLoading) return;
-
     const stageId = String(targetStage.id);
     
     // Actualización optimista: actualizar el estado local inmediatamente
@@ -555,7 +562,7 @@ export default function EtapasPage() {
     try {
       // Usar el endpoint PATCH específico para isHiredStage
       const updatedStage = await apiClient.patch(
-        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageId}/hired-stage`,
+        `${stagesUrl(stageId)}/hired-stage`,
         { isHiredStage: newValue }
       );
 
@@ -619,20 +626,17 @@ export default function EtapasPage() {
 
   const handleConfirmDelete = async () => {
     if (!stageToDelete) return;
-
     setDeleteLoading(true);
     try {
       await apiClient.delete(
-        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageToDelete.id}`
+        stagesUrl(stageToDelete.id)
       );
       setIsDeleteModalOpen(false);
       setStageToDelete(null);
       
       // After deleting, reorder all remaining stages
       try {
-        const data = await apiClient.get(
-          `/api/recruiter/companies/${COMPANY_ID}/stages`
-        );
+        const data = await apiClient.get(stagesUrl());
         const list = unwrapListArray(data);
         const mappedStages = list.map((item, i) => mapStageFromApi(item, i));
         
@@ -753,15 +757,18 @@ export default function EtapasPage() {
                   description={tStages("page.description")}
                   layout="split"
                   actions={
-                    <Button
-                      type="button"
-                      variant="primary"
-                      onClick={handleNewStage}
-                      aria-label={tStages("actions.newStageAria")}
-                    >
-                      <Plus className="h-4 w-4" aria-hidden />
-                      {tStages("actions.newStage")}
-                    </Button>
+                    <>
+                      <Button
+                        type="button"
+                        variant="primary"
+                        onClick={handleNewStage}
+                        disabled={false}
+                        aria-label={tStages("actions.newStageAria")}
+                      >
+                        <Plus className="h-4 w-4" aria-hidden />
+                        {tStages("actions.newStage")}
+                      </Button>
+                    </>
                   }
                 />
                 {reorderLoading ? (
@@ -818,7 +825,6 @@ export default function EtapasPage() {
         onClose={handleCloseModal}
         onSubmit={handleModalSubmit}
         editingStage={editingStage}
-        companyId={COMPANY_ID}
         setAsDefaultOnCreate={!editingStage && stages.length === 0}
         onSnackbar={(message, variant = "success") =>
           setSnackbar({ open: true, message, variant })

@@ -54,40 +54,65 @@ export interface ApplicantsByStageFullSection {
   applicants: VacancyApplicantLike[]
 }
 
+/**
+ * Last-resort column names when the global catalog and applicants are both empty.
+ * Prefer locale-specific names from i18n (`fallbackKanbanStages`).
+ */
 export const FALLBACK_KANBAN_STAGES = [
+  "Sourced",
   "Applied",
   "Screening",
   "Interview",
   "Offer",
   "Hired",
+  "Rejected",
 ] as const
 
 /**
+ * Reads locale-specific last-resort column names from i18n (`fallbackKanbanStages`).
+ * Falls back to `FALLBACK_KANBAN_STAGES` when the payload is missing or empty.
+ */
+export function parseFallbackKanbanStages(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [...FALLBACK_KANBAN_STAGES]
+  const names = raw
+    .map((item) => String(item ?? "").trim())
+    .filter((name) => name !== "")
+  return names.length > 0 ? names : [...FALLBACK_KANBAN_STAGES]
+}
+
+/**
  * Orden de etapas del tablero + etapas que aparecen en postulantes pero no estaban en el catálogo (al final).
+ * If the global catalog is empty, applicant stage names are used instead of inventing English columns.
  */
 export function resolveOrderedStageNames(
   kanbanStageNames: readonly string[],
-  applicants: VacancyApplicantLike[]
+  applicants: VacancyApplicantLike[],
+  fallbackStageNames: readonly string[] = FALLBACK_KANBAN_STAGES
 ): string[] {
   const base: string[] = []
   const seen = new Set<string>()
-  const source =
-    kanbanStageNames.length > 0
-      ? kanbanStageNames.map((s) => String(s).trim()).filter(Boolean)
-      : [...FALLBACK_KANBAN_STAGES]
-  for (const raw of source) {
+  const catalog = kanbanStageNames
+    .map((stage) => String(stage).trim())
+    .filter(Boolean)
+  const fallback = [...fallbackStageNames]
+    .map((stage) => String(stage).trim())
+    .filter(Boolean)
+
+  const addName = (raw: string) => {
     const key = raw.toLowerCase()
-    if (seen.has(key)) continue
+    if (seen.has(key)) return
     seen.add(key)
     base.push(raw)
   }
-  for (const m of applicants) {
-    const raw = String(m.applicationStage ?? m.stage ?? "").trim()
+
+  for (const raw of catalog) addName(raw)
+  for (const match of applicants) {
+    const raw = String(match.applicationStage ?? match.stage ?? "").trim()
     if (!raw) continue
-    const key = raw.toLowerCase()
-    if (seen.has(key)) continue
-    seen.add(key)
-    base.push(raw)
+    addName(raw)
+  }
+  if (base.length === 0) {
+    for (const raw of fallback) addName(raw)
   }
   return base
 }

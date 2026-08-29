@@ -1,5 +1,5 @@
 /**
- * Cuerpo PUT /api/recruiter/companies/{companyId}/stages/{stageId}
+ * Cuerpo PUT /api/recruiter/stages/{stageId}
  * name, orderIndex, isDefault, final e isHiredStage (cuando el backend lo expone).
  */
 export const buildRecruiterStagePutPayload = (stage) => {

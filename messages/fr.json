@@ -2185,7 +2185,14 @@
           "score": "Score",
           "columnAria": "Colonne {stage}",
           "moveStageAria": "Déplacer {name} vers une autre étape",
-          "statusAria": "Statut de {name}"
+          "statusAria": "Statut de {name}",
+          "dropNotAllowedTooltip": "Vous pouvez seulement avancer ou reculer d'une étape, ou écarter",
+          "finalStatusRequiredTooltip": "Pour avancer ou passer à une étape finale, le statut de candidature doit être marqué comme final",
+          "moveToStage": "Déplacer vers {stageName}",
+          "moveToStageAria": "Déplacer {name} vers {stageName}",
+          "moveToShortcutPlaceholder": "Déplacer vers…",
+          "shortcutColumnAria": "Colonne d'écart {stage}",
+          "hiredColumnAria": "Colonne d'embauche {stage}"
         },
         "aria": {
           "matchedCandidates": "Candidats correspondants",
@@ -2222,8 +2229,9 @@
         },
         "errors": {
           "moveStageFailed": "Impossible de déplacer le candidat vers une autre étape.",
-          "stageSkipNotAllowed": "Vous ne pouvez déplacer le candidat que vers l'étape consécutive (précédente ou suivante). Les sauts ne sont pas autorisés.",
-          "finalStatusRequiredForStageMove": "Pour passer à l'étape suivante, le candidat doit être dans un statut de candidature marqué comme final.",
+          "stageSkipNotAllowed": "Vous pouvez seulement avancer ou reculer d'une étape, ou écarter.",
+          "stageMoveConflict": "Les candidats ne peuvent passer qu'à une étape voisine du pipeline, ou à une étape finale qui n'est pas l'étape d'embauche.",
+          "finalStatusRequiredForStageMove": "Pour passer à l'étape suivante ou à une étape finale, le candidat doit être dans un statut de candidature marqué comme final.",
           "missingDefaultApplicationStatus": "Le statut de candidature par défaut de l'entreprise est manquant. Le serveur en a besoin pour déplacer les candidats entre les étapes. Configurez-le dans Étapes (statuts) ou demandez à un administrateur de le faire.",
           "updateApplicationStatusFailed": "Impossible de mettre à jour le statut de la candidature.",
           "candidateMovedStage": "Candidat déplacé vers une autre étape.",
@@ -2244,7 +2252,18 @@
         "emptyApplicants": "Il n'y a pas encore de candidats sur ce poste.",
         "kanbanBoardAria": "Conteneur du tableau Kanban",
         "kanbanStagesAria": "Étapes des candidats",
-        "goToStagesLink": "Aller aux Étapes et gérer les statuts"
+        "fallbackKanbanStages": [
+          "Sourced",
+          "Applied",
+          "Screening",
+          "Interview",
+          "Offer",
+          "Hired",
+          "Rejected"
+        ],
+        "goToStagesLink": "Aller aux Étapes et gérer les statuts",
+        "manageStagesAria": "Gérer le catalogue global des étapes",
+        "manageStages": "Gérer les étapes"
       },
       "rematch": {
         "ariaLabel": "Réajuster les correspondances",
@@ -2727,18 +2746,36 @@
     "users": {
       "page": {
         "title": "Utilisateurs",
-        "description": "Liste et administration des comptes du portail."
+        "description": "Liste et administration des comptes du portail.",
+        "headerRegionLabel": "En-tête des utilisateurs",
+        "listRegionLabel": "Liste des utilisateurs",
+        "filtersAndListRegionLabel": "Filtres et liste"
       },
       "filters": {
         "regionAria": "Filtres",
-        "emailLabel": "E-mail (contient)",
-        "emailPlaceholder": "ex. @entreprise.com",
+        "regionLabel": "Filtres des utilisateurs",
+        "emailLabel": "E-mail",
+        "emailPlaceholder": "Rechercher par e-mail...",
         "roleLabel": "Rôle",
         "allRoles": "Tous",
+        "allLockouts": "Tous",
         "lockedOnly": "Verrouillés uniquement",
         "lockoutLabel": "Verrouillage",
         "apply": "Appliquer les filtres",
-        "clear": "Effacer"
+        "clear": "Effacer",
+        "clearFilters": "Effacer les filtres",
+        "filterByAria": "Filtrer par {label}"
+      },
+      "cards": {
+        "cardAria": "Utilisateur : {email}",
+        "cardLockedAria": "Utilisateur verrouillé : {email}",
+        "rolesLabel": "Rôles",
+        "statusLabel": "État",
+        "noRoles": "Aucun rôle",
+        "confirmed": "Confirmé",
+        "unconfirmed": "Non confirmé",
+        "locked": "Verrouillé",
+        "unlocked": "Actif"
       },
       "table": {
         "email": "E-mail",
@@ -2761,17 +2798,28 @@
         "pageSizeAria": "Utilisateurs par page",
         "refreshAria": "Actualiser la liste",
         "regionAria": "Pagination",
-        "summary": "Page {page} sur {total}"
+        "summary": "Page {page} sur {total}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "count": "{count, plural, one {# utilisateur} other {# utilisateurs}}"
       },
       "emptyStates": {
         "noResults": "Aucun utilisateur ne correspond aux filtres actuels.",
+        "noUsers": "Aucun utilisateur trouvé",
+        "noUsersFiltered": "Aucun utilisateur ne correspond aux filtres appliqués",
         "description": "Essayez d'ajuster les filtres ou créez un nouvel utilisateur."
+      },
+      "loadingStates": {
+        "loading": "Chargement des utilisateurs..."
       },
       "actions": {
         "create": "Nouvel utilisateur",
+        "createShort": "Nouveau",
+        "createAria": "Créer un nouvel utilisateur",
         "refresh": "Actualiser",
         "retry": "Réessayer",
         "manage": "Gérer",
+        "manageAria": "Gérer l'utilisateur {email}",
         "prev": "Précédent",
         "next": "Suivant"
       },
@@ -2789,9 +2837,12 @@
         "title": "Détail de l'utilisateur",
         "emailLabel": "E-mail",
         "userNameLabel": "Nom d'utilisateur",
+        "createdAtLabel": "Créé",
         "accountHeading": "État du compte",
         "lockedCheckbox": "Compte verrouillé",
         "emailConfirmed": "E-mail confirmé",
+        "emailConfirmedHint": "Cet e-mail est déjà vérifié.",
+        "emailPendingHint": "Cet e-mail n'est pas encore vérifié.",
         "readOnly": "Lecture seule",
         "lockAction": "Verrouiller le compte",
         "unlockAction": "Déverrouiller le compte",
