@@ -269,13 +269,14 @@ export default function DocumentsUploadZone({
       ? leftActions({ files, clearStagedFiles: clearAll })
       : leftActions
 
-  const processableFiles = stagingOnly
-    ? []
-    : processAllAcceptedFiles
-    ? files.map((file, index) => ({ file, index }))
-    : files
-        .map((file, index) => ({ file, index }))
-        .filter(({ file }) => isResumeLikeFile(file.name));
+  const processableFiles =
+    stagingOnly || !onProcess
+      ? []
+      : processAllAcceptedFiles
+        ? files.map((file, index) => ({ file, index }))
+        : files
+            .map((file, index) => ({ file, index }))
+            .filter(({ file }) => isResumeLikeFile(file.name))
 
   const handleProcessClick = async (file: File, index: number) => {
     if (!onProcess || processingIndex !== null || isProcessingAll) return;
@@ -448,8 +449,9 @@ export default function DocumentsUploadZone({
             <ul className="flex flex-col gap-2">
             {files.map((file, index) => {
               const showProcessButton =
+                Boolean(onProcess) &&
                 !stagingOnly &&
-                (processAllAcceptedFiles || isResumeLikeFile(file.name));
+                (processAllAcceptedFiles || isResumeLikeFile(file.name))
               const isExternallyProcessing = externalProcessingIndex === index
               const isExternallyCompleted =
                 externalProcessingIndex != null && index < externalProcessingIndex

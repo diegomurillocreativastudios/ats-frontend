@@ -6,7 +6,6 @@ import { Upload, FileText } from "lucide-react"
 import CandidateSidebar from "@/components/candidato/CandidateSidebar"
 import CandidateTopbar from "@/components/candidato/CandidateTopbar"
 import DocumentsUploadZone, {
-  type AiIngestProcessBatchMeta,
   type DocumentsUploadZoneLeftContext,
 } from "@/components/candidato/DocumentsUploadZone"
 import DocumentsList from "@/components/candidato/DocumentsList"
@@ -14,25 +13,9 @@ import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import AgregarCandidatoModal from "@/components/candidato/AgregarCandidatoModal"
 import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
 import { apiClient } from "@/lib/api"
-import { getApiErrorMessage, createSilentError } from "@/lib/api-error"
+import { getApiErrorMessage } from "@/lib/api-error"
 import { getUploadApiErrorMessage } from "@/lib/upload-constraints"
 import { useCandidateDocuments } from "@/hooks/useCandidateDocuments"
-
-const PROCESAR_ENDPOINT = "/Ingest/upload";
-const ENTITY_TYPE = "Candidate";
-const GENERAL_DOCUMENT_KEYWORDS = [
-  "cv",
-  "resume",
-  "curriculum",
-  "curriculum vitae",
-  "hoja de vida",
-  "hojadevida",
-]
-
-const isResumeLikeDocument = (fileName: string) => {
-  const normalizedName = (fileName || "").toLowerCase()
-  return GENERAL_DOCUMENT_KEYWORDS.some((keyword) => normalizedName.includes(keyword))
-}
 
 export default function DocumentosContent() {
   const t = useTranslations("CandidatePortal.documents")
@@ -64,49 +47,6 @@ export default function DocumentosContent() {
     [deleteDocument, showSnackbar, t]
   )
 
-  const handleProcess = async (
-    file: File,
-    _index: number,
-    _meta?: AiIngestProcessBatchMeta
-  ) => {
-    const formData = new FormData();
-    formData.append("File", file);
-    formData.append("EntityType", ENTITY_TYPE);
-    try {
-      await apiClient.postFormData(PROCESAR_ENDPOINT, formData)
-      await refetch()
-      showSnackbar(t("toastProcessed"), "success")
-    } catch (err: unknown) {
-      const message =
-        getUploadApiErrorMessage(err) ||
-        getApiErrorMessage(err) ||
-        t("toastProcessError")
-      showSnackbar(message, "error")
-      throw createSilentError(message)
-    }
-  }
-
-  const handleProcessAll = async (files: File[]) => {
-    if (!files?.length) return;
-    const total = files.length;
-    try {
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("File", file);
-        formData.append("EntityType", ENTITY_TYPE);
-        await apiClient.postFormData(PROCESAR_ENDPOINT, formData);
-      }
-      await refetch()
-      showSnackbar(t("toastProcessedMany", { count: total }), "success")
-    } catch (err: unknown) {
-      const message =
-        getUploadApiErrorMessage(err) ||
-        getApiErrorMessage(err) ||
-        t("toastProcessManyError")
-      showSnackbar(message, "error")
-    }
-  }
-
   const handleSubmitGeneralDocuments = useCallback(
     async (files: File[], clearStagedFiles: () => void) => {
       if (!files.length) {
@@ -115,14 +55,6 @@ export default function DocumentosContent() {
       }
       if (!candidateId) {
         showSnackbar(t("toastNoProfile"), "error")
-        return
-      }
-      const blocked = files.find((file) => isResumeLikeDocument(file.name))
-      if (blocked) {
-        showSnackbar(
-          t("toastResumeBlocked", { fileName: blocked.name }),
-          "error"
-        )
         return
       }
 
@@ -197,11 +129,7 @@ export default function DocumentosContent() {
                   </button>
                 }
               />
-              <DocumentsUploadZone
-                onProcess={handleProcess}
-                onProcessAll={handleProcessAll}
-                leftActions={renderGeneralUploadLeft}
-              />
+              <DocumentsUploadZone leftActions={renderGeneralUploadLeft} />
               {loading ? (
                 <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
                   {t("loading")}
@@ -249,11 +177,7 @@ export default function DocumentosContent() {
                 </button>
               }
             />
-            <DocumentsUploadZone
-              onProcess={handleProcess}
-              onProcessAll={handleProcessAll}
-              leftActions={renderGeneralUploadLeft}
-            />
+            <DocumentsUploadZone leftActions={renderGeneralUploadLeft} />
             {loading ? (
               <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
                 {t("loading")}

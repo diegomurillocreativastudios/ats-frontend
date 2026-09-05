@@ -495,13 +495,8 @@
       "uploadGeneralAria": "Allgemeine Dokumente des Kandidaten hochladen",
       "toastDeleted": "Dokument erfolgreich gelöscht.",
       "toastDeleteError": "Das Dokument konnte nicht gelöscht werden.",
-      "toastProcessed": "Dokument erfolgreich verarbeitet.",
-      "toastProcessError": "Fehler bei der Verarbeitung des Dokuments.",
-      "toastProcessedMany": "{count, plural, one {# Dokument erfolgreich verarbeitet.} other {# Dokumente erfolgreich verarbeitet.}}",
-      "toastProcessManyError": "Fehler bei der Verarbeitung der Dokumente.",
       "toastSelectFile": "Wähle mindestens eine Datei zum Hochladen aus.",
       "toastNoProfile": "Wir konnten dein Kandidatenprofil nicht identifizieren.",
-      "toastResumeBlocked": "Dieser Endpunkt ist nur für allgemeine Dokumente. Entferne oder ersetze Dateien vom Typ CV/Lebenslauf (zum Beispiel: {fileName}).",
       "toastGeneralUploaded": "{count, plural, one {Allgemeines Dokument erfolgreich hochgeladen.} other {# allgemeine Dokumente erfolgreich hochgeladen.}}",
       "toastGeneralUploadError": "Das allgemeine Dokument konnte nicht hochgeladen werden.",
       "upload": {

@@ -495,13 +495,8 @@
       "uploadGeneralAria": "Subir documentos generales del candidato",
       "toastDeleted": "Documento eliminado correctamente.",
       "toastDeleteError": "No se pudo eliminar el documento.",
-      "toastProcessed": "Documento procesado correctamente.",
-      "toastProcessError": "Error al procesar el documento.",
-      "toastProcessedMany": "{count, plural, one {# documento procesado correctamente.} other {# documentos procesados correctamente.}}",
-      "toastProcessManyError": "Error al procesar los documentos.",
       "toastSelectFile": "Selecciona al menos un archivo para subir.",
       "toastNoProfile": "No se pudo identificar tu perfil de candidato.",
-      "toastResumeBlocked": "Este endpoint es solo para documentos generales. Quita o reemplaza archivos tipo CV/Resume (por ejemplo: {fileName}).",
       "toastGeneralUploaded": "{count, plural, one {Documento general subido correctamente.} other {# documentos generales subidos correctamente.}}",
       "toastGeneralUploadError": "No se pudo subir el documento general.",
       "upload": {

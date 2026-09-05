@@ -495,13 +495,8 @@
       "uploadGeneralAria": "Téléverser les documents généraux du candidat",
       "toastDeleted": "Document supprimé avec succès.",
       "toastDeleteError": "Le document n'a pas pu être supprimé.",
-      "toastProcessed": "Document traité avec succès.",
-      "toastProcessError": "Erreur lors du traitement du document.",
-      "toastProcessedMany": "{count, plural, one {# document traité avec succès.} other {# documents traités avec succès.}}",
-      "toastProcessManyError": "Erreur lors du traitement des documents.",
       "toastSelectFile": "Sélectionnez au moins un fichier à téléverser.",
       "toastNoProfile": "Nous n'avons pas pu identifier votre profil de candidat.",
-      "toastResumeBlocked": "Cet endpoint est uniquement pour les documents généraux. Retirez ou remplacez les fichiers de type CV/Resume (par exemple : {fileName}).",
       "toastGeneralUploaded": "{count, plural, one {Document général téléversé avec succès.} other {# documents généraux téléversés avec succès.}}",
       "toastGeneralUploadError": "Le document général n'a pas pu être téléversé.",
       "upload": {
