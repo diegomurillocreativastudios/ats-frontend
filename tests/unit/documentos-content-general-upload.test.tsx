@@ -33,10 +33,6 @@ vi.mock("@/components/candidato/CandidateTopbar", () => ({
   default: () => <header data-testid="candidate-topbar" />,
 }))
 
-vi.mock("@/components/candidato/AgregarCandidatoModal", () => ({
-  default: () => null,
-}))
-
 vi.mock("@/lib/api/identity-document-types", () => ({
   listIdentityDocumentTypes: vi.fn(async () => []),
 }))
@@ -54,6 +50,12 @@ describe("DocumentosContent general upload", () => {
 
   it("permite subir un archivo con nombre tipo CV como documento general", async () => {
     renderWithIntl(<DocumentosContent />)
+
+    expect(
+      screen.queryByRole("button", {
+        name: "Completar información del candidato",
+      }),
+    ).not.toBeInTheDocument()
 
     const inputs = document.querySelectorAll('input[type="file"]')
     expect(inputs.length).toBeGreaterThan(0)

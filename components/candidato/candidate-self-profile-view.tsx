@@ -165,6 +165,7 @@ interface CandidateSelfProfileViewProps {
   savingProfile: boolean
   saveProfileError: string | null
   clearSaveProfileError: () => void
+  onCompleteInformation?: () => void
 }
 
 export function CandidateSelfProfileView({
@@ -176,6 +177,7 @@ export function CandidateSelfProfileView({
   savingProfile,
   saveProfileError,
   clearSaveProfileError,
+  onCompleteInformation,
 }: CandidateSelfProfileViewProps) {
   const t = useTranslations("CandidatePortal.profile")
   const raw = useMemo(
@@ -968,12 +970,18 @@ export function CandidateSelfProfileView({
           role="status"
         >
           {t("emptyStates.enrichedEmptyPrefix")}
-          <Link
-            href={DOCUMENTS_HREF}
-            className="rounded font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
-          >
-            {t("emptyStates.documentsLink")}
-          </Link>
+          {onCompleteInformation ? (
+            <button
+              type="button"
+              onClick={onCompleteInformation}
+              className="rounded font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
+              aria-label={t("completeInfoAria")}
+            >
+              {t("completeInfo")}
+            </button>
+          ) : (
+            <span className="font-medium text-vo-purple">{t("completeInfo")}</span>
+          )}
           {t("emptyStates.enrichedEmptySuffix")}
         </div>
       )}

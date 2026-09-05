@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
+import AgregarCandidatoModal from "@/components/candidato/AgregarCandidatoModal"
 import CandidateSidebar from "@/components/candidato/CandidateSidebar"
 import CandidateTopbar from "@/components/candidato/CandidateTopbar"
 import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
@@ -20,7 +21,7 @@ import {
   type CandidateAuthConsentStatus,
 } from "@/lib/candidate-auth-consent"
 import type { CandidateProfileSaveBody } from "@/lib/candidate-profile"
-import { AlertCircle, UserCircle } from "lucide-react"
+import { AlertCircle, FileText, UserCircle } from "lucide-react"
 
 const emptyDash = (value: string | null | undefined) =>
   value != null && String(value).trim() !== "" ? String(value) : "—"
@@ -42,6 +43,8 @@ export default function MiPerfilContent() {
   const { profile: selfDto, loading: selfLoading, refetch: refetchSelf } =
     useCandidateSelfProfile()
   const { showSnackbar } = useCandidateSnackbar()
+  const [isCompleteInformationModalOpen, setIsCompleteInformationModalOpen] =
+    useState(false)
   const [isConsentOpen, setIsConsentOpen] = useState(false)
   const [consentStatus, setConsentStatus] =
     useState<CandidateAuthConsentStatus | null>(null)
@@ -96,6 +99,25 @@ export default function MiPerfilContent() {
     void refetchApiProfile()
     void refetchSelf()
   }, [refetchApiProfile, refetchSelf])
+
+  const handleSnackbarFromModal = useCallback(
+    (message: string, variant: "success" | "error" = "success") => {
+      showSnackbar(message, variant)
+    },
+    [showSnackbar]
+  )
+
+  const handleCompleteInformationSuccess = useCallback(() => {
+    void Promise.all([refetchApiProfile(), refetchSelf()])
+  }, [refetchApiProfile, refetchSelf])
+
+  const handleOpenCompleteInformation = useCallback(() => {
+    setIsCompleteInformationModalOpen(true)
+  }, [])
+
+  const handleCloseCompleteInformation = useCallback(() => {
+    setIsCompleteInformationModalOpen(false)
+  }, [])
 
   const handleCloseConsent = useCallback(() => {
     // Consent is required until verified; allow dismiss only if already verified.
@@ -221,9 +243,25 @@ export default function MiPerfilContent() {
   const mainInner = (
     <div className="mx-auto w-full max-w-7xl pb-10">
       <header className="mb-6 md:mb-8">
-        <h1 className="font-sans text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-          {t("page.title")}
-        </h1>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="font-sans text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+            {t("page.title")}
+          </h1>
+          <button
+            type="button"
+            onClick={handleOpenCompleteInformation}
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-4 py-2 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:px-5 sm:py-2.5"
+            aria-label={t("completeInfoAria")}
+          >
+            <FileText className="h-4 w-4" aria-hidden />
+            <span className="hidden sm:inline" aria-hidden>
+              {t("completeInfo")}
+            </span>
+            <span className="sm:hidden" aria-hidden>
+              {t("completeInfoShort")}
+            </span>
+          </button>
+        </div>
         <p className="mt-2 max-w-2xl font-sans text-sm leading-relaxed text-muted-foreground md:text-base">
           {t("page.description")}
         </p>
@@ -297,6 +335,7 @@ export default function MiPerfilContent() {
           savingProfile={saving}
           saveProfileError={saveError}
           clearSaveProfileError={clearSaveError}
+          onCompleteInformation={handleOpenCompleteInformation}
         />
       ) : null}
     </div>
@@ -327,6 +366,14 @@ export default function MiPerfilContent() {
         onAccept={handleAcceptConsent}
         initialEmail={user?.email ?? apiProfile?.email}
         isDismissible={!isConsentRequired}
+      />
+
+      <AgregarCandidatoModal
+        variant="self"
+        isOpen={isCompleteInformationModalOpen}
+        onClose={handleCloseCompleteInformation}
+        onSuccess={handleCompleteInformationSuccess}
+        onSnackbar={handleSnackbarFromModal}
       />
     </div>
   )

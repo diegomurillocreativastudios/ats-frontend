@@ -486,9 +486,6 @@
       "title": "Documents",
       "description": "Upload and manage the documents for your selection process",
       "descriptionShort": "Upload and manage your documents",
-      "completeInfo": "Complete information",
-      "completeInfoShort": "Complete info",
-      "completeInfoAria": "Complete candidate information",
       "loading": "Loading documents...",
       "uploadGeneral": "Upload general document",
       "uploading": "Uploading...",
@@ -620,6 +617,9 @@
     },
     "profile": {
       "breadcrumb": "My profile",
+      "completeInfo": "Complete information",
+      "completeInfoShort": "Complete info",
+      "completeInfoAria": "Complete candidate information",
       "page": {
         "title": "My profile",
         "description": "Edit your record with the required data and check how it combines with the information from your documents.",
@@ -811,8 +811,7 @@
         "complianceValueLabel": "Value"
       },
       "emptyStates": {
-        "enrichedEmptyPrefix": "There is no background or skills in your record yet. You can add them by editing the profile or uploading a CV in ",
-        "documentsLink": "Documents",
+        "enrichedEmptyPrefix": "There is no background or skills in your record yet. You can add them by editing the profile or uploading a CV with ",
         "enrichedEmptySuffix": ".",
         "technicalDataWarning": "Part of your profile arrived in a format that could not be interpreted as JSON. If you see this, let support know.",
         "complianceDash": "—",

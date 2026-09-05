@@ -486,9 +486,6 @@
       "title": "Dokumente",
       "description": "Lade die Dokumente deines Auswahlprozesses hoch und verwalte sie",
       "descriptionShort": "Lade deine Dokumente hoch und verwalte sie",
-      "completeInfo": "Informationen vervollständigen",
-      "completeInfoShort": "Infos ergänzen",
-      "completeInfoAria": "Kandidateninformationen vervollständigen",
       "loading": "Dokumente werden geladen...",
       "uploadGeneral": "Allgemeines Dokument hochladen",
       "uploading": "Wird hochgeladen...",
@@ -620,6 +617,9 @@
     },
     "profile": {
       "breadcrumb": "Mein Profil",
+      "completeInfo": "Informationen vervollständigen",
+      "completeInfoShort": "Infos ergänzen",
+      "completeInfoAria": "Kandidateninformationen vervollständigen",
       "page": {
         "title": "Mein Profil",
         "description": "Bearbeite deine Daten mit den Pflichtangaben und prüfe, wie sie mit den Informationen aus deinen Dokumenten kombiniert werden.",
@@ -743,8 +743,7 @@
         "complianceValueLabel": "Wert"
       },
       "emptyStates": {
-        "enrichedEmptyPrefix": "In deinen Daten gibt es noch keinen Werdegang oder Kompetenzen. Du kannst sie hinzufügen, indem du das Profil bearbeitest oder einen Lebenslauf hochlädst unter ",
-        "documentsLink": "Dokumente",
+        "enrichedEmptyPrefix": "In deinen Daten gibt es noch keinen Werdegang oder Kompetenzen. Du kannst sie hinzufügen, indem du das Profil bearbeitest oder einen Lebenslauf hochlädst mit ",
         "enrichedEmptySuffix": ".",
         "technicalDataWarning": "Ein Teil deines Profils ist in einem Format eingegangen, das nicht als JSON interpretiert werden konnte. Wenn du das siehst, informiere den Support.",
         "complianceDash": "—",

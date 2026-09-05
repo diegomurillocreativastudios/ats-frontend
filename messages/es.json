@@ -486,9 +486,6 @@
       "title": "Documentos",
       "description": "Sube y gestiona los documentos de tu proceso de selección",
       "descriptionShort": "Sube y gestiona tus documentos",
-      "completeInfo": "Completar información",
-      "completeInfoShort": "Completar info",
-      "completeInfoAria": "Completar información del candidato",
       "loading": "Cargando documentos...",
       "uploadGeneral": "Subir documento general",
       "uploading": "Subiendo...",
@@ -873,6 +870,9 @@
     },
     "profile": {
       "breadcrumb": "Mi perfil",
+      "completeInfo": "Completar información",
+      "completeInfoShort": "Completar info",
+      "completeInfoAria": "Completar información del candidato",
       "page": {
         "title": "Mi perfil",
         "description": "Editá tu ficha con los datos obligatorios y revisá cómo se combina con la información de tus documentos.",
@@ -1064,8 +1064,7 @@
         "complianceValueLabel": "Valor"
       },
       "emptyStates": {
-        "enrichedEmptyPrefix": "Aún no hay trayectoria ni competencias en tu ficha. Podés cargarlas editando el perfil o subiendo un CV en ",
-        "documentsLink": "Documentos",
+        "enrichedEmptyPrefix": "Aún no hay trayectoria ni competencias en tu ficha. Podés cargarlas editando el perfil o subiendo un CV con ",
         "enrichedEmptySuffix": ".",
         "technicalDataWarning": "Parte de tu perfil llegó en un formato que no se pudo interpretar como JSON. Si ves esto, avisá a soporte.",
         "complianceDash": "—",

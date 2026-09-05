@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react"
 import { useTranslations } from "next-intl"
-import { Upload, FileText } from "lucide-react"
+import { Upload } from "lucide-react"
 import CandidateSidebar from "@/components/candidato/CandidateSidebar"
 import CandidateTopbar from "@/components/candidato/CandidateTopbar"
 import DocumentsUploadZone, {
@@ -10,7 +10,6 @@ import DocumentsUploadZone, {
 } from "@/components/candidato/DocumentsUploadZone"
 import DocumentsList from "@/components/candidato/DocumentsList"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
-import AgregarCandidatoModal from "@/components/candidato/AgregarCandidatoModal"
 import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
@@ -20,17 +19,9 @@ import { useCandidateDocuments } from "@/hooks/useCandidateDocuments"
 export default function DocumentosContent() {
   const t = useTranslations("CandidatePortal.documents")
   const [isUploadingGeneralDocument, setIsUploadingGeneralDocument] = useState(false)
-  const [isCompleteInformationModalOpen, setIsCompleteInformationModalOpen] = useState(false)
   const { showSnackbar } = useCandidateSnackbar()
   const { candidateId, documents, loading, error, refetch, deleteDocument } =
     useCandidateDocuments()
-
-  const handleSnackbarFromModal = useCallback(
-    (message: string, variant: "success" | "error" = "success") => {
-      showSnackbar(message, variant)
-    },
-    [showSnackbar]
-  )
 
   const handleDeleteDocument = useCallback(
     async (documentId: string) => {
@@ -116,18 +107,7 @@ export default function DocumentosContent() {
               <PortalPageHeader
                 title={t("title")}
                 description={t("description")}
-                className="pb-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-                actions={
-                  <button
-                    type="button"
-                    onClick={() => setIsCompleteInformationModalOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                    aria-label={t("completeInfoAria")}
-                  >
-                    <FileText className="h-4 w-4" aria-hidden />
-                    {t("completeInfo")}
-                  </button>
-                }
+                className="pb-0"
               />
               <DocumentsUploadZone leftActions={renderGeneralUploadLeft} />
               {loading ? (
@@ -160,22 +140,8 @@ export default function DocumentosContent() {
             <PortalPageHeader
               title={t("title")}
               description={t("descriptionShort")}
-              className="pb-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+              className="pb-0"
               descriptionClassName="text-sm leading-6 md:text-base"
-              actions={
-                <button
-                  type="button"
-                  onClick={() => setIsCompleteInformationModalOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-vo-purple px-4 py-2 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                  aria-label={t("completeInfoAria")}
-                >
-                  <FileText className="h-4 w-4" aria-hidden />
-                  <span className="hidden sm:inline">{t("completeInfo")}</span>
-                  <span className="sm:hidden" aria-hidden>
-                    {t("completeInfoShort")}
-                  </span>
-                </button>
-              }
             />
             <DocumentsUploadZone leftActions={renderGeneralUploadLeft} />
             {loading ? (
@@ -198,14 +164,6 @@ export default function DocumentosContent() {
           </div>
         </main>
       </div>
-
-      <AgregarCandidatoModal
-        variant="self"
-        isOpen={isCompleteInformationModalOpen}
-        onClose={() => setIsCompleteInformationModalOpen(false)}
-        onSuccess={refetch}
-        onSnackbar={handleSnackbarFromModal}
-      />
     </div>
   )
 }
