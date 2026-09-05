@@ -1,5 +1,11 @@
+import { extractStructuredApiErrorMessage } from "@/lib/api-error"
 import { getAccessToken } from "@/lib/auth"
 import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
+
+/** Incluye application/json y application/problem+json (validación ASP.NET). */
+function isJsonContentType(contentType: string): boolean {
+  return contentType.includes("json")
+}
 
 const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || ""
 
@@ -81,7 +87,7 @@ export const apiClient = {
     let data: unknown = {}
     if (res.status !== 204 && res.status !== 205) {
       const contentType = res.headers.get("content-type")?.toLowerCase() ?? ""
-      if (contentType.includes("application/json")) {
+      if (isJsonContentType(contentType)) {
         data = await res.json().catch(() => ({}))
       } else {
         data = await res.text().catch(() => "")
@@ -105,11 +111,8 @@ export const apiClient = {
           ? (data as Record<string, unknown>)
           : {}
       const fromText =
-        typeof data === "string" && data.trim() !== "" ? data.trim() : null
-      const fromBody =
-        (typeof payload.message === "string" && payload.message.trim()) ||
-        (typeof payload.error === "string" && payload.error.trim()) ||
-        (typeof payload.detail === "string" && payload.detail.trim())
+        typeof data === "string" ? extractStructuredApiErrorMessage(data) : ""
+      const fromBody = extractStructuredApiErrorMessage(payload)
       const message = fromBody || fromText || `Solicitud fallida (${res.status})`
       const err = new Error(message) as ApiClientError
       err.status = res.status

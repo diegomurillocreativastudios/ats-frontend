@@ -1453,6 +1453,8 @@
     "candidateDetail": {
       "page": {
         "loadingProfile": "Loading profile...",
+        "errorNotFoundTitle": "We could not find this candidate",
+        "errorLoadTitle": "The profile could not be loaded",
         "backToCandidates": "Back to candidates",
         "backToCandidatesAria": "Back to candidates",
         "interviews": "Interviews",
@@ -1541,6 +1543,7 @@
       "errors": {
         "loadProfileFailed": "The candidate profile could not be loaded.",
         "candidateUnavailable": "This candidate is not available or you do not have access.",
+        "invalidCandidateId": "This link does not match a valid candidate.",
         "missingCandidateId": "The candidate identifier is missing.",
         "downloadFailed": "Download failed.",
         "downloadCvFailed": "The CV could not be downloaded.",

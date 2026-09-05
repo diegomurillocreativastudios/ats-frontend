@@ -1385,6 +1385,8 @@
     "candidateDetail": {
       "page": {
         "loadingProfile": "Profil wird geladen...",
+        "errorNotFoundTitle": "Wir konnten diesen Kandidaten nicht finden",
+        "errorLoadTitle": "Das Profil konnte nicht geladen werden",
         "backToCandidates": "Zurück zu Kandidaten",
         "backToCandidatesAria": "Zurück zu Kandidaten",
         "interviews": "Interviews",
@@ -1473,6 +1475,7 @@
       "errors": {
         "loadProfileFailed": "Das Kandidatenprofil konnte nicht geladen werden.",
         "candidateUnavailable": "Dieser Kandidat ist nicht verfügbar oder Sie haben keinen Zugriff.",
+        "invalidCandidateId": "Dieser Link gehört zu keinem gültigen Kandidaten.",
         "missingCandidateId": "Die Kandidatenkennung fehlt.",
         "downloadFailed": "Fehler beim Herunterladen.",
         "downloadCvFailed": "Der Lebenslauf konnte nicht heruntergeladen werden.",

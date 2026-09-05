@@ -1385,6 +1385,8 @@
     "candidateDetail": {
       "page": {
         "loadingProfile": "Chargement du profil...",
+        "errorNotFoundTitle": "Nous n'avons pas trouvé ce candidat",
+        "errorLoadTitle": "Impossible de charger le profil",
         "backToCandidates": "Retour aux candidats",
         "backToCandidatesAria": "Retour aux candidats",
         "interviews": "Entretiens",
@@ -1473,6 +1475,7 @@
       "errors": {
         "loadProfileFailed": "Impossible de charger le profil du candidat.",
         "candidateUnavailable": "Ce candidat n'est pas disponible ou vous n'y avez pas accès.",
+        "invalidCandidateId": "Ce lien ne correspond pas à un candidat valide.",
         "missingCandidateId": "L'identifiant du candidat est manquant.",
         "downloadFailed": "Erreur lors du téléchargement.",
         "downloadCvFailed": "Impossible de télécharger le CV.",

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, UserX } from "lucide-react"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
 import { RecruiterCandidateProfileView } from "@/components/rrhh/recruiter-candidate-profile-view"
@@ -93,7 +93,7 @@ export default function CandidatoDetallePage() {
     <>
       {loading ? (
         <div
-          className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
+          className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
           aria-live="polite"
         >
           <div
@@ -104,24 +104,38 @@ export default function CandidatoDetallePage() {
         </div>
       ) : fetchError ? (
         <div
-          className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
+          className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 rounded-xl border border-border bg-card px-6 py-16 text-center"
           role="alert"
         >
-          <p className="font-sans text-sm text-destructive">{fetchError}</p>
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+            <UserX className="h-7 w-7 text-destructive" aria-hidden />
+          </div>
+          <div className="max-w-md space-y-2">
+            <h1 className="font-sans text-lg font-semibold text-foreground">
+              {fetchError.canRetry
+                ? t("page.errorLoadTitle")
+                : t("page.errorNotFoundTitle")}
+            </h1>
+            <p className="font-sans text-sm text-muted-foreground">
+              {fetchError.message}
+            </p>
+          </div>
           <Link
             href="/portal-rrhh/candidatos"
-            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
             {t("page.backToCandidates")}
           </Link>
-          <button
-            type="button"
-            onClick={() => void refetch()}
-            className="font-sans text-sm text-vo-purple hover:underline"
-          >
-            {t("actions.retry")}
-          </button>
+          {fetchError.canRetry ? (
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              className="font-sans text-sm text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+            >
+              {t("actions.retry")}
+            </button>
+          ) : null}
         </div>
       ) : (
         <>
@@ -170,8 +184,8 @@ export default function CandidatoDetallePage() {
             breadcrumbLabel={breadcrumbLabel}
             breadcrumbTrail={breadcrumbTrail}
           />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 flex flex-col p-8">{mainInner}</div>
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            <div className="flex min-h-full min-w-0 flex-1 flex-col p-8">{mainInner}</div>
           </main>
         </div>
       </div>
@@ -182,8 +196,8 @@ export default function CandidatoDetallePage() {
           breadcrumbLabel={breadcrumbLabel}
           breadcrumbTrail={breadcrumbTrail}
         />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 flex flex-col p-4 md:p-6">{mainInner}</div>
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+          <div className="flex min-h-full min-w-0 flex-1 flex-col p-4 md:p-6">{mainInner}</div>
         </main>
       </div>
     </div>

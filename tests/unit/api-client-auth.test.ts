@@ -83,4 +83,36 @@ describe("apiClient auth hardening", () => {
       retryAfter: 45,
     } satisfies Partial<ApiClientError>)
   })
+
+  it("parsea application/problem+json y no usa el cuerpo crudo como mensaje", async () => {
+    const problem = {
+      type: "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      title: "One or more validation errors occurred.",
+      status: 400,
+      errors: { id: ["The value 'id-invalido-00000-test' is not valid."] },
+      traceId: "00-abc-def-00",
+    }
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      headers: {
+        get: (name: string) =>
+          name.toLowerCase() === "content-type" ? "application/problem+json" : null,
+      },
+      json: async () => problem,
+      text: async () => JSON.stringify(problem),
+    })
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    try {
+      await apiClient.get("/api/recruiter/candidates/id-invalido-00000-test")
+      throw new Error("expected request to fail")
+    } catch (err) {
+      const apiError = err as ApiClientError
+      expect(apiError.status).toBe(400)
+      expect(apiError.body).toEqual(problem)
+      expect(apiError.message).not.toContain("traceId")
+      expect(apiError.message.startsWith("{")).toBe(false)
+    }
+  })
 })
