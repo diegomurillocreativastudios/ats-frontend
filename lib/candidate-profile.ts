@@ -387,6 +387,14 @@ const optStr = (s: string) => {
 const rowHasContent = (o: Record<string, string>) =>
   Object.values(o).some((x) => String(x).trim() !== "")
 
+export interface CandidateProfileRequiredFieldErrors {
+  firstName?: boolean
+  lastName?: boolean
+  headline?: boolean
+  summary?: boolean
+  nationalId?: boolean
+}
+
 export interface FullProfileFormInput {
   headline: string
   summary: string
@@ -443,11 +451,29 @@ const buildJobPreferencesPayload = (input: FullProfileFormInput): Record<string,
   return Object.keys(o).length > 0 ? o : undefined
 }
 
+/**
+ * ASP.NET exige ResumeMarkdown no vacío en PUT /api/candidate/profile.
+ * Si no hay texto extraído del CV, se arma con los campos ya validados de la ficha.
+ */
+export const resolveResumeMarkdownForApi = (
+  input: Pick<FullProfileFormInput, "resumeMarkdown" | "firstName" | "lastName" | "headline" | "summary">
+): string => {
+  const existing = input.resumeMarkdown.trim()
+  if (existing) return existing
+  const name = [input.firstName, input.lastName]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(" ")
+  const headline = input.headline.trim()
+  const summary = input.summary.trim()
+  return [name ? `# ${name}` : "", headline, summary].filter(Boolean).join("\n\n")
+}
+
 export const buildCandidateProfileSaveBody = (input: FullProfileFormInput): CandidateProfileSaveBody => {
   const body: CandidateProfileSaveBody = {
     headline: input.headline.trim(),
     summary: input.summary.trim(),
-    resumeMarkdown: input.resumeMarkdown.trim(),
+    resumeMarkdown: resolveResumeMarkdownForApi(input),
     nationalId: input.nationalId.trim(),
   }
   const fn = optStr(input.firstName)

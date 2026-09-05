@@ -61,9 +61,7 @@ describe("CandidateSelfProfileView i18n (Etapa 5D)", () => {
     expect(screen.getByText("Guardar cambios")).toBeInTheDocument()
     expect(screen.getByText("Pretensión salarial")).toBeInTheDocument()
     expect(
-      screen.getByText(
-        "Titular, resumen y documento de identidad son obligatorios al guardar.",
-      ),
+      screen.getByText("Los campos con asterisco son obligatorios al guardar."),
     ).toBeInTheDocument()
   })
 
@@ -73,9 +71,7 @@ describe("CandidateSelfProfileView i18n (Etapa 5D)", () => {
     expect(screen.getByText("Save changes")).toBeInTheDocument()
     expect(screen.getByText("Salary expectation")).toBeInTheDocument()
     expect(
-      screen.getByText(
-        "Headline, summary and ID document are required when saving.",
-      ),
+      screen.getByText("Fields marked with an asterisk are required when saving."),
     ).toBeInTheDocument()
   })
 })
@@ -231,6 +227,21 @@ describe("Namespace CandidatePortal.profile (Etapa 5D)", () => {
       expect(Object.keys(options)).toEqual(
         expect.arrayContaining(["gender", "maritalStatus", "availability"]),
       )
+    }
+  })
+
+  it("incluye el campo de currículum en texto en los 5 idiomas", () => {
+    for (const locale of locales) {
+      const profile = (
+        (messagesByLocale[locale] as Record<string, unknown>)
+          .CandidatePortal as Record<string, unknown>
+      ).profile as Record<string, unknown>
+      const actions = profile.actions as Record<string, unknown>
+      const form = profile.form as Record<string, unknown>
+      const labels = form.labels as Record<string, unknown>
+      expect(actions).toHaveProperty("resumeMissingAria")
+      expect(labels).toHaveProperty("resumeText")
+      expect(form).toHaveProperty("resumeMissing")
     }
   })
 })

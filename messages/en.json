@@ -749,7 +749,8 @@
         "cancelAria": "Cancel editing without saving",
         "save": "Save changes",
         "saving": "Saving…",
-        "requiredHint": "Headline, summary and ID document are required when saving.",
+        "requiredHint": "Fields marked with an asterisk are required when saving.",
+        "resumeMissingAria": "Resume text is required before you can save the profile",
         "triggerComplete": "Complete my profile",
         "triggerEdit": "Edit my profile"
       },
@@ -764,7 +765,6 @@
       "hero": {
         "editTitle": "Your record",
         "editDescription": "Edit your name, headline and summary in the same place where you see them when reading the profile.",
-        "profileSubtitle": "This is how your professional profile appears in the system.",
         "summaryEmpty": "Complete the summary by editing the profile or from the information imported from your documents.",
         "defaultName": "Candidate"
       },
@@ -838,9 +838,17 @@
         "links": "Links",
         "references": "References",
         "recognitions": "Recognitions",
+        "resumeMissing": {
+          "emptyTitle": "No extracted text yet",
+          "emptyBody": "Upload the file in Documents so you can save the profile.",
+          "fileWithoutTextTitle": "File uploaded, text still missing",
+          "fileWithoutTextBody": "A CV is on file, but there is no extracted text to save. Check Documents or contact support.",
+          "uploadCta": "Upload in Documents",
+          "reviewCta": "Review in Documents"
+        },
         "labels": {
-          "firstName": "First name",
-          "lastName": "Last name",
+          "firstName": "First names",
+          "lastName": "Last names",
           "headline": "Headline",
           "summary": "Professional summary",
           "nationalId": "ID document",
@@ -859,6 +867,7 @@
           "availability": "Availability",
           "disability": "Disability",
           "resumeMarkdown": "Résumé as text (markdown)",
+          "resumeText": "Résumé as text",
           "company": "Company",
           "role": "Role / position",
           "start": "Start",
@@ -931,7 +940,7 @@
             "futureDate": "The date cannot be in the future",
             "tooYoung": "You must be at least 18 years old"
           },
-          "requiredFields": "Headline, summary and ID document are required.",
+          "requiredFields": "First names, last names, headline, summary and ID document are required.",
           "resumeRequired": "Your profile must include resume text. Upload a CV in Documents or contact support."
         }
       },
@@ -1577,9 +1586,17 @@
         "links": "Links",
         "references": "References",
         "recognitions": "Recognitions",
+        "resumeMissing": {
+          "emptyTitle": "No extracted text yet",
+          "emptyBody": "Upload the file in Documents so you can save the profile.",
+          "fileWithoutTextTitle": "File uploaded, text still missing",
+          "fileWithoutTextBody": "A CV is on file, but there is no extracted text to save. Check Documents or contact support.",
+          "uploadCta": "Upload in Documents",
+          "reviewCta": "Review in Documents"
+        },
         "labels": {
-          "firstName": "First name",
-          "lastName": "Last name",
+          "firstName": "First names",
+          "lastName": "Last names",
           "headline": "Headline",
           "summary": "Professional summary",
           "nationalId": "ID document",
@@ -1598,6 +1615,7 @@
           "availability": "Availability",
           "disability": "Disability",
           "resumeMarkdown": "Résumé as text (markdown)",
+          "resumeText": "Résumé as text",
           "company": "Company",
           "role": "Role / position",
           "start": "Start",
@@ -1670,7 +1688,7 @@
             "futureDate": "The date cannot be in the future",
             "tooYoung": "You must be at least 18 years old"
           },
-          "requiredFields": "Headline, summary and ID document are required.",
+          "requiredFields": "First names, last names, headline, summary and ID document are required.",
           "resumeRequired": "The profile must include resume text. Upload a CV or contact support."
         }
       },

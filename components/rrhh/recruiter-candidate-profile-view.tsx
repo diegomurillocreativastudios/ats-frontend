@@ -159,6 +159,7 @@ export function RecruiterCandidateProfileView({
     patch,
     isEditing,
     validationError,
+    fieldErrors,
     handleOpenEdit,
     handleCancelEdit,
     handleSubmit,
@@ -172,7 +173,6 @@ export function RecruiterCandidateProfileView({
     onDismissSaveError: clearSaveProfileError,
     messages: {
       requiredFields: t("form.validation.requiredFields"),
-      resumeRequired: t("form.validation.resumeRequired"),
       birthDate: {
         invalid: t("form.validation.birthDate.invalid"),
         futureDate: t("form.validation.birthDate.futureDate"),
@@ -381,46 +381,52 @@ export function RecruiterCandidateProfileView({
             <div
               role="toolbar"
               aria-label={t("actions.toolbarEditingAria")}
-              className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3"
+              className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 ${
+                cvCandidateId ? "sm:justify-between" : "sm:justify-end"
+              }`}
             >
               {cvCandidateId ? (
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDownloadCv}
+                    disabled={downloading}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label={t("actions.downloadCvAria")}
+                  >
+                    {downloading ? (
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                    ) : (
+                      <Download className="h-4 w-4 shrink-0" aria-hidden />
+                    )}
+                    {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
+                  </button>
+                </div>
+              ) : null}
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
                 <button
                   type="button"
-                  onClick={handleDownloadCv}
-                  disabled={downloading}
+                  onClick={handleCancelEdit}
+                  disabled={savingProfile}
                   className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label={t("actions.downloadCvAria")}
+                  aria-label={t("actions.cancelAria")}
                 >
-                  {downloading ? (
+                  <X className="h-4 w-4 shrink-0" aria-hidden />
+                  {t("actions.cancel")}
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {savingProfile ? (
                     <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                   ) : (
-                    <Download className="h-4 w-4 shrink-0" aria-hidden />
+                    <Save className="h-4 w-4 shrink-0" aria-hidden />
                   )}
-                  {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
+                  {savingProfile ? t("actions.saving") : t("actions.save")}
                 </button>
-              ) : null}
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                disabled={savingProfile}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label={t("actions.cancelAria")}
-              >
-                <X className="h-4 w-4 shrink-0" aria-hidden />
-                {t("actions.cancel")}
-              </button>
-              <button
-                type="submit"
-                disabled={savingProfile}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {savingProfile ? (
-                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                ) : (
-                  <Save className="h-4 w-4 shrink-0" aria-hidden />
-                )}
-                {savingProfile ? t("actions.saving") : t("actions.save")}
-              </button>
+              </div>
             </div>
             {downloadError ? (
               <p className="font-sans text-xs text-destructive" role="alert">
@@ -474,27 +480,51 @@ export function RecruiterCandidateProfileView({
         className="scroll-mt-28 rounded-xl border border-border bg-card p-6"
         aria-label={t("sections.summary")}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-          <div className="flex min-w-0 flex-1 flex-col gap-6 md:flex-row md:items-start">
-          <div
-            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-lg font-semibold text-white"
-            aria-hidden
-          >
-            {initials}
-          </div>
-          <div className="min-w-0 flex-1">
-            {isEditing ? (
-              <>
+        {isEditing ? (
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center gap-4">
+              <div
+                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-lg font-semibold text-white"
+                aria-hidden
+              >
+                {initials}
+              </div>
+              <div className="min-w-0 flex-1">
                 <h1 className="font-sans text-2xl font-bold text-foreground">{t("hero.editTitle")}</h1>
                 <p className="mt-1 font-sans text-sm text-muted-foreground">
                   {t("hero.editDescription")}
                 </p>
-                <div className="mt-4">
-                  <ProfileEditHeroFields form={form} patch={patch} saving={savingProfile} />
-                </div>
-              </>
-            ) : (
-              <>
+              </div>
+            </div>
+            <div className="border-t border-border/60 pt-6">
+              <ProfileEditHeroFields
+                form={form}
+                patch={patch}
+                saving={savingProfile}
+                fieldErrors={fieldErrors}
+                sidebar={
+                  <CandidateSalaryExpectationCard
+                    jobPrefs={jobPrefs}
+                    fallbackMinSalary={canonicalProfile?.minSalary}
+                    isEditing
+                    editValue={form.jobMinSalary}
+                    onEditChange={(jobMinSalary) => patch({ jobMinSalary })}
+                    saving={savingProfile}
+                  />
+                }
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(16.5rem,19rem)]">
+            <div className="flex min-w-0 flex-col gap-6 md:flex-row md:items-start">
+              <div
+                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-lg font-semibold text-white"
+                aria-hidden
+              >
+                {initials}
+              </div>
+              <div className="min-w-0 flex-1">
                 <h1 className="font-sans text-2xl font-bold text-foreground">{displayName}</h1>
                 {headlineDisplay ? (
                   <p className="mt-2 font-sans text-base font-medium text-vo-purple">
@@ -510,7 +540,7 @@ export function RecruiterCandidateProfileView({
                   {email ? (
                     <a
                       href={`mailto:${email}`}
-                      className="inline-flex items-center gap-2 text-foreground hover:text-vo-purple focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded"
+                      className="inline-flex items-center gap-2 rounded text-foreground hover:text-vo-purple focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                     >
                       <Mail className="h-4 w-4 shrink-0" aria-hidden />
                       {email}
@@ -532,19 +562,14 @@ export function RecruiterCandidateProfileView({
                 <p className="mt-3 font-sans text-xs text-muted-foreground">
                   {t("fields.idLabel")}: {emptyToDash(profile?.id ?? candidateId, dashFallback)}
                 </p>
-              </>
-            )}
+              </div>
+            </div>
+            <CandidateSalaryExpectationCard
+              jobPrefs={jobPrefs}
+              fallbackMinSalary={canonicalProfile?.minSalary}
+            />
           </div>
-          </div>
-          <CandidateSalaryExpectationCard
-            jobPrefs={jobPrefs}
-            fallbackMinSalary={canonicalProfile?.minSalary}
-            isEditing={isEditing}
-            editValue={form.jobMinSalary}
-            onEditChange={(jobMinSalary) => patch({ jobMinSalary })}
-            saving={savingProfile}
-          />
-        </div>
+        )}
       </section>
 
       <div id="rrhh-perfil-datos" className="scroll-mt-28">
@@ -557,6 +582,7 @@ export function RecruiterCandidateProfileView({
                 setForm={setForm}
                 patch={patch}
                 saving={savingProfile}
+                fieldErrors={fieldErrors}
               />
               <ProfileEditContactFields
                 form={form}

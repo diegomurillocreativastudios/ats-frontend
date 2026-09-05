@@ -681,7 +681,8 @@
         "cancelAria": "Annulla la modifica senza salvare",
         "save": "Salva modifiche",
         "saving": "Salvataggio…",
-        "requiredHint": "Titolo, riepilogo e documento d'identità sono obbligatori al salvataggio.",
+        "requiredHint": "I campi con asterisco sono obbligatori al salvataggio.",
+        "resumeMissingAria": "Manca il testo del curriculum per poter salvare il profilo",
         "triggerComplete": "Completa il mio profilo",
         "triggerEdit": "Modifica il mio profilo"
       },
@@ -696,7 +697,6 @@
       "hero": {
         "editTitle": "La tua scheda",
         "editDescription": "Modifica nome, titolo e riepilogo nello stesso posto in cui li vedi leggendo il profilo.",
-        "profileSubtitle": "Così appare il tuo profilo professionale nel sistema.",
         "summaryEmpty": "Completa il riepilogo modificando il profilo o dalle informazioni importate dai tuoi documenti.",
         "defaultName": "Candidato"
       },
@@ -770,9 +770,17 @@
         "links": "Link",
         "references": "Referenze",
         "recognitions": "Riconoscimenti",
+        "resumeMissing": {
+          "emptyTitle": "Nessun testo estratto",
+          "emptyBody": "Carica il file in Documenti per poter salvare il profilo.",
+          "fileWithoutTextTitle": "File senza testo estratto",
+          "fileWithoutTextBody": "Il CV è caricato, ma manca ancora il testo da salvare. Controlla Documenti o contatta l'assistenza.",
+          "uploadCta": "Carica in Documenti",
+          "reviewCta": "Rivedi in Documenti"
+        },
         "labels": {
-          "firstName": "Nome",
-          "lastName": "Cognome",
+          "firstName": "Nomi",
+          "lastName": "Cognomi",
           "headline": "Titolo / headline",
           "summary": "Riepilogo professionale",
           "nationalId": "Documento d'identità",
@@ -791,6 +799,7 @@
           "availability": "Disponibilità",
           "disability": "Disabilità",
           "resumeMarkdown": "Curriculum in testo (markdown)",
+          "resumeText": "Curriculum in testo",
           "company": "Azienda",
           "role": "Ruolo / posizione",
           "start": "Inizio",
@@ -863,7 +872,7 @@
             "futureDate": "La data non può essere nel futuro",
             "tooYoung": "Devi avere almeno 18 anni"
           },
-          "requiredFields": "Titolo, riepilogo e documento di identità sono obbligatori.",
+          "requiredFields": "Nomi, cognomi, titolo, riepilogo e documento di identità sono obbligatori.",
           "resumeRequired": "Il profilo deve includere il curriculum in testo. Carica un CV in Documenti o contatta il supporto."
         }
       },
@@ -1509,9 +1518,17 @@
         "links": "Link",
         "references": "Referenze",
         "recognitions": "Riconoscimenti",
+        "resumeMissing": {
+          "emptyTitle": "Nessun testo estratto",
+          "emptyBody": "Carica il file in Documenti per poter salvare il profilo.",
+          "fileWithoutTextTitle": "File senza testo estratto",
+          "fileWithoutTextBody": "Il CV è caricato, ma manca ancora il testo da salvare. Controlla Documenti o contatta l'assistenza.",
+          "uploadCta": "Carica in Documenti",
+          "reviewCta": "Rivedi in Documenti"
+        },
         "labels": {
-          "firstName": "Nome",
-          "lastName": "Cognome",
+          "firstName": "Nomi",
+          "lastName": "Cognomi",
           "headline": "Titolo / headline",
           "summary": "Riepilogo professionale",
           "nationalId": "Documento d'identità",
@@ -1530,6 +1547,7 @@
           "availability": "Disponibilità",
           "disability": "Disabilità",
           "resumeMarkdown": "Curriculum in testo (markdown)",
+          "resumeText": "Curriculum in testo",
           "company": "Azienda",
           "role": "Ruolo / posizione",
           "start": "Inizio",
@@ -1602,7 +1620,7 @@
             "futureDate": "La data non può essere nel futuro",
             "tooYoung": "Devi avere almeno 18 anni"
           },
-          "requiredFields": "Titolo, riepilogo e documento di identità sono obbligatori.",
+          "requiredFields": "Nomi, cognomi, titolo, riepilogo e documento di identità sono obbligatori.",
           "resumeRequired": "Il profilo deve includere il curriculum in testo. Carica un CV o contatta il supporto."
         }
       },

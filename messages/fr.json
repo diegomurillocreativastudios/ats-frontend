@@ -681,7 +681,8 @@
         "cancelAria": "Annuler la modification sans enregistrer",
         "save": "Enregistrer les modifications",
         "saving": "Enregistrement…",
-        "requiredHint": "Le titre, le résumé et la pièce d'identité sont obligatoires lors de l'enregistrement.",
+        "requiredHint": "Les champs marqués d'un astérisque sont obligatoires à l'enregistrement.",
+        "resumeMissingAria": "Le texte du CV est requis pour pouvoir enregistrer le profil",
         "triggerComplete": "Compléter mon profil",
         "triggerEdit": "Modifier mon profil"
       },
@@ -696,7 +697,6 @@
       "hero": {
         "editTitle": "Votre fiche",
         "editDescription": "Modifiez le nom, le titre et le résumé au même endroit où vous les voyez en lisant le profil.",
-        "profileSubtitle": "Voici comment votre profil professionnel apparaît dans le système.",
         "summaryEmpty": "Complétez le résumé en modifiant le profil ou à partir des informations importées de vos documents.",
         "defaultName": "Candidat"
       },
@@ -770,9 +770,17 @@
         "links": "Liens",
         "references": "Références",
         "recognitions": "Distinctions",
+        "resumeMissing": {
+          "emptyTitle": "Aucun texte extrait",
+          "emptyBody": "Téléversez le fichier dans Documents pour pouvoir enregistrer le profil.",
+          "fileWithoutTextTitle": "Fichier sans texte extrait",
+          "fileWithoutTextBody": "Un CV est chargé, mais il n'y a pas encore de texte à enregistrer. Vérifiez Documents ou contactez le support.",
+          "uploadCta": "Téléverser dans Documents",
+          "reviewCta": "Vérifier dans Documents"
+        },
         "labels": {
-          "firstName": "Prénom",
-          "lastName": "Nom",
+          "firstName": "Prénoms",
+          "lastName": "Noms de famille",
           "headline": "Titre / headline",
           "summary": "Résumé professionnel",
           "nationalId": "Pièce d'identité",
@@ -791,6 +799,7 @@
           "availability": "Disponibilité",
           "disability": "Handicap",
           "resumeMarkdown": "CV en texte (markdown)",
+          "resumeText": "CV en texte",
           "company": "Entreprise",
           "role": "Rôle / poste",
           "start": "Début",
@@ -863,7 +872,7 @@
             "futureDate": "La date ne peut pas être dans le futur",
             "tooYoung": "Vous devez avoir au moins 18 ans"
           },
-          "requiredFields": "Le titre, le résumé et la pièce d'identité sont obligatoires.",
+          "requiredFields": "Les prénoms, noms de famille, titre, résumé et pièce d'identité sont obligatoires.",
           "resumeRequired": "Le profil doit inclure le CV en texte. Téléversez un CV dans Documents ou contactez le support."
         }
       },
@@ -1509,9 +1518,17 @@
         "links": "Liens",
         "references": "Références",
         "recognitions": "Distinctions",
+        "resumeMissing": {
+          "emptyTitle": "Aucun texte extrait",
+          "emptyBody": "Téléversez le fichier dans Documents pour pouvoir enregistrer le profil.",
+          "fileWithoutTextTitle": "Fichier sans texte extrait",
+          "fileWithoutTextBody": "Un CV est chargé, mais il n'y a pas encore de texte à enregistrer. Vérifiez Documents ou contactez le support.",
+          "uploadCta": "Téléverser dans Documents",
+          "reviewCta": "Vérifier dans Documents"
+        },
         "labels": {
-          "firstName": "Prénom",
-          "lastName": "Nom",
+          "firstName": "Prénoms",
+          "lastName": "Noms de famille",
           "headline": "Titre / headline",
           "summary": "Résumé professionnel",
           "nationalId": "Pièce d'identité",
@@ -1530,6 +1547,7 @@
           "availability": "Disponibilité",
           "disability": "Handicap",
           "resumeMarkdown": "CV en texte (markdown)",
+          "resumeText": "CV en texte",
           "company": "Entreprise",
           "role": "Rôle / poste",
           "start": "Début",
@@ -1602,7 +1620,7 @@
             "futureDate": "La date ne peut pas être dans le futur",
             "tooYoung": "Vous devez avoir au moins 18 ans"
           },
-          "requiredFields": "Le titre, le résumé et la pièce d'identité sont obligatoires.",
+          "requiredFields": "Les prénoms, noms de famille, titre, résumé et pièce d'identité sont obligatoires.",
           "resumeRequired": "Le profil doit inclure le CV en texte. Téléversez un CV ou contactez le support."
         }
       },

@@ -681,7 +681,8 @@
         "cancelAria": "Bearbeitung abbrechen, ohne zu speichern",
         "save": "Änderungen speichern",
         "saving": "Wird gespeichert…",
-        "requiredHint": "Überschrift, Zusammenfassung und Ausweisdokument sind beim Speichern erforderlich.",
+        "requiredHint": "Mit Sternchen markierte Felder sind beim Speichern erforderlich.",
+        "resumeMissingAria": "Der Lebenslauftext fehlt, um das Profil speichern zu können",
         "triggerComplete": "Mein Profil vervollständigen",
         "triggerEdit": "Mein Profil bearbeiten"
       },
@@ -696,7 +697,6 @@
       "hero": {
         "editTitle": "Deine Daten",
         "editDescription": "Bearbeite Name, Überschrift und Zusammenfassung an derselben Stelle, an der du sie beim Lesen des Profils siehst.",
-        "profileSubtitle": "So erscheint dein berufliches Profil im System.",
         "summaryEmpty": "Vervollständige die Zusammenfassung durch Bearbeiten des Profils oder aus den aus deinen Dokumenten importierten Informationen.",
         "defaultName": "Kandidat"
       },
@@ -770,9 +770,17 @@
         "links": "Links",
         "references": "Referenzen",
         "recognitions": "Auszeichnungen",
+        "resumeMissing": {
+          "emptyTitle": "Noch kein extrahierter Text",
+          "emptyBody": "Lade die Datei unter Dokumente hoch, um das Profil speichern zu können.",
+          "fileWithoutTextTitle": "Datei ohne extrahierten Text",
+          "fileWithoutTextBody": "Ein Lebenslauf ist vorhanden, aber noch kein Text zum Speichern. Prüfe Dokumente oder kontaktiere den Support.",
+          "uploadCta": "Unter Dokumente hochladen",
+          "reviewCta": "In Dokumenten prüfen"
+        },
         "labels": {
-          "firstName": "Vorname",
-          "lastName": "Nachname",
+          "firstName": "Vornamen",
+          "lastName": "Nachnamen",
           "headline": "Überschrift / Headline",
           "summary": "Berufliche Zusammenfassung",
           "nationalId": "Ausweisdokument",
@@ -791,6 +799,7 @@
           "availability": "Verfügbarkeit",
           "disability": "Behinderung",
           "resumeMarkdown": "Lebenslauf als Text (Markdown)",
+          "resumeText": "Lebenslauf als Text",
           "company": "Unternehmen",
           "role": "Rolle / Position",
           "start": "Beginn",
@@ -863,7 +872,7 @@
             "futureDate": "Das Datum darf nicht in der Zukunft liegen",
             "tooYoung": "Du musst mindestens 18 Jahre alt sein"
           },
-          "requiredFields": "Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
+          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
           "resumeRequired": "Das Profil muss Lebenslauftext enthalten. Lade einen CV unter Dokumente hoch oder kontaktiere den Support."
         }
       },
@@ -1509,9 +1518,17 @@
         "links": "Links",
         "references": "Referenzen",
         "recognitions": "Auszeichnungen",
+        "resumeMissing": {
+          "emptyTitle": "Noch kein extrahierter Text",
+          "emptyBody": "Lade die Datei unter Dokumente hoch, um das Profil speichern zu können.",
+          "fileWithoutTextTitle": "Datei ohne extrahierten Text",
+          "fileWithoutTextBody": "Ein Lebenslauf ist vorhanden, aber noch kein Text zum Speichern. Prüfe Dokumente oder kontaktiere den Support.",
+          "uploadCta": "Unter Dokumente hochladen",
+          "reviewCta": "In Dokumenten prüfen"
+        },
         "labels": {
-          "firstName": "Vorname",
-          "lastName": "Nachname",
+          "firstName": "Vornamen",
+          "lastName": "Nachnamen",
           "headline": "Überschrift / Headline",
           "summary": "Berufliche Zusammenfassung",
           "nationalId": "Ausweisdokument",
@@ -1530,6 +1547,7 @@
           "availability": "Verfügbarkeit",
           "disability": "Behinderung",
           "resumeMarkdown": "Lebenslauf als Text (Markdown)",
+          "resumeText": "Lebenslauf als Text",
           "company": "Unternehmen",
           "role": "Rolle / Position",
           "start": "Beginn",
@@ -1602,7 +1620,7 @@
             "futureDate": "Das Datum darf nicht in der Zukunft liegen",
             "tooYoung": "Du musst mindestens 18 Jahre alt sein"
           },
-          "requiredFields": "Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
+          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
           "resumeRequired": "Das Profil muss Lebenslauftext enthalten. Lade einen CV hoch oder kontaktiere den Support."
         }
       },

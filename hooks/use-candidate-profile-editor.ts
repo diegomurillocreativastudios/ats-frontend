@@ -6,23 +6,49 @@ import {
   getBirthDateInputValidationErrorCode,
   type BirthDateValidationErrorCode,
   type CandidateProfile,
+  type CandidateProfileRequiredFieldErrors,
   type CandidateProfileSaveBody,
   type FullProfileFormInput,
 } from "@/lib/candidate-profile"
 import { buildFullFormStateFromSources } from "@/lib/candidate-profile-hydrate"
 
+export type { CandidateProfileRequiredFieldErrors }
+
 export interface CandidateProfileEditorMessages {
   requiredFields: string
-  resumeRequired: string
   birthDate: Record<BirthDateValidationErrorCode, string>
   triggerComplete: string
   triggerEdit: string
 }
 
+const REQUIRED_FIELD_IDS: Record<keyof CandidateProfileRequiredFieldErrors, string> = {
+  firstName: "pf-first",
+  lastName: "pf-last",
+  headline: "pf-headline",
+  summary: "pf-summary",
+  nationalId: "pf-national-id",
+}
+
+const REQUIRED_FIELD_ORDER: (keyof CandidateProfileRequiredFieldErrors)[] = [
+  "firstName",
+  "lastName",
+  "headline",
+  "summary",
+  "nationalId",
+]
+
+function firstInvalidRequiredField(
+  errors: CandidateProfileRequiredFieldErrors
+): keyof CandidateProfileRequiredFieldErrors | null {
+  return REQUIRED_FIELD_ORDER.find((key) => errors[key]) ?? null
+}
+
+function focusProfileField(fieldId: string): void {
+  document.getElementById(fieldId)?.focus()
+}
+
 const DEFAULT_EDITOR_MESSAGES: CandidateProfileEditorMessages = {
-  requiredFields: "Completá titular, resumen y documento de identidad.",
-  resumeRequired:
-    "Tu perfil debe tener currículum en texto registrado. Cargá un CV en Documentos o contactá soporte.",
+  requiredFields: "Completá nombres, apellidos, titular, resumen y documento de identidad.",
   birthDate: {
     invalid: "Fecha inválida",
     futureDate: "La fecha no puede estar en el futuro",
@@ -69,6 +95,7 @@ export function useCandidateProfileEditor({
     buildFullFormStateFromSources(initialProfile, enrichedNd)
   )
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<CandidateProfileRequiredFieldErrors>({})
   const [isEditing, setIsEditing] = useState(isCreating)
 
   const syncFormFromProfile = useCallback(() => {
@@ -88,6 +115,7 @@ export function useCandidateProfileEditor({
   const handleOpenEdit = useCallback(() => {
     onDismissSaveError()
     setValidationError(null)
+    setFieldErrors({})
     syncFormFromProfile()
     setIsEditing(true)
   }, [onDismissSaveError, syncFormFromProfile])
@@ -95,12 +123,22 @@ export function useCandidateProfileEditor({
   const handleCancelEdit = useCallback(() => {
     onDismissSaveError()
     setValidationError(null)
+    setFieldErrors({})
     syncFormFromProfile()
     if (!isCreating) setIsEditing(false)
   }, [isCreating, onDismissSaveError, syncFormFromProfile])
 
   const patch = useCallback((partial: Partial<FullProfileFormInput>) => {
     setForm((f) => ({ ...f, ...partial }))
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      if ("firstName" in partial) delete next.firstName
+      if ("lastName" in partial) delete next.lastName
+      if ("headline" in partial) delete next.headline
+      if ("summary" in partial) delete next.summary
+      if ("nationalId" in partial) delete next.nationalId
+      return next
+    })
   }, [])
 
   const handleSubmit = useCallback(
@@ -108,21 +146,27 @@ export function useCandidateProfileEditor({
       e.preventDefault()
       onDismissSaveError()
       setValidationError(null)
+      const firstName = form.firstName.trim()
+      const lastName = form.lastName.trim()
       const h = form.headline.trim()
       const s = form.summary.trim()
-      const r = form.resumeMarkdown.trim()
       const n = form.nationalId.trim()
-      if (!h || !s || !n) {
-        setValidationError(messages.requiredFields)
+      const nextFieldErrors: CandidateProfileRequiredFieldErrors = {}
+      if (!firstName) nextFieldErrors.firstName = true
+      if (!lastName) nextFieldErrors.lastName = true
+      if (!h) nextFieldErrors.headline = true
+      if (!s) nextFieldErrors.summary = true
+      if (!n) nextFieldErrors.nationalId = true
+      const firstInvalid = firstInvalidRequiredField(nextFieldErrors)
+      if (firstInvalid) {
+        setFieldErrors(nextFieldErrors)
+        queueMicrotask(() => focusProfileField(REQUIRED_FIELD_IDS[firstInvalid]))
         return
       }
-      if (!r) {
-        setValidationError(messages.resumeRequired)
-        return
-      }
+      setFieldErrors({})
       const birthDateErrorCode = getBirthDateInputValidationErrorCode(form.birthDateInput)
       if (birthDateErrorCode) {
-        setValidationError(messages.birthDate[birthDateErrorCode])
+        queueMicrotask(() => focusProfileField("pf-birth"))
         return
       }
       try {
@@ -142,6 +186,7 @@ export function useCandidateProfileEditor({
     isEditing,
     setIsEditing,
     validationError,
+    fieldErrors,
     handleOpenEdit,
     handleCancelEdit,
     handleSubmit,

@@ -168,6 +168,25 @@ describe("ProfileEditHeroFields namespace (Etapa 15)", () => {
     expect(screen.getByText("Identity and summary")).toBeInTheDocument()
     expect(screen.getByLabelText(/^Headline/)).toBeInTheDocument()
   })
+
+  it("marca nombres, apellidos, titular y resumen inválidos para el lector de pantalla", () => {
+    render(
+      <NextIntlClientProvider locale="es" messages={messagesByLocale.es}>
+        <CandidateProfileSectionsProvider namespace="CandidatePortal.profile">
+          <ProfileEditHeroFields
+            form={baseForm}
+            patch={vi.fn()}
+            saving={false}
+            fieldErrors={{ firstName: true, lastName: true, headline: true, summary: true }}
+          />
+        </CandidateProfileSectionsProvider>
+      </NextIntlClientProvider>,
+    )
+    expect(screen.getByLabelText(/^Nombres/)).toHaveAttribute("aria-invalid", "true")
+    expect(screen.getByLabelText(/^Apellidos/)).toHaveAttribute("aria-invalid", "true")
+    expect(screen.getByLabelText(/^Titular/)).toHaveAttribute("aria-invalid", "true")
+    expect(screen.getByLabelText(/^Resumen profesional/)).toHaveAttribute("aria-invalid", "true")
+  })
 })
 
 describe("useCandidateProfileEditor messages (Etapa 15)", () => {
@@ -178,7 +197,7 @@ describe("useCandidateProfileEditor messages (Etapa 15)", () => {
     messages?: Partial<CandidateProfileEditorMessages>
     initialProfile?: Parameters<typeof useCandidateProfileEditor>[0]["initialProfile"]
   }) {
-    const { validationError, handleSubmit, triggerLabel } = useCandidateProfileEditor({
+    const { validationError, fieldErrors, handleSubmit, triggerLabel } = useCandidateProfileEditor({
       initialProfile: initialProfile ?? null,
       enrichedNd: {},
       isCreating: !initialProfile,
@@ -192,6 +211,7 @@ describe("useCandidateProfileEditor messages (Etapa 15)", () => {
     return (
       <form onSubmit={(e) => void handleSubmit(e)}>
         {validationError ? <p role="status">{validationError}</p> : null}
+        <pre data-testid="field-errors">{JSON.stringify(fieldErrors)}</pre>
         <button type="submit">Submit</button>
         <span data-testid="trigger">{triggerLabel}</span>
       </form>
@@ -203,7 +223,6 @@ describe("useCandidateProfileEditor messages (Etapa 15)", () => {
       <EditorHarness
         messages={{
           requiredFields: "EN_REQUIRED",
-          resumeRequired: "EN_RESUME",
           birthDate: {
             invalid: "EN_INVALID",
             futureDate: "EN_FUTURE",
@@ -217,16 +236,28 @@ describe("useCandidateProfileEditor messages (Etapa 15)", () => {
 
     expect(screen.getByTestId("trigger")).toHaveTextContent("EN_COMPLETE")
     fireEvent.click(screen.getByRole("button", { name: "Submit" }))
-    expect(screen.getByRole("status")).toHaveTextContent("EN_REQUIRED")
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(JSON.parse(screen.getByTestId("field-errors").textContent ?? "{}")).toEqual({
+      firstName: true,
+      lastName: true,
+      headline: true,
+      summary: true,
+      nationalId: true,
+    })
   })
 
   it("conserva defaults en español sin mensajes inyectados", () => {
     render(<EditorHarness />)
     expect(screen.getByTestId("trigger")).toHaveTextContent("Completar mi perfil")
     fireEvent.click(screen.getByRole("button", { name: "Submit" }))
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Completá titular, resumen y documento de identidad.",
-    )
+    expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    expect(JSON.parse(screen.getByTestId("field-errors").textContent ?? "{}")).toEqual({
+      firstName: true,
+      lastName: true,
+      headline: true,
+      summary: true,
+      nationalId: true,
+    })
   })
 })
 

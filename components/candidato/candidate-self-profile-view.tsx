@@ -154,6 +154,8 @@ function ProfileSectionNav({ items }: ProfileSectionNavProps) {
   )
 }
 
+const DOCUMENTS_HREF = "/portal-candidato/documentos"
+
 interface CandidateSelfProfileViewProps {
   candidateProfile: CandidateProfile | null
   selfProfile: CandidateSelfProfileDto | null
@@ -190,6 +192,7 @@ export function CandidateSelfProfileView({
     patch,
     isEditing,
     validationError,
+    fieldErrors,
     handleOpenEdit,
     handleCancelEdit,
     handleSubmit,
@@ -204,7 +207,6 @@ export function CandidateSelfProfileView({
     onDismissSaveError: clearSaveProfileError,
     messages: {
       requiredFields: t("form.validation.requiredFields"),
-      resumeRequired: t("form.validation.resumeRequired"),
       birthDate: {
         invalid: t("form.validation.birthDate.invalid"),
         futureDate: t("form.validation.birthDate.futureDate"),
@@ -512,88 +514,91 @@ export function CandidateSelfProfileView({
       >
         {isEditing ? (
           <div className="flex flex-col gap-4">
-            <div className="min-w-0 space-y-2">
-              {validationError ? (
-                <div
-                  className="rounded-xl border border-amber-900/20 bg-amber-50 px-4 py-3 font-sans text-sm leading-snug text-amber-950 shadow-sm selection:bg-amber-200 selection:text-amber-950"
-                  role="status"
-                >
-                  {validationError}
-                </div>
-              ) : null}
-              {saveProfileError ? (
-                <div
-                  className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 font-sans text-sm text-destructive"
-                  role="alert"
-                >
-                  {saveProfileError}
-                </div>
-              ) : null}
-              <p className="font-sans text-xs text-muted-foreground">
-                {t("actions.requiredHint")}
-              </p>
-            </div>
+            {validationError || saveProfileError ? (
+              <div className="min-w-0 space-y-2">
+                {validationError ? (
+                  <div
+                    className="rounded-xl border border-amber-900/20 bg-amber-50 px-4 py-3 font-sans text-sm leading-snug text-amber-950 shadow-sm selection:bg-amber-200 selection:text-amber-950"
+                    role="status"
+                  >
+                    {validationError}
+                  </div>
+                ) : null}
+                {saveProfileError ? (
+                  <div
+                    className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 font-sans text-sm text-destructive"
+                    role="alert"
+                  >
+                    {saveProfileError}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             <div
               role="toolbar"
               aria-label={t("actions.toolbarEditingAria")}
-              className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3"
+              className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
-              {cvStoragePath || candidateProfile?.cvDownloadUrl?.trim() ? (
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+                {cvStoragePath || candidateProfile?.cvDownloadUrl?.trim() ? (
+                  <button
+                    type="button"
+                    onClick={handleDownloadCv}
+                    disabled={downloading}
+                    className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto"
+                    aria-label={t("actions.downloadCvAria")}
+                  >
+                    {downloading ? (
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                    ) : (
+                      <Download className="h-4 w-4 shrink-0" aria-hidden />
+                    )}
+                    {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
+                  </button>
+                ) : null}
+                <Link
+                  href={DOCUMENTS_HREF}
+                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
+                  aria-label={t("actions.manageDocumentsAria")}
+                >
+                  <FileText className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
+                  {t("actions.manageDocuments")}
+                  <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                </Link>
+                <Link
+                  href="/portal-candidato/mi-perfil/versiones"
+                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
+                  aria-label={t("actions.viewVersionsAria")}
+                >
+                  <History className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
+                  {t("actions.viewVersions")}
+                  <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                </Link>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
                 <button
                   type="button"
-                  onClick={handleDownloadCv}
-                  disabled={downloading}
-                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto"
-                  aria-label={t("actions.downloadCvAria")}
+                  onClick={handleCancelEdit}
+                  disabled={savingProfile}
+                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-10 sm:w-auto"
+                  aria-label={t("actions.cancelAria")}
                 >
-                  {downloading ? (
+                  <X className="h-4 w-4 shrink-0" aria-hidden />
+                  {t("actions.cancel")}
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto sm:min-w-35"
+                >
+                  {savingProfile ? (
                     <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
                   ) : (
-                    <Download className="h-4 w-4 shrink-0" aria-hidden />
+                    <Save className="h-4 w-4 shrink-0" aria-hidden />
                   )}
-                  {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
+                  {savingProfile ? t("actions.saving") : t("actions.save")}
                 </button>
-              ) : null}
-              <Link
-                href="/portal-candidato/documentos"
-                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
-                aria-label={t("actions.manageDocumentsAria")}
-              >
-                <FileText className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
-                {t("actions.manageDocuments")}
-                <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-              </Link>
-              <Link
-                href="/portal-candidato/mi-perfil/versiones"
-                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
-                aria-label={t("actions.viewVersionsAria")}
-              >
-                <History className="h-4 w-4 shrink-0 text-vo-purple" aria-hidden />
-                {t("actions.viewVersions")}
-                <ChevronRight className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-              </Link>
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                disabled={savingProfile}
-                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-10 sm:w-auto"
-                aria-label={t("actions.cancelAria")}
-              >
-                <X className="h-4 w-4 shrink-0" aria-hidden />
-                {t("actions.cancel")}
-              </button>
-              <button
-                type="submit"
-                disabled={savingProfile}
-                className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white shadow-sm transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:w-auto sm:min-w-[140px]"
-              >
-                {savingProfile ? (
-                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                ) : (
-                  <Save className="h-4 w-4 shrink-0" aria-hidden />
-                )}
-                {savingProfile ? t("actions.saving") : t("actions.save")}
-              </button>
+              </div>
             </div>
             {downloadError ? (
               <p className="font-sans text-xs text-destructive" role="alert">
@@ -637,7 +642,7 @@ export function CandidateSelfProfileView({
                 {triggerLabel}
               </button>
               <Link
-                href="/portal-candidato/documentos"
+                href={DOCUMENTS_HREF}
                 className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 sm:min-h-10 sm:w-auto"
                 aria-label={t("actions.manageDocumentsAria")}
               >
@@ -670,32 +675,59 @@ export function CandidateSelfProfileView({
           className="scroll-mt-28 overflow-hidden rounded-2xl border border-border bg-linear-to-br from-card via-card to-vo-purple/[0.07] p-5 shadow-sm md:p-8"
           aria-labelledby="perfil-resumen-titulo"
         >
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-            <div className="flex min-w-0 flex-1 flex-col gap-5 sm:flex-row sm:items-start">
-            <div
-              className="flex h-18 w-18 shrink-0 items-center justify-center rounded-2xl bg-vo-purple font-sans text-xl font-semibold text-white shadow-md shadow-vo-purple/25 md:h-20 md:w-20 md:text-2xl"
-              aria-hidden
-            >
-              {initials}
-            </div>
-            <div className="min-w-0 flex-1">
-              {isEditing ? (
-                <>
+          {isEditing ? (
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-vo-purple font-sans text-lg font-semibold text-white shadow-md shadow-vo-purple/25 md:h-18 md:w-18 md:text-xl"
+                  aria-hidden
+                >
+                  {initials}
+                </div>
+                <div className="min-w-0 flex-1">
                   <h2
                     id="perfil-resumen-titulo"
                     className="font-sans text-xl font-bold leading-tight text-foreground md:text-2xl"
                   >
                     {t("hero.editTitle")}
                   </h2>
-                  <p className="mt-1 font-sans text-sm text-muted-foreground">
+                  <p className="mt-1 font-sans text-sm leading-relaxed text-muted-foreground">
                     {t("hero.editDescription")}
                   </p>
-                  <div className="mt-4">
-                    <ProfileEditHeroFields form={form} patch={patch} saving={savingProfile} />
-                  </div>
-                </>
-              ) : (
-                <>
+                  <p className="mt-2 font-sans text-xs text-muted-foreground">
+                    {t("actions.requiredHint")}
+                  </p>
+                </div>
+              </div>
+              <div className="border-t border-border/60 pt-6">
+                <ProfileEditHeroFields
+                  form={form}
+                  patch={patch}
+                  saving={savingProfile}
+                  fieldErrors={fieldErrors}
+                  sidebar={
+                    <CandidateSalaryExpectationCard
+                      jobPrefs={jobPrefs}
+                      fallbackMinSalary={candidateProfile?.minSalary}
+                      isEditing
+                      editValue={form.jobMinSalary}
+                      onEditChange={(jobMinSalary) => patch({ jobMinSalary })}
+                      saving={savingProfile}
+                    />
+                  }
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(16.5rem,19rem)]">
+              <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start">
+                <div
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-vo-purple font-sans text-lg font-semibold text-white shadow-md shadow-vo-purple/25 md:h-18 md:w-18 md:text-xl"
+                  aria-hidden
+                >
+                  {initials}
+                </div>
+                <div className="min-w-0 flex-1">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <h2
                       id="perfil-resumen-titulo"
@@ -721,9 +753,6 @@ export function CandidateSelfProfileView({
                       {headlineDisplay}
                     </p>
                   ) : null}
-                  <p className="mt-1 font-sans text-sm text-muted-foreground">
-                    {t("hero.profileSubtitle")}
-                  </p>
                   {summary ? (
                     <p className="mt-4 max-w-2xl font-sans text-sm leading-relaxed text-foreground/90 md:text-[15px]">
                       {summary}
@@ -733,19 +762,14 @@ export function CandidateSelfProfileView({
                       {t("hero.summaryEmpty")}
                     </p>
                   )}
-                </>
-              )}
+                </div>
+              </div>
+              <CandidateSalaryExpectationCard
+                jobPrefs={jobPrefs}
+                fallbackMinSalary={candidateProfile?.minSalary}
+              />
             </div>
-            </div>
-            <CandidateSalaryExpectationCard
-              jobPrefs={jobPrefs}
-              fallbackMinSalary={candidateProfile?.minSalary}
-              isEditing={isEditing}
-              editValue={form.jobMinSalary}
-              onEditChange={(jobMinSalary) => patch({ jobMinSalary })}
-              saving={savingProfile}
-            />
-          </div>
+          )}
         </section>
       ) : profileNotFound ? (
         <div
@@ -784,6 +808,7 @@ export function CandidateSelfProfileView({
                 setForm={setForm}
                 patch={patch}
                 saving={savingProfile}
+                fieldErrors={fieldErrors}
               />
               <ProfileEditContactFields
                 form={form}
@@ -944,7 +969,7 @@ export function CandidateSelfProfileView({
         >
           {t("emptyStates.enrichedEmptyPrefix")}
           <Link
-            href="/portal-candidato/documentos"
+            href={DOCUMENTS_HREF}
             className="rounded font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
           >
             {t("emptyStates.documentsLink")}

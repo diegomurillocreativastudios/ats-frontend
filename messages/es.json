@@ -1002,7 +1002,8 @@
         "cancelAria": "Cancelar edición sin guardar",
         "save": "Guardar cambios",
         "saving": "Guardando…",
-        "requiredHint": "Titular, resumen y documento de identidad son obligatorios al guardar.",
+        "requiredHint": "Los campos con asterisco son obligatorios al guardar.",
+        "resumeMissingAria": "Falta el currículum en texto para poder guardar el perfil",
         "triggerComplete": "Completar mi perfil",
         "triggerEdit": "Editar mi perfil"
       },
@@ -1017,7 +1018,6 @@
       "hero": {
         "editTitle": "Tu ficha",
         "editDescription": "Editá nombre, titular y resumen en el mismo lugar donde los ves al leer el perfil.",
-        "profileSubtitle": "Así figura tu perfil profesional en el sistema.",
         "summaryEmpty": "Completá el resumen al editar el perfil o desde la información importada de tus documentos.",
         "defaultName": "Candidato"
       },
@@ -1091,9 +1091,17 @@
         "links": "Enlaces",
         "references": "Referencias",
         "recognitions": "Reconocimientos",
+        "resumeMissing": {
+          "emptyTitle": "Sin texto extraído",
+          "emptyBody": "Subí el archivo en Documentos para poder guardar el perfil.",
+          "fileWithoutTextTitle": "Archivo sin texto extraído",
+          "fileWithoutTextBody": "El CV está cargado, pero todavía no hay texto para guardar. Revisá Documentos o contactá soporte.",
+          "uploadCta": "Subir en Documentos",
+          "reviewCta": "Revisar en Documentos"
+        },
         "labels": {
-          "firstName": "Nombre",
-          "lastName": "Apellido",
+          "firstName": "Nombres",
+          "lastName": "Apellidos",
           "headline": "Titular / headline",
           "summary": "Resumen profesional",
           "nationalId": "Documento de identidad",
@@ -1112,6 +1120,7 @@
           "availability": "Disponibilidad",
           "disability": "Discapacidad",
           "resumeMarkdown": "Currículum en texto (markdown)",
+          "resumeText": "Currículum en texto",
           "company": "Empresa",
           "role": "Rol / puesto",
           "start": "Inicio",
@@ -1184,7 +1193,7 @@
             "futureDate": "La fecha no puede estar en el futuro",
             "tooYoung": "Debés tener al menos 18 años"
           },
-          "requiredFields": "Completá titular, resumen y documento de identidad.",
+          "requiredFields": "Completá nombres, apellidos, titular, resumen y documento de identidad.",
           "resumeRequired": "Tu perfil debe tener currículum en texto registrado. Cargá un CV en Documentos o contactá soporte."
         }
       },
@@ -1577,9 +1586,17 @@
         "links": "Enlaces",
         "references": "Referencias",
         "recognitions": "Reconocimientos",
+        "resumeMissing": {
+          "emptyTitle": "Sin texto extraído",
+          "emptyBody": "Subí el archivo en Documentos para poder guardar el perfil.",
+          "fileWithoutTextTitle": "Archivo sin texto extraído",
+          "fileWithoutTextBody": "El CV está cargado, pero todavía no hay texto para guardar. Revisá Documentos o contactá soporte.",
+          "uploadCta": "Subir en Documentos",
+          "reviewCta": "Revisar en Documentos"
+        },
         "labels": {
-          "firstName": "Nombre",
-          "lastName": "Apellido",
+          "firstName": "Nombres",
+          "lastName": "Apellidos",
           "headline": "Titular / headline",
           "summary": "Resumen profesional",
           "nationalId": "Documento de identidad",
@@ -1598,6 +1615,7 @@
           "availability": "Disponibilidad",
           "disability": "Discapacidad",
           "resumeMarkdown": "Currículum en texto (markdown)",
+          "resumeText": "Currículum en texto",
           "company": "Empresa",
           "role": "Rol / puesto",
           "start": "Inicio",
@@ -1670,7 +1688,7 @@
             "futureDate": "La fecha no puede estar en el futuro",
             "tooYoung": "Debés tener al menos 18 años"
           },
-          "requiredFields": "Completá titular, resumen y documento de identidad.",
+          "requiredFields": "Completá nombres, apellidos, titular, resumen y documento de identidad.",
           "resumeRequired": "El perfil debe incluir currículum en texto. Cargá un CV o contactá soporte."
         }
       },
