@@ -68,6 +68,26 @@ describe("ConsentAuthorizationModal contrast", () => {
     ).toBeDisabled()
   })
 
+  it("mantiene el título de una sección aceptada en texto oscuro sobre verde opaco", async () => {
+    renderModal({ initialValues: completeInitialValues })
+
+    const firstCheckbox = screen.getAllByRole("checkbox", {
+      name: "He leído y acepto esta sección",
+    })[0]
+    fireEvent.click(firstCheckbox)
+
+    const acceptedTitle = screen.getByRole("button", {
+      name: "Autorización para uso y presentación de perfil",
+    })
+    const titleText = acceptedTitle.querySelector("span.font-sans")
+    expect(titleText?.className).toContain("text-gray-900")
+    expect(titleText?.className).not.toMatch(/dark:text-/)
+
+    const acceptedRow = acceptedTitle.closest("div.rounded-xl")
+    expect(acceptedRow?.className).toContain("bg-emerald-100")
+    expect(acceptedRow?.className).not.toMatch(/dark:bg-/)
+  })
+
   it("hace perceptible el cambio de estado al completar el formulario y marcar la última sección", async () => {
     renderModal({ initialValues: completeInitialValues })
 

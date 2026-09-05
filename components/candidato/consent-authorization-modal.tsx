@@ -178,10 +178,43 @@ function getAcceptanceConfirmClassName(
   }
 
   if (isAccepted) {
-    return `${base} cursor-pointer border-2 border-emerald-800 bg-emerald-800 font-semibold text-white dark:border-emerald-600 dark:bg-emerald-700`
+    return `${base} cursor-pointer border-2 border-emerald-800 bg-emerald-800 font-semibold text-white`
   }
 
-  return `${base} cursor-pointer border-2 border-emerald-800 bg-white font-semibold text-emerald-950 shadow-sm hover:bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-950 dark:text-emerald-50 dark:hover:bg-emerald-900`
+  return `${base} cursor-pointer border-2 border-emerald-800 bg-white font-semibold text-emerald-950 shadow-sm hover:bg-emerald-50`
+}
+
+/**
+ * Accepted rows stay mint + near-black. The modal is always a light glass
+ * surface, so dark: light-text on translucent green washes out when the OS
+ * prefers dark mode.
+ */
+function getSectionSurfaceClassName(isAccepted: boolean, isAcceptance: boolean): string {
+  const base = "rounded-xl border transition-colors duration-300"
+
+  if (isAccepted) {
+    return `${base} border-emerald-700/55 bg-emerald-100`
+  }
+
+  if (isAcceptance) {
+    return `${base} border-amber-600/35 bg-amber-50`
+  }
+
+  return `${base} border-border bg-card`
+}
+
+function getSectionTitleClassName(isAccepted: boolean, isAcceptance: boolean): string {
+  const base = "font-sans text-sm font-semibold leading-snug"
+
+  if (isAccepted) {
+    return `${base} text-gray-900`
+  }
+
+  if (isAcceptance) {
+    return `${base} text-amber-950`
+  }
+
+  return `${base} text-foreground`
 }
 
 /**
@@ -412,16 +445,7 @@ export function ConsentAuthorizationModal({
 
             return (
               <li key={id}>
-                <div
-                  className={[
-                    "rounded-xl border transition-colors duration-300",
-                    isAccepted
-                      ? "border-emerald-600/40 bg-emerald-50 dark:bg-emerald-950/30"
-                      : isAcceptance
-                        ? "border-amber-600/35 bg-amber-50/80 dark:bg-amber-950/20"
-                        : "border-border bg-card",
-                  ].join(" ")}
-                >
+                <div className={getSectionSurfaceClassName(isAccepted, isAcceptance)}>
                   <div className="flex items-start gap-3 px-3 py-3 sm:px-4">
                     <input
                       id={`${baseId}-${id}-check`}
@@ -451,23 +475,17 @@ export function ConsentAuthorizationModal({
                     >
                       <span
                         className={[
-                          "mt-0.5 shrink-0 text-muted-foreground transition-transform duration-300 ease-out",
+                          "mt-0.5 shrink-0 transition-transform duration-300 ease-out",
+                          isAccepted
+                            ? "text-emerald-800"
+                            : "text-muted-foreground",
                           isExpanded ? "rotate-0" : "-rotate-90",
                         ].join(" ")}
                         aria-hidden
                       >
                         <ChevronDown className="h-4 w-4" />
                       </span>
-                      <span
-                        className={[
-                          "font-sans text-sm font-semibold leading-snug",
-                          isAccepted
-                            ? "text-emerald-900 dark:text-emerald-100"
-                            : isAcceptance
-                              ? "text-amber-950 dark:text-amber-100"
-                              : "text-foreground",
-                        ].join(" ")}
-                      >
+                      <span className={getSectionTitleClassName(isAccepted, isAcceptance)}>
                         {t(`sections.${id}.title`)}
                       </span>
                     </button>
@@ -664,7 +682,7 @@ export function ConsentAuthorizationModal({
                             <span
                               className={
                                 isAccepted
-                                  ? "text-emerald-800 dark:text-emerald-200"
+                                  ? "text-emerald-950"
                                   : "text-muted-foreground"
                               }
                             >

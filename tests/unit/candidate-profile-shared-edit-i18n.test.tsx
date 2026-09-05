@@ -285,6 +285,40 @@ describe("RecruiterCandidateProfileView edit labels (Etapa 15)", () => {
   })
 })
 
+describe("CandidateSelfProfileView verified badge contrast", () => {
+  it("muestra Autorizado en texto oscuro sobre verde opaco", () => {
+    render(
+      <NextIntlClientProvider locale="es" messages={messagesByLocale.es}>
+        <CandidateSelfProfileView
+          candidateProfile={{
+            firstName: "Diego",
+            lastName: "Correa",
+            headline: "Dev",
+            summary: "Resumen",
+            nationalId: "1",
+            resumeMarkdown: "cv",
+            authAndConsentVerification: true,
+            workExperience: [],
+            education: [],
+          } as never}
+          selfProfile={{ userName: "Diego Correa", email: "diego@test.com" } as never}
+          profileNotFound={false}
+          onSaveProfile={vi.fn(async () => {})}
+          savingProfile={false}
+          saveProfileError={null}
+          clearSaveProfileError={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    )
+
+    const badge = screen.getByText("Autorizado").closest("span.inline-flex")
+    expect(badge?.className).toContain("bg-emerald-100")
+    expect(badge?.className).toContain("text-gray-900")
+    expect(badge?.className).not.toMatch(/dark:text-/)
+    expect(badge?.className).not.toMatch(/dark:bg-/)
+  })
+})
+
 describe("JobPreferencesBlock canonical values (Etapa 15)", () => {
   it("muestra availability dinámica verbatim sin traducir el value", () => {
     render(

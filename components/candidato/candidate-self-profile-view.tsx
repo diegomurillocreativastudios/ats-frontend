@@ -95,6 +95,9 @@ const formatCompliancePreview = (
   return [{ label: fallbackLabel, value: String(value) }]
 }
 
+const VERIFIED_BADGE_CLASS_NAME =
+  "inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 font-sans text-xs font-semibold text-gray-900 ring-1 ring-inset ring-emerald-700/50"
+
 const SectionGroupLabel = ({ children }: { children: ReactNode }) => (
   <div className="scroll-mt-28 pt-2 first:pt-0">
     <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -702,11 +705,11 @@ export function CandidateSelfProfileView({
                     </h2>
                     {candidateProfile?.authAndConsentVerification ? (
                       <span
-                        className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 font-sans text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-500/30"
+                        className={VERIFIED_BADGE_CLASS_NAME}
                         title={t("consent.verifiedBadgeTitle")}
                       >
                         <BadgeCheck
-                          className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+                          className="h-4 w-4 shrink-0 text-emerald-800"
                           aria-hidden
                         />
                         <span>{t("consent.verifiedBadge")}</span>
@@ -726,7 +729,7 @@ export function CandidateSelfProfileView({
                       {summary}
                     </p>
                   ) : (
-                    <p className="mt-4 font-sans text-sm italic text-muted-foreground">
+                    <p className="mt-4 font-sans text-sm italic text-gray-600">
                       {t("hero.summaryEmpty")}
                     </p>
                   )}
