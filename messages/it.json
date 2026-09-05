@@ -605,7 +605,7 @@
           "submit": "Salva le informazioni",
           "success": "Le tue informazioni sono state aggiornate correttamente. Controlla il tuo profilo per vedere i dati.",
           "errorPrefix": "Errore durante il salvataggio delle tue informazioni",
-          "cvRequired": "Devi caricare il tuo CV.",
+          "cvRequired": "Il tuo CV è un campo obbligatorio.",
           "cvHeading": "Il tuo CV",
           "cvDescription": "Carica il tuo CV per completare automaticamente le informazioni del tuo profilo.",
           "aiNote": "Risultato generato dall'IA. Controlla i dati in Il mio profilo prima di candidarti."
@@ -616,7 +616,7 @@
           "success": "Candidato creato ed elaborato correttamente.",
           "successMany": "{count} candidati elaborati correttamente.",
           "errorPrefix": "Errore durante la creazione del candidato",
-          "cvRequired": "Devi caricare il CV del candidato.",
+          "cvRequired": "Il CV del candidato è un campo obbligatorio.",
           "cvHeading": "CV del candidato",
           "cvDescription": "Carica il CV del candidato per creare automaticamente il suo profilo.",
           "aiNote": "Risultato generato dall'IA. Richiede la convalida delle Risorse Umane."

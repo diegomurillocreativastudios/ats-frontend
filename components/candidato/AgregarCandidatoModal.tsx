@@ -138,6 +138,7 @@ export default function AgregarCandidatoModal({
   );
   const [isSubmittingCandidate, setIsSubmittingCandidate] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [cvFieldError, setCvFieldError] = useState<string | null>(null);
   const [aiProcessingBar, setAiProcessingBar] = useState<AiBarState>(
     initialAiProcessingBar
   );
@@ -164,6 +165,7 @@ export default function AgregarCandidatoModal({
     setIdentityFile(null);
     setIdentityDocumentTypeId("");
     setSubmitError(null);
+    setCvFieldError(null);
     setAiProcessingBar(initialAiProcessingBar());
   }, []);
 
@@ -204,15 +206,17 @@ export default function AgregarCandidatoModal({
     scrollToProcessingPanel,
   ]);
 
-  const hasCvSelected = allowsStaffCvUpload
-    ? cvFiles.length > 0
-    : Boolean(cvFile);
+  const isSubmitDisabled = isSubmittingCandidate;
 
-  const isSubmitDisabled =
-    isSubmittingCandidate ||
-    !hasCvSelected ||
-    (requiresIdentityDocuments &&
-      (!identityFile || !identityDocumentTypeId.trim()));
+  const handleCvFileChange = (file: File | null) => {
+    setCvFile(file);
+    if (file) setCvFieldError(null);
+  };
+
+  const handleCvFilesChange = (files: File[]) => {
+    setCvFiles(files);
+    if (files.length > 0) setCvFieldError(null);
+  };
 
   const handleCreateCandidate = async () => {
     if (isSubmittingCandidate) return;
@@ -224,7 +228,8 @@ export default function AgregarCandidatoModal({
         : [];
 
     if (filesToProcess.length === 0) {
-      setSubmitError(copy.cvRequiredError);
+      setCvFieldError(copy.cvRequiredError);
+      setSubmitError(null);
       return;
     }
     if (requiresIdentityDocuments) {
@@ -239,6 +244,7 @@ export default function AgregarCandidatoModal({
     }
 
     setSubmitError(null);
+    setCvFieldError(null);
     setIsSubmittingCandidate(true);
 
     try {
@@ -402,6 +408,7 @@ export default function AgregarCandidatoModal({
         <section
           className="flex flex-col gap-2"
           aria-labelledby="candidato-cv-heading"
+          aria-describedby={cvFieldError ? "candidato-cv-error" : undefined}
         >
           <div className="flex flex-col gap-1">
             <h3
@@ -420,7 +427,7 @@ export default function AgregarCandidatoModal({
           {!allowsStaffCvUpload ? (
             <SingleFileUploadZone
               file={cvFile}
-              onFileChange={setCvFile}
+              onFileChange={handleCvFileChange}
               acceptedTypes={CV_ACCEPTED_TYPES}
               acceptedExtensions={CV_ACCEPTED_EXTENSIONS}
               accept={CV_ACCEPT_ATTR}
@@ -431,6 +438,9 @@ export default function AgregarCandidatoModal({
               maxSizeBytes={UPLOAD_MAX_BYTES_15_MB}
               disabled={isSubmittingCandidate}
               inputId="candidato-cv-input"
+              hasError={Boolean(cvFieldError)}
+              describedBy={cvFieldError ? "candidato-cv-error" : undefined}
+              isRequired
             />
           ) : (
             <DocumentsUploadZone
@@ -441,10 +451,22 @@ export default function AgregarCandidatoModal({
               stagingOnly
               processAllAcceptedFiles
               maxSizeBytes={UPLOAD_MAX_BYTES_15_MB}
-              onFilesChange={setCvFiles}
+              onFilesChange={handleCvFilesChange}
               externalProcessingIndex={externalProcessingIndex}
+              hasError={Boolean(cvFieldError)}
+              describedBy={cvFieldError ? "candidato-cv-error" : undefined}
+              isRequired
             />
           )}
+          {cvFieldError ? (
+            <p
+              id="candidato-cv-error"
+              className="font-sans text-sm text-destructive"
+              role="alert"
+            >
+              {cvFieldError}
+            </p>
+          ) : null}
         </section>
 
         {requiresIdentityDocuments ? (

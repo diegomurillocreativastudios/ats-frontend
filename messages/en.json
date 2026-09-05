@@ -605,7 +605,7 @@
           "submit": "Save information",
           "success": "Your information was updated successfully. Check your profile to see the data.",
           "errorPrefix": "Error saving your information",
-          "cvRequired": "You must upload your CV.",
+          "cvRequired": "Your CV is a required field.",
           "cvHeading": "Your CV",
           "cvDescription": "Upload your CV to automatically complete your profile information.",
           "aiNote": "AI-generated result. Review the data in My profile before applying."
@@ -616,7 +616,7 @@
           "success": "Candidate created and processed successfully.",
           "successMany": "{count} candidates processed successfully.",
           "errorPrefix": "Error creating the candidate",
-          "cvRequired": "You must upload the candidate's CV.",
+          "cvRequired": "The candidate's CV is a required field.",
           "cvHeading": "Candidate's CV",
           "cvDescription": "Upload the candidate's CV to create their profile automatically.",
           "aiNote": "AI-generated result. Requires HR validation."

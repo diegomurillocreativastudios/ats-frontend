@@ -605,7 +605,7 @@
           "submit": "Informationen speichern",
           "success": "Deine Informationen wurden erfolgreich aktualisiert. Sieh in deinem Profil nach, um die Daten zu prüfen.",
           "errorPrefix": "Fehler beim Speichern deiner Informationen",
-          "cvRequired": "Du musst deinen Lebenslauf hochladen.",
+          "cvRequired": "Dein Lebenslauf ist ein Pflichtfeld.",
           "cvHeading": "Dein Lebenslauf",
           "cvDescription": "Lade deinen Lebenslauf hoch, um deine Profilinformationen automatisch zu vervollständigen.",
           "aiNote": "Von KI generiertes Ergebnis. Prüfe die Daten in Mein Profil, bevor du dich bewirbst."
@@ -616,7 +616,7 @@
           "success": "Kandidat erfolgreich erstellt und verarbeitet.",
           "successMany": "{count} Kandidaten erfolgreich verarbeitet.",
           "errorPrefix": "Fehler beim Erstellen des Kandidaten",
-          "cvRequired": "Du musst den Lebenslauf des Kandidaten hochladen.",
+          "cvRequired": "Der Lebenslauf des Kandidaten ist ein Pflichtfeld.",
           "cvHeading": "Lebenslauf des Kandidaten",
           "cvDescription": "Lade den Lebenslauf des Kandidaten hoch, um sein Profil automatisch zu erstellen.",
           "aiNote": "Von KI generiertes Ergebnis. Erfordert die Validierung durch die Personalabteilung."

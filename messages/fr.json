@@ -605,7 +605,7 @@
           "submit": "Enregistrer les informations",
           "success": "Vos informations ont été mises à jour avec succès. Consultez votre profil pour voir les données.",
           "errorPrefix": "Erreur lors de l'enregistrement de vos informations",
-          "cvRequired": "Vous devez téléverser votre CV.",
+          "cvRequired": "Votre CV est un champ obligatoire.",
           "cvHeading": "Votre CV",
           "cvDescription": "Téléversez votre CV pour compléter automatiquement les informations de votre profil.",
           "aiNote": "Résultat généré par l'IA. Vérifiez les données dans Mon profil avant de postuler."
@@ -616,7 +616,7 @@
           "success": "Candidat créé et traité avec succès.",
           "successMany": "{count} candidats traités avec succès.",
           "errorPrefix": "Erreur lors de la création du candidat",
-          "cvRequired": "Vous devez téléverser le CV du candidat.",
+          "cvRequired": "Le CV du candidat est un champ obligatoire.",
           "cvHeading": "CV du candidat",
           "cvDescription": "Téléversez le CV du candidat pour créer son profil automatiquement.",
           "aiNote": "Résultat généré par l'IA. Nécessite la validation des RH."

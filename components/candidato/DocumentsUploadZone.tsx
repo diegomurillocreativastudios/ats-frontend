@@ -115,6 +115,12 @@ interface DocumentsUploadZoneProps {
   externalProcessingIndex?: number | null
   /** Tamaño máximo por archivo. Por defecto 15 MB (BE-SEC-016). */
   maxSizeBytes?: number
+  /** Marca el dropzone como inválido (p. ej. campo obligatorio vacío). */
+  hasError?: boolean
+  /** `id` del mensaje de error externo para `aria-describedby`. */
+  describedBy?: string
+  /** Indica que el dropzone es obligatorio. */
+  isRequired?: boolean
 }
 
 export default function DocumentsUploadZone({
@@ -132,6 +138,9 @@ export default function DocumentsUploadZone({
   onFilesChange,
   externalProcessingIndex = null,
   maxSizeBytes = UPLOAD_MAX_BYTES_15_MB,
+  hasError = false,
+  describedBy,
+  isRequired = false,
 }: DocumentsUploadZoneProps = {}) {
   const t = useTranslations("CandidatePortal.documents.upload")
   const inputRef = useRef<HTMLInputElement>(null)
@@ -352,10 +361,12 @@ export default function DocumentsUploadZone({
       <div
         role="button"
         tabIndex={0}
-        className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed bg-muted p-5 transition-colors md:gap-3 md:p-6 ${
+        className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-5 transition-colors md:gap-3 md:p-6 ${
           isDragging
             ? "border-vo-purple bg-ats-arena/70"
-            : "border-border hover:border-muted-foreground/30"
+            : hasError
+              ? "border-destructive bg-destructive/5"
+              : "border-border bg-muted hover:border-muted-foreground/30"
         }`}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -363,6 +374,9 @@ export default function DocumentsUploadZone({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         aria-label={t("dropzoneAria")}
+        aria-invalid={hasError || undefined}
+        aria-describedby={describedBy}
+        aria-required={isRequired || undefined}
       >
         <input
           ref={inputRef}
