@@ -2,8 +2,8 @@
 
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import { Loader2 } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { CalendarDays, Check, Loader2 } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
 import { GoogleCalendarConnect } from "@/components/rrhh/interviews/google-calendar-connect"
 import { GoogleCalendarDisconnect } from "@/components/rrhh/interviews/google-calendar-disconnect"
@@ -11,9 +11,63 @@ import Snackbar from "@/components/ui/Snackbar"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 
+function formatConnectedAt(value: string | null, locale: string): string | null {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(date)
+}
+
+function CalendarStatusBadge({ isConnected }: { isConnected: boolean }) {
+  const tPage = useTranslations("RecruiterPortal.settings.calendarPage")
+
+  return (
+    <span
+      className={
+        isConnected
+          ? "inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 font-sans text-xs font-medium text-emerald-800"
+          : "inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 font-sans text-xs font-medium text-muted-foreground"
+      }
+    >
+      {isConnected ? tPage("statusConnected") : tPage("notConnected")}
+    </span>
+  )
+}
+
+function CalendarBenefits() {
+  const tPage = useTranslations("RecruiterPortal.settings.calendarPage")
+  const benefits = [
+    tPage("benefitEvents"),
+    tPage("benefitInvites"),
+    tPage("benefitVideo"),
+  ]
+
+  return (
+    <div>
+      <h3 className="font-sans text-sm font-semibold text-foreground">
+        {tPage("benefitsTitle")}
+      </h3>
+      <ul className="mt-3 grid gap-2.5 sm:grid-cols-3 sm:gap-4">
+        {benefits.map((text) => (
+          <li key={text} className="flex items-start gap-2.5">
+            <span
+              className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-vo-purple/10"
+              aria-hidden
+            >
+              <Check className="h-3 w-3 text-vo-purple" />
+            </span>
+            <span className="font-sans text-sm text-foreground">{text}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export function CalendarSettingsClient() {
   const t = useTranslations("RecruiterPortal.settings")
   const tPage = useTranslations("RecruiterPortal.settings.calendarPage")
+  const locale = useLocale()
   const searchParams = useSearchParams()
   const { status, isLoading, error, refresh, sync, isSyncing } =
     useGoogleCalendar()
@@ -72,55 +126,94 @@ export function CalendarSettingsClient() {
     })
   }
 
-  const connectedEmail =
-    status.email || tPage("accountFallback")
+  const connectedEmail = status.email || tPage("accountFallback")
+  const connectedSince = formatConnectedAt(status.connectedAt, locale)
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 md:px-8">
+    <div className="w-full px-4 py-6 md:px-8">
       <PortalPageHeader
         title={tPage("title")}
         description={tPage("pageDescription")}
         className="mb-8"
       />
 
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <h2 className="font-sans text-lg font-semibold text-foreground">
-          {t("googleCalendar.title")}
-        </h2>
+      <section
+        aria-labelledby="google-calendar-heading"
+        className="w-full rounded-xl border border-border bg-card p-6 shadow-sm"
+      >
+        <div className="flex items-start gap-3">
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-vo-purple/10"
+            aria-hidden
+          >
+            <CalendarDays className="h-5 w-5 text-vo-purple" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2
+                id="google-calendar-heading"
+                className="font-sans text-lg font-semibold text-foreground"
+              >
+                {t("googleCalendar.title")}
+              </h2>
+              {!isLoading ? (
+                <CalendarStatusBadge isConnected={status.isConnected} />
+              ) : null}
+            </div>
+            {!isLoading ? (
+              <p className="mt-1 font-sans text-sm text-muted-foreground">
+                {status.isConnected
+                  ? tPage("connectedHint")
+                  : tPage("connectDescription")}
+              </p>
+            ) : null}
+          </div>
+        </div>
 
         {isLoading ? (
           <div className="flex justify-center py-10">
             <LoadingSpinner />
           </div>
         ) : status.isConnected ? (
-          <div className="mt-4 flex flex-col gap-4">
-            <p className="rounded-md border border-emerald-700 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-              {tPage("connectedAs", { email: connectedEmail })}
-            </p>
-            <p className="font-sans text-sm text-muted-foreground">
-              {tPage("connectedServerHint")}
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <GoogleCalendarDisconnect onDisconnected={() => void refresh()} />
+          <div className="mt-6 flex flex-col gap-5">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <p className="font-sans text-xs font-medium uppercase tracking-wide text-emerald-800">
+                {tPage("accountLabel")}
+              </p>
+              <p
+                className="mt-1 font-sans text-sm font-semibold break-all text-foreground"
+                aria-label={tPage("connectedAs", { email: connectedEmail })}
+              >
+                {connectedEmail}
+              </p>
+              {connectedSince ? (
+                <p className="mt-1 font-sans text-xs text-emerald-800/80">
+                  {tPage("connectedSince", { date: connectedSince })}
+                </p>
+              ) : null}
+            </div>
+            <div className="flex flex-col gap-3">
               <button
                 type="button"
                 onClick={() => void handleManualSync()}
                 disabled={isSyncing}
-                className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-sans text-sm font-medium hover:bg-muted disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-vo-purple px-4 py-2.5 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:opacity-50 sm:w-auto"
               >
                 {isSyncing ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                 ) : null}
                 {isSyncing ? tPage("syncing") : tPage("syncInterviews")}
               </button>
+              <GoogleCalendarDisconnect onDisconnected={() => void refresh()} />
             </div>
           </div>
         ) : (
-          <div className="mt-4 flex flex-col gap-4">
-            <p className="font-sans text-sm text-muted-foreground">
-              {tPage("connectDescription")}
-            </p>
+          <div className="mt-6 flex flex-col gap-6">
+            <CalendarBenefits />
             <GoogleCalendarConnect />
+            <p className="max-w-3xl font-sans text-xs leading-5 text-muted-foreground">
+              {tPage("trustNote")}
+            </p>
           </div>
         )}
 
@@ -132,7 +225,7 @@ export function CalendarSettingsClient() {
             {error}
           </p>
         ) : null}
-      </div>
+      </section>
 
       <Snackbar
         open={snackbar.open}
