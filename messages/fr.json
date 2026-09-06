@@ -178,7 +178,7 @@
       "invalidBrandSubtitle": "Lancez la réinitialisation depuis « Mot de passe oublié ? ».",
       "invalidCardTitle": "Nous n'avons pas pu ouvrir la réinitialisation",
       "invalidCardBody": "Le lien est invalide ou a expiré. Revenez à « Mot de passe oublié ? » pour en demander un nouveau.",
-      "invalidGoForgot": "Aller à mot de passe oublié"
+      "invalidGoForgot": "Demander un nouveau lien"
     },
     "loadingFallback": "Chargement…",
     "poweredBy": "Powered by <link>Creativa Studios</link> LLC",

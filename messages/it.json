@@ -178,7 +178,7 @@
       "invalidBrandSubtitle": "Avvia la reimpostazione da \"Hai dimenticato la password?\".",
       "invalidCardTitle": "Non siamo riusciti ad aprire la reimpostazione",
       "invalidCardBody": "Il link non è valido o è scaduto. Torna a \"Hai dimenticato la password?\" per richiederne uno nuovo.",
-      "invalidGoForgot": "Vai a password dimenticata"
+      "invalidGoForgot": "Richiedi un nuovo link"
     },
     "loadingFallback": "Caricamento…",
     "poweredBy": "Powered by <link>Creativa Studios</link> LLC",

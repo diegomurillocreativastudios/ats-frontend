@@ -4,6 +4,35 @@ import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
 const isDev = process.env.NODE_ENV === "development"
 
+const GENERIC_FORGOT_MESSAGE =
+  "Si existe una cuenta con ese correo, te enviamos un enlace para restablecer la contraseña."
+
+const ACCOUNT_MISSING_MESSAGE_RE =
+  /not\s*found|no\s*(encontrad[oa]|existe)|email\s*not\s*found|cuenta\s*no\s*existe|user\s*not\s*found|does\s*not\s*exist/i
+
+/**
+ * Detecta respuestas del backend que revelan si el correo está registrado.
+ * Solo normalizamos 404 y 400 de enumeración; 429/5xx y validación propia se reenvían.
+ */
+function isAccountMissingEnumeration(
+  status: number,
+  data: Record<string, unknown>,
+): boolean {
+  if (status === 404) return true
+  if (status !== 400) return false
+
+  if ("exists" in data || "success" in data) return true
+
+  const raw = data.message ?? data.detail ?? data.Message
+  const text = Array.isArray(raw) ? raw[0] : raw
+  if (typeof text !== "string") return false
+  return ACCOUNT_MISSING_MESSAGE_RE.test(text)
+}
+
+function genericForgotResponse() {
+  return NextResponse.json({ message: GENERIC_FORGOT_MESSAGE })
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -52,6 +81,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!res.ok) {
+      if (isAccountMissingEnumeration(res.status, data)) {
+        return genericForgotResponse()
+      }
+
       if (isDev) {
         console.warn("[forgot-password] backend error body", data)
       }
@@ -74,7 +107,7 @@ export async function POST(request: NextRequest) {
         ? data.message
         : typeof data.Message === "string"
           ? data.Message
-          : "Si existe una cuenta con ese correo, te enviamos un enlace para restablecer la contraseña."
+          : GENERIC_FORGOT_MESSAGE
 
     return NextResponse.json({ message })
   } catch (err: unknown) {

@@ -178,7 +178,7 @@
       "invalidBrandSubtitle": "Starten Sie das Zurücksetzen über \"Passwort vergessen?\".",
       "invalidCardTitle": "Wir konnten das Zurücksetzen nicht öffnen",
       "invalidCardBody": "Der Link ist ungültig oder abgelaufen. Gehen Sie zurück zu \"Passwort vergessen?\", um einen neuen anzufordern.",
-      "invalidGoForgot": "Zu Passwort vergessen"
+      "invalidGoForgot": "Neuen Link anfordern"
     },
     "loadingFallback": "Laden…",
     "poweredBy": "Powered by <link>Creativa Studios</link> LLC",

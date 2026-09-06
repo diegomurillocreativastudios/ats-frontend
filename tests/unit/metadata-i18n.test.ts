@@ -60,9 +60,8 @@ vi.mock("next-intl/server", async () => {
   }
 })
 
-import { generateMetadata as forgotPasswordMetadata } from "@/app/auth/forgot-password/page"
-import { generateMetadata as resetPasswordMetadata } from "@/app/restablecer-contrasena/page"
-import { generateMetadata as authResetPasswordMetadata } from "@/app/auth/restablecer-contrasena/page"
+import { generateMetadata as forgotPasswordMetadata } from "@/app/auth/olvidaste-tu-contrasena/page"
+import { generateMetadata as resetPasswordMetadata } from "@/app/auth/restablecer-contrasena/page"
 import { generateMetadata as portalSelectionMetadata } from "@/app/seleccion-portal/page"
 import { generateMetadata as candidateProfileMetadata } from "@/app/portal-candidato/mi-perfil/page"
 
@@ -102,7 +101,7 @@ describe("Metadata auth/acceso (Etapa 5A)", () => {
     )
   })
 
-  it("genera la metadata de reset password (ruta pública) en es y en", async () => {
+  it("genera la metadata de reset password en es y en", async () => {
     hoisted.locale = "es"
     const es = await resetPasswordMetadata()
     expect(es.title).toBe(esMessages.Metadata.auth.resetPassword.title)
@@ -112,16 +111,6 @@ describe("Metadata auth/acceso (Etapa 5A)", () => {
     const en = await resetPasswordMetadata()
     expect(en.title).toBe(enMessages.Metadata.auth.resetPassword.title)
     expect(en.description).toBe(enMessages.Metadata.auth.resetPassword.description)
-  })
-
-  it("genera la metadata de reset password (ruta /auth) en es y en", async () => {
-    hoisted.locale = "es"
-    const es = await authResetPasswordMetadata()
-    expect(es.title).toBe(esMessages.Metadata.auth.resetPassword.title)
-
-    hoisted.locale = "en"
-    const en = await authResetPasswordMetadata()
-    expect(en.title).toBe(enMessages.Metadata.auth.resetPassword.title)
   })
 
   it("genera la metadata de selección de portal en es y en", async () => {

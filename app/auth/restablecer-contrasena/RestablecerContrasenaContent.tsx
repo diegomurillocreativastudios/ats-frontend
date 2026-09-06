@@ -165,36 +165,41 @@ export default function RestablecerContrasenaContent() {
           </div>
         </div>
 
-        <div className="flex flex-1 items-center justify-center bg-background px-6 py-10 md:max-w-[448px] md:px-10 lg:max-w-[560px] lg:px-16">
-          <div className="w-full max-w-[400px]">
-            <div className="mb-6 flex justify-center md:hidden">
+        <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-background px-6 py-6 md:max-w-[448px] md:px-10 md:py-0 lg:max-w-[560px] lg:px-16">
+          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+            <div className="ambient-orb ambient-orb--green right-[-120px] top-[-80px] h-[360px] w-[360px]" />
+            <div className="ambient-orb ambient-orb--violet bottom-[-120px] left-[-100px] h-[340px] w-[340px]" />
+          </div>
+          <div className="glass-iridescent-card glass-edge-highlight w-full rounded-2xl p-6 md:max-w-[360px] md:p-8 lg:max-w-[400px]">
+            <div className="mb-6 flex w-full justify-center md:hidden">
               <AuthBrand size="mobile-login" variant="light-navy" />
             </div>
             <div
-              className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-6 text-center md:text-left"
+              className="flex flex-col items-center text-center"
               data-testid="auth-reset-invalid-link"
               role="alert"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-                <AlertCircle className="h-8 w-8" aria-hidden />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive ring-1 ring-destructive/15">
+                <AlertCircle className="h-7 w-7" aria-hidden />
               </div>
-              <h2 className="font-sans text-[22px] font-bold text-foreground md:text-2xl">
+              <h2 className="mt-5 max-w-[18ch] text-balance font-sans text-[22px] font-bold leading-tight text-foreground md:text-2xl">
                 {t("reset.invalidCardTitle")}
               </h2>
-              <p className="font-sans text-sm text-muted-foreground">
+              <p className="mt-3 max-w-[36ch] text-pretty font-sans text-sm leading-relaxed text-muted-foreground">
                 {t("reset.invalidCardBody")}
               </p>
-              <div className="flex w-full flex-col gap-3 pt-2 sm:flex-row sm:justify-center">
+              <div className="mt-8 flex w-full flex-col items-center gap-4">
                 <Link
-                  href="/auth/forgot-password"
-                  className="font-sans text-center text-sm font-medium text-vo-navy hover:underline"
+                  href="/auth/olvidaste-tu-contrasena"
+                  className="flex h-12 w-full items-center justify-center rounded-md bg-vo-navy px-6 text-base font-medium text-white transition-colors hover:bg-vo-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-navy focus-visible:ring-offset-2"
+                  data-testid="auth-reset-invalid-go-forgot"
                 >
                   {t("reset.invalidGoForgot")}
                 </Link>
-                <span className="hidden text-muted-foreground sm:inline">·</span>
                 <Link
                   href="/auth/iniciar-sesion"
-                  className="font-sans text-center text-sm font-medium text-vo-navy hover:underline"
+                  className="font-sans text-[13px] font-medium text-vo-navy hover:underline md:text-sm"
+                  data-testid="auth-reset-invalid-back-login"
                 >
                   {t("reset.backToLogin")}
                 </Link>

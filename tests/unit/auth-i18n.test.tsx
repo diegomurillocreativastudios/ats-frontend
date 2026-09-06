@@ -3,8 +3,8 @@ import { render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 
 import IniciarSesion from "@/app/auth/iniciar-sesion/page"
-import ForgotPasswordContent from "@/app/auth/forgot-password/ForgotPasswordContent"
-import RestablecerContrasenaContent from "@/app/restablecer-contrasena/RestablecerContrasenaContent"
+import OlvidasteTuContrasenaContent from "@/app/auth/olvidaste-tu-contrasena/OlvidasteTuContrasenaContent"
+import RestablecerContrasenaContent from "@/app/auth/restablecer-contrasena/RestablecerContrasenaContent"
 import { locales, type Locale } from "@/i18n/routing"
 import esMessages from "@/messages/es.json"
 import enMessages from "@/messages/en.json"
@@ -71,7 +71,7 @@ describe("Login i18n (Etapa 4)", () => {
 
 describe("Recuperar contraseña i18n (Etapa 4)", () => {
   it("renderiza los textos en español desde next-intl", () => {
-    renderWithIntl(<ForgotPasswordContent />, "es")
+    renderWithIntl(<OlvidasteTuContrasenaContent />, "es")
     expect(
       screen.getByRole("heading", { name: "¿Olvidaste tu contraseña?" }),
     ).toBeInTheDocument()
@@ -81,7 +81,7 @@ describe("Recuperar contraseña i18n (Etapa 4)", () => {
   })
 
   it("traduce los textos al inglés y mantiene el selector de idioma", () => {
-    renderWithIntl(<ForgotPasswordContent />, "en")
+    renderWithIntl(<OlvidasteTuContrasenaContent />, "en")
     expect(
       screen.getByRole("heading", { name: "Forgot your password?" }),
     ).toBeInTheDocument()

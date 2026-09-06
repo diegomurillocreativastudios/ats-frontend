@@ -25,7 +25,7 @@ interface SnackbarState {
   text: string
 }
 
-export default function ForgotPasswordContent() {
+export default function OlvidasteTuContrasenaContent() {
   const t = useTranslations("Auth")
   const tValidation = useTranslations("Validation")
   const tErrors = useTranslations("Errors")

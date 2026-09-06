@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { getTranslations } from "next-intl/server"
-import RestablecerContrasenaContent from "@/app/restablecer-contrasena/RestablecerContrasenaContent"
+import RestablecerContrasenaContent from "./RestablecerContrasenaContent"
 
 export async function generateMetadata() {
   const t = await getTranslations("Metadata.auth.resetPassword")

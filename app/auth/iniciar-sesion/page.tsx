@@ -350,7 +350,7 @@ export default function IniciarSesion() {
 
                 <div className="flex justify-center md:justify-end">
                   <Link
-                    href="/auth/forgot-password"
+                    href="/auth/olvidaste-tu-contrasena"
                     className="text-[13px] font-medium text-vo-purple hover:underline"
                   >
                     {t("login.forgotPasswordLink")}

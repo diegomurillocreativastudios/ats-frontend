@@ -46,6 +46,19 @@ export function proxy(request: NextRequest) {
   if (pathname === "/crear-cuenta") {
     return NextResponse.redirect(new URL("/auth/registrarse", request.url))
   }
+  if (pathname === "/restablecer-contrasena") {
+    const dest = new URL("/auth/restablecer-contrasena", request.url)
+    dest.search = request.nextUrl.search
+    return NextResponse.redirect(dest)
+  }
+  if (
+    pathname === "/auth/forgot-password" ||
+    pathname.startsWith("/auth/forgot-password/")
+  ) {
+    const dest = new URL("/auth/olvidaste-tu-contrasena", request.url)
+    dest.search = request.nextUrl.search
+    return NextResponse.redirect(dest)
+  }
 
   if (pathname === "/mi-perfil" || pathname.startsWith("/mi-perfil/")) {
     const url = request.nextUrl.clone()
@@ -73,7 +86,7 @@ export function proxy(request: NextRequest) {
   const isAuthPage =
     pathname === "/auth/iniciar-sesion" ||
     pathname === "/auth/registrarse" ||
-    pathname.startsWith("/auth/forgot-password") ||
+    pathname.startsWith("/auth/olvidaste-tu-contrasena") ||
     pathname === "/recuperar-contrasena"
 
   /**

@@ -178,7 +178,7 @@
       "invalidBrandSubtitle": "Start the reset from \"Forgot your password?\".",
       "invalidCardTitle": "We couldn't open the reset",
       "invalidCardBody": "The link is invalid or has expired. Go back to \"Forgot your password?\" to request a new one.",
-      "invalidGoForgot": "Go to forgot my password"
+      "invalidGoForgot": "Request a new link"
     },
     "loadingFallback": "Loading…",
     "poweredBy": "Powered by <link>Creativa Studios</link> LLC",

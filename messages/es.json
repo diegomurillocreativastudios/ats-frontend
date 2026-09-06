@@ -178,7 +178,7 @@
       "invalidBrandSubtitle": "Iniciá el restablecimiento desde \"¿Olvidaste tu contraseña?\".",
       "invalidCardTitle": "No pudimos abrir el restablecimiento",
       "invalidCardBody": "El enlace es inválido o expiró. Volvé a \"¿Olvidaste tu contraseña?\" para solicitar uno nuevo.",
-      "invalidGoForgot": "Ir a olvidé mi contraseña"
+      "invalidGoForgot": "Solicitar un enlace nuevo"
     },
     "loadingFallback": "Cargando…",
     "poweredBy": "Powered by <link>Creativa Studios</link> LLC",

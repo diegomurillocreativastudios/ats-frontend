@@ -172,10 +172,9 @@ const EXACT_PATH_SUFFIX = {
   "/": joinDocumentTitle(PORTAL_CANDIDATO, "Inicio"),
   "/seleccion-portal": joinDocumentTitle(CUENTA, "Elegí un portal"),
   "/recuperar-contrasena": joinDocumentTitle(CUENTA, "Recuperar contraseña"),
-  "/restablecer-contrasena": joinDocumentTitle(CUENTA, "Restablecer contraseña"),
   "/auth/iniciar-sesion": "Iniciar sesión",
   "/auth/registrarse": "Registrarse",
-  "/auth/forgot-password": "¿Olvidaste tu contraseña?",
+  "/auth/olvidaste-tu-contrasena": "¿Olvidaste tu contraseña?",
   "/auth/restablecer-contrasena": "Restablecer contraseña",
   "/portal-oportunidades": OPORTUNIDADES,
 }
