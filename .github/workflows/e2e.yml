@@ -1,4 +1,5 @@
-# Frontend-only repo: build + `next start`; tests call the API on Render.
+# Frontend-only repo: build + `next start`; tests call a configured API.
+# FE-SEC-008: fail-closed — no default admin/admin or external Render URL.
 name: E2E Integration Tests
 
 on:
@@ -13,14 +14,34 @@ jobs:
     timeout-minutes: 30
 
     env:
-      NEXT_PUBLIC_API_URL: ${{ vars.E2E_API_URL || 'https://backend-7eop.onrender.com' }}
-      API_URL: ${{ vars.E2E_API_URL || 'https://backend-7eop.onrender.com' }}
-      E2E_DEMO_EMAIL: ${{ secrets.E2E_DEMO_EMAIL || 'admin' }}
-      E2E_DEMO_PASSWORD: ${{ secrets.E2E_DEMO_PASSWORD || 'admin' }}
+      NEXT_PUBLIC_API_URL: ${{ vars.E2E_API_URL }}
+      API_URL: ${{ vars.E2E_API_URL }}
+      E2E_DEMO_EMAIL: ${{ secrets.E2E_DEMO_EMAIL }}
+      E2E_DEMO_PASSWORD: ${{ secrets.E2E_DEMO_PASSWORD }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Require E2E secrets and API URL
+        run: |
+          missing=0
+          if [ -z "${{ vars.E2E_API_URL }}" ]; then
+            echo "::error::Missing repository variable E2E_API_URL"
+            missing=1
+          fi
+          if [ -z "${{ secrets.E2E_DEMO_EMAIL }}" ]; then
+            echo "::error::Missing repository secret E2E_DEMO_EMAIL"
+            missing=1
+          fi
+          if [ -z "${{ secrets.E2E_DEMO_PASSWORD }}" ]; then
+            echo "::error::Missing repository secret E2E_DEMO_PASSWORD"
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            echo "FE-SEC-008: CI fails closed without E2E_API_URL, E2E_DEMO_EMAIL, and E2E_DEMO_PASSWORD."
+            exit 1
+          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v6

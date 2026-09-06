@@ -74,7 +74,14 @@ test.describe("@smoke Auth", () => {
   test("login demo completa sesión (selector o portal según rol)", async ({
     page,
   }) => {
-    test.skip(!e2eAuth.isAuthAvailable, e2eAuth.message)
+    if (process.env.CI) {
+      expect(
+        e2eAuth.isAuthAvailable,
+        e2eAuth.message || "Auth E2E no disponible en CI (fail-closed)"
+      ).toBe(true)
+    } else {
+      test.skip(!e2eAuth.isAuthAvailable, e2eAuth.message)
+    }
     await loginAsDemoUser(page)
     const pathname = new URL(page.url()).pathname
     if (pathname.startsWith("/seleccion-portal")) {

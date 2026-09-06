@@ -61,11 +61,8 @@ export default function IniciarSesion() {
     const newErrors: Partial<Record<keyof LoginFormState, string>> = {}
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     const rawLogin = formData.email?.trim() ?? ""
-    /** Solo exigimos formato de correo si el usuario escribió algo con @ (usuario tipo `admin` no es email). */
+    /** Solo exigimos formato de correo si el usuario escribió algo con @ (username sin @ es válido). */
     const looksLikeEmail = rawLogin.includes("@")
-    /** Demo local: usuario `admin` + contraseña `admin` (relaja regla de longitud de contraseña). */
-    const isAdminDemo =
-      rawLogin.toLowerCase() === "admin" && formData.password === "admin"
 
     if (!rawLogin) {
       newErrors.email = tValidation("userOrEmailRequired")
@@ -73,9 +70,9 @@ export default function IniciarSesion() {
       newErrors.email = tValidation("invalidEmail")
     }
     if (!formData.password) {
-      newErrors.password = tValidation("passwordRequired");
-    } else if (!isAdminDemo && formData.password.length < 8) {
-      newErrors.password = tValidation("passwordMinLength");
+      newErrors.password = tValidation("passwordRequired")
+    } else if (formData.password.length < 8) {
+      newErrors.password = tValidation("passwordMinLength")
     }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0

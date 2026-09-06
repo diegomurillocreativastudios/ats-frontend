@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 10 · In Progress 0 · Last ToDos 0 · To Do 14
+**Conteo:** Done 11 · In Progress 0 · Last ToDos 0 · To Do 13
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -43,6 +43,9 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - Front: sin `sessionStorage` de empresa ni UUID default; create/edit fail-closed si no hay empresa del catálogo
   - Backend: `CreateVacancy` exige `companyId` (400 sin fallback a `…0001`)
   - Evidencia BE-SEC-004 / ownership: candidato ajeno → 403; sin sesión → 401; Recruiter en CRUD empresas → 403; empresa inactiva denegada; ficha con IDs cruzados → 404; Recruiter ve empresas activas del comprador (no muro A↔B)
+- [x] **FE-SEC-008** — Quitar `admin/admin` y fallback end-to-end a servicio externo
+  - Login sin `isAdminDemo`; helpers/`global-setup` sin defaults `admin`/`admin`
+  - `e2e.yml` exige `E2E_API_URL` + secrets; CI falla cerrado; pin `e2e-credentials-fail-closed.test.ts`
 
 ---
 
@@ -62,8 +65,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-008** — Quitar `admin/admin` y fallback end-to-end a servicio externo
-  - Login, `.github/workflows/e2e.yml`, `global-setup.ts`, helpers; CI falla cerrado sin secretos
 - [ ] **FE-SEC-009** — Sesión fail-closed: sin identidad/rol desde cookie `ats_user`
   - `lib/server-session-user.ts`, `/api/auth/me`, `proxy.ts`; backend caído → 401/503
 - [ ] **FE-SEC-010** — Headers defensivos + Content Security Policy Report-Only → enforcement

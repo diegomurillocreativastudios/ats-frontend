@@ -115,7 +115,17 @@ Modo watch: `npm run test:watch`
 
 ### 3. Pruebas E2E (Playwright)
 
-Por defecto, `npm run test:e2e` **levanta el frontend** con `npm run dev` si no hay nada en el puerto (ver `playwright.config.ts`). Los tests de login y plantillas **requieren el API** configurado en `.env.local` (`NEXT_PUBLIC_API_URL`) y backend accesible.
+Por defecto, `npm run test:e2e` **levanta el frontend** con `npm run dev` si no hay nada en el puerto (ver `playwright.config.ts`). Los tests de login y plantillas **requieren el API** y credenciales de prueba (sin defaults `admin`/`admin`).
+
+Variables obligatorias para tests que hacen login:
+
+| Variable | Dónde | Descripción |
+|----------|--------|-------------|
+| `NEXT_PUBLIC_API_URL` / `API_URL` | `.env.local` o CI (`vars.E2E_API_URL`) | URL del backend de pruebas |
+| `E2E_DEMO_EMAIL` | entorno local o `secrets.E2E_DEMO_EMAIL` | Usuario de prueba |
+| `E2E_DEMO_PASSWORD` | entorno local o `secrets.E2E_DEMO_PASSWORD` | Contraseña de prueba |
+
+En **GitHub Actions**, el workflow falla cerrado si faltan `E2E_API_URL`, `E2E_DEMO_EMAIL` o `E2E_DEMO_PASSWORD`. En local, los tests que no necesitan sesión siguen corriendo; los de login/plantillas se saltean con un mensaje claro si no hay auth.
 
 | Comando | Descripción |
 |--------|-------------|

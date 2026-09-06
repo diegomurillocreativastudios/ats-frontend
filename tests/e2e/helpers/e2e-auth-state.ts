@@ -12,10 +12,12 @@ const AUTH_STATE_FILE = path.join(
   "tests/e2e/.e2e-auth-state.json"
 )
 
+/** Fail-closed default: sin archivo de setup, no asumir que auth está disponible. */
 const DEFAULT_STATE: E2EAuthState = {
   apiUrl: "",
-  isAuthAvailable: true,
-  message: "",
+  isAuthAvailable: false,
+  message:
+    "Estado de auth E2E no encontrado. Ejecutá global-setup o configurá E2E_DEMO_* y API_URL.",
 }
 
 /**

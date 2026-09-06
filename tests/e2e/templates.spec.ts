@@ -6,7 +6,14 @@ const e2eAuth = readE2EAuthState()
 
 test.describe("Template Management E2E", () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(!e2eAuth.isAuthAvailable, e2eAuth.message)
+    if (process.env.CI) {
+      expect(
+        e2eAuth.isAuthAvailable,
+        e2eAuth.message || "Auth E2E no disponible en CI (fail-closed)"
+      ).toBe(true)
+    } else {
+      test.skip(!e2eAuth.isAuthAvailable, e2eAuth.message)
+    }
     await loginAsDemoUser(page)
     await openAdminPortalFromSelector(page)
   })

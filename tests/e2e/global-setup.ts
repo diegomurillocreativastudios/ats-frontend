@@ -20,16 +20,28 @@ const getApiBaseUrl = (): string => {
   return raw.replace(/\/$/, "")
 }
 
-const getDemoCredentials = (): { email: string; password: string } => ({
-  email: process.env.E2E_DEMO_EMAIL?.trim() || "admin",
-  password: process.env.E2E_DEMO_PASSWORD ?? "admin",
-})
+const getDemoCredentials = ():
+  | { email: string; password: string }
+  | { error: string } => {
+  const email = process.env.E2E_DEMO_EMAIL?.trim() ?? ""
+  const password = process.env.E2E_DEMO_PASSWORD ?? ""
+  if (!email || !password) {
+    return {
+      error:
+        "E2E_DEMO_EMAIL y E2E_DEMO_PASSWORD son obligatorias. " +
+        "Definilas en CI (secrets) o en el entorno local. Sin defaults admin/admin.",
+    }
+  }
+  return { email, password }
+}
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * Verifica que el API de E2E responda y que las credenciales demo funcionen.
- * Escribe el resultado en `.e2e-auth-state.json` para que los tests fallen rápido con un mensaje claro.
+ * Escribe el resultado en `.e2e-auth-state.json`.
+ * En CI: falla cerrado si faltan secretos o el login no responde.
+ * En local: marca auth no disponible para que los specs salteen solo tests de sesión.
  */
 async function verifyBackendAuth(): Promise<E2EAuthState> {
   const apiUrl = getApiBaseUrl()
@@ -38,11 +50,20 @@ async function verifyBackendAuth(): Promise<E2EAuthState> {
       apiUrl: "",
       isAuthAvailable: false,
       message:
-        "NEXT_PUBLIC_API_URL no está configurada. Definila en CI o en .env.local para tests con login.",
+        "NEXT_PUBLIC_API_URL / API_URL no está configurada. Definila en CI (E2E_API_URL) o en .env.local.",
     }
   }
 
-  const { email, password } = getDemoCredentials()
+  const credentials = getDemoCredentials()
+  if ("error" in credentials) {
+    return {
+      apiUrl,
+      isAuthAvailable: false,
+      message: credentials.error,
+    }
+  }
+
+  const { email, password } = credentials
   const maxAttempts = process.env.CI ? 6 : 2
   let lastDetail = "sin respuesta del servidor"
 
@@ -92,7 +113,7 @@ async function verifyBackendAuth(): Promise<E2EAuthState> {
       `No se pudo autenticar contra ${apiUrl} con el usuario demo (${email}). ` +
       `Detalle: ${lastDetail}. ` +
       "Configurá los secrets E2E_DEMO_EMAIL y E2E_DEMO_PASSWORD en GitHub, " +
-      "o restablecé el usuario admin en el backend de pruebas.",
+      "o restablecé el usuario de prueba en el backend.",
   }
 }
 
@@ -101,6 +122,9 @@ async function globalSetup(): Promise<void> {
   fs.writeFileSync(AUTH_STATE_FILE, JSON.stringify(authState, null, 2))
 
   if (!authState.isAuthAvailable) {
+    if (process.env.CI) {
+      throw new Error(`[e2e] Fail-closed: ${authState.message}`)
+    }
     console.warn(`[e2e] ${authState.message}`)
   }
 }

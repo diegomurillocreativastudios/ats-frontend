@@ -1,11 +1,21 @@
 import { expect, type Page } from "@playwright/test"
 
 /**
- * Credenciales demo para E2E (validación client-side + API `/login`).
- * Configurables con `E2E_DEMO_EMAIL` y `E2E_DEMO_PASSWORD` (p. ej. secrets de GitHub Actions).
+ * Credenciales de prueba para E2E (validación client-side + API `/login`).
+ * Obligatorias vía `E2E_DEMO_EMAIL` y `E2E_DEMO_PASSWORD` (secrets en GitHub Actions).
+ * Sin defaults débiles (`admin`/`admin`).
  */
-export const E2E_DEMO_EMAIL = process.env.E2E_DEMO_EMAIL?.trim() || "admin"
-export const E2E_DEMO_PASSWORD = process.env.E2E_DEMO_PASSWORD ?? "admin"
+export function getE2EDemoCredentials(): { email: string; password: string } {
+  const email = process.env.E2E_DEMO_EMAIL?.trim() ?? ""
+  const password = process.env.E2E_DEMO_PASSWORD ?? ""
+  if (!email || !password) {
+    throw new Error(
+      "E2E_DEMO_EMAIL y E2E_DEMO_PASSWORD son obligatorias para login demo. " +
+        "Definilas en el entorno o en secrets de GitHub Actions."
+    )
+  }
+  return { email, password }
+}
 
 const LOGIN_REDIRECT_TIMEOUT_MS = process.env.CI ? 90_000 : 30_000
 
@@ -27,8 +37,9 @@ export async function fillLoginForm(
  * si el usuario ya tiene rol (ver `proxy.ts`).
  */
 export async function loginAsDemoUser(page: Page): Promise<void> {
+  const { email, password } = getE2EDemoCredentials()
   await page.goto("/auth/iniciar-sesion")
-  await fillLoginForm(page, E2E_DEMO_EMAIL, E2E_DEMO_PASSWORD)
+  await fillLoginForm(page, email, password)
 
   const redirectPattern =
     /\/(seleccion-portal|portal-rrhh|portal-candidato|portal-admin)/
