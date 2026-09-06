@@ -11,10 +11,9 @@ export interface RenderTechnicalSheetPdfInput {
   templates: TemplateListItem[]
   candidateProfileId: string
   vacancyTitleFallback: string | null
-  previewHtml?: string | null
   /**
    * `pdfkit` (default, schema-driven like reports).
-   * `chromium` is an emergency rollback that prints schema HTML, not author markup.
+   * `chromium` is an emergency rollback that prints schema HTML, not client markup.
    */
   engine?: "pdfkit" | "chromium"
   preferPdfKit?: boolean
@@ -55,6 +54,7 @@ async function renderFromSchemaPdfKit(input: RenderTechnicalSheetPdfInput): Prom
 /**
  * Chromium path only — dynamic imports keep puppeteer/@sparticuz/chromium/jsdom
  * out of the default PDFKit serverless cold start on Vercel.
+ * Always renders schema HTML from authoritative payload (FE-SEC-015).
  */
 async function renderFromSchemaChromium(input: RenderTechnicalSheetPdfInput): Promise<Buffer> {
   const [
@@ -96,29 +96,6 @@ async function renderFromSchemaChromium(input: RenderTechnicalSheetPdfInput): Pr
   )
 }
 
-async function renderFromPreviewHtml(previewHtml: string): Promise<Buffer> {
-  const [
-    { sanitizeTechnicalSheetPreviewHtml },
-    { inlineVisibleLogoInPreviewHtml },
-    { renderHtmlToPdfBuffer },
-    { ensureTechnicalSheetPdfDocument },
-    { assertTechnicalSheetPdfHtmlSize },
-  ] = await Promise.all([
-    import("@/lib/technical-sheet/sanitize-technical-sheet-preview-html"),
-    import("@/lib/technical-sheet/inline-preview-html-images-for-pdf"),
-    import("@/lib/technical-sheet/html-to-pdf-chromium"),
-    import("@/lib/technical-sheet/wrap-technical-sheet-html-for-pdf"),
-    import("@/lib/technical-sheet/validate-technical-sheet-preview-html"),
-  ])
-
-  const sanitized = sanitizeTechnicalSheetPreviewHtml(previewHtml)
-  assertTechnicalSheetPdfHtmlSize(sanitized)
-  const withInlineLogo = await inlineVisibleLogoInPreviewHtml(sanitized)
-  const documentHtml = ensureTechnicalSheetPdfDocument(withInlineLogo)
-  assertTechnicalSheetPdfHtmlSize(documentHtml)
-  return renderHtmlToPdfBuffer(documentHtml, { mediaType: "screen" })
-}
-
 export async function renderTechnicalSheetPdfBuffer(
   input: RenderTechnicalSheetPdfInput
 ): Promise<Buffer> {
@@ -126,27 +103,6 @@ export async function renderTechnicalSheetPdfBuffer(
 
   if (engine === "pdfkit") {
     return renderFromSchemaPdfKit(input)
-  }
-
-  const previewHtml = input.previewHtml?.trim() ?? ""
-  const [{ sanitizeTechnicalSheetPreviewHtml }, { isValidTechnicalSheetPreviewHtml }] =
-    await Promise.all([
-      import("@/lib/technical-sheet/sanitize-technical-sheet-preview-html"),
-      import("@/lib/technical-sheet/validate-technical-sheet-preview-html"),
-    ])
-  const sanitizedPreview =
-    previewHtml !== "" ? sanitizeTechnicalSheetPreviewHtml(previewHtml) : ""
-  const hasValidPreview =
-    sanitizedPreview !== "" && isValidTechnicalSheetPreviewHtml(sanitizedPreview)
-
-  if (hasValidPreview) {
-    return renderFromPreviewHtml(previewHtml)
-  }
-
-  if (previewHtml !== "") {
-    console.warn(
-      "[technical-sheet-pdf] Preview HTML rejected after sanitize; using schema Chromium pipeline"
-    )
   }
 
   return renderFromSchemaChromium(input)

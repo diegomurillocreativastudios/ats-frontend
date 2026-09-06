@@ -3,6 +3,11 @@ import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import type { ReportRuntimeRow } from "@/lib/api/recruiter-report-runtime"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
+import { formatGeneratedAtForPdf } from "@/lib/reportes/executive-summary-metrics"
+import {
+  FetchReportForServerError,
+  fetchReportForServer,
+} from "@/lib/reportes/fetch-report-for-server"
 import { safeParseReportSchema } from "@/lib/reportes/schema/report-schema"
 import { supportsSchemaReportPipeline } from "@/lib/reportes/report-template-context-registry"
 import {
@@ -10,6 +15,10 @@ import {
   renderReportPdfBuffer,
   ReportPdfError,
 } from "@/lib/reportes/render-report-pdf-buffer"
+import {
+  assertTechnicalSheetPdfRateLimit,
+  TechnicalSheetPdfRateLimitError,
+} from "@/lib/technical-sheet/pdf-chromium-concurrency"
 import { REPORT_PDF_MAX_ROWS } from "@/lib/technical-sheet/pdf-chromium-limits"
 import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for-server"
 import {
@@ -17,37 +26,44 @@ import {
   findReportDocumentTemplateById,
 } from "@/lib/templates/technical-sheet-template"
 
+/**
+ * Body mínimo del cliente. Filas / summary / extras / HTML se ignoran
+ * (FE-SEC-015: datos autoritativos server-side).
+ */
 export interface ReportPdfRequestBody {
-  previewHtml?: unknown
   fileBaseName?: unknown
-  reportType?: unknown
-  rows?: unknown
-  summary?: unknown
-  metadata?: unknown
-  extras?: unknown
-  totalCount?: unknown
   templateId?: unknown
-  reportName?: unknown
-  reportDescription?: unknown
   appliedFilters?: unknown
+  /** @deprecated Ignorado; el servidor vuelve a pedir las filas al backend. */
+  rows?: unknown
+  /** @deprecated Ignorado. */
+  summary?: unknown
+  /** @deprecated Ignorado. */
+  metadata?: unknown
+  /** @deprecated Ignorado. */
+  extras?: unknown
+  /** @deprecated Ignorado. */
+  totalCount?: unknown
+  /** @deprecated Ignorado. */
   clientName?: unknown
+  /** @deprecated Ignorado. */
   generatedAt?: unknown
+  /** @deprecated Ignorado. */
+  reportName?: unknown
+  /** @deprecated Ignorado. */
+  reportDescription?: unknown
+  /** @deprecated Ignorado. */
+  previewHtml?: unknown
+  /** @deprecated Ignorado. */
+  reportType?: unknown
 }
 
-function jsonError(message: string, status: number): NextResponse {
-  return NextResponse.json({ message }, { status })
-}
-
-function coerceRows(raw: unknown): ReportRuntimeRow[] {
-  if (!Array.isArray(raw)) return []
-  return raw.filter(
-    (row): row is ReportRuntimeRow => row != null && typeof row === "object"
-  )
-}
-
-function coerceSummary(raw: unknown): Record<string, unknown> | null {
-  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return null
-  return raw as Record<string, unknown>
+function jsonError(
+  message: string,
+  status: number,
+  headers?: HeadersInit
+): NextResponse {
+  return NextResponse.json({ message }, { status, headers })
 }
 
 function coerceString(raw: unknown): string {
@@ -65,6 +81,42 @@ function coerceFilters(raw: unknown): Record<string, string> {
     out[key] = String(value)
   }
   return out
+}
+
+function resolvePdfQuotaKey(accessToken: string): string {
+  return `token:${accessToken.slice(0, 16)}`
+}
+
+/**
+ * Etiqueta de cliente desde datos autoritativos (extras o primera fila).
+ */
+function resolveClientNameFromAuthoritative(
+  rows: ReportRuntimeRow[],
+  extras: Record<string, unknown> | null
+): string {
+  const fromExtras =
+    extras && typeof extras.clientName === "string"
+      ? extras.clientName.trim()
+      : ""
+  if (fromExtras) return fromExtras
+
+  const summary = extras?.summary
+  if (summary != null && typeof summary === "object" && !Array.isArray(summary)) {
+    const name = (summary as Record<string, unknown>).clientName
+    if (typeof name === "string" && name.trim() !== "") return name.trim()
+  }
+
+  const first = rows[0]
+  if (first) {
+    const client =
+      typeof first.clientName === "string" ? first.clientName.trim() : ""
+    if (client) return client
+    const company =
+      typeof first.companyName === "string" ? first.companyName.trim() : ""
+    if (company) return company
+  }
+
+  return "Todos"
 }
 
 export async function handleReportPdfPost(
@@ -85,6 +137,8 @@ export async function handleReportPdfPost(
       return jsonError("No autorizado", 401)
     }
 
+    assertTechnicalSheetPdfRateLimit(resolvePdfQuotaKey(accessToken))
+
     const body = (await request.json().catch(() => null)) as
       | ReportPdfRequestBody
       | null
@@ -101,33 +155,21 @@ export async function handleReportPdfPost(
       )
     }
 
-    const rows = coerceRows(body.rows)
-    const summary = coerceSummary(body.summary) ?? coerceSummary(body.metadata)
-    const extras = coerceSummary(body.extras)
+    const appliedFilters = coerceFilters(body.appliedFilters)
     const templateIdRaw = body.templateId
     const templateId =
       typeof templateIdRaw === "string" || typeof templateIdRaw === "number"
         ? String(templateIdRaw).trim()
         : ""
-
     const fileBaseName = coerceString(body.fileBaseName) || null
-    const reportName = coerceString(body.reportName) || key
-    const reportDescription = coerceString(body.reportDescription) || undefined
-    const appliedFilters = coerceFilters(body.appliedFilters)
-    const clientName =
-      coerceString(body.clientName) ||
-      coerceString(summary?.clientName) ||
-      "Todos"
-    const generatedAt =
-      coerceString(body.generatedAt) ||
-      coerceString(summary?.generatedAt) ||
-      new Date().toLocaleString("es-MX")
 
-    const totalCountRaw = body.totalCount ?? summary?.totalCount
-    const totalCount =
-      totalCountRaw != null && !Number.isNaN(Number(totalCountRaw))
-        ? Number(totalCountRaw)
-        : rows.length
+    const reportData = await fetchReportForServer(
+      baseUrl,
+      accessToken,
+      key,
+      appliedFilters
+    )
+    const { rows, totalCount, extras } = reportData
 
     if (rows.length === 0) {
       return jsonError(
@@ -143,7 +185,7 @@ export async function handleReportPdfPost(
       )
     }
 
-    console.info("[Report PDF] server received", {
+    console.info("[Report PDF] authoritative rows", {
       reportKey: key,
       rowsCount: rows.length,
       totalCount,
@@ -183,10 +225,13 @@ export async function handleReportPdfPost(
       })
     }
 
+    const reportName = template.name?.trim() || key
+    const clientName = resolveClientNameFromAuthoritative(rows, extras)
+    const generatedAt = formatGeneratedAtForPdf()
+
     const { buffer, engine, templateVersion } = await renderReportPdfBuffer({
       reportKey: key,
       reportName,
-      reportDescription,
       rows,
       totalCount,
       appliedFilters,
@@ -216,6 +261,14 @@ export async function handleReportPdfPost(
       "[Report PDF] Unrecoverable error generating PDF",
       e instanceof Error ? e.stack ?? e.message : e
     )
+    if (e instanceof TechnicalSheetPdfRateLimitError) {
+      return jsonError(e.message, 429, {
+        "Retry-After": String(e.retryAfterSec),
+      })
+    }
+    if (e instanceof FetchReportForServerError) {
+      return jsonError(e.message, e.status)
+    }
     if (e instanceof ReportPdfError) {
       return jsonError(e.message, e.status)
     }

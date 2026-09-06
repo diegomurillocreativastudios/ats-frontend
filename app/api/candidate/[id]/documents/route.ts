@@ -5,6 +5,7 @@ import { getApiErrorMessage } from "@/lib/api-error"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 import {
   getUploadMaxBytesForBackendPath,
+  isBoundedBodyTooLarge,
   readRequestBodyWithinLimit,
 } from "@/lib/upload-body-limit"
 
@@ -141,7 +142,7 @@ export async function POST(
     const backendPath = `/api/candidate/${encodeURIComponent(candidateId)}/documents`
     const maxBytes = getUploadMaxBytesForBackendPath(backendPath)
     const bounded = await readRequestBodyWithinLimit(request, maxBytes)
-    if (!bounded.ok) {
+    if (isBoundedBodyTooLarge(bounded)) {
       return NextResponse.json(
         { message: bounded.message },
         { status: bounded.status }

@@ -46,6 +46,15 @@ export type BoundedBodyResult =
   | { ok: false; status: 413; message: string }
 
 /**
+ * Narrows a bounded-body result to the 413 size-limit rejection.
+ */
+export function isBoundedBodyTooLarge(
+  result: BoundedBodyResult
+): result is Extract<BoundedBodyResult, { ok: false }> {
+  return result.ok === false
+}
+
+/**
  * Rejects oversized bodies via Content-Length first, then after buffering.
  * Does not stream-cut; still avoids unbounded formData() parsing.
  */

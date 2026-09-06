@@ -4,6 +4,7 @@ import { buildBackendPathFromSegments } from "@/lib/api/bff-path"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 import {
   getUploadMaxBytesForBackendPath,
+  isBoundedBodyTooLarge,
   readRequestBodyWithinLimit,
 } from "@/lib/upload-body-limit"
 
@@ -88,7 +89,7 @@ async function proxyToBackend(
   if (hasBody) {
     const maxBytes = getUploadMaxBytesForBackendPath(backendPath)
     const bounded = await readRequestBodyWithinLimit(request, maxBytes)
-    if (!bounded.ok) {
+    if (isBoundedBodyTooLarge(bounded)) {
       return NextResponse.json(
         { message: bounded.message },
         { status: bounded.status }

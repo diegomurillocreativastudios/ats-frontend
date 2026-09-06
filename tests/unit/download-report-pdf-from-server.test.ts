@@ -53,7 +53,7 @@ describe("downloadReportPdfFromServer", () => {
     vi.restoreAllMocks()
   })
 
-  it("posts to the dynamic [reportKey] endpoint for any schema report", async () => {
+  it("posts filters only to the dynamic [reportKey] endpoint", async () => {
     const fetchMock = vi.fn(async () =>
       buildPdfResponse("candidate-status-by-stage", 2)
     )
@@ -61,10 +61,9 @@ describe("downloadReportPdfFromServer", () => {
 
     await downloadReportPdfFromServer({
       reportType: "candidate-status-by-stage",
-      rows: [{ a: 1 }, { a: 2 }],
-      summary: { generatedAt: "01/01/2026", totalCount: 2 },
-      totalCount: 2,
       fileBaseName: "estatus",
+      appliedFilters: { clientId: "c1" },
+      templateId: "tpl-1",
     })
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
@@ -77,6 +76,15 @@ describe("downloadReportPdfFromServer", () => {
     expect((init.headers as Record<string, string>)["Accept"]).toBe(
       "application/pdf"
     )
+    const body = JSON.parse(String(init.body)) as Record<string, unknown>
+    expect(body).toEqual({
+      fileBaseName: "estatus",
+      templateId: "tpl-1",
+      appliedFilters: { clientId: "c1" },
+    })
+    expect(body).not.toHaveProperty("rows")
+    expect(body).not.toHaveProperty("summary")
+    expect(body).not.toHaveProperty("extras")
   })
 
   it("posts to /api/recruiter/reportes/<reportKey>/pdf for vacancy-progress too", async () => {
@@ -87,10 +95,8 @@ describe("downloadReportPdfFromServer", () => {
 
     await downloadReportPdfFromServer({
       reportType: "vacancy-progress-by-client",
-      rows: [],
-      summary: null,
-      totalCount: 0,
       fileBaseName: "avance",
+      appliedFilters: {},
     })
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -116,14 +122,12 @@ describe("downloadReportPdfFromServer", () => {
     await expect(
       downloadReportPdfFromServer({
         reportType: "technical-evaluations",
-        rows: [{ a: 1 }],
-        totalCount: 1,
         fileBaseName: "evals",
       })
     ).rejects.toThrow(/Motor PDF inesperado/i)
   })
 
-  it("rejects when the rows count header diverges from the client payload", async () => {
+  it("does not require client rows count to match server header", async () => {
     const response = new Response(new Blob(["%PDF-1.4"], { type: "application/pdf" }), {
       status: 200,
       headers: {
@@ -133,6 +137,7 @@ describe("downloadReportPdfFromServer", () => {
           "recruitment-sources"
         ),
         "X-Report-Rows-Count": "10",
+        "X-Report-Key": "recruitment-sources",
       },
     })
     globalThis.fetch = vi.fn(async () => response) as unknown as typeof fetch
@@ -140,11 +145,9 @@ describe("downloadReportPdfFromServer", () => {
     await expect(
       downloadReportPdfFromServer({
         reportType: "recruitment-sources",
-        rows: [{ a: 1 }],
-        totalCount: 1,
         fileBaseName: "fuentes",
       })
-    ).rejects.toThrow(/Cantidad de filas inconsistente/i)
+    ).resolves.toBeUndefined()
   })
 
   it("rejects with the server message when the response is not ok", async () => {
@@ -160,8 +163,6 @@ describe("downloadReportPdfFromServer", () => {
     await expect(
       downloadReportPdfFromServer({
         reportType: "preliminary-match-scores",
-        rows: [{ a: 1 }],
-        totalCount: 1,
       })
     ).rejects.toThrow(/No autorizado/i)
   })

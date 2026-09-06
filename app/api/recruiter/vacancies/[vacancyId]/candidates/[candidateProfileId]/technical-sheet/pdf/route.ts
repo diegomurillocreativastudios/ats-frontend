@@ -3,6 +3,7 @@
  * Rollback Chromium: `?engine=chromium` / `TECHNICAL_SHEET_PDF_ENGINE=chromium`.
  *
  * Hardening: cuota por usuario, semáforo Chromium (503), timeouts acotados.
+ * FE-SEC-015: no acepta HTML del cliente; datos solo del backend.
  */
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
@@ -50,8 +51,7 @@ function resolvePdfQuotaKey(accessToken: string): string {
 
 async function handleTechnicalSheetPdf(
   request: Request,
-  context: PdfRouteContext,
-  previewHtml: string | null
+  context: PdfRouteContext
 ) {
   const { vacancyId, candidateProfileId } = await context.params
   const vid = String(vacancyId ?? "").trim()
@@ -112,7 +112,6 @@ async function handleTechnicalSheetPdf(
     templates,
     candidateProfileId: cid,
     vacancyTitleFallback: readVacancyTitleFallback(request),
-    previewHtml,
     engine,
   })
 
@@ -164,18 +163,16 @@ function pdfErrorResponse(e: unknown) {
 
 export async function GET(request: Request, context: PdfRouteContext) {
   try {
-    return await handleTechnicalSheetPdf(request, context, null)
+    return await handleTechnicalSheetPdf(request, context)
   } catch (e: unknown) {
     return pdfErrorResponse(e)
   }
 }
 
+/** Alias del GET: no lee body ni HTML del cliente (FE-SEC-015). */
 export async function POST(request: Request, context: PdfRouteContext) {
   try {
-    const body = (await request.json().catch(() => null)) as { previewHtml?: unknown } | null
-    const previewHtml =
-      body != null && typeof body.previewHtml === "string" ? body.previewHtml : null
-    return await handleTechnicalSheetPdf(request, context, previewHtml)
+    return await handleTechnicalSheetPdf(request, context)
   } catch (e: unknown) {
     return pdfErrorResponse(e)
   }

@@ -4,6 +4,7 @@ import type { TechnicalSheetPayload } from "@/lib/api/technical-sheet"
 const renderHtmlToPdfBuffer = vi.fn()
 const renderPaginatedTechnicalSheetPdfFromInterpolated = vi.fn()
 const buildTechnicalSheetPdfKitBuffer = vi.fn()
+const renderSchemaToHtmlMock = vi.fn()
 
 vi.mock("@/lib/technical-sheet/html-to-pdf-chromium", () => ({
   renderHtmlToPdfBuffer,
@@ -17,12 +18,28 @@ vi.mock("@/lib/technical-sheet/build-technical-sheet-pdfkit", () => ({
   buildTechnicalSheetPdfKitBuffer,
 }))
 
+vi.mock("@/lib/technical-sheet/schema/render-technical-sheet-schema-to-html", () => ({
+  renderTechnicalSheetSchemaToHtml: (...args: unknown[]) =>
+    renderSchemaToHtmlMock(...args),
+}))
+
+vi.mock("@/lib/technical-sheet/technical-sheet-template-context", () => ({
+  buildTechnicalSheetTemplateContext: vi.fn(() => ({
+    header: { fullName: "Ana", address: "", englishLevel: "" },
+    logoUrl: "data:image/png;base64,abc",
+  })),
+}))
+
 vi.mock("@/lib/technical-sheet/inline-preview-html-images-for-pdf", () => ({
   inlineVisibleLogoInPreviewHtml: vi.fn(async (html: string) => html),
 }))
 
 vi.mock("@/lib/technical-sheet/resolve-visible-logo-data-uri", () => ({
   resolveVisibleLogoDataUriForPdf: vi.fn(async () => "data:image/png;base64,abc"),
+}))
+
+vi.mock("@/lib/technical-sheet/server-public-app-url", () => ({
+  buildVisibleLogoUrlForTechnicalSheet: vi.fn(() => ""),
 }))
 
 vi.mock("@/lib/templates/technical-sheet-template", async (importOriginal) => {
@@ -44,8 +61,6 @@ vi.mock("@/lib/templates/technical-sheet-template", async (importOriginal) => {
   }
 })
 
-const previewDoc = `<!DOCTYPE html><html><body><main class="technical-sheet-doc"><section class="technical-sheet-page"><article class="ts-article"></article></section></main></body></html>`
-
 const baseInput = {
   payload: {} as TechnicalSheetPayload,
   templates: [],
@@ -59,21 +74,20 @@ describe("renderTechnicalSheetPdfBuffer", () => {
     renderHtmlToPdfBuffer.mockReset()
     renderPaginatedTechnicalSheetPdfFromInterpolated.mockReset()
     buildTechnicalSheetPdfKitBuffer.mockReset()
+    renderSchemaToHtmlMock.mockReset()
+    renderSchemaToHtmlMock.mockReturnValue("<p>schema</p>")
     delete process.env.VERCEL
     delete process.env.VERCEL_ENV
   })
 
-  it("uses PDFKit schema pipeline by default and ignores preview HTML", async () => {
+  it("uses PDFKit schema pipeline by default", async () => {
     buildTechnicalSheetPdfKitBuffer.mockResolvedValue(Buffer.from("%PDF-kit"))
 
     const { renderTechnicalSheetPdfBuffer } = await import(
       "@/lib/technical-sheet/render-technical-sheet-pdf-response"
     )
 
-    const buf = await renderTechnicalSheetPdfBuffer({
-      ...baseInput,
-      previewHtml: previewDoc,
-    })
+    const buf = await renderTechnicalSheetPdfBuffer(baseInput)
 
     expect(buf.toString("utf8")).toBe("%PDF-kit")
     expect(buildTechnicalSheetPdfKitBuffer).toHaveBeenCalled()
@@ -81,8 +95,10 @@ describe("renderTechnicalSheetPdfBuffer", () => {
     expect(renderPaginatedTechnicalSheetPdfFromInterpolated).not.toHaveBeenCalled()
   })
 
-  it("uses Chromium preview only when engine is chromium", async () => {
-    renderHtmlToPdfBuffer.mockResolvedValue(Buffer.from("%PDF-preview"))
+  it("uses schema Chromium pipeline when engine is chromium (never client HTML)", async () => {
+    renderPaginatedTechnicalSheetPdfFromInterpolated.mockResolvedValue(
+      Buffer.from("%PDF-schema-chromium")
+    )
 
     const { renderTechnicalSheetPdfBuffer } = await import(
       "@/lib/technical-sheet/render-technical-sheet-pdf-response"
@@ -91,16 +107,18 @@ describe("renderTechnicalSheetPdfBuffer", () => {
     const buf = await renderTechnicalSheetPdfBuffer({
       ...baseInput,
       engine: "chromium",
-      previewHtml: previewDoc,
     })
 
-    expect(buf.toString("utf8")).toBe("%PDF-preview")
-    expect(renderHtmlToPdfBuffer).toHaveBeenCalled()
+    expect(buf.toString("utf8")).toBe("%PDF-schema-chromium")
+    expect(renderPaginatedTechnicalSheetPdfFromInterpolated).toHaveBeenCalled()
+    expect(renderHtmlToPdfBuffer).not.toHaveBeenCalled()
     expect(buildTechnicalSheetPdfKitBuffer).not.toHaveBeenCalled()
   })
 
-  it("throws when Chromium preview fails instead of falling back to PDFKit", async () => {
-    renderHtmlToPdfBuffer.mockRejectedValue(new Error("chromium preview failed"))
+  it("throws when schema Chromium fails instead of falling back to PDFKit", async () => {
+    renderPaginatedTechnicalSheetPdfFromInterpolated.mockRejectedValue(
+      new Error("chromium schema failed")
+    )
 
     const { renderTechnicalSheetPdfBuffer } = await import(
       "@/lib/technical-sheet/render-technical-sheet-pdf-response"
@@ -110,9 +128,8 @@ describe("renderTechnicalSheetPdfBuffer", () => {
       renderTechnicalSheetPdfBuffer({
         ...baseInput,
         engine: "chromium",
-        previewHtml: previewDoc,
       })
-    ).rejects.toThrow("chromium preview failed")
+    ).rejects.toThrow("chromium schema failed")
 
     expect(buildTechnicalSheetPdfKitBuffer).not.toHaveBeenCalled()
   })

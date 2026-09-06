@@ -46,7 +46,6 @@ import {
 } from "@/lib/reportes/report-preview-html"
 import { buildReportTemplateContext } from "@/lib/reportes/report-template-context"
 import {
-  extractReportSummaryPayload,
   supportsSchemaReportPipeline,
 } from "@/lib/reportes/report-template-context-registry"
 import type { ReportTemplateConfig } from "@/lib/reportes/report-document-types"
@@ -556,26 +555,13 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
         return
       }
 
-      const summary = extractReportSummaryPayload(previewContext)
-      const totalFromContext =
-        typeof previewContext?.rowCount === "number"
-          ? previewContext.rowCount
-          : rows.length
       await downloadReportPdfFromServer({
         reportType: reportKey,
-        rows,
-        summary,
-        metadata: summary,
-        extras: previewContext,
-        totalCount: totalFromContext,
         fileBaseName: baseName,
         templateId: templateId.trim(),
-        reportName: template?.name ?? reportKey,
         appliedFilters: Object.fromEntries(
           Object.entries(appliedFilters).map(([key, value]) => [key, String(value ?? "")])
         ),
-        clientName: resolveClientName(String(appliedFilters.clientId ?? "")),
-        generatedAt: formatGeneratedAtForPdf(),
       })
       showSnackbar("success", "PDF generado correctamente.")
     } catch {
@@ -595,7 +581,6 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
     reportConfig?.pdfFormat,
     reportConfig?.pdfOrientation,
     reportConfig?.reportKey,
-    resolveClientName,
     showSnackbar,
     template?.name,
     templateId,

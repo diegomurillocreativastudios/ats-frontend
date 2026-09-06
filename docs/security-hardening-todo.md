@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 15 · In Progress 0 · Last ToDos 0 · To Do 9
+**Conteo:** Done 16 · In Progress 0 · Last ToDos 0 · To Do 8
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -61,6 +61,9 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
 - [x] **FE-SEC-014** — Logout con revocación demostrable de la familia refresh
   - Spec: `docs/LOGOUT_REFRESH_BACKEND_SPEC.md`; BFF → `POST /auth/logout` y `/auth/refresh`
   - Cookies siempre borradas aunque el API falle; backend: store + replay revoca familia
+- [x] **FE-SEC-015** — PDF/reportes: datos autoritativos server-side + cuotas
+  - Reportes: `POST` PDF vuelve a pedir filas al backend; ignora `rows`/`summary`/`extras` del cliente
+  - Ficha: sin `previewHtml`; Chromium solo esquema JSON del servidor; 413/429 reutilizados
 
 ---
 
@@ -80,8 +83,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-015** — PDF/reportes: datos autoritativos server-side + cuotas
-  - No confiar en filas/HTML del cliente; 413/429; cola si el trabajo es caro
 - [ ] **FE-SEC-016** — Redirects y OAuth: un solo helper interno + allowlist Google
   - Login usa `normalizeInternalPath`; state / Proof Key for Code Exchange en backend
 - [ ] **FE-SEC-017** — Supply chain: SHA de acciones, digest de imagen, Software Bill of Materials / provenance

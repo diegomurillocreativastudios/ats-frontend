@@ -17,34 +17,12 @@ export function getReportPdfServerEndpoint(reportType: string): string {
 export interface DownloadReportPdfFromServerInput {
   /** Identificador del reporte (`reportKey` del catálogo). */
   reportType: string
-  /** Filas crudas del reporte renderizado en pantalla. */
-  rows: unknown[]
-  /** Resumen estructurado (totales, periodo, cliente, etc.). */
-  summary?: Record<string, unknown> | null
-  /** Alias opcional de summary para compatibilidad con el endpoint. */
-  metadata?: Record<string, unknown> | null
-  /**
-   * Campos adicionales del payload del endpoint de datos (por ejemplo
-   * `summary`/`aiComparison`) que el builder server-side puede necesitar para
-   * hidratar el contexto del schema.
-   */
-  extras?: Record<string, unknown> | null
-  /** Total de registros según la vista previa actual. */
-  totalCount?: number | null
   /** Nombre base sin extensión; el servidor agrega `.pdf` si no lo trae. */
   fileBaseName?: string | null
   /** Id de la plantilla del reporte (Document template en backend). */
   templateId?: string | number | null
-  /** Nombre visible del reporte (catálogo). */
-  reportName?: string | null
-  /** Descripción del reporte. */
-  reportDescription?: string | null
-  /** Filtros aplicados en la vista (para contexto PDF). */
+  /** Filtros aplicados en la vista (el servidor vuelve a pedir las filas con estos). */
   appliedFilters?: Record<string, string> | null
-  /** Etiqueta de cliente resuelta en UI. */
-  clientName?: string | null
-  /** Fecha de generación mostrada en el PDF. */
-  generatedAt?: string | null
 }
 
 export interface DownloadReportPdfServerError extends Error {
@@ -93,7 +71,6 @@ async function extractJsonErrorMessage(
 
 function assertReportPdfHeaders(
   response: Response,
-  expectedRowsCount: number,
   reportType: string
 ): void {
   const engine = response.headers.get("X-Report-Pdf-Engine") ?? ""
@@ -128,16 +105,11 @@ function assertReportPdfHeaders(
       `ReportKey inconsistente: servidor=${reportKeyHeader}, cliente=${reportType}.`
     )
   }
-
-  if (rowsCountHeader !== String(expectedRowsCount)) {
-    throw new Error(
-      `Cantidad de filas inconsistente: servidor=${rowsCountHeader}, cliente=${expectedRowsCount}.`
-    )
-  }
 }
 
 /**
  * Descarga el PDF de un reporte llamando al endpoint server-side correspondiente.
+ * Solo envía filtros; el servidor carga filas autoritativas del backend (FE-SEC-015).
  */
 export async function downloadReportPdfFromServer(
   input: DownloadReportPdfFromServerInput
@@ -154,30 +126,17 @@ export async function downloadReportPdfFromServer(
   }
 
   const endpoint = getReportPdfServerEndpoint(reportType)
-  const rows = Array.isArray(input.rows) ? input.rows : []
-  const summary = input.summary ?? input.metadata ?? null
 
   const payload = {
     fileBaseName: input.fileBaseName ?? null,
-    reportType,
-    rows,
-    summary,
-    metadata: input.metadata ?? summary,
-    extras: input.extras ?? null,
-    totalCount: input.totalCount ?? rows.length,
     templateId: input.templateId ?? null,
-    reportName: input.reportName ?? null,
-    reportDescription: input.reportDescription ?? null,
     appliedFilters: input.appliedFilters ?? null,
-    clientName: input.clientName ?? null,
-    generatedAt: input.generatedAt ?? null,
   }
 
   console.info("[Report PDF] client payload", {
     reportType,
-    rowsCount: rows.length,
-    totalCount: payload.totalCount,
     endpoint,
+    filterKeys: Object.keys(payload.appliedFilters ?? {}),
   })
 
   const response = await fetch(endpoint, {
@@ -210,7 +169,7 @@ export async function downloadReportPdfFromServer(
     throw err
   }
 
-  assertReportPdfHeaders(response, rows.length, reportType)
+  assertReportPdfHeaders(response, reportType)
 
   const blob = await response.blob()
   triggerBlobDownload(blob, buildFileName(input.fileBaseName))

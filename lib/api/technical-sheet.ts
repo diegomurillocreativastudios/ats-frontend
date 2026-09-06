@@ -1,6 +1,5 @@
 import { apiClient, resolveBffUrl } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
-import { csrfHeaders } from "@/lib/auth/csrf-client"
 
 export interface TechnicalSheetPayload {
   generatedAtUtc?: string
@@ -86,8 +85,6 @@ export const buildTechnicalSheetNextPdfAppPath = (
 
 export interface DownloadTechnicalSheetPdfFromNextOptions {
   vacancyTitle?: string | null
-  /** HTML paginado de la vista previa; el PDF coincide con lo mostrado en pantalla. */
-  previewHtml?: string | null
 }
 
 /**
@@ -105,16 +102,9 @@ export const downloadTechnicalSheetPdfFromNextRoute = async (
   if (title) params.set("vacancyTitle", title)
   const qs = params.toString()
   const url = qs ? `${path}?${qs}` : path
-  const previewHtml = options?.previewHtml?.trim() ?? ""
-  const usePreview = previewHtml.length > 0
-  const headers = usePreview
-    ? await csrfHeaders({ "Content-Type": "application/json" })
-    : undefined
   const res = await fetch(url, {
-    method: usePreview ? "POST" : "GET",
+    method: "GET",
     credentials: "include",
-    headers,
-    body: usePreview ? JSON.stringify({ previewHtml }) : undefined,
   })
   if (!res.ok) {
     let message = `Error ${res.status}`

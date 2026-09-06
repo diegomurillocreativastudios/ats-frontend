@@ -45,7 +45,6 @@ import { safeParseReportSchema } from "@/lib/reportes/schema/report-schema"
 import { renderReportSchemaToHtml } from "@/lib/reportes/schema/render-report-schema-to-html"
 import {
   buildReportTemplateContext,
-  extractReportSummaryPayload,
   supportsSchemaReportPipeline,
 } from "@/lib/reportes/report-template-context-registry"
 import {
@@ -533,19 +532,12 @@ export function ReportDataViewClient({
     })
   }, [renderedHtml])
 
-  const buildSummaryPayload = useCallback(
-    (): Record<string, unknown> | null =>
-      extractReportSummaryPayload(previewContext),
-    [previewContext]
-  )
-
   const handleDownloadPdf = useCallback(async () => {
     setPdfActionError(null)
     setDownloadingPdf(true)
 
     const baseName = slugifyReportFileName(catalogItem.name || catalogItem.reportKey)
     const rows = response?.rows ?? []
-    const summary = buildSummaryPayload()
 
     if (rows.length === 0) {
       setPdfActionError(t("errors.pdfFailed"))
@@ -556,18 +548,9 @@ export function ReportDataViewClient({
     try {
       await downloadReportPdfFromServer({
         reportType: catalogItem.reportKey,
-        rows,
-        summary,
-        metadata: summary,
-        extras: response?.extras ?? null,
-        totalCount: response?.totalCount ?? rows.length,
         fileBaseName: baseName,
         templateId: linkedTemplateId || null,
-        reportName: catalogItem.name,
-        reportDescription: catalogItem.description ?? null,
         appliedFilters,
-        clientName: resolvedClientName,
-        generatedAt: previewMeta.generatedAt,
       })
     } catch (err: unknown) {
       console.error("[Report PDF] Download failed", err)
@@ -579,16 +562,11 @@ export function ReportDataViewClient({
     }
   }, [
     appliedFilters,
-    buildSummaryPayload,
-    catalogItem.description,
     catalogItem.name,
     catalogItem.reportKey,
     linkedTemplateId,
-    previewMeta.generatedAt,
-    resolvedClientName,
-    response?.extras,
     response?.rows,
-    response?.totalCount,
+    t,
   ])
 
   const canDownloadPdf =
