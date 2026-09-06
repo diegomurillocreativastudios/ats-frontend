@@ -43,16 +43,17 @@ export async function loginAsDemoUser(page: Page): Promise<void> {
 
   const redirectPattern =
     /\/(seleccion-portal|portal-rrhh|portal-candidato|portal-admin)/
-  const loginError = page.getByText(
-    /credenciales|contraseña|bloqueada|error al iniciar|connection/i
-  )
+  /** Error toast only (`role=alert`); success uses `role=status` and must not abort the race. */
+  const loginErrorSnackbar = page
+    .getByTestId("app-snackbar")
+    .and(page.getByRole("alert"))
 
   await Promise.race([
     page.waitForURL(redirectPattern, { timeout: LOGIN_REDIRECT_TIMEOUT_MS }),
-    loginError
+    loginErrorSnackbar
       .waitFor({ state: "visible", timeout: LOGIN_REDIRECT_TIMEOUT_MS })
       .then(async () => {
-        const message = (await loginError.first().textContent())?.trim()
+        const message = (await loginErrorSnackbar.textContent())?.trim()
         throw new Error(
           message
             ? `Login demo falló: ${message}`
