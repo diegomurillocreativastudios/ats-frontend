@@ -1,9 +1,11 @@
+import { BlockList, isIP } from "node:net"
 import type { HTTPRequest, Page } from "puppeteer-core"
 import { getPublicAppOrigin } from "@/lib/technical-sheet/server-public-app-url"
 
 /**
  * Política de red deny-by-default para Chromium PDF.
- * Solo `data:`, `about:blank` y https del origen público de la app.
+ * Solo `data:`, `about:blank`, `blob:` y http(s) del origen público de la app.
+ * Hosts/IPs se clasifican con `URL` + `node:net` (sin regex).
  */
 
 const BLOCKED_HOST_SUFFIXES = [
@@ -11,8 +13,62 @@ const BLOCKED_HOST_SUFFIXES = [
   "metadata.google",
 ] as const
 
+const BLOCKED_HOSTNAMES = new Set(["localhost", "metadata", "0.0.0.0"])
+
+const PRIVATE_NETWORK = createPrivateNetworkBlockList()
+
+function createPrivateNetworkBlockList(): BlockList {
+  const list = new BlockList()
+  // IPv4: this / unspecified / loopback / RFC1918 / link-local / CGNAT
+  list.addSubnet("0.0.0.0", 8, "ipv4")
+  list.addSubnet("10.0.0.0", 8, "ipv4")
+  list.addSubnet("127.0.0.0", 8, "ipv4")
+  list.addSubnet("169.254.0.0", 16, "ipv4")
+  list.addSubnet("172.16.0.0", 12, "ipv4")
+  list.addSubnet("192.168.0.0", 16, "ipv4")
+  list.addSubnet("100.64.0.0", 10, "ipv4")
+  // IPv6: loopback / link-local / unique-local
+  list.addAddress("::1", "ipv6")
+  list.addSubnet("fe80::", 10, "ipv6")
+  list.addSubnet("fc00::", 7, "ipv6")
+  return list
+}
+
 function normalizeHostname(hostname: string): string {
-  return hostname.trim().toLowerCase().replace(/\.$/, "").replace(/^\[|\]$/g, "")
+  const trimmed = hostname.trim().toLowerCase()
+  if (!trimmed) return ""
+  // URL.hostname may wrap IPv6 in brackets; strip trailing DNS root dot.
+  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+    return trimmed.slice(1, -1)
+  }
+  if (trimmed.endsWith(".")) return trimmed.slice(0, -1)
+  return trimmed
+}
+
+function isBlockedMetadataHost(hostname: string): boolean {
+  if (BLOCKED_HOSTNAMES.has(hostname)) return true
+  for (const suffix of BLOCKED_HOST_SUFFIXES) {
+    if (hostname === suffix || hostname.endsWith(`.${suffix}`)) return true
+  }
+  return false
+}
+
+function isBlockedIpLiteral(address: string): boolean {
+  const version = isIP(address)
+  if (version === 0) return false
+
+  if (version === 4) {
+    return PRIVATE_NETWORK.check(address, "ipv4")
+  }
+
+  // IPv4-mapped IPv6 (::ffff:a.b.c.d) — evaluate the embedded IPv4.
+  const mappedPrefix = "::ffff:"
+  if (address.startsWith(mappedPrefix)) {
+    const embedded = address.slice(mappedPrefix.length)
+    if (isIP(embedded) === 4) return isBlockedIpLiteral(embedded)
+  }
+
+  return PRIVATE_NETWORK.check(address, "ipv6")
 }
 
 /**
@@ -21,35 +77,8 @@ function normalizeHostname(hostname: string): string {
 export function isBlockedPdfChromiumHost(hostname: string): boolean {
   const h = normalizeHostname(hostname)
   if (!h) return true
-  if (h === "localhost" || h === "metadata" || h === "::1" || h === "0.0.0.0") {
-    return true
-  }
-  for (const suffix of BLOCKED_HOST_SUFFIXES) {
-    if (h === suffix || h.endsWith(`.${suffix}`)) return true
-  }
-
-  if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(h)) {
-    const parts = h.split(".").map((p) => Number(p))
-    if (parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return true
-    const [a, b] = parts
-    if (a === 10) return true
-    if (a === 127) return true
-    if (a === 0) return true
-    if (a === 169 && b === 254) return true
-    if (a === 172 && b >= 16 && b <= 31) return true
-    if (a === 192 && b === 168) return true
-    if (a === 100 && b >= 64 && b <= 127) return true
-    return false
-  }
-
-  // IPv6 link-local / unique-local / loopback (formas comunes)
-  if (h === "0:0:0:0:0:0:0:1") return true
-  if (h.startsWith("fe80:") || h.startsWith("fc") || h.startsWith("fd")) return true
-  if (h.startsWith("::ffff:")) {
-    const mapped = h.slice("::ffff:".length)
-    if (isBlockedPdfChromiumHost(mapped)) return true
-  }
-
+  if (isBlockedMetadataHost(h)) return true
+  if (isBlockedIpLiteral(h)) return true
   return false
 }
 

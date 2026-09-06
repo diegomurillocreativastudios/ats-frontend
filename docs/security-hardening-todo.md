@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 3 · In Progress 0 · Last ToDos 0 · To Do 21
+**Conteo:** Done 4 · In Progress 0 · Last ToDos 0 · To Do 20
 
 **Antes del primer PR:** autorización explícita; coordinar con backend la evidencia de **FE-SEC-007**. Un lote = un PR pequeño. No agrupar todo.
 
@@ -21,6 +21,10 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - Ficha y reportes solo esquema JSON; preview/PDF sin interpolar HTML de autor
   - `template-interpolate.ts`: sin `{{{...}}}` / sufijo `*Html`; valores siempre escapados
   - Detalle de reporte: PDF schema por servidor; sin host offscreen; Admin exige JSON en reportes/ficha
+- [x] **FE-SEC-003** — SSRF / red en Chromium PDF: denegar red por defecto
+  - Interceptor deny-by-default en `pdf-chromium-network-policy.ts` (pipeline + paginado)
+  - Allowlist con `URL` + origen público; hosts/IPs con `node:net` BlockList/`isIP` (sin regex)
+  - Cuotas/timeouts/semáforo en ruta ficha; renderer schema / servicio aislado en **FE-SEC-015**
 
 ---
 
@@ -40,9 +44,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-003** — SSRF / red en Chromium PDF: denegar red por defecto
-  - Interceptor en `html-to-pdf-chromium.ts`; parser allowlist (no regex); cuotas/timeout
-  - Renderer schema-driven o servicio aislado queda en **FE-SEC-015** / lote PDF
 - [ ] **FE-SEC-004** — Access token HttpOnly + Backend-for-Frontend
   - Hoy `httpOnly: false` + `document.cookie` + `Authorization: Bearer` desde el navegador
   - CSRF robusto es requisito previo o simultáneo (**FE-SEC-011**)
