@@ -27,6 +27,7 @@ import { resolveTechnicalSheetPdfEngine } from "@/lib/technical-sheet/technical-
 import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for-server"
 
 export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 /** Alineado al presupuesto Chromium (~45s setContent + margen). */
 export const maxDuration = 60
 

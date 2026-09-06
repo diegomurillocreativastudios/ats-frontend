@@ -6,7 +6,7 @@ import { getTechnicalSheetCandidateHeaderFacts } from "@/lib/technical-sheet/can
 import { DEFAULT_TECHNICAL_SHEET_SCHEMA } from "@/lib/technical-sheet/schema/technical-sheet-default-schema"
 import { renderTechnicalSheetSchemaToPdfKit } from "@/lib/technical-sheet/schema/render-technical-sheet-schema-to-pdfkit"
 import type { TechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema-types"
-import { buildTechnicalSheetTemplateContext } from "@/lib/technical-sheet/template-interpolate"
+import { buildTechnicalSheetTemplateContext } from "@/lib/technical-sheet/technical-sheet-template-context"
 import { tryLoadAppLogoRasterBufferForPdfKit } from "@/lib/technical-sheet/technical-sheet-pdf-logo"
 
 /**

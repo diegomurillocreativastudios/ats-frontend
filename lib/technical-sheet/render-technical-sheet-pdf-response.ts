@@ -2,12 +2,6 @@ import type { TechnicalSheetPayload } from "@/lib/api/technical-sheet"
 import { buildTechnicalSheetPdfKitBuffer } from "@/lib/technical-sheet/build-technical-sheet-pdfkit"
 import { resolveTechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema"
 import type { TechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema-types"
-import { buildTechnicalSheetTemplateContext } from "@/lib/technical-sheet/template-interpolate"
-import {
-  assertTechnicalSheetPdfHtmlSize,
-  isValidTechnicalSheetPreviewHtml,
-} from "@/lib/technical-sheet/validate-technical-sheet-preview-html"
-import { ensureTechnicalSheetPdfDocument } from "@/lib/technical-sheet/wrap-technical-sheet-html-for-pdf"
 import type { TemplateListItem } from "@/lib/templates/technical-sheet-template"
 import { findTechnicalSheetDocumentTemplate } from "@/lib/templates/technical-sheet-template"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
@@ -68,11 +62,15 @@ async function renderFromSchemaChromium(input: RenderTechnicalSheetPdfInput): Pr
     { buildVisibleLogoUrlForTechnicalSheet },
     { renderTechnicalSheetSchemaToHtml },
     { renderPaginatedTechnicalSheetPdfFromInterpolated },
+    { buildTechnicalSheetTemplateContext },
+    { assertTechnicalSheetPdfHtmlSize },
   ] = await Promise.all([
     import("@/lib/technical-sheet/resolve-visible-logo-data-uri"),
     import("@/lib/technical-sheet/server-public-app-url"),
     import("@/lib/technical-sheet/schema/render-technical-sheet-schema-to-html"),
     import("@/lib/technical-sheet/technical-sheet-pdf-render-paginated"),
+    import("@/lib/technical-sheet/technical-sheet-template-context"),
+    import("@/lib/technical-sheet/validate-technical-sheet-preview-html"),
   ])
 
   const schema = resolveSheetSchema(input)
@@ -103,10 +101,14 @@ async function renderFromPreviewHtml(previewHtml: string): Promise<Buffer> {
     { sanitizeTechnicalSheetPreviewHtml },
     { inlineVisibleLogoInPreviewHtml },
     { renderHtmlToPdfBuffer },
+    { ensureTechnicalSheetPdfDocument },
+    { assertTechnicalSheetPdfHtmlSize },
   ] = await Promise.all([
     import("@/lib/technical-sheet/sanitize-technical-sheet-preview-html"),
     import("@/lib/technical-sheet/inline-preview-html-images-for-pdf"),
     import("@/lib/technical-sheet/html-to-pdf-chromium"),
+    import("@/lib/technical-sheet/wrap-technical-sheet-html-for-pdf"),
+    import("@/lib/technical-sheet/validate-technical-sheet-preview-html"),
   ])
 
   const sanitized = sanitizeTechnicalSheetPreviewHtml(previewHtml)
@@ -127,11 +129,13 @@ export async function renderTechnicalSheetPdfBuffer(
   }
 
   const previewHtml = input.previewHtml?.trim() ?? ""
+  const [{ sanitizeTechnicalSheetPreviewHtml }, { isValidTechnicalSheetPreviewHtml }] =
+    await Promise.all([
+      import("@/lib/technical-sheet/sanitize-technical-sheet-preview-html"),
+      import("@/lib/technical-sheet/validate-technical-sheet-preview-html"),
+    ])
   const sanitizedPreview =
-    previewHtml !== ""
-      ? (await import("@/lib/technical-sheet/sanitize-technical-sheet-preview-html"))
-          .sanitizeTechnicalSheetPreviewHtml(previewHtml)
-      : ""
+    previewHtml !== "" ? sanitizeTechnicalSheetPreviewHtml(previewHtml) : ""
   const hasValidPreview =
     sanitizedPreview !== "" && isValidTechnicalSheetPreviewHtml(sanitizedPreview)
 

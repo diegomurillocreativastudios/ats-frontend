@@ -17,6 +17,7 @@ const nextConfig = {
   // breaks fs.readFileSync(.../browser/default-stylesheet.css) during "Collecting page data".
   serverExternalPackages: [
     "pdfkit",
+    "sharp",
     "puppeteer-core",
     "@sparticuz/chromium",
     "isomorphic-dompurify",

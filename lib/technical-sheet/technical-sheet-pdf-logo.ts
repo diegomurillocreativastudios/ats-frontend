@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
-import sharp from "sharp"
 import { APP_LOGO_SVG_FILE } from "@/lib/app-brand"
 
 const LOGO_REL_SEGMENTS = ["public", APP_LOGO_SVG_FILE] as const
@@ -26,6 +25,7 @@ export function tryLoadVisibleLogoDataUriForTechnicalSheetPdf(): string | null {
 
 /**
  * Rasteriza el SVG en memoria para PDFKit (no escribe PNG en disco).
+ * `sharp` se carga bajo demanda para no tumbar el cold start serverless.
  */
 export async function tryLoadAppLogoRasterBufferForPdfKit(
   widthPx = 64
@@ -33,6 +33,7 @@ export async function tryLoadAppLogoRasterBufferForPdfKit(
   const svg = readAppLogoSvgBuffer()
   if (!svg) return null
   try {
+    const { default: sharp } = await import("sharp")
     return await sharp(svg).resize(widthPx, widthPx).png().toBuffer()
   } catch {
     return null
