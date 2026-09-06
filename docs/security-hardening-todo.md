@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 14 · In Progress 0 · Last ToDos 0 · To Do 10
+**Conteo:** Done 15 · In Progress 0 · Last ToDos 0 · To Do 9
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -58,6 +58,9 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - BFF: tope de cuerpo por ruta (5/10/15/20 MB); sin `formData()` sin límite
   - Documentos candidato: reenvío de buffer acotado; SVG de logos no se pinta como data URI
   - Barra autoritativa / AV / cuarentena siguen en backend (BE-SEC-016)
+- [x] **FE-SEC-014** — Logout con revocación demostrable de la familia refresh
+  - Spec: `docs/LOGOUT_REFRESH_BACKEND_SPEC.md`; BFF → `POST /auth/logout` y `/auth/refresh`
+  - Cookies siempre borradas aunque el API falle; backend: store + replay revoca familia
 
 ---
 
@@ -77,8 +80,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-014** — Logout con revocación demostrable de la familia refresh
-  - Borrar cookies aunque el backend falle; replay de refresh revoca familia
 - [ ] **FE-SEC-015** — PDF/reportes: datos autoritativos server-side + cuotas
   - No confiar en filas/HTML del cliente; 413/429; cola si el trabajo es caro
 - [ ] **FE-SEC-016** — Redirects y OAuth: un solo helper interno + allowlist Google
