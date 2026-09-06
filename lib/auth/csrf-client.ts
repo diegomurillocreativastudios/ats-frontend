@@ -1,5 +1,5 @@
 import { AUTH_COOKIES, getCsrfToken } from "@/lib/auth"
-import { CSRF_HEADER } from "@/lib/auth/csrf"
+import { CSRF_HEADER } from "@/lib/auth/csrf-constants"
 
 let inflight: Promise<string | null> | null = null
 

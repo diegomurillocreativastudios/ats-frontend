@@ -112,7 +112,10 @@ describe("buildVacancyProgressReportPdfKitBuffer", () => {
 
   it("omits the debug footer marker in production", async () => {
     const previousNodeEnv = process.env.NODE_ENV
-    process.env.NODE_ENV = "production"
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: "production",
+      configurable: true,
+    })
 
     try {
       const buffer = await buildVacancyProgressReportPdfKitBuffer({
@@ -130,7 +133,10 @@ describe("buildVacancyProgressReportPdfKitBuffer", () => {
 
       expect(buffer.toString("latin1")).not.toContain(FOOTER_DEBUG_MARKER)
     } finally {
-      process.env.NODE_ENV = previousNodeEnv
+      Object.defineProperty(process.env, "NODE_ENV", {
+        value: previousNodeEnv,
+        configurable: true,
+      })
     }
   })
 

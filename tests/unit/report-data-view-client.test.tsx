@@ -88,7 +88,7 @@ describe("ReportDataViewClient", () => {
         vi.mocked(fetchTemplateById).mockReset()
 
         vi.mocked(listRecruiterCompanies).mockResolvedValue([
-            { id: "company-1", name: "Acme Corp" },
+            { id: "company-1", name: "Acme Corp", isActive: true },
         ])
         vi.mocked(listRecruiterVacancies).mockResolvedValue([])
         vi.mocked(fetchTemplateById).mockResolvedValue(null)

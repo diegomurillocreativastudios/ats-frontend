@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 7 · In Progress 0 · Last ToDos 0 · To Do 17
+**Conteo:** Done 8 · In Progress 0 · Last ToDos 0 · To Do 16
 
 **Antes del primer PR:** autorización explícita; coordinar con backend la evidencia de **FE-SEC-007**. Un lote = un PR pequeño. No agrupar todo.
 
@@ -33,6 +33,9 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - Gate en `proxy.ts` para `POST`/`PUT`/`PATCH`/`DELETE` bajo `/api/*`; bootstrap `GET /api/auth/csrf`
 - [x] **FE-SEC-021** — `apiClient` no adjunta bearer a URLs absolutas
   - `resolveBffUrl` rechaza `http(s)://`; el cliente ya no adjunta Authorization
+- [x] **FE-SEC-005** — Parchear Next.js / `ws` y transitivas productivas
+  - `next` / `eslint-config-next` 16.3.4; `puppeteer-core` / `puppeteer` 25.10.0 (`ws` 8.21.3)
+  - `npm audit --omit=dev` sin High/Critical; CSRF header en `csrf-constants` (sin `node:crypto` en cliente)
 
 ---
 
@@ -52,8 +55,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-005** — Parchear Next.js / `ws` y transitivas productivas
-  - PR dedicado de lockfile; `npm audit --omit=dev` sin High/Critical abiertos
 - [ ] **FE-SEC-006** — Runtime Node Long Term Support (hoy imagen `node:20`, End of Life 2026-04-30)
   - Preferir 24; fijar `engines` e imagen por digest
 - [ ] **FE-SEC-007** — Verificar autorización multiempresa / ownership en backend

@@ -1,9 +1,12 @@
 import { timingSafeEqual, randomBytes } from "node:crypto"
 import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
+import {
+  CSRF_COOKIE_MAX_AGE,
+  CSRF_HEADER,
+} from "@/lib/auth/csrf-constants"
 
-export const CSRF_HEADER = "x-csrf-token"
-export const CSRF_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+export { CSRF_COOKIE_MAX_AGE, CSRF_HEADER }
 
 const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"])
 

@@ -36,7 +36,7 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const csrf = assertMutationCsrf(request)
-  if (!csrf.ok) {
+  if (csrf.ok === false) {
     return NextResponse.json(
       { message: csrf.message },
       { status: csrf.status }

@@ -64,7 +64,7 @@ describe("assertMutationCsrf", () => {
     })
     const result = assertMutationCsrf(req)
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.status).toBe(403)
+    if (result.ok === false) expect(result.status).toBe(403)
   })
 
   it("rejects missing CSRF token", () => {
