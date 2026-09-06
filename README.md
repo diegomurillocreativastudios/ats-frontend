@@ -13,10 +13,10 @@ candidatos, entrevistas, evaluaciones, comunicaciones y contratación.
 ---
 
 ## Requisitos
-- **Node.js** recomendado: **18+** (ideal 20+)
+- **Node.js** **24** (Long Term Support; ver `.nvmrc` y `package.json` → `engines`)
 - **npm** (o tu gestor favorito: pnpm/yarn, si el repo ya lo usa)
 
-> Tip: si ya existe un `.nvmrc`, usá esa versión de Node para evitar problemas.
+> Tip: `nvm use` / `fnm use` lee `.nvmrc` y evita desvíos de versión.
 
 ---
 

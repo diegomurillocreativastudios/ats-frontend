@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 8 · In Progress 0 · Last ToDos 0 · To Do 16
+**Conteo:** Done 9 · In Progress 0 · Last ToDos 0 · To Do 15
 
 **Antes del primer PR:** autorización explícita; coordinar con backend la evidencia de **FE-SEC-007**. Un lote = un PR pequeño. No agrupar todo.
 
@@ -36,6 +36,9 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
 - [x] **FE-SEC-005** — Parchear Next.js / `ws` y transitivas productivas
   - `next` / `eslint-config-next` 16.3.4; `puppeteer-core` / `puppeteer` 25.10.0 (`ws` 8.21.3)
   - `npm audit --omit=dev` sin High/Critical; CSRF header en `csrf-constants` (sin `node:crypto` en cliente)
+- [x] **FE-SEC-006** — Runtime Node Long Term Support (Node 24)
+  - `Dockerfile` base/runner: `node:24-bookworm-slim@sha256:…`; `engines`: `>=24 <25`; `.nvmrc` 24
+  - CI ya en 24; test de regresión `node-lts-runtime-pin.test.ts`
 
 ---
 
@@ -55,8 +58,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-006** — Runtime Node Long Term Support (hoy imagen `node:20`, End of Life 2026-04-30)
-  - Preferir 24; fijar `engines` e imagen por digest
 - [ ] **FE-SEC-007** — Verificar autorización multiempresa / ownership en backend
   - El frontend no es el control; IDs y `sessionStorage.companyId` son manipulables
   - Cierre: matriz 403/404 dos tenants × roles × documentos/PDF. Quitar storage si sobra
