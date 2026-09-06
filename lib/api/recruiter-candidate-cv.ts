@@ -1,4 +1,4 @@
-import { getAccessToken } from "@/lib/auth"
+import { resolveBffUrl } from "@/lib/api"
 
 export type RecruiterCandidateCvErrorCode = "unavailable" | "failed"
 
@@ -37,8 +37,8 @@ export function parseContentDispositionFilename(
 }
 
 /**
- * Descarga el CV de un candidato vía GET /api/recruiter/candidates/{id}/cv.
- * Requiere Bearer; 404 implica CV/acceso no disponible (sin filtrar existencia cross-empresa).
+ * Descarga el CV de un candidato vía BFF (cookie HttpOnly → Bearer en servidor).
+ * 404 implica CV/acceso no disponible (sin filtrar existencia cross-empresa).
  */
 export async function downloadRecruiterCandidateCv(
   candidateProfileId: string
@@ -48,12 +48,12 @@ export async function downloadRecruiterCandidateCv(
     throw new RecruiterCandidateCvError("Missing candidate id", 400, "failed")
   }
 
-  const token = getAccessToken()
-  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "")
-  const url = `${baseUrl}/api/recruiter/candidates/${encodeURIComponent(id)}/cv`
+  const url = resolveBffUrl(
+    `/api/recruiter/candidates/${encodeURIComponent(id)}/cv`
+  )
   const res = await fetch(url, {
     method: "GET",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: "include",
   })
 
   if (!res.ok) {

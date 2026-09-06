@@ -18,6 +18,7 @@ import ProductBrand from "@/components/branding/ProductBrand"
 import LanguageSwitcher from "@/components/language-switcher"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { csrfHeaders } from "@/lib/auth/csrf-client"
 import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
 import {
   getSsoErrorTranslationKey,
@@ -171,7 +172,7 @@ export default function IniciarSesion() {
     try {
       const res = await fetch(`${getOrigin()}/api/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await csrfHeaders({ "Content-Type": "application/json" }),
         credentials: "include",
         body: JSON.stringify({
           email: formData.email,

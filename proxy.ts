@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
+import { assertMutationCsrf } from "@/lib/auth/csrf"
 import { isPublicPath } from "@/lib/auth/public-paths"
 import {
   PORTAL_HOME_HREF,
@@ -33,6 +34,15 @@ function getSessionRoleRaw(request: NextRequest): string | null {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  const csrf = assertMutationCsrf(request)
+  if (!csrf.ok) {
+    return NextResponse.json(
+      { message: csrf.message },
+      { status: csrf.status }
+    )
+  }
+
   const hasToken = Boolean(request.cookies.get(AUTH_COOKIES.access)?.value)
   const rawRole = getSessionRoleRaw(request)
   const isCandidate = isCandidateRole(rawRole)

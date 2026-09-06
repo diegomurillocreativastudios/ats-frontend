@@ -1,6 +1,6 @@
-import { apiClient } from "@/lib/api"
+import { apiClient, resolveBffUrl } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
-import { getAccessToken } from "@/lib/auth"
+import { csrfHeaders } from "@/lib/auth/csrf-client"
 
 export interface TechnicalSheetPayload {
   generatedAtUtc?: string
@@ -18,8 +18,6 @@ export interface TechnicalSheetPayload {
   interviewList?: unknown[]
   [key: string]: unknown
 }
-
-const getBaseUrl = () => (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "")
 
 export const buildTechnicalSheetBasePath = (
   vacancyId: string,
@@ -59,24 +57,18 @@ const triggerBlobDownload = (blob: Blob, filename: string) => {
   URL.revokeObjectURL(objUrl)
 }
 
-const fetchBinaryAuthenticated = async (url: string): Promise<Response> => {
-  const token = getAccessToken()
-  return fetch(url, {
-    method: "GET",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    credentials: "omit",
-  })
-}
-
 export const downloadTechnicalSheetHtml = async (
   vacancyId: string,
   candidateProfileId: string,
   filename: string
 ): Promise<void> => {
-  const base = getBaseUrl()
-  const path = `${buildTechnicalSheetBasePath(vacancyId, candidateProfileId)}.html?download=1`
-  const url = `${base}${path}`
-  const res = await fetchBinaryAuthenticated(url)
+  const url = resolveBffUrl(
+    `${buildTechnicalSheetBasePath(vacancyId, candidateProfileId)}.html?download=1`
+  )
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  })
   if (!res.ok) {
     const err = new Error(`HTML ${res.status}`) as Error & { status: number }
     err.status = res.status
@@ -115,10 +107,13 @@ export const downloadTechnicalSheetPdfFromNextRoute = async (
   const url = qs ? `${path}?${qs}` : path
   const previewHtml = options?.previewHtml?.trim() ?? ""
   const usePreview = previewHtml.length > 0
+  const headers = usePreview
+    ? await csrfHeaders({ "Content-Type": "application/json" })
+    : undefined
   const res = await fetch(url, {
     method: usePreview ? "POST" : "GET",
-    credentials: "same-origin",
-    headers: usePreview ? { "Content-Type": "application/json" } : undefined,
+    credentials: "include",
+    headers,
     body: usePreview ? JSON.stringify({ previewHtml }) : undefined,
   })
   if (!res.ok) {

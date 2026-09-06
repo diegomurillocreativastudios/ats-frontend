@@ -71,7 +71,7 @@ import {
   type CandidateProfileSaveBody,
 } from "@/lib/candidate-profile"
 import { resolveHeadlineForDisplay } from "@/lib/candidate-profile-hydrate"
-import { getAccessToken } from "@/lib/auth"
+import { resolveBffUrl } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv"
 import { getInitials } from "@/lib/getInitials"
@@ -435,12 +435,12 @@ export function CandidateSelfProfileView({
     setDownloadError(null)
     try {
       if (path) {
-        const token = getAccessToken()
-        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "")
-        const url = `${baseUrl}/api/Storage/files/${encodeURIComponent(path)}`
+        const url = resolveBffUrl(
+          `/api/Storage/files/${encodeURIComponent(path)}`
+        )
         const res = await fetch(url, {
           method: "GET",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          credentials: "include",
         })
         if (!res.ok) throw new Error(t("download.cvError"))
         const blob = await res.blob()

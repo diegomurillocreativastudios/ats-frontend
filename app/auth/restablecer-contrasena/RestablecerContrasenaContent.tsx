@@ -18,6 +18,7 @@ import ProductBrand from "@/components/branding/ProductBrand"
 import LanguageSwitcher from "@/components/language-switcher"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { csrfHeaders } from "@/lib/auth/csrf-client"
 
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : ""
@@ -100,7 +101,8 @@ export default function RestablecerContrasenaContent() {
     try {
       const res = await fetch(`${getOrigin()}/api/auth/reset-password`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await csrfHeaders({ "Content-Type": "application/json" }),
+        credentials: "include",
         body: JSON.stringify({ password: formData.password, token }),
       })
 

@@ -1,27 +1,29 @@
-import { NextResponse } from 'next/server';
-import { AUTH_COOKIES } from '@/lib/auth';
+import { NextResponse } from "next/server"
+import { AUTH_COOKIES } from "@/lib/auth"
+import { clearCsrfCookie } from "@/lib/auth/csrf"
 
 export async function POST() {
-  const response = NextResponse.json({ success: true });
+  const response = NextResponse.json({ success: true })
 
-  response.cookies.set(AUTH_COOKIES.access, '', {
+  response.cookies.set(AUTH_COOKIES.access, "", {
     path: AUTH_COOKIES.path,
     maxAge: 0,
-  });
-  response.cookies.set(AUTH_COOKIES.expires, '', {
+  })
+  response.cookies.set(AUTH_COOKIES.expires, "", {
     path: AUTH_COOKIES.path,
     maxAge: 0,
-  });
-  response.cookies.set(AUTH_COOKIES.refresh, '', {
+  })
+  response.cookies.set(AUTH_COOKIES.refresh, "", {
     path: AUTH_COOKIES.path,
     maxAge: 0,
-  });
+  })
   if (AUTH_COOKIES.user) {
-    response.cookies.set(AUTH_COOKIES.user, '', {
+    response.cookies.set(AUTH_COOKIES.user, "", {
       path: AUTH_COOKIES.path,
       maxAge: 0,
-    });
+    })
   }
+  clearCsrfCookie(response)
 
-  return response;
+  return response
 }

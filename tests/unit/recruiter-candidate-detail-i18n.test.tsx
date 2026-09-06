@@ -53,7 +53,16 @@ vi.mock("@/components/candidato/candidate-salary-expectation-card", () => ({
 }))
 
 vi.mock("@/lib/auth", () => ({
-  getAccessToken: () => "token",
+  getAccessToken: () => null,
+  getCurrentUser: () => null,
+  AUTH_COOKIES: {
+    access: "ats_access_token",
+    refresh: "ats_refresh_token",
+    expires: "ats_token_expires",
+    user: "ats_user",
+    csrf: "ats_csrf",
+    path: "/",
+  },
 }))
 
 vi.mock("next-intl/server", async () => {

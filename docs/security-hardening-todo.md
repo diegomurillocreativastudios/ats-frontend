@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 4 · In Progress 0 · Last ToDos 0 · To Do 20
+**Conteo:** Done 7 · In Progress 0 · Last ToDos 0 · To Do 17
 
 **Antes del primer PR:** autorización explícita; coordinar con backend la evidencia de **FE-SEC-007**. Un lote = un PR pequeño. No agrupar todo.
 
@@ -25,6 +25,14 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - Interceptor deny-by-default en `pdf-chromium-network-policy.ts` (pipeline + paginado)
   - Allowlist con `URL` + origen público; hosts/IPs con `node:net` BlockList/`isIP` (sin regex)
   - Cuotas/timeouts/semáforo en ruta ficha; renderer schema / servicio aislado en **FE-SEC-015**
+- [x] **FE-SEC-004** — Access token HttpOnly + Backend-for-Frontend
+  - `ats_access_token` HttpOnly; `apiClient` → `/api/bff` same-origin con cookies
+  - Sin `getAccessToken` / Bearer en el browser; CV/storage/HTML vía puente
+- [x] **FE-SEC-011** — Cross-Site Request Forgery en mutaciones cookie-auth
+  - Origin allowlist + Fetch Metadata + token double-submit (`ats_csrf` / `X-CSRF-Token`)
+  - Gate en `proxy.ts` para `POST`/`PUT`/`PATCH`/`DELETE` bajo `/api/*`; bootstrap `GET /api/auth/csrf`
+- [x] **FE-SEC-021** — `apiClient` no adjunta bearer a URLs absolutas
+  - `resolveBffUrl` rechaza `http(s)://`; el cliente ya no adjunta Authorization
 
 ---
 
@@ -44,9 +52,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-004** — Access token HttpOnly + Backend-for-Frontend
-  - Hoy `httpOnly: false` + `document.cookie` + `Authorization: Bearer` desde el navegador
-  - CSRF robusto es requisito previo o simultáneo (**FE-SEC-011**)
 - [ ] **FE-SEC-005** — Parchear Next.js / `ws` y transitivas productivas
   - PR dedicado de lockfile; `npm audit --omit=dev` sin High/Critical abiertos
 - [ ] **FE-SEC-006** — Runtime Node Long Term Support (hoy imagen `node:20`, End of Life 2026-04-30)
@@ -60,8 +65,6 @@ _(vacío)_
   - `lib/server-session-user.ts`, `/api/auth/me`, `proxy.ts`; backend caído → 401/503
 - [ ] **FE-SEC-010** — Headers defensivos + Content Security Policy Report-Only → enforcement
   - `poweredByHeader: false`; nosniff / referrer / frame-ancestors; HSTS solo tras inventario HTTPS
-- [ ] **FE-SEC-011** — Cross-Site Request Forgery en mutaciones cookie-auth
-  - Origin allowlist + Fetch Metadata + token; cubre refresh/logout/documentos/PDF
 - [ ] **FE-SEC-012** — Uploads: allowlist / magic bytes / tamaño / cuota en servidor
   - BFF no hace `formData()` sin límite; SVG de logos bloqueado o aislado
   - Barra autoritativa en backend; AV/cuarentena alineada con BE-SEC-016
@@ -78,7 +81,6 @@ _(vacío)_
 - [ ] **FE-SEC-019** — Controles de IA en backend: esquema, prompt injection, humano en el loop
   - Frontend ya renderiza texto; no acciones solo por salida del modelo
 - [ ] **FE-SEC-020** — Data Transfer Object mínimo de documentos (sin `storagePath` / `contentSha256`)
-- [ ] **FE-SEC-021** — `apiClient` no adjunta bearer a URLs absolutas
 - [ ] **FE-SEC-022** — Errores genéricos, logs redacted, lint/test como gate
   - Sin excepciones en query; `global-error.tsx`; baseline verde
 - [ ] **FE-SEC-023** — Quitar artefactos legacy: `chromium-pack.tar`, `vercel.json` si Cloud Run es único, header size 64 KiB

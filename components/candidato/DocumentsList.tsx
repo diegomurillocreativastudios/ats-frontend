@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { FileText, Download, Loader2, Trash2 } from "lucide-react";
 import type { CandidateDocument } from "@/lib/candidate-documents";
-import { getAccessToken } from "@/lib/auth";
+import { resolveBffUrl } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/api-error";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
 
@@ -50,12 +50,12 @@ export default function DocumentsList({
     setDownloadingId(doc.id);
     setDownloadError(null);
     try {
-      const token = getAccessToken();
-      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-      const url = `${baseUrl}/api/Storage/files/${encodeURIComponent(path)}`;
+      const url = resolveBffUrl(
+        `/api/Storage/files/${encodeURIComponent(path)}`
+      );
       const res = await fetch(url, {
         method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: "include",
       });
       if (!res.ok) throw new Error(t("downloadError"));
       const blob = await res.blob();

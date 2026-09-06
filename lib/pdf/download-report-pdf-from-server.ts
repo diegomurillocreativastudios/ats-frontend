@@ -1,4 +1,5 @@
 import { getApiErrorMessage } from "@/lib/api-error"
+import { csrfHeaders } from "@/lib/auth/csrf-client"
 import {
   REPORT_PDF_ENGINE,
   reportPdfTemplateVersion,
@@ -181,8 +182,11 @@ export async function downloadReportPdfFromServer(
 
   const response = await fetch(endpoint, {
     method: "POST",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+    credentials: "include",
+    headers: await csrfHeaders({
+      "Content-Type": "application/json",
+      Accept: "application/pdf",
+    }),
     body: JSON.stringify(payload),
   })
 

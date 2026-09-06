@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
+import {
+  generateCsrfToken,
+  setCsrfCookie,
+} from "@/lib/auth/csrf"
 import { fetchBackendSessionUser } from "@/lib/fetch-backend-session-user"
 import { isInternalPath } from "@/lib/auth/internal-path"
 
@@ -132,7 +136,7 @@ export async function createAuthSessionResponse(
     maxAge: expiresIn,
     sameSite: "lax",
     secure: isProd,
-    httpOnly: false,
+    httpOnly: true,
   })
 
   response.cookies.set(AUTH_COOKIES.expires, String(expiresAt), {
@@ -159,6 +163,11 @@ export async function createAuthSessionResponse(
     sameSite: "lax",
     secure: isProd,
     httpOnly: false,
+  })
+
+  setCsrfCookie(response, generateCsrfToken(), {
+    maxAge: Math.max(expiresIn, 60 * 60 * 24 * 7),
+    isProd,
   })
 
   return response

@@ -19,6 +19,7 @@ import {
   resolveSsoExchangeCode,
   stripSsoCodeFromLocationUrl,
 } from "@/lib/auth/sso-exchange-code"
+import { csrfHeaders } from "@/lib/auth/csrf-client"
 
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : ""
@@ -73,7 +74,7 @@ export default function SsoSuccessContent() {
       try {
         const res = await fetch(`${getOrigin()}/api/auth/sso/exchange`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: await csrfHeaders({ "Content-Type": "application/json" }),
           credentials: "include",
           body: JSON.stringify({ code: hashCode }),
         })

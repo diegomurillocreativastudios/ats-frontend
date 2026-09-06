@@ -5,6 +5,14 @@ import {
   reportPdfTemplateVersion,
 } from "@/lib/reportes/report-pdf-constants"
 
+vi.mock("@/lib/auth/csrf-client", () => ({
+  csrfHeaders: vi.fn(async (extra?: Record<string, string>) => ({
+    ...(extra ?? {}),
+    "x-csrf-token": "test-csrf",
+  })),
+  ensureCsrfToken: vi.fn(async () => "test-csrf"),
+}))
+
 const originalFetch = globalThis.fetch
 const originalCreateObjectURL = globalThis.URL.createObjectURL
 const originalRevokeObjectURL = globalThis.URL.revokeObjectURL

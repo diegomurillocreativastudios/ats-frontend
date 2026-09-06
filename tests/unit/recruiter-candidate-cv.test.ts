@@ -6,10 +6,6 @@ import {
   RecruiterCandidateCvError,
 } from "@/lib/api/recruiter-candidate-cv"
 
-vi.mock("@/lib/auth", () => ({
-  getAccessToken: () => "test-token",
-}))
-
 describe("parseContentDispositionFilename", () => {
   it("parses quoted filename", () => {
     expect(
@@ -32,20 +28,17 @@ describe("parseContentDispositionFilename", () => {
 
 describe("downloadRecruiterCandidateCv", () => {
   const originalFetch = globalThis.fetch
-  const originalEnv = process.env.NEXT_PUBLIC_API_URL
 
   beforeEach(() => {
-    process.env.NEXT_PUBLIC_API_URL = "https://api.example.com"
     document.body.innerHTML = ""
   })
 
   afterEach(() => {
     globalThis.fetch = originalFetch
-    process.env.NEXT_PUBLIC_API_URL = originalEnv
     vi.restoreAllMocks()
   })
 
-  it("requests CV with Bearer auth and triggers download", async () => {
+  it("requests CV via same-origin BFF with credentials and triggers download", async () => {
     const blob = new Blob(["pdf-bytes"], { type: "application/pdf" })
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -79,10 +72,10 @@ describe("downloadRecruiterCandidateCv", () => {
     await downloadRecruiterCandidateCv("cand-42")
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.example.com/api/recruiter/candidates/cand-42/cv",
+      "/api/bff/api/recruiter/candidates/cand-42/cv",
       {
         method: "GET",
-        headers: { Authorization: "Bearer test-token" },
+        credentials: "include",
       }
     )
     expect(anchor.download).toBe("cv-ana.pdf")

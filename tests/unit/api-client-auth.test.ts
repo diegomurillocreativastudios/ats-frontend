@@ -1,28 +1,48 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-vi.mock("@/lib/auth", () => ({
-  getAccessToken: vi.fn(() => "test-access-token"),
+vi.mock("@/lib/auth/csrf-client", () => ({
+  csrfHeaders: vi.fn(async (extra?: Record<string, string>) => ({
+    ...(extra ?? {}),
+    "x-csrf-token": "test-csrf-token",
+  })),
+  ensureCsrfToken: vi.fn(async () => "test-csrf-token"),
 }))
 
-import { getAccessToken } from "@/lib/auth"
-import { apiClient, type ApiClientError } from "@/lib/api"
+import { apiClient, resolveBffUrl, type ApiClientError } from "@/lib/api"
 
-describe("apiClient auth hardening", () => {
+describe("apiClient auth hardening (HttpOnly BFF)", () => {
   const originalFetch = globalThis.fetch
-  const originalEnv = process.env.NEXT_PUBLIC_API_URL
 
   beforeEach(() => {
-    process.env.NEXT_PUBLIC_API_URL = "https://api.example.com"
-    vi.mocked(getAccessToken).mockReturnValue("test-access-token")
+    vi.stubGlobal(
+      "window",
+      Object.assign(globalThis.window ?? {}, {
+        location: { origin: "http://localhost:3000", href: "" },
+      })
+    )
   })
 
   afterEach(() => {
     globalThis.fetch = originalFetch
-    process.env.NEXT_PUBLIC_API_URL = originalEnv
     vi.restoreAllMocks()
+    vi.unstubAllGlobals()
   })
 
-  it("adjunta Authorization Bearer cuando hay token", async () => {
+  it("resuelve rutas relativas al puente /api/bff", () => {
+    expect(resolveBffUrl("/api/Templates")).toBe("/api/bff/api/Templates")
+    expect(resolveBffUrl("register")).toBe("/api/bff/register")
+    expect(resolveBffUrl("/api/x.html?download=1")).toBe(
+      "/api/bff/api/x.html?download=1"
+    )
+  })
+
+  it("rechaza URLs absolutas (FE-SEC-021)", () => {
+    expect(() => resolveBffUrl("https://evil.example/api")).toThrow(
+      /URLs absolutas/
+    )
+  })
+
+  it("no adjunta Authorization Bearer; usa credentials include", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -34,9 +54,29 @@ describe("apiClient auth hardening", () => {
     await apiClient.get("/api/Templates")
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe("/api/bff/api/Templates")
+    expect(init.credentials).toBe("include")
     const headers = init.headers as Record<string, string>
-    expect(headers.Authorization).toBe("Bearer test-access-token")
+    expect(headers.Authorization).toBeUndefined()
+  })
+
+  it("adjunta X-CSRF-Token en mutaciones", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => "application/json" },
+      json: async () => ({ ok: true }),
+    })
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    await apiClient.post("/register", { email: "a@b.com" })
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe("/api/bff/register")
+    const headers = init.headers as Record<string, string>
+    expect(headers["x-csrf-token"]).toBe("test-csrf-token")
+    expect(headers.Authorization).toBeUndefined()
   })
 
   it("expone headers de paging en getWithHeaders", async () => {

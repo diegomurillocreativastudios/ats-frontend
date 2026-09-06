@@ -65,6 +65,9 @@ confirmá
 contab
 continuás
 contrasena
+csrf
+Csrf
+CSRF
 demonyms
 desactivalo
 descart

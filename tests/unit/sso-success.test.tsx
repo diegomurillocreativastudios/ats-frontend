@@ -13,6 +13,14 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => searchParamsValue,
 }))
 
+vi.mock("@/lib/auth/csrf-client", () => ({
+  csrfHeaders: vi.fn(async (extra?: Record<string, string>) => ({
+    ...(extra ?? {}),
+    "x-csrf-token": "test-csrf",
+  })),
+  ensureCsrfToken: vi.fn(async () => "test-csrf"),
+}))
+
 describe("SsoSuccessContent", () => {
   beforeEach(() => {
     replaceMock.mockReset()
