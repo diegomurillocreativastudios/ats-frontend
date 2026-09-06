@@ -5,6 +5,7 @@ import {
   CSRF_COOKIE_MAX_AGE,
   CSRF_HEADER,
 } from "@/lib/auth/csrf-constants"
+import { CSP_REPORT_PATH } from "@/lib/security/security-headers"
 
 export { CSRF_COOKIE_MAX_AGE, CSRF_HEADER }
 
@@ -114,6 +115,11 @@ export function assertMutationCsrf(request: NextRequest): CsrfCheckResult {
 
   const pathname = request.nextUrl.pathname
   if (!pathname.startsWith("/api/")) {
+    return { ok: true }
+  }
+
+  // Browser CSP reports cannot carry double-submit CSRF tokens (FE-SEC-010).
+  if (pathname === CSP_REPORT_PATH) {
     return { ok: true }
   }
 

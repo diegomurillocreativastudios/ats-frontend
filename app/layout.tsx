@@ -1,21 +1,22 @@
-import { Inter, Manrope, Fraunces } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages, getTranslations } from "next-intl/server";
-import { APP_NAME } from "@/lib/app-brand";
-import "./globals.css";
-import PageTitle from "@/components/PageTitle";
+import { Inter, Manrope, Fraunces } from "next/font/google"
+import { connection } from "next/server"
+import { NextIntlClientProvider } from "next-intl"
+import { getLocale, getMessages, getTranslations } from "next-intl/server"
+import { APP_NAME } from "@/lib/app-brand"
+import "./globals.css"
+import PageTitle from "@/components/PageTitle"
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
-});
+})
 
 const manrope = Manrope({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-manrope",
-});
+})
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -23,19 +24,22 @@ const fraunces = Fraunces({
   style: "italic",
   display: "swap",
   variable: "--font-fraunces",
-});
+})
 
 export async function generateMetadata() {
-  const t = await getTranslations("Metadata.root");
+  const t = await getTranslations("Metadata.root")
   return {
     title: { default: APP_NAME, template: `${APP_NAME} | %s` },
     description: t("description"),
-  };
+  }
 }
 
 export default async function RootLayout({ children }) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  // FE-SEC-010: nonce-based Content Security Policy requires dynamic rendering
+  await connection()
+
+  const locale = await getLocale()
+  const messages = await getMessages()
 
   return (
     <html lang={locale} className={`${inter.variable} ${manrope.variable} ${fraunces.variable}`}>
@@ -46,5 +50,5 @@ export default async function RootLayout({ children }) {
         </NextIntlClientProvider>
       </body>
     </html>
-  );
+  )
 }

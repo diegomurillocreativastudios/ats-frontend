@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 12 · In Progress 0 · Last ToDos 0 · To Do 12
+**Conteo:** Done 13 · In Progress 0 · Last ToDos 0 · To Do 11
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -50,6 +50,10 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - `lookupServerSession` / `fetchBackendSessionUser`: ok | unauthenticated | unavailable
   - `/api/auth/me` y layouts de portal solo confían en `/api/auth/session`; backend caído → 401/503
   - Proxy sin rol desde cookie; `useCurrentUser` / `getCurrentUser` sin fallback a `ats_user`
+- [x] **FE-SEC-010** — Headers defensivos + Content Security Policy con nonce
+  - `poweredByHeader: false`; nosniff / referrer / `X-Frame-Options` / Permissions-Policy / COOP en config + proxy
+  - CSP enforce por defecto (`CSP_MODE=report-only` rollback); nonce en `proxy.ts`; `POST /api/csp-report`
+  - HSTS opt-in (`ENABLE_HSTS=1`) tras inventario HTTPS
 
 ---
 
@@ -69,8 +73,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-010** — Headers defensivos + Content Security Policy Report-Only → enforcement
-  - `poweredByHeader: false`; nosniff / referrer / frame-ancestors; HSTS solo tras inventario HTTPS
 - [ ] **FE-SEC-012** — Uploads: allowlist / magic bytes / tamaño / cuota en servidor
   - BFF no hace `formData()` sin límite; SVG de logos bloqueado o aislado
   - Barra autoritativa en backend; AV/cuarentena alineada con BE-SEC-016

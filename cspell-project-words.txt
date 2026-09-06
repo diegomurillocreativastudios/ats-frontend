@@ -83,6 +83,8 @@ gestioná
 guardá
 hhmm
 hojadevida
+Hsts
+HSTS
 ilustrations
 incluyente
 incomplet
@@ -94,6 +96,7 @@ lfir
 msword
 noasist
 noshow
+nosniff
 officedocument
 ofrecerlo
 openxmlformats
