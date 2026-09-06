@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 2 · In Progress 0 · Last ToDos 0 · To Do 22
+**Conteo:** Done 3 · In Progress 0 · Last ToDos 0 · To Do 21
 
 **Antes del primer PR:** autorización explícita; coordinar con backend la evidencia de **FE-SEC-007**. Un lote = un PR pequeño. No agrupar todo.
 
@@ -17,6 +17,10 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
 - [x] **FE-SEC-013** — Forgot password: respuesta uniforme (status, tamaño, latencia)
   - Front: sin `exists` / `success` distinguibles; 404/400-enumeración → 200 genérico
   - Rate limit por IP/cuenta y padding de tamaño/latencia siguen siendo del backend
+- [x] **FE-SEC-002** — XSS en plantillas HTML: quitar sink offscreen y placeholders raw
+  - Ficha y reportes solo esquema JSON; preview/PDF sin interpolar HTML de autor
+  - `template-interpolate.ts`: sin `{{{...}}}` / sufijo `*Html`; valores siempre escapados
+  - Detalle de reporte: PDF schema por servidor; sin host offscreen; Admin exige JSON en reportes/ficha
 
 ---
 
@@ -36,9 +40,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-002** — XSS en plantillas HTML: quitar sink offscreen y placeholders raw
-  - `report-template-detail-client.tsx`: no `dangerouslySetInnerHTML` en el documento principal
-  - `template-interpolate.ts`: eliminar `{{{...}}}` / sufijo `*Html`; sanitizar al guardar y al renderizar
 - [ ] **FE-SEC-003** — SSRF / red en Chromium PDF: denegar red por defecto
   - Interceptor en `html-to-pdf-chromium.ts`; parser allowlist (no regex); cuotas/timeout
   - Renderer schema-driven o servicio aislado queda en **FE-SEC-015** / lote PDF

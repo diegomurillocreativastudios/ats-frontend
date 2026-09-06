@@ -69,13 +69,15 @@ import {
   AiKpiCard,
 } from "@/components/rrhh/AiDisclosure"
 import { VacancyAiSearchLoadingState } from "@/components/rrhh/vacancy-ai-search-loading-state"
-import { getVacancyPreliminaryMatchTypicalMsForDocCount } from "@/lib/apply-loading-bar"
+import { VACANCY_PRELIMINARY_MATCH_TYPICAL_MS } from "@/lib/apply-loading-bar"
 import {
   getCandidateId,
   normalizeKanbanStage,
   parseFallbackKanbanStages,
+  pickApplicantDisplayName,
   resolveOrderedStageNames,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
+import { runVacancyPreliminaryMatchBatch } from "@/lib/rrhh/run-vacancy-preliminary-match-batch"
 import {
   isFinalApplicationStatus,
   isHiredTerminalStage,
@@ -936,6 +938,13 @@ export default function VacanteDetallePage() {
   const [smartError, setSmartError] = useState(null);
   const [loadingMatch, setLoadingMatch] = useState(false);
   const [matchError, setMatchError] = useState(null);
+  const [matchProgress, setMatchProgress] = useState({
+    cycleKey: null,
+    isCompleted: false,
+    batchIndex: 0,
+    batchTotal: 0,
+    currentName: null,
+  });
   const [loadingStartProcess, setLoadingStartProcess] = useState(false);
   const [startProcessError, setStartProcessError] = useState(null);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState(() => new Set());
@@ -2167,15 +2176,76 @@ export default function VacanteDetallePage() {
 
   const handleMatch = useCallback(async () => {
     if (!id || isVacancyReadOnly) return;
-    const docIds = displayCandidates
-      .map((m, i) => (selectedCandidateIds.has(getCandidateId(m, i)) ? m.candidateDocumentId : null))
-      .filter((docId) => docId != null && String(docId).trim() !== "");
-    if (docIds.length === 0) return;
+    const items = displayCandidates
+      .map((match, index) => {
+        if (!selectedCandidateIds.has(getCandidateId(match, index))) return null;
+        const documentId = match.candidateDocumentId;
+        if (documentId == null || String(documentId).trim() === "") return null;
+        return {
+          documentId: String(documentId),
+          displayName: pickApplicantDisplayName(match, index),
+        };
+      })
+      .filter(Boolean);
+    if (items.length === 0) return;
+
     setLoadingMatch(true);
     setMatchError(null);
+    setMatchProgress({
+      cycleKey: null,
+      isCompleted: false,
+      batchIndex: 0,
+      batchTotal: items.length,
+      currentName: null,
+    });
+
     try {
-      await apiClient.post(`/api/recruiter/vacancies/${id}/match`, docIds);
+      const result = await runVacancyPreliminaryMatchBatch({
+        items,
+        matchOne: async (documentId) => {
+          await apiClient.post(`/api/recruiter/vacancies/${id}/match`, [documentId]);
+        },
+        onProgress: (progress) => {
+          setMatchProgress({
+            cycleKey: progress.cycleKey,
+            isCompleted: progress.isCompleted,
+            batchIndex: progress.batchIndex,
+            batchTotal: progress.batchTotal,
+            currentName: progress.displayName ?? null,
+          });
+        },
+        getErrorMessage: (err) =>
+          getApiErrorMessage(err) || tMatching("toasts.matchFailed"),
+      });
+
       await fetchVacancy(true);
+
+      if (result.succeeded === 0) {
+        const firstFailure = result.failed[0];
+        const msg =
+          firstFailure?.message ?? tMatching("toasts.matchFailed");
+        setMatchError(msg);
+        setSnackbar({ open: true, variant: "error", message: msg });
+        return;
+      }
+
+      if (result.failed.length > 0) {
+        const names = result.failed
+          .map((item) => item.displayName || item.documentId)
+          .join(", ");
+        setSnackbar({
+          open: true,
+          variant: "success",
+          message: tMatching("toasts.matchPartialSuccess", {
+            succeeded: result.succeeded,
+            total: result.total,
+            names,
+          }),
+        });
+        scrollToPossibleCandidates();
+        return;
+      }
+
       setSnackbar({
         open: true,
         variant: "success",
@@ -2183,13 +2253,29 @@ export default function VacanteDetallePage() {
       });
       scrollToPossibleCandidates();
     } catch (err) {
-      const msg = err?.message ?? err?.detail ?? "No se pudo ejecutar el emparejamiento.";
+      const msg =
+        getApiErrorMessage(err) || tMatching("toasts.matchFailed");
       setMatchError(msg);
       setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
       setLoadingMatch(false);
+      setMatchProgress({
+        cycleKey: null,
+        isCompleted: false,
+        batchIndex: 0,
+        batchTotal: 0,
+        currentName: null,
+      });
     }
-  }, [id, displayCandidates, selectedCandidateIds, fetchVacancy, scrollToPossibleCandidates, isVacancyReadOnly]);
+  }, [
+    id,
+    displayCandidates,
+    selectedCandidateIds,
+    fetchVacancy,
+    scrollToPossibleCandidates,
+    isVacancyReadOnly,
+    tMatching,
+  ]);
 
   const selectedCount = selectedCandidateIds.size;
 
@@ -2822,25 +2908,33 @@ export default function VacanteDetallePage() {
 
                     {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                     <div className="flex flex-col gap-3">
-                      {loadingMatch ? (
+                      {loadingMatch && matchProgress.cycleKey ? (
                         <div
                           className="w-full max-w-2xl space-y-2"
                           role="status"
                           aria-live="polite"
-                          aria-label={tMatching("reanalyzingEllipsis")}
+                          aria-label={tMatching("aria.analysisProgress")}
                         >
                           <AiDisclosurePillProgress
+                            key={matchProgress.cycleKey}
                             percent={null}
-                            timeBasedTypicalMs={getVacancyPreliminaryMatchTypicalMsForDocCount(
-                              Math.max(1, selectedDocumentIds.length)
-                            )}
+                            timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
                             preliminaryMatchStepLabels
+                            isCompleted={matchProgress.isCompleted}
                             className="mt-0!"
                             aria-label={tMatching("aria.analysisProgress")}
                           />
-                          <p className="font-sans text-sm text-muted-foreground">
-                            {tMatching("reanalyzingEllipsis")}
+                          <p className="font-sans text-sm font-medium text-foreground">
+                            {tMatching("processingCurrentCandidate", {
+                              current: matchProgress.batchIndex,
+                              total: matchProgress.batchTotal,
+                            })}
                           </p>
+                          {matchProgress.currentName ? (
+                            <p className="font-sans text-sm text-muted-foreground">
+                              {matchProgress.currentName}
+                            </p>
+                          ) : null}
                         </div>
                       ) : null}
                       <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
@@ -3643,25 +3737,33 @@ export default function VacanteDetallePage() {
 
                   {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                   <div className="flex flex-col gap-3">
-                    {loadingMatch ? (
+                    {loadingMatch && matchProgress.cycleKey ? (
                       <div
                         className="w-full max-w-2xl space-y-2"
                         role="status"
                         aria-live="polite"
-                        aria-label="Reanalizando con IA"
+                        aria-label={tMatching("aria.analysisProgress")}
                       >
                         <AiDisclosurePillProgress
+                          key={matchProgress.cycleKey}
                           percent={null}
-                          timeBasedTypicalMs={getVacancyPreliminaryMatchTypicalMsForDocCount(
-                            Math.max(1, selectedDocumentIds.length)
-                          )}
+                          timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
                           preliminaryMatchStepLabels
+                          isCompleted={matchProgress.isCompleted}
                           className="mt-0!"
-                          aria-label="Progreso del análisis preliminar con IA"
+                          aria-label={tMatching("aria.analysisProgress")}
                         />
-                        <p className="font-sans text-sm text-muted-foreground">
-                          Reanalizando con IA…
+                        <p className="font-sans text-sm font-medium text-foreground">
+                          {tMatching("processingCurrentCandidate", {
+                            current: matchProgress.batchIndex,
+                            total: matchProgress.batchTotal,
+                          })}
                         </p>
+                        {matchProgress.currentName ? (
+                          <p className="font-sans text-sm text-muted-foreground">
+                            {matchProgress.currentName}
+                          </p>
+                        ) : null}
                       </div>
                     ) : null}
                     <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">

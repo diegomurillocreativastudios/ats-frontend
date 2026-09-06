@@ -6,9 +6,11 @@ import { renderPaginatedTechnicalSheetPdfFromInterpolated } from "@/lib/technica
 import { sanitizeTechnicalSheetPreviewHtml } from "@/lib/technical-sheet/sanitize-technical-sheet-preview-html"
 import { buildVisibleLogoUrlForTechnicalSheet } from "@/lib/technical-sheet/server-public-app-url"
 import { resolveVisibleLogoDataUriForPdf } from "@/lib/technical-sheet/resolve-visible-logo-data-uri"
+import { renderTechnicalSheetSchemaToHtml } from "@/lib/technical-sheet/schema/render-technical-sheet-schema-to-html"
+import { resolveTechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema"
+import type { TechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema-types"
 import {
   buildTechnicalSheetTemplateContext,
-  renderTechnicalSheetHtml,
 } from "@/lib/technical-sheet/template-interpolate"
 import {
   assertTechnicalSheetPdfHtmlSize,
@@ -25,6 +27,11 @@ export interface RenderTechnicalSheetPdfInput {
   candidateProfileId: string
   vacancyTitleFallback: string | null
   previewHtml?: string | null
+  /**
+   * `pdfkit` (default, schema-driven like reports).
+   * `chromium` is an emergency rollback that prints schema HTML, not author markup.
+   */
+  engine?: "pdfkit" | "chromium"
   preferPdfKit?: boolean
 }
 
@@ -37,16 +44,21 @@ export class TechnicalSheetPdfError extends Error {
   }
 }
 
-async function renderFromServerTemplate(
-  input: RenderTechnicalSheetPdfInput,
-  options: { allowPdfKitFallback: boolean }
-): Promise<Buffer> {
+interface ResolvedSheetTemplate {
+  schema: TechnicalSheetSchema
+  ctx: Record<string, unknown>
+}
+
+async function resolveSheetTemplateAndContext(
+  input: RenderTechnicalSheetPdfInput
+): Promise<ResolvedSheetTemplate> {
   const picked = findTechnicalSheetDocumentTemplate(input.templates)
   const rawTemplate = picked?.contentTemplate?.trim() ?? ""
   if (!picked || rawTemplate === "") {
     throw new TechnicalSheetPdfError(m.errorNoTechnicalSheetTemplate, 400)
   }
 
+  const { schema } = resolveTechnicalSheetSchema(rawTemplate)
   const logoDataUri = await resolveVisibleLogoDataUriForPdf()
   const logoFallbackUrl = buildVisibleLogoUrlForTechnicalSheet()
   const logoUrl = logoDataUri ?? (logoFallbackUrl.trim() !== "" ? logoFallbackUrl : null)
@@ -54,7 +66,26 @@ async function renderFromServerTemplate(
     vacancyTitleFallback: input.vacancyTitleFallback,
     logoUrl,
   })
-  const innerHtml = renderTechnicalSheetHtml(rawTemplate, ctx)
+  return { schema, ctx }
+}
+
+function resolveEngine(input: RenderTechnicalSheetPdfInput): "pdfkit" | "chromium" {
+  if (input.engine === "chromium" || input.engine === "pdfkit") return input.engine
+  if (input.preferPdfKit === false) return "chromium"
+  return "pdfkit"
+}
+
+async function renderFromSchemaPdfKit(input: RenderTechnicalSheetPdfInput): Promise<Buffer> {
+  const { schema } = await resolveSheetTemplateAndContext(input)
+  return buildTechnicalSheetPdfKitBuffer(input.payload, {
+    schema,
+    vacancyTitleFallback: input.vacancyTitleFallback,
+  })
+}
+
+async function renderFromSchemaChromium(input: RenderTechnicalSheetPdfInput): Promise<Buffer> {
+  const { schema, ctx } = await resolveSheetTemplateAndContext(input)
+  const innerHtml = renderTechnicalSheetSchemaToHtml(schema, ctx)
   assertTechnicalSheetPdfHtmlSize(innerHtml)
   const headerRecord = ctx.header as Record<string, unknown> | undefined
   const header = {
@@ -62,26 +93,11 @@ async function renderFromServerTemplate(
     address: String(headerRecord?.address ?? ""),
     englishLevel: String(headerRecord?.englishLevel ?? ""),
   }
-
-  try {
-    return await renderPaginatedTechnicalSheetPdfFromInterpolated(
-      innerHtml,
-      header,
-      String(ctx.logoUrl ?? "")
-    )
-  } catch (chromiumErr) {
-    const onVercel = Boolean(process.env.VERCEL || process.env.VERCEL_ENV)
-    const disablePdfKitFallback =
-      process.env.TECHNICAL_SHEET_PDF_DISABLE_VERCEL_PDFKIT_FALLBACK === "1"
-    if (!options.allowPdfKitFallback || !onVercel || disablePdfKitFallback) {
-      throw chromiumErr
-    }
-    console.error(
-      "[technical-sheet-pdf] Chromium PDF failed on Vercel; using PDFKit fallback",
-      chromiumErr instanceof Error ? chromiumErr.stack ?? chromiumErr.message : chromiumErr
-    )
-    return buildTechnicalSheetPdfKitBuffer(input.payload)
-  }
+  return renderPaginatedTechnicalSheetPdfFromInterpolated(
+    innerHtml,
+    header,
+    String(ctx.logoUrl ?? "")
+  )
 }
 
 async function renderFromPreviewHtml(previewHtml: string): Promise<Buffer> {
@@ -96,8 +112,10 @@ async function renderFromPreviewHtml(previewHtml: string): Promise<Buffer> {
 export async function renderTechnicalSheetPdfBuffer(
   input: RenderTechnicalSheetPdfInput
 ): Promise<Buffer> {
-  if (input.preferPdfKit) {
-    return buildTechnicalSheetPdfKitBuffer(input.payload)
+  const engine = resolveEngine(input)
+
+  if (engine === "pdfkit") {
+    return renderFromSchemaPdfKit(input)
   }
 
   const previewHtml = input.previewHtml?.trim() ?? ""
@@ -107,22 +125,16 @@ export async function renderTechnicalSheetPdfBuffer(
     sanitizedPreview !== "" && isValidTechnicalSheetPreviewHtml(sanitizedPreview)
 
   if (hasValidPreview) {
-    try {
-      return await renderFromPreviewHtml(previewHtml)
-    } catch (previewErr) {
-      console.error(
-        "[technical-sheet-pdf] Preview HTML PDF failed",
-        previewErr instanceof Error ? previewErr.stack ?? previewErr.message : previewErr
-      )
-      throw previewErr
-    }
-  } else if (previewHtml !== "") {
+    return renderFromPreviewHtml(previewHtml)
+  }
+
+  if (previewHtml !== "") {
     console.warn(
-      "[technical-sheet-pdf] Preview HTML rejected after sanitize; using server template pipeline"
+      "[technical-sheet-pdf] Preview HTML rejected after sanitize; using schema Chromium pipeline"
     )
   }
 
-  return renderFromServerTemplate(input, { allowPdfKitFallback: true })
+  return renderFromSchemaChromium(input)
 }
 
 export function buildTechnicalSheetPdfFilename(candidateProfileId: string): string {

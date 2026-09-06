@@ -115,20 +115,23 @@ describe("TechnicalSheetPanel i18n (Etapa 19)", () => {
   })
 
   it("mantiene contenido de match/IA verbatim en el preview del iframe", async () => {
-    const templateHtml = `<article class="ts-article"><section>
-      <h2>Match</h2>
-      <p data-testid="positive">{{match.positiveReasons}}</p>
-      <p data-testid="qualitative">{{match.qualitativeReasoning}}</p>
-      <p data-testid="score">{{match.totalScore}}</p>
-      <p data-testid="candidate">{{header.fullName}}</p>
-    </section></article>`
+    const templateSchema = JSON.stringify({
+      version: 1,
+      kind: "technical-sheet",
+      sections: [
+        { type: "paragraph", title: "Match", text: "{{match.positiveReasons}}" },
+        { type: "paragraph", title: "Qualitative", text: "{{match.qualitativeReasoning}}" },
+        { type: "paragraph", title: "Score", text: "{{match.totalScore}}" },
+        { type: "paragraph", title: "Candidate", text: "{{header.fullName}}" },
+      ],
+    })
 
     vi.mocked(fetchTemplatesList).mockResolvedValue([
       {
         id: 1,
         type: "Document",
         name: "Ficha técnica CV",
-        contentTemplate: templateHtml,
+        contentTemplate: templateSchema,
         isTechnicalSheet: true,
         isReport: false,
       },

@@ -46,10 +46,12 @@ describe("interpolateTechnicalSheetTemplate", () => {
     expect(interpolateTechnicalSheetTemplate("{{candidate.missing}}", { candidate: {} })).toBe("")
   })
 
-  it("does not escape placeholders ending with Html", () => {
+  it("escapes placeholders ending with Html", () => {
     const html = "<ul>{{insightsHtml}}</ul>"
     const ctx = { insightsHtml: "<li>OK</li>" }
-    expect(interpolateTechnicalSheetTemplate(html, ctx)).toBe("<ul><li>OK</li></ul>")
+    expect(interpolateTechnicalSheetTemplate(html, ctx)).toBe(
+      "<ul>&lt;li&gt;OK&lt;/li&gt;</ul>"
+    )
   })
 
   it("escapes substituted values", () => {
@@ -156,14 +158,15 @@ describe("expandEachBlocks & renderTechnicalSheetHtml", () => {
     )
   })
 
-  it("sanitizes XSS from raw HTML placeholders after interpolate", () => {
-    const tpl = "<div>{{{payloadHtml}}}</div>"
+  it("escapes XSS from former raw HTML placeholders", () => {
+    const tpl = "<div>{{payloadHtml}}</div>"
     const out = renderTechnicalSheetHtml(tpl, {
       payloadHtml: '<p>ok</p><script>alert(1)</script><img src=x onerror=alert(2)>',
     })
-    expect(out).toContain("<p>ok</p>")
-    expect(out).not.toMatch(/<script/i)
-    expect(out).not.toMatch(/onerror/i)
+    expect(out).toContain("&lt;p&gt;ok&lt;/p&gt;")
+    expect(out).toContain("&lt;script&gt;")
+    expect(out).not.toMatch(/<script[\s>]/i)
+    expect(out).not.toMatch(/<img[\s>]/i)
   })
 
   it("supports nested each for responsibilities", () => {

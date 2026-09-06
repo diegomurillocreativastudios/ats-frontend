@@ -146,6 +146,7 @@
         "starting": "Starting…",
         "searchResults": "Search results",
         "reanalyzingEllipsis": "Re-analyzing with AI…",
+        "processingCurrentCandidate": "Processing candidate {current} of {total}",
         "updatingSearchEllipsis": "Updating AI search…",
         "searchLoadingHint": "This can take a few seconds. Keep this page open.",
         "searchLoadingStepScanning": "Exploring the talent pool",
@@ -230,6 +231,7 @@
         },
         "toasts": {
           "matchSuccess": "Matching completed successfully.",
+          "matchPartialSuccess": "Analyzed {succeeded} of {total}. Could not analyze: {names}.",
           "matchFailed": "Matching could not be run.",
           "loadMatchFailed": "Matching could not be loaded.",
           "processStarted": "Process started…",
@@ -533,6 +535,7 @@
         "starting": "Démarrage…",
         "searchResults": "Résultats de recherche",
         "reanalyzingEllipsis": "Réanalyse par IA…",
+        "processingCurrentCandidate": "Traitement du candidat {current} sur {total}",
         "updatingSearchEllipsis": "Mise à jour de la recherche IA…",
         "searchLoadingHint": "Cela peut prendre quelques secondes. Ne fermez pas cette page.",
         "searchLoadingStepScanning": "Exploration du vivier de talents",
@@ -617,6 +620,7 @@
         },
         "toasts": {
           "matchSuccess": "Correspondance exécutée avec succès.",
+          "matchPartialSuccess": "{succeeded} sur {total} analysés. Impossible d'analyser : {names}.",
           "matchFailed": "Impossible d'exécuter la correspondance.",
           "loadMatchFailed": "Impossible de charger la correspondance.",
           "processStarted": "Processus démarré…",
@@ -920,6 +924,7 @@
         "starting": "Wird gestartet…",
         "searchResults": "Suchergebnisse",
         "reanalyzingEllipsis": "Neuanalyse mit KI…",
+        "processingCurrentCandidate": "Kandidat {current} von {total} wird verarbeitet",
         "updatingSearchEllipsis": "KI-Suche wird aktualisiert…",
         "searchLoadingHint": "Das kann ein paar Sekunden dauern. Bitte diese Seite geöffnet lassen.",
         "searchLoadingStepScanning": "Talentpool wird durchsucht",
@@ -1004,6 +1009,7 @@
         },
         "toasts": {
           "matchSuccess": "Matching erfolgreich ausgeführt.",
+          "matchPartialSuccess": "{succeeded} von {total} analysiert. Konnte nicht analysiert werden: {names}.",
           "matchFailed": "Matching konnte nicht ausgeführt werden.",
           "loadMatchFailed": "Matching konnte nicht geladen werden.",
           "processStarted": "Prozess gestartet…",
@@ -1307,6 +1313,7 @@
         "starting": "Avvio…",
         "searchResults": "Risultati di ricerca",
         "reanalyzingEllipsis": "Rianalisi con IA…",
+        "processingCurrentCandidate": "Elaborazione candidato {current} di {total}",
         "updatingSearchEllipsis": "Aggiornamento ricerca IA…",
         "searchLoadingHint": "L'operazione può richiedere alcuni secondi. Non chiudere questa pagina.",
         "searchLoadingStepScanning": "Esplorazione del bacino di talenti",
@@ -1391,6 +1398,7 @@
         },
         "toasts": {
           "matchSuccess": "Corrispondenza eseguita correttamente.",
+          "matchPartialSuccess": "Analizzati {succeeded} di {total}. Impossibile analizzare: {names}.",
           "matchFailed": "Impossibile eseguire la corrispondenza.",
           "loadMatchFailed": "Impossibile caricare la corrispondenza.",
           "processStarted": "Processo avviato…",

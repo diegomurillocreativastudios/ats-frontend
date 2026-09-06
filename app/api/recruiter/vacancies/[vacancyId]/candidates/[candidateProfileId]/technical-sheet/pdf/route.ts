@@ -1,6 +1,6 @@
 /**
- * PDF de ficha técnica: Chromium (`page.pdf`) sobre el HTML de la vista previa (POST)
- * o reconstruido en servidor (GET). Rollback PDFKit: `?engine=pdfkit`.
+ * PDF de ficha técnica: PDFKit desde el esquema JSON (igual que reportes).
+ * Rollback Chromium: `?engine=chromium` / `TECHNICAL_SHEET_PDF_ENGINE=chromium`.
  *
  * Hardening: cuota por usuario, semáforo Chromium (503), timeouts acotados.
  */
@@ -124,7 +124,7 @@ async function handleTechnicalSheetPdf(
     candidateProfileId: cid,
     vacancyTitleFallback: readVacancyTitleFallback(request),
     previewHtml,
-    preferPdfKit: engine === "pdfkit",
+    engine,
   })
 
   return new NextResponse(new Uint8Array(buffer), {
@@ -133,6 +133,7 @@ async function handleTechnicalSheetPdf(
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${filenameAscii}"`,
       "Cache-Control": "no-store",
+      "X-Technical-Sheet-Pdf-Engine": engine,
     },
   })
 }

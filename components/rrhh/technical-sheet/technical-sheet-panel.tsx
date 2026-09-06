@@ -10,16 +10,14 @@ import {
   fetchTechnicalSheetJson,
   slugifyVacancyForFilename,
 } from "@/lib/api/technical-sheet"
-import { downloadTechnicalSheetPreviewAsPdf } from "@/lib/pdf/download-technical-sheet-preview-as-pdf"
 import { paginateTechnicalSheetArticleToPageBodies } from "@/lib/technical-sheet/paginate-technical-sheet-article-dom"
 import { buildPaginatedTechnicalSheetSrcDoc } from "@/lib/technical-sheet/build-paginated-technical-sheet-src-doc"
 import { fetchVisibleLogoDataUriClient } from "@/lib/technical-sheet/fetch-visible-logo-data-uri-client"
+import { renderTechnicalSheetSchemaToHtml } from "@/lib/technical-sheet/schema/render-technical-sheet-schema-to-html"
+import { resolveTechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema"
 import { buildTechnicalSheetPageHtml } from "@/lib/technical-sheet/technical-sheet-page-shell"
 import { TECHNICAL_SHEET_CONTENT_AVAILABLE_HEIGHT_PX } from "@/lib/technical-sheet/technical-sheet-page-constants"
-import {
-  buildTechnicalSheetTemplateContext,
-  renderTechnicalSheetHtml,
-} from "@/lib/technical-sheet/template-interpolate"
+import { buildTechnicalSheetTemplateContext } from "@/lib/technical-sheet/template-interpolate"
 import {
   fetchTemplatesList,
   findTechnicalSheetDocumentTemplate,
@@ -103,7 +101,8 @@ export function TechnicalSheetPanel({
         },
         logoUrl: String(ctx.logoUrl ?? ""),
       })
-      setTemplateHtml(renderTechnicalSheetHtml(rawTemplate, ctx))
+      const { schema } = resolveTechnicalSheetSchema(rawTemplate)
+      setTemplateHtml(renderTechnicalSheetSchemaToHtml(schema, ctx))
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -190,20 +189,11 @@ export function TechnicalSheetPanel({
     const slug = slugifyVacancyForFilename(vacancyTitle ?? "vacante")
     const name = `ficha-tecnica-${slug}-${cid.slice(0, 8)}.pdf`
     try {
-      await downloadTechnicalSheetPreviewAsPdf({
-        panelRoot: panelRef.current,
-        fileName: name,
-        scale: 2,
+      await downloadTechnicalSheetPdfFromNextRoute(vid, cid, name, {
+        vacancyTitle: vacancyTitle ?? null,
       })
     } catch {
-      try {
-        await downloadTechnicalSheetPdfFromNextRoute(vid, cid, name, {
-          vacancyTitle: vacancyTitle ?? null,
-          previewHtml: paginatedSrcDoc,
-        })
-      } catch {
-        setPdfActionError(t("errors.pdfExportFailed"))
-      }
+      setPdfActionError(t("errors.pdfExportFailed"))
     } finally {
       setPdfBusy(false)
     }

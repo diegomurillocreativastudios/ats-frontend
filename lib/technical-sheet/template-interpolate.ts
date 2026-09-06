@@ -308,17 +308,9 @@ export function buildTechnicalSheetTemplateContext(
   }
 }
 
-const TRIPLE_PLACEHOLDER_RE = /\{\{\{\s*([^}\n]+?)\s*\}\}\}/g
-
-function isRawHtmlPlaceholder(path: string, marker: "triple" | "double"): boolean {
-  if (marker === "triple") return true
-  return /Html$/i.test(path.trim())
-}
-
 function substitutePlaceholder(
   pathStr: string,
   context: Record<string, unknown>,
-  marker: "triple" | "double",
   fullMatch: string
 ): string {
   const trimmed = pathStr.trim()
@@ -331,7 +323,6 @@ function substitutePlaceholder(
       return s.replace(/"/g, "")
     }
   }
-  if (isRawHtmlPlaceholder(trimmed, marker)) return text
   return escapeHtmlForTechnicalSheet(text)
 }
 
@@ -339,10 +330,7 @@ export function interpolateTechnicalSheetTemplate(
   template: string,
   context: Record<string, unknown>
 ): string {
-  const withTriple = template.replace(TRIPLE_PLACEHOLDER_RE, (_full, pathStr: string) =>
-    substitutePlaceholder(pathStr, context, "triple", _full)
-  )
-  return withTriple.replace(PLACEHOLDER_RE, (_full, pathStr: string) =>
-    substitutePlaceholder(pathStr, context, "double", _full)
+  return template.replace(PLACEHOLDER_RE, (_full, pathStr: string) =>
+    substitutePlaceholder(pathStr, context, _full)
   )
 }

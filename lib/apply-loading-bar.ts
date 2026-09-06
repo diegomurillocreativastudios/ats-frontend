@@ -16,24 +16,8 @@ export const RECRUITER_ADD_CANDIDATE_TYPICAL_MS = 25_000
 /** Búsqueda preliminar con IA (vacante): ajusta la barra al ritmo del POST de búsqueda. */
 export const VACANCY_SMART_PRELIMINARY_SEARCH_TYPICAL_MS = 50_000
 
-/** POST `/api/recruiter/vacancies/:id/match` (Análisis preliminar): ritmo de animación ~20s. */
+/** POST `/api/recruiter/vacancies/:id/match` (Análisis preliminar): ritmo de animación ~20s por candidato. */
 export const VACANCY_PRELIMINARY_MATCH_TYPICAL_MS = 20_000
-
-/**
- * Escala la duración típica del stepper de análisis preliminar cuando se envían varios `docIds` en una sola request.
- * El factor tiene tope para no inflar demasiado la animación.
- *
- * Progreso por candidato individual en el stepper requeriría otro contrato backend (p. ej. POST secuenciales por documento,
- * SSE o WebSocket) porque hoy el cliente solo espera una respuesta agregada.
- */
-export function getVacancyPreliminaryMatchTypicalMsForDocCount(docCount: number): number {
-  const n = Math.max(1, Math.floor(docCount))
-  const factor = Math.min(
-    1.75,
-    1 + 0.18 * Math.min(n - 1, 8)
-  )
-  return Math.round(VACANCY_PRELIMINARY_MATCH_TYPICAL_MS * factor)
-}
 
 /** Si el envío supera esto, el formulario público muestra texto orientativo */
 export const APPLY_LONG_WAIT_HINT_MS = 35_000

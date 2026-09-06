@@ -43,7 +43,7 @@ export const reportTemplateMessages = {
   errorNoConfig:
     "Esta plantilla aún no tiene configuración de reporte. Contactá al administrador o usá un reporte del listado.",
   errorNoContent:
-    "La plantilla no tiene contenido HTML. Configurá contentTemplate en Administración → Plantillas.",
+    "La plantilla no tiene un esquema JSON válido. Configurá contentTemplate en Administración → Plantillas.",
   errorNoData: "No hay datos para los filtros seleccionados. Probá ampliar el rango o cambiar el cliente.",
   errorForbidden: "No tenés permisos para ver este reporte.",
   errorGeneric: "No se pudo cargar el reporte.",

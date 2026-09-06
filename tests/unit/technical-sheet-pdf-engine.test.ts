@@ -6,20 +6,20 @@ describe("resolveTechnicalSheetPdfEngine", () => {
     vi.unstubAllEnvs()
   })
 
-  it("defaults to chromium", () => {
+  it("defaults to pdfkit", () => {
     vi.stubEnv("TECHNICAL_SHEET_PDF_ENGINE", "")
-    expect(resolveTechnicalSheetPdfEngine(new Request("https://app.example/pdf"))).toBe("chromium")
-  })
-
-  it("selects pdfkit when env is pdfkit", () => {
-    vi.stubEnv("TECHNICAL_SHEET_PDF_ENGINE", "pdfkit")
     expect(resolveTechnicalSheetPdfEngine(new Request("https://app.example/pdf"))).toBe("pdfkit")
   })
 
-  it("selects pdfkit when query engine=pdfkit", () => {
+  it("selects chromium when env is chromium", () => {
+    vi.stubEnv("TECHNICAL_SHEET_PDF_ENGINE", "chromium")
+    expect(resolveTechnicalSheetPdfEngine(new Request("https://app.example/pdf"))).toBe("chromium")
+  })
+
+  it("selects chromium when query engine=chromium", () => {
     vi.stubEnv("TECHNICAL_SHEET_PDF_ENGINE", "")
     expect(
-      resolveTechnicalSheetPdfEngine(new Request("https://app.example/pdf?engine=pdfkit"))
-    ).toBe("pdfkit")
+      resolveTechnicalSheetPdfEngine(new Request("https://app.example/pdf?engine=chromium"))
+    ).toBe("chromium")
   })
 })

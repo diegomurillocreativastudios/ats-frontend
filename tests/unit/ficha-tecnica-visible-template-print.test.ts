@@ -1,32 +1,29 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
 import { describe, expect, it } from "vitest"
+import { DEFAULT_TECHNICAL_SHEET_SCHEMA } from "@/lib/technical-sheet/schema/technical-sheet-default-schema"
 
-describe("ficha-tecnica-visible-template.html (article-only / paginated shell)", () => {
-  const pathToTemplate = join(
-    process.cwd(),
-    "lib",
-    "technical-sheet",
-    "ficha-tecnica-visible-template.html"
-  )
-
-  it("keeps article and sections for per-page shell wrapping", () => {
-    const html = readFileSync(pathToTemplate, "utf8")
-    expect(html).toContain('class="technical-sheet-source"')
-    expect(html).toContain('class="ts-article"')
-    expect(html).toContain("<section>")
-    expect(html).not.toContain("position: fixed")
+describe("default technical sheet schema", () => {
+  it("keeps the article sections used by the paginated preview shell", () => {
+    const titles = DEFAULT_TECHNICAL_SHEET_SCHEMA.sections.map((section) => section.title)
+    expect(titles).toContain("Experiencia laboral")
+    expect(titles).toContain("Educación")
+    expect(titles).toContain("Información adicional")
+    expect(DEFAULT_TECHNICAL_SHEET_SCHEMA.kind).toBe("technical-sheet")
   })
 
-  it("includes experience loop markers for long profiles", () => {
-    const html = readFileSync(pathToTemplate, "utf8")
-    expect(html).toContain("{{#each candidate.workExperience}}")
-    expect(html).toContain("{{/each}}")
+  it("includes experience bindings for long profiles", () => {
+    const work = DEFAULT_TECHNICAL_SHEET_SCHEMA.sections.find(
+      (section) => section.type === "repeatCards" && section.rowsBinding === "candidate.workExperience"
+    )
+    expect(work).toBeTruthy()
+    if (work?.type === "repeatCards") {
+      expect(work.bullets?.rowsBinding).toBe("responsibilities")
+    }
   })
 
   it("does not include interview notes section", () => {
-    const html = readFileSync(pathToTemplate, "utf8")
-    expect(html).not.toContain("Notas de entrevista")
-    expect(html).not.toContain("candidate.interviewNotes")
+    const titles = DEFAULT_TECHNICAL_SHEET_SCHEMA.sections.map((section) => section.title)
+    expect(titles.join(" ")).not.toContain("entrevista")
+    const bindings = JSON.stringify(DEFAULT_TECHNICAL_SHEET_SCHEMA)
+    expect(bindings).not.toContain("interviewNotes")
   })
 })

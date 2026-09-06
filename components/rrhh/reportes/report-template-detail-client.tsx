@@ -29,7 +29,7 @@ import {
 } from "@/lib/api/recruiter-reports"
 import { getReportTemplateMessages } from "@/lib/messages/report-template"
 import { captureElementAsPdfBlob } from "@/lib/pdf/download-element-as-pdf"
-import { resolveReportPdfCaptureElement } from "@/lib/pdf/resolve-report-preview-pdf-element"
+import { downloadReportPdfFromServer } from "@/lib/pdf/download-report-pdf-from-server"
 import {
   formatGeneratedAtForPdf,
   formatIsoDateForPdf,
@@ -40,10 +40,18 @@ import {
   mapPreviewContextToPdfFilters,
   mapSummaryPreviewToExecutivePdfData,
 } from "@/lib/reportes/map-report-preview-context"
-import { wrapReportPreviewHtml } from "@/lib/reportes/report-preview-html"
+import {
+  REPORT_PRINT_PREVIEW_SCREEN_ZOOM,
+  wrapReportPreviewHtml,
+} from "@/lib/reportes/report-preview-html"
 import { buildReportTemplateContext } from "@/lib/reportes/report-template-context"
+import {
+  extractReportSummaryPayload,
+  supportsSchemaReportPipeline,
+} from "@/lib/reportes/report-template-context-registry"
 import type { ReportTemplateConfig } from "@/lib/reportes/report-document-types"
-import { renderTechnicalSheetHtml } from "@/lib/technical-sheet/template-interpolate"
+import { safeParseReportSchema } from "@/lib/reportes/schema/report-schema"
+import { renderReportSchemaToHtml } from "@/lib/reportes/schema/render-report-schema-to-html"
 import {
   fetchTemplateById,
   type TemplateListItem,
@@ -86,10 +94,32 @@ function hasPreviewContext(ctx: Record<string, unknown> | null): boolean {
   return Object.keys(ctx).length > 0
 }
 
+function escapePreviewHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+function renderSchemaErrorHtml(message: string): string {
+  return `<section class="report-template-error"><h2>Plantilla de reporte inválida</h2><p>${escapePreviewHtml(
+    message
+  )}</p><p>Revisá el JSON guardado en Administración → Plantillas.</p></section>`
+}
+
+function coercePreviewRows(context: Record<string, unknown> | null): unknown[] {
+  if (!context) return []
+  const rows = context.rows
+  if (!Array.isArray(rows)) return []
+  return rows.filter((row) => row != null && typeof row === "object")
+}
+
 export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailClientProps) {
   const tReport = useTranslations("RecruiterPortal.reports.templateDetail")
   const m = useMemo(() => getReportTemplateMessages(tReport), [tReport])
-  const pdfCaptureRef = useRef<HTMLDivElement>(null)
+  const reactPreviewRef = useRef<HTMLDivElement>(null)
   const initialPreviewDoneRef = useRef(false)
 
   const [template, setTemplate] = useState<TemplateListItem | null>(null)
@@ -372,31 +402,43 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
       return
     }
 
-    const rendered = renderTechnicalSheetHtml(rawTemplate, previewContext)
-    setPreviewSrcDoc(wrapReportPreviewHtml(rendered))
+    const reportKey = reportConfig?.reportKey?.trim() ?? ""
+    if (reportKey && !supportsSchemaReportPipeline(reportKey)) {
+      setPreviewSrcDoc(
+        wrapReportPreviewHtml(
+          renderSchemaErrorHtml(
+            `Este reporte (${reportKey}) no tiene pipeline de esquema JSON configurado.`
+          ),
+          { screenZoom: REPORT_PRINT_PREVIEW_SCREEN_ZOOM }
+        )
+      )
+      setUseReactPreview(false)
+      return
+    }
+
+    const parsed = safeParseReportSchema(rawTemplate)
+    if (parsed.success === false) {
+      setPreviewSrcDoc(
+        wrapReportPreviewHtml(renderSchemaErrorHtml(parsed.error), {
+          screenZoom: REPORT_PRINT_PREVIEW_SCREEN_ZOOM,
+        })
+      )
+      setUseReactPreview(false)
+      return
+    }
+
+    const rendered = renderReportSchemaToHtml(parsed.data, previewContext)
+    setPreviewSrcDoc(
+      wrapReportPreviewHtml(rendered, { screenZoom: REPORT_PRINT_PREVIEW_SCREEN_ZOOM })
+    )
     setUseReactPreview(false)
-  }, [template, previewContext])
+  }, [previewContext, reportConfig?.reportKey, template])
 
   const handleApplyFilters = () => {
     const next = cloneFilters(draftFilters)
     setAppliedFilters(next)
     const controller = new AbortController()
     void generatePreview(controller.signal, next, { notifyOnSuccess: true })
-  }
-
-  const waitForCaptureIframe = async (captureRoot: HTMLElement | null) => {
-    if (!captureRoot) return
-    const iframe = captureRoot.querySelector("iframe")
-    if (!(iframe instanceof HTMLIFrameElement)) return
-
-    const doc = iframe.contentDocument
-    if (doc?.body && doc.body.childNodes.length > 0) return
-
-    await new Promise<void>((resolve) => {
-      const done = () => resolve()
-      iframe.addEventListener("load", done, { once: true })
-      window.setTimeout(done, 2000)
-    })
   }
 
   const waitForCaptureReady = async (captureTarget: HTMLElement) => {
@@ -431,72 +473,111 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
     setPdfWarning(null)
     setDownloadingPdf(true)
 
-    const orientation = reportConfig?.pdfOrientation ?? "landscape"
-    const format = reportConfig?.pdfFormat ?? "a4"
     const baseName = slugifyReportFileName(template?.name ?? "reporte")
     const fileName = `${baseName}-${String(templateId).slice(0, 8)}.pdf`
+    const reportKey = reportConfig?.reportKey?.trim() ?? ""
 
     try {
-      await waitForCaptureIframe(pdfCaptureRef.current)
-      const captureTarget = resolveReportPdfCaptureElement(pdfCaptureRef.current)
-      if (!captureTarget) {
-        setPdfActionError(m.pdfExportFailed)
+      if (useReactPreview && pdfData) {
+        const captureTarget = reactPreviewRef.current
+        if (!captureTarget) {
+          setPdfActionError(m.pdfExportFailed)
+          return
+        }
+
+        await waitForCaptureReady(captureTarget)
+
+        const orientation = reportConfig?.pdfOrientation ?? "landscape"
+        const format = reportConfig?.pdfFormat ?? "a4"
+        const blob = await captureElementAsPdfBlob({
+          element: captureTarget,
+          orientation,
+          format,
+          scale: 2,
+          marginMm: 5,
+        })
+
+        const objectUrl = URL.createObjectURL(blob)
+        const anchor = document.createElement("a")
+        anchor.href = objectUrl
+        anchor.download = fileName
+        anchor.rel = "noopener"
+        anchor.click()
+        URL.revokeObjectURL(objectUrl)
+
+        if (previewHistoryId) {
+          setSavingPdf(true)
+          try {
+            if (blob.size > UPLOAD_MAX_BYTES_20_MB) {
+              const tooLargeMessage =
+                "El PDF supera 20 MB y no se pudo guardar en el historial. El archivo local sí se descargó."
+              setPdfWarning(tooLargeMessage)
+              showSnackbar("warning", tooLargeMessage)
+            } else {
+              await uploadReportDocumentPdf({
+                historyId: previewHistoryId,
+                file: blob,
+                fileName,
+              })
+              showSnackbar("success", "PDF guardado en el historial correctamente.")
+            }
+          } catch (err: unknown) {
+            const uploadMessage = getUploadApiErrorMessage(err, {
+              tooLarge:
+                "El PDF es demasiado grande para guardarlo en el historial (máximo 20 MB).",
+              typeMismatch:
+                "El PDF generado no coincide con el tipo esperado y no se pudo guardar en el historial.",
+              unsupported:
+                "No se pudo guardar el PDF en el historial por un formato no soportado.",
+              generic: m.pdfHistoryWarning,
+            })
+            setPdfWarning(uploadMessage || getApiErrorMessage(err) || m.pdfHistoryWarning)
+            showSnackbar(
+              "warning",
+              uploadMessage || getApiErrorMessage(err) || m.pdfHistoryWarning
+            )
+          } finally {
+            setSavingPdf(false)
+          }
+        }
         return
       }
 
-      await waitForCaptureReady(captureTarget)
-
-      const blob = await captureElementAsPdfBlob({
-        element: captureTarget,
-        orientation,
-        format,
-        scale: 2,
-        marginMm: 5,
-      })
-
-      const objectUrl = URL.createObjectURL(blob)
-      const anchor = document.createElement("a")
-      anchor.href = objectUrl
-      anchor.download = fileName
-      anchor.rel = "noopener"
-      anchor.click()
-      URL.revokeObjectURL(objectUrl)
-
-      if (previewHistoryId) {
-        setSavingPdf(true)
-        try {
-          if (blob.size > UPLOAD_MAX_BYTES_20_MB) {
-            const tooLargeMessage =
-              "El PDF supera 20 MB y no se pudo guardar en el historial. El archivo local sí se descargó."
-            setPdfWarning(tooLargeMessage)
-            showSnackbar("warning", tooLargeMessage)
-          } else {
-            await uploadReportDocumentPdf({
-              historyId: previewHistoryId,
-              file: blob,
-              fileName,
-            })
-            showSnackbar("success", "PDF guardado en el historial correctamente.")
-          }
-        } catch (err: unknown) {
-          const uploadMessage = getUploadApiErrorMessage(err, {
-            tooLarge:
-              "El PDF es demasiado grande para guardarlo en el historial (máximo 20 MB).",
-            typeMismatch:
-              "El PDF generado no coincide con el tipo esperado y no se pudo guardar en el historial.",
-            unsupported:
-              "No se pudo guardar el PDF en el historial por un formato no soportado.",
-            generic: m.pdfHistoryWarning,
-          })
-          setPdfWarning(uploadMessage || getApiErrorMessage(err) || m.pdfHistoryWarning)
-          showSnackbar(
-            "warning",
-            uploadMessage || getApiErrorMessage(err) || m.pdfHistoryWarning
-          )
-        } finally {
-          setSavingPdf(false)
-        }
+      if (!supportsSchemaReportPipeline(reportKey)) {
+        setPdfActionError(m.pdfExportFailed)
+        showSnackbar("error", m.pdfExportFailed)
+        return
       }
+
+      const rows = coercePreviewRows(previewContext)
+      if (rows.length === 0) {
+        setPdfActionError(m.errorNoData)
+        showSnackbar("error", m.errorNoData)
+        return
+      }
+
+      const summary = extractReportSummaryPayload(previewContext)
+      const totalFromContext =
+        typeof previewContext?.rowCount === "number"
+          ? previewContext.rowCount
+          : rows.length
+      await downloadReportPdfFromServer({
+        reportType: reportKey,
+        rows,
+        summary,
+        metadata: summary,
+        extras: previewContext,
+        totalCount: totalFromContext,
+        fileBaseName: baseName,
+        templateId: templateId.trim(),
+        reportName: template?.name ?? reportKey,
+        appliedFilters: Object.fromEntries(
+          Object.entries(appliedFilters).map(([key, value]) => [key, String(value ?? "")])
+        ),
+        clientName: resolveClientName(String(appliedFilters.clientId ?? "")),
+        generatedAt: formatGeneratedAtForPdf(),
+      })
+      showSnackbar("success", "PDF generado correctamente.")
     } catch {
       setPdfActionError(m.pdfExportFailed)
       showSnackbar("error", m.pdfExportFailed)
@@ -504,14 +585,21 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
       setDownloadingPdf(false)
     }
   }, [
+    appliedFilters,
+    m.errorNoData,
     m.pdfExportFailed,
     m.pdfHistoryWarning,
+    pdfData,
+    previewContext,
     previewHistoryId,
     reportConfig?.pdfFormat,
     reportConfig?.pdfOrientation,
+    reportConfig?.reportKey,
+    resolveClientName,
     showSnackbar,
     template?.name,
     templateId,
+    useReactPreview,
   ])
 
   const trail = template
@@ -521,9 +609,16 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
   const breadcrumbLabel = template?.name ?? m.breadcrumbReport
   const busy = loadingTemplate || loadingConfig || generatingPreview
   const hasPreviewData = hasPreviewContext(previewContext)
+  const schemaReady =
+    !useReactPreview &&
+    previewSrcDoc != null &&
+    previewSrcDoc.trim() !== "" &&
+    !previewSrcDoc.includes("report-template-error")
   const hasPdfCaptureSource =
     (useReactPreview && pdfData != null) ||
-    (previewSrcDoc != null && previewSrcDoc.trim() !== "")
+    (schemaReady &&
+      supportsSchemaReportPipeline(reportConfig?.reportKey?.trim() ?? "") &&
+      coercePreviewRows(previewContext).length > 0)
   const canDownload =
     !busy &&
     !templateError &&
@@ -695,7 +790,10 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
             {!generatingPreview && !previewError && hasPreviewData ? (
               <section aria-label={m.previewTitle} className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
                 {useReactPreview && pdfData ? (
-                  <div className="min-h-0 flex-1 overflow-auto overscroll-contain rounded-lg border border-border bg-muted/15 p-4">
+                  <div
+                    ref={reactPreviewRef}
+                    className="min-h-0 flex-1 overflow-auto overscroll-contain rounded-lg border border-border bg-muted/15 p-4"
+                  >
                     <div className="flex w-full justify-center">
                       <ExecutiveSummaryReportPdfTemplate
                         data={pdfData}
@@ -738,29 +836,6 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
           </>
         ) : null}
       </div>
-
-      {!loadingTemplate && !templateError && template && hasPreviewData && !previewError ? (
-        <div
-          ref={pdfCaptureRef}
-          className="pointer-events-none fixed left-[-12000px] top-0 z-[-1] overflow-visible bg-background"
-          aria-hidden
-        >
-          {useReactPreview && pdfData ? (
-            <ExecutiveSummaryReportPdfTemplate
-              data={pdfData}
-              filters={pdfFilters}
-              generatedAt={formatGeneratedAtForPdf()}
-            />
-          ) : previewSrcDoc ? (
-            <iframe
-              title={`${m.previewTitle} PDF`}
-              sandbox="allow-same-origin"
-              srcDoc={previewSrcDoc}
-              className="h-[1200px] w-[1600px] border-0 bg-background"
-            />
-          ) : null}
-        </div>
-      ) : null}
     </RrhhReportsShell>
     <Snackbar
       open={snackbar.open}

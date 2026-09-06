@@ -48,7 +48,6 @@ import {
   extractReportSummaryPayload,
   supportsSchemaReportPipeline,
 } from "@/lib/reportes/report-template-context-registry"
-import { renderTechnicalSheetHtml } from "@/lib/technical-sheet/template-interpolate"
 import {
   fetchTemplateById,
   type TemplateListItem,
@@ -500,38 +499,39 @@ export function ReportDataViewClient({
     response,
   ])
 
-  const reportTemplateHtml = useMemo(() => {
-    if (usesSchemaPipeline) return ""
-    return template?.contentTemplate?.trim() ?? ""
-  }, [template?.contentTemplate, usesSchemaPipeline])
-
   const parsedSchema = useMemo(() => {
-    if (!usesSchemaPipeline) return null
+    if (!usesSchemaPipeline) {
+      return {
+        success: false as const,
+        error: "Este reporte no tiene pipeline de esquema JSON configurado.",
+      }
+    }
     const content = template?.contentTemplate?.trim() ?? ""
     if (!content) {
       return { success: false as const, error: t("noTemplate") }
     }
     return safeParseReportSchema(content)
-  }, [template?.contentTemplate, usesSchemaPipeline])
+  }, [template?.contentTemplate, t, usesSchemaPipeline])
 
   const renderedHtml = useMemo(() => {
     if (!previewContext) return null
-    if (usesSchemaPipeline) {
-      if (!parsedSchema) return null
-      if (parsedSchema.success === false) return renderSchemaErrorHtml(parsedSchema.error)
-      return renderReportSchemaToHtml(parsedSchema.data, previewContext)
+    if (!usesSchemaPipeline) {
+      return renderSchemaErrorHtml(
+        "Este reporte no tiene pipeline de esquema JSON configurado."
+      )
     }
-    if (!reportTemplateHtml) return null
-    return renderTechnicalSheetHtml(reportTemplateHtml, previewContext)
-  }, [parsedSchema, previewContext, reportTemplateHtml, usesSchemaPipeline])
+    if (parsedSchema.success === false) {
+      return renderSchemaErrorHtml(parsedSchema.error)
+    }
+    return renderReportSchemaToHtml(parsedSchema.data, previewContext)
+  }, [parsedSchema, previewContext, usesSchemaPipeline])
 
   const previewSrcDoc = useMemo(() => {
     if (!renderedHtml) return null
-    const screenZoom = usesSchemaPipeline
-      ? REPORT_PRINT_PREVIEW_SCREEN_ZOOM
-      : undefined
-    return wrapReportPreviewHtml(renderedHtml, { screenZoom })
-  }, [renderedHtml, usesSchemaPipeline])
+    return wrapReportPreviewHtml(renderedHtml, {
+      screenZoom: REPORT_PRINT_PREVIEW_SCREEN_ZOOM,
+    })
+  }, [renderedHtml])
 
   const buildSummaryPayload = useCallback(
     (): Record<string, unknown> | null =>

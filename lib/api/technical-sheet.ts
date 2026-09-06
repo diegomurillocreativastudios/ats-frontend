@@ -99,7 +99,7 @@ export interface DownloadTechnicalSheetPdfFromNextOptions {
 }
 
 /**
- * Descarga el PDF de ficha técnica generado en el servidor (Chromium).
+ * Descarga el PDF de ficha técnica generado en el servidor (PDFKit + esquema JSON).
  */
 export const downloadTechnicalSheetPdfFromNextRoute = async (
   vacancyId: string,
