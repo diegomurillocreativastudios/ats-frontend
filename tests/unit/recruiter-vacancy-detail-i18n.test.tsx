@@ -37,12 +37,10 @@ vi.mock("@/lib/api/admin-vacancy-catalogs", () => ({
 }))
 
 vi.mock("@/lib/api/recruiter-companies", () => ({
-  DEFAULT_RECRUITER_COMPANY_ID: "default-co",
   listCompanyApplicantStatuses: vi.fn(async () => []),
   listRecruiterCompanies: vi.fn(async () => []),
   listRecruiterStages: vi.fn(async () => []),
-  persistVacancyCompanyId: vi.fn(),
-  resolveVacancyCompanyId: () => "default-co",
+  resolveVacancyCompanyId: () => "",
   adminStagesCatalogHref: () => "/portal-admin/vacantes/etapas",
 }))
 

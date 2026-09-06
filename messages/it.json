@@ -1822,7 +1822,9 @@
           },
           "client": {
             "label": "Cliente / azienda",
-            "ariaLabel": "Cliente o azienda della posizione"
+            "ariaLabel": "Cliente o azienda della posizione",
+            "loading": "Caricamento aziende…",
+            "empty": "Nessuna azienda disponibile"
           },
           "country": {
             "label": "Paese a cui si applica la posizione"

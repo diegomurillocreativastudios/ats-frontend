@@ -29,11 +29,9 @@ import { apiClient } from "@/lib/api"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
 import {
   adminStagesCatalogHref,
-  DEFAULT_RECRUITER_COMPANY_ID,
   listCompanyApplicantStatuses,
   listRecruiterCompanies,
   listRecruiterStages,
-  persistVacancyCompanyId,
   resolveVacancyCompanyId,
 } from "@/lib/api/recruiter-companies"
 import {
@@ -914,7 +912,7 @@ export default function VacanteDetallePage() {
   const [editStateCode, setEditStateCode] = useState("");
   const [editVacancyDepartmentId, setEditVacancyDepartmentId] = useState("");
   const [editVacancyModalityId, setEditVacancyModalityId] = useState("");
-  const [editCompanyId, setEditCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
+  const [editCompanyId, setEditCompanyId] = useState("");
   const [editRequirements, setEditRequirements] = useState(() => [createEmptyRequirement()]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [savingVacancy, setSavingVacancy] = useState(false);
@@ -970,7 +968,7 @@ export default function VacanteDetallePage() {
   const etapasSectionDesktopRef = useRef(null);
   const etapasSectionMobileRef = useRef(null);
   const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
-  const originalCompanyIdAtEditRef = useRef(DEFAULT_RECRUITER_COMPANY_ID);
+  const originalCompanyIdAtEditRef = useRef("");
 
   const vacancyDepartmentSummary = useMemo(
     () =>
@@ -1033,20 +1031,17 @@ export default function VacanteDetallePage() {
     });
   }, []);
 
-  const vacancyRouteId = Array.isArray(id) ? id[0] : id;
-
   const savedCompanyId = useMemo(
     () =>
       resolveVacancyCompanyId(
-        vacancy && typeof vacancy === "object" ? vacancy : null,
-        companies,
-        vacancyRouteId
+        vacancy && typeof vacancy === "object" ? vacancy : null
       ),
-    [vacancy, companies, vacancyRouteId]
+    [vacancy]
   );
 
   const companySelectOptions = useMemo(() => {
     if (companies.length > 0) return companies;
+    if (!savedCompanyId) return [];
     const fallbackName = String(vacancy?.company ?? vacancy?.companyName ?? "").trim();
     return [
       {
@@ -1132,14 +1127,6 @@ export default function VacanteDetallePage() {
       const data = await apiClient.get(`/api/recruiter/vacancies/${id}`);
       const withApplicants = await overlayVacancyApplicants(String(id), data);
       setVacancy(normalizeVacancyDetailFromApi(withApplicants) ?? withApplicants);
-      const record =
-        data && typeof data === "object" && !Array.isArray(data)
-          ? (data as Record<string, unknown>)
-          : null;
-      const companyIdFromApi = record?.companyId ?? record?.company_id;
-      if (companyIdFromApi != null && String(companyIdFromApi).trim() !== "") {
-        persistVacancyCompanyId(String(id), String(companyIdFromApi).trim());
-      }
     } catch (err: unknown) {
       if (!silent) {
         setFetchError(
@@ -1259,23 +1246,25 @@ export default function VacanteDetallePage() {
     setEditErrors({});
     setVacancyCatalogsError(null);
     const resolvedCompanyId = resolveVacancyCompanyId(
-      vacancy && typeof vacancy === "object" ? vacancy : null,
-      companies,
-      vacancyRouteId
+      vacancy && typeof vacancy === "object" ? vacancy : null
     );
     originalCompanyIdAtEditRef.current = resolvedCompanyId;
     setEditCompanyId(resolvedCompanyId);
     hydrateEditFormFromVacancy(vacancy);
     setIsEditing(true);
-  }, [vacancy, hydrateEditFormFromVacancy, companies, vacancyRouteId]);
+  }, [vacancy, hydrateEditFormFromVacancy]);
 
   const handleCopyVacancy = useCallback(async () => {
     if (!vacancy || typeof vacancy !== "object") return;
-    const companyId = resolveVacancyCompanyId(
-      vacancy,
-      companies,
-      vacancyRouteId
-    );
+    const companyId = resolveVacancyCompanyId(vacancy);
+    if (!companyId) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tDetail("errors.companyRequired"),
+      });
+      return;
+    }
     const companyName =
       vacancyCompanyDisplayName === "—" ? "" : vacancyCompanyDisplayName;
     const payload = buildVacancyClipboardPayload(vacancy, companyId, companyName);
@@ -1293,7 +1282,7 @@ export default function VacanteDetallePage() {
       variant: "success",
       message: tDetail("toasts.copied"),
     });
-  }, [vacancy, companies, vacancyRouteId, vacancyCompanyDisplayName, tDetail]);
+  }, [vacancy, vacancyCompanyDisplayName, tDetail]);
 
   const applyClipboardToEditForm = useCallback((payload) => {
     setEditTitle(payload.title);
@@ -1462,7 +1451,6 @@ export default function VacanteDetallePage() {
     try {
       if (companyChanged && !hasOtherFormChanges) {
         await patchVacancyClientCompany(vacancyId, editCompanyId);
-        persistVacancyCompanyId(vacancyId, editCompanyId);
         await fetchVacancy(true);
       } else if (hasOtherFormChanges) {
         const payload: Record<string, unknown> = {
@@ -1516,10 +1504,6 @@ export default function VacanteDetallePage() {
         const nextCompanyName =
           companySelectOptions.find((c) => c.id === editCompanyId)?.name ??
           String(updatedRecord.company ?? vacancy?.company ?? "").trim();
-
-        if (companyChanged) {
-          persistVacancyCompanyId(vacancyId, editCompanyId);
-        }
 
         setVacancy((prev) => ({
           ...(prev && typeof prev === "object" ? prev : {}),

@@ -1890,7 +1890,9 @@
           },
           "client": {
             "label": "Cliente / compañía",
-            "ariaLabel": "Cliente o compañía de la vacante"
+            "ariaLabel": "Cliente o compañía de la vacante",
+            "loading": "Cargando empresas…",
+            "empty": "No hay empresas disponibles"
           },
           "country": {
             "label": "País al que aplica la vacante"

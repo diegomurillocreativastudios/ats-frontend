@@ -1822,7 +1822,9 @@
           },
           "client": {
             "label": "Kunde / Unternehmen",
-            "ariaLabel": "Kunde oder Unternehmen der Stelle"
+            "ariaLabel": "Kunde oder Unternehmen der Stelle",
+            "loading": "Unternehmen werden geladen…",
+            "empty": "Keine Unternehmen verfügbar"
           },
           "country": {
             "label": "Land, für das die Stelle gilt"

@@ -1890,7 +1890,9 @@
           },
           "client": {
             "label": "Client / company",
-            "ariaLabel": "Vacancy client or company"
+            "ariaLabel": "Vacancy client or company",
+            "loading": "Loading companies…",
+            "empty": "No companies available"
           },
           "country": {
             "label": "Country the vacancy applies to"

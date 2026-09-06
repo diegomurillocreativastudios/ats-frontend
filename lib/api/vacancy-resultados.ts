@@ -1,12 +1,8 @@
 import { apiClient } from "@/lib/api"
 import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
-import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api"
 import {
   listCompanyApplicantStatuses,
-  listRecruiterCompanies,
   listRecruiterStages,
-  persistVacancyCompanyId,
-  resolveVacancyCompanyId,
 } from "@/lib/api/recruiter-companies"
 import {
   buildApplicantComponentScoreAverages,
@@ -135,14 +131,6 @@ export async function fetchVacancyResultadosPayload(
     vacancyId,
     vacancyData
   )
-  const vacancyRecord = normalizeVacancyDetailFromApi(vacancyWithApplicants)
-  const directCompanyId = vacancyRecord?.companyId ?? vacancyRecord?.company_id
-  if (directCompanyId != null && String(directCompanyId).trim() !== "") {
-    persistVacancyCompanyId(vacancyId, String(directCompanyId).trim())
-  }
-
-  const companies = await listRecruiterCompanies().catch(() => [])
-  const companyId = resolveVacancyCompanyId(vacancyRecord, companies, vacancyId)
 
   const [stageRows, companyStatuses] = await Promise.all([
     listRecruiterStages().catch(() => []),

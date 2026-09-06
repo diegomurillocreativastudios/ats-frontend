@@ -1822,7 +1822,9 @@
           },
           "client": {
             "label": "Client / entreprise",
-            "ariaLabel": "Client ou entreprise du poste"
+            "ariaLabel": "Client ou entreprise du poste",
+            "loading": "Chargement des entreprises…",
+            "empty": "Aucune entreprise disponible"
           },
           "country": {
             "label": "Pays auquel s'applique le poste"

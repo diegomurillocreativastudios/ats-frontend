@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { apiClient } from "@/lib/api";
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs";
 import {
-  DEFAULT_RECRUITER_COMPANY_ID,
   listRecruiterCompanies,
-  persistVacancyCompanyId,
   type RecruiterCompanyOption,
 } from "@/lib/api/recruiter-companies";
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields";
@@ -56,7 +54,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [vacancyModalityId, setVacancyModalityId] = useState("");
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
   const [companyOptions, setCompanyOptions] = useState<RecruiterCompanyOption[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
+  const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [loadingCompanies, setLoadingCompanies] = useState(false);
   const [companyLoadError, setCompanyLoadError] = useState<string | null>(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
@@ -85,17 +83,13 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
 
         setCompanyOptions(companies)
         if (!companyTouchedRef.current) {
-          const defaultId =
-            companies.find((c) => c.id === DEFAULT_RECRUITER_COMPANY_ID)?.id ??
-            companies[0]?.id ??
-            DEFAULT_RECRUITER_COMPANY_ID
-          setSelectedCompanyId(defaultId)
+          setSelectedCompanyId(companies[0]?.id ?? "")
         }
       } catch (error) {
         if (cancelled) return
         setCompanyOptions([])
         if (!companyTouchedRef.current) {
-          setSelectedCompanyId(DEFAULT_RECRUITER_COMPANY_ID)
+          setSelectedCompanyId("")
         }
         setCompanyLoadError(
           (error as { message?: string })?.message ||
@@ -211,6 +205,15 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     e.preventDefault();
     if (!validate()) return;
 
+    const companyId = selectedCompanyId.trim()
+    if (!companyId || companyOptions.length === 0) {
+      setErrors((prev) => ({
+        ...prev,
+        empresa: t("validation.companyRequired"),
+      }))
+      return
+    }
+
     const validReqs = requerimientos.filter(
       (r) => r.requirementName.trim() && r.requirementValue.trim()
     );
@@ -236,7 +239,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
       details: trimmedDetalles || null,
       salary: trimmedSalario || null,
       advantages: trimmedVentajas || null,
-      companyId: selectedCompanyId || DEFAULT_RECRUITER_COMPANY_ID,
+      companyId,
       requirements,
       weights: {
         semantic: 0.5,
@@ -256,16 +259,6 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
 
     try {
       const data = await apiClient.post("/api/recruiter/vacancies", payload);
-      const created =
-        data && typeof data === "object" && !Array.isArray(data)
-          ? (data as Record<string, unknown>)
-          : null
-      const createdId = created?.id ?? created?.uuid
-      const createdCompanyId =
-        created?.companyId ?? created?.company_id ?? payload.companyId
-      if (createdId != null && createdCompanyId != null) {
-        persistVacancyCompanyId(String(createdId), String(createdCompanyId))
-      }
       handleClose();
       onSubmit?.(data);
     } catch (err) {
@@ -288,7 +281,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     setStateCode("");
     setVacancyDepartmentId("");
     setVacancyModalityId("");
-    setSelectedCompanyId(DEFAULT_RECRUITER_COMPANY_ID);
+    setSelectedCompanyId("");
     setRequerimientos([createEmptyRequirement()]);
     setErrors({});
     setSubmitError(null);
@@ -550,7 +543,11 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             disabled={loading || loadingCompanies}
           >
             {companyOptions.length === 0 ? (
-              <option value={DEFAULT_RECRUITER_COMPANY_ID}>Applican Tree</option>
+              <option value="" disabled>
+                {loadingCompanies
+                  ? t("fields.client.loading")
+                  : t("fields.client.empty")}
+              </option>
             ) : (
               companyOptions.map((company) => (
                 <option key={company.id} value={company.id}>

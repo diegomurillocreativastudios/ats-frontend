@@ -1,15 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import {
-  DEFAULT_RECRUITER_COMPANY_ID,
   listRecruiterCompanies,
   listCompanyVacancyStatuses,
   listRecruiterStages,
   listCompanyApplicantStatuses,
   resolveVacancyCompanyId,
-  persistVacancyCompanyId,
-  readPersistedVacancyCompanyId,
   adminStagesCatalogHref,
-  type RecruiterCompanyOption,
 } from "@/lib/api/recruiter-companies"
 
 const apiGet = vi.fn()
@@ -21,47 +17,26 @@ vi.mock("@/lib/api", () => ({
 }))
 
 describe("resolveVacancyCompanyId", () => {
-  const companies: RecruiterCompanyOption[] = [
-    { id: "00000000-0000-0000-0000-000000000001", name: "Applican Tree", isActive: true },
-    { id: "company-b-id", name: "Acme Corp", isActive: true },
-  ]
-
   it("returns companyId from vacancy when present", () => {
     expect(
-      resolveVacancyCompanyId({ companyId: "company-b-id", company: "Acme Corp" }, companies)
+      resolveVacancyCompanyId({ companyId: "company-b-id", company: "Acme Corp" })
     ).toBe("company-b-id")
   })
 
-  it("resolves companyId by matching company display name", () => {
-    expect(resolveVacancyCompanyId({ company: "Acme Corp" }, companies)).toBe("company-b-id")
-  })
-
-  it("falls back to default company id when unresolved", () => {
-    expect(resolveVacancyCompanyId({ company: "Unknown LLC" }, companies)).toBe(
-      DEFAULT_RECRUITER_COMPANY_ID
-    )
-  })
-
-  it("reads persisted company id for vacancy when API omits companyId", () => {
-    persistVacancyCompanyId("vac-42", "company-b-id")
-    expect(resolveVacancyCompanyId({ company: "Acme Corp" }, companies, "vac-42")).toBe(
+  it("reads company_id snake_case from vacancy", () => {
+    expect(resolveVacancyCompanyId({ company_id: "company-b-id" })).toBe(
       "company-b-id"
     )
-    expect(readPersistedVacancyCompanyId("vac-42")).toBe("company-b-id")
   })
 
-  it("prefers API companyId over persisted session value", () => {
-    persistVacancyCompanyId("vac-99", "company-b-id")
-    expect(
-      resolveVacancyCompanyId(
-        {
-          companyId: "00000000-0000-0000-0000-000000000001",
-          company: "Applican Tree",
-        },
-        companies,
-        "vac-99"
-      )
-    ).toBe("00000000-0000-0000-0000-000000000001")
+  it("returns empty string when companyId is omitted", () => {
+    expect(resolveVacancyCompanyId({ company: "Acme Corp" })).toBe("")
+    expect(resolveVacancyCompanyId(null)).toBe("")
+    expect(resolveVacancyCompanyId(undefined)).toBe("")
+  })
+
+  it("returns empty string for blank companyId", () => {
+    expect(resolveVacancyCompanyId({ companyId: "   " })).toBe("")
   })
 })
 

@@ -3,9 +3,9 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 9 · In Progress 0 · Last ToDos 0 · To Do 15
+**Conteo:** Done 10 · In Progress 0 · Last ToDos 0 · To Do 14
 
-**Antes del primer PR:** autorización explícita; coordinar con backend la evidencia de **FE-SEC-007**. Un lote = un PR pequeño. No agrupar todo.
+**Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
 ---
 
@@ -39,6 +39,10 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
 - [x] **FE-SEC-006** — Runtime Node Long Term Support (Node 24)
   - `Dockerfile` base/runner: `node:24-bookworm-slim@sha256:…`; `engines`: `>=24 <25`; `.nvmrc` 24
   - CI ya en 24; test de regresión `node-lts-runtime-pin.test.ts`
+- [x] **FE-SEC-007** — `companyId` explícito; ownership en backend (catálogo compartido)
+  - Front: sin `sessionStorage` de empresa ni UUID default; create/edit fail-closed si no hay empresa del catálogo
+  - Backend: `CreateVacancy` exige `companyId` (400 sin fallback a `…0001`)
+  - Evidencia BE-SEC-004 / ownership: candidato ajeno → 403; sin sesión → 401; Recruiter en CRUD empresas → 403; empresa inactiva denegada; ficha con IDs cruzados → 404; Recruiter ve empresas activas del comprador (no muro A↔B)
 
 ---
 
@@ -58,9 +62,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-007** — Verificar autorización multiempresa / ownership en backend
-  - El frontend no es el control; IDs y `sessionStorage.companyId` son manipulables
-  - Cierre: matriz 403/404 dos tenants × roles × documentos/PDF. Quitar storage si sobra
 - [ ] **FE-SEC-008** — Quitar `admin/admin` y fallback end-to-end a servicio externo
   - Login, `.github/workflows/e2e.yml`, `global-setup.ts`, helpers; CI falla cerrado sin secretos
 - [ ] **FE-SEC-009** — Sesión fail-closed: sin identidad/rol desde cookie `ats_user`

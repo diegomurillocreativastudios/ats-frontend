@@ -1,11 +1,5 @@
 import { apiClient } from "@/lib/api"
 
-/** Default tenant when the API omits `companyId` on create. */
-export const DEFAULT_RECRUITER_COMPANY_ID =
-  "00000000-0000-0000-0000-000000000001"
-
-const VACANCY_COMPANY_STORAGE_PREFIX = "ats:vacancy-company:"
-
 export interface RecruiterCompanyOption {
   id: string
   name: string
@@ -43,65 +37,18 @@ function parseListPayload(raw: unknown, keys: string[]): unknown[] {
   return []
 }
 
-export function vacancyCompanyIdStorageKey(vacancyId: string): string {
-  return `${VACANCY_COMPANY_STORAGE_PREFIX}${vacancyId}`
-}
-
-/** Persists tenant id after POST create when detail/list only expose company name. */
-export function persistVacancyCompanyId(vacancyId: string, companyId: string): void {
-  if (typeof window === "undefined") return
-  const id = String(vacancyId ?? "").trim()
-  const company = String(companyId ?? "").trim()
-  if (!id || !company) return
-  try {
-    sessionStorage.setItem(vacancyCompanyIdStorageKey(id), company)
-  } catch {
-    // quota / private mode
-  }
-}
-
-export function readPersistedVacancyCompanyId(vacancyId: string): string | null {
-  if (typeof window === "undefined") return null
-  const id = String(vacancyId ?? "").trim()
-  if (!id) return null
-  try {
-    const stored = sessionStorage.getItem(vacancyCompanyIdStorageKey(id))
-    const trimmed = stored?.trim() ?? ""
-    return trimmed !== "" ? trimmed : null
-  } catch {
-    return null
-  }
-}
-
 /**
- * Resolves the tenant `companyId` for vacancy create/edit (not pipeline catalogs).
- * Detail/list DTOs may only include `company` (display name).
+ * Reads `companyId` from a vacancy API payload only.
+ * Returns empty string when the API omits it — never invents a default UUID.
  */
 export function resolveVacancyCompanyId(
-  vacancy: Record<string, unknown> | null | undefined,
-  companies: RecruiterCompanyOption[] = [],
-  vacancyId?: string | null
+  vacancy: Record<string, unknown> | null | undefined
 ): string {
   const direct = vacancy?.companyId ?? vacancy?.company_id
   if (direct != null && String(direct).trim() !== "") {
     return String(direct).trim()
   }
-
-  const persisted =
-    vacancyId != null ? readPersistedVacancyCompanyId(String(vacancyId)) : null
-  if (persisted) return persisted
-
-  const companyName = String(vacancy?.company ?? vacancy?.companyName ?? "").trim()
-  if (companyName !== "" && companies.length > 0) {
-    const lower = companyName.toLowerCase()
-    const match = companies.find((c) => {
-      const candidate = String(c.name ?? "").trim()
-      return candidate.toLowerCase() === lower || c.id === companyName
-    })
-    if (match?.id) return match.id
-  }
-
-  return DEFAULT_RECRUITER_COMPANY_ID
+  return ""
 }
 
 export const ADMIN_STAGES_CATALOG_PATH = "/portal-admin/vacantes/etapas"
