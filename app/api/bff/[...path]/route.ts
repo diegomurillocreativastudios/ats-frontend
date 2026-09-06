@@ -2,7 +2,10 @@ import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { buildBackendPathFromSegments } from "@/lib/api/bff-path"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
-import { UPLOAD_MAX_BYTES_20_MB } from "@/lib/upload-constraints"
+import {
+  getUploadMaxBytesForBackendPath,
+  readRequestBodyWithinLimit,
+} from "@/lib/upload-body-limit"
 
 const HOP_BY_HOP = new Set([
   "connection",
@@ -62,20 +65,6 @@ async function proxyToBackend(
     )
   }
 
-  const contentLengthHeader = request.headers.get("content-length")
-  if (contentLengthHeader) {
-    const contentLength = Number(contentLengthHeader)
-    if (
-      Number.isFinite(contentLength) &&
-      contentLength > UPLOAD_MAX_BYTES_20_MB
-    ) {
-      return NextResponse.json(
-        { message: "El cuerpo de la solicitud supera el límite permitido" },
-        { status: 413 }
-      )
-    }
-  }
-
   const search = request.nextUrl.search || ""
   const targetUrl = `${baseUrl}${backendPath}${search}`
 
@@ -97,13 +86,15 @@ async function proxyToBackend(
 
   let body: ArrayBuffer | undefined
   if (hasBody) {
-    body = await request.arrayBuffer()
-    if (body.byteLength > UPLOAD_MAX_BYTES_20_MB) {
+    const maxBytes = getUploadMaxBytesForBackendPath(backendPath)
+    const bounded = await readRequestBodyWithinLimit(request, maxBytes)
+    if (!bounded.ok) {
       return NextResponse.json(
-        { message: "El cuerpo de la solicitud supera el límite permitido" },
-        { status: 413 }
+        { message: bounded.message },
+        { status: bounded.status }
       )
     }
+    body = bounded.body
   }
 
   let backendResponse: Response

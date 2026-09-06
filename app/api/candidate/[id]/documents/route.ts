@@ -3,6 +3,10 @@ import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
+import {
+  getUploadMaxBytesForBackendPath,
+  readRequestBodyWithinLimit,
+} from "@/lib/upload-body-limit"
 
 interface CandidateDocumentDto {
   id: string
@@ -123,15 +127,6 @@ export async function POST(
       return NextResponse.json({ message: "No autorizado" }, { status: 401 })
     }
 
-    const incomingFormData = await request.formData()
-    const file = incomingFormData.get("File")
-    if (!(file instanceof File)) {
-      return NextResponse.json({ message: "No file uploaded." }, { status: 400 })
-    }
-
-    const backendFormData = new FormData()
-    backendFormData.append("File", file)
-
     const baseUrl = getServerBackendBaseUrl()
     if (!baseUrl) {
       return NextResponse.json(
@@ -143,17 +138,32 @@ export async function POST(
       )
     }
 
-    const backendResponse = await fetch(
-      `${baseUrl}/api/candidate/${encodeURIComponent(candidateId)}/documents`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: backendFormData,
-        cache: "no-store",
-      }
-    )
+    const backendPath = `/api/candidate/${encodeURIComponent(candidateId)}/documents`
+    const maxBytes = getUploadMaxBytesForBackendPath(backendPath)
+    const bounded = await readRequestBodyWithinLimit(request, maxBytes)
+    if (!bounded.ok) {
+      return NextResponse.json(
+        { message: bounded.message },
+        { status: bounded.status }
+      )
+    }
+    if (bounded.body.byteLength === 0) {
+      return NextResponse.json({ message: "No file uploaded." }, { status: 400 })
+    }
+
+    const forwardHeaders = new Headers()
+    forwardHeaders.set("Authorization", `Bearer ${accessToken}`)
+    const contentType = request.headers.get("content-type")
+    if (contentType) {
+      forwardHeaders.set("Content-Type", contentType)
+    }
+
+    const backendResponse = await fetch(`${baseUrl}${backendPath}`, {
+      method: "POST",
+      headers: forwardHeaders,
+      body: bounded.body,
+      cache: "no-store",
+    })
 
     const payload = await backendResponse.json().catch(() => null)
     if (!backendResponse.ok) {

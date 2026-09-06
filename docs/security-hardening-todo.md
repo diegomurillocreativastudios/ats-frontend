@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 13 · In Progress 0 · Last ToDos 0 · To Do 11
+**Conteo:** Done 14 · In Progress 0 · Last ToDos 0 · To Do 10
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -54,6 +54,10 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - `poweredByHeader: false`; nosniff / referrer / `X-Frame-Options` / Permissions-Policy / COOP en config + proxy
   - CSP enforce por defecto (`CSP_MODE=report-only` rollback); nonce en `proxy.ts`; `POST /api/csp-report`
   - HSTS opt-in (`ENABLE_HSTS=1`) tras inventario HTTPS
+- [x] **FE-SEC-012** — Uploads: allowlist / magic bytes / tamaño / cuota en servidor
+  - BFF: tope de cuerpo por ruta (5/10/15/20 MB); sin `formData()` sin límite
+  - Documentos candidato: reenvío de buffer acotado; SVG de logos no se pinta como data URI
+  - Barra autoritativa / AV / cuarentena siguen en backend (BE-SEC-016)
 
 ---
 
@@ -73,9 +77,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-012** — Uploads: allowlist / magic bytes / tamaño / cuota en servidor
-  - BFF no hace `formData()` sin límite; SVG de logos bloqueado o aislado
-  - Barra autoritativa en backend; AV/cuarentena alineada con BE-SEC-016
 - [ ] **FE-SEC-014** — Logout con revocación demostrable de la familia refresh
   - Borrar cookies aunque el backend falle; replay de refresh revoca familia
 - [ ] **FE-SEC-015** — PDF/reportes: datos autoritativos server-side + cuotas

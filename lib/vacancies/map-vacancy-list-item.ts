@@ -2,6 +2,7 @@ import { readCompanyIsActiveForVacancy } from "@/lib/vacancies/read-company-is-a
 import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active"
 import { formatVacancyCountryLabel } from "@/lib/vacancies/vacancy-location-display"
 import { normalizeCountryCode, readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
+import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 import {
   getVacancyDepartmentId,
   getVacancyDepartmentLabel,
@@ -46,13 +47,12 @@ const resolveLogoSrc = (item: Record<string, unknown>): string | null => {
   const logo = item?.logo
   if (logo == null || typeof logo !== "object" || Array.isArray(logo)) return null
   const logoRecord = logo as Record<string, unknown>
-  const base64 = String(logoRecord.base64 ?? "").trim()
-  if (!base64) return null
-  if (base64.startsWith("data:")) return base64
-  const contentType =
-    String(logoRecord.contentType ?? logoRecord.content_type ?? "image/png").trim() ||
-    "image/png"
-  return `data:${contentType};base64,${base64}`
+  return buildSafeLogoDataUri({
+    base64: String(logoRecord.base64 ?? "").trim() || null,
+    contentType:
+      String(logoRecord.contentType ?? logoRecord.content_type ?? "").trim() ||
+      null,
+  })
 }
 
 export const formatRequirementsSummary = (req: unknown): string => {

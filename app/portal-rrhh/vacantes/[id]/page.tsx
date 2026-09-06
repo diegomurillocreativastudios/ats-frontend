@@ -46,6 +46,7 @@ import {
   unwrapListArray,
 } from "@/lib/api/query-paging"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
@@ -1063,11 +1064,11 @@ export default function VacanteDetallePage() {
     const logo = vacancy?.logo;
     const hasLogo = Boolean(vacancy?.hasLogo ?? vacancy?.has_logo);
     if (!hasLogo || !logo || typeof logo !== "object") return null;
-    const base64 = String(logo.base64 ?? "").trim();
-    if (!base64) return null;
-    if (base64.startsWith("data:")) return base64;
-    const contentType = String(logo.contentType ?? logo.content_type ?? "image/png").trim() || "image/png";
-    return `data:${contentType};base64,${base64}`;
+    return buildSafeLogoDataUri({
+      base64: String(logo.base64 ?? "").trim() || null,
+      contentType:
+        String(logo.contentType ?? logo.content_type ?? "").trim() || null,
+    });
   }, [vacancy?.hasLogo, vacancy?.has_logo, vacancy?.logo]);
 
   const fetchStages = useCallback(async () => {

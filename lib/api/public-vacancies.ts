@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 import { formatCountryCodeLabel } from "@/lib/profile-form-options"
 import { normalizeCountryCode, readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
 import {
@@ -214,9 +215,7 @@ function normalizeCompany(raw: Record<string, unknown>): OpportunityCompanySumma
 export function buildOpportunityCompanyLogoDataUri(
   logo: OpportunityCompanyLogo | null
 ): string | null {
-  if (!logo || !logo.base64) return null
-  const contentType = logo.contentType || "image/png"
-  return `data:${contentType};base64,${logo.base64}`
+  return buildSafeLogoDataUri(logo)
 }
 
 function normalizeCountryCodeField(raw: Record<string, unknown>): string | undefined {
