@@ -2,6 +2,7 @@
  * Auth helpers for session-based auth using cookies.
  * Backend returns: tokenType, accessToken, expiresIn, refreshToken.
  * Access token is HttpOnly; the browser must not read it.
+ * Identity/role come only from GET /api/auth/me (backend session).
  */
 
 const COOKIE_ACCESS = "ats_access_token"
@@ -34,29 +35,20 @@ export const getTokenExpiresAt = (): number | null => {
 
 /**
  * Simple “is logged in” check on the client without reading the access token.
- * Uses the non-HttpOnly expiry or user cookie as a hint.
+ * Uses the non-HttpOnly expiry cookie as a UI hint only (not authorization).
  */
-export const hasAuth = (): boolean =>
-  Boolean(getTokenExpiresAt() || getCookie(COOKIE_USER))
+export const hasAuth = (): boolean => Boolean(getTokenExpiresAt())
 
 /**
- * Get current user from cookie (client-side only).
- * Set by login route when backend returns user, or by /api/auth/me.
+ * @deprecated Identity must come from GET /api/auth/me (backend session).
+ * Kept so mistaken imports fail closed (always null).
  */
 export const getCurrentUser = (): {
   id: string | null
   name: string
   email: string
   role?: string | null
-} | null => {
-  const raw = getCookie(COOKIE_USER)
-  if (!raw) return null
-  try {
-    return JSON.parse(raw)
-  } catch {
-    return null
-  }
-}
+} | null => null
 
 /** Readable CSRF token for double-submit header. */
 export const getCsrfToken = (): string | null => getCookie(COOKIE_CSRF)

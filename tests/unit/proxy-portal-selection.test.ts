@@ -5,14 +5,16 @@ import { AUTH_COOKIES } from "@/lib/auth"
 import { PORTAL_SELECTION_PATH } from "@/lib/portal-access"
 import { proxy } from "../../proxy"
 
-function requestWithSession(
+function requestWithToken(
   path: string,
-  role: string | null,
+  roleInCookie: string | null = null
 ): NextRequest {
   const cookies = [`${AUTH_COOKIES.access}=token`]
-  if (role) {
+  if (roleInCookie) {
     cookies.push(
-      `${AUTH_COOKIES.user}=${encodeURIComponent(JSON.stringify({ role }))}`,
+      `${AUTH_COOKIES.user}=${encodeURIComponent(
+        JSON.stringify({ role: roleInCookie })
+      )}`
     )
   }
   return new NextRequest(`https://dev-applicantree-ats.vercel.app${path}`, {
@@ -26,27 +28,34 @@ function redirectPath(response: Response): string | null {
   return new URL(location).pathname
 }
 
-describe("proxy portal selection", () => {
-  it("redirige al candidato con un solo portal a su home", () => {
-    const res = proxy(requestWithSession(PORTAL_SELECTION_PATH, "candidate"))
-    expect(res.status).toBeGreaterThanOrEqual(300)
-    expect(redirectPath(res)).toBe("/portal-candidato")
-  })
-
-  it("deja al reclutador en la selección porque tiene más de un portal", () => {
-    const res = proxy(requestWithSession(PORTAL_SELECTION_PATH, "recruiter"))
-    expect(res.status).toBeLessThan(300)
-    expect(res.headers.get("location")).toBeNull()
-  })
-
-  it("deja al admin en la selección porque tiene más de un portal", () => {
-    const res = proxy(requestWithSession(PORTAL_SELECTION_PATH, "admin"))
-    expect(res.status).toBeLessThan(300)
-    expect(res.headers.get("location")).toBeNull()
-  })
-
-  it("desde / manda al admin a la selección de portal", () => {
-    const res = proxy(requestWithSession("/", "admin"))
+describe("proxy portal selection (no role from ats_user)", () => {
+  it("sends authenticated / to portal selection regardless of cookie role", () => {
+    const res = proxy(requestWithToken("/", "candidate"))
     expect(redirectPath(res)).toBe(PORTAL_SELECTION_PATH)
+  })
+
+  it("sends authenticated auth pages to portal selection", () => {
+    const res = proxy(requestWithToken("/auth/iniciar-sesion", "admin"))
+    expect(redirectPath(res)).toBe(PORTAL_SELECTION_PATH)
+  })
+
+  it("does not redirect portal selection by cookie role", () => {
+    const res = proxy(requestWithToken(PORTAL_SELECTION_PATH, "candidate"))
+    expect(res.status).toBeLessThan(300)
+    expect(res.headers.get("location")).toBeNull()
+  })
+
+  it("does not cross-redirect candidate and recruiter portals by cookie", () => {
+    const asRecruiterOnCandidate = proxy(
+      requestWithToken("/portal-candidato", "recruiter")
+    )
+    expect(asRecruiterOnCandidate.status).toBeLessThan(300)
+    expect(asRecruiterOnCandidate.headers.get("location")).toBeNull()
+
+    const asCandidateOnRrhh = proxy(
+      requestWithToken("/portal-rrhh", "candidate")
+    )
+    expect(asCandidateOnRrhh.status).toBeLessThan(300)
+    expect(asCandidateOnRrhh.headers.get("location")).toBeNull()
   })
 })

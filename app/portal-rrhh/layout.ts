@@ -1,4 +1,8 @@
+import type { ReactNode } from "react"
 import { getTranslations } from "next-intl/server"
+import { requirePortalRecruiterUser } from "@/lib/server-session-user"
+
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata() {
   const t = await getTranslations("Metadata.recruiterPortal")
@@ -8,6 +12,11 @@ export async function generateMetadata() {
   }
 }
 
-export default function PortalRRHHLayout({ children }) {
+export default async function PortalRRHHLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
+  await requirePortalRecruiterUser()
   return children
 }

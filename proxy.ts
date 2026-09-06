@@ -5,33 +5,16 @@ import { isPublicPath } from "@/lib/auth/public-paths"
 import {
   PORTAL_HOME_HREF,
   PORTAL_SELECTION_PATH,
-  resolvePostAuthPath,
-  resolveSolePortalHref,
 } from "@/lib/portal-access"
-import { isCandidateRole, isRecruiterRole } from "@/lib/roles"
 
 const AUTH_ROUTE = "/auth/iniciar-sesion"
 const SSO_SUCCESS_PATH = "/auth/sso/success"
 const CANDIDATE_HOME = PORTAL_HOME_HREF.candidate
-const RECRUITER_HOME = PORTAL_HOME_HREF.rrhh
 
-function getSessionRoleRaw(request: NextRequest): string | null {
-  const userCookie = request.cookies.get(AUTH_COOKIES.user)?.value
-  if (!userCookie) return null
-
-  try {
-    const parsed = JSON.parse(userCookie) as { role?: unknown; roles?: unknown }
-    if (typeof parsed.role === "string") return parsed.role
-    if (Array.isArray(parsed.roles) && typeof parsed.roles[0] === "string") {
-      return parsed.roles[0]
-    }
-  } catch {
-    return null
-  }
-
-  return null
-}
-
+/**
+ * Edge proxy: auth gate by access-token presence only.
+ * Role-based portal isolation lives in server layouts (backend session).
+ */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -44,9 +27,6 @@ export function proxy(request: NextRequest) {
   }
 
   const hasToken = Boolean(request.cookies.get(AUTH_COOKIES.access)?.value)
-  const rawRole = getSessionRoleRaw(request)
-  const isCandidate = isCandidateRole(rawRole)
-  const isRecruiter = isRecruiterRole(rawRole)
 
   if (pathname === "/iniciar-sesion" || pathname === "/login") {
     const dest = new URL("/auth/iniciar-sesion", request.url)
@@ -105,25 +85,14 @@ export function proxy(request: NextRequest) {
    * y nunca ve el formulario de nueva contraseña).
    */
   if (hasToken && isAuthPage) {
-    return NextResponse.redirect(
-      new URL(resolvePostAuthPath(rawRole), request.url),
-    )
+    return NextResponse.redirect(new URL(PORTAL_SELECTION_PATH, request.url))
   }
 
   if (pathname === "/" && hasToken) {
-    return NextResponse.redirect(
-      new URL(resolvePostAuthPath(rawRole), request.url),
-    )
+    return NextResponse.redirect(new URL(PORTAL_SELECTION_PATH, request.url))
   }
 
   if (pathname === PORTAL_SELECTION_PATH && hasToken) {
-    const solePortalHref = resolveSolePortalHref(rawRole)
-    if (solePortalHref) {
-      const url = request.nextUrl.clone()
-      url.pathname = solePortalHref
-      url.search = ""
-      return NextResponse.redirect(url)
-    }
     return NextResponse.next()
   }
 
@@ -137,24 +106,6 @@ export function proxy(request: NextRequest) {
       loginUrl.searchParams.set("from", `${pathname}${request.nextUrl.search}`)
     }
     return NextResponse.redirect(loginUrl)
-  }
-
-  const isPortalCandidateRoute =
-    pathname === CANDIDATE_HOME || pathname.startsWith(`${CANDIDATE_HOME}/`)
-  const isPortalRecruiterRoute =
-    pathname === RECRUITER_HOME || pathname.startsWith(`${RECRUITER_HOME}/`)
-  if (isPortalCandidateRoute && isRecruiter) {
-    const url = request.nextUrl.clone()
-    url.pathname = RECRUITER_HOME
-    url.search = ""
-    return NextResponse.redirect(url)
-  }
-
-  if (isPortalRecruiterRoute && isCandidate) {
-    const url = request.nextUrl.clone()
-    url.pathname = CANDIDATE_HOME
-    url.search = ""
-    return NextResponse.redirect(url)
   }
 
   return NextResponse.next()

@@ -7,7 +7,7 @@ import {
 import { AUTH_COOKIES } from "@/lib/auth"
 
 vi.mock("@/lib/fetch-backend-session-user", () => ({
-  fetchBackendSessionUser: vi.fn(async () => null),
+  fetchBackendSessionUser: vi.fn(async () => ({ status: "unavailable" })),
 }))
 
 describe("parseBackendAuthPayload", () => {

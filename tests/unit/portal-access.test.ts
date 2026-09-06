@@ -34,12 +34,10 @@ describe("getAccessiblePortalKeys", () => {
     expect(getAccessiblePortalKeys("candidato")).toEqual(["candidate"])
   })
 
-  it("sin rol clasificado ofrece las tres vistas no admin", () => {
-    expect(getAccessiblePortalKeys(null)).toEqual([
-      "candidate",
-      "opportunities",
-      "rrhh",
-    ])
+  it("sin rol clasificado no ofrece portales (fail-closed)", () => {
+    expect(getAccessiblePortalKeys(null)).toEqual([])
+    expect(getAccessiblePortalKeys(undefined)).toEqual([])
+    expect(getAccessiblePortalKeys("")).toEqual([])
   })
 })
 
@@ -51,6 +49,9 @@ describe("resolveSolePortalHref", () => {
   it("no fuerza destino si hay dos o más vistas", () => {
     expect(resolveSolePortalHref("recruiter")).toBeNull()
     expect(resolveSolePortalHref("admin")).toBeNull()
+  })
+
+  it("sin rol no fuerza destino", () => {
     expect(resolveSolePortalHref(null)).toBeNull()
   })
 })
@@ -63,5 +64,9 @@ describe("resolvePostAuthPath", () => {
   it("manda a staff a la selección de portal", () => {
     expect(resolvePostAuthPath("recruiter")).toBe(PORTAL_SELECTION_PATH)
     expect(resolvePostAuthPath("admin")).toBe(PORTAL_SELECTION_PATH)
+  })
+
+  it("sin rol manda a la selección de portal", () => {
+    expect(resolvePostAuthPath(null)).toBe(PORTAL_SELECTION_PATH)
   })
 })

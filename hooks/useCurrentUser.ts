@@ -1,43 +1,47 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { getCurrentUser } from "@/lib/auth";
+import { useState, useEffect } from "react"
+
+interface CurrentUser {
+  id: string | null
+  name: string
+  email: string
+  role?: string | null
+}
 
 /**
- * Returns the currently logged-in user (from /api/auth/me or ats_user cookie).
- * @returns {{ user: { id, name, email, role? } | null, loading: boolean }}
+ * Returns the currently logged-in user from GET /api/auth/me only.
+ * Fail-closed: never reads identity from the `ats_user` cookie.
  */
 export const useCurrentUser = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<CurrentUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
 
     const load = async () => {
       try {
-        const res = await fetch("/api/auth/me", { credentials: "include" });
-        if (cancelled) return;
+        const res = await fetch("/api/auth/me", { credentials: "include" })
+        if (cancelled) return
         if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-          return;
+          const data = (await res.json()) as CurrentUser
+          setUser(data)
+          return
         }
-        const fromCookie = getCurrentUser();
-        if (fromCookie) setUser(fromCookie);
+        setUser(null)
       } catch {
-        if (!cancelled) {
-          const fromCookie = getCurrentUser();
-          if (fromCookie) setUser(fromCookie);
-        }
+        if (!cancelled) setUser(null)
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoading(false)
       }
-    };
+    }
 
-    load();
-    return () => { cancelled = true; };
-  }, []);
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  return { user, loading };
-};
+  return { user, loading }
+}

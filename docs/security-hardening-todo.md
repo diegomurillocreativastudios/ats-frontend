@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 11 · In Progress 0 · Last ToDos 0 · To Do 13
+**Conteo:** Done 12 · In Progress 0 · Last ToDos 0 · To Do 12
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -46,6 +46,10 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
 - [x] **FE-SEC-008** — Quitar `admin/admin` y fallback end-to-end a servicio externo
   - Login sin `isAdminDemo`; helpers/`global-setup` sin defaults `admin`/`admin`
   - `e2e.yml` exige `E2E_API_URL` + secrets; CI falla cerrado; pin `e2e-credentials-fail-closed.test.ts`
+- [x] **FE-SEC-009** — Sesión fail-closed: sin identidad/rol desde cookie `ats_user`
+  - `lookupServerSession` / `fetchBackendSessionUser`: ok | unauthenticated | unavailable
+  - `/api/auth/me` y layouts de portal solo confían en `/api/auth/session`; backend caído → 401/503
+  - Proxy sin rol desde cookie; `useCurrentUser` / `getCurrentUser` sin fallback a `ats_user`
 
 ---
 
@@ -65,8 +69,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-009** — Sesión fail-closed: sin identidad/rol desde cookie `ats_user`
-  - `lib/server-session-user.ts`, `/api/auth/me`, `proxy.ts`; backend caído → 401/503
 - [ ] **FE-SEC-010** — Headers defensivos + Content Security Policy Report-Only → enforcement
   - `poweredByHeader: false`; nosniff / referrer / frame-ancestors; HSTS solo tras inventario HTTPS
 - [ ] **FE-SEC-012** — Uploads: allowlist / magic bytes / tamaño / cuota en servidor

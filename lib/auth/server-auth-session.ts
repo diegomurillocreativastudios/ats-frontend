@@ -115,12 +115,12 @@ export async function createAuthSessionResponse(
   )
 
   const hydrated = await fetchBackendSessionUser(baseUrl, accessToken)
-  if (hydrated) {
+  if (hydrated.status === "ok") {
     userPayload = {
-      id: hydrated.id ?? userPayload.id,
-      name: hydrated.name || userPayload.name || userPayload.email,
-      email: hydrated.email || userPayload.email,
-      role: hydrated.role ?? userPayload.role,
+      id: hydrated.user.id ?? userPayload.id,
+      name: hydrated.user.name || userPayload.name || userPayload.email,
+      email: hydrated.user.email || userPayload.email,
+      role: hydrated.user.role ?? userPayload.role,
     }
   }
 

@@ -44,17 +44,7 @@ function readVacancyTitleFallback(request: Request): string | null {
   }
 }
 
-function resolvePdfQuotaKey(accessToken: string, userCookie: string | undefined): string {
-  if (userCookie) {
-    try {
-      const parsed = JSON.parse(userCookie) as { id?: unknown }
-      if (parsed?.id != null && String(parsed.id).trim() !== "") {
-        return `user:${String(parsed.id).trim()}`
-      }
-    } catch {
-      /* fall through */
-    }
-  }
+function resolvePdfQuotaKey(accessToken: string): string {
   return `token:${accessToken.slice(0, 16)}`
 }
 
@@ -76,9 +66,7 @@ async function handleTechnicalSheetPdf(
     return NextResponse.json({ message: "No autorizado" }, { status: 401 })
   }
 
-  assertTechnicalSheetPdfRateLimit(
-    resolvePdfQuotaKey(accessToken, cookieStore.get(AUTH_COOKIES.user)?.value)
-  )
+  assertTechnicalSheetPdfRateLimit(resolvePdfQuotaKey(accessToken))
 
   const baseUrl = getServerBackendBaseUrl()
   if (!baseUrl) {

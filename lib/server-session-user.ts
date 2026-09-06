@@ -1,59 +1,79 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { AUTH_COOKIES } from "@/lib/auth"
-import { fetchBackendSessionUser } from "@/lib/fetch-backend-session-user"
+import {
+  fetchBackendSessionUser,
+  type BackendSessionLookupResult,
+  type BackendSessionUserPayload,
+} from "@/lib/fetch-backend-session-user"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
-import type { BackendSessionUserPayload } from "@/lib/fetch-backend-session-user"
-import { isAdminRole } from "@/lib/roles"
+import { isAdminRole, isCandidateRole, isRecruiterRole } from "@/lib/roles"
 
-export type { BackendSessionUserPayload }
+export type { BackendSessionUserPayload, BackendSessionLookupResult }
 
 /**
- * Usuario de sesión en el servidor (cookies + API session cuando hay base URL).
- * Sin redirecciones; para layouts públicos o selectores de portal.
+ * Lookup de sesión fail-closed: solo `/api/auth/session` con el access token.
+ * Nunca lee identidad ni rol desde la cookie `ats_user`.
  */
-export async function getServerSessionUser(): Promise<BackendSessionUserPayload | null> {
+export async function lookupServerSession(): Promise<BackendSessionLookupResult> {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get(AUTH_COOKIES.access)?.value
-  if (!accessToken) return null
+  if (!accessToken) return { status: "unauthenticated" }
 
   const baseUrl = getServerBackendBaseUrl()
-  if (baseUrl) {
-    const fromBackend = await fetchBackendSessionUser(baseUrl, accessToken)
-    if (fromBackend) return fromBackend
-  }
+  if (!baseUrl) return { status: "unavailable" }
 
-  const userCookie = cookieStore.get(AUTH_COOKIES.user)?.value
-  if (userCookie) {
-    try {
-      const u = JSON.parse(userCookie) as Record<string, unknown>
-      const id = u.id != null ? String(u.id) : null
-      const email = u.email != null ? String(u.email) : ""
-      const nameRaw =
-        u.name ?? u.userName ?? (email ? email.split("@")[0] : "") ?? ""
-      const name = String(nameRaw).trim() || email || "Usuario"
-      const rolesArr = Array.isArray(u.roles) ? u.roles : []
-      const role =
-        u.role != null && u.role !== ""
-          ? String(u.role)
-          : u.type != null && u.type !== ""
-            ? String(u.type)
-            : rolesArr.length > 0
-              ? String(rolesArr[0])
-              : null
-      return { id, name, email, role }
-    } catch {
-      return null
-    }
-  }
+  return fetchBackendSessionUser(baseUrl, accessToken)
+}
 
-  return null
+/**
+ * Usuario de sesión en el servidor. Sin redirecciones.
+ * Solo retorna usuario cuando el backend confirma la sesión.
+ */
+export async function getServerSessionUser(): Promise<BackendSessionUserPayload | null> {
+  const result = await lookupServerSession()
+  return result.status === "ok" ? result.user : null
+}
+
+function redirectForSessionFailure(
+  result: Exclude<BackendSessionLookupResult, { status: "ok" }>
+): never {
+  if (result.status === "unavailable") {
+    redirect("/auth/iniciar-sesion?error=service-unavailable")
+  }
+  redirect("/auth/iniciar-sesion")
 }
 
 /** Exige sesión y rol admin; redirige a login o selección de portal. */
 export async function requirePortalAdminUser(): Promise<BackendSessionUserPayload> {
-  const user = await getServerSessionUser()
-  if (!user) redirect("/auth/iniciar-sesion")
-  if (!isAdminRole(user.role)) redirect("/seleccion-portal")
-  return user
+  const result = await lookupServerSession()
+  if (result.status !== "ok") redirectForSessionFailure(result)
+  if (!isAdminRole(result.user.role)) redirect("/seleccion-portal")
+  return result.user
+}
+
+/**
+ * Exige sesión de candidato (o admin). Recruiter sin admin → selección de portal.
+ */
+export async function requirePortalCandidateUser(): Promise<BackendSessionUserPayload> {
+  const result = await lookupServerSession()
+  if (result.status !== "ok") redirectForSessionFailure(result)
+  const { role } = result.user
+  if (!isAdminRole(role) && !isCandidateRole(role)) {
+    redirect("/seleccion-portal")
+  }
+  return result.user
+}
+
+/**
+ * Exige sesión de reclutador / Recursos Humanos (o admin).
+ */
+export async function requirePortalRecruiterUser(): Promise<BackendSessionUserPayload> {
+  const result = await lookupServerSession()
+  if (result.status !== "ok") redirectForSessionFailure(result)
+  const { role } = result.user
+  if (!isAdminRole(role) && !isRecruiterRole(role)) {
+    redirect("/seleccion-portal")
+  }
+  return result.user
 }
