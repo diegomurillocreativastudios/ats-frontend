@@ -56,6 +56,14 @@ test.describe("@smoke Auth", () => {
     await expect(page.getByTestId("auth-reset-form")).toBeVisible()
   })
 
+  test("muestra el primer paso del registro (correo)", async ({ page }) => {
+    await page.goto("/auth/registrarse")
+    await expect(page.getByTestId("auth-register-form")).toBeVisible()
+    await expect(page.getByTestId("auth-register-email")).toBeVisible()
+    await expect(page.getByTestId("auth-register-submit")).toBeVisible()
+    await expect(page.getByTestId("auth-register-password")).toHaveCount(0)
+  })
+
   test("muestra el formulario de olvidaste tu contraseña", async ({ page }) => {
     await page.goto("/auth/olvidaste-tu-contrasena")
     await expect(page.getByTestId("auth-forgot-form")).toBeVisible()

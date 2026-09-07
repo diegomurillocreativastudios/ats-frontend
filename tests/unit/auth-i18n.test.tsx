@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl"
 import IniciarSesion from "@/app/auth/iniciar-sesion/page"
 import OlvidasteTuContrasenaContent from "@/app/auth/olvidaste-tu-contrasena/OlvidasteTuContrasenaContent"
 import RestablecerContrasenaContent from "@/app/auth/restablecer-contrasena/RestablecerContrasenaContent"
+import Registrarse from "@/app/auth/registrarse/page"
 import { locales, type Locale } from "@/i18n/routing"
 import esMessages from "@/messages/es.json"
 import enMessages from "@/messages/en.json"
@@ -121,6 +122,27 @@ describe("Restablecer contraseña i18n (Etapa 4)", () => {
   })
 })
 
+describe("Registro i18n", () => {
+  it("renderiza el paso de correo en español desde next-intl", () => {
+    renderWithIntl(<Registrarse />, "es")
+    expect(
+      screen.getByRole("heading", { name: "Registrarse" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Enviar código" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Idioma" })).toBeInTheDocument()
+  })
+
+  it("traduce el paso de correo al inglés según el locale", () => {
+    renderWithIntl(<Registrarse />, "en")
+    expect(screen.getByRole("heading", { name: "Sign up" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Send code" }),
+    ).toBeInTheDocument()
+  })
+})
+
 describe("Diccionarios auth (Etapa 4)", () => {
   const allMessages: Record<Locale, Record<string, unknown>> = {
     es: esMessages,
@@ -140,6 +162,19 @@ describe("Diccionarios auth (Etapa 4)", () => {
           `${namespace} ausente en ${locale}.json`,
         ).toContain(namespace)
       }
+    }
+  })
+
+  it("mantiene las keys del wizard de registro en los 5 idiomas", () => {
+    const expected = Object.keys(
+      (esMessages.Auth as { register: Record<string, unknown> }).register,
+    ).sort()
+    for (const locale of locales) {
+      const auth = allMessages[locale].Auth as { register: Record<string, unknown> }
+      expect(
+        Object.keys(auth.register).sort(),
+        `Auth.register distinto en ${locale}.json`,
+      ).toEqual(expected)
     }
   })
 })

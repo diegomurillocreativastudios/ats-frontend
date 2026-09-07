@@ -11,6 +11,12 @@ interface AuthInputProps
     | "value"
     | "onChange"
     | "disabled"
+    | "maxLength"
+    | "minLength"
+    | "inputMode"
+    | "pattern"
+    | "autoFocus"
+    | "spellCheck"
   > {
   label: string
   error?: string
@@ -31,6 +37,12 @@ export default function Input({
   onChange,
   error,
   disabled = false,
+  maxLength,
+  minLength,
+  inputMode,
+  pattern,
+  autoFocus,
+  spellCheck,
   testId,
   accent = "purple",
 }: AuthInputProps) {
@@ -50,6 +62,12 @@ export default function Input({
         value={value}
         onChange={handleChange}
         disabled={disabled}
+        maxLength={maxLength}
+        minLength={minLength}
+        inputMode={inputMode}
+        pattern={pattern}
+        autoFocus={autoFocus}
+        spellCheck={spellCheck}
         aria-invalid={!!error}
         aria-describedby={error ? `${name}-error` : undefined}
         data-testid={testId}
