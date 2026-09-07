@@ -220,6 +220,8 @@ export interface CandidateProfileSaveBody {
   videoLink?: string | null
   references?: unknown
   recognitions?: unknown
+  /** FE-SEC-019: set only when confirming apply of an AI-adapted version. */
+  appliedFromVersionId?: string | null
 }
 
 /**

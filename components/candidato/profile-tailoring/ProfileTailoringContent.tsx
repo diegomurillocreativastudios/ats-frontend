@@ -176,15 +176,18 @@ export default function ProfileTailoringContent() {
   }, [adaptedForm, result?.versionId, showSnackbar, t])
 
   const handleApplyToMainProfile = useCallback(async () => {
-    if (!adaptedForm) return
+    if (!adaptedForm || !result?.versionId) return
     try {
-      await saveMainProfile(buildCandidateProfileSaveBody(adaptedForm))
+      await saveMainProfile({
+        ...buildCandidateProfileSaveBody(adaptedForm),
+        appliedFromVersionId: result.versionId,
+      })
       showSnackbar(t("toasts.applySuccess"), "success")
       setShowApplyConfirm(false)
     } catch {
       showSnackbar(t("toasts.applyError"), "error")
     }
-  }, [adaptedForm, saveMainProfile, showSnackbar, t])
+  }, [adaptedForm, result?.versionId, saveMainProfile, showSnackbar, t])
 
   const tabButtonClass = (tab: TabId) =>
     `flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 font-sans text-sm font-medium transition-colors ${

@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 18 · In Progress 0 · Last ToDos 1 · To Do 5
+**Conteo:** Done 19 · In Progress 0 · Last ToDos 1 · To Do 4
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -71,6 +71,11 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - Actions pinneadas a SHA en `spellcheck` / `e2e` / `supply-chain`; builders Cloud Build por digest; sin `:latest`
   - `requestedVerifyOption: VERIFIED`; workflow CycloneDX + `attest-sbom`; etapas con `@dnd-kit` (sin `react-nestable`)
   - Tests: `supply-chain-pins`, `react-nestable-removed`, `stages-reorder-contract`
+- [x] **FE-SEC-019** — Controles de IA: esquema, prompt injection, humano en el loop
+  - Spec: `docs/AI_CONTROLS_BACKEND_SPEC.md` (inventario + mapeo BE-SEC-017/018/019)
+  - Backend: `security_events` `ai_candidates_included_in_process` / `ai_adapted_profile_applied`; PUT con `appliedFromVersionId`
+  - Front: salida IA solo texto; apply con confirmación + version id; pines `ai-controls-fe-sec-019.test.ts`
+  - Runbooks: `ats-backend/engine/docs/security/be-sec-017-llm-guardrails.md`, `be-sec-018-llm-governance.md`
 
 ---
 
@@ -92,8 +97,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-019** — Controles de IA en backend: esquema, prompt injection, humano en el loop
-  - Frontend ya renderiza texto; no acciones solo por salida del modelo
 - [ ] **FE-SEC-020** — Data Transfer Object mínimo de documentos (sin `storagePath` / `contentSha256`)
 - [ ] **FE-SEC-022** — Errores genéricos, logs redacted, lint/test como gate
   - Sin excepciones en query; `global-error.tsx`; baseline verde
