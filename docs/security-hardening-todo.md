@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 22 · In Progress 0 · Last ToDos 1 · To Do 1
+**Conteo:** Done 23 · In Progress 0 · Last ToDos 1 · To Do 0
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -89,6 +89,10 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - Header size: default de Node (~16 KiB); sin `--max-http-header-size=65536`
   - `vercel.json` se conserva: deploy dual Vercel + Cloud Run (PDF memory/duration)
   - Pin: `fe-sec-023-legacy-artifacts.test.ts`
+- [x] **FE-SEC-024** — Mantener `private, no-store` en sesión / información personal / PDF; confirmar borde
+  - Helper `cache-headers` + sellado en `applySecurityHeaders` (portales / auth / API; no oportunidades públicas)
+  - PDF, `/api/auth/me`, sesión, BFF, documentos y auth mutations con `private, no-store`
+  - Pin: `fe-sec-024-cache-control.test.ts`; checklist borde: curl preview HTML/API/PDF (Cloud Run = FE-SEC-018)
 
 ---
 
@@ -110,5 +114,4 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-024** — Mantener `private, no-store` en sesión / información personal / PDF; confirmar borde
-  - Dos tenants + back/forward sin mezcla; assets hashed `public, immutable`
+_(vacío)_

@@ -23,6 +23,7 @@ describe("proxy security headers (FE-SEC-010)", () => {
     expect(res.headers.get("Cross-Origin-Opener-Policy")).toBe(
       "same-origin-allow-popups"
     )
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store")
     const csp = res.headers.get("Content-Security-Policy")
     expect(csp).toBeTruthy()
     expect(csp).toMatch(/'nonce-[^']+'/)

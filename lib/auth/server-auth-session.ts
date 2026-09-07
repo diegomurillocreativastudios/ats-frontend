@@ -6,6 +6,10 @@ import {
 } from "@/lib/auth/csrf"
 import { fetchBackendSessionUser } from "@/lib/fetch-backend-session-user"
 import { isInternalPath } from "@/lib/auth/internal-path"
+import {
+  applyPrivateNoStore,
+  jsonWithPrivateNoStore,
+} from "@/lib/security/cache-headers"
 
 export interface AuthUserPayload {
   id: string | null
@@ -98,7 +102,7 @@ export async function createAuthSessionResponse(
 ): Promise<NextResponse> {
   const parsed = parseBackendAuthPayload(data)
   if (!parsed) {
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: "La respuesta del servidor no incluye token" },
       { status: 502 }
     )
@@ -129,7 +133,7 @@ export async function createAuthSessionResponse(
     body.returnUrl = returnUrl
   }
 
-  const response = NextResponse.json(body)
+  const response = applyPrivateNoStore(NextResponse.json(body))
 
   response.cookies.set(AUTH_COOKIES.access, accessToken, {
     path: AUTH_COOKIES.path,

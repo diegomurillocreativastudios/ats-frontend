@@ -72,6 +72,7 @@ describe("createAuthSessionResponse cookie flags", () => {
     expect(csrf?.httpOnly).toBe(false)
     expect(csrf?.value?.length).toBeGreaterThan(16)
     expect(expires?.httpOnly).toBe(false)
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store")
 
     const body = await response.json()
     expect(body).toEqual({ success: true })

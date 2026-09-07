@@ -21,6 +21,11 @@ import {
 } from "@/lib/technical-sheet/pdf-chromium-concurrency"
 import { REPORT_PDF_MAX_ROWS } from "@/lib/technical-sheet/pdf-chromium-limits"
 import { logServerError } from "@/lib/security/safe-server-log"
+import {
+  applyPrivateNoStore,
+  PRIVATE_NO_STORE_CACHE_CONTROL,
+  jsonWithPrivateNoStore,
+} from "@/lib/security/cache-headers"
 import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for-server"
 import {
   findReportDocumentTemplate,
@@ -64,7 +69,7 @@ function jsonError(
   status: number,
   headers?: HeadersInit
 ): NextResponse {
-  return NextResponse.json({ message }, { status, headers })
+  return jsonWithPrivateNoStore({ message }, { status, headers })
 }
 
 function coerceString(raw: unknown): string {
@@ -245,18 +250,20 @@ export async function handleReportPdfPost(
 
     const filename = buildReportPdfFilename(key, fileBaseName)
 
-    return new NextResponse(new Uint8Array(buffer), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Cache-Control": "no-store",
-        "X-Report-Pdf-Engine": engine,
-        "X-Report-Pdf-Template-Version": templateVersion,
-        "X-Report-Key": key,
-        "X-Report-Rows-Count": String(rows.length),
-      },
-    })
+    return applyPrivateNoStore(
+      new NextResponse(new Uint8Array(buffer), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${filename}"`,
+          "Cache-Control": PRIVATE_NO_STORE_CACHE_CONTROL,
+          "X-Report-Pdf-Engine": engine,
+          "X-Report-Pdf-Template-Version": templateVersion,
+          "X-Report-Key": key,
+          "X-Report-Rows-Count": String(rows.length),
+        },
+      })
+    )
   } catch (e: unknown) {
     logServerError("report-pdf", e)
     if (e instanceof TechnicalSheetPdfRateLimitError) {

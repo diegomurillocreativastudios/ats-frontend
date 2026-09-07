@@ -1,8 +1,12 @@
-import { NextResponse, type NextRequest } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import {
   createAuthSessionResponse,
   extractBackendErrorMessage,
 } from "@/lib/auth/server-auth-session"
+import {
+  applyPrivateNoStore,
+  jsonWithPrivateNoStore,
+} from "@/lib/security/cache-headers"
 import { logServerError } from "@/lib/security/safe-server-log"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
@@ -14,7 +18,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = body
 
     if (!email || !password) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         { message: "Email y contraseña son requeridos" },
         { status: 400 }
       )
@@ -38,7 +42,9 @@ export async function POST(request: NextRequest) {
       const headers = new Headers()
       const retryAfter = res.headers.get("retry-after")
       if (retryAfter) headers.set("retry-after", retryAfter)
-      return NextResponse.json({ message }, { status: res.status, headers })
+      return applyPrivateNoStore(
+        NextResponse.json({ message }, { status: res.status, headers })
+      )
     }
 
     return createAuthSessionResponse(baseUrl, data, {
@@ -46,7 +52,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (err: unknown) {
     logServerError("auth-login", err)
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: GENERIC_LOGIN_ERROR },
       { status: 500 }
     )

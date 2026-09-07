@@ -125,5 +125,6 @@ describe("proxy CSRF gate", () => {
     })
     const res = proxy(req)
     expect(res.status).toBe(403)
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store")
   })
 })

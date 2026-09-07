@@ -104,6 +104,7 @@ describe("POST /api/recruiter/reportes/[reportKey]/pdf", () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get("X-Report-Key")).toBe("candidate-status-by-stage")
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store")
     expect(fetchReportForServerMock).toHaveBeenCalledWith(
       "http://localhost",
       "test-token-abcdefgh",

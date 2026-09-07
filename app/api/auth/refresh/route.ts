@@ -7,6 +7,7 @@ import {
   generateCsrfToken,
   setCsrfCookie,
 } from "@/lib/auth/csrf"
+import { applyPrivateNoStore } from "@/lib/security/cache-headers"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
 export async function POST() {
@@ -17,9 +18,11 @@ export async function POST() {
     const refreshToken = cookieStore.get(AUTH_COOKIES.refresh)?.value
 
     if (!refreshToken) {
-      const response = NextResponse.json(
-        { message: "No hay refresh token" },
-        { status: 401 }
+      const response = applyPrivateNoStore(
+        NextResponse.json(
+          { message: "No hay refresh token" },
+          { status: 401 }
+        )
       )
       clearAuthSessionCookies(response, { isProd })
       return response
@@ -36,9 +39,11 @@ export async function POST() {
     const data = await res.json().catch(() => ({}))
 
     if (!res.ok) {
-      const response = NextResponse.json(
-        { message: data.message || data.detail || "Sesión expirada" },
-        { status: res.status }
+      const response = applyPrivateNoStore(
+        NextResponse.json(
+          { message: data.message || data.detail || "Sesión expirada" },
+          { status: res.status }
+        )
       )
       clearAuthSessionCookies(response, { isProd })
       return response
@@ -49,16 +54,18 @@ export async function POST() {
     const expiresIn = Number(data.expiresIn) || 3600
 
     if (!accessToken) {
-      const response = NextResponse.json(
-        { message: "La respuesta del servidor no incluye token" },
-        { status: 502 }
+      const response = applyPrivateNoStore(
+        NextResponse.json(
+          { message: "La respuesta del servidor no incluye token" },
+          { status: 502 }
+        )
       )
       clearAuthSessionCookies(response, { isProd })
       return response
     }
 
     const expiresAt = Math.floor(Date.now() / 1000) + expiresIn
-    const response = NextResponse.json({ success: true })
+    const response = applyPrivateNoStore(NextResponse.json({ success: true }))
 
     response.cookies.set(AUTH_COOKIES.access, accessToken, {
       path: AUTH_COOKIES.path,
@@ -91,9 +98,11 @@ export async function POST() {
 
     return response
   } catch (err: unknown) {
-    const response = NextResponse.json(
-      { message: getApiErrorMessage(err) || "Error al renovar sesión" },
-      { status: 500 }
+    const response = applyPrivateNoStore(
+      NextResponse.json(
+        { message: getApiErrorMessage(err) || "Error al renovar sesión" },
+        { status: 500 }
+      )
     )
     clearAuthSessionCookies(response, { isProd })
     return response

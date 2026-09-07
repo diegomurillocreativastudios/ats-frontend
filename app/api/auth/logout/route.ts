@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { clearAuthSessionCookies } from "@/lib/auth/clear-auth-session-cookies"
+import { applyPrivateNoStore } from "@/lib/security/cache-headers"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
 const BACKEND_LOGOUT_TIMEOUT_MS = 4_000
@@ -41,7 +42,7 @@ export async function POST() {
     }
   }
 
-  const response = NextResponse.json({ success: true })
+  const response = applyPrivateNoStore(NextResponse.json({ success: true }))
   clearAuthSessionCookies(response, { isProd })
   return response
 }

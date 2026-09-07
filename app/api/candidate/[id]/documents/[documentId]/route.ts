@@ -2,6 +2,11 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  applyPrivateNoStore,
+  jsonWithPrivateNoStore,
+  PRIVATE_NO_STORE_CACHE_CONTROL,
+} from "@/lib/security/cache-headers"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
 const FORWARD_RESPONSE_HEADERS = [
@@ -28,18 +33,21 @@ export async function GET(
     const candidateId = String(id ?? "").trim()
     const docId = String(documentId ?? "").trim()
     if (!candidateId || !docId) {
-      return NextResponse.json({ message: "Parámetros inválidos" }, { status: 400 })
+      return jsonWithPrivateNoStore(
+        { message: "Parámetros inválidos" },
+        { status: 400 }
+      )
     }
 
     const cookieStore = await cookies()
     const accessToken = cookieStore.get(AUTH_COOKIES.access)?.value
     if (!accessToken) {
-      return NextResponse.json({ message: "No autorizado" }, { status: 401 })
+      return jsonWithPrivateNoStore({ message: "No autorizado" }, { status: 401 })
     }
 
     const baseUrl = getServerBackendBaseUrl()
     if (!baseUrl) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         {
           message:
             "El servicio no está configurado. Definí NEXT_PUBLIC_API_URL, API_URL o BACKEND_URL.",
@@ -65,7 +73,10 @@ export async function GET(
         getApiErrorMessage(errBody) ||
         getApiErrorMessage(backendResponse.statusText) ||
         "No se pudo descargar el documento"
-      return NextResponse.json({ message }, { status: backendResponse.status })
+      return jsonWithPrivateNoStore(
+        { message },
+        { status: backendResponse.status }
+      )
     }
 
     const responseHeaders = new Headers()
@@ -73,7 +84,7 @@ export async function GET(
       const value = backendResponse.headers.get(name)
       if (value) responseHeaders.set(name, value)
     }
-    responseHeaders.set("Cache-Control", "private, no-store")
+    responseHeaders.set("Cache-Control", PRIVATE_NO_STORE_CACHE_CONTROL)
 
     return new NextResponse(backendResponse.body, {
       status: backendResponse.status,
@@ -81,7 +92,7 @@ export async function GET(
       headers: responseHeaders,
     })
   } catch (err: unknown) {
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: getApiErrorMessage(err) || "Error al descargar el documento" },
       { status: 500 }
     )
@@ -97,18 +108,21 @@ export async function DELETE(
     const candidateId = String(id ?? "").trim()
     const docId = String(documentId ?? "").trim()
     if (!candidateId || !docId) {
-      return NextResponse.json({ message: "Parámetros inválidos" }, { status: 400 })
+      return jsonWithPrivateNoStore(
+        { message: "Parámetros inválidos" },
+        { status: 400 }
+      )
     }
 
     const cookieStore = await cookies()
     const accessToken = cookieStore.get(AUTH_COOKIES.access)?.value
     if (!accessToken) {
-      return NextResponse.json({ message: "No autorizado" }, { status: 401 })
+      return jsonWithPrivateNoStore({ message: "No autorizado" }, { status: 401 })
     }
 
     const baseUrl = getServerBackendBaseUrl()
     if (!baseUrl) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         {
           message:
             "El servicio no está configurado. Definí NEXT_PUBLIC_API_URL, API_URL o BACKEND_URL.",
@@ -129,7 +143,9 @@ export async function DELETE(
     )
 
     if (backendResponse.status === 204 || backendResponse.status === 205) {
-      return new NextResponse(null, { status: backendResponse.status })
+      return applyPrivateNoStore(
+        new NextResponse(null, { status: backendResponse.status })
+      )
     }
 
     const payload = await backendResponse.json().catch(() => null)
@@ -139,13 +155,20 @@ export async function DELETE(
         getApiErrorMessage(payload) ||
         getApiErrorMessage(backendResponse.statusText) ||
         "No se pudo eliminar el documento del candidato"
-      return NextResponse.json({ message }, { status: backendResponse.status })
+      return jsonWithPrivateNoStore(
+        { message },
+        { status: backendResponse.status }
+      )
     }
 
-    return new NextResponse(null, { status: 204 })
+    return applyPrivateNoStore(new NextResponse(null, { status: 204 }))
   } catch (err: unknown) {
-    return NextResponse.json(
-      { message: getApiErrorMessage(err) || "Error al eliminar el documento del candidato" },
+    return jsonWithPrivateNoStore(
+      {
+        message:
+          getApiErrorMessage(err) ||
+          "Error al eliminar el documento del candidato",
+      },
       { status: 500 }
     )
   }

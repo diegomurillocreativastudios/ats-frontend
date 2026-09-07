@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { buildBackendPathFromSegments } from "@/lib/api/bff-path"
+import {
+  jsonWithPrivateNoStore,
+  PRIVATE_NO_STORE_CACHE_CONTROL,
+} from "@/lib/security/cache-headers"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 import {
   getUploadMaxBytesForBackendPath,
@@ -52,12 +56,12 @@ async function proxyToBackend(
   const { path: segments } = await context.params
   const backendPath = buildBackendPathFromSegments(segments)
   if (!backendPath) {
-    return NextResponse.json({ message: "Ruta inválida" }, { status: 400 })
+    return jsonWithPrivateNoStore({ message: "Ruta inválida" }, { status: 400 })
   }
 
   const baseUrl = getServerBackendBaseUrl()
   if (!baseUrl) {
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       {
         message:
           "El servicio no está configurado. Definí NEXT_PUBLIC_API_URL, API_URL o BACKEND_URL.",
@@ -90,7 +94,7 @@ async function proxyToBackend(
     const maxBytes = getUploadMaxBytesForBackendPath(backendPath)
     const bounded = await readRequestBodyWithinLimit(request, maxBytes)
     if (isBoundedBodyTooLarge(bounded)) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         { message: bounded.message },
         { status: bounded.status }
       )
@@ -108,7 +112,7 @@ async function proxyToBackend(
       redirect: "manual",
     })
   } catch {
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: "No se pudo contactar al servicio" },
       { status: 502 }
     )
@@ -120,7 +124,7 @@ async function proxyToBackend(
     if (value) responseHeaders.set(name, value)
   }
   // Never forward Set-Cookie from the backend to the browser.
-  responseHeaders.set("Cache-Control", "private, no-store")
+  responseHeaders.set("Cache-Control", PRIVATE_NO_STORE_CACHE_CONTROL)
 
   return new NextResponse(backendResponse.body, {
     status: backendResponse.status,

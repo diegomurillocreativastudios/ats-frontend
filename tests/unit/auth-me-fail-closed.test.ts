@@ -35,6 +35,7 @@ describe("GET /api/auth/me fail-closed", () => {
     const { GET } = await import("@/app/api/auth/me/route")
     const res = await GET()
     expect(res.status).toBe(401)
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store")
   })
 
   it("returns 503 when backend base URL is missing", async () => {
@@ -104,6 +105,7 @@ describe("GET /api/auth/me fail-closed", () => {
     const { GET } = await import("@/app/api/auth/me/route")
     const res = await GET()
     expect(res.status).toBe(200)
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store")
     const body = await res.json()
     expect(body).toEqual({
       id: "real-1",

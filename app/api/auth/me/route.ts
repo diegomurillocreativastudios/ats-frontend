@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { fetchBackendSessionUser } from "@/lib/fetch-backend-session-user"
+import { jsonWithPrivateNoStore } from "@/lib/security/cache-headers"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
 /**
@@ -13,12 +13,12 @@ export async function GET() {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get(AUTH_COOKIES.access)?.value
   if (!accessToken) {
-    return NextResponse.json({ message: "No autorizado" }, { status: 401 })
+    return jsonWithPrivateNoStore({ message: "No autorizado" }, { status: 401 })
   }
 
   const baseUrl = getServerBackendBaseUrl()
   if (!baseUrl) {
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: "Servicio no disponible" },
       { status: 503 }
     )
@@ -27,14 +27,14 @@ export async function GET() {
   const result = await fetchBackendSessionUser(baseUrl, accessToken)
 
   if (result.status === "ok") {
-    return NextResponse.json(result.user)
+    return jsonWithPrivateNoStore(result.user)
   }
 
   if (result.status === "unauthenticated") {
-    return NextResponse.json({ message: "No autorizado" }, { status: 401 })
+    return jsonWithPrivateNoStore({ message: "No autorizado" }, { status: 401 })
   }
 
-  return NextResponse.json(
+  return jsonWithPrivateNoStore(
     { message: "Servicio no disponible" },
     { status: 503 }
   )

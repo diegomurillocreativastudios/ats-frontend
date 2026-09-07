@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import {
@@ -6,6 +5,9 @@ import {
   toPublicCandidateDocument,
   type CandidateDocument,
 } from "@/lib/candidate-documents"
+import {
+  jsonWithPrivateNoStore,
+} from "@/lib/security/cache-headers"
 import { publicApiErrorBody } from "@/lib/security/public-api-error"
 import { logServerError } from "@/lib/security/safe-server-log"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
@@ -35,18 +37,21 @@ export async function GET(
     const { id } = await context.params
     const candidateId = String(id ?? "").trim()
     if (!candidateId) {
-      return NextResponse.json({ message: "Id de candidato inválido" }, { status: 400 })
+      return jsonWithPrivateNoStore(
+        { message: "Id de candidato inválido" },
+        { status: 400 }
+      )
     }
 
     const cookieStore = await cookies()
     const accessToken = cookieStore.get(AUTH_COOKIES.access)?.value
     if (!accessToken) {
-      return NextResponse.json({ message: "No autorizado" }, { status: 401 })
+      return jsonWithPrivateNoStore({ message: "No autorizado" }, { status: 401 })
     }
 
     const baseUrl = getServerBackendBaseUrl()
     if (!baseUrl) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         {
           message:
             "El servicio no está configurado. Definí NEXT_PUBLIC_API_URL, API_URL o BACKEND_URL.",
@@ -70,7 +75,7 @@ export async function GET(
     const payload = await backendResponse.json().catch(() => null)
 
     if (!backendResponse.ok) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         publicApiErrorBody(
           backendResponse.status,
           payload,
@@ -81,10 +86,10 @@ export async function GET(
     }
 
     const documents = sortByCreatedAtDesc(normalizeCandidateDocuments(payload))
-    return NextResponse.json(documents)
+    return jsonWithPrivateNoStore(documents)
   } catch (err: unknown) {
     logServerError("candidate-documents-get", err)
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: GENERIC_DOCUMENTS_GET_ERROR },
       { status: 500 }
     )
@@ -99,18 +104,21 @@ export async function POST(
     const { id } = await context.params
     const candidateId = String(id ?? "").trim()
     if (!candidateId) {
-      return NextResponse.json({ message: "Id de candidato inválido" }, { status: 400 })
+      return jsonWithPrivateNoStore(
+        { message: "Id de candidato inválido" },
+        { status: 400 }
+      )
     }
 
     const cookieStore = await cookies()
     const accessToken = cookieStore.get(AUTH_COOKIES.access)?.value
     if (!accessToken) {
-      return NextResponse.json({ message: "No autorizado" }, { status: 401 })
+      return jsonWithPrivateNoStore({ message: "No autorizado" }, { status: 401 })
     }
 
     const baseUrl = getServerBackendBaseUrl()
     if (!baseUrl) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         {
           message:
             "El servicio no está configurado. Definí NEXT_PUBLIC_API_URL, API_URL o BACKEND_URL.",
@@ -123,13 +131,16 @@ export async function POST(
     const maxBytes = getUploadMaxBytesForBackendPath(backendPath)
     const bounded = await readRequestBodyWithinLimit(request, maxBytes)
     if (isBoundedBodyTooLarge(bounded)) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         { message: bounded.message },
         { status: bounded.status }
       )
     }
     if (bounded.body.byteLength === 0) {
-      return NextResponse.json({ message: "No file uploaded." }, { status: 400 })
+      return jsonWithPrivateNoStore(
+        { message: "No file uploaded." },
+        { status: 400 }
+      )
     }
 
     const forwardHeaders = new Headers()
@@ -148,7 +159,7 @@ export async function POST(
 
     const payload = await backendResponse.json().catch(() => null)
     if (!backendResponse.ok) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         publicApiErrorBody(
           backendResponse.status,
           payload,
@@ -160,16 +171,16 @@ export async function POST(
 
     const document = toPublicCandidateDocument(payload)
     if (!document) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         { message: "Respuesta inválida al subir el documento del candidato" },
         { status: 502 }
       )
     }
 
-    return NextResponse.json(document)
+    return jsonWithPrivateNoStore(document)
   } catch (err: unknown) {
     logServerError("candidate-documents-post", err)
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: GENERIC_DOCUMENTS_POST_ERROR },
       { status: 500 }
     )

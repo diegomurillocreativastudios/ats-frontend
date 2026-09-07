@@ -10,6 +10,11 @@ import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { logServerError } from "@/lib/security/safe-server-log"
+import {
+  applyPrivateNoStore,
+  jsonWithPrivateNoStore,
+  PRIVATE_NO_STORE_CACHE_CONTROL,
+} from "@/lib/security/cache-headers"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 import {
   buildTechnicalSheetBasePath,
@@ -58,20 +63,20 @@ async function handleTechnicalSheetPdf(
   const vid = String(vacancyId ?? "").trim()
   const cid = String(candidateProfileId ?? "").trim()
   if (!vid || !cid) {
-    return NextResponse.json({ message: "Parámetros inválidos" }, { status: 400 })
+    return jsonWithPrivateNoStore({ message: "Parámetros inválidos" }, { status: 400 })
   }
 
   const cookieStore = await cookies()
   const accessToken = cookieStore.get(AUTH_COOKIES.access)?.value
   if (!accessToken) {
-    return NextResponse.json({ message: "No autorizado" }, { status: 401 })
+    return jsonWithPrivateNoStore({ message: "No autorizado" }, { status: 401 })
   }
 
   assertTechnicalSheetPdfRateLimit(resolvePdfQuotaKey(accessToken))
 
   const baseUrl = getServerBackendBaseUrl()
   if (!baseUrl) {
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       {
         message:
           "El servicio no está configurado. Definí NEXT_PUBLIC_API_URL, API_URL o BACKEND_URL.",
@@ -102,7 +107,7 @@ async function handleTechnicalSheetPdf(
       getApiErrorMessage(raw) ||
       getApiErrorMessage(backendResponse.statusText) ||
       "No se pudo obtener la ficha técnica"
-    return NextResponse.json({ message }, { status: backendResponse.status })
+    return jsonWithPrivateNoStore({ message }, { status: backendResponse.status })
   }
 
   const payload = normalizeTechnicalSheetPayload(raw)
@@ -116,21 +121,23 @@ async function handleTechnicalSheetPdf(
     engine,
   })
 
-  return new NextResponse(new Uint8Array(buffer), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filenameAscii}"`,
-      "Cache-Control": "no-store",
-      "X-Technical-Sheet-Pdf-Engine": engine,
-    },
-  })
+  return applyPrivateNoStore(
+    new NextResponse(new Uint8Array(buffer), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filenameAscii}"`,
+        "Cache-Control": PRIVATE_NO_STORE_CACHE_CONTROL,
+        "X-Technical-Sheet-Pdf-Engine": engine,
+      },
+    })
+  )
 }
 
 function pdfErrorResponse(e: unknown) {
   logServerError("technical-sheet-pdf", e)
   if (e instanceof TechnicalSheetPdfRateLimitError) {
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: e.message },
       {
         status: 429,
@@ -139,7 +146,7 @@ function pdfErrorResponse(e: unknown) {
     )
   }
   if (e instanceof TechnicalSheetPdfBusyError) {
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: e.message },
       {
         status: 503,
@@ -148,7 +155,7 @@ function pdfErrorResponse(e: unknown) {
     )
   }
   if (e instanceof TechnicalSheetPdfError) {
-    return NextResponse.json({ message: e.message }, { status: e.status })
+    return jsonWithPrivateNoStore({ message: e.message }, { status: e.status })
   }
   const errWithStatus = e as Error & { status?: number }
   const status =
@@ -159,7 +166,7 @@ function pdfErrorResponse(e: unknown) {
       : 500
   const message =
     status !== 500 && errWithStatus.message ? errWithStatus.message : "Error al generar el PDF"
-  return NextResponse.json({ message }, { status })
+  return jsonWithPrivateNoStore({ message }, { status })
 }
 
 export async function GET(request: Request, context: PdfRouteContext) {

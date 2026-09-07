@@ -1,4 +1,5 @@
 import type { NextRequest, NextResponse } from "next/server"
+import { shouldApplyPrivateNoStore, applyPrivateNoStore } from "@/lib/security/cache-headers"
 
 export const CSP_REPORT_PATH = "/api/csp-report"
 export const NONCE_HEADER = "x-nonce"
@@ -156,6 +157,11 @@ export function applySecurityHeaders(
     response.headers.set(key, value)
   }
   response.headers.set(headerName, csp)
+
+  const pathname = options?.request?.nextUrl.pathname
+  if (pathname && shouldApplyPrivateNoStore(pathname)) {
+    applyPrivateNoStore(response)
+  }
 
   if (options?.requestHeaders) {
     options.requestHeaders.set(NONCE_HEADER, nonce)
