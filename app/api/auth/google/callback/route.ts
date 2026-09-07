@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
+import {
+  type GoogleCalendarCallbackErrorCode,
+} from "@/lib/google-calendar-callback-errors"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 import { GOOGLE_CALENDAR_API } from "@/lib/google-calendar"
+import { logServerError } from "@/lib/security/safe-server-log"
 
-function calendarSettingsUrl(request: NextRequest, query: Record<string, string>) {
+function calendarSettingsUrl(
+  request: NextRequest,
+  query: Record<string, string>
+) {
   const u = new URL(
     "/portal-rrhh/configuracion/calendario",
     request.nextUrl.origin
@@ -14,6 +21,15 @@ function calendarSettingsUrl(request: NextRequest, query: Record<string, string>
   return u
 }
 
+function redirectWithError(
+  request: NextRequest,
+  code: GoogleCalendarCallbackErrorCode
+) {
+  return NextResponse.redirect(
+    calendarSettingsUrl(request, { error: code })
+  )
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const code = searchParams.get("code")
@@ -21,26 +37,16 @@ export async function GET(request: NextRequest) {
   const oauthError = searchParams.get("error")
 
   if (oauthError) {
-    const errorDescription =
-      searchParams.get("error_description") ?? oauthError
-    return NextResponse.redirect(
-      calendarSettingsUrl(request, { error: errorDescription })
-    )
+    return redirectWithError(request, "connect_denied")
   }
 
   if (!code) {
-    return NextResponse.redirect(
-      calendarSettingsUrl(request, { error: "missing_code" })
-    )
+    return redirectWithError(request, "missing_code")
   }
 
   const token = request.cookies.get(AUTH_COOKIES.access)?.value
   if (!token) {
-    return NextResponse.redirect(
-      calendarSettingsUrl(request, {
-        error: "Sesión expirada. Iniciá sesión de nuevo e intentá conectar el calendario.",
-      })
-    )
+    return redirectWithError(request, "session_expired")
   }
 
   try {
@@ -67,21 +73,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const message =
-      data.message ||
-      data.error ||
-      (typeof data === "object" && data !== null
-        ? JSON.stringify(data)
-        : `Error ${res.status}`)
-    return NextResponse.redirect(
-      calendarSettingsUrl(request, { error: message })
-    )
+    logServerError("google-calendar-callback", data)
+    return redirectWithError(request, "callback_failed")
   } catch (error) {
-    console.error("[OAuth Callback] Error:", error)
-    const message =
-      error instanceof Error ? error.message : "Callback failed"
-    return NextResponse.redirect(
-      calendarSettingsUrl(request, { error: message })
-    )
+    logServerError("google-calendar-callback", error)
+    return redirectWithError(request, "callback_failed")
   }
 }

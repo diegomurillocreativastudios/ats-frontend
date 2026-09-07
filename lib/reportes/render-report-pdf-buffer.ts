@@ -5,6 +5,7 @@ import {
   REPORT_PDF_ENGINE,
   reportPdfTemplateVersion,
 } from "@/lib/reportes/report-pdf-constants"
+import { logServerError } from "@/lib/security/safe-server-log"
 
 export class ReportPdfError extends Error {
   status: number
@@ -77,12 +78,7 @@ export async function renderReportPdfBuffer(
       reportKey: input.reportKey.trim(),
     }
   } catch (pdfkitError: unknown) {
-    console.error(
-      "[Report PDF] PDFKit schema generation failed",
-      pdfkitError instanceof Error
-        ? pdfkitError.stack ?? pdfkitError.message
-        : pdfkitError
-    )
+    logServerError("report-pdf-pdfkit", pdfkitError)
     throw new ReportPdfError(
       "No se pudo generar el PDF del reporte con PDFKit.",
       500

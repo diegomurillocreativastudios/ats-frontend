@@ -20,6 +20,7 @@ import {
   TechnicalSheetPdfRateLimitError,
 } from "@/lib/technical-sheet/pdf-chromium-concurrency"
 import { REPORT_PDF_MAX_ROWS } from "@/lib/technical-sheet/pdf-chromium-limits"
+import { logServerError } from "@/lib/security/safe-server-log"
 import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for-server"
 import {
   findReportDocumentTemplate,
@@ -257,10 +258,7 @@ export async function handleReportPdfPost(
       },
     })
   } catch (e: unknown) {
-    console.error(
-      "[Report PDF] Unrecoverable error generating PDF",
-      e instanceof Error ? e.stack ?? e.message : e
-    )
+    logServerError("report-pdf", e)
     if (e instanceof TechnicalSheetPdfRateLimitError) {
       return jsonError(e.message, 429, {
         "Retry-After": String(e.retryAfterSec),

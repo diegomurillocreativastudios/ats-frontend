@@ -41,5 +41,4 @@ docs/
 .vercel/
 design.pen
 avance-de-vacantes-*.pdf
-public/chromium-pack.tar
 tsconfig.tsbuildinfo

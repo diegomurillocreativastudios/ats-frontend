@@ -1,10 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { getApiErrorMessage } from "@/lib/api-error"
 import {
   createAuthSessionResponse,
   extractBackendErrorMessage,
 } from "@/lib/auth/server-auth-session"
+import { logServerError } from "@/lib/security/safe-server-log"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
+
+const GENERIC_LOGIN_ERROR = "Error al iniciar sesión. Intenta de nuevo."
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,8 +45,9 @@ export async function POST(request: NextRequest) {
       fallbackEmail: String(email || "").trim(),
     })
   } catch (err: unknown) {
+    logServerError("auth-login", err)
     return NextResponse.json(
-      { message: getApiErrorMessage(err) || "Error al iniciar sesión" },
+      { message: GENERIC_LOGIN_ERROR },
       { status: 500 }
     )
   }

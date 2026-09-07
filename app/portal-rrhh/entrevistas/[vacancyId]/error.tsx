@@ -2,8 +2,11 @@
 
 import { useTranslations } from "next-intl"
 
+/**
+ * Vacancy interviews error boundary.
+ * FE-SEC-022: never prefer raw error.message over product copy.
+ */
 export default function EntrevistasVacancyError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string }
@@ -13,7 +16,7 @@ export default function EntrevistasVacancyError({
   return (
     <div className="flex flex-col items-center justify-center gap-4 p-8">
       <p className="font-sans text-sm text-destructive" role="alert">
-        {error.message || t("errors.loadInterviewsFailed")}
+        {t("errors.loadInterviewsFailed")}
       </p>
       <button
         type="button"

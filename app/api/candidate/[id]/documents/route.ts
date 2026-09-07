@@ -1,18 +1,24 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
-import { getApiErrorMessage } from "@/lib/api-error"
 import {
   normalizeCandidateDocuments,
   toPublicCandidateDocument,
   type CandidateDocument,
 } from "@/lib/candidate-documents"
+import { publicApiErrorBody } from "@/lib/security/public-api-error"
+import { logServerError } from "@/lib/security/safe-server-log"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 import {
   getUploadMaxBytesForBackendPath,
   isBoundedBodyTooLarge,
   readRequestBodyWithinLimit,
 } from "@/lib/upload-body-limit"
+
+const GENERIC_DOCUMENTS_GET_ERROR =
+  "No se pudieron obtener los documentos del candidato"
+const GENERIC_DOCUMENTS_POST_ERROR =
+  "No se pudo subir el documento del candidato"
 
 const sortByCreatedAtDesc = (items: CandidateDocument[]) =>
   [...items].sort((a, b) => {
@@ -64,18 +70,22 @@ export async function GET(
     const payload = await backendResponse.json().catch(() => null)
 
     if (!backendResponse.ok) {
-      const message =
-        getApiErrorMessage(payload) ||
-        getApiErrorMessage(backendResponse.statusText) ||
-        "No se pudieron obtener los documentos del candidato"
-      return NextResponse.json({ message }, { status: backendResponse.status })
+      return NextResponse.json(
+        publicApiErrorBody(
+          backendResponse.status,
+          payload,
+          GENERIC_DOCUMENTS_GET_ERROR
+        ),
+        { status: backendResponse.status }
+      )
     }
 
     const documents = sortByCreatedAtDesc(normalizeCandidateDocuments(payload))
     return NextResponse.json(documents)
   } catch (err: unknown) {
+    logServerError("candidate-documents-get", err)
     return NextResponse.json(
-      { message: getApiErrorMessage(err) || "Error al obtener documentos del candidato" },
+      { message: GENERIC_DOCUMENTS_GET_ERROR },
       { status: 500 }
     )
   }
@@ -138,11 +148,14 @@ export async function POST(
 
     const payload = await backendResponse.json().catch(() => null)
     if (!backendResponse.ok) {
-      const message =
-        getApiErrorMessage(payload) ||
-        getApiErrorMessage(backendResponse.statusText) ||
-        "No se pudo subir el documento del candidato"
-      return NextResponse.json({ message }, { status: backendResponse.status })
+      return NextResponse.json(
+        publicApiErrorBody(
+          backendResponse.status,
+          payload,
+          GENERIC_DOCUMENTS_POST_ERROR
+        ),
+        { status: backendResponse.status }
+      )
     }
 
     const document = toPublicCandidateDocument(payload)
@@ -155,8 +168,9 @@ export async function POST(
 
     return NextResponse.json(document)
   } catch (err: unknown) {
+    logServerError("candidate-documents-post", err)
     return NextResponse.json(
-      { message: getApiErrorMessage(err) || "Error al subir el documento del candidato" },
+      { message: GENERIC_DOCUMENTS_POST_ERROR },
       { status: 500 }
     )
   }

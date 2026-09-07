@@ -1,11 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { getApiErrorMessage } from "@/lib/api-error"
+import { publicApiErrorBody } from "@/lib/security/public-api-error"
+import { logServerError } from "@/lib/security/safe-server-log"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 
 const isDev = process.env.NODE_ENV === "development"
 
 const GENERIC_FORGOT_MESSAGE =
   "Si existe una cuenta con ese correo, te enviamos un enlace para restablecer la contraseña."
+
+const GENERIC_FORGOT_ERROR =
+  "No se pudo procesar la solicitud. Intenta de nuevo."
 
 const ACCOUNT_MISSING_MESSAGE_RE =
   /not\s*found|no\s*(encontrad[oa]|existe)|email\s*not\s*found|cuenta\s*no\s*existe|user\s*not\s*found|does\s*not\s*exist/i
@@ -86,18 +90,14 @@ export async function POST(request: NextRequest) {
       }
 
       if (isDev) {
-        console.warn("[forgot-password] backend error body", data)
+        logServerError("forgot-password", data)
       }
-      const raw =
-        data.message ??
-        data.detail ??
-        "No se pudo procesar la solicitud."
-      const text = Array.isArray(raw) ? raw[0] : raw
+
       const headers = new Headers()
       const retryAfter = res.headers.get("retry-after")
       if (retryAfter) headers.set("retry-after", retryAfter)
       return NextResponse.json(
-        { message: typeof text === "string" ? text : String(text) },
+        publicApiErrorBody(res.status, data, GENERIC_FORGOT_ERROR),
         { status: res.status, headers }
       )
     }
@@ -111,11 +111,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message })
   } catch (err: unknown) {
+    logServerError("forgot-password", err)
     return NextResponse.json(
-      {
-        message:
-          getApiErrorMessage(err) || "Error al procesar la solicitud. Intenta de nuevo.",
-      },
+      { message: GENERIC_FORGOT_ERROR },
       { status: 500 }
     )
   }

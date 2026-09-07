@@ -10,6 +10,10 @@ import { GoogleCalendarDisconnect } from "@/components/rrhh/interviews/google-ca
 import Snackbar from "@/components/ui/Snackbar"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import {
+  googleCalendarCallbackErrorI18nKey,
+  parseGoogleCalendarCallbackError,
+} from "@/lib/google-calendar-callback-errors"
 
 function formatConnectedAt(value: string | null, locale: string): string | null {
   if (!value) return null
@@ -94,10 +98,13 @@ export function CalendarSettingsClient() {
       return
     }
     if (errorParam) {
+      const knownCode = parseGoogleCalendarCallbackError(errorParam)
       setSnackbar({
         open: true,
         variant: "error",
-        message: decodeURIComponent(errorParam),
+        message: knownCode
+          ? tPage(googleCalendarCallbackErrorI18nKey(knownCode))
+          : tPage("oauthErrors.generic"),
       })
     }
   }, [successParam, errorParam, tPage])

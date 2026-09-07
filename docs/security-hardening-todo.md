@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 20 · In Progress 0 · Last ToDos 1 · To Do 3
+**Conteo:** Done 22 · In Progress 0 · Last ToDos 1 · To Do 1
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -80,6 +80,15 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
   - DTO público: `id` / `fileName` / `createdAt`; puente lista/alta strippea secretos
   - Descarga por id: `GET .../documents/{documentId}` (backend + BFF); CV vía `GET /api/candidate/profile/cv`
   - Perfil/`me`: `hasCvFile` + `latestResume.{documentId,hasFile}`; spec `docs/CANDIDATE_DOCUMENTS_MINIMAL_DTO_BACKEND_SPEC.md`
+- [x] **FE-SEC-022** — Errores genéricos, logs redacted, lint/test como gate
+  - Helper `public-api-error` en reset/forgot/documentos/login catch; Google callback solo códigos estables
+  - `logServerError` con redacción; `app/global-error.tsx` + `app/error.tsx`; entrevistas sin `error.message` crudo
+  - Workflow `quality.yml` (`npm run lint` + `npm test`); pin `quality-ci-gate.test.ts`
+- [x] **FE-SEC-023** — Quitar artefactos legacy (pack Chromium + header 64 KiB)
+  - Sin `chromium-pack.tar` / script / exención pública; `/chromium-pack.tar` → 404
+  - Header size: default de Node (~16 KiB); sin `--max-http-header-size=65536`
+  - `vercel.json` se conserva: deploy dual Vercel + Cloud Run (PDF memory/duration)
+  - Pin: `fe-sec-023-legacy-artifacts.test.ts`
 
 ---
 
@@ -101,8 +110,5 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-022** — Errores genéricos, logs redacted, lint/test como gate
-  - Sin excepciones en query; `global-error.tsx`; baseline verde
-- [ ] **FE-SEC-023** — Quitar artefactos legacy: `chromium-pack.tar`, `vercel.json` si Cloud Run es único, header size 64 KiB
 - [ ] **FE-SEC-024** — Mantener `private, no-store` en sesión / información personal / PDF; confirmar borde
   - Dos tenants + back/forward sin mezcla; assets hashed `public, immutable`

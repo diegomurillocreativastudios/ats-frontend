@@ -223,7 +223,13 @@
     "passwordsDontMatch": "Las contraseñas no coinciden"
   },
   "Errors": {
-    "connection": "Error de conexión. Intenta de nuevo."
+    "connection": "Error de conexión. Intenta de nuevo.",
+    "boundary": {
+      "title": "Algo salió mal",
+      "description": "No pudimos mostrar esta página. Podés reintentar o volver más tarde.",
+      "retry": "Reintentar",
+      "ref": "Ref: {digest}"
+    }
   },
   "Metadata": {
     "auth": {
@@ -1771,7 +1777,14 @@
         "syncFailed": "No se pudo sincronizar el calendario.",
         "syncResultPartial": "Sincronizado: {synced} ok, {failed} con error.",
         "syncResultSuccess": "Sincronizado: {synced} entrevista(s).",
-        "accountFallback": "tu cuenta"
+        "accountFallback": "tu cuenta",
+        "oauthErrors": {
+          "missing_code": "Faltó el código de autorización de Google. Intentá conectar de nuevo.",
+          "session_expired": "Tu sesión expiró. Iniciá sesión de nuevo e intentá conectar el calendario.",
+          "connect_denied": "No se autorizó el acceso a Google Calendar.",
+          "callback_failed": "No se pudo completar la conexión con Google Calendar. Intentá de nuevo.",
+          "generic": "No se pudo conectar Google Calendar. Intentá de nuevo."
+        }
       },
       "calendarConnect": {
         "label": "Conectar Google Calendar",

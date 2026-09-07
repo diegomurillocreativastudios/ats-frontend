@@ -223,7 +223,13 @@
     "passwordsDontMatch": "Passwords don't match"
   },
   "Errors": {
-    "connection": "Connection error. Please try again."
+    "connection": "Connection error. Please try again.",
+    "boundary": {
+      "title": "Something went wrong",
+      "description": "We could not display this page. You can try again or come back later.",
+      "retry": "Try again",
+      "ref": "Ref: {digest}"
+    }
   },
   "Metadata": {
     "auth": {
@@ -1771,7 +1777,14 @@
         "syncFailed": "Could not sync the calendar.",
         "syncResultPartial": "Synced: {synced} ok, {failed} with errors.",
         "syncResultSuccess": "Synced: {synced} interview(s).",
-        "accountFallback": "your account"
+        "accountFallback": "your account",
+        "oauthErrors": {
+          "missing_code": "Google authorization code was missing. Try connecting again.",
+          "session_expired": "Your session expired. Sign in again and try connecting the calendar.",
+          "connect_denied": "Google Calendar access was not authorized.",
+          "callback_failed": "Could not finish connecting Google Calendar. Try again.",
+          "generic": "Could not connect Google Calendar. Try again."
+        }
       },
       "calendarConnect": {
         "label": "Connect Google Calendar",

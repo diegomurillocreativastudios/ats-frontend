@@ -8,6 +8,7 @@ import {
   VACANCY_PROGRESS_PDF_ENGINE,
   VACANCY_PROGRESS_PDF_TEMPLATE_VERSION,
 } from "@/lib/reportes/vacancy-progress-pdf-constants"
+import { logServerError } from "@/lib/security/safe-server-log"
 
 export class VacancyProgressReportPdfError extends Error {
   status: number
@@ -69,12 +70,7 @@ export async function renderVacancyProgressReportPdfBuffer(
       templateVersion: VACANCY_PROGRESS_PDF_TEMPLATE_VERSION,
     }
   } catch (pdfkitError: unknown) {
-    console.error(
-      "[Report PDF] PDFKit v2 generation failed",
-      pdfkitError instanceof Error
-        ? pdfkitError.stack ?? pdfkitError.message
-        : pdfkitError
-    )
+    logServerError("vacancy-progress-pdf-pdfkit", pdfkitError)
     throw new VacancyProgressReportPdfError(
       "No se pudo generar el PDF del reporte con PDFKit v2.",
       500

@@ -30,9 +30,6 @@ tests/e2e/.e2e-auth-state.json
 *.pem
 /avance-de-vacantes-*.pdf
 
-# Legacy Chromium pack (removed server PDF pipeline; do not commit if regenerated locally)
-/public/chromium-pack.tar
-
 # debug
 npm-debug.log*
 yarn-debug.log*

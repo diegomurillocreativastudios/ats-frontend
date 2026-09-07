@@ -9,6 +9,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { logServerError } from "@/lib/security/safe-server-log"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 import {
   buildTechnicalSheetBasePath,
@@ -127,7 +128,7 @@ async function handleTechnicalSheetPdf(
 }
 
 function pdfErrorResponse(e: unknown) {
-  console.error("[technical-sheet-pdf]", e instanceof Error ? e.stack ?? e.message : e)
+  logServerError("technical-sheet-pdf", e)
   if (e instanceof TechnicalSheetPdfRateLimitError) {
     return NextResponse.json(
       { message: e.message },

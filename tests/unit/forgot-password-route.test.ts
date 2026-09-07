@@ -127,11 +127,13 @@ describe("POST /api/auth/forgot-password", () => {
     ) as unknown as typeof fetch
 
     const res = await POST(forgotRequest("alguien@ejemplo.com"))
+    const body = (await res.json()) as Record<string, unknown>
     expect(res.status).toBe(429)
     expect(res.headers.get("retry-after")).toBe("30")
+    expect(body.message).toBe("Demasiados intentos")
   })
 
-  it("reenvía 500 del backend sin normalizar", async () => {
+  it("normaliza 500 del backend a mensaje genérico", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(
       mockBackendResponse({
         ok: false,
@@ -144,10 +146,13 @@ describe("POST /api/auth/forgot-password", () => {
     const body = (await res.json()) as Record<string, unknown>
 
     expect(res.status).toBe(500)
-    expect(body.message).toBe("Internal error")
+    expect(body.message).toBe(
+      "No se pudo procesar la solicitud. Intenta de nuevo."
+    )
+    expect(body.message).not.toBe("Internal error")
   })
 
-  it("reenvía 503 del backend sin normalizar", async () => {
+  it("normaliza 503 del backend a mensaje genérico", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(
       mockBackendResponse({
         ok: false,
@@ -157,7 +162,11 @@ describe("POST /api/auth/forgot-password", () => {
     ) as unknown as typeof fetch
 
     const res = await POST(forgotRequest("alguien@ejemplo.com"))
+    const body = (await res.json()) as Record<string, unknown>
     expect(res.status).toBe(503)
+    expect(body.message).toBe(
+      "No se pudo procesar la solicitud. Intenta de nuevo."
+    )
   })
 
   it("rechaza correo vacío sin llamar al backend", async () => {

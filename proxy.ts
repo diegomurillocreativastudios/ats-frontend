@@ -52,6 +52,10 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const nonce = generateCspNonce()
 
+  if (pathname === "/chromium-pack.tar") {
+    return secureResponse(request, new NextResponse(null, { status: 404 }), nonce)
+  }
+
   const csrf = assertMutationCsrf(request)
   if (csrf.ok === false) {
     return secureResponse(
@@ -163,6 +167,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|chromium-pack\\.tar|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|tar)$).*)",
+    "/((?!_next/static|_next/image|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)$).*)",
   ],
 }

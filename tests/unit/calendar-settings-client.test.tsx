@@ -15,8 +15,14 @@ const calendarState = vi.hoisted(() => ({
   isSyncing: false,
 }))
 
+const searchParamsState = vi.hoisted(() => ({
+  get: (key: string): string | null => null as string | null,
+}))
+
 vi.mock("next/navigation", () => ({
-  useSearchParams: () => ({ get: () => null }),
+  useSearchParams: () => ({
+    get: (key: string) => searchParamsState.get(key),
+  }),
 }))
 
 vi.mock("@/hooks/useGoogleCalendar", () => ({
@@ -32,7 +38,15 @@ vi.mock("@/hooks/useGoogleCalendar", () => ({
   }),
 }))
 
-vi.mock("@/components/ui/Snackbar", () => ({ default: () => null }))
+vi.mock("@/components/ui/Snackbar", () => ({
+  default: ({
+    open,
+    message,
+  }: {
+    open: boolean
+    message: string
+  }) => (open ? <div role="status">{message}</div> : null),
+}))
 
 function renderPage() {
   return render(
@@ -52,6 +66,7 @@ describe("CalendarSettingsClient", () => {
     calendarState.isLoading = false
     calendarState.error = null
     calendarState.isSyncing = false
+    searchParamsState.get = () => null
   })
 
   it("muestra el estado vacío con beneficios y el botón de conectar", () => {
@@ -94,5 +109,32 @@ describe("CalendarSettingsClient", () => {
     ).toBeInTheDocument()
     expect(screen.queryByText(/backend/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/servidor/i)).not.toBeInTheDocument()
+  })
+
+  it("traduce códigos OAuth estables y no pinta texto técnico de la query (FE-SEC-022)", () => {
+    searchParamsState.get = (key: string) =>
+      key === "error" ? "callback_failed" : null
+
+    renderPage()
+
+    expect(
+      screen.getByText(
+        "No se pudo completar la conexión con Google Calendar. Intentá de nuevo.",
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it("usa toast genérico ante valores desconocidos en ?error= (FE-SEC-022)", () => {
+    searchParamsState.get = (key: string) =>
+      key === "error"
+        ? encodeURIComponent("SqlException: connection string")
+        : null
+
+    renderPage()
+
+    expect(
+      screen.getByText("No se pudo conectar Google Calendar. Intentá de nuevo."),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/SqlException/i)).not.toBeInTheDocument()
   })
 })

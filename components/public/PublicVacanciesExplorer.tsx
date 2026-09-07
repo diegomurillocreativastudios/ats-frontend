@@ -275,6 +275,8 @@ function OpportunityCard({
                 className="h-full w-full object-cover"
               />
             ) : (
+              // Dynamic Lucide icon from department metadata (stable component type).
+              // eslint-disable-next-line react-hooks/static-components -- icon lookup returns a component type, not a new component
               <DepartmentIcon className="h-5 w-5 text-ats-terracotta" aria-hidden />
             )}
           </div>

@@ -41,6 +41,5 @@ eslint.config.mjs
 design.pen
 docs
 avance-de-vacantes-*.pdf
-public/chromium-pack.tar
 tsconfig.tsbuildinfo
 next-env.d.ts

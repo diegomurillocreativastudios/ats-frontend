@@ -196,7 +196,7 @@ describe("EntrevistasVacancyError i18n (Etapa 11)", () => {
     expect(screen.getByText("Reintentar")).toBeInTheDocument()
   })
 
-  it("prioriza el mensaje crudo del error sobre el fallback", () => {
+  it("nunca muestra el mensaje crudo del error (FE-SEC-022)", () => {
     renderWithIntl(
       <EntrevistasVacancyError
         error={new Error("Boom backend")}
@@ -204,10 +204,10 @@ describe("EntrevistasVacancyError i18n (Etapa 11)", () => {
       />,
       "en"
     )
-    expect(screen.getByText("Boom backend")).toBeInTheDocument()
+    expect(screen.queryByText("Boom backend")).not.toBeInTheDocument()
     expect(
-      screen.queryByText("An error occurred while loading the interviews.")
-    ).not.toBeInTheDocument()
+      screen.getByText("An error occurred while loading the interviews.")
+    ).toBeInTheDocument()
   })
 })
 

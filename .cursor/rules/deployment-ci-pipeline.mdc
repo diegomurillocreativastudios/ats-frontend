@@ -19,7 +19,9 @@ Un cambio “listo” no es solo que compile en local: debe sobrevivir Actions.
 | Workflow | Qué corre | Cuándo importa |
 |----------|-----------|----------------|
 | `spellcheck.yml` | `npm run spellcheck` (cspell en `app/`, `components/`, `lib/`) | Casi siempre al tocar TS/TSX ahí |
+| `quality.yml` | `npm run lint` + `npm test` (Vitest) | Casi siempre; gate de FE-SEC-022 |
 | `e2e.yml` | `npm ci` → build → Playwright | Cambios de flujos críticos / auth / portal |
+| `supply-chain.yml` | CycloneDX Software Bill of Materials + attestation | Dependencias / Actions pins |
 
 Branches que disparan Actions: `main`, `develop` (push y PR).
 
