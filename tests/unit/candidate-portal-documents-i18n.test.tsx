@@ -70,14 +70,17 @@ describe("DocumentsUploadZone i18n (Etapa 5C)", () => {
 
 describe("DocumentsList i18n (Etapa 5C)", () => {
   it("traduce el encabezado y el empty state según el locale", () => {
-    const { unmount } = renderWithIntl(<DocumentsList documents={[]} />, "es")
+    const { unmount } = renderWithIntl(
+      <DocumentsList candidateId="cand-1" documents={[]} />,
+      "es",
+    )
     expect(screen.getByText("Mis documentos")).toBeInTheDocument()
     expect(
       screen.getByText("Aún no hay documentos. Los que subas aparecerán aquí."),
     ).toBeInTheDocument()
     unmount()
 
-    renderWithIntl(<DocumentsList documents={[]} />, "en")
+    renderWithIntl(<DocumentsList candidateId="cand-1" documents={[]} />, "en")
     expect(screen.getByText("My documents")).toBeInTheDocument()
     expect(
       screen.getByText(

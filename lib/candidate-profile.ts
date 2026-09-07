@@ -47,10 +47,11 @@ export interface CandidateProfile {
   videoLink?: string | null
   references?: unknown
   recognitions?: unknown
-  /** URL directa al PDF del CV (p. ej. GCS); solo lectura desde GET del perfil. */
-  cvDownloadUrl?: string | null
-  /** Ruta en storage del CV (mismo criterio que GET `/api/Storage/files/{path}`). */
-  storagePath?: string | null
+  /**
+   * True if the backend had a CV file for this profile.
+   * Derived server-side from storagePath / cvDownloadUrl without exposing them (FE-SEC-020).
+   */
+  hasCvFile?: boolean
   /** True si el candidato ya envió consentimiento vigente (solo lectura; server-owned). */
   authAndConsentVerification?: boolean
   /** ISO-8601 UTC del consentimiento vigente, o null. */
@@ -127,19 +128,18 @@ export function normalizeCandidateProfileFromApi(raw: unknown): CandidateProfile
     videoLink: toNullableString(o.videoLink),
     references: o.references ?? null,
     recognitions: o.recognitions ?? null,
-    cvDownloadUrl: toNullableString(o.cvDownloadUrl),
-    storagePath: toNullableString(o.storagePath),
+    hasCvFile:
+      o.hasCvFile === true ||
+      Boolean(toNullableString(o.storagePath)) ||
+      Boolean(toNullableString(o.cvDownloadUrl)),
     authAndConsentVerification: o.authAndConsentVerification === true,
     authAndConsentVerifiedAt: toNullableString(o.authAndConsentVerifiedAt),
   }
 }
 
-const hasTrimmedText = (v: string | null | undefined): boolean =>
-  v != null && String(v).trim() !== ""
-
 /**
- * Tras PUT `/api/candidate/profile`, la respuesta puede omitir `storagePath` / `cvDownloadUrl`.
- * Conserva los valores ya cargados para que no desaparezca el botón de descarga.
+ * Tras PUT `/api/candidate/profile`, la respuesta puede omitir la señal de CV.
+ * Conserva hasCvFile para que no desaparezca el botón de descarga.
  */
 export function mergeCandidateProfilePreservingCvRefs(
   previous: CandidateProfile | null,
@@ -148,12 +148,7 @@ export function mergeCandidateProfilePreservingCvRefs(
   if (!previous) return incoming
   return {
     ...incoming,
-    storagePath: hasTrimmedText(incoming.storagePath)
-      ? incoming.storagePath
-      : previous.storagePath ?? null,
-    cvDownloadUrl: hasTrimmedText(incoming.cvDownloadUrl)
-      ? incoming.cvDownloadUrl
-      : previous.cvDownloadUrl ?? null,
+    hasCvFile: incoming.hasCvFile === true || previous.hasCvFile === true,
   }
 }
 

@@ -2,6 +2,11 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  normalizeCandidateDocuments,
+  toPublicCandidateDocument,
+  type CandidateDocument,
+} from "@/lib/candidate-documents"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 import {
   getUploadMaxBytesForBackendPath,
@@ -9,34 +14,7 @@ import {
   readRequestBodyWithinLimit,
 } from "@/lib/upload-body-limit"
 
-interface CandidateDocumentDto {
-  id: string
-  storagePath: string | null
-  createdAt: string | null
-  contentSha256: string | null
-}
-
-const toStringOrNull = (value: unknown) => {
-  if (value == null) return null
-  const text = String(value).trim()
-  return text || null
-}
-
-const normalizeCandidateDocument = (raw: unknown): CandidateDocumentDto | null => {
-  if (!raw || typeof raw !== "object") return null
-  const row = raw as Record<string, unknown>
-  const id = toStringOrNull(row.id)
-  if (!id) return null
-
-  return {
-    id,
-    storagePath: toStringOrNull(row.storagePath),
-    createdAt: toStringOrNull(row.createdAt),
-    contentSha256: toStringOrNull(row.contentSha256),
-  }
-}
-
-const sortByCreatedAtDesc = (items: CandidateDocumentDto[]) =>
+const sortByCreatedAtDesc = (items: CandidateDocument[]) =>
   [...items].sort((a, b) => {
     const aTime = a.createdAt ? Date.parse(a.createdAt) : Number.NEGATIVE_INFINITY
     const bTime = b.createdAt ? Date.parse(b.createdAt) : Number.NEGATIVE_INFINITY
@@ -71,14 +49,17 @@ export async function GET(
       )
     }
 
-    const backendResponse = await fetch(`${baseUrl}/api/candidate/${encodeURIComponent(candidateId)}/documents`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    })
+    const backendResponse = await fetch(
+      `${baseUrl}/api/candidate/${encodeURIComponent(candidateId)}/documents`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      }
+    )
 
     const payload = await backendResponse.json().catch(() => null)
 
@@ -90,18 +71,7 @@ export async function GET(
       return NextResponse.json({ message }, { status: backendResponse.status })
     }
 
-    const listRaw = Array.isArray(payload)
-      ? payload
-      : Array.isArray((payload as Record<string, unknown> | null)?.items)
-        ? ((payload as Record<string, unknown>).items as unknown[])
-        : []
-
-    const documents = sortByCreatedAtDesc(
-      listRaw
-        .map((item) => normalizeCandidateDocument(item))
-        .filter((item): item is CandidateDocumentDto => item !== null)
-    )
-
+    const documents = sortByCreatedAtDesc(normalizeCandidateDocuments(payload))
     return NextResponse.json(documents)
   } catch (err: unknown) {
     return NextResponse.json(
@@ -175,7 +145,7 @@ export async function POST(
       return NextResponse.json({ message }, { status: backendResponse.status })
     }
 
-    const document = normalizeCandidateDocument(payload)
+    const document = toPublicCandidateDocument(payload)
     if (!document) {
       return NextResponse.json(
         { message: "Respuesta inválida al subir el documento del candidato" },

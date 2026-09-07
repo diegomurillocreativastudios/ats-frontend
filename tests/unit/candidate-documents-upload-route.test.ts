@@ -15,7 +15,74 @@ vi.mock("@/lib/server-backend-url", () => ({
   getServerBackendBaseUrl: () => "https://api.example.com",
 }))
 
-import { POST } from "@/app/api/candidate/[id]/documents/route"
+import { GET, POST } from "@/app/api/candidate/[id]/documents/route"
+
+describe("GET /api/candidate/[id]/documents", () => {
+  const fetchMock = vi.fn()
+
+  beforeEach(() => {
+    fetchMock.mockReset()
+    vi.stubGlobal("fetch", fetchMock)
+  })
+
+  it("returns a public DTO without storagePath or contentSha256", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify([
+          {
+            id: "doc-1",
+            storagePath: "cvs/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee_cv.pdf",
+            createdAt: "2026-01-01T00:00:00Z",
+            contentSha256: "abc123",
+          },
+        ]),
+        { status: 200, headers: { "content-type": "application/json" } }
+      )
+    )
+
+    const response = await GET(new Request("https://app.example.com"), {
+      params: Promise.resolve({ id: "cand-1" }),
+    })
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as Record<string, unknown>[]
+    expect(payload).toHaveLength(1)
+    expect(payload[0]).toEqual({
+      id: "doc-1",
+      fileName: "cv.pdf",
+      createdAt: "2026-01-01T00:00:00Z",
+    })
+    expect(payload[0]).not.toHaveProperty("storagePath")
+    expect(payload[0]).not.toHaveProperty("contentSha256")
+  })
+
+  it("passes through public fileName from the backend without deriving from path", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify([
+          {
+            id: "doc-2",
+            fileName: "Curriculum.pdf",
+            createdAt: "2026-03-01T00:00:00Z",
+          },
+        ]),
+        { status: 200, headers: { "content-type": "application/json" } }
+      )
+    )
+
+    const response = await GET(new Request("https://app.example.com"), {
+      params: Promise.resolve({ id: "cand-1" }),
+    })
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as Record<string, unknown>[]
+    expect(payload[0]).toEqual({
+      id: "doc-2",
+      fileName: "Curriculum.pdf",
+      createdAt: "2026-03-01T00:00:00Z",
+    })
+  })
+})
 
 describe("POST /api/candidate/[id]/documents", () => {
   const fetchMock = vi.fn()
@@ -48,14 +115,15 @@ describe("POST /api/candidate/[id]/documents", () => {
     expect(payload.message).toContain("límite")
   })
 
-  it("forwards the raw body without parsing formData", async () => {
+  it("forwards the raw body and strips storage secrets from the response", async () => {
     fetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
           id: "doc-1",
-          storagePath: null,
+          fileName: "secret.pdf",
           createdAt: "2026-01-01T00:00:00Z",
-          contentSha256: null,
+          storagePath: "cvs/secret.pdf",
+          contentSha256: "hash",
         }),
         { status: 200, headers: { "content-type": "application/json" } }
       )
@@ -87,6 +155,15 @@ describe("POST /api/candidate/[id]/documents", () => {
     const headers = new Headers(init.headers)
     expect(headers.get("Authorization")).toBe("Bearer test-token")
     expect(headers.get("Content-Type")).toContain("multipart/form-data")
+
+    const payload = (await response.json()) as Record<string, unknown>
+    expect(payload).toEqual({
+      id: "doc-1",
+      fileName: "secret.pdf",
+      createdAt: "2026-01-01T00:00:00Z",
+    })
+    expect(payload).not.toHaveProperty("storagePath")
+    expect(payload).not.toHaveProperty("contentSha256")
   })
 
   it("returns 400 for an empty body", async () => {

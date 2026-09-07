@@ -122,6 +122,7 @@ export default function DocumentosContent() {
                     </p>
                   ) : null}
                   <DocumentsList
+                    candidateId={candidateId ?? ""}
                     documents={documents}
                     onDeleteDocument={handleDeleteDocument}
                   />
@@ -156,6 +157,7 @@ export default function DocumentosContent() {
                   </p>
                 ) : null}
                 <DocumentsList
+                  candidateId={candidateId ?? ""}
                   documents={documents}
                   onDeleteDocument={handleDeleteDocument}
                 />

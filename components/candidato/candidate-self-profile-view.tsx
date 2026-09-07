@@ -72,6 +72,7 @@ import {
 } from "@/lib/candidate-profile"
 import { resolveHeadlineForDisplay } from "@/lib/candidate-profile-hydrate"
 import { resolveBffUrl } from "@/lib/api"
+import { parseContentDispositionFilename } from "@/lib/api/recruiter-candidate-cv"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv"
 import { getInitials } from "@/lib/getInitials"
@@ -221,14 +222,8 @@ export function CandidateSelfProfileView({
   const parseState = getLatestResumeParseState(raw)
   const latest = selfProfile?.latestResume ?? null
 
-  const cvStoragePath =
-    (latest?.storagePath != null && String(latest.storagePath).trim() !== ""
-      ? String(latest.storagePath).trim()
-      : "") ||
-    (candidateProfile?.storagePath != null &&
-    String(candidateProfile.storagePath).trim() !== ""
-      ? String(candidateProfile.storagePath).trim()
-      : "")
+  const canDownloadCv =
+    latest?.hasFile === true || candidateProfile?.hasCvFile === true
 
   const firstNameNd = nd.FirstName ?? nd.firstName ?? ""
   const lastNameNd = nd.LastName ?? nd.lastName ?? ""
@@ -426,65 +421,29 @@ export function CandidateSelfProfileView({
   }, [t, compliance])
 
   const handleDownloadCv = async () => {
-    const path = cvStoragePath
-    const directUrl = candidateProfile?.cvDownloadUrl?.trim() ?? ""
-
-    if (!path && !directUrl) return
+    if (!canDownloadCv) return
 
     setDownloading(true)
     setDownloadError(null)
     try {
-      if (path) {
-        const url = resolveBffUrl(
-          `/api/Storage/files/${encodeURIComponent(path)}`
-        )
-        const res = await fetch(url, {
-          method: "GET",
-          credentials: "include",
-        })
-        if (!res.ok) throw new Error(t("download.cvError"))
-        const blob = await res.blob()
-        const objUrl = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = objUrl
-        a.download = path.split("/").pop() || "cv.pdf"
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(objUrl)
-        return
-      }
-
-      try {
-        const res = await fetch(directUrl, {
-          method: "GET",
-          mode: "cors",
-          credentials: "omit",
-        })
-        if (res.ok) {
-          const blob = await res.blob()
-          const objUrl = URL.createObjectURL(blob)
-          const a = document.createElement("a")
-          a.href = objUrl
-          let name = "cv.pdf"
-          try {
-            const u = new URL(directUrl)
-            const seg = decodeURIComponent(u.pathname.split("/").pop() || "")
-            if (seg) name = seg.split("?")[0] || name
-          } catch {
-            /* nombre por defecto */
-          }
-          a.download = name
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-          URL.revokeObjectURL(objUrl)
-          return
-        }
-      } catch {
-        /* CORS u otro error: abrir en nueva pestaña */
-      }
-      window.open(directUrl, "_blank", "noopener,noreferrer")
+      const url = resolveBffUrl("/api/candidate/profile/cv")
+      const res = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+      })
+      if (!res.ok) throw new Error(t("download.cvError"))
+      const blob = await res.blob()
+      const objUrl = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = objUrl
+      a.download =
+        parseContentDispositionFilename(
+          res.headers.get("Content-Disposition")
+        ) || "cv.pdf"
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(objUrl)
     } catch (err: unknown) {
       setDownloadError(getApiErrorMessage(err) || t("download.genericError"))
     } finally {
@@ -542,7 +501,7 @@ export function CandidateSelfProfileView({
               className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
-                {cvStoragePath || candidateProfile?.cvDownloadUrl?.trim() ? (
+                {canDownloadCv ? (
                   <button
                     type="button"
                     onClick={handleDownloadCv}
@@ -618,7 +577,7 @@ export function CandidateSelfProfileView({
               aria-label={t("actions.toolbarViewingAria")}
               className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3"
             >
-              {cvStoragePath || candidateProfile?.cvDownloadUrl?.trim() ? (
+              {canDownloadCv ? (
                 <button
                   type="button"
                   onClick={handleDownloadCv}
