@@ -6,11 +6,11 @@ import { ConsentAuthorizationModal } from "@/components/candidato/consent-author
 import { resetPhoneCountriesCache } from "@/lib/phone-countries"
 import esMessages from "@/messages/es.json"
 
-vi.mock("@countrystatecity/countries-browser", () => ({
-  getCountries: vi.fn(async () => [
+vi.mock("@/lib/phone-countries-data", () => ({
+  getBundledPhoneCountryRows: () => [
     { iso2: "SV", name: "El Salvador", phonecode: "503" },
     { iso2: "US", name: "United States", phonecode: "1" },
-  ]),
+  ],
 }))
 
 const completeInitialValues = {

@@ -104,4 +104,94 @@ describe("CandidateProfileModal", () => {
       "kimi.antonelli-4c32755e1d9e46e3b8d96234e3a6b8ba@local.dev"
     )
   })
+
+  it("does not render boolean matched attributes as the word true", () => {
+    renderModal(
+      <CandidateProfileModal
+        match={{
+          ...antonelliMatch,
+          componentScores: {
+            Git: 1,
+            CSS: 1,
+            attribute_aggregate: 0.813,
+          },
+          matchedAttributes: {
+            Git: true,
+            HTML: "true",
+            CSS: "layout responsivo y estados de UI",
+          },
+        }}
+        uploadedAtLabel="Subido: 13 ago 2026"
+        onClose={() => undefined}
+      />
+    )
+
+    expect(screen.getByText("Git")).toBeInTheDocument()
+    expect(screen.getByText("layout responsivo y estados de UI")).toBeInTheDocument()
+    expect(screen.getAllByText("Sin detalle").length).toBeGreaterThan(0)
+    expect(screen.queryByText("true")).not.toBeInTheDocument()
+    expect(screen.queryByText("false")).not.toBeInTheDocument()
+  })
+
+  it("hides presence flags from PascalCase and nested matching payloads", () => {
+    renderModal(
+      <CandidateProfileModal
+        match={{
+          ...antonelliMatch,
+          componentScores: undefined,
+          ComponentScores: {
+            Git: 1,
+            React: 1,
+            attribute_aggregate: 0.813,
+          },
+          matchedAttributes: undefined,
+          MatchedAttributes: {
+            Git: { matched: true },
+            React: { matched: true, evidence: "2+ años en producción" },
+            TypeScript: { Level: "True" },
+          },
+        }}
+        uploadedAtLabel="Subido: 13 ago 2026"
+        onClose={() => undefined}
+      />
+    )
+
+    expect(screen.getByText("Git")).toBeInTheDocument()
+    expect(screen.getByText("2+ años en producción")).toBeInTheDocument()
+    expect(screen.getAllByText("Sin detalle").length).toBeGreaterThan(0)
+    expect(screen.queryByText("true")).not.toBeInTheDocument()
+    expect(screen.queryByText("True")).not.toBeInTheDocument()
+    expect(screen.queryByText("false")).not.toBeInTheDocument()
+  })
+
+  it("keeps attribute evidence on one line and exposes the full text on hover", () => {
+    const evidence =
+      "HTML semántico, accesibilidad, manejo de focus y aria-invalid en flujos de alta y edición."
+
+    renderModal(
+      <CandidateProfileModal
+        match={{
+          ...antonelliMatch,
+          componentScores: {
+            HTML: 0,
+            JavaScript: 1,
+            attribute_aggregate: 0.683,
+          },
+          matchedAttributes: {
+            HTML: evidence,
+          },
+        }}
+        uploadedAtLabel="Subido: 4 sept 2026"
+        onClose={() => undefined}
+      />
+    )
+
+    const evidenceNode = screen.getByText(evidence)
+    expect(evidenceNode).toHaveClass("truncate")
+    expect(evidenceNode).toHaveClass("text-[10px]")
+    expect(evidenceNode).toHaveAttribute("title", evidence)
+    expect(screen.getByText("HTML")).toHaveClass("truncate")
+    expect(screen.getByText("JavaScript")).toBeInTheDocument()
+    expect(screen.getByText("Sin detalle")).toBeInTheDocument()
+  })
 })

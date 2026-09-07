@@ -8,8 +8,93 @@ export interface AttributeTableRow {
   score: unknown
 }
 
-function emptyToDash(value: unknown): string {
-  return value != null && String(value).trim() !== "" ? String(value).trim() : "—"
+export const MATCHED_ATTRIBUTE_RECORD_KEYS = [
+  "matchedAttributes",
+  "MatchedAttributes",
+  "matched_attributes",
+] as const
+
+export const COMPONENT_SCORE_RECORD_KEYS = [
+  "componentScores",
+  "ComponentScores",
+  "component_scores",
+] as const
+
+const NESTED_LEVEL_KEYS = [
+  "evidence",
+  "Evidence",
+  "level",
+  "Level",
+  "description",
+  "Description",
+  "detail",
+  "Detail",
+  "text",
+  "Text",
+  "note",
+  "Note",
+  "value",
+  "Value",
+] as const
+
+function isBooleanLikeLevel(value: unknown): boolean {
+  if (typeof value === "boolean") return true
+  if (typeof value !== "string") return false
+  const normalized = value.trim().toLowerCase()
+  return normalized === "true" || normalized === "false"
+}
+
+/**
+ * First object record found under any of the given keys.
+ */
+export function pickNamedRecord(
+  source: unknown,
+  keys: readonly string[]
+): Record<string, unknown> | null {
+  if (source == null || typeof source !== "object" || Array.isArray(source)) {
+    return null
+  }
+  const record = source as Record<string, unknown>
+  for (const key of keys) {
+    const value = record[key]
+    if (value != null && typeof value === "object" && !Array.isArray(value)) {
+      return value as Record<string, unknown>
+    }
+  }
+  return null
+}
+
+function resolveAttributeLevel(value: unknown, depth: number): string | null {
+  if (depth > 3) return null
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const text = resolveAttributeLevel(item, depth + 1)
+      if (text != null) return text
+    }
+    return null
+  }
+
+  if (value != null && typeof value === "object") {
+    const record = value as Record<string, unknown>
+    for (const key of NESTED_LEVEL_KEYS) {
+      if (!(key in record)) continue
+      const text = resolveAttributeLevel(record[key], depth + 1)
+      if (text != null) return text
+    }
+    return null
+  }
+
+  if (typeof value !== "string" || isBooleanLikeLevel(value)) return null
+  const text = value.trim()
+  return text === "" || text === "—" ? null : text
+}
+
+/**
+ * Human-readable evidence for an attribute. Presence flags like `true` are not levels.
+ */
+export function toAttributeLevel(value: unknown): string | null {
+  return resolveAttributeLevel(value, 0)
 }
 
 function normalizeToken(value: string): string {
@@ -28,8 +113,8 @@ function buildMatchedLevelLookup(matchedAttributes: ScoreEntry[]): Map<string, s
   for (const [key, value] of matchedAttributes) {
     const canonical = canonicalAttributeKey(key)
     if (canonical === "") continue
-    const level = emptyToDash(value)
-    if (level === "—") continue
+    const level = toAttributeLevel(value)
+    if (level == null) continue
     lookup.set(canonical, level)
   }
   return lookup
@@ -60,7 +145,7 @@ export function buildAttributeTableRows(
     rowsByCanonical.set(canonical, {
       key,
       label: formatRequirementKey(key),
-      level: emptyToDash(value) === "—" ? null : emptyToDash(value),
+      level: toAttributeLevel(value),
       score: null,
     })
   }

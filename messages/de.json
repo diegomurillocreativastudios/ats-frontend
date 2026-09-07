@@ -2253,6 +2253,7 @@
           "attributes": "Attribute",
           "attributesDetail": "Attributdetails ({count})",
           "attributesZeroHint": "Ein Wert von 0 % senkt nicht immer den Gesamtwert: Aktualität oder relevante Jahre werden getrennt gemessen.",
+          "attributeLevelFallback": "Kein Detail",
           "qualitativeScore": "Qualitative Punktzahl",
           "semanticSimilarity": "Semantische Ähnlichkeit",
           "attributeMatch": "Attributübereinstimmung",

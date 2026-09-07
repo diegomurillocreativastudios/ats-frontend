@@ -20,6 +20,10 @@ import {
 } from "@/lib/api/recruiter-candidate-cv"
 import {
   buildAttributeTableRows,
+  COMPONENT_SCORE_RECORD_KEYS,
+  MATCHED_ATTRIBUTE_RECORD_KEYS,
+  pickNamedRecord,
+  toAttributeLevel,
   type AttributeTableRow,
 } from "@/lib/vacancies/build-attribute-table-rows"
 import {
@@ -43,7 +47,11 @@ export interface CandidateProfileMatch {
   candidateProfileId?: string | null
   candidateDocumentId?: string | null
   componentScores?: Record<string, unknown> | null
+  ComponentScores?: Record<string, unknown> | null
+  component_scores?: Record<string, unknown> | null
   matchedAttributes?: Record<string, unknown> | null
+  MatchedAttributes?: Record<string, unknown> | null
+  matched_attributes?: Record<string, unknown> | null
   matchedAttributePaths?: Record<string, unknown> | null
   qualitativeReasoning?: string | null
   qualitativeReasoningPositive?: string | null
@@ -58,6 +66,7 @@ interface CandidateProfileModalProps {
 }
 
 function emptyToDash(value: unknown): string {
+  if (typeof value === "boolean") return "—"
   return value != null && String(value).trim() !== "" ? String(value).trim() : "—"
 }
 
@@ -131,6 +140,7 @@ interface ScoreBarRowProps {
   barTrackClass?: string
   isTotalRow?: boolean
   hideLabel?: boolean
+  levelFallback?: string | null
 }
 
 function ScoreBarRow({
@@ -140,53 +150,64 @@ function ScoreBarRow({
   labelClass,
   barClass,
   valueClass,
-  barTrackClass = "bg-slate-200/90",
+  barTrackClass = "bg-slate-300/80",
   isTotalRow = false,
   hideLabel = false,
+  levelFallback = null,
 }: ScoreBarRowProps) {
   const percentLabel = formatScorePercent(value) ?? emptyToDash(value)
   const barWidth = scoreBarWidth(value)
   const hasNumericScore = typeof value === "number" && Number.isFinite(value)
+  const displayLevel =
+    toAttributeLevel(level) ?? (isTotalRow || hideLabel ? null : levelFallback)
 
   return (
     <li
       className={
         isTotalRow
-          ? "flex flex-col gap-2.5 rounded-lg border border-sky-200/80 bg-sky-50/70 px-3 py-3 sm:flex-row sm:items-center sm:gap-3"
-          : "flex items-center gap-3"
+          ? "flex flex-col gap-1 rounded-lg border border-sky-200/80 bg-sky-50/70 px-3 py-3"
+          : "flex flex-col gap-1"
       }
     >
-      {hideLabel ? (
-        <span className="sr-only">{label}</span>
-      ) : (
-        <span
-          className={`w-full shrink-0 font-sans text-xs sm:w-44 ${labelClass} ${isTotalRow ? "font-semibold" : ""}`}
-        >
-          <span className="block">{label}</span>
-          {level != null && (
-            <span className="mt-0.5 block font-normal text-slate-500">{level}</span>
-          )}
-        </span>
-      )}
-      {hasNumericScore ? (
-        <div
-          className={`h-2.5 min-w-0 flex-1 overflow-hidden rounded-full ${barTrackClass}`}
-          role="presentation"
-        >
+      <div className="flex items-center gap-3">
+        {hideLabel ? (
+          <span className="sr-only">{label}</span>
+        ) : (
+          <span
+            className={`w-28 shrink-0 truncate font-sans text-xs sm:w-36 ${labelClass} ${isTotalRow ? "font-semibold" : ""}`}
+            title={label}
+          >
+            {label}
+          </span>
+        )}
+        {hasNumericScore ? (
           <div
-            className={`h-full rounded-full transition-all ${barClass}`}
-            style={{ width: `${barWidth}%` }}
-            aria-hidden
-          />
-        </div>
-      ) : (
-        <div className="min-w-0 flex-1" aria-hidden />
+            className={`h-2 min-w-0 flex-1 overflow-hidden rounded-full ${barTrackClass}`}
+            role="presentation"
+          >
+            <div
+              className={`h-full rounded-full transition-all ${barClass}`}
+              style={{ width: `${barWidth}%` }}
+              aria-hidden
+            />
+          </div>
+        ) : (
+          <div className="min-w-0 flex-1" aria-hidden />
+        )}
+        <span
+          className={`w-12 shrink-0 text-right font-sans text-xs font-semibold tabular-nums ${valueClass}`}
+        >
+          {percentLabel}
+        </span>
+      </div>
+      {displayLevel != null && (
+        <p
+          className="truncate font-sans text-[10px] leading-3 text-slate-400"
+          title={displayLevel}
+        >
+          {displayLevel}
+        </p>
       )}
-      <span
-        className={`w-full shrink-0 text-left font-sans text-xs font-semibold tabular-nums sm:w-13 sm:text-right ${valueClass}`}
-      >
-        {percentLabel}
-      </span>
     </li>
   )
 }
@@ -282,7 +303,7 @@ export function CandidateProfileModal({
     if (event.target === event.currentTarget) onClose()
   }
 
-  const componentScores = objectEntries(match.componentScores)
+  const componentScores = objectEntries(pickNamedRecord(match, COMPONENT_SCORE_RECORD_KEYS))
   const {
     attributeIndividuals,
     aggregateEntry,
@@ -292,7 +313,9 @@ export function CandidateProfileModal({
   const sortedAttributeIndividuals = sortScoresByAscendingValue(attributeIndividuals)
   const showZeroHint = hasZeroScoreOutsideFullAggregate(attributeIndividuals, aggregateEntry)
 
-  const matchedAttributesEntries = objectEntries(match.matchedAttributes)
+  const matchedAttributesEntries = objectEntries(
+    pickNamedRecord(match, MATCHED_ATTRIBUTE_RECORD_KEYS)
+  )
   const attributeTableRows = sortAttributeRows(
     buildAttributeTableRows(sortedAttributeIndividuals, matchedAttributesEntries, getScoreLabel)
   )
@@ -407,7 +430,7 @@ export function CandidateProfileModal({
                           {tModal("attributesZeroHint")}
                         </p>
                       )}
-                      <ul className="flex flex-col gap-3" role="list">
+                      <ul className="flex flex-col gap-2.5" role="list">
                         {attributeTableRows.map((row) => (
                           <ScoreBarRow
                             key={row.key}
@@ -421,7 +444,8 @@ export function CandidateProfileModal({
                                 : "bg-sky-500"
                             }
                             valueClass="text-slate-900"
-                            barTrackClass="bg-slate-200/95"
+                            barTrackClass="bg-slate-300/80"
+                            levelFallback={tModal("attributeLevelFallback")}
                           />
                         ))}
                         {aggregateEntry != null && (
@@ -431,7 +455,7 @@ export function CandidateProfileModal({
                             labelClass="text-slate-800"
                             barClass="bg-sky-600"
                             valueClass="text-slate-900"
-                            barTrackClass="bg-slate-200/95"
+                            barTrackClass="bg-slate-300/80"
                             isTotalRow
                           />
                         )}

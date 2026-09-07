@@ -20,11 +20,11 @@ vi.mock("@/components/public/ApplyEmailConfirmationModal", () => ({
   ApplyEmailConfirmationModal: () => null,
 }))
 
-vi.mock("@countrystatecity/countries-browser", () => ({
-  getCountries: vi.fn(async () => [
+vi.mock("@/lib/phone-countries-data", () => ({
+  getBundledPhoneCountryRows: () => [
     { iso2: "SV", name: "El Salvador", phonecode: "503" },
     { iso2: "US", name: "United States", phonecode: "1" },
-  ]),
+  ],
 }))
 
 function renderForm() {

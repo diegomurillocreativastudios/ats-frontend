@@ -7,10 +7,10 @@ import {
   type PhoneCountryOption,
 } from "@/lib/phone-countries"
 
-const getCountriesMock = vi.hoisted(() => vi.fn())
+const getBundledPhoneCountryRowsMock = vi.hoisted(() => vi.fn())
 
-vi.mock("@countrystatecity/countries-browser", () => ({
-  getCountries: getCountriesMock,
+vi.mock("@/lib/phone-countries-data", () => ({
+  getBundledPhoneCountryRows: getBundledPhoneCountryRowsMock,
 }))
 
 const sample: PhoneCountryOption[] = [
@@ -41,8 +41,8 @@ describe("filterPhoneCountries", () => {
 describe("loadPhoneCountries", () => {
   beforeEach(() => {
     resetPhoneCountriesCache()
-    getCountriesMock.mockReset()
-    getCountriesMock.mockResolvedValue([
+    getBundledPhoneCountryRowsMock.mockReset()
+    getBundledPhoneCountryRowsMock.mockReturnValue([
       { iso2: "sv", name: "El Salvador", phonecode: "503" },
       { iso2: "us", name: "United States", phonecode: "1" },
     ])
@@ -57,6 +57,6 @@ describe("loadPhoneCountries", () => {
       { iso2: "SV", name: "El Salvador", phonecode: "+503" },
       { iso2: "US", name: "United States", phonecode: "+1" },
     ])
-    expect(getCountriesMock).toHaveBeenCalledTimes(1)
+    expect(getBundledPhoneCountryRowsMock).toHaveBeenCalledTimes(1)
   })
 })

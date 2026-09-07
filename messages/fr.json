@@ -2253,6 +2253,7 @@
           "attributes": "Attributs",
           "attributesDetail": "Détail des attributs ({count})",
           "attributesZeroHint": "Un 0 % ne baisse pas toujours le score combiné : récence ou années pertinentes sont mesurées à part.",
+          "attributeLevelFallback": "Sans détail",
           "qualitativeScore": "Score qualitatif",
           "semanticSimilarity": "Similarité sémantique",
           "attributeMatch": "Correspondance d'attributs",

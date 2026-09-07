@@ -2253,6 +2253,7 @@
           "attributes": "Atributos",
           "attributesDetail": "Detalle de atributos ({count})",
           "attributesZeroHint": "Un 0% no siempre baja el agregado: actualidad o años relevantes se miden aparte.",
+          "attributeLevelFallback": "Sin detalle",
           "qualitativeScore": "Puntaje cualitativo",
           "semanticSimilarity": "Similitud semántica",
           "attributeMatch": "Coincidencia de atributos",

@@ -50,6 +50,8 @@ describe("buildContentSecurityPolicy", () => {
     expect(csp).not.toContain("'unsafe-eval'")
     expect(csp).toContain("upgrade-insecure-requests")
     expect(csp).toContain("https://flagcdn.com")
+    expect(csp).toContain("connect-src 'self'")
+    expect(csp).not.toContain("jsdelivr")
     expect(csp).toContain("frame-ancestors 'none'")
     expect(csp).toContain("report-uri /api/csp-report")
   })
