@@ -2,13 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
-import Nestable from "react-nestable";
 import {
   Plus,
-  Pencil,
-  Trash2,
   ListOrdered,
-  GripVertical,
 } from "lucide-react";
 import EtapaModal from "@/components/rrhh/EtapaModal";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
@@ -20,6 +16,7 @@ import {
   AdminSummaryBar,
   AdminSurface,
 } from "@/components/portal-admin/admin-page-chrome";
+import { SortableStagesList } from "@/components/portal-admin/sortable-stages-list";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import { Button } from "@/components/ui/Button";
 import Snackbar from "@/components/ui/Snackbar";
@@ -27,8 +24,6 @@ import { apiClient } from "@/lib/api";
 import { unwrapListArray } from "@/lib/api/query-paging";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { buildRecruiterStagePutPayload } from "@/lib/recruiterStagePayload";
-import "react-nestable/dist/styles/index.css";
-import "./nestable-custom.css";
 
 /**
  * Global platform stages catalog URL.
@@ -246,88 +241,6 @@ const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) =>
           />
         </div>
       )}
-    </div>
-  );
-};
-
-const renderStageItem = ({ item, handler, tStages }) => {
-  return (
-    <div className="flex w-full flex-col gap-4 rounded-xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-1 items-center gap-4">
-        <div
-          {...handler}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-vo-purple/10 cursor-grab active:cursor-grabbing"
-          aria-label={tStages("actions.dragAria")}
-        >
-          <GripVertical className="h-6 w-6 text-vo-purple" aria-hidden />
-        </div>
-        <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="font-sans text-base font-semibold text-foreground">
-            {item.name}
-          </h3>
-          {item.description && (
-            <p className="font-sans text-sm text-muted-foreground line-clamp-2">
-              {item.description}
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-col gap-1.5">
-          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
-            {tStages("fields.defaultStage")}
-          </span>
-          <DefaultStageSwitch
-            stage={item}
-            onActivate={item.onDefaultActivate}
-            disabled={item.defaultSwitchDisabled}
-            isUpdating={item.defaultSwitchUpdating}
-            tStages={tStages}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
-            {tStages("fields.finalStage")}
-          </span>
-          <FinalStageSwitch
-            stage={item}
-            onToggle={item.onFinalToggle}
-            disabled={item.finalSwitchDisabled}
-            isUpdating={item.finalSwitchUpdating}
-            tStages={tStages}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
-            {tStages("fields.hiredStage")}
-          </span>
-          <HiredStageSwitch
-            stage={item}
-            onToggle={item.onHiredToggle}
-            disabled={item.hiredSwitchDisabled}
-            isUpdating={item.hiredSwitchUpdating}
-            tStages={tStages}
-          />
-        </div>
-        <button
-          type="button"
-          onClick={() => item.onEdit(item)}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-          aria-label={tStages("aria.editStage", { name: item.name })}
-        >
-          <Pencil className="h-4 w-4" aria-hidden />
-          {tStages("actions.edit")}
-        </button>
-        <button
-          type="button"
-          onClick={() => item.onDelete(item)}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-destructive/30 bg-background px-4 py-2.5 font-sans text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2"
-          aria-label={tStages("aria.deleteStage", { name: item.name })}
-        >
-          <Trash2 className="h-4 w-4" aria-hidden />
-          {tStages("actions.delete")}
-        </button>
-      </div>
     </div>
   );
 };
@@ -686,7 +599,7 @@ export default function EtapasPage() {
     setIsModalOpen(true);
   };
 
-  const handleReorder = async ({ items }) => {
+  const handleReorder = async (items) => {
     if (reorderLoading) return;
 
     if (items.length !== stages.length) {
@@ -734,7 +647,7 @@ export default function EtapasPage() {
 
   const sortedStages = [...stages].sort(sortStagesStable);
 
-  const nestableItems = sortedStages.map((stage) => ({
+  const sortableItems = sortedStages.map((stage) => ({
     ...stage,
     onEdit: handleEdit,
     onDelete: handleDelete,
@@ -810,11 +723,16 @@ export default function EtapasPage() {
                       role="region"
                       aria-label={tStages("page.listAria")}
                     >
-                    <Nestable
-                      items={nestableItems}
-                      renderItem={(props) => renderStageItem({ ...props, tStages })}
-                      onChange={handleReorder}
-                      maxDepth={1}
+                    <SortableStagesList
+                      items={sortableItems}
+                      disabled={reorderLoading || deleteLoading}
+                      onReorder={handleReorder}
+                      tStages={tStages}
+                      renderSwitches={{
+                        Default: DefaultStageSwitch,
+                        Final: FinalStageSwitch,
+                        Hired: HiredStageSwitch,
+                      }}
                     />
                     </div>
                   )}

@@ -1,3 +1,5 @@
+# FE-SEC-017: digest-pinned builders; deploy by $SHORT_SHA only (no :latest).
+# requestedVerifyOption VERIFIED fails the build if provenance is missing.
 substitutions:
   _REGION: us-west2
   _SERVICE_NAME: ats-frontend-staging
@@ -7,7 +9,8 @@ substitutions:
   _NEXT_PUBLIC_APP_URL: https://ats-frontend-staging-temp.run.app
 
 steps:
-  - name: gcr.io/cloud-builders/docker
+  # Digest from: docker buildx imagetools inspect gcr.io/cloud-builders/docker
+  - name: gcr.io/cloud-builders/docker@sha256:3d00b6c1a9b862621c30fc74d4f2abfc62bcbdee631ed3febd31e7edbdf6252c
     id: Build image
     args:
       - build
@@ -17,18 +20,16 @@ steps:
       - NEXT_PUBLIC_APP_URL=${_NEXT_PUBLIC_APP_URL}
       - -t
       - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
-      - -t
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:latest
       - .
 
-  - name: gcr.io/cloud-builders/docker
+  - name: gcr.io/cloud-builders/docker@sha256:3d00b6c1a9b862621c30fc74d4f2abfc62bcbdee631ed3febd31e7edbdf6252c
     id: Push image
     args:
       - push
-      - --all-tags
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
 
-  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+  # Digest from: docker buildx imagetools inspect gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim@sha256:df30191e2435b838d0d6e07c228ced843829703c9f966c0163175bad88b291be
     id: Deploy to Cloud Run
     entrypoint: gcloud
     args:
@@ -47,7 +48,7 @@ steps:
 
 images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
-  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_IMAGE_NAME}:latest
 
 options:
   logging: CLOUD_LOGGING_ONLY
+  requestedVerifyOption: VERIFIED

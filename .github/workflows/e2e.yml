@@ -1,5 +1,6 @@
 # Frontend-only repo: build + `next start`; tests call a configured API.
 # FE-SEC-008: fail-closed — no default admin/admin or external Render URL.
+# FE-SEC-017: pin actions to full commit SHA (mutable tags can move).
 name: E2E Integration Tests
 
 on:
@@ -21,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Require E2E secrets and API URL
         run: |
@@ -44,7 +45,7 @@ jobs:
           fi
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "24"
           cache: "npm"
@@ -65,7 +66,7 @@ jobs:
           CI: true
 
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
