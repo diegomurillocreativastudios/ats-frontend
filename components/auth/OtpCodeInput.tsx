@@ -19,6 +19,7 @@ interface OtpCodeInputProps {
   disabled?: boolean
   length?: number
   testId?: string
+  labelClassName?: string
   digitAriaLabel: (current: number, total: number) => string
 }
 
@@ -40,6 +41,7 @@ export default function OtpCodeInput({
   disabled = false,
   length = DEFAULT_OTP_LENGTH,
   testId,
+  labelClassName,
   digitAriaLabel,
 }: OtpCodeInputProps) {
   const fieldId = useId()
@@ -157,7 +159,7 @@ export default function OtpCodeInput({
       <label
         id={labelId}
         htmlFor={`${fieldId}-0`}
-        className="text-sm font-medium text-foreground"
+        className={labelClassName ?? "text-sm font-medium text-foreground"}
       >
         {label}
       </label>

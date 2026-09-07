@@ -685,6 +685,60 @@ h6 {
   .animate-apply-shimmer {
     animation: apply-shimmer 1.45s ease-in-out infinite;
   }
+
+  /* Panel de marca (login): movimiento orgánico continuo */
+  .auth-brand-grid {
+    animation: auth-brand-grid 48s linear infinite;
+  }
+
+  .auth-brand-orb-a {
+    animation: auth-brand-orb-a 20s ease-in-out infinite;
+  }
+
+  .auth-brand-orb-b {
+    animation: auth-brand-orb-b 26s ease-in-out infinite;
+  }
+
+  .auth-brand-logo {
+    animation: auth-brand-logo 7.5s ease-in-out infinite;
+  }
+
+  .auth-brand-float {
+    animation: auth-brand-float 6.8s ease-in-out infinite;
+  }
+
+  .auth-brand-glow {
+    animation: auth-brand-glow 3.8s ease-in-out infinite;
+  }
+
+  .auth-brand-spark {
+    display: inline-block;
+    animation: auth-brand-spark 2.8s ease-in-out infinite;
+  }
+
+  .auth-brand-shimmer {
+    animation: auth-brand-shimmer 8.2s ease-in-out infinite;
+  }
+
+  .auth-brand-live {
+    animation: auth-brand-live 2.2s ease-in-out infinite;
+  }
+
+  .auth-brand-live-ring {
+    animation: auth-brand-live-ring 2.2s ease-in-out infinite;
+  }
+
+  .auth-brand-check {
+    animation: auth-brand-check 4.8s ease-in-out infinite;
+  }
+
+  .auth-brand-features li:nth-child(2) .auth-brand-check {
+    animation-delay: 0.7s;
+  }
+
+  .auth-brand-features li:nth-child(3) .auth-brand-check {
+    animation-delay: 1.4s;
+  }
 }
 
 @keyframes apply-shimmer {
@@ -716,6 +770,124 @@ h6 {
   }
 }
 
+@keyframes auth-brand-grid {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 22px 22px;
+  }
+}
+
+@keyframes auth-brand-orb-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(28px, 20px) scale(1.08);
+  }
+}
+
+@keyframes auth-brand-orb-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-24px, -18px) scale(1.06);
+  }
+}
+
+@keyframes auth-brand-logo {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
+}
+
+@keyframes auth-brand-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes auth-brand-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    box-shadow: 0 0 18px 2px rgba(255, 255, 255, 0.22);
+  }
+}
+
+@keyframes auth-brand-spark {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18) rotate(-8deg);
+    opacity: 0.85;
+  }
+}
+
+@keyframes auth-brand-shimmer {
+  0%,
+  62% {
+    transform: translateX(-140%) skewX(-14deg);
+  }
+  100% {
+    transform: translateX(320%) skewX(-14deg);
+  }
+}
+
+@keyframes auth-brand-live {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes auth-brand-live-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes auth-brand-check {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.1);
+  }
+}
+
 /* Rendimiento / accesibilidad ------------------------------------- */
 @media (max-width: 768px) {
   .glass-panel,
@@ -732,7 +904,18 @@ h6 {
   .glass-card-hover,
   .animate-fade-in,
   .animate-slide-up,
-  .animate-apply-shimmer {
+  .animate-apply-shimmer,
+  .auth-brand-grid,
+  .auth-brand-orb-a,
+  .auth-brand-orb-b,
+  .auth-brand-logo,
+  .auth-brand-float,
+  .auth-brand-glow,
+  .auth-brand-spark,
+  .auth-brand-shimmer,
+  .auth-brand-live,
+  .auth-brand-live-ring,
+  .auth-brand-check {
     transition: none !important;
     animation: none !important;
   }

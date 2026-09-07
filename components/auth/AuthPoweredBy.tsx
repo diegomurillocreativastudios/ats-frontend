@@ -1,7 +1,15 @@
-import { getTranslations } from "next-intl/server"
+"use client"
 
-export default async function AuthPoweredBy() {
-  const t = await getTranslations("Auth")
+import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
+
+export default function AuthPoweredBy() {
+  const pathname = usePathname()
+  const t = useTranslations("Auth")
+
+  if (pathname?.startsWith("/auth/") && pathname !== "/auth/iniciar-sesion-neo") {
+    return null
+  }
 
   return (
     <p

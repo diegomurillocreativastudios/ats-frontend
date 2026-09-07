@@ -10,12 +10,17 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
+import { AtSign, Lock } from "lucide-react"
 import Input from "@/components/auth/Input"
 import OtpCodeInput from "@/components/auth/OtpCodeInput"
 import Button from "@/components/auth/Button"
-import AuthBrand from "@/components/auth/AuthBrand"
-import ProductBrand from "@/components/branding/ProductBrand"
-import LanguageSwitcher from "@/components/language-switcher"
+import {
+  AUTH_FIELD_LABEL_CLASS,
+  AUTH_LINK_CLASS,
+  AUTH_SUBTITLE_CLASS,
+  AUTH_TITLE_CLASS,
+  AuthSplitShell,
+} from "@/components/auth/AuthSplitShell"
 import Snackbar from "@/components/ui/Snackbar"
 import { csrfHeaders } from "@/lib/auth/csrf-client"
 import { resolveAuthRedirectDestination } from "@/lib/auth/internal-path"
@@ -361,241 +366,175 @@ export default function Registrarse() {
         : isPasswordSubmitBlocked
 
   return (
-    <div className="relative min-h-screen flex font-sans">
-      <div className="absolute right-3 top-3 z-50 md:right-4 md:top-4">
-        <LanguageSwitcher />
-      </div>
-      <div className="hidden lg:flex flex-1 bg-vo-magenta text-white flex-col justify-center px-16 gap-8">
-        <div className="flex flex-col gap-8 lg:gap-10">
-          <ProductBrand
-            layout="inline"
-            tone="onDark"
-            density="authMarketing"
-          />
-
-          <h1 className="text-[40px] font-bold leading-[1.2]">
-            {t("brandTitle")}
-          </h1>
-          <p className="text-lg text-white/80 leading-normal whitespace-pre-line">
-            {t("brandSubtitle")}
+    <>
+      <AuthSplitShell>
+        <div className="flex flex-col gap-2">
+          <p
+            data-testid="auth-register-step"
+            data-step={step}
+            className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400"
+            aria-live="polite"
+          >
+            {t("stepOf", {
+              current: STEP_NUMBER[step],
+              total: TOTAL_STEPS,
+            })}
           </p>
+          <h2 className={AUTH_TITLE_CLASS}>{title}</h2>
+          <p className={AUTH_SUBTITLE_CLASS}>{subtitle}</p>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <span className="text-base">{t("feature1")}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <span className="text-base">{t("feature2")}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <span className="text-base">{t("feature3")}</span>
-          </div>
-        </div>
-      </div>
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="mt-7 flex flex-col gap-5"
+          data-testid="auth-register-form"
+        >
+          {step === "email" && (
+            <Input
+              label={t("emailLabel")}
+              labelClassName={AUTH_FIELD_LABEL_CLASS}
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder={t("emailPlaceholder")}
+              required
+              value={formData.email}
+              onChange={handleChange}
+              error={errors.email}
+              disabled={isEmailSubmitBlocked}
+              testId="auth-register-email"
+              accent="green"
+              leftIcon={<AtSign className="h-4 w-4" strokeWidth={1.75} />}
+            />
+          )}
 
-      <div className="hidden md:flex lg:hidden fixed top-0 left-0 right-0 bg-vo-magenta text-white h-[120px] items-center justify-between px-8 gap-4 z-10">
-        <ProductBrand
-          layout="inline"
-          tone="onDark"
-          density="authMarketing"
-        />
-        <p className="text-sm text-white/80">{t("tabletTitle")}</p>
-      </div>
+          {step === "code" && (
+            <OtpCodeInput
+              label={t("codeLabel")}
+              labelClassName={AUTH_FIELD_LABEL_CLASS}
+              name="code"
+              value={formData.code}
+              onCodeChange={handleCodeChange}
+              error={errors.code}
+              disabled={isCodeSubmitBlocked}
+              testId="auth-register-code"
+              digitAriaLabel={(current, total) =>
+                t("codeDigitAria", { current, total })
+              }
+            />
+          )}
 
-      <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-background px-6 md:px-10 lg:px-12 py-6 md:py-40 lg:py-0 md:max-w-full lg:max-w-[560px]">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
-          <div className="ambient-orb ambient-orb--green right-[-120px] top-[-80px] h-[360px] w-[360px]" />
-          <div className="ambient-orb ambient-orb--violet bottom-[-120px] left-[-100px] h-[340px] w-[340px]" />
-        </div>
-        <div className="glass-iridescent-card glass-edge-highlight w-full rounded-2xl p-6 md:max-w-[500px] md:p-8 lg:max-w-[420px]">
-          <div className="md:hidden w-full flex justify-center mb-5">
-            <AuthBrand size="mobile-register" variant="light-secondary" />
-          </div>
+          {step === "password" && (
+            <>
+              <Input
+                label={t("passwordLabel")}
+                labelClassName={AUTH_FIELD_LABEL_CLASS}
+                type={showPasswords ? "text" : "password"}
+                name="password"
+                autoComplete="new-password"
+                placeholder={t("passwordPlaceholder")}
+                required
+                value={formData.password}
+                onChange={handleChange}
+                error={errors.password}
+                disabled={isPasswordSubmitBlocked}
+                testId="auth-register-password"
+                accent="green"
+                leftIcon={<Lock className="h-4 w-4" strokeWidth={1.75} />}
+              />
 
-          <div className="flex flex-col gap-5 md:gap-5 lg:gap-6">
-            <div className="flex flex-col items-center md:items-start gap-1 md:gap-1.5 lg:gap-2 text-center md:text-left">
-              <p
-                data-testid="auth-register-step"
-                data-step={step}
-                className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                aria-live="polite"
-              >
-                {t("stepOf", {
-                  current: STEP_NUMBER[step],
-                  total: TOTAL_STEPS,
-                })}
-              </p>
-              <h2 className="text-[22px] md:text-2xl lg:text-[28px] font-bold text-foreground">
-                {title}
-              </h2>
-              <p className="text-sm md:text-sm lg:text-base text-muted-foreground">
-                {subtitle}
-              </p>
-            </div>
+              <Input
+                label={t("confirmPasswordLabel")}
+                labelClassName={AUTH_FIELD_LABEL_CLASS}
+                type={showPasswords ? "text" : "password"}
+                name="confirmPassword"
+                autoComplete="new-password"
+                placeholder={t("confirmPasswordPlaceholder")}
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                error={errors.confirmPassword}
+                disabled={isPasswordSubmitBlocked}
+                testId="auth-register-confirm-password"
+                accent="green"
+                leftIcon={<Lock className="h-4 w-4" strokeWidth={1.75} />}
+              />
 
-            <form
-              onSubmit={handleSubmit}
-              noValidate
-              className="flex flex-col gap-5"
-              data-testid="auth-register-form"
+              <label className="flex cursor-pointer items-start gap-2.5 text-sm text-slate-600">
+                <input
+                  type="checkbox"
+                  id="showPasswords"
+                  checked={showPasswords}
+                  onChange={(e) => setShowPasswords(e.target.checked)}
+                  disabled={isPasswordSubmitBlocked}
+                  className="mt-0.5 h-4 w-4 rounded border-input text-vo-purple accent-vo-purple focus:ring-2 focus:ring-vo-purple/40"
+                  aria-label={t("showPasswordsAria")}
+                />
+                <span>{t("showPasswords")}</span>
+              </label>
+            </>
+          )}
+
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isSubmitBlocked}
+            data-testid="auth-register-submit"
+          >
+            {submitLabel()}
+          </Button>
+        </form>
+
+        {step === "code" && (
+          <div className="mt-5 flex flex-col items-center gap-2 text-sm">
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={isResendBlocked}
+              data-testid="auth-register-resend"
+              className="font-semibold text-vo-purple transition-colors hover:text-vo-purple-hover hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline"
             >
-              <div className="flex flex-col gap-3.5 md:gap-4">
-                {step === "email" && (
-                  <Input
-                    label={t("emailLabel")}
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    placeholder={t("emailPlaceholder")}
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    error={errors.email}
-                    disabled={isEmailSubmitBlocked}
-                    testId="auth-register-email"
-                  />
-                )}
-
-                {step === "code" && (
-                  <OtpCodeInput
-                    label={t("codeLabel")}
-                    name="code"
-                    value={formData.code}
-                    onCodeChange={handleCodeChange}
-                    error={errors.code}
-                    disabled={isCodeSubmitBlocked}
-                    testId="auth-register-code"
-                    digitAriaLabel={(current, total) =>
-                      t("codeDigitAria", { current, total })
-                    }
-                  />
-                )}
-
-                {step === "password" && (
-                  <>
-                    <Input
-                      label={t("passwordLabel")}
-                      type={showPasswords ? "text" : "password"}
-                      name="password"
-                      autoComplete="new-password"
-                      placeholder={t("passwordPlaceholder")}
-                      required
-                      value={formData.password}
-                      onChange={handleChange}
-                      error={errors.password}
-                      disabled={isPasswordSubmitBlocked}
-                      testId="auth-register-password"
-                    />
-
-                    <Input
-                      label={t("confirmPasswordLabel")}
-                      type={showPasswords ? "text" : "password"}
-                      name="confirmPassword"
-                      autoComplete="new-password"
-                      placeholder={t("confirmPasswordPlaceholder")}
-                      required
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      error={errors.confirmPassword}
-                      disabled={isPasswordSubmitBlocked}
-                      testId="auth-register-confirm-password"
-                    />
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="showPasswords"
-                        checked={showPasswords}
-                        onChange={(e) => setShowPasswords(e.target.checked)}
-                        disabled={isPasswordSubmitBlocked}
-                        className="h-4 w-4 rounded border-input accent-vo-magenta focus:ring-vo-magenta"
-                        aria-label={t("showPasswordsAria")}
-                      />
-                      <label
-                        htmlFor="showPasswords"
-                        className="text-xs md:text-[13px] lg:text-[13px] text-foreground cursor-pointer"
-                      >
-                        {t("showPasswords")}
-                      </label>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                variant="secondary"
-                disabled={isSubmitBlocked}
-                data-testid="auth-register-submit"
-              >
-                {submitLabel()}
-              </Button>
-            </form>
-
-            {step === "code" && (
-              <div className="flex flex-col items-center gap-2 text-[13px] md:text-sm">
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={isResendBlocked}
-                  data-testid="auth-register-resend"
-                  className="font-medium text-vo-magenta hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline"
-                >
-                  {resending
-                    ? t("resendingCode")
-                    : resendSecondsLeft > 0
-                      ? t("resendIn", { seconds: resendSecondsLeft })
-                      : t("resendCode")}
-                </button>
-                <p className="text-center text-xs text-muted-foreground">
-                  {t("resendLimitHint")}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleChangeEmail}
-                  data-testid="auth-register-change-email"
-                  className="text-muted-foreground hover:underline"
-                >
-                  {t("changeEmail")}
-                </button>
-              </div>
-            )}
-
-            {step === "password" && (
-              <div className="flex justify-center">
-                <button
-                  type="button"
-                  onClick={handleBackToCode}
-                  data-testid="auth-register-back"
-                  className="text-[13px] font-medium text-vo-magenta hover:underline md:text-sm"
-                >
-                  {t("back")}
-                </button>
-              </div>
-            )}
-
-            <div className="flex items-center justify-center gap-1 text-[13px] md:text-[13px] lg:text-sm">
-              <span className="text-muted-foreground">{t("hasAccount")}</span>
-              <Link
-                href="/auth/iniciar-sesion"
-                className="font-medium text-vo-magenta hover:underline"
-              >
-                {t("loginLink")}
-              </Link>
-            </div>
+              {resending
+                ? t("resendingCode")
+                : resendSecondsLeft > 0
+                  ? t("resendIn", { seconds: resendSecondsLeft })
+                  : t("resendCode")}
+            </button>
+            <p className="text-center text-xs text-slate-500">
+              {t("resendLimitHint")}
+            </p>
+            <button
+              type="button"
+              onClick={handleChangeEmail}
+              data-testid="auth-register-change-email"
+              className="text-slate-500 transition-colors hover:text-slate-700 hover:underline"
+            >
+              {t("changeEmail")}
+            </button>
           </div>
-        </div>
-      </div>
+        )}
+
+        {step === "password" && (
+          <div className="mt-5 flex justify-center">
+            <button
+              type="button"
+              onClick={handleBackToCode}
+              data-testid="auth-register-back"
+              className="text-sm font-semibold text-vo-purple transition-colors hover:text-vo-purple-hover hover:underline"
+            >
+              {t("back")}
+            </button>
+          </div>
+        )}
+
+        <p className="mt-6 text-center text-sm text-slate-500">
+          {t("hasAccount")}{" "}
+          <Link href="/auth/iniciar-sesion" className={AUTH_LINK_CLASS}>
+            {t("loginLink")}
+          </Link>
+        </p>
+      </AuthSplitShell>
 
       <Snackbar
         open={!!message}
@@ -603,6 +542,6 @@ export default function Registrarse() {
         variant={message?.type === "error" ? "error" : "success"}
         message={message?.text ?? ""}
       />
-    </div>
+    </>
   )
 }

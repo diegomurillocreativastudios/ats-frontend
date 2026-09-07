@@ -68,6 +68,23 @@ describe("Login i18n (Etapa 4)", () => {
       screen.getByRole("button", { name: "Idioma" }),
     ).toBeInTheDocument()
   })
+
+  it("renderiza el panel de marca, recordar sesión y enlaces legales", () => {
+    renderWithIntl(<IniciarSesion />, "es")
+    expect(screen.getByTestId("auth-login-brand-panel")).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", {
+        name: "Sistema de Gestión de Candidatos para departamentos de RRHH",
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId("auth-login-remember")).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Soporte y Ayuda" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Mostrar contraseña" })).toBeInTheDocument()
+    expect(screen.getByTestId("auth-login-legal-footer")).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Privacidad" })).toBeInTheDocument()
+  })
 })
 
 describe("Recuperar contraseña i18n (Etapa 4)", () => {
@@ -174,6 +191,19 @@ describe("Diccionarios auth (Etapa 4)", () => {
       expect(
         Object.keys(auth.register).sort(),
         `Auth.register distinto en ${locale}.json`,
+      ).toEqual(expected)
+    }
+  })
+
+  it("mantiene las keys del login en los 5 idiomas", () => {
+    const expected = Object.keys(
+      (esMessages.Auth as { login: Record<string, unknown> }).login,
+    ).sort()
+    for (const locale of locales) {
+      const auth = allMessages[locale].Auth as { login: Record<string, unknown> }
+      expect(
+        Object.keys(auth.login).sort(),
+        `Auth.login distinto en ${locale}.json`,
       ).toEqual(expected)
     }
   })

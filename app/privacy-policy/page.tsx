@@ -21,11 +21,12 @@ export async function generateMetadata(): Promise<Metadata> {
 interface PolicySectionProps {
   title: string
   children: ReactNode
+  id?: string
 }
 
-function PolicySection({ title, children }: PolicySectionProps) {
+function PolicySection({ title, children, id }: PolicySectionProps) {
   return (
-    <section className="space-y-3">
+    <section id={id} className="scroll-mt-24 space-y-3">
       <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
         {title}
       </h2>
@@ -159,7 +160,7 @@ export default async function PrivacyPolicyPage() {
             <PolicyList items={dataSharingItems} />
           </PolicySection>
 
-          <PolicySection title={t("sections.dataSecurity.title")}>
+          <PolicySection id="security" title={t("sections.dataSecurity.title")}>
             <p>{t("sections.dataSecurity.p1")}</p>
           </PolicySection>
 

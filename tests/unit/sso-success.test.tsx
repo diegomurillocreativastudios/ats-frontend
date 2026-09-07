@@ -10,6 +10,7 @@ const replaceStateMock = vi.fn()
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock, push: vi.fn() }),
+  usePathname: () => "/auth/sso/success",
   useSearchParams: () => searchParamsValue,
 }))
 

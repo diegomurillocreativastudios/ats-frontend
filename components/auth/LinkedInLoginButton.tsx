@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback } from "react"
-import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import Button from "@/components/auth/Button"
 import { isInternalPath } from "@/lib/auth/internal-path"
@@ -39,18 +38,22 @@ function LinkedInLogoIcon({ className }: LinkedInLogoIconProps) {
 
 const getApiBaseUrl = () => (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "")
 
+function getLoginFromPath() {
+  if (typeof window === "undefined") return null
+  return new URLSearchParams(window.location.search).get("from")
+}
+
 export function LinkedInLoginButton({
   className = "",
   disabled = false,
 }: LinkedInLoginButtonProps) {
   const t = useTranslations("Auth.login")
-  const searchParams = useSearchParams()
 
   const handleLinkedInLogin = useCallback(() => {
     const apiBaseUrl = getApiBaseUrl()
     if (!apiBaseUrl) return
 
-    const from = searchParams.get("from")
+    const from = getLoginFromPath()
     const loginUrl = new URL(`${apiBaseUrl}/api/auth/linkedin/login`)
 
     if (isInternalPath(from)) {
@@ -58,12 +61,12 @@ export function LinkedInLoginButton({
     }
 
     window.location.href = loginUrl.toString()
-  }, [searchParams])
+  }, [])
 
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="outlineLight"
       disabled={disabled || !getApiBaseUrl()}
       onClick={handleLinkedInLogin}
       className={className}

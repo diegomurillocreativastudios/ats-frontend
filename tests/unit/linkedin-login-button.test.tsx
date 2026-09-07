@@ -4,19 +4,17 @@ import { NextIntlClientProvider } from "next-intl"
 import { LinkedInLoginButton } from "@/components/auth/LinkedInLoginButton"
 import esMessages from "@/messages/es.json"
 
-let searchParamsValue = new URLSearchParams()
-
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => searchParamsValue,
-}))
+function stubLocation(search = "") {
+  const href = `http://localhost/auth/iniciar-sesion${search}`
+  vi.stubGlobal("location", { href, search })
+}
 
 describe("LinkedInLoginButton", () => {
   const originalApiUrl = process.env.NEXT_PUBLIC_API_URL
 
   beforeEach(() => {
-    searchParamsValue = new URLSearchParams()
     process.env.NEXT_PUBLIC_API_URL = "http://localhost:10000"
-    vi.stubGlobal("location", { href: "" })
+    stubLocation()
   })
 
   afterEach(() => {
@@ -47,7 +45,7 @@ describe("LinkedInLoginButton", () => {
   })
 
   it("maps internal from to backend returnUrl", () => {
-    searchParamsValue = new URLSearchParams("from=/portal-rrhh")
+    stubLocation("?from=/portal-rrhh")
     renderButton()
     fireEvent.click(screen.getByTestId("auth-linkedin-login"))
     expect(window.location.href).toBe(
@@ -56,7 +54,7 @@ describe("LinkedInLoginButton", () => {
   })
 
   it("ignores external from values", () => {
-    searchParamsValue = new URLSearchParams("from=https://evil.com")
+    stubLocation("?from=https://evil.com")
     renderButton()
     fireEvent.click(screen.getByTestId("auth-linkedin-login"))
     expect(window.location.href).toBe(

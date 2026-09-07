@@ -26,6 +26,7 @@ busqueda
 calification
 Calification
 cand
+Carrillo
 catalogos
 CGNAT
 cian
@@ -67,6 +68,7 @@ Descripcion
 descripcion
 Deutsch
 Dont
+DSGVO
 dotnet
 econnrefused
 Editá
@@ -195,6 +197,7 @@ reqs
 Resetea
 retir
 Reusa
+RGPD
 revis
 revisá
 rrhh
@@ -205,6 +208,8 @@ salvadoran
 salvadoren
 salvadorian
 samesite
+SOC
+SOC2
 sanitiza
 schedul
 Segoe
@@ -236,6 +241,7 @@ Tocá
 topbar
 Topbar
 topbars
+treeApplicant
 traceid
 undraw
 unscored

@@ -4,18 +4,22 @@ import {
   useState,
   useCallback,
   useEffect,
-  Suspense,
   type ChangeEvent,
   type FormEvent,
 } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
+import { AtSign, Eye, EyeOff, Lock } from "lucide-react"
 import Input from "@/components/auth/Input"
 import Button from "@/components/auth/Button"
-import AuthBrand from "@/components/auth/AuthBrand"
-import ProductBrand from "@/components/branding/ProductBrand"
-import LanguageSwitcher from "@/components/language-switcher"
+import {
+  AUTH_FIELD_LABEL_CLASS,
+  AUTH_LINK_CLASS,
+  AUTH_SUBTITLE_CLASS,
+  AUTH_TITLE_CLASS,
+  AuthSplitShell,
+} from "@/components/auth/AuthSplitShell"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { csrfHeaders } from "@/lib/auth/csrf-client"
@@ -28,8 +32,10 @@ import {
 import { LinkedInLoginButton } from "@/components/auth/LinkedInLoginButton"
 import { resolveAuthRedirectDestination } from "@/lib/auth/internal-path"
 
+const REMEMBER_EMAIL_STORAGE_KEY = "applicantree-login-remember-email"
+
 const getOrigin = () =>
-  typeof window !== "undefined" ? window.location.origin : "";
+  typeof window !== "undefined" ? window.location.origin : ""
 
 interface LoginFormState {
   email: string
@@ -44,6 +50,7 @@ interface SnackbarState {
 export default function IniciarSesion() {
   const router = useRouter()
   const t = useTranslations("Auth")
+  const tCommon = useTranslations("Common")
   const tValidation = useTranslations("Validation")
   const tErrors = useTranslations("Errors")
   const [formData, setFormData] = useState<LoginFormState>({
@@ -51,12 +58,22 @@ export default function IniciarSesion() {
     password: "",
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberSession, setRememberSession] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<SnackbarState | null>(null)
   const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0)
   const [errors, setErrors] = useState<
     Partial<Record<keyof LoginFormState, string>>
   >({})
+
+  const persistRememberedEmail = (email: string, remember: boolean) => {
+    if (typeof window === "undefined") return
+    if (remember && email.trim()) {
+      window.localStorage.setItem(REMEMBER_EMAIL_STORAGE_KEY, email.trim())
+      return
+    }
+    window.localStorage.removeItem(REMEMBER_EMAIL_STORAGE_KEY)
+  }
 
   const validateForm = () => {
     const newErrors: Partial<Record<keyof LoginFormState, string>> = {}
@@ -81,6 +98,24 @@ export default function IniciarSesion() {
 
   const handleCloseSnackbar = useCallback(() => {
     setMessage(null)
+  }, [])
+
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev)
+  }
+
+  const handleRememberChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const nextRemember = e.target.checked
+    setRememberSession(nextRemember)
+    persistRememberedEmail(formData.email, nextRemember)
+  }
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const saved = window.localStorage.getItem(REMEMBER_EMAIL_STORAGE_KEY)
+    if (!saved) return
+    setRememberSession(true)
+    setFormData((prev) => ({ ...prev, email: prev.email || saved }))
   }, [])
 
   useEffect(() => {
@@ -153,6 +188,9 @@ export default function IniciarSesion() {
     const { name, value } = e.target
     const field = name as keyof LoginFormState
     setFormData((prev) => ({ ...prev, [field]: value }))
+    if (field === "email" && rememberSession) {
+      persistRememberedEmail(value, true)
+    }
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }))
     }
@@ -162,11 +200,12 @@ export default function IniciarSesion() {
   const isSubmitBlocked = loading || rateLimitSecondsLeft > 0
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setMessage(null);
-    if (!validateForm()) return;
+    e.preventDefault()
+    setMessage(null)
+    if (!validateForm()) return
 
-    setLoading(true);
+    persistRememberedEmail(formData.email, rememberSession)
+    setLoading(true)
     try {
       const res = await fetch(`${getOrigin()}/api/auth/login`, {
         method: "POST",
@@ -174,11 +213,11 @@ export default function IniciarSesion() {
         credentials: "include",
         body: JSON.stringify({
           email: formData.email,
-          password: formData.password
-        })
-      });
+          password: formData.password,
+        }),
+      })
 
-      const data = await res.json().catch(() => ({}));
+      const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
         if (res.status === 429) {
@@ -196,8 +235,8 @@ export default function IniciarSesion() {
         setMessage({
           type: "error",
           text: typeof text === "string" ? text : String(text),
-        });
-        return;
+        })
+        return
       }
 
       setMessage({ type: "success", text: t("login.toastSignedIn") })
@@ -212,191 +251,136 @@ export default function IniciarSesion() {
         text: getApiErrorMessage(err) || tErrors("connection"),
       })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="relative min-h-screen flex font-sans">
-      <div className="absolute right-3 top-3 z-50 md:right-4 md:top-4">
-        <LanguageSwitcher />
-      </div>
-      {/* Desktop & Tablet: Left Panel */}
-      <div className="hidden md:flex md:w-80 lg:flex-1 bg-vo-purple text-white flex-col justify-center md:px-10 lg:px-16 md:gap-6 lg:gap-8">
-        <div className="flex flex-col md:gap-8 lg:gap-10">
-          <ProductBrand
-            layout="inline"
-            tone="onDark"
-            density="authMarketing"
+    <>
+      <AuthSplitShell>
+        <div className="flex flex-col gap-2">
+          <h2 className={AUTH_TITLE_CLASS}>{t("login.title")}</h2>
+          <p className={AUTH_SUBTITLE_CLASS}>
+            {t("login.subtitle")}{" "}
+            <span className="hidden sm:inline">{t("login.subtitleExtended")}</span>
+          </p>
+        </div>
+
+        <form
+          method="post"
+          action="#"
+          onSubmit={handleSubmit}
+          noValidate
+          className="mt-7 flex flex-col gap-5"
+          data-testid="auth-login-form"
+        >
+          <Input
+            label={t("login.emailLabel")}
+            labelClassName={AUTH_FIELD_LABEL_CLASS}
+            type="text"
+            name="email"
+            placeholder={t("login.emailPlaceholder")}
+            autoComplete="username"
+            required
+            value={formData.email}
+            onChange={handleChange}
+            error={errors.email}
+            disabled={isSubmitBlocked}
+            testId="auth-login-email"
+            accent="green"
+            leftIcon={<AtSign className="h-4 w-4" strokeWidth={1.75} />}
           />
 
-          <div className="hidden lg:block">
-            <h1 className="text-[40px] font-bold leading-[1.2]">
-              {t.rich("login.brandTitle", { br: () => <br /> })}
-            </h1>
-            <p className="text-lg text-white/80 leading-normal mt-6">
-              {t.rich("login.brandSubtitle", { br: () => <br /> })}
-            </p>
-          </div>
-
-          <div className="lg:hidden">
-            <h1 className="text-2xl font-bold leading-[1.2]">
-              {t.rich("login.brandTitleSm", { br: () => <br /> })}
-            </h1>
-            <p className="text-sm text-white/80 leading-[1.4] mt-6">
-              {t.rich("login.brandSubtitleSm", { br: () => <br /> })}
-            </p>
-          </div>
-        </div>
-
-        <div className="hidden lg:flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span className="text-base">{t("login.feature1")}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span className="text-base">{t("login.feature2")}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span className="text-base">{t("login.feature3")}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel: Form */}
-      <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-background px-6 md:px-10 lg:px-16 py-6 md:py-0 md:max-w-[448px] lg:max-w-[560px]">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
-          <div className="ambient-orb ambient-orb--green right-[-120px] top-[-80px] h-[360px] w-[360px]" />
-          <div className="ambient-orb ambient-orb--violet bottom-[-120px] left-[-100px] h-[340px] w-[340px]" />
-        </div>
-        <div className="glass-iridescent-card glass-edge-highlight w-full rounded-2xl p-6 md:max-w-[400px] md:p-8 lg:max-w-[440px]">
-          <div className="md:hidden w-full flex justify-center mb-6">
-            <AuthBrand size="mobile-login" variant="light-primary" />
-          </div>
-
-          <div className="flex flex-col gap-6 md:gap-6 lg:gap-8">
-            <div className="flex flex-col items-center md:items-start gap-2 text-center md:text-left">
-              <h2 className="text-[22px] md:text-2xl lg:text-[28px] font-bold text-foreground">
-                {t("login.title")}
-              </h2>
-              <p className="text-sm md:text-sm lg:text-base text-muted-foreground">
-                {t("login.subtitle")}{" "}
-                <span className="hidden lg:inline">{t("login.subtitleExtended")}</span>
-              </p>
-            </div>
-
-            <form
-              onSubmit={handleSubmit}
-              noValidate
-              className="flex flex-col gap-6"
-              data-testid="auth-login-form"
-            >
-              <div className="flex flex-col gap-4 md:gap-4 lg:gap-5">
-                <Input
-                  label={t("login.emailLabel")}
-                  type="text"
-                  name="email"
-                  placeholder={t("login.emailPlaceholder")}
-                  autoComplete="username"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={errors.email}
-                  disabled={isSubmitBlocked}
-                  testId="auth-login-email"
-                />
-
-                <Input
-                  label={t("login.passwordLabel")}
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="••••••••"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={errors.password}
-                  disabled={isSubmitBlocked}
-                  testId="auth-login-password"
-                />
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="showPassword"
-                    checked={showPassword}
-                    onChange={(e) => setShowPassword(e.target.checked)}
-                    disabled={isSubmitBlocked}
-                    className="h-4 w-4 rounded border-input accent-vo-purple focus:ring-vo-purple focus:ring-2 focus:ring-offset-0"
-                    aria-label={t("login.showPassword")}
-                  />
-                  <label
-                    htmlFor="showPassword"
-                    className="text-xs md:text-[13px] text-foreground cursor-pointer"
-                  >
-                    {t("login.showPassword")}
-                  </label>
-                </div>
-
-                <div className="flex justify-center md:justify-end">
-                  <Link
-                    href="/auth/olvidaste-tu-contrasena"
-                    className="text-[13px] font-medium text-vo-purple hover:underline"
-                  >
-                    {t("login.forgotPasswordLink")}
-                  </Link>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <Button
-                  type="submit"
-                  disabled={isSubmitBlocked}
-                  data-testid="auth-login-submit"
-                >
-                  {loading
-                    ? t("login.submitting")
-                    : rateLimitSecondsLeft > 0
-                      ? t("login.retryIn", { seconds: rateLimitSecondsLeft })
-                      : t("login.submit")}
-                </Button>
-
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-xs text-muted-foreground">
-                      {t("login.orContinueWith")}
-                    </span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-
-                  <Suspense fallback={null}>
-                    <LinkedInLoginButton disabled={isSubmitBlocked} />
-                  </Suspense>
-                </div>
-              </div>
-            </form>
-
-            <div className="flex items-center justify-center gap-1 text-[13px] md:text-[13px] lg:text-sm">
-              <span className="text-muted-foreground">{t("login.noAccount")}</span>
+          <Input
+            label={t("login.passwordLabel")}
+            labelClassName={AUTH_FIELD_LABEL_CLASS}
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            required
+            value={formData.password}
+            onChange={handleChange}
+            error={errors.password}
+            disabled={isSubmitBlocked}
+            testId="auth-login-password"
+            accent="green"
+            leftIcon={<Lock className="h-4 w-4" strokeWidth={1.75} />}
+            labelTrailing={
               <Link
-                href="/auth/registrarse"
-                className="font-medium text-vo-purple hover:underline"
+                href="/auth/olvidaste-tu-contrasena"
+                className="text-xs font-medium text-vo-purple transition-colors hover:text-vo-purple-hover hover:underline"
               >
-                <span className="md:hidden">{t("login.registerShort")}</span>
-                <span className="hidden md:inline">{t("login.registerLong")}</span>
+                {t("login.forgotPasswordLink")}
               </Link>
-            </div>
+            }
+            rightAction={
+              <button
+                type="button"
+                onClick={handleTogglePassword}
+                disabled={isSubmitBlocked}
+                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple/40 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={
+                  showPassword
+                    ? tCommon("hidePassword")
+                    : tCommon("showPassword")
+                }
+                data-testid="auth-login-toggle-password"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" strokeWidth={1.75} />
+                ) : (
+                  <Eye className="h-4 w-4" strokeWidth={1.75} />
+                )}
+              </button>
+            }
+          />
+
+          <label className="flex cursor-pointer items-start gap-2.5 text-sm text-slate-600">
+            <input
+              type="checkbox"
+              id="rememberSession"
+              checked={rememberSession}
+              onChange={handleRememberChange}
+              disabled={isSubmitBlocked}
+              data-testid="auth-login-remember"
+              className="mt-0.5 h-4 w-4 rounded border-input text-vo-purple accent-vo-purple focus:ring-2 focus:ring-vo-purple/40"
+              aria-label={t("login.rememberSession")}
+            />
+            <span>{t("login.rememberSession")}</span>
+          </label>
+
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isSubmitBlocked}
+            data-testid="auth-login-submit"
+          >
+            {loading
+              ? t("login.submitting")
+              : rateLimitSecondsLeft > 0
+                ? t("login.retryIn", { seconds: rateLimitSecondsLeft })
+                : t("login.submit")}
+          </Button>
+
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+              {t("login.orContinueWith")}
+            </span>
+            <div className="h-px flex-1 bg-slate-200" />
           </div>
-        </div>
-      </div>
+
+          <LinkedInLoginButton disabled={isSubmitBlocked} />
+        </form>
+
+        <p className="mt-6 text-center text-sm text-slate-500">
+          {t("login.noAccount")}{" "}
+          <Link href="/auth/registrarse" className={AUTH_LINK_CLASS}>
+            {t("login.registerLong")}
+          </Link>
+        </p>
+      </AuthSplitShell>
 
       <Snackbar
         open={!!message}
@@ -404,6 +388,6 @@ export default function IniciarSesion() {
         variant={message?.type === "error" ? "error" : "success"}
         message={message?.text ?? ""}
       />
-    </div>
-  );
+    </>
+  )
 }
