@@ -34,7 +34,7 @@ function GoogleMark({ className }: { className?: string }) {
 
 export function GoogleCalendarConnect() {
   const t = useTranslations("RecruiterPortal.settings.calendarConnect")
-  const { connect, isLoading } = useGoogleCalendar()
+  const { connect, isLoading, error } = useGoogleCalendar()
   const [isConnecting, setIsConnecting] = useState(false)
 
   const handleClick = async () => {
@@ -49,19 +49,29 @@ export function GoogleCalendarConnect() {
   const disabled = isLoading || isConnecting
 
   return (
-    <button
-      type="button"
-      onClick={() => void handleClick()}
-      disabled={disabled}
-      className="inline-flex w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-background px-4 py-3 font-sans text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:opacity-50 sm:w-auto"
-      aria-label={t("ariaLabel")}
-    >
-      {isConnecting ? (
-        <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden />
-      ) : (
-        <GoogleMark className="h-5 w-5 shrink-0" />
-      )}
-      {isConnecting ? t("redirecting") : t("label")}
-    </button>
+    <div className="flex flex-col gap-3">
+      <button
+        type="button"
+        onClick={() => void handleClick()}
+        disabled={disabled}
+        className="inline-flex w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-background px-4 py-3 font-sans text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:opacity-50 sm:w-auto"
+        aria-label={t("ariaLabel")}
+      >
+        {isConnecting ? (
+          <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden />
+        ) : (
+          <GoogleMark className="h-5 w-5 shrink-0" />
+        )}
+        {isConnecting ? t("redirecting") : t("label")}
+      </button>
+      {error ? (
+        <p
+          className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 font-sans text-sm text-destructive"
+          role="alert"
+        >
+          {error}
+        </p>
+      ) : null}
+    </div>
   )
 }

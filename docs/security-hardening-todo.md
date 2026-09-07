@@ -3,7 +3,7 @@
 Fuente: auditoría frontend 2026-07-21 (24 hallazgos FE-SEC).  
 Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualizar el conteo.
 
-**Conteo:** Done 16 · In Progress 0 · Last ToDos 0 · To Do 8
+**Conteo:** Done 17 · In Progress 0 · Last ToDos 0 · To Do 7
 
 **Antes del primer PR:** autorización explícita. Un lote = un PR pequeño. No agrupar todo.
 
@@ -64,6 +64,9 @@ Al cerrar un ítem: marcar `- [x]`, moverlo a **Done** si hace falta, y actualiz
 - [x] **FE-SEC-015** — PDF/reportes: datos autoritativos server-side + cuotas
   - Reportes: `POST` PDF vuelve a pedir filas al backend; ignora `rows`/`summary`/`extras` del cliente
   - Ficha: sin `previewHtml`; Chromium solo esquema JSON del servidor; 413/429 reutilizados
+- [x] **FE-SEC-016** — Redirects y OAuth: un solo helper interno + allowlist Google
+  - `normalizeInternalPath` + login/`returnUrl` vía helper; Google solo `accounts.google.com/o/oauth2/`
+  - State / Proof Key for Code Exchange siguen siendo del backend
 
 ---
 
@@ -83,8 +86,6 @@ _(vacío)_
 
 ### Sin empezar
 
-- [ ] **FE-SEC-016** — Redirects y OAuth: un solo helper interno + allowlist Google
-  - Login usa `normalizeInternalPath`; state / Proof Key for Code Exchange en backend
 - [ ] **FE-SEC-017** — Supply chain: SHA de acciones, digest de imagen, Software Bill of Materials / provenance
   - Reemplazar `react-nestable` (React 15/18 transitivos)
 - [ ] **FE-SEC-018** — Verificar Cloud Run / Identity and Access Management / Load Balancer / secretos reales

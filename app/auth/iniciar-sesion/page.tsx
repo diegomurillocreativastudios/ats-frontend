@@ -26,6 +26,7 @@ import {
   resolveSsoQueryErrorCode,
 } from "@/lib/auth/sso-errors"
 import { LinkedInLoginButton } from "@/components/auth/LinkedInLoginButton"
+import { resolveAuthRedirectDestination } from "@/lib/auth/internal-path"
 
 const getOrigin = () =>
   typeof window !== "undefined" ? window.location.origin : "";
@@ -199,14 +200,12 @@ export default function IniciarSesion() {
         return;
       }
 
-      setMessage({ type: "success", text: t("login.toastSignedIn") });
+      setMessage({ type: "success", text: t("login.toastSignedIn") })
       const from =
         typeof window !== "undefined"
           ? new URLSearchParams(window.location.search).get("from")
-          : null;
-      router.push(
-        from && from.startsWith("/") ? from : "/seleccion-portal"
-      );
+          : null
+      router.push(resolveAuthRedirectDestination([from]))
     } catch (err: unknown) {
       setMessage({
         type: "error",

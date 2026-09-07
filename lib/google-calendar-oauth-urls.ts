@@ -5,6 +5,33 @@
 export const GOOGLE_CALENDAR_SETTINGS_PATH =
   "/portal-rrhh/configuracion/calendario"
 
+const GOOGLE_OAUTH_HOST = "accounts.google.com"
+const GOOGLE_OAUTH_PATH_PREFIX = "/o/oauth2/"
+
+/**
+ * Strict allowlist for Google Calendar OAuth authorize URLs before navigating.
+ * Only https://accounts.google.com/o/oauth2/... is accepted.
+ */
+export function isAllowedGoogleOAuthAuthorizeUrl(
+  value: string | null | undefined
+): boolean {
+  if (!value || typeof value !== "string") return false
+
+  let parsed: URL
+  try {
+    parsed = new URL(value.trim())
+  } catch {
+    return false
+  }
+
+  if (parsed.protocol !== "https:") return false
+  if (parsed.username || parsed.password) return false
+  if (parsed.hostname.toLowerCase() !== GOOGLE_OAUTH_HOST) return false
+  if (!parsed.pathname.startsWith(GOOGLE_OAUTH_PATH_PREFIX)) return false
+
+  return true
+}
+
 /**
  * URLs que el backend suele pedir como `FrontendSuccessUrl` / `FrontendErrorUrl`
  * (appsettings o cuerpo de `authorize`).
