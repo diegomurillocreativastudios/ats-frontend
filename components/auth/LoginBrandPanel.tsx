@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { APP_NAME } from "@/lib/app-brand"
 
@@ -10,11 +11,35 @@ const TEAM_AVATARS = [
   { initials: "JP", className: "bg-[#D4EDCC] text-[#438C39]" },
 ] as const
 
-const PREVIEW_TAGS = [
-  "previewTagSourcing",
-  "previewTagAnalytics",
-  "previewTagEnglish",
+const PREVIEW_PERSONA_IDS = [
+  "sofia",
+  "tomas",
+  "irene",
+  "marco",
+  "helena",
+  "julian",
 ] as const
+
+const PREVIEW_PERSONA_AVATARS: Record<(typeof PREVIEW_PERSONA_IDS)[number], string> = {
+  sofia: "bg-[#E8F5E0] text-[#256D35]",
+  tomas: "bg-[#D4EDCC] text-[#337C37]",
+  irene: "bg-white text-[#256D35]",
+  marco: "bg-[#A8D98A] text-[#256D35]",
+  helena: "bg-[#E8F5E0] text-[#337C37]",
+  julian: "bg-[#D4EDCC] text-[#256D35]",
+}
+
+const PREVIEW_PERSONA_TAGS = ["tag1", "tag2", "tag3"] as const
+const PREVIEW_ROTATE_MS = 7000
+
+/**
+ * Elige otro índice al azar para no repetir el personaje actual.
+ */
+const pickOtherIndex = (current: number, length: number) => {
+  if (length < 2) return current
+  const offset = 1 + Math.floor(Math.random() * (length - 1))
+  return (current + offset) % length
+}
 
 interface LoginBrandLockupProps {
   tone?: "onDark" | "onLight"
@@ -50,6 +75,81 @@ export function LoginBrandLockup({ tone = "onDark" }: LoginBrandLockupProps) {
         </span>
       </p>
     </div>
+  )
+}
+
+/**
+ * Tarjeta de candidato destacado: rota entre perfiles ficticios.
+ */
+function PreviewCandidateCard() {
+  const t = useTranslations("Auth.login")
+  const [index, setIndex] = useState(0)
+  const personaId = PREVIEW_PERSONA_IDS[index]
+  const personaKey = `previewPersonas.${personaId}` as const
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
+    if (media.matches) return
+
+    const id = window.setInterval(() => {
+      setIndex((prev) => pickOtherIndex(prev, PREVIEW_PERSONA_IDS.length))
+    }, PREVIEW_ROTATE_MS)
+
+    return () => window.clearInterval(id)
+  }, [])
+
+  return (
+    <article
+      className="auth-brand-float relative hidden min-w-120 w-fit max-w-2xl overflow-hidden rounded-2xl border border-white/20 bg-white/12 p-4 shadow-xl backdrop-blur-md [@media(min-height:820px)]:block"
+      aria-label={t("previewAria")}
+      data-testid="auth-login-preview-card"
+    >
+      <span
+        className="auth-brand-shimmer pointer-events-none absolute inset-y-0 -left-1/3 z-0 w-1/3 bg-linear-to-r from-transparent via-white/25 to-transparent"
+        aria-hidden
+      />
+      <div key={personaId} className="auth-brand-persona relative z-10">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span
+              className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold ${PREVIEW_PERSONA_AVATARS[personaId]}`}
+            >
+              {t(`${personaKey}.initials`)}
+            </span>
+            <div>
+              <p
+                className="font-semibold text-white"
+                data-testid="auth-login-preview-name"
+              >
+                {t(`${personaKey}.name`)}
+              </p>
+              <p className="text-xs text-white/75">{t(`${personaKey}.role`)}</p>
+            </div>
+          </div>
+          <span className="auth-brand-glow whitespace-nowrap rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-semibold text-white ring-1 ring-white/30">
+            {t(`${personaKey}.topBadge`)}
+          </span>
+        </div>
+
+        <p className="mt-4 inline-flex rounded-lg bg-[#256D35]/25 px-2.5 py-1.5 text-xs font-medium text-white ring-1 ring-white/15">
+          {t(`${personaKey}.match`)}
+        </p>
+
+        <div className="mt-3 flex flex-nowrap items-center gap-1.5">
+          {PREVIEW_PERSONA_TAGS.map((tag) => (
+            <span
+              key={tag}
+              className="whitespace-nowrap rounded-full border border-white/15 bg-[#256D35]/20 px-2.5 py-1 text-[11px] text-white/90"
+            >
+              {t(`${personaKey}.${tag}`)}
+            </span>
+          ))}
+          <span className="whitespace-nowrap rounded-full bg-[#E8F5E0]/90 px-2.5 py-1 text-[11px] font-medium text-[#256D35]">
+            {t(`${personaKey}.evaluation`)}
+          </span>
+        </div>
+      </div>
+    </article>
   )
 }
 
@@ -138,47 +238,7 @@ export function LoginBrandPanel() {
             ))}
           </ul>
 
-          <article
-            className="auth-brand-float relative hidden max-w-md overflow-hidden rounded-2xl border border-white/20 bg-white/12 p-4 shadow-xl backdrop-blur-md [@media(min-height:820px)]:block"
-            aria-label={t("previewAria")}
-          >
-            <span
-              className="auth-brand-shimmer pointer-events-none absolute inset-y-0 -left-1/3 z-0 w-1/3 bg-linear-to-r from-transparent via-white/25 to-transparent"
-              aria-hidden
-            />
-            <div className="relative z-10 flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#E8F5E0] text-sm font-semibold text-[#256D35]">
-                  {t("previewInitials")}
-                </span>
-                <div>
-                  <p className="font-semibold text-white">{t("previewName")}</p>
-                  <p className="text-xs text-white/75">{t("previewRole")}</p>
-                </div>
-              </div>
-              <span className="auth-brand-glow rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-semibold text-white ring-1 ring-white/30">
-                {t("previewTopBadge")}
-              </span>
-            </div>
-
-            <p className="relative z-10 mt-4 inline-flex rounded-lg bg-[#256D35]/25 px-2.5 py-1.5 text-xs font-medium text-white ring-1 ring-white/15">
-              {t("previewMatch")}
-            </p>
-
-            <div className="relative z-10 mt-3 flex flex-wrap gap-1.5">
-              {PREVIEW_TAGS.map((key) => (
-                <span
-                  key={key}
-                  className="rounded-full border border-white/15 bg-[#256D35]/20 px-2.5 py-1 text-[11px] text-white/90"
-                >
-                  {t(key)}
-                </span>
-              ))}
-              <span className="rounded-full bg-[#E8F5E0]/90 px-2.5 py-1 text-[11px] font-medium text-[#256D35]">
-                {t("previewTagEvaluation")}
-              </span>
-            </div>
-          </article>
+          <PreviewCandidateCard />
         </div>
 
         <footer className="flex flex-wrap items-center justify-between gap-3">

@@ -754,6 +754,10 @@ h6 {
   .auth-brand-features li:nth-child(3) .auth-brand-check {
     animation-delay: 2.2s;
   }
+
+  .auth-brand-persona {
+    animation: auth-brand-persona-in 0.55s ease both;
+  }
 }
 
 @keyframes apply-shimmer {
@@ -960,6 +964,17 @@ h6 {
   }
 }
 
+@keyframes auth-brand-persona-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 @keyframes auth-brand-check {
   0%,
   100% {
@@ -1007,7 +1022,8 @@ h6 {
   .auth-brand-shimmer,
   .auth-brand-live,
   .auth-brand-live-ring,
-  .auth-brand-check {
+  .auth-brand-check,
+  .auth-brand-persona {
     transition: none !important;
     animation: none !important;
   }

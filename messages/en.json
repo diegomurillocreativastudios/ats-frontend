@@ -85,9 +85,9 @@
     "login": {
       "aiEngineBadge": "AI Engine v4.2 Active",
       "themeBadge": "High-Impact Hiring",
-      "brandTitle": "Candidate Management System for HR departments",
+      "brandTitle": "Applicant Tracking System for HR Departments",
       "brandSubtitle": "Optimize hiring with predictive AI scoring. Manage candidates, vacancies, and assessments in one place.",
-      "brandTitleSm": "Recruitment Management System",
+      "brandTitleSm": "Applicant Tracking System",
       "brandSubtitleSm": "Optimize your selection process with AI.",
       "feature1": "Intelligent candidate matching with AI and competency scoring.",
       "feature2": "Streamlined hiring workflows and automated interviews.",
@@ -102,6 +102,74 @@
       "previewTagAnalytics": "HR Analytics",
       "previewTagEnglish": "English C1",
       "previewTagEvaluation": "Evaluation complete",
+      "previewPersonas": {
+        "sofia": {
+          "name": "Sofía Carrillo",
+          "initials": "SC",
+          "role": "Senior Tech Recruiter",
+          "topBadge": "Top Candidate",
+          "match": "AI Match: 96% • High cultural fit",
+          "tag1": "Active Sourcing",
+          "tag2": "HR Analytics",
+          "tag3": "English C1",
+          "evaluation": "Evaluation complete"
+        },
+        "tomas": {
+          "name": "Tomás Herrera",
+          "initials": "TH",
+          "role": "Full Stack Developer",
+          "topBadge": "Top Candidate",
+          "match": "AI Match: 94% • Solid architecture",
+          "tag1": "TypeScript",
+          "tag2": "React",
+          "tag3": "Node.js",
+          "evaluation": "Evaluation complete"
+        },
+        "irene": {
+          "name": "Irene Solís",
+          "initials": "IS",
+          "role": "Senior UX/UI Designer",
+          "topBadge": "Top Candidate",
+          "match": "AI Match: 97% • User-centered design",
+          "tag1": "Figma",
+          "tag2": "Design systems",
+          "tag3": "Accessibility",
+          "evaluation": "Evaluation complete"
+        },
+        "marco": {
+          "name": "Marco Bellini",
+          "initials": "MB",
+          "role": "Formula 1 Driver",
+          "topBadge": "Top Candidate",
+          "match": "AI Match: 91% • High performance under pressure",
+          "tag1": "Telemetry",
+          "tag2": "Qualifying",
+          "tag3": "Endurance",
+          "evaluation": "Evaluation complete"
+        },
+        "helena": {
+          "name": "Helena Duarte",
+          "initials": "HD",
+          "role": "General Practitioner",
+          "topBadge": "Top Candidate",
+          "match": "AI Match: 93% • Human and precise care",
+          "tag1": "Family medicine",
+          "tag2": "Primary care",
+          "tag3": "Emergency care",
+          "evaluation": "Evaluation complete"
+        },
+        "julian": {
+          "name": "Julián Castro",
+          "initials": "JC",
+          "role": "Marketing Coordinator",
+          "topBadge": "Top Candidate",
+          "match": "AI Match: 95% • High-impact campaigns",
+          "tag1": "Campaigns",
+          "tag2": "Content",
+          "tag3": "SEO",
+          "evaluation": "Evaluation complete"
+        }
+      },
       "teamsSocialProof": "450+ talent teams",
       "complianceBadge": "GDPR & SOC-2",
       "title": "Sign in",
