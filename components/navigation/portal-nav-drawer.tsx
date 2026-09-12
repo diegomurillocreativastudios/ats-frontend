@@ -14,6 +14,7 @@ import { createPortal } from "react-dom"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { X } from "lucide-react"
+import { useIsBelowLg } from "@/hooks/use-is-below-lg"
 
 const DRAWER_TRANSITION_MS = 300
 
@@ -25,8 +26,8 @@ interface PortalNavDrawerProps {
 
 /**
  * Left slide-over for portal navigation below `lg`. Reuses each portal sidebar
- * as children; closes on Escape, overlay click, or route change.
- * Enter/exit animate overlay fade + panel slide.
+ * as children; closes on Escape, overlay click, route change, or when the
+ * viewport reaches 1024px. Enter/exit animate overlay fade + panel slide.
  */
 export function PortalNavDrawer({
   isOpen,
@@ -35,6 +36,7 @@ export function PortalNavDrawer({
 }: PortalNavDrawerProps) {
   const t = useTranslations("Topbar")
   const pathname = usePathname()
+  const isBelowLg = useIsBelowLg()
   const pathnameWhenOpened = useRef<string | null>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -46,6 +48,13 @@ export function PortalNavDrawer({
     () => true,
     () => false,
   )
+
+  useEffect(() => {
+    if (isBelowLg) return
+    if (isOpen) onClose()
+    setIsEntered(false)
+    setIsMounted(false)
+  }, [isBelowLg, isOpen, onClose])
 
   useEffect(() => {
     if (!isOpen) {
@@ -132,7 +141,7 @@ export function PortalNavDrawer({
     setIsMounted(false)
   }
 
-  if (!isClient || !isMounted) return null
+  if (!isClient || !isBelowLg || !isMounted) return null
 
   return createPortal(
     <div

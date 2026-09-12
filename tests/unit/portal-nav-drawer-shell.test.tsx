@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen, within, waitFor, fireEvent } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 
@@ -9,6 +9,7 @@ import { CandidatePortalShell } from "@/components/candidato/candidate-portal-sh
 import { PortalNavDrawer } from "@/components/navigation/portal-nav-drawer"
 import { PORTAL_COMPACT_TOPBAR_LAYOUT_CLASS } from "@/components/navigation/portal-topbar"
 import esMessages from "@/messages/es.json"
+import { stubMatchMedia } from "@/tests/helpers/stub-match-media"
 
 const { useCurrentUserMock, usePathnameMock } = vi.hoisted(() => ({
   useCurrentUserMock: vi.fn(() => ({
@@ -55,6 +56,11 @@ beforeEach(() => {
   useCurrentUserMock.mockClear()
   usePathnameMock.mockReturnValue("/portal-rrhh/candidatos")
   document.body.style.overflow = ""
+  stubMatchMedia(true)
+})
+
+afterEach(() => {
+  stubMatchMedia(false)
 })
 
 describe("RrhhPortalShell", () => {
@@ -149,6 +155,19 @@ describe("PortalNavDrawer", () => {
 
     expect(document.body.style.overflow).toBe("hidden")
     fireEvent.keyDown(document, { key: "Escape" })
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it("no se monta desde 1024px y pide cerrar si quedó abierto", () => {
+    stubMatchMedia(false)
+    const onClose = vi.fn()
+    renderWithIntl(
+      <PortalNavDrawer isOpen onClose={onClose}>
+        <p>Nav content</p>
+      </PortalNavDrawer>,
+    )
+
+    expect(screen.queryByRole("dialog", { name: "Menú de navegación" })).not.toBeInTheDocument()
     expect(onClose).toHaveBeenCalled()
   })
 })
