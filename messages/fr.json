@@ -486,6 +486,10 @@
       "title": "ApplicanTree | Portal RRHH | Settings",
       "description": "Settings del portal RRHH"
     },
+    "recruiterProfile": {
+      "title": "ApplicanTree | Portail RH | Mon profil",
+      "description": "Modifiez vos informations de recruteur"
+    },
     "publicOpportunities": {
       "list": {
         "title": "ApplicanTree | Portail opportunités",
@@ -1861,9 +1865,48 @@
       "portalCrumb": "Portail RH",
       "title": "Configuration",
       "description": "Centralisez ici les paramètres fonctionnels du portail RH.",
+      "profile": {
+        "title": "Mon profil",
+        "description": "Modifiez le nom et la photo affichés dans le portail."
+      },
       "googleCalendar": {
         "title": "Google Agenda",
         "description": "Connectez et gérez la synchronisation des entretiens."
+      },
+      "profilePage": {
+        "title": "Mon profil",
+        "pageDescription": "Mettez à jour votre nom visible et votre photo. L'e-mail et le rôle viennent de votre compte.",
+        "formHint": "Ces données et votre photo apparaissent dans le menu du compte et dans les entretiens que vous planifiez.",
+        "photoLabel": "Photo de profil",
+        "photoHint": "PNG, JPEG, WebP ou GIF. Maximum 5 Mo.",
+        "photoAlt": "Photo de profil de {name}",
+        "photoAdd": "Ajouter une photo",
+        "photoChange": "Changer la photo",
+        "photoRemove": "Supprimer la photo",
+        "photoRemoving": "Suppression…",
+        "photoUploading": "Envoi…",
+        "photoUploadedToast": "Photo de profil mise à jour.",
+        "photoRemovedToast": "Photo de profil supprimée.",
+        "photoFailed": "Impossible de mettre à jour la photo.",
+        "photoInvalidType": "La photo doit être PNG, JPEG, WebP ou GIF.",
+        "photoTooLarge": "La photo ne peut pas dépasser 5 Mo.",
+        "photoEmpty": "La photo est vide.",
+        "nameLabel": "Nom visible",
+        "namePlaceholder": "Comment vous voulez apparaître dans le portail",
+        "required": "Saisissez votre nom.",
+        "tooShort": "Le nom doit contenir au moins 2 caractères.",
+        "tooLong": "Le nom ne peut pas dépasser 80 caractères.",
+        "invalid": "Le nom n'est pas valide.",
+        "rateLimited": "Trop de tentatives. Réessaie plus tard.",
+        "emailLabel": "E-mail",
+        "emailHint": "L'e-mail ne peut pas être modifié ici.",
+        "roleLabel": "Rôle",
+        "roleUnknown": "Aucun rôle",
+        "save": "Enregistrer les modifications",
+        "saving": "Enregistrement…",
+        "savedToast": "Profil mis à jour.",
+        "saveFailed": "Impossible d'enregistrer le profil.",
+        "loadFailed": "Impossible de charger vos données."
       },
       "calendarPage": {
         "title": "Calendrier",

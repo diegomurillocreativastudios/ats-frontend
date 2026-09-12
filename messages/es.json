@@ -486,6 +486,10 @@
       "title": "ApplicanTree | Portal RRHH | Configuración",
       "description": "Configuración del portal RRHH"
     },
+    "recruiterProfile": {
+      "title": "ApplicanTree | Portal RRHH | Mi perfil",
+      "description": "Edita tu información de reclutador"
+    },
     "publicOpportunities": {
       "list": {
         "title": "ApplicanTree | Portal Oportunidades",
@@ -1861,9 +1865,48 @@
       "portalCrumb": "Portal RRHH",
       "title": "Configuración",
       "description": "Centraliza aquí las configuraciones funcionales del portal RRHH.",
+      "profile": {
+        "title": "Mi perfil",
+        "description": "Edita el nombre y la foto que se muestran en el portal."
+      },
       "googleCalendar": {
         "title": "Calendario Google",
         "description": "Conecta y administra la sincronización de entrevistas."
+      },
+      "profilePage": {
+        "title": "Mi perfil",
+        "pageDescription": "Actualiza tu nombre visible y tu foto. El correo y el rol vienen de tu cuenta.",
+        "formHint": "Estos datos y tu foto aparecen en el menú de cuenta y en las entrevistas que agendes.",
+        "photoLabel": "Foto de perfil",
+        "photoHint": "PNG, JPEG, WebP o GIF. Máximo 5 MB.",
+        "photoAlt": "Foto de perfil de {name}",
+        "photoAdd": "Agregar foto",
+        "photoChange": "Cambiar foto",
+        "photoRemove": "Eliminar foto",
+        "photoRemoving": "Eliminando…",
+        "photoUploading": "Subiendo…",
+        "photoUploadedToast": "Foto de perfil actualizada.",
+        "photoRemovedToast": "Foto de perfil eliminada.",
+        "photoFailed": "No se pudo actualizar la foto.",
+        "photoInvalidType": "La foto debe ser PNG, JPEG, WebP o GIF.",
+        "photoTooLarge": "La foto no puede superar 5 MB.",
+        "photoEmpty": "La foto está vacía.",
+        "nameLabel": "Nombre visible",
+        "namePlaceholder": "Cómo quieres que te vean en el portal",
+        "required": "Escribe tu nombre.",
+        "tooShort": "El nombre debe tener al menos 2 caracteres.",
+        "tooLong": "El nombre no puede superar 80 caracteres.",
+        "invalid": "El nombre no es válido.",
+        "rateLimited": "Demasiados intentos. Probá de nuevo más tarde.",
+        "emailLabel": "Correo",
+        "emailHint": "El correo no se puede cambiar desde aquí.",
+        "roleLabel": "Rol",
+        "roleUnknown": "Sin rol",
+        "save": "Guardar cambios",
+        "saving": "Guardando…",
+        "savedToast": "Perfil actualizado.",
+        "saveFailed": "No se pudo guardar el perfil.",
+        "loadFailed": "No se pudieron cargar tus datos."
       },
       "calendarPage": {
         "title": "Calendario",

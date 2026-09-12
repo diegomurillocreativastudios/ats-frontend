@@ -17,7 +17,8 @@ export function getUploadMaxBytesForBackendPath(backendPath: string): number {
 
   if (
     path === "/api/admin/companies" ||
-    /^\/api\/admin\/companies\/[^/]+$/.test(path)
+    /^\/api\/admin\/companies\/[^/]+$/.test(path) ||
+    path === "/api/auth/profile/photo"
   ) {
     return UPLOAD_MAX_BYTES_5_MB
   }

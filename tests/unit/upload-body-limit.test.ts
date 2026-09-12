@@ -20,6 +20,12 @@ describe("getUploadMaxBytesForBackendPath", () => {
     ).toBe(UPLOAD_MAX_BYTES_5_MB)
   })
 
+  it("applies 5 MB for recruiter profile photo", () => {
+    expect(getUploadMaxBytesForBackendPath("/api/auth/profile/photo")).toBe(
+      UPLOAD_MAX_BYTES_5_MB
+    )
+  })
+
   it("applies 10 MB for vacancy tailoring", () => {
     expect(
       getUploadMaxBytesForBackendPath("/api/candidate/profile/tailor-to-vacancy")

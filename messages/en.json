@@ -486,6 +486,10 @@
       "title": "ApplicanTree | Portal RRHH | Settings",
       "description": "Settings del portal RRHH"
     },
+    "recruiterProfile": {
+      "title": "ApplicanTree | HR Portal | My profile",
+      "description": "Edit your recruiter information"
+    },
     "publicOpportunities": {
       "list": {
         "title": "ApplicanTree | Opportunities Portal",
@@ -1861,9 +1865,48 @@
       "portalCrumb": "HR Portal",
       "title": "Settings",
       "description": "Centralize the functional settings of the HR portal here.",
+      "profile": {
+        "title": "My profile",
+        "description": "Edit the name and photo shown in the portal."
+      },
       "googleCalendar": {
         "title": "Google Calendar",
         "description": "Connect and manage interview synchronization."
+      },
+      "profilePage": {
+        "title": "My profile",
+        "pageDescription": "Update your visible name and photo. Email and role come from your account.",
+        "formHint": "These details and your photo appear in the account menu and in interviews you schedule.",
+        "photoLabel": "Profile photo",
+        "photoHint": "PNG, JPEG, WebP or GIF. Maximum 5 MB.",
+        "photoAlt": "Profile photo of {name}",
+        "photoAdd": "Add photo",
+        "photoChange": "Change photo",
+        "photoRemove": "Remove photo",
+        "photoRemoving": "Removing…",
+        "photoUploading": "Uploading…",
+        "photoUploadedToast": "Profile photo updated.",
+        "photoRemovedToast": "Profile photo removed.",
+        "photoFailed": "Could not update the photo.",
+        "photoInvalidType": "The photo must be PNG, JPEG, WebP or GIF.",
+        "photoTooLarge": "The photo cannot exceed 5 MB.",
+        "photoEmpty": "The photo is empty.",
+        "nameLabel": "Display name",
+        "namePlaceholder": "How you want to appear in the portal",
+        "required": "Enter your name.",
+        "tooShort": "The name must have at least 2 characters.",
+        "tooLong": "The name cannot exceed 80 characters.",
+        "invalid": "The name is not valid.",
+        "rateLimited": "Too many attempts. Try again later.",
+        "emailLabel": "Email",
+        "emailHint": "Email cannot be changed from here.",
+        "roleLabel": "Role",
+        "roleUnknown": "No role",
+        "save": "Save changes",
+        "saving": "Saving…",
+        "savedToast": "Profile updated.",
+        "saveFailed": "Could not save the profile.",
+        "loadFailed": "Could not load your details."
       },
       "calendarPage": {
         "title": "Calendar",

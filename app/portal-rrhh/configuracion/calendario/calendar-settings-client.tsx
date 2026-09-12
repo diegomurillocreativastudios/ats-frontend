@@ -9,7 +9,7 @@ import { GoogleCalendarConnect } from "@/components/rrhh/interviews/google-calen
 import { GoogleCalendarDisconnect } from "@/components/rrhh/interviews/google-calendar-disconnect"
 import Snackbar from "@/components/ui/Snackbar"
 import { LoadingSpinner } from "@/components/common/loading-spinner"
-import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import { SettingsPageSection } from "@/components/rrhh/settings-page-section"
 import {
   googleCalendarCallbackErrorI18nKey,
   parseGoogleCalendarCallbackError,
@@ -137,13 +137,10 @@ export function CalendarSettingsClient() {
   const connectedSince = formatConnectedAt(status.connectedAt, locale)
 
   return (
-    <div className="w-full px-4 py-6 md:px-8">
-      <PortalPageHeader
-        title={tPage("title")}
-        description={tPage("pageDescription")}
-        className="mb-8"
-      />
-
+    <SettingsPageSection
+      title={tPage("title")}
+      description={tPage("pageDescription")}
+    >
       <section
         aria-labelledby="google-calendar-heading"
         className="w-full rounded-xl border border-border bg-card p-6 shadow-sm"
@@ -240,6 +237,6 @@ export function CalendarSettingsClient() {
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </div>
+    </SettingsPageSection>
   )
 }

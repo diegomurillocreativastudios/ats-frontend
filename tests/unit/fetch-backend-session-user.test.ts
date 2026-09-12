@@ -34,6 +34,40 @@ describe("fetchBackendSessionUser", () => {
         email: "a@b.com",
         name: "Ana",
         role: "admin",
+        hasPhoto: false,
+      },
+    })
+  })
+
+  it("returns hasPhoto when the session includes it", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            id: "u-1",
+            email: "a@b.com",
+            name: "Ana",
+            role: "admin",
+            hasPhoto: true,
+          }),
+          { status: 200 }
+        )
+      )
+    )
+
+    const result = await fetchBackendSessionUser(
+      "https://api.example.com",
+      "token"
+    )
+    expect(result).toEqual({
+      status: "ok",
+      user: {
+        id: "u-1",
+        email: "a@b.com",
+        name: "Ana",
+        role: "admin",
+        hasPhoto: true,
       },
     })
   })

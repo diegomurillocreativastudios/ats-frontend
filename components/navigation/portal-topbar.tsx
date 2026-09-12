@@ -12,8 +12,8 @@ import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { ChevronRight, LogOut, Shield } from "lucide-react"
 import LanguageSwitcher from "@/components/language-switcher"
+import { RecruiterAvatar } from "@/components/rrhh/recruiter-avatar"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
-import { getInitials } from "@/lib/getInitials"
 import { logoutToLogin } from "@/lib/logout-to-login"
 import { isAdminRole } from "@/lib/roles"
 import {
@@ -109,14 +109,13 @@ function TopbarAccountMenu({
   const tSidebar = useTranslations("Sidebar")
   const tCommon = useTranslations("Common")
   const tActions = useTranslations("Actions")
-  const { user, loading } = useCurrentUser()
+  const { user, photoSrc, loading } = useCurrentUser()
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const displayName =
     formatSidebarDisplayName(user?.name, user?.email) ?? tCommon("userFallback")
-  const initials = getInitials(user?.name, user?.email)
   const roleKey = resolveSidebarRoleLabelKey(user?.role)
   const roleLabel = roleKey
     ? tSidebar(roleKey)
@@ -180,19 +179,13 @@ function TopbarAccountMenu({
         aria-expanded={isMenuOpen}
         aria-haspopup="menu"
       >
-        {loading ? (
-          <span
-            className="h-9 w-9 animate-pulse rounded-full bg-muted"
-            aria-hidden
-          />
-        ) : (
-          <span
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-vo-purple to-vo-magenta font-sans text-[11px] font-semibold text-white"
-            aria-hidden
-          >
-            {initials}
-          </span>
-        )}
+        <RecruiterAvatar
+          name={user?.name}
+          email={user?.email}
+          photoSrc={photoSrc}
+          size="md"
+          isLoading={loading}
+        />
       </button>
       {isMenuOpen ? (
         <div

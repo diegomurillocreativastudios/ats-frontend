@@ -1,9 +1,33 @@
-import Link from "next/link"
 import { getTranslations } from "next-intl/server"
-import { CalendarClock, ChevronRight } from "lucide-react"
+import { CalendarClock, UserRound, type LucideIcon } from "lucide-react"
 import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
 import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
-import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import { SettingsHubLink } from "@/components/rrhh/settings-hub-link"
+import { SettingsPageSection } from "@/components/rrhh/settings-page-section"
+
+interface SettingsHubItem {
+  href: string
+  icon: LucideIcon
+  title: string
+  description: string
+}
+
+/** Destinos del hub en dos columnas, sin pastillas. */
+function SettingsHubList({ items }: { items: SettingsHubItem[] }) {
+  return (
+    <div className="grid max-w-4xl grid-cols-1 gap-10 md:grid-cols-2 md:gap-x-16 md:gap-y-8">
+      {items.map((item) => (
+        <SettingsHubLink
+          key={item.href}
+          href={item.href}
+          icon={item.icon}
+          title={item.title}
+          description={item.description}
+        />
+      ))}
+    </div>
+  )
+}
 
 export async function generateMetadata() {
   const t = await getTranslations("Metadata.recruiterSettings")
@@ -16,6 +40,20 @@ export async function generateMetadata() {
 export default async function RRHHConfiguracionPage() {
   const t = await getTranslations("RecruiterPortal.settings")
   const trail = [{ label: t("breadcrumb") }]
+  const items = [
+    {
+      href: "/portal-rrhh/configuracion/perfil",
+      icon: UserRound,
+      title: t("profile.title"),
+      description: t("profile.description"),
+    },
+    {
+      href: "/portal-rrhh/configuracion/calendario",
+      icon: CalendarClock,
+      title: t("googleCalendar.title"),
+      description: t("googleCalendar.description"),
+    },
+  ]
 
   return (
     <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
@@ -28,35 +66,13 @@ export default async function RRHHConfiguracionPage() {
             breadcrumbTrail={trail}
           />
           <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <section className="flex flex-col gap-6 px-4 py-6 md:px-8">
-              <PortalPageHeader
-                title={t("title")}
-                description={t("description")}
-                contentClassName="max-w-3xl"
-              />
-              <Link
-                href="/portal-rrhh/configuracion/calendario"
-                className="flex w-full max-w-xl items-center justify-between rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-lg bg-vo-purple/10"
-                    aria-hidden
-                  >
-                    <CalendarClock className="h-5 w-5 text-vo-purple" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-sans text-sm font-semibold text-foreground">
-                      {t("googleCalendar.title")}
-                    </span>
-                    <span className="font-sans text-xs text-muted-foreground">
-                      {t("googleCalendar.description")}
-                    </span>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
-              </Link>
-            </section>
+            <SettingsPageSection
+              title={t("title")}
+              description={t("description")}
+              contentClassName="max-w-4xl"
+            >
+              <SettingsHubList items={items} />
+            </SettingsPageSection>
           </main>
         </div>
       </div>
@@ -68,24 +84,12 @@ export default async function RRHHConfiguracionPage() {
           breadcrumbTrail={trail}
         />
         <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <section className="flex flex-col gap-6 px-4 py-6">
-            <PortalPageHeader
-              title={t("title")}
-              description={t("description")}
-            />
-            <Link
-              href="/portal-rrhh/configuracion/calendario"
-              className="flex items-center justify-between rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted"
-            >
-              <div className="flex items-center gap-3">
-                <CalendarClock className="h-5 w-5 text-vo-purple" aria-hidden />
-                <span className="font-sans text-sm font-semibold text-foreground">
-                  {t("googleCalendar.title")}
-                </span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
-            </Link>
-          </section>
+          <SettingsPageSection
+            title={t("title")}
+            description={t("description")}
+          >
+            <SettingsHubList items={items} />
+          </SettingsPageSection>
         </main>
       </div>
     </div>

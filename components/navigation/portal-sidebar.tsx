@@ -17,8 +17,8 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import ProductBrand from "@/components/branding/ProductBrand"
+import { RecruiterAvatar } from "@/components/rrhh/recruiter-avatar"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
-import { getInitials } from "@/lib/getInitials"
 import { logoutToLogin } from "@/lib/logout-to-login"
 import { PORTAL_SELECTION_PATH } from "@/lib/portal-access"
 import { isAdminRole } from "@/lib/roles"
@@ -172,14 +172,13 @@ export function SidebarUserFooter({
   const tCommon = useTranslations("Common")
   const tActions = useTranslations("Actions")
   const tTopbar = useTranslations("Topbar")
-  const { user, loading } = useCurrentUser()
+  const { user, photoSrc, loading } = useCurrentUser()
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const displayName =
     formatSidebarDisplayName(user?.name, user?.email) ?? tCommon("userFallback")
-  const initials = getInitials(user?.name, user?.email)
   const roleKey = resolveSidebarRoleLabelKey(user?.role)
   const roleLabel = roleKey
     ? tSidebar(roleKey)
@@ -243,19 +242,13 @@ export function SidebarUserFooter({
         aria-expanded={isMenuOpen}
         aria-haspopup="menu"
       >
-        {loading ? (
-          <span
-            className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-muted"
-            aria-hidden
-          />
-        ) : (
-          <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-vo-purple to-vo-magenta font-sans text-xs font-semibold text-white"
-            aria-hidden
-          >
-            {initials}
-          </span>
-        )}
+        <RecruiterAvatar
+          name={user?.name}
+          email={user?.email}
+          photoSrc={photoSrc}
+          size="sm"
+          isLoading={loading}
+        />
         <span className="min-w-0 flex-1">
           <span
             className="block truncate font-sans text-sm font-medium text-foreground"

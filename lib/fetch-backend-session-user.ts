@@ -8,6 +8,7 @@ export interface BackendSessionUserPayload {
   name: string
   email: string
   role: string | null
+  hasPhoto: boolean
 }
 
 export type BackendSessionLookupResult =
@@ -31,8 +32,20 @@ function parseSessionUser(
       : Array.isArray(u.roles) && u.roles.length > 0
         ? String(u.roles[0])
         : null
+  const hasPhotoRaw = u.hasPhoto ?? u.has_photo
 
-  return { id, name, email, role }
+  return {
+    id,
+    name,
+    email,
+    role,
+    hasPhoto:
+      typeof hasPhotoRaw === "boolean"
+        ? hasPhotoRaw
+        : typeof hasPhotoRaw === "string"
+          ? hasPhotoRaw.toLowerCase() === "true"
+          : false,
+  }
 }
 
 /**
