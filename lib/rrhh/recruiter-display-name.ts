@@ -96,18 +96,18 @@ export function parseRecruiterProfilePatchBody(
   }
 
   const rec = raw as Record<string, unknown>
-  const hasUserName = typeof rec.userName === "string"
-  const hasName = typeof rec.name === "string"
+  const userName = typeof rec.userName === "string" ? rec.userName : undefined
+  const name = typeof rec.name === "string" ? rec.name : undefined
 
-  if (hasUserName && hasName && rec.userName.trim() !== rec.name.trim()) {
+  if (
+    userName !== undefined &&
+    name !== undefined &&
+    userName.trim() !== name.trim()
+  ) {
     return { ok: false, message: RECRUITER_PROFILE_BACKEND_MESSAGES.mismatch }
   }
 
-  const candidate = hasUserName
-    ? rec.userName
-    : hasName
-      ? rec.name
-      : ""
+  const candidate = userName ?? name ?? ""
   const validation = validateRecruiterDisplayName(candidate)
   if (validation) {
     return { ok: false, message: backendMessageForValidation(validation) }

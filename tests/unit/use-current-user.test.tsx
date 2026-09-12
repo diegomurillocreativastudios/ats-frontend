@@ -6,17 +6,27 @@ const photoState = vi.hoisted(() => ({
 }))
 
 const getCurrentUserStateMock = vi.hoisted(() =>
-  vi.fn(() => ({ user: null, status: "idle" as const }))
+  vi.fn((): { user: null; status: "idle" | "loading" | "ready" } => ({
+    user: null,
+    status: "idle",
+  }))
 )
 const loadCurrentUserMock = vi.hoisted(() => vi.fn())
 const subscribeCurrentUserMock = vi.hoisted(() => vi.fn())
 const getRecruiterPhotoStateMock = vi.hoisted(() =>
-  vi.fn(() => ({
-    userId: null,
-    photoFileId: null,
-    dataUri: photoState.dataUri,
-    status: "idle" as const,
-  }))
+  vi.fn(
+    (): {
+      userId: null
+      photoFileId: null
+      dataUri: string | null
+      status: "idle" | "loading" | "ready" | "hydrating"
+    } => ({
+      userId: null,
+      photoFileId: null,
+      dataUri: photoState.dataUri,
+      status: "idle",
+    })
+  )
 )
 const hydrateRecruiterPhotoCacheMock = vi.hoisted(() => vi.fn())
 const subscribeRecruiterPhotoMock = vi.hoisted(() => vi.fn())

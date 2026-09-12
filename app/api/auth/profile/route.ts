@@ -53,7 +53,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const parsed = parseRecruiterProfilePatchBody(raw)
-  if (!parsed.ok) {
+  if (parsed.ok === false) {
     return jsonWithPrivateNoStore({ message: parsed.message }, { status: 400 })
   }
 
