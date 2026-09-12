@@ -240,7 +240,8 @@ describe("ProfileSettingsClient", () => {
     })
     expect(writeRecruiterPhotoCacheMock).toHaveBeenCalledWith(
       "u-1",
-      "data:image/png;base64,abc"
+      "data:image/png;base64,abc",
+      "p-1"
     )
     expect(notifyCurrentUserUpdatedMock).toHaveBeenCalled()
     expect(screen.getByRole("status")).toHaveTextContent(

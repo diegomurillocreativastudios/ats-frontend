@@ -2,15 +2,14 @@
 
 import { useState, useEffect } from "react"
 import {
-  mapRecruiterAccount,
-  type RecruiterAccount,
-} from "@/lib/api/recruiter-account"
+  getCurrentUserState,
+  loadCurrentUser,
+  subscribeCurrentUser,
+} from "@/lib/rrhh/current-user-store"
 import {
-  clearRecruiterPhotoCache,
   getRecruiterPhotoState,
-  loadRecruiterPhotoIfNeeded,
+  hydrateRecruiterPhotoCache,
   subscribeRecruiterPhoto,
-  writeRecruiterPhotoCache,
 } from "@/lib/rrhh/recruiter-photo-cache"
 
 export const CURRENT_USER_UPDATED_EVENT = "ats-current-user-updated"
@@ -26,13 +25,20 @@ export function notifyCurrentUserUpdated() {
 /**
  * Returns the currently logged-in user from GET /api/auth/me only.
  * Fail-closed: never reads identity from the `ats_user` cookie.
+ * Session and photo are shared across sidebar, topbar, and profile mounts.
  */
 export const useCurrentUser = () => {
-  const [user, setUser] = useState<RecruiterAccount | null>(null)
-  const [photoSrc, setPhotoSrc] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(() => getCurrentUserState().user)
+  const [photoSrc, setPhotoSrc] = useState<string | null>(
+    () => getRecruiterPhotoState().dataUri
+  )
+  const [loading, setLoading] = useState(
+    () => getCurrentUserState().status !== "ready"
+  )
 
   useEffect(() => {
+    void hydrateRecruiterPhotoCache()
+
     const syncPhoto = () => {
       setPhotoSrc(getRecruiterPhotoState().dataUri)
     }
@@ -41,43 +47,23 @@ export const useCurrentUser = () => {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-
-    const load = async () => {
-      try {
-        const res = await fetch("/api/auth/me", { credentials: "include" })
-        if (cancelled) return
-        if (res.ok) {
-          const data = (await res.json()) as Record<string, unknown>
-          const account = mapRecruiterAccount(data)
-          setUser(account)
-          if (account.hasPhoto && account.id) {
-            void loadRecruiterPhotoIfNeeded(account.id)
-            return
-          }
-          writeRecruiterPhotoCache(account.id, null)
-          return
-        }
-        setUser(null)
-        clearRecruiterPhotoCache()
-      } catch {
-        if (!cancelled) {
-          setUser(null)
-          clearRecruiterPhotoCache()
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
+    const syncUser = () => {
+      const next = getCurrentUserState()
+      setUser(next.user)
+      setLoading(next.status !== "ready")
     }
+    syncUser()
+    const unsubscribe = subscribeCurrentUser(syncUser)
 
-    void load()
+    void loadCurrentUser()
+
     const handleUpdated = () => {
-      void load()
+      void loadCurrentUser({ force: true })
     }
     window.addEventListener(CURRENT_USER_UPDATED_EVENT, handleUpdated)
 
     return () => {
-      cancelled = true
+      unsubscribe()
       window.removeEventListener(CURRENT_USER_UPDATED_EVENT, handleUpdated)
     }
   }, [])

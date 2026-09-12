@@ -247,7 +247,7 @@ export function SidebarUserFooter({
           email={user?.email}
           photoSrc={photoSrc}
           size="sm"
-          isLoading={loading}
+          isLoading={loading && !photoSrc}
         />
         <span className="min-w-0 flex-1">
           <span

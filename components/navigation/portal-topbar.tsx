@@ -184,7 +184,7 @@ function TopbarAccountMenu({
           email={user?.email}
           photoSrc={photoSrc}
           size="md"
-          isLoading={loading}
+          isLoading={loading && !photoSrc}
         />
       </button>
       {isMenuOpen ? (

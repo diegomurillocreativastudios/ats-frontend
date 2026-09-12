@@ -181,7 +181,7 @@ export function ProfileSettingsClient() {
     setIsUploadingPhoto(true)
     try {
       const photo = await uploadRecruiterProfilePhoto(file)
-      writeRecruiterPhotoCache(user.id, photo.dataUri)
+      writeRecruiterPhotoCache(user.id, photo.dataUri, photo.photoFileId)
       notifyCurrentUserUpdated()
       setSnackbar({
         open: true,
