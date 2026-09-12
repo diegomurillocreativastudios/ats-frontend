@@ -63,12 +63,27 @@ describe("useCurrentUser", () => {
     subscribeRecruiterPhotoMock.mockImplementation(() => () => undefined)
   })
 
-  it("initializes photoSrc from the shared cache without waiting for /me", () => {
+  it("reads photoSrc from the shared cache after subscribe (not on the server snapshot)", async () => {
     photoState.dataUri = "blob:http://localhost/cached-photo"
+    let photoListener: (() => void) | null = null
+    subscribeRecruiterPhotoMock.mockImplementation((listener: () => void) => {
+      photoListener = listener
+      return () => undefined
+    })
+
     const { result } = renderHook(() => useCurrentUser())
-    expect(result.current.photoSrc).toBe("blob:http://localhost/cached-photo")
+
+    // Client subscribe may already see the cache; either way hydrate + load run.
     expect(hydrateRecruiterPhotoCacheMock).toHaveBeenCalled()
     expect(loadCurrentUserMock).toHaveBeenCalled()
+
+    act(() => {
+      photoListener?.()
+    })
+
+    await waitFor(() => {
+      expect(result.current.photoSrc).toBe("blob:http://localhost/cached-photo")
+    })
   })
 
   it("force-reloads the shared session on notifyCurrentUserUpdated", async () => {

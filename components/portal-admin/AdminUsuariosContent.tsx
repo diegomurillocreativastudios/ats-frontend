@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
+import { ResponsiveFilters } from "@/components/ui/responsive-filters"
 import Modal from "@/components/ui/Modal"
 import {
   AdminLoadingState,
@@ -164,88 +165,92 @@ function UserListFilters({
   const t = useTranslations("AdminPortal.users")
 
   return (
-    <div
-      className="rounded-xl border border-border bg-card p-3 md:p-4"
-      aria-label={t("filters.regionLabel")}
+    <ResponsiveFilters
+      toggleLabel={t("filters.toggle")}
+      title={t("filters.toggle")}
+      regionLabel={t("filters.regionLabel")}
+      hasActiveFilters={hasActiveFilters}
+      disabled={disabled}
+      desktopClassName="rounded-xl border border-border bg-card p-3 md:p-4"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <label htmlFor="users-filter-email" className={FILTER_LABEL_CLASS}>
-            {t("filters.emailLabel")}
-          </label>
-          <div className="relative">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden
-            />
-            <input
-              id="users-filter-email"
-              type="search"
-              value={email}
-              onChange={(event) => onEmailChange(event.target.value)}
-              placeholder={t("filters.emailPlaceholder")}
-              disabled={disabled}
-              className={`${FILTER_CONTROL_CLASS} pl-9 pr-3`}
-            />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <label htmlFor="users-filter-email" className={FILTER_LABEL_CLASS}>
+                {t("filters.emailLabel")}
+              </label>
+              <div className="relative">
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                />
+                <input
+                  id="users-filter-email"
+                  type="search"
+                  value={email}
+                  onChange={(event) => onEmailChange(event.target.value)}
+                  placeholder={t("filters.emailPlaceholder")}
+                  disabled={disabled}
+                  className={`${FILTER_CONTROL_CLASS} pl-9 pr-3`}
+                />
+              </div>
+            </div>
+
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <label htmlFor="users-filter-role" className={FILTER_LABEL_CLASS}>
+                {t("filters.roleLabel")}
+              </label>
+              <select
+                id="users-filter-role"
+                value={role}
+                onChange={(event) => onRoleChange(event.target.value)}
+                disabled={disabled}
+                className={`${FILTER_CONTROL_CLASS} px-3`}
+                aria-label={t("filters.filterByAria", { label: t("filters.roleLabel") })}
+              >
+                <option value="">{t("filters.allRoles")}</option>
+                {ASSIGNABLE_ROLES.map((assignableRole) => (
+                  <option key={assignableRole} value={assignableRole}>
+                    {assignableRole}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <label htmlFor="users-filter-lockout" className={FILTER_LABEL_CLASS}>
+                {t("filters.lockoutLabel")}
+              </label>
+              <select
+                id="users-filter-lockout"
+                value={lockedOnly ? "locked" : ""}
+                onChange={(event) =>
+                  onLockedOnlyChange(event.target.value === "locked")
+                }
+                disabled={disabled}
+                className={`${FILTER_CONTROL_CLASS} px-3`}
+                aria-label={t("filters.filterByAria", {
+                  label: t("filters.lockoutLabel"),
+                })}
+              >
+                <option value="">{t("filters.allLockouts")}</option>
+                <option value="locked">{t("filters.lockedOnly")}</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <label htmlFor="users-filter-role" className={FILTER_LABEL_CLASS}>
-            {t("filters.roleLabel")}
-          </label>
-          <select
-            id="users-filter-role"
-            value={role}
-            onChange={(event) => onRoleChange(event.target.value)}
-            disabled={disabled}
-            className={`${FILTER_CONTROL_CLASS} px-3`}
-            aria-label={t("filters.filterByAria", { label: t("filters.roleLabel") })}
-          >
-            <option value="">{t("filters.allRoles")}</option>
-            {ASSIGNABLE_ROLES.map((assignableRole) => (
-              <option key={assignableRole} value={assignableRole}>
-                {assignableRole}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <label htmlFor="users-filter-lockout" className={FILTER_LABEL_CLASS}>
-            {t("filters.lockoutLabel")}
-          </label>
-          <select
-            id="users-filter-lockout"
-            value={lockedOnly ? "locked" : ""}
-            onChange={(event) =>
-              onLockedOnlyChange(event.target.value === "locked")
-            }
-            disabled={disabled}
-            className={`${FILTER_CONTROL_CLASS} px-3`}
-            aria-label={t("filters.filterByAria", {
-              label: t("filters.lockoutLabel"),
-            })}
-          >
-            <option value="">{t("filters.allLockouts")}</option>
-            <option value="locked">{t("filters.lockedOnly")}</option>
-          </select>
-        </div>
-      </div>
-
-      {hasActiveFilters ? (
-        <div className="mt-3 flex justify-end border-t border-border pt-3">
-          <button
-            type="button"
-            onClick={onClear}
-            disabled={disabled}
-            className="font-sans text-sm font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
-          >
-            {t("filters.clearFilters")}
-          </button>
-        </div>
-      ) : null}
-    </div>
+          {hasActiveFilters ? (
+            <div className="mt-3 flex justify-end border-t border-border pt-3">
+              <button
+                type="button"
+                onClick={onClear}
+                disabled={disabled}
+                className="font-sans text-sm font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+              >
+                {t("filters.clearFilters")}
+              </button>
+            </div>
+          ) : null}
+    </ResponsiveFilters>
   )
 }
 

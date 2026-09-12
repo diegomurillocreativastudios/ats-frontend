@@ -45,6 +45,16 @@ describe("AdminUsuariosContent", () => {
     })
   })
 
+  it("en desktop deja los campos de filtro visibles sin botón Filtros", async () => {
+    render(<AdminUsuariosContent />)
+
+    await screen.findByText("No se encontraron usuarios")
+
+    expect(screen.queryByRole("button", { name: "Filtros" })).not.toBeInTheDocument()
+    expect(screen.getByLabelText("Correo")).toBeVisible()
+    expect(screen.getByLabelText("Filtrar por Rol")).toBeVisible()
+  })
+
   it("places create in the page header like the vacancy list", async () => {
     render(<AdminUsuariosContent />)
 

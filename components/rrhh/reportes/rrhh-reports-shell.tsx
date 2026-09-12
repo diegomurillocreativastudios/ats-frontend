@@ -1,8 +1,7 @@
 "use client"
 
 import { useLayoutEffect, type ReactNode } from "react"
-import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
-import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
+import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell"
 
 export interface ReportesBreadcrumbSegment {
   label: string
@@ -32,33 +31,14 @@ export default function RrhhReportsShell({
   }, [])
 
   return (
-    <div
-      data-rrhh-reports-shell
-      className="h-dvh max-h-dvh overflow-hidden bg-background font-sans text-foreground"
-    >
-      <div className="hidden h-full min-h-0 min-w-0 lg:flex">
-        <RRHHSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar
-            variant="desktop"
-            breadcrumbLabel={breadcrumbLabel}
-            breadcrumbTrail={breadcrumbTrail}
-          />
-          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden overscroll-y-none">
-            {children}
-          </main>
-        </div>
-      </div>
-      <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar
-          variant="tablet"
-          breadcrumbLabel={breadcrumbLabel}
-          breadcrumbTrail={breadcrumbTrail}
-        />
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden overscroll-y-none">
-          {children}
-        </main>
-      </div>
+    <div data-rrhh-reports-shell>
+      <RrhhPortalShell
+        breadcrumbLabel={breadcrumbLabel}
+        breadcrumbTrail={breadcrumbTrail}
+        lockMainScroll
+      >
+        {children}
+      </RrhhPortalShell>
     </div>
   )
 }

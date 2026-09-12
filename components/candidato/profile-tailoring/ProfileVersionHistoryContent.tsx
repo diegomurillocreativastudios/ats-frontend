@@ -4,8 +4,7 @@ import Link from "next/link"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import { ArrowLeft, Briefcase, Eye, Loader2, Sparkles, Trash2 } from "lucide-react"
-import CandidateSidebar from "@/components/candidato/CandidateSidebar"
-import CandidateTopbar from "@/components/candidato/CandidateTopbar"
+import { CandidatePortalShell } from "@/components/candidato/candidate-portal-shell"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import { Button } from "@/components/ui/Button"
@@ -323,23 +322,8 @@ export default function ProfileVersionHistoryContent() {
   )
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <div className="hidden h-full lg:flex">
-        <CandidateSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <CandidateTopbar variant="desktop" breadcrumbLabel={t("title")} />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 p-8">{pageContent}</div>
-          </main>
-        </div>
-      </div>
-
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <CandidateTopbar variant="tablet" breadcrumbLabel={t("title")} />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 p-4 md:p-6">{pageContent}</div>
-        </main>
-      </div>
+    <CandidatePortalShell breadcrumbLabel={t("title")}>
+      <div className="min-w-0 p-4 md:p-6 lg:p-8">{pageContent}</div>
 
       <DeleteConfirmModal
         isOpen={deleteTarget != null}
@@ -349,6 +333,6 @@ export default function ProfileVersionHistoryContent() {
         message={t("deleteConfirm.message")}
         loading={mutating}
       />
-    </div>
+    </CandidatePortalShell>
   )
 }

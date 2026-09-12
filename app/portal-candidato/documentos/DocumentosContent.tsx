@@ -3,8 +3,7 @@
 import { useCallback, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Upload } from "lucide-react"
-import CandidateSidebar from "@/components/candidato/CandidateSidebar"
-import CandidateTopbar from "@/components/candidato/CandidateTopbar"
+import { CandidatePortalShell } from "@/components/candidato/candidate-portal-shell"
 import DocumentsUploadZone, {
   type DocumentsUploadZoneLeftContext,
 } from "@/components/candidato/DocumentsUploadZone"
@@ -96,76 +95,34 @@ export default function DocumentosContent() {
   )
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      {/* Desktop: sidebar + main — fixed height so only main scrolls */}
-      <div className="hidden h-full lg:flex">
-        <CandidateSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <CandidateTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 flex flex-col gap-8 p-8">
-              <PortalPageHeader
-                title={t("title")}
-                description={t("description")}
-                className="pb-0"
-              />
-              <DocumentsUploadZone leftActions={renderGeneralUploadLeft} />
-              {loading ? (
-                <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
-                  {t("loading")}
-                </p>
-              ) : (
-                <>
-                  {error ? (
-                    <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-4 text-sm text-destructive">
-                      {error}
-                    </p>
-                  ) : null}
-                  <DocumentsList
-                    candidateId={candidateId ?? ""}
-                    documents={documents}
-                    onDeleteDocument={handleDeleteDocument}
-                  />
-                </>
-              )}
-            </div>
-          </main>
-        </div>
-      </div>
-
-      {/* Tablet & Mobile: topbar + content — fixed height so only main scrolls */}
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <CandidateTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
-            <PortalPageHeader
-              title={t("title")}
-              description={t("descriptionShort")}
-              className="pb-0"
-              descriptionClassName="text-sm leading-6 md:text-base"
-            />
-            <DocumentsUploadZone leftActions={renderGeneralUploadLeft} />
-            {loading ? (
-              <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
-                {t("loading")}
+    <CandidatePortalShell breadcrumbLabel={t("breadcrumb")}>
+      <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6 lg:gap-8 lg:p-8">
+        <PortalPageHeader
+          title={t("title")}
+          description={t("description")}
+          className="pb-0"
+          descriptionClassName="text-sm leading-6 md:text-base"
+        />
+        <DocumentsUploadZone leftActions={renderGeneralUploadLeft} />
+        {loading ? (
+          <p className="rounded-lg border border-border bg-muted/50 px-4 py-6 text-center font-sans text-sm text-muted-foreground">
+            {t("loading")}
+          </p>
+        ) : (
+          <>
+            {error ? (
+              <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-4 text-sm text-destructive">
+                {error}
               </p>
-            ) : (
-              <>
-                {error ? (
-                  <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-4 text-sm text-destructive">
-                    {error}
-                  </p>
-                ) : null}
-                <DocumentsList
-                  candidateId={candidateId ?? ""}
-                  documents={documents}
-                  onDeleteDocument={handleDeleteDocument}
-                />
-              </>
-            )}
-          </div>
-        </main>
+            ) : null}
+            <DocumentsList
+              candidateId={candidateId ?? ""}
+              documents={documents}
+              onDeleteDocument={handleDeleteDocument}
+            />
+          </>
+        )}
       </div>
-    </div>
+    </CandidatePortalShell>
   )
 }

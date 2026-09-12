@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import ReportesFiltersPlaceholder, {
   ReportesFilterControl,
+  hasActiveReportFilterValues,
 } from "@/components/rrhh/reportes/reportes-filters-placeholder"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import {
@@ -593,6 +594,7 @@ export function ReportDataViewClient({
   const emptyMessage = resolveReportEmptyMessage(catalogItem.reportKey)
   const hasFilters = catalogFilters.length > 0
   const hasRows = (response?.rows?.length ?? 0) > 0
+  const hasActiveFilters = hasActiveReportFilterValues(appliedFilters)
 
   return (
     <RrhhReportsShell breadcrumbLabel={catalogItem.name} breadcrumbTrail={trail}>
@@ -660,6 +662,7 @@ export function ReportDataViewClient({
               <ReportesFiltersPlaceholder
                 hintText={tReports("filters.hint")}
                 controlsClassName={filterGridClass}
+                hasActiveFilters={hasActiveFilters}
               >
                 {catalogFilters.map((filter) => (
                   <FilterField

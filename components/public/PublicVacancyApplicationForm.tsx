@@ -306,7 +306,7 @@ function PublicApplicationSubmitProgress({
         percent={isSuccess ? 100 : loadingBarPercent}
       />
 
-      <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-5 sm:gap-2" aria-label={t("aria.submitStatus")}>
+      <ol className="grid grid-cols-1 gap-2 sm:grid-cols-5 sm:gap-2" aria-label={t("aria.submitStatus")}>
         {[1, 2, 3, 4, 5].map((step) => {
           const isComplete = currentStep > step
           const isCurrent = currentStep === step
@@ -797,10 +797,10 @@ export function PublicVacancyApplicationForm({
       <form
         onSubmit={handleSubmit}
         aria-busy={showProgressOverlay}
-        className={`grid grid-cols-2 gap-x-4 gap-y-5 transition-opacity duration-200 ${showProgressOverlay ? "pointer-events-none select-none opacity-[0.38] blur-[0.5px]" : ""}`}
+        className={`grid grid-cols-1 gap-x-4 gap-y-5 transition-opacity duration-200 sm:grid-cols-2 ${showProgressOverlay ? "pointer-events-none select-none opacity-[0.38] blur-[0.5px]" : ""}`}
       >
       {serverError ? (
-        <p className={`col-span-2 ${errClass}`} role="alert">
+        <p className={`sm:col-span-2 ${errClass}`} role="alert">
           {serverError}
         </p>
       ) : null}
@@ -1028,7 +1028,7 @@ export function PublicVacancyApplicationForm({
         ) : null}
       </div>
 
-      <div className="col-span-2 space-y-2">
+      <div className="space-y-2 sm:col-span-2">
         <label htmlFor="apply-cv" className={labelClass}>
           {t("fields.resume")}
         </label>
@@ -1124,7 +1124,7 @@ export function PublicVacancyApplicationForm({
       </div>
 
       <div
-        className={`col-span-2 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center ${
+        className={`flex flex-col gap-3 border-t pt-4 sm:col-span-2 sm:flex-row sm:items-center ${
           theme === "dark" ? "border-border" : "border-border"
         }`}
       >

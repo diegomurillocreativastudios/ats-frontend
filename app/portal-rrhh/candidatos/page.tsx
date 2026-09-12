@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Search, Eye, Users, Plus, ClipboardList } from "lucide-react";
-import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
-import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
+import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import { ListPaginationBar } from "@/components/ui/list-pagination-bar";
@@ -143,7 +142,7 @@ const CandidateRow = ({ candidate, onFollowUpClick }) => {
               type="button"
               onClick={followUpDisabled ? undefined : () => onFollowUpClick(candidate)}
               disabled={followUpDisabled}
-              className={`inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 ${
+              className={`inline-flex h-11 w-11 items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 ${
                 followUpDisabled
                   ? "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
                   : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
@@ -152,7 +151,6 @@ const CandidateRow = ({ candidate, onFollowUpClick }) => {
             >
               <ClipboardList className="h-4 w-4" aria-hidden />
             </button>
-            {/* Tooltip */}
             <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
               <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
                 {tooltipText}
@@ -162,7 +160,7 @@ const CandidateRow = ({ candidate, onFollowUpClick }) => {
           </div>
           <Link
             href={detailHref}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
             aria-label={t("viewDetailAriaLabel", { name: candidate.name })}
           >
             <Eye className="h-4 w-4" aria-hidden />
@@ -170,6 +168,84 @@ const CandidateRow = ({ candidate, onFollowUpClick }) => {
         </div>
       </td>
     </tr>
+  );
+};
+
+const CandidateCard = ({ candidate, onFollowUpClick }) => {
+  const t = useTranslations("RecruiterPortal.candidates");
+  const detailHref = `/portal-rrhh/candidatos/${candidate.id}`;
+  const isHired = candidate.hired === true;
+  const followUpDisabled = !isHired;
+  const tooltipText = isHired ? t("hired") : t("notHired");
+
+  return (
+    <article
+      className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
+      aria-label={t("rowAriaLabel", { name: candidate.name })}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-sm font-semibold text-white"
+          aria-hidden
+        >
+          {candidate.initials}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-sans text-sm font-semibold text-foreground">
+            {candidate.name}
+          </p>
+          <p className="truncate font-sans text-xs text-muted-foreground">
+            {candidate.email}
+          </p>
+        </div>
+      </div>
+      <dl className="grid grid-cols-1 gap-2 font-sans text-sm sm:grid-cols-2">
+        <div>
+          <dt className="text-xs text-muted-foreground">{t("table.phone")}</dt>
+          <dd className="text-foreground">{candidate.phone}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-muted-foreground">{t("table.country")}</dt>
+          <dd className="text-foreground">{candidate.country}</dd>
+        </div>
+        <div className="sm:col-span-2">
+          <dt className="text-xs text-muted-foreground">{t("table.headline")}</dt>
+          <dd className="text-foreground">{candidate.headline}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-muted-foreground">{t("table.uploadedAt")}</dt>
+          <dd className="text-muted-foreground">{candidate.date}</dd>
+        </div>
+      </dl>
+      <div className="flex flex-wrap gap-2 pt-1">
+        <button
+          type="button"
+          onClick={followUpDisabled ? undefined : () => onFollowUpClick(candidate)}
+          disabled={followUpDisabled}
+          className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md px-3 font-sans text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:flex-none ${
+            followUpDisabled
+              ? "cursor-not-allowed bg-muted/50 text-muted-foreground/50"
+              : "bg-muted text-foreground hover:bg-muted/80"
+          }`}
+          aria-label={
+            followUpDisabled
+              ? tooltipText
+              : t("followUpAriaLabel", { name: candidate.name })
+          }
+        >
+          <ClipboardList className="h-4 w-4" aria-hidden />
+          {tooltipText}
+        </button>
+        <Link
+          href={detailHref}
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md bg-vo-purple px-3 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 sm:flex-none"
+          aria-label={t("viewDetailAriaLabel", { name: candidate.name })}
+        >
+          <Eye className="h-4 w-4" aria-hidden />
+          {t("table.actions")}
+        </Link>
+      </div>
+    </article>
   );
 };
 
@@ -353,39 +429,50 @@ export default function CandidatosPage() {
           </div>
         ) : (
           <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
-            <table className="w-full min-w-[720px] border-separate border-spacing-0 font-sans">
-              <thead>
-                <tr>
-                  <th className={TABLE_HEAD_CELL_CLASS} scope="col">
-                    {t("table.candidate")}
-                  </th>
-                  <th className={TABLE_HEAD_CELL_CLASS} scope="col">
-                    {t("table.phone")}
-                  </th>
-                  <th className={TABLE_HEAD_CELL_CLASS} scope="col">
-                    {t("table.country")}
-                  </th>
-                  <th className={TABLE_HEAD_CELL_CLASS} scope="col">
-                    {t("table.headline")}
-                  </th>
-                  <th className={TABLE_HEAD_CELL_CLASS} scope="col">
-                    {t("table.uploadedAt")}
-                  </th>
-                  <th className={TABLE_HEAD_CELL_CLASS} scope="col">
-                    {t("table.actions")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCandidates.map((candidate, index) => (
-                  <CandidateRow
-                    key={`${candidate.id}-${index}`}
-                    candidate={candidate}
-                    onFollowUpClick={handleFollowUpClick}
-                  />
-                ))}
-              </tbody>
-            </table>
+            <div className="flex flex-col gap-3 md:hidden">
+              {filteredCandidates.map((candidate, index) => (
+                <CandidateCard
+                  key={`${candidate.id}-${index}`}
+                  candidate={candidate}
+                  onFollowUpClick={handleFollowUpClick}
+                />
+              ))}
+            </div>
+            <div className="hidden md:block">
+              <table className="w-full min-w-[720px] border-separate border-spacing-0 font-sans">
+                <thead>
+                  <tr>
+                    <th className={TABLE_HEAD_CELL_CLASS} scope="col">
+                      {t("table.candidate")}
+                    </th>
+                    <th className={TABLE_HEAD_CELL_CLASS} scope="col">
+                      {t("table.phone")}
+                    </th>
+                    <th className={TABLE_HEAD_CELL_CLASS} scope="col">
+                      {t("table.country")}
+                    </th>
+                    <th className={TABLE_HEAD_CELL_CLASS} scope="col">
+                      {t("table.headline")}
+                    </th>
+                    <th className={TABLE_HEAD_CELL_CLASS} scope="col">
+                      {t("table.uploadedAt")}
+                    </th>
+                    <th className={TABLE_HEAD_CELL_CLASS} scope="col">
+                      {t("table.actions")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCandidates.map((candidate, index) => (
+                    <CandidateRow
+                      key={`${candidate.id}-${index}`}
+                      candidate={candidate}
+                      onFollowUpClick={handleFollowUpClick}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
@@ -406,34 +493,20 @@ export default function CandidatosPage() {
   );
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      {/* Desktop: sidebar + main — fixed height so only main scrolls */}
-      <div className="hidden h-full lg:flex">
-        <RRHHSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
-          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <section className="shrink-0 px-8 pt-6" aria-label={t("headerRegionLabel")}>
-                {renderPageHeader()}
-              </section>
-              <section className="flex min-h-0 flex-1 flex-col px-8 pb-4 pt-2" aria-label={t("contentRegionLabel")}>
-                {mainContent}
-              </section>
-            </div>
-          </main>
-        </div>
-      </div>
-
-      {/* Tablet & Mobile — fixed height so only main scrolls */}
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-4 md:p-6">
-            {renderPageHeader()}
-            {mainContent}
-          </div>
-        </main>
+    <RrhhPortalShell breadcrumbLabel={t("breadcrumb")} lockMainScroll>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <section
+          className="shrink-0 px-4 pt-4 md:px-6 md:pt-6 lg:px-8"
+          aria-label={t("headerRegionLabel")}
+        >
+          {renderPageHeader()}
+        </section>
+        <section
+          className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-2 md:px-6 lg:px-8"
+          aria-label={t("contentRegionLabel")}
+        >
+          {mainContent}
+        </section>
       </div>
 
       <AgregarCandidatoModal
@@ -456,6 +529,6 @@ export default function CandidatosPage() {
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </div>
+    </RrhhPortalShell>
   );
 }

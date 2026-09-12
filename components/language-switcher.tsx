@@ -94,7 +94,7 @@ export default function LanguageSwitcher({
     triggerClassName ??
     (isOnDark
       ? defaultOnDarkTriggerClass
-      : "inline-flex h-9 items-center gap-2 rounded-lg px-2.5 font-sans text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2")
+      : "inline-flex h-11 items-center gap-2 rounded-lg px-2.5 font-sans text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2")
 
   return (
     <div className={`relative ${className ?? ""}`} ref={containerRef}>
@@ -124,7 +124,7 @@ export default function LanguageSwitcher({
           className={
             isOnDark
               ? "absolute right-0 top-full z-120 mt-2 min-w-46 overflow-hidden rounded-2xl border border-white/12 bg-[#2A2B2E]/98 py-1.5 shadow-[0_18px_48px_rgba(7,12,27,0.55)] backdrop-blur-md"
-              : "absolute right-0 top-full z-50 mt-2 min-w-[160px] rounded-lg border border-border bg-card py-1 shadow-lg"
+              : "absolute right-0 top-full z-[9999] mt-2 min-w-[160px] rounded-lg border border-border bg-white py-1 shadow-lg"
           }
           role="listbox"
           aria-label={t("label")}

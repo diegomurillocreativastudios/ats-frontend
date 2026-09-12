@@ -190,6 +190,7 @@ describe("RecruiterPortal.reports namespace parity (Etapa 12)", () => {
       "emptyStates",
       "errors",
     ]
+    const expectedFilterKeys = ["legend", "toggle", "regionLabel", "hint"]
     for (const locale of locales) {
       const reports = (
         messagesByLocale[locale].RecruiterPortal as Record<string, unknown>
@@ -198,6 +199,10 @@ describe("RecruiterPortal.reports namespace parity (Etapa 12)", () => {
         Object.keys(reports),
         `subsecciones reports en ${locale}.json`
       ).toEqual(expect.arrayContaining(expected))
+      expect(
+        Object.keys(reports.filters as Record<string, unknown>),
+        `filters en ${locale}.json`
+      ).toEqual(expect.arrayContaining(expectedFilterKeys))
     }
   })
 

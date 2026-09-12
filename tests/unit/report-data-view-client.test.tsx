@@ -113,6 +113,19 @@ describe("ReportDataViewClient", () => {
         expect(screen.queryByRole("table")).not.toBeInTheDocument()
     })
 
+    it("shows filter fields inline on desktop without a Filtros button", async () => {
+        vi.mocked(fetchRecruiterReportForCatalogItem).mockResolvedValueOnce({
+            rows: [],
+            totalCount: 0,
+            extras: null,
+        })
+
+        renderDataView()
+
+        expect(await screen.findByLabelText(/Cliente/i)).toBeVisible()
+        expect(screen.queryByRole("button", { name: "Filtros" })).not.toBeInTheDocument()
+    })
+
     it("reapplies filters when the user clicks Aplicar", async () => {
         vi.mocked(fetchRecruiterReportForCatalogItem).mockResolvedValue({
             rows: [],

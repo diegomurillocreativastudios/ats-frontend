@@ -62,6 +62,8 @@
     "portalRRHH": "HR-Portal",
     "portalAdmin": "Admin-Portal",
     "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "navigationMenu": "Navigationsmenü",
     "userMenu": "Benutzermenü",
     "breadcrumb": "Brotkrümelnavigation",
     "adminShortcut": "Verwaltung"
@@ -1387,6 +1389,8 @@
       },
       "filters": {
         "legend": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Berichtsfilter",
         "hint": "Die Werte werden als Query-Parameter an die Berichts-API gesendet."
       },
       "actions": {
@@ -1976,6 +1980,7 @@
       },
       "filters": {
         "regionLabel": "Stellenfilter",
+        "toggle": "Filter",
         "name": "Name",
         "searchPlaceholder": "Stelle suchen...",
         "company": "Unternehmen",
@@ -1984,7 +1989,8 @@
         "department": "Abteilung",
         "allFemale": "Alle",
         "allMale": "Alle",
-        "filterByAria": "Filtern nach {label}"
+        "filterByAria": "Filtern nach {label}",
+        "clearFilters": "Filter zurücksetzen"
       },
       "cards": {
         "untitled": "Ohne Titel",
@@ -3016,6 +3022,7 @@
       },
       "filters": {
         "regionAria": "Filter",
+        "toggle": "Filter",
         "regionLabel": "Benutzerfilter",
         "emailLabel": "E-Mail",
         "emailPlaceholder": "Nach E-Mail suchen...",

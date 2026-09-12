@@ -7,7 +7,9 @@ import { useTranslations } from "next-intl"
 import { ExecutiveSummaryReportPdfTemplate } from "@/components/recruiter/reports/executive-summary-report-pdf-template"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import { ReportFilterRenderer } from "@/components/rrhh/reportes/report-filter-renderer"
-import ReportesFiltersPlaceholder from "@/components/rrhh/reportes/reportes-filters-placeholder"
+import ReportesFiltersPlaceholder, {
+  hasActiveReportFilterValues,
+} from "@/components/rrhh/reportes/reportes-filters-placeholder"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import { getApiErrorMessage } from "@/lib/api-error"
@@ -738,7 +740,11 @@ export function ReportTemplateDetailClient({ templateId }: ReportTemplateDetailC
 
             {!loadingConfig && !configError && reportConfig ? (
               <section className="shrink-0" aria-label={m.filtersAria} data-report-pdf-exclude>
-                <ReportesFiltersPlaceholder hintText={m.filtersHint} controlsClassName={filterGridClass}>
+                <ReportesFiltersPlaceholder
+                  hintText={m.filtersHint}
+                  controlsClassName={filterGridClass}
+                  hasActiveFilters={hasActiveReportFilterValues(appliedFilters)}
+                >
                   <ReportFilterRenderer
                     schema={reportConfig.filterSchema}
                     value={draftFilters}

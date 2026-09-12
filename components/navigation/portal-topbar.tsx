@@ -11,6 +11,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { ChevronRight, LogOut, Shield } from "lucide-react"
+import ProductBrand from "@/components/branding/ProductBrand"
 import LanguageSwitcher from "@/components/language-switcher"
 import { RecruiterAvatar } from "@/components/rrhh/recruiter-avatar"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
@@ -33,9 +34,26 @@ interface PortalTopbarCrumbsProps {
   ariaLabel: string
 }
 
+interface PortalTopbarBrandLinkProps {
+  href: string
+  ariaLabel: string
+}
+
 interface PortalTopbarActionsProps {
   includeAdminShortcut?: boolean
 }
+
+/**
+ * Compact topbar: hamburger | centered logo | actions.
+ */
+export const PORTAL_COMPACT_TOPBAR_LAYOUT_CLASS =
+  "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center"
+
+/**
+ * Desktop topbar: breadcrumbs on the left, actions on the right.
+ */
+export const PORTAL_DESKTOP_TOPBAR_LAYOUT_CLASS =
+  "flex items-center justify-between"
 
 interface TopbarAccountMenuProps {
   includeAdminShortcut?: boolean
@@ -85,6 +103,28 @@ export function PortalTopbarCrumbs({
         )
       })}
     </nav>
+  )
+}
+
+/**
+ * Centered product mark for the compact (tablet / mobile) topbar.
+ */
+export function PortalTopbarBrandLink({
+  href,
+  ariaLabel,
+}: PortalTopbarBrandLinkProps) {
+  return (
+    <Link
+      href={href}
+      className="justify-self-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+      aria-label={ariaLabel}
+    >
+      <ProductBrand
+        layout="inline"
+        tone="onLight"
+        density="topbarMobile"
+      />
+    </Link>
   )
 }
 
@@ -170,7 +210,7 @@ function TopbarAccountMenu({
         type="button"
         onClick={handleToggleMenu}
         onKeyDown={handleMenuButtonKeyDown}
-        className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full p-0 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+        className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full p-0 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
         aria-label={
           loading
             ? t("userMenu")

@@ -107,71 +107,126 @@ export function CandidateInterviewList({
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-border bg-card">
-            <table className="w-full min-w-[640px] border-collapse text-left font-sans text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="px-4 py-3 font-semibold">{tList("dateTime")}</th>
-                  <th className="px-4 py-3 font-semibold">{tVacancy("vacancy")}</th>
-                  <th className="px-4 py-3 font-semibold">{tList("status")}</th>
-                  <th className="px-4 py-3 font-semibold">{tList("actions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-b border-border last:border-0 hover:bg-muted/20"
-                  >
-                    <td className="px-4 py-3 tabular-nums">
-                      {formatInterviewLocalDateTime(row.scheduledAtUtc)}
-                    </td>
-                    <td className="max-w-[240px] truncate px-4 py-3 text-sm text-foreground">
-                      {row.jobTitle?.trim() || row.vacancyId}
-                    </td>
-                    <td className="px-4 py-3">
-                      <InterviewStatusBadge
-                        status={row.status}
-                        label={row.statusDisplayName}
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenDetail(row.id, row.vacancyId)}
-                          className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
-                        >
-                          {tActions("manage")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setNotesInterviewId(row.id)}
-                          className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
-                        >
-                          {tActions("notes")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setTechnicalSheetContext({
-                              vacancyId: row.vacancyId,
-                              vacancyTitle: row.jobTitle?.trim() ?? null,
-                            })
-                          }
-                          className="inline-flex items-center gap-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple rounded-sm"
-                          aria-label={tTechnicalSheet("aria.viewSheet")}
-                        >
-                          <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                          {tTechnicalSheet("title")}
-                        </button>
-                      </div>
-                    </td>
+          <>
+            <ul className="flex flex-col gap-3 md:hidden">
+              {items.map((row) => (
+                <li
+                  key={row.id}
+                  className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-sans text-sm font-semibold text-foreground">
+                        {row.jobTitle?.trim() || row.vacancyId}
+                      </p>
+                      <p className="font-sans text-xs tabular-nums text-muted-foreground">
+                        {formatInterviewLocalDateTime(row.scheduledAtUtc)}
+                      </p>
+                    </div>
+                    <InterviewStatusBadge
+                      status={row.status}
+                      label={row.statusDisplayName}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenDetail(row.id, row.vacancyId)}
+                      className="inline-flex min-h-11 items-center justify-center rounded-md bg-vo-purple px-4 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple"
+                    >
+                      {tActions("manage")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNotesInterviewId(row.id)}
+                      className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-background px-4 font-sans text-sm font-medium hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
+                    >
+                      {tActions("notes")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setTechnicalSheetContext({
+                          vacancyId: row.vacancyId,
+                          vacancyTitle: row.jobTitle?.trim() ?? null,
+                        })
+                      }
+                      className="inline-flex min-h-11 items-center justify-center gap-1 rounded-md border border-border bg-background px-4 font-sans text-sm font-medium hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple"
+                      aria-label={tTechnicalSheet("aria.viewSheet")}
+                    >
+                      <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                      {tTechnicalSheet("title")}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-x-auto rounded-xl border border-border bg-card md:block">
+              <table className="w-full min-w-[640px] border-collapse text-left font-sans text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40">
+                    <th className="px-4 py-3 font-semibold">{tList("dateTime")}</th>
+                    <th className="px-4 py-3 font-semibold">{tVacancy("vacancy")}</th>
+                    <th className="px-4 py-3 font-semibold">{tList("status")}</th>
+                    <th className="px-4 py-3 font-semibold">{tList("actions")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {items.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="border-b border-border last:border-0 hover:bg-muted/20"
+                    >
+                      <td className="px-4 py-3 tabular-nums">
+                        {formatInterviewLocalDateTime(row.scheduledAtUtc)}
+                      </td>
+                      <td className="max-w-[240px] truncate px-4 py-3 text-sm text-foreground">
+                        {row.jobTitle?.trim() || row.vacancyId}
+                      </td>
+                      <td className="px-4 py-3">
+                        <InterviewStatusBadge
+                          status={row.status}
+                          label={row.statusDisplayName}
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(row.id, row.vacancyId)}
+                            className="min-h-11 rounded-sm font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple"
+                          >
+                            {tActions("manage")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setNotesInterviewId(row.id)}
+                            className="min-h-11 rounded-sm font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple"
+                          >
+                            {tActions("notes")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setTechnicalSheetContext({
+                                vacancyId: row.vacancyId,
+                                vacancyTitle: row.jobTitle?.trim() ?? null,
+                              })
+                            }
+                            className="inline-flex min-h-11 items-center gap-1 rounded-sm font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple"
+                            aria-label={tTechnicalSheet("aria.viewSheet")}
+                          >
+                            <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                            {tTechnicalSheet("title")}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
 

@@ -341,7 +341,93 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
           </div>
         ) : (
           <div className="min-h-0 flex-1 overflow-auto overscroll-contain rounded-xl border border-border bg-card">
-            <table className="w-full min-w-[880px] border-separate border-spacing-0 font-sans text-sm">
+            <ul className="flex flex-col gap-3 p-3 md:hidden">
+              {items.map((row) => {
+                const candidateLabel = formatCandidateLabel(
+                  row.candidateProfileId,
+                  applicantLabelByProfileId,
+                  t,
+                )
+                return (
+                  <li
+                    key={row.id}
+                    className="flex flex-col gap-3 rounded-lg border border-border bg-background p-4"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-sans text-sm font-semibold text-foreground">
+                          {candidateLabel}
+                        </p>
+                        <p className="font-sans text-xs tabular-nums text-muted-foreground">
+                          {formatInterviewLocalDateTime(row.scheduledAtUtc)}
+                        </p>
+                      </div>
+                      <InterviewStatusBadge
+                        status={row.status}
+                        label={row.statusDisplayName}
+                      />
+                    </div>
+                    <dl className="grid grid-cols-1 gap-2 font-sans text-sm sm:grid-cols-2">
+                      <div>
+                        <dt className="text-xs text-muted-foreground">
+                          {t("list.table.type")}
+                        </dt>
+                        <dd className="text-foreground">
+                          {row.interviewTypeLabel ?? row.interviewType ?? "—"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-muted-foreground">
+                          {t("list.table.duration")}
+                        </dt>
+                        <dd className="tabular-nums text-foreground">
+                          {formatDurationCell(row.durationMinutes)}
+                        </dd>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <dt className="text-xs text-muted-foreground">
+                          {t("list.table.interviewer")}
+                        </dt>
+                        <dd className="text-foreground">
+                          {row.interviewerName?.trim() ? row.interviewerName : "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => setDetailInterviewId(row.id)}
+                        className="inline-flex min-h-11 items-center justify-center rounded-md bg-vo-purple px-4 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                        data-testid={`interview-open-detail-${row.id}`}
+                      >
+                        {t("actions.manage")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNotesInterviewId(row.id)}
+                        className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-background px-4 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                        data-testid={`interview-open-notes-${row.id}`}
+                      >
+                        {t("actions.notes")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setTechnicalSheetProfileId(row.candidateProfileId)
+                        }
+                        className="inline-flex min-h-11 items-center justify-center gap-1 rounded-md border border-border bg-background px-4 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                        aria-label={tTechnicalSheet("aria.viewSheet")}
+                        data-testid={`interview-open-technical-sheet-${row.id}`}
+                      >
+                        <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                        {t("actions.technicalSheet")}
+                      </button>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+            <table className="hidden w-full min-w-[880px] border-separate border-spacing-0 font-sans text-sm md:table">
               <thead>
                 <tr>
                   <th scope="col" className={TABLE_HEAD_CELL_CLASS}>
@@ -406,7 +492,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                         <button
                           type="button"
                           onClick={() => setDetailInterviewId(row.id)}
-                          className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+                          className="min-h-11 rounded-sm px-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                           data-testid={`interview-open-detail-${row.id}`}
                         >
                           {t("actions.manage")}
@@ -414,7 +500,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                         <button
                           type="button"
                           onClick={() => setNotesInterviewId(row.id)}
-                          className="font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+                          className="min-h-11 rounded-sm px-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                           data-testid={`interview-open-notes-${row.id}`}
                         >
                           {t("actions.notes")}
@@ -424,7 +510,7 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
                           onClick={() =>
                             setTechnicalSheetProfileId(row.candidateProfileId)
                           }
-                          className="inline-flex items-center gap-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+                          className="inline-flex min-h-11 items-center gap-1 rounded-sm px-1 font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                           aria-label={tTechnicalSheet("aria.viewSheet")}
                           data-testid={`interview-open-technical-sheet-${row.id}`}
                         >

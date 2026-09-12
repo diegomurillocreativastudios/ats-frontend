@@ -22,8 +22,7 @@ import {
   User,
   Users,
 } from "lucide-react";
-import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
-import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
+import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell";
 import Snackbar from "@/components/ui/Snackbar";
 import { apiClient } from "@/lib/api"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
@@ -2284,22 +2283,18 @@ export default function VacanteDetallePage() {
   const showAdvantagesBlock = showVacancyInfo
   const topRowGridClass = " grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
   const narrativeGridClass = " grid-cols-1 lg:grid-cols-3"
-  const mobileTopRowGridClass = " sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
-  const mobileNarrativeGridClass = " sm:grid-cols-3"
+  const mobileTopRowGridClass = " md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+  const mobileNarrativeGridClass = " md:grid-cols-2 lg:grid-cols-3"
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      {/* Desktop: sidebar + main — fixed height so only main scrolls */}
-      <div className="hidden h-full lg:flex">
-        <RRHHSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar
-            variant="desktop"
-            breadcrumbLabel={breadcrumbLabel}
-            breadcrumbTrail={breadcrumbTrail}
-          />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 flex flex-col p-8">
+    <>
+    <RrhhPortalShell
+      breadcrumbLabel={breadcrumbLabel}
+      breadcrumbTrail={breadcrumbTrail}
+      allowHorizontalOverflow
+    >
+      {/* Desktop content */}
+      <div className="hidden min-w-0 flex-col p-8 lg:flex">
               {loading ? (
                 <div
                   className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
@@ -3137,20 +3132,10 @@ export default function VacanteDetallePage() {
                   </section>
                 </>
               ) : null}
-            </div>
-          </main>
-        </div>
       </div>
 
-      {/* Tablet & Mobile — fixed height so only main scrolls */}
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar
-          variant="tablet"
-          breadcrumbLabel={breadcrumbLabel}
-          breadcrumbTrail={breadcrumbTrail}
-        />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 flex flex-col p-4 md:p-6">
+      {/* Tablet & Mobile content */}
+      <div className="flex min-w-0 flex-col p-4 md:p-6 lg:hidden">
             {loading ? (
               <div
                 className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
@@ -3966,9 +3951,8 @@ export default function VacanteDetallePage() {
                 </section>
               </>
             ) : null}
-          </div>
-        </main>
       </div>
+    </RrhhPortalShell>
 
       <Snackbar
         open={snackbar.open}
@@ -3989,6 +3973,6 @@ export default function VacanteDetallePage() {
         onClose={handleCancelPaste}
         onConfirm={handleConfirmPaste}
       />
-    </div>
+    </>
   );
 }

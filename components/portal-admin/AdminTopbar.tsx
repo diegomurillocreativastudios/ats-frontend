@@ -1,12 +1,16 @@
 "use client"
 
-import Link from "next/link"
+import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Menu } from "lucide-react"
-import ProductBrand from "@/components/branding/ProductBrand"
+import AdminSidebar from "@/components/portal-admin/AdminSidebar"
+import { PortalNavDrawer } from "@/components/navigation/portal-nav-drawer"
 import {
+  PORTAL_COMPACT_TOPBAR_LAYOUT_CLASS,
+  PORTAL_DESKTOP_TOPBAR_LAYOUT_CLASS,
   PortalTopbarActions,
+  PortalTopbarBrandLink,
   PortalTopbarCrumbs,
 } from "@/components/navigation/portal-topbar"
 import {
@@ -72,9 +76,8 @@ export default function AdminTopbar({
   const tNav = useTranslations("Navigation")
   const tSidebar = useTranslations("Sidebar")
   const pathname = usePathname()
-  const isDesktop = variant === "desktop"
-  const isTablet = variant === "tablet"
-  const isMobile = variant === "mobile"
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const showCompactChrome = variant === "tablet" || variant === "mobile"
 
   const resolvedTrail =
     breadcrumbTrail ?? defaultAdminBreadcrumbTrail(pathname, tNav)
@@ -106,48 +109,59 @@ export default function AdminTopbar({
         ? "h-14 md:h-16"
         : "h-16"
 
+  const handleOpenMenu = () => {
+    setIsMenuOpen(true)
+  }
+
+  const handleCloseMenu = () => {
+    setIsMenuOpen(false)
+  }
+
   return (
-    <header
-      className={`glass-navbar flex shrink-0 items-center justify-between ${heightClass} ${paddingClass}`}
-      role="banner"
-    >
-      <div className="flex min-w-0 items-center gap-4">
-        {isTablet || isMobile ? (
-          <button
-            type="button"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
-            aria-label={t("openMenu")}
-          >
-            <Menu className="h-5 w-5 text-foreground" aria-hidden />
-          </button>
-        ) : null}
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          {isDesktop ? (
-            <PortalTopbarCrumbs
-              crumbs={crumbs}
-              ariaLabel={t("breadcrumb")}
-            />
-          ) : null}
-          {isTablet || isMobile ? (
-            <Link
+    <>
+      <header
+        className={`glass-navbar shrink-0 ${
+          showCompactChrome
+            ? PORTAL_COMPACT_TOPBAR_LAYOUT_CLASS
+            : PORTAL_DESKTOP_TOPBAR_LAYOUT_CLASS
+        } ${heightClass} ${paddingClass}`}
+        role="banner"
+      >
+        {showCompactChrome ? (
+          <>
+            <div className="flex items-center justify-self-start">
+              <button
+                type="button"
+                onClick={handleOpenMenu}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                aria-label={t("openMenu")}
+                aria-expanded={isMenuOpen}
+                aria-haspopup="dialog"
+              >
+                <Menu className="h-5 w-5 text-foreground" aria-hidden />
+              </button>
+              <span className="sr-only">{breadcrumbScreenReaderText}</span>
+            </div>
+            <PortalTopbarBrandLink
               href={PORTAL_SELECTION_PATH}
-              className="flex min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
-              aria-label={tSidebar("goToPortalSelection")}
-            >
-              <ProductBrand
-                layout="inline"
-                tone="onLight"
-                density="topbarMobile"
-                className="min-w-0 shrink"
-              />
-            </Link>
-          ) : null}
-          {!isDesktop ? (
-            <span className="sr-only">{breadcrumbScreenReaderText}</span>
-          ) : null}
-        </div>
-      </div>
-      <PortalTopbarActions />
-    </header>
+              ariaLabel={tSidebar("goToPortalSelection")}
+            />
+            <div className="justify-self-end">
+              <PortalTopbarActions />
+            </div>
+          </>
+        ) : (
+          <>
+            <PortalTopbarCrumbs crumbs={crumbs} ariaLabel={t("breadcrumb")} />
+            <PortalTopbarActions />
+          </>
+        )}
+      </header>
+      {showCompactChrome ? (
+        <PortalNavDrawer isOpen={isMenuOpen} onClose={handleCloseMenu}>
+          <AdminSidebar />
+        </PortalNavDrawer>
+      ) : null}
+    </>
   )
 }

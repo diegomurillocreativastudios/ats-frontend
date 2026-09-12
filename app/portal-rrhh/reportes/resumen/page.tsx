@@ -105,6 +105,11 @@ export default function ReporteResumenPage() {
     setAppliedDateTo(draftDateTo)
   }
 
+  const hasActiveFilters =
+    appliedClientId.trim() !== "" ||
+    appliedDateFrom !== initialRange.dateFrom ||
+    appliedDateTo !== initialRange.dateTo
+
   const statusText = loading
     ? t("loadingStates.loading")
     : error
@@ -154,6 +159,7 @@ export default function ReporteResumenPage() {
           <ReportesFiltersPlaceholder
             hintText={tReports("filters.hint")}
             controlsClassName={filterGridClass}
+            hasActiveFilters={hasActiveFilters}
           >
             <ReportesFilterControl label={t("filters.client")} controlId="filtro-cliente-sum">
               <select

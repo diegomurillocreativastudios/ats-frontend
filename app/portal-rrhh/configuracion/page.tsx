@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { CalendarClock, UserRound, type LucideIcon } from "lucide-react"
-import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
-import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
+import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell"
 import { SettingsHubLink } from "@/components/rrhh/settings-hub-link"
 import { SettingsPageSection } from "@/components/rrhh/settings-page-section"
 
@@ -56,42 +55,14 @@ export default async function RRHHConfiguracionPage() {
   ]
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <div className="hidden h-full lg:flex">
-        <RRHHSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar
-            variant="desktop"
-            breadcrumbLabel={t("breadcrumb")}
-            breadcrumbTrail={trail}
-          />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <SettingsPageSection
-              title={t("title")}
-              description={t("description")}
-              contentClassName="max-w-4xl"
-            >
-              <SettingsHubList items={items} />
-            </SettingsPageSection>
-          </main>
-        </div>
-      </div>
-
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar
-          variant="tablet"
-          breadcrumbLabel={t("breadcrumb")}
-          breadcrumbTrail={trail}
-        />
-        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <SettingsPageSection
-            title={t("title")}
-            description={t("description")}
-          >
-            <SettingsHubList items={items} />
-          </SettingsPageSection>
-        </main>
-      </div>
-    </div>
+    <RrhhPortalShell breadcrumbLabel={t("breadcrumb")} breadcrumbTrail={trail}>
+      <SettingsPageSection
+        title={t("title")}
+        description={t("description")}
+        contentClassName="max-w-4xl"
+      >
+        <SettingsHubList items={items} />
+      </SettingsPageSection>
+    </RrhhPortalShell>
   )
 }

@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import AgregarCandidatoModal from "@/components/candidato/AgregarCandidatoModal"
-import CandidateSidebar from "@/components/candidato/CandidateSidebar"
-import CandidateTopbar from "@/components/candidato/CandidateTopbar"
+import { CandidatePortalShell } from "@/components/candidato/candidate-portal-shell"
 import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
 import { CandidateSelfProfileView } from "@/components/candidato/candidate-self-profile-view"
 import {
@@ -342,22 +341,9 @@ export default function MiPerfilContent() {
   )
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <div className="hidden h-full lg:flex">
-        <CandidateSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-muted/15">
-          <CandidateTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 px-4 py-6 md:px-8 md:py-8">{mainInner}</div>
-          </main>
-        </div>
-      </div>
-
-      <div className="flex h-full min-w-0 flex-col overflow-hidden bg-muted/15 lg:hidden">
-        <CandidateTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 px-4 py-5 md:px-6 md:py-6">{mainInner}</div>
-        </main>
+    <CandidatePortalShell breadcrumbLabel={t("breadcrumb")}>
+      <div className="min-w-0 flex-1 bg-muted/15 px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-8">
+        {mainInner}
       </div>
 
       <ConsentAuthorizationModal
@@ -375,6 +361,6 @@ export default function MiPerfilContent() {
         onSuccess={handleCompleteInformationSuccess}
         onSnackbar={handleSnackbarFromModal}
       />
-    </div>
+    </CandidatePortalShell>
   )
 }

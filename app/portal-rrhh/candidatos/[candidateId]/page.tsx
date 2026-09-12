@@ -5,8 +5,7 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { ArrowLeft, UserX } from "lucide-react"
-import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
-import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
+import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell"
 import { RecruiterCandidateProfileView } from "@/components/rrhh/recruiter-candidate-profile-view"
 import Snackbar from "@/components/ui/Snackbar"
 import { useRecruiterCandidateProfile } from "@/hooks/use-recruiter-candidate-profile"
@@ -175,38 +174,20 @@ export default function CandidatoDetallePage() {
 
   return (
     <>
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <div className="hidden h-full lg:flex">
-        <RRHHSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar
-            variant="desktop"
-            breadcrumbLabel={breadcrumbLabel}
-            breadcrumbTrail={breadcrumbTrail}
-          />
-          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            <div className="flex min-h-full min-w-0 flex-1 flex-col p-8">{mainInner}</div>
-          </main>
+      <RrhhPortalShell
+        breadcrumbLabel={breadcrumbLabel}
+        breadcrumbTrail={breadcrumbTrail}
+      >
+        <div className="flex min-h-full min-w-0 shrink-0 flex-col p-4 pb-24 md:p-6 md:pb-28 lg:p-8 lg:pb-32">
+          {mainInner}
         </div>
-      </div>
-
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar
-          variant="tablet"
-          breadcrumbLabel={breadcrumbLabel}
-          breadcrumbTrail={breadcrumbTrail}
-        />
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
-          <div className="flex min-h-full min-w-0 flex-1 flex-col p-4 md:p-6">{mainInner}</div>
-        </main>
-      </div>
-    </div>
-    <Snackbar
-      open={snackbar.open}
-      onClose={handleCloseSnackbar}
-      variant={snackbar.variant}
-      message={snackbar.message}
-    />
+      </RrhhPortalShell>
+      <Snackbar
+        open={snackbar.open}
+        onClose={handleCloseSnackbar}
+        variant={snackbar.variant}
+        message={snackbar.message}
+      />
     </>
   )
 }
