@@ -396,7 +396,7 @@
       "description": "Verwaltung der Applican Tree-Plattform",
       "companies": {
         "title": "Unternehmen",
-        "description": "Verwaltung der Kundenunternehmen (Tenants) der Plattform"
+        "description": "Verwaltung der Kundenunternehmen der Plattform"
       },
       "users": {
         "title": "Benutzer",
@@ -2948,7 +2948,7 @@
     "companies": {
       "page": {
         "title": "Unternehmen",
-        "description": "Verwaltung der Kunden (Tenants). Beim Erstellen eines Unternehmens werden Pipeline-Status und -Phasen automatisch angelegt."
+        "description": "Verwaltung der Kunden. Beim Erstellen eines Unternehmens werden Pipeline-Status und -Phasen automatisch angelegt."
       },
       "table": {
         "logo": "Logo",

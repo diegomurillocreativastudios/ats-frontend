@@ -14,6 +14,7 @@ export const ADMIN_PORTAL_NAV_ITEMS = [
       { href: "/portal-admin/vacantes/estados", labelKey: "stageStatuses" },
       { href: "/portal-admin/vacantes/departamentos", labelKey: "departments" },
       { href: "/portal-admin/vacantes/modalidades", labelKey: "modalities" },
+      { href: "/portal-admin/empresas", labelKey: "companies" },
     ],
   },
   {
@@ -60,7 +61,6 @@ export type AdminPortalNavChild = AdminPortalNavGroup["children"][number]
 
 /** Rutas que ya no están en el menú pero siguen activas (migas de pan). */
 const ADMIN_PORTAL_LEGACY_NAV_LINKS = [
-  { href: "/portal-admin/empresas", labelKey: "companies" },
   { href: "/portal-admin/entrevistas/general", labelKey: "interviewsCalendar" },
 ] as const
 

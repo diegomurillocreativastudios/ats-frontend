@@ -88,6 +88,9 @@ describe("admin portal nav", () => {
     expect(
       resolveAdminPortalNavLabelKey("/portal-admin/vacantes/modalidades"),
     ).toBe("modalities")
+    expect(resolveAdminPortalNavLabelKey("/portal-admin/empresas")).toBe(
+      "companies",
+    )
     expect(resolveAdminPortalNavLabelKey("/portal-admin/plantillas")).toBe(
       "templates",
     )
@@ -114,9 +117,6 @@ describe("admin portal nav", () => {
         "/portal-admin/administracion/tipos-de-documento",
       ),
     ).toBe("documentTypes")
-    expect(resolveAdminPortalNavLabelKey("/portal-admin/empresas")).toBe(
-      "companies",
-    )
     expect(resolveAdminPortalNavLabelKey("/portal-admin/entrevistas/general")).toBe(
       "interviewsCalendar",
     )
@@ -169,6 +169,7 @@ describe("admin portal nav", () => {
       },
     ])
     expect(resolveAdminPortalBreadcrumbTrail("/portal-admin/empresas")).toEqual([
+      { href: "/portal-admin/vacantes", labelKey: "vacancies" },
       { href: "/portal-admin/empresas", labelKey: "companies" },
     ])
   })

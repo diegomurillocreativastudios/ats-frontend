@@ -396,7 +396,7 @@
       "description": "Administración de la plataforma Applican Tree",
       "companies": {
         "title": "Empresas",
-        "description": "Gestión de empresas cliente (tenants) de la plataforma"
+        "description": "Gestión de empresas cliente de la plataforma"
       },
       "users": {
         "title": "Usuarios",
@@ -2948,7 +2948,7 @@
     "companies": {
       "page": {
         "title": "Empresas",
-        "description": "Gestión de clientes (tenants). Al crear una empresa se siembran estados y etapas de pipeline automáticamente."
+        "description": "Gestión de clientes. Al crear una empresa se siembran estados y etapas de pipeline automáticamente."
       },
       "table": {
         "logo": "Logo",

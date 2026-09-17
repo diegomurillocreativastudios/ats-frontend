@@ -396,7 +396,7 @@
       "description": "Applican Tree platform administration",
       "companies": {
         "title": "Companies",
-        "description": "Manage the platform's client companies (tenants)"
+        "description": "Manage the platform's client companies"
       },
       "users": {
         "title": "Users",
@@ -2948,7 +2948,7 @@
     "companies": {
       "page": {
         "title": "Companies",
-        "description": "Manage clients (tenants). Creating a company automatically seeds pipeline statuses and stages."
+        "description": "Manage clients. Creating a company automatically seeds pipeline statuses and stages."
       },
       "table": {
         "logo": "Logo",
