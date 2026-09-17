@@ -2462,6 +2462,29 @@
           "shortcutColumnAria": "Discard column {stage}",
           "hiredColumnAria": "Hiring column {stage}"
         },
+        "interviewFeedback": {
+          "button": "Interview feedback",
+          "buttonAria": "Add interview feedback for {name}",
+          "modalTitle": "Interview feedback",
+          "modalDescription": "Recalculation uses only this text in the qualitative score component.",
+          "fieldLabel": "Feedback",
+          "placeholder": "Write the recruiter feedback",
+          "required": "Feedback is required.",
+          "submit": "Submit",
+          "submitting": "Sending…",
+          "successIncreased": "The score increased from {previous}% to {next}%.",
+          "successDecreased": "The score changed from {previous}% to {next}%.",
+          "changePoints": "Change: {signedDelta} points.",
+          "successUnchanged": "Feedback saved. The score remains at {score}%.",
+          "successUnchangedNoWeight": "Feedback saved. The score did not change because the qualitative component has no weight on this vacancy.",
+          "conflictNotInterview": "The application is no longer in the interview stage. The board will be updated.",
+          "conflictVacancyNotEditable": "The vacancy is no longer editable. The board will be updated.",
+          "errorInvalid": "The feedback is not valid. Check the text and try again.",
+          "errorForbidden": "You do not have permission to submit this feedback.",
+          "errorNotFound": "The application no longer exists.",
+          "errorScoringFailed": "The score could not be recalculated. Feedback was not saved.",
+          "errorGeneric": "Could not submit the feedback. Please try again."
+        },
         "aria": {
           "matchedCandidates": "Matched candidates",
           "preliminarySearch": "Preliminary search",
@@ -3180,7 +3203,8 @@
       "fields": {
         "defaultStage": "Default stage",
         "finalStage": "Final stage",
-        "hiredStage": "Hiring stage"
+        "hiredStage": "Hiring stage",
+        "interviewStage": "Interview stage"
       },
       "switches": {
         "defaultActive": "{name}: default stage active",
@@ -3188,7 +3212,9 @@
         "finalActive": "{name}: final stage active",
         "markFinal": "Mark {name} as final stage",
         "hiredActive": "{name}: hiring stage active",
-        "markHired": "Mark {name} as hiring stage"
+        "markHired": "Mark {name} as hiring stage",
+        "interviewActive": "{name}: interview stage active",
+        "markInterview": "Mark {name} as interview stage"
       },
       "loadingStates": {
         "savingOrder": "Saving order...",
@@ -3206,6 +3232,11 @@
         "defaultUpdateFailed": "Could not update the default stage. Please try again.",
         "updateFailed": "Could not update the stage. Please try again.",
         "hiredUpdateFailed": "Could not update the hiring stage. Please try again.",
+        "interviewUpdateFailed": "Could not update the interview stage. Please try again.",
+        "interviewCannotCombineFinal": "An interview stage cannot also be a final stage.",
+        "interviewCannotCombineHired": "An interview stage cannot also be a hiring stage.",
+        "finalCannotCombineInterview": "An interview stage cannot be marked as final.",
+        "hiredCannotCombineInterview": "An interview stage cannot be marked as a hiring stage.",
         "forbidden": "You do not have permission to change this stage.",
         "notFound": "The stage no longer exists. Reloading list...",
         "deleteFailed": "Could not delete the stage. Please try again.",
@@ -3219,6 +3250,8 @@
         "finalUnmarked": "Stage unmarked as final.",
         "hiredMarked": "Stage marked as hiring stage.",
         "hiredUnmarked": "Stage unmarked as hiring stage.",
+        "interviewMarked": "Stage marked as interview stage.",
+        "interviewUnmarked": "Stage unmarked as interview stage.",
         "deleted": "Stage deleted successfully.",
         "orderSaved": "Order saved successfully."
       },

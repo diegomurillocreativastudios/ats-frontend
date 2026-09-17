@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import { readIsInterviewStageFromApi } from "@/lib/recruiter/interview-stage"
 
 export interface RecruiterCompanyOption {
   id: string
@@ -18,6 +19,7 @@ export interface RecruiterStageOption {
   orderIndex: number
   final?: boolean
   isHiredStage?: boolean
+  isInterviewStage?: boolean
 }
 
 export interface RecruiterApplicantStatusOption {
@@ -109,6 +111,7 @@ export async function listRecruiterStages(): Promise<RecruiterStageOption[]> {
         orderIndex,
         final: Boolean(item?.final ?? false),
         isHiredStage: Boolean(item?.isHiredStage ?? item?.is_hired_stage ?? false),
+        isInterviewStage: readIsInterviewStageFromApi(item),
       }
     })
     .sort((a, b) => {

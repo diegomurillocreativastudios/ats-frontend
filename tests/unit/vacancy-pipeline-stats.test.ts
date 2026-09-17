@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   buildApplicantComponentScoreAverages,
   extractApplicantComponentScores01,
+  getApplicantPrimaryScore01,
   parseFallbackKanbanStages,
   resolveOrderedStageNames,
   type VacancyApplicantLike,
@@ -94,5 +95,29 @@ describe("buildApplicantComponentScoreAverages", () => {
     expect(avg.vectorMean01).toBeCloseTo(0.5)
     expect(avg.attributeMean01).toBe(0)
     expect(avg.samplesWithAnyComponent).toBe(2)
+  })
+})
+
+describe("getApplicantPrimaryScore01", () => {
+  it("prefers totalScore over semanticScore", () => {
+    expect(
+      getApplicantPrimaryScore01({
+        semanticScore: 0.71,
+        totalScore: 0.82,
+      })
+    ).toBe(0.82)
+  })
+
+  it("uses matchScore when totalScore is missing", () => {
+    expect(
+      getApplicantPrimaryScore01({
+        semanticScore: 0.71,
+        matchScore: 0.82,
+      })
+    ).toBe(0.82)
+  })
+
+  it("falls back to semanticScore only for legacy payloads", () => {
+    expect(getApplicantPrimaryScore01({ semanticScore: 0.68 })).toBe(0.68)
   })
 })

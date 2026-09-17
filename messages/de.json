@@ -2462,6 +2462,29 @@
           "shortcutColumnAria": "Verwerfen-Spalte {stage}",
           "hiredColumnAria": "Einstellungsspalte {stage}"
         },
+        "interviewFeedback": {
+          "button": "Interview-Feedback",
+          "buttonAria": "Interview-Feedback für {name} hinzufügen",
+          "modalTitle": "Interview-Feedback",
+          "modalDescription": "Die Neuberechnung verwendet nur diesen Text in der qualitativen Score-Komponente.",
+          "fieldLabel": "Feedback",
+          "placeholder": "Schreiben Sie das Recruiter-Feedback",
+          "required": "Feedback ist erforderlich.",
+          "submit": "Senden",
+          "submitting": "Wird gesendet…",
+          "successIncreased": "Die Punktzahl stieg von {previous}% auf {next}%.",
+          "successDecreased": "Die Punktzahl änderte sich von {previous}% auf {next}%.",
+          "changePoints": "Änderung: {signedDelta} Punkte.",
+          "successUnchanged": "Feedback gespeichert. Die Punktzahl bleibt bei {score}%.",
+          "successUnchangedNoWeight": "Feedback gespeichert. Die Punktzahl hat sich nicht geändert, weil die qualitative Komponente in dieser Stelle kein Gewicht hat.",
+          "conflictNotInterview": "Die Bewerbung ist nicht mehr in der Interviewphase. Das Board wird aktualisiert.",
+          "conflictVacancyNotEditable": "Die Stelle ist nicht mehr bearbeitbar. Das Board wird aktualisiert.",
+          "errorInvalid": "Das Feedback ist ungültig. Prüfen Sie den Text und versuchen Sie es erneut.",
+          "errorForbidden": "Sie haben keine Berechtigung, dieses Feedback zu senden.",
+          "errorNotFound": "Die Bewerbung existiert nicht mehr.",
+          "errorScoringFailed": "Die Punktzahl konnte nicht neu berechnet werden. Das Feedback wurde nicht gespeichert.",
+          "errorGeneric": "Das Feedback konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+        },
         "aria": {
           "matchedCandidates": "Gematchte Kandidaten",
           "preliminarySearch": "Vorabrecherche",
@@ -3180,7 +3203,8 @@
       "fields": {
         "defaultStage": "Standardphase",
         "finalStage": "Endphase",
-        "hiredStage": "Einstellungsphase"
+        "hiredStage": "Einstellungsphase",
+        "interviewStage": "Interviewphase"
       },
       "switches": {
         "defaultActive": "{name}: Standardphase aktiv",
@@ -3188,7 +3212,9 @@
         "finalActive": "{name}: Endphase aktiv",
         "markFinal": "{name} als Endphase markieren",
         "hiredActive": "{name}: Einstellungsphase aktiv",
-        "markHired": "{name} als Einstellungsphase markieren"
+        "markHired": "{name} als Einstellungsphase markieren",
+        "interviewActive": "{name}: Interviewphase aktiv",
+        "markInterview": "{name} als Interviewphase markieren"
       },
       "loadingStates": {
         "savingOrder": "Reihenfolge wird gespeichert...",
@@ -3206,6 +3232,11 @@
         "defaultUpdateFailed": "Die Standardphase konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
         "updateFailed": "Die Phase konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
         "hiredUpdateFailed": "Die Einstellungsphase konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+        "interviewUpdateFailed": "Die Interviewphase konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+        "interviewCannotCombineFinal": "Eine Interviewphase kann keine Endphase sein.",
+        "interviewCannotCombineHired": "Eine Interviewphase kann keine Einstellungsphase sein.",
+        "finalCannotCombineInterview": "Eine Interviewphase kann nicht als Endphase markiert werden.",
+        "hiredCannotCombineInterview": "Eine Interviewphase kann nicht als Einstellungsphase markiert werden.",
         "forbidden": "Sie haben keine Berechtigung, diese Phase zu ändern.",
         "notFound": "Die Phase existiert nicht mehr. Liste wird neu geladen...",
         "deleteFailed": "Die Phase konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
@@ -3219,6 +3250,8 @@
         "finalUnmarked": "Markierung als Endphase entfernt.",
         "hiredMarked": "Phase als Einstellungsphase markiert.",
         "hiredUnmarked": "Markierung als Einstellungsphase entfernt.",
+        "interviewMarked": "Phase als Interviewphase markiert.",
+        "interviewUnmarked": "Markierung als Interviewphase entfernt.",
         "deleted": "Phase erfolgreich gelöscht.",
         "orderSaved": "Reihenfolge erfolgreich gespeichert."
       },

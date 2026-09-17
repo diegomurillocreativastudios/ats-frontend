@@ -2462,6 +2462,29 @@
           "shortcutColumnAria": "Colonne d'écart {stage}",
           "hiredColumnAria": "Colonne d'embauche {stage}"
         },
+        "interviewFeedback": {
+          "button": "Retour d'entretien",
+          "buttonAria": "Ajouter un retour d'entretien pour {name}",
+          "modalTitle": "Retour d'entretien",
+          "modalDescription": "Le recalcul utilise uniquement ce texte dans le composant qualitatif du score.",
+          "fieldLabel": "Retour",
+          "placeholder": "Saisissez le retour du recruteur",
+          "required": "Le retour est obligatoire.",
+          "submit": "Envoyer",
+          "submitting": "Envoi…",
+          "successIncreased": "Le score est passé de {previous}% à {next}%.",
+          "successDecreased": "Le score a changé de {previous}% à {next}%.",
+          "changePoints": "Changement : {signedDelta} points.",
+          "successUnchanged": "Retour enregistré. Le score reste à {score}%.",
+          "successUnchangedNoWeight": "Retour enregistré. Le score n'a pas changé car le composant qualitatif n'a aucun poids sur cette offre.",
+          "conflictNotInterview": "La candidature n'est plus à l'étape entretien. Le tableau sera actualisé.",
+          "conflictVacancyNotEditable": "L'offre n'est plus modifiable. Le tableau sera actualisé.",
+          "errorInvalid": "Le retour n'est pas valide. Vérifiez le texte et réessayez.",
+          "errorForbidden": "Vous n'avez pas l'autorisation d'envoyer ce retour.",
+          "errorNotFound": "La candidature n'existe plus.",
+          "errorScoringFailed": "Impossible de recalculer le score. Le retour n'a pas été enregistré.",
+          "errorGeneric": "Impossible d'envoyer le retour. Veuillez réessayer."
+        },
         "aria": {
           "matchedCandidates": "Candidats correspondants",
           "preliminarySearch": "Recherche préliminaire",
@@ -3180,7 +3203,8 @@
       "fields": {
         "defaultStage": "Étape par défaut",
         "finalStage": "Étape finale",
-        "hiredStage": "Étape d'embauche"
+        "hiredStage": "Étape d'embauche",
+        "interviewStage": "Étape entretien"
       },
       "switches": {
         "defaultActive": "{name} : étape par défaut active",
@@ -3188,7 +3212,9 @@
         "finalActive": "{name} : étape finale active",
         "markFinal": "Marquer {name} comme étape finale",
         "hiredActive": "{name} : étape d'embauche active",
-        "markHired": "Marquer {name} comme étape d'embauche"
+        "markHired": "Marquer {name} comme étape d'embauche",
+        "interviewActive": "{name} : étape entretien active",
+        "markInterview": "Marquer {name} comme étape entretien"
       },
       "loadingStates": {
         "savingOrder": "Enregistrement de l'ordre...",
@@ -3206,6 +3232,11 @@
         "defaultUpdateFailed": "Impossible de mettre à jour l'étape par défaut. Veuillez réessayer.",
         "updateFailed": "Impossible de mettre à jour l'étape. Veuillez réessayer.",
         "hiredUpdateFailed": "Impossible de mettre à jour l'étape d'embauche. Veuillez réessayer.",
+        "interviewUpdateFailed": "Impossible de mettre à jour l'étape entretien. Veuillez réessayer.",
+        "interviewCannotCombineFinal": "Une étape entretien ne peut pas être une étape finale.",
+        "interviewCannotCombineHired": "Une étape entretien ne peut pas être une étape d'embauche.",
+        "finalCannotCombineInterview": "Une étape entretien ne peut pas être marquée comme finale.",
+        "hiredCannotCombineInterview": "Une étape entretien ne peut pas être marquée comme étape d'embauche.",
         "forbidden": "Vous n'avez pas l'autorisation de modifier cette étape.",
         "notFound": "L'étape n'existe plus. Rechargement de la liste...",
         "deleteFailed": "Impossible de supprimer l'étape. Veuillez réessayer.",
@@ -3219,6 +3250,8 @@
         "finalUnmarked": "Étape démarquée comme finale.",
         "hiredMarked": "Étape marquée comme étape d'embauche.",
         "hiredUnmarked": "Étape démarquée comme étape d'embauche.",
+        "interviewMarked": "Étape marquée comme étape entretien.",
+        "interviewUnmarked": "Étape démarquée comme étape entretien.",
         "deleted": "Étape supprimée avec succès.",
         "orderSaved": "Ordre enregistré avec succès."
       },

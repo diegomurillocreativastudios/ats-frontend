@@ -115,6 +115,7 @@ describe("listRecruiterStages", () => {
         orderIndex: 1,
         final: true,
         isHiredStage: true,
+        isInterviewStage: false,
       },
       {
         id: "reject",
@@ -123,8 +124,31 @@ describe("listRecruiterStages", () => {
         orderIndex: 2,
         final: true,
         isHiredStage: false,
+        isInterviewStage: false,
       },
     ])
+  })
+
+  it("maps isInterviewStage from the catalog payload", async () => {
+    apiGet.mockResolvedValueOnce([
+      {
+        id: "interview",
+        name: "Interview",
+        orderIndex: 3,
+        isInterviewStage: true,
+      },
+      {
+        id: "offer",
+        name: "Offer",
+        orderIndex: 4,
+        is_interview_stage: false,
+      },
+    ])
+
+    const result = await listRecruiterStages()
+
+    expect(result.find((s) => s.id === "interview")?.isInterviewStage).toBe(true)
+    expect(result.find((s) => s.id === "offer")?.isInterviewStage).toBe(false)
   })
 
   it("breaks orderIndex ties by id", async () => {

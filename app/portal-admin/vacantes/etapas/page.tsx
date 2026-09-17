@@ -24,6 +24,13 @@ import { apiClient } from "@/lib/api";
 import { unwrapListArray } from "@/lib/api/query-paging";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { buildRecruiterStagePutPayload } from "@/lib/recruiterStagePayload";
+import {
+  applyInterviewStageToggleLocal,
+  canEnableFinalOrHiredStage,
+  canEnableInterviewStage,
+  isInterviewPipelineStage,
+  readIsInterviewStageFromApi,
+} from "@/lib/recruiter/interview-stage";
 
 /**
  * Global platform stages catalog URL.
@@ -54,6 +61,7 @@ const mapStageFromApi = (item, index = 0) => {
     ),
     final: Boolean(item.final ?? item.Final),
     isHiredStage: Boolean(item.isHiredStage ?? item.is_hired_stage),
+    isInterviewStage: readIsInterviewStageFromApi(item),
     triggersNotification: Boolean(item.triggersNotification),
     notificationTemplateId: item.notificationTemplateId ?? null,
   };
@@ -245,6 +253,62 @@ const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) =>
   );
 };
 
+const InterviewStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) => {
+  const isOn = Boolean(stage.isInterviewStage);
+  const handleClick = () => {
+    if (disabled || isUpdating) return;
+    onToggle(stage, !isOn);
+  };
+  const handleKeyDown = (e) => {
+    if (disabled || isUpdating) return;
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    onToggle(stage, !isOn);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isOn}
+        aria-label={
+          isOn
+            ? tStages("switches.interviewActive", { name: stage.name })
+            : tStages("switches.markInterview", { name: stage.name })
+        }
+        disabled={disabled || isUpdating}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
+          isUpdating ? "opacity-60" : "opacity-100"
+        } ${
+          isOn
+            ? "bg-emerald-600 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
+            : "border border-slate-300/80 bg-slate-100 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)]"
+        }`}
+      >
+        <span
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background transition-[transform,box-shadow] duration-200 ease-out ${
+            isOn
+              ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
+              : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
+          }`}
+          aria-hidden
+        />
+      </button>
+      {isUpdating && (
+        <div className="absolute -right-6 top-1/2 -translate-y-1/2">
+          <div
+            className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"
+            aria-hidden
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function EtapasPage() {
   const tStages = useTranslations("AdminPortal.stages");
   const tCommon = useTranslations("Common");
@@ -261,9 +325,11 @@ export default function EtapasPage() {
   const [defaultStageSwitchLoading, setDefaultStageSwitchLoading] = useState(false);
   const [finalStageSwitchLoading, setFinalStageSwitchLoading] = useState(false);
   const [hiredStageSwitchLoading, setHiredStageSwitchLoading] = useState(false);
+  const [interviewStageSwitchLoading, setInterviewStageSwitchLoading] = useState(false);
   const [updatingDefaultStageId, setUpdatingDefaultStageId] = useState(null);
   const [updatingFinalStageId, setUpdatingFinalStageId] = useState(null);
   const [updatingHiredStageId, setUpdatingHiredStageId] = useState(null);
+  const [updatingInterviewStageId, setUpdatingInterviewStageId] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success",
@@ -407,6 +473,14 @@ export default function EtapasPage() {
 
   const handleFinalStageToggle = async (targetStage, newValue) => {
     if (finalStageSwitchLoading) return;
+    if (newValue && !canEnableFinalOrHiredStage(targetStage)) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tStages("errors.finalCannotCombineInterview"),
+      });
+      return;
+    }
     const stageId = String(targetStage.id);
     
     // Actualización optimista: actualizar el estado local inmediatamente
@@ -460,6 +534,14 @@ export default function EtapasPage() {
 
   const handleHiredStageToggle = async (targetStage, newValue) => {
     if (hiredStageSwitchLoading) return;
+    if (newValue && !canEnableFinalOrHiredStage(targetStage)) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tStages("errors.hiredCannotCombineInterview"),
+      });
+      return;
+    }
     const stageId = String(targetStage.id);
     
     // Actualización optimista: actualizar el estado local inmediatamente
@@ -524,6 +606,95 @@ export default function EtapasPage() {
     } finally {
       setUpdatingHiredStageId(null);
       setHiredStageSwitchLoading(false);
+    }
+  };
+
+  const handleInterviewStageToggle = async (targetStage, newValue) => {
+    if (interviewStageSwitchLoading) return;
+    if (newValue && !canEnableInterviewStage(targetStage)) {
+      const message = targetStage.isHiredStage
+        ? tStages("errors.interviewCannotCombineHired")
+        : tStages("errors.interviewCannotCombineFinal");
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message,
+      });
+      return;
+    }
+
+    const stageId = String(targetStage.id);
+    const previousInterviewId = stages.find((s) =>
+      isInterviewPipelineStage(s)
+    )?.id;
+
+    setStages((prevStages) =>
+      applyInterviewStageToggleLocal(prevStages, stageId, newValue)
+    );
+
+    setUpdatingInterviewStageId(stageId);
+    setInterviewStageSwitchLoading(true);
+
+    try {
+      const updatedStage = await apiClient.patch(
+        `${stagesUrl(stageId)}/interview-stage`,
+        { isInterviewStage: newValue }
+      );
+
+      setStages((prevStages) =>
+        applyInterviewStageToggleLocal(
+          prevStages.map((s) =>
+            String(s.id) === stageId ? mapStageFromApi(updatedStage) : s
+          ),
+          stageId,
+          newValue
+        )
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: newValue
+          ? tStages("toasts.interviewMarked")
+          : tStages("toasts.interviewUnmarked"),
+      });
+    } catch (err) {
+      setStages((prevStages) =>
+        prevStages.map((s) => {
+          if (String(s.id) === stageId) {
+            return { ...s, isInterviewStage: !newValue };
+          }
+          if (
+            newValue &&
+            previousInterviewId &&
+            String(s.id) === String(previousInterviewId)
+          ) {
+            return { ...s, isInterviewStage: true };
+          }
+          return s;
+        })
+      );
+
+      let errorMessage = tStages("errors.interviewUpdateFailed");
+      if (err?.status === 403 || err?.response?.status === 403) {
+        errorMessage = tStages("errors.forbidden");
+      } else if (err?.status === 404 || err?.response?.status === 404) {
+        errorMessage = tStages("errors.notFound");
+        setTimeout(() => fetchStages(), 1000);
+      } else if (getApiErrorMessage(err)) {
+        errorMessage = getApiErrorMessage(err);
+      }
+
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: errorMessage,
+      });
+    } finally {
+      setUpdatingInterviewStageId(null);
+      setInterviewStageSwitchLoading(false);
     }
   };
 
@@ -654,12 +825,20 @@ export default function EtapasPage() {
     onDefaultActivate: handleDefaultStageActivate,
     onFinalToggle: handleFinalStageToggle,
     onHiredToggle: handleHiredStageToggle,
+    onInterviewToggle: handleInterviewStageToggle,
     defaultSwitchDisabled: reorderLoading || deleteLoading,
     defaultSwitchUpdating: updatingDefaultStageId === String(stage.id),
-    finalSwitchDisabled: reorderLoading || deleteLoading,
+    finalSwitchDisabled:
+      reorderLoading || deleteLoading || isInterviewPipelineStage(stage),
     finalSwitchUpdating: updatingFinalStageId === String(stage.id),
-    hiredSwitchDisabled: reorderLoading || deleteLoading,
+    hiredSwitchDisabled:
+      reorderLoading || deleteLoading || isInterviewPipelineStage(stage),
     hiredSwitchUpdating: updatingHiredStageId === String(stage.id),
+    interviewSwitchDisabled:
+      reorderLoading ||
+      deleteLoading ||
+      (!isInterviewPipelineStage(stage) && !canEnableInterviewStage(stage)),
+    interviewSwitchUpdating: updatingInterviewStageId === String(stage.id),
   }));
 
   return (
@@ -732,6 +911,7 @@ export default function EtapasPage() {
                         Default: DefaultStageSwitch,
                         Final: FinalStageSwitch,
                         Hired: HiredStageSwitch,
+                        Interview: InterviewStageSwitch,
                       }}
                     />
                     </div>

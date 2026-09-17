@@ -29,15 +29,19 @@ export interface SortableStageItem {
   onDefaultActivate: (stage: SortableStageItem) => void
   onFinalToggle: (stage: SortableStageItem, value: boolean) => void
   onHiredToggle: (stage: SortableStageItem, value: boolean) => void
+  onInterviewToggle: (stage: SortableStageItem, value: boolean) => void
   defaultSwitchDisabled: boolean
   defaultSwitchUpdating: boolean
   finalSwitchDisabled: boolean
   finalSwitchUpdating: boolean
   hiredSwitchDisabled: boolean
   hiredSwitchUpdating: boolean
+  interviewSwitchDisabled: boolean
+  interviewSwitchUpdating: boolean
   isDefault?: boolean
   final?: boolean
   isHiredStage?: boolean
+  isInterviewStage?: boolean
   [key: string]: unknown
 }
 
@@ -65,6 +69,7 @@ interface SortableStagesListProps {
     Default: ComponentType<DefaultStageSwitchProps>
     Final: ComponentType<ToggleStageSwitchProps>
     Hired: ComponentType<ToggleStageSwitchProps>
+    Interview: ComponentType<ToggleStageSwitchProps>
   }
 }
 
@@ -78,6 +83,7 @@ function SortableStageRow({
   DefaultSwitch,
   FinalSwitch,
   HiredSwitch,
+  InterviewSwitch,
 }: {
   item: SortableStageItem
   disabled: boolean
@@ -85,6 +91,7 @@ function SortableStageRow({
   DefaultSwitch: ComponentType<DefaultStageSwitchProps>
   FinalSwitch: ComponentType<ToggleStageSwitchProps>
   HiredSwitch: ComponentType<ToggleStageSwitchProps>
+  InterviewSwitch: ComponentType<ToggleStageSwitchProps>
 }): ReactNode {
   const {
     attributes,
@@ -169,6 +176,18 @@ function SortableStageRow({
             tStages={tStages}
           />
         </div>
+        <div className="flex flex-col gap-1.5">
+          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
+            {tStages("fields.interviewStage")}
+          </span>
+          <InterviewSwitch
+            stage={item}
+            onToggle={item.onInterviewToggle}
+            disabled={item.interviewSwitchDisabled}
+            isUpdating={item.interviewSwitchUpdating}
+            tStages={tStages}
+          />
+        </div>
         <button
           type="button"
           onClick={() => item.onEdit(item)}
@@ -240,6 +259,7 @@ export function SortableStagesList({
                 DefaultSwitch={renderSwitches.Default}
                 FinalSwitch={renderSwitches.Final}
                 HiredSwitch={renderSwitches.Hired}
+                InterviewSwitch={renderSwitches.Interview}
               />
             </li>
           ))}

@@ -194,4 +194,21 @@ describe("CandidateProfileModal", () => {
     expect(screen.getByText("JavaScript")).toBeInTheDocument()
     expect(screen.getByText("Sin detalle")).toBeInTheDocument()
   })
+
+  it("shows Application.MatchScore instead of semanticScore", () => {
+    renderModal(
+      <CandidateProfileModal
+        match={{
+          ...antonelliMatch,
+          semanticScore: 0.71,
+          totalScore: 0.82,
+        }}
+        uploadedAtLabel="Subido: 13 ago 2026"
+        onClose={() => undefined}
+      />
+    )
+
+    expect(screen.getByText(/82\.0%/)).toBeInTheDocument()
+    expect(screen.queryByText(/71\.0%/)).not.toBeInTheDocument()
+  })
 })

@@ -5,6 +5,7 @@ export interface ApplicationStageCatalogItem {
   order?: number
   final?: boolean
   isHiredStage?: boolean
+  isInterviewStage?: boolean
 }
 
 export type ApplicationStageRef =
@@ -22,6 +23,7 @@ export interface PipelineStage {
   order: number
   final?: boolean
   isHiredStage?: boolean
+  isInterviewStage?: boolean
 }
 
 export interface ApplicantStatusOption {

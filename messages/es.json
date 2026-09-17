@@ -2462,6 +2462,29 @@
           "shortcutColumnAria": "Columna de descarte {stage}",
           "hiredColumnAria": "Columna de contratación {stage}"
         },
+        "interviewFeedback": {
+          "button": "Feedback de entrevista",
+          "buttonAria": "Agregar feedback de entrevista para {name}",
+          "modalTitle": "Feedback de entrevista",
+          "modalDescription": "El recálculo usa solo este texto en el componente cualitativo del puntaje.",
+          "fieldLabel": "Feedback",
+          "placeholder": "Escribe el feedback del reclutador",
+          "required": "El feedback es obligatorio.",
+          "submit": "Enviar",
+          "submitting": "Enviando…",
+          "successIncreased": "El puntaje aumentó de {previous}% a {next}%.",
+          "successDecreased": "El puntaje cambió de {previous}% a {next}%.",
+          "changePoints": "Cambio: {signedDelta} puntos.",
+          "successUnchanged": "Feedback guardado. El puntaje se mantiene en {score}%.",
+          "successUnchangedNoWeight": "Feedback guardado. El puntaje no cambió porque el componente cualitativo no tiene peso en esta vacante.",
+          "conflictNotInterview": "La postulación ya no se encuentra en la etapa de entrevista. El tablero será actualizado.",
+          "conflictVacancyNotEditable": "La vacante ya no es editable. El tablero será actualizado.",
+          "errorInvalid": "El feedback no es válido. Revisa el texto e inténtalo de nuevo.",
+          "errorForbidden": "No tienes permisos para enviar este feedback.",
+          "errorNotFound": "La postulación ya no existe.",
+          "errorScoringFailed": "No se pudo recalcular el puntaje. El feedback no se guardó.",
+          "errorGeneric": "No se pudo enviar el feedback. Intenta de nuevo."
+        },
         "aria": {
           "matchedCandidates": "Candidatos con emparejamiento",
           "preliminarySearch": "Búsqueda preliminar",
@@ -3180,7 +3203,8 @@
       "fields": {
         "defaultStage": "Etapa por defecto",
         "finalStage": "Etapa final",
-        "hiredStage": "Etapa de contratación"
+        "hiredStage": "Etapa de contratación",
+        "interviewStage": "Etapa entrevista"
       },
       "switches": {
         "defaultActive": "{name}: Etapa por defecto activa",
@@ -3188,7 +3212,9 @@
         "finalActive": "{name}: Etapa final activa",
         "markFinal": "Marcar {name} como etapa final",
         "hiredActive": "{name}: Etapa de contratación activa",
-        "markHired": "Marcar {name} como etapa de contratación"
+        "markHired": "Marcar {name} como etapa de contratación",
+        "interviewActive": "{name}: Etapa entrevista activa",
+        "markInterview": "Marcar {name} como etapa entrevista"
       },
       "loadingStates": {
         "savingOrder": "Guardando orden...",
@@ -3206,6 +3232,11 @@
         "defaultUpdateFailed": "No se pudo actualizar la etapa por defecto. Intenta de nuevo.",
         "updateFailed": "No se pudo actualizar la etapa. Intenta de nuevo.",
         "hiredUpdateFailed": "No se pudo actualizar la etapa de contratación. Intenta de nuevo.",
+        "interviewUpdateFailed": "No se pudo actualizar la etapa entrevista. Intenta de nuevo.",
+        "interviewCannotCombineFinal": "Una etapa entrevista no puede ser etapa final.",
+        "interviewCannotCombineHired": "Una etapa entrevista no puede ser etapa de contratación.",
+        "finalCannotCombineInterview": "Una etapa entrevista no puede marcarse como final.",
+        "hiredCannotCombineInterview": "Una etapa entrevista no puede marcarse como etapa de contratación.",
         "forbidden": "No tienes permisos para cambiar esta etapa.",
         "notFound": "La etapa ya no existe. Recargando lista...",
         "deleteFailed": "No se pudo eliminar la etapa. Intenta de nuevo.",
@@ -3219,6 +3250,8 @@
         "finalUnmarked": "Etapa desmarcada como final.",
         "hiredMarked": "Etapa marcada como etapa de contratación.",
         "hiredUnmarked": "Etapa desmarcada como etapa de contratación.",
+        "interviewMarked": "Etapa marcada como etapa entrevista.",
+        "interviewUnmarked": "Etapa desmarcada como etapa entrevista.",
         "deleted": "Etapa eliminada correctamente.",
         "orderSaved": "Orden guardado correctamente."
       },

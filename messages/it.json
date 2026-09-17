@@ -2462,6 +2462,29 @@
           "shortcutColumnAria": "Colonna di scarto {stage}",
           "hiredColumnAria": "Colonna di assunzione {stage}"
         },
+        "interviewFeedback": {
+          "button": "Feedback del colloquio",
+          "buttonAria": "Aggiungi feedback del colloquio per {name}",
+          "modalTitle": "Feedback del colloquio",
+          "modalDescription": "Il ricalcolo usa solo questo testo nel componente qualitativo del punteggio.",
+          "fieldLabel": "Feedback",
+          "placeholder": "Scrivi il feedback del recruiter",
+          "required": "Il feedback è obbligatorio.",
+          "submit": "Invia",
+          "submitting": "Invio…",
+          "successIncreased": "Il punteggio è aumentato da {previous}% a {next}%.",
+          "successDecreased": "Il punteggio è cambiato da {previous}% a {next}%.",
+          "changePoints": "Variazione: {signedDelta} punti.",
+          "successUnchanged": "Feedback salvato. Il punteggio resta al {score}%.",
+          "successUnchangedNoWeight": "Feedback salvato. Il punteggio non è cambiato perché il componente qualitativo non ha peso in questa vacante.",
+          "conflictNotInterview": "La candidatura non è più nella fase colloquio. La bacheca verrà aggiornata.",
+          "conflictVacancyNotEditable": "La vacante non è più modificabile. La bacheca verrà aggiornata.",
+          "errorInvalid": "Il feedback non è valido. Controlla il testo e riprova.",
+          "errorForbidden": "Non hai i permessi per inviare questo feedback.",
+          "errorNotFound": "La candidatura non esiste più.",
+          "errorScoringFailed": "Impossibile ricalcolare il punteggio. Il feedback non è stato salvato.",
+          "errorGeneric": "Impossibile inviare il feedback. Riprova."
+        },
         "aria": {
           "matchedCandidates": "Candidati con corrispondenza",
           "preliminarySearch": "Ricerca preliminare",
@@ -3180,7 +3203,8 @@
       "fields": {
         "defaultStage": "Fase predefinita",
         "finalStage": "Fase finale",
-        "hiredStage": "Fase di assunzione"
+        "hiredStage": "Fase di assunzione",
+        "interviewStage": "Fase colloquio"
       },
       "switches": {
         "defaultActive": "{name}: fase predefinita attiva",
@@ -3188,7 +3212,9 @@
         "finalActive": "{name}: fase finale attiva",
         "markFinal": "Segna {name} come fase finale",
         "hiredActive": "{name}: fase di assunzione attiva",
-        "markHired": "Segna {name} come fase di assunzione"
+        "markHired": "Segna {name} come fase di assunzione",
+        "interviewActive": "{name}: fase colloquio attiva",
+        "markInterview": "Segna {name} come fase colloquio"
       },
       "loadingStates": {
         "savingOrder": "Salvataggio ordine...",
@@ -3206,6 +3232,11 @@
         "defaultUpdateFailed": "Impossibile aggiornare la fase predefinita. Riprova.",
         "updateFailed": "Impossibile aggiornare la fase. Riprova.",
         "hiredUpdateFailed": "Impossibile aggiornare la fase di assunzione. Riprova.",
+        "interviewUpdateFailed": "Impossibile aggiornare la fase colloquio. Riprova.",
+        "interviewCannotCombineFinal": "Una fase colloquio non può essere una fase finale.",
+        "interviewCannotCombineHired": "Una fase colloquio non può essere una fase di assunzione.",
+        "finalCannotCombineInterview": "Una fase colloquio non può essere contrassegnata come finale.",
+        "hiredCannotCombineInterview": "Una fase colloquio non può essere contrassegnata come fase di assunzione.",
         "forbidden": "Non hai i permessi per modificare questa fase.",
         "notFound": "La fase non esiste più. Ricaricamento elenco...",
         "deleteFailed": "Impossibile eliminare la fase. Riprova.",
@@ -3219,6 +3250,8 @@
         "finalUnmarked": "Fase non più contrassegnata come finale.",
         "hiredMarked": "Fase contrassegnata come fase di assunzione.",
         "hiredUnmarked": "Fase non più contrassegnata come fase di assunzione.",
+        "interviewMarked": "Fase contrassegnata come fase colloquio.",
+        "interviewUnmarked": "Fase non più contrassegnata come fase colloquio.",
         "deleted": "Fase eliminata correttamente.",
         "orderSaved": "Ordine salvato correttamente."
       },

@@ -14,6 +14,7 @@ import {
   Gift,
   Loader2,
   Mail,
+  MessageSquare,
   Plus,
   Phone,
   Scale,
@@ -61,6 +62,10 @@ import { VacancyReadOnlyIdentity } from "@/components/rrhh/vacancy-read-only-ide
 import { CandidateProfileModal } from "@/components/rrhh/candidate-profile-modal"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
 import {
+  InterviewFeedbackModal,
+  type InterviewFeedbackCompletePayload,
+} from "@/components/rrhh/interview-feedback-modal"
+import {
   AiDisclosureBadge,
   AiDisclosureNotice,
   AiDisclosurePillProgress,
@@ -69,6 +74,7 @@ import {
 import { VacancyAiSearchLoadingState } from "@/components/rrhh/vacancy-ai-search-loading-state"
 import { VACANCY_PRELIMINARY_MATCH_TYPICAL_MS } from "@/lib/apply-loading-bar"
 import {
+  getApplicantPrimaryScore01,
   getCandidateId,
   normalizeKanbanStage,
   parseFallbackKanbanStages,
@@ -82,6 +88,11 @@ import {
   isRejectionShortcutStage,
   validateStageMove,
 } from "@/lib/recruiter/stage-move-validation"
+import {
+  canShowInterviewFeedbackAction,
+  isInterviewPipelineStage,
+  readApplicationId,
+} from "@/lib/recruiter/interview-stage"
 import {
   downloadRecruiterCandidateCv,
   isRecruiterCandidateCvError,
@@ -411,9 +422,10 @@ const MatchCard = ({
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex flex-col items-center rounded-lg bg-muted/50 px-4 py-2">
               <span className="font-sans text-lg font-semibold text-foreground">
-                {typeof (match.semanticScore ?? match.totalScore) === "number"
-                  ? ((match.semanticScore ?? match.totalScore) * 100).toFixed(2)
-                  : "—"}
+                {(() => {
+                  const score01 = getApplicantPrimaryScore01(match)
+                  return score01 != null ? (score01 * 100).toFixed(2) : "—"
+                })()}
               </span>
               <span className="font-sans text-xs text-muted-foreground">
                 {tMatching("score")}
@@ -457,6 +469,7 @@ const KanbanCard = ({
   candidateId,
   stage,
   stageId = null,
+  isInterviewStage = false,
   statuses,
   currentStatusId,
   onStatusChange,
@@ -468,10 +481,12 @@ const KanbanCard = ({
   onMoveToStage,
   onPipelineDragStart,
   onPipelineDragEnd,
+  onInterviewFeedbackComplete = () => {},
 }) => {
   const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
   const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false);
+  const [interviewFeedbackOpen, setInterviewFeedbackOpen] = useState(false);
   const sheetCandidateProfileId =
     match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
       ? String(match.candidateProfileId).trim()
@@ -482,8 +497,8 @@ const KanbanCard = ({
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
   );
-  const rawScore = match.semanticScore ?? match.totalScore;
-  const score = typeof rawScore === "number" ? (rawScore * 100).toFixed(0) : "—";
+  const rawScore = getApplicantPrimaryScore01(match);
+  const score = rawScore != null ? (rawScore * 100).toFixed(0) : "—";
   const applicationSourceLabel = formatApplicationSourceBadge(
     match.applicationSource ?? match.application_source
   );
@@ -534,6 +549,12 @@ const KanbanCard = ({
 
   const displayName = emptyToDash(match.name);
   const showTechnicalSheetButton = Boolean(vacancyId && sheetCandidateProfileId);
+  const applicationId = readApplicationId(match);
+  const showInterviewFeedbackButton = canShowInterviewFeedbackAction({
+    isInterviewStage,
+    applicationId,
+    readOnly,
+  });
   const hasStatuses = statuses.length > 0;
   const visibleShortcutStages = Array.isArray(shortcutStages) ? shortcutStages : [];
   const canLeaveStageByStatus = isFinalApplicationStatus(currentStatusId, statuses);
@@ -651,6 +672,24 @@ const KanbanCard = ({
             ))}
           </select>
         ) : null}
+
+        {showInterviewFeedbackButton ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setInterviewFeedbackOpen(true);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 font-sans text-xs font-medium text-emerald-800 transition-colors hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={tMatching("interviewFeedback.buttonAria", {
+              name: displayName,
+            })}
+          >
+            <MessageSquare className="h-3.5 w-3.5" aria-hidden />
+            {tMatching("interviewFeedback.button")}
+          </button>
+        ) : null}
       </div>
       {vacancyId && sheetCandidateProfileId && technicalSheetOpen ? (
         <TechnicalSheetModal
@@ -660,6 +699,15 @@ const KanbanCard = ({
           candidateProfileId={sheetCandidateProfileId}
           vacancyTitle={vacancyTitle}
           candidateLabel={candidateLabelForSheet}
+        />
+      ) : null}
+      {showInterviewFeedbackButton && interviewFeedbackOpen ? (
+        <InterviewFeedbackModal
+          isOpen={interviewFeedbackOpen}
+          onClose={() => setInterviewFeedbackOpen(false)}
+          applicationId={applicationId}
+          candidateLabel={displayName}
+          onComplete={onInterviewFeedbackComplete}
         />
       ) : null}
     </>
@@ -742,6 +790,7 @@ const KanbanColumn = ({
   shortcutStages = [],
   onPipelineDragStart,
   onPipelineDragEnd,
+  onInterviewFeedbackComplete,
 }) => {
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
   const columnKind = getKanbanColumnKind(stageMeta);
@@ -873,6 +922,7 @@ const KanbanColumn = ({
             candidateId={candidateId}
             stage={stage}
             stageId={stageMeta?.id ?? null}
+            isInterviewStage={isInterviewPipelineStage(stageMeta)}
             statuses={statuses}
             currentStatusId={getCurrentStatusId(match, candidateId)}
             onStatusChange={onStatusChange}
@@ -884,6 +934,7 @@ const KanbanColumn = ({
             onMoveToStage={onDrop}
             onPipelineDragStart={onPipelineDragStart}
             onPipelineDragEnd={onPipelineDragEnd}
+            onInterviewFeedbackComplete={onInterviewFeedbackComplete}
           />
         ))}
       </div>
@@ -1994,6 +2045,20 @@ export default function VacanteDetallePage() {
     setDragFromStatusId(null);
     setDragOverStage(null);
   }, []);
+
+  const handleInterviewFeedbackComplete = useCallback(
+    (payload: InterviewFeedbackCompletePayload) => {
+      setSnackbar({
+        open: true,
+        variant: payload.variant,
+        message: payload.message,
+      });
+      if (payload.shouldRefresh) {
+        void fetchVacancy(true);
+      }
+    },
+    [fetchVacancy]
+  );
 
   const getKanbanDropState = (stage) => {
     const stageMeta =
@@ -3122,6 +3187,7 @@ export default function VacanteDetallePage() {
                                 shortcutStages={dropState.columnShortcutStages}
                                 onPipelineDragStart={handleKanbanCardDragStart}
                                 onPipelineDragEnd={handleKanbanCardDragEnd}
+                                onInterviewFeedbackComplete={handleInterviewFeedbackComplete}
                               />
                               );
                             })}
@@ -3941,6 +4007,7 @@ export default function VacanteDetallePage() {
                               shortcutStages={dropState.columnShortcutStages}
                               onPipelineDragStart={handleKanbanCardDragStart}
                               onPipelineDragEnd={handleKanbanCardDragEnd}
+                              onInterviewFeedbackComplete={handleInterviewFeedbackComplete}
                             />
                             );
                           })}

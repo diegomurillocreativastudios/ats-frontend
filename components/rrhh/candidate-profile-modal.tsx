@@ -30,6 +30,7 @@ import {
   formatScorePercent,
   scoreBarWidth,
 } from "@/lib/vacancies/format-score-percent"
+import { getApplicantPrimaryScore01 } from "@/lib/rrhh/vacancy-pipeline-stats"
 import {
   formatScoreKey,
   hasZeroScoreOutsideFullAggregate,
@@ -44,6 +45,8 @@ export interface CandidateProfileMatch {
   phone?: string | null
   uploadedAt?: string | Date | null
   totalScore?: number | null
+  matchScore?: number | null
+  semanticScore?: number | null
   candidateProfileId?: string | null
   candidateDocumentId?: string | null
   componentScores?: Record<string, unknown> | null
@@ -339,7 +342,14 @@ export function CandidateProfileModal({
   const phone = toTrimmedText(match.phone)
   const initials = getInitials(displayName !== "—" ? displayName : "", email ?? "")
   const profileHref = resolveProfileHref(match, candidateId)
-  const totalScorePercent = formatScorePercent(match.totalScore, { forceOneDecimal: true })
+  const totalScorePercent = formatScorePercent(
+    getApplicantPrimaryScore01({
+      totalScore: match.totalScore,
+      matchScore: match.matchScore,
+      semanticScore: match.semanticScore,
+    }),
+    { forceOneDecimal: true }
+  )
 
   const hasContent =
     componentScores.length > 0 || hasQualitativeBlock || matchedAttributesEntries.length > 0

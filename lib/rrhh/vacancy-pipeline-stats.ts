@@ -4,6 +4,7 @@ export interface VacancyApplicantLike {
   stage?: string | null
   semanticScore?: number | null
   totalScore?: number | null
+  matchScore?: number | null
   componentScores?: Record<string, unknown> | null
   qualitativeReasoningPositive?: string | null
   qualitative_reasoning_positive?: string | null
@@ -19,6 +20,7 @@ export interface VacancyApplicantLike {
   phone?: string | null
   uploadedAt?: string | null
   applicationId?: string | null
+  application_id?: string | null
   applicationStageId?: string | null
   applicationSource?: number | null
   applicationStatusId?: string | null
@@ -140,11 +142,20 @@ export function getCandidateId(match: VacancyApplicantLike, index: number): stri
   )
 }
 
-/** Puntaje principal alineado con Kanban: 0–1 o null si no aplica. */
+function readFiniteScore(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null
+  return value
+}
+
+/**
+ * Official application score (`Application.MatchScore`), usually `totalScore` or `matchScore`.
+ * `semanticScore` is only a fallback for legacy payloads that never exposed the blended score.
+ * After qualitative interview feedback, semantic is unchanged — using it first would hide the recalculation.
+ */
 export function getApplicantPrimaryScore01(match: VacancyApplicantLike): number | null {
-  const raw = match.semanticScore ?? match.totalScore
-  if (typeof raw !== "number" || !Number.isFinite(raw)) return null
-  return raw
+  const official = readFiniteScore(match.totalScore) ?? readFiniteScore(match.matchScore)
+  if (official != null) return official
+  return readFiniteScore(match.semanticScore)
 }
 
 export interface StageCountRow {
