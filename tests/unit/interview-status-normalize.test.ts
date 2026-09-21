@@ -28,6 +28,22 @@ describe("normalizeInterview — estado", () => {
       status: "Completada",
     })
     expect(row.status).toBe("Completed")
+    expect(row.candidateName).toBeNull()
+    expect(row.applicationId).toBeNull()
+  })
+
+  it("mapea candidateName y applicationId cuando el API los envía", () => {
+    const row = normalizeInterview({
+      id: "a",
+      vacancyId: "v",
+      candidateProfileId: "c",
+      candidateName: "Ana Pérez",
+      applicationId: "app-9",
+      scheduledAtUtc: "2026-01-01T12:00:00Z",
+      status: "Scheduled",
+    })
+    expect(row.candidateName).toBe("Ana Pérez")
+    expect(row.applicationId).toBe("app-9")
   })
 
   it("lee interviewStatus anidado (camelCase) antes que status vacío", () => {

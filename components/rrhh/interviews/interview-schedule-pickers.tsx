@@ -48,6 +48,8 @@ export interface QuarterHourTimeSelectProps {
   ariaLabel: string
   allowEmpty?: boolean
   emptyLabel?: string
+  className?: string
+  inputClassName?: string
 }
 
 /**
@@ -61,6 +63,8 @@ export function QuarterHourTimeSelect({
   ariaLabel,
   allowEmpty = false,
   emptyLabel = "Hora",
+  className = "",
+  inputClassName = "",
 }: QuarterHourTimeSelectProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -154,7 +158,7 @@ export function QuarterHourTimeSelect({
   if (disabled && !value) {
     return (
       <div
-        className={`${timeInputClass} pointer-events-none flex items-center justify-center text-muted-foreground`}
+        className={`${timeInputClass} ${inputClassName} pointer-events-none flex items-center justify-center text-muted-foreground ${className}`.trim()}
         aria-label={ariaLabel}
       >
         —
@@ -169,7 +173,7 @@ export function QuarterHourTimeSelect({
       : ""
 
   return (
-    <div className="relative inline-flex items-center" ref={rootRef}>
+    <div className={`relative inline-flex min-w-0 items-center ${className}`.trim()} ref={rootRef}>
       <input
         ref={inputRef}
         type="text"
@@ -196,7 +200,7 @@ export function QuarterHourTimeSelect({
             setOpen(false)
           }
         }}
-        className={`${timeInputClass} pr-6`}
+        className={`${timeInputClass} pr-6 ${inputClassName}`.trim()}
         aria-label={ariaLabel}
         autoComplete="off"
       />

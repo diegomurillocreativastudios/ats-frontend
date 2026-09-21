@@ -246,6 +246,9 @@ export function CandidateInterviewList({
         onClose={handleCloseDetail}
         interviewId={detailInterviewId}
         vacancyIdFromQuery={detailVacancyId}
+        vacancyTitle={
+          items.find((row) => row.id === detailInterviewId)?.jobTitle ?? null
+        }
         onSaved={() => {
           load().catch(() => {})
           setSnackbar({

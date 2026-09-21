@@ -14,12 +14,14 @@ export interface InterviewCalendarWidgetProps {
   /** ISO UTC; si está vacío no se puede crear evento en calendario. */
   scheduledAtUtc: string
   onSync?: () => void
+  compact?: boolean
 }
 
 export function InterviewCalendarWidget({
   interviewId,
   scheduledAtUtc,
   onSync,
+  compact = false,
 }: InterviewCalendarWidgetProps) {
   const t = useTranslations("RecruiterPortal.interviews.calendar")
   const { status } = useGoogleCalendar()
@@ -65,16 +67,20 @@ export function InterviewCalendarWidget({
     }
   }
 
-  const cardClass =
-    "rounded-xl border border-border bg-card p-5 font-sans text-sm shadow-sm"
+  const cardClass = compact
+    ? "font-sans text-sm"
+    : "rounded-xl border border-border bg-card p-5 font-sans text-sm shadow-sm"
+  const headingClass = compact
+    ? "sr-only"
+    : "text-base font-semibold text-foreground"
 
   if (!status.isConnected) {
     return (
       <div className={cardClass}>
-        <h3 className="text-base font-semibold text-foreground">
+        <h3 className={headingClass}>
           {t("title")}
         </h3>
-        <p className="mt-2 text-muted-foreground">
+        <p className={compact ? "text-muted-foreground" : "mt-2 text-muted-foreground"}>
           {t("notConnected")}{" "}
           <Link
             href="/portal-rrhh/configuracion/calendario"
@@ -91,10 +97,10 @@ export function InterviewCalendarWidget({
   if (!scheduledAtUtc?.trim()) {
     return (
       <div className={cardClass}>
-        <h3 className="text-base font-semibold text-foreground">
+        <h3 className={headingClass}>
           {t("title")}
         </h3>
-        <p className="mt-2 text-muted-foreground">
+        <p className={compact ? "text-muted-foreground" : "mt-2 text-muted-foreground"}>
           {t("noSchedule")}
         </p>
       </div>
@@ -103,10 +109,8 @@ export function InterviewCalendarWidget({
 
   return (
     <>
-      <div className={`${cardClass} border-vo-purple/30`}>
-        <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-          {t("title")}
-        </h3>
+      <div className={compact ? cardClass : `${cardClass} border-vo-purple/30`}>
+        <h3 className={headingClass}>{t("title")}</h3>
 
         {isLoading ? (
           <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground">

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Modal from "@/components/ui/Modal"
+import { Button } from "@/components/ui/Button"
 import {
   classifyInterviewFeedbackConflict,
   fetchInterviewFeedbackForm,
@@ -17,6 +18,7 @@ import {
   type InterviewFeedbackForm,
   type InterviewFeedbackResponse,
 } from "@/lib/api/interview-feedback"
+import { getInitials } from "@/lib/getInitials"
 import { formatRequirementKey } from "@/lib/vacancies/format-requirement-key"
 
 export interface InterviewFeedbackCompletePayload {
@@ -30,11 +32,16 @@ export interface InterviewFeedbackModalProps {
   onClose: () => void
   applicationId: string | null
   candidateLabel?: string | null
+  vacancyLabel?: string | null
   onComplete: (payload: InterviewFeedbackCompletePayload) => void
 }
 
 const SCORE_MIN = 1
 const SCORE_MAX = 10
+const SCORE_VALUES = Array.from(
+  { length: SCORE_MAX - SCORE_MIN + 1 },
+  (_, index) => SCORE_MIN + index
+)
 
 function buildSuccessToastMessage(
   t: (key: string, values?: Record<string, string | number>) => string,
@@ -59,63 +66,111 @@ function buildSuccessToastMessage(
   return t("successUnchanged", { score: next })
 }
 
-function ScoreSlider({
+function countSetScores(scores: Record<string, number | null>): number {
+  return Object.values(scores).filter((value) => value != null).length
+}
+
+function ScoreChips({
   id,
   label,
   value,
   disabled,
   onChange,
-  unsetLabel,
+  expectedValue,
 }: {
   id: string
   label: string
   value: number | null
   disabled: boolean
   onChange: (next: number) => void
-  unsetLabel: string
+  expectedValue?: string
 }) {
+  const t = useTranslations("RecruiterPortal.vacancies.matching.interviewFeedback")
+  const labelId = `${id}-label`
+  const expected = expectedValue?.trim() ?? ""
+
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <label htmlFor={id} className="font-sans text-sm font-medium text-foreground">
-          {label}
-        </label>
-        <span className="font-sans text-xs font-medium tabular-nums text-foreground">
-          {value == null ? unsetLabel : value}
+    <div className="flex flex-col gap-2 rounded-lg border border-border bg-background px-3 py-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p
+            id={labelId}
+            className="font-sans text-sm font-medium text-foreground"
+          >
+            {label}
+          </p>
+          {expected ? (
+            <p
+              className="mt-1 inline-flex rounded-md border border-border bg-muted px-2 py-0.5 font-sans text-[11px] font-medium text-foreground"
+              title={t("expectedLevel", { level: expected })}
+            >
+              {expected}
+            </p>
+          ) : null}
+        </div>
+        <span className="shrink-0 font-sans text-xs font-medium tabular-nums text-muted-foreground">
+          {value == null ? t("notScored") : t("scoreValue", { score: value })}
         </span>
       </div>
-      <input
-        id={id}
-        type="range"
-        min={SCORE_MIN}
-        max={SCORE_MAX}
-        step={1}
-        value={value ?? SCORE_MIN}
-        disabled={disabled}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="h-2 w-full cursor-pointer accent-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
-        aria-valuemin={SCORE_MIN}
-        aria-valuemax={SCORE_MAX}
-        aria-valuenow={value ?? undefined}
-        aria-valuetext={value == null ? unsetLabel : String(value)}
-      />
+      <div
+        role="radiogroup"
+        aria-labelledby={labelId}
+        aria-required="true"
+        className="flex flex-wrap gap-1.5"
+      >
+        {SCORE_VALUES.map((score) => {
+          const isSelected = value === score
+          return (
+            <label
+              key={score}
+              className={disabled ? "cursor-not-allowed" : "cursor-pointer"}
+            >
+              <input
+                type="radio"
+                name={id}
+                value={score}
+                checked={isSelected}
+                disabled={disabled}
+                onChange={() => onChange(score)}
+                className="peer sr-only"
+                aria-label={t("scoreChipAria", { skill: label, score })}
+              />
+              <span className="inline-flex min-h-11 min-w-11 select-none items-center justify-center rounded-md border border-border bg-background font-sans text-sm font-medium tabular-nums text-foreground transition-colors hover:bg-muted peer-checked:border-vo-purple peer-checked:bg-vo-purple peer-checked:font-semibold peer-checked:text-white peer-checked:hover:bg-vo-purple-hover peer-focus-visible:ring-2 peer-focus-visible:ring-vo-purple peer-focus-visible:ring-offset-2 peer-disabled:opacity-60">
+                {score}
+              </span>
+            </label>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
 function FeedbackHistoryList({
   entries,
+  isOpen,
+  onOpenChange,
   t,
 }: {
   entries: InterviewFeedbackEntry[]
+  isOpen: boolean
+  onOpenChange: (next: boolean) => void
   t: (key: string, values?: Record<string, string | number>) => string
 }) {
   if (entries.length === 0) return null
 
   return (
-    <section className="flex flex-col gap-3 border-t border-border pt-4" aria-label={t("historyTitle")}>
-      <h3 className="font-sans text-sm font-semibold text-foreground">{t("historyTitle")}</h3>
-      <ul className="flex flex-col gap-3">
+    <details
+      className="border-t border-border pt-4"
+      open={isOpen}
+      onToggle={(event) => {
+        onOpenChange(event.currentTarget.open)
+      }}
+    >
+      <summary className="cursor-pointer rounded-md font-sans text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2">
+        {t("historyTitle")} ({entries.length})
+      </summary>
+      <ul className="mt-3 flex flex-col gap-3">
         {entries.map((entry) => {
           const previous = toPercentPoints(entry.previousMatchScore)
           const next = toPercentPoints(entry.matchScore)
@@ -177,7 +232,7 @@ function FeedbackHistoryList({
           )
         })}
       </ul>
-    </section>
+    </details>
   )
 }
 
@@ -186,6 +241,7 @@ export function InterviewFeedbackModal({
   onClose,
   applicationId,
   candidateLabel,
+  vacancyLabel,
   onComplete,
 }: InterviewFeedbackModalProps) {
   const t = useTranslations("RecruiterPortal.vacancies.matching.interviewFeedback")
@@ -197,6 +253,7 @@ export function InterviewFeedbackModal({
   const [isLoadingForm, setIsLoadingForm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
   const resetFormFields = useCallback((nextForm: InterviewFeedbackForm | null) => {
     setFeedback("")
@@ -249,6 +306,7 @@ export function InterviewFeedbackModal({
     if (!isOpen || !applicationId) return
     setForm(null)
     resetFormFields(null)
+    setIsHistoryOpen(false)
     void loadForm()
     // Only reload when the modal opens for an application.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional open/id gate
@@ -292,13 +350,26 @@ export function InterviewFeedbackModal({
     technicalSkills: techPayload,
   })
 
+  const totalSkills = softSkillIds.length + technicalKeys.length
+  const scoredCount = countSetScores(softScores) + countSetScores(techScores)
+  const hasComment = feedback.trim().length > 0
+
   const canSubmit =
     Boolean(applicationId) &&
     Boolean(form) &&
     !isLoadingForm &&
     !isSubmitting &&
-    feedback.trim().length > 0 &&
+    hasComment &&
     coverageOk
+
+  const progressText = useMemo(() => {
+    const parts: string[] = []
+    if (totalSkills > 0) {
+      parts.push(t("progressSkills", { scored: scoredCount, total: totalSkills }))
+    }
+    parts.push(hasComment ? t("progressCommentReady") : t("progressCommentMissing"))
+    return parts.join(" · ")
+  }, [hasComment, scoredCount, t, totalSkills])
 
   const handleSubmit = useCallback(async () => {
     if (!applicationId || !form || isSubmitting || isLoadingForm) return
@@ -341,6 +412,7 @@ export function InterviewFeedbackModal({
       const refreshed = await fetchInterviewFeedbackForm(applicationId)
       setForm(refreshed)
       resetFormFields(refreshed)
+      setIsHistoryOpen(true)
     } catch (err: unknown) {
       const conflict = classifyInterviewFeedbackConflict(err)
       const message = t(interviewFeedbackErrorKey(err))
@@ -375,6 +447,12 @@ export function InterviewFeedbackModal({
 
   if (!applicationId) return null
 
+  const trimmedCandidate = candidateLabel?.trim() ?? ""
+  const trimmedVacancy = vacancyLabel?.trim() ?? ""
+  const showSkills = Boolean(
+    form && !isLoadingForm && (form.softSkills.length > 0 || form.technicalSkills.length > 0)
+  )
+
   return (
     <Modal
       isOpen={isOpen}
@@ -383,34 +461,66 @@ export function InterviewFeedbackModal({
       size="lg"
       closeOnOverlayClick={!isSubmitting && !isLoadingForm}
       overlayZIndexClass="z-[100]"
+      contentClassName="modal-surface-solid"
       footer={
-        <div className="flex w-full flex-wrap items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={isSubmitting || isLoadingForm}
-            className="inline-flex items-center rounded-md border border-border px-4 py-2 font-sans text-sm text-foreground hover:bg-muted disabled:opacity-50"
-          >
-            {tCommon("cancel")}
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleSubmit()}
-            disabled={!canSubmit}
-            className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2 font-sans text-sm font-medium text-white hover:bg-vo-purple-hover disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            ) : null}
-            {isSubmitting ? t("submitting") : t("submit")}
-          </button>
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {form && !isLoadingForm ? (
+            <p
+              id="interview-feedback-progress"
+              className="font-sans text-xs text-muted-foreground"
+              aria-live="polite"
+            >
+              {progressText}
+            </p>
+          ) : (
+            <span className="hidden sm:block" />
+          )}
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={isSubmitting || isLoadingForm}
+              className="min-h-11"
+            >
+              {tCommon("cancel")}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void handleSubmit()}
+              disabled={!canSubmit}
+              loading={isSubmitting}
+              aria-describedby={form && !isLoadingForm ? "interview-feedback-progress" : undefined}
+              className="min-h-11 bg-vo-purple text-white hover:bg-vo-purple-hover"
+            >
+              {isSubmitting ? t("submitting") : t("submit")}
+            </Button>
+          </div>
         </div>
       }
     >
-      <div className="flex flex-col gap-4">
-        {candidateLabel ? (
-          <p className="font-sans text-sm text-muted-foreground">{candidateLabel}</p>
+      <div className="flex flex-col gap-5">
+        {trimmedCandidate ? (
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/50 px-3 py-3">
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-sm font-semibold text-white"
+              aria-hidden
+            >
+              {getInitials(trimmedCandidate)}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate font-sans text-sm font-semibold text-foreground">
+                {trimmedCandidate}
+              </p>
+              {trimmedVacancy ? (
+                <p className="truncate font-sans text-xs text-muted-foreground">
+                  {trimmedVacancy}
+                </p>
+              ) : null}
+            </div>
+          </div>
         ) : null}
+
         <p className="font-sans text-sm text-muted-foreground">{t("modalDescription")}</p>
 
         {isLoadingForm ? (
@@ -431,13 +541,17 @@ export function InterviewFeedbackModal({
 
         {form && !isLoadingForm ? (
           <>
+            {showSkills ? (
+              <p className="font-sans text-xs text-muted-foreground">{t("scaleLegend")}</p>
+            ) : null}
+
             {form.softSkills.length > 0 ? (
               <section className="flex flex-col gap-3" aria-label={t("softSkillsTitle")}>
                 <h3 className="font-sans text-sm font-semibold text-foreground">
                   {t("softSkillsTitle")}
                 </h3>
                 {form.softSkills.map((skill) => (
-                  <ScoreSlider
+                  <ScoreChips
                     key={skill.id}
                     id={`interview-feedback-soft-${skill.id}`}
                     label={skill.displayName}
@@ -446,7 +560,6 @@ export function InterviewFeedbackModal({
                     onChange={(next) =>
                       setSoftScores((prev) => ({ ...prev, [skill.id]: next }))
                     }
-                    unsetLabel={t("scoreUnset")}
                   />
                 ))}
               </section>
@@ -460,28 +573,22 @@ export function InterviewFeedbackModal({
                 <h3 className="font-sans text-sm font-semibold text-foreground">
                   {t("technicalSkillsTitle")}
                 </h3>
-                {form.technicalSkills.map((skill) => {
-                  const keyLabel = formatRequirementKey(skill.requirementKey)
-                  const label = skill.expectedValue
-                    ? `${keyLabel} (${skill.expectedValue})`
-                    : keyLabel
-                  return (
-                    <ScoreSlider
-                      key={skill.requirementKey}
-                      id={`interview-feedback-tech-${skill.requirementKey}`}
-                      label={label}
-                      value={techScores[skill.requirementKey] ?? null}
-                      disabled={isSubmitting}
-                      onChange={(next) =>
-                        setTechScores((prev) => ({
-                          ...prev,
-                          [skill.requirementKey]: next,
-                        }))
-                      }
-                      unsetLabel={t("scoreUnset")}
-                    />
-                  )
-                })}
+                {form.technicalSkills.map((skill) => (
+                  <ScoreChips
+                    key={skill.requirementKey}
+                    id={`interview-feedback-tech-${skill.requirementKey}`}
+                    label={formatRequirementKey(skill.requirementKey)}
+                    expectedValue={skill.expectedValue}
+                    value={techScores[skill.requirementKey] ?? null}
+                    disabled={isSubmitting}
+                    onChange={(next) =>
+                      setTechScores((prev) => ({
+                        ...prev,
+                        [skill.requirementKey]: next,
+                      }))
+                    }
+                  />
+                ))}
               </section>
             ) : null}
 
@@ -496,14 +603,21 @@ export function InterviewFeedbackModal({
                 id="interview-feedback-modal-field"
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                rows={6}
+                rows={5}
                 disabled={isSubmitting}
+                required
+                aria-invalid={Boolean(error) && !hasComment}
                 placeholder={t("placeholder")}
-                className="resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
+                className="min-h-34 resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
               />
             </div>
 
-            <FeedbackHistoryList entries={form.entries} t={t} />
+            <FeedbackHistoryList
+              entries={form.entries}
+              isOpen={isHistoryOpen}
+              onOpenChange={setIsHistoryOpen}
+              t={t}
+            />
           </>
         ) : null}
       </div>

@@ -9,6 +9,8 @@ export interface InterviewDetailModalProps {
   onClose: () => void
   interviewId: string | null
   vacancyIdFromQuery?: string | null
+  candidateLabel?: string | null
+  vacancyTitle?: string | null
   onSaved?: () => void
   onDeleted?: (interviewId: string) => void
 }
@@ -18,6 +20,8 @@ export function InterviewDetailModal({
   onClose,
   interviewId,
   vacancyIdFromQuery = null,
+  candidateLabel = null,
+  vacancyTitle = null,
   onSaved,
   onDeleted,
 }: InterviewDetailModalProps) {
@@ -35,6 +39,8 @@ export function InterviewDetailModal({
       <InterviewDetailPanel
         interviewId={interviewId}
         vacancyIdFromQuery={vacancyIdFromQuery}
+        candidateLabel={candidateLabel}
+        vacancyTitle={vacancyTitle}
         variant="modal"
         onClose={onClose}
         onSaved={onSaved}

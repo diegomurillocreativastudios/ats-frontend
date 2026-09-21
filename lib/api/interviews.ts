@@ -17,6 +17,10 @@ export interface Interview {
   /** Título de la vacante u oferta si el API lo envía (p. ej. portal candidato). */
   jobTitle: string | null
   candidateProfileId: string
+  /** Nombre del candidato si el API lo envía. */
+  candidateName: string | null
+  /** Id de postulación si el API lo envía (para evaluación al completar). */
+  applicationId: string | null
   scheduledAtUtc: string
   durationMinutes: number | null
   /** Valor para PATCH / select (código, id o string legacy). */
@@ -529,6 +533,17 @@ export function normalizeInterview(raw: unknown): Interview {
       "candidate_profile_id",
       "CandidateProfileId",
     ]) ?? ""
+  const candidateName =
+    pickString(r, [
+      "candidateName",
+      "candidate_name",
+      "candidateFullName",
+      "candidate_full_name",
+      "applicantName",
+      "applicant_name",
+    ]) ?? null
+  const applicationId =
+    pickString(r, ["applicationId", "application_id", "ApplicationId"]) ?? null
   const scheduledAtUtc =
     pickString(r, [
       "scheduledAtUtc",
@@ -544,6 +559,8 @@ export function normalizeInterview(raw: unknown): Interview {
     vacancyId,
     jobTitle,
     candidateProfileId,
+    candidateName,
+    applicationId,
     scheduledAtUtc,
     durationMinutes: pickNumber(r, ["durationMinutes", "duration_minutes"]),
     interviewType: typeMeta.typeValue,

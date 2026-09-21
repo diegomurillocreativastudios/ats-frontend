@@ -36,12 +36,12 @@ describe("validateStageMove", () => {
     })
   })
 
-  it("allows moving one stage backward without a final application status", () => {
+  it("blocks moving one stage backward even without a final application status", () => {
     expect(
       validateStageMove("Screening", "Applied", catalog, "st-open", statuses)
     ).toEqual({
-      allowed: true,
-      code: "ok",
+      allowed: false,
+      code: "skip_not_allowed",
     })
   })
 

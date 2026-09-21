@@ -130,8 +130,9 @@ export function readApplicationId(
 }
 
 /**
- * Gates leaving the interview stage forward. Entering interview, moving back,
- * or rejecting stay unrestricted by interviewDone / feedback.
+ * Gates leaving the interview stage forward. Entering interview or rejecting
+ * stay unrestricted by interviewDone / feedback. Backward moves are blocked
+ * earlier by pipeline geometry (`canMoveApplicationStage`).
  */
 export function validateInterviewStageLeaveMove(params: {
   current: ApplicationStageRef

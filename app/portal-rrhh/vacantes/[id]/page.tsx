@@ -48,6 +48,7 @@ import {
 import { getApiErrorMessage } from "@/lib/api-error"
 import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
+import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
 import { VacancyFinishedSummary } from "@/components/rrhh/VacancyFinishedSummary"
@@ -776,6 +777,7 @@ const KanbanCard = ({
           onClose={() => setInterviewFeedbackOpen(false)}
           applicationId={applicationId}
           candidateLabel={displayName}
+          vacancyLabel={vacancyTitle}
           onComplete={onInterviewFeedbackComplete}
         />
       ) : null}
@@ -1095,6 +1097,7 @@ export default function VacanteDetallePage() {
   const [companies, setCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [loadingMoveStage, setLoadingMoveStage] = useState(false);
+  const [pendingStageMove, setPendingStageMove] = useState(null);
   const [applicationStatusError, setApplicationStatusError] = useState(null);
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
   const [finishProcessModalOpen, setFinishProcessModalOpen] = useState(false);
@@ -2003,10 +2006,13 @@ export default function VacanteDetallePage() {
   const handleKanbanStageDrop = useCallback(
     async (candidateId, newStage) => {
       if (isVacancyReadOnly) return;
+      if (loadingMoveStage || pendingStageMove) return;
       setApplicationStatusError(null);
-      const applicant = applicants.find(
+      const applicantIndex = applicants.findIndex(
         (m, i) => getCandidateId(m, i) === candidateId
       );
+      const applicant =
+        applicantIndex >= 0 ? applicants[applicantIndex] : null;
       const applicationId = applicant?.applicationId ?? applicant?.application_id;
       const currentStage =
         candidateStageOverrides[candidateId] ??
@@ -2095,52 +2101,87 @@ export default function VacanteDetallePage() {
         return;
       }
 
-      setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
-      setLoadingMoveStage(true);
+      setPendingStageMove({
+        candidateId,
+        applicationId,
+        stageId,
+        newStage,
+        fromStage: currentStage,
+        displayName: pickApplicantDisplayName(
+          applicant,
+          applicantIndex >= 0 ? applicantIndex : 0
+        ),
+      });
+    },
+    [
+      applicants,
+      stages,
+      statuses,
+      orderedKanbanStageNames,
+      candidateStageOverrides,
+      candidateStatusOverrides,
+      isVacancyReadOnly,
+      loadingMoveStage,
+      pendingStageMove,
+      tMatching,
+    ]
+  );
+
+  const handleCancelPendingStageMove = useCallback(() => {
+    if (loadingMoveStage) return;
+    setPendingStageMove(null);
+  }, [loadingMoveStage]);
+
+  const handleConfirmPendingStageMove = useCallback(async () => {
+    if (!pendingStageMove || loadingMoveStage) return;
+    const { candidateId, applicationId, stageId, newStage } = pendingStageMove;
+
+    setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
+    setLoadingMoveStage(true);
+    try {
+      await apiClient.patch(
+        `/api/recruiter/applications/${applicationId}/move-to-stage`,
+        { stageId, notes: "" }
+      );
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: tMatching("errors.candidateMovedStage"),
+      });
+      setPendingStageMove(null);
+      /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
       try {
-        await apiClient.patch(
-          `/api/recruiter/applications/${applicationId}/move-to-stage`,
-          { stageId, notes: "" }
-        );
-        setSnackbar({
-          open: true,
-          variant: "success",
-          message: tMatching("errors.candidateMovedStage"),
-        });
-        /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
-        try {
-          await fetchVacancy(true);
-          setCandidateStageOverrides((prev) => {
-            const next = { ...prev };
-            delete next[candidateId];
-            return next;
-          });
-          setCandidateStatusOverrides((prev) => {
-            const next = { ...prev };
-            delete next[candidateId];
-            return next;
-          });
-        } catch {
-          /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
-        }
-      } catch (err) {
-        const normalized = normalizeMoveStageError(err, tMatching);
-        setSnackbar({
-          open: true,
-          variant: "error",
-          message: normalized.text,
-        });
+        await fetchVacancy(true);
         setCandidateStageOverrides((prev) => {
           const next = { ...prev };
           delete next[candidateId];
           return next;
         });
-      } finally {
-        setLoadingMoveStage(false);
+        setCandidateStatusOverrides((prev) => {
+          const next = { ...prev };
+          delete next[candidateId];
+          return next;
+        });
+      } catch {
+        /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
       }
-    },
-    [applicants, stages, statuses, orderedKanbanStageNames, candidateStageOverrides, candidateStatusOverrides, fetchVacancy, isVacancyReadOnly, tMatching]
-  );
+    } catch (err) {
+      const normalized = normalizeMoveStageError(err, tMatching);
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: normalized.text,
+      });
+      setCandidateStageOverrides((prev) => {
+        const next = { ...prev };
+        delete next[candidateId];
+        return next;
+      });
+      setPendingStageMove(null);
+    } finally {
+      setLoadingMoveStage(false);
+    }
+  }, [pendingStageMove, loadingMoveStage, fetchVacancy, tMatching]);
 
   const handleKanbanCardDragStart = useCallback(
     (stage, statusId, interviewDone, hasInterviewFeedback) => {
@@ -4192,6 +4233,23 @@ export default function VacanteDetallePage() {
         onClose={handleCancelPaste}
         onConfirm={handleConfirmPaste}
       />
+
+      {pendingStageMove ? (
+        <DeleteConfirmModal
+          isOpen
+          onClose={handleCancelPendingStageMove}
+          onConfirm={handleConfirmPendingStageMove}
+          loading={loadingMoveStage}
+          intent="primary"
+          title={tMatching("kanban.confirmStageMoveTitle")}
+          message={tMatching("kanban.confirmStageMoveMessage", {
+            name: pendingStageMove.displayName,
+            fromStage: pendingStageMove.fromStage,
+            toStage: pendingStageMove.newStage,
+          })}
+          confirmText={tMatching("kanban.confirmStageMoveConfirm")}
+        />
+      ) : null}
     </>
   );
 }

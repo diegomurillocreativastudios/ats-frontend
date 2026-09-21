@@ -41,6 +41,7 @@ export type InterviewFormProps =
 export function InterviewForm(props: InterviewFormProps) {
   const { vacancyId } = props
   const t = useTranslations("RecruiterPortal.interviews.form")
+  const tDetail = useTranslations("RecruiterPortal.interviews.detail")
   const tCommon = useTranslations("Common")
   const { status: calendarStatus } = useGoogleCalendar()
   const isModal = props.mode === "modal"
@@ -329,6 +330,14 @@ export function InterviewForm(props: InterviewFormProps) {
             onDurationMinutesChange={setDurationMinutes}
             ariaLabelledBy="interview-when-label"
             errorMessage={fieldErrors.scheduledLocal ?? null}
+            durationLabel={
+              Number.isFinite(parseInt(durationMinutes, 10)) &&
+              parseInt(durationMinutes, 10) > 0
+                ? tDetail("durationMinutes", {
+                    minutes: parseInt(durationMinutes, 10),
+                  })
+                : null
+            }
           />
           {fieldErrors.scheduledLocal ? (
             <p id="err-when" className="text-sm text-destructive" role="alert">

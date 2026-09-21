@@ -123,12 +123,12 @@ export function isHiredTerminalStage(
 }
 
 /**
- * Mirrors backend `ApplicationStageTransitions.CanMove`.
+ * Pipeline stage geometry for the Kanban.
  *
  * 1. Same stage → allowed (no-op).
  * 2. Target `final === true && isHiredStage !== true` → allowed from any origin.
- * 3. Otherwise only neighbors in the catalog sorted by `orderIndex`, then `id`.
- * 4. Everything else → invalid.
+ * 3. Otherwise only the next neighbor in the catalog sorted by `orderIndex`, then `id`.
+ * 4. Moving backward (or skipping) → invalid.
  */
 export function canMoveApplicationStage(
   current: ApplicationStageRef,
@@ -149,7 +149,7 @@ export function canMoveApplicationStage(
   const fromIndex = sorted.findIndex((stage) => stage.id === from.id)
   const toIndex = sorted.findIndex((stage) => stage.id === to.id)
   if (fromIndex < 0 || toIndex < 0) return false
-  return Math.abs(fromIndex - toIndex) === 1
+  return toIndex === fromIndex + 1
 }
 
 export function isFinalApplicationStatus(
@@ -165,7 +165,6 @@ export function isFinalApplicationStatus(
 /**
  * Forward to the next pipeline stage, or to any pipeline stage with `final: true`
  * (shortcut or hired), requires an application status marked as final.
- * Backward to the previous neighbor does not.
  */
 export function stageMoveRequiresFinalApplicationStatus(
   current: ApplicationStageRef,

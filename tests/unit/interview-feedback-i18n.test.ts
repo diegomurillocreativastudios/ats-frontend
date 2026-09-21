@@ -42,6 +42,13 @@ describe("interview feedback i18n", () => {
       expect(feedback.softSkillsTitle, locale).toBeTruthy()
       expect(feedback.technicalSkillsTitle, locale).toBeTruthy()
       expect(feedback.historyTitle, locale).toBeTruthy()
+      expect(feedback.scaleLegend, locale).toBeTruthy()
+      expect(feedback.notScored, locale).toBeTruthy()
+      expect(feedback.scoreChipAria, locale).toContain("{skill}")
+      expect(feedback.scoreChipAria, locale).toContain("{score}")
+      expect(feedback.progressSkills, locale).toContain("{scored}")
+      expect(feedback.progressSkills, locale).toMatch(/\{total/)
+      expect(feedback.progressCommentMissing, locale).toBeTruthy()
       expect(feedback.successIncreased, locale).toContain("{previous}")
       expect(feedback.changePoints, locale).toContain("{signedDelta}")
       const matching = (

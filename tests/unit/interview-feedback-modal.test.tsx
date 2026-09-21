@@ -61,11 +61,11 @@ describe("InterviewFeedbackModal", () => {
       />
     )
 
-    await screen.findByLabelText("Feedback")
-    const submit = screen.getByRole("button", { name: "Enviar" })
+    await screen.findByLabelText("Comentario")
+    const submit = screen.getByRole("button", { name: "Guardar evaluación" })
     expect(submit).toBeDisabled()
 
-    fireEvent.change(screen.getByLabelText("Feedback"), {
+    fireEvent.change(screen.getByLabelText("Comentario"), {
       target: { value: "   " },
     })
     expect(submit).toBeDisabled()
@@ -110,14 +110,14 @@ describe("InterviewFeedbackModal", () => {
       />
     )
 
-    fireEvent.change(await screen.findByLabelText("Feedback"), {
+    fireEvent.change(await screen.findByLabelText("Comentario"), {
       target: { value: "Buena comunicación" },
     })
-    const submit = screen.getByRole("button", { name: "Enviar" })
+    const submit = screen.getByRole("button", { name: "Guardar evaluación" })
     fireEvent.click(submit)
     fireEvent.click(submit)
 
-    expect(await screen.findByRole("button", { name: "Enviando…" })).toBeDisabled()
+    expect(await screen.findByRole("button", { name: "Guardando…" })).toBeDisabled()
     expect(submitInterviewFeedback).toHaveBeenCalledTimes(1)
     expect(submitInterviewFeedback).toHaveBeenCalledWith("app-1", {
       feedback: "Buena comunicación",
@@ -145,7 +145,7 @@ describe("InterviewFeedbackModal", () => {
     expect(onComplete.mock.calls[0]?.[0].message).toContain("+6")
     expect(onClose).not.toHaveBeenCalled()
     expect(fetchInterviewFeedbackForm).toHaveBeenCalledTimes(2)
-    expect(await screen.findByText("Historial de feedback")).toBeInTheDocument()
+    expect(await screen.findByText(/Historial de feedback/)).toBeInTheDocument()
   })
 
   it("refreshes the board on 409 without retrying", async () => {
@@ -168,16 +168,16 @@ describe("InterviewFeedbackModal", () => {
       />
     )
 
-    fireEvent.change(await screen.findByLabelText("Feedback"), {
+    fireEvent.change(await screen.findByLabelText("Comentario"), {
       target: { value: "Notas del reclutador" },
     })
-    fireEvent.click(screen.getByRole("button", { name: "Enviar" }))
+    fireEvent.click(screen.getByRole("button", { name: "Guardar evaluación" }))
 
     await waitFor(() => {
       expect(onComplete).toHaveBeenCalledWith({
         variant: "error",
         message:
-          "La postulación ya no se encuentra en la etapa de entrevista. El tablero será actualizado.",
+          "El feedback solo aplica en la etapa Entrevista.",
         shouldRefresh: true,
       })
     })
@@ -211,19 +211,37 @@ describe("InterviewFeedbackModal", () => {
       />
     )
 
-    fireEvent.change(await screen.findByLabelText("Feedback"), {
+    fireEvent.change(await screen.findByLabelText("Comentario"), {
       target: { value: "Notas" },
     })
-    expect(screen.getByRole("button", { name: "Enviar" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Guardar evaluación" })).toBeDisabled()
+    expect(screen.getByText("1–3 bajo · 4–6 medio · 7–8 alto · 9–10 excelente")).toBeInTheDocument()
+    expect(screen.getByText("0 de 2 habilidades · comentario listo")).toBeInTheDocument()
 
-    fireEvent.change(screen.getByLabelText("Comunicación"), {
-      target: { value: "8" },
-    })
-    expect(screen.getByRole("button", { name: "Enviar" })).toBeDisabled()
+    fireEvent.click(screen.getByRole("radio", { name: "Comunicación: 8" }))
+    expect(screen.getByRole("button", { name: "Guardar evaluación" })).toBeDisabled()
+    expect(screen.getByText("1 de 2 habilidades · comentario listo")).toBeInTheDocument()
 
-    fireEvent.change(screen.getByLabelText("React.js (Avanzado)"), {
-      target: { value: "7" },
-    })
-    expect(screen.getByRole("button", { name: "Enviar" })).not.toBeDisabled()
+    fireEvent.click(screen.getByRole("radio", { name: "React.js: 7" }))
+    expect(screen.getByRole("button", { name: "Guardar evaluación" })).not.toBeDisabled()
+    expect(screen.getByText("2 de 2 habilidades · comentario listo")).toBeInTheDocument()
+    expect(screen.getByText("Avanzado")).toBeInTheDocument()
+  })
+
+  it("shows candidate and vacancy context in the header", async () => {
+    renderModal(
+      <InterviewFeedbackModal
+        isOpen
+        onClose={vi.fn()}
+        applicationId="app-1"
+        candidateLabel="Camila Rivas Navarro"
+        vacancyLabel="Desarrollador frontend"
+        onComplete={vi.fn()}
+      />
+    )
+
+    await screen.findByLabelText("Comentario")
+    expect(screen.getByText("Camila Rivas Navarro")).toBeInTheDocument()
+    expect(screen.getByText("Desarrollador frontend")).toBeInTheDocument()
   })
 })

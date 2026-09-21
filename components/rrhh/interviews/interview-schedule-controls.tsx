@@ -20,6 +20,10 @@ export interface InterviewScheduleRowProps {
   disabled?: boolean
   ariaLabelledBy?: string
   errorMessage?: string | null
+  dateAriaLabel?: string
+  startAriaLabel?: string
+  endAriaLabel?: string
+  durationLabel?: string | null
 }
 
 /**
@@ -33,6 +37,10 @@ export function InterviewScheduleRow({
   disabled = false,
   ariaLabelledBy,
   errorMessage,
+  dateAriaLabel = "Fecha de la entrevista",
+  startAriaLabel = "Hora de inicio",
+  endAriaLabel = "Hora de fin",
+  durationLabel = null,
 }: InterviewScheduleRowProps) {
   const { date, time: startTime } = splitDatetimeLocal(scheduledLocal)
   const durationParsed = parseInt(durationMinutes, 10)
@@ -79,7 +87,7 @@ export function InterviewScheduleRow({
   return (
     <div
       role="group"
-      className="flex flex-wrap items-center gap-2"
+      className="flex flex-col gap-2"
       aria-labelledby={ariaLabelledBy}
       aria-describedby={errorMessage ? "err-when" : undefined}
     >
@@ -87,29 +95,45 @@ export function InterviewScheduleRow({
         value={date}
         onChange={handleDateChange}
         disabled={disabled}
-        ariaLabel="Fecha de la entrevista"
+        ariaLabel={dateAriaLabel}
         errorMessage={errorMessage}
+        wrapperClassName="relative w-full"
+        buttonClassName="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-center font-sans text-sm text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
       />
-      <QuarterHourTimeSelect
-        value={startTime}
-        onChange={handleStartChange}
-        disabled={disabled}
-        ariaLabel="Hora de inicio"
-        allowEmpty
-        emptyLabel="Inicio"
-      />
-      <span
-        className="select-none font-sans text-sm text-muted-foreground"
-        aria-hidden
-      >
-        —
-      </span>
-      <QuarterHourTimeSelect
-        value={endTime}
-        onChange={handleEndChange}
-        disabled={disabled || !startTime}
-        ariaLabel="Hora de fin"
-      />
+      <div className="flex min-w-0 items-center gap-2">
+        <QuarterHourTimeSelect
+          value={startTime}
+          onChange={handleStartChange}
+          disabled={disabled}
+          ariaLabel={startAriaLabel}
+          allowEmpty
+          emptyLabel="Inicio"
+          className="min-w-0 flex-1"
+          inputClassName="w-full min-w-0 max-w-none"
+        />
+        <span
+          className="select-none font-sans text-sm text-muted-foreground"
+          aria-hidden
+        >
+          —
+        </span>
+        <QuarterHourTimeSelect
+          value={endTime}
+          onChange={handleEndChange}
+          disabled={disabled || !startTime}
+          ariaLabel={endAriaLabel}
+          className="min-w-0 flex-1"
+          inputClassName="w-full min-w-0 max-w-none"
+        />
+        {durationLabel ? (
+          <span
+            className="shrink-0 font-sans text-xs tabular-nums text-muted-foreground"
+            data-testid="interview-schedule-duration"
+          >
+            {durationLabel}
+          </span>
+        ) : null}
+      </div>
     </div>
   )
 }

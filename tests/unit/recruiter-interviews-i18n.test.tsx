@@ -242,6 +242,35 @@ describe("RecruiterPortal.interviews namespace parity (Etapa 11)", () => {
     }
   })
 
+  it("mantiene las claves de detalle del modal en los 5 idiomas", () => {
+    const keys = [
+      "candidateFallback",
+      "durationMinutes",
+      "descriptionPlaceholder",
+      "sessionLinks",
+      "copyMeet",
+      "completedNoFeedback",
+    ]
+    for (const locale of locales) {
+      const detail = (
+        (
+          messagesByLocale[locale].RecruiterPortal as {
+            interviews: { detail: Record<string, unknown> }
+          }
+        ).interviews.detail
+      )
+      for (const key of keys) {
+        expect(detail[key], `${key} ausente en ${locale}`).toBeTruthy()
+      }
+      const confirm = detail.statusConfirm as Record<string, string>
+      expect(confirm.completeTitle, locale).toBeTruthy()
+      expect(confirm.noShowConfirm, locale).toBeTruthy()
+      expect((detail.fields as Record<string, string>).description).not.toMatch(
+        /Descripcion$/
+      )
+    }
+  })
+
   it("mantiene las subsecciones esperadas de interviews en los 5 idiomas", () => {
     const expected = [
       "breadcrumb",

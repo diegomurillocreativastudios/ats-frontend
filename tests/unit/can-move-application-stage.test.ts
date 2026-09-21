@@ -33,9 +33,9 @@ describe("canMoveApplicationStage", () => {
     )
   })
 
-  it("allows moving to the previous adjacent stage", () => {
+  it("blocks moving to the previous adjacent stage", () => {
     expect(canMoveApplicationStage("Screening", "Applied", canonicalCatalog)).toBe(
-      true
+      false
     )
   })
 
@@ -100,13 +100,13 @@ describe("canMoveApplicationStage", () => {
     ).toBe(true)
   })
 
-  it("treats orderIndex gaps as adjacent when they are neighbors in the sorted catalog", () => {
+  it("treats orderIndex gaps as the next neighbor in the sorted catalog", () => {
     const sparse: ApplicationStageCatalogItem[] = [
       { id: "a", name: "First", orderIndex: 0, final: false, isHiredStage: false },
       { id: "b", name: "Last", orderIndex: 10, final: false, isHiredStage: false },
     ]
     expect(canMoveApplicationStage("First", "Last", sparse)).toBe(true)
-    expect(canMoveApplicationStage("Last", "First", sparse)).toBe(true)
+    expect(canMoveApplicationStage("Last", "First", sparse)).toBe(false)
   })
 
   it("does not use the stage name to decide the shortcut", () => {
@@ -157,18 +157,18 @@ describe("isRejectionShortcutStage", () => {
 })
 
 describe("listValidMoveTargets", () => {
-  it("lists previous, next, and every shortcut stage from Applied", () => {
+  it("lists next and every shortcut stage from Applied", () => {
     const names = listValidMoveTargets("Applied", canonicalCatalog).map(
       (stage) => stage.name
     )
-    expect(names).toEqual(["Sourced", "Screening", "Rejected"])
+    expect(names).toEqual(["Screening", "Rejected"])
   })
 
-  it("includes Hired only when it is the adjacent neighbor", () => {
+  it("includes Hired only when it is the next neighbor", () => {
     const fromOffer = listValidMoveTargets("Offer", canonicalCatalog).map(
       (stage) => stage.name
     )
-    expect(fromOffer).toEqual(["Interview", "Hired", "Rejected"])
+    expect(fromOffer).toEqual(["Hired", "Rejected"])
 
     const fromApplied = listValidMoveTargets("Applied", canonicalCatalog).map(
       (stage) => stage.name
@@ -176,7 +176,7 @@ describe("listValidMoveTargets", () => {
     expect(fromApplied).not.toContain("Hired")
   })
 
-  it("keeps only the previous neighbor when the application status is not final", () => {
+  it("keeps no targets when the application status is not final and there is no shortcut-only path", () => {
     const statuses = [
       { id: "st-open", name: "Por iniciar", final: false },
       { id: "st-done", name: "Concluido", final: true },
@@ -187,7 +187,7 @@ describe("listValidMoveTargets", () => {
       "st-open",
       statuses
     ).map((stage) => stage.name)
-    expect(names).toEqual(["Applied"])
+    expect(names).toEqual([])
   })
 
   it("allows next and shortcut when the application status is final", () => {
@@ -201,6 +201,6 @@ describe("listValidMoveTargets", () => {
       "st-done",
       statuses
     ).map((stage) => stage.name)
-    expect(names).toEqual(["Sourced", "Screening", "Rejected"])
+    expect(names).toEqual(["Screening", "Rejected"])
   })
 })

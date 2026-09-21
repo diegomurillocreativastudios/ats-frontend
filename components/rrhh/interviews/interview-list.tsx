@@ -541,6 +541,21 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
         onClose={handleCloseDetail}
         interviewId={detailInterviewId}
         vacancyIdFromQuery={vacancyId}
+        candidateLabel={
+          detailInterviewId
+            ? (() => {
+                const row = items.find((item) => item.id === detailInterviewId)
+                return row
+                  ? formatCandidateLabel(
+                      row.candidateProfileId,
+                      applicantLabelByProfileId,
+                      t
+                    )
+                  : null
+              })()
+            : null
+        }
+        vacancyTitle={vacancyTitle}
         onSaved={() => {
           load().catch(() => {})
           setSnackbar({
