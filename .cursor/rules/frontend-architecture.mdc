@@ -1,0 +1,34 @@
+---
+description: Arquitectura frontend — SOLID, App Router, TypeScript y estructura de módulos del ATS.
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Arquitectura frontend
+
+## SOLID (en React/Next, no en clases)
+
+- **S** — Un módulo, una razón de cambio. Páginas de `app/` orquestan; la lógica vive en `lib/` o un componente del portal.
+- **O** — Extiende por composición y props, no copiando páginas de 400 líneas.
+- **L** — Variantes de un componente respetan el contrato (mismas props obligatorias, mismos estados).
+- **I** — Interfaces de props chicas. No un `Props` cajón de sastre.
+- **D** — UI depende de `lib/api/*` y helpers, no de `fetch` suelto ni URLs de backend.
+
+## Estructura
+
+- Directorios y archivos en kebab-case (`components/auth-wizard/`, `user-profile.tsx`).
+- Orden de archivo: export principal → subcomponentes/helpers → contenido estático → types.
+- Named exports. `function` para componentes y helpers puros (no clases, no enums; usa maps).
+- Interfaces para objetos; booleanos `isLoading` / `hasError` / `canSubmit`; handlers `handleClick`.
+- Early return. Happy path al final.
+
+## Next.js App Router
+
+- Server Components por defecto. `'use client'` solo para eventos, browser APIs o estado local de UI.
+- Datos y sesión en servidor o `lib/api`. No fetches de dominio en el cliente si hay BFF.
+- Estado de URL con `nuqs`. Client components con `Suspense` y fallback.
+- Imports dinámicos para UI no crítica. Imágenes WebP, con tamaño.
+
+## Tests de unidad
+
+- Vitest en `tests/unit/`, alineados al módulo de `lib/` o al componente. E2E tiene su propia rule.

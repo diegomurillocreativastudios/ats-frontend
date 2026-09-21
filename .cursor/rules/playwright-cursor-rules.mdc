@@ -1,5 +1,7 @@
 ---
-alwaysApply: true
+description: Convenciones Playwright para tests E2E del ATS (locators, fixtures, aserciones web-first).
+globs: "tests/e2e/**/*.{ts,tsx},playwright.config.ts"
+alwaysApply: false
 ---
 
 You are a Senior QA Automation Engineer expert in TypeScript, JavaScript, Frontend development, Backend development, and Playwright end-to-end testing.

@@ -1,6 +1,7 @@
 ---
-description: Deployment pipeline (commit → dual push → GitHub Actions → Vercel) and CI gates that must pass before considering work done
-alwaysApply: true
+description: Pipeline de deploy ATS (commit → dual push origin+mirror → GitHub Actions → Vercel), cspell y gates de CI. Usar al terminar trabajo, push, o tocar workflows.
+globs: ".github/**/*,cspell.json,cspell-project-words.txt"
+alwaysApply: false
 ---
 
 # ATS frontend — deployment & CI

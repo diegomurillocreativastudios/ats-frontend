@@ -55,7 +55,8 @@
     "interviewTypes": "Types",
     "interviewModalities": "Modalités",
     "interviewStatuses": "Statuts",
-    "tailorProfile": "Adapter mon profil"
+    "tailorProfile": "Adapter mon profil",
+    "softSkills": "Compétences transversales"
   },
   "Topbar": {
     "portalCandidate": "Portail candidat",
@@ -449,6 +450,10 @@
       "configuration": {
         "title": "Paramètres",
         "description": "Paramètres généraux du portail d'administration"
+      },
+      "softSkills": {
+        "title": "Compétences transversales",
+        "description": "Gestion du catalogue global des compétences transversales pour le feedback d'entretien"
       }
     },
     "root": {
@@ -2477,13 +2482,23 @@
           "changePoints": "Changement : {signedDelta} points.",
           "successUnchanged": "Retour enregistré. Le score reste à {score}%.",
           "successUnchangedNoWeight": "Retour enregistré. Le score n'a pas changé car le composant qualitatif n'a aucun poids sur cette offre.",
-          "conflictNotInterview": "La candidature n'est plus à l'étape entretien. Le tableau sera actualisé.",
+          "conflictNotInterview": "Le feedback s'applique uniquement à l'étape Entretien.",
           "conflictVacancyNotEditable": "L'offre n'est plus modifiable. Le tableau sera actualisé.",
           "errorInvalid": "Le retour n'est pas valide. Vérifiez le texte et réessayez.",
           "errorForbidden": "Vous n'avez pas l'autorisation d'envoyer ce retour.",
           "errorNotFound": "La candidature n'existe plus.",
           "errorScoringFailed": "Impossible de recalculer le score. Le retour n'a pas été enregistré.",
-          "errorGeneric": "Impossible d'envoyer le retour. Veuillez réessayer."
+          "errorGeneric": "Impossible d'envoyer le retour. Veuillez réessayer.",
+          "softSkillsTitle": "Compétences transversales",
+          "technicalSkillsTitle": "Compétences techniques",
+          "scoreUnset": "—",
+          "scoresRequired": "Complétez toutes les notes de 1 à 10 avant d'envoyer.",
+          "loadingForm": "Chargement du formulaire de feedback…",
+          "historyTitle": "Historique du feedback",
+          "historyBy": "Par {name}",
+          "historyAnonymous": "Entrée précédente",
+          "historyScore": "{previous}% → {next}% ({signedDelta})",
+          "conflictInterviewNotDone": "Marquez l'entretien comme effectué avant de continuer."
         },
         "aria": {
           "matchedCandidates": "Candidats correspondants",
@@ -2534,7 +2549,9 @@
           "searchNoResults": "Aucun candidat trouvé dans la recherche.",
           "searchAlreadyInPipeline": "Les candidats trouvés sont déjà dans Candidats potentiels ou Étapes.",
           "goToStagesAria": "Aller à la section Étapes pour gérer les statuts de candidature",
-          "openProfileAria": "Ouvrir le profil du candidat dans un nouvel onglet"
+          "openProfileAria": "Ouvrir le profil du candidat dans un nouvel onglet",
+          "interviewNotDone": "Marquez l'entretien comme effectué avant de continuer.",
+          "interviewFeedbackRequired": "Envoyez le feedback de l'entretien avant de passer à l'étape suivante."
         },
         "scoreTooltips": {
           "semanticSimilarity": "Mesure dans quelle mesure le contenu du CV correspond à la description du poste, par comparaison sémantique du texte.",
@@ -2820,7 +2837,15 @@
           "updated": "Statut d'entretien mis à jour avec succès.",
           "deleted": "Statut d'entretien supprimé avec succès.",
           "deleteTitle": "Supprimer le statut d'entretien",
-          "deleteMessage": "Supprimer « {name} » ? Autorisé uniquement s'il n'y a pas d'entretiens utilisant ce statut."
+          "deleteMessage": "Supprimer « {name} » ? Autorisé uniquement s'il n'y a pas d'entretiens utilisant ce statut.",
+          "interviewDone": "Entretien effectué",
+          "interviewDoneActive": "{name} : entretien effectué actif",
+          "markInterviewDone": "Marquer {name} comme entretien effectué",
+          "interviewDoneMarked": "Statut marqué comme entretien effectué.",
+          "interviewDoneUnmarked": "Statut démarqué comme entretien effectué.",
+          "interviewDoneTransferTitle": "Changer le statut d'entretien effectué",
+          "interviewDoneTransferMessage": "Un seul statut peut marquer l'entretien comme effectué. Si vous continuez, « {previous} » sera désactivé et « {next} » sera activé.",
+          "interviewDoneTransferConfirm": "Changer"
         },
         "modalities": {
           "title": "Modalités d'entretien",
@@ -3528,6 +3553,25 @@
         "deactivateSuccess": "Modalité désactivée.",
         "deleteSuccess": "Modalité supprimée.",
         "deleteConflictMessage": "Impossible de supprimer car elle est associée à des offres existantes.",
+        "formCreateTitle": "Nouvelle {singularCapitalized}",
+        "formEditTitle": "Modifier la {singular}",
+        "deleteTitle": "Supprimer la {singular}"
+      },
+      "softSkills": {
+        "title": "Compétences transversales",
+        "singular": "compétence transversale",
+        "singularCapitalized": "Compétence transversale",
+        "plural": "compétences transversales",
+        "article": "la",
+        "createCta": "Créer une compétence transversale",
+        "emptyMessage": "Aucune compétence transversale créée pour le moment",
+        "headingDescription": "Gérez le catalogue global des compétences transversales utilisées dans le feedback d'entretien.",
+        "createSuccess": "Compétence transversale créée.",
+        "updateSuccess": "Compétence transversale mise à jour.",
+        "activateSuccess": "Compétence transversale activée.",
+        "deactivateSuccess": "Compétence transversale désactivée.",
+        "deleteSuccess": "Compétence transversale supprimée.",
+        "deleteConflictMessage": "Impossible de supprimer car elle est associée à des notes historiques.",
         "formCreateTitle": "Nouvelle {singularCapitalized}",
         "formEditTitle": "Modifier la {singular}",
         "deleteTitle": "Supprimer la {singular}"

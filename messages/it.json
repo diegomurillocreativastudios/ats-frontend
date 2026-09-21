@@ -55,7 +55,8 @@
     "interviewTypes": "Tipi",
     "interviewModalities": "Modalità",
     "interviewStatuses": "Stati",
-    "tailorProfile": "Adatta il mio profilo"
+    "tailorProfile": "Adatta il mio profilo",
+    "softSkills": "Competenze trasversali"
   },
   "Topbar": {
     "portalCandidate": "Portale candidato",
@@ -449,6 +450,10 @@
       "configuration": {
         "title": "Impostazioni",
         "description": "Impostazioni generali del portale di amministrazione"
+      },
+      "softSkills": {
+        "title": "Competenze trasversali",
+        "description": "Gestione del catalogo globale delle competenze trasversali per il feedback del colloquio"
       }
     },
     "root": {
@@ -2477,13 +2482,23 @@
           "changePoints": "Variazione: {signedDelta} punti.",
           "successUnchanged": "Feedback salvato. Il punteggio resta al {score}%.",
           "successUnchangedNoWeight": "Feedback salvato. Il punteggio non è cambiato perché il componente qualitativo non ha peso in questa vacante.",
-          "conflictNotInterview": "La candidatura non è più nella fase colloquio. La bacheca verrà aggiornata.",
+          "conflictNotInterview": "Il feedback si applica solo nella fase Colloquio.",
           "conflictVacancyNotEditable": "La vacante non è più modificabile. La bacheca verrà aggiornata.",
           "errorInvalid": "Il feedback non è valido. Controlla il testo e riprova.",
           "errorForbidden": "Non hai i permessi per inviare questo feedback.",
           "errorNotFound": "La candidatura non esiste più.",
           "errorScoringFailed": "Impossibile ricalcolare il punteggio. Il feedback non è stato salvato.",
-          "errorGeneric": "Impossibile inviare il feedback. Riprova."
+          "errorGeneric": "Impossibile inviare il feedback. Riprova.",
+          "softSkillsTitle": "Competenze trasversali",
+          "technicalSkillsTitle": "Competenze tecniche",
+          "scoreUnset": "—",
+          "scoresRequired": "Completa tutti i punteggi da 1 a 10 prima di inviare.",
+          "loadingForm": "Caricamento del modulo di feedback…",
+          "historyTitle": "Cronologia del feedback",
+          "historyBy": "Di {name}",
+          "historyAnonymous": "Voce precedente",
+          "historyScore": "{previous}% → {next}% ({signedDelta})",
+          "conflictInterviewNotDone": "Segna il colloquio come effettuato prima di continuare."
         },
         "aria": {
           "matchedCandidates": "Candidati con corrispondenza",
@@ -2534,7 +2549,9 @@
           "searchNoResults": "Nessun candidato trovato nella ricerca.",
           "searchAlreadyInPipeline": "I candidati trovati sono già in Candidati possibili o Fasi.",
           "goToStagesAria": "Vai alla sezione Fasi per gestire gli stati di candidatura",
-          "openProfileAria": "Apri il profilo del candidato in una nuova scheda"
+          "openProfileAria": "Apri il profilo del candidato in una nuova scheda",
+          "interviewNotDone": "Segna il colloquio come effettuato prima di continuare.",
+          "interviewFeedbackRequired": "Invia il feedback del colloquio prima di avanzare di fase."
         },
         "scoreTooltips": {
           "semanticSimilarity": "Misura quanto il contenuto del CV è allineato alla descrizione della posizione, usando il confronto semantico del testo.",
@@ -2820,7 +2837,15 @@
           "updated": "Stato del colloquio aggiornato correttamente.",
           "deleted": "Stato del colloquio eliminato correttamente.",
           "deleteTitle": "Elimina stato del colloquio",
-          "deleteMessage": "Eliminare «{name}»? Consentito solo se non ci sono colloqui che usano questo stato."
+          "deleteMessage": "Eliminare «{name}»? Consentito solo se non ci sono colloqui che usano questo stato.",
+          "interviewDone": "Colloquio effettuato",
+          "interviewDoneActive": "{name}: colloquio effettuato attivo",
+          "markInterviewDone": "Segna {name} come colloquio effettuato",
+          "interviewDoneMarked": "Stato segnato come colloquio effettuato.",
+          "interviewDoneUnmarked": "Stato deselezionato come colloquio effettuato.",
+          "interviewDoneTransferTitle": "Cambia colloquio effettuato",
+          "interviewDoneTransferMessage": "Solo uno stato può segnare il colloquio come effettuato. Se continui, «{previous}» verrà disattivato e «{next}» verrà attivato.",
+          "interviewDoneTransferConfirm": "Cambia"
         },
         "modalities": {
           "title": "Modalità di colloquio",
@@ -3528,6 +3553,25 @@
         "deactivateSuccess": "Modalità disattivata.",
         "deleteSuccess": "Modalità eliminata.",
         "deleteConflictMessage": "Impossibile eliminare perché associata a posizioni esistenti.",
+        "formCreateTitle": "Nuova {singularCapitalized}",
+        "formEditTitle": "Modifica {singular}",
+        "deleteTitle": "Elimina {singular}"
+      },
+      "softSkills": {
+        "title": "Competenze trasversali",
+        "singular": "competenza trasversale",
+        "singularCapitalized": "Competenza trasversale",
+        "plural": "competenze trasversali",
+        "article": "la",
+        "createCta": "Crea competenza trasversale",
+        "emptyMessage": "Nessuna competenza trasversale creata ancora",
+        "headingDescription": "Gestisci il catalogo globale delle competenze trasversali usate nel feedback del colloquio.",
+        "createSuccess": "Competenza trasversale creata.",
+        "updateSuccess": "Competenza trasversale aggiornata.",
+        "activateSuccess": "Competenza trasversale attivata.",
+        "deactivateSuccess": "Competenza trasversale disattivata.",
+        "deleteSuccess": "Competenza trasversale eliminata.",
+        "deleteConflictMessage": "Impossibile eliminare perché associata a valutazioni storiche.",
         "formCreateTitle": "Nuova {singularCapitalized}",
         "formEditTitle": "Modifica {singular}",
         "deleteTitle": "Elimina {singular}"

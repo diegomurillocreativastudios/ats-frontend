@@ -1063,6 +1063,7 @@ export interface InterviewStatusAdmin {
   description: string | null
   sortOrder: number
   isTerminal: boolean
+  isInterviewDone: boolean
   isActive: boolean
   createdAtUtc?: string | null
   updatedAtUtc?: string | null
@@ -1108,6 +1109,11 @@ function normalizeInterviewStatusAdminItem(
     description: description ?? null,
     sortOrder,
     isTerminal: pickBool(o, ["isTerminal", "is_terminal"], false),
+    isInterviewDone: pickBool(
+      o,
+      ["isInterviewDone", "is_interview_done", "IsInterviewDone"],
+      false
+    ),
     isActive: pickBool(o, ["isActive", "is_active"], true),
     createdAtUtc: pickString(o, ["createdAtUtc", "created_at_utc"]),
     updatedAtUtc: pickString(o, ["updatedAtUtc", "updated_at_utc"]),
@@ -1213,6 +1219,7 @@ export async function createInterviewStatus(
       description: body.description,
       sortOrder: body.sortOrder,
       isTerminal: body.isTerminal,
+      isInterviewDone: false,
       isActive: body.isActive,
     }
   }
@@ -1230,6 +1237,27 @@ export async function updateInterviewStatus(
   const rec = normalizeInterviewStatusAdminItem(data)
   if (!rec) {
     throw new Error("Respuesta inválida al actualizar estado de entrevista")
+  }
+  return rec
+}
+
+/**
+ * Sets the unique "interview done" flag on a catalog status.
+ * Enabling one clears the flag on every other status (server-side).
+ */
+export async function setInterviewStatusInterviewDone(
+  id: string,
+  isInterviewDone: boolean
+): Promise<InterviewStatusAdmin> {
+  const data = await apiClient.patch(
+    `/api/admin/interview-statuses/${encodeURIComponent(id)}/interview-done`,
+    { isInterviewDone }
+  )
+  const rec = normalizeInterviewStatusAdminItem(data)
+  if (!rec) {
+    throw new Error(
+      "Respuesta inválida al actualizar el estado de entrevista efectuada"
+    )
   }
   return rec
 }

@@ -55,7 +55,8 @@
     "interviewTypes": "Types",
     "interviewModalities": "Modalities",
     "interviewStatuses": "Statuses",
-    "tailorProfile": "Tailor my Profile"
+    "tailorProfile": "Tailor my Profile",
+    "softSkills": "Soft skills"
   },
   "Topbar": {
     "portalCandidate": "Candidate Portal",
@@ -449,6 +450,10 @@
       "configuration": {
         "title": "Settings",
         "description": "General settings of the administration portal"
+      },
+      "softSkills": {
+        "title": "Soft skills",
+        "description": "Manage the global catalog of soft skills for interview feedback"
       }
     },
     "root": {
@@ -2477,13 +2482,23 @@
           "changePoints": "Change: {signedDelta} points.",
           "successUnchanged": "Feedback saved. The score remains at {score}%.",
           "successUnchangedNoWeight": "Feedback saved. The score did not change because the qualitative component has no weight on this vacancy.",
-          "conflictNotInterview": "The application is no longer in the interview stage. The board will be updated.",
+          "conflictNotInterview": "Feedback only applies in the Interview stage.",
           "conflictVacancyNotEditable": "The vacancy is no longer editable. The board will be updated.",
           "errorInvalid": "The feedback is not valid. Check the text and try again.",
           "errorForbidden": "You do not have permission to submit this feedback.",
           "errorNotFound": "The application no longer exists.",
           "errorScoringFailed": "The score could not be recalculated. Feedback was not saved.",
-          "errorGeneric": "Could not submit the feedback. Please try again."
+          "errorGeneric": "Could not submit the feedback. Please try again.",
+          "softSkillsTitle": "Soft skills",
+          "technicalSkillsTitle": "Technical skills",
+          "scoreUnset": "—",
+          "scoresRequired": "Complete every score from 1 to 10 before submitting.",
+          "loadingForm": "Loading feedback form…",
+          "historyTitle": "Feedback history",
+          "historyBy": "By {name}",
+          "historyAnonymous": "Previous entry",
+          "historyScore": "{previous}% → {next}% ({signedDelta})",
+          "conflictInterviewNotDone": "Mark the interview as done before continuing."
         },
         "aria": {
           "matchedCandidates": "Matched candidates",
@@ -2534,7 +2549,9 @@
           "searchNoResults": "No candidates were found in the search.",
           "searchAlreadyInPipeline": "The candidates found are already in Possible candidates or Stages.",
           "goToStagesAria": "Go to the Stages section to manage application statuses",
-          "openProfileAria": "Open the candidate profile in a new tab"
+          "openProfileAria": "Open the candidate profile in a new tab",
+          "interviewNotDone": "Mark the interview as done before continuing.",
+          "interviewFeedbackRequired": "Submit the interview feedback before advancing to the next stage."
         },
         "scoreTooltips": {
           "semanticSimilarity": "Measures how closely the CV content aligns with the vacancy description using semantic text comparison.",
@@ -2820,7 +2837,15 @@
           "updated": "Interview status updated successfully.",
           "deleted": "Interview status deleted successfully.",
           "deleteTitle": "Delete interview status",
-          "deleteMessage": "Delete «{name}»? Only allowed if no interviews are using this status."
+          "deleteMessage": "Delete «{name}»? Only allowed if no interviews are using this status.",
+          "interviewDone": "Interview done",
+          "interviewDoneActive": "{name}: interview done active",
+          "markInterviewDone": "Mark {name} as interview done",
+          "interviewDoneMarked": "Status marked as interview done.",
+          "interviewDoneUnmarked": "Status unmarked as interview done.",
+          "interviewDoneTransferTitle": "Change interview done status",
+          "interviewDoneTransferMessage": "Only one status can mark the interview as done. If you continue, «{previous}» will be turned off and «{next}» will be turned on.",
+          "interviewDoneTransferConfirm": "Change"
         },
         "modalities": {
           "title": "Interview modalities",
@@ -3528,6 +3553,25 @@
         "deactivateSuccess": "Modality deactivated.",
         "deleteSuccess": "Modality deleted.",
         "deleteConflictMessage": "Cannot delete because it is linked to existing vacancies.",
+        "formCreateTitle": "New {singularCapitalized}",
+        "formEditTitle": "Edit {singular}",
+        "deleteTitle": "Delete {singular}"
+      },
+      "softSkills": {
+        "title": "Soft skills",
+        "singular": "soft skill",
+        "singularCapitalized": "Soft skill",
+        "plural": "soft skills",
+        "article": "the",
+        "createCta": "Create soft skill",
+        "emptyMessage": "No soft skills created yet",
+        "headingDescription": "Manage the global catalog of soft skills used in interview feedback.",
+        "createSuccess": "Soft skill created.",
+        "updateSuccess": "Soft skill updated.",
+        "activateSuccess": "Soft skill activated.",
+        "deactivateSuccess": "Soft skill deactivated.",
+        "deleteSuccess": "Soft skill deleted.",
+        "deleteConflictMessage": "Cannot delete because it is linked to historical ratings.",
         "formCreateTitle": "New {singularCapitalized}",
         "formEditTitle": "Edit {singular}",
         "deleteTitle": "Delete {singular}"

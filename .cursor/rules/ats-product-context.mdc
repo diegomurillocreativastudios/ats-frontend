@@ -1,0 +1,34 @@
+---
+description: Mapa del producto ApplicanTree — portales, carpetas y convenciones de dominio. Contexto global para no explorar todo el repo.
+alwaysApply: true
+---
+
+# ApplicanTree (ATS frontend)
+
+SaaS de Applicant Tracking System: vacantes, candidatos, entrevistas, fichas técnicas y reportes. Marca **ApplicanTree** (`lib/app-brand.ts`). Stack: Next.js 16 App Router, React 19, Tailwind 4, `next-intl`. Backend vía BFF same-origin (`/api/bff`, `lib/api.ts`); nunca URLs absolutas ni cookies a terceros.
+
+## Portales (empezar aquí, no recorrer todo el árbol)
+
+| Ruta | Rol | Qué es |
+|---|---|---|
+| `app/portal-admin/` | `admin` | Catálogos: etapas, estados, departamentos, modalidades, habilidades blandas, empresas, tipos/estados de entrevista, usuarios, tipos de documento, plantillas |
+| `app/portal-rrhh/` | `recruiter` | Pipeline de vacantes, candidatos, entrevistas, reportes, ficha técnica, calendario |
+| `app/portal-candidato/` | `candidate` | Perfil, documentos, entrevistas, adecuar perfil a vacante |
+| `app/portal-oportunidades/` | público | Listado y postulación a vacantes |
+| `app/auth/` | — | Login, registro, OTP, SSO, recuperar contraseña |
+| `app/seleccion-portal/` | staff | Cambio de portal |
+
+Roles: `lib/roles.ts` (`isAdminRole`, `isRecruiterRole`, `isCandidateRole`).
+
+## Dónde está el código
+
+- `app/` — rutas y layouts. `components/` — UI por oficio: `portal-admin/`, `rrhh/`, `candidato/`, `public/`, `auth/`, `ui/`, `branding/`.
+- `lib/` — dominio y API: `api/`, `auth/`, `reportes/`, `technical-sheet/`, `vacancies/`, `rrhh/`.
+- `messages/` — i18n `es` `en` `de` `fr` `it`. Copy de producto va aquí, no hardcodeado.
+- `tests/unit/` — Vitest. `tests/e2e/` — Playwright.
+
+## Qué no reinventar
+
+- Paleta verde Applican + glass: tokens en `app/globals.css`. Detalle visual → rule UX/UI.
+- Git: `origin` (GitLab) + `mirror` (GitHub). Push dual y CI → rule de deploy.
+- Abrir solo el portal y la carpeta `components/` / `lib/` del oficio. No inventar un quinto portal.

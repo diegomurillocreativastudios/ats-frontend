@@ -31,6 +31,12 @@ export interface VacancyApplicantLike {
   status?: string | null
   applicationStatusDisplayName?: string | null
   application_status_display_name?: string | null
+  interviewDone?: boolean | null
+  interview_done?: boolean | null
+  InterviewDone?: boolean | null
+  hasInterviewFeedback?: boolean | null
+  has_interview_feedback?: boolean | null
+  HasInterviewFeedback?: boolean | null
 }
 
 /** Catálogo de estados de postulación (empresa), mismo criterio que el Kanban. */

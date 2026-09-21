@@ -394,6 +394,47 @@ h6 {
   }
 }
 
+/* Shared UI Modal — enter / exit */
+@keyframes ui-modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ui-modal-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ui-modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes ui-modal-panel-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.985);
+  }
+}
+
 @layer components {
   .apply-privacy-backdrop {
     animation: apply-privacy-backdrop-fade 0.28s ease-out both;
@@ -409,6 +450,33 @@ h6 {
 
   .apply-privacy-panel.apply-privacy-panel--exit {
     animation: apply-privacy-panel-slide-exit 0.48s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .ui-modal-backdrop {
+    animation: ui-modal-backdrop-in 0.28s ease-out both;
+  }
+
+  .ui-modal-backdrop.ui-modal-backdrop--exit {
+    animation: ui-modal-backdrop-out 0.22s ease-in forwards;
+  }
+
+  .ui-modal-panel {
+    animation: ui-modal-panel-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+  }
+
+  .ui-modal-panel.ui-modal-panel--exit {
+    animation: ui-modal-panel-out 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-modal-backdrop,
+    .ui-modal-backdrop.ui-modal-backdrop--exit,
+    .ui-modal-panel,
+    .ui-modal-panel.ui-modal-panel--exit {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
   }
 
   .no-scrollbar {

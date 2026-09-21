@@ -55,7 +55,8 @@
     "documentTypes": "Tipos de documento",
     "interviewTypes": "Tipos",
     "interviewModalities": "Modalidades",
-    "interviewStatuses": "Estados"
+    "interviewStatuses": "Estados",
+    "softSkills": "Habilidades blandas"
   },
   "Topbar": {
     "portalCandidate": "Portal Candidato",
@@ -449,6 +450,10 @@
       "configuration": {
         "title": "Configuracion",
         "description": "Configuración general del portal de administración"
+      },
+      "softSkills": {
+        "title": "Habilidades blandas",
+        "description": "Gestión del catálogo global de habilidades blandas para feedback de entrevista"
       }
     },
     "root": {
@@ -2477,13 +2482,23 @@
           "changePoints": "Cambio: {signedDelta} puntos.",
           "successUnchanged": "Feedback guardado. El puntaje se mantiene en {score}%.",
           "successUnchangedNoWeight": "Feedback guardado. El puntaje no cambió porque el componente cualitativo no tiene peso en esta vacante.",
-          "conflictNotInterview": "La postulación ya no se encuentra en la etapa de entrevista. El tablero será actualizado.",
+          "conflictNotInterview": "El feedback solo aplica en la etapa Entrevista.",
           "conflictVacancyNotEditable": "La vacante ya no es editable. El tablero será actualizado.",
           "errorInvalid": "El feedback no es válido. Revisa el texto e inténtalo de nuevo.",
           "errorForbidden": "No tienes permisos para enviar este feedback.",
           "errorNotFound": "La postulación ya no existe.",
           "errorScoringFailed": "No se pudo recalcular el puntaje. El feedback no se guardó.",
-          "errorGeneric": "No se pudo enviar el feedback. Intenta de nuevo."
+          "errorGeneric": "No se pudo enviar el feedback. Intenta de nuevo.",
+          "softSkillsTitle": "Habilidades blandas",
+          "technicalSkillsTitle": "Habilidades técnicas",
+          "scoreUnset": "—",
+          "scoresRequired": "Completa todas las notas del 1 al 10 antes de enviar.",
+          "loadingForm": "Cargando formulario de feedback…",
+          "historyTitle": "Historial de feedback",
+          "historyBy": "Por {name}",
+          "historyAnonymous": "Entrada anterior",
+          "historyScore": "{previous}% → {next}% ({signedDelta})",
+          "conflictInterviewNotDone": "Marca la entrevista como efectuada antes de continuar."
         },
         "aria": {
           "matchedCandidates": "Candidatos con emparejamiento",
@@ -2534,7 +2549,9 @@
           "searchNoResults": "No se encontraron candidatos en la búsqueda.",
           "searchAlreadyInPipeline": "Los candidatos encontrados ya están en Posibles candidatos o en Etapas.",
           "goToStagesAria": "Ir a la sección Etapas para administrar estados de postulación",
-          "openProfileAria": "Abrir perfil del candidato en una nueva pestaña"
+          "openProfileAria": "Abrir perfil del candidato en una nueva pestaña",
+          "interviewNotDone": "Marca la entrevista como efectuada antes de continuar.",
+          "interviewFeedbackRequired": "Envía el feedback de la entrevista antes de avanzar de etapa."
         },
         "scoreTooltips": {
           "semanticSimilarity": "Mide qué tan alineado está el contenido del CV con la descripción de la vacante, usando comparación semántica de texto.",
@@ -2820,7 +2837,15 @@
           "updated": "Estado de entrevista actualizado correctamente.",
           "deleted": "Estado de entrevista eliminado correctamente.",
           "deleteTitle": "Eliminar estado de entrevista",
-          "deleteMessage": "¿Eliminar «{name}»? Solo se permitirá si no hay entrevistas usando este estado."
+          "deleteMessage": "¿Eliminar «{name}»? Solo se permitirá si no hay entrevistas usando este estado.",
+          "interviewDone": "Entrevista efectuada",
+          "interviewDoneActive": "{name}: entrevista efectuada activa",
+          "markInterviewDone": "Marcar {name} como entrevista efectuada",
+          "interviewDoneMarked": "Estado marcado como entrevista efectuada.",
+          "interviewDoneUnmarked": "Estado desmarcado como entrevista efectuada.",
+          "interviewDoneTransferTitle": "Cambiar entrevista efectuada",
+          "interviewDoneTransferMessage": "Solo un estado puede marcar la entrevista como efectuada. Si continúas, se desactivará «{previous}» y se activará «{next}».",
+          "interviewDoneTransferConfirm": "Cambiar"
         },
         "modalities": {
           "title": "Modalidades de entrevista",
@@ -3529,6 +3554,25 @@
         "deleteSuccess": "Modalidad eliminada.",
         "deleteConflictMessage": "No se puede eliminar porque está asociado a vacantes existentes.",
         "formCreateTitle": "{singularCapitalized} nuevo",
+        "formEditTitle": "Editar {singular}",
+        "deleteTitle": "Eliminar {singular}"
+      },
+      "softSkills": {
+        "title": "Habilidades blandas",
+        "singular": "habilidad blanda",
+        "singularCapitalized": "Habilidad blanda",
+        "plural": "habilidades blandas",
+        "article": "la",
+        "createCta": "Crear habilidad blanda",
+        "emptyMessage": "Aún no hay habilidades blandas creadas",
+        "headingDescription": "Gestiona el catálogo global de habilidades blandas usadas en el feedback de entrevista.",
+        "createSuccess": "Habilidad blanda creada.",
+        "updateSuccess": "Habilidad blanda actualizada.",
+        "activateSuccess": "Habilidad blanda activada.",
+        "deactivateSuccess": "Habilidad blanda desactivada.",
+        "deleteSuccess": "Habilidad blanda eliminada.",
+        "deleteConflictMessage": "No se puede eliminar porque tiene calificaciones históricas asociadas.",
+        "formCreateTitle": "{singularCapitalized} nueva",
         "formEditTitle": "Editar {singular}",
         "deleteTitle": "Eliminar {singular}"
       }

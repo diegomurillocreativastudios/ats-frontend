@@ -92,6 +92,9 @@ import {
   canShowInterviewFeedbackAction,
   isInterviewPipelineStage,
   readApplicationId,
+  readHasInterviewFeedbackFromApplicant,
+  readInterviewDoneFromApplicant,
+  validateInterviewStageLeaveMove,
 } from "@/lib/recruiter/interview-stage"
 import {
   downloadRecruiterCandidateCv,
@@ -195,6 +198,30 @@ const normalizeMoveStageError = (err, t) => {
   const fallback = t("errors.moveStageFailed")
   const raw = extractApiErrorMessage(err) ?? fallback
   const lower = raw.toLowerCase()
+  const errorCode =
+    typeof err?.body?.code === "string"
+      ? String(err.body.code).trim().toLowerCase()
+      : typeof err?.code === "string"
+        ? String(err.code).trim().toLowerCase()
+        : ""
+  if (
+    errorCode === "interview_not_done" ||
+    lower.includes("interview has not been marked as done")
+  ) {
+    return {
+      text: t("errors.interviewNotDone"),
+      showEstadosLink: false,
+    }
+  }
+  if (
+    errorCode === "interview_feedback_required" ||
+    (lower.includes("interview feedback") && lower.includes("required"))
+  ) {
+    return {
+      text: t("errors.interviewFeedbackRequired"),
+      showEstadosLink: false,
+    }
+  }
   const isDefaultStatusMissing =
     lower.includes("default application status") ||
     lower.includes("missing default application status")
@@ -220,6 +247,22 @@ const normalizeMoveStageError = (err, t) => {
 const normalizeApplicationStatusError = (err, t) => {
   const fallback = t("errors.updateApplicationStatusFailed")
   const raw = extractApiErrorMessage(err) ?? fallback
+  const lower = raw.toLowerCase()
+  const errorCode =
+    typeof err?.body?.code === "string"
+      ? String(err.body.code).trim().toLowerCase()
+      : typeof err?.code === "string"
+        ? String(err.code).trim().toLowerCase()
+        : ""
+  if (
+    errorCode === "interview_not_done" ||
+    lower.includes("interview has not been marked as done")
+  ) {
+    return {
+      text: t("errors.interviewNotDone"),
+      showEstadosLink: false,
+    }
+  }
   return { text: raw, showEstadosLink: false }
 }
 
@@ -233,6 +276,18 @@ const normalizeStageMoveValidationError = (code, t) => {
   if (code === "skip_not_allowed") {
     return {
       text: t("errors.stageSkipNotAllowed"),
+      showEstadosLink: false,
+    }
+  }
+  if (code === "interview_not_done") {
+    return {
+      text: t("errors.interviewNotDone"),
+      showEstadosLink: false,
+    }
+  }
+  if (code === "interview_feedback_required") {
+    return {
+      text: t("errors.interviewFeedbackRequired"),
       showEstadosLink: false,
     }
   }
@@ -502,17 +557,29 @@ const KanbanCard = ({
   const applicationSourceLabel = formatApplicationSourceBadge(
     match.applicationSource ?? match.application_source
   );
+  const applicationId = readApplicationId(match);
+  const interviewDone = readInterviewDoneFromApplicant(match);
+  const hasInterviewFeedback = readHasInterviewFeedbackFromApplicant(match);
+  const isStatusLockedByInterview =
+    isInterviewStage === true && interviewDone !== true;
 
   const handleDragStart = (e) => {
     if (readOnly) {
       e.preventDefault();
       return;
     }
-    onPipelineDragStart?.(stage, currentStatusId);
+    onPipelineDragStart?.(stage, currentStatusId, interviewDone, hasInterviewFeedback);
     try {
       e.dataTransfer.setData(
         "application/json",
-        JSON.stringify({ candidateId, stage, stageId, statusId: currentStatusId })
+        JSON.stringify({
+          candidateId,
+          stage,
+          stageId,
+          statusId: currentStatusId,
+          interviewDone,
+          hasInterviewFeedback,
+        })
       );
       e.dataTransfer.effectAllowed = "move";
     } catch {
@@ -549,9 +616,9 @@ const KanbanCard = ({
 
   const displayName = emptyToDash(match.name);
   const showTechnicalSheetButton = Boolean(vacancyId && sheetCandidateProfileId);
-  const applicationId = readApplicationId(match);
   const showInterviewFeedbackButton = canShowInterviewFeedbackAction({
     isInterviewStage,
+    interviewDone,
     applicationId,
     readOnly,
   });
@@ -618,7 +685,9 @@ const KanbanCard = ({
             onChange={handleStatusChange}
             onMouseDown={handleSelectMouseDown}
             onClick={handleSelectClick}
-            disabled={statusSelectDisabled || readOnly}
+            disabled={
+              statusSelectDisabled || readOnly || isStatusLockedByInterview
+            }
             className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             aria-label={tMatching("kanban.statusAria", { name: displayName })}
           >
@@ -774,6 +843,7 @@ const KanbanColumn = ({
   stageMeta = null,
   candidates,
   onDrop,
+  onDropBlocked,
   onDragEnter,
   onDragLeave,
   isOver,
@@ -806,7 +876,17 @@ const KanbanColumn = ({
     if (readOnly) return;
     e.preventDefault();
     onDragLeave?.();
-    if (!canAcceptDrop) return;
+    if (!canAcceptDrop) {
+      if (
+        isDragActive &&
+        (dropBlockCode === "final_status_required" ||
+          dropBlockCode === "interview_not_done" ||
+          dropBlockCode === "interview_feedback_required")
+      ) {
+        onDropBlocked?.(dropBlockCode);
+      }
+      return;
+    }
     try {
       const raw = e.dataTransfer.getData("application/json");
       const payload = raw ? JSON.parse(raw) : null;
@@ -881,11 +961,15 @@ const KanbanColumn = ({
       data-column-kind={columnKind}
       title={
         isOver && showInvalidDrop
-          ? tMatching(
-              dropBlockCode === "final_status_required"
-                ? "kanban.finalStatusRequiredTooltip"
-                : "kanban.dropNotAllowedTooltip"
-            )
+          ? dropBlockCode === "interview_not_done"
+            ? tMatching("errors.interviewNotDone")
+            : dropBlockCode === "interview_feedback_required"
+              ? tMatching("errors.interviewFeedbackRequired")
+              : tMatching(
+                  dropBlockCode === "final_status_required"
+                    ? "kanban.finalStatusRequiredTooltip"
+                    : "kanban.dropNotAllowedTooltip"
+                )
           : undefined
       }
     >
@@ -1003,6 +1087,9 @@ export default function VacanteDetallePage() {
   const [dragOverStage, setDragOverStage] = useState(null);
   const [dragFromStage, setDragFromStage] = useState(null);
   const [dragFromStatusId, setDragFromStatusId] = useState(null);
+  const [dragFromInterviewDone, setDragFromInterviewDone] = useState(null);
+  const [dragFromHasInterviewFeedback, setDragFromHasInterviewFeedback] =
+    useState(null);
   const [stages, setStages] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -1974,6 +2061,26 @@ export default function VacanteDetallePage() {
         return;
       }
 
+      const interviewLeave = validateInterviewStageLeaveMove({
+        current: currentRef,
+        target: targetRef,
+        catalog: stages,
+        interviewDone: readInterviewDoneFromApplicant(applicant),
+        hasInterviewFeedback: readHasInterviewFeedbackFromApplicant(applicant),
+      });
+      if (!interviewLeave.allowed) {
+        const normalized = normalizeStageMoveValidationError(
+          interviewLeave.code,
+          tMatching
+        );
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: normalized.text,
+        });
+        return;
+      }
+
       const currentName = String(currentStage ?? "").trim().toLowerCase();
       const nextName = String(newStage ?? "").trim().toLowerCase();
       if (currentName !== "" && currentName === nextName) return;
@@ -2035,14 +2142,21 @@ export default function VacanteDetallePage() {
     [applicants, stages, statuses, orderedKanbanStageNames, candidateStageOverrides, candidateStatusOverrides, fetchVacancy, isVacancyReadOnly, tMatching]
   );
 
-  const handleKanbanCardDragStart = useCallback((stage, statusId) => {
-    setDragFromStage(stage);
-    setDragFromStatusId(statusId ?? null);
-  }, []);
+  const handleKanbanCardDragStart = useCallback(
+    (stage, statusId, interviewDone, hasInterviewFeedback) => {
+      setDragFromStage(stage);
+      setDragFromStatusId(statusId ?? null);
+      setDragFromInterviewDone(interviewDone === true);
+      setDragFromHasInterviewFeedback(hasInterviewFeedback === true);
+    },
+    []
+  );
 
   const handleKanbanCardDragEnd = useCallback(() => {
     setDragFromStage(null);
     setDragFromStatusId(null);
+    setDragFromInterviewDone(null);
+    setDragFromHasInterviewFeedback(null);
     setDragOverStage(null);
   }, []);
 
@@ -2080,10 +2194,25 @@ export default function VacanteDetallePage() {
           statuses
         )
       : { allowed: false, code: "skip_not_allowed" };
+    const interviewLeave =
+      isForeignDrag && validation.allowed
+        ? validateInterviewStageLeaveMove({
+            current: dragFromStage,
+            target: stageMeta ?? stage,
+            catalog: stages,
+            interviewDone: dragFromInterviewDone === true,
+            hasInterviewFeedback: dragFromHasInterviewFeedback === true,
+          })
+        : { allowed: true, code: "ok" };
+    const leaveBlocked = interviewLeave.allowed !== true;
     return {
       stageMeta,
-      dropAllowed: isForeignDrag && validation.allowed,
-      dropBlockCode: isForeignDrag && !validation.allowed ? validation.code : null,
+      dropAllowed: isForeignDrag && validation.allowed && !leaveBlocked,
+      dropBlockCode: leaveBlocked
+        ? interviewLeave.code
+        : isForeignDrag && !validation.allowed
+          ? validation.code
+          : null,
       isDragActive: isForeignDrag,
       columnShortcutStages: shortcutStages.filter(
         (item) =>
@@ -2100,6 +2229,27 @@ export default function VacanteDetallePage() {
   const handleKanbanDragLeave = useCallback(() => {
     setDragOverStage(null);
   }, []);
+
+  const handleKanbanDropBlocked = useCallback(
+    (blockCode) => {
+      if (
+        blockCode === "final_status_required" ||
+        blockCode === "interview_not_done" ||
+        blockCode === "interview_feedback_required"
+      ) {
+        const normalized = normalizeStageMoveValidationError(
+          blockCode,
+          tMatching
+        );
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: normalized.text,
+        });
+      }
+    },
+    [tMatching]
+  );
 
   const handleStatusChange = useCallback(
     async (candidateId, statusId) => {
@@ -3171,6 +3321,7 @@ export default function VacanteDetallePage() {
                                 stageMeta={dropState.stageMeta}
                                 candidates={stageCandidates}
                                 onDrop={handleKanbanStageDrop}
+                                onDropBlocked={handleKanbanDropBlocked}
                                 onDragEnter={handleKanbanDragEnter}
                                 onDragLeave={handleKanbanDragLeave}
                                 isOver={dragOverStage === stage}
@@ -3991,6 +4142,7 @@ export default function VacanteDetallePage() {
                               stageMeta={dropState.stageMeta}
                               candidates={stageCandidates}
                               onDrop={handleKanbanStageDrop}
+                              onDropBlocked={handleKanbanDropBlocked}
                               onDragEnter={handleKanbanDragEnter}
                               onDragLeave={handleKanbanDragLeave}
                               isOver={dragOverStage === stage}

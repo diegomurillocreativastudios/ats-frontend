@@ -38,8 +38,31 @@ describe("interview feedback i18n", () => {
       const feedback = matchingFeedback(messages)
       expect(feedback.button, locale).toBeTruthy()
       expect(feedback.conflictNotInterview, locale).toBeTruthy()
+      expect(feedback.conflictInterviewNotDone, locale).toBeTruthy()
+      expect(feedback.softSkillsTitle, locale).toBeTruthy()
+      expect(feedback.technicalSkillsTitle, locale).toBeTruthy()
+      expect(feedback.historyTitle, locale).toBeTruthy()
       expect(feedback.successIncreased, locale).toContain("{previous}")
       expect(feedback.changePoints, locale).toContain("{signedDelta}")
+      const matching = (
+        messages as {
+          RecruiterPortal: {
+            vacancies: { matching: { errors: Record<string, string> } }
+          }
+        }
+      ).RecruiterPortal.vacancies.matching.errors
+      expect(matching.interviewNotDone, locale).toBeTruthy()
+      expect(matching.interviewFeedbackRequired, locale).toBeTruthy()
+      const softSkills = (
+        messages as {
+          AdminPortal: {
+            vacancyCatalog: { softSkills: Record<string, string> }
+          }
+          Navigation: Record<string, string>
+        }
+      )
+      expect(softSkills.AdminPortal.vacancyCatalog.softSkills.title, locale).toBeTruthy()
+      expect(softSkills.Navigation.softSkills, locale).toBeTruthy()
     }
   })
 })

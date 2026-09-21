@@ -88,6 +88,11 @@ describe("admin portal nav", () => {
     expect(
       resolveAdminPortalNavLabelKey("/portal-admin/vacantes/modalidades"),
     ).toBe("modalities")
+    expect(
+      resolveAdminPortalNavLabelKey(
+        "/portal-admin/vacantes/habilidades-blandas",
+      ),
+    ).toBe("softSkills")
     expect(resolveAdminPortalNavLabelKey("/portal-admin/empresas")).toBe(
       "companies",
     )

@@ -1,0 +1,39 @@
+---
+description: Criterios de UX/UI para diseñar y revisar interfaces del ATS.
+globs: "**/*.{tsx,css}"
+alwaysApply: false
+---
+
+# Antes de codear
+
+- Identifica usuario, tarea principal y un solo CTA primario.
+- Reutiliza componentes y tokens existentes. No añadas librerías de UI sin preguntar.
+- En 3 líneas: jerarquía visual, acción principal, estados (loading / vacío / error / éxito).
+
+# Sistema visual (no inventar tokens)
+
+- Paleta: `--color-green-primary` y escala verde; superficies `--background`, `--card`, glass.
+- Texto: `--foreground`, `--color-text-gray`, `--muted-foreground`.
+- Fuentes: Inter (UI), Manrope (display/brand), Fraunces (editorial). Máximo esas tres.
+- Espaciado Tailwind de 4px. No hex sueltos ni una paleta paralela.
+- Prohibido: degradados morados, emojis como iconos, sombras o animación sin propósito.
+
+# UX
+
+- Etiquetas claras y patrones conocidos. Menos campos y pasos.
+- Errores junto al campo, con causa y siguiente paso. Conservar datos si falla el envío.
+- Confirmar o deshacer acciones destructivas.
+- Densidad alta en portales; más aire en páginas públicas.
+
+# Accesibilidad
+
+- HTML semántico, label visible, alt en imágenes.
+- `:hover`, `:focus-visible` y `:disabled` en controles. Foco visible. Teclado completo.
+- Contraste ≥ 4.5:1. No comunicar estado solo con color. Respetar `prefers-reduced-motion`.
+- Área táctil mínima 44×44px. Mobile-first (375 / 768 / 1280).
+
+# Verificación
+
+- Si hay navegador, recorre el flujo real y los estados alternativos.
+- Corrige visual e interacción antes de terminar.
+- Declara qué verificaste y qué quedó sin comprobar.
