@@ -31,4 +31,6 @@ alwaysApply: false
 
 ## Tests de unidad
 
-- Vitest en `tests/unit/`, alineados al módulo de `lib/` o al componente. E2E tiene su propia rule.
+- Vitest en `tests/unit/`, alineados al módulo de `lib/` o al componente.
+- Al cambiar UI o navegación, actualizar el test en el mismo commit (rule `vitest-unit-tests`).
+- Antes de push: `npm run qa` (lint + Vitest + spellcheck). E2E: rule Playwright.

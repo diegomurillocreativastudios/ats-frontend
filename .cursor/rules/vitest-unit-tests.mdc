@@ -1,0 +1,28 @@
+---
+description: Convenciones Vitest para tests de unidad del ATS. Actualizar tests al cambiar UI; aserciones async con Modal.
+globs: "tests/unit/**/*.{ts,tsx},tests/helpers/**/*.{ts,tsx},components/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Vitest — tests de unidad
+
+## Al cambiar UI o navegación
+
+- Busca el test en `tests/unit/` alineado al componente o módulo de `lib/`.
+- Actualízalo **en el mismo commit** que el cambio de producto. El gate `quality.yml` (`npm test`) falla si el test describe el estado anterior.
+- Preferir roles y labels (`getByRole`, `getByLabelText`) sobre selectores CSS.
+
+## Modal y animación de salida
+
+- Tras cerrar un `Modal`, el `dialog` permanece ~280ms en fase `--exit` antes de salir del DOM.
+- No asertar `queryByRole("dialog").not.toBeInTheDocument()` en el mismo tick que el click de cerrar.
+- Usar `waitForDialogClosed` de `tests/helpers/wait-for-dialog-closed.ts` (o `waitForElementToBeRemoved`).
+
+## Ruido en CI
+
+- Logs `[Report PDF]`, `schema reportKey mismatch` y avisos `act(...)` no fallan el job por sí solos.
+- En Actions, mira la sección `Failed Tests`.
+
+## Verificación
+
+- Antes de dar por listo un cambio de UI: `npm run qa` (o al menos `npm test` sobre los archivos tocados).

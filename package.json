@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "spellcheck": "cspell lint \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" --no-progress",
+    "qa": "npm run lint && npm test && npm run spellcheck",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

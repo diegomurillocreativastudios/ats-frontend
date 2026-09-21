@@ -54,7 +54,6 @@ describe("AdminSidebar", () => {
       "href",
       "/portal-admin/plantillas",
     )
-    expect(within(menu).queryByRole("link", { name: "Empresas" })).not.toBeInTheDocument()
     expect(
       within(menu).queryByRole("link", { name: "Configuración" }),
     ).not.toBeInTheDocument()
@@ -110,6 +109,11 @@ describe("AdminSidebar", () => {
       "/portal-admin/vacantes/modalidades",
       "/portal-admin/entrevistas/modalidades",
     ])
+    const vacancies = within(menu).getByRole("group", { name: "Vacantes" })
+    expect(within(vacancies).getByRole("link", { name: "Empresas" })).toHaveAttribute(
+      "href",
+      "/portal-admin/empresas",
+    )
     expect(within(menu).getByRole("link", { name: "Tipos" })).toHaveAttribute(
       "href",
       "/portal-admin/entrevistas/tipos",

@@ -1,6 +1,6 @@
 ---
-description: Pipeline de deploy ATS (commit → dual push origin+mirror → GitHub Actions → Vercel), cspell y gates de CI. Usar al terminar trabajo, push, o tocar workflows.
-globs: ".github/**/*,cspell.json,cspell-project-words.txt"
+description: Pipeline de deploy ATS (commit → dual push → Actions → Vercel), gates de CI y checklist qa. Usar al terminar trabajo en app/components/lib/tests o al hacer push.
+globs: "app/**/*,components/**/*,lib/**/*,tests/**/*,.github/**/*,cspell.json,cspell-project-words.txt,package.json"
 alwaysApply: false
 ---
 
@@ -26,22 +26,14 @@ Un cambio “listo” no es solo que compile en local: debe sobrevivir Actions.
 
 Branches que disparan Actions: `main`, `develop` (push y PR).
 
-## Spellcheck (fallo más frecuente)
+## Fallos frecuentes
 
-- Comando: `npm run spellcheck`
-- Diccionario del proyecto: `cspell-project-words.txt` (vía `cspell.json`)
-- Idiomas: `en` + `es` (`@cspell/dict-es-es`)
+1. **Vitest (`quality.yml`)** — UI cambió y el test de unidad quedó huérfano. Actualizar el test en el mismo commit. En el log de Actions, mira `Failed Tests`, no el `stderr` de PDFs ni avisos `act(...)`.
+2. **cspell (`spellcheck.yml`)** — palabra válida (marca, API, español de producto): añadirla a `cspell-project-words.txt` (una por línea, orden alfabético), volver a correr `npm run spellcheck`, incluir el archivo en el mismo commit/PR. No inventar sinónimos solo para pasar CI.
 
-Si cspell marca **Unknown word** y el término es válido (marca, API, español de producto, constantes de sistema):
+## Checklist del agente al terminar cambios en `app|components|lib|tests`
 
-1. Añadir la palabra a `cspell-project-words.txt` (una por línea, orden alfabético si el archivo ya lo está)
-2. Volver a correr `npm run spellcheck`
-3. Incluir ese archivo en el mismo commit/PR
-
-No “arreglar” ortografía inventando sinónimos solo para pasar CI si el copy/nombre de producto es intencional.
-
-## Checklist del agente al terminar cambios en `app|components|lib`
-
-1. Correr `npm run spellcheck` (o al menos no dejar palabras nuevas sin diccionario)
-2. No asumir que Vercel valida ortografía: **Actions es el gate**
-3. Al pedir push: recordar dual push (`origin` + `mirror`); el deploy en Vercel no sustituye Actions en GitHub
+1. Correr `npm run qa` (lint + Vitest + spellcheck)
+2. Si cambió UI o navegación, actualizar el test en `tests/unit/` del mismo commit
+3. No asumir que Vercel valida ortografía ni tests: **Actions es el gate**
+4. Al pedir push: recordar dual push (`origin` + `mirror`)

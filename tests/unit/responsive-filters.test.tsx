@@ -4,6 +4,7 @@ import { fireEvent, screen } from "@testing-library/react"
 import { ResponsiveFilters } from "@/components/ui/responsive-filters"
 import { renderWithIntl } from "@/tests/helpers/render-with-intl"
 import { stubMatchMedia } from "@/tests/helpers/stub-match-media"
+import { waitForDialogClosed } from "@/tests/helpers/wait-for-dialog-closed"
 
 function renderFilters() {
   return renderWithIntl(
@@ -34,7 +35,7 @@ describe("ResponsiveFilters", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
   })
 
-  it("bajo 1024px abre los campos en un modal y no empuja el listado", () => {
+  it("bajo 1024px abre los campos en un modal y no empuja el listado", async () => {
     stubMatchMedia(true)
     renderFilters()
 
@@ -48,7 +49,7 @@ describe("ResponsiveFilters", () => {
     expect(screen.getByLabelText("Cliente")).toBeVisible()
 
     fireEvent.click(screen.getByRole("button", { name: "Cerrar" }))
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    await waitForDialogClosed("Filtros")
     expect(screen.queryByLabelText("Cliente")).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Filtros" })).toBeInTheDocument()
   })
