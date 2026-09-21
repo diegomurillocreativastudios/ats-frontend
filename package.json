@@ -7,6 +7,8 @@
   },
   "scripts": {
     "dev": "next dev",
+    "predev": "node scripts/copy-location-states-catalog.mjs",
+    "prebuild": "node scripts/copy-location-states-catalog.mjs",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",

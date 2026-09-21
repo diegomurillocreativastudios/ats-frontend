@@ -10,6 +10,11 @@ const pdfRouteTraceAssets = [
   "./public/appli-ai-logo.svg",
 ]
 
+const locationStatesTraceAssets = [
+  "./public/location-catalog/states/**",
+  "./node_modules/@countrystatecity/countries-browser/dist/data/states/**",
+]
+
 /** Static defensive headers (FE-SEC-010). CSP is per-request in proxy.ts. */
 const staticSecurityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -47,6 +52,7 @@ const nextConfig = {
     "@sparticuz/chromium",
     "isomorphic-dompurify",
     "jsdom",
+    "@countrystatecity/countries-browser",
   ],
   /**
    * @sparticuz/chromium brotli binaries + logos must ship inside the PDF serverless trace on Vercel.
@@ -57,6 +63,8 @@ const nextConfig = {
     "/api/recruiter/vacancies/[vacancyId]/candidates/[candidateProfileId]/technical-sheet/pdf":
       pdfRouteTraceAssets,
     "/api/recruiter/**/technical-sheet/pdf": pdfRouteTraceAssets,
+    "/api/location-catalog/states/[iso2]": locationStatesTraceAssets,
+    "/api/location-catalog/**": locationStatesTraceAssets,
   },
   async headers() {
     return [

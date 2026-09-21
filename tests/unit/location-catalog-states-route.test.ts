@@ -17,6 +17,18 @@ describe("GET /api/location-catalog/states/[iso2]", () => {
     )
   })
 
+  it("returns packaged provinces for Afghanistan", async () => {
+    const response = await GET(
+      new NextRequest("http://localhost/api/location-catalog/states/AF"),
+      { params: Promise.resolve({ iso2: "AF" }) }
+    )
+
+    expect(response.status).toBe(200)
+    const body = (await response.json()) as Array<{ iso2?: string; name?: string }>
+    expect(body.length).toBeGreaterThan(0)
+    expect(body.some((row) => row.iso2 === "BDS")).toBe(true)
+  })
+
   it("rejects an invalid country code", async () => {
     const response = await GET(
       new NextRequest("http://localhost/api/location-catalog/states/salvador"),

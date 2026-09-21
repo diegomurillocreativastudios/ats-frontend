@@ -47,7 +47,34 @@ describe("getBundledStatesOfCountry", () => {
     expect(states).toHaveLength(1)
     expect(state?.name).toBe("San Salvador")
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringMatching(/\/api\/location-catalog\/states\/SV$/),
+      expect.stringMatching(/\/location-catalog\/states\/SV\.json$/),
+      expect.objectContaining({ credentials: "same-origin" })
+    )
+  })
+
+  it("falls back to the same-origin API when the static file is missing", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input)
+        if (url.includes("/api/location-catalog/states/AF")) {
+          return new Response(
+            JSON.stringify([
+              { iso2: "BDS", name: "Badakhshan", native: "Badakhshan" },
+            ]),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          )
+        }
+        return new Response("Not found", { status: 404 })
+      })
+    )
+
+    const states = await getBundledStatesOfCountry("AF")
+    expect(states).toEqual([
+      { iso2: "BDS", name: "Badakhshan", native: "Badakhshan" },
+    ])
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringMatching(/\/api\/location-catalog\/states\/AF$/),
       expect.objectContaining({ credentials: "same-origin" })
     )
   })

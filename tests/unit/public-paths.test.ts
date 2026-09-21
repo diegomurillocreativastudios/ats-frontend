@@ -10,6 +10,10 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/api/health")).toBe(true)
   })
 
+  it("allows the packaged location catalog without auth", () => {
+    expect(isPublicPath("/location-catalog/states/AF.json")).toBe(true)
+  })
+
   it("requires auth for recruiter portal routes", () => {
     expect(isPublicPath("/portal-rrhh")).toBe(false)
   })

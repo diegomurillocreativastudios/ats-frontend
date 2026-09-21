@@ -57,12 +57,14 @@ export function resetBundledStatesCache(): void {
   statesByCountry.clear()
 }
 
-function sameOriginStatesUrl(iso2: string): string {
-  const path = `/api/location-catalog/states/${encodeURIComponent(iso2)}`
+function catalogUrls(iso2: string): string[] {
+  const staticPath = `/location-catalog/states/${encodeURIComponent(iso2)}.json`
+  const apiPath = `/api/location-catalog/states/${encodeURIComponent(iso2)}`
   if (typeof window !== "undefined" && window.location?.origin) {
-    return new URL(path, window.location.origin).toString()
+    const origin = window.location.origin
+    return [new URL(staticPath, origin).toString(), new URL(apiPath, origin).toString()]
   }
-  return path
+  return [staticPath, apiPath]
 }
 
 /**
@@ -78,17 +80,20 @@ export function getBundledStatesOfCountry(
   if (cached) return cached
 
   const request = (async () => {
-    try {
-      const response = await fetch(sameOriginStatesUrl(iso2), {
-        credentials: "same-origin",
-      })
-      if (!response.ok) return []
-      const data: unknown = await response.json().catch(() => [])
-      if (!Array.isArray(data)) return []
-      return data.filter(isBundledState)
-    } catch {
-      return []
+    const urls = catalogUrls(iso2)
+
+    for (const url of urls) {
+      try {
+        const response = await fetch(url, { credentials: "same-origin" })
+        if (!response.ok) continue
+        const data: unknown = await response.json().catch(() => [])
+        if (!Array.isArray(data)) continue
+        return data.filter(isBundledState)
+      } catch {
+        // Try the next same-origin catalog URL.
+      }
     }
+    return []
   })()
 
   statesByCountry.set(iso2, request)

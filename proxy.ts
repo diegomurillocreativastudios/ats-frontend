@@ -167,6 +167,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)$).*)",
+    "/((?!_next/static|_next/image|location-catalog/|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)$).*)",
   ],
 }

@@ -43,6 +43,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Copied from @countrystatecity/countries-browser at predev/prebuild
+/public/location-catalog/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
