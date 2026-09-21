@@ -103,14 +103,27 @@ const normalizeCity = (raw: unknown): LocationCityItem => {
   }
 }
 
+const asRecord = (raw: unknown): Record<string, unknown> =>
+  raw && typeof raw === "object" && !Array.isArray(raw)
+    ? (raw as Record<string, unknown>)
+    : {}
+
+const unwrapPageRecord = (raw: unknown): Record<string, unknown> => {
+  const record = asRecord(raw)
+  const nested = record.data ?? record.Data
+  const nestedRecord = asRecord(nested)
+  const nestedItems = nestedRecord.items ?? nestedRecord.Items
+  if (Array.isArray(nestedItems) && !Array.isArray(record.items ?? record.Items)) {
+    return nestedRecord
+  }
+  return record
+}
+
 const normalizePage = <T>(
   raw: unknown,
   mapItem: (item: unknown) => T
 ): LocationPagedResult<T> => {
-  const record =
-    raw && typeof raw === "object" && !Array.isArray(raw)
-      ? (raw as Record<string, unknown>)
-      : {}
+  const record = unwrapPageRecord(raw)
   const itemsRaw = record.items ?? record.Items
   const items = Array.isArray(itemsRaw) ? itemsRaw.map(mapItem) : []
   return {

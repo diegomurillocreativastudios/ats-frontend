@@ -3,15 +3,15 @@
 import { useEffect, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import {
-  getCountries,
-  getStatesOfCountry,
-  type IState,
-} from "@countrystatecity/countries-browser"
-import {
   fetchAllLocationCountries,
   fetchAllLocationDivisions,
   getLocationCatalogStatus,
 } from "@/lib/api/locations"
+import {
+  getBundledCountryOptions,
+  getBundledStatesOfCountry,
+  type BundledState,
+} from "@/lib/locations/bundled-catalog"
 import type { VacancyLocationSelection } from "@/lib/vacancies/vacancy-location"
 import { normalizeCountryCode, normalizeStateCode } from "@/lib/vacancies/vacancy-location"
 import { resolveCountryDisplayLabel } from "@/lib/profile-form-options"
@@ -73,7 +73,7 @@ export function VacancyLocationFields({
   const [useGeoNamesApi, setUseGeoNamesApi] = useState(false)
   const [countryOptions, setCountryOptions] = useState<CountryOption[]>([])
   const [stateOptions, setStateOptions] = useState<StateOption[]>([])
-  const [legacyStates, setLegacyStates] = useState<IState[]>([])
+  const [legacyStates, setLegacyStates] = useState<BundledState[]>([])
   const [loadingCountries, setLoadingCountries] = useState(true)
   const [loadingStates, setLoadingStates] = useState(false)
   const [loadError, setLoadError] = useState<"countries" | "states" | null>(null)
@@ -92,41 +92,37 @@ export function VacancyLocationFields({
         if (cancelled) return
 
         if (status.hasData) {
-          setUseGeoNamesApi(true)
           const countries = await fetchAllLocationCountries()
           if (cancelled) return
-          const mapped = countries.map((country) => ({
-            iso2: country.iso2.toUpperCase(),
-            label: resolveCountryDisplayLabel(country.iso2, country.names.display),
-          }))
-          setCountryOptions(mapped.sort((a, b) => a.label.localeCompare(b.label, "es")))
-          return
+          if (countries.length > 0) {
+            setUseGeoNamesApi(true)
+            const mapped = countries.map((country) => ({
+              iso2: country.iso2.toUpperCase(),
+              label: resolveCountryDisplayLabel(country.iso2, country.names.display),
+            }))
+            setCountryOptions(mapped.sort((a, b) => a.label.localeCompare(b.label, "es")))
+            return
+          }
         }
 
         setUseGeoNamesApi(false)
-        const nextCountries = await getCountries()
-        if (cancelled) return
-        const mapped = nextCountries.map((country) => ({
-          iso2: country.iso2.toUpperCase(),
-          label: formatVacancyCountryLabel(country.iso2),
-        }))
-        setCountryOptions(mapped.sort((a, b) => a.label.localeCompare(b.label, "es")))
-      } catch {
-        if (cancelled) return
-        try {
-          setUseGeoNamesApi(false)
-          const nextCountries = await getCountries()
-          if (cancelled) return
-          const mapped = nextCountries.map((country) => ({
-            iso2: country.iso2.toUpperCase(),
-            label: formatVacancyCountryLabel(country.iso2),
-          }))
-          setCountryOptions(mapped.sort((a, b) => a.label.localeCompare(b.label, "es")))
-        } catch {
-          if (cancelled) return
+        const mapped = getBundledCountryOptions()
+        if (mapped.length === 0) {
           setCountryOptions([])
           setLoadError("countries")
+          return
         }
+        setCountryOptions(mapped)
+      } catch {
+        if (cancelled) return
+        setUseGeoNamesApi(false)
+        const mapped = getBundledCountryOptions()
+        if (mapped.length === 0) {
+          setCountryOptions([])
+          setLoadError("countries")
+          return
+        }
+        setCountryOptions(mapped)
       } finally {
         if (!cancelled) setLoadingCountries(false)
       }
@@ -168,7 +164,7 @@ export function VacancyLocationFields({
           return
         }
 
-        const nextStates = await getStatesOfCountry(normalizedCountryCode)
+        const nextStates = await getBundledStatesOfCountry(normalizedCountryCode)
         if (cancelled) return
         setLegacyStates(nextStates)
         const mapped = nextStates.map((state) => ({

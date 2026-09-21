@@ -36,11 +36,9 @@ vi.mock("@/lib/api/locations", () => ({
   fetchAllLocationDivisions: vi.fn(async () => []),
 }))
 
-vi.mock("@countrystatecity/countries-browser", () => ({
-  getCountries: vi.fn(async () => {
-    throw new Error("offline")
-  }),
-  getStatesOfCountry: vi.fn(async () => []),
+vi.mock("@/lib/locations/bundled-catalog", () => ({
+  getBundledCountryOptions: vi.fn(() => []),
+  getBundledStatesOfCountry: vi.fn(async () => []),
 }))
 
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"

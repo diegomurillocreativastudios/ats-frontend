@@ -11,8 +11,8 @@ vi.mock("@/lib/api/locations", () => ({
   searchLocationDivisions: vi.fn(),
 }))
 
-vi.mock("@countrystatecity/countries-browser", () => ({
-  getStateByCode: vi.fn(async (countryCode: string, stateCode: string) => {
+vi.mock("@/lib/locations/bundled-catalog", () => ({
+  getBundledStateByCode: vi.fn(async (countryCode: string, stateCode: string) => {
     if (countryCode === "SV" && stateCode === "SS") {
       return {
         iso2: "SS",
@@ -90,7 +90,7 @@ describe("vacancy-location-display", () => {
     await expect(resolveVacancyStateDisplayName("US", "NY")).resolves.toBe("Nueva York")
   })
 
-  it("resolves GeoNames shortCode divisions when countries-browser has no match", async () => {
+  it("resolves GeoNames shortCode divisions when the bundled catalog has no match", async () => {
     vi.mocked(getLocationCatalogStatus).mockResolvedValue({ hasData: true })
     vi.mocked(searchLocationDivisions).mockResolvedValue({
       items: [

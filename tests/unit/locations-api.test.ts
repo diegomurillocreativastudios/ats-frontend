@@ -75,6 +75,31 @@ describe("locations API client", () => {
     )
   })
 
+  it("searchLocationCountries unwraps a nested data envelope", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({
+      data: {
+        items: [
+          {
+            iso2: "HN",
+            geonameId: 3,
+            iso3: "HND",
+            names: { display: "Honduras" },
+          },
+        ],
+        page: 1,
+        pageSize: 50,
+        total: 1,
+        totalPages: 1,
+      },
+    })
+
+    const result = await searchLocationCountries()
+
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0]?.iso2).toBe("HN")
+    expect(result.totalPages).toBe(1)
+  })
+
   it("searchLocationDivisions targets divisions route", async () => {
     vi.mocked(apiClient.get).mockResolvedValue({
       items: [],
