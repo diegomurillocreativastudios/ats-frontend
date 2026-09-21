@@ -98,9 +98,9 @@ export function InterviewScheduleRow({
         ariaLabel={dateAriaLabel}
         errorMessage={errorMessage}
         wrapperClassName="relative w-full"
-        buttonClassName="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-center font-sans text-sm text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
+        buttonClassName="inline-flex min-h-10 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-left font-sans text-sm text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
       />
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-2">
         <QuarterHourTimeSelect
           value={startTime}
           onChange={handleStartChange}
@@ -108,7 +108,7 @@ export function InterviewScheduleRow({
           ariaLabel={startAriaLabel}
           allowEmpty
           emptyLabel="Inicio"
-          className="min-w-0 flex-1"
+          className="min-w-0 w-full"
           inputClassName="w-full min-w-0 max-w-none"
         />
         <span
@@ -122,12 +122,12 @@ export function InterviewScheduleRow({
           onChange={handleEndChange}
           disabled={disabled || !startTime}
           ariaLabel={endAriaLabel}
-          className="min-w-0 flex-1"
+          className="min-w-0 w-full"
           inputClassName="w-full min-w-0 max-w-none"
         />
         {durationLabel ? (
           <span
-            className="shrink-0 font-sans text-xs tabular-nums text-muted-foreground"
+            className="w-14 shrink-0 text-right font-sans text-xs tabular-nums text-muted-foreground"
             data-testid="interview-schedule-duration"
           >
             {durationLabel}

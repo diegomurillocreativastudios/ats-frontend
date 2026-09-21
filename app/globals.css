@@ -461,8 +461,29 @@ h6 {
   }
 
   .ui-modal-panel {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: fit-content;
+    max-height: min(90vh, calc(100dvh - 2rem));
+    overflow: clip;
+    overscroll-behavior: none;
     animation: ui-modal-panel-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
     will-change: transform, opacity;
+  }
+
+  .ui-modal-body {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    max-height: calc(min(90vh, 100dvh - 2rem) - 5.5rem);
+  }
+
+  .ui-modal-panel:has(> footer) .ui-modal-body {
+    max-height: calc(min(90vh, 100dvh - 2rem) - 9.5rem);
   }
 
   .ui-modal-panel.ui-modal-panel--exit {

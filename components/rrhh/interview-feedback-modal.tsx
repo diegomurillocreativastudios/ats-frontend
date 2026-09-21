@@ -19,6 +19,7 @@ import {
   type InterviewFeedbackResponse,
 } from "@/lib/api/interview-feedback"
 import { getInitials } from "@/lib/getInitials"
+import { splitCandidateIdentity } from "@/lib/rrhh/candidate-identity"
 import { formatRequirementKey } from "@/lib/vacancies/format-requirement-key"
 
 export interface InterviewFeedbackCompletePayload {
@@ -448,6 +449,8 @@ export function InterviewFeedbackModal({
   if (!applicationId) return null
 
   const trimmedCandidate = candidateLabel?.trim() ?? ""
+  const { name: candidateName, email: candidateEmail } =
+    splitCandidateIdentity(trimmedCandidate)
   const trimmedVacancy = vacancyLabel?.trim() ?? ""
   const showSkills = Boolean(
     form && !isLoadingForm && (form.softSkills.length > 0 || form.technicalSkills.length > 0)
@@ -501,19 +504,27 @@ export function InterviewFeedbackModal({
     >
       <div className="flex flex-col gap-5">
         {trimmedCandidate ? (
-          <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/50 px-3 py-3">
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/50 px-3 py-3">
             <div
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-vo-purple font-sans text-sm font-semibold text-white"
               aria-hidden
             >
-              {getInitials(trimmedCandidate)}
+              {getInitials(candidateName, candidateEmail ?? "")}
             </div>
-            <div className="min-w-0">
-              <p className="truncate font-sans text-sm font-semibold text-foreground">
-                {trimmedCandidate}
+            <div className="min-w-0 space-y-1">
+              <p className="wrap-break-word font-sans text-sm font-semibold leading-snug text-foreground">
+                {candidateName}
               </p>
+              {candidateEmail ? (
+                <p
+                  className="truncate font-sans text-sm text-muted-foreground"
+                  title={candidateEmail}
+                >
+                  {candidateEmail}
+                </p>
+              ) : null}
               {trimmedVacancy ? (
-                <p className="truncate font-sans text-xs text-muted-foreground">
+                <p className="wrap-break-word font-sans text-sm text-muted-foreground">
                   {trimmedVacancy}
                 </p>
               ) : null}
@@ -541,6 +552,26 @@ export function InterviewFeedbackModal({
 
         {form && !isLoadingForm ? (
           <>
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="interview-feedback-modal-field"
+                className="font-sans text-sm font-medium"
+              >
+                {t("fieldLabel")}
+              </label>
+              <textarea
+                id="interview-feedback-modal-field"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                rows={4}
+                disabled={isSubmitting}
+                required
+                aria-invalid={Boolean(error) && !hasComment}
+                placeholder={t("placeholder")}
+                className="min-h-24 w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
+              />
+            </div>
+
             {showSkills ? (
               <p className="font-sans text-xs text-muted-foreground">{t("scaleLegend")}</p>
             ) : null}
@@ -591,26 +622,6 @@ export function InterviewFeedbackModal({
                 ))}
               </section>
             ) : null}
-
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="interview-feedback-modal-field"
-                className="font-sans text-sm font-medium"
-              >
-                {t("fieldLabel")}
-              </label>
-              <textarea
-                id="interview-feedback-modal-field"
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                rows={5}
-                disabled={isSubmitting}
-                required
-                aria-invalid={Boolean(error) && !hasComment}
-                placeholder={t("placeholder")}
-                className="min-h-34 resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
-              />
-            </div>
 
             <FeedbackHistoryList
               entries={form.entries}

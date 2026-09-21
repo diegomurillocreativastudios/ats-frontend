@@ -1,7 +1,6 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import Modal from "@/components/ui/Modal"
 import { InterviewDetailPanel } from "@/components/rrhh/interviews/interview-detail-panel"
 
 export interface InterviewDetailModalProps {
@@ -25,27 +24,19 @@ export function InterviewDetailModal({
   onSaved,
   onDeleted,
 }: InterviewDetailModalProps) {
-  const t = useTranslations("RecruiterPortal.interviews.modals")
   if (!interviewId) return null
 
   return (
-    <Modal
+    <InterviewDetailPanel
+      interviewId={interviewId}
+      vacancyIdFromQuery={vacancyIdFromQuery}
+      candidateLabel={candidateLabel}
+      vacancyTitle={vacancyTitle}
+      variant="modal"
       isOpen={isOpen}
       onClose={onClose}
-      title={t("detailTitle")}
-      size="lg"
-      closeOnOverlayClick={false}
-    >
-      <InterviewDetailPanel
-        interviewId={interviewId}
-        vacancyIdFromQuery={vacancyIdFromQuery}
-        candidateLabel={candidateLabel}
-        vacancyTitle={vacancyTitle}
-        variant="modal"
-        onClose={onClose}
-        onSaved={onSaved}
-        onDeleted={onDeleted}
-      />
-    </Modal>
+      onSaved={onSaved}
+      onDeleted={onDeleted}
+    />
   )
 }

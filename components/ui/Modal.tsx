@@ -20,14 +20,14 @@ const EXIT_FALLBACK_MS = 280
 
 const MODAL_STYLES = {
   overlayBase:
-    "ui-modal-backdrop fixed inset-0 flex items-center justify-center bg-black/45 p-4 backdrop-blur-[3px]",
+    "ui-modal-backdrop fixed inset-0 flex flex-col items-center justify-center bg-black/45 p-4 backdrop-blur-[3px]",
   getContent: (sizeClass: string) =>
-    `ui-modal-panel glass-modal glass-iridescent-border relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-2xl ${sizeClass}`,
+    `ui-modal-panel glass-modal glass-iridescent-border relative flex h-fit max-h-[min(90vh,calc(100dvh-2rem))] w-full shrink-0 grow-0 flex-col overflow-clip rounded-2xl ${sizeClass}`,
   header:
     "shrink-0 flex items-center justify-between border-b border-border px-6 py-4",
-  body: "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 py-5",
+  body: "ui-modal-body min-h-0 overflow-y-auto overscroll-y-contain px-6 py-5",
   footer:
-    "shrink-0 flex items-center justify-end gap-3 border-t border-border px-6 py-4",
+    "relative z-10 shrink-0 flex w-full items-center gap-3 rounded-b-2xl border-t border-border bg-background px-6 py-4",
 }
 
 const SIZE_CLASSES = {
@@ -47,6 +47,8 @@ interface ModalProps {
   bodyClassName?: string
   /** Clases extra para el panel (p. ej. fondo sólido). */
   contentClassName?: string
+  /** Clases extra para el pie. Por defecto alinea las acciones a la derecha. */
+  footerClassName?: string
   closeOnOverlayClick?: boolean
   closeOnEscape?: boolean
   /** Por defecto z-50; use p. ej. z-[100] si este modal se abre encima de otro. */
@@ -69,6 +71,7 @@ export default function Modal({
   size = "md",
   bodyClassName = "",
   contentClassName = "",
+  footerClassName = "justify-end",
   closeOnOverlayClick = true,
   closeOnEscape = true,
   overlayZIndexClass = "z-50",
@@ -83,6 +86,7 @@ export default function Modal({
   )
   const [phase, setPhase] = useState<ModalPhase>("closed")
   const exitTimerRef = useRef<number | null>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const isInteractive = phase === "open"
 
   const clearExitTimer = useCallback(() => {
@@ -159,6 +163,19 @@ export default function Modal({
     return () => clearExitTimer()
   }, [clearExitTimer])
 
+  useEffect(() => {
+    if (phase === "closed") return undefined
+    const el = panelRef.current
+    if (!el) return undefined
+    const lockPanelScroll = () => {
+      if (el.scrollTop !== 0) el.scrollTop = 0
+      if (el.scrollLeft !== 0) el.scrollLeft = 0
+    }
+    lockPanelScroll()
+    el.addEventListener("scroll", lockPanelScroll, { passive: true })
+    return () => el.removeEventListener("scroll", lockPanelScroll)
+  }, [phase])
+
   if (!isClient || phase === "closed") return null
 
   const isClosing = phase === "closing"
@@ -179,6 +196,7 @@ export default function Modal({
       onClick={handleOverlayClick}
     >
       <div
+        ref={panelRef}
         className={[
           MODAL_STYLES.getContent(sizeClass),
           isClosing ? "ui-modal-panel--exit" : "",
@@ -210,7 +228,11 @@ export default function Modal({
         <div className={`${MODAL_STYLES.body} ${bodyClassName}`.trim()}>
           {children}
         </div>
-        {footer ? <footer className={MODAL_STYLES.footer}>{footer}</footer> : null}
+        {footer ? (
+          <footer className={`${MODAL_STYLES.footer} ${footerClassName}`.trim()}>
+            {footer}
+          </footer>
+        ) : null}
       </div>
     </div>,
     document.body

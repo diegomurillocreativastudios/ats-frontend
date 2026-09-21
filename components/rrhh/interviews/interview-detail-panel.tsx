@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Loader2, Trash2 } from "lucide-react"
@@ -19,7 +19,6 @@ import {
   type InterviewTypeOption,
   type PatchInterviewPayload,
 } from "@/lib/api/interviews"
-import { resolveApplicationIdForCandidate } from "@/lib/api/vacancy-applications"
 import {
   localDatetimeInputToUtcIso,
   utcIsoToLocalDatetimeInputValue,
@@ -28,15 +27,13 @@ import { InterviewerRecruiterSelect } from "@/components/rrhh/interviews/intervi
 import { InterviewScheduleRow } from "@/components/rrhh/interviews/interview-schedule-controls"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
 import { InterviewSessionLinks } from "@/components/rrhh/interviews/interview-session-links"
-import {
-  InterviewFeedbackModal,
-  type InterviewFeedbackCompletePayload,
-} from "@/components/rrhh/interview-feedback-modal"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import Modal from "@/components/ui/Modal"
 import Snackbar from "@/components/ui/Snackbar"
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar"
 import { getInterviewStatusLabel } from "@/lib/interviews/interview-status-labels"
+import { splitCandidateIdentity } from "@/lib/rrhh/candidate-identity"
 
 interface DetailFormSnapshot {
   scheduledLocal: string
@@ -82,6 +79,9 @@ function applySnapshot(
   setters.setStatusChoice(snap.statusChoice)
 }
 
+const FIELD_CONTROL =
+  "h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
+
 export interface InterviewDetailPanelProps {
   interviewId: string
   vacancyIdFromQuery: string | null
@@ -89,6 +89,9 @@ export interface InterviewDetailPanelProps {
   vacancyTitle?: string | null
   /** En modal: sin breadcrumb ni título de página duplicado. */
   variant?: "page" | "modal"
+  /** Solo en `variant="modal"`: controla el dialog. */
+  isOpen?: boolean
+  modalTitle?: string
   onClose?: () => void
   onSaved?: () => void
   /** Tras borrado exitoso (p. ej. quitar fila del listado en modal). */
@@ -101,6 +104,8 @@ export function InterviewDetailPanel({
   candidateLabel = null,
   vacancyTitle = null,
   variant = "page",
+  isOpen,
+  modalTitle,
   onClose,
   onSaved,
   onDeleted,
@@ -137,12 +142,6 @@ export function InterviewDetailPanel({
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [pendingStatus, setPendingStatus] = useState<InterviewStatus | null>(
-    null
-  )
-  const [feedbackApplicationId, setFeedbackApplicationId] = useState<
-    string | null
-  >(null)
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success" as "success" | "error" | "info",
@@ -320,6 +319,8 @@ export function InterviewDetailPanel({
     candidateLabel?.trim() ||
     interview?.candidateName?.trim() ||
     t("detail.candidateFallback")
+  const { name: candidateName, email: candidateEmail } =
+    splitCandidateIdentity(candidateDisplay)
   const vacancyDisplay =
     vacancyTitle?.trim() || interview?.jobTitle?.trim() || null
 
@@ -332,25 +333,19 @@ export function InterviewDetailPanel({
   }, [isModal, onClose, savedSnapshot, setters])
 
   const finishAfterSave = useCallback(
-    (updated: Interview, previousStatus: InterviewStatus) => {
+    (updated: Interview) => {
       const snap = snapshotFromInterview(updated)
       setSavedSnapshot(snap)
       applySnapshot(snap, setters)
       onSaved?.()
-      const becameCompleted =
-        updated.status === "Completed" && previousStatus !== "Completed"
-      if (!becameCompleted) {
-        if (isModal && onClose) onClose()
-        else {
-          setSnackbar({
-            open: true,
-            variant: "success",
-            message: t("toasts.saved"),
-          })
-        }
-        return { becameCompleted: false }
+      if (isModal && onClose) onClose()
+      else {
+        setSnackbar({
+          open: true,
+          variant: "success",
+          message: t("toasts.saved"),
+        })
       }
-      return { becameCompleted: true }
     },
     [isModal, onClose, onSaved, setters, t]
   )
@@ -360,7 +355,6 @@ export function InterviewDetailPanel({
     const ae = document.activeElement
     if (ae instanceof HTMLElement) ae.blur()
     setSaving(true)
-    const previousStatus = interview.status
     try {
       const durationValue =
         durationMinutes.trim() === ""
@@ -394,26 +388,7 @@ export function InterviewDetailPanel({
       }
       const updated = await patchInterview(interview.id, patchPayload)
       setInterview(updated)
-      const result = finishAfterSave(updated, previousStatus)
-      if (!result.becameCompleted) return
-
-      const knownId = updated.applicationId?.trim() || null
-      const resolved =
-        knownId ??
-        (await resolveApplicationIdForCandidate(
-          updated.vacancyId || vacancyId,
-          updated.candidateProfileId
-        ))
-      if (resolved) {
-        setFeedbackApplicationId(resolved)
-        return
-      }
-      setSnackbar({
-        open: true,
-        variant: "info",
-        message: t("detail.completedNoFeedback"),
-      })
-      if (isModal && onClose) onClose()
+      finishAfterSave(updated)
     } catch (err: unknown) {
       const status =
         typeof err === "object" && err !== null && "status" in err
@@ -460,28 +435,6 @@ export function InterviewDetailPanel({
     setSnackbar((prev) => ({ ...prev, open: false }))
   }
 
-  const handleStatusSelect = (next: InterviewStatus) => {
-    if (next === statusChoice) return
-    if (next === "Completed" || next === "Cancelled" || next === "NoShow") {
-      setPendingStatus(next)
-      return
-    }
-    setStatusChoice(next)
-  }
-
-  const handleFeedbackComplete = (payload: InterviewFeedbackCompletePayload) => {
-    setFeedbackApplicationId(null)
-    setSnackbar({
-      open: true,
-      variant: payload.variant,
-      message: payload.message,
-    })
-    if (payload.shouldRefresh) {
-      load().catch(() => {})
-    }
-    if (isModal && onClose) onClose()
-  }
-
   const actionBar = (
     <div className="flex w-full flex-wrap items-center justify-between gap-3">
       <button
@@ -521,6 +474,23 @@ export function InterviewDetailPanel({
       </div>
     </div>
   )
+
+  const withModalShell = (body: ReactNode, footer?: ReactNode) => {
+    if (!isModal) return body
+    return (
+      <Modal
+        isOpen={isOpen ?? true}
+        onClose={onClose ?? (() => {})}
+        title={modalTitle ?? t("modals.detailTitle")}
+        size="lg"
+        closeOnOverlayClick={false}
+        footer={footer}
+        footerClassName="justify-between"
+      >
+        {body}
+      </Modal>
+    )
+  }
 
   const meetHint = showMeetHint ? (
     <div
@@ -562,32 +532,8 @@ export function InterviewDetailPanel({
     />
   ) : null
 
-  const statusConfirmCopy =
-    pendingStatus === "Completed"
-      ? {
-          title: t("detail.statusConfirm.completeTitle"),
-          message: t("detail.statusConfirm.completeMessage"),
-          confirm: t("detail.statusConfirm.completeConfirm"),
-          intent: "primary" as const,
-        }
-      : pendingStatus === "Cancelled"
-        ? {
-            title: t("detail.statusConfirm.cancelTitle"),
-            message: t("detail.statusConfirm.cancelMessage"),
-            confirm: t("detail.statusConfirm.cancelConfirm"),
-            intent: "danger" as const,
-          }
-        : pendingStatus === "NoShow"
-          ? {
-              title: t("detail.statusConfirm.noShowTitle"),
-              message: t("detail.statusConfirm.noShowMessage"),
-              confirm: t("detail.statusConfirm.noShowConfirm"),
-              intent: "danger" as const,
-            }
-          : null
-
   if (loading) {
-    return (
+    return withModalShell(
       <div
         className="flex flex-col items-center justify-center gap-3 py-20"
         data-testid="interview-detail-loading"
@@ -601,8 +547,8 @@ export function InterviewDetailPanel({
   }
 
   if (error || !interview) {
-    return (
-      <div className="flex flex-col gap-4 p-6">
+    return withModalShell(
+      <div className="flex flex-col gap-4">
         <p className="font-sans text-sm text-destructive" role="alert">
           {error ?? t("detail.loadFailed")}
         </p>
@@ -644,13 +590,13 @@ export function InterviewDetailPanel({
         />
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="detail-type" className="font-sans text-sm font-medium">
             {t("detail.fields.type")}
           </label>
           {loadingInterviewTypes ? (
-            <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
+            <div className={`flex items-center gap-2 text-muted-foreground ${FIELD_CONTROL}`}>
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
               {t("form.loadingTypes")}
             </div>
@@ -660,7 +606,7 @@ export function InterviewDetailPanel({
               value={interviewType}
               onChange={(e) => setInterviewType(e.target.value)}
               disabled={!isEditable}
-              className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
+              className={FIELD_CONTROL}
             >
               <option value="">{t("form.placeholders.typeExample")}</option>
               {interviewTypeOptions.map((opt) => (
@@ -683,7 +629,7 @@ export function InterviewDetailPanel({
             {t("detail.fields.modality")}
           </label>
           {loadingModalities ? (
-            <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 font-sans text-sm text-muted-foreground">
+            <div className={`flex items-center gap-2 text-muted-foreground ${FIELD_CONTROL}`}>
               <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
               {t("form.loadingModalities")}
             </div>
@@ -693,7 +639,7 @@ export function InterviewDetailPanel({
               value={interviewModalityId}
               onChange={(e) => setInterviewModalityId(e.target.value)}
               disabled={!isEditable}
-              className="h-10 rounded-md border border-input bg-background px-3 font-sans text-sm disabled:opacity-60"
+              className={FIELD_CONTROL}
             >
               <option value="">{t("form.placeholders.selectModality")}</option>
               {modalityOptions.map((m) => (
@@ -742,13 +688,13 @@ export function InterviewDetailPanel({
           disabled={!isEditable}
           rows={4}
           placeholder={t("detail.descriptionPlaceholder")}
-          className="resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
+          className="w-full min-w-0 resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm disabled:opacity-60"
         />
       </div>
     </>
   )
 
-  return (
+  const body = (
     <div className={rootClass}>
       <div className="flex flex-col gap-3">
         {variant === "page" ? (
@@ -762,32 +708,42 @@ export function InterviewDetailPanel({
         {variant === "page" ? (
           <PortalPageHeader title={t("detail.pageTitle")} className="w-full pb-0" />
         ) : null}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <p
-              className="font-sans text-base font-semibold text-foreground"
-              data-testid="interview-detail-candidate"
-            >
-              {candidateDisplay}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_13rem] sm:items-start sm:gap-x-4">
+          <div
+            className="min-w-0 space-y-1"
+            data-testid="interview-detail-candidate"
+          >
+            <p className="wrap-break-word font-sans text-base font-semibold leading-snug text-foreground">
+              {candidateName}
             </p>
-            <p className="font-sans text-sm text-muted-foreground">
+            {candidateEmail ? (
+              <p
+                className="truncate font-sans text-sm text-muted-foreground"
+                title={candidateEmail}
+              >
+                {candidateEmail}
+              </p>
+            ) : null}
+            <p className="wrap-break-word font-sans text-sm text-muted-foreground">
               {vacancyDisplay || t("detail.vacancyFallback")}
             </p>
           </div>
-          <div className="flex min-w-[12rem] flex-col gap-1.5 sm:items-end">
+          <div className="flex min-w-0 flex-col gap-1.5">
             {isEditable ? (
               <>
-                <label htmlFor="detail-status" className="sr-only">
+                <label
+                  htmlFor="detail-status"
+                  className="font-sans text-sm font-medium text-foreground"
+                >
                   {t("detail.fields.status")}
                 </label>
                 <select
                   id="detail-status"
                   value={statusChoice}
                   onChange={(e) =>
-                    handleStatusSelect(e.target.value as InterviewStatus)
+                    setStatusChoice(e.target.value as InterviewStatus)
                   }
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 font-sans text-sm sm:w-52"
-                  aria-label={t("detail.statusAria")}
+                  className={FIELD_CONTROL}
                 >
                   {statusActions.map((s) => (
                     <option key={s.value} value={s.value}>
@@ -797,10 +753,15 @@ export function InterviewDetailPanel({
                 </select>
               </>
             ) : (
-              <InterviewStatusBadge
-                status={interview.status}
-                label={interview.statusDisplayName}
-              />
+              <>
+                <span className="font-sans text-sm font-medium text-foreground">
+                  {t("detail.fields.status")}
+                </span>
+                <InterviewStatusBadge
+                  status={interview.status}
+                  label={interview.statusDisplayName}
+                />
+              </>
             )}
             {!isEditable ? (
               <p className="font-sans text-xs text-muted-foreground" role="status">
@@ -834,13 +795,11 @@ export function InterviewDetailPanel({
           <div className="flex flex-col gap-4">{sessionLinks}</div>
         ) : null}
       </div>
+    </div>
+  )
 
-      {isModal ? (
-        <div className="sticky bottom-0 z-10 -mx-6 -mb-5 mt-1 border-t border-border bg-background/95 px-6 py-4 backdrop-blur-sm">
-          {actionBar}
-        </div>
-      ) : null}
-
+  const overlays = (
+    <>
       <DeleteConfirmModal
         isOpen={deleteConfirmOpen}
         onClose={() => {
@@ -853,40 +812,19 @@ export function InterviewDetailPanel({
         overlayZIndexClass={isModal ? "z-[100]" : undefined}
       />
 
-      <DeleteConfirmModal
-        isOpen={pendingStatus != null && statusConfirmCopy != null}
-        onClose={() => setPendingStatus(null)}
-        onConfirm={() => {
-          if (pendingStatus) setStatusChoice(pendingStatus)
-          setPendingStatus(null)
-        }}
-        title={statusConfirmCopy?.title ?? ""}
-        message={statusConfirmCopy?.message ?? ""}
-        confirmText={statusConfirmCopy?.confirm}
-        intent={statusConfirmCopy?.intent ?? "danger"}
-        overlayZIndexClass={isModal ? "z-[100]" : undefined}
-      />
-
-      {feedbackApplicationId ? (
-        <InterviewFeedbackModal
-          isOpen
-          onClose={() => {
-            setFeedbackApplicationId(null)
-            if (isModal && onClose) onClose()
-          }}
-          applicationId={feedbackApplicationId}
-          candidateLabel={candidateDisplay}
-          vacancyLabel={vacancyDisplay}
-          onComplete={handleFeedbackComplete}
-        />
-      ) : null}
-
       <Snackbar
         open={snackbar.open}
         onClose={handleCloseSnackbar}
         variant={snackbar.variant}
         message={snackbar.message}
       />
-    </div>
+    </>
+  )
+
+  return (
+    <>
+      {withModalShell(body, isModal ? actionBar : undefined)}
+      {overlays}
+    </>
   )
 }

@@ -1,9 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 import type { ReactNode } from "react"
 
 import { InterviewDetailPanel } from "@/components/rrhh/interviews/interview-detail-panel"
+import { splitCandidateIdentity } from "@/lib/rrhh/candidate-identity"
 import esMessages from "@/messages/es.json"
 import type { Interview } from "@/lib/api/interviews"
 
@@ -138,6 +139,7 @@ describe("InterviewDetailPanel", () => {
       "Ana Pérez"
     )
     expect(screen.getByText("Dev Senior")).toBeInTheDocument()
+    expect(screen.getByLabelText("Estado")).toBeInTheDocument()
     expect(screen.getByTestId("interview-schedule-duration")).toHaveTextContent(
       "60 min"
     )
@@ -146,7 +148,7 @@ describe("InterviewDetailPanel", () => {
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument()
   })
 
-  it("habilita guardar al editar y pide confirmación al completar", async () => {
+  it("habilita guardar al editar y aplica el estado sin confirmación", async () => {
     renderPanel(
       <InterviewDetailPanel
         interviewId="int-1"
@@ -161,20 +163,52 @@ describe("InterviewDetailPanel", () => {
     })
     expect(screen.getByTestId("interview-detail-save")).not.toBeDisabled()
 
-    fireEvent.change(screen.getByLabelText("Estado de la entrevista"), {
+    fireEvent.change(screen.getByLabelText("Estado"), {
       target: { value: "Completed" },
     })
-    expect(
-      await screen.findByText("Marcar como completada")
-    ).toBeInTheDocument()
-    expect(screen.getByLabelText("Estado de la entrevista")).toHaveValue(
-      "Scheduled"
+    expect(screen.queryByText("Marcar como completada")).not.toBeInTheDocument()
+    expect(screen.getByLabelText("Estado")).toHaveValue("Completed")
+  })
+
+  it("separa nombre y correo del candidato para no saturar el encabezado", async () => {
+    renderPanel(
+      <InterviewDetailPanel
+        interviewId="int-1"
+        vacancyIdFromQuery="vac-1"
+        candidateLabel="Diego Murillo - diegomurillo@example.com"
+        vacancyTitle="React Frontend Dev"
+        variant="modal"
+      />
     )
-    fireEvent.click(screen.getByRole("button", { name: "Marcar completada" }))
-    await waitFor(() => {
-      expect(screen.getByLabelText("Estado de la entrevista")).toHaveValue(
-        "Completed"
-      )
+
+    const identity = await screen.findByTestId("interview-detail-candidate")
+    expect(identity).toHaveTextContent("Diego Murillo")
+    expect(identity).toHaveTextContent("diegomurillo@example.com")
+    expect(screen.getByText("React Frontend Dev")).toBeInTheDocument()
+    expect(screen.getByLabelText("Estado")).toBeInTheDocument()
+  })
+})
+
+describe("splitCandidateIdentity", () => {
+  it("parte nombre y correo con guion o punto medio", () => {
+    expect(
+      splitCandidateIdentity("Diego Murillo - diegomurillo@example.com")
+    ).toEqual({
+      name: "Diego Murillo",
+      email: "diegomurillo@example.com",
+    })
+    expect(
+      splitCandidateIdentity("Ana Pérez · ana@test.com")
+    ).toEqual({
+      name: "Ana Pérez",
+      email: "ana@test.com",
+    })
+  })
+
+  it("no parte cuando no hay correo", () => {
+    expect(splitCandidateIdentity("Ana Pérez")).toEqual({
+      name: "Ana Pérez",
+      email: null,
     })
   })
 })

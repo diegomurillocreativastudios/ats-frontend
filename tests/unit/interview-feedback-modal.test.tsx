@@ -244,4 +244,25 @@ describe("InterviewFeedbackModal", () => {
     expect(screen.getByText("Camila Rivas Navarro")).toBeInTheDocument()
     expect(screen.getByText("Desarrollador frontend")).toBeInTheDocument()
   })
+
+  it("separa nombre y correo como en administrar entrevista", async () => {
+    renderModal(
+      <InterviewFeedbackModal
+        isOpen
+        onClose={vi.fn()}
+        applicationId="app-1"
+        candidateLabel="Diego Murillo - diegomurillo@example.com"
+        vacancyLabel="React Frontend Dev"
+        onComplete={vi.fn()}
+      />
+    )
+
+    await screen.findByLabelText("Comentario")
+    expect(screen.getByText("Diego Murillo")).toBeInTheDocument()
+    expect(screen.getByText("diegomurillo@example.com")).toBeInTheDocument()
+    expect(
+      screen.queryByText("Diego Murillo - diegomurillo@example.com")
+    ).not.toBeInTheDocument()
+    expect(screen.getByText("React Frontend Dev")).toBeInTheDocument()
+  })
 })
