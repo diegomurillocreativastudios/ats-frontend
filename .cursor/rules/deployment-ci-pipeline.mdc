@@ -9,7 +9,7 @@ alwaysApply: false
 ## Pipeline (orden real)
 
 1. **Commit** en la rama de trabajo
-2. **Push dual** a `origin` (GitLab) y `mirror` (GitHub) — skills `push-ats-develop` / `push-ats-test` / `push-ats-prod`
+2. **Push dual** a `origin` (GitLab) y `mirror` (GitHub) — skills `push-ats-develop` / `push-ats-test` / `push-ats-demo` / `push-ats-prod`
 3. **GitHub Actions** en `mirror` (bloquea o alerta antes del deploy útil)
 4. **Vercel CI/CD** despliega desde el remoto conectado
 
