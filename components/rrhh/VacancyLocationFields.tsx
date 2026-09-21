@@ -145,33 +145,52 @@ export function VacancyLocationFields({
 
     let cancelled = false
 
+    const applyBundledStates = async () => {
+      const nextStates = await getBundledStatesOfCountry(normalizedCountryCode)
+      if (cancelled) return false
+      const mapped = nextStates
+        .map((state) => ({
+          code: state.iso2.toUpperCase(),
+          label: formatVacancyStateLabel(state, normalizedCountryCode),
+        }))
+        .filter((state) => state.code && state.label)
+        .sort((a, b) => a.label.localeCompare(b.label, "es"))
+      setLegacyStates(nextStates)
+      setStateOptions(mapped)
+      return mapped.length > 0
+    }
+
     const loadStates = async () => {
       setLoadingStates(true)
       setLoadError(null)
       try {
         if (useGeoNamesApi) {
-          const divisions = await fetchAllLocationDivisions({
-            countryIso2: normalizedCountryCode,
-            level: 1,
-          })
-          if (cancelled) return
-          const mapped = divisions.map((division) => ({
-            code: division.shortCode.toUpperCase(),
-            label: division.names.display,
-          }))
-          setStateOptions(mapped.sort((a, b) => a.label.localeCompare(b.label, "es")))
-          setLegacyStates([])
-          return
+          try {
+            const divisions = await fetchAllLocationDivisions({
+              countryIso2: normalizedCountryCode,
+              level: 1,
+            })
+            if (cancelled) return
+            const mapped = divisions
+              .map((division) => ({
+                code: (division.shortCode || division.adminCode).toUpperCase(),
+                label: (division.names?.display ?? "").trim(),
+              }))
+              .filter((state) => state.code && state.label)
+              .sort((a, b) => a.label.localeCompare(b.label, "es"))
+            if (mapped.length > 0) {
+              setStateOptions(mapped)
+              setLegacyStates([])
+              return
+            }
+          } catch {
+            // GeoNames empty or offline: use the packaged catalog (same-origin).
+          }
         }
 
-        const nextStates = await getBundledStatesOfCountry(normalizedCountryCode)
+        const loadedBundled = await applyBundledStates()
         if (cancelled) return
-        setLegacyStates(nextStates)
-        const mapped = nextStates.map((state) => ({
-          code: state.iso2.toUpperCase(),
-          label: formatVacancyStateLabel(state, normalizedCountryCode),
-        }))
-        setStateOptions(mapped.sort((a, b) => a.label.localeCompare(b.label, "es")))
+        if (!loadedBundled) setLoadError("states")
       } catch {
         if (cancelled) return
         setStateOptions([])
@@ -281,7 +300,8 @@ export function VacancyLocationFields({
             onChange={(event) => handleStateChange(event.target.value)}
             className={selectClassName}
             aria-label={resolvedStateLabel}
-            disabled={disabled || !normalizedCountryCode || loadingStates}
+            aria-busy={loadingStates}
+            disabled={disabled || !normalizedCountryCode}
           >
             <option value="">{resolvedUnspecifiedLabel}</option>
             {stateOptionsWithSelection.map((state) => (
