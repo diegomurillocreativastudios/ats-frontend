@@ -151,8 +151,12 @@ describe("AdminUsuariosContent i18n (Etapa 13)", () => {
     expect(
       await screen.findByText("No se encontraron usuarios"),
     ).toBeInTheDocument()
-    // Los roles asignables son valores del backend: se mantienen verbatim.
-    expect(screen.getByRole("option", { name: "Admin" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("option", { name: "Administrador" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("option", { name: "Candidato" }),
+    ).toBeInTheDocument()
   })
 
   it("renderiza la UI estática del listado de usuarios en inglés", async () => {
@@ -163,8 +167,12 @@ describe("AdminUsuariosContent i18n (Etapa 13)", () => {
     expect(
       await screen.findByText("No users found"),
     ).toBeInTheDocument()
-    // Rol verbatim también en inglés (no se traduce).
-    expect(screen.getByRole("option", { name: "Recruiter" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("option", { name: "Recruiter" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("option", { name: "Applicant" }),
+    ).toBeInTheDocument()
   })
 })
 

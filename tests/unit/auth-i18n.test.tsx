@@ -93,6 +93,7 @@ describe("Login i18n (Etapa 4)", () => {
 
   it("traduce el panel de marca en español sin dejar textos en inglés", () => {
     renderWithIntl(<IniciarSesion />, "es")
+    expect(screen.queryByText("Top Applicant")).not.toBeInTheDocument()
     expect(screen.queryByText("Top Candidate")).not.toBeInTheDocument()
     expect(screen.queryByText("Senior Tech Recruiter")).not.toBeInTheDocument()
     expect(screen.queryByText("HR Analytics")).not.toBeInTheDocument()
@@ -246,7 +247,7 @@ describe("Diccionarios auth (Etapa 4)", () => {
 
   it("no reutiliza el copy en inglés del panel de marca en los otros idiomas", () => {
     const englishOnly = {
-      previewTopBadge: "Top Candidate",
+      previewTopBadge: "Top Applicant",
       previewRole: "Senior Tech Recruiter",
       previewTagAnalytics: "HR Analytics",
       previewTagSourcing: "Active Sourcing",

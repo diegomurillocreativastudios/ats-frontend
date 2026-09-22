@@ -149,7 +149,7 @@ describe("VacancyListCard i18n (Etapa 7)", () => {
       "en",
     )
 
-    expect(screen.getByText("Candidates")).toBeInTheDocument()
+    expect(screen.getByText("Applicants")).toBeInTheDocument()
     expect(screen.getByText("View details")).toBeInTheDocument()
     expect(screen.getByText("Senior React Engineer")).toBeInTheDocument()
     expect(screen.getByText("Acme")).toBeInTheDocument()

@@ -112,9 +112,9 @@ describe("AdminUsuariosContent", () => {
       name: "Usuario: admin@matchengine.com",
     })
     expect(within(card).getByText("admin")).toBeInTheDocument()
-    expect(within(card).getByText("Admin")).toBeInTheDocument()
-    expect(within(card).getByText("Candidate")).toBeInTheDocument()
-    expect(within(card).getByText("Recruiter")).toBeInTheDocument()
+    expect(within(card).getByText("Administrador")).toBeInTheDocument()
+    expect(within(card).getByText("Candidato")).toBeInTheDocument()
+    expect(within(card).getByText("Reclutador")).toBeInTheDocument()
     expect(within(card).queryByText("+1")).not.toBeInTheDocument()
     expect(within(card).getByText("Roles")).toBeInTheDocument()
     expect(within(card).getByText("Estado")).toBeInTheDocument()
@@ -230,7 +230,7 @@ describe("AdminUsuariosContent", () => {
     ).toBeInTheDocument()
     expect(within(dialog).getByText("Añadir roles")).toBeInTheDocument()
     expect(
-      within(dialog).getByRole("checkbox", { name: "Candidate" })
+      within(dialog).getByRole("checkbox", { name: "Candidato" })
     ).toBeInTheDocument()
     expect(
       within(dialog).getByRole("button", { name: "Añadir" })

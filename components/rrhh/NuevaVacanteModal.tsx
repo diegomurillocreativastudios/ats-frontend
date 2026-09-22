@@ -22,13 +22,7 @@ import {
   type VacancyClipboardPayload,
 } from "@/lib/vacancies/vacancy-clipboard";
 import { mapActiveCatalogItemsToOptions } from "@/lib/vacancy-catalogs";
-
-const toSnakeCase = (str) =>
-  str
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-z0-9_]/g, "");
+import { toRequirementStorageKey } from "@/lib/vacancies/format-requirement-key";
 
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
@@ -222,7 +216,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     const attributes = {};
 
     validReqs.forEach((r) => {
-      const key = toSnakeCase(r.requirementName);
+      const key = toRequirementStorageKey(r.requirementName);
       if (key) {
         requirements[key] = r.requirementValue.trim();
         attributes[key] = r.scale / 10;

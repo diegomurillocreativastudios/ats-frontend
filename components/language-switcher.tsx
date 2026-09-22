@@ -1,11 +1,21 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react"
+import { createPortal } from "react-dom"
 import { useLocale, useTranslations } from "next-intl"
 import { Check, ChevronDown, Globe } from "lucide-react"
 
 import { useRouter } from "@/i18n/navigation"
 import { locales, localeCookieName, type Locale } from "@/i18n/routing"
+
+/**
+ * Por encima de cabeceras, tablas y navbars. Los modales empiezan en z-50
+ * (`components/ui/Modal.tsx`), así que este menú queda debajo de ellos.
+ * El navbar usa backdrop-filter y atrapa cualquier z-index interno.
+ */
+const LANGUAGE_MENU_Z_CLASS = "z-[49]"
+const LANGUAGE_MENU_GAP_PX = 8
+const LANGUAGE_MENU_ESTIMATED_HEIGHT_PX = 240
 
 /**
  * Selector de idioma de la plataforma (Etapa 2 de i18n).
@@ -42,6 +52,28 @@ function persistLocaleCookie(locale: Locale) {
   document.cookie = `${localeCookieName}=${locale}; path=/; max-age=${ONE_YEAR_IN_SECONDS}; samesite=lax`
 }
 
+function getLanguageMenuStyle(anchor: HTMLElement | null): CSSProperties {
+  if (!anchor) return { top: LANGUAGE_MENU_GAP_PX, right: LANGUAGE_MENU_GAP_PX }
+
+  const rect = anchor.getBoundingClientRect()
+  const right = Math.max(LANGUAGE_MENU_GAP_PX, window.innerWidth - rect.right)
+  const spaceBelow = window.innerHeight - rect.bottom
+  const openUp =
+    spaceBelow < LANGUAGE_MENU_ESTIMATED_HEIGHT_PX && rect.top > spaceBelow
+
+  if (openUp) {
+    return {
+      right,
+      bottom: window.innerHeight - rect.top + LANGUAGE_MENU_GAP_PX,
+    }
+  }
+
+  return {
+    right,
+    top: rect.bottom + LANGUAGE_MENU_GAP_PX,
+  }
+}
+
 interface LanguageSwitcherProps {
   /** Clase adicional para el contenedor (posicionamiento en topbars/sidebars). */
   className?: string
@@ -60,20 +92,38 @@ export default function LanguageSwitcher({
   const activeLocale = useLocale() as Locale
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [menuStyle, setMenuStyle] = useState<CSSProperties | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const menuRef = useRef<HTMLUListElement | null>(null)
+
+  const updateMenuPosition = useCallback(() => {
+    setMenuStyle(getLanguageMenuStyle(triggerRef.current))
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!open) return
+
+    updateMenuPosition()
+    window.addEventListener("resize", updateMenuPosition)
+    window.addEventListener("scroll", updateMenuPosition, true)
+    return () => {
+      window.removeEventListener("resize", updateMenuPosition)
+      window.removeEventListener("scroll", updateMenuPosition, true)
+    }
+  }, [open, updateMenuPosition])
 
   useEffect(() => {
+    if (!open) return
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false)
-      }
+      const target = event.target as Node
+      if (containerRef.current?.contains(target)) return
+      if (menuRef.current?.contains(target)) return
+      setOpen(false)
     }
-    if (open) {
-      document.addEventListener("click", handleClickOutside)
-    }
+
+    document.addEventListener("click", handleClickOutside)
     return () => document.removeEventListener("click", handleClickOutside)
   }, [open])
 
@@ -99,6 +149,7 @@ export default function LanguageSwitcher({
   return (
     <div className={`relative ${className ?? ""}`} ref={containerRef}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className={triggerClass}
@@ -119,51 +170,56 @@ export default function LanguageSwitcher({
           aria-hidden
         />
       </button>
-      {open && (
-        <ul
-          className={
-            isOnDark
-              ? "absolute right-0 top-full z-120 mt-2 min-w-46 overflow-hidden rounded-2xl border border-white/12 bg-[#2A2B2E]/98 py-1.5 shadow-[0_18px_48px_rgba(7,12,27,0.55)] backdrop-blur-md"
-              : "absolute right-0 top-full z-[9999] mt-2 min-w-[160px] rounded-lg border border-border bg-white py-1 shadow-lg"
-          }
-          role="listbox"
-          aria-label={t("label")}
-        >
-          {locales.map((locale) => {
-            const isActive = locale === activeLocale
-            const meta = LOCALE_META[locale]
-            return (
-              <li key={locale} role="none">
-                <button
-                  type="button"
-                  onClick={() => handleSelect(locale)}
-                  className={
-                    isOnDark
-                      ? `flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left text-sm transition-colors focus:outline-none ${
-                          isActive
-                            ? "bg-white/10 font-medium text-white"
-                            : "text-white/82 hover:bg-white/8 focus:bg-white/8"
-                        }`
-                      : "flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left font-sans text-sm text-foreground hover:bg-muted focus:outline-none focus:bg-muted"
-                  }
-                  role="option"
-                  aria-selected={isActive}
-                  aria-label={t(meta.nameKey)}
-                  lang={locale}
-                >
-                  <span>{meta.endonym}</span>
-                  {isActive && (
-                    <Check
-                      className={`h-4 w-4 shrink-0 ${isOnDark ? "text-ats-cobre-light" : "text-vo-purple"}`}
-                      aria-hidden
-                    />
-                  )}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      )}
+      {open && menuStyle
+        ? createPortal(
+            <ul
+              ref={menuRef}
+              style={menuStyle}
+              className={
+                isOnDark
+                  ? `fixed ${LANGUAGE_MENU_Z_CLASS} min-w-46 overflow-hidden rounded-2xl border border-white/12 bg-[#2A2B2E]/98 py-1.5 shadow-[0_18px_48px_rgba(7,12,27,0.55)] backdrop-blur-md`
+                  : `fixed ${LANGUAGE_MENU_Z_CLASS} min-w-[160px] rounded-lg border border-border bg-white py-1 shadow-lg`
+              }
+              role="listbox"
+              aria-label={t("label")}
+            >
+              {locales.map((locale) => {
+                const isActive = locale === activeLocale
+                const meta = LOCALE_META[locale]
+                return (
+                  <li key={locale} role="none">
+                    <button
+                      type="button"
+                      onClick={() => handleSelect(locale)}
+                      className={
+                        isOnDark
+                          ? `flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left text-sm transition-colors focus:outline-none ${
+                              isActive
+                                ? "bg-white/10 font-medium text-white"
+                                : "text-white/82 hover:bg-white/8 focus:bg-white/8"
+                            }`
+                          : "flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left font-sans text-sm text-foreground hover:bg-muted focus:outline-none focus:bg-muted"
+                      }
+                      role="option"
+                      aria-selected={isActive}
+                      aria-label={t(meta.nameKey)}
+                      lang={locale}
+                    >
+                      <span>{meta.endonym}</span>
+                      {isActive && (
+                        <Check
+                          className={`h-4 w-4 shrink-0 ${isOnDark ? "text-ats-cobre-light" : "text-vo-purple"}`}
+                          aria-hidden
+                        />
+                      )}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }

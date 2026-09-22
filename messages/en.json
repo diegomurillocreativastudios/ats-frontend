@@ -37,7 +37,7 @@
     "myProfile": "My profile",
     "documents": "Documents",
     "interviews": "Interviews",
-    "candidates": "Candidates",
+    "candidates": "Applicants",
     "vacancies": "Vacancies",
     "reports": "Reports",
     "settings": "Settings",
@@ -59,7 +59,7 @@
     "softSkills": "Soft skills"
   },
   "Topbar": {
-    "portalCandidate": "Candidate Portal",
+    "portalCandidate": "Applicant Portal",
     "portalRRHH": "HR Portal",
     "portalAdmin": "Admin Portal",
     "openMenu": "Open menu",
@@ -75,30 +75,30 @@
     "ariaCandidate": "Main navigation",
     "ariaRRHH": "HR Portal navigation",
     "ariaAdmin": "Admin Portal navigation",
-    "menuCandidate": "Candidate menu",
+    "menuCandidate": "Applicant menu",
     "menuRRHH": "HR menu",
     "menuAdmin": "Admin menu",
     "toggleNavGroup": "Show or hide {label}",
     "accountMenu": "Account menu",
     "roleAdmin": "Administrator",
     "roleRecruiter": "Recruiter",
-    "roleCandidate": "Candidate"
+    "roleCandidate": "Applicant"
   },
   "Auth": {
     "login": {
       "aiEngineBadge": "AI Engine v4.2 Active",
       "themeBadge": "High-Impact Hiring",
       "brandTitle": "Applicant Tracking System for HR Departments",
-      "brandSubtitle": "Optimize hiring with predictive AI scoring. Manage candidates, vacancies, and assessments in one place.",
+      "brandSubtitle": "Optimize hiring with predictive AI scoring. Manage applicants, vacancies, and assessments in one place.",
       "brandTitleSm": "Applicant Tracking System",
       "brandSubtitleSm": "Optimize your selection process with AI.",
-      "feature1": "Intelligent candidate matching with AI and competency scoring.",
+      "feature1": "Intelligent applicant matching with AI and competency scoring.",
       "feature2": "Streamlined hiring workflows and automated interviews.",
       "feature3": "Real-time executive reports with time-to-fill metrics.",
-      "previewAria": "Preview of a highlighted candidate",
+      "previewAria": "Preview of a highlighted applicant",
       "previewName": "Sofía Carrillo",
       "previewInitials": "SC",
-      "previewTopBadge": "Top Candidate",
+      "previewTopBadge": "Top Applicant",
       "previewRole": "Senior Tech Recruiter",
       "previewMatch": "AI Match: 96% • High cultural fit",
       "previewTagSourcing": "Active Sourcing",
@@ -110,7 +110,7 @@
           "name": "Sofía Carrillo",
           "initials": "SC",
           "role": "Senior Tech Recruiter",
-          "topBadge": "Top Candidate",
+          "topBadge": "Top Applicant",
           "match": "AI Match: 96% • High cultural fit",
           "tag1": "Active Sourcing",
           "tag2": "HR Analytics",
@@ -121,7 +121,7 @@
           "name": "Tomás Herrera",
           "initials": "TH",
           "role": "Full Stack Developer",
-          "topBadge": "Top Candidate",
+          "topBadge": "Top Applicant",
           "match": "AI Match: 94% • Solid architecture",
           "tag1": "TypeScript",
           "tag2": "React",
@@ -132,7 +132,7 @@
           "name": "Irene Solís",
           "initials": "IS",
           "role": "Senior UX/UI Designer",
-          "topBadge": "Top Candidate",
+          "topBadge": "Top Applicant",
           "match": "AI Match: 97% • User-centered design",
           "tag1": "Figma",
           "tag2": "Design systems",
@@ -143,7 +143,7 @@
           "name": "Marco Bellini",
           "initials": "MB",
           "role": "Formula 1 Driver",
-          "topBadge": "Top Candidate",
+          "topBadge": "Top Applicant",
           "match": "AI Match: 91% • High performance under pressure",
           "tag1": "Telemetry",
           "tag2": "Qualifying",
@@ -154,7 +154,7 @@
           "name": "Helena Duarte",
           "initials": "HD",
           "role": "General Practitioner",
-          "topBadge": "Top Candidate",
+          "topBadge": "Top Applicant",
           "match": "AI Match: 93% • Human and precise care",
           "tag1": "Family medicine",
           "tag2": "Primary care",
@@ -165,7 +165,7 @@
           "name": "Julián Castro",
           "initials": "JC",
           "role": "Marketing Coordinator",
-          "topBadge": "Top Candidate",
+          "topBadge": "Top Applicant",
           "match": "AI Match: 95% • High-impact campaigns",
           "tag1": "Campaigns",
           "tag2": "Content",
@@ -366,11 +366,11 @@
     },
     "portalSelection": {
       "title": "Choose a portal",
-      "description": "Select the candidate, opportunities or recruitment portal"
+      "description": "Select the applicant, opportunities or recruitment portal"
     },
     "candidateProfile": {
       "title": "My profile",
-      "description": "Review and manage your account information in the candidate portal"
+      "description": "Review and manage your account information in the applicant portal"
     },
     "recruiterVacancies": {
       "title": "ApplicanTree | HR Portal | Vacancies",
@@ -382,15 +382,15 @@
     },
     "recruiterVacancyResults": {
       "title": "ApplicanTree | HR Portal | Vacancy results",
-      "description": "View evaluated candidate results"
+      "description": "View evaluated applicant results"
     },
     "recruiterReports": {
       "title": "ApplicanTree | HR Portal | Reports",
       "description": "Review recruiting metrics and reports"
     },
     "recruiterCandidateDetail": {
-      "title": "ApplicanTree | HR Portal | Candidate",
-      "description": "Detailed candidate profile in the HR portal"
+      "title": "ApplicanTree | HR Portal | Applicant",
+      "description": "Detailed applicant profile in the HR portal"
     },
     "adminPortal": {
       "title": "Admin Portal",
@@ -457,23 +457,23 @@
       }
     },
     "root": {
-      "description": "Portal del candidate - Resumen de tu proceso de seleccion"
+      "description": "Applicant portal — Overview of your selection process"
     },
     "candidatePortal": {
       "home": {
-        "title": "ApplicanTree | Portal Candidate",
-        "description": "Portal del candidate - Resumen de tu proceso de seleccion"
+        "title": "ApplicanTree | Applicant Portal",
+        "description": "Applicant portal — Overview of your selection process"
       },
       "documents": {
-        "title": "ApplicanTree | Portal Candidate | Documents",
-        "description": "Manage tus documentos en el portal del candidate"
+        "title": "ApplicanTree | Applicant Portal | Documents",
+        "description": "Manage your documents in the applicant portal"
       },
       "interviews": {
-        "title": "ApplicanTree | Portal Candidate | Interviews",
-        "description": "View tus interviews agendadas e historial en el portal del candidate"
+        "title": "ApplicanTree | Applicant Portal | Interviews",
+        "description": "View your scheduled interviews and history in the applicant portal"
       },
       "profileTailoring": {
-        "title": "ApplicanTree | Candidate Portal | Tailor profile",
+        "title": "ApplicanTree | Applicant Portal | Tailor profile",
         "description": "Adapt your professional profile to a job posting with AI assistance"
       },
       "profileVersions": {
@@ -483,11 +483,11 @@
     },
     "recruiterPortal": {
       "title": "ApplicanTree | Portal RRHH",
-      "description": "Portal RRHH - Dashboard de reclutamiento y gestion de candidates"
+      "description": "HR Portal — Recruitment dashboard and applicant management"
     },
     "recruiterCandidates": {
-      "title": "ApplicanTree | Portal RRHH | Candidates",
-      "description": "Manage los candidates y sus perfiles en el portal RRHH"
+      "title": "ApplicanTree | HR Portal | Applicants",
+      "description": "Manage applicants and their profiles in the HR portal"
     },
     "recruiterSettings": {
       "title": "ApplicanTree | Portal RRHH | Settings",
@@ -521,14 +521,14 @@
     "subtitle": "Choose the portal for your role to continue",
     "enter": "Enter →",
     "footer": "You can switch portals later from the menu or by signing out and signing back in.",
-    "candidateName": "Candidate Portal",
+    "candidateName": "Applicant Portal",
     "candidateDesc": "Your process, documents and applications",
-    "candidateAria": "Go to the candidate portal",
+    "candidateAria": "Go to the applicant portal",
     "opportunitiesName": "Opportunities Portal",
     "opportunitiesDesc": "Explore active vacancies and apply",
     "opportunitiesAria": "Go to the job opportunities portal",
     "rrhhName": "HR Portal",
-    "rrhhDesc": "Candidates, vacancies, templates and stages",
+    "rrhhDesc": "Applicants, vacancies, templates and stages",
     "rrhhAria": "Go to the HR recruitment portal",
     "adminName": "Administration Portal",
     "adminDesc": "Users and platform settings",
@@ -617,11 +617,11 @@
       "loading": "Loading documents...",
       "uploadGeneral": "Upload general document",
       "uploading": "Uploading...",
-      "uploadGeneralAria": "Upload the candidate's general documents",
+      "uploadGeneralAria": "Upload the applicant's general documents",
       "toastDeleted": "Document deleted successfully.",
       "toastDeleteError": "The document could not be deleted.",
       "toastSelectFile": "Select at least one file to upload.",
-      "toastNoProfile": "We couldn't identify your candidate profile.",
+      "toastNoProfile": "We couldn't identify your applicant profile.",
       "toastGeneralUploaded": "{count, plural, one {General document uploaded successfully.} other {# general documents uploaded successfully.}}",
       "toastGeneralUploadError": "The general document could not be uploaded.",
       "upload": {
@@ -679,7 +679,7 @@
         "identityRequired": "You must upload the identity document.",
         "documentTypesLoadError": "The document types could not be loaded.",
         "processErrorSelf": "Error processing your information.",
-        "processErrorRecruiter": "Error processing the candidate.",
+        "processErrorRecruiter": "Error processing the applicant.",
         "aiIntro": "CVs and identity documents are processed with AI to extract preliminary profile information.",
         "kpisAria": "Applican Tree efficiency KPIs",
         "documentTypeHeading": "Identity document type",
@@ -692,7 +692,7 @@
         "retry": "Retry",
         "noTypesConfigured": "There are no document types configured yet. Ask an administrator to create the catalogs.",
         "identityHeading": "Identity document",
-        "identityDescription": "Upload the candidate's identity document in PDF format.",
+        "identityDescription": "Upload the applicant's identity document in PDF format.",
         "cvPrimaryText": "Drag the CV here or click to upload",
         "cvHelperText": "PDF, DOCX or TXT up to 15 MB",
         "cvHelperTextPdfOnly": "PDF files only, up to 15 MB",
@@ -731,14 +731,14 @@
           "aiNote": "AI-generated result. Review the data in My profile before applying."
         },
         "recruiter": {
-          "title": "Add candidate",
+          "title": "Add applicant",
           "submit": "Process",
-          "success": "Candidate created and processed successfully.",
-          "successMany": "{count} candidates processed successfully.",
-          "errorPrefix": "Error creating the candidate",
-          "cvRequired": "The candidate's CV is a required field.",
-          "cvHeading": "Candidate's CV",
-          "cvDescription": "Upload the candidate's CV to create their profile automatically.",
+          "success": "Applicant created and processed successfully.",
+          "successMany": "{count} applicants processed successfully.",
+          "errorPrefix": "Error creating the applicant",
+          "cvRequired": "The applicant's CV is a required field.",
+          "cvHeading": "Applicant's CV",
+          "cvDescription": "Upload the applicant's CV to create their profile automatically.",
           "aiNote": "AI-generated result. Requires HR validation."
         }
       }
@@ -747,7 +747,7 @@
       "breadcrumb": "My profile",
       "completeInfo": "Complete information",
       "completeInfoShort": "Complete info",
-      "completeInfoAria": "Complete candidate information",
+      "completeInfoAria": "Complete applicant information",
       "page": {
         "title": "My profile",
         "description": "Edit your record with the required data and check how it combines with the information from your documents.",
@@ -785,7 +785,7 @@
           "validation": "Please review the form data and try again.",
           "versionMismatch": "The authorization document was updated. Reload the page and try again.",
           "nationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support.",
-          "profileNotFound": "You do not have a candidate profile yet. Complete your profile and try again.",
+          "profileNotFound": "You do not have an applicant profile yet. Complete your profile and try again.",
           "forbidden": "Your account is not allowed to submit this authorization."
         },
         "sections": {
@@ -803,18 +803,18 @@
           },
           "communications": {
             "title": "Channeling of process-related communications",
-            "body": "I acknowledge that {companyName} performs professional management of search, contact, evaluation, selection, and presentation of candidates to its clients.\n\nTherefore, if during the process or within the months following my formal presentation to a client I receive a communication, interview, proposal, or direct offer related to the same vacancy, client, or process managed by {companyName}, I commit to informing {companyName} and channeling the corresponding communication through the company.\n\nThis provision does not limit my right to work, seek employment, participate in other processes, or accept job opportunities. Its purpose is to maintain process traceability, protect information confidentiality, and recognize the professional management performed by {companyName}."
+            "body": "I acknowledge that {companyName} performs professional management of search, contact, evaluation, selection, and presentation of applicants to its clients.\n\nTherefore, if during the process or within the months following my formal presentation to a client I receive a communication, interview, proposal, or direct offer related to the same vacancy, client, or process managed by {companyName}, I commit to informing {companyName} and channeling the corresponding communication through the company.\n\nThis provision does not limit my right to work, seek employment, participate in other processes, or accept job opportunities. Its purpose is to maintain process traceability, protect information confidentiality, and recognize the professional management performed by {companyName}."
           },
           "nonExclusivity": {
             "title": "Non-exclusivity and freedom to work",
-            "body": "I declare that my participation as a candidate does not imply exclusivity, does not limit my right to work, does not prevent me from participating in other processes, and does not constitute an automatic employment relationship with {companyName} or its clients.\n\nAn employment, commercial, or service relationship will exist only if a contract, offer letter, service agreement, or corresponding onboarding document is later signed."
+            "body": "I declare that my participation as an applicant does not imply exclusivity, does not limit my right to work, does not prevent me from participating in other processes, and does not constitute an automatic employment relationship with {companyName} or its clients.\n\nAn employment, commercial, or service relationship will exist only if a contract, offer letter, service agreement, or corresponding onboarding document is later signed."
           },
           "electronicSignature": {
             "title": "Electronic signature and acceptance",
             "body": "I accept that this form may be signed physically or electronically through platforms such as DocuSign, PandaDoc, or other equivalent tools used by {companyName}.\n\nAn electronic signature, digitized signature, click acceptance, digital confirmation, or validation through an electronic platform will constitute a free and informed expression of my consent for the processing and presentation of my professional profile under this document.\n\n{companyName} may retain the electronic evidence generated by the platform used, including date, time, email address, IP address, audit log, signed document version, and other supporting technical elements.\n\nThis acceptance does not constitute an employment relationship, promise of employment, or hiring obligation."
           },
           "acceptance": {
-            "title": "Acceptance (candidate signature and details)",
+            "title": "Acceptance (applicant signature and details)",
             "body": "I declare that I have read and understood this document, that I voluntarily participate in the processes managed by {companyName}, and that I authorize the processing and presentation of my information according to the stated purposes."
           }
         },
@@ -889,10 +889,10 @@
         "editTitle": "Your record",
         "editDescription": "Edit your name, headline and summary in the same place where you see them when reading the profile.",
         "summaryEmpty": "Complete the summary by editing the profile or from the information imported from your documents.",
-        "defaultName": "Candidate"
+        "defaultName": "Applicant"
       },
       "notFound": {
-        "intro": "You don't have a candidate profile on the server yet. Tap ",
+        "intro": "You don't have an applicant profile on the server yet. Tap ",
         "cta": "Complete my profile",
         "outro": ", fill in the required data and save to activate your record."
       },
@@ -1447,18 +1447,18 @@
           "clients": "Clients",
           "vacancies": "Vacancies",
           "openVacancies": "Open vacancies",
-          "candidates": "Candidates",
+          "candidates": "Applicants",
           "hired": "Hired",
           "vacancyStatus": "Vacancy status",
           "open": "Open:",
           "closed": "Closed:",
           "avgProgress": "Average vacancy progress",
           "avgMatch": "Average preliminary matching",
-          "candidateFlow": "Candidate flow",
+          "candidateFlow": "Applicant flow",
           "registered": "Registered",
           "inInterview": "In interview",
-          "percentOfTotal": "% of total candidates",
-          "noCandidatesInPeriod": "No candidates in the period",
+          "percentOfTotal": "% of total applicants",
+          "noCandidatesInPeriod": "No applicants in the period",
           "technicalEvaluations": "Technical evaluations",
           "mainSource": "Primary sourcing channel",
           "periodFindings": "Period findings",
@@ -1466,8 +1466,8 @@
           "clientsRegistered": "Clients registered in the period",
           "vacanciesCreated": "Vacancies created",
           "vacanciesDistribution": "Distribution between open and closed vacancies in the period.",
-          "candidatesRegistered": "Candidates registered",
-          "candidatesHired": "Candidates marked as hired",
+          "candidatesRegistered": "Applicants registered",
+          "candidatesHired": "Applicants marked as hired",
           "technicalEvaluationsSubtitle": "Tracking of completed evaluations and pass rate.",
           "mainSourceSubtitle": "Channel with the highest activity recorded in the selected period.",
           "noRegisteredSource": "No registered source",
@@ -1545,28 +1545,28 @@
       }
     },
     "candidates": {
-      "breadcrumb": "Candidates",
-      "title": "Candidates",
-      "description": "Review and manage all candidates",
-      "regionLabel": "Candidate list",
-      "headerRegionLabel": "Candidates header",
-      "contentRegionLabel": "Candidates content",
-      "searchPlaceholder": "Search candidates...",
-      "searchAriaLabel": "Search candidates",
-      "addCandidate": "Add candidate",
-      "loading": "Loading candidates...",
+      "breadcrumb": "Applicants",
+      "title": "Applicants",
+      "description": "Review and manage all applicants",
+      "regionLabel": "Applicant list",
+      "headerRegionLabel": "Applicants header",
+      "contentRegionLabel": "Applicants content",
+      "searchPlaceholder": "Search applicants...",
+      "searchAriaLabel": "Search applicants",
+      "addCandidate": "Add applicant",
+      "loading": "Loading applicants...",
       "retry": "Retry",
-      "empty": "No candidates",
-      "loadError": "Candidates could not be loaded.",
+      "empty": "No applicants",
+      "loadError": "Applicants could not be loaded.",
       "followUpSaved": "Follow-up saved successfully",
       "hired": "Hired",
       "notHired": "Not hired",
       "noName": "No name",
-      "rowAriaLabel": "Candidate {name}",
+      "rowAriaLabel": "Applicant {name}",
       "followUpAriaLabel": "Follow-up for {name}",
       "viewDetailAriaLabel": "View details for {name}",
       "table": {
-        "candidate": "Candidate",
+        "candidate": "Applicant",
         "phone": "Phone",
         "country": "Country",
         "headline": "Title",
@@ -1580,18 +1580,18 @@
         "summary": "Page {page} of {total}",
         "prev": "Previous",
         "next": "Next",
-        "count": "{count, plural, one {# candidate} other {# candidates}}"
+        "count": "{count, plural, one {# applicant} other {# applicants}}"
       }
     },
     "candidateDetail": {
       "page": {
         "loadingProfile": "Loading profile...",
-        "errorNotFoundTitle": "We could not find this candidate",
+        "errorNotFoundTitle": "We could not find this applicant",
         "errorLoadTitle": "The profile could not be loaded",
-        "backToCandidates": "Back to candidates",
-        "backToCandidatesAria": "Back to candidates",
+        "backToCandidates": "Back to applicants",
+        "backToCandidatesAria": "Back to applicants",
         "interviews": "Interviews",
-        "interviewsAria": "View this candidate's interviews"
+        "interviewsAria": "View this applicant's interviews"
       },
       "nav": {
         "aria": "Go to profile section",
@@ -1614,7 +1614,7 @@
       },
       "sections": {
         "profileActions": "Profile actions",
-        "summary": "Candidate summary",
+        "summary": "Applicant summary",
         "contactPersonal": "Contact and personal",
         "jobPreferences": "Job preferences",
         "workExperience": "Work experience",
@@ -1659,9 +1659,9 @@
         "retry": "Retry"
       },
       "hero": {
-        "editTitle": "Edit candidate",
+        "editTitle": "Edit applicant",
         "editDescription": "Name, headline and professional summary.",
-        "editHint": "Edit the candidate information. Changes update the canonical profile and the normalized record."
+        "editHint": "Edit the applicant information. Changes update the canonical profile and the normalized record."
       },
       "warnings": {
         "parseFailed": "Part of the CV data could not be interpreted as JSON. You can edit the canonical profile; saved changes will regenerate the normalized record.",
@@ -1674,10 +1674,10 @@
         "noRecognitions": "No awards on record."
       },
       "errors": {
-        "loadProfileFailed": "The candidate profile could not be loaded.",
-        "candidateUnavailable": "This candidate is not available or you do not have access.",
-        "invalidCandidateId": "This link does not match a valid candidate.",
-        "missingCandidateId": "The candidate identifier is missing.",
+        "loadProfileFailed": "The applicant profile could not be loaded.",
+        "candidateUnavailable": "This applicant is not available or you do not have access.",
+        "invalidCandidateId": "This link does not match a valid applicant.",
+        "missingCandidateId": "The applicant identifier is missing.",
         "downloadFailed": "Download failed.",
         "downloadCvFailed": "The CV could not be downloaded.",
         "downloadCvUnavailable": "The CV is not available.",
@@ -1690,7 +1690,7 @@
         "saveError": "Changes could not be saved. Please try again."
       },
       "fallbacks": {
-        "candidate": "Candidate",
+        "candidate": "Applicant",
         "dash": "—",
         "linkPlatform": "Link"
       },
@@ -1855,14 +1855,14 @@
         "periodLabel": "Period de seguimiento",
         "selectPeriod": "Select periodo",
         "commentsLabel": "Comments de evaluacion",
-        "commentsPlaceholder": "Escribe comentarios sobre el seguimiento del candidate...",
+        "commentsPlaceholder": "Write comments about the applicant follow-up...",
         "deleteAria": "Delete seguimiento {index}",
         "period3": "3 meses post-contratacion",
         "period6": "6 meses post-contratacion",
         "period12": "12 meses post-contratacion",
         "periodMonths": "{months} meses",
         "errors": {
-          "missingCandidateId": "ID de candidate no disponible",
+          "missingCandidateId": "Applicant ID not available",
           "emptyFollowUp": "Debes completar al menos un seguimiento con un periodo o comentarios.",
           "invalidPeriod": "Debes seleccionar un periodo de seguimiento valido.",
           "saveFailed": "Could not guardar el seguimiento."
@@ -1932,7 +1932,7 @@
         "connectedHint": "Interviews with a date are created or updated in your calendar. Events already created are not deleted if you disconnect.",
         "benefitsTitle": "What you will be able to do",
         "benefitEvents": "Create interview events in your calendar",
-        "benefitInvites": "Send invitations to the candidate with date and time",
+        "benefitInvites": "Send invitations to the applicant with date and time",
         "benefitVideo": "Add a video call link when the interview is virtual",
         "trustNote": "We only request permission to create and update interview events. We do not use your calendar for anything else.",
         "connectedSince": "Connected on {date}",
@@ -1999,7 +1999,7 @@
       },
       "cards": {
         "untitled": "Untitled",
-        "candidates": "Candidates",
+        "candidates": "Applicants",
         "cardAria": "Vacancy: {title}",
         "cardReadOnlyAria": "Inactive vacancy, read-only: {title}",
         "logoAlt": "{company} logo"
@@ -2213,7 +2213,7 @@
           },
           "company": {
             "title": "Inactive company — read only",
-            "body": "This vacancy's company is inactive. You can view candidates and stages, but you cannot run search or preliminary AI analysis or other editing actions."
+            "body": "This vacancy's company is inactive. You can view applicants and stages, but you cannot run search or preliminary AI analysis or other editing actions."
           },
           "done": {
             "title": "Process finished — read only",
@@ -2296,8 +2296,8 @@
           "stagesTablistAria": "Process stages",
           "noStageData": "No stage data.",
           "emptyStageTitle": "No applicants in this stage",
-          "emptyStageBody": "When candidates are moved on the board, they will appear here.",
-          "noFilterMatch": "No candidates match the filters",
+          "emptyStageBody": "When applicants are moved on the board, they will appear here.",
+          "noFilterMatch": "No applicants match the filters",
           "stageLabel": "Stage:",
           "statusLabel": "Status:",
           "matchLabel": "Match",
@@ -2329,7 +2329,7 @@
           "hiredRejectedHint": "By pipeline stage name"
         },
         "charts": {
-          "noApplicants": "There are no applicants for this vacancy yet. When candidates are on the board, you will see distribution by stage and score here.",
+          "noApplicants": "There are no applicants for this vacancy yet. When applicants are on the board, you will see distribution by stage and score here.",
           "heading": "Chart indicators",
           "description": "Compact view of the pipeline and matching; the operational list is below.",
           "byStageHeading": "Applicants by stage",
@@ -2371,7 +2371,7 @@
       },
       "matching": {
         "sectionTitle": "AI preliminary search and analysis",
-        "sectionDescription": "Explore candidates with preliminary search and AI-assisted analysis before moving them into the process.",
+        "sectionDescription": "Explore applicants with preliminary search and AI-assisted analysis before moving them into the process.",
         "preliminarySearch": "Preliminary search",
         "preliminaryAnalysis": "Preliminary analysis",
         "updatingSearch": "Updating AI search…",
@@ -2382,7 +2382,7 @@
         "starting": "Starting…",
         "searchResults": "Search results",
         "reanalyzingEllipsis": "Re-analyzing with AI…",
-        "processingCurrentCandidate": "Processing candidate {current} of {total}",
+        "processingCurrentCandidate": "Processing applicant {current} of {total}",
         "updatingSearchEllipsis": "Updating AI search…",
         "searchLoadingHint": "This can take a few seconds. Keep this page open.",
         "searchLoadingStepScanning": "Exploring the talent pool",
@@ -2392,8 +2392,8 @@
         "selectAll": "Select all",
         "deselectAll": "Deselect all",
         "selectedCount": "{count} selected",
-        "possibleCandidates": "Possible candidates",
-        "includeSelectedHint": "Add selected candidates to the process",
+        "possibleCandidates": "Possible applicants",
+        "includeSelectedHint": "Add selected applicants to the process",
         "noSuggestions": "There are no matching suggestions for this vacancy.",
         "preliminaryMatchBadge": "AI preliminary match",
         "preliminaryAnalysisBadge": "AI preliminary analysis",
@@ -2403,11 +2403,11 @@
         "uploadedPrefix": "Uploaded:",
         "viewTechnicalSheet": "View technical sheet",
         "refreshAnalysis": "Refresh analysis",
-        "loadingCandidates": "Loading candidates",
-        "noCandidates": "No candidates",
-        "emptySearch": "Run the preliminary search to see suggested candidates.",
-        "emptyAnalysis": "Run the preliminary analysis to see evaluated candidates.",
-        "emptyDefault": "No candidates to display at this time.",
+        "loadingCandidates": "Loading applicants",
+        "noCandidates": "No applicants",
+        "emptySearch": "Run the preliminary search to see suggested applicants.",
+        "emptyAnalysis": "Run the preliminary analysis to see evaluated applicants.",
+        "emptyDefault": "No applicants to display at this time.",
         "profileModal": {
           "aiProcessed": "Analysis processed with AI",
           "aiProcessedShort": "AI evaluation · support for the HR decision",
@@ -2435,7 +2435,7 @@
           "noAdditionalInfo": "No additional information available.",
           "downloading": "Downloading…",
           "downloadCv": "Download CV",
-          "downloadCvAria": "Download candidate CV",
+          "downloadCvAria": "Download applicant CV",
           "viewFullProfile": "View full profile",
           "close": "Close",
           "profileAria": "Profile of {name}",
@@ -2512,18 +2512,18 @@
           "conflictInterviewNotDone": "Mark the interview as done before continuing."
         },
         "aria": {
-          "matchedCandidates": "Matched candidates",
+          "matchedCandidates": "Matched applicants",
           "preliminarySearch": "Preliminary search",
           "preliminaryAnalysis": "Preliminary analysis",
           "analysisProgress": "AI preliminary analysis progress",
           "searchProgress": "AI preliminary search progress",
           "searchResults": "Search results",
-          "possibleCandidates": "Possible candidates",
-          "selectAll": "Select all candidates",
-          "deselectAll": "Deselect all candidates",
-          "selectCandidate": "Select candidate {name}",
+          "possibleCandidates": "Possible applicants",
+          "selectAll": "Select all applicants",
+          "deselectAll": "Deselect all applicants",
+          "selectCandidate": "Select applicant {name}",
           "viewCandidate": "View profile of {name}",
-          "candidateCard": "Candidate {name}"
+          "candidateCard": "Applicant {name}"
         },
         "toasts": {
           "matchSuccess": "Matching completed successfully.",
@@ -2541,37 +2541,37 @@
           "preliminaryMatchSubtitle": "Observed accuracy of 90% to 95%",
           "preliminaryMatchGoal": "Calibration target: 90%",
           "coverageTitle": "Results coverage",
-          "coverageSubtitle": "Initial shortlist with suggested candidates",
+          "coverageSubtitle": "Initial shortlist with suggested applicants",
           "coverageHint": "Starting point for HR validation",
           "prioritizationTitle": "AI-assisted initial prioritization"
         },
         "errors": {
-          "moveStageFailed": "The candidate could not be moved to another stage.",
+          "moveStageFailed": "The applicant could not be moved to another stage.",
           "stageSkipNotAllowed": "You can only move forward one stage, or discard.",
-          "stageMoveConflict": "Candidates can only move to the next pipeline stage, or to a final stage that is not the hiring stage.",
-          "finalStatusRequiredForStageMove": "To advance to the next stage or to a final stage, the candidate must be in an application status marked as final.",
-          "missingDefaultApplicationStatus": "The company's default application status is missing. The server needs it when moving candidates between stages. Configure it in Stages (statuses) or ask an administrator to do so.",
+          "stageMoveConflict": "Applicants can only move to the next pipeline stage, or to a final stage that is not the hiring stage.",
+          "finalStatusRequiredForStageMove": "To advance to the next stage or to a final stage, the applicant must be in an application status marked as final.",
+          "missingDefaultApplicationStatus": "The company's default application status is missing. The server needs it when moving applicants between stages. Configure it in Stages (statuses) or ask an administrator to do so.",
           "updateApplicationStatusFailed": "The application status could not be updated.",
-          "candidateMovedStage": "Candidate moved to another stage.",
+          "candidateMovedStage": "Applicant moved to another stage.",
           "applicationStatusUpdated": "Application status updated.",
           "missingApplicationId": "The application ID to update the status was not found.",
           "downloadCvFailed": "The CV could not be downloaded.",
           "downloadCvUnavailable": "The CV is not available.",
-          "searchNoResults": "No candidates were found in the search.",
-          "searchAlreadyInPipeline": "The candidates found are already in Possible candidates or Stages.",
+          "searchNoResults": "No applicants were found in the search.",
+          "searchAlreadyInPipeline": "The applicants found are already in Possible applicants or Stages.",
           "goToStagesAria": "Go to the Stages section to manage application statuses",
-          "openProfileAria": "Open the candidate profile in a new tab",
+          "openProfileAria": "Open the applicant profile in a new tab",
           "interviewNotDone": "Mark the interview as done before continuing.",
           "interviewFeedbackRequired": "Submit the interview feedback before advancing to the next stage."
         },
         "scoreTooltips": {
           "semanticSimilarity": "Measures how closely the CV content aligns with the vacancy description using semantic text comparison.",
-          "qualitativeScore": "Evaluates how well the candidate fits qualitative aspects such as experience, skills, and profile context relative to the vacancy."
+          "qualitativeScore": "Evaluates how well the applicant fits qualitative aspects such as experience, skills, and profile context relative to the vacancy."
         },
         "stagesTitle": "Stages",
         "emptyApplicants": "There are no applicants on this vacancy yet.",
         "kanbanBoardAria": "Kanban board container",
-        "kanbanStagesAria": "Candidate stages",
+        "kanbanStagesAria": "Applicant stages",
         "fallbackKanbanStages": [
           "Sourced",
           "Applied",
@@ -2628,7 +2628,7 @@
         "regionLabel": "Interviews list",
         "table": {
           "dateTime": "Date and time",
-          "candidate": "Candidate",
+          "candidate": "Applicant",
           "type": "Type",
           "duration": "Duration",
           "interviewer": "Interviewer",
@@ -2639,13 +2639,13 @@
       "cards": {
         "viewInterviews": "View interviews",
         "viewInterviewsAria": "View interviews for vacancy {title}",
-        "candidatesCount": "{count, plural, one {# candidate} other {# candidates}}",
-        "candidateFallback": "Candidate ({id}…)"
+        "candidatesCount": "{count, plural, one {# applicant} other {# applicants}}",
+        "candidateFallback": "Applicant ({id}…)"
       },
       "actions": {
         "goToVacancies": "Go to vacancies",
-        "reviewCandidates": "Review candidates",
-        "reviewCandidatesAria": "Go to vacancy results to review candidates before scheduling an interview",
+        "reviewCandidates": "Review applicants",
+        "reviewCandidatesAria": "Go to vacancy results to review applicants before scheduling an interview",
         "newInterview": "New interview",
         "createFirst": "Create first interview",
         "manage": "Manage",
@@ -2691,10 +2691,10 @@
         "pageTitle": "New interview",
         "backToList": "← Back to list",
         "ariaLabel": "New interview form",
-        "loadingCandidates": "Loading vacancy candidates…",
-        "noCandidates": "This vacancy has no candidates yet. Add candidates to the vacancy first; then you can schedule an interview.",
+        "loadingCandidates": "Loading vacancy applicants…",
+        "noCandidates": "This vacancy has no applicants yet. Add applicants to the vacancy first; then you can schedule an interview.",
         "fields": {
-          "candidate": "Candidate",
+          "candidate": "Applicant",
           "dateTime": "Date and time",
           "type": "Type",
           "modality": "Modality",
@@ -2718,7 +2718,7 @@
           "meetNotConnectedSuffix": "so it can be created automatically."
         },
         "validation": {
-          "selectCandidate": "Select a candidate",
+          "selectCandidate": "Select an applicant",
           "indicateDateTime": "Enter date and time",
           "invalidDateTime": "Invalid date or time"
         },
@@ -2728,14 +2728,14 @@
           "cancel": "Cancel"
         }
       },
-        "detail": {
+      "detail": {
         "pageTitle": "Interview",
         "backToInterviews": "← Back to interviews",
         "loading": "Loading interview…",
         "loadFailed": "The interview could not be loaded.",
         "close": "Close",
         "backToList": "Back to list",
-        "candidateFallback": "Candidate",
+        "candidateFallback": "Applicant",
         "vacancyFallback": "Vacancy",
         "durationMinutes": "{minutes} min",
         "descriptionPlaceholder": "Agenda, links, or context for the interviewer…",
@@ -2913,25 +2913,25 @@
         "manualHint": "You can enter the name manually."
       },
       "candidateList": {
-        "title": "Candidate interviews",
+        "title": "Applicant interviews",
         "description": "Interview timeline across all vacancies.",
-        "regionAria": "Candidate interview list",
+        "regionAria": "Applicant interview list",
         "loading": "Loading…",
-        "empty": "No interviews recorded for this candidate."
+        "empty": "No interviews recorded for this applicant."
       },
       "aria": {
         "formNewInterview": "New interview form"
       },
       "prepPanel": {
-        "titleEmbedded": "Vacancy candidates",
-        "titleDrawer": "Review candidates",
-        "vacancyFallback": "Vacancy candidates",
+        "titleEmbedded": "Vacancy applicants",
+        "titleDrawer": "Review applicants",
+        "vacancyFallback": "Vacancy applicants",
         "embeddedDescription": "{title} · Per-applicant context to schedule interviews or open the technical sheet.",
         "closeAria": "Close panel",
-        "loading": "Loading candidates…",
+        "loading": "Loading applicants…",
         "retry": "Retry",
         "empty": "There are no applicants for this vacancy yet.",
-        "listAria": "Candidate list",
+        "listAria": "Applicant list",
         "currentStage": "Current stage",
         "applicationStatus": "Application status",
         "interview": "Interview",
@@ -2953,14 +2953,14 @@
     },
     "dashboard": {
       "statsAria": "Dashboard statistics",
-      "activeCandidates": "Active candidates",
+      "activeCandidates": "Active applicants",
       "openVacancies": "Open vacancies",
       "interviewsToday": "Interviews today",
       "hiresThisMonth": "Hires this month",
       "recentActivityAria": "Recent activity",
       "recentActivityTitle": "Recent activity",
-      "recentCandidatesAria": "Recent candidates",
-      "recentCandidatesTitle": "Recent candidates",
+      "recentCandidatesAria": "Recent applicants",
+      "recentCandidatesTitle": "Recent applicants",
       "newCandidatesBadge": "{count} new",
       "mockBadges": {
         "interview": "Interview",
@@ -2981,12 +2981,12 @@
         "downloadingPdf": "Downloading PDF…"
       },
       "errors": {
-        "notPosted": "This candidate is not applied to this vacancy or there is no sheet data.",
+        "notPosted": "This applicant is not applied to this vacancy or there is no sheet data.",
         "noTemplate": "There is no document template marked as a technical sheet. Configure it in Admin → Templates.",
         "generic": "Could not load the technical sheet.",
         "forbidden": "You do not have permission to view this sheet.",
         "pdfExportFailed": "Could not generate the PDF. Try again or open the browser console (F12) if the problem persists.",
-        "missingParams": "Vacancy or candidate parameters are missing from the URL."
+        "missingParams": "Vacancy or applicant parameters are missing from the URL."
       },
       "page": {
         "breadcrumb": "Technical sheet"
@@ -3340,7 +3340,7 @@
     "statuses": {
       "page": {
         "title": "Stage statuses",
-        "description": "Define the statuses used by vacancy pipeline stages when moving candidates on the board.",
+        "description": "Define the statuses used by vacancy pipeline stages when moving applicants on the board.",
         "regionAria": "Vacancy stage statuses",
         "listAria": "Stage statuses list",
         "newStatusAria": "Create new status"
@@ -3362,8 +3362,8 @@
         "loading": "Loading statuses...",
         "retry": "Retry",
         "empty": "No statuses created",
-        "defaultLegend": "Default status — When moving candidates between stages (Kanban), only one applies; activating another deactivates the rest.",
-        "finalLegend": "Final status — Turn on or off whether this status closes the candidate process.",
+        "defaultLegend": "Default status — When moving applicants between stages (Kanban), only one applies; activating another deactivates the rest.",
+        "finalLegend": "Final status — Turn on or off whether this status closes the applicant process.",
         "defaultActiveAria": "{name}: default status active",
         "markDefaultAria": "Mark {name} as default status",
         "finalActiveAria": "{name}: final status active",
@@ -3616,9 +3616,9 @@
     "documentTypes": {
       "page": {
         "title": "Document Types",
-        "description": "Manage the document types available to candidates.",
+        "description": "Manage the document types available to applicants.",
         "createCta": "Create document type",
-        "summaryHelper": "Manage document types available for candidates.",
+        "summaryHelper": "Manage document types available for applicants.",
         "countLoading": "Loading...",
         "countSummary": "{count, plural, one {# document type} other {# document types}}"
       },
@@ -3665,7 +3665,7 @@
         "noResults": "No results found",
         "noItems": "No document types created yet",
         "searchHint": "Try searching with other terms.",
-        "createHint": "When you create a document type, it will be available to classify candidate identity documents."
+        "createHint": "When you create a document type, it will be available to classify applicant identity documents."
       },
       "deleteConfirm": {
         "title": "Delete document type",
@@ -3737,7 +3737,7 @@
           "typeLocal": "Type (local)",
           "modalityLocal": "Modality (local)",
           "search": "Search",
-          "searchPlaceholder": "Candidate, vacancy, recruiter…",
+          "searchPlaceholder": "Applicant, vacancy, recruiter…",
           "includeCancelled": "Include cancelled",
           "allFeminine": "All",
           "allMasculine": "All"
@@ -3787,7 +3787,7 @@
         },
         "agenda": {
           "time": "Time",
-          "candidate": "Candidate",
+          "candidate": "Applicant",
           "vacancy": "Vacancy",
           "company": "Company",
           "recruiter": "Recruiter",
@@ -4025,7 +4025,7 @@
       "accept": "I accept",
       "intro": "Your personal data will be added to the Applican Tree database and processed exclusively by authorized Human Resources professionals in the context of recruitment and personnel management processes.",
       "dataTreatmentHeading": "Data processing:",
-      "purposeItem": "Purpose: Candidate evaluation and recruitment process management",
+      "purposeItem": "Purpose: Applicant evaluation and recruitment process management",
       "accessItem": "Access: Authorized HR staff only",
       "confidentialityItem": "Confidentiality: Your data will be handled under strict confidentiality and information security standards",
       "rightsItem": "Rights: You have the right to access, rectify, or request deletion of your personal data",
@@ -4065,7 +4065,7 @@
       "applyBadge": "Apply",
       "beforeSubmit": "Before submitting",
       "checklistCv": "Have your CV in PDF ready to attach.",
-      "checklistEmail": "Use the same email associated with your candidate account.",
+      "checklistEmail": "Use the same email associated with your applicant account.",
       "checklistData": "Complete first names, last names, and email with real data.",
       "formSectionLabel": "Application form",
       "documentTitle": "ApplicanTree | Opportunities Portal | Apply to {title}"
@@ -4103,7 +4103,7 @@
         "items": {
           "operate": "Provide, operate, and maintain the platform",
           "authenticate": "Authenticate users and manage account access",
-          "recruitment": "Support recruitment workflows, including candidate applications and hiring processes enabled by your organization",
+          "recruitment": "Support recruitment workflows, including applicant applications and hiring processes enabled by your organization",
           "support": "Respond to support requests and service-related inquiries",
           "improve": "Improve reliability, security, and performance of the service",
           "legal": "Comply with applicable legal obligations"

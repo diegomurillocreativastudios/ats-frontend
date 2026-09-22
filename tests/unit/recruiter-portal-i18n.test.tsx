@@ -145,15 +145,15 @@ describe("CandidatosPage (home RRHH) i18n (Etapa 6)", () => {
   it("renderiza la UI estática del listado en inglés", async () => {
     renderWithIntl(<CandidatosPage />, "en")
 
-    expect((await screen.findAllByText("Candidates")).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText("Applicants")).length).toBeGreaterThan(0)
     expect(
-      screen.getAllByText("Review and manage all candidates").length,
+      screen.getAllByText("Review and manage all applicants").length,
     ).toBeGreaterThan(0)
     expect(
-      screen.getAllByPlaceholderText("Search candidates...").length,
+      screen.getAllByPlaceholderText("Search applicants...").length,
     ).toBeGreaterThan(0)
-    expect(screen.getAllByText("Add candidate").length).toBeGreaterThan(0)
-    expect((await screen.findAllByText("No candidates")).length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Add applicant").length).toBeGreaterThan(0)
+    expect((await screen.findAllByText("No applicants")).length).toBeGreaterThan(0)
   })
 })
 

@@ -56,6 +56,7 @@ import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProces
 import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confirm-modal"
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
 import { RequirementsDisplay } from "@/components/rrhh/requirements-display"
+import { toRequirementStorageKey } from "@/lib/vacancies/format-requirement-key"
 import { VacancyDelimitedText } from "@/components/rrhh/vacancy-delimited-text"
 import { VacancyDetailsCard } from "@/components/rrhh/vacancy-details-readout"
 import { VacancySalaryCard } from "@/components/rrhh/vacancy-salary-card"
@@ -359,13 +360,6 @@ const AI_EFFICIENCY_KPI_KEYS = [
 
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
-
-const toSnakeCase = (str) =>
-  String(str ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-z0-9_]/g, "");
 
 const createEmptyRequirement = () => ({
   id: crypto.randomUUID?.() ?? `req-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -1534,7 +1528,7 @@ export default function VacanteDetallePage() {
     const attributes = {};
 
     validReqs.forEach((r) => {
-      const key = toSnakeCase(r.requirementName);
+      const key = toRequirementStorageKey(r.requirementName);
       if (!key) return;
       requirements[key] = String(r.requirementValue ?? "").trim();
       const scaleNumber = typeof r.scale === "number" ? r.scale : parseInt(r.scale, 10) || 5;

@@ -38,6 +38,21 @@ import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging"
 
 const ASSIGNABLE_ROLES = ["Admin", "Recruiter", "Candidate"] as const
 
+type SidebarRoleLabelKey = "roleAdmin" | "roleRecruiter" | "roleCandidate"
+
+function sidebarRoleLabelKey(role: string): SidebarRoleLabelKey | null {
+  switch (role) {
+    case "Admin":
+      return "roleAdmin"
+    case "Recruiter":
+      return "roleRecruiter"
+    case "Candidate":
+      return "roleCandidate"
+    default:
+      return null
+  }
+}
+
 function isDistinctUserName(email: string, userName: string): boolean {
   const name = userName.trim()
   return name !== "" && name.toLowerCase() !== email.trim().toLowerCase()
@@ -106,6 +121,7 @@ function UserRolePills({
   isMuted?: boolean
 }) {
   const t = useTranslations("AdminPortal.users")
+  const tSidebar = useTranslations("Sidebar")
 
   if (roles.length === 0) {
     return (
@@ -118,25 +134,28 @@ function UserRolePills({
       className="flex flex-wrap items-center gap-1.5"
       aria-label={t("cards.rolesLabel")}
     >
-      {roles.map((role) => (
-        <li key={role}>
-          <span
-            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium ${
-              isMuted
-                ? "border-slate-200 bg-slate-100 text-slate-500"
-                : rolePillClass(role)
-            }`}
-          >
+      {roles.map((role) => {
+        const labelKey = sidebarRoleLabelKey(role)
+        return (
+          <li key={role}>
             <span
-              className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                isMuted ? "bg-slate-400" : roleDotClass(role)
+              className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium ${
+                isMuted
+                  ? "border-slate-200 bg-slate-100 text-slate-500"
+                  : rolePillClass(role)
               }`}
-              aria-hidden
-            />
-            {role}
-          </span>
-        </li>
-      ))}
+            >
+              <span
+                className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                  isMuted ? "bg-slate-400" : roleDotClass(role)
+                }`}
+                aria-hidden
+              />
+              {labelKey ? tSidebar(labelKey) : role}
+            </span>
+          </li>
+        )
+      })}
     </ul>
   )
 }
@@ -163,6 +182,7 @@ function UserListFilters({
   onClear: () => void
 }) {
   const t = useTranslations("AdminPortal.users")
+  const tSidebar = useTranslations("Sidebar")
 
   return (
     <ResponsiveFilters
@@ -208,11 +228,14 @@ function UserListFilters({
                 aria-label={t("filters.filterByAria", { label: t("filters.roleLabel") })}
               >
                 <option value="">{t("filters.allRoles")}</option>
-                {ASSIGNABLE_ROLES.map((assignableRole) => (
-                  <option key={assignableRole} value={assignableRole}>
-                    {assignableRole}
-                  </option>
-                ))}
+                {ASSIGNABLE_ROLES.map((assignableRole) => {
+                  const labelKey = sidebarRoleLabelKey(assignableRole)
+                  return (
+                    <option key={assignableRole} value={assignableRole}>
+                      {labelKey ? tSidebar(labelKey) : assignableRole}
+                    </option>
+                  )
+                })}
               </select>
             </div>
 
@@ -612,6 +635,15 @@ function formatDateUtc(value: string | null, locale: string): string | null {
 
 export default function AdminUsuariosContent() {
   const t = useTranslations("AdminPortal.users")
+  const tSidebar = useTranslations("Sidebar")
+
+  const roleDisplayLabel = useCallback(
+    (role: string) => {
+      const labelKey = sidebarRoleLabelKey(role)
+      return labelKey ? tSidebar(labelKey) : role
+    },
+    [tSidebar]
+  )
   const locale = useLocale()
   const [items, setItems] = useState<AdminUserListItem[]>([])
   const [totalCount, setTotalCount] = useState(0)
@@ -1044,7 +1076,7 @@ export default function AdminUsuariosContent() {
                           : "text-vo-navy"
                     }
                   >
-                    {r}
+                    {roleDisplayLabel(r)}
                   </span>
                 </label>
               ))}
@@ -1182,13 +1214,15 @@ export default function AdminUsuariosContent() {
                         className={`h-1.5 w-1.5 shrink-0 rounded-full ${roleDotClass(role)}`}
                         aria-hidden
                       />
-                      {role}
+                      {roleDisplayLabel(role)}
                       <button
                         type="button"
                         className="inline-flex h-6 w-6 items-center justify-center rounded-full transition hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-vo-purple/50"
                         disabled={detailBusy}
                         onClick={() => setRemoveRoleTarget(role)}
-                        aria-label={t("detail.removeRoleAria", { role })}
+                        aria-label={t("detail.removeRoleAria", {
+                          role: roleDisplayLabel(role),
+                        })}
                       >
                         <X className="h-3 w-3" aria-hidden />
                       </button>
@@ -1226,7 +1260,7 @@ export default function AdminUsuariosContent() {
                             disabled={detailBusy}
                             onChange={() => toggleAddRole(role)}
                           />
-                          {role}
+                          {roleDisplayLabel(role)}
                         </label>
                       ))}
                     </div>
@@ -1277,7 +1311,11 @@ export default function AdminUsuariosContent() {
         }
       >
         <p className="font-sans text-sm text-foreground">
-          {t("removeRole.message", { role: removeRoleTarget ?? "" })}
+          {t("removeRole.message", {
+            role: removeRoleTarget
+              ? roleDisplayLabel(removeRoleTarget)
+              : "",
+          })}
         </p>
       </Modal>
 
