@@ -2619,8 +2619,8 @@ export default function VacanteDetallePage() {
                     className="mb-8 rounded-xl border border-border bg-card p-6"
                     aria-label={tDetail("page.vacancyInfoAria")}
                   >
-                    <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                      <div className="flex min-w-0 flex-1 items-start gap-4">
+                    <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+                      <div className="flex min-w-[min(100%,24rem)] max-w-full grow basis-[min(100%,24rem)] items-start gap-4">
                         {companyLogoSrc ? (
                           <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background">
                             <img
@@ -2768,7 +2768,7 @@ export default function VacanteDetallePage() {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex max-w-full shrink-0 flex-wrap items-center gap-3">
                         {!isEditing ? (
                           <>
                             {!isVacancyReadOnly ? (

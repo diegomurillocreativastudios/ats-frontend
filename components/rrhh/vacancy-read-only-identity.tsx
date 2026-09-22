@@ -20,8 +20,8 @@ interface VacancyReadOnlyIdentityProps {
 function IdentityFact({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
-      <dt className="font-sans text-xs font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-0.5 font-sans text-sm text-foreground">{children}</dd>
+      <dt className="font-sans text-xs font-medium wrap-break-word text-muted-foreground">{label}</dt>
+      <dd className="mt-0.5 font-sans text-sm wrap-break-word text-foreground">{children}</dd>
     </div>
   )
 }
@@ -44,10 +44,10 @@ export function VacancyReadOnlyIdentity({
   const t = useTranslations("RecruiterPortal.vacancies.detail.headerMeta")
 
   return (
-    <div className="flex min-w-0 flex-col gap-4">
+    <div className="@container/identity flex min-w-0 flex-col gap-4">
       <div className="flex min-w-0 flex-col gap-1.5">
         <div className="flex flex-wrap items-center gap-2.5">
-          <h1 className={`min-w-0 font-sans font-bold text-foreground ${titleClassName}`}>
+          <h1 className={`min-w-0 wrap-break-word font-sans font-bold text-foreground ${titleClassName}`}>
             {title}
           </h1>
           <span
@@ -56,16 +56,16 @@ export function VacancyReadOnlyIdentity({
             {statusLabel}
           </span>
         </div>
-        <p className="font-sans text-sm font-medium text-foreground">{companyName}</p>
+        <p className="min-w-0 wrap-break-word font-sans text-sm font-medium text-foreground">{companyName}</p>
       </div>
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-3">
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-3 @min-[22rem]/identity:grid-cols-2 @min-[40rem]/identity:grid-cols-3">
         <IdentityFact label={t("department")}>{department}</IdentityFact>
         <IdentityFact label={t("modality")}>{modality}</IdentityFact>
         <IdentityFact label={t("location")}>
           <VacancyLocationLabel countryCode={countryCode} stateCode={stateCode} />
         </IdentityFact>
       </dl>
-      <p className="font-sans text-xs text-muted-foreground">{createdAtLabel}</p>
+      <p className="min-w-0 wrap-break-word font-sans text-xs text-muted-foreground">{createdAtLabel}</p>
     </div>
   )
 }
