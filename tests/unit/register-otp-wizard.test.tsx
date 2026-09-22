@@ -122,9 +122,11 @@ describe("Registro con One-Time Password", () => {
       "data-step",
       "code",
     )
-    expect(screen.getByTestId("app-snackbar")).toHaveTextContent(
-      /si el correo es válido/i,
-    )
+    await waitFor(() => {
+      expect(screen.getByTestId("app-snackbar")).toHaveTextContent(
+        /si el correo es válido/i,
+      )
+    })
     expect(JSON.stringify(vi.mocked(fetch).mock.calls)).not.toMatch(
       /\/(api\/bff\/)?register(?!\/otp)/,
     )
