@@ -70,6 +70,7 @@ vi.mock("@/components/ui/Snackbar", () => ({
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "vac-99" }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }))
 
 import VacanteDetallePage from "@/app/portal-rrhh/vacantes/[id]/page"

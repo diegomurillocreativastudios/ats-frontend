@@ -45,6 +45,7 @@ const listResponse = {
   items: [
     {
       id: "vac-1",
+      publicSlug: null,
       title: "Ejecutivo de negocios y créditos",
       company: { id: "c1", name: "Creativa", hasLogo: false, logo: null },
       countryCode: "SV",
@@ -54,6 +55,7 @@ const listResponse = {
     },
     {
       id: "vac-2",
+      publicSlug: null,
       title: "Piloto titular de Fórmula 1",
       company: { id: "c2", name: "Mercedes Benz", hasLogo: false, logo: null },
       countryCode: "DE",

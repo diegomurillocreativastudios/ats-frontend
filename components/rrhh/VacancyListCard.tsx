@@ -14,6 +14,7 @@ import {
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import type { VacancyListItem, VacancyListStatusKey } from "@/lib/vacancies/map-vacancy-list-item"
+import { buildRecruiterVacancyPath } from "@/lib/vacancies/vacancy-public-path"
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
 import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles"
 
@@ -189,7 +190,7 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
             />
           ) : null}
           <Link
-            href={`/portal-rrhh/vacantes/${vacancy.id}`}
+            href={buildRecruiterVacancyPath(vacancy)}
             className={
               isReadOnly
                 ? "inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md border border-slate-200 bg-background/90 px-5 font-sans text-sm font-medium text-slate-600 transition-colors hover:bg-background focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 sm:flex-none sm:px-6"

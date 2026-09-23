@@ -4,10 +4,12 @@ import { useMemo } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell"
 import { TechnicalSheetPanel } from "@/components/rrhh/technical-sheet/technical-sheet-panel"
 import { useRecruiterVacancySummary } from "@/hooks/use-recruiter-vacancy-summary"
+import { useResolvedRecruiterVacancyPath } from "@/hooks/use-resolved-recruiter-vacancy-path"
+import { buildRecruiterVacancyPath } from "@/lib/vacancies/vacancy-public-path"
 
 export default function VacancyCandidateTechnicalSheetPage() {
   const t = useTranslations("RecruiterPortal.technicalSheet")
@@ -15,11 +17,17 @@ export default function VacancyCandidateTechnicalSheetPage() {
   const params = useParams()
   const rawVacancy = params?.id
   const rawCandidate = params?.candidateProfileId
-  const vacancyId = Array.isArray(rawVacancy) ? rawVacancy[0] : rawVacancy ?? ""
+  const pathSegment = Array.isArray(rawVacancy) ? rawVacancy[0] : rawVacancy ?? ""
   const candidateProfileId = Array.isArray(rawCandidate)
     ? rawCandidate[0]
     : rawCandidate ?? ""
 
+  const resolved = useResolvedRecruiterVacancyPath(pathSegment, {
+    pathSuffix: candidateProfileId
+      ? `candidatos/${encodeURIComponent(candidateProfileId)}/technical-sheet`
+      : "",
+  })
+  const vacancyId = resolved.vacancyId
   const vacancySummary = useRecruiterVacancySummary(vacancyId)
 
   const candidateLabel = useMemo(() => {
@@ -31,26 +39,54 @@ export default function VacancyCandidateTechnicalSheetPage() {
     return null
   }, [vacancySummary.applicantOptions, candidateProfileId])
 
-  const backHref =
-    vacancyId !== ""
-      ? `/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}`
-      : "/portal-rrhh/vacantes"
+  const backHref = buildRecruiterVacancyPath({
+    id: vacancyId || pathSegment,
+    publicSlug: resolved.publicSlug,
+  })
 
   const trail =
-    vacancyId !== ""
+    pathSegment !== ""
       ? [
           { label: tVacancies("breadcrumb"), href: "/portal-rrhh/vacantes" },
           {
-            label: vacancySummary.loading
-              ? "…"
-              : vacancySummary.title?.trim() || tVacancies("results.page.vacancyFallback"),
+            label:
+              resolved.loading || vacancySummary.loading
+                ? "…"
+                : vacancySummary.title?.trim() ||
+                  tVacancies("results.page.vacancyFallback"),
             href: backHref,
           },
           { label: t("page.breadcrumb") },
         ]
       : [{ label: tVacancies("breadcrumb"), href: "/portal-rrhh/vacantes" }]
 
-  if (!vacancyId || !candidateProfileId) {
+  if (!pathSegment || !candidateProfileId) {
+    return (
+      <RrhhPortalShell breadcrumbLabel="RRHH" breadcrumbTrail={trail}>
+        <div className="p-4 md:p-8">
+          <p className="font-sans text-sm text-destructive" role="alert">
+            {t("errors.missingParams")}
+          </p>
+        </div>
+      </RrhhPortalShell>
+    )
+  }
+
+  if (resolved.loading) {
+    return (
+      <RrhhPortalShell breadcrumbLabel="RRHH" breadcrumbTrail={trail}>
+        <div
+          className="flex flex-col items-center justify-center gap-3 p-8"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="h-8 w-8 animate-spin text-vo-purple" aria-hidden />
+        </div>
+      </RrhhPortalShell>
+    )
+  }
+
+  if (resolved.error || !vacancyId) {
     return (
       <RrhhPortalShell breadcrumbLabel="RRHH" breadcrumbTrail={trail}>
         <div className="p-4 md:p-8">
@@ -78,7 +114,6 @@ export default function VacancyCandidateTechnicalSheetPage() {
           candidateProfileId={candidateProfileId}
           vacancyTitle={vacancySummary.title}
           candidateLabel={candidateLabel}
-          variant="page"
         />
       </div>
     </RrhhPortalShell>

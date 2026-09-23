@@ -5,8 +5,8 @@ import { NextIntlClientProvider } from "next-intl"
 import { PublicVacancyApplyPage } from "@/components/public/PublicVacancyApplyPage"
 import esMessages from "@/messages/es.json"
 
-const { getPublicVacancyDetailMock } = vi.hoisted(() => ({
-  getPublicVacancyDetailMock: vi.fn(),
+const { getPublicVacancyByPathSegmentMock } = vi.hoisted(() => ({
+  getPublicVacancyByPathSegmentMock: vi.fn(),
 }))
 
 vi.mock("next/navigation", () => ({
@@ -27,7 +27,7 @@ vi.mock("@/lib/api/public-vacancies", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/api/public-vacancies")>()
   return {
     ...actual,
-    getPublicVacancyDetail: getPublicVacancyDetailMock,
+    getPublicVacancyByPathSegment: getPublicVacancyByPathSegmentMock,
   }
 })
 
@@ -53,9 +53,10 @@ function renderApply() {
 
 describe("PublicVacancyApplyPage", () => {
   beforeEach(() => {
-    getPublicVacancyDetailMock.mockReset()
-    getPublicVacancyDetailMock.mockResolvedValue({
+    getPublicVacancyByPathSegmentMock.mockReset()
+    getPublicVacancyByPathSegmentMock.mockResolvedValue({
       id: "vac-1",
+      publicSlug: null,
       title: "Ejecutivo de negocios y créditos",
       company: {
         id: "c1",

@@ -11,11 +11,12 @@ import { PublicOpportunitiesShell } from "@/components/public/PublicOpportunitie
 import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
 import { VacancyIdentityFacts } from "@/components/public/vacancy-identity-facts"
 import {
-  getPublicVacancyDetail,
+  getPublicVacancyByPathSegment,
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
 import { hasVacancyFieldValue } from "@/lib/public-vacancy-content"
 import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
+import { buildPublicVacancyPath } from "@/lib/vacancies/vacancy-public-path"
 
 const applyIllustrationSrc = "/ilustrations/undraw_contract-signed_vutk.svg"
 
@@ -52,9 +53,13 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
   const [hasAcceptedPrivacy, setHasAcceptedPrivacy] = useState(false)
 
   const queryString = searchParams.toString()
-  const backToDetailHref = queryString
-    ? `/portal-oportunidades/${vacancyId}?${queryString}`
-    : `/portal-oportunidades/${vacancyId}`
+  const backToDetailHref = vacancy
+    ? queryString
+      ? `${buildPublicVacancyPath(vacancy)}?${queryString}`
+      : buildPublicVacancyPath(vacancy)
+    : queryString
+      ? `/portal-oportunidades/${encodeURIComponent(vacancyId)}?${queryString}`
+      : `/portal-oportunidades/${encodeURIComponent(vacancyId)}`
 
   useEffect(() => {
     let isCancelled = false
@@ -64,7 +69,7 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
       setErrorMessage(null)
 
       try {
-        const nextVacancy = await getPublicVacancyDetail(vacancyId)
+        const nextVacancy = await getPublicVacancyByPathSegment(vacancyId)
         if (isCancelled) return
 
         if (!nextVacancy) {
@@ -74,6 +79,13 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
         }
 
         setVacancy(nextVacancy)
+
+        const canonical = nextVacancy.publicSlug
+        if (canonical && vacancyId !== canonical) {
+          const nextPath = buildPublicVacancyPath(nextVacancy, "aplicar")
+          const withQuery = queryString ? `${nextPath}?${queryString}` : nextPath
+          router.replace(withQuery)
+        }
       } catch (error) {
         if (isCancelled) return
         const message =
@@ -94,7 +106,7 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
     return () => {
       isCancelled = true
     }
-  }, [t, vacancyId])
+  }, [t, vacancyId, router, queryString])
 
   useEffect(() => {
     if (!vacancy?.title) return
@@ -215,7 +227,7 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
 
                 <div className="mt-6">
                   <PublicVacancyApplicationForm
-                    vacancyId={vacancyId}
+                    vacancyId={vacancy.id}
                     theme="light"
                   />
                 </div>

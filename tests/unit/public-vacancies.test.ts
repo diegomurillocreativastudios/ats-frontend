@@ -82,6 +82,7 @@ describe("public vacancies API helpers", () => {
     const detail = normalizeOpportunityDetail({
       id: "vac-1",
       title: "UX Designer",
+      publicSlug: "aoj-9920",
       companyName: "Creativa Studios",
       department: {
         id: "dep-2",
@@ -100,6 +101,7 @@ describe("public vacancies API helpers", () => {
     })
 
     expect(detail?.company.name).toBe("Creativa Studios")
+    expect(detail?.publicSlug).toBe("aoj-9920")
     expect(detail?.department?.displayName).toBe("Design")
     expect(detail?.modality?.displayName).toBe("Híbrido")
     expect(detail?.responsibilities).toEqual([

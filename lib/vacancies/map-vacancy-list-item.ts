@@ -9,11 +9,14 @@ import {
   getVacancyModalityId,
   getVacancyModalityLabel,
 } from "@/lib/vacancy-catalogs"
+import { readPublicSlug } from "@/lib/vacancies/vacancy-public-path"
 
 export type VacancyListStatusKey = "activa" | "cerrada" | "pausada" | "borrador"
 
 export interface VacancyListItem {
   id: string
+  /** Prefer for detail URLs when set; null for legacy vacancies. */
+  publicSlug: string | null
   title: string
   description: string
   company: string
@@ -170,6 +173,7 @@ export const mapVacancyFromApi = (
 
   return {
     id,
+    publicSlug: readPublicSlug(item),
     title,
     description,
     company,

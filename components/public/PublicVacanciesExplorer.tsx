@@ -34,6 +34,7 @@ import {
   type OpportunityVacancySummary,
 } from "@/lib/api/public-vacancies"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
+import { buildPublicVacancyPath } from "@/lib/vacancies/vacancy-public-path"
 import {
   getOpportunityResultsRange,
   mergeCountryFilterOptions,
@@ -248,7 +249,7 @@ function OpportunityCard({
   t: ReturnType<typeof useTranslations<"PublicOpportunities.page">>
 }) {
   const publishedLabel = formatPublishedLabel(vacancy.publishedAt)
-  const href = `/portal-oportunidades/${vacancy.id}${queryString ? `?${queryString}` : ""}`
+  const href = `${buildPublicVacancyPath(vacancy)}${queryString ? `?${queryString}` : ""}`
   const departmentLabel = vacancy.department?.displayName
   const modalityLabel = vacancy.modality?.displayName
   const companyName = vacancy.company.name?.trim() ?? ""

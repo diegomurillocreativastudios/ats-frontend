@@ -3,6 +3,10 @@ import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 import { formatCountryCodeLabel } from "@/lib/profile-form-options"
 import { normalizeCountryCode, readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
 import {
+  isVacancyGuid,
+  readPublicSlug,
+} from "@/lib/vacancies/vacancy-public-path"
+import {
   getVacancyDepartmentSummary,
   getVacancyModalitySummary,
   type VacancyCatalogSummary,
@@ -44,6 +48,8 @@ export interface OpportunityCompanySummary {
 
 export interface OpportunityVacancySummary {
   id: string
+  /** Prefer for public URLs when set; null for legacy vacancies. */
+  publicSlug: string | null
   title: string
   company: OpportunityCompanySummary
   countryCode?: string
@@ -253,6 +259,7 @@ function normalizeOpportunitySummary(raw: unknown): OpportunityVacancySummary | 
 
   return {
     id,
+    publicSlug: readPublicSlug(record),
     title,
     company: normalizeCompany(record),
     countryCode,
@@ -385,5 +392,24 @@ export async function getPublicVacancyDetail(
   vacancyId: string
 ): Promise<OpportunityVacancyDetail | null> {
   const data = await apiClient.get(`/api/vacantes/${encodeURIComponent(vacancyId)}`)
+  return normalizeOpportunityDetail(data)
+}
+
+/**
+ * Loads a public vacancy from a URL segment that may be a Guid or a publicSlug.
+ */
+export async function getPublicVacancyByPathSegment(
+  pathSegment: string
+): Promise<OpportunityVacancyDetail | null> {
+  const segment = String(pathSegment ?? "").trim()
+  if (!segment) return null
+
+  if (isVacancyGuid(segment)) {
+    return getPublicVacancyDetail(segment)
+  }
+
+  const data = await apiClient.get(
+    `/api/vacantes/by-public-slug/${encodeURIComponent(segment)}`
+  )
   return normalizeOpportunityDetail(data)
 }

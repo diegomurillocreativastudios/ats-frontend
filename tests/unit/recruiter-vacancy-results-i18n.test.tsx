@@ -50,8 +50,8 @@ vi.mock("@/lib/api/interviews", () => ({
 }))
 
 vi.mock("next/navigation", () => ({
-  useParams: () => ({ id: "vac-results-1" }),
-  useRouter: () => ({ push: vi.fn() }),
+  useParams: () => ({ id: "1d2f9cbe-9079-4794-8569-eff14f0f8943" }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }))
 
 import VacancyResultadosPage from "@/app/portal-rrhh/vacantes/[id]/resultados/page"
@@ -74,7 +74,7 @@ function renderWithIntl(ui: React.ReactNode, locale: Locale) {
 }
 
 const mockViewModel: VacancyResultadosViewModel = {
-  vacancyId: "vac-results-1",
+  vacancyId: "1d2f9cbe-9079-4794-8569-eff14f0f8943",
   title: "Senior Backend Engineer",
   meta: {
     description: null,

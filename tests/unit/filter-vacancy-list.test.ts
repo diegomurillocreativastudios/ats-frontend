@@ -8,6 +8,7 @@ import type { VacancyListItem } from "@/lib/vacancies/map-vacancy-list-item"
 
 const baseVacancy = (overrides: Partial<VacancyListItem>): VacancyListItem => ({
   id: "v1",
+  publicSlug: null,
   title: "Sales Agent",
   description: "",
   company: "Creativa Studios",

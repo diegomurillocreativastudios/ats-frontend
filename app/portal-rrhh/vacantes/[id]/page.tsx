@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeft,
@@ -39,7 +39,7 @@ import {
   patchVacancyClientCompany,
 } from "@/lib/api/recruiter-vacancies"
 import { finishVacancyProcess } from "@/lib/api/recruiter-vacancy-finish"
-import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
+import { fetchRecruiterVacancyByPathSegment } from "@/lib/api/recruiter-vacancy-by-path"
 import {
   QUERY_SEARCH_CANDIDATES_LIMIT,
   clampSearchLimit,
@@ -57,6 +57,11 @@ import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confir
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
 import { RequirementsDisplay } from "@/components/rrhh/requirements-display"
 import { toRequirementStorageKey } from "@/lib/vacancies/format-requirement-key"
+import {
+  buildRecruiterVacancyPath,
+  isVacancyGuid,
+  readPublicSlug,
+} from "@/lib/vacancies/vacancy-public-path"
 import { VacancyDelimitedText } from "@/components/rrhh/vacancy-delimited-text"
 import { VacancyDetailsCard } from "@/components/rrhh/vacancy-details-readout"
 import { VacancySalaryCard } from "@/components/rrhh/vacancy-salary-card"
@@ -103,7 +108,6 @@ import {
   isRecruiterCandidateCvError,
 } from "@/lib/api/recruiter-candidate-cv"
 import { getInitials } from "@/lib/getInitials";
-import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api";
 import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active";
 import {
   getVacancyRecruiterReadOnlyReason,
@@ -1029,7 +1033,13 @@ export default function VacanteDetallePage() {
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
   const locale = useLocale();
   const params = useParams();
-  const id = params?.id ?? null;
+  const router = useRouter();
+  const pathSegmentRaw = params?.id ?? null;
+  const pathSegment = Array.isArray(pathSegmentRaw)
+    ? pathSegmentRaw[0]
+    : pathSegmentRaw;
+  /** Guid used for recruiter APIs (match, edit, applications). */
+  const [vacancyId, setVacancyId] = useState<string | null>(null);
   const [vacancy, setVacancy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -1249,7 +1259,7 @@ export default function VacanteDetallePage() {
 
   const fetchVacancy = useCallback(async (silentFlag?: unknown) => {
     const silent = silentFlag === true
-    if (!id) {
+    if (!pathSegment) {
       if (!silent) setLoading(false);
       if (!silent) setFetchError(tDetail("errors.missingId"));
       return;
@@ -1259,24 +1269,62 @@ export default function VacanteDetallePage() {
       setFetchError(null);
     }
     try {
-      const data = await apiClient.get(`/api/recruiter/vacancies/${id}`);
-      const withApplicants = await overlayVacancyApplicants(String(id), data);
-      setVacancy(normalizeVacancyDetailFromApi(withApplicants) ?? withApplicants);
+      const resolved = await fetchRecruiterVacancyByPathSegment(pathSegment);
+      if (!resolved) {
+        if (!silent) {
+          setFetchError(tDetail("errors.loadFailed"));
+          setVacancy(null);
+          setVacancyId(null);
+        }
+        return;
+      }
+      setVacancyId(resolved.id);
+      setVacancy(resolved.vacancy);
+
+      const canonicalSlug = resolved.publicSlug;
+      if (canonicalSlug && pathSegment && pathSegment !== canonicalSlug) {
+        router.replace(
+          buildRecruiterVacancyPath({
+            id: resolved.id,
+            publicSlug: canonicalSlug,
+          })
+        );
+      }
     } catch (err: unknown) {
       if (!silent) {
         setFetchError(
           getApiErrorMessage(err) || tDetail("errors.loadFailed")
         );
         setVacancy(null);
+        setVacancyId(null);
       }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [id, tDetail]);
+  }, [pathSegment, router, tDetail]);
 
   useEffect(() => {
     fetchVacancy();
   }, [fetchVacancy]);
+
+  const vacancyPathSource = useMemo(
+    () => ({
+      id: vacancyId ?? pathSegment ?? "",
+      publicSlug:
+        readPublicSlug(vacancy) ??
+        (pathSegment && !isVacancyGuid(pathSegment) ? pathSegment : null),
+    }),
+    [vacancy, vacancyId, pathSegment]
+  );
+
+  const resultadosHref = buildRecruiterVacancyPath(
+    vacancyPathSource,
+    "resultados"
+  );
+  const entrevistasHref =
+    vacancyId != null && vacancyId !== ""
+      ? `/portal-rrhh/entrevistas/${encodeURIComponent(vacancyId)}`
+      : "/portal-rrhh/entrevistas";
 
   useEffect(() => {
     let cancelled = false;
@@ -1510,7 +1558,6 @@ export default function VacanteDetallePage() {
   }, []);
 
   const handleSaveVacancy = useCallback(async () => {
-    const vacancyId = Array.isArray(id) ? id[0] : id;
     if (!vacancyId || !vacancy || !readVacancyIsActive(vacancy)) return;
     if (!validateEditForm()) return;
     if (!editCompanyId.trim()) {
@@ -1667,6 +1714,20 @@ export default function VacanteDetallePage() {
           work_arrangement: nextModalitySummary?.displayName ?? null,
         }));
 
+        const nextPublicSlug = readPublicSlug(updatedRecord)
+        if (
+          nextPublicSlug &&
+          pathSegment &&
+          pathSegment !== nextPublicSlug
+        ) {
+          router.replace(
+            buildRecruiterVacancyPath({
+              id: vacancyId,
+              publicSlug: nextPublicSlug,
+            })
+          )
+        }
+
         if (companyChanged) {
           await fetchVacancy(true);
         }
@@ -1688,7 +1749,9 @@ export default function VacanteDetallePage() {
       setSavingVacancy(false);
     }
   }, [
-    id,
+    vacancyId,
+    pathSegment,
+    router,
     vacancy,
     editCompanyId,
     editTitle,
@@ -1713,7 +1776,6 @@ export default function VacanteDetallePage() {
 
   const handleFinishProcess = useCallback(
     async (data: { calification: number; comments: string }) => {
-      const vacancyId = Array.isArray(id) ? id[0] : id
       if (!vacancyId) {
         throw new Error(tDetail("errors.missingId"))
       }
@@ -1758,7 +1820,7 @@ export default function VacanteDetallePage() {
         setFinishingProcess(false)
       }
     },
-    [id, fetchVacancy, tDetail]
+    [vacancyId, fetchVacancy, tDetail]
   )
 
   useEffect(() => {
@@ -1833,7 +1895,7 @@ export default function VacanteDetallePage() {
 
   const loadSmartCandidates = useCallback(
     async (options?: { silent?: boolean }) => {
-      if (!id) return;
+      if (!vacancyId) return;
       if (isVacancyReadOnly && !options?.silent) return;
 
       setLoadingSmart(true);
@@ -1843,7 +1905,7 @@ export default function VacanteDetallePage() {
       }
 
       try {
-        const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=${clampSearchLimit(QUERY_SEARCH_CANDIDATES_LIMIT)}&minScore=0.7`;
+        const url = `/api/recruiter/vacancies/${vacancyId}/search-candidates?limit=${clampSearchLimit(QUERY_SEARCH_CANDIDATES_LIMIT)}&minScore=0.7`;
         const data = await apiClient.post(url, {});
         const list = unwrapListArray(data);
         setSmartCandidates(list);
@@ -1870,7 +1932,7 @@ export default function VacanteDetallePage() {
         setLoadingSmart(false);
       }
     },
-    [id, isVacancyReadOnly, tMatching]
+    [vacancyId, isVacancyReadOnly, tMatching]
   );
 
   const handleSearchSmartRecommendations = useCallback(() => {
@@ -1878,19 +1940,19 @@ export default function VacanteDetallePage() {
   }, [loadSmartCandidates]);
 
   useEffect(() => {
-    if (!id || loading || !isVacancyReadOnly || smartCandidates !== null) return;
+    if (!vacancyId || loading || !isVacancyReadOnly || smartCandidates !== null) return;
     void loadSmartCandidates({ silent: true });
-  }, [id, loading, isVacancyReadOnly, smartCandidates, loadSmartCandidates]);
+  }, [vacancyId, loading, isVacancyReadOnly, smartCandidates, loadSmartCandidates]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!vacancyId) return;
     if (loading) return;
     document.title = formatVacancyDetailDocumentTitle(
       vacancy?.title != null && String(vacancy.title).trim() !== ""
         ? vacancy.title
         : null
     );
-  }, [id, loading, vacancy?.title]);
+  }, [vacancyId, loading, vacancy?.title]);
 
   const statusConfig = vacancy ? getStatusConfig(vacancy.status, t) : getStatusConfig("activa", t);
   /** AI match suggestions from vacancy (for "Posibles candidatos" container). */
@@ -2374,7 +2436,7 @@ export default function VacanteDetallePage() {
   }, []);
 
   const handleStartProcess = useCallback(async () => {
-    if (!id || isVacancyReadOnly) return;
+    if (!vacancyId || isVacancyReadOnly) return;
     const candidateProfileIds = vacancyCandidates
       .map((match, index) => (selectedPossibleCandidateIds.has(getCandidateId(match, index)) ? match.candidateProfileId : null))
       .filter((pid) => pid != null && String(pid).trim() !== "");
@@ -2383,7 +2445,7 @@ export default function VacanteDetallePage() {
     setStartProcessError(null);
     try {
       await apiClient.post("/api/recruiter/applications/start", {
-        vacancyId: id,
+        vacancyId,
         candidateProfileIds,
       });
       setSelectedPossibleCandidateIds(new Set());
@@ -2401,7 +2463,7 @@ export default function VacanteDetallePage() {
     } finally {
       setLoadingStartProcess(false);
     }
-  }, [id, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas, isVacancyReadOnly]);
+  }, [vacancyId, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas, isVacancyReadOnly, tMatching]);
 
   /** Selected candidate document IDs to send to the match API. */
   const selectedDocumentIds = displayCandidates
@@ -2409,7 +2471,7 @@ export default function VacanteDetallePage() {
     .filter((docId) => docId != null && String(docId).trim() !== "");
 
   const handleMatch = useCallback(async () => {
-    if (!id || isVacancyReadOnly) return;
+    if (!vacancyId || isVacancyReadOnly) return;
     const items = displayCandidates
       .map((match, index) => {
         if (!selectedCandidateIds.has(getCandidateId(match, index))) return null;
@@ -2437,7 +2499,7 @@ export default function VacanteDetallePage() {
       const result = await runVacancyPreliminaryMatchBatch({
         items,
         matchOne: async (documentId) => {
-          await apiClient.post(`/api/recruiter/vacancies/${id}/match`, [documentId]);
+          await apiClient.post(`/api/recruiter/vacancies/${vacancyId}/match`, [documentId]);
         },
         onProgress: (progress) => {
           setMatchProgress({
@@ -2502,7 +2564,7 @@ export default function VacanteDetallePage() {
       });
     }
   }, [
-    id,
+    vacancyId,
     displayCandidates,
     selectedCandidateIds,
     fetchVacancy,
@@ -2767,7 +2829,7 @@ export default function VacanteDetallePage() {
                           <>
                             {!isVacancyReadOnly ? (
                               <RematchButton
-                                vacancyId={id}
+                                vacancyId={vacancyId}
                                 needsRematch={vacancy.needsRematch}
                                 onSuccess={() => fetchVacancy(true)}
                                 onSnackbar={(message, variant = "success") =>
@@ -2796,14 +2858,14 @@ export default function VacanteDetallePage() {
                               </button>
                             ) : null}
                             <Link
-                              href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
+                              href={entrevistasHref}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                               aria-label={tDetail("actions.interviewsAria")}
                             >
                               {tDetail("actions.interviews")}
                             </Link>
                             <Link
-                              href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
+                              href={resultadosHref}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                               aria-label={tDetail("actions.resultsAria")}
                             >
@@ -3367,7 +3429,7 @@ export default function VacanteDetallePage() {
                                 candidateStatusOverrides={candidateStatusOverrides}
                                 onStatusChange={handleStatusChange}
                                 updatingStatusCandidateId={updatingStatusCandidateId}
-                                vacancyId={id != null ? String(id) : null}
+                                vacancyId={vacancyId}
                                 vacancyTitle={vacancy?.title ?? ""}
                                 readOnly={isVacancyReadOnly}
                                 shortcutStages={dropState.columnShortcutStages}
@@ -3610,14 +3672,14 @@ export default function VacanteDetallePage() {
                           </button>
                           ) : null}
                           <Link
-                            href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
+                            href={entrevistasHref}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                             aria-label={tDetail("actions.interviewsAria")}
                           >
                             {tDetail("actions.interviews")}
                           </Link>
                           <Link
-                            href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
+                            href={resultadosHref}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                             aria-label={tDetail("actions.resultsAria")}
                           >
@@ -4188,7 +4250,7 @@ export default function VacanteDetallePage() {
                               candidateStatusOverrides={candidateStatusOverrides}
                               onStatusChange={handleStatusChange}
                               updatingStatusCandidateId={updatingStatusCandidateId}
-                              vacancyId={id != null ? String(id) : null}
+                              vacancyId={vacancyId}
                               vacancyTitle={vacancy?.title ?? ""}
                               readOnly={isVacancyReadOnly}
                               shortcutStages={dropState.columnShortcutStages}
