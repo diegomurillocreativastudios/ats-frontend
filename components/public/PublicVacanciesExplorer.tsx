@@ -65,6 +65,7 @@ function toRequestFilters(queryState: PublicOpportunitiesQueryState): Opportunit
     vacanteName: queryState.vacanteName || undefined,
     countryCode: queryState.countryCode || undefined,
     page: queryState.page > 1 ? queryState.page : undefined,
+    filter: "openVacancies",
   }
 }
 

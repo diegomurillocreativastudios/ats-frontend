@@ -29,6 +29,8 @@ export interface OpportunityListFilters {
   countryCode?: string
   country?: string
   page?: number
+  /** Sent only on the API request; not mirrored to the browser URL. */
+  filter?: "openVacancies"
 }
 
 export interface OpportunityCompanyLogo {

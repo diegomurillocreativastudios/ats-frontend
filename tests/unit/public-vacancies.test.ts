@@ -19,6 +19,25 @@ describe("public vacancies API helpers", () => {
     expect(params.get("departmentId")).toBe("dep-1")
     expect(params.get("modalityId")).toBe("mod-1")
     expect(params.get("page")).toBe("2")
+    expect(params.has("filter")).toBe(false)
+  })
+
+  it("includes filter=openVacancies when requested", () => {
+    const query = buildPublicVacanciesQuery({
+      filter: "openVacancies",
+      page: 1,
+    })
+    const params = new URLSearchParams(query.replace(/^\?/, ""))
+
+    expect(params.get("filter")).toBe("openVacancies")
+    expect(params.get("page")).toBe("1")
+  })
+
+  it("omits filter from the query when not set", () => {
+    const query = buildPublicVacanciesQuery({ page: 1 })
+    const params = new URLSearchParams(query.replace(/^\?/, ""))
+
+    expect(params.has("filter")).toBe(false)
   })
 
   it("normalizes paginated vacancies and availableFilters", () => {
