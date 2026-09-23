@@ -80,14 +80,34 @@ describe("renderTechnicalSheetPdfBuffer", () => {
     delete process.env.VERCEL_ENV
   })
 
-  it("uses PDFKit schema pipeline by default", async () => {
-    buildTechnicalSheetPdfKitBuffer.mockResolvedValue(Buffer.from("%PDF-kit"))
+  it("uses schema Chromium pipeline by default", async () => {
+    renderPaginatedTechnicalSheetPdfFromInterpolated.mockResolvedValue(
+      Buffer.from("%PDF-schema-chromium")
+    )
 
     const { renderTechnicalSheetPdfBuffer } = await import(
       "@/lib/technical-sheet/render-technical-sheet-pdf-response"
     )
 
     const buf = await renderTechnicalSheetPdfBuffer(baseInput)
+
+    expect(buf.toString("utf8")).toBe("%PDF-schema-chromium")
+    expect(renderPaginatedTechnicalSheetPdfFromInterpolated).toHaveBeenCalled()
+    expect(renderHtmlToPdfBuffer).not.toHaveBeenCalled()
+    expect(buildTechnicalSheetPdfKitBuffer).not.toHaveBeenCalled()
+  })
+
+  it("uses PDFKit schema pipeline when engine is pdfkit", async () => {
+    buildTechnicalSheetPdfKitBuffer.mockResolvedValue(Buffer.from("%PDF-kit"))
+
+    const { renderTechnicalSheetPdfBuffer } = await import(
+      "@/lib/technical-sheet/render-technical-sheet-pdf-response"
+    )
+
+    const buf = await renderTechnicalSheetPdfBuffer({
+      ...baseInput,
+      engine: "pdfkit",
+    })
 
     expect(buf.toString("utf8")).toBe("%PDF-kit")
     expect(buildTechnicalSheetPdfKitBuffer).toHaveBeenCalled()

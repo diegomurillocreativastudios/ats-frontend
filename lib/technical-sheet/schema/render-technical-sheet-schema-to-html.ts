@@ -56,6 +56,19 @@ export function getTechnicalSheetSchemaPreviewCss(): string {
       text-transform: uppercase;
       text-decoration: underline;
     }
+
+    ul.ts-bullet-list--cols {
+      columns: 2;
+      -webkit-columns: 2;
+      column-gap: 28px;
+      -webkit-column-gap: 28px;
+    }
+
+    ul.ts-bullet-list--cols > li {
+      break-inside: avoid;
+      -webkit-column-break-inside: avoid;
+      page-break-inside: avoid;
+    }
   `
 }
 
@@ -114,14 +127,18 @@ function renderBulletList(
     .map((item) => {
       const text = resolveSheetBinding(section.item, mergeRowContext(ctx, item), "")
       return text.trim() !== ""
-        ? `<li style="margin: 4px 0; padding-left: 3px;">${escapeHtml(text)}</li>`
+        ? `<li style="margin: 3px 0; padding-left: 2px; break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid;">${escapeHtml(text)}</li>`
         : ""
     })
     .join("")
 
   if (!items) return ""
   const title = escapeHtml(resolveSheetTemplateString(section.title, ctx))
-  return `<section><h2>${title}</h2><ul style="margin: 0; padding-left: 32px;">${items}</ul></section>`
+  const useColumns = rows.length >= 4
+  const ulStyle = useColumns
+    ? "margin: 0; padding-left: 18px; list-style-position: outside; columns: 2; -webkit-columns: 2; column-gap: 28px; -webkit-column-gap: 28px;"
+    : "margin: 0; padding-left: 32px;"
+  return `<section><h2>${title}</h2><ul class="ts-bullet-list${useColumns ? " ts-bullet-list--cols" : ""}" style="${ulStyle}">${items}</ul></section>`
 }
 
 function renderFacts(section: FactsSection, ctx: Record<string, unknown>): string {

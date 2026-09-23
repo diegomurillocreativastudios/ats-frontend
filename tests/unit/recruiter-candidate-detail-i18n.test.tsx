@@ -169,6 +169,7 @@ describe("RecruiterCandidateProfileView i18n (Etapa 14)", () => {
   it("renderiza UI estática en español", () => {
     renderProfileView("es")
     expect(screen.getByText("Editar perfil")).toBeInTheDocument()
+    expect(screen.getByText("Generar ficha técnica")).toBeInTheDocument()
     expect(screen.getByText("Contacto y personales")).toBeInTheDocument()
     expect(screen.getByText("Experiencia laboral")).toBeInTheDocument()
     expect(
@@ -180,6 +181,7 @@ describe("RecruiterCandidateProfileView i18n (Etapa 14)", () => {
   it("renderiza UI estática en inglés", () => {
     renderProfileView("en")
     expect(screen.getByText("Edit profile")).toBeInTheDocument()
+    expect(screen.getByText("Generate technical sheet")).toBeInTheDocument()
     expect(screen.getByText("Contact and personal")).toBeInTheDocument()
     expect(screen.getByText("Work experience")).toBeInTheDocument()
     expect(screen.getByText("No work experience on record.")).toBeInTheDocument()

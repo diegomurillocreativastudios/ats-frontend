@@ -4,14 +4,18 @@ import { useEffect } from "react"
 import { X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { TechnicalSheetPanel } from "@/components/rrhh/technical-sheet/technical-sheet-panel"
+import type { TechnicalSheetPayload } from "@/lib/api/technical-sheet"
 
 export interface TechnicalSheetModalProps {
   isOpen: boolean
   onClose: () => void
-  vacancyId: string
   candidateProfileId: string
+  /** Vacancy sheet. Omit when using `payload` from the candidate profile. */
+  vacancyId?: string
   vacancyTitle?: string | null
   candidateLabel?: string | null
+  /** Profile sheet: pre-built payload (preview). PDF re-fetches on the server. */
+  payload?: TechnicalSheetPayload | null
 }
 
 export function TechnicalSheetModal({
@@ -21,6 +25,7 @@ export function TechnicalSheetModal({
   candidateProfileId,
   vacancyTitle,
   candidateLabel,
+  payload = null,
 }: TechnicalSheetModalProps) {
   const t = useTranslations("RecruiterPortal.technicalSheet")
 
@@ -50,6 +55,7 @@ export function TechnicalSheetModal({
         candidateProfileId={candidateProfileId}
         vacancyTitle={vacancyTitle}
         candidateLabel={candidateLabel}
+        payload={payload}
         variant="modal"
         headerEnd={
           <button

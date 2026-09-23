@@ -103,6 +103,17 @@ article.ts-article table,
   break-inside: avoid;
   page-break-inside: avoid;
 }
+ul.ts-bullet-list--cols {
+  columns: 2;
+  -webkit-columns: 2;
+  column-gap: 28px;
+  -webkit-column-gap: 28px;
+}
+ul.ts-bullet-list--cols > li {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+}
 @media print {
   .technical-sheet-doc {
     padding: 0;

@@ -1,8 +1,8 @@
 export type TechnicalSheetPdfEngine = "chromium" | "pdfkit"
 
 /**
- * Motor por defecto: PDFKit + esquema JSON (igual que reportes).
- * Rollback Chromium: `TECHNICAL_SHEET_PDF_ENGINE=chromium` o `?engine=chromium`.
+ * Motor por defecto: Chromium (mismo HTML que la vista previa).
+ * Rollback PDFKit: `TECHNICAL_SHEET_PDF_ENGINE=pdfkit` o `?engine=pdfkit`.
  */
 export function resolveTechnicalSheetPdfEngine(request: Request): TechnicalSheetPdfEngine {
   const env = process.env.TECHNICAL_SHEET_PDF_ENGINE?.trim().toLowerCase()
@@ -16,5 +16,5 @@ export function resolveTechnicalSheetPdfEngine(request: Request): TechnicalSheet
   } catch {
     /* ignore invalid URL */
   }
-  return "pdfkit"
+  return "chromium"
 }

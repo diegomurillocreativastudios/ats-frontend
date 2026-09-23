@@ -132,3 +132,43 @@ export const slugifyVacancyForFilename = (title: string): string => {
     .slice(0, 48)
   return slug || "vacante"
 }
+
+export const buildCandidateProfileTechnicalSheetPdfPath = (candidateId: string) =>
+  `/api/recruiter/candidates/${encodeURIComponent(candidateId)}/technical-sheet/pdf`
+
+/**
+ * PDF de ficha técnica desde el perfil del candidato (sin vacante).
+ * El servidor vuelve a leer el perfil; no acepta payload del cliente.
+ */
+export const downloadCandidateProfileTechnicalSheetPdf = async (
+  candidateId: string,
+  filename: string
+): Promise<void> => {
+  const cid = candidateId.trim()
+  if (!cid) {
+    const err = new Error("candidateId required") as Error & { status: number }
+    err.status = 400
+    throw err
+  }
+  const url = buildCandidateProfileTechnicalSheetPdfPath(cid)
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  })
+  if (!res.ok) {
+    let message = `Error ${res.status}`
+    try {
+      const j = await res.json()
+      const parsed = getApiErrorMessage(j)
+      if (parsed) message = parsed
+    } catch {
+      /* ignore */
+    }
+    const err = new Error(message) as Error & { status: number }
+    err.status = res.status
+    throw err
+  }
+  const blob = await res.blob()
+  const name = filename.endsWith(".pdf") ? filename : `${filename}.pdf`
+  triggerBlobDownload(blob, name)
+}

@@ -102,6 +102,64 @@ function normalizeCandidateRecordForTemplateHtml(candidate: Record<string, unkno
   }
 }
 
+function pickNonEmptyString(...values: unknown[]): string {
+  for (const v of values) {
+    if (v == null) continue
+    const s = typeof v === "string" ? v.trim() : String(v).trim()
+    if (s !== "") return s
+  }
+  return ""
+}
+
+/**
+ * Rellena `country` / preferencias cuando el payload de vacante trae dirección
+ * o claves PascalCase pero no los bindings del esquema (`candidate.country`, etc.).
+ */
+function enrichCandidateAdditionalFacts(candidate: Record<string, unknown>): void {
+  const country = pickNonEmptyString(
+    candidate.country,
+    candidate.Country,
+    candidate.nationality,
+    candidate.Nationality,
+    candidate.birthCountry,
+    candidate.BirthCountry
+  )
+  if (country) {
+    candidate.country = country
+  } else {
+    const address = pickNonEmptyString(candidate.address, candidate.Address)
+    const parts = address
+      .split(",")
+      .map((p) => p.trim())
+      .filter((p) => p !== "")
+    if (parts.length >= 2) {
+      candidate.country = parts[parts.length - 1]
+    }
+  }
+
+  const availability = pickNonEmptyString(
+    candidate.availability,
+    candidate.Availability
+  )
+  if (availability) candidate.availability = availability
+
+  const workMode = pickNonEmptyString(
+    candidate.workMode,
+    candidate.WorkMode,
+    candidate.desiredWorkMode,
+    candidate.DesiredWorkMode
+  )
+  if (workMode) candidate.workMode = workMode
+
+  const salaryExpectation = pickNonEmptyString(
+    candidate.salaryExpectation,
+    candidate.SalaryExpectation,
+    candidate.minSalary,
+    candidate.MinSalary
+  )
+  if (salaryExpectation) candidate.salaryExpectation = salaryExpectation
+}
+
 /**
  * Root object for `{{...}}` substitution: merges payload sections with `header` and `candidate` shortcuts.
  */
@@ -136,6 +194,7 @@ export function buildTechnicalSheetTemplateContext(
   }
 
   normalizeCandidateRecordForTemplateHtml(candRaw)
+  enrichCandidateAdditionalFacts(candRaw)
 
   const langsCheck = candRaw["languages"]
   if (

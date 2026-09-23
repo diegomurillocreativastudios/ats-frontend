@@ -73,7 +73,21 @@ describe("renderTechnicalSheetSchemaToHtml", () => {
     expect(html).toContain("Senior engineer")
     expect(html).toContain("Experiencia laboral")
     expect(html).toContain('class="ts-article"')
+    expect(html).toContain("ts-bullet-list")
     expect(html).not.toContain("{{#each")
+  })
+
+  it("uses two columns for longer bullet lists", () => {
+    const ctx = buildTechnicalSheetTemplateContext({
+      candidate: {
+        firstName: "Ana",
+        lastName: "García",
+        technicalSkills: ["A", "B", "C", "D", "E", "F"],
+      },
+    })
+    const html = renderTechnicalSheetSchemaToHtml(DEFAULT_TECHNICAL_SHEET_SCHEMA, ctx)
+    expect(html).toContain("ts-bullet-list--cols")
+    expect(html).toContain("columns: 2")
   })
 
   it("escapes script payloads from bound values", () => {

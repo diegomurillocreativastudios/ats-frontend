@@ -6,9 +6,11 @@ import { FileDown, Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
+  downloadCandidateProfileTechnicalSheetPdf,
   downloadTechnicalSheetPdfFromNextRoute,
   fetchTechnicalSheetJson,
   slugifyVacancyForFilename,
+  type TechnicalSheetPayload,
 } from "@/lib/api/technical-sheet"
 import { paginateTechnicalSheetArticleToPageBodies } from "@/lib/technical-sheet/paginate-technical-sheet-article-dom"
 import { buildPaginatedTechnicalSheetSrcDoc } from "@/lib/technical-sheet/build-paginated-technical-sheet-src-doc"
@@ -25,10 +27,19 @@ import {
 
 export interface TechnicalSheetPanelProps {
   enabled: boolean
-  vacancyId: string
   candidateProfileId: string
+  /**
+   * Vacancy sheet mode. Required when `payload` is omitted.
+   * Profile sheet mode: omit and pass `payload` instead.
+   */
+  vacancyId?: string
   vacancyTitle?: string | null
   candidateLabel?: string | null
+  /**
+   * Pre-built payload from the recruiter candidate profile (no vacancy fetch).
+   * PDF still re-loads the profile on the server.
+   */
+  payload?: TechnicalSheetPayload | null
   variant?: "modal" | "page"
   className?: string
   headerEnd?: ReactNode
@@ -49,6 +60,7 @@ export function TechnicalSheetPanel({
   candidateProfileId,
   vacancyTitle,
   candidateLabel,
+  payload: providedPayload = null,
   variant = "modal",
   className = "",
   headerEnd = null,
@@ -65,18 +77,25 @@ export function TechnicalSheetPanel({
   const [pdfBusy, setPdfBusy] = useState(false)
   const [pdfActionError, setPdfActionError] = useState<string | null>(null)
 
+  const isProfileSheet = providedPayload != null
+
   const load = useCallback(async () => {
-    if (!vacancyId?.trim() || !candidateProfileId?.trim()) return
+    const cid = candidateProfileId?.trim()
+    if (!cid) return
+    if (!isProfileSheet && !vacancyId?.trim()) return
+
     setLoading(true)
     setError(null)
     setTemplateHtml(null)
     setPreviewMeta(null)
     setPaginatedSrcDoc(null)
     try {
-      const [list, payload] = await Promise.all([
-        fetchTemplatesList({ documentOnly: true }),
-        fetchTechnicalSheetJson(vacancyId.trim(), candidateProfileId.trim()),
-      ])
+      const listPromise = fetchTemplatesList({ documentOnly: true })
+      const payloadPromise = isProfileSheet
+        ? Promise.resolve(providedPayload as TechnicalSheetPayload)
+        : fetchTechnicalSheetJson(vacancyId!.trim(), cid)
+
+      const [list, payload] = await Promise.all([listPromise, payloadPromise])
       const picked = findTechnicalSheetDocumentTemplate(list)
       const rawTemplate = picked?.contentTemplate?.trim() ?? ""
       if (!picked || rawTemplate === "") {
@@ -89,7 +108,7 @@ export function TechnicalSheetPanel({
       const origin = windowOrigin || publicBase
       const logoUrl = origin ? await fetchVisibleLogoDataUriClient(origin) : ""
       const ctx = buildTechnicalSheetTemplateContext(payload, {
-        vacancyTitleFallback: vacancyTitle ?? null,
+        vacancyTitleFallback: isProfileSheet ? null : (vacancyTitle ?? null),
         logoUrl,
       })
       const headerRecord = ctx.header as Record<string, unknown> | undefined
@@ -118,7 +137,14 @@ export function TechnicalSheetPanel({
     } finally {
       setLoading(false)
     }
-  }, [vacancyId, candidateProfileId, vacancyTitle, t])
+  }, [
+    vacancyId,
+    candidateProfileId,
+    vacancyTitle,
+    providedPayload,
+    isProfileSheet,
+    t,
+  ])
 
   useEffect(() => {
     if (!enabled) return
@@ -133,10 +159,7 @@ export function TechnicalSheetPanel({
 
     const iframe = document.createElement("iframe")
     iframe.sandbox = "allow-same-origin"
-    iframe.setAttribute(
-      "aria-hidden",
-      "true"
-    )
+    iframe.setAttribute("aria-hidden", "true")
     iframe.style.cssText =
       "position:fixed;left:-9999px;top:0;width:816px;height:1200px;visibility:hidden;pointer-events:none;border:0;opacity:0"
 
@@ -181,23 +204,36 @@ export function TechnicalSheetPanel({
   }, [enabled, variant, loading, error, paginatedSrcDoc])
 
   const handleDownloadPdf = useCallback(async () => {
-    const vid = vacancyId?.trim()
     const cid = candidateProfileId?.trim()
-    if (!vid || !cid || !paginatedSrcDoc || !panelRef.current) return
+    if (!cid || !paginatedSrcDoc || !panelRef.current) return
     setPdfActionError(null)
     setPdfBusy(true)
-    const slug = slugifyVacancyForFilename(vacancyTitle ?? "vacante")
-    const name = `ficha-tecnica-${slug}-${cid.slice(0, 8)}.pdf`
     try {
-      await downloadTechnicalSheetPdfFromNextRoute(vid, cid, name, {
-        vacancyTitle: vacancyTitle ?? null,
-      })
+      if (isProfileSheet) {
+        const name = `ficha-tecnica-perfil-${cid.slice(0, 8)}.pdf`
+        await downloadCandidateProfileTechnicalSheetPdf(cid, name)
+      } else {
+        const vid = vacancyId?.trim()
+        if (!vid) return
+        const slug = slugifyVacancyForFilename(vacancyTitle ?? "vacante")
+        const name = `ficha-tecnica-${slug}-${cid.slice(0, 8)}.pdf`
+        await downloadTechnicalSheetPdfFromNextRoute(vid, cid, name, {
+          vacancyTitle: vacancyTitle ?? null,
+        })
+      }
     } catch {
       setPdfActionError(t("errors.pdfExportFailed"))
     } finally {
       setPdfBusy(false)
     }
-  }, [vacancyId, candidateProfileId, paginatedSrcDoc, vacancyTitle, t])
+  }, [
+    vacancyId,
+    candidateProfileId,
+    paginatedSrcDoc,
+    vacancyTitle,
+    isProfileSheet,
+    t,
+  ])
 
   const busy = loading
   const iframeDoc = paginatedSrcDoc ?? templateHtml

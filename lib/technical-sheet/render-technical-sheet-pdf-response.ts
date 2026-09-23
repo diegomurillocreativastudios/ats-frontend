@@ -12,8 +12,8 @@ export interface RenderTechnicalSheetPdfInput {
   candidateProfileId: string
   vacancyTitleFallback: string | null
   /**
-   * `pdfkit` (default, schema-driven like reports).
-   * `chromium` is an emergency rollback that prints schema HTML, not client markup.
+   * `chromium` (default): mismo HTML que la vista previa.
+   * `pdfkit`: rollback de emergencia (texto programático).
    */
   engine?: "pdfkit" | "chromium"
   preferPdfKit?: boolean
@@ -30,8 +30,8 @@ export class TechnicalSheetPdfError extends Error {
 
 function resolveEngine(input: RenderTechnicalSheetPdfInput): "pdfkit" | "chromium" {
   if (input.engine === "chromium" || input.engine === "pdfkit") return input.engine
-  if (input.preferPdfKit === false) return "chromium"
-  return "pdfkit"
+  if (input.preferPdfKit === true) return "pdfkit"
+  return "chromium"
 }
 
 function resolveSheetSchema(input: RenderTechnicalSheetPdfInput): TechnicalSheetSchema {

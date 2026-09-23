@@ -1650,6 +1650,8 @@
         "downloadCv": "Descargar CV",
         "downloadingCv": "Descargando…",
         "downloadCvAria": "Descargar CV en PDF",
+        "generateTechnicalSheet": "Generar ficha técnica",
+        "generateTechnicalSheetAria": "Generar ficha técnica del candidato",
         "cancel": "Cancelar",
         "cancelAria": "Cancelar edición sin guardar",
         "save": "Guardar cambios",

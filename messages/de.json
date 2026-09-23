@@ -1650,6 +1650,8 @@
         "downloadCv": "Lebenslauf herunterladen",
         "downloadingCv": "Wird heruntergeladen…",
         "downloadCvAria": "Lebenslauf als PDF herunterladen",
+        "generateTechnicalSheet": "Technisches Blatt erstellen",
+        "generateTechnicalSheetAria": "Technisches Blatt dieses Kandidaten erstellen",
         "cancel": "Abbrechen",
         "cancelAria": "Bearbeitung ohne Speichern abbrechen",
         "save": "Änderungen speichern",

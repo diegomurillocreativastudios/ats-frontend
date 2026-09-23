@@ -1,9 +1,6 @@
 /**
- * PDF de ficha técnica: Chromium (mismo HTML que la vista previa).
- * Rollback PDFKit: `?engine=pdfkit` / `TECHNICAL_SHEET_PDF_ENGINE=pdfkit`.
- *
- * Hardening: cuota por usuario, semáforo Chromium (503), timeouts acotados.
- * FE-SEC-015: no acepta HTML del cliente; datos solo del backend.
+ * PDF de ficha técnica desde el perfil del candidato (sin vacante).
+ * FE-SEC-015: no acepta HTML ni payload del cliente; relee GET de candidatos.
  */
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
@@ -17,14 +14,11 @@ import {
 } from "@/lib/security/cache-headers"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
 import {
-  buildTechnicalSheetBasePath,
-  normalizeTechnicalSheetPayload,
-} from "@/lib/api/technical-sheet"
-import {
   assertTechnicalSheetPdfRateLimit,
   TechnicalSheetPdfBusyError,
   TechnicalSheetPdfRateLimitError,
 } from "@/lib/technical-sheet/pdf-chromium-concurrency"
+import { buildTechnicalSheetPayloadFromRecruiterApiResponses } from "@/lib/technical-sheet/profile-to-technical-sheet-payload"
 import {
   buildTechnicalSheetPdfFilename,
   renderTechnicalSheetPdfBuffer,
@@ -35,34 +29,40 @@ import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
-/** Alineado al presupuesto Chromium (~45s setContent + margen). */
 export const maxDuration = 60
 
 interface PdfRouteContext {
-  params: Promise<{ vacancyId: string; candidateProfileId: string }>
-}
-
-function readVacancyTitleFallback(request: Request): string | null {
-  try {
-    const q = new URL(request.url).searchParams.get("vacancyTitle")?.trim()
-    return q || null
-  } catch {
-    return null
-  }
+  params: Promise<{ candidateId: string }>
 }
 
 function resolvePdfQuotaKey(accessToken: string): string {
   return `token:${accessToken.slice(0, 16)}`
 }
 
-async function handleTechnicalSheetPdf(
+async function fetchBackendJson(
+  baseUrl: string,
+  path: string,
+  accessToken: string
+): Promise<{ ok: boolean; status: number; raw: unknown }> {
+  const res = await fetch(`${baseUrl}${path}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  })
+  const raw = await res.json().catch(() => null)
+  return { ok: res.ok, status: res.status, raw }
+}
+
+async function handleCandidateProfileTechnicalSheetPdf(
   request: Request,
   context: PdfRouteContext
 ) {
-  const { vacancyId, candidateProfileId } = await context.params
-  const vid = String(vacancyId ?? "").trim()
-  const cid = String(candidateProfileId ?? "").trim()
-  if (!vid || !cid) {
+  const { candidateId } = await context.params
+  const cid = String(candidateId ?? "").trim()
+  if (!cid) {
     return jsonWithPrivateNoStore({ message: "Parámetros inválidos" }, { status: 400 })
   }
 
@@ -85,39 +85,40 @@ async function handleTechnicalSheetPdf(
     )
   }
 
-  const path = buildTechnicalSheetBasePath(vid, cid)
   const engine = resolveTechnicalSheetPdfEngine(request)
+  const detailPath = `/api/recruiter/candidates/${encodeURIComponent(cid)}`
+  const profilePath = `/api/recruiter/candidates/${encodeURIComponent(cid)}/profile`
 
-  const [backendResponse, templates] = await Promise.all([
-    fetch(`${baseUrl}${path}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    }),
+  const [detailResult, profileResult, templates] = await Promise.all([
+    fetchBackendJson(baseUrl, detailPath, accessToken),
+    fetchBackendJson(baseUrl, profilePath, accessToken).catch(() => ({
+      ok: false,
+      status: 0,
+      raw: null,
+    })),
     fetchTemplatesListForServer(baseUrl, accessToken),
   ])
 
-  const raw = await backendResponse.json().catch(() => null)
-
-  if (!backendResponse.ok) {
+  if (!detailResult.ok) {
     const message =
-      getApiErrorMessage(raw) ||
-      getApiErrorMessage(backendResponse.statusText) ||
-      "No se pudo obtener la ficha técnica"
-    return jsonWithPrivateNoStore({ message }, { status: backendResponse.status })
+      getApiErrorMessage(detailResult.raw) ||
+      "No se pudo obtener el perfil del candidato"
+    return jsonWithPrivateNoStore({ message }, { status: detailResult.status })
   }
 
-  const payload = normalizeTechnicalSheetPayload(raw)
-  const filenameAscii = buildTechnicalSheetPdfFilename(cid)
+  const profileRaw = profileResult.ok ? profileResult.raw : null
+  const payload = buildTechnicalSheetPayloadFromRecruiterApiResponses({
+    candidateId: cid,
+    detailRaw: detailResult.raw,
+    profileRaw,
+  })
 
+  const filenameAscii = buildTechnicalSheetPdfFilename(cid)
   const buffer = await renderTechnicalSheetPdfBuffer({
     payload,
     templates,
     candidateProfileId: cid,
-    vacancyTitleFallback: readVacancyTitleFallback(request),
+    vacancyTitleFallback: null,
     engine,
   })
 
@@ -135,7 +136,7 @@ async function handleTechnicalSheetPdf(
 }
 
 function pdfErrorResponse(e: unknown) {
-  logServerError("technical-sheet-pdf", e)
+  logServerError("candidate-profile-technical-sheet-pdf", e)
   if (e instanceof TechnicalSheetPdfRateLimitError) {
     return jsonWithPrivateNoStore(
       { message: e.message },
@@ -165,13 +166,15 @@ function pdfErrorResponse(e: unknown) {
       ? errWithStatus.status
       : 500
   const message =
-    status !== 500 && errWithStatus.message ? errWithStatus.message : "Error al generar el PDF"
+    status !== 500 && errWithStatus.message
+      ? errWithStatus.message
+      : "Error al generar el PDF"
   return jsonWithPrivateNoStore({ message }, { status })
 }
 
 export async function GET(request: Request, context: PdfRouteContext) {
   try {
-    return await handleTechnicalSheetPdf(request, context)
+    return await handleCandidateProfileTechnicalSheetPdf(request, context)
   } catch (e: unknown) {
     return pdfErrorResponse(e)
   }
@@ -180,7 +183,7 @@ export async function GET(request: Request, context: PdfRouteContext) {
 /** Alias del GET: no lee body ni HTML del cliente (FE-SEC-015). */
 export async function POST(request: Request, context: PdfRouteContext) {
   try {
-    return await handleTechnicalSheetPdf(request, context)
+    return await handleCandidateProfileTechnicalSheetPdf(request, context)
   } catch (e: unknown) {
     return pdfErrorResponse(e)
   }

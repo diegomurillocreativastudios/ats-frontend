@@ -69,6 +69,8 @@ import {
   downloadRecruiterCandidateCv,
   isRecruiterCandidateCvError,
 } from "@/lib/api/recruiter-candidate-cv"
+import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
+import { buildTechnicalSheetPayloadFromRecruiterProfile } from "@/lib/technical-sheet/profile-to-technical-sheet-payload"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv"
 import { getInitials } from "@/lib/getInitials"
@@ -259,6 +261,7 @@ export function RecruiterCandidateProfileView({
 
   const [downloading, setDownloading] = useState(false)
   const [downloadError, setDownloadError] = useState<string | null>(null)
+  const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false)
 
   const cvCandidateId =
     candidateId != null && String(candidateId).trim() !== ""
@@ -266,6 +269,16 @@ export function RecruiterCandidateProfileView({
       : profile?.id != null && String(profile.id).trim() !== ""
         ? String(profile.id).trim()
         : null
+
+  const technicalSheetPayload = useMemo(
+    () =>
+      buildTechnicalSheetPayloadFromRecruiterProfile({
+        candidateId: cvCandidateId,
+        profile,
+        canonicalProfile,
+      }),
+    [cvCandidateId, profile, canonicalProfile]
+  )
 
   const contactItems = useMemo(
     () => [
@@ -328,6 +341,7 @@ export function RecruiterCandidateProfileView({
 
   return (
     <CandidateProfileSectionsProvider namespace="RecruiterPortal.candidateDetail">
+    <>
     <form
       className="flex flex-col gap-6 md:gap-8"
       noValidate
@@ -401,6 +415,15 @@ export function RecruiterCandidateProfileView({
                     )}
                     {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setTechnicalSheetOpen(true)}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                    aria-label={t("actions.generateTechnicalSheetAria")}
+                  >
+                    <FileText className="h-4 w-4 shrink-0" aria-hidden />
+                    {t("actions.generateTechnicalSheet")}
+                  </button>
                 </div>
               ) : null}
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
@@ -441,20 +464,31 @@ export function RecruiterCandidateProfileView({
             </p>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               {cvCandidateId ? (
-                <button
-                  type="button"
-                  onClick={handleDownloadCv}
-                  disabled={downloading}
-                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label={t("actions.downloadCvAria")}
-                >
-                  {downloading ? (
-                    <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                  ) : (
-                    <Download className="h-4 w-4 shrink-0" aria-hidden />
-                  )}
-                  {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={handleDownloadCv}
+                    disabled={downloading}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label={t("actions.downloadCvAria")}
+                  >
+                    {downloading ? (
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                    ) : (
+                      <Download className="h-4 w-4 shrink-0" aria-hidden />
+                    )}
+                    {downloading ? t("actions.downloadingCv") : t("actions.downloadCv")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTechnicalSheetOpen(true)}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                    aria-label={t("actions.generateTechnicalSheetAria")}
+                  >
+                    <FileText className="h-4 w-4 shrink-0" aria-hidden />
+                    {t("actions.generateTechnicalSheet")}
+                  </button>
+                </>
               ) : null}
               <button
                 type="button"
@@ -753,6 +787,16 @@ export function RecruiterCandidateProfileView({
         </SectionCard>
       ) : null}
     </form>
+    {cvCandidateId && technicalSheetOpen ? (
+      <TechnicalSheetModal
+        isOpen={technicalSheetOpen}
+        onClose={() => setTechnicalSheetOpen(false)}
+        candidateProfileId={cvCandidateId}
+        candidateLabel={displayName}
+        payload={technicalSheetPayload}
+      />
+    ) : null}
+    </>
     </CandidateProfileSectionsProvider>
   )
 }

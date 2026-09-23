@@ -21,6 +21,7 @@ vi.mock("@/lib/api/technical-sheet", () => ({
   fetchTechnicalSheetJson: vi.fn(),
   slugifyVacancyForFilename: vi.fn(() => "senior-backend"),
   downloadTechnicalSheetPdfFromNextRoute: vi.fn(),
+  downloadCandidateProfileTechnicalSheetPdf: vi.fn(),
 }))
 
 vi.mock("@/lib/templates/technical-sheet-template", async (importOriginal) => {

@@ -76,6 +76,42 @@ function bulletList(doc: PdfDoc, items: string[]) {
   doc.moveDown(0.12)
 }
 
+/** Two-column layout for long skill / certification lists. */
+function bulletListTwoColumn(doc: PdfDoc, items: string[]) {
+  if (items.length < 4) {
+    bulletList(doc, items)
+    return
+  }
+
+  const { left, width } = contentMetrics(doc)
+  const gap = 18
+  const colWidth = (width - gap) / 2
+  const mid = Math.ceil(items.length / 2)
+  const leftItems = items.slice(0, mid)
+  const rightItems = items.slice(mid)
+  const startY = doc.y
+
+  const drawColumn = (columnItems: string[], x: number): number => {
+    let y = startY
+    for (const item of columnItems) {
+      doc.fontSize(10).font("Helvetica").fillColor("#000000")
+      doc.text(`• ${item}`, x, y, {
+        width: colWidth - 4,
+        align: "left",
+        lineGap: 3,
+      })
+      y = doc.y + 4
+    }
+    return y
+  }
+
+  const endLeft = drawColumn(leftItems, left)
+  const endRight = drawColumn(rightItems, left + colWidth + gap)
+  doc.x = left
+  doc.y = Math.max(endLeft, endRight)
+  doc.moveDown(0.2)
+}
+
 function renderRepeatCards(
   doc: PdfDoc,
   section: RepeatCardsSection,
@@ -128,7 +164,7 @@ function renderBulletListSection(
     .filter((text) => text !== "")
   if (items.length === 0) return
   sectionHeading(doc, resolveSheetTemplateString(section.title, ctx))
-  bulletList(doc, items)
+  bulletListTwoColumn(doc, items)
 }
 
 function renderFacts(doc: PdfDoc, section: FactsSection, ctx: Record<string, unknown>) {

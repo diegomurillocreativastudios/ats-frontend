@@ -62,6 +62,7 @@ const nextConfig = {
   outputFileTracingIncludes: {
     "/api/recruiter/vacancies/[vacancyId]/candidates/[candidateProfileId]/technical-sheet/pdf":
       pdfRouteTraceAssets,
+    "/api/recruiter/candidates/[candidateId]/technical-sheet/pdf": pdfRouteTraceAssets,
     "/api/recruiter/**/technical-sheet/pdf": pdfRouteTraceAssets,
     "/api/location-catalog/states/[iso2]": locationStatesTraceAssets,
     "/api/location-catalog/**": locationStatesTraceAssets,
