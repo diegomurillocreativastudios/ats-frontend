@@ -6,7 +6,7 @@ describe("technical sheet schema PDF (PDFKit)", () => {
   it(
     "renders a schema template to a valid PDF buffer",
     async () => {
-      const buf = await renderTechnicalSheetPdfBuffer({
+      const result = await renderTechnicalSheetPdfBuffer({
         payload: {
           personal: { firstName: "Smoke", lastName: "Test" },
           candidate: { profileSummary: "Smoke test profile", technicalSkills: ["TypeScript"] },
@@ -23,10 +23,12 @@ describe("technical sheet schema PDF (PDFKit)", () => {
         ],
         candidateProfileId: "00000000-0000-0000-0000-000000000001",
         vacancyTitleFallback: "RPA",
+        engine: "pdfkit",
       })
 
-      expect(buf.length).toBeGreaterThan(1000)
-      expect(buf.subarray(0, 4).toString("utf8")).toBe("%PDF")
+      expect(result.buffer.length).toBeGreaterThan(1000)
+      expect(result.buffer.subarray(0, 4).toString("utf8")).toBe("%PDF")
+      expect(result.engine).toBe("pdfkit")
     },
     30_000
   )

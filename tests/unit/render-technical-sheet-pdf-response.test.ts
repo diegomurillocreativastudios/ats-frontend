@@ -89,9 +89,11 @@ describe("renderTechnicalSheetPdfBuffer", () => {
       "@/lib/technical-sheet/render-technical-sheet-pdf-response"
     )
 
-    const buf = await renderTechnicalSheetPdfBuffer(baseInput)
+    const result = await renderTechnicalSheetPdfBuffer(baseInput)
 
-    expect(buf.toString("utf8")).toBe("%PDF-schema-chromium")
+    expect(result.buffer.toString("utf8")).toBe("%PDF-schema-chromium")
+    expect(result.engine).toBe("chromium")
+    expect(result.fallbackFrom).toBeUndefined()
     expect(renderPaginatedTechnicalSheetPdfFromInterpolated).toHaveBeenCalled()
     expect(renderHtmlToPdfBuffer).not.toHaveBeenCalled()
     expect(buildTechnicalSheetPdfKitBuffer).not.toHaveBeenCalled()
@@ -104,12 +106,13 @@ describe("renderTechnicalSheetPdfBuffer", () => {
       "@/lib/technical-sheet/render-technical-sheet-pdf-response"
     )
 
-    const buf = await renderTechnicalSheetPdfBuffer({
+    const result = await renderTechnicalSheetPdfBuffer({
       ...baseInput,
       engine: "pdfkit",
     })
 
-    expect(buf.toString("utf8")).toBe("%PDF-kit")
+    expect(result.buffer.toString("utf8")).toBe("%PDF-kit")
+    expect(result.engine).toBe("pdfkit")
     expect(buildTechnicalSheetPdfKitBuffer).toHaveBeenCalled()
     expect(renderHtmlToPdfBuffer).not.toHaveBeenCalled()
     expect(renderPaginatedTechnicalSheetPdfFromInterpolated).not.toHaveBeenCalled()
@@ -124,23 +127,46 @@ describe("renderTechnicalSheetPdfBuffer", () => {
       "@/lib/technical-sheet/render-technical-sheet-pdf-response"
     )
 
-    const buf = await renderTechnicalSheetPdfBuffer({
+    const result = await renderTechnicalSheetPdfBuffer({
       ...baseInput,
       engine: "chromium",
     })
 
-    expect(buf.toString("utf8")).toBe("%PDF-schema-chromium")
+    expect(result.buffer.toString("utf8")).toBe("%PDF-schema-chromium")
+    expect(result.engine).toBe("chromium")
     expect(renderPaginatedTechnicalSheetPdfFromInterpolated).toHaveBeenCalled()
     expect(renderHtmlToPdfBuffer).not.toHaveBeenCalled()
     expect(buildTechnicalSheetPdfKitBuffer).not.toHaveBeenCalled()
   })
 
-  it("throws when schema Chromium fails instead of falling back to PDFKit", async () => {
+  it("falls back to PDFKit when Chromium launch fails", async () => {
     renderPaginatedTechnicalSheetPdfFromInterpolated.mockRejectedValue(
       new Error("chromium schema failed")
     )
+    buildTechnicalSheetPdfKitBuffer.mockResolvedValue(Buffer.from("%PDF-kit-fallback"))
 
     const { renderTechnicalSheetPdfBuffer } = await import(
+      "@/lib/technical-sheet/render-technical-sheet-pdf-response"
+    )
+
+    const result = await renderTechnicalSheetPdfBuffer({
+      ...baseInput,
+      engine: "chromium",
+    })
+
+    expect(result.buffer.toString("utf8")).toBe("%PDF-kit-fallback")
+    expect(result.engine).toBe("pdfkit")
+    expect(result.fallbackFrom).toBe("chromium")
+    expect(buildTechnicalSheetPdfKitBuffer).toHaveBeenCalled()
+  })
+
+  it("does not fall back when the schema template is missing", async () => {
+    const { findTechnicalSheetDocumentTemplate } = await import(
+      "@/lib/templates/technical-sheet-template"
+    )
+    vi.mocked(findTechnicalSheetDocumentTemplate).mockReturnValueOnce(null as never)
+
+    const { renderTechnicalSheetPdfBuffer, TechnicalSheetPdfError } = await import(
       "@/lib/technical-sheet/render-technical-sheet-pdf-response"
     )
 
@@ -149,7 +175,7 @@ describe("renderTechnicalSheetPdfBuffer", () => {
         ...baseInput,
         engine: "chromium",
       })
-    ).rejects.toThrow("chromium schema failed")
+    ).rejects.toBeInstanceOf(TechnicalSheetPdfError)
 
     expect(buildTechnicalSheetPdfKitBuffer).not.toHaveBeenCalled()
   })

@@ -114,7 +114,7 @@ async function handleCandidateProfileTechnicalSheetPdf(
   })
 
   const filenameAscii = buildTechnicalSheetPdfFilename(cid)
-  const buffer = await renderTechnicalSheetPdfBuffer({
+  const { buffer, engine: engineUsed, fallbackFrom } = await renderTechnicalSheetPdfBuffer({
     payload,
     templates,
     candidateProfileId: cid,
@@ -122,15 +122,20 @@ async function handleCandidateProfileTechnicalSheetPdf(
     engine,
   })
 
+  const headers: Record<string, string> = {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename="${filenameAscii}"`,
+    "Cache-Control": PRIVATE_NO_STORE_CACHE_CONTROL,
+    "X-Technical-Sheet-Pdf-Engine": engineUsed,
+  }
+  if (fallbackFrom) {
+    headers["X-Technical-Sheet-Pdf-Fallback-From"] = fallbackFrom
+  }
+
   return applyPrivateNoStore(
     new NextResponse(new Uint8Array(buffer), {
       status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filenameAscii}"`,
-        "Cache-Control": PRIVATE_NO_STORE_CACHE_CONTROL,
-        "X-Technical-Sheet-Pdf-Engine": engine,
-      },
+      headers,
     })
   )
 }

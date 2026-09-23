@@ -5,6 +5,7 @@ import type { TechnicalSheetSchema } from "@/lib/technical-sheet/schema/technica
 import type { TemplateListItem } from "@/lib/templates/technical-sheet-template"
 import { findTechnicalSheetDocumentTemplate } from "@/lib/templates/technical-sheet-template"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
+import { logServerError } from "@/lib/security/safe-server-log"
 
 export interface RenderTechnicalSheetPdfInput {
   payload: TechnicalSheetPayload
@@ -17,6 +18,14 @@ export interface RenderTechnicalSheetPdfInput {
    */
   engine?: "pdfkit" | "chromium"
   preferPdfKit?: boolean
+}
+
+export interface RenderTechnicalSheetPdfResult {
+  buffer: Buffer
+  /** Motor que produjo el buffer (puede ser PDFKit tras fallback). */
+  engine: "pdfkit" | "chromium"
+  /** Si Chromium falló y se usó PDFKit como respaldo. */
+  fallbackFrom?: "chromium"
 }
 
 export class TechnicalSheetPdfError extends Error {
@@ -98,14 +107,30 @@ async function renderFromSchemaChromium(input: RenderTechnicalSheetPdfInput): Pr
 
 export async function renderTechnicalSheetPdfBuffer(
   input: RenderTechnicalSheetPdfInput
-): Promise<Buffer> {
+): Promise<RenderTechnicalSheetPdfResult> {
   const engine = resolveEngine(input)
 
   if (engine === "pdfkit") {
-    return renderFromSchemaPdfKit(input)
+    return { buffer: await renderFromSchemaPdfKit(input), engine: "pdfkit" }
   }
 
-  return renderFromSchemaChromium(input)
+  try {
+    return { buffer: await renderFromSchemaChromium(input), engine: "chromium" }
+  } catch (err) {
+    // Domain errors (missing template, oversized HTML) must not silently fall back.
+    if (err instanceof TechnicalSheetPdfError) throw err
+    const withStatus = err as Error & { status?: number }
+    if (typeof withStatus.status === "number" && withStatus.status >= 400 && withStatus.status < 600) {
+      throw err
+    }
+
+    logServerError("technical-sheet-pdf-chromium-fallback", err)
+    return {
+      buffer: await renderFromSchemaPdfKit(input),
+      engine: "pdfkit",
+      fallbackFrom: "chromium",
+    }
+  }
 }
 
 export function buildTechnicalSheetPdfFilename(candidateProfileId: string): string {
