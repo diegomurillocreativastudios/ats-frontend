@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/Button"
 import {
   buildOpportunityCompanyLogoDataUri,
   listPublicVacancies,
+  PUBLIC_OPPORTUNITIES_PAGE_SIZE,
   type OpportunityFilterOption,
   type OpportunityListFilters,
   type OpportunityListResponse,
@@ -65,6 +66,7 @@ function toRequestFilters(queryState: PublicOpportunitiesQueryState): Opportunit
     vacanteName: queryState.vacanteName || undefined,
     countryCode: queryState.countryCode || undefined,
     page: queryState.page > 1 ? queryState.page : undefined,
+    pageSize: PUBLIC_OPPORTUNITIES_PAGE_SIZE,
     filter: "openVacancies",
   }
 }
@@ -615,7 +617,7 @@ function PublicVacanciesExplorerContent({
   )
     ? queryState.countryCode
     : ""
-  const filteredItems = useMemo(() => {
+  const searchMatchedItems = useMemo(() => {
     const items = response?.items ?? []
     return items.filter((vacancy) => vacancyMatchesSearch(vacancy, searchInput))
   }, [response?.items, searchInput])
@@ -629,15 +631,34 @@ function PublicVacanciesExplorerContent({
       queryState.countryCode
   )
 
-  const currentPage = response?.pagination.page ?? queryState.page
-  const pageSize = response?.pagination.pageSize ?? filteredItems.length
+  const isClientReduced =
+    searchMatchedItems.length !== (response?.items.length ?? 0)
+  const apiReturnedTooMany =
+    !isClientReduced && searchMatchedItems.length > PUBLIC_OPPORTUNITIES_PAGE_SIZE
+  const filteredItems = useMemo(() => {
+    if (!apiReturnedTooMany) return searchMatchedItems
+    const start = (queryState.page - 1) * PUBLIC_OPPORTUNITIES_PAGE_SIZE
+    return searchMatchedItems.slice(start, start + PUBLIC_OPPORTUNITIES_PAGE_SIZE)
+  }, [apiReturnedTooMany, queryState.page, searchMatchedItems])
+
+  const currentPage = apiReturnedTooMany
+    ? queryState.page
+    : (response?.pagination.page ?? queryState.page)
+  const pageSize = PUBLIC_OPPORTUNITIES_PAGE_SIZE
   const apiTotalCount = response?.pagination.totalCount ?? 0
-  const isClientReduced = filteredItems.length !== (response?.items.length ?? 0)
-  const totalCount = isClientReduced ? filteredItems.length : apiTotalCount
-  const totalPages = isClientReduced ? 1 : (response?.pagination.totalPages ?? 1)
+  const totalCount = isClientReduced
+    ? searchMatchedItems.length
+    : apiReturnedTooMany
+      ? Math.max(apiTotalCount, searchMatchedItems.length)
+      : apiTotalCount
+  const totalPages = isClientReduced
+    ? 1
+    : apiReturnedTooMany
+      ? Math.max(1, Math.ceil(totalCount / pageSize))
+      : (response?.pagination.totalPages ?? 1)
   const resultsRange = getOpportunityResultsRange(
     isClientReduced ? 1 : currentPage,
-    isClientReduced ? Math.max(filteredItems.length, 1) : pageSize,
+    isClientReduced ? Math.max(searchMatchedItems.length, 1) : pageSize,
     totalCount
   )
   const resultsSummary = buildResultsSummary({

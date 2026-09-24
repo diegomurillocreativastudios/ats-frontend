@@ -19,6 +19,9 @@ export interface OpportunityFilterOption {
   count?: number
 }
 
+/** Page size for the public opportunities list (`GET /api/vacantes`). */
+export const PUBLIC_OPPORTUNITIES_PAGE_SIZE = 10
+
 export interface OpportunityListFilters {
   departmentId?: string
   departmentCode?: string
@@ -29,6 +32,8 @@ export interface OpportunityListFilters {
   countryCode?: string
   country?: string
   page?: number
+  /** Sent only on the API request; not mirrored to the browser URL. */
+  pageSize?: number
   /** Sent only on the API request; not mirrored to the browser URL. */
   filter?: "openVacancies"
 }

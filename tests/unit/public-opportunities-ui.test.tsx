@@ -203,4 +203,17 @@ describe("portal de oportunidades UI", () => {
     expect(within(department as HTMLSelectElement).getByText("Ventas")).toBeInTheDocument()
     expect(screen.getByLabelText("Modalidad")).toHaveTextContent("Presencial")
   })
+
+  it("pide pageSize 10 al cargar el listado", async () => {
+    renderWithIntl(<PublicVacanciesExplorer />)
+
+    await screen.findByLabelText("Buscar vacantes")
+
+    expect(listPublicVacanciesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pageSize: 10,
+        filter: "openVacancies",
+      })
+    )
+  })
 })

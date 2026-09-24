@@ -11,6 +11,7 @@ describe("public vacancies API helpers", () => {
       departmentId: "dep-1",
       modalityId: "mod-1",
       page: 2,
+      pageSize: 10,
     })
     const params = new URLSearchParams(query.replace(/^\?/, ""))
 
@@ -19,6 +20,7 @@ describe("public vacancies API helpers", () => {
     expect(params.get("departmentId")).toBe("dep-1")
     expect(params.get("modalityId")).toBe("mod-1")
     expect(params.get("page")).toBe("2")
+    expect(params.get("pageSize")).toBe("10")
     expect(params.has("filter")).toBe(false)
   })
 
@@ -26,11 +28,13 @@ describe("public vacancies API helpers", () => {
     const query = buildPublicVacanciesQuery({
       filter: "openVacancies",
       page: 1,
+      pageSize: 10,
     })
     const params = new URLSearchParams(query.replace(/^\?/, ""))
 
     expect(params.get("filter")).toBe("openVacancies")
     expect(params.get("page")).toBe("1")
+    expect(params.get("pageSize")).toBe("10")
   })
 
   it("omits filter from the query when not set", () => {
