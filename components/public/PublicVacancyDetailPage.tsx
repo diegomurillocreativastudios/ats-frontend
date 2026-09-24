@@ -16,6 +16,7 @@ import {
   PublicVacancyOutline,
   VacancyContentBlocks,
 } from "@/components/public/PublicVacancyOutline"
+import { CopyPublicVacancyLinkButton } from "@/components/shared/copy-public-vacancy-link-button"
 import {
   buildVacancyStory,
   hasVacancyFieldValue,
@@ -129,6 +130,7 @@ export function PublicVacancyDetailPage({
   const hasModality = hasVacancyFieldValue(modalityLabel)
   const hasLocation = Boolean(vacancy?.countryCode || vacancy?.stateCode)
   const applyClassName = `inline-flex items-center justify-center gap-2 ${publicOpportunitiesTheme.cta}`
+  const copyLinkClassName = `inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ats-cobre focus-visible:ring-offset-2 focus-visible:ring-offset-background`
   const story = useMemo(() => {
     if (!vacancy) return null
     return buildVacancyStory({
@@ -188,11 +190,19 @@ export function PublicVacancyDetailPage({
                   {vacancy.title}
                 </h1>
 
-                <div className="mt-6 lg:hidden">
+                <div className="mt-6 space-y-3 lg:hidden">
                   <Link href={applyHref} className={applyClassName}>
                     {t("apply")}
                     <ArrowRight className="h-4 w-4" aria-hidden />
                   </Link>
+                  <CopyPublicVacancyLinkButton
+                    vacancy={vacancy}
+                    label={t("copyLink")}
+                    ariaLabel={t("copyLinkAria")}
+                    copiedLabel={t("linkCopied")}
+                    copyFailedLabel={t("linkCopyFailed")}
+                    className={copyLinkClassName}
+                  />
                 </div>
 
                 {story.description.length ? (
@@ -248,6 +258,14 @@ export function PublicVacancyDetailPage({
                     {t("apply")}
                     <ArrowRight className="h-4 w-4" aria-hidden />
                   </Link>
+                  <CopyPublicVacancyLinkButton
+                    vacancy={vacancy}
+                    label={t("copyLink")}
+                    ariaLabel={t("copyLinkAria")}
+                    copiedLabel={t("linkCopied")}
+                    copyFailedLabel={t("linkCopyFailed")}
+                    className={`mt-3 ${copyLinkClassName}`}
+                  />
                 </div>
 
                 <div className="border-t border-border pt-5">

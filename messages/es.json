@@ -2192,6 +2192,8 @@
           "resultsAria": "Ver resultados y métricas de esta vacante",
           "copy": "Copiar",
           "copyAria": "Copiar esta vacante",
+          "copyLink": "Copiar enlace",
+          "copyLinkAria": "Copiar enlace público de esta vacante",
           "addRequirement": "Agregar",
           "addRequirementAria": "Agregar requerimiento",
           "companyChangeHint": "Cambiar el cliente no modifica el estado de la vacante ni las postulaciones existentes."
@@ -2213,7 +2215,9 @@
           "saved": "Cambios guardados correctamente.",
           "finishSuccess": "Proceso finalizado correctamente.",
           "copied": "Vacante copiada.",
-          "copyFailed": "No se pudo copiar la vacante."
+          "copyFailed": "No se pudo copiar la vacante.",
+          "linkCopied": "Enlace público copiado.",
+          "linkCopyFailed": "No se pudo copiar el enlace público."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -3929,6 +3933,10 @@
       "moreVacanciesLink": "Ver más oportunidades",
       "readyTitle": "¿Estás preparado para esta oportunidad?",
       "readyBody": "Completá tu postulación en unos minutos. El equipo de reclutamiento recibe tu perfil de forma segura.",
+      "copyLink": "Copiar enlace",
+      "copyLinkAria": "Copiar enlace público de esta vacante",
+      "linkCopied": "Enlace copiado",
+      "linkCopyFailed": "No se pudo copiar el enlace",
       "documentTitle": "ApplicanTree | Portal Oportunidades | {title}"
     },
     "applicationForm": {

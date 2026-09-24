@@ -2192,6 +2192,8 @@
           "resultsAria": "Voir les résultats et métriques de ce poste",
           "copy": "Copier",
           "copyAria": "Copier ce poste",
+          "copyLink": "Copier le lien",
+          "copyLinkAria": "Copier le lien public de ce poste",
           "addRequirement": "Ajouter",
           "addRequirementAria": "Ajouter une exigence",
           "companyChangeHint": "Changer le client ne modifie pas le statut du poste ni les candidatures existantes."
@@ -2213,7 +2215,9 @@
           "saved": "Modifications enregistrées avec succès.",
           "finishSuccess": "Processus terminé avec succès.",
           "copied": "Poste copié.",
-          "copyFailed": "Impossible de copier le poste."
+          "copyFailed": "Impossible de copier le poste.",
+          "linkCopied": "Lien public copié.",
+          "linkCopyFailed": "Impossible de copier le lien public."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -3929,6 +3933,10 @@
       "moreVacanciesLink": "Voir plus d'opportunités",
       "readyTitle": "Êtes-vous prêt pour cette opportunité ?",
       "readyBody": "Finalisez votre candidature en quelques minutes. L'équipe de recrutement reçoit votre profil en toute sécurité.",
+      "copyLink": "Copier le lien",
+      "copyLinkAria": "Copier le lien public de ce poste",
+      "linkCopied": "Lien copié",
+      "linkCopyFailed": "Impossible de copier le lien",
       "documentTitle": "ApplicanTree | Portail opportunités | {title}"
     },
     "applicationForm": {

@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell";
 import Snackbar from "@/components/ui/Snackbar";
+import { CopyPublicVacancyLinkButton } from "@/components/shared/copy-public-vacancy-link-button";
 import { apiClient } from "@/lib/api"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
 import {
@@ -60,6 +61,7 @@ import { toRequirementStorageKey } from "@/lib/vacancies/format-requirement-key"
 import {
   buildRecruiterVacancyPath,
   isVacancyGuid,
+  isVacancyPublicLinkShareable,
   readPublicSlug,
 } from "@/lib/vacancies/vacancy-public-path"
 import { VacancyDelimitedText } from "@/components/rrhh/vacancy-delimited-text"
@@ -1467,6 +1469,19 @@ export default function VacanteDetallePage() {
     });
   }, [vacancy, vacancyCompanyDisplayName, tDetail]);
 
+  const handleCopyPublicLinkResult = useCallback(
+    (ok) => {
+      setSnackbar({
+        open: true,
+        variant: ok ? "success" : "error",
+        message: ok
+          ? tDetail("toasts.linkCopied")
+          : tDetail("toasts.linkCopyFailed"),
+      });
+    },
+    [tDetail]
+  );
+
   const applyClipboardToEditForm = useCallback((payload) => {
     setEditTitle(payload.title);
     setEditDescription(payload.description);
@@ -1955,6 +1970,7 @@ export default function VacanteDetallePage() {
   }, [vacancyId, loading, vacancy?.title]);
 
   const statusConfig = vacancy ? getStatusConfig(vacancy.status, t) : getStatusConfig("activa", t);
+  const canSharePublicLink = isVacancyPublicLinkShareable(vacancy);
   /** AI match suggestions from vacancy (for "Posibles candidatos" container). */
   const vacancyCandidates = Array.isArray(vacancy?.aiMatchSuggestions)
     ? vacancy.aiMatchSuggestions
@@ -2879,6 +2895,20 @@ export default function VacanteDetallePage() {
                             >
                               {tDetail("actions.copy")}
                             </button>
+                            {canSharePublicLink && vacancy?.id ? (
+                              <CopyPublicVacancyLinkButton
+                                vacancy={{
+                                  id: String(vacancy.id),
+                                  publicSlug: readPublicSlug(vacancy),
+                                }}
+                                label={tDetail("actions.copyLink")}
+                                ariaLabel={tDetail("actions.copyLinkAria")}
+                                copiedLabel={tDetail("toasts.linkCopied")}
+                                copyFailedLabel={tDetail("toasts.linkCopyFailed")}
+                                onCopyResult={handleCopyPublicLinkResult}
+                                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              />
+                            ) : null}
                           </>
                         ) : (
                           <>
@@ -3693,6 +3723,20 @@ export default function VacanteDetallePage() {
                           >
                             {tDetail("actions.copy")}
                           </button>
+                          {canSharePublicLink && vacancy?.id ? (
+                            <CopyPublicVacancyLinkButton
+                              vacancy={{
+                                id: String(vacancy.id),
+                                publicSlug: readPublicSlug(vacancy),
+                              }}
+                              label={tDetail("actions.copyLink")}
+                              ariaLabel={tDetail("actions.copyLinkAria")}
+                              copiedLabel={tDetail("toasts.linkCopied")}
+                              copyFailedLabel={tDetail("toasts.linkCopyFailed")}
+                              onCopyResult={handleCopyPublicLinkResult}
+                              className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            />
+                          ) : null}
                         </>
                       ) : (
                         <>

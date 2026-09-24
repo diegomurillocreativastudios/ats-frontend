@@ -2192,6 +2192,8 @@
           "resultsAria": "Ergebnisse und Kennzahlen dieser Stelle anzeigen",
           "copy": "Kopieren",
           "copyAria": "Diese Stelle kopieren",
+          "copyLink": "Link kopieren",
+          "copyLinkAria": "Öffentlichen Link dieser Stelle kopieren",
           "addRequirement": "Hinzufügen",
           "addRequirementAria": "Anforderung hinzufügen",
           "companyChangeHint": "Das Ändern des Kunden ändert weder den Stellenstatus noch bestehende Bewerbungen."
@@ -2213,7 +2215,9 @@
           "saved": "Änderungen erfolgreich gespeichert.",
           "finishSuccess": "Prozess erfolgreich abgeschlossen.",
           "copied": "Stelle kopiert.",
-          "copyFailed": "Die Stelle konnte nicht kopiert werden."
+          "copyFailed": "Die Stelle konnte nicht kopiert werden.",
+          "linkCopied": "Öffentlicher Link kopiert.",
+          "linkCopyFailed": "Der öffentliche Link konnte nicht kopiert werden."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -3929,6 +3933,10 @@
       "moreVacanciesLink": "Weitere Stellen ansehen",
       "readyTitle": "Bist du bereit für diese Chance?",
       "readyBody": "Schließe deine Bewerbung in wenigen Minuten ab. Das Recruiting-Team erhält dein Profil sicher.",
+      "copyLink": "Link kopieren",
+      "copyLinkAria": "Öffentlichen Link dieser Stelle kopieren",
+      "linkCopied": "Link kopiert",
+      "linkCopyFailed": "Link konnte nicht kopiert werden",
       "documentTitle": "ApplicanTree | Stellenportal | {title}"
     },
     "applicationForm": {

@@ -2192,6 +2192,8 @@
           "resultsAria": "Vedi risultati e metriche di questa posizione",
           "copy": "Copia",
           "copyAria": "Copia questa posizione",
+          "copyLink": "Copia link",
+          "copyLinkAria": "Copia il link pubblico di questa posizione",
           "addRequirement": "Aggiungi",
           "addRequirementAria": "Aggiungi requisito",
           "companyChangeHint": "Cambiare il cliente non modifica lo stato della posizione né le candidature esistenti."
@@ -2213,7 +2215,9 @@
           "saved": "Modifiche salvate correttamente.",
           "finishSuccess": "Processo concluso correttamente.",
           "copied": "Posizione copiata.",
-          "copyFailed": "Impossibile copiare la posizione."
+          "copyFailed": "Impossibile copiare la posizione.",
+          "linkCopied": "Link pubblico copiato.",
+          "linkCopyFailed": "Impossibile copiare il link pubblico."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -3929,6 +3933,10 @@
       "moreVacanciesLink": "Vedi altre opportunità",
       "readyTitle": "Sei pronto per questa opportunità?",
       "readyBody": "Completa la candidatura in pochi minuti. Il team di selezione riceve il tuo profilo in modo sicuro.",
+      "copyLink": "Copia link",
+      "copyLinkAria": "Copia il link pubblico di questa posizione",
+      "linkCopied": "Link copiato",
+      "linkCopyFailed": "Impossibile copiare il link",
       "documentTitle": "ApplicanTree | Portale opportunità | {title}"
     },
     "applicationForm": {

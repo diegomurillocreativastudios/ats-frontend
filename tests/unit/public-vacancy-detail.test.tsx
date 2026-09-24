@@ -48,7 +48,7 @@ describe("PublicVacancyDetailPage", () => {
     getPublicVacancyByPathSegmentMock.mockReset()
     getPublicVacancyByPathSegmentMock.mockResolvedValue({
       id: "vac-1",
-      publicSlug: null,
+      publicSlug: "ejecutivo-negocios",
       title: "Ejecutivo de negocios y créditos",
       company: {
         id: "c1",
@@ -111,6 +111,9 @@ describe("PublicVacancyDetailPage", () => {
       screen.getByRole("heading", { name: "¿Estás preparado para esta oportunidad?" })
     ).toBeInTheDocument()
     expect(screen.getAllByRole("link", { name: "Postularme" }).length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByRole("button", { name: "Copiar enlace público de esta vacante" }).length
+    ).toBeGreaterThan(0)
     const moreOpportunitiesLink = within(applyRail).getByRole("link", {
       name: "Ver más oportunidades",
     })

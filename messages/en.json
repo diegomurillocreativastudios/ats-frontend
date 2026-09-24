@@ -2192,6 +2192,8 @@
           "resultsAria": "View results and metrics for this vacancy",
           "copy": "Copy",
           "copyAria": "Copy this vacancy",
+          "copyLink": "Copy link",
+          "copyLinkAria": "Copy public link for this vacancy",
           "addRequirement": "Add",
           "addRequirementAria": "Add requirement",
           "companyChangeHint": "Changing the client does not modify the vacancy status or existing applications."
@@ -2213,7 +2215,9 @@
           "saved": "Changes saved successfully.",
           "finishSuccess": "Process finished successfully.",
           "copied": "Vacancy copied.",
-          "copyFailed": "Could not copy the vacancy."
+          "copyFailed": "Could not copy the vacancy.",
+          "linkCopied": "Public link copied.",
+          "linkCopyFailed": "Could not copy the public link."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -3929,6 +3933,10 @@
       "moreVacanciesLink": "See more opportunities",
       "readyTitle": "Are you ready for this opportunity?",
       "readyBody": "Complete your application in a few minutes. The recruiting team receives your profile securely.",
+      "copyLink": "Copy link",
+      "copyLinkAria": "Copy public link for this vacancy",
+      "linkCopied": "Link copied",
+      "linkCopyFailed": "Could not copy the link",
       "documentTitle": "ApplicanTree | Opportunities Portal | {title}"
     },
     "applicationForm": {

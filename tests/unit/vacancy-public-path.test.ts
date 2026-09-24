@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest"
 import {
+  buildPublicVacancyAbsoluteUrl,
   buildPublicVacancyPath,
   buildRecruiterVacancyPath,
   isVacancyGuid,
+  isVacancyPublicLinkShareable,
   readPublicSlug,
   vacancyPathSegment,
 } from "@/lib/vacancies/vacancy-public-path"
@@ -90,5 +92,55 @@ describe("buildRecruiterVacancyPath / buildPublicVacancyPath", () => {
         "aplicar"
       )
     ).toBe("/portal-oportunidades/aoj-9920/aplicar")
+  })
+})
+
+describe("buildPublicVacancyAbsoluteUrl", () => {
+  it("joins origin and public path without query or aplicar", () => {
+    expect(
+      buildPublicVacancyAbsoluteUrl(
+        { id: "vac-1", publicSlug: "aoj-9920" },
+        "https://app.example.com"
+      )
+    ).toBe("https://app.example.com/portal-oportunidades/aoj-9920")
+  })
+
+  it("strips trailing slash from origin", () => {
+    expect(
+      buildPublicVacancyAbsoluteUrl(
+        { id: "vac-1", publicSlug: null },
+        "https://app.example.com/"
+      )
+    ).toBe("https://app.example.com/portal-oportunidades/vac-1")
+  })
+})
+
+describe("isVacancyPublicLinkShareable", () => {
+  it("allows open/activa and active vacancies", () => {
+    expect(
+      isVacancyPublicLinkShareable({ status: "open", isActive: true })
+    ).toBe(true)
+    expect(
+      isVacancyPublicLinkShareable({ status: "activa", isActive: true })
+    ).toBe(true)
+    expect(
+      isVacancyPublicLinkShareable({ status: "Open", is_active: true })
+    ).toBe(true)
+  })
+
+  it("rejects closed, paused, draft, or inactive vacancies", () => {
+    expect(
+      isVacancyPublicLinkShareable({ status: "closed", isActive: true })
+    ).toBe(false)
+    expect(
+      isVacancyPublicLinkShareable({ status: "pausada", isActive: true })
+    ).toBe(false)
+    expect(
+      isVacancyPublicLinkShareable({ status: "borrador", isActive: true })
+    ).toBe(false)
+    expect(
+      isVacancyPublicLinkShareable({ status: "open", isActive: false })
+    ).toBe(false)
+    expect(isVacancyPublicLinkShareable(null)).toBe(false)
   })
 })

@@ -3,6 +3,9 @@
  * Nested API calls (match, edit, apply) always use the Guid `id`.
  */
 
+import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active"
+import { resolveVacancyStatusKey } from "@/lib/vacancies/vacancy-status-labels"
+
 const GUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -59,4 +62,35 @@ export function buildPublicVacancyPath(
   if (!suffix) return base
   const normalized = suffix.startsWith("/") ? suffix : `/${suffix}`
   return `${base}${normalized}`
+}
+
+/**
+ * Absolute public vacancy URL (origin + path). No query string, no /aplicar.
+ * Pass `origin` explicitly in tests; in the browser defaults to `window.location.origin`.
+ */
+export function buildPublicVacancyAbsoluteUrl(
+  vacancy: VacancyPathSource,
+  origin?: string
+): string {
+  const path = buildPublicVacancyPath(vacancy)
+  const resolvedOrigin =
+    origin?.replace(/\/$/, "") ||
+    (typeof window !== "undefined" ? window.location.origin : "")
+  if (!resolvedOrigin) return path
+  return `${resolvedOrigin}${path}`
+}
+
+/**
+ * Whether a recruiter vacancy can expose its public opportunities link:
+ * status must be open/activa and `isActive` must be true.
+ */
+export function isVacancyPublicLinkShareable(vacancy: unknown): boolean {
+  if (vacancy == null || typeof vacancy !== "object") return false
+  if (!readVacancyIsActive(vacancy)) return false
+  const record = vacancy as Record<string, unknown>
+  const status = record.status ?? record.state ?? record.vacancyStatus
+  const key = resolveVacancyStatusKey(
+    status == null ? null : String(status)
+  )
+  return key === "activa"
 }
