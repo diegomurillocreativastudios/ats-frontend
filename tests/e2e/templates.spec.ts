@@ -33,6 +33,7 @@ test.describe("Template Management E2E", () => {
 
     await page.getByRole("button", { name: /Crear plantilla/i }).click()
 
+    await expect(page.getByText("Plantilla creada correctamente.")).toBeVisible()
     await expect(page.getByText(templateName).first()).toBeVisible()
 
     const card = page.locator("article", { hasText: templateName }).first()
@@ -60,6 +61,7 @@ test.describe("Template Management E2E", () => {
 
     await page.getByRole("button", { name: /Crear plantilla/i }).click()
 
+    await expect(page.getByText("Plantilla creada correctamente.")).toBeVisible()
     await expect(page.getByText(docName).first()).toBeVisible()
     await expect(page.getByText("Documento").first()).toBeVisible()
 

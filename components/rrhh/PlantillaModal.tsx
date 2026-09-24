@@ -108,10 +108,16 @@ const buildPayload = (
   return payload
 }
 
+export interface PlantillaSavedResult {
+  id?: number | string
+  name: string
+  wasEditing: boolean
+}
+
 interface PlantillaModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit?: () => void
+  onSubmit?: (saved: PlantillaSavedResult) => void
   editingTemplate?: Record<string, unknown> | null
   onSnackbar?: (message: string, variant?: string) => void
 }
@@ -371,8 +377,13 @@ export default function PlantillaModal({
           "success"
         )
       }
+      const saved: PlantillaSavedResult = {
+        id: templateId,
+        name: formData.name.trim(),
+        wasEditing: isEditing,
+      }
       handleClose()
-      onSubmit?.()
+      onSubmit?.(saved)
     } catch (err) {
       const msg = getApiErrorMessage(err) || t("toastSaveFailed")
       setSubmitError(msg)
