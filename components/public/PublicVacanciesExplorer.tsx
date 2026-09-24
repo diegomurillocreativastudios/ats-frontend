@@ -266,7 +266,7 @@ function OpportunityCard({
       >
         <div className="flex min-w-0 items-center gap-3">
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/35 text-xs font-semibold text-foreground/80"
+            className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-background p-1"
             aria-hidden
           >
             {companyLogoSrc ? (
@@ -274,12 +274,12 @@ function OpportunityCard({
                 src={companyLogoSrc}
                 alt=""
                 loading="lazy"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             ) : (
               // Dynamic Lucide icon from department metadata (stable component type).
               // eslint-disable-next-line react-hooks/static-components -- icon lookup returns a component type, not a new component
-              <DepartmentIcon className="h-5 w-5 text-ats-terracotta" aria-hidden />
+              <DepartmentIcon className="h-6 w-6 text-ats-terracotta" aria-hidden />
             )}
           </div>
 
@@ -350,7 +350,7 @@ function OpportunityCardSkeleton() {
   return (
     <div className={`grid animate-pulse gap-4 py-4 ${opportunityRowGridClassName}`}>
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 rounded-lg bg-muted/50" />
+        <div className="h-12 w-12 rounded-lg bg-muted/50" />
         <div className="min-w-0 flex-1 space-y-2">
           <div className="h-5 w-44 rounded-md bg-muted/50" />
           <div className="h-4 w-40 rounded-md bg-muted/50" />
