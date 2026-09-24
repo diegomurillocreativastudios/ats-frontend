@@ -31,8 +31,9 @@ export interface ProfileComparisonPanelProps {
   onViewOriginal?: () => void
   onViewAdapted?: () => void
   onApplyAdapted?: () => void
-  onExportComparison?: () => void
+  onDownloadAdaptedCv?: () => void
   applying?: boolean
+  downloadingCv?: boolean
   showActions?: boolean
 }
 
@@ -48,8 +49,9 @@ export function ProfileComparisonPanel({
   onViewOriginal,
   onViewAdapted,
   onApplyAdapted,
-  onExportComparison,
+  onDownloadAdaptedCv,
   applying = false,
+  downloadingCv = false,
   showActions = false,
 }: ProfileComparisonPanelProps) {
   const t = useTranslations("CandidatePortal.profileTailoring.comparison")
@@ -189,8 +191,9 @@ export function ProfileComparisonPanel({
           onViewOriginal={handleViewOriginal}
           onViewAdapted={handleViewAdapted}
           onApplyAdapted={onApplyAdapted}
-          onExportComparison={onExportComparison}
+          onDownloadAdaptedCv={onDownloadAdaptedCv}
           applying={applying}
+          downloadingCv={downloadingCv}
           showApply={Boolean(onApplyAdapted)}
         />
       ) : null}

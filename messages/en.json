@@ -1154,7 +1154,9 @@
         "versionSaved": "Version saved successfully.",
         "versionSaveError": "Could not save the version.",
         "applySuccess": "Your main profile was updated.",
-        "applyError": "Could not update your main profile."
+        "applyError": "Could not update your main profile.",
+        "downloadCvSuccess": "Adapted CV downloaded.",
+        "downloadCvFailed": "Could not download the adapted CV."
       },
       "actions": {
         "saveVersion": "Save to this version",
@@ -1265,7 +1267,8 @@
           },
           "viewOriginalCv": "View original CV",
           "viewAdaptedCv": "View adapted CV",
-          "exportComparison": "Export comparison",
+          "downloadAdaptedCv": "Download adapted CV",
+          "downloadingCv": "Downloading CV…",
           "applyAdaptedVersion": "Apply adapted version",
           "applying": "Applying…",
           "categories": {
@@ -1345,6 +1348,7 @@
         },
         "actions": {
           "view": "View",
+          "downloadCv": "Download adapted CV",
           "delete": "Delete"
         },
         "toasts": {

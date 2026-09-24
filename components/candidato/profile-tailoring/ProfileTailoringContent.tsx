@@ -16,7 +16,7 @@ import { ProfileComparisonPanel } from "@/components/candidato/profile-tailoring
 import { VacancySystemPicker } from "@/components/candidato/profile-tailoring/VacancySystemPicker"
 import { useProfileTailoring } from "@/hooks/use-profile-tailoring"
 import { useCandidateProfile } from "@/hooks/useCandidateProfile"
-import { patchProfileVersion } from "@/lib/api/candidate-profile-tailor"
+import { patchProfileVersion, downloadAdaptedCv } from "@/lib/api/candidate-profile-tailor"
 import { buildCandidateProfileSaveBody } from "@/lib/candidate-profile"
 import { formStateToDisplayProfile } from "@/lib/candidate-profile-version"
 import {
@@ -61,6 +61,7 @@ export default function ProfileTailoringContent() {
   const [showTabConfirm, setShowTabConfirm] = useState(false)
   const [showApplyConfirm, setShowApplyConfirm] = useState(false)
   const [savingVersion, setSavingVersion] = useState(false)
+  const [downloadingCv, setDownloadingCv] = useState(false)
   const [processingComplete, setProcessingComplete] = useState(false)
 
   const draftInput = useMemo(
@@ -173,6 +174,19 @@ export default function ProfileTailoringContent() {
       setSavingVersion(false)
     }
   }, [adaptedForm, result?.versionId, showSnackbar, t])
+
+  const handleDownloadAdaptedCv = useCallback(async () => {
+    if (!result?.versionId) return
+    setDownloadingCv(true)
+    try {
+      await downloadAdaptedCv(result.versionId)
+      showSnackbar(t("toasts.downloadCvSuccess"), "success")
+    } catch (err: unknown) {
+      showSnackbar(getApiErrorMessage(err) || t("toasts.downloadCvFailed"), "error")
+    } finally {
+      setDownloadingCv(false)
+    }
+  }, [result?.versionId, showSnackbar, t])
 
   const handleApplyToMainProfile = useCallback(async () => {
     if (!adaptedForm || !result?.versionId) return
@@ -365,7 +379,9 @@ export default function ProfileTailoringContent() {
             atsComplianceChecklist={result.atsComplianceChecklist}
             showActions
             onApplyAdapted={() => setShowApplyConfirm(true)}
+            onDownloadAdaptedCv={() => void handleDownloadAdaptedCv()}
             applying={savingMainProfile}
+            downloadingCv={downloadingCv}
           />
 
           <details className="rounded-2xl border border-border bg-card">

@@ -8,8 +8,9 @@ interface ComparisonActionsProps {
   onViewOriginal?: () => void
   onViewAdapted?: () => void
   onApplyAdapted?: () => void
-  onExportComparison?: () => void
+  onDownloadAdaptedCv?: () => void
   applying?: boolean
+  downloadingCv?: boolean
   showApply?: boolean
 }
 
@@ -17,8 +18,9 @@ export function ComparisonActions({
   onViewOriginal,
   onViewAdapted,
   onApplyAdapted,
-  onExportComparison,
+  onDownloadAdaptedCv,
   applying = false,
+  downloadingCv = false,
   showApply = true,
 }: ComparisonActionsProps) {
   const t = useTranslations("CandidatePortal.profileTailoring.comparison.dashboard")
@@ -38,10 +40,17 @@ export function ComparisonActions({
             {t("viewAdaptedCv")}
           </Button>
         ) : null}
-        {onExportComparison ? (
-          <Button type="button" variant="ghost" onClick={onExportComparison} className="px-4 py-2.5">
+        {onDownloadAdaptedCv ? (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onDownloadAdaptedCv}
+            disabled={downloadingCv}
+            aria-busy={downloadingCv}
+            className="px-4 py-2.5"
+          >
             <Download className="h-4 w-4" aria-hidden />
-            {t("exportComparison")}
+            {downloadingCv ? t("downloadingCv") : t("downloadAdaptedCv")}
           </Button>
         ) : null}
       </div>

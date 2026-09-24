@@ -230,6 +230,7 @@ sparticuz
 subpuntajes
 subrutas
 Sumá
+Taleo
 tecnica
 Tecnicas
 tecnicas

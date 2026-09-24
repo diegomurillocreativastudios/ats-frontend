@@ -11,6 +11,12 @@ import {
   normalizeProfileVersionDetail,
   normalizeTailorToVacancyResult,
 } from "@/lib/candidate-profile-version"
+import {
+  buildAdaptedCvPdfBuffer,
+  buildAdaptedCvPdfFilename,
+} from "@/lib/candidate-cv-pdfkit"
+import { buildAdaptedCvDownloadPath } from "@/lib/api/candidate-profile-tailor"
+import type { CandidateProfile } from "@/lib/candidate-profile"
 
 describe("resolveExclusiveVacancySource", () => {
   it("returns none when no source is provided", () => {
@@ -195,5 +201,75 @@ describe("formStateToDisplayProfile", () => {
     const display = formStateToDisplayProfile(form)
     expect(display.headline).toBe("Lead Backend Engineer")
     expect(display.summary).toBe("Adapted summary")
+  })
+})
+
+describe("buildAdaptedCvDownloadPath", () => {
+  it("builds the Next.js CV download route", () => {
+    expect(buildAdaptedCvDownloadPath("ver-123")).toBe(
+      "/api/candidate/profile/versions/ver-123/cv"
+    )
+  })
+
+  it("encodes special characters in the version id", () => {
+    expect(buildAdaptedCvDownloadPath("a/b")).toBe(
+      "/api/candidate/profile/versions/a%2Fb/cv"
+    )
+  })
+})
+
+describe("buildAdaptedCvPdfFilename", () => {
+  it("slugifies vacancy title for the filename", () => {
+    expect(
+      buildAdaptedCvPdfFilename({ vacancyTitle: "Backend Engineer (Remote)" })
+    ).toBe("cv-adaptado-backend-engineer-remote.pdf")
+  })
+
+  it("falls back when meta is empty", () => {
+    expect(buildAdaptedCvPdfFilename()).toBe("cv-adaptado-perfil.pdf")
+  })
+})
+
+describe("buildAdaptedCvPdfBuffer", () => {
+  it("produces a non-empty PDF buffer with extractable header", async () => {
+    const profile: CandidateProfile = {
+      id: "p1",
+      firstName: "Ana",
+      lastName: "García",
+      headline: "Backend Engineer",
+      summary: "Experiencia en APIs y microservicios.",
+      resumeMarkdown: "",
+      nationalId: "",
+      email: "ana@example.com",
+      phoneNumber: "+52 55 0000 0000",
+      workExperience: [
+        {
+          Company: "Acme",
+          Role: "Developer",
+          StartDate: "2020",
+          EndDate: "2024",
+          Description: "TypeScript and Node.js",
+        },
+      ],
+      education: [
+        {
+          Institution: "UNAM",
+          Degree: "Ingeniería",
+          StartDate: "2015",
+          EndDate: "2019",
+        },
+      ],
+      skills: ["TypeScript", "Node.js"],
+      languages: [{ Language: "Español", Level: "Nativo" }],
+    }
+
+    const buffer = await buildAdaptedCvPdfBuffer(profile, {
+      vacancyTitle: "Backend Engineer",
+      versionNumber: 1,
+    })
+
+    expect(Buffer.isBuffer(buffer)).toBe(true)
+    expect(buffer.length).toBeGreaterThan(500)
+    expect(buffer.subarray(0, 4).toString("ascii")).toBe("%PDF")
   })
 })
