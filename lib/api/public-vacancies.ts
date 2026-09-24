@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api"
 import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 import { formatCountryCodeLabel } from "@/lib/profile-form-options"
+import { formatRequirementKey } from "@/lib/vacancies/format-requirement-key"
 import { normalizeCountryCode, readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
 import {
   isVacancyGuid,
@@ -134,6 +135,53 @@ function toStringArray(value: unknown): string[] {
   }
 
   return []
+}
+
+function requirementValueText(value: unknown): string {
+  if (value == null) return ""
+  if (typeof value === "string") return value.trim()
+  if (typeof value === "number" || typeof value === "boolean") return String(value)
+  if (Array.isArray(value)) return toStringArray(value).join(", ")
+
+  const record = getRecord(value)
+  if (!record) return ""
+
+  return Object.entries(record)
+    .map(([key, nested]) => {
+      const nestedText = requirementValueText(nested)
+      if (!nestedText) return ""
+      const label = formatRequirementKey(key)
+      return label ? `${label}: ${nestedText}` : nestedText
+    })
+    .filter(Boolean)
+    .join(", ")
+}
+
+/**
+ * Public vacancies store requirements as a map (`{ Seniority: "3 years" }`),
+ * a newline string, or a string array. The public page only renders a list.
+ */
+function normalizePublicRequirements(value: unknown): string[] {
+  if (Array.isArray(value) || typeof value === "string") {
+    return toStringArray(value)
+  }
+
+  const record = getRecord(value)
+  if (!record) return []
+
+  return Object.entries(record)
+    .filter(([key]) => {
+      const normalized = key.trim()
+      return normalized !== "" && !normalized.startsWith("additionalProp")
+    })
+    .map(([key, entry]) => {
+      const label = formatRequirementKey(key)
+      const text = requirementValueText(entry)
+      if (!label) return text
+      if (!text) return label
+      return `${label}: ${text}`
+    })
+    .filter(Boolean)
 }
 
 function normalizeFilterOption(raw: unknown): OpportunityFilterOption | null {
@@ -361,7 +409,7 @@ export function normalizeOpportunityDetail(payload: unknown): OpportunityVacancy
     responsibilities: toStringArray(
       record.responsibilities ?? record.duties ?? record.tasks
     ),
-    requirements: toStringArray(record.requirements ?? record.skills),
+    requirements: normalizePublicRequirements(record.requirements ?? record.skills),
     benefits: toStringArray(record.benefits),
   }
 }

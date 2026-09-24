@@ -135,6 +135,23 @@ describe("public vacancies API helpers", () => {
     expect(detail?.benefits).toEqual(["Horario flexible"])
   })
 
+  it("keeps structured requirements from vacancy creation", () => {
+    const detail = normalizeOpportunityDetail({
+      id: "524c0d08-2ead-4721-9e04-e0d7da6f45df",
+      title: "Senior Software Engineer",
+      companyName: "Creativa Studios",
+      requirements: {
+        Seniority: "3 years",
+        TypeScript: "Advanced",
+      },
+    })
+
+    expect(detail?.requirements).toEqual([
+      "Seniority: 3 years",
+      "TypeScript: Advanced",
+    ])
+  })
+
   it("does not expose salary in public opportunity detail", () => {
     const detail = normalizeOpportunityDetail({
       id: "vac-1",

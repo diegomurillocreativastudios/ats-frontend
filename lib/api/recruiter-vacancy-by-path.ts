@@ -31,8 +31,23 @@ function readVacancyId(payload: unknown): string | null {
 }
 
 /**
+ * `GET /vacancies/by-public-slug` only returns id, title, slug and logo.
+ * The detail screen must follow that with `GET /vacancies/{id}`.
+ */
+async function resolveVacancyIdentityFromSlug(
+  segment: string
+): Promise<{ id: string; publicSlug: string | null } | null> {
+  const data = await apiClient.get(
+    `/api/recruiter/vacancies/by-public-slug/${encodeURIComponent(segment)}`
+  )
+  const id = readVacancyId(data)
+  if (!id) return null
+  return { id, publicSlug: readPublicSlug(data) }
+}
+
+/**
  * Loads a recruiter vacancy from a URL segment that may be a Guid or a publicSlug.
- * Always returns the Guid `id` for subsequent API calls.
+ * Always returns the Guid `id` for subsequent API calls, and the full vacancy detail.
  */
 export async function fetchRecruiterVacancyByPathSegment(
   pathSegment: string,
@@ -42,20 +57,15 @@ export async function fetchRecruiterVacancyByPathSegment(
   if (!segment) return null
 
   const shouldOverlay = options?.overlayApplicants !== false
+  const identity = isVacancyGuid(segment)
+    ? { id: segment, publicSlug: null }
+    : await resolveVacancyIdentityFromSlug(segment)
+  if (!identity) return null
 
-  let data: unknown
-  if (isVacancyGuid(segment)) {
-    data = await apiClient.get(
-      `/api/recruiter/vacancies/${encodeURIComponent(segment)}`
-    )
-  } else {
-    data = await apiClient.get(
-      `/api/recruiter/vacancies/by-public-slug/${encodeURIComponent(segment)}`
-    )
-  }
-
-  const id = readVacancyId(data) ?? (isVacancyGuid(segment) ? segment : null)
-  if (!id) return null
+  const data = await apiClient.get(
+    `/api/recruiter/vacancies/${encodeURIComponent(identity.id)}`
+  )
+  const id = readVacancyId(data) ?? identity.id
 
   const withApplicants = shouldOverlay
     ? await overlayVacancyApplicants(id, data)
@@ -72,7 +82,7 @@ export async function fetchRecruiterVacancyByPathSegment(
 
   return {
     id,
-    publicSlug: readPublicSlug(vacancy),
+    publicSlug: readPublicSlug(vacancy) ?? identity.publicSlug,
     vacancy,
   }
 }
@@ -90,9 +100,5 @@ export async function resolveRecruiterVacancyIdFromPathSegment(
     return { id: segment, publicSlug: null }
   }
 
-  const resolved = await fetchRecruiterVacancyByPathSegment(segment, {
-    overlayApplicants: false,
-  })
-  if (!resolved) return null
-  return { id: resolved.id, publicSlug: resolved.publicSlug }
+  return resolveVacancyIdentityFromSlug(segment)
 }
