@@ -2012,6 +2012,9 @@
         "paused": "En pause",
         "draft": "Brouillon"
       },
+      "catalogFallbacks": {
+        "uncategorized": "Sans catégorie"
+      },
       "actions": {
         "create": "Nouveau poste",
         "createShort": "Nouveau",
@@ -2279,7 +2282,7 @@
         },
         "filters": {
           "heading": "Filtres des candidats",
-          "description": "S'appliquent à la liste principale sous les graphiques.",
+          "description": "S'appliquent à la liste des candidats.",
           "searchAria": "Rechercher par nom ou e-mail",
           "searchPlaceholder": "Rechercher par nom ou e-mail…",
           "applicationStatus": "Statut de candidature",
@@ -2333,7 +2336,7 @@
         "charts": {
           "noApplicants": "Il n'y a pas encore de candidats pour ce poste. Lorsqu'il y en aura sur le tableau, vous verrez ici la distribution par étape et score.",
           "heading": "Indicateurs graphiques",
-          "description": "Vue compacte du pipeline et de la correspondance ; la liste opérationnelle est en dessous.",
+          "description": "Répartition par étape et correspondance à côté de la liste des candidats.",
           "byStageHeading": "Candidats par étape",
           "byStageDescription": "Nombre selon l'étape actuelle de chaque candidature.",
           "scoreDistributionHeading": "Distribution des scores",
@@ -2351,7 +2354,7 @@
         "meta": {
           "srOnlyContext": "Contexte du poste : {title}",
           "company": "Entreprise",
-          "countryCode": "Pays (code)",
+          "countryCode": "Pays",
           "department": "Département",
           "modality": "Modalité",
           "created": "Créé",
@@ -2363,8 +2366,8 @@
           "viewFullDescription": "Voir la description complète",
           "expandHint": "(cliquer pour développer)",
           "technicalDetails": "Détails techniques",
-          "technicalDetailsHint": "(exigences, suggestions IA)",
-          "requirementsPayload": "Exigences (payload)",
+          "technicalDetailsHint": "(poids, exigences, suggestions IA)",
+          "requirementsPayload": "Exigences",
           "noRequirements": "Aucune exigence dans le payload.",
           "emptyRequirements": "Exigences vides (objet sans clés). La correspondance peut reposer uniquement sur le texte libre de la description.",
           "aiSuggestionsHeading": "Suggestions IA ({count})",

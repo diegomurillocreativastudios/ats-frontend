@@ -7,12 +7,18 @@ import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell"
 export interface RrhhInterviewsShellProps {
   breadcrumbLabel: string
   breadcrumbTrail?: { label: string; href?: string }[] | null
+  /**
+   * When true, main does not scroll (the page owns an inner scroller).
+   * Results is a long document and needs the main scroller.
+   */
+  lockMainScroll?: boolean
   children: ReactNode
 }
 
 export function RrhhInterviewsShell({
   breadcrumbLabel,
   breadcrumbTrail = null,
+  lockMainScroll = true,
   children,
 }: RrhhInterviewsShellProps) {
   useEffect(() => {
@@ -28,7 +34,7 @@ export function RrhhInterviewsShell({
     <RrhhPortalShell
       breadcrumbLabel={breadcrumbLabel}
       breadcrumbTrail={breadcrumbTrail}
-      lockMainScroll
+      lockMainScroll={lockMainScroll}
     >
       {children}
     </RrhhPortalShell>

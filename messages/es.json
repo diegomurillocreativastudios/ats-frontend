@@ -2012,6 +2012,9 @@
         "paused": "Pausada",
         "draft": "Borrador"
       },
+      "catalogFallbacks": {
+        "uncategorized": "Sin categoría"
+      },
       "actions": {
         "create": "Nueva Vacante",
         "createShort": "Nueva",
@@ -2279,7 +2282,7 @@
         },
         "filters": {
           "heading": "Filtros de postulantes",
-          "description": "Aplican al listado principal debajo de las gráficas.",
+          "description": "Aplican al listado de postulantes.",
           "searchAria": "Buscar por nombre o correo",
           "searchPlaceholder": "Buscar por nombre o correo…",
           "applicationStatus": "Estado de postulación",
@@ -2333,7 +2336,7 @@
         "charts": {
           "noApplicants": "No hay postulantes en esta vacante todavía. Cuando haya candidatos en el tablero, aquí verás la distribución por etapa y puntaje.",
           "heading": "Indicadores gráficos",
-          "description": "Vista compacta de la tubería y del emparejamiento; el listado operativo está debajo.",
+          "description": "Distribución por etapa y emparejamiento junto al listado de postulantes.",
           "byStageHeading": "Postulantes por etapa",
           "byStageDescription": "Conteo según la etapa actual de cada postulación.",
           "scoreDistributionHeading": "Distribución de puntaje",
@@ -2351,7 +2354,7 @@
         "meta": {
           "srOnlyContext": "Contexto de la vacante: {title}",
           "company": "Empresa",
-          "countryCode": "País (código)",
+          "countryCode": "País",
           "department": "Departamento",
           "modality": "Modalidad",
           "created": "Creada",
@@ -2363,8 +2366,8 @@
           "viewFullDescription": "Ver descripción completa",
           "expandHint": "(click para expandir)",
           "technicalDetails": "Detalles técnicos",
-          "technicalDetailsHint": "(requisitos, sugerencias de IA)",
-          "requirementsPayload": "Requisitos (payload)",
+          "technicalDetailsHint": "(pesos, requisitos, sugerencias de IA)",
+          "requirementsPayload": "Requisitos",
           "noRequirements": "Sin requisitos en el payload.",
           "emptyRequirements": "Requisitos vacíos (objeto sin claves). El emparejamiento puede basarse solo en texto libre de la descripción.",
           "aiSuggestionsHeading": "Sugerencias de IA ({count})",

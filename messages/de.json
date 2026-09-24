@@ -2012,6 +2012,9 @@
         "paused": "Pausiert",
         "draft": "Entwurf"
       },
+      "catalogFallbacks": {
+        "uncategorized": "Ohne Kategorie"
+      },
       "actions": {
         "create": "Neue Stelle",
         "createShort": "Neu",
@@ -2279,7 +2282,7 @@
         },
         "filters": {
           "heading": "Bewerberfilter",
-          "description": "Gelten für die Hauptliste unter den Diagrammen.",
+          "description": "Gelten für die Bewerberliste.",
           "searchAria": "Nach Name oder E-Mail suchen",
           "searchPlaceholder": "Nach Name oder E-Mail suchen…",
           "applicationStatus": "Bewerbungsstatus",
@@ -2333,7 +2336,7 @@
         "charts": {
           "noApplicants": "Es gibt noch keine Bewerber für diese Stelle. Sobald Kandidaten auf dem Board sind, sehen Sie hier die Verteilung nach Phase und Punktzahl.",
           "heading": "Diagrammindikatoren",
-          "description": "Kompakte Ansicht der Pipeline und des Matchings; die operative Liste ist unten.",
+          "description": "Stufen- und Matching-Verteilung neben der Bewerberliste.",
           "byStageHeading": "Bewerber nach Phase",
           "byStageDescription": "Anzahl nach aktueller Phase jeder Bewerbung.",
           "scoreDistributionHeading": "Punktzahlverteilung",
@@ -2351,7 +2354,7 @@
         "meta": {
           "srOnlyContext": "Stellenkontext: {title}",
           "company": "Unternehmen",
-          "countryCode": "Land (Code)",
+          "countryCode": "Land",
           "department": "Abteilung",
           "modality": "Modalität",
           "created": "Erstellt",
@@ -2363,8 +2366,8 @@
           "viewFullDescription": "Vollständige Beschreibung anzeigen",
           "expandHint": "(klicken zum Erweitern)",
           "technicalDetails": "Technische Details",
-          "technicalDetailsHint": "(Anforderungen, KI-Vorschläge)",
-          "requirementsPayload": "Anforderungen (Payload)",
+          "technicalDetailsHint": "(Gewichte, Anforderungen, KI-Vorschläge)",
+          "requirementsPayload": "Anforderungen",
           "noRequirements": "Keine Anforderungen im Payload.",
           "emptyRequirements": "Leere Anforderungen (Objekt ohne Schlüssel). Matching kann nur auf Freitext in der Beschreibung basieren.",
           "aiSuggestionsHeading": "KI-Vorschläge ({count})",

@@ -22,6 +22,8 @@ import { formatVacancyResultadosDocumentTitle } from "@/lib/pageTitles"
 import { parseFallbackKanbanStages } from "@/lib/rrhh/vacancy-pipeline-stats"
 import { useResolvedRecruiterVacancyPath } from "@/hooks/use-resolved-recruiter-vacancy-path"
 import { buildRecruiterVacancyPath } from "@/lib/vacancies/vacancy-public-path"
+import { getVacancyJobCategoryLabel } from "@/lib/vacancies/vacancy-catalog-labels"
+import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
 
 function formatDisplayDate(iso: string | null): string | null {
   if (!iso) return null
@@ -161,7 +163,11 @@ export default function VacancyResultadosPage() {
   const pageLoading = resolved.loading || loading
 
   return (
-    <RrhhInterviewsShell breadcrumbLabel={tVacancies("breadcrumb")} breadcrumbTrail={trail}>
+    <RrhhInterviewsShell
+      breadcrumbLabel={tVacancies("breadcrumb")}
+      breadcrumbTrail={trail}
+      lockMainScroll={false}
+    >
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {!pathSegment ? (
           <p className="font-sans text-sm text-destructive" role="alert">
@@ -204,13 +210,16 @@ export default function VacancyResultadosPage() {
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {model.meta.status ? (
                     <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-sans text-xs font-semibold text-emerald-800">
-                      {model.meta.status}
+                      {getVacancyStatusLabel(model.meta.status, tVacancies)}
                     </span>
                   ) : null}
                   {model.meta.jobCategory ? (
                     <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-3 py-1 font-sans text-xs text-foreground">
                       <Tag className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden />
-                      {model.meta.jobCategory}
+                      {getVacancyJobCategoryLabel(
+                        model.meta.jobCategory,
+                        tVacancies
+                      )}
                     </span>
                   ) : null}
                   {model.meta.needsRematch ? (
@@ -257,16 +266,16 @@ export default function VacancyResultadosPage() {
               </div>
             </header>
 
-            <VacancyResultadosMetaPanel
-              vacancyTitle={model.title}
-              meta={model.meta}
-              hideVacancyHeading
-            />
-
             <VacancyResultadosKpisStrip
               totalApplicants={model.applicants.length}
               scoreSummary={model.scoreSummary}
               byStage={model.byStage}
+            />
+
+            <VacancyResultadosMetaPanel
+              vacancyTitle={model.title}
+              meta={model.meta}
+              hideVacancyHeading
             />
 
             <VacancyResultadosCandidateFiltersBar
@@ -275,28 +284,32 @@ export default function VacancyResultadosPage() {
               onFilterChange={setCandidateFilters}
             />
 
-            <VacancyPipelineCharts
-              componentAverages={model.componentAverages}
-              byStage={model.byStage}
-              scoreBuckets={model.scoreBuckets}
-              scoreSummary={model.scoreSummary}
-              totalApplicants={model.applicants.length}
-            />
-
-            <VacancyResultadosCandidatesBlock
-              vacancyId={vacancyId}
-              applicantsByStageFull={model.applicantsByStageFull}
-              companyStatuses={model.companyStatuses}
-              allApplicants={model.applicants}
-              interviews={interviews}
-              filterState={candidateFilters}
-              onFilterChange={setCandidateFilters}
-              onScheduleInterview={handleScheduleFromResultados}
-              onOpenTechnicalSheet={(id, displayName) => {
-                setTechnicalSheetProfileId(id)
-                setTechnicalSheetCandidateLabel(displayName)
-              }}
-            />
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,22rem)] xl:items-start">
+              <VacancyResultadosCandidatesBlock
+                vacancyId={vacancyId}
+                applicantsByStageFull={model.applicantsByStageFull}
+                companyStatuses={model.companyStatuses}
+                allApplicants={model.applicants}
+                interviews={interviews}
+                filterState={candidateFilters}
+                onFilterChange={setCandidateFilters}
+                onScheduleInterview={handleScheduleFromResultados}
+                onOpenTechnicalSheet={(id, displayName) => {
+                  setTechnicalSheetProfileId(id)
+                  setTechnicalSheetCandidateLabel(displayName)
+                }}
+              />
+              <div className="xl:sticky xl:top-4">
+                <VacancyPipelineCharts
+                  componentAverages={model.componentAverages}
+                  byStage={model.byStage}
+                  scoreBuckets={model.scoreBuckets}
+                  scoreSummary={model.scoreSummary}
+                  totalApplicants={model.applicants.length}
+                  compact
+                />
+              </div>
+            </div>
           </div>
         ) : null}
       </div>

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Calendar, FileText, Loader2, Plus, Users } from "lucide-react"
 import {
   getInterviewsByVacancy,
@@ -36,6 +36,9 @@ const TABLE_HEAD_CELL_CLASS =
   "sticky top-0 z-10 border-b border-border bg-muted px-4 py-3 text-left font-semibold text-foreground"
 const TABLE_BODY_CELL_CLASS = "border-b border-border px-4 py-3"
 
+/** Survives a second mount of this list while `?nueva=1` is still in the router snapshot. */
+let nuevaQueryConsumed = false
+
 export interface InterviewListProps {
   vacancyId: string
   vacancySummary: UseRecruiterVacancySummaryResult
@@ -60,8 +63,6 @@ function formatDurationCell(minutes: number | null): string {
 export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps) {
   const t = useTranslations("RecruiterPortal.interviews")
   const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
-  const router = useRouter()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
@@ -137,12 +138,25 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
   }, [load])
 
   useEffect(() => {
-    if (searchParams.get("nueva") !== "1") return
+    if (nuevaQueryConsumed) return undefined
+    if (searchParams.get("nueva") !== "1") return undefined
+    nuevaQueryConsumed = true
     const cand = searchParams.get("candidato")?.trim()
     setCreateInitialCandidateProfileId(cand && cand !== "" ? cand : null)
     setIsCreateOpen(true)
-    router.replace(pathname, { scroll: false })
-  }, [searchParams, router, pathname])
+    const url = new URL(window.location.href)
+    url.searchParams.delete("nueva")
+    url.searchParams.delete("candidato")
+    const qs = url.searchParams.toString()
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${qs ? `?${qs}` : ""}`
+    )
+    return () => {
+      nuevaQueryConsumed = false
+    }
+  }, [searchParams])
 
   const handleOpenCreate = () => {
     setCreateInitialCandidateProfileId(null)
@@ -151,7 +165,6 @@ export function InterviewList({ vacancyId, vacancySummary }: InterviewListProps)
 
   const handleCloseCreate = () => {
     setIsCreateOpen(false)
-    setCreateInitialCandidateProfileId(null)
   }
 
   const handleCloseDetail = () => {

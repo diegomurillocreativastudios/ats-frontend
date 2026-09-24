@@ -2012,6 +2012,9 @@
         "paused": "In pausa",
         "draft": "Bozza"
       },
+      "catalogFallbacks": {
+        "uncategorized": "Senza categoria"
+      },
       "actions": {
         "create": "Nuova posizione",
         "createShort": "Nuova",
@@ -2279,7 +2282,7 @@
         },
         "filters": {
           "heading": "Filtri candidati",
-          "description": "Si applicano all'elenco principale sotto i grafici.",
+          "description": "Si applicano all'elenco dei candidati.",
           "searchAria": "Cerca per nome o email",
           "searchPlaceholder": "Cerca per nome o email…",
           "applicationStatus": "Stato candidatura",
@@ -2333,7 +2336,7 @@
         "charts": {
           "noApplicants": "Non ci sono ancora candidati per questa posizione. Quando ci saranno candidati nella board, vedrai qui la distribuzione per fase e punteggio.",
           "heading": "Indicatori grafici",
-          "description": "Vista compatta della pipeline e dell'abbinamento; l'elenco operativo è sotto.",
+          "description": "Distribuzione per fase e abbinamento accanto all'elenco dei candidati.",
           "byStageHeading": "Candidati per fase",
           "byStageDescription": "Conteggio per fase attuale di ogni candidatura.",
           "scoreDistributionHeading": "Distribuzione punteggi",
@@ -2351,7 +2354,7 @@
         "meta": {
           "srOnlyContext": "Contesto posizione: {title}",
           "company": "Azienda",
-          "countryCode": "Paese (codice)",
+          "countryCode": "Paese",
           "department": "Dipartimento",
           "modality": "Modalità",
           "created": "Creata",
@@ -2363,8 +2366,8 @@
           "viewFullDescription": "Vedi descrizione completa",
           "expandHint": "(clic per espandere)",
           "technicalDetails": "Dettagli tecnici",
-          "technicalDetailsHint": "(requisiti, suggerimenti IA)",
-          "requirementsPayload": "Requisiti (payload)",
+          "technicalDetailsHint": "(pesi, requisiti, suggerimenti IA)",
+          "requirementsPayload": "Requisiti",
           "noRequirements": "Nessun requisito nel payload.",
           "emptyRequirements": "Requisiti vuoti (oggetto senza chiavi). L'abbinamento può basarsi solo sul testo libero della descrizione.",
           "aiSuggestionsHeading": "Suggerimenti IA ({count})",

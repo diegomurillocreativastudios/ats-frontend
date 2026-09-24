@@ -27,6 +27,8 @@ export interface VacancyPipelineChartsProps {
   scoreBuckets: ScoreBucketRow[]
   scoreSummary: ScoreSummary
   totalApplicants: number
+  /** Stack charts in one column for a side rail next to candidates. */
+  compact?: boolean
 }
 
 function buildComponentAverageRows(
@@ -65,6 +67,7 @@ export function VacancyPipelineCharts({
   scoreBuckets,
   scoreSummary,
   totalApplicants,
+  compact = false,
 }: VacancyPipelineChartsProps) {
   const t = useTranslations("RecruiterPortal.vacancies.results.charts")
   const componentAvgRows = buildComponentAverageRows(componentAverages, {
@@ -72,6 +75,13 @@ export function VacancyPipelineCharts({
     vector: t("vectorAvg"),
     attribute: t("attributeAvg"),
   })
+  const chartHeightClass = compact
+    ? "h-[180px] w-full min-h-[160px]"
+    : "h-[220px] w-full min-h-[200px] sm:h-[240px]"
+  const componentHeightClass = compact
+    ? "h-[160px] w-full min-h-[140px]"
+    : "h-[200px] w-full min-h-[180px] sm:h-[220px]"
+  const chartsGridClass = compact ? "grid gap-3" : "grid gap-4 lg:grid-cols-2"
 
   if (totalApplicants === 0) {
     return (
@@ -97,7 +107,7 @@ export function VacancyPipelineCharts({
       </h2>
       <p className="mb-4 font-sans text-xs text-muted-foreground">{t("description")}</p>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className={chartsGridClass}>
         <div
           className="rounded-lg border border-border/60 bg-muted/10 p-3"
           aria-labelledby="vacancy-resultados-stages-heading"
@@ -111,7 +121,7 @@ export function VacancyPipelineCharts({
           <p className="mb-2 font-sans text-[11px] text-muted-foreground">
             {t("byStageDescription")}
           </p>
-          <div className="h-[220px] w-full min-h-[200px] sm:h-[240px]">
+          <div className={chartHeightClass}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={byStage}
@@ -177,7 +187,7 @@ export function VacancyPipelineCharts({
               {t("noScoresYet")}
             </p>
           ) : (
-            <div className="h-[220px] w-full min-h-[200px] sm:h-[240px]">
+            <div className={chartHeightClass}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={scoreBuckets}
@@ -236,7 +246,7 @@ export function VacancyPipelineCharts({
               samples: componentAverages.samplesWithAnyComponent,
             })}
           </p>
-          <div className="h-[200px] w-full min-h-[180px] sm:h-[220px]">
+          <div className={componentHeightClass}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={componentAvgRows}
@@ -254,7 +264,7 @@ export function VacancyPipelineCharts({
                 <YAxis
                   type="category"
                   dataKey="name"
-                  width={148}
+                  width={compact ? 108 : 148}
                   tick={{ fontSize: 10, fill: "var(--muted-foreground, #6B7280)" }}
                 />
                 <Tooltip

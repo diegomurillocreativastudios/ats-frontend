@@ -2012,6 +2012,9 @@
         "paused": "Paused",
         "draft": "Draft"
       },
+      "catalogFallbacks": {
+        "uncategorized": "Uncategorized"
+      },
       "actions": {
         "create": "New Vacancy",
         "createShort": "New",
@@ -2279,7 +2282,7 @@
         },
         "filters": {
           "heading": "Applicant filters",
-          "description": "Apply to the main list below the charts.",
+          "description": "Apply to the applicants list.",
           "searchAria": "Search by name or email",
           "searchPlaceholder": "Search by name or email…",
           "applicationStatus": "Application status",
@@ -2333,7 +2336,7 @@
         "charts": {
           "noApplicants": "There are no applicants for this vacancy yet. When applicants are on the board, you will see distribution by stage and score here.",
           "heading": "Chart indicators",
-          "description": "Compact view of the pipeline and matching; the operational list is below.",
+          "description": "Stage and matching distribution beside the applicants list.",
           "byStageHeading": "Applicants by stage",
           "byStageDescription": "Count by each applicant's current stage.",
           "scoreDistributionHeading": "Score distribution",
@@ -2351,7 +2354,7 @@
         "meta": {
           "srOnlyContext": "Vacancy context: {title}",
           "company": "Company",
-          "countryCode": "Country (code)",
+          "countryCode": "Country",
           "department": "Department",
           "modality": "Modality",
           "created": "Created",
@@ -2363,8 +2366,8 @@
           "viewFullDescription": "View full description",
           "expandHint": "(click to expand)",
           "technicalDetails": "Technical details",
-          "technicalDetailsHint": "(requirements, AI suggestions)",
-          "requirementsPayload": "Requirements (payload)",
+          "technicalDetailsHint": "(weights, requirements, AI suggestions)",
+          "requirementsPayload": "Requirements",
           "noRequirements": "No requirements in the payload.",
           "emptyRequirements": "Empty requirements (object with no keys). Matching may rely only on free text in the description.",
           "aiSuggestionsHeading": "AI suggestions ({count})",
