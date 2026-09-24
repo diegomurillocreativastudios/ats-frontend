@@ -2725,7 +2725,8 @@
         "validation": {
           "selectCandidate": "Seleziona un candidato",
           "indicateDateTime": "Indica data e ora",
-          "invalidDateTime": "Data o ora non valida"
+          "invalidDateTime": "Data o ora non valida",
+          "pastDateNotAllowed": "Non puoi programmare un colloquio in una data già trascorsa"
         },
         "actions": {
           "schedule": "Programma colloquio",

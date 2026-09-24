@@ -2725,7 +2725,8 @@
         "validation": {
           "selectCandidate": "Wählen Sie einen Kandidaten",
           "indicateDateTime": "Geben Sie Datum und Uhrzeit an",
-          "invalidDateTime": "Ungültiges Datum oder Uhrzeit"
+          "invalidDateTime": "Ungültiges Datum oder Uhrzeit",
+          "pastDateNotAllowed": "Sie können kein Interview an einem vergangenen Datum planen"
         },
         "actions": {
           "schedule": "Gespräch planen",

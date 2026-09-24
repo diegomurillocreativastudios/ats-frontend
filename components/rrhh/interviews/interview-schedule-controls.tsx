@@ -24,6 +24,8 @@ export interface InterviewScheduleRowProps {
   startAriaLabel?: string
   endAriaLabel?: string
   durationLabel?: string | null
+  /** Fecha mínima `YYYY-MM-DD` (p. ej. hoy al crear). */
+  minDate?: string
 }
 
 /**
@@ -41,6 +43,7 @@ export function InterviewScheduleRow({
   startAriaLabel = "Hora de inicio",
   endAriaLabel = "Hora de fin",
   durationLabel = null,
+  minDate,
 }: InterviewScheduleRowProps) {
   const { date, time: startTime } = splitDatetimeLocal(scheduledLocal)
   const durationParsed = parseInt(durationMinutes, 10)
@@ -97,6 +100,7 @@ export function InterviewScheduleRow({
         disabled={disabled}
         ariaLabel={dateAriaLabel}
         errorMessage={errorMessage}
+        minDate={minDate}
         wrapperClassName="relative w-full"
         buttonClassName="inline-flex min-h-10 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-left font-sans text-sm text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
       />

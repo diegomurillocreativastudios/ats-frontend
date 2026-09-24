@@ -2725,7 +2725,8 @@
         "validation": {
           "selectCandidate": "Selecciona un candidato",
           "indicateDateTime": "Indica fecha y hora",
-          "invalidDateTime": "Fecha u hora no válida"
+          "invalidDateTime": "Fecha u hora no válida",
+          "pastDateNotAllowed": "No puedes agendar una entrevista en una fecha ya transcurrida"
         },
         "actions": {
           "schedule": "Agendar entrevista",

@@ -2725,7 +2725,8 @@
         "validation": {
           "selectCandidate": "Sélectionnez un candidat",
           "indicateDateTime": "Indiquez la date et l'heure",
-          "invalidDateTime": "Date ou heure non valide"
+          "invalidDateTime": "Date ou heure non valide",
+          "pastDateNotAllowed": "Vous ne pouvez pas planifier un entretien à une date déjà passée"
         },
         "actions": {
           "schedule": "Planifier l'entretien",

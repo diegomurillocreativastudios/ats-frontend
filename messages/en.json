@@ -2725,7 +2725,8 @@
         "validation": {
           "selectCandidate": "Select an applicant",
           "indicateDateTime": "Enter date and time",
-          "invalidDateTime": "Invalid date or time"
+          "invalidDateTime": "Invalid date or time",
+          "pastDateNotAllowed": "You cannot schedule an interview on a past date"
         },
         "actions": {
           "schedule": "Schedule interview",

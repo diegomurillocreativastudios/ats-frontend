@@ -80,6 +80,8 @@ export interface DatePickerProps {
   minYear?: number
   /** Año máximo en el desplegable (por defecto: hoy + 10). */
   maxYear?: number
+  /** Fecha mínima `YYYY-MM-DD` (días anteriores quedan deshabilitados). */
+  minDate?: string
 }
 
 /**
@@ -97,6 +99,7 @@ export function DatePicker({
   wrapperClassName = "relative inline-flex max-w-full",
   minYear: minYearProp,
   maxYear: maxYearProp,
+  minDate,
 }: DatePickerProps) {
   const t = useTranslations("Common")
   const resolvedPlaceholder = placeholder ?? t("pickDate")
@@ -109,14 +112,30 @@ export function DatePicker({
   const rootRef = useRef<HTMLDivElement>(null)
   const dialogId = useId()
 
+  const parsedMinDate = useMemo(
+    () => (minDate ? parseYmd(minDate) : null),
+    [minDate]
+  )
+
   const syncViewMonthForOpen = useCallback(() => {
     const p = value ? parseYmd(value) : null
-    if (p) setViewMonth(new Date(p.y, p.m, 1))
-    else {
-      const n = new Date()
-      setViewMonth(new Date(n.getFullYear(), n.getMonth(), 1))
+    if (p) {
+      const candidate = new Date(p.y, p.m, 1)
+      if (parsedMinDate) {
+        const minMonth = new Date(parsedMinDate.y, parsedMinDate.m, 1)
+        setViewMonth(candidate < minMonth ? minMonth : candidate)
+      } else {
+        setViewMonth(candidate)
+      }
+      return
     }
-  }, [value])
+    if (parsedMinDate) {
+      setViewMonth(new Date(parsedMinDate.y, parsedMinDate.m, 1))
+      return
+    }
+    const n = new Date()
+    setViewMonth(new Date(n.getFullYear(), n.getMonth(), 1))
+  }, [value, parsedMinDate])
 
   useEffect(() => {
     if (!open) return
@@ -150,43 +169,86 @@ export function DatePicker({
   }, [year, monthIndex, daysInMonth])
 
   const todayYear = useMemo(() => new Date().getFullYear(), [])
-  const minYear = minYearProp ?? todayYear - DEFAULT_YEAR_SPAN_PAST
+  const minYear =
+    minYearProp ??
+    (parsedMinDate ? parsedMinDate.y : todayYear - DEFAULT_YEAR_SPAN_PAST)
   const maxYear = maxYearProp ?? todayYear + DEFAULT_YEAR_SPAN_FUTURE
 
-  const monthOptions = useMemo(() => buildMonthOptions(), [])
+  const monthOptions = useMemo(() => {
+    const all = buildMonthOptions()
+    if (!parsedMinDate || year > parsedMinDate.y) return all
+    return all.filter((option) => option.value >= parsedMinDate.m)
+  }, [parsedMinDate, year])
+
   const yearOptions = useMemo(
     () => buildYearOptions(minYear, maxYear),
     [minYear, maxYear]
   )
 
+  const isBeforeMinMonth =
+    !!parsedMinDate &&
+    (year < parsedMinDate.y ||
+      (year === parsedMinDate.y && monthIndex <= parsedMinDate.m))
+
   const handleMonthSelect = useCallback(
     (monthValue: number) => {
+      if (
+        parsedMinDate &&
+        year === parsedMinDate.y &&
+        monthValue < parsedMinDate.m
+      ) {
+        return
+      }
       setViewMonth(new Date(year, monthValue, 1))
     },
-    [year]
+    [year, parsedMinDate]
   )
 
   const handleYearSelect = useCallback(
     (yearValue: number) => {
-      setViewMonth(new Date(yearValue, monthIndex, 1))
+      let nextMonth = monthIndex
+      if (
+        parsedMinDate &&
+        yearValue === parsedMinDate.y &&
+        nextMonth < parsedMinDate.m
+      ) {
+        nextMonth = parsedMinDate.m
+      }
+      setViewMonth(new Date(yearValue, nextMonth, 1))
     },
-    [monthIndex]
+    [monthIndex, parsedMinDate]
   )
 
   const handlePrevMonth = useCallback(() => {
-    setViewMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
-  }, [])
+    setViewMonth((d) => {
+      const prev = new Date(d.getFullYear(), d.getMonth() - 1, 1)
+      if (parsedMinDate) {
+        const minMonth = new Date(parsedMinDate.y, parsedMinDate.m, 1)
+        if (prev < minMonth) return d
+      }
+      return prev
+    })
+  }, [parsedMinDate])
 
   const handleNextMonth = useCallback(() => {
     setViewMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
   }, [])
 
+  const isDayDisabled = useCallback(
+    (ymd: string) => {
+      if (!minDate) return false
+      return ymd < minDate
+    },
+    [minDate]
+  )
+
   const handlePickDay = useCallback(
     (ymd: string) => {
+      if (isDayDisabled(ymd)) return
       onChange(ymd)
       setOpen(false)
     },
-    [onChange]
+    [onChange, isDayDisabled]
   )
 
   const displayLabel = value
@@ -227,7 +289,9 @@ export function DatePicker({
             <button
               type="button"
               onClick={handlePrevMonth}
-              disabled={year <= minYear && monthIndex <= 0}
+              disabled={
+                isBeforeMinMonth || (year <= minYear && monthIndex <= 0)
+              }
               className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={t("prevMonth")}
             >
@@ -286,19 +350,24 @@ export function DatePicker({
             {gridDays.map(({ day, ymd }) => {
               const isSelected = value === ymd
               const isToday = ymd === todayYmd
+              const dayDisabled = isDayDisabled(ymd)
               return (
                 <button
                   key={ymd}
                   type="button"
+                  disabled={dayDisabled}
                   onClick={() => handlePickDay(ymd)}
-                  className={`flex h-9 w-full items-center justify-center rounded-md font-sans text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple ${
-                    isSelected
-                      ? "bg-vo-purple font-medium text-white"
-                      : isToday
-                        ? "bg-vo-purple/15 font-medium text-vo-purple"
-                        : "text-foreground hover:bg-muted"
+                  className={`flex h-9 w-full items-center justify-center rounded-md font-sans text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent ${
+                    dayDisabled
+                      ? "text-muted-foreground"
+                      : isSelected
+                        ? "bg-vo-purple font-medium text-white"
+                        : isToday
+                          ? "bg-vo-purple/15 font-medium text-vo-purple"
+                          : "text-foreground hover:bg-muted"
                   }`}
                   aria-pressed={isSelected}
+                  aria-disabled={dayDisabled || undefined}
                   aria-label={`Día ${day}`}
                 >
                   {day}
