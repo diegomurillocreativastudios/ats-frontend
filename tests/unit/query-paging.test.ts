@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import {
   QUERY_PAGE_SIZE_MAX,
+  QUERY_PAGE_SIZE_OPTIONS,
   buildPageQuery,
   clampQueryPage,
   clampQueryPageSize,
@@ -29,8 +30,12 @@ describe("query paging helpers", () => {
     expect(clampQueryPage(2.8)).toBe(2)
   })
 
+  it("offers page sizes 10, 50 and 100", () => {
+    expect(QUERY_PAGE_SIZE_OPTIONS).toEqual([10, 50, 100])
+  })
+
   it("clamps pageSize to max 100", () => {
-    expect(clampQueryPageSize(undefined)).toBe(50)
+    expect(clampQueryPageSize(undefined)).toBe(10)
     expect(clampQueryPageSize(200)).toBe(QUERY_PAGE_SIZE_MAX)
     expect(clampQueryPageSize(20)).toBe(20)
   })

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 import AdminEmpresasContent from "@/components/portal-admin/AdminEmpresasContent"
 import type { AdminCompany } from "@/lib/api/admin-companies"
+import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging"
 import esMessages from "@/messages/es.json"
 
 // El componente migró a `next-intl` (Etapa 13): requiere el provider de
@@ -108,8 +109,17 @@ describe("AdminEmpresasContent", () => {
     await screen.findByText("Aún no hay empresas")
 
     expect(companiesApiMocks.fetchAdminCompaniesList).toHaveBeenCalledWith(
-      expect.objectContaining({ includeInactive: true, page: 1 })
+      expect.objectContaining({
+        includeInactive: true,
+        page: 1,
+        pageSize: QUERY_PAGE_SIZE_DEFAULT,
+      })
     )
+    const pageSizeSelect = screen.getByLabelText("Tamaño de página")
+    expect(pageSizeSelect).toHaveValue(String(QUERY_PAGE_SIZE_DEFAULT))
+    expect(
+      Array.from(pageSizeSelect.querySelectorAll("option"), (option) => option.value)
+    ).toEqual(["10", "50", "100"])
   })
 
   it("deactivates a company from the row action", async () => {

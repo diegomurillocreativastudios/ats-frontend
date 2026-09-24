@@ -53,6 +53,11 @@ describe("AdminUsuariosContent", () => {
     expect(screen.queryByRole("button", { name: "Filtros" })).not.toBeInTheDocument()
     expect(screen.getByLabelText("Correo")).toBeVisible()
     expect(screen.getByLabelText("Filtrar por Rol")).toBeVisible()
+    const pageSizeSelect = screen.getByLabelText("Usuarios por página")
+    expect(pageSizeSelect).toHaveValue("10")
+    expect(
+      Array.from(pageSizeSelect.querySelectorAll("option"), (option) => option.value)
+    ).toEqual(["10", "50", "100"])
   })
 
   it("places create in the page header like the vacancy list", async () => {
