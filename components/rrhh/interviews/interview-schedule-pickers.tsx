@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -15,6 +14,7 @@ import {
   formatTimePickerLabel,
   getNearestQuarterHourClockNow,
   getQuarterHourTimeOptions,
+  isClockTimeBefore,
   isQuarterHourTime,
   parseFlexibleTimeInput,
 } from "@/lib/interview-datetime"
@@ -50,6 +50,20 @@ export interface QuarterHourTimeSelectProps {
   emptyLabel?: string
   className?: string
   inputClassName?: string
+  /**
+   * Hora mínima `HH:mm` (inclusive). `null` = no hay horas válidas (todas deshabilitadas).
+   * `undefined` = sin restricción.
+   */
+  minTime?: string | null
+}
+
+function isTimeBelowMin(
+  hhmm: string,
+  minTime: string | null | undefined
+): boolean {
+  if (minTime === undefined) return false
+  if (minTime === null) return true
+  return isClockTimeBefore(hhmm, minTime)
 }
 
 /**
@@ -65,6 +79,7 @@ export function QuarterHourTimeSelect({
   emptyLabel = "Hora",
   className = "",
   inputClassName = "",
+  minTime,
 }: QuarterHourTimeSelectProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -97,15 +112,20 @@ export function QuarterHourTimeSelect({
 
   useLayoutEffect(() => {
     if (!open || !listboxRef.current) return
+    const firstEnabled =
+      typeof minTime === "string"
+        ? options.find((o) => !isTimeBelowMin(o.value, minTime))?.value
+        : undefined
     const anchor =
-      value && options.some((o) => o.value === value)
+      value && options.some((o) => o.value === value) && !isTimeBelowMin(value, minTime)
         ? value
-        : getNearestQuarterHourClockNow()
+        : firstEnabled ??
+          (typeof minTime === "string" ? minTime : getNearestQuarterHourClockNow())
     const node = listboxRef.current.querySelector(
       `[data-time-value="${anchor}"]`
     )
     node?.scrollIntoView({ block: "center" })
-  }, [open, value, options])
+  }, [open, value, options, minTime])
 
   const commitFromText = useCallback(() => {
     const parsed = parseFlexibleTimeInput(text)
@@ -120,7 +140,7 @@ export function QuarterHourTimeSelect({
       setText(value ? formatTimePickerLabel(value) : "")
       return
     }
-    if (parsed === null) {
+    if (parsed === null || isTimeBelowMin(parsed, minTime)) {
       setText(value ? formatTimePickerLabel(value) : "")
       return
     }
@@ -128,7 +148,7 @@ export function QuarterHourTimeSelect({
       onChange(parsed)
     })
     setText(formatTimePickerLabel(parsed))
-  }, [allowEmpty, onChange, text, value])
+  }, [allowEmpty, minTime, onChange, text, value])
 
   const handleBlur = useCallback(() => {
     setFocused(false)
@@ -145,6 +165,7 @@ export function QuarterHourTimeSelect({
 
   const handleSelectOption = useCallback(
     (nextTime: string) => {
+      if (nextTime && isTimeBelowMin(nextTime, minTime)) return
       flushSync(() => {
         onChange(nextTime)
       })
@@ -152,7 +173,7 @@ export function QuarterHourTimeSelect({
       setOpen(false)
       setFocused(false)
     },
-    [onChange]
+    [minTime, onChange]
   )
 
   if (disabled && !value) {
@@ -236,20 +257,25 @@ export function QuarterHourTimeSelect({
             ) : null}
             {options.map((option) => {
               const selected = option.value === value
+              const belowMin = isTimeBelowMin(option.value, minTime)
               return (
                 <li key={option.value}>
                   <button
                     type="button"
                     data-time-value={option.value}
+                    disabled={belowMin}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSelectOption(option.value)}
-                    className={`w-full px-3 py-2 text-left font-sans text-sm tabular-nums transition-colors hover:bg-muted/70 ${
-                      selected
-                        ? "bg-vo-purple/10 font-medium text-vo-purple"
-                        : "text-foreground"
+                    className={`w-full px-3 py-2 text-left font-sans text-sm tabular-nums transition-colors ${
+                      belowMin
+                        ? "cursor-not-allowed text-muted-foreground/50"
+                        : selected
+                          ? "bg-vo-purple/10 font-medium text-vo-purple hover:bg-muted/70"
+                          : "text-foreground hover:bg-muted/70"
                     }`}
                     role="option"
                     aria-selected={selected}
+                    aria-disabled={belowMin}
                   >
                     {option.label}
                   </button>

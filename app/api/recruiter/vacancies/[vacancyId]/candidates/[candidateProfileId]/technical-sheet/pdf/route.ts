@@ -32,6 +32,7 @@ import {
 } from "@/lib/technical-sheet/render-technical-sheet-pdf-response"
 import { resolveTechnicalSheetPdfEngine } from "@/lib/technical-sheet/technical-sheet-pdf-engine"
 import { fetchTemplatesListForServer } from "@/lib/templates/fetch-templates-for-server"
+import { readTechnicalSheetCompanyBrandFromVacancy } from "@/lib/technical-sheet/vacancy-company-brand"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -88,7 +89,7 @@ async function handleTechnicalSheetPdf(
   const path = buildTechnicalSheetBasePath(vid, cid)
   const engine = resolveTechnicalSheetPdfEngine(request)
 
-  const [backendResponse, templates] = await Promise.all([
+  const [backendResponse, templates, vacancyResponse] = await Promise.all([
     fetch(`${baseUrl}${path}`, {
       method: "GET",
       headers: {
@@ -98,6 +99,14 @@ async function handleTechnicalSheetPdf(
       cache: "no-store",
     }),
     fetchTemplatesListForServer(baseUrl, accessToken),
+    fetch(`${baseUrl}/api/recruiter/vacancies/${encodeURIComponent(vid)}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    }).catch(() => null),
   ])
 
   const raw = await backendResponse.json().catch(() => null)
@@ -113,11 +122,18 @@ async function handleTechnicalSheetPdf(
   const payload = normalizeTechnicalSheetPayload(raw)
   const filenameAscii = buildTechnicalSheetPdfFilename(cid)
 
+  let companyBrand = null
+  if (vacancyResponse?.ok) {
+    const vacancyRaw = await vacancyResponse.json().catch(() => null)
+    companyBrand = readTechnicalSheetCompanyBrandFromVacancy(vacancyRaw)
+  }
+
   const { buffer, engine: engineUsed, fallbackFrom } = await renderTechnicalSheetPdfBuffer({
     payload,
     templates,
     candidateProfileId: cid,
     vacancyTitleFallback: readVacancyTitleFallback(request),
+    companyBrand,
     engine,
   })
 

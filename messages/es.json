@@ -2734,7 +2734,8 @@
           "selectCandidate": "Selecciona un candidato",
           "indicateDateTime": "Indica fecha y hora",
           "invalidDateTime": "Fecha u hora no válida",
-          "pastDateNotAllowed": "No puedes agendar una entrevista en una fecha ya transcurrida"
+          "pastDateNotAllowed": "No puedes agendar una entrevista en una fecha ya transcurrida",
+          "pastDateTimeNotAllowed": "No puedes agendar una entrevista en una hora ya transcurrida"
         },
         "actions": {
           "schedule": "Agendar entrevista",
@@ -2774,7 +2775,9 @@
         "statusAria": "Estado de la entrevista",
         "terminalReadOnly": "Esta entrevista está cerrada (estado terminal). Los datos son solo lectura.",
         "validation": {
-          "invalidDateTime": "La fecha u hora no es válida. Revisa el campo de hora."
+          "invalidDateTime": "La fecha u hora no es válida. Revisa el campo de hora.",
+          "pastDateNotAllowed": "No puedes agendar una entrevista en una fecha ya transcurrida",
+          "pastDateTimeNotAllowed": "No puedes agendar una entrevista en una hora ya transcurrida"
         },
         "actions": {
           "save": "Guardar cambios",

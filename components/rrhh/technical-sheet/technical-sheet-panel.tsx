@@ -15,9 +15,13 @@ import {
 import { paginateTechnicalSheetArticleToPageBodies } from "@/lib/technical-sheet/paginate-technical-sheet-article-dom"
 import { buildPaginatedTechnicalSheetSrcDoc } from "@/lib/technical-sheet/build-paginated-technical-sheet-src-doc"
 import { fetchVisibleLogoDataUriClient } from "@/lib/technical-sheet/fetch-visible-logo-data-uri-client"
+import { fetchVacancyCompanyBrandForTechnicalSheet } from "@/lib/technical-sheet/fetch-vacancy-company-brand-client"
 import { renderTechnicalSheetSchemaToHtml } from "@/lib/technical-sheet/schema/render-technical-sheet-schema-to-html"
 import { resolveTechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema"
-import { buildTechnicalSheetPageHtml } from "@/lib/technical-sheet/technical-sheet-page-shell"
+import {
+  buildTechnicalSheetPageHtml,
+  type TechnicalSheetCompanyBrandHeader,
+} from "@/lib/technical-sheet/technical-sheet-page-shell"
 import { TECHNICAL_SHEET_CONTENT_AVAILABLE_HEIGHT_PX } from "@/lib/technical-sheet/technical-sheet-page-constants"
 import { buildTechnicalSheetTemplateContext } from "@/lib/technical-sheet/template-interpolate"
 import {
@@ -52,6 +56,7 @@ interface SheetPreviewMeta {
     englishLevel: string
   }
   logoUrl: string
+  companyBrand: TechnicalSheetCompanyBrandHeader | null
 }
 
 export function TechnicalSheetPanel({
@@ -94,8 +99,16 @@ export function TechnicalSheetPanel({
       const payloadPromise = isProfileSheet
         ? Promise.resolve(providedPayload as TechnicalSheetPayload)
         : fetchTechnicalSheetJson(vacancyId!.trim(), cid)
+      const companyBrandPromise =
+        !isProfileSheet && vacancyId?.trim()
+          ? fetchVacancyCompanyBrandForTechnicalSheet(vacancyId.trim())
+          : Promise.resolve(null)
 
-      const [list, payload] = await Promise.all([listPromise, payloadPromise])
+      const [list, payload, companyBrand] = await Promise.all([
+        listPromise,
+        payloadPromise,
+        companyBrandPromise,
+      ])
       const picked = findTechnicalSheetDocumentTemplate(list)
       const rawTemplate = picked?.contentTemplate?.trim() ?? ""
       if (!picked || rawTemplate === "") {
@@ -119,6 +132,12 @@ export function TechnicalSheetPanel({
           englishLevel: String(headerRecord?.englishLevel ?? ""),
         },
         logoUrl: String(ctx.logoUrl ?? ""),
+        companyBrand: companyBrand
+          ? {
+              name: companyBrand.name,
+              logoDataUri: companyBrand.logoDataUri,
+            }
+          : null,
       })
       const { schema } = resolveTechnicalSheetSchema(rawTemplate)
       setTemplateHtml(renderTechnicalSheetSchemaToHtml(schema, ctx))
@@ -177,6 +196,7 @@ export function TechnicalSheetPanel({
             bodyHtml: body,
             header: previewMeta.header,
             logoUrl: safeLogo,
+            companyBrand: previewMeta.companyBrand,
           })
         )
         setPaginatedSrcDoc(buildPaginatedTechnicalSheetSrcDoc(pages))

@@ -4,6 +4,7 @@ import { resolveTechnicalSheetSchema } from "@/lib/technical-sheet/schema/techni
 import type { TechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema-types"
 import type { TemplateListItem } from "@/lib/templates/technical-sheet-template"
 import { findTechnicalSheetDocumentTemplate } from "@/lib/templates/technical-sheet-template"
+import type { TechnicalSheetCompanyBrand } from "@/lib/technical-sheet/vacancy-company-brand"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
 import { logServerError } from "@/lib/security/safe-server-log"
 
@@ -12,6 +13,8 @@ export interface RenderTechnicalSheetPdfInput {
   templates: TemplateListItem[]
   candidateProfileId: string
   vacancyTitleFallback: string | null
+  /** Vacancy sheets only: company mark next to ApplicanTree. */
+  companyBrand?: TechnicalSheetCompanyBrand | null
   /**
    * `chromium` (default): mismo HTML que la vista previa.
    * `pdfkit`: rollback de emergencia (texto programático).
@@ -57,6 +60,7 @@ async function renderFromSchemaPdfKit(input: RenderTechnicalSheetPdfInput): Prom
   return buildTechnicalSheetPdfKitBuffer(input.payload, {
     schema,
     vacancyTitleFallback: input.vacancyTitleFallback,
+    companyBrand: input.companyBrand ?? null,
   })
 }
 
@@ -98,10 +102,19 @@ async function renderFromSchemaChromium(input: RenderTechnicalSheetPdfInput): Pr
     address: String(headerRecord?.address ?? ""),
     englishLevel: String(headerRecord?.englishLevel ?? ""),
   }
+  const companyBrand = input.companyBrand ?? null
   return renderPaginatedTechnicalSheetPdfFromInterpolated(
     innerHtml,
     header,
-    String(ctx.logoUrl ?? "")
+    String(ctx.logoUrl ?? ""),
+    {
+      companyBrand: companyBrand
+        ? {
+            name: companyBrand.name,
+            logoDataUri: companyBrand.logoDataUri,
+          }
+        : null,
+    }
   )
 }
 

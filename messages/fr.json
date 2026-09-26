@@ -2734,7 +2734,8 @@
           "selectCandidate": "Sélectionnez un candidat",
           "indicateDateTime": "Indiquez la date et l'heure",
           "invalidDateTime": "Date ou heure non valide",
-          "pastDateNotAllowed": "Vous ne pouvez pas planifier un entretien à une date déjà passée"
+          "pastDateNotAllowed": "Vous ne pouvez pas planifier un entretien à une date déjà passée",
+          "pastDateTimeNotAllowed": "Vous ne pouvez pas planifier un entretien à une heure déjà passée"
         },
         "actions": {
           "schedule": "Planifier l'entretien",
@@ -2774,7 +2775,9 @@
         "statusAria": "Statut de l'entretien",
         "terminalReadOnly": "Cet entretien est clôturé (statut terminal). Les données sont en lecture seule.",
         "validation": {
-          "invalidDateTime": "La date ou l'heure n'est pas valide. Vérifiez le champ horaire."
+          "invalidDateTime": "La date ou l'heure n'est pas valide. Vérifiez le champ horaire.",
+          "pastDateNotAllowed": "Vous ne pouvez pas planifier un entretien à une date déjà passée",
+          "pastDateTimeNotAllowed": "Vous ne pouvez pas planifier un entretien à une heure déjà passée"
         },
         "actions": {
           "save": "Enregistrer les modifications",

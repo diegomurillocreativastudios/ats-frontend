@@ -15,11 +15,42 @@ export interface TechnicalSheetPageHeaderFields {
   englishLevel: string
 }
 
+export interface TechnicalSheetCompanyBrandHeader {
+  name: string
+  /** Safe raster data URI for the company logo; omit or empty when unavailable. */
+  logoDataUri?: string | null
+}
+
 export interface TechnicalSheetPageShellOptions {
   logoUrl: string
   header: TechnicalSheetPageHeaderFields
+  /** Vacancy sheets only: company mark next to ApplicanTree. */
+  companyBrand?: TechnicalSheetCompanyBrandHeader | null
   /** HTML ya interpolado que va dentro del área segura (normalmente `<article>...</article>`). */
   bodyHtml: string
+}
+
+function buildCompanyBrandHtml(
+  companyBrand: TechnicalSheetCompanyBrandHeader | null | undefined
+): string {
+  if (!companyBrand) return ""
+  const name = String(companyBrand.name ?? "").trim()
+  const logoSrc = String(companyBrand.logoDataUri ?? "")
+    .trim()
+    .replace(/"/g, "")
+  if (!name && !logoSrc) return ""
+
+  const logoHtml = logoSrc
+    ? `<img src="${logoSrc}" alt="" width="48" height="48" style="width:48px;height:48px;display:block;object-fit:contain;flex-shrink:0;" />`
+    : ""
+  const nameHtml = name
+    ? `<div style="font-size:13px;font-weight:700;line-height:1.25;color:#454648;font-family:Arial,Helvetica,sans-serif;max-width:140px;">${escapeHtmlForTechnicalSheet(name)}</div>`
+    : ""
+
+  return `<div class="technical-sheet-page__company" style="display:flex;align-items:center;gap:10px;margin-left:12px;padding-left:14px;border-left:1px solid #D1D5DB;min-width:0;">
+      ${logoHtml}
+      ${nameHtml}
+    </div>`
 }
 
 /**
@@ -30,6 +61,7 @@ export function buildTechnicalSheetPageHtml(options: TechnicalSheetPageShellOpti
   const fullName = escapeHtmlForTechnicalSheet(options.header.fullName)
   const address = escapeHtmlForTechnicalSheet(options.header.address)
   const englishLevel = escapeHtmlForTechnicalSheet(options.header.englishLevel)
+  const companyBrandHtml = buildCompanyBrandHtml(options.companyBrand)
 
   return `<section class="technical-sheet-page" style="width:${TECHNICAL_SHEET_PAGE_WIDTH_PX}px;height:${TECHNICAL_SHEET_PAGE_HEIGHT_PX}px;max-width:100%;margin:0 auto 16px;position:relative;overflow:hidden;box-sizing:border-box;background:#FFFFFF;box-shadow:0 14px 40px rgba(0,0,0,0.16);page-break-after:always;">
   <div class="technical-sheet-page__decor" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;">
@@ -49,13 +81,14 @@ export function buildTechnicalSheetPageHtml(options: TechnicalSheetPageShellOpti
     </div>
     <div style="position:absolute;bottom:0;left:0;right:0;height:58px;background:#256D35;"></div>
   </div>
-  <header class="technical-sheet-page__header" style="position:relative;z-index:5;display:grid;grid-template-columns:430px 1fr;column-gap:35px;align-items:start;padding:62px 72px 0 20px;box-sizing:border-box;background:#FFFFFF;">
-    <div style="display:flex;align-items:center;gap:14px;">
-      <img src="${logo}" alt="" width="105" style="width:105px;height:auto;display:block;object-fit:contain;" />
-      <div style="line-height:1;">
-        <div style="font-size:34px;font-weight:800;letter-spacing:-1px;color:#454648;font-family:Arial,Helvetica,sans-serif;">${escapeHtmlForTechnicalSheet(APP_NAME)}</div>
-        <div style="font-size:12px;color:#7A7A7A;margin-top:2px;letter-spacing:-0.2px;font-family:Arial,Helvetica,sans-serif;">${escapeHtmlForTechnicalSheet(APP_TAGLINE)}</div>
+  <header class="technical-sheet-page__header" style="position:relative;z-index:5;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:24px;align-items:start;padding:62px 72px 0 20px;box-sizing:border-box;background:#FFFFFF;">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+      <img src="${logo}" alt="" width="88" style="width:88px;height:auto;display:block;object-fit:contain;flex-shrink:0;" />
+      <div style="line-height:1;min-width:0;">
+        <div style="font-size:28px;font-weight:800;letter-spacing:-1px;color:#454648;font-family:Arial,Helvetica,sans-serif;">${escapeHtmlForTechnicalSheet(APP_NAME)}</div>
+        <div style="font-size:11px;color:#7A7A7A;margin-top:2px;letter-spacing:-0.2px;font-family:Arial,Helvetica,sans-serif;">${escapeHtmlForTechnicalSheet(APP_TAGLINE)}</div>
       </div>
+      ${companyBrandHtml}
     </div>
     <div style="font-size:12px;line-height:1.45;color:#256D35;white-space:nowrap;padding-top:13px;">
       <div><strong>Nombre:</strong> ${fullName}</div>

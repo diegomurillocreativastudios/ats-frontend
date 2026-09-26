@@ -45,9 +45,80 @@ const pad2 = (n: number) => String(n).padStart(2, "0")
 /**
  * Fecha local `YYYY-MM-DD` para usar en `input type="date"`.
  */
-export function getTodayDateInputValue(): string {
-  const d = new Date()
+export function getDateInputValue(d: Date = new Date()): string {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
+}
+
+/**
+ * Fecha local de hoy `YYYY-MM-DD` para usar en `input type="date"`.
+ */
+export function getTodayDateInputValue(): string {
+  return getDateInputValue(new Date())
+}
+
+function clockTimeToMinutes(hhmm: string): number | null {
+  const parts = hhmm.split(":")
+  const h = Number.parseInt(parts[0] ?? "", 10)
+  const m = Number.parseInt(parts[1] ?? "", 10)
+  if (Number.isNaN(h) || Number.isNaN(m)) return null
+  return h * 60 + m
+}
+
+/**
+ * True si `a` es estrictamente anterior a `b` (`HH:mm`).
+ */
+export function isClockTimeBefore(a: string, b: string): boolean {
+  const am = clockTimeToMinutes(a)
+  const bm = clockTimeToMinutes(b)
+  if (am == null || bm == null) return false
+  return am < bm
+}
+
+/**
+ * True si el datetime-local (`YYYY-MM-DDTHH:mm`) ya pasó respecto a `now`.
+ */
+export function isLocalDatetimeInPast(
+  datetimeLocal: string,
+  now: Date = new Date()
+): boolean {
+  const trimmed = datetimeLocal.trim()
+  if (!trimmed) return false
+  const d = new Date(trimmed)
+  if (Number.isNaN(d.getTime())) return false
+  return d.getTime() < now.getTime()
+}
+
+/**
+ * Primer cuarto de hora local que aún no ha pasado (ceil al siguiente cuarto).
+ * Si son las 21:27 → `"21:30"`; si son exactamente 21:15:00 → `"21:15"`.
+ * Si ya no queda ningún cuarto hoy (p. ej. 23:50), devuelve `null`.
+ */
+export function getCeilingQuarterHourClockNow(
+  now: Date = new Date()
+): string | null {
+  const totalSec =
+    now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()
+  const quarterSec = 15 * 60
+  const ceilingSec = Math.ceil(totalSec / quarterSec) * quarterSec
+  if (ceilingSec >= 24 * 3600) return null
+  const h = Math.floor(ceilingSec / 3600)
+  const m = Math.floor((ceilingSec % 3600) / 60)
+  return `${pad2(h)}:${pad2(m)}`
+}
+
+/**
+ * Hora mínima de inicio (`HH:mm`) cuando `dateYmd` es hoy; `undefined` si es un día futuro
+ * (sin restricción). `null` si es hoy y ya no hay cuartos válidos, o si la fecha es pasada.
+ */
+export function getMinStartClockForDate(
+  dateYmd: string,
+  now: Date = new Date()
+): string | null | undefined {
+  if (!dateYmd) return undefined
+  const todayYmd = getDateInputValue(now)
+  if (dateYmd > todayYmd) return undefined
+  if (dateYmd < todayYmd) return null
+  return getCeilingQuarterHourClockNow(now)
 }
 
 /**
@@ -111,8 +182,11 @@ export function addMinutesToClockTime(timeHHmm: string, addMinutes: number): str
   return `${pad2(hh)}:${pad2(mm)}`
 }
 
+const LAST_QUARTER_DAY_MINUTES = 23 * 60 + 45
+
 /**
- * Minutos entre dos horas el mismo día; si la hora fin es menor o igual, cuenta hasta el día siguiente (cruce de medianoche).
+ * Minutos entre dos horas el mismo día.
+ * Si el fin no es estrictamente posterior al inicio, devuelve `0` (no cruza medianoche).
  */
 export function sameDayMinutesFromStartToEnd(
   timeStart: string,
@@ -121,10 +195,53 @@ export function sameDayMinutesFromStartToEnd(
   const [sh, sm] = timeStart.split(":").map((x) => parseInt(x, 10))
   const [eh, em] = timeEnd.split(":").map((x) => parseInt(x, 10))
   if ([sh, sm, eh, em].some((n) => Number.isNaN(n))) return 0
-  let a = sh * 60 + sm
-  let b = eh * 60 + em
-  if (b <= a) b += 24 * 60
+  const a = sh * 60 + sm
+  const b = eh * 60 + em
+  if (b <= a) return 0
   return b - a
+}
+
+/**
+ * Primer cuarto de hora estrictamente posterior a `startHHmm`.
+ * `null` si no queda ninguno el mismo día (p. ej. inicio 23:45).
+ */
+export function getMinEndClockAfterStart(startHHmm: string): string | null {
+  const parts = startHHmm.split(":")
+  const h = Number.parseInt(parts[0] ?? "", 10)
+  const m = Number.parseInt(parts[1] ?? "", 10)
+  if (Number.isNaN(h) || Number.isNaN(m)) return null
+  const startMin = h * 60 + m
+  const nextQuarter = Math.floor(startMin / 15) * 15 + 15
+  if (nextQuarter > LAST_QUARTER_DAY_MINUTES) return null
+  const hh = Math.floor(nextQuarter / 60)
+  const mm = nextQuarter % 60
+  return `${pad2(hh)}:${pad2(mm)}`
+}
+
+/**
+ * Máxima duración (minutos) para que el fin quede el mismo día y no envuelva a las 00:00.
+ * El último fin seleccionable es 23:45.
+ */
+export function maxSameDayDurationMinutes(startHHmm: string): number {
+  const parts = startHHmm.split(":")
+  const h = Number.parseInt(parts[0] ?? "", 10)
+  const m = Number.parseInt(parts[1] ?? "", 10)
+  if (Number.isNaN(h) || Number.isNaN(m)) return 0
+  const startMin = h * 60 + m
+  const diff = LAST_QUARTER_DAY_MINUTES - startMin
+  return diff > 0 ? diff : 0
+}
+
+/**
+ * Acota la duración para que inicio + duración no cruce medianoche en la UI.
+ */
+export function clampDurationMinutesToSameDay(
+  startHHmm: string,
+  durationMinutes: number
+): number {
+  const max = maxSameDayDurationMinutes(startHHmm)
+  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) return max
+  return Math.min(durationMinutes, max)
 }
 
 const QUARTER_MINUTES = [0, 15, 30, 45] as const

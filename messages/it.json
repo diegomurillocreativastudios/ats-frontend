@@ -2734,7 +2734,8 @@
           "selectCandidate": "Seleziona un candidato",
           "indicateDateTime": "Indica data e ora",
           "invalidDateTime": "Data o ora non valida",
-          "pastDateNotAllowed": "Non puoi programmare un colloquio in una data già trascorsa"
+          "pastDateNotAllowed": "Non puoi programmare un colloquio in una data già trascorsa",
+          "pastDateTimeNotAllowed": "Non puoi programmare un colloquio a un'ora già trascorsa"
         },
         "actions": {
           "schedule": "Programma colloquio",
@@ -2774,7 +2775,9 @@
         "statusAria": "Stato del colloquio",
         "terminalReadOnly": "Questo colloquio è chiuso (stato terminale). I dati sono in sola lettura.",
         "validation": {
-          "invalidDateTime": "La data o l'ora non è valida. Controlla il campo orario."
+          "invalidDateTime": "La data o l'ora non è valida. Controlla il campo orario.",
+          "pastDateNotAllowed": "Non puoi programmare un colloquio in una data già trascorsa",
+          "pastDateTimeNotAllowed": "Non puoi programmare un colloquio a un'ora già trascorsa"
         },
         "actions": {
           "save": "Salva modifiche",

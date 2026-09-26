@@ -19,9 +19,14 @@ import {
 import {
   buildTechnicalSheetPageHtml,
   TECHNICAL_SHEET_MULTI_PAGE_STYLES,
+  type TechnicalSheetCompanyBrandHeader,
   type TechnicalSheetPageHeaderFields,
 } from "@/lib/technical-sheet/technical-sheet-page-shell"
 import { ensureTechnicalSheetPdfDocument } from "@/lib/technical-sheet/wrap-technical-sheet-html-for-pdf"
+
+export interface RenderPaginatedTechnicalSheetPdfOptions {
+  companyBrand?: TechnicalSheetCompanyBrandHeader | null
+}
 
 /**
  * PDF con hojas Letter reales: mide `<article>` en Chromium, parte en `.technical-sheet-page`
@@ -30,9 +35,11 @@ import { ensureTechnicalSheetPdfDocument } from "@/lib/technical-sheet/wrap-tech
 export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
   interpolatedFragment: string,
   header: TechnicalSheetPageHeaderFields,
-  logoUrl: string
+  logoUrl: string,
+  options?: RenderPaginatedTechnicalSheetPdfOptions
 ): Promise<Buffer> {
   const safeLogo = logoUrl.replace(/"/g, "")
+  const companyBrand = options?.companyBrand ?? null
   if (
     interpolatedFragment.includes("technical-sheet-page") &&
     interpolatedFragment.includes("technical-sheet-doc")
@@ -241,6 +248,7 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
             bodyHtml: body,
             header,
             logoUrl: safeLogo,
+            companyBrand,
           })
         )
 

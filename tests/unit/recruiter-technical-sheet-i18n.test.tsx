@@ -36,6 +36,10 @@ vi.mock("@/lib/technical-sheet/fetch-visible-logo-data-uri-client", () => ({
   fetchVisibleLogoDataUriClient: vi.fn(async () => ""),
 }))
 
+vi.mock("@/lib/technical-sheet/fetch-vacancy-company-brand-client", () => ({
+  fetchVacancyCompanyBrandForTechnicalSheet: vi.fn(async () => null),
+}))
+
 vi.mock("@/lib/pdf/download-technical-sheet-preview-as-pdf", () => ({
   downloadTechnicalSheetPreviewAsPdf: vi.fn(),
 }))

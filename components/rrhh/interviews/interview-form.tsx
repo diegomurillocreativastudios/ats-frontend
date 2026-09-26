@@ -18,6 +18,7 @@ import {
 } from "@/lib/api/interviews"
 import {
   getTodayDateInputValue,
+  isLocalDatetimeInPast,
   localDatetimeInputToUtcIso,
   splitDatetimeLocal,
 } from "@/lib/interview-datetime"
@@ -187,6 +188,8 @@ export function InterviewForm(props: InterviewFormProps) {
       const todayYmd = getTodayDateInputValue()
       if (scheduledDate && scheduledDate < todayYmd) {
         nextErrors.scheduledLocal = t("validation.pastDateNotAllowed")
+      } else if (isLocalDatetimeInPast(scheduledLocal)) {
+        nextErrors.scheduledLocal = t("validation.pastDateTimeNotAllowed")
       } else {
         try {
           scheduledAtUtc = localDatetimeInputToUtcIso(scheduledLocal)

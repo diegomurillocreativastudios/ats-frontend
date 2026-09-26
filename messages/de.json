@@ -2734,7 +2734,8 @@
           "selectCandidate": "Wählen Sie einen Kandidaten",
           "indicateDateTime": "Geben Sie Datum und Uhrzeit an",
           "invalidDateTime": "Ungültiges Datum oder Uhrzeit",
-          "pastDateNotAllowed": "Sie können kein Interview an einem vergangenen Datum planen"
+          "pastDateNotAllowed": "Sie können kein Interview an einem vergangenen Datum planen",
+          "pastDateTimeNotAllowed": "Sie können kein Interview zu einer bereits vergangenen Uhrzeit planen"
         },
         "actions": {
           "schedule": "Gespräch planen",
@@ -2774,7 +2775,9 @@
         "statusAria": "Status des Gesprächs",
         "terminalReadOnly": "Dieses Gespräch ist abgeschlossen (Endstatus). Die Daten sind schreibgeschützt.",
         "validation": {
-          "invalidDateTime": "Datum oder Uhrzeit ist ungültig. Überprüfen Sie das Uhrzeitfeld."
+          "invalidDateTime": "Datum oder Uhrzeit ist ungültig. Überprüfen Sie das Uhrzeitfeld.",
+          "pastDateNotAllowed": "Sie können kein Interview an einem vergangenen Datum planen",
+          "pastDateTimeNotAllowed": "Sie können kein Interview zu einer bereits vergangenen Uhrzeit planen"
         },
         "actions": {
           "save": "Änderungen speichern",

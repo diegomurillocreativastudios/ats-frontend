@@ -160,6 +160,58 @@ describe("renderTechnicalSheetPdfBuffer", () => {
     expect(buildTechnicalSheetPdfKitBuffer).toHaveBeenCalled()
   })
 
+  it("passes companyBrand into the Chromium page shell pipeline", async () => {
+    renderPaginatedTechnicalSheetPdfFromInterpolated.mockResolvedValue(
+      Buffer.from("%PDF-company")
+    )
+
+    const { renderTechnicalSheetPdfBuffer } = await import(
+      "@/lib/technical-sheet/render-technical-sheet-pdf-response"
+    )
+
+    const companyBrand = {
+      name: "Creativa",
+      logoDataUri: "data:image/png;base64,abc",
+    }
+
+    await renderTechnicalSheetPdfBuffer({
+      ...baseInput,
+      companyBrand,
+      engine: "chromium",
+    })
+
+    expect(renderPaginatedTechnicalSheetPdfFromInterpolated).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(Object),
+      expect.any(String),
+      { companyBrand }
+    )
+  })
+
+  it("passes companyBrand into the PDFKit pipeline", async () => {
+    buildTechnicalSheetPdfKitBuffer.mockResolvedValue(Buffer.from("%PDF-kit-company"))
+
+    const { renderTechnicalSheetPdfBuffer } = await import(
+      "@/lib/technical-sheet/render-technical-sheet-pdf-response"
+    )
+
+    const companyBrand = {
+      name: "Creativa",
+      logoDataUri: null,
+    }
+
+    await renderTechnicalSheetPdfBuffer({
+      ...baseInput,
+      companyBrand,
+      engine: "pdfkit",
+    })
+
+    expect(buildTechnicalSheetPdfKitBuffer).toHaveBeenCalledWith(
+      baseInput.payload,
+      expect.objectContaining({ companyBrand })
+    )
+  })
+
   it("does not fall back when the schema template is missing", async () => {
     const { findTechnicalSheetDocumentTemplate } = await import(
       "@/lib/templates/technical-sheet-template"

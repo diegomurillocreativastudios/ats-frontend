@@ -2734,7 +2734,8 @@
           "selectCandidate": "Select an applicant",
           "indicateDateTime": "Enter date and time",
           "invalidDateTime": "Invalid date or time",
-          "pastDateNotAllowed": "You cannot schedule an interview on a past date"
+          "pastDateNotAllowed": "You cannot schedule an interview on a past date",
+          "pastDateTimeNotAllowed": "You cannot schedule an interview at a past time"
         },
         "actions": {
           "schedule": "Schedule interview",
@@ -2774,7 +2775,9 @@
         "statusAria": "Interview status",
         "terminalReadOnly": "This interview is closed (terminal status). Data is read-only.",
         "validation": {
-          "invalidDateTime": "The date or time is invalid. Check the time field."
+          "invalidDateTime": "The date or time is invalid. Check the time field.",
+          "pastDateNotAllowed": "You cannot schedule an interview on a past date",
+          "pastDateTimeNotAllowed": "You cannot schedule an interview at a past time"
         },
         "actions": {
           "save": "Save changes",

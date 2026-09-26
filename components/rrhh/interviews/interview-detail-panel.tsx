@@ -20,6 +20,8 @@ import {
   type PatchInterviewPayload,
 } from "@/lib/api/interviews"
 import {
+  getTodayDateInputValue,
+  isLocalDatetimeInPast,
   localDatetimeInputToUtcIso,
   utcIsoToLocalDatetimeInputValue,
 } from "@/lib/interview-datetime"
@@ -374,6 +376,28 @@ export function InterviewDetailPanel({
       }
       const scheduleTrimmed = scheduledLocal.trim()
       if (scheduleTrimmed) {
+        const scheduleChanged =
+          !savedSnapshot || scheduleTrimmed !== savedSnapshot.scheduledLocal
+        if (scheduleChanged) {
+          const todayYmd = getTodayDateInputValue()
+          const datePart = scheduleTrimmed.slice(0, 10)
+          if (datePart && datePart < todayYmd) {
+            setSnackbar({
+              open: true,
+              variant: "error",
+              message: t("detail.validation.pastDateNotAllowed"),
+            })
+            return
+          }
+          if (isLocalDatetimeInPast(scheduleTrimmed)) {
+            setSnackbar({
+              open: true,
+              variant: "error",
+              message: t("detail.validation.pastDateTimeNotAllowed"),
+            })
+            return
+          }
+        }
         try {
           patchPayload.scheduledAtUtc =
             localDatetimeInputToUtcIso(scheduleTrimmed)
@@ -587,6 +611,7 @@ export function InterviewDetailPanel({
           startAriaLabel={t("detail.fields.startTime")}
           endAriaLabel={t("detail.fields.endTime")}
           durationLabel={durationLabel}
+          minDate={getTodayDateInputValue()}
         />
       </div>
 

@@ -8,6 +8,7 @@ import { renderTechnicalSheetSchemaToPdfKit } from "@/lib/technical-sheet/schema
 import type { TechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema-types"
 import { buildTechnicalSheetTemplateContext } from "@/lib/technical-sheet/technical-sheet-template-context"
 import { tryLoadAppLogoRasterBufferForPdfKit } from "@/lib/technical-sheet/technical-sheet-pdf-logo"
+import type { TechnicalSheetCompanyBrand } from "@/lib/technical-sheet/vacancy-company-brand"
 
 /**
  * PDF estructurado con PDFKit desde el esquema JSON (mismo patrón que reportes).
@@ -19,6 +20,8 @@ const BRAND = {
   footer: "#256D35",
   black: "#000000",
   taglineGray: "#57585B",
+  companyGray: "#454648",
+  dividerGray: "#D1D5DB",
   dotGray: "#94a3b8",
 }
 
@@ -96,13 +99,67 @@ function drawPageDecorations(doc: PdfDoc) {
   doc.restore()
 }
 
+function decodeDataUriToBuffer(dataUri: string): Buffer | null {
+  const trimmed = dataUri.trim()
+  const match = /^data:([^;,]+);base64,(.+)$/i.exec(trimmed)
+  if (!match) return null
+  try {
+    const buf = Buffer.from(match[2], "base64")
+    return buf.length > 0 ? buf : null
+  } catch {
+    return null
+  }
+}
+
+function drawCompanyBrand(
+  doc: PdfDoc,
+  companyBrand: TechnicalSheetCompanyBrand | null | undefined,
+  startX: number,
+  headerTop: number,
+  maxRight: number
+) {
+  if (!companyBrand) return
+  const name = String(companyBrand.name ?? "").trim()
+  const logoUri = String(companyBrand.logoDataUri ?? "").trim()
+  if (!name && !logoUri) return
+
+  let x = startX + 10
+  doc.save()
+  doc.strokeColor(BRAND.dividerGray).lineWidth(0.75)
+  doc
+    .moveTo(startX, headerTop)
+    .lineTo(startX, headerTop + 28)
+    .stroke()
+  doc.restore()
+
+  if (logoUri) {
+    const logoBuf = decodeDataUriToBuffer(logoUri)
+    if (logoBuf) {
+      try {
+        const iconW = 22
+        doc.image(logoBuf, x, headerTop, { fit: [iconW, iconW] })
+        x += iconW + 6
+      } catch {
+        /* ignore corrupt logo */
+      }
+    }
+  }
+
+  if (name) {
+    const available = Math.max(40, maxRight - x)
+    doc.fontSize(9).font("Helvetica-Bold").fillColor(BRAND.companyGray)
+    doc.text(name, x, headerTop + 4, { width: available, lineBreak: false, ellipsis: true })
+  }
+}
+
 /**
  * Logo Applican Tree + tagline + datos personales (solo página 1; las siguientes no repiten cabecera).
  */
 function drawRepeatedHeader(
   doc: PdfDoc,
   facts: ReturnType<typeof getTechnicalSheetCandidateHeaderFacts>,
-  iconBuffer: Buffer | undefined
+  iconBuffer: Buffer | undefined,
+  companyBrand: TechnicalSheetCompanyBrand | null | undefined
 ) {
   const { left, right, width } = contentMetrics(doc)
   const headerTop = HEADER_BAND_TOP
@@ -122,6 +179,11 @@ function drawRepeatedHeader(
     })
     doc.fontSize(8.5).font("Helvetica").fillColor(BRAND.taglineGray)
     doc.text(m.brandTagline, left, headerTop + 22, { width: 280, lineGap: 2 })
+
+    const companyStart = wordmarkX + 155
+    if (companyStart + 40 < factsX - 8) {
+      drawCompanyBrand(doc, companyBrand, companyStart, headerTop, factsX - 8)
+    }
   } catch {
     drawVisibleFallbackWordmark(doc, left, headerTop)
   }
@@ -170,6 +232,7 @@ export interface BuildTechnicalSheetPdfKitOptions {
   schema?: TechnicalSheetSchema
   vacancyTitleFallback?: string | null
   logoUrl?: string | null
+  companyBrand?: TechnicalSheetCompanyBrand | null
 }
 
 export async function buildTechnicalSheetPdfKitBuffer(
@@ -183,6 +246,7 @@ export async function buildTechnicalSheetPdfKitBuffer(
   })
   const facts = getTechnicalSheetCandidateHeaderFacts(payload)
   const iconBuffer = (await tryLoadAppLogoRasterBufferForPdfKit(32)) ?? undefined
+  const companyBrand = options?.companyBrand ?? null
 
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
@@ -201,7 +265,7 @@ export async function buildTechnicalSheetPdfKitBuffer(
 
       drawFooterBar(doc)
       drawPageDecorations(doc)
-      drawRepeatedHeader(doc, facts, iconBuffer)
+      drawRepeatedHeader(doc, facts, iconBuffer, companyBrand)
       resetTextCursorToContentArea(doc)
     }
 
