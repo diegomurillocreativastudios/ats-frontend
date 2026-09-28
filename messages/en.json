@@ -2011,7 +2011,8 @@
         "cardAria": "Vacancy: {title}",
         "cardReadOnlyAria": "Inactive vacancy, read-only: {title}",
         "logoAlt": "{company} logo",
-        "unpublished": "Unpublished"
+        "published": "Published",
+        "archived": "Archived"
       },
       "statuses": {
         "active": "Active",
@@ -2112,8 +2113,8 @@
             "removeAria": "Remove requirement {index}"
           },
           "isPublished": {
-            "label": "Published on the opportunities portal",
-            "helper": "If you turn this off, candidates will not see the vacancy. You can publish it later."
+            "label": "Publish on the opportunities portal",
+            "helper": "If you turn this off, the vacancy is saved as Archived: candidates will not see it and you can publish it later."
           }
         },
         "actions": {
@@ -2228,7 +2229,7 @@
           "linkCopied": "Public link copied.",
           "linkCopyFailed": "Could not copy the public link.",
           "published": "Vacancy published on the opportunities portal.",
-          "unpublished": "Vacancy hidden from candidates."
+          "archived": "Vacancy archived: it no longer appears on the opportunities portal."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2271,11 +2272,11 @@
           "errorFallback": "Error finishing the process"
         },
         "publication": {
-          "label": "Published on the opportunities portal",
-          "helperPublished": "Candidates can see this vacancy and apply.",
-          "helperUnpublished": "Hidden from candidates. You can still manage applications and the process as usual.",
-          "readOnlyHint": "A finished or read-only vacancy cannot be published or unpublished.",
-          "badge": "Unpublished"
+          "published": "Published",
+          "archived": "Archived",
+          "helperPublished": "Visible on the opportunities portal: candidates can see it and apply.",
+          "helperArchived": "Hidden from the opportunities portal. The recruitment process stays active.",
+          "readOnlyHint": "A finished or read-only vacancy cannot be published or archived."
         }
       },
       "results": {

@@ -2003,7 +2003,7 @@ export default function VacanteDetallePage() {
           variant: "success",
           message: confirmed
             ? tDetail("toasts.published")
-            : tDetail("toasts.unpublished"),
+            : tDetail("toasts.archived"),
         });
       } catch (err) {
         if (isVacancyReadOnlyConflict(err)) {
@@ -2033,18 +2033,22 @@ export default function VacanteDetallePage() {
     <VacancyPublicationSwitch
       checked={vacancyIsPublished}
       onCheckedChange={handleTogglePublication}
-      label={tDetail("publication.label")}
+      label={
+        vacancyIsPublished
+          ? tDetail("publication.published")
+          : tDetail("publication.archived")
+      }
       description={
         vacancyIsPublished
           ? tDetail("publication.helperPublished")
-          : tDetail("publication.helperUnpublished")
+          : tDetail("publication.helperArchived")
       }
       disabled={isPublicationLocked}
       disabledReason={
         isVacancyReadOnly ? tDetail("publication.readOnlyHint") : undefined
       }
       isBusy={updatingPublication}
-      className="rounded-lg border border-border bg-card px-3 py-2.5"
+      variant="compact"
     />
   );
   /** AI match suggestions from vacancy (for "Posibles candidatos" container). */
@@ -2912,14 +2916,9 @@ export default function VacanteDetallePage() {
                               statusLabel={statusConfig.label}
                               statusClassName={`${statusConfig.bgClass} ${statusConfig.textClass}`}
                               titleClassName="text-2xl"
-                              unpublishedLabel={
-                                vacancyIsPublished ? undefined : tDetail("publication.badge")
-                              }
+                              titleAccessory={renderPublicationSwitch()}
                             />
                           )}
-                          {!isEditing ? (
-                            <div className="mt-4 max-w-md">{renderPublicationSwitch()}</div>
-                          ) : null}
                         </div>
                       </div>
                       <div className="flex max-w-full shrink-0 flex-wrap items-center gap-3">
@@ -3766,14 +3765,9 @@ export default function VacanteDetallePage() {
                             statusLabel={statusConfig.label}
                             statusClassName={`${statusConfig.bgClass} ${statusConfig.textClass}`}
                             titleClassName="text-xl"
-                            unpublishedLabel={
-                              vacancyIsPublished ? undefined : tDetail("publication.badge")
-                            }
+                            titleAccessory={renderPublicationSwitch()}
                           />
                         )}
-                        {!isEditing ? (
-                          <div className="mt-4">{renderPublicationSwitch()}</div>
-                        ) : null}
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">

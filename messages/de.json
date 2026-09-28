@@ -2011,7 +2011,8 @@
         "cardAria": "Stelle: {title}",
         "cardReadOnlyAria": "Inaktive Stelle, nur Ansicht: {title}",
         "logoAlt": "Logo von {company}",
-        "unpublished": "Nicht veröffentlicht"
+        "published": "Veröffentlicht",
+        "archived": "Archiviert"
       },
       "statuses": {
         "active": "Aktiv",
@@ -2112,8 +2113,8 @@
             "removeAria": "Anforderung {index} entfernen"
           },
           "isPublished": {
-            "label": "Im Stellenportal veröffentlicht",
-            "helper": "Wenn du dies deaktivierst, sehen Bewerber die Stelle nicht. Du kannst sie später veröffentlichen."
+            "label": "Im Stellenportal veröffentlichen",
+            "helper": "Wenn du dies deaktivierst, wird die Stelle als Archiviert gespeichert: Bewerber sehen sie nicht und du kannst sie später veröffentlichen."
           }
         },
         "actions": {
@@ -2228,7 +2229,7 @@
           "linkCopied": "Öffentlicher Link kopiert.",
           "linkCopyFailed": "Der öffentliche Link konnte nicht kopiert werden.",
           "published": "Stelle im Stellenportal veröffentlicht.",
-          "unpublished": "Stelle für Bewerber ausgeblendet."
+          "archived": "Stelle archiviert: Sie erscheint nicht mehr im Stellenportal."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2271,11 +2272,11 @@
           "errorFallback": "Fehler beim Abschließen des Prozesses"
         },
         "publication": {
-          "label": "Im Stellenportal veröffentlicht",
-          "helperPublished": "Bewerber können diese Stelle sehen und sich bewerben.",
-          "helperUnpublished": "Für Bewerber ausgeblendet. Bewerbungen und Prozess verwaltest du weiterhin wie gewohnt.",
-          "readOnlyHint": "Eine abgeschlossene oder schreibgeschützte Stelle kann weder veröffentlicht noch ausgeblendet werden.",
-          "badge": "Nicht veröffentlicht"
+          "published": "Veröffentlicht",
+          "archived": "Archiviert",
+          "helperPublished": "Im Stellenportal sichtbar: Bewerber können sie sehen und sich bewerben.",
+          "helperArchived": "Im Stellenportal ausgeblendet. Der Recruiting-Prozess bleibt aktiv.",
+          "readOnlyHint": "Eine abgeschlossene oder schreibgeschützte Stelle kann weder veröffentlicht noch archiviert werden."
         }
       },
       "results": {

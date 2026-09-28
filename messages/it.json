@@ -2011,7 +2011,8 @@
         "cardAria": "Posizione: {title}",
         "cardReadOnlyAria": "Posizione inattiva, sola lettura: {title}",
         "logoAlt": "Logo di {company}",
-        "unpublished": "Non pubblicata"
+        "published": "Pubblicata",
+        "archived": "Archiviata"
       },
       "statuses": {
         "active": "Attiva",
@@ -2112,8 +2113,8 @@
             "removeAria": "Elimina requisito {index}"
           },
           "isPublished": {
-            "label": "Pubblicata sul portale delle opportunità",
-            "helper": "Se la disattivi, i candidati non vedranno la posizione. Potrai pubblicarla in seguito."
+            "label": "Pubblica sul portale delle opportunità",
+            "helper": "Se la disattivi, la posizione viene salvata come Archiviata: i candidati non la vedranno e potrai pubblicarla in seguito."
           }
         },
         "actions": {
@@ -2228,7 +2229,7 @@
           "linkCopied": "Link pubblico copiato.",
           "linkCopyFailed": "Impossibile copiare il link pubblico.",
           "published": "Posizione pubblicata sul portale delle opportunità.",
-          "unpublished": "Posizione nascosta ai candidati."
+          "archived": "Posizione archiviata: non compare più sul portale delle opportunità."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2271,11 +2272,11 @@
           "errorFallback": "Errore nella conclusione del processo"
         },
         "publication": {
-          "label": "Pubblicata sul portale delle opportunità",
-          "helperPublished": "I candidati possono vedere questa posizione e candidarsi.",
-          "helperUnpublished": "Nascosta ai candidati. Continui a gestire candidature e processo normalmente.",
-          "readOnlyHint": "Una posizione conclusa o in sola lettura non può essere pubblicata né nascosta.",
-          "badge": "Non pubblicata"
+          "published": "Pubblicata",
+          "archived": "Archiviata",
+          "helperPublished": "Visibile sul portale delle opportunità: i candidati possono vederla e candidarsi.",
+          "helperArchived": "Nascosta sul portale delle opportunità. Il processo di selezione resta attivo.",
+          "readOnlyHint": "Una posizione conclusa o in sola lettura non può essere né pubblicata né archiviata."
         }
       },
       "results": {

@@ -165,8 +165,8 @@ describe("VacancyListCard i18n (Etapa 7)", () => {
     expect(screen.getByText("Sin título")).toBeInTheDocument()
   })
 
-  it("marca 'No publicada' sin estilizarla como solo lectura", () => {
-    const unpublished = mapVacancyFromApi({
+  it("marca 'Archivado' sin estilizarla como solo lectura", () => {
+    const archived = mapVacancyFromApi({
       id: "vac-3",
       title: "Analista oculto",
       company: "Acme",
@@ -174,23 +174,26 @@ describe("VacancyListCard i18n (Etapa 7)", () => {
       isPublished: false,
     })
     renderWithIntl(
-      <VacancyListCard vacancy={unpublished} onRefresh={() => {}} onSnackbar={() => {}} />,
+      <VacancyListCard vacancy={archived} onRefresh={() => {}} onSnackbar={() => {}} />,
       "es",
     )
 
-    expect(screen.getByText("No publicada")).toBeInTheDocument()
+    const badge = screen.getByText("Archivado")
+    expect(badge).toHaveAttribute("data-published", "false")
+    expect(screen.queryByText("Publicado")).not.toBeInTheDocument()
     expect(
       screen.getByRole("article", { name: "Vacante: Analista oculto" }),
     ).not.toHaveAttribute("data-read-only")
   })
 
-  it("no muestra el badge cuando la vacante está publicada", () => {
+  it("muestra 'Publicado' cuando la vacante está publicada", () => {
     renderWithIntl(
       <VacancyListCard vacancy={baseVacancy} onRefresh={() => {}} onSnackbar={() => {}} />,
-      "en",
+      "es",
     )
 
-    expect(screen.queryByText("Unpublished")).not.toBeInTheDocument()
+    expect(screen.getByText("Publicado")).toHaveAttribute("data-published", "true")
+    expect(screen.queryByText("Archivado")).not.toBeInTheDocument()
   })
 })
 
@@ -200,15 +203,16 @@ describe("RecruiterPortal.vacancies publication keys", () => {
       const vacancies = (
         messagesByLocale[locale].RecruiterPortal as Record<string, unknown>
       ).vacancies as Record<string, Record<string, Record<string, unknown>>>
-      expect(vacancies.cards.unpublished, `cards.unpublished en ${locale}`).toBeTruthy()
+      expect(vacancies.cards.published, `cards.published en ${locale}`).toBeTruthy()
+      expect(vacancies.cards.archived, `cards.archived en ${locale}`).toBeTruthy()
       expect(
         Object.keys(vacancies.detail.publication).sort(),
         `detail.publication en ${locale}`,
       ).toEqual(
-        ["badge", "helperPublished", "helperUnpublished", "label", "readOnlyHint"],
+        ["archived", "helperArchived", "helperPublished", "published", "readOnlyHint"],
       )
       expect(vacancies.detail.toasts.published, locale).toBeTruthy()
-      expect(vacancies.detail.toasts.unpublished, locale).toBeTruthy()
+      expect(vacancies.detail.toasts.archived, locale).toBeTruthy()
       expect(vacancies.detail.errors.publicationConflict, locale).toBeTruthy()
       expect(vacancies.detail.errors.publicationFailed, locale).toBeTruthy()
     }

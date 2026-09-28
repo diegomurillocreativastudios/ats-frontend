@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 
+import { VacancyPublicationSwitch } from "@/components/rrhh/vacancy-publication-switch"
 import { VacancyReadOnlyIdentity } from "@/components/rrhh/vacancy-read-only-identity"
 import esMessages from "@/messages/es.json"
 
@@ -41,7 +42,7 @@ describe("VacancyReadOnlyIdentity", () => {
     expect(screen.queryByText("No publicada")).not.toBeInTheDocument()
   })
 
-  it("shows the unpublished badge next to the status when provided", () => {
+  it("renders the title accessory in the same row as the status", () => {
     render(
       <NextIntlClientProvider locale="es" messages={esMessages}>
         <VacancyReadOnlyIdentity
@@ -53,13 +54,21 @@ describe("VacancyReadOnlyIdentity", () => {
           statusLabel="Activa"
           statusClassName="bg-emerald-100 text-emerald-800"
           titleClassName="text-2xl"
-          unpublishedLabel={esMessages.RecruiterPortal.vacancies.detail.publication.badge}
+          titleAccessory={
+            <VacancyPublicationSwitch
+              checked={false}
+              onCheckedChange={() => {}}
+              label={esMessages.RecruiterPortal.vacancies.detail.publication.archived}
+              variant="compact"
+            />
+          }
         />
       </NextIntlClientProvider>
     )
 
-    const badge = screen.getByText("No publicada")
-    expect(badge).toBeInTheDocument()
-    expect(badge.parentElement).toBe(screen.getByText("Activa").parentElement)
+    const control = screen.getByRole("switch", { name: "Archivado" })
+    const row = screen.getByText("Activa").parentElement
+    expect(row).toContainElement(control)
+    expect(screen.queryByText("No publicada")).not.toBeInTheDocument()
   })
 })

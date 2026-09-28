@@ -2011,7 +2011,8 @@
         "cardAria": "Vacante: {title}",
         "cardReadOnlyAria": "Vacante inactiva, solo consulta: {title}",
         "logoAlt": "Logo de {company}",
-        "unpublished": "No publicada"
+        "published": "Publicado",
+        "archived": "Archivado"
       },
       "statuses": {
         "active": "Activa",
@@ -2112,8 +2113,8 @@
             "removeAria": "Eliminar requerimiento {index}"
           },
           "isPublished": {
-            "label": "Publicada en el portal de oportunidades",
-            "helper": "Si la desactivas, la vacante no aparecerá para los candidatos. Podrás publicarla después."
+            "label": "Publicar en el portal de oportunidades",
+            "helper": "Si la desactivas, la vacante queda como Archivado: no aparecerá para los candidatos y podrás publicarla después."
           }
         },
         "actions": {
@@ -2228,7 +2229,7 @@
           "linkCopied": "Enlace público copiado.",
           "linkCopyFailed": "No se pudo copiar el enlace público.",
           "published": "Vacante publicada en el portal de oportunidades.",
-          "unpublished": "Vacante oculta para los candidatos."
+          "archived": "Vacante archivada: ya no aparece en el portal de oportunidades."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2271,11 +2272,11 @@
           "errorFallback": "Error al finalizar el proceso"
         },
         "publication": {
-          "label": "Publicada en el portal de oportunidades",
-          "helperPublished": "Los candidatos pueden ver esta vacante y postularse.",
-          "helperUnpublished": "Oculta para los candidatos. Sigues gestionando postulaciones y el proceso normalmente.",
-          "readOnlyHint": "Una vacante finalizada o de solo lectura no se puede publicar ni despublicar.",
-          "badge": "No publicada"
+          "published": "Publicado",
+          "archived": "Archivado",
+          "helperPublished": "Visible en el portal de oportunidades: los candidatos pueden verla y postularse.",
+          "helperArchived": "Oculta en el portal de oportunidades. El proceso de reclutamiento sigue activo.",
+          "readOnlyHint": "Una vacante finalizada o de solo lectura no se puede publicar ni archivar."
         }
       },
       "results": {

@@ -2011,7 +2011,8 @@
         "cardAria": "Poste : {title}",
         "cardReadOnlyAria": "Poste inactif, lecture seule : {title}",
         "logoAlt": "Logo de {company}",
-        "unpublished": "Non publiée"
+        "published": "Publiée",
+        "archived": "Archivée"
       },
       "statuses": {
         "active": "Active",
@@ -2112,8 +2113,8 @@
             "removeAria": "Supprimer l'exigence {index}"
           },
           "isPublished": {
-            "label": "Publiée sur le portail des opportunités",
-            "helper": "Si vous la désactivez, les candidats ne verront pas l'offre. Vous pourrez la publier plus tard."
+            "label": "Publier sur le portail des opportunités",
+            "helper": "Si vous la désactivez, l'offre est enregistrée comme Archivée : les candidats ne la verront pas et vous pourrez la publier plus tard."
           }
         },
         "actions": {
@@ -2228,7 +2229,7 @@
           "linkCopied": "Lien public copié.",
           "linkCopyFailed": "Impossible de copier le lien public.",
           "published": "Offre publiée sur le portail des opportunités.",
-          "unpublished": "Offre masquée pour les candidats."
+          "archived": "Offre archivée : elle n'apparaît plus sur le portail des opportunités."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2271,11 +2272,11 @@
           "errorFallback": "Erreur lors de la fin du processus"
         },
         "publication": {
-          "label": "Publiée sur le portail des opportunités",
-          "helperPublished": "Les candidats peuvent voir cette offre et postuler.",
-          "helperUnpublished": "Masquée pour les candidats. Vous gérez toujours les candidatures et le processus normalement.",
-          "readOnlyHint": "Une offre clôturée ou en lecture seule ne peut pas être publiée ni masquée.",
-          "badge": "Non publiée"
+          "published": "Publiée",
+          "archived": "Archivée",
+          "helperPublished": "Visible sur le portail des opportunités : les candidats peuvent la voir et postuler.",
+          "helperArchived": "Masquée sur le portail des opportunités. Le processus de recrutement reste actif.",
+          "readOnlyHint": "Une offre clôturée ou en lecture seule ne peut être ni publiée ni archivée."
         }
       },
       "results": {
