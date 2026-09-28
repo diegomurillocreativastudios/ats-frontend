@@ -45,6 +45,7 @@ const listResponse = {
   items: [
     {
       id: "vac-1",
+      publicSlug: null,
       title: "Ejecutivo de negocios y créditos",
       company: { id: "c1", name: "Creativa", hasLogo: false, logo: null },
       countryCode: "SV",
@@ -54,6 +55,7 @@ const listResponse = {
     },
     {
       id: "vac-2",
+      publicSlug: null,
       title: "Piloto titular de Fórmula 1",
       company: { id: "c2", name: "Mercedes Benz", hasLogo: false, logo: null },
       countryCode: "DE",
@@ -200,5 +202,18 @@ describe("portal de oportunidades UI", () => {
     const department = await screen.findByLabelText("Departamento")
     expect(within(department as HTMLSelectElement).getByText("Ventas")).toBeInTheDocument()
     expect(screen.getByLabelText("Modalidad")).toHaveTextContent("Presencial")
+  })
+
+  it("pide pageSize 10 al cargar el listado", async () => {
+    renderWithIntl(<PublicVacanciesExplorer />)
+
+    await screen.findByLabelText("Buscar vacantes")
+
+    expect(listPublicVacanciesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pageSize: 10,
+        filter: "openVacancies",
+      })
+    )
   })
 })

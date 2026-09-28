@@ -1,12 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import {
-  getPublicVacancyDetail,
+  getPublicVacancyByPathSegment,
   type OpportunityVacancyDetail,
 } from "@/lib/api/public-vacancies"
 import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
@@ -16,11 +16,13 @@ import {
   PublicVacancyOutline,
   VacancyContentBlocks,
 } from "@/components/public/PublicVacancyOutline"
+import { CopyPublicVacancyLinkButton } from "@/components/shared/copy-public-vacancy-link-button"
 import {
   buildVacancyStory,
   hasVacancyFieldValue,
 } from "@/lib/public-vacancy-content"
 import { publicOpportunitiesTheme } from "@/lib/public-opportunities-theme"
+import { buildPublicVacancyPath } from "@/lib/vacancies/vacancy-public-path"
 
 const vacancyIllustrationSrc = "/ilustrations/undraw_document-review_lfir.svg"
 
@@ -51,6 +53,7 @@ export function PublicVacancyDetailPage({
 }) {
   const t = useTranslations("PublicOpportunities.detail")
   const tPage = useTranslations("PublicOpportunities.page")
+  const router = useRouter()
   const searchParams = useSearchParams()
   const [vacancy, setVacancy] = useState<OpportunityVacancyDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -69,7 +72,7 @@ export function PublicVacancyDetailPage({
       setErrorMessage(null)
 
       try {
-        const nextVacancy = await getPublicVacancyDetail(vacancyId)
+        const nextVacancy = await getPublicVacancyByPathSegment(vacancyId)
 
         if (isCancelled) return
         if (!nextVacancy) {
@@ -79,6 +82,13 @@ export function PublicVacancyDetailPage({
         }
 
         setVacancy(nextVacancy)
+
+        const canonical = nextVacancy.publicSlug
+        if (canonical && vacancyId !== canonical) {
+          const nextPath = buildPublicVacancyPath(nextVacancy)
+          const withQuery = queryString ? `${nextPath}?${queryString}` : nextPath
+          router.replace(withQuery)
+        }
       } catch (error) {
         if (isCancelled) return
         const message =
@@ -99,7 +109,7 @@ export function PublicVacancyDetailPage({
     return () => {
       isCancelled = true
     }
-  }, [vacancyId, t])
+  }, [vacancyId, t, router, queryString])
 
   useEffect(() => {
     if (!vacancy?.title) return
@@ -107,15 +117,20 @@ export function PublicVacancyDetailPage({
   }, [vacancy?.title, t])
 
   const companyName = vacancy?.company.name?.trim() ?? ""
-  const applyHref = queryString
-    ? `/portal-oportunidades/${vacancyId}/aplicar?${queryString}`
-    : `/portal-oportunidades/${vacancyId}/aplicar`
+  const applyHref = vacancy
+    ? queryString
+      ? `${buildPublicVacancyPath(vacancy, "aplicar")}?${queryString}`
+      : buildPublicVacancyPath(vacancy, "aplicar")
+    : queryString
+      ? `/portal-oportunidades/${encodeURIComponent(vacancyId)}/aplicar?${queryString}`
+      : `/portal-oportunidades/${encodeURIComponent(vacancyId)}/aplicar`
   const departmentLabel = vacancy?.department?.displayName
   const modalityLabel = vacancy?.modality?.displayName
   const hasDepartment = hasVacancyFieldValue(departmentLabel)
   const hasModality = hasVacancyFieldValue(modalityLabel)
   const hasLocation = Boolean(vacancy?.countryCode || vacancy?.stateCode)
   const applyClassName = `inline-flex items-center justify-center gap-2 ${publicOpportunitiesTheme.cta}`
+  const copyLinkClassName = `inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ats-cobre focus-visible:ring-offset-2 focus-visible:ring-offset-background`
   const story = useMemo(() => {
     if (!vacancy) return null
     return buildVacancyStory({
@@ -175,11 +190,19 @@ export function PublicVacancyDetailPage({
                   {vacancy.title}
                 </h1>
 
-                <div className="mt-6 lg:hidden">
+                <div className="mt-6 space-y-3 lg:hidden">
                   <Link href={applyHref} className={applyClassName}>
                     {t("apply")}
                     <ArrowRight className="h-4 w-4" aria-hidden />
                   </Link>
+                  <CopyPublicVacancyLinkButton
+                    vacancy={vacancy}
+                    label={t("copyLink")}
+                    ariaLabel={t("copyLinkAria")}
+                    copiedLabel={t("linkCopied")}
+                    copyFailedLabel={t("linkCopyFailed")}
+                    className={copyLinkClassName}
+                  />
                 </div>
 
                 {story.description.length ? (
@@ -235,6 +258,14 @@ export function PublicVacancyDetailPage({
                     {t("apply")}
                     <ArrowRight className="h-4 w-4" aria-hidden />
                   </Link>
+                  <CopyPublicVacancyLinkButton
+                    vacancy={vacancy}
+                    label={t("copyLink")}
+                    ariaLabel={t("copyLinkAria")}
+                    copiedLabel={t("linkCopied")}
+                    copyFailedLabel={t("linkCopyFailed")}
+                    className={`mt-3 ${copyLinkClassName}`}
+                  />
                 </div>
 
                 <div className="border-t border-border pt-5">

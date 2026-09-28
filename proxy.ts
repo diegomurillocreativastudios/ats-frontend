@@ -1,56 +1,105 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
+import { assertMutationCsrf } from "@/lib/auth/csrf"
 import { isPublicPath } from "@/lib/auth/public-paths"
 import {
   PORTAL_HOME_HREF,
   PORTAL_SELECTION_PATH,
-  resolvePostAuthPath,
-  resolveSolePortalHref,
 } from "@/lib/portal-access"
-import { isCandidateRole, isRecruiterRole } from "@/lib/roles"
+import {
+  applySecurityHeaders,
+  generateCspNonce,
+} from "@/lib/security/security-headers"
 
 const AUTH_ROUTE = "/auth/iniciar-sesion"
 const SSO_SUCCESS_PATH = "/auth/sso/success"
 const CANDIDATE_HOME = PORTAL_HOME_HREF.candidate
-const RECRUITER_HOME = PORTAL_HOME_HREF.rrhh
 
-function getSessionRoleRaw(request: NextRequest): string | null {
-  const userCookie = request.cookies.get(AUTH_COOKIES.user)?.value
-  if (!userCookie) return null
-
-  try {
-    const parsed = JSON.parse(userCookie) as { role?: unknown; roles?: unknown }
-    if (typeof parsed.role === "string") return parsed.role
-    if (Array.isArray(parsed.roles) && typeof parsed.roles[0] === "string") {
-      return parsed.roles[0]
-    }
-  } catch {
-    return null
-  }
-
-  return null
+/**
+ * Continues the chain with security headers and per-request CSP nonce
+ * stamped on both the request (for Next script sealing) and the response.
+ */
+function nextWithSecurity(request: NextRequest, nonce: string): NextResponse {
+  const requestHeaders = new Headers(request.headers)
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  })
+  return applySecurityHeaders(response, {
+    request,
+    requestHeaders,
+    nonce,
+  })
 }
 
+/**
+ * Redirect/rewrite/JSON responses: security headers on the response only
+ * (no request CSP; Next does not render HTML for these).
+ */
+function secureResponse(
+  request: NextRequest,
+  response: NextResponse,
+  nonce: string
+): NextResponse {
+  return applySecurityHeaders(response, { request, nonce })
+}
+
+/**
+ * Edge proxy: auth gate by access-token presence only.
+ * Role-based portal isolation lives in server layouts (backend session).
+ * FE-SEC-010: defensive headers + Content Security Policy with nonce.
+ */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const nonce = generateCspNonce()
+
+  if (pathname === "/chromium-pack.tar") {
+    return secureResponse(request, new NextResponse(null, { status: 404 }), nonce)
+  }
+
+  const csrf = assertMutationCsrf(request)
+  if (csrf.ok === false) {
+    return secureResponse(
+      request,
+      NextResponse.json(
+        { message: csrf.message },
+        { status: csrf.status }
+      ),
+      nonce
+    )
+  }
+
   const hasToken = Boolean(request.cookies.get(AUTH_COOKIES.access)?.value)
-  const rawRole = getSessionRoleRaw(request)
-  const isCandidate = isCandidateRole(rawRole)
-  const isRecruiter = isRecruiterRole(rawRole)
 
   if (pathname === "/iniciar-sesion" || pathname === "/login") {
     const dest = new URL("/auth/iniciar-sesion", request.url)
     dest.search = request.nextUrl.search
-    return NextResponse.redirect(dest)
+    return secureResponse(request, NextResponse.redirect(dest), nonce)
   }
   if (pathname === "/crear-cuenta") {
-    return NextResponse.redirect(new URL("/auth/registrarse", request.url))
+    return secureResponse(
+      request,
+      NextResponse.redirect(new URL("/auth/registrarse", request.url)),
+      nonce
+    )
+  }
+  if (pathname === "/restablecer-contrasena") {
+    const dest = new URL("/auth/restablecer-contrasena", request.url)
+    dest.search = request.nextUrl.search
+    return secureResponse(request, NextResponse.redirect(dest), nonce)
+  }
+  if (
+    pathname === "/auth/forgot-password" ||
+    pathname.startsWith("/auth/forgot-password/")
+  ) {
+    const dest = new URL("/auth/olvidaste-tu-contrasena", request.url)
+    dest.search = request.nextUrl.search
+    return secureResponse(request, NextResponse.redirect(dest), nonce)
   }
 
   if (pathname === "/mi-perfil" || pathname.startsWith("/mi-perfil/")) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace(/^\/mi-perfil/, `${CANDIDATE_HOME}/mi-perfil`)
-    return NextResponse.redirect(url)
+    return secureResponse(request, NextResponse.redirect(url), nonce)
   }
 
   if (
@@ -65,15 +114,15 @@ export function proxy(request: NextRequest) {
     if (pathname !== SSO_SUCCESS_PATH) {
       const dest = new URL(SSO_SUCCESS_PATH, request.nextUrl.origin)
       dest.search = request.nextUrl.search
-      return NextResponse.rewrite(dest)
+      return secureResponse(request, NextResponse.rewrite(dest), nonce)
     }
-    return NextResponse.next()
+    return nextWithSecurity(request, nonce)
   }
 
   const isAuthPage =
     pathname === "/auth/iniciar-sesion" ||
     pathname === "/auth/registrarse" ||
-    pathname.startsWith("/auth/forgot-password") ||
+    pathname.startsWith("/auth/olvidaste-tu-contrasena") ||
     pathname === "/recuperar-contrasena"
 
   /**
@@ -82,30 +131,27 @@ export function proxy(request: NextRequest) {
    * y nunca ve el formulario de nueva contraseña).
    */
   if (hasToken && isAuthPage) {
-    return NextResponse.redirect(
-      new URL(resolvePostAuthPath(rawRole), request.url),
+    return secureResponse(
+      request,
+      NextResponse.redirect(new URL(PORTAL_SELECTION_PATH, request.url)),
+      nonce
     )
   }
 
   if (pathname === "/" && hasToken) {
-    return NextResponse.redirect(
-      new URL(resolvePostAuthPath(rawRole), request.url),
+    return secureResponse(
+      request,
+      NextResponse.redirect(new URL(PORTAL_SELECTION_PATH, request.url)),
+      nonce
     )
   }
 
   if (pathname === PORTAL_SELECTION_PATH && hasToken) {
-    const solePortalHref = resolveSolePortalHref(rawRole)
-    if (solePortalHref) {
-      const url = request.nextUrl.clone()
-      url.pathname = solePortalHref
-      url.search = ""
-      return NextResponse.redirect(url)
-    }
-    return NextResponse.next()
+    return nextWithSecurity(request, nonce)
   }
 
   if (isPublicPath(pathname)) {
-    return NextResponse.next()
+    return nextWithSecurity(request, nonce)
   }
 
   if (!hasToken) {
@@ -113,32 +159,14 @@ export function proxy(request: NextRequest) {
     if (pathname !== "/") {
       loginUrl.searchParams.set("from", `${pathname}${request.nextUrl.search}`)
     }
-    return NextResponse.redirect(loginUrl)
+    return secureResponse(request, NextResponse.redirect(loginUrl), nonce)
   }
 
-  const isPortalCandidateRoute =
-    pathname === CANDIDATE_HOME || pathname.startsWith(`${CANDIDATE_HOME}/`)
-  const isPortalRecruiterRoute =
-    pathname === RECRUITER_HOME || pathname.startsWith(`${RECRUITER_HOME}/`)
-  if (isPortalCandidateRoute && isRecruiter) {
-    const url = request.nextUrl.clone()
-    url.pathname = RECRUITER_HOME
-    url.search = ""
-    return NextResponse.redirect(url)
-  }
-
-  if (isPortalRecruiterRoute && isCandidate) {
-    const url = request.nextUrl.clone()
-    url.pathname = CANDIDATE_HOME
-    url.search = ""
-    return NextResponse.redirect(url)
-  }
-
-  return NextResponse.next()
+  return nextWithSecurity(request, nonce)
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|chromium-pack\\.tar|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|tar)$).*)",
+    "/((?!_next/static|_next/image|location-catalog/|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg)$).*)",
   ],
 }

@@ -95,10 +95,26 @@ export const buildFullFormStateFromSources = (
   const headline =
     headlineRaw.trim() !== "" ? headlineRaw : desiredRoleFallback
 
+  const latestResume =
+    nd.latestResume != null && typeof nd.latestResume === "object" && !Array.isArray(nd.latestResume)
+      ? (nd.latestResume as Record<string, unknown>)
+      : null
+  const resumeFromDocument = str(latestResume?.rawText ?? latestResume?.RawText).trim()
+  const resumeMarkdown = [
+    p?.resumeMarkdown,
+    nd.resumeMarkdown,
+    nd.ResumeMarkdown,
+    resumeFromDocument,
+    nd.rawText,
+    nd.RawText,
+  ]
+    .map((value) => str(value).trim())
+    .find((value) => value !== "") ?? ""
+
   return {
     headline,
     summary: p?.summary ?? str(nd.Summary ?? nd.summary),
-    resumeMarkdown: p?.resumeMarkdown ?? str(nd.resumeMarkdown),
+    resumeMarkdown,
     nationalId: p?.nationalId ?? "",
     firstName: p?.firstName ?? str(nd.FirstName ?? nd.firstName) ?? "",
     lastName: p?.lastName ?? str(nd.LastName ?? nd.lastName) ?? "",

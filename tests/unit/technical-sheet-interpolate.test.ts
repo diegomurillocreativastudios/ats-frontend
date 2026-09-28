@@ -46,10 +46,12 @@ describe("interpolateTechnicalSheetTemplate", () => {
     expect(interpolateTechnicalSheetTemplate("{{candidate.missing}}", { candidate: {} })).toBe("")
   })
 
-  it("does not escape placeholders ending with Html", () => {
+  it("escapes placeholders ending with Html", () => {
     const html = "<ul>{{insightsHtml}}</ul>"
     const ctx = { insightsHtml: "<li>OK</li>" }
-    expect(interpolateTechnicalSheetTemplate(html, ctx)).toBe("<ul><li>OK</li></ul>")
+    expect(interpolateTechnicalSheetTemplate(html, ctx)).toBe(
+      "<ul>&lt;li&gt;OK&lt;/li&gt;</ul>"
+    )
   })
 
   it("escapes substituted values", () => {
@@ -156,14 +158,15 @@ describe("expandEachBlocks & renderTechnicalSheetHtml", () => {
     )
   })
 
-  it("sanitizes XSS from raw HTML placeholders after interpolate", () => {
-    const tpl = "<div>{{{payloadHtml}}}</div>"
+  it("escapes XSS from former raw HTML placeholders", () => {
+    const tpl = "<div>{{payloadHtml}}</div>"
     const out = renderTechnicalSheetHtml(tpl, {
       payloadHtml: '<p>ok</p><script>alert(1)</script><img src=x onerror=alert(2)>',
     })
-    expect(out).toContain("<p>ok</p>")
-    expect(out).not.toMatch(/<script/i)
-    expect(out).not.toMatch(/onerror/i)
+    expect(out).toContain("&lt;p&gt;ok&lt;/p&gt;")
+    expect(out).toContain("&lt;script&gt;")
+    expect(out).not.toMatch(/<script[\s>]/i)
+    expect(out).not.toMatch(/<img[\s>]/i)
   })
 
   it("supports nested each for responsibilities", () => {
@@ -192,5 +195,36 @@ describe("expandEachBlocks & renderTechnicalSheetHtml", () => {
       },
     })
     expect(renderTechnicalSheetHtml(tpl, ctx)).toBe("<span>Acme</span>-Zoe Lee")
+  })
+
+  it("fills candidate.country from address when country is missing (vacancy payload)", () => {
+    const ctx = buildTechnicalSheetTemplateContext({
+      candidate: {
+        firstName: "Diego",
+        lastName: "Murillo",
+        address: "SAN SALVADOR, El Salvador",
+        englishLevel: "Avanzado",
+      },
+    })
+    const candidate = ctx.candidate as Record<string, unknown>
+    expect(candidate.country).toBe("El Salvador")
+  })
+
+  it("normalizes PascalCase country and workMode for additional-info bindings", () => {
+    const ctx = buildTechnicalSheetTemplateContext({
+      candidate: {
+        firstName: "Ana",
+        lastName: "García",
+        Country: "Costa Rica",
+        WorkMode: "Remoto",
+        Availability: "Inmediata",
+        MinSalary: 3000,
+      },
+    })
+    const candidate = ctx.candidate as Record<string, unknown>
+    expect(candidate.country).toBe("Costa Rica")
+    expect(candidate.workMode).toBe("Remoto")
+    expect(candidate.availability).toBe("Inmediata")
+    expect(candidate.salaryExpectation).toBe("3000")
   })
 })

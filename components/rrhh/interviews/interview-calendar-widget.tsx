@@ -14,12 +14,14 @@ export interface InterviewCalendarWidgetProps {
   /** ISO UTC; si está vacío no se puede crear evento en calendario. */
   scheduledAtUtc: string
   onSync?: () => void
+  compact?: boolean
 }
 
 export function InterviewCalendarWidget({
   interviewId,
   scheduledAtUtc,
   onSync,
+  compact = false,
 }: InterviewCalendarWidgetProps) {
   const t = useTranslations("RecruiterPortal.interviews.calendar")
   const { status } = useGoogleCalendar()
@@ -65,16 +67,26 @@ export function InterviewCalendarWidget({
     }
   }
 
-  const cardClass =
-    "rounded-xl border border-border bg-card p-5 font-sans text-sm shadow-sm"
+  const cardClass = compact
+    ? "font-sans text-sm"
+    : "rounded-xl border border-border bg-card p-5 font-sans text-sm shadow-sm"
+  const headingClass = compact
+    ? "sr-only"
+    : "text-base font-semibold text-foreground"
+  const compactRow =
+    "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+  const stackClass = compact ? compactRow : "mt-3 flex flex-col gap-3"
+  const actionClass = compact
+    ? "inline-flex min-h-11 shrink-0 items-center gap-2 self-start rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple sm:self-center"
+    : "inline-flex w-fit items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
 
   if (!status.isConnected) {
     return (
       <div className={cardClass}>
-        <h3 className="text-base font-semibold text-foreground">
+        <h3 className={headingClass}>
           {t("title")}
         </h3>
-        <p className="mt-2 text-muted-foreground">
+        <p className={compact ? "text-muted-foreground" : "mt-2 text-muted-foreground"}>
           {t("notConnected")}{" "}
           <Link
             href="/portal-rrhh/configuracion/calendario"
@@ -91,10 +103,10 @@ export function InterviewCalendarWidget({
   if (!scheduledAtUtc?.trim()) {
     return (
       <div className={cardClass}>
-        <h3 className="text-base font-semibold text-foreground">
+        <h3 className={headingClass}>
           {t("title")}
         </h3>
-        <p className="mt-2 text-muted-foreground">
+        <p className={compact ? "text-muted-foreground" : "mt-2 text-muted-foreground"}>
           {t("noSchedule")}
         </p>
       </div>
@@ -103,46 +115,56 @@ export function InterviewCalendarWidget({
 
   return (
     <>
-      <div className={`${cardClass} border-vo-purple/30`}>
-        <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-          {t("title")}
-        </h3>
+      <div className={compact ? cardClass : `${cardClass} border-vo-purple/30`}>
+        <h3 className={headingClass}>{t("title")}</h3>
 
         {isLoading ? (
-          <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground">
+          <div
+            className={
+              compact
+                ? "flex items-center gap-2 py-1 text-muted-foreground"
+                : "flex items-center justify-center gap-2 py-6 text-muted-foreground"
+            }
+          >
             <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
             {t("loadingEvent")}
           </div>
         ) : calendarEvent?.syncStatus === "synced" &&
           calendarEvent.googleCalendarUrl ? (
-          <div className="mt-3 flex flex-col gap-3">
-            <p className="rounded-md border border-emerald-700 bg-emerald-50 px-3 py-2 text-emerald-700">
+          <div className={stackClass}>
+            <p
+              className={`min-w-0 rounded-md border border-emerald-700 bg-emerald-50 px-3 py-2 text-emerald-700 ${compact ? "flex-1" : ""}`}
+            >
               {t("synced")}
             </p>
             <a
               href={calendarEvent.googleCalendarUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex w-fit items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+              className={actionClass}
             >
               {t("viewInGoogle")}
               <ExternalLink className="h-4 w-4" aria-hidden />
             </a>
           </div>
         ) : calendarEvent?.syncStatus === "pending" ? (
-          <p className="mt-3 rounded-md border border-border bg-muted px-3 py-2 text-foreground">
+          <p
+            className={`rounded-md border border-border bg-muted px-3 py-2 text-foreground ${compact ? "" : "mt-3"}`}
+          >
             {t("pending")}
           </p>
         ) : (
-          <div className="mt-3 flex flex-col gap-3">
-            <p className="rounded-md border border-amber-700 bg-amber-50 px-3 py-2 text-amber-700">
+          <div className={stackClass}>
+            <p
+              className={`min-w-0 rounded-md border border-amber-700 bg-amber-50 px-3 py-2 text-amber-700 ${compact ? "flex-1" : ""}`}
+            >
               {calendarEvent ? t("notSynced") : t("noEvent")}
             </p>
             <button
               type="button"
               onClick={() => void handleSync()}
               disabled={isSyncing}
-              className="w-fit rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
+              className={`${actionClass} disabled:opacity-50`}
             >
               {isSyncing ? t("updating") : t("retry")}
             </button>

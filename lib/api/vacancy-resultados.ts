@@ -1,12 +1,8 @@
 import { apiClient } from "@/lib/api"
 import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
-import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api"
 import {
   listCompanyApplicantStatuses,
-  listRecruiterCompanies,
   listRecruiterStages,
-  persistVacancyCompanyId,
-  resolveVacancyCompanyId,
 } from "@/lib/api/recruiter-companies"
 import {
   buildApplicantComponentScoreAverages,
@@ -125,7 +121,8 @@ export interface VacancyResultadosViewModel {
  * Cuando exista `GET .../vacancies/:id/resultados`, sustituir el cuerpo por esa llamada.
  */
 export async function fetchVacancyResultadosPayload(
-  vacancyId: string
+  vacancyId: string,
+  options?: { fallbackStageNames?: readonly string[] }
 ): Promise<VacancyResultadosViewModel> {
   const vacancyData = await apiClient.get(
     `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}`
@@ -134,18 +131,10 @@ export async function fetchVacancyResultadosPayload(
     vacancyId,
     vacancyData
   )
-  const vacancyRecord = normalizeVacancyDetailFromApi(vacancyWithApplicants)
-  const directCompanyId = vacancyRecord?.companyId ?? vacancyRecord?.company_id
-  if (directCompanyId != null && String(directCompanyId).trim() !== "") {
-    persistVacancyCompanyId(vacancyId, String(directCompanyId).trim())
-  }
-
-  const companies = await listRecruiterCompanies().catch(() => [])
-  const companyId = resolveVacancyCompanyId(vacancyRecord, companies, vacancyId)
 
   const [stageRows, companyStatuses] = await Promise.all([
-    listRecruiterStages(companyId).catch(() => []),
-    listCompanyApplicantStatuses(companyId).catch(() => []),
+    listRecruiterStages().catch(() => []),
+    listCompanyApplicantStatuses().catch(() => []),
   ])
 
   const kanbanStageNames = kanbanStageNamesFromApiStages(
@@ -154,7 +143,11 @@ export async function fetchVacancyResultadosPayload(
   const applicants = applicantsFromVacancyPayload(vacancyWithApplicants)
   const title = titleFromVacancyPayload(vacancyWithApplicants)
   const meta = vacancyMetaFromPayload(vacancyWithApplicants)
-  const orderedStageNames = resolveOrderedStageNames(kanbanStageNames, applicants)
+  const orderedStageNames = resolveOrderedStageNames(
+    kanbanStageNames,
+    applicants,
+    options?.fallbackStageNames
+  )
 
   const byStage = buildStageCounts(applicants, orderedStageNames)
   const applicantsByStageFull = buildApplicantsGroupedByStageFull(

@@ -51,13 +51,16 @@ export function resolvePdfChromiumLaunchArgs(): string[] {
 }
 
 export function resolvePdfChromiumHeadless(): LaunchOptions["headless"] {
-  return isVercelRuntime() ? chromium.headless : true
+  // @sparticuz/chromium >=143 embeds `--headless='shell'` in `args` and no longer
+  // exports `chromium.headless`. Passing `headless: true` enables the new headless
+  // stack and breaks launch on Vercel.
+  if (isVercelRuntime()) return "shell"
+  return true
 }
 
 export function resolvePdfChromiumDefaultViewport(): LaunchOptions["defaultViewport"] {
-  return isVercelRuntime()
-    ? chromium.defaultViewport
-    : { width: 1280, height: 1600 }
+  // @sparticuz/chromium >=143 no longer exports `defaultViewport`.
+  return { width: 1280, height: 1600, deviceScaleFactor: 1 }
 }
 
 export function preparePdfChromiumForLaunch(): void {

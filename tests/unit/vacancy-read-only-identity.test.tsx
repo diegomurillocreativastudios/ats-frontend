@@ -33,5 +33,10 @@ describe("VacancyReadOnlyIdentity", () => {
     expect(screen.getByText("Presencial")).toBeInTheDocument()
     expect(screen.getByText("Ubicación")).toBeInTheDocument()
     expect(screen.getByText("Creada el 13 ago 2026")).toBeInTheDocument()
+
+    const facts = screen.getByText("Departamento").closest("dl")
+    expect(facts).toHaveClass("grid-cols-1", "@min-[22rem]/identity:grid-cols-2")
+    expect(facts?.parentElement).toHaveClass("@container/identity")
+    expect(screen.getByRole("heading", { name: "Piloto titular de Fórmula 1" })).toHaveClass("wrap-break-word")
   })
 })

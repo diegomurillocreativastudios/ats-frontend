@@ -11,9 +11,10 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { ChevronRight, LogOut, Shield } from "lucide-react"
+import ProductBrand from "@/components/branding/ProductBrand"
 import LanguageSwitcher from "@/components/language-switcher"
+import { RecruiterAvatar } from "@/components/rrhh/recruiter-avatar"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
-import { getInitials } from "@/lib/getInitials"
 import { logoutToLogin } from "@/lib/logout-to-login"
 import { isAdminRole } from "@/lib/roles"
 import {
@@ -33,9 +34,26 @@ interface PortalTopbarCrumbsProps {
   ariaLabel: string
 }
 
+interface PortalTopbarBrandLinkProps {
+  href: string
+  ariaLabel: string
+}
+
 interface PortalTopbarActionsProps {
   includeAdminShortcut?: boolean
 }
+
+/**
+ * Compact topbar: hamburger | centered logo | actions.
+ */
+export const PORTAL_COMPACT_TOPBAR_LAYOUT_CLASS =
+  "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center"
+
+/**
+ * Desktop topbar: breadcrumbs on the left, actions on the right.
+ */
+export const PORTAL_DESKTOP_TOPBAR_LAYOUT_CLASS =
+  "flex items-center justify-between"
 
 interface TopbarAccountMenuProps {
   includeAdminShortcut?: boolean
@@ -89,6 +107,28 @@ export function PortalTopbarCrumbs({
 }
 
 /**
+ * Centered product mark for the compact (tablet / mobile) topbar.
+ */
+export function PortalTopbarBrandLink({
+  href,
+  ariaLabel,
+}: PortalTopbarBrandLinkProps) {
+  return (
+    <Link
+      href={href}
+      className="justify-self-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+      aria-label={ariaLabel}
+    >
+      <ProductBrand
+        layout="inline"
+        tone="onLight"
+        density="topbarMobile"
+      />
+    </Link>
+  )
+}
+
+/**
  * Language and account — shared hit target and spacing.
  */
 export function PortalTopbarActions({
@@ -109,14 +149,13 @@ function TopbarAccountMenu({
   const tSidebar = useTranslations("Sidebar")
   const tCommon = useTranslations("Common")
   const tActions = useTranslations("Actions")
-  const { user, loading } = useCurrentUser()
+  const { user, photoSrc, loading } = useCurrentUser()
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const displayName =
     formatSidebarDisplayName(user?.name, user?.email) ?? tCommon("userFallback")
-  const initials = getInitials(user?.name, user?.email)
   const roleKey = resolveSidebarRoleLabelKey(user?.role)
   const roleLabel = roleKey
     ? tSidebar(roleKey)
@@ -171,7 +210,7 @@ function TopbarAccountMenu({
         type="button"
         onClick={handleToggleMenu}
         onKeyDown={handleMenuButtonKeyDown}
-        className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full p-0 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+        className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full p-0 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
         aria-label={
           loading
             ? t("userMenu")
@@ -180,19 +219,13 @@ function TopbarAccountMenu({
         aria-expanded={isMenuOpen}
         aria-haspopup="menu"
       >
-        {loading ? (
-          <span
-            className="h-9 w-9 animate-pulse rounded-full bg-muted"
-            aria-hidden
-          />
-        ) : (
-          <span
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-vo-purple to-vo-magenta font-sans text-[11px] font-semibold text-white"
-            aria-hidden
-          >
-            {initials}
-          </span>
-        )}
+        <RecruiterAvatar
+          name={user?.name}
+          email={user?.email}
+          photoSrc={photoSrc}
+          size="md"
+          isLoading={loading && !photoSrc}
+        />
       </button>
       {isMenuOpen ? (
         <div

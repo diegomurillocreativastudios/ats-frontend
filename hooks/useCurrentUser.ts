@@ -1,43 +1,89 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { getCurrentUser } from "@/lib/auth";
+import { useEffect, useSyncExternalStore } from "react"
+import {
+  getCurrentUserState,
+  loadCurrentUser,
+  subscribeCurrentUser,
+  type CurrentUserStoreState,
+} from "@/lib/rrhh/current-user-store"
+import {
+  getRecruiterPhotoState,
+  hydrateRecruiterPhotoCache,
+  subscribeRecruiterPhoto,
+} from "@/lib/rrhh/recruiter-photo-cache"
+
+export const CURRENT_USER_UPDATED_EVENT = "ats-current-user-updated"
+
+const SERVER_USER_SNAPSHOT: CurrentUserStoreState = {
+  user: null,
+  status: "idle",
+}
 
 /**
- * Returns the currently logged-in user (from /api/auth/me or ats_user cookie).
- * @returns {{ user: { id, name, email, role? } | null, loading: boolean }}
+ * Avisa a los consumers de `useCurrentUser` para recargar GET /api/auth/me.
+ */
+export function notifyCurrentUserUpdated() {
+  if (typeof window === "undefined") return
+  window.dispatchEvent(new Event(CURRENT_USER_UPDATED_EVENT))
+}
+
+function getPhotoSrcSnapshot(): string | null {
+  return getRecruiterPhotoState().dataUri
+}
+
+function getServerPhotoSrcSnapshot(): string | null {
+  return null
+}
+
+function getUserSnapshot(): CurrentUserStoreState {
+  return getCurrentUserState()
+}
+
+function getServerUserSnapshot(): CurrentUserStoreState {
+  return SERVER_USER_SNAPSHOT
+}
+
+/**
+ * Returns the currently logged-in user from GET /api/auth/me only.
+ * Fail-closed: never reads identity from the `ats_user` cookie.
+ * Session and photo are shared across sidebar, topbar, and profile mounts.
+ *
+ * Photo/user start from a stable server snapshot so Soft Navigation + cached
+ * blob URLs cannot cause hydration mismatches in RecruiterAvatar.
  */
 export const useCurrentUser = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const userState = useSyncExternalStore(
+    subscribeCurrentUser,
+    getUserSnapshot,
+    getServerUserSnapshot,
+  )
+  const photoSrc = useSyncExternalStore(
+    subscribeRecruiterPhoto,
+    getPhotoSrcSnapshot,
+    getServerPhotoSrcSnapshot,
+  )
 
   useEffect(() => {
-    let cancelled = false;
+    void hydrateRecruiterPhotoCache()
+  }, [])
 
-    const load = async () => {
-      try {
-        const res = await fetch("/api/auth/me", { credentials: "include" });
-        if (cancelled) return;
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-          return;
-        }
-        const fromCookie = getCurrentUser();
-        if (fromCookie) setUser(fromCookie);
-      } catch {
-        if (!cancelled) {
-          const fromCookie = getCurrentUser();
-          if (fromCookie) setUser(fromCookie);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
+  useEffect(() => {
+    void loadCurrentUser()
 
-    load();
-    return () => { cancelled = true; };
-  }, []);
+    const handleUpdated = () => {
+      void loadCurrentUser({ force: true })
+    }
+    window.addEventListener(CURRENT_USER_UPDATED_EVENT, handleUpdated)
 
-  return { user, loading };
-};
+    return () => {
+      window.removeEventListener(CURRENT_USER_UPDATED_EVENT, handleUpdated)
+    }
+  }, [])
+
+  return {
+    user: userState.user,
+    photoSrc,
+    loading: userState.status !== "ready",
+  }
+}

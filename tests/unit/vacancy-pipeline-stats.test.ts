@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest"
 import {
   buildApplicantComponentScoreAverages,
   extractApplicantComponentScores01,
+  getApplicantPrimaryScore01,
+  parseFallbackKanbanStages,
   resolveOrderedStageNames,
   type VacancyApplicantLike,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
@@ -24,6 +26,33 @@ describe("resolveOrderedStageNames", () => {
     const kanban = ["Applied", "applied", "Screening"]
     const ordered = resolveOrderedStageNames(kanban, [])
     expect(ordered).toEqual(["Applied", "Screening"])
+  })
+
+  it("uses applicant stage names when the company catalog is empty", () => {
+    const applicants: VacancyApplicantLike[] = [
+      { applicationStage: "Postulados", totalScore: 0.5 },
+      { applicationStage: "Entrevista", totalScore: 0.4 },
+    ]
+    const ordered = resolveOrderedStageNames([], applicants)
+    expect(ordered).toEqual(["Postulados", "Entrevista"])
+  })
+
+  it("uses localized fallback names only when catalog and applicants are empty", () => {
+    const ordered = resolveOrderedStageNames([], [], [
+      "Postulados",
+      "Filtrado",
+      "Entrevista",
+    ])
+    expect(ordered).toEqual(["Postulados", "Filtrado", "Entrevista"])
+  })
+})
+
+describe("parseFallbackKanbanStages", () => {
+  it("reads a non-empty string array from i18n", () => {
+    expect(parseFallbackKanbanStages(["Postulados", "Filtrado"])).toEqual([
+      "Postulados",
+      "Filtrado",
+    ])
   })
 })
 
@@ -66,5 +95,29 @@ describe("buildApplicantComponentScoreAverages", () => {
     expect(avg.vectorMean01).toBeCloseTo(0.5)
     expect(avg.attributeMean01).toBe(0)
     expect(avg.samplesWithAnyComponent).toBe(2)
+  })
+})
+
+describe("getApplicantPrimaryScore01", () => {
+  it("prefers totalScore over semanticScore", () => {
+    expect(
+      getApplicantPrimaryScore01({
+        semanticScore: 0.71,
+        totalScore: 0.82,
+      })
+    ).toBe(0.82)
+  })
+
+  it("uses matchScore when totalScore is missing", () => {
+    expect(
+      getApplicantPrimaryScore01({
+        semanticScore: 0.71,
+        matchScore: 0.82,
+      })
+    ).toBe(0.82)
+  })
+
+  it("falls back to semanticScore only for legacy payloads", () => {
+    expect(getApplicantPrimaryScore01({ semanticScore: 0.68 })).toBe(0.68)
   })
 })

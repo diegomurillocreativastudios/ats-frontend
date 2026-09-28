@@ -1,19 +1,11 @@
 import { describe, expect, it } from "vitest"
-import { readFileSync } from "fs"
-import { join } from "path"
 import { pickCandidateDisplayRecord } from "@/lib/technical-sheet/candidate-from-payload"
-import {
-  buildTechnicalSheetTemplateContext,
-  renderTechnicalSheetHtml,
-} from "@/lib/technical-sheet/template-interpolate"
 import { paginateTechnicalSheetArticleToPageBodies } from "@/lib/technical-sheet/paginate-technical-sheet-article-dom"
+import { DEFAULT_TECHNICAL_SHEET_SCHEMA } from "@/lib/technical-sheet/schema/technical-sheet-default-schema"
+import { renderTechnicalSheetSchemaToHtml } from "@/lib/technical-sheet/schema/render-technical-sheet-schema-to-html"
+import { buildTechnicalSheetTemplateContext } from "@/lib/technical-sheet/template-interpolate"
 
 describe("ficha template context merge", () => {
-  const tpl = readFileSync(
-    join(process.cwd(), "lib/technical-sheet/ficha-tecnica-visible-template.html"),
-    "utf8"
-  )
-
   it("merges personal header fields with candidate profile arrays", () => {
     const record = pickCandidateDisplayRecord({
       personal: { firstName: "Diego", lastName: "Murillo", address: "Bogotá" },
@@ -33,7 +25,7 @@ describe("ficha template context merge", () => {
     expect(record?.workExperience).toEqual([{ company: "Acme", role: "Dev" }])
   })
 
-  it("keeps work experience after sanitize when personal and candidate are both present", () => {
+  it("keeps work experience after schema render when personal and candidate are both present", () => {
     const payload = {
       personal: {
         firstName: "Diego",
@@ -63,7 +55,7 @@ describe("ficha template context merge", () => {
       },
     }
     const ctx = buildTechnicalSheetTemplateContext(payload)
-    const html = renderTechnicalSheetHtml(tpl, ctx)
+    const html = renderTechnicalSheetSchemaToHtml(DEFAULT_TECHNICAL_SHEET_SCHEMA, ctx)
     expect(html).toContain("Acme")
     expect(html).toContain("TypeScript")
     expect(html).toContain("Inmediata")

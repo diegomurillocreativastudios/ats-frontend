@@ -7,6 +7,7 @@ import {
   useState,
   type ChangeEvent,
   type FormEvent,
+  type KeyboardEvent,
 } from "react"
 import { CircleDot } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -34,9 +35,11 @@ import {
   deleteInterviewStatus,
   getInterviewHttpErrorMessage,
   listInterviewStatusesAdmin,
+  setInterviewStatusInterviewDone,
   updateInterviewStatus,
   type InterviewStatusAdmin,
 } from "@/lib/api/interviews"
+import { applyInterviewDoneToggleLocal } from "@/lib/recruiter/interview-stage"
 
 export interface InterviewStatusesCrudModalProps {
   isOpen?: boolean
@@ -54,6 +57,81 @@ function readErrorStatus(err: unknown): number {
   return 0
 }
 
+function InterviewDoneSwitch({
+  row,
+  disabled,
+  isUpdating,
+  onToggle,
+  t,
+}: {
+  row: InterviewStatusAdmin
+  disabled: boolean
+  isUpdating: boolean
+  onToggle: (row: InterviewStatusAdmin, next: boolean) => void
+  t: (key: string, values?: Record<string, string>) => string
+}) {
+  const isOn = Boolean(row.isInterviewDone)
+  const handleClick = () => {
+    if (disabled || isUpdating) return
+    onToggle(row, !isOn)
+  }
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (disabled || isUpdating) return
+    if (event.key !== "Enter" && event.key !== " ") return
+    event.preventDefault()
+    onToggle(row, !isOn)
+  }
+
+  return (
+    <div className="relative inline-flex items-center">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isOn}
+        aria-busy={isUpdating || undefined}
+        aria-label={
+          isOn
+            ? t("interviewDoneActive", { name: row.displayName })
+            : t("markInterviewDone", { name: row.displayName })
+        }
+        disabled={disabled || isUpdating}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-300 ease-out motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
+          isUpdating ? "opacity-70" : "opacity-100"
+        } ${
+          isOn
+            ? "bg-emerald-600 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
+            : "border border-zinc-300/80 bg-zinc-200 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)] dark:border-zinc-600 dark:bg-zinc-700"
+        }`}
+      >
+        <span
+          aria-hidden
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ease-out motion-reduce:transition-none ${
+            isOn
+              ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
+              : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)]"
+          }`}
+        />
+      </button>
+      {isUpdating ? (
+        <span
+          className="absolute -right-5 top-1/2 -translate-y-1/2"
+          aria-hidden
+        >
+          <span className="block h-3 w-3 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
 export function InterviewStatusesCrudModal({
   isOpen,
   onClose,
@@ -67,6 +145,12 @@ export function InterviewStatusesCrudModal({
   const [items, setItems] = useState<InterviewStatusAdmin[]>([])
   const [loading, setLoading] = useState(variant === "inline")
   const [saving, setSaving] = useState(false)
+  const [updatingInterviewDoneId, setUpdatingInterviewDoneId] = useState<
+    string | null
+  >(null)
+  const [transferBusyIds, setTransferBusyIds] = useState<readonly string[]>(
+    []
+  )
   const [error, setError] = useState<string | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<"create" | "edit">("create")
@@ -76,6 +160,10 @@ export function InterviewStatusesCrudModal({
   const [deleteTarget, setDeleteTarget] = useState<InterviewStatusAdmin | null>(
     null
   )
+  const [interviewDoneTransfer, setInterviewDoneTransfer] = useState<{
+    target: InterviewStatusAdmin
+    previous: InterviewStatusAdmin
+  } | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [snackbar, setSnackbar] = useState<{
     open: boolean
@@ -99,17 +187,23 @@ export function InterviewStatusesCrudModal({
     [items.length]
   )
 
-  const loadList = useCallback(async () => {
-    setLoading(true)
+  const loadList = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setLoading(true)
+    }
     setError(null)
     try {
       const list = await listInterviewStatusesAdmin()
       setItems(list)
     } catch (err: unknown) {
       setError(getInterviewHttpErrorMessage(readErrorStatus(err), err))
-      setItems([])
+      if (!options?.silent) {
+        setItems([])
+      }
     } finally {
-      setLoading(false)
+      if (!options?.silent) {
+        setLoading(false)
+      }
     }
   }, [])
 
@@ -198,11 +292,163 @@ export function InterviewStatusesCrudModal({
     }
   }
 
+  const applyInterviewDoneToggle = async (
+    row: InterviewStatusAdmin,
+    newValue: boolean
+  ) => {
+    if (updatingInterviewDoneId) return
+    const statusId = String(row.id)
+    const previousDoneId = items.find((item) => item.isInterviewDone)?.id
+
+    setItems((prev) => applyInterviewDoneToggleLocal(prev, statusId, newValue))
+    setUpdatingInterviewDoneId(statusId)
+
+    try {
+      const updated = await setInterviewStatusInterviewDone(statusId, newValue)
+      setItems((prev) =>
+        applyInterviewDoneToggleLocal(
+          prev.map((item) =>
+            String(item.id) === statusId ? { ...item, ...updated } : item
+          ),
+          statusId,
+          newValue
+        )
+      )
+      showSnackbar(
+        "success",
+        newValue ? t("interviewDoneMarked") : t("interviewDoneUnmarked")
+      )
+      onMutate?.()
+    } catch (err: unknown) {
+      setItems((prev) =>
+        prev.map((item) => {
+          if (String(item.id) === statusId) {
+            return { ...item, isInterviewDone: !newValue }
+          }
+          if (
+            newValue &&
+            previousDoneId &&
+            String(item.id) === String(previousDoneId)
+          ) {
+            return { ...item, isInterviewDone: true }
+          }
+          return item
+        })
+      )
+      showSnackbar(
+        "error",
+        getInterviewHttpErrorMessage(readErrorStatus(err), err)
+      )
+    } finally {
+      setUpdatingInterviewDoneId(null)
+    }
+  }
+
+  /**
+   * Moves the unique interview-done flag: deactivate the previous status first,
+   * then activate the target. Activating alone while another is true can 500.
+   * Visual handoff is staggered so both switches animate in sequence.
+   */
+  const applyInterviewDoneTransfer = async (
+    previous: InterviewStatusAdmin,
+    target: InterviewStatusAdmin
+  ) => {
+    if (updatingInterviewDoneId || transferBusyIds.length > 0) return
+    const previousId = String(previous.id)
+    const targetId = String(target.id)
+
+    setTransferBusyIds([previousId, targetId])
+    setUpdatingInterviewDoneId(previousId)
+    setItems((prev) => applyInterviewDoneToggleLocal(prev, previousId, false))
+
+    try {
+      await setInterviewStatusInterviewDone(previousId, false)
+      await wait(220)
+
+      setUpdatingInterviewDoneId(targetId)
+      setItems((prev) => applyInterviewDoneToggleLocal(prev, targetId, true))
+      await wait(40)
+      const updated = await setInterviewStatusInterviewDone(targetId, true)
+      setItems((prev) =>
+        applyInterviewDoneToggleLocal(
+          prev.map((item) =>
+            String(item.id) === targetId ? { ...item, ...updated } : item
+          ),
+          targetId,
+          true
+        )
+      )
+      await wait(260)
+      showSnackbar("success", t("interviewDoneMarked"))
+      onMutate?.()
+      await loadList({ silent: true })
+    } catch (err: unknown) {
+      showSnackbar(
+        "error",
+        getInterviewHttpErrorMessage(readErrorStatus(err), err)
+      )
+      await loadList({ silent: true })
+    } finally {
+      setUpdatingInterviewDoneId(null)
+      setTransferBusyIds([])
+    }
+  }
+
+  const handleInterviewDoneToggle = (
+    row: InterviewStatusAdmin,
+    newValue: boolean
+  ) => {
+    if (
+      updatingInterviewDoneId ||
+      interviewDoneTransfer ||
+      transferBusyIds.length > 0
+    ) {
+      return
+    }
+
+    if (newValue) {
+      const previous = items.find(
+        (item) =>
+          item.isInterviewDone && String(item.id) !== String(row.id)
+      )
+      if (previous) {
+        setInterviewDoneTransfer({ target: row, previous })
+        return
+      }
+    }
+
+    void applyInterviewDoneToggle(row, newValue)
+  }
+
+  const handleConfirmInterviewDoneTransfer = () => {
+    if (
+      !interviewDoneTransfer ||
+      updatingInterviewDoneId ||
+      transferBusyIds.length > 0
+    ) {
+      return
+    }
+    const { target, previous } = interviewDoneTransfer
+    setInterviewDoneTransfer(null)
+    void applyInterviewDoneTransfer(previous, target)
+  }
+
+  const handleCloseInterviewDoneTransfer = () => {
+    if (updatingInterviewDoneId || transferBusyIds.length > 0) return
+    setInterviewDoneTransfer(null)
+  }
+
   const handleClose = () => {
     onClose?.()
   }
 
   const isEmpty = !loading && !error && items.length === 0
+  const switchesBusy =
+    saving ||
+    deleting ||
+    updatingInterviewDoneId != null ||
+    interviewDoneTransfer != null ||
+    transferBusyIds.length > 0
 
   const listBody = (
     <AdminCatalogListLayout
@@ -230,6 +476,7 @@ export function InterviewStatusesCrudModal({
           <tr>
             <th className={ADMIN_TH_CLASS}>{tCommon("name")}</th>
             <th className={ADMIN_TH_CLASS}>{t("terminal")}</th>
+            <th className={ADMIN_TH_CLASS}>{t("interviewDone")}</th>
             <th className={`${ADMIN_TH_CLASS} text-right`}>
               {tCommon("actions")}
             </th>
@@ -244,13 +491,29 @@ export function InterviewStatusesCrudModal({
               <td className={`${ADMIN_TD_CLASS} text-muted-foreground`}>
                 {row.isTerminal ? tCommon("yes") : tCommon("no")}
               </td>
+              <td className={ADMIN_TD_CLASS}>
+                <InterviewDoneSwitch
+                  row={row}
+                  disabled={
+                    switchesBusy &&
+                    updatingInterviewDoneId !== row.id &&
+                    !transferBusyIds.includes(row.id)
+                  }
+                  isUpdating={
+                    updatingInterviewDoneId === row.id ||
+                    transferBusyIds.includes(row.id)
+                  }
+                  onToggle={handleInterviewDoneToggle}
+                  t={t}
+                />
+              </td>
               <td className={ADMIN_CATALOG_ACTIONS_TD_CLASS}>
                 <AdminCatalogRowActions
                   onEdit={() => handleOpenEdit(row)}
                   onDelete={() => setDeleteTarget(row)}
                   editLabel={tCommon("edit")}
                   deleteLabel={tCommon("delete")}
-                  disabled={saving}
+                  disabled={saving || updatingInterviewDoneId != null}
                 />
               </td>
             </tr>
@@ -312,6 +575,54 @@ export function InterviewStatusesCrudModal({
         confirmText={tCommon("delete")}
         loading={deleting}
       />
+      <Modal
+        isOpen={interviewDoneTransfer != null}
+        onClose={handleCloseInterviewDoneTransfer}
+        title={t("interviewDoneTransferTitle")}
+        size="sm"
+        closeOnOverlayClick={
+          updatingInterviewDoneId == null && transferBusyIds.length === 0
+        }
+        closeOnEscape={
+          updatingInterviewDoneId == null && transferBusyIds.length === 0
+        }
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCloseInterviewDoneTransfer}
+              disabled={
+                updatingInterviewDoneId != null || transferBusyIds.length > 0
+              }
+            >
+              {tCommon("cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={handleConfirmInterviewDoneTransfer}
+              disabled={
+                updatingInterviewDoneId != null || transferBusyIds.length > 0
+              }
+              loading={
+                updatingInterviewDoneId != null || transferBusyIds.length > 0
+              }
+            >
+              {t("interviewDoneTransferConfirm")}
+            </Button>
+          </>
+        }
+      >
+        <p className="font-sans text-sm text-foreground">
+          {interviewDoneTransfer
+            ? t("interviewDoneTransferMessage", {
+                previous: interviewDoneTransfer.previous.displayName,
+                next: interviewDoneTransfer.target.displayName,
+              })
+            : ""}
+        </p>
+      </Modal>
       <Snackbar
         open={snackbar.open}
         onClose={() => setSnackbar((current) => ({ ...current, open: false }))}

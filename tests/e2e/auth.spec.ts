@@ -29,13 +29,6 @@ test.describe("@smoke Auth", () => {
     await expect(page).toHaveURL(/\/auth\/iniciar-sesion/)
   })
 
-  test("restablecer contraseña sin token muestra aviso", async ({
-    page,
-  }) => {
-    await page.goto("/restablecer-contrasena")
-    await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
-  })
-
   test("ruta /auth/restablecer-contrasena sin token muestra aviso (enlace del mail)", async ({
     page,
   }) => {
@@ -46,15 +39,57 @@ test.describe("@smoke Auth", () => {
   test("restablecer solo con ?email= no abre el formulario (token-only)", async ({
     page,
   }) => {
-    await page.goto("/restablecer-contrasena?email=usuario@ejemplo.com")
+    await page.goto(
+      "/auth/restablecer-contrasena?email=usuario@ejemplo.com",
+    )
     await expect(page.getByTestId("auth-reset-invalid-link")).toBeVisible()
     await expect(page.getByTestId("auth-reset-form")).toHaveCount(0)
+  })
+
+  test("ruta vieja /restablecer-contrasena redirige a /auth y conserva la query", async ({
+    page,
+  }) => {
+    await page.goto("/restablecer-contrasena?token=demo-token")
+    await expect(page).toHaveURL(
+      /\/auth\/restablecer-contrasena\?token=demo-token/,
+    )
+    await expect(page.getByTestId("auth-reset-form")).toBeVisible()
+  })
+
+  test("muestra el primer paso del registro (correo)", async ({ page }) => {
+    await page.goto("/auth/registrarse")
+    await expect(page.getByTestId("auth-register-form")).toBeVisible()
+    await expect(page.getByTestId("auth-register-email")).toBeVisible()
+    await expect(page.getByTestId("auth-register-submit")).toBeVisible()
+    await expect(page.getByTestId("auth-register-password")).toHaveCount(0)
+  })
+
+  test("muestra el formulario de olvidaste tu contraseña", async ({ page }) => {
+    await page.goto("/auth/olvidaste-tu-contrasena")
+    await expect(page.getByTestId("auth-forgot-form")).toBeVisible()
+    await expect(page.getByTestId("auth-forgot-email")).toBeVisible()
+    await expect(page.getByTestId("auth-forgot-submit")).toBeVisible()
+  })
+
+  test("ruta vieja /auth/forgot-password redirige a /auth/olvidaste-tu-contrasena", async ({
+    page,
+  }) => {
+    await page.goto("/auth/forgot-password")
+    await expect(page).toHaveURL(/\/auth\/olvidaste-tu-contrasena/)
+    await expect(page.getByTestId("auth-forgot-form")).toBeVisible()
   })
 
   test("login demo completa sesión (selector o portal según rol)", async ({
     page,
   }) => {
-    test.skip(!e2eAuth.isAuthAvailable, e2eAuth.message)
+    if (process.env.CI) {
+      expect(
+        e2eAuth.isAuthAvailable,
+        e2eAuth.message || "Auth E2E no disponible en CI (fail-closed)"
+      ).toBe(true)
+    } else {
+      test.skip(!e2eAuth.isAuthAvailable, e2eAuth.message)
+    }
     await loginAsDemoUser(page)
     const pathname = new URL(page.url()).pathname
     if (pathname.startsWith("/seleccion-portal")) {

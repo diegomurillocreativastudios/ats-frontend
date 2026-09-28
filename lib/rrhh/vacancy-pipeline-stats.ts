@@ -4,6 +4,7 @@ export interface VacancyApplicantLike {
   stage?: string | null
   semanticScore?: number | null
   totalScore?: number | null
+  matchScore?: number | null
   componentScores?: Record<string, unknown> | null
   qualitativeReasoningPositive?: string | null
   qualitative_reasoning_positive?: string | null
@@ -19,6 +20,7 @@ export interface VacancyApplicantLike {
   phone?: string | null
   uploadedAt?: string | null
   applicationId?: string | null
+  application_id?: string | null
   applicationStageId?: string | null
   applicationSource?: number | null
   applicationStatusId?: string | null
@@ -29,6 +31,12 @@ export interface VacancyApplicantLike {
   status?: string | null
   applicationStatusDisplayName?: string | null
   application_status_display_name?: string | null
+  interviewDone?: boolean | null
+  interview_done?: boolean | null
+  InterviewDone?: boolean | null
+  hasInterviewFeedback?: boolean | null
+  has_interview_feedback?: boolean | null
+  HasInterviewFeedback?: boolean | null
 }
 
 /** Catálogo de estados de postulación (empresa), mismo criterio que el Kanban. */
@@ -54,40 +62,65 @@ export interface ApplicantsByStageFullSection {
   applicants: VacancyApplicantLike[]
 }
 
+/**
+ * Last-resort column names when the global catalog and applicants are both empty.
+ * Prefer locale-specific names from i18n (`fallbackKanbanStages`).
+ */
 export const FALLBACK_KANBAN_STAGES = [
+  "Sourced",
   "Applied",
   "Screening",
   "Interview",
   "Offer",
   "Hired",
+  "Rejected",
 ] as const
 
 /**
+ * Reads locale-specific last-resort column names from i18n (`fallbackKanbanStages`).
+ * Falls back to `FALLBACK_KANBAN_STAGES` when the payload is missing or empty.
+ */
+export function parseFallbackKanbanStages(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [...FALLBACK_KANBAN_STAGES]
+  const names = raw
+    .map((item) => String(item ?? "").trim())
+    .filter((name) => name !== "")
+  return names.length > 0 ? names : [...FALLBACK_KANBAN_STAGES]
+}
+
+/**
  * Orden de etapas del tablero + etapas que aparecen en postulantes pero no estaban en el catálogo (al final).
+ * If the global catalog is empty, applicant stage names are used instead of inventing English columns.
  */
 export function resolveOrderedStageNames(
   kanbanStageNames: readonly string[],
-  applicants: VacancyApplicantLike[]
+  applicants: VacancyApplicantLike[],
+  fallbackStageNames: readonly string[] = FALLBACK_KANBAN_STAGES
 ): string[] {
   const base: string[] = []
   const seen = new Set<string>()
-  const source =
-    kanbanStageNames.length > 0
-      ? kanbanStageNames.map((s) => String(s).trim()).filter(Boolean)
-      : [...FALLBACK_KANBAN_STAGES]
-  for (const raw of source) {
+  const catalog = kanbanStageNames
+    .map((stage) => String(stage).trim())
+    .filter(Boolean)
+  const fallback = [...fallbackStageNames]
+    .map((stage) => String(stage).trim())
+    .filter(Boolean)
+
+  const addName = (raw: string) => {
     const key = raw.toLowerCase()
-    if (seen.has(key)) continue
+    if (seen.has(key)) return
     seen.add(key)
     base.push(raw)
   }
-  for (const m of applicants) {
-    const raw = String(m.applicationStage ?? m.stage ?? "").trim()
+
+  for (const raw of catalog) addName(raw)
+  for (const match of applicants) {
+    const raw = String(match.applicationStage ?? match.stage ?? "").trim()
     if (!raw) continue
-    const key = raw.toLowerCase()
-    if (seen.has(key)) continue
-    seen.add(key)
-    base.push(raw)
+    addName(raw)
+  }
+  if (base.length === 0) {
+    for (const raw of fallback) addName(raw)
   }
   return base
 }
@@ -115,11 +148,20 @@ export function getCandidateId(match: VacancyApplicantLike, index: number): stri
   )
 }
 
-/** Puntaje principal alineado con Kanban: 0–1 o null si no aplica. */
+function readFiniteScore(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null
+  return value
+}
+
+/**
+ * Official application score (`Application.MatchScore`), usually `totalScore` or `matchScore`.
+ * `semanticScore` is only a fallback for legacy payloads that never exposed the blended score.
+ * After qualitative interview feedback, semantic is unchanged — using it first would hide the recalculation.
+ */
 export function getApplicantPrimaryScore01(match: VacancyApplicantLike): number | null {
-  const raw = match.semanticScore ?? match.totalScore
-  if (typeof raw !== "number" || !Number.isFinite(raw)) return null
-  return raw
+  const official = readFiniteScore(match.totalScore) ?? readFiniteScore(match.matchScore)
+  if (official != null) return official
+  return readFiniteScore(match.semanticScore)
 }
 
 export interface StageCountRow {

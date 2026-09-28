@@ -4,8 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { Briefcase, Calendar, Loader2, MapPin, Users } from "lucide-react"
-import RRHHSidebar from "@/components/rrhh/RRHHSidebar"
-import RRHHTopbar from "@/components/rrhh/RRHHTopbar"
+import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { ListPaginationBar } from "@/components/ui/list-pagination-bar"
 import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging"
@@ -294,35 +293,18 @@ export default function EntrevistasHubPage() {
   )
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <div className="hidden h-full lg:flex">
-        <RRHHSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
-          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <section
-                className="shrink-0 px-8 pt-6"
-                aria-label={t("hub.headerRegionLabel")}
-              >
-                {renderPageHeader()}
-              </section>
-              <section className="flex min-h-0 flex-1 flex-col px-8 pb-4 pt-2">
-                {renderMainContent()}
-              </section>
-            </div>
-          </main>
-        </div>
+    <RrhhPortalShell breadcrumbLabel={t("breadcrumb")} lockMainScroll>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <section
+          className="shrink-0 px-4 pt-4 md:px-6 md:pt-6 lg:px-8"
+          aria-label={t("hub.headerRegionLabel")}
+        >
+          {renderPageHeader()}
+        </section>
+        <section className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-2 md:px-6 lg:px-8">
+          {renderMainContent()}
+        </section>
       </div>
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-4 md:p-6">
-            {renderPageHeader()}
-            {renderMainContent()}
-          </div>
-        </main>
-      </div>
-    </div>
+    </RrhhPortalShell>
   )
 }

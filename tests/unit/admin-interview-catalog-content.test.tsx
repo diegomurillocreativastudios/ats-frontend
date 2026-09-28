@@ -20,6 +20,7 @@ const interviewApiMocks = vi.hoisted(() => ({
   listInterviewStatusesAdmin: vi.fn(),
   createInterviewStatus: vi.fn(),
   updateInterviewStatus: vi.fn(),
+  setInterviewStatusInterviewDone: vi.fn(),
   deleteInterviewStatus: vi.fn(),
 }))
 
@@ -63,6 +64,7 @@ function buildStatus(
     description: null,
     sortOrder: 1,
     isTerminal: false,
+    isInterviewDone: false,
     isActive: true,
     ...overrides,
   }
@@ -160,6 +162,9 @@ describe("AdminInterviewCatalogContent", () => {
     expect(await screen.findByText("Programada")).toBeInTheDocument()
     expect(screen.getByRole("columnheader", { name: "Terminal" })).toBeInTheDocument()
     expect(
+      screen.getByRole("columnheader", { name: "Entrevista efectuada" })
+    ).toBeInTheDocument()
+    expect(
       screen.queryByRole("columnheader", { name: "Código" })
     ).not.toBeInTheDocument()
     expect(screen.getByText("No")).toBeInTheDocument()
@@ -173,5 +178,103 @@ describe("AdminInterviewCatalogContent", () => {
     expect(
       within(dialog).getByLabelText(/Nombre visible/i)
     ).toBeInTheDocument()
+  })
+
+  it("asks for confirmation before moving the interview-done flag to another status", async () => {
+    const cancelledDone = buildStatus({
+      id: "cancelled",
+      displayName: "Cancelada",
+      isTerminal: true,
+      isInterviewDone: true,
+    })
+    const completedOff = buildStatus({
+      id: "completed",
+      code: "2",
+      displayName: "Completada",
+      isTerminal: true,
+      isInterviewDone: false,
+    })
+    const cancelledOff = {
+      ...cancelledDone,
+      isInterviewDone: false,
+    }
+    const completedDone = {
+      ...completedOff,
+      isInterviewDone: true,
+    }
+
+    interviewApiMocks.listInterviewStatusesAdmin
+      .mockResolvedValueOnce([cancelledDone, completedOff])
+      .mockResolvedValueOnce([cancelledOff, completedDone])
+    interviewApiMocks.setInterviewStatusInterviewDone
+      .mockResolvedValueOnce(cancelledOff)
+      .mockResolvedValueOnce(completedDone)
+
+    render(<AdminInterviewCatalogContent catalog="statuses" />)
+
+    expect(await screen.findByText("Cancelada")).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole("switch", {
+        name: "Marcar Completada como entrevista efectuada",
+      })
+    )
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Cambiar entrevista efectuada",
+      })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/se desactivará «Cancelada» y se activará «Completada»/i)
+    ).toBeInTheDocument()
+    expect(
+      interviewApiMocks.setInterviewStatusInterviewDone
+    ).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }))
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("heading", {
+          name: "Cambiar entrevista efectuada",
+        })
+      ).not.toBeInTheDocument()
+    })
+    expect(
+      interviewApiMocks.setInterviewStatusInterviewDone
+    ).not.toHaveBeenCalled()
+    expect(
+      screen.getByRole("switch", {
+        name: "Cancelada: entrevista efectuada activa",
+      })
+    ).toHaveAttribute("aria-checked", "true")
+
+    fireEvent.click(
+      screen.getByRole("switch", {
+        name: "Marcar Completada como entrevista efectuada",
+      })
+    )
+    fireEvent.click(await screen.findByRole("button", { name: "Cambiar" }))
+
+    await waitFor(() => {
+      expect(
+        interviewApiMocks.setInterviewStatusInterviewDone
+      ).toHaveBeenNthCalledWith(1, "cancelled", false)
+      expect(
+        interviewApiMocks.setInterviewStatusInterviewDone
+      ).toHaveBeenNthCalledWith(2, "completed", true)
+    })
+
+    expect(
+      await screen.findByRole("switch", {
+        name: "Completada: entrevista efectuada activa",
+      })
+    ).toHaveAttribute("aria-checked", "true")
+    expect(
+      screen.getByRole("switch", {
+        name: "Marcar Cancelada como entrevista efectuada",
+      })
+    ).toHaveAttribute("aria-checked", "false")
   })
 })

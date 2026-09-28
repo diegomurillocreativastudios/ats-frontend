@@ -1,6 +1,12 @@
 import { apiClient } from "@/lib/api"
+import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 import { formatCountryCodeLabel } from "@/lib/profile-form-options"
+import { formatRequirementKey } from "@/lib/vacancies/format-requirement-key"
 import { normalizeCountryCode, readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
+import {
+  isVacancyGuid,
+  readPublicSlug,
+} from "@/lib/vacancies/vacancy-public-path"
 import {
   getVacancyDepartmentSummary,
   getVacancyModalitySummary,
@@ -14,6 +20,9 @@ export interface OpportunityFilterOption {
   count?: number
 }
 
+/** Page size for the public opportunities list (`GET /api/vacantes`). */
+export const PUBLIC_OPPORTUNITIES_PAGE_SIZE = 10
+
 export interface OpportunityListFilters {
   departmentId?: string
   departmentCode?: string
@@ -24,6 +33,10 @@ export interface OpportunityListFilters {
   countryCode?: string
   country?: string
   page?: number
+  /** Sent only on the API request; not mirrored to the browser URL. */
+  pageSize?: number
+  /** Sent only on the API request; not mirrored to the browser URL. */
+  filter?: "openVacancies"
 }
 
 export interface OpportunityCompanyLogo {
@@ -43,6 +56,8 @@ export interface OpportunityCompanySummary {
 
 export interface OpportunityVacancySummary {
   id: string
+  /** Prefer for public URLs when set; null for legacy vacancies. */
+  publicSlug: string | null
   title: string
   company: OpportunityCompanySummary
   countryCode?: string
@@ -120,6 +135,53 @@ function toStringArray(value: unknown): string[] {
   }
 
   return []
+}
+
+function requirementValueText(value: unknown): string {
+  if (value == null) return ""
+  if (typeof value === "string") return value.trim()
+  if (typeof value === "number" || typeof value === "boolean") return String(value)
+  if (Array.isArray(value)) return toStringArray(value).join(", ")
+
+  const record = getRecord(value)
+  if (!record) return ""
+
+  return Object.entries(record)
+    .map(([key, nested]) => {
+      const nestedText = requirementValueText(nested)
+      if (!nestedText) return ""
+      const label = formatRequirementKey(key)
+      return label ? `${label}: ${nestedText}` : nestedText
+    })
+    .filter(Boolean)
+    .join(", ")
+}
+
+/**
+ * Public vacancies store requirements as a map (`{ Seniority: "3 years" }`),
+ * a newline string, or a string array. The public page only renders a list.
+ */
+function normalizePublicRequirements(value: unknown): string[] {
+  if (Array.isArray(value) || typeof value === "string") {
+    return toStringArray(value)
+  }
+
+  const record = getRecord(value)
+  if (!record) return []
+
+  return Object.entries(record)
+    .filter(([key]) => {
+      const normalized = key.trim()
+      return normalized !== "" && !normalized.startsWith("additionalProp")
+    })
+    .map(([key, entry]) => {
+      const label = formatRequirementKey(key)
+      const text = requirementValueText(entry)
+      if (!label) return text
+      if (!text) return label
+      return `${label}: ${text}`
+    })
+    .filter(Boolean)
 }
 
 function normalizeFilterOption(raw: unknown): OpportunityFilterOption | null {
@@ -214,9 +276,7 @@ function normalizeCompany(raw: Record<string, unknown>): OpportunityCompanySumma
 export function buildOpportunityCompanyLogoDataUri(
   logo: OpportunityCompanyLogo | null
 ): string | null {
-  if (!logo || !logo.base64) return null
-  const contentType = logo.contentType || "image/png"
-  return `data:${contentType};base64,${logo.base64}`
+  return buildSafeLogoDataUri(logo)
 }
 
 function normalizeCountryCodeField(raw: Record<string, unknown>): string | undefined {
@@ -254,6 +314,7 @@ function normalizeOpportunitySummary(raw: unknown): OpportunityVacancySummary | 
 
   return {
     id,
+    publicSlug: readPublicSlug(record),
     title,
     company: normalizeCompany(record),
     countryCode,
@@ -348,7 +409,7 @@ export function normalizeOpportunityDetail(payload: unknown): OpportunityVacancy
     responsibilities: toStringArray(
       record.responsibilities ?? record.duties ?? record.tasks
     ),
-    requirements: toStringArray(record.requirements ?? record.skills),
+    requirements: normalizePublicRequirements(record.requirements ?? record.skills),
     benefits: toStringArray(record.benefits),
   }
 }
@@ -386,5 +447,24 @@ export async function getPublicVacancyDetail(
   vacancyId: string
 ): Promise<OpportunityVacancyDetail | null> {
   const data = await apiClient.get(`/api/vacantes/${encodeURIComponent(vacancyId)}`)
+  return normalizeOpportunityDetail(data)
+}
+
+/**
+ * Loads a public vacancy from a URL segment that may be a Guid or a publicSlug.
+ */
+export async function getPublicVacancyByPathSegment(
+  pathSegment: string
+): Promise<OpportunityVacancyDetail | null> {
+  const segment = String(pathSegment ?? "").trim()
+  if (!segment) return null
+
+  if (isVacancyGuid(segment)) {
+    return getPublicVacancyDetail(segment)
+  }
+
+  const data = await apiClient.get(
+    `/api/vacantes/by-public-slug/${encodeURIComponent(segment)}`
+  )
   return normalizeOpportunityDetail(data)
 }

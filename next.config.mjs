@@ -10,17 +10,49 @@ const pdfRouteTraceAssets = [
   "./public/appli-ai-logo.svg",
 ]
 
+const locationStatesTraceAssets = [
+  "./public/location-catalog/states/**",
+  "./node_modules/@countrystatecity/countries-browser/dist/data/states/**",
+]
+
+/** Static defensive headers (FE-SEC-010). CSP is per-request in proxy.ts. */
+const staticSecurityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  {
+    key: "Referrer-Policy",
+    value: "strict-origin-when-cross-origin",
+  },
+  { key: "X-Frame-Options", value: "DENY" },
+  {
+    key: "Permissions-Policy",
+    value:
+      "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
+  },
+  {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin-allow-popups",
+  },
+  {
+    key: "Reporting-Endpoints",
+    value: 'csp-endpoint="/api/csp-report"',
+  },
+]
+
 const nextConfig = {
   // Required for Docker / Cloud Run (copies a minimal Node server under .next/standalone)
   output: "standalone",
+  // FE-SEC-010: do not advertise the framework stack
+  poweredByHeader: false,
   // jsdom/isomorphic-dompurify must stay external: webpack rewrites __dirname and
   // breaks fs.readFileSync(.../browser/default-stylesheet.css) during "Collecting page data".
   serverExternalPackages: [
     "pdfkit",
+    "sharp",
     "puppeteer-core",
     "@sparticuz/chromium",
     "isomorphic-dompurify",
     "jsdom",
+    "@countrystatecity/countries-browser",
   ],
   /**
    * @sparticuz/chromium brotli binaries + logos must ship inside the PDF serverless trace on Vercel.
@@ -30,7 +62,18 @@ const nextConfig = {
   outputFileTracingIncludes: {
     "/api/recruiter/vacancies/[vacancyId]/candidates/[candidateProfileId]/technical-sheet/pdf":
       pdfRouteTraceAssets,
+    "/api/recruiter/candidates/[candidateId]/technical-sheet/pdf": pdfRouteTraceAssets,
     "/api/recruiter/**/technical-sheet/pdf": pdfRouteTraceAssets,
+    "/api/location-catalog/states/[iso2]": locationStatesTraceAssets,
+    "/api/location-catalog/**": locationStatesTraceAssets,
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: staticSecurityHeaders,
+      },
+    ]
   },
 }
 

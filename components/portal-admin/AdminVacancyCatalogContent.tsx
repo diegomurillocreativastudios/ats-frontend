@@ -10,6 +10,7 @@ import {
 import {
   Briefcase,
   Building2,
+  Handshake,
   Loader2,
   Pencil,
   Plus,
@@ -161,7 +162,12 @@ export function AdminVacancyCatalogContent({
   const tShared = useTranslations("AdminPortal.vacancyCatalog.shared")
   const tKind = useTranslations(`AdminPortal.vacancyCatalog.${catalog}`)
   const tCommon = useTranslations("Common")
-  const CatalogIcon = catalog === "departments" ? Building2 : Briefcase
+  const CatalogIcon =
+    catalog === "departments"
+      ? Building2
+      : catalog === "modalities"
+        ? Briefcase
+        : Handshake
   const isDepartmentCatalog = catalog === "departments"
 
   const kindValues = {

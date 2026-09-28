@@ -1,5 +1,16 @@
-import { describe, expect, it } from "vitest"
-import { normalizeInterviewCalendarEvent } from "@/lib/google-calendar"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import {
+  getGoogleAuthUrl,
+  normalizeInterviewCalendarEvent,
+} from "@/lib/google-calendar"
+
+const apiPost = vi.fn()
+
+vi.mock("@/lib/api", () => ({
+  apiClient: {
+    post: (...args: unknown[]) => apiPost(...args),
+  },
+}))
 
 describe("normalizeInterviewCalendarEvent", () => {
   it("normaliza evento directo cuando viene con id", () => {
@@ -51,5 +62,27 @@ describe("normalizeInterviewCalendarEvent", () => {
     expect(event?.id).toBe("google_evt_3")
     expect(event?.googleEventId).toBe("google_evt_3")
     expect(event?.googleCalendarUrl).toContain("calendar.google.com")
+  })
+})
+
+describe("getGoogleAuthUrl", () => {
+  beforeEach(() => {
+    apiPost.mockReset()
+  })
+
+  it("returns an allowlisted Google OAuth URL", async () => {
+    apiPost.mockResolvedValue({
+      authUrl: "https://accounts.google.com/o/oauth2/v2/auth?client=test",
+    })
+    await expect(getGoogleAuthUrl()).resolves.toBe(
+      "https://accounts.google.com/o/oauth2/v2/auth?client=test"
+    )
+  })
+
+  it("rejects a non-allowlisted authUrl", async () => {
+    apiPost.mockResolvedValue({
+      authUrl: "https://evil.com/o/oauth2/v2/auth",
+    })
+    await expect(getGoogleAuthUrl()).rejects.toThrow(/no es válida/)
   })
 })

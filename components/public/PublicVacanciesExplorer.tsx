@@ -28,12 +28,14 @@ import { Button } from "@/components/ui/Button"
 import {
   buildOpportunityCompanyLogoDataUri,
   listPublicVacancies,
+  PUBLIC_OPPORTUNITIES_PAGE_SIZE,
   type OpportunityFilterOption,
   type OpportunityListFilters,
   type OpportunityListResponse,
   type OpportunityVacancySummary,
 } from "@/lib/api/public-vacancies"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
+import { buildPublicVacancyPath } from "@/lib/vacancies/vacancy-public-path"
 import {
   getOpportunityResultsRange,
   mergeCountryFilterOptions,
@@ -64,6 +66,8 @@ function toRequestFilters(queryState: PublicOpportunitiesQueryState): Opportunit
     vacanteName: queryState.vacanteName || undefined,
     countryCode: queryState.countryCode || undefined,
     page: queryState.page > 1 ? queryState.page : undefined,
+    pageSize: PUBLIC_OPPORTUNITIES_PAGE_SIZE,
+    filter: "openVacancies",
   }
 }
 
@@ -248,7 +252,7 @@ function OpportunityCard({
   t: ReturnType<typeof useTranslations<"PublicOpportunities.page">>
 }) {
   const publishedLabel = formatPublishedLabel(vacancy.publishedAt)
-  const href = `/portal-oportunidades/${vacancy.id}${queryString ? `?${queryString}` : ""}`
+  const href = `${buildPublicVacancyPath(vacancy)}${queryString ? `?${queryString}` : ""}`
   const departmentLabel = vacancy.department?.displayName
   const modalityLabel = vacancy.modality?.displayName
   const companyName = vacancy.company.name?.trim() ?? ""
@@ -264,7 +268,7 @@ function OpportunityCard({
       >
         <div className="flex min-w-0 items-center gap-3">
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/35 text-xs font-semibold text-foreground/80"
+            className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-background p-1"
             aria-hidden
           >
             {companyLogoSrc ? (
@@ -272,10 +276,12 @@ function OpportunityCard({
                 src={companyLogoSrc}
                 alt=""
                 loading="lazy"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             ) : (
-              <DepartmentIcon className="h-5 w-5 text-ats-terracotta" aria-hidden />
+              // Dynamic Lucide icon from department metadata (stable component type).
+              // eslint-disable-next-line react-hooks/static-components -- icon lookup returns a component type, not a new component
+              <DepartmentIcon className="h-6 w-6 text-ats-terracotta" aria-hidden />
             )}
           </div>
 
@@ -346,7 +352,7 @@ function OpportunityCardSkeleton() {
   return (
     <div className={`grid animate-pulse gap-4 py-4 ${opportunityRowGridClassName}`}>
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 rounded-lg bg-muted/50" />
+        <div className="h-12 w-12 rounded-lg bg-muted/50" />
         <div className="min-w-0 flex-1 space-y-2">
           <div className="h-5 w-44 rounded-md bg-muted/50" />
           <div className="h-4 w-40 rounded-md bg-muted/50" />
@@ -611,7 +617,7 @@ function PublicVacanciesExplorerContent({
   )
     ? queryState.countryCode
     : ""
-  const filteredItems = useMemo(() => {
+  const searchMatchedItems = useMemo(() => {
     const items = response?.items ?? []
     return items.filter((vacancy) => vacancyMatchesSearch(vacancy, searchInput))
   }, [response?.items, searchInput])
@@ -625,15 +631,34 @@ function PublicVacanciesExplorerContent({
       queryState.countryCode
   )
 
-  const currentPage = response?.pagination.page ?? queryState.page
-  const pageSize = response?.pagination.pageSize ?? filteredItems.length
+  const isClientReduced =
+    searchMatchedItems.length !== (response?.items.length ?? 0)
+  const apiReturnedTooMany =
+    !isClientReduced && searchMatchedItems.length > PUBLIC_OPPORTUNITIES_PAGE_SIZE
+  const filteredItems = useMemo(() => {
+    if (!apiReturnedTooMany) return searchMatchedItems
+    const start = (queryState.page - 1) * PUBLIC_OPPORTUNITIES_PAGE_SIZE
+    return searchMatchedItems.slice(start, start + PUBLIC_OPPORTUNITIES_PAGE_SIZE)
+  }, [apiReturnedTooMany, queryState.page, searchMatchedItems])
+
+  const currentPage = apiReturnedTooMany
+    ? queryState.page
+    : (response?.pagination.page ?? queryState.page)
+  const pageSize = PUBLIC_OPPORTUNITIES_PAGE_SIZE
   const apiTotalCount = response?.pagination.totalCount ?? 0
-  const isClientReduced = filteredItems.length !== (response?.items.length ?? 0)
-  const totalCount = isClientReduced ? filteredItems.length : apiTotalCount
-  const totalPages = isClientReduced ? 1 : (response?.pagination.totalPages ?? 1)
+  const totalCount = isClientReduced
+    ? searchMatchedItems.length
+    : apiReturnedTooMany
+      ? Math.max(apiTotalCount, searchMatchedItems.length)
+      : apiTotalCount
+  const totalPages = isClientReduced
+    ? 1
+    : apiReturnedTooMany
+      ? Math.max(1, Math.ceil(totalCount / pageSize))
+      : (response?.pagination.totalPages ?? 1)
   const resultsRange = getOpportunityResultsRange(
     isClientReduced ? 1 : currentPage,
-    isClientReduced ? Math.max(filteredItems.length, 1) : pageSize,
+    isClientReduced ? Math.max(searchMatchedItems.length, 1) : pageSize,
     totalCount
   )
   const resultsSummary = buildResultsSummary({

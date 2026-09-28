@@ -1,14 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
-import Nestable from "react-nestable";
 import {
   Plus,
-  Pencil,
-  Trash2,
   ListOrdered,
-  GripVertical,
 } from "lucide-react";
 import EtapaModal from "@/components/rrhh/EtapaModal";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
@@ -20,6 +16,7 @@ import {
   AdminSummaryBar,
   AdminSurface,
 } from "@/components/portal-admin/admin-page-chrome";
+import { SortableStagesList } from "@/components/portal-admin/sortable-stages-list";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import { Button } from "@/components/ui/Button";
 import Snackbar from "@/components/ui/Snackbar";
@@ -27,10 +24,21 @@ import { apiClient } from "@/lib/api";
 import { unwrapListArray } from "@/lib/api/query-paging";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { buildRecruiterStagePutPayload } from "@/lib/recruiterStagePayload";
-import "react-nestable/dist/styles/index.css";
-import "./nestable-custom.css";
+import {
+  applyInterviewStageToggleLocal,
+  canEnableFinalOrHiredStage,
+  canEnableInterviewStage,
+  isInterviewPipelineStage,
+  readIsInterviewStageFromApi,
+} from "@/lib/recruiter/interview-stage";
 
-const COMPANY_ID = "00000000-0000-0000-0000-000000000001";
+/**
+ * Global platform stages catalog URL.
+ */
+const stagesUrl = (suffix = "") => {
+  const base = `/api/recruiter/stages`;
+  return suffix ? `${base}/${suffix}` : base;
+};
 
 /**
  * Orden de etapa: siempre `orderIndex` (mismo nombre y semántica que el API, 1…n).
@@ -53,6 +61,7 @@ const mapStageFromApi = (item, index = 0) => {
     ),
     final: Boolean(item.final ?? item.Final),
     isHiredStage: Boolean(item.isHiredStage ?? item.is_hired_stage),
+    isInterviewStage: readIsInterviewStageFromApi(item),
     triggersNotification: Boolean(item.triggersNotification),
     notificationTemplateId: item.notificationTemplateId ?? null,
   };
@@ -68,7 +77,7 @@ const persistStageOrdersSequential = async (orderedStages) => {
   for (let i = 0; i < orderedStages.length; i++) {
     const stage = orderedStages[i];
     await apiClient.put(
-      `/api/recruiter/companies/${COMPANY_ID}/stages/${stage.id}`,
+      stagesUrl(stage.id),
       buildRecruiterStagePutPayload(stage)
     );
   }
@@ -244,84 +253,58 @@ const HiredStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) =>
   );
 };
 
-const renderStageItem = ({ item, handler, tStages }) => {
+const InterviewStageSwitch = ({ stage, onToggle, disabled, isUpdating, tStages }) => {
+  const isOn = Boolean(stage.isInterviewStage);
+  const handleClick = () => {
+    if (disabled || isUpdating) return;
+    onToggle(stage, !isOn);
+  };
+  const handleKeyDown = (e) => {
+    if (disabled || isUpdating) return;
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    onToggle(stage, !isOn);
+  };
+
   return (
-    <div className="flex w-full flex-col gap-4 rounded-xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-1 items-center gap-4">
-        <div
-          {...handler}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-vo-purple/10 cursor-grab active:cursor-grabbing"
-          aria-label={tStages("actions.dragAria")}
-        >
-          <GripVertical className="h-6 w-6 text-vo-purple" aria-hidden />
-        </div>
-        <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="font-sans text-base font-semibold text-foreground">
-            {item.name}
-          </h3>
-          {item.description && (
-            <p className="font-sans text-sm text-muted-foreground line-clamp-2">
-              {item.description}
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-col gap-1.5">
-          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
-            {tStages("fields.defaultStage")}
-          </span>
-          <DefaultStageSwitch
-            stage={item}
-            onActivate={item.onDefaultActivate}
-            disabled={item.defaultSwitchDisabled}
-            isUpdating={item.defaultSwitchUpdating}
-            tStages={tStages}
+    <div className="relative">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isOn}
+        aria-label={
+          isOn
+            ? tStages("switches.interviewActive", { name: stage.name })
+            : tStages("switches.markInterview", { name: stage.name })
+        }
+        disabled={disabled || isUpdating}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className={`relative inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-[background-color,box-shadow,border-color,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${
+          isUpdating ? "opacity-60" : "opacity-100"
+        } ${
+          isOn
+            ? "bg-emerald-600 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18)]"
+            : "border border-slate-300/80 bg-slate-100 shadow-[inset_0_1px_1px_rgba(15,23,42,0.06)]"
+        }`}
+      >
+        <span
+          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background transition-[transform,box-shadow] duration-200 ease-out ${
+            isOn
+              ? "translate-x-5 shadow-[0_1px_3px_rgba(15,23,42,0.18)]"
+              : "translate-x-0.5 shadow-[0_1px_2px_rgba(15,23,42,0.12)] ring-1 ring-slate-300/40"
+          }`}
+          aria-hidden
+        />
+      </button>
+      {isUpdating && (
+        <div className="absolute -right-6 top-1/2 -translate-y-1/2">
+          <div
+            className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent"
+            aria-hidden
           />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
-            {tStages("fields.finalStage")}
-          </span>
-          <FinalStageSwitch
-            stage={item}
-            onToggle={item.onFinalToggle}
-            disabled={item.finalSwitchDisabled}
-            isUpdating={item.finalSwitchUpdating}
-            tStages={tStages}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <span className="font-sans text-[11px] font-normal leading-none tracking-wide text-muted-foreground/70">
-            {tStages("fields.hiredStage")}
-          </span>
-          <HiredStageSwitch
-            stage={item}
-            onToggle={item.onHiredToggle}
-            disabled={item.hiredSwitchDisabled}
-            isUpdating={item.hiredSwitchUpdating}
-            tStages={tStages}
-          />
-        </div>
-        <button
-          type="button"
-          onClick={() => item.onEdit(item)}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-          aria-label={tStages("aria.editStage", { name: item.name })}
-        >
-          <Pencil className="h-4 w-4" aria-hidden />
-          {tStages("actions.edit")}
-        </button>
-        <button
-          type="button"
-          onClick={() => item.onDelete(item)}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-destructive/30 bg-background px-4 py-2.5 font-sans text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2"
-          aria-label={tStages("aria.deleteStage", { name: item.name })}
-        >
-          <Trash2 className="h-4 w-4" aria-hidden />
-          {tStages("actions.delete")}
-        </button>
-      </div>
+      )}
     </div>
   );
 };
@@ -329,6 +312,7 @@ const renderStageItem = ({ item, handler, tStages }) => {
 export default function EtapasPage() {
   const tStages = useTranslations("AdminPortal.stages");
   const tCommon = useTranslations("Common");
+  const stagesFetchGenerationRef = useRef(0);
   const [stages, setStages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -341,9 +325,11 @@ export default function EtapasPage() {
   const [defaultStageSwitchLoading, setDefaultStageSwitchLoading] = useState(false);
   const [finalStageSwitchLoading, setFinalStageSwitchLoading] = useState(false);
   const [hiredStageSwitchLoading, setHiredStageSwitchLoading] = useState(false);
+  const [interviewStageSwitchLoading, setInterviewStageSwitchLoading] = useState(false);
   const [updatingDefaultStageId, setUpdatingDefaultStageId] = useState(null);
   const [updatingFinalStageId, setUpdatingFinalStageId] = useState(null);
   const [updatingHiredStageId, setUpdatingHiredStageId] = useState(null);
+  const [updatingInterviewStageId, setUpdatingInterviewStageId] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: "success",
@@ -354,28 +340,33 @@ export default function EtapasPage() {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
+  const stagesLoadFailedMessage = tStages("errors.loadFailed");
+
   const fetchStages = useCallback(async () => {
+    const generation = ++stagesFetchGenerationRef.current;
     setLoading(true);
     setFetchError(null);
     try {
-      const data = await apiClient.get(
-        `/api/recruiter/companies/${COMPANY_ID}/stages`
-      );
+      const data = await apiClient.get(stagesUrl());
+      if (generation !== stagesFetchGenerationRef.current) return;
       const list = unwrapListArray(data);
       const mapped = list.map((item, i) => mapStageFromApi(item, i));
       setStages([...mapped].sort(sortStagesStable));
     } catch (err) {
+      if (generation !== stagesFetchGenerationRef.current) return;
       setFetchError(
-        getApiErrorMessage(err) || tStages("errors.loadFailed")
+        getApiErrorMessage(err) || stagesLoadFailedMessage
       );
       setStages([]);
     } finally {
-      setLoading(false);
+      if (generation === stagesFetchGenerationRef.current) {
+        setLoading(false);
+      }
     }
-  }, []);
+  }, [stagesLoadFailedMessage]);
 
   useEffect(() => {
-    fetchStages();
+    void fetchStages();
   }, [fetchStages]);
 
   const handleModalSubmit = async (wasCreating, createdStage) => {
@@ -384,9 +375,7 @@ export default function EtapasPage() {
     // Si se creó una etapa, dejarla primera (orderIndex 1) y reenumerar el resto
     if (wasCreating && createdStage) {
       try {
-        const data = await apiClient.get(
-          `/api/recruiter/companies/${COMPANY_ID}/stages`
-        );
+        const data = await apiClient.get(stagesUrl());
         const list = unwrapListArray(data);
         const mappedStages = list.map((item, i) => mapStageFromApi(item, i));
         
@@ -425,7 +414,6 @@ export default function EtapasPage() {
   const handleDefaultStageActivate = async (targetStage) => {
     if (defaultStageSwitchLoading) return;
     if (targetStage.isDefault) return;
-
     const stageId = String(targetStage.id);
     
     // Actualización optimista: actualizar el estado local inmediatamente
@@ -445,7 +433,7 @@ export default function EtapasPage() {
         stages.find((s) => String(s.id) === stageId) ?? targetStage;
       
       await apiClient.put(
-        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageId}`,
+        stagesUrl(stageId),
         buildRecruiterStagePutPayload({ ...target, isDefault: true })
       );
       
@@ -453,7 +441,7 @@ export default function EtapasPage() {
       for (const s of stages) {
         if (String(s.id) === stageId) continue;
         await apiClient.put(
-          `/api/recruiter/companies/${COMPANY_ID}/stages/${s.id}`,
+          stagesUrl(s.id),
           buildRecruiterStagePutPayload({ ...s, isDefault: false })
         );
       }
@@ -485,7 +473,14 @@ export default function EtapasPage() {
 
   const handleFinalStageToggle = async (targetStage, newValue) => {
     if (finalStageSwitchLoading) return;
-
+    if (newValue && !canEnableFinalOrHiredStage(targetStage)) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tStages("errors.finalCannotCombineInterview"),
+      });
+      return;
+    }
     const stageId = String(targetStage.id);
     
     // Actualización optimista: actualizar el estado local inmediatamente
@@ -503,7 +498,7 @@ export default function EtapasPage() {
         stages.find((s) => String(s.id) === stageId) ?? targetStage;
       
       await apiClient.put(
-        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageId}`,
+        stagesUrl(stageId),
         buildRecruiterStagePutPayload({ ...target, final: newValue })
       );
 
@@ -539,7 +534,14 @@ export default function EtapasPage() {
 
   const handleHiredStageToggle = async (targetStage, newValue) => {
     if (hiredStageSwitchLoading) return;
-
+    if (newValue && !canEnableFinalOrHiredStage(targetStage)) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tStages("errors.hiredCannotCombineInterview"),
+      });
+      return;
+    }
     const stageId = String(targetStage.id);
     
     // Actualización optimista: actualizar el estado local inmediatamente
@@ -555,7 +557,7 @@ export default function EtapasPage() {
     try {
       // Usar el endpoint PATCH específico para isHiredStage
       const updatedStage = await apiClient.patch(
-        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageId}/hired-stage`,
+        `${stagesUrl(stageId)}/hired-stage`,
         { isHiredStage: newValue }
       );
 
@@ -607,6 +609,95 @@ export default function EtapasPage() {
     }
   };
 
+  const handleInterviewStageToggle = async (targetStage, newValue) => {
+    if (interviewStageSwitchLoading) return;
+    if (newValue && !canEnableInterviewStage(targetStage)) {
+      const message = targetStage.isHiredStage
+        ? tStages("errors.interviewCannotCombineHired")
+        : tStages("errors.interviewCannotCombineFinal");
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message,
+      });
+      return;
+    }
+
+    const stageId = String(targetStage.id);
+    const previousInterviewId = stages.find((s) =>
+      isInterviewPipelineStage(s)
+    )?.id;
+
+    setStages((prevStages) =>
+      applyInterviewStageToggleLocal(prevStages, stageId, newValue)
+    );
+
+    setUpdatingInterviewStageId(stageId);
+    setInterviewStageSwitchLoading(true);
+
+    try {
+      const updatedStage = await apiClient.patch(
+        `${stagesUrl(stageId)}/interview-stage`,
+        { isInterviewStage: newValue }
+      );
+
+      setStages((prevStages) =>
+        applyInterviewStageToggleLocal(
+          prevStages.map((s) =>
+            String(s.id) === stageId ? mapStageFromApi(updatedStage) : s
+          ),
+          stageId,
+          newValue
+        )
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: newValue
+          ? tStages("toasts.interviewMarked")
+          : tStages("toasts.interviewUnmarked"),
+      });
+    } catch (err) {
+      setStages((prevStages) =>
+        prevStages.map((s) => {
+          if (String(s.id) === stageId) {
+            return { ...s, isInterviewStage: !newValue };
+          }
+          if (
+            newValue &&
+            previousInterviewId &&
+            String(s.id) === String(previousInterviewId)
+          ) {
+            return { ...s, isInterviewStage: true };
+          }
+          return s;
+        })
+      );
+
+      let errorMessage = tStages("errors.interviewUpdateFailed");
+      if (err?.status === 403 || err?.response?.status === 403) {
+        errorMessage = tStages("errors.forbidden");
+      } else if (err?.status === 404 || err?.response?.status === 404) {
+        errorMessage = tStages("errors.notFound");
+        setTimeout(() => fetchStages(), 1000);
+      } else if (getApiErrorMessage(err)) {
+        errorMessage = getApiErrorMessage(err);
+      }
+
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: errorMessage,
+      });
+    } finally {
+      setUpdatingInterviewStageId(null);
+      setInterviewStageSwitchLoading(false);
+    }
+  };
+
   const handleEdit = (stage) => {
     setEditingStage(stage);
     setIsModalOpen(true);
@@ -619,20 +710,17 @@ export default function EtapasPage() {
 
   const handleConfirmDelete = async () => {
     if (!stageToDelete) return;
-
     setDeleteLoading(true);
     try {
       await apiClient.delete(
-        `/api/recruiter/companies/${COMPANY_ID}/stages/${stageToDelete.id}`
+        stagesUrl(stageToDelete.id)
       );
       setIsDeleteModalOpen(false);
       setStageToDelete(null);
       
       // After deleting, reorder all remaining stages
       try {
-        const data = await apiClient.get(
-          `/api/recruiter/companies/${COMPANY_ID}/stages`
-        );
+        const data = await apiClient.get(stagesUrl());
         const list = unwrapListArray(data);
         const mappedStages = list.map((item, i) => mapStageFromApi(item, i));
         
@@ -682,7 +770,7 @@ export default function EtapasPage() {
     setIsModalOpen(true);
   };
 
-  const handleReorder = async ({ items }) => {
+  const handleReorder = async (items) => {
     if (reorderLoading) return;
 
     if (items.length !== stages.length) {
@@ -730,19 +818,27 @@ export default function EtapasPage() {
 
   const sortedStages = [...stages].sort(sortStagesStable);
 
-  const nestableItems = sortedStages.map((stage) => ({
+  const sortableItems = sortedStages.map((stage) => ({
     ...stage,
     onEdit: handleEdit,
     onDelete: handleDelete,
     onDefaultActivate: handleDefaultStageActivate,
     onFinalToggle: handleFinalStageToggle,
     onHiredToggle: handleHiredStageToggle,
+    onInterviewToggle: handleInterviewStageToggle,
     defaultSwitchDisabled: reorderLoading || deleteLoading,
     defaultSwitchUpdating: updatingDefaultStageId === String(stage.id),
-    finalSwitchDisabled: reorderLoading || deleteLoading,
+    finalSwitchDisabled:
+      reorderLoading || deleteLoading || isInterviewPipelineStage(stage),
     finalSwitchUpdating: updatingFinalStageId === String(stage.id),
-    hiredSwitchDisabled: reorderLoading || deleteLoading,
+    hiredSwitchDisabled:
+      reorderLoading || deleteLoading || isInterviewPipelineStage(stage),
     hiredSwitchUpdating: updatingHiredStageId === String(stage.id),
+    interviewSwitchDisabled:
+      reorderLoading ||
+      deleteLoading ||
+      (!isInterviewPipelineStage(stage) && !canEnableInterviewStage(stage)),
+    interviewSwitchUpdating: updatingInterviewStageId === String(stage.id),
   }));
 
   return (
@@ -753,15 +849,18 @@ export default function EtapasPage() {
                   description={tStages("page.description")}
                   layout="split"
                   actions={
-                    <Button
-                      type="button"
-                      variant="primary"
-                      onClick={handleNewStage}
-                      aria-label={tStages("actions.newStageAria")}
-                    >
-                      <Plus className="h-4 w-4" aria-hidden />
-                      {tStages("actions.newStage")}
-                    </Button>
+                    <>
+                      <Button
+                        type="button"
+                        variant="primary"
+                        onClick={handleNewStage}
+                        disabled={false}
+                        aria-label={tStages("actions.newStageAria")}
+                      >
+                        <Plus className="h-4 w-4" aria-hidden />
+                        {tStages("actions.newStage")}
+                      </Button>
+                    </>
                   }
                 />
                 {reorderLoading ? (
@@ -803,11 +902,17 @@ export default function EtapasPage() {
                       role="region"
                       aria-label={tStages("page.listAria")}
                     >
-                    <Nestable
-                      items={nestableItems}
-                      renderItem={(props) => renderStageItem({ ...props, tStages })}
-                      onChange={handleReorder}
-                      maxDepth={1}
+                    <SortableStagesList
+                      items={sortableItems}
+                      disabled={reorderLoading || deleteLoading}
+                      onReorder={handleReorder}
+                      tStages={tStages}
+                      renderSwitches={{
+                        Default: DefaultStageSwitch,
+                        Final: FinalStageSwitch,
+                        Hired: HiredStageSwitch,
+                        Interview: InterviewStageSwitch,
+                      }}
                     />
                     </div>
                   )}
@@ -818,7 +923,6 @@ export default function EtapasPage() {
         onClose={handleCloseModal}
         onSubmit={handleModalSubmit}
         editingStage={editingStage}
-        companyId={COMPANY_ID}
         setAsDefaultOnCreate={!editingStage && stages.length === 0}
         onSnackbar={(message, variant = "success") =>
           setSnackbar({ open: true, message, variant })

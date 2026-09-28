@@ -39,9 +39,7 @@ vi.mock("@/lib/api/admin-vacancy-catalogs", () => ({
 }))
 
 vi.mock("@/lib/api/recruiter-companies", () => ({
-  DEFAULT_RECRUITER_COMPANY_ID: "default-co",
   listRecruiterCompanies: vi.fn(async () => []),
-  persistVacancyCompanyId: vi.fn(),
 }))
 
 // El campo de ubicación carga catálogos remotos (GeoNames / countrystatecity);

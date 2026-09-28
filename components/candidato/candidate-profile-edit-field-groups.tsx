@@ -14,6 +14,7 @@ import { useProfileEditTranslations } from "@/components/rrhh/CandidateProfileSe
 import { DatePicker } from "@/components/ui/date-picker"
 import {
   getBirthDateInputValidationErrorCode,
+  type CandidateProfileRequiredFieldErrors,
   type FullProfileFormInput,
 } from "@/lib/candidate-profile"
 import {
@@ -52,8 +53,11 @@ export const blockNegativeNumberKeys = (e: KeyboardEvent<HTMLInputElement>): voi
 export const profileEditLabelClass =
   "font-sans text-xs font-medium text-muted-foreground md:text-sm"
 
+const profileEditFieldInvalidClass =
+  "[&_input]:border-destructive [&_textarea]:border-destructive [&_button]:border-destructive [&_input]:focus-visible:ring-destructive [&_textarea]:focus-visible:ring-destructive [&_button]:focus-visible:ring-destructive"
+
 export const profileEditSectionTitleClass =
-  "font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+  "font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/70"
 
 function ProfileEditSelect({
   id,
@@ -105,6 +109,7 @@ export function ProfileEditField({
   className = "",
   hint,
   error,
+  invalid,
 }: {
   label: string
   required?: boolean
@@ -113,10 +118,17 @@ export function ProfileEditField({
   className?: string
   hint?: string
   error?: string | null
+  invalid?: boolean
 }) {
+  const isInvalid = Boolean(invalid || error)
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={htmlFor} className={profileEditLabelClass}>
+    <div
+      className={`flex flex-col gap-1.5 ${className} ${isInvalid ? profileEditFieldInvalidClass : ""}`}
+    >
+      <label
+        htmlFor={htmlFor}
+        className={`${profileEditLabelClass} ${isInvalid ? "text-destructive" : ""}`}
+      >
         {label}
         {required ? <span className="text-destructive"> *</span> : null}
       </label>
@@ -137,19 +149,33 @@ interface EditorFieldsBase {
   setForm: Dispatch<SetStateAction<FullProfileFormInput>>
   patch: (partial: Partial<FullProfileFormInput>) => void
   saving: boolean
+  fieldErrors?: CandidateProfileRequiredFieldErrors
 }
 
 export function ProfileEditHeroFields({
   form,
   patch,
   saving,
-}: Pick<EditorFieldsBase, "form" | "patch" | "saving">) {
+  sidebar,
+  fieldErrors,
+}: Pick<EditorFieldsBase, "form" | "patch" | "saving" | "fieldErrors"> & {
+  sidebar?: ReactNode
+}) {
   const t = useProfileEditTranslations()
+  const firstNameInvalid = Boolean(fieldErrors?.firstName)
+  const lastNameInvalid = Boolean(fieldErrors?.lastName)
+  const headlineInvalid = Boolean(fieldErrors?.headline)
+  const summaryInvalid = Boolean(fieldErrors?.summary)
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <p className={profileEditSectionTitleClass}>{t("form.identitySummary")}</p>
       <div className="grid gap-4 sm:grid-cols-2">
-        <ProfileEditField label={t("form.labels.firstName")} htmlFor="pf-first">
+        <ProfileEditField
+          label={t("form.labels.firstName")}
+          required
+          htmlFor="pf-first"
+          invalid={firstNameInvalid}
+        >
           <input
             id="pf-first"
             autoComplete="given-name"
@@ -157,9 +183,15 @@ export function ProfileEditHeroFields({
             onChange={(e) => patch({ firstName: e.target.value })}
             className={profileEditInputClass}
             disabled={saving}
+            aria-invalid={firstNameInvalid}
           />
         </ProfileEditField>
-        <ProfileEditField label={t("form.labels.lastName")} htmlFor="pf-last">
+        <ProfileEditField
+          label={t("form.labels.lastName")}
+          required
+          htmlFor="pf-last"
+          invalid={lastNameInvalid}
+        >
           <input
             id="pf-last"
             autoComplete="family-name"
@@ -167,9 +199,16 @@ export function ProfileEditHeroFields({
             onChange={(e) => patch({ lastName: e.target.value })}
             className={profileEditInputClass}
             disabled={saving}
+            aria-invalid={lastNameInvalid}
           />
         </ProfileEditField>
-        <ProfileEditField label={t("form.labels.headline")} required htmlFor="pf-headline" className="sm:col-span-2">
+        <ProfileEditField
+          label={t("form.labels.headline")}
+          required
+          htmlFor="pf-headline"
+          className="sm:col-span-2"
+          invalid={headlineInvalid}
+        >
           <input
             id="pf-headline"
             value={form.headline}
@@ -177,9 +216,38 @@ export function ProfileEditHeroFields({
             className={profileEditInputClass}
             disabled={saving}
             autoComplete="off"
+            aria-invalid={headlineInvalid}
           />
         </ProfileEditField>
-        <ProfileEditField label={t("form.labels.summary")} required htmlFor="pf-summary" className="sm:col-span-2">
+      </div>
+      {sidebar ? (
+        <div className="grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(16.5rem,19rem)]">
+          <ProfileEditField
+            label={t("form.labels.summary")}
+            required
+            htmlFor="pf-summary"
+            className="h-full min-h-0"
+            invalid={summaryInvalid}
+          >
+            <textarea
+              id="pf-summary"
+              rows={5}
+              value={form.summary}
+              onChange={(e) => patch({ summary: e.target.value })}
+              className={`${profileEditInputClass} min-h-[148px] flex-1 resize-y`}
+              disabled={saving}
+              aria-invalid={summaryInvalid}
+            />
+          </ProfileEditField>
+          <div className="min-h-0 lg:h-full">{sidebar}</div>
+        </div>
+      ) : (
+        <ProfileEditField
+          label={t("form.labels.summary")}
+          required
+          htmlFor="pf-summary"
+          invalid={summaryInvalid}
+        >
           <textarea
             id="pf-summary"
             rows={4}
@@ -187,17 +255,24 @@ export function ProfileEditHeroFields({
             onChange={(e) => patch({ summary: e.target.value })}
             className={`${profileEditInputClass} min-h-[100px] resize-y`}
             disabled={saving}
+            aria-invalid={summaryInvalid}
           />
         </ProfileEditField>
-      </div>
+      )}
     </div>
   )
 }
 
-export function ProfileEditNationalIdField({ form, patch, saving }: EditorFieldsBase) {
+export function ProfileEditNationalIdField({ form, patch, saving, fieldErrors }: EditorFieldsBase) {
   const t = useProfileEditTranslations()
+  const nationalIdInvalid = Boolean(fieldErrors?.nationalId)
   return (
-    <ProfileEditField label={t("form.labels.nationalId")} required htmlFor="pf-national-id">
+    <ProfileEditField
+      label={t("form.labels.nationalId")}
+      required
+      htmlFor="pf-national-id"
+      invalid={nationalIdInvalid}
+    >
       <input
         id="pf-national-id"
         value={form.nationalId}
@@ -205,6 +280,7 @@ export function ProfileEditNationalIdField({ form, patch, saving }: EditorFields
         className={profileEditInputClass}
         disabled={saving}
         autoComplete="off"
+        aria-invalid={nationalIdInvalid}
       />
     </ProfileEditField>
   )

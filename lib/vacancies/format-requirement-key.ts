@@ -9,15 +9,41 @@ const KNOWN_REQUIREMENT_KEYS: Record<string, string> = {
   dotnet: ".NET",
 }
 
+const LEGACY_ASCII_SNAKE_KEY = /^[A-Za-z0-9_]+$/
+const LEGACY_ASCII_TOKEN = /^[a-z0-9]+$/
+const LEGACY_CAMEL_KEY = /^[a-z]+(?:[A-Z][a-z0-9]*)+$/
+
+/**
+ * Keys created by the old ASCII slug (snake_case, a single lowercase token, or camelCase).
+ * Labels written by a recruiter keep their letters, accents, apostrophes and casing.
+ */
+function isLegacyMachineKey(value: string): boolean {
+  if (KNOWN_REQUIREMENT_KEYS[value.toLowerCase()]) return true
+  if (LEGACY_CAMEL_KEY.test(value)) return true
+  if (!LEGACY_ASCII_SNAKE_KEY.test(value)) return false
+  return value.includes("_") || LEGACY_ASCII_TOKEN.test(value)
+}
+
+/**
+ * Storage key for a requirement name. Keeps the written label so Spanish, English,
+ * German, Italian and French orthography stays intact in every screen that reads it.
+ */
+export function toRequirementStorageKey(name: unknown): string {
+  return String(name ?? "").trim().replace(/\s+/g, " ")
+}
+
 /**
  * Turns a stored requirement key (snake_case, camelCase, or attr_ prefix)
- * into a label a recruiter can read.
+ * into a label a recruiter can read. Written labels are returned unchanged.
  */
 export function formatRequirementKey(key: unknown): string {
   const raw = String(key ?? "").trim()
   if (raw === "") return ""
 
   const withoutAttrPrefix = raw.replace(/^attr_/i, "")
+  if (withoutAttrPrefix === "") return ""
+  if (!isLegacyMachineKey(withoutAttrPrefix)) return withoutAttrPrefix
+
   const normalized = withoutAttrPrefix.toLowerCase()
   if (KNOWN_REQUIREMENT_KEYS[normalized]) {
     return KNOWN_REQUIREMENT_KEYS[normalized]

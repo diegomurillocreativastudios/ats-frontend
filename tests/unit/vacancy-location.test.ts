@@ -9,8 +9,8 @@ import {
   resolveVacancyStateName,
 } from "@/lib/vacancies/vacancy-location"
 
-vi.mock("@countrystatecity/countries-browser", () => ({
-  getStateByCode: vi.fn(async (countryCode: string, stateCode: string) => {
+vi.mock("@/lib/locations/bundled-catalog", () => ({
+  getBundledStateByCode: vi.fn(async (countryCode: string, stateCode: string) => {
     if (countryCode === "SV" && stateCode === "SS") {
       return {
         iso2: "SS",
@@ -70,7 +70,7 @@ describe("vacancy-location", () => {
     expect(payload).toEqual({ countryCode: "", stateCode: null })
   })
 
-  it("resolves state names through the countries-browser helper", async () => {
+  it("resolves state names through the bundled catalog helper", async () => {
     await expect(resolveVacancyStateName("SV", "SS")).resolves.toBe("San Salvador")
     await expect(buildVacancyLocationLabel({
       countryCode: "SV",

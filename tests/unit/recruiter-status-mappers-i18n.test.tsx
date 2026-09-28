@@ -12,6 +12,7 @@ import {
   VACANCY_STATUS_TRANSLATION_KEYS,
   getVacancyStatusLabel,
 } from "@/lib/vacancies/vacancy-status-labels"
+import { getVacancyJobCategoryLabel } from "@/lib/vacancies/vacancy-catalog-labels"
 import { mapVacancyFromApi } from "@/lib/vacancies/map-vacancy-list-item"
 
 /**
@@ -70,6 +71,14 @@ describe("getVacancyStatusLabel (Etapa 10)", () => {
     expect(getVacancyStatusLabel("borrador", t)).toBe("Draft")
   })
 
+  it("traduce alias del API en inglés (Open, Closed, …)", () => {
+    const t = translate("es")
+    expect(getVacancyStatusLabel("Open", t)).toBe("Activa")
+    expect(getVacancyStatusLabel("Closed", t)).toBe("Cerrada")
+    expect(getVacancyStatusLabel("Draft", t)).toBe("Borrador")
+    expect(getVacancyStatusLabel("Paused", t)).toBe("Pausada")
+  })
+
   it("devuelve el valor crudo para un código desconocido (sin traducir)", () => {
     const t = vi.fn(() => "NO_DEBERIA_LLAMARSE")
     expect(getVacancyStatusLabel("CUSTOM_STATUS_FROM_BACKEND", t)).toBe(
@@ -82,6 +91,33 @@ describe("getVacancyStatusLabel (Etapa 10)", () => {
     const t = vi.fn(() => "x")
     expect(getVacancyStatusLabel(null, t)).toBe("")
     expect(getVacancyStatusLabel(undefined, t)).toBe("")
+  })
+})
+
+describe("getVacancyJobCategoryLabel", () => {
+  const translate =
+    (locale: Locale) =>
+    (key: string): string => {
+      const vacancies = (
+        messagesByLocale[locale].RecruiterPortal as Record<
+          string,
+          Record<string, Record<string, string>>
+        >
+      ).vacancies
+      const [group, leaf] = key.split(".")
+      return vacancies[group][leaf]
+    }
+
+  it("traduce Uncategorized en español", () => {
+    expect(getVacancyJobCategoryLabel("Uncategorized", translate("es"))).toBe(
+      "Sin categoría"
+    )
+  })
+
+  it("deja categorías libres sin cambiar", () => {
+    expect(
+      getVacancyJobCategoryLabel("Engineering", translate("es"))
+    ).toBe("Engineering")
   })
 })
 
@@ -158,6 +194,19 @@ describe("namespaces de estados/labels parity (Etapa 10)", () => {
       expect(candidates, `noName en ${locale}.json`).toHaveProperty("noName")
       expect(candidates, `hired en ${locale}.json`).toHaveProperty("hired")
       expect(candidates, `notHired en ${locale}.json`).toHaveProperty("notHired")
+    }
+  })
+
+  it("expone catalogFallbacks.uncategorized en los 5 idiomas", () => {
+    for (const locale of locales) {
+      const vacancies = (
+        messagesByLocale[locale].RecruiterPortal as Record<string, unknown>
+      ).vacancies as Record<string, unknown>
+      expect(vacancies, `catalogFallbacks en ${locale}.json`).toHaveProperty(
+        "catalogFallbacks"
+      )
+      const fallbacks = vacancies.catalogFallbacks as Record<string, string>
+      expect(fallbacks.uncategorized?.length).toBeGreaterThan(0)
     }
   })
 

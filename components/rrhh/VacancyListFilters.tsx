@@ -12,6 +12,7 @@ import {
 } from "@/lib/vacancies/filter-vacancy-list"
 import { getCountryIso2SelectOptions } from "@/lib/profile-form-options"
 import { mapActiveCatalogItemsToOptions } from "@/lib/vacancy-catalogs"
+import { ResponsiveFilters } from "@/components/ui/responsive-filters"
 
 const controlClassName =
   "h-10 w-full min-w-0 rounded-lg border border-input bg-background font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -40,6 +41,7 @@ export function VacancyListFilters({
   const [loadingOptions, setLoadingOptions] = useState(true)
 
   const countryOptions = useMemo(() => getCountryIso2SelectOptions(), [])
+  const hasActiveFilters = hasActiveVacancyListFilters(value)
 
   useEffect(() => {
     let cancelled = false
@@ -82,93 +84,97 @@ export function VacancyListFilters({
   }
 
   return (
-    <div
-      className="rounded-xl border border-border bg-card p-3 md:p-4"
-      aria-label={t("regionLabel")}
+    <ResponsiveFilters
+      toggleLabel={t("toggle")}
+      title={t("toggle")}
+      regionLabel={t("regionLabel")}
+      hasActiveFilters={hasActiveFilters}
+      disabled={disabled}
+      desktopClassName="w-full rounded-xl border border-border bg-card p-3 md:p-4"
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <FilterField id="vacancy-filter-search" label={t("name")}>
-          <div className="relative">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <FilterField id="vacancy-filter-search" label={t("name")}>
+              <div className="relative">
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                />
+                <input
+                  id="vacancy-filter-search"
+                  type="search"
+                  value={value.titleQuery}
+                  onChange={(e) => patch({ titleQuery: e.target.value })}
+                  placeholder={t("searchPlaceholder")}
+                  disabled={disabled}
+                  className={`${controlClassName} pl-9 pr-3`}
+                />
+              </div>
+            </FilterField>
+
+            <FilterSelect
+              id="vacancy-filter-company"
+              label={t("company")}
+              ariaLabel={t("filterByAria", { label: t("company") })}
+              value={value.companyId}
+              onChange={(companyId) => patch({ companyId })}
+              disabled={disabled || loadingOptions}
+              emptyLabel={t("allFemale")}
+              options={companyOptions.map((c) => ({ value: c.id, label: c.name }))}
             />
-            <input
-              id="vacancy-filter-search"
-              type="search"
-              value={value.titleQuery}
-              onChange={(e) => patch({ titleQuery: e.target.value })}
-              placeholder={t("searchPlaceholder")}
+
+            <FilterSelect
+              id="vacancy-filter-modality"
+              label={t("modality")}
+              ariaLabel={t("filterByAria", { label: t("modality") })}
+              value={value.modalityId}
+              onChange={(modalityId) => patch({ modalityId })}
+              disabled={disabled || loadingOptions}
+              emptyLabel={t("allFemale")}
+              options={modalityOptions.map((m) => ({
+                value: m.id,
+                label: m.displayName,
+              }))}
+            />
+
+            <FilterSelect
+              id="vacancy-filter-country"
+              label={t("country")}
+              ariaLabel={t("filterByAria", { label: t("country") })}
+              emptyLabel={t("allMale")}
+              value={value.countryCode}
+              onChange={(countryCode) => patch({ countryCode })}
               disabled={disabled}
-              className={`${controlClassName} pl-9 pr-3`}
+              options={countryOptions.map((c) => ({ value: c.value, label: c.label }))}
+            />
+
+            <FilterSelect
+              id="vacancy-filter-department"
+              label={t("department")}
+              ariaLabel={t("filterByAria", { label: t("department") })}
+              value={value.departmentId}
+              onChange={(departmentId) => patch({ departmentId })}
+              disabled={disabled || loadingOptions}
+              emptyLabel={t("allFemale")}
+              options={departmentOptions.map((d) => ({
+                value: d.id,
+                label: d.displayName,
+              }))}
             />
           </div>
-        </FilterField>
 
-        <FilterSelect
-          id="vacancy-filter-company"
-          label={t("company")}
-          ariaLabel={t("filterByAria", { label: t("company") })}
-          value={value.companyId}
-          onChange={(companyId) => patch({ companyId })}
-          disabled={disabled || loadingOptions}
-          emptyLabel={t("allFemale")}
-          options={companyOptions.map((c) => ({ value: c.id, label: c.name }))}
-        />
-
-        <FilterSelect
-          id="vacancy-filter-modality"
-          label={t("modality")}
-          ariaLabel={t("filterByAria", { label: t("modality") })}
-          value={value.modalityId}
-          onChange={(modalityId) => patch({ modalityId })}
-          disabled={disabled || loadingOptions}
-          emptyLabel={t("allFemale")}
-          options={modalityOptions.map((m) => ({
-            value: m.id,
-            label: m.displayName,
-          }))}
-        />
-
-        <FilterSelect
-          id="vacancy-filter-country"
-          label={t("country")}
-          ariaLabel={t("filterByAria", { label: t("country") })}
-          emptyLabel={t("allMale")}
-          value={value.countryCode}
-          onChange={(countryCode) => patch({ countryCode })}
-          disabled={disabled}
-          options={countryOptions.map((c) => ({ value: c.value, label: c.label }))}
-        />
-
-        <FilterSelect
-          id="vacancy-filter-department"
-          label={t("department")}
-          ariaLabel={t("filterByAria", { label: t("department") })}
-          value={value.departmentId}
-          onChange={(departmentId) => patch({ departmentId })}
-          disabled={disabled || loadingOptions}
-          emptyLabel={t("allFemale")}
-          options={departmentOptions.map((d) => ({
-            value: d.id,
-            label: d.displayName,
-          }))}
-        />
-      </div>
-
-      {hasActiveVacancyListFilters(value) ? (
-        <div className="mt-3 flex justify-end border-t border-border pt-3">
-          <button
-            type="button"
-            onClick={handleClearFilters}
-            disabled={disabled}
-            className="font-sans text-sm font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
-          >
-            {t("clearFilters")}
-          </button>
-        </div>
-      ) : null}
-    </div>
+          {hasActiveFilters ? (
+            <div className="mt-3 flex justify-end border-t border-border pt-3">
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                disabled={disabled}
+                className="font-sans text-sm font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:opacity-50"
+              >
+                {t("clearFilters")}
+              </button>
+            </div>
+          ) : null}
+    </ResponsiveFilters>
   )
 }
 

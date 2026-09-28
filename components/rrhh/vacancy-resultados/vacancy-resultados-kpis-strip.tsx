@@ -63,29 +63,31 @@ export function VacancyResultadosKpisStrip({
 
   return (
     <section
-      className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
+      className="rounded-xl border border-border bg-card px-4 py-3 shadow-sm sm:px-5"
       aria-labelledby="vacancy-resultados-kpis-heading"
     >
       <h2
         id="vacancy-resultados-kpis-heading"
-        className="mb-3 font-sans text-sm font-semibold text-foreground"
+        className="mb-2 font-sans text-sm font-semibold text-foreground"
       >
         {t("heading")}
       </h2>
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {items.map((item) => (
           <li
             key={item.label}
-            className="rounded-lg border border-border/60 bg-muted/30 px-3 py-3"
+            className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2.5"
           >
             <p className="font-sans text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {item.label}
             </p>
-            <p className="mt-1 font-sans text-xl font-semibold tabular-nums text-foreground">
+            <p className="mt-0.5 font-sans text-lg font-semibold tabular-nums text-foreground">
               {item.value}
             </p>
             {item.hint ? (
-              <p className="mt-1 font-sans text-[11px] text-muted-foreground">{item.hint}</p>
+              <p className="mt-0.5 font-sans text-[11px] text-muted-foreground">
+                {item.hint}
+              </p>
             ) : null}
           </li>
         ))}

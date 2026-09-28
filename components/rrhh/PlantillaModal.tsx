@@ -16,6 +16,9 @@ import {
   describeReportBindingError,
   saveReportBinding,
 } from "@/lib/api/recruiter-report-bindings";
+import { safeParseReportSchema } from "@/lib/reportes/schema/report-schema";
+import { DEFAULT_TECHNICAL_SHEET_SCHEMA_TEXT } from "@/lib/technical-sheet/schema/technical-sheet-default-schema";
+import { safeParseTechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema";
 
 const slugify = (text: string) =>
   text
@@ -25,6 +28,17 @@ const slugify = (text: string) =>
     .replace(/\s+/g, "-")
     .replace(/[^\w-]+/g, "")
     .replace(/--+/g, "-");
+
+const DEFAULT_REPORT_SCHEMA_TEXT = JSON.stringify(
+  {
+    version: 1,
+    reportKey: "vacancy-progress-by-client",
+    title: "Reporte",
+    sections: [{ type: "heroHeader", title: "Reporte" }],
+  },
+  null,
+  2
+)
 
 interface PlantillaFormData {
   type: string
@@ -94,10 +108,16 @@ const buildPayload = (
   return payload
 }
 
+export interface PlantillaSavedResult {
+  id?: number | string
+  name: string
+  wasEditing: boolean
+}
+
 interface PlantillaModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit?: () => void
+  onSubmit?: (saved: PlantillaSavedResult) => void
   editingTemplate?: Record<string, unknown> | null
   onSnackbar?: (message: string, variant?: string) => void
 }
@@ -142,7 +162,18 @@ export default function PlantillaModal({
         slug: String(t["slug"] ?? ""),
         subject: String(t["subject"] ?? t["subjectTemplate"] ?? ""),
         body: String(t["body"] ?? t["bodyTemplate"] ?? t["content"] ?? ""),
-        contentTemplate: String(t["contentTemplate"] ?? ""),
+        contentTemplate: (() => {
+          const raw = String(t["contentTemplate"] ?? "")
+          if (Boolean(t["isTechnicalSheet"])) {
+            const parsed = safeParseTechnicalSheetSchema(raw)
+            return parsed.success ? raw : DEFAULT_TECHNICAL_SHEET_SCHEMA_TEXT
+          }
+          if (Boolean(t["isReport"])) {
+            const parsed = safeParseReportSchema(raw)
+            return parsed.success ? raw : DEFAULT_REPORT_SCHEMA_TEXT
+          }
+          return raw
+        })(),
         outputFormat: String(t["outputFormat"] ?? "PDF"),
         isTechnicalSheet: Boolean(t["isTechnicalSheet"]),
         isReport: Boolean(t["isReport"]),
@@ -248,6 +279,16 @@ export default function PlantillaModal({
     } else if (formData.type === "Document") {
       if (!formData.contentTemplate.trim()) {
         nextErrors.contentTemplate = t("validation.contentTemplateRequired")
+      } else if (formData.isTechnicalSheet) {
+        const parsedSchema = safeParseTechnicalSheetSchema(formData.contentTemplate)
+        if (parsedSchema.success === false) {
+          nextErrors.contentTemplate = t("validation.contentTemplateJsonInvalid")
+        }
+      } else if (formData.isReport) {
+        const parsedSchema = safeParseReportSchema(formData.contentTemplate)
+        if (parsedSchema.success === false) {
+          nextErrors.contentTemplate = t("validation.contentTemplateReportJsonInvalid")
+        }
       }
       const selectedReportKey = formData.reportKey.trim()
       if (
@@ -336,8 +377,13 @@ export default function PlantillaModal({
           "success"
         )
       }
+      const saved: PlantillaSavedResult = {
+        id: templateId,
+        name: formData.name.trim(),
+        wasEditing: isEditing,
+      }
       handleClose()
-      onSubmit?.()
+      onSubmit?.(saved)
     } catch (err) {
       const msg = getApiErrorMessage(err) || t("toastSaveFailed")
       setSubmitError(msg)
@@ -500,9 +546,20 @@ export default function PlantillaModal({
                 id="plantilla-content-template"
                 value={formData.contentTemplate}
                 onChange={(e) => setFormData((prev) => ({ ...prev, contentTemplate: e.target.value }))}
-                placeholder={t("contentTemplatePlaceholder", {
-                  htmlExample: CONTENT_TEMPLATE_HTML_EXAMPLE,
-                })}
+                placeholder={
+                  formData.isTechnicalSheet
+                    ? t("contentTemplatePlaceholderJson", {
+                        jsonExample: '{"version":1,"kind":"technical-sheet","sections":[]}',
+                      })
+                    : formData.isReport
+                      ? t("contentTemplatePlaceholderJson", {
+                          jsonExample:
+                            '{"version":1,"reportKey":"vacancy-progress-by-client","sections":[]}',
+                        })
+                      : t("contentTemplatePlaceholder", {
+                          htmlExample: CONTENT_TEMPLATE_HTML_EXAMPLE,
+                        })
+                }
                 rows={8}
                 className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent min-h-[150px]"
                 aria-invalid={!!errors.contentTemplate}
@@ -539,12 +596,22 @@ export default function PlantillaModal({
                   id="plantilla-is-technical-sheet"
                   type="checkbox"
                   checked={formData.isTechnicalSheet}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      isTechnicalSheet: e.target.checked,
-                    }))
-                  }
+                  onChange={(e) => {
+                    const checked = e.target.checked
+                    setFormData((prev) => {
+                      if (!checked) {
+                        return { ...prev, isTechnicalSheet: false }
+                      }
+                      const parsed = safeParseTechnicalSheetSchema(prev.contentTemplate)
+                      return {
+                        ...prev,
+                        isTechnicalSheet: true,
+                        contentTemplate: parsed.success
+                          ? prev.contentTemplate
+                          : DEFAULT_TECHNICAL_SHEET_SCHEMA_TEXT,
+                      }
+                    })
+                  }}
                   className="h-4 w-4 rounded border-gray-300 text-vo-purple focus:ring-vo-purple"
                   aria-describedby="plantilla-is-technical-sheet-hint"
                 />
@@ -571,11 +638,19 @@ export default function PlantillaModal({
                   checked={formData.isReport}
                   onChange={(e) => {
                     const checked = e.target.checked
-                    setFormData((prev) => ({
-                      ...prev,
-                      isReport: checked,
-                      reportKey: checked ? prev.reportKey : "",
-                    }))
+                    setFormData((prev) => {
+                      if (!checked) {
+                        return { ...prev, isReport: false, reportKey: "" }
+                      }
+                      const parsed = safeParseReportSchema(prev.contentTemplate)
+                      return {
+                        ...prev,
+                        isReport: true,
+                        contentTemplate: parsed.success
+                          ? prev.contentTemplate
+                          : DEFAULT_REPORT_SCHEMA_TEXT,
+                      }
+                    })
                   }}
                   className="h-4 w-4 rounded border-gray-300 text-vo-purple focus:ring-vo-purple"
                   aria-describedby="plantilla-is-report-hint"

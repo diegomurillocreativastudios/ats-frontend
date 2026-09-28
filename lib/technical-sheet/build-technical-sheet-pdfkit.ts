@@ -2,14 +2,16 @@ import { APP_NAME } from "@/lib/app-brand"
 import PDFDocument from "pdfkit"
 import type { TechnicalSheetPayload } from "@/lib/api/technical-sheet"
 import { technicalSheetMessages as m } from "@/lib/messages/technical-sheet"
-import {
-  getTechnicalSheetCandidateHeaderFacts,
-  pickCandidateDisplayRecord,
-} from "@/lib/technical-sheet/candidate-from-payload"
+import { getTechnicalSheetCandidateHeaderFacts } from "@/lib/technical-sheet/candidate-from-payload"
+import { DEFAULT_TECHNICAL_SHEET_SCHEMA } from "@/lib/technical-sheet/schema/technical-sheet-default-schema"
+import { renderTechnicalSheetSchemaToPdfKit } from "@/lib/technical-sheet/schema/render-technical-sheet-schema-to-pdfkit"
+import type { TechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema-types"
+import { buildTechnicalSheetTemplateContext } from "@/lib/technical-sheet/technical-sheet-template-context"
 import { tryLoadAppLogoRasterBufferForPdfKit } from "@/lib/technical-sheet/technical-sheet-pdf-logo"
+import type { TechnicalSheetCompanyBrand } from "@/lib/technical-sheet/vacancy-company-brand"
 
 /**
- * PDF estructurado con PDFKit. La ruta Next lo usa solo como rollback temporal (`?engine=pdfkit` / `TECHNICAL_SHEET_PDF_ENGINE=pdfkit`); el flujo principal es HTML → Chromium.
+ * PDF estructurado con PDFKit desde el esquema JSON (mismo patrón que reportes).
  */
 
 const BRAND = {
@@ -18,6 +20,8 @@ const BRAND = {
   footer: "#256D35",
   black: "#000000",
   taglineGray: "#57585B",
+  companyGray: "#454648",
+  dividerGray: "#D1D5DB",
   dotGray: "#94a3b8",
 }
 
@@ -29,106 +33,6 @@ const CONTENT_MARGIN_TOP = 120
 const HEADER_FACT_LINE_HEIGHT = 14
 /** Hueco respecto al borde útil para no solapar decoración esquina superior derecha */
 const HEADER_FACTS_RIGHT_INSET = 24
-
-function pickFromRecord(o: Record<string, unknown>, keys: string[]): string | null {
-  for (const k of keys) {
-    const v = o[k] ?? o[k.charAt(0).toUpperCase() + k.slice(1)]
-    if (v != null && String(v).trim() !== "") return String(v)
-  }
-  return null
-}
-
-const capitalizeSentence = (s: string) =>
-  s.length === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)
-
-function formatSpanishMonthYearRaw(raw: string | null | undefined): string {
-  if (raw == null || String(raw).trim() === "") return ""
-  const t = String(raw).trim()
-  const d = new Date(t)
-  if (!Number.isNaN(d.getTime())) {
-    const formatted = new Intl.DateTimeFormat("es", {
-      month: "long",
-      year: "numeric",
-    }).format(d)
-    return capitalizeSentence(formatted)
-  }
-  return t
-}
-
-function formatWorkPeriodDisplay(from: string | null, to: string | null): string {
-  const a = formatSpanishMonthYearRaw(from)
-  const b = formatSpanishMonthYearRaw(to)
-  if (a !== "" && b !== "") return `${a}–${b}`
-  if (a !== "") return a
-  if (b !== "") return b
-  return "—"
-}
-
-function extractWorkFunctions(rec: Record<string, unknown>): string[] {
-  const arrayKeys = [
-    "responsibilities",
-    "Responsibilities",
-    "functions",
-    "Functions",
-    "mainFunctions",
-    "MainFunctions",
-    "bullets",
-    "Bullets",
-    "achievements",
-    "Achievements",
-  ]
-  for (const k of arrayKeys) {
-    const v = rec[k]
-    if (Array.isArray(v)) {
-      const out = v.map((x) => String(x).trim()).filter((x) => x !== "")
-      if (out.length > 0) return out
-    }
-  }
-  const desc = pickFromRecord(rec, ["Description", "description", "summary"])
-  if (!desc) return []
-  const lines = desc
-    .split(/\r?\n/)
-    .map((line) => line.replace(/^[\s\-•*·]+/, "").trim())
-    .filter((line) => line !== "")
-  if (lines.length > 1) return lines
-  if (lines.length === 1) {
-    const single = lines[0]
-    if (single.length > 200) {
-      const bySentence = single.split(/(?<=[.!?])\s+/).filter((p) => p.trim().length > 0)
-      if (bySentence.length > 1) return bySentence
-    }
-    return lines
-  }
-  return [desc.trim()]
-}
-
-function collectStringList(v: unknown): string[] {
-  return Array.isArray(v)
-    ? [...new Set(v.map((s) => String(s).trim()).filter((s) => s !== ""))]
-    : []
-}
-
-function formatIsoDisplayPdf(iso: string | null | undefined): string {
-  if (iso == null || String(iso).trim() === "") return "—"
-  const d = new Date(String(iso))
-  if (Number.isNaN(d.getTime())) return String(iso)
-  return new Intl.DateTimeFormat("es", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(d)
-}
-
-function pickInterviewNoteTextPdf(rec: Record<string, unknown>): string | null {
-  const fromNote = pickFromRecord(rec, ["note", "Note"])
-  const fromNotes = pickFromRecord(rec, ["notes", "Notes"])
-  const t = (fromNote ?? fromNotes ?? "").trim()
-  return t !== "" ? t : null
-}
-
-function asRecord(v: unknown): Record<string, unknown> | null {
-  if (v != null && typeof v === "object" && !Array.isArray(v)) return v as Record<string, unknown>
-  return null
-}
 
 type PdfDoc = InstanceType<typeof PDFDocument>
 
@@ -195,13 +99,67 @@ function drawPageDecorations(doc: PdfDoc) {
   doc.restore()
 }
 
+function decodeDataUriToBuffer(dataUri: string): Buffer | null {
+  const trimmed = dataUri.trim()
+  const match = /^data:([^;,]+);base64,(.+)$/i.exec(trimmed)
+  if (!match) return null
+  try {
+    const buf = Buffer.from(match[2], "base64")
+    return buf.length > 0 ? buf : null
+  } catch {
+    return null
+  }
+}
+
+function drawCompanyBrand(
+  doc: PdfDoc,
+  companyBrand: TechnicalSheetCompanyBrand | null | undefined,
+  startX: number,
+  headerTop: number,
+  maxRight: number
+) {
+  if (!companyBrand) return
+  const name = String(companyBrand.name ?? "").trim()
+  const logoUri = String(companyBrand.logoDataUri ?? "").trim()
+  if (!name && !logoUri) return
+
+  let x = startX + 10
+  doc.save()
+  doc.strokeColor(BRAND.dividerGray).lineWidth(0.75)
+  doc
+    .moveTo(startX, headerTop)
+    .lineTo(startX, headerTop + 28)
+    .stroke()
+  doc.restore()
+
+  if (logoUri) {
+    const logoBuf = decodeDataUriToBuffer(logoUri)
+    if (logoBuf) {
+      try {
+        const iconW = 22
+        doc.image(logoBuf, x, headerTop, { fit: [iconW, iconW] })
+        x += iconW + 6
+      } catch {
+        /* ignore corrupt logo */
+      }
+    }
+  }
+
+  if (name) {
+    const available = Math.max(40, maxRight - x)
+    doc.fontSize(9).font("Helvetica-Bold").fillColor(BRAND.companyGray)
+    doc.text(name, x, headerTop + 4, { width: available, lineBreak: false, ellipsis: true })
+  }
+}
+
 /**
  * Logo Applican Tree + tagline + datos personales (solo página 1; las siguientes no repiten cabecera).
  */
 function drawRepeatedHeader(
   doc: PdfDoc,
   facts: ReturnType<typeof getTechnicalSheetCandidateHeaderFacts>,
-  iconBuffer: Buffer | undefined
+  iconBuffer: Buffer | undefined,
+  companyBrand: TechnicalSheetCompanyBrand | null | undefined
 ) {
   const { left, right, width } = contentMetrics(doc)
   const headerTop = HEADER_BAND_TOP
@@ -221,6 +179,11 @@ function drawRepeatedHeader(
     })
     doc.fontSize(8.5).font("Helvetica").fillColor(BRAND.taglineGray)
     doc.text(m.brandTagline, left, headerTop + 22, { width: 280, lineGap: 2 })
+
+    const companyStart = wordmarkX + 155
+    if (companyStart + 40 < factsX - 8) {
+      drawCompanyBrand(doc, companyBrand, companyStart, headerTop, factsX - 8)
+    }
   } catch {
     drawVisibleFallbackWordmark(doc, left, headerTop)
   }
@@ -265,204 +228,25 @@ function resetTextCursorToContentArea(doc: PdfDoc) {
   doc.y = doc.page.margins.top
 }
 
-function sectionHeading(doc: PdfDoc, title: string) {
-  const { width, left, right } = contentMetrics(doc)
-  doc.moveDown(0.85)
-  doc.fontSize(11).font("Helvetica-Bold").fillColor(BRAND.black).text(title.toUpperCase(), {
-    width,
-    align: "left",
-  })
-  doc.moveDown(0.22)
-  doc.strokeColor(BRAND.black).lineWidth(0.85).moveTo(left, doc.y).lineTo(right, doc.y).stroke()
-  doc.moveDown(0.55)
-  doc.fillColor(BRAND.black).font("Helvetica").fontSize(10)
-}
-
-function paragraph(doc: PdfDoc, text: string) {
-  const { width } = contentMetrics(doc)
-  doc.fontSize(10).font("Helvetica").fillColor(BRAND.black).text(text, {
-    width,
-    align: "left",
-    lineGap: 4,
-  })
-  doc.moveDown(0.45)
-}
-
-/**
- * Etiqueta y valor en bloques separados (sin `continued`) para que los saltos de página
- * no superpongan texto como en FORMACIÓN ACADÉMICA página 2.
- */
-function labeledLine(doc: PdfDoc, label: string, value: string) {
-  const { width } = contentMetrics(doc)
-  const v = value.trim() !== "" ? value : "—"
-  doc.fontSize(10).font("Helvetica-Bold").fillColor(BRAND.black).text(`${label}:`, {
-    width,
-    align: "left",
-  })
-  doc.moveDown(0.07)
-  doc.font("Helvetica").fontSize(10).fillColor(BRAND.black).text(v, {
-    width,
-    align: "left",
-    lineGap: 3,
-  })
-  doc.moveDown(0.28)
-}
-
-function bulletList(doc: PdfDoc, items: string[]) {
-  const { width } = contentMetrics(doc)
-  for (const item of items) {
-    doc.fontSize(10).font("Helvetica").fillColor(BRAND.black).text(`• ${item}`, {
-      width: width - 14,
-      indent: 14,
-      align: "left",
-      lineGap: 5,
-    })
-    doc.moveDown(0.28)
-  }
-  doc.moveDown(0.12)
-}
-
-function renderTechnicalSheetBody(doc: PdfDoc, payload: TechnicalSheetPayload, record: Record<string, unknown> | null) {
-  const { width } = contentMetrics(doc)
-
-  if (!record) {
-    doc.fontSize(11).font("Helvetica").fillColor(BRAND.black).text(m.emptyPreview, { width, lineGap: 4 })
-    return
-  }
-
-  const summary = typeof record.summary === "string" ? record.summary.trim() : ""
-  if (summary !== "") {
-    sectionHeading(doc, m.summary)
-    paragraph(doc, summary)
-  }
-
-  const work = Array.isArray(record.workExperience) ? record.workExperience : []
-  if (work.length > 0) {
-    sectionHeading(doc, m.workExperience)
-    for (const raw of work) {
-      const rec = asRecord(raw)
-      if (!rec) {
-        paragraph(doc, typeof raw === "string" ? raw : JSON.stringify(raw))
-        continue
-      }
-      const company = pickFromRecord(rec, ["Company", "company", "employer"]) ?? "—"
-      const role = pickFromRecord(rec, ["Role", "role", "position", "title"]) ?? "—"
-      const from = pickFromRecord(rec, ["StartDate", "startDate", "from"])
-      const to = pickFromRecord(rec, ["EndDate", "endDate", "to"])
-      const period = formatWorkPeriodDisplay(from, to)
-      labeledLine(doc, m.company, company)
-      labeledLine(doc, m.workRolePerformed, role)
-      labeledLine(doc, m.workPeriod, period)
-      doc.font("Helvetica-Bold").fontSize(10).fillColor(BRAND.black).text(`${m.workMainFunctions}:`, { width })
-      doc.moveDown(0.18)
-      const lines = extractWorkFunctions(rec)
-      if (lines.length > 0) bulletList(doc, lines)
-      else paragraph(doc, "—")
-      doc.moveDown(0.5)
-    }
-  }
-
-  const education = Array.isArray(record.education) ? record.education : []
-  if (education.length > 0) {
-    sectionHeading(doc, m.education)
-    for (const raw of education) {
-      const rec = asRecord(raw)
-      if (!rec) {
-        paragraph(doc, typeof raw === "string" ? raw : JSON.stringify(raw))
-        continue
-      }
-      const inst = pickFromRecord(rec, ["Institution", "institution", "school"]) ?? "—"
-      const deg = pickFromRecord(rec, ["Degree", "degree", "title"])
-      const from = pickFromRecord(rec, ["StartDate", "startDate"])
-      const to = pickFromRecord(rec, ["EndDate", "endDate"])
-      const period = from || to ? formatWorkPeriodDisplay(from, to) : null
-      labeledLine(doc, m.institution, inst)
-      if (deg) labeledLine(doc, m.degree, deg)
-      if (period && period !== "—") labeledLine(doc, m.workPeriod, period)
-      doc.moveDown(0.22)
-    }
-  }
-
-  const langs = Array.isArray(record.languages) ? record.languages : []
-  if (langs.length > 0) {
-    sectionHeading(doc, m.languages)
-    for (const raw of langs) {
-      const rec = asRecord(raw)
-      const lang = rec
-        ? pickFromRecord(rec, ["Language", "language", "name"])
-        : typeof raw === "string"
-          ? raw
-          : null
-      const level = rec ? pickFromRecord(rec, ["Level", "level", "proficiency"]) : null
-      paragraph(doc, level ? `${lang ?? "—"} — ${level}` : `${lang ?? "—"}`)
-    }
-  }
-
-  const skillsLegacy = collectStringList(record.skills)
-  const technicalSkillsList = collectStringList(record.technicalSkills)
-  const softSkillsList = collectStringList(record.softSkills)
-  const hasTechnicalBucket = technicalSkillsList.length > 0
-  const hasSoftBucket = softSkillsList.length > 0
-  const showSplitSkillBuckets = hasTechnicalBucket || hasSoftBucket
-  const combinedTechnicalSkills = hasTechnicalBucket
-    ? [...new Set([...technicalSkillsList, ...skillsLegacy])]
-    : []
-  const legacySkillsWhenOnlySoftTyped =
-    !hasTechnicalBucket && hasSoftBucket ? skillsLegacy : []
-
-  if (showSplitSkillBuckets) {
-    if (combinedTechnicalSkills.length > 0) {
-      sectionHeading(doc, m.technicalSkills)
-      bulletList(doc, combinedTechnicalSkills)
-    }
-    if (softSkillsList.length > 0) {
-      sectionHeading(doc, m.softSkills)
-      bulletList(doc, softSkillsList)
-    }
-    if (legacySkillsWhenOnlySoftTyped.length > 0) {
-      sectionHeading(doc, m.skills)
-      bulletList(doc, legacySkillsWhenOnlySoftTyped)
-    }
-  } else if (skillsLegacy.length > 0) {
-    sectionHeading(doc, m.skills)
-    bulletList(doc, skillsLegacy)
-  }
-
-  const socialLinks = Array.isArray(record.socialLinks) ? record.socialLinks : []
-  if (socialLinks.length > 0) {
-    sectionHeading(doc, m.socialLinks)
-    for (const raw of socialLinks) {
-      const rec = asRecord(raw)
-      const platform = rec
-        ? pickFromRecord(rec, ["Platform", "platform", "name", "label"])
-        : null
-      const url = rec ? pickFromRecord(rec, ["Url", "url", "link", "href"]) : null
-      paragraph(doc, `${platform ?? "—"}: ${url ?? "—"}`)
-    }
-  }
-
-  const recognitions = Array.isArray(record.recognitions)
-    ? record.recognitions.map((r) => String(r)).filter((r) => r.trim() !== "")
-    : []
-  if (recognitions.length > 0) {
-    sectionHeading(doc, m.recognitions)
-    bulletList(doc, recognitions)
-  }
-
-  const resume = typeof record.resumeMarkdown === "string" ? record.resumeMarkdown.trim() : ""
-  if (resume !== "") {
-    sectionHeading(doc, m.resumeMarkdown)
-    paragraph(doc, resume)
-  }
-
+export interface BuildTechnicalSheetPdfKitOptions {
+  schema?: TechnicalSheetSchema
+  vacancyTitleFallback?: string | null
+  logoUrl?: string | null
+  companyBrand?: TechnicalSheetCompanyBrand | null
 }
 
 export async function buildTechnicalSheetPdfKitBuffer(
-  payload: TechnicalSheetPayload
+  payload: TechnicalSheetPayload,
+  options?: BuildTechnicalSheetPdfKitOptions
 ): Promise<Buffer> {
-  const record = pickCandidateDisplayRecord(payload)
+  const schema = options?.schema ?? DEFAULT_TECHNICAL_SHEET_SCHEMA
+  const ctx = buildTechnicalSheetTemplateContext(payload, {
+    vacancyTitleFallback: options?.vacancyTitleFallback,
+    logoUrl: options?.logoUrl,
+  })
   const facts = getTechnicalSheetCandidateHeaderFacts(payload)
   const iconBuffer = (await tryLoadAppLogoRasterBufferForPdfKit(32)) ?? undefined
+  const companyBrand = options?.companyBrand ?? null
 
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
@@ -481,7 +265,7 @@ export async function buildTechnicalSheetPdfKitBuffer(
 
       drawFooterBar(doc)
       drawPageDecorations(doc)
-      drawRepeatedHeader(doc, facts, iconBuffer)
+      drawRepeatedHeader(doc, facts, iconBuffer, companyBrand)
       resetTextCursorToContentArea(doc)
     }
 
@@ -489,7 +273,7 @@ export async function buildTechnicalSheetPdfKitBuffer(
 
     try {
       doc.addPage()
-      renderTechnicalSheetBody(doc, payload, record)
+      renderTechnicalSheetSchemaToPdfKit(doc, schema, ctx)
     } catch (e) {
       reject(e)
       return

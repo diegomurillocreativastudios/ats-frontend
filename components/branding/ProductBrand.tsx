@@ -26,7 +26,7 @@ function getLogoClassName(density: ProductBrandProps["density"]): string {
   if (density === "sidebar") {
     return "h-auto w-full max-h-[5.5rem] max-w-full object-left"
   }
-  return "h-8 w-auto shrink-0"
+  return "h-11 w-auto max-h-full shrink-0 md:h-12"
 }
 
 /**

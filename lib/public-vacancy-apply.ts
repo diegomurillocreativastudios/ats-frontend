@@ -1,5 +1,9 @@
 import { apiClient } from "@/lib/api"
 import type { CandidateAuthConsentSubmitBody } from "@/lib/candidate-auth-consent"
+import {
+  CV_OUTPUT_LANGUAGE_FIELD,
+  type CvOutputLanguage,
+} from "@/lib/cv-output-language"
 import { MIME_PDF, UPLOAD_MAX_BYTES_15_MB } from "@/lib/upload-constraints"
 
 /** Límite alineado con backend security-hardening (CV ≤ 15 MB). */
@@ -150,7 +154,8 @@ export function isCvFileWithinSizeLimit(
 
 export function buildPublicApplyFormData(
   vacancyId: string,
-  values: PublicVacancyApplyValues
+  values: PublicVacancyApplyValues,
+  outputLanguage: CvOutputLanguage
 ): FormData {
   const fd = new FormData()
   const candidate: CandidatePersonalAppliancePayload = {
@@ -178,16 +183,18 @@ export function buildPublicApplyFormData(
   if (values.authConsent) {
     fd.append("authConsent", JSON.stringify(values.authConsent))
   }
+  fd.append(CV_OUTPUT_LANGUAGE_FIELD, outputLanguage)
   return fd
 }
 
 export async function submitPublicVacancyApplication(
   vacancyId: string,
-  values: PublicVacancyApplyValues
+  values: PublicVacancyApplyValues,
+  outputLanguage: CvOutputLanguage
 ): Promise<PublicVacancyApplySuccess> {
   const data = await apiClient.postFormData(
     "/api/candidate/personal-appliance",
-    buildPublicApplyFormData(vacancyId, values)
+    buildPublicApplyFormData(vacancyId, values, outputLanguage)
   )
   const message =
     typeof data === "string" && data.trim()

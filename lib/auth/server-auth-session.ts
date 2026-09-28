@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
+import {
+  generateCsrfToken,
+  setCsrfCookie,
+} from "@/lib/auth/csrf"
 import { fetchBackendSessionUser } from "@/lib/fetch-backend-session-user"
 import { isInternalPath } from "@/lib/auth/internal-path"
+import {
+  applyPrivateNoStore,
+  jsonWithPrivateNoStore,
+} from "@/lib/security/cache-headers"
 
 export interface AuthUserPayload {
   id: string | null
@@ -94,7 +102,7 @@ export async function createAuthSessionResponse(
 ): Promise<NextResponse> {
   const parsed = parseBackendAuthPayload(data)
   if (!parsed) {
-    return NextResponse.json(
+    return jsonWithPrivateNoStore(
       { message: "La respuesta del servidor no incluye token" },
       { status: 502 }
     )
@@ -111,12 +119,12 @@ export async function createAuthSessionResponse(
   )
 
   const hydrated = await fetchBackendSessionUser(baseUrl, accessToken)
-  if (hydrated) {
+  if (hydrated.status === "ok") {
     userPayload = {
-      id: hydrated.id ?? userPayload.id,
-      name: hydrated.name || userPayload.name || userPayload.email,
-      email: hydrated.email || userPayload.email,
-      role: hydrated.role ?? userPayload.role,
+      id: hydrated.user.id ?? userPayload.id,
+      name: hydrated.user.name || userPayload.name || userPayload.email,
+      email: hydrated.user.email || userPayload.email,
+      role: hydrated.user.role ?? userPayload.role,
     }
   }
 
@@ -125,14 +133,14 @@ export async function createAuthSessionResponse(
     body.returnUrl = returnUrl
   }
 
-  const response = NextResponse.json(body)
+  const response = applyPrivateNoStore(NextResponse.json(body))
 
   response.cookies.set(AUTH_COOKIES.access, accessToken, {
     path: AUTH_COOKIES.path,
     maxAge: expiresIn,
     sameSite: "lax",
     secure: isProd,
-    httpOnly: false,
+    httpOnly: true,
   })
 
   response.cookies.set(AUTH_COOKIES.expires, String(expiresAt), {
@@ -159,6 +167,11 @@ export async function createAuthSessionResponse(
     sameSite: "lax",
     secure: isProd,
     httpOnly: false,
+  })
+
+  setCsrfCookie(response, generateCsrfToken(), {
+    maxAge: Math.max(expiresIn, 60 * 60 * 24 * 7),
+    isProd,
   })
 
   return response

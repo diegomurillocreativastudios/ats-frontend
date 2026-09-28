@@ -11,8 +11,7 @@ import {
   Loader2,
   UserRound,
 } from "lucide-react"
-import CandidateSidebar from "@/components/candidato/CandidateSidebar"
-import CandidateTopbar from "@/components/candidato/CandidateTopbar"
+import { CandidatePortalShell } from "@/components/candidato/candidate-portal-shell"
 import { InterviewStatusBadge } from "@/components/rrhh/interviews/interview-status-badge"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { useCandidateSelfInterviews } from "@/hooks/useCandidateSelfInterviews"
@@ -265,38 +264,16 @@ export default function CandidateInterviewsContent() {
   )
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <div className="hidden h-full lg:flex">
-        <CandidateSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <CandidateTopbar variant="desktop" breadcrumbLabel={t("breadcrumb")} />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 flex flex-col gap-8 p-8">
-              <PortalPageHeader
-                title={t("headerTitle")}
-                description={t("headerDescription")}
-                className="pb-0"
-              />
-              {mainSections}
-            </div>
-          </main>
-        </div>
+    <CandidatePortalShell breadcrumbLabel={t("breadcrumb")}>
+      <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6 lg:gap-8 lg:p-8">
+        <PortalPageHeader
+          title={t("headerTitle")}
+          description={t("headerDescription")}
+          className="pb-0"
+          descriptionClassName="text-sm leading-6 md:text-base"
+        />
+        {mainSections}
       </div>
-
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <CandidateTopbar variant="tablet" breadcrumbLabel={t("breadcrumb")} />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
-            <PortalPageHeader
-              title={t("headerTitle")}
-              description={t("headerDescriptionShort")}
-              className="pb-0"
-              descriptionClassName="text-sm leading-6 md:text-base"
-            />
-            {mainSections}
-          </div>
-        </main>
-      </div>
-    </div>
+    </CandidatePortalShell>
   )
 }

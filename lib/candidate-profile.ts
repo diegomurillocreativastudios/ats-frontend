@@ -47,10 +47,11 @@ export interface CandidateProfile {
   videoLink?: string | null
   references?: unknown
   recognitions?: unknown
-  /** URL directa al PDF del CV (p. ej. GCS); solo lectura desde GET del perfil. */
-  cvDownloadUrl?: string | null
-  /** Ruta en storage del CV (mismo criterio que GET `/api/Storage/files/{path}`). */
-  storagePath?: string | null
+  /**
+   * True if the backend had a CV file for this profile.
+   * Derived server-side from storagePath / cvDownloadUrl without exposing them (FE-SEC-020).
+   */
+  hasCvFile?: boolean
   /** True si el candidato ya envió consentimiento vigente (solo lectura; server-owned). */
   authAndConsentVerification?: boolean
   /** ISO-8601 UTC del consentimiento vigente, o null. */
@@ -127,19 +128,18 @@ export function normalizeCandidateProfileFromApi(raw: unknown): CandidateProfile
     videoLink: toNullableString(o.videoLink),
     references: o.references ?? null,
     recognitions: o.recognitions ?? null,
-    cvDownloadUrl: toNullableString(o.cvDownloadUrl),
-    storagePath: toNullableString(o.storagePath),
+    hasCvFile:
+      o.hasCvFile === true ||
+      Boolean(toNullableString(o.storagePath)) ||
+      Boolean(toNullableString(o.cvDownloadUrl)),
     authAndConsentVerification: o.authAndConsentVerification === true,
     authAndConsentVerifiedAt: toNullableString(o.authAndConsentVerifiedAt),
   }
 }
 
-const hasTrimmedText = (v: string | null | undefined): boolean =>
-  v != null && String(v).trim() !== ""
-
 /**
- * Tras PUT `/api/candidate/profile`, la respuesta puede omitir `storagePath` / `cvDownloadUrl`.
- * Conserva los valores ya cargados para que no desaparezca el botón de descarga.
+ * Tras PUT `/api/candidate/profile`, la respuesta puede omitir la señal de CV.
+ * Conserva hasCvFile para que no desaparezca el botón de descarga.
  */
 export function mergeCandidateProfilePreservingCvRefs(
   previous: CandidateProfile | null,
@@ -148,12 +148,7 @@ export function mergeCandidateProfilePreservingCvRefs(
   if (!previous) return incoming
   return {
     ...incoming,
-    storagePath: hasTrimmedText(incoming.storagePath)
-      ? incoming.storagePath
-      : previous.storagePath ?? null,
-    cvDownloadUrl: hasTrimmedText(incoming.cvDownloadUrl)
-      ? incoming.cvDownloadUrl
-      : previous.cvDownloadUrl ?? null,
+    hasCvFile: incoming.hasCvFile === true || previous.hasCvFile === true,
   }
 }
 
@@ -220,6 +215,8 @@ export interface CandidateProfileSaveBody {
   videoLink?: string | null
   references?: unknown
   recognitions?: unknown
+  /** FE-SEC-019: set only when confirming apply of an AI-adapted version. */
+  appliedFromVersionId?: string | null
 }
 
 /**
@@ -387,6 +384,14 @@ const optStr = (s: string) => {
 const rowHasContent = (o: Record<string, string>) =>
   Object.values(o).some((x) => String(x).trim() !== "")
 
+export interface CandidateProfileRequiredFieldErrors {
+  firstName?: boolean
+  lastName?: boolean
+  headline?: boolean
+  summary?: boolean
+  nationalId?: boolean
+}
+
 export interface FullProfileFormInput {
   headline: string
   summary: string
@@ -443,11 +448,29 @@ const buildJobPreferencesPayload = (input: FullProfileFormInput): Record<string,
   return Object.keys(o).length > 0 ? o : undefined
 }
 
+/**
+ * ASP.NET exige ResumeMarkdown no vacío en PUT /api/candidate/profile.
+ * Si no hay texto extraído del CV, se arma con los campos ya validados de la ficha.
+ */
+export const resolveResumeMarkdownForApi = (
+  input: Pick<FullProfileFormInput, "resumeMarkdown" | "firstName" | "lastName" | "headline" | "summary">
+): string => {
+  const existing = input.resumeMarkdown.trim()
+  if (existing) return existing
+  const name = [input.firstName, input.lastName]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(" ")
+  const headline = input.headline.trim()
+  const summary = input.summary.trim()
+  return [name ? `# ${name}` : "", headline, summary].filter(Boolean).join("\n\n")
+}
+
 export const buildCandidateProfileSaveBody = (input: FullProfileFormInput): CandidateProfileSaveBody => {
   const body: CandidateProfileSaveBody = {
     headline: input.headline.trim(),
     summary: input.summary.trim(),
-    resumeMarkdown: input.resumeMarkdown.trim(),
+    resumeMarkdown: resolveResumeMarkdownForApi(input),
     nationalId: input.nationalId.trim(),
   }
   const fn = optStr(input.firstName)

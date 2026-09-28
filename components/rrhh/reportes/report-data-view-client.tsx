@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl"
 import RrhhReportsShell from "@/components/rrhh/reportes/rrhh-reports-shell"
 import ReportesFiltersPlaceholder, {
   ReportesFilterControl,
+  hasActiveReportFilterValues,
 } from "@/components/rrhh/reportes/reportes-filters-placeholder"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import {
@@ -45,10 +46,8 @@ import { safeParseReportSchema } from "@/lib/reportes/schema/report-schema"
 import { renderReportSchemaToHtml } from "@/lib/reportes/schema/render-report-schema-to-html"
 import {
   buildReportTemplateContext,
-  extractReportSummaryPayload,
   supportsSchemaReportPipeline,
 } from "@/lib/reportes/report-template-context-registry"
-import { renderTechnicalSheetHtml } from "@/lib/technical-sheet/template-interpolate"
 import {
   fetchTemplateById,
   type TemplateListItem,
@@ -500,44 +499,39 @@ export function ReportDataViewClient({
     response,
   ])
 
-  const reportTemplateHtml = useMemo(() => {
-    if (usesSchemaPipeline) return ""
-    return template?.contentTemplate?.trim() ?? ""
-  }, [template?.contentTemplate, usesSchemaPipeline])
-
   const parsedSchema = useMemo(() => {
-    if (!usesSchemaPipeline) return null
+    if (!usesSchemaPipeline) {
+      return {
+        success: false as const,
+        error: "Este reporte no tiene pipeline de esquema JSON configurado.",
+      }
+    }
     const content = template?.contentTemplate?.trim() ?? ""
     if (!content) {
       return { success: false as const, error: t("noTemplate") }
     }
     return safeParseReportSchema(content)
-  }, [template?.contentTemplate, usesSchemaPipeline])
+  }, [template?.contentTemplate, t, usesSchemaPipeline])
 
   const renderedHtml = useMemo(() => {
     if (!previewContext) return null
-    if (usesSchemaPipeline) {
-      if (!parsedSchema) return null
-      if (parsedSchema.success === false) return renderSchemaErrorHtml(parsedSchema.error)
-      return renderReportSchemaToHtml(parsedSchema.data, previewContext)
+    if (!usesSchemaPipeline) {
+      return renderSchemaErrorHtml(
+        "Este reporte no tiene pipeline de esquema JSON configurado."
+      )
     }
-    if (!reportTemplateHtml) return null
-    return renderTechnicalSheetHtml(reportTemplateHtml, previewContext)
-  }, [parsedSchema, previewContext, reportTemplateHtml, usesSchemaPipeline])
+    if (parsedSchema.success === false) {
+      return renderSchemaErrorHtml(parsedSchema.error)
+    }
+    return renderReportSchemaToHtml(parsedSchema.data, previewContext)
+  }, [parsedSchema, previewContext, usesSchemaPipeline])
 
   const previewSrcDoc = useMemo(() => {
     if (!renderedHtml) return null
-    const screenZoom = usesSchemaPipeline
-      ? REPORT_PRINT_PREVIEW_SCREEN_ZOOM
-      : undefined
-    return wrapReportPreviewHtml(renderedHtml, { screenZoom })
-  }, [renderedHtml, usesSchemaPipeline])
-
-  const buildSummaryPayload = useCallback(
-    (): Record<string, unknown> | null =>
-      extractReportSummaryPayload(previewContext),
-    [previewContext]
-  )
+    return wrapReportPreviewHtml(renderedHtml, {
+      screenZoom: REPORT_PRINT_PREVIEW_SCREEN_ZOOM,
+    })
+  }, [renderedHtml])
 
   const handleDownloadPdf = useCallback(async () => {
     setPdfActionError(null)
@@ -545,7 +539,6 @@ export function ReportDataViewClient({
 
     const baseName = slugifyReportFileName(catalogItem.name || catalogItem.reportKey)
     const rows = response?.rows ?? []
-    const summary = buildSummaryPayload()
 
     if (rows.length === 0) {
       setPdfActionError(t("errors.pdfFailed"))
@@ -556,18 +549,9 @@ export function ReportDataViewClient({
     try {
       await downloadReportPdfFromServer({
         reportType: catalogItem.reportKey,
-        rows,
-        summary,
-        metadata: summary,
-        extras: response?.extras ?? null,
-        totalCount: response?.totalCount ?? rows.length,
         fileBaseName: baseName,
         templateId: linkedTemplateId || null,
-        reportName: catalogItem.name,
-        reportDescription: catalogItem.description ?? null,
         appliedFilters,
-        clientName: resolvedClientName,
-        generatedAt: previewMeta.generatedAt,
       })
     } catch (err: unknown) {
       console.error("[Report PDF] Download failed", err)
@@ -579,16 +563,11 @@ export function ReportDataViewClient({
     }
   }, [
     appliedFilters,
-    buildSummaryPayload,
-    catalogItem.description,
     catalogItem.name,
     catalogItem.reportKey,
     linkedTemplateId,
-    previewMeta.generatedAt,
-    resolvedClientName,
-    response?.extras,
     response?.rows,
-    response?.totalCount,
+    t,
   ])
 
   const canDownloadPdf =
@@ -615,6 +594,7 @@ export function ReportDataViewClient({
   const emptyMessage = resolveReportEmptyMessage(catalogItem.reportKey)
   const hasFilters = catalogFilters.length > 0
   const hasRows = (response?.rows?.length ?? 0) > 0
+  const hasActiveFilters = hasActiveReportFilterValues(appliedFilters)
 
   return (
     <RrhhReportsShell breadcrumbLabel={catalogItem.name} breadcrumbTrail={trail}>
@@ -682,6 +662,7 @@ export function ReportDataViewClient({
               <ReportesFiltersPlaceholder
                 hintText={tReports("filters.hint")}
                 controlsClassName={filterGridClass}
+                hasActiveFilters={hasActiveFilters}
               >
                 {catalogFilters.map((filter) => (
                   <FilterField

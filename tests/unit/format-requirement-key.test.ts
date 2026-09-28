@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   formatRequirementKey,
   toRequirementImportance,
+  toRequirementStorageKey,
 } from "@/lib/vacancies/format-requirement-key"
 
 describe("formatRequirementKey", () => {
@@ -25,6 +26,28 @@ describe("formatRequirementKey", () => {
   it("returns an empty string for blank keys", () => {
     expect(formatRequirementKey("")).toBe("")
     expect(formatRequirementKey(null)).toBe("")
+  })
+
+  it("keeps orthography for labels written in the supported languages", () => {
+    expect(formatRequirementKey("Canción")).toBe("Canción")
+    expect(formatRequirementKey("Análisis de datos")).toBe("Análisis de datos")
+    expect(formatRequirementKey("Straße")).toBe("Straße")
+    expect(formatRequirementKey("l'hôpital")).toBe("l'hôpital")
+    expect(formatRequirementKey("città")).toBe("città")
+    expect(formatRequirementKey("attr_Canción")).toBe("Canción")
+  })
+})
+
+describe("toRequirementStorageKey", () => {
+  it("keeps the written label, including accents and apostrophes", () => {
+    expect(toRequirementStorageKey("  Canción  ")).toBe("Canción")
+    expect(toRequirementStorageKey("Gestión   de   documentación")).toBe(
+      "Gestión de documentación"
+    )
+    expect(toRequirementStorageKey("Straße")).toBe("Straße")
+    expect(toRequirementStorageKey("l'hôpital")).toBe("l'hôpital")
+    expect(toRequirementStorageKey("città")).toBe("città")
+    expect(toRequirementStorageKey("Français")).toBe("Français")
   })
 })
 

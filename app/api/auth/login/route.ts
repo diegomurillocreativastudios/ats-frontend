@@ -1,10 +1,16 @@
-import { NextResponse, type NextRequest } from "next/server"
-import { getApiErrorMessage } from "@/lib/api-error"
+import { type NextRequest, NextResponse } from "next/server"
 import {
   createAuthSessionResponse,
   extractBackendErrorMessage,
 } from "@/lib/auth/server-auth-session"
+import {
+  applyPrivateNoStore,
+  jsonWithPrivateNoStore,
+} from "@/lib/security/cache-headers"
+import { logServerError } from "@/lib/security/safe-server-log"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
+
+const GENERIC_LOGIN_ERROR = "Error al iniciar sesión. Intenta de nuevo."
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +18,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = body
 
     if (!email || !password) {
-      return NextResponse.json(
+      return jsonWithPrivateNoStore(
         { message: "Email y contraseña son requeridos" },
         { status: 400 }
       )
@@ -36,15 +42,18 @@ export async function POST(request: NextRequest) {
       const headers = new Headers()
       const retryAfter = res.headers.get("retry-after")
       if (retryAfter) headers.set("retry-after", retryAfter)
-      return NextResponse.json({ message }, { status: res.status, headers })
+      return applyPrivateNoStore(
+        NextResponse.json({ message }, { status: res.status, headers })
+      )
     }
 
     return createAuthSessionResponse(baseUrl, data, {
       fallbackEmail: String(email || "").trim(),
     })
   } catch (err: unknown) {
-    return NextResponse.json(
-      { message: getApiErrorMessage(err) || "Error al iniciar sesión" },
+    logServerError("auth-login", err)
+    return jsonWithPrivateNoStore(
+      { message: GENERIC_LOGIN_ERROR },
       { status: 500 }
     )
   }

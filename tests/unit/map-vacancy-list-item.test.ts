@@ -34,6 +34,7 @@ describe("mapVacancyFromApi", () => {
     })
 
     expect(item.id).toBe("vac-1")
+    expect(item.publicSlug).toBeNull()
     expect(item.title).toBe("Sales Agent")
     expect(item.company).toBe("Creativa Studios")
     expect(item.companyId).toBe("co-1")
@@ -60,6 +61,16 @@ describe("mapVacancyFromApi", () => {
     })
 
     expect(item.isActive).toBe(false)
+  })
+
+  it("maps publicSlug when the API provides it", () => {
+    const item = mapVacancyFromApi({
+      id: "1d2f9cbe-9079-4794-8569-eff14f0f8943",
+      title: "Sales Agent",
+      publicSlug: "aoj-9920",
+    })
+
+    expect(item.publicSlug).toBe("aoj-9920")
   })
 
   it("marks vacancy read-only when company is inactive", () => {

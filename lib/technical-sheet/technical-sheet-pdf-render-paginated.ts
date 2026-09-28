@@ -19,9 +19,14 @@ import {
 import {
   buildTechnicalSheetPageHtml,
   TECHNICAL_SHEET_MULTI_PAGE_STYLES,
+  type TechnicalSheetCompanyBrandHeader,
   type TechnicalSheetPageHeaderFields,
 } from "@/lib/technical-sheet/technical-sheet-page-shell"
 import { ensureTechnicalSheetPdfDocument } from "@/lib/technical-sheet/wrap-technical-sheet-html-for-pdf"
+
+export interface RenderPaginatedTechnicalSheetPdfOptions {
+  companyBrand?: TechnicalSheetCompanyBrandHeader | null
+}
 
 /**
  * PDF con hojas Letter reales: mide `<article>` en Chromium, parte en `.technical-sheet-page`
@@ -30,9 +35,11 @@ import { ensureTechnicalSheetPdfDocument } from "@/lib/technical-sheet/wrap-tech
 export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
   interpolatedFragment: string,
   header: TechnicalSheetPageHeaderFields,
-  logoUrl: string
+  logoUrl: string,
+  options?: RenderPaginatedTechnicalSheetPdfOptions
 ): Promise<Buffer> {
   const safeLogo = logoUrl.replace(/"/g, "")
+  const companyBrand = options?.companyBrand ?? null
   if (
     interpolatedFragment.includes("technical-sheet-page") &&
     interpolatedFragment.includes("technical-sheet-doc")
@@ -80,6 +87,62 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
               return h
             }
 
+            function cloneListWithItems(list: Element, items: Element[]): string {
+              const clone = list.cloneNode(false) as HTMLElement
+              for (const item of items) {
+                clone.appendChild(item.cloneNode(true))
+              }
+              return clone.outerHTML
+            }
+
+            function splitOversizedListSection(
+              sec: Element,
+              doc: Document,
+              maxPx: number,
+              h0: number
+            ): { html: string; h: number }[] | null {
+              const children = [...sec.children]
+              const h2 = children.find((c) => c.tagName === "H2")
+              const rest = children.filter((c) => c.tagName !== "H2")
+              if (rest.length !== 1 || rest[0].tagName !== "UL") return null
+
+              const list = rest[0]
+              const items = [...list.children].filter((c) => c.tagName === "LI")
+              if (items.length < 2) return null
+
+              const blocks: { html: string; h: number }[] = []
+              let chunk: Element[] = []
+              let isFirst = true
+
+              const flush = () => {
+                if (chunk.length === 0) return
+                const listHtml = cloneListWithItems(list, chunk)
+                const frag = (isFirst && h2 ? h2.outerHTML : "") + listHtml
+                isFirst = false
+                blocks.push({ html: frag, h: measureHtmlBlock(doc, frag) })
+                chunk = []
+              }
+
+              for (const item of items) {
+                const trial = [...chunk, item]
+                const listHtml = cloneListWithItems(list, trial)
+                const frag =
+                  (isFirst && h2 && chunk.length === 0 ? h2.outerHTML : "") + listHtml
+                const h = measureHtmlBlock(doc, frag)
+                if (h > maxPx && chunk.length > 0) {
+                  flush()
+                  chunk = [item]
+                  continue
+                }
+                chunk = trial
+              }
+              flush()
+
+              if (blocks.length === 0) return null
+              if (blocks.length === 1 && blocks[0].h >= h0) return null
+              return blocks
+            }
+
             function buildFlatBlocks(article: Element, doc: Document, maxPx: number) {
               const sections = [...article.querySelectorAll(":scope > section")]
               if (sections.length === 0) {
@@ -94,6 +157,12 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
                 const h0 = measureHtmlBlock(doc, outer)
                 if (h0 <= maxPx) {
                   blocks.push({ html: outer, h: h0 })
+                  continue
+                }
+
+                const listSplit = splitOversizedListSection(sec, doc, maxPx, h0)
+                if (listSplit) {
+                  blocks.push(...listSplit)
                   continue
                 }
 
@@ -179,6 +248,7 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
             bodyHtml: body,
             header,
             logoUrl: safeLogo,
+            companyBrand,
           })
         )
 

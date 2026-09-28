@@ -2,17 +2,19 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeft,
   ArrowRight,
+  Ban,
   Briefcase,
   CheckSquare,
   FileText,
   Gift,
   Loader2,
   Mail,
+  MessageSquare,
   Plus,
   Phone,
   Scale,
@@ -21,17 +23,16 @@ import {
   User,
   Users,
 } from "lucide-react";
-import RRHHSidebar from "@/components/rrhh/RRHHSidebar";
-import RRHHTopbar from "@/components/rrhh/RRHHTopbar";
+import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell";
 import Snackbar from "@/components/ui/Snackbar";
+import { CopyPublicVacancyLinkButton } from "@/components/shared/copy-public-vacancy-link-button";
 import { apiClient } from "@/lib/api"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
 import {
-  DEFAULT_RECRUITER_COMPANY_ID,
+  adminStagesCatalogHref,
   listCompanyApplicantStatuses,
   listRecruiterCompanies,
   listRecruiterStages,
-  persistVacancyCompanyId,
   resolveVacancyCompanyId,
 } from "@/lib/api/recruiter-companies"
 import {
@@ -39,14 +40,16 @@ import {
   patchVacancyClientCompany,
 } from "@/lib/api/recruiter-vacancies"
 import { finishVacancyProcess } from "@/lib/api/recruiter-vacancy-finish"
-import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
+import { fetchRecruiterVacancyByPathSegment } from "@/lib/api/recruiter-vacancy-by-path"
 import {
   QUERY_SEARCH_CANDIDATES_LIMIT,
   clampSearchLimit,
   unwrapListArray,
 } from "@/lib/api/query-paging"
 import { getApiErrorMessage } from "@/lib/api-error"
+import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
+import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
 import { VacancyFinishedSummary } from "@/components/rrhh/VacancyFinishedSummary"
@@ -54,6 +57,13 @@ import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProces
 import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confirm-modal"
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
 import { RequirementsDisplay } from "@/components/rrhh/requirements-display"
+import { toRequirementStorageKey } from "@/lib/vacancies/format-requirement-key"
+import {
+  buildRecruiterVacancyPath,
+  isVacancyGuid,
+  isVacancyPublicLinkShareable,
+  readPublicSlug,
+} from "@/lib/vacancies/vacancy-public-path"
 import { VacancyDelimitedText } from "@/components/rrhh/vacancy-delimited-text"
 import { VacancyDetailsCard } from "@/components/rrhh/vacancy-details-readout"
 import { VacancySalaryCard } from "@/components/rrhh/vacancy-salary-card"
@@ -61,26 +71,45 @@ import { VacancyReadOnlyIdentity } from "@/components/rrhh/vacancy-read-only-ide
 import { CandidateProfileModal } from "@/components/rrhh/candidate-profile-modal"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
 import {
+  InterviewFeedbackModal,
+  type InterviewFeedbackCompletePayload,
+} from "@/components/rrhh/interview-feedback-modal"
+import {
   AiDisclosureBadge,
   AiDisclosureNotice,
   AiDisclosurePillProgress,
   AiKpiCard,
 } from "@/components/rrhh/AiDisclosure"
 import { VacancyAiSearchLoadingState } from "@/components/rrhh/vacancy-ai-search-loading-state"
-import { getVacancyPreliminaryMatchTypicalMsForDocCount } from "@/lib/apply-loading-bar"
+import { VACANCY_PRELIMINARY_MATCH_TYPICAL_MS } from "@/lib/apply-loading-bar"
 import {
-  FALLBACK_KANBAN_STAGES,
+  getApplicantPrimaryScore01,
   getCandidateId,
   normalizeKanbanStage,
+  parseFallbackKanbanStages,
+  pickApplicantDisplayName,
   resolveOrderedStageNames,
 } from "@/lib/rrhh/vacancy-pipeline-stats"
-import { validateStageMove } from "@/lib/recruiter/stage-move-validation"
+import { runVacancyPreliminaryMatchBatch } from "@/lib/rrhh/run-vacancy-preliminary-match-batch"
+import {
+  isFinalApplicationStatus,
+  isHiredTerminalStage,
+  isRejectionShortcutStage,
+  validateStageMove,
+} from "@/lib/recruiter/stage-move-validation"
+import {
+  canShowInterviewFeedbackAction,
+  isInterviewPipelineStage,
+  readApplicationId,
+  readHasInterviewFeedbackFromApplicant,
+  readInterviewDoneFromApplicant,
+  validateInterviewStageLeaveMove,
+} from "@/lib/recruiter/interview-stage"
 import {
   downloadRecruiterCandidateCv,
   isRecruiterCandidateCvError,
 } from "@/lib/api/recruiter-candidate-cv"
 import { getInitials } from "@/lib/getInitials";
-import { normalizeVacancyDetailFromApi } from "@/lib/vacancies/normalize-vacancy-detail-from-api";
 import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active";
 import {
   getVacancyRecruiterReadOnlyReason,
@@ -177,6 +206,30 @@ const normalizeMoveStageError = (err, t) => {
   const fallback = t("errors.moveStageFailed")
   const raw = extractApiErrorMessage(err) ?? fallback
   const lower = raw.toLowerCase()
+  const errorCode =
+    typeof err?.body?.code === "string"
+      ? String(err.body.code).trim().toLowerCase()
+      : typeof err?.code === "string"
+        ? String(err.code).trim().toLowerCase()
+        : ""
+  if (
+    errorCode === "interview_not_done" ||
+    lower.includes("interview has not been marked as done")
+  ) {
+    return {
+      text: t("errors.interviewNotDone"),
+      showEstadosLink: false,
+    }
+  }
+  if (
+    errorCode === "interview_feedback_required" ||
+    (lower.includes("interview feedback") && lower.includes("required"))
+  ) {
+    return {
+      text: t("errors.interviewFeedbackRequired"),
+      showEstadosLink: false,
+    }
+  }
   const isDefaultStatusMissing =
     lower.includes("default application status") ||
     lower.includes("missing default application status")
@@ -186,12 +239,38 @@ const normalizeMoveStageError = (err, t) => {
       showEstadosLink: true,
     }
   }
+  const isSequentialConflict =
+    err?.status === 409 ||
+    lower.includes("adjacent pipeline stage") ||
+    lower.includes("final stage that is not the hiring")
+  if (isSequentialConflict) {
+    return {
+      text: t("errors.stageMoveConflict"),
+      showEstadosLink: false,
+    }
+  }
   return { text: raw, showEstadosLink: false }
 }
 
 const normalizeApplicationStatusError = (err, t) => {
   const fallback = t("errors.updateApplicationStatusFailed")
   const raw = extractApiErrorMessage(err) ?? fallback
+  const lower = raw.toLowerCase()
+  const errorCode =
+    typeof err?.body?.code === "string"
+      ? String(err.body.code).trim().toLowerCase()
+      : typeof err?.code === "string"
+        ? String(err.code).trim().toLowerCase()
+        : ""
+  if (
+    errorCode === "interview_not_done" ||
+    lower.includes("interview has not been marked as done")
+  ) {
+    return {
+      text: t("errors.interviewNotDone"),
+      showEstadosLink: false,
+    }
+  }
   return { text: raw, showEstadosLink: false }
 }
 
@@ -202,8 +281,26 @@ const normalizeStageMoveValidationError = (code, t) => {
       showEstadosLink: true,
     }
   }
+  if (code === "skip_not_allowed") {
+    return {
+      text: t("errors.stageSkipNotAllowed"),
+      showEstadosLink: false,
+    }
+  }
+  if (code === "interview_not_done") {
+    return {
+      text: t("errors.interviewNotDone"),
+      showEstadosLink: false,
+    }
+  }
+  if (code === "interview_feedback_required") {
+    return {
+      text: t("errors.interviewFeedbackRequired"),
+      showEstadosLink: false,
+    }
+  }
   return {
-    text: t("errors.stageSkipNotAllowed"),
+    text: t("errors.moveStageFailed"),
     showEstadosLink: false,
   }
 }
@@ -269,13 +366,6 @@ const AI_EFFICIENCY_KPI_KEYS = [
 
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
-
-const toSnakeCase = (str) =>
-  String(str ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-z0-9_]/g, "");
 
 const createEmptyRequirement = () => ({
   id: crypto.randomUUID?.() ?? `req-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -388,9 +478,10 @@ const MatchCard = ({
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex flex-col items-center rounded-lg bg-muted/50 px-4 py-2">
               <span className="font-sans text-lg font-semibold text-foreground">
-                {typeof (match.semanticScore ?? match.totalScore) === "number"
-                  ? ((match.semanticScore ?? match.totalScore) * 100).toFixed(2)
-                  : "—"}
+                {(() => {
+                  const score01 = getApplicantPrimaryScore01(match)
+                  return score01 != null ? (score01 * 100).toFixed(2) : "—"
+                })()}
               </span>
               <span className="font-sans text-xs text-muted-foreground">
                 {tMatching("score")}
@@ -433,6 +524,8 @@ const KanbanCard = ({
   match,
   candidateId,
   stage,
+  stageId = null,
+  isInterviewStage = false,
   statuses,
   currentStatusId,
   onStatusChange,
@@ -440,10 +533,16 @@ const KanbanCard = ({
   vacancyId = null,
   vacancyTitle = null,
   readOnly = false,
+  shortcutStages = [],
+  onMoveToStage,
+  onPipelineDragStart,
+  onPipelineDragEnd,
+  onInterviewFeedbackComplete = () => {},
 }) => {
   const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
   const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false);
+  const [interviewFeedbackOpen, setInterviewFeedbackOpen] = useState(false);
   const sheetCandidateProfileId =
     match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
       ? String(match.candidateProfileId).trim()
@@ -454,24 +553,45 @@ const KanbanCard = ({
     emptyToDash(match.name) !== "—" ? match.name : "",
     match.email ?? ""
   );
-  const rawScore = match.semanticScore ?? match.totalScore;
-  const score = typeof rawScore === "number" ? (rawScore * 100).toFixed(0) : "—";
+  const rawScore = getApplicantPrimaryScore01(match);
+  const score = rawScore != null ? (rawScore * 100).toFixed(0) : "—";
   const applicationSourceLabel = formatApplicationSourceBadge(
     match.applicationSource ?? match.application_source
   );
+  const applicationId = readApplicationId(match);
+  const interviewDone = readInterviewDoneFromApplicant(match);
+  const hasInterviewFeedback = readHasInterviewFeedbackFromApplicant(match);
+  const isStatusLockedByInterview =
+    isInterviewStage === true && interviewDone !== true;
 
   const handleDragStart = (e) => {
     if (readOnly) {
       e.preventDefault();
       return;
     }
-    e.dataTransfer.setData("application/json", JSON.stringify({ candidateId, stage }));
-    e.dataTransfer.effectAllowed = "move";
+    onPipelineDragStart?.(stage, currentStatusId, interviewDone, hasInterviewFeedback);
+    try {
+      e.dataTransfer.setData(
+        "application/json",
+        JSON.stringify({
+          candidateId,
+          stage,
+          stageId,
+          statusId: currentStatusId,
+          interviewDone,
+          hasInterviewFeedback,
+        })
+      );
+      e.dataTransfer.effectAllowed = "move";
+    } catch {
+      // Some browsers reject setData outside a user-initiated drag.
+    }
     e.currentTarget.setAttribute("data-dragging", "true");
   };
 
   const handleDragEnd = (e) => {
     e.currentTarget.removeAttribute("data-dragging");
+    onPipelineDragEnd?.();
   };
 
   const handleStatusChange = (e) => {
@@ -483,9 +603,31 @@ const KanbanCard = ({
   const handleSelectMouseDown = (e) => e.stopPropagation();
   const handleSelectClick = (e) => e.stopPropagation();
 
+  const handleMoveToShortcut = (targetStageName) => {
+    if (readOnly || !targetStageName) return;
+    onMoveToStage?.(candidateId, targetStageName);
+  };
+
+  const handleShortcutSelectChange = (e) => {
+    e.stopPropagation();
+    const value = e.target.value;
+    if (value) handleMoveToShortcut(value);
+    e.target.value = "";
+  };
+
   const displayName = emptyToDash(match.name);
   const showTechnicalSheetButton = Boolean(vacancyId && sheetCandidateProfileId);
+  const showInterviewFeedbackButton = canShowInterviewFeedbackAction({
+    isInterviewStage,
+    interviewDone,
+    applicationId,
+    readOnly,
+  });
   const hasStatuses = statuses.length > 0;
+  const visibleShortcutStages = Array.isArray(shortcutStages) ? shortcutStages : [];
+  const canLeaveStageByStatus = isFinalApplicationStatus(currentStatusId, statuses);
+  const showShortcutActions =
+    !readOnly && canLeaveStageByStatus && visibleShortcutStages.length > 0;
 
   return (
     <>
@@ -544,7 +686,9 @@ const KanbanCard = ({
             onChange={handleStatusChange}
             onMouseDown={handleSelectMouseDown}
             onClick={handleSelectClick}
-            disabled={statusSelectDisabled || readOnly}
+            disabled={
+              statusSelectDisabled || readOnly || isStatusLockedByInterview
+            }
             className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             aria-label={tMatching("kanban.statusAria", { name: displayName })}
           >
@@ -555,6 +699,67 @@ const KanbanCard = ({
             ))}
           </select>
         ) : null}
+
+        {showShortcutActions && visibleShortcutStages.length === 1 ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMoveToShortcut(visibleShortcutStages[0].name);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-2.5 py-1.5 font-sans text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={tMatching("kanban.moveToStageAria", {
+              name: displayName,
+              stageName: visibleShortcutStages[0].name,
+            })}
+          >
+            <Ban className="h-3.5 w-3.5" aria-hidden />
+            {tMatching("kanban.moveToStage", {
+              stageName: visibleShortcutStages[0].name,
+            })}
+          </button>
+        ) : null}
+
+        {showShortcutActions && visibleShortcutStages.length > 1 ? (
+          <select
+            defaultValue=""
+            onChange={handleShortcutSelectChange}
+            onMouseDown={handleSelectMouseDown}
+            onClick={handleSelectClick}
+            className="w-full rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-2.5 py-1.5 font-sans text-xs text-zinc-700 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={tMatching("kanban.moveToShortcutPlaceholder")}
+          >
+            <option value="" disabled>
+              {tMatching("kanban.moveToShortcutPlaceholder")}
+            </option>
+            {visibleShortcutStages.map((shortcutStage) => (
+              <option key={shortcutStage.id} value={shortcutStage.name}>
+                {tMatching("kanban.moveToStage", {
+                  stageName: shortcutStage.name,
+                })}
+              </option>
+            ))}
+          </select>
+        ) : null}
+
+        {showInterviewFeedbackButton ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setInterviewFeedbackOpen(true);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 font-sans text-xs font-medium text-emerald-800 transition-colors hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+            aria-label={tMatching("interviewFeedback.buttonAria", {
+              name: displayName,
+            })}
+          >
+            <MessageSquare className="h-3.5 w-3.5" aria-hidden />
+            {tMatching("interviewFeedback.button")}
+          </button>
+        ) : null}
       </div>
       {vacancyId && sheetCandidateProfileId && technicalSheetOpen ? (
         <TechnicalSheetModal
@@ -564,6 +769,16 @@ const KanbanCard = ({
           candidateProfileId={sheetCandidateProfileId}
           vacancyTitle={vacancyTitle}
           candidateLabel={candidateLabelForSheet}
+        />
+      ) : null}
+      {showInterviewFeedbackButton && interviewFeedbackOpen ? (
+        <InterviewFeedbackModal
+          isOpen={interviewFeedbackOpen}
+          onClose={() => setInterviewFeedbackOpen(false)}
+          applicationId={applicationId}
+          candidateLabel={displayName}
+          vacancyLabel={vacancyTitle}
+          onComplete={onInterviewFeedbackComplete}
         />
       ) : null}
     </>
@@ -581,7 +796,7 @@ const MoveStageErrorBanner = ({ error }) => {
       <p className="font-sans text-sm text-destructive">{error.text}</p>
       {error.showEstadosLink ? (
         <Link
-          href="/portal-admin/vacantes/etapas"
+          href={adminStagesCatalogHref()}
           className="font-sans text-sm font-medium text-vo-purple underline underline-offset-2 hover:text-vo-purple/90 focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
           aria-label={tMatching("errors.goToStagesAria")}
         >
@@ -592,13 +807,51 @@ const MoveStageErrorBanner = ({ error }) => {
   )
 }
 
+const KanbanStagesHeading = ({
+  applicantCount,
+  headingClassName,
+  iconClassName,
+}) => {
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
+
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      <h2 className={headingClassName}>
+        <Users className={iconClassName} aria-hidden />
+        {tMatching("stagesTitle")}
+        <span className="font-sans text-sm font-normal text-muted-foreground">
+          ({applicantCount})
+        </span>
+      </h2>
+      <Link
+        href={adminStagesCatalogHref()}
+        className="shrink-0 font-sans text-sm font-medium text-vo-purple underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2 rounded-sm"
+        aria-label={tMatching("manageStagesAria")}
+      >
+        {tMatching("manageStages")}
+      </Link>
+    </div>
+  )
+}
+
+const getKanbanColumnKind = (stageMeta) => {
+  if (isRejectionShortcutStage(stageMeta)) return "shortcut";
+  if (isHiredTerminalStage(stageMeta)) return "hired";
+  return "pipeline";
+};
+
 const KanbanColumn = ({
   stage,
+  stageMeta = null,
   candidates,
   onDrop,
+  onDropBlocked,
   onDragEnter,
   onDragLeave,
   isOver,
+  dropAllowed = false,
+  dropBlockCode = null,
+  isDragActive = false,
   statuses,
   candidateStatusOverrides,
   onStatusChange,
@@ -606,18 +859,36 @@ const KanbanColumn = ({
   vacancyId = null,
   vacancyTitle = null,
   readOnly = false,
+  shortcutStages = [],
+  onPipelineDragStart,
+  onPipelineDragEnd,
+  onInterviewFeedbackComplete,
 }) => {
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
+  const columnKind = getKanbanColumnKind(stageMeta);
+  const canAcceptDrop = !readOnly && dropAllowed;
+  const showInvalidDrop = !readOnly && isDragActive && !dropAllowed;
   const handleDragOver = (e) => {
-    if (readOnly) return;
+    if (readOnly || !isDragActive) return;
     e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+    e.dataTransfer.dropEffect = canAcceptDrop ? "move" : "none";
   };
 
   const handleDrop = (e) => {
     if (readOnly) return;
     e.preventDefault();
     onDragLeave?.();
+    if (!canAcceptDrop) {
+      if (
+        isDragActive &&
+        (dropBlockCode === "final_status_required" ||
+          dropBlockCode === "interview_not_done" ||
+          dropBlockCode === "interview_feedback_required")
+      ) {
+        onDropBlocked?.(dropBlockCode);
+      }
+      return;
+    }
     try {
       const raw = e.dataTransfer.getData("application/json");
       const payload = raw ? JSON.parse(raw) : null;
@@ -660,15 +931,59 @@ const KanbanColumn = ({
   const widthClasses = hasCandidates
     ? "min-w-[320px] max-w-[420px] flex-1"
     : "min-w-[140px] max-w-[180px] flex-none";
+  const columnShellClass =
+    columnKind === "shortcut"
+      ? "border-dashed border-zinc-300 bg-zinc-100/80"
+      : columnKind === "hired"
+        ? "border-emerald-200 bg-emerald-50/50"
+        : "border-border bg-muted/30";
+  const columnAriaKey =
+    columnKind === "shortcut"
+      ? "kanban.shortcutColumnAria"
+      : columnKind === "hired"
+        ? "kanban.hiredColumnAria"
+        : "kanban.columnAria";
+  const dropZoneClass = [
+    "flex min-h-[260px] flex-1 flex-col gap-3 p-4 transition-colors",
+    isOver && canAcceptDrop
+      ? "bg-vo-purple/10 ring-2 ring-inset ring-vo-purple"
+      : isOver && showInvalidDrop
+        ? "cursor-not-allowed bg-destructive/5 ring-2 ring-inset ring-destructive/30"
+        : showInvalidDrop
+          ? "cursor-not-allowed"
+          : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
-      className={`flex min-h-[320px] flex-col rounded-xl border border-border bg-muted/30 ${widthClasses}`}
-      aria-label={tMatching("kanban.columnAria", { stage })}
+      className={`flex min-h-[320px] flex-col rounded-xl border ${columnShellClass} ${widthClasses}`}
+      aria-label={tMatching(columnAriaKey, { stage })}
+      data-column-kind={columnKind}
+      title={
+        isOver && showInvalidDrop
+          ? dropBlockCode === "interview_not_done"
+            ? tMatching("errors.interviewNotDone")
+            : dropBlockCode === "interview_feedback_required"
+              ? tMatching("errors.interviewFeedbackRequired")
+              : tMatching(
+                  dropBlockCode === "final_status_required"
+                    ? "kanban.finalStatusRequiredTooltip"
+                    : "kanban.dropNotAllowedTooltip"
+                )
+          : undefined
+      }
     >
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <h3 className="font-sans text-sm font-semibold text-foreground">
-          {stage}
+      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <h3 className="flex min-w-0 items-center gap-1.5 font-sans text-sm font-semibold text-foreground">
+          {columnKind === "shortcut" ? (
+            <Ban className="h-3.5 w-3.5 shrink-0 text-zinc-500" aria-hidden />
+          ) : null}
+          {columnKind === "hired" ? (
+            <CheckSquare className="h-3.5 w-3.5 shrink-0 text-emerald-700" aria-hidden />
+          ) : null}
+          <span className="truncate">{stage}</span>
         </h3>
         <span
           className="rounded-full bg-muted px-2 py-0.5 font-sans text-xs text-muted-foreground"
@@ -682,8 +997,9 @@ const KanbanColumn = ({
         onDrop={handleDrop}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        className={`flex min-h-[260px] flex-1 flex-col gap-3 p-4 transition-colors ${isOver ? "bg-vo-purple/10" : ""}`}
+        className={dropZoneClass}
         data-stage={stage}
+        data-drop-allowed={isDragActive ? String(canAcceptDrop) : undefined}
       >
         {candidates.map(({ match, candidateId }) => (
           <KanbanCard
@@ -691,6 +1007,8 @@ const KanbanColumn = ({
             match={match}
             candidateId={candidateId}
             stage={stage}
+            stageId={stageMeta?.id ?? null}
+            isInterviewStage={isInterviewPipelineStage(stageMeta)}
             statuses={statuses}
             currentStatusId={getCurrentStatusId(match, candidateId)}
             onStatusChange={onStatusChange}
@@ -698,6 +1016,11 @@ const KanbanColumn = ({
             vacancyId={vacancyId}
             vacancyTitle={vacancyTitle}
             readOnly={readOnly}
+            shortcutStages={shortcutStages}
+            onMoveToStage={onDrop}
+            onPipelineDragStart={onPipelineDragStart}
+            onPipelineDragEnd={onPipelineDragEnd}
+            onInterviewFeedbackComplete={onInterviewFeedbackComplete}
           />
         ))}
       </div>
@@ -712,7 +1035,13 @@ export default function VacanteDetallePage() {
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
   const locale = useLocale();
   const params = useParams();
-  const id = params?.id ?? null;
+  const router = useRouter();
+  const pathSegmentRaw = params?.id ?? null;
+  const pathSegment = Array.isArray(pathSegmentRaw)
+    ? pathSegmentRaw[0]
+    : pathSegmentRaw;
+  /** Guid used for recruiter APIs (match, edit, applications). */
+  const [vacancyId, setVacancyId] = useState<string | null>(null);
   const [vacancy, setVacancy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -726,7 +1055,7 @@ export default function VacanteDetallePage() {
   const [editStateCode, setEditStateCode] = useState("");
   const [editVacancyDepartmentId, setEditVacancyDepartmentId] = useState("");
   const [editVacancyModalityId, setEditVacancyModalityId] = useState("");
-  const [editCompanyId, setEditCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
+  const [editCompanyId, setEditCompanyId] = useState("");
   const [editRequirements, setEditRequirements] = useState(() => [createEmptyRequirement()]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [savingVacancy, setSavingVacancy] = useState(false);
@@ -750,6 +1079,13 @@ export default function VacanteDetallePage() {
   const [smartError, setSmartError] = useState(null);
   const [loadingMatch, setLoadingMatch] = useState(false);
   const [matchError, setMatchError] = useState(null);
+  const [matchProgress, setMatchProgress] = useState({
+    cycleKey: null,
+    isCompleted: false,
+    batchIndex: 0,
+    batchTotal: 0,
+    currentName: null,
+  });
   const [loadingStartProcess, setLoadingStartProcess] = useState(false);
   const [startProcessError, setStartProcessError] = useState(null);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState(() => new Set());
@@ -757,11 +1093,17 @@ export default function VacanteDetallePage() {
   const [candidateStageOverrides, setCandidateStageOverrides] = useState(() => ({}));
   const [candidateStatusOverrides, setCandidateStatusOverrides] = useState(() => ({}));
   const [dragOverStage, setDragOverStage] = useState(null);
+  const [dragFromStage, setDragFromStage] = useState(null);
+  const [dragFromStatusId, setDragFromStatusId] = useState(null);
+  const [dragFromInterviewDone, setDragFromInterviewDone] = useState(null);
+  const [dragFromHasInterviewFeedback, setDragFromHasInterviewFeedback] =
+    useState(null);
   const [stages, setStages] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [loadingMoveStage, setLoadingMoveStage] = useState(false);
+  const [pendingStageMove, setPendingStageMove] = useState(null);
   const [applicationStatusError, setApplicationStatusError] = useState(null);
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
   const [finishProcessModalOpen, setFinishProcessModalOpen] = useState(false);
@@ -773,9 +1115,7 @@ export default function VacanteDetallePage() {
   const etapasSectionDesktopRef = useRef(null);
   const etapasSectionMobileRef = useRef(null);
   const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
-  const originalCompanyIdAtEditRef = useRef(DEFAULT_RECRUITER_COMPANY_ID);
-  const pipelineCompanyCapturedForVacancyRef = useRef<string | null>(null);
-  const [pipelineCompanyId, setPipelineCompanyId] = useState(DEFAULT_RECRUITER_COMPANY_ID);
+  const originalCompanyIdAtEditRef = useRef("");
 
   const vacancyDepartmentSummary = useMemo(
     () =>
@@ -838,38 +1178,17 @@ export default function VacanteDetallePage() {
     });
   }, []);
 
-  const vacancyRouteId = Array.isArray(id) ? id[0] : id;
-
-  useEffect(() => {
-    pipelineCompanyCapturedForVacancyRef.current = null;
-  }, [vacancyRouteId]);
-
-  useEffect(() => {
-    if (!vacancy || !vacancyRouteId) return;
-    const routeKey = String(vacancyRouteId);
-    if (pipelineCompanyCapturedForVacancyRef.current === routeKey) return;
-    pipelineCompanyCapturedForVacancyRef.current = routeKey;
-    setPipelineCompanyId(
-      resolveVacancyCompanyId(
-        vacancy && typeof vacancy === "object" ? vacancy : null,
-        companies,
-        vacancyRouteId
-      )
-    );
-  }, [vacancy, companies, vacancyRouteId]);
-
   const savedCompanyId = useMemo(
     () =>
       resolveVacancyCompanyId(
-        vacancy && typeof vacancy === "object" ? vacancy : null,
-        companies,
-        vacancyRouteId
+        vacancy && typeof vacancy === "object" ? vacancy : null
       ),
-    [vacancy, companies, vacancyRouteId]
+    [vacancy]
   );
 
   const companySelectOptions = useMemo(() => {
     if (companies.length > 0) return companies;
+    if (!savedCompanyId) return [];
     const fallbackName = String(vacancy?.company ?? vacancy?.companyName ?? "").trim();
     return [
       {
@@ -891,37 +1210,30 @@ export default function VacanteDetallePage() {
     const logo = vacancy?.logo;
     const hasLogo = Boolean(vacancy?.hasLogo ?? vacancy?.has_logo);
     if (!hasLogo || !logo || typeof logo !== "object") return null;
-    const base64 = String(logo.base64 ?? "").trim();
-    if (!base64) return null;
-    if (base64.startsWith("data:")) return base64;
-    const contentType = String(logo.contentType ?? logo.content_type ?? "image/png").trim() || "image/png";
-    return `data:${contentType};base64,${base64}`;
+    return buildSafeLogoDataUri({
+      base64: String(logo.base64 ?? "").trim() || null,
+      contentType:
+        String(logo.contentType ?? logo.content_type ?? "").trim() || null,
+    });
   }, [vacancy?.hasLogo, vacancy?.has_logo, vacancy?.logo]);
 
   const fetchStages = useCallback(async () => {
     try {
-      const list = await listRecruiterStages(pipelineCompanyId);
-      setStages(
-        list.map((item) => ({
-          id: item.id,
-          name: item.name,
-          order: item.order,
-          final: item.final ?? false,
-        }))
-      );
+      const list = await listRecruiterStages();
+      setStages(list);
     } catch {
       setStages([]);
     }
-  }, [pipelineCompanyId]);
+  }, []);
 
   const fetchStatuses = useCallback(async () => {
     try {
-      const list = await listCompanyApplicantStatuses(pipelineCompanyId);
+      const list = await listCompanyApplicantStatuses();
       setStatuses(list.map((item, i) => mapStatusFromApi(item, i)));
     } catch {
       setStatuses([]);
     }
-  }, [pipelineCompanyId]);
+  }, []);
 
   const fetchVacancyCatalogs = useCallback(async () => {
     setLoadingVacancyCatalogs(true)
@@ -949,7 +1261,7 @@ export default function VacanteDetallePage() {
 
   const fetchVacancy = useCallback(async (silentFlag?: unknown) => {
     const silent = silentFlag === true
-    if (!id) {
+    if (!pathSegment) {
       if (!silent) setLoading(false);
       if (!silent) setFetchError(tDetail("errors.missingId"));
       return;
@@ -959,16 +1271,26 @@ export default function VacanteDetallePage() {
       setFetchError(null);
     }
     try {
-      const data = await apiClient.get(`/api/recruiter/vacancies/${id}`);
-      const withApplicants = await overlayVacancyApplicants(String(id), data);
-      setVacancy(normalizeVacancyDetailFromApi(withApplicants) ?? withApplicants);
-      const record =
-        data && typeof data === "object" && !Array.isArray(data)
-          ? (data as Record<string, unknown>)
-          : null;
-      const companyIdFromApi = record?.companyId ?? record?.company_id;
-      if (companyIdFromApi != null && String(companyIdFromApi).trim() !== "") {
-        persistVacancyCompanyId(String(id), String(companyIdFromApi).trim());
+      const resolved = await fetchRecruiterVacancyByPathSegment(pathSegment);
+      if (!resolved) {
+        if (!silent) {
+          setFetchError(tDetail("errors.loadFailed"));
+          setVacancy(null);
+          setVacancyId(null);
+        }
+        return;
+      }
+      setVacancyId(resolved.id);
+      setVacancy(resolved.vacancy);
+
+      const canonicalSlug = resolved.publicSlug;
+      if (canonicalSlug && pathSegment && pathSegment !== canonicalSlug) {
+        router.replace(
+          buildRecruiterVacancyPath({
+            id: resolved.id,
+            publicSlug: canonicalSlug,
+          })
+        );
       }
     } catch (err: unknown) {
       if (!silent) {
@@ -976,15 +1298,35 @@ export default function VacanteDetallePage() {
           getApiErrorMessage(err) || tDetail("errors.loadFailed")
         );
         setVacancy(null);
+        setVacancyId(null);
       }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [id, tDetail]);
+  }, [pathSegment, router, tDetail]);
 
   useEffect(() => {
     fetchVacancy();
   }, [fetchVacancy]);
+
+  const vacancyPathSource = useMemo(
+    () => ({
+      id: vacancyId ?? pathSegment ?? "",
+      publicSlug:
+        readPublicSlug(vacancy) ??
+        (pathSegment && !isVacancyGuid(pathSegment) ? pathSegment : null),
+    }),
+    [vacancy, vacancyId, pathSegment]
+  );
+
+  const resultadosHref = buildRecruiterVacancyPath(
+    vacancyPathSource,
+    "resultados"
+  );
+  const entrevistasHref =
+    vacancyId != null && vacancyId !== ""
+      ? `/portal-rrhh/entrevistas/${encodeURIComponent(vacancyId)}`
+      : "/portal-rrhh/entrevistas";
 
   useEffect(() => {
     let cancelled = false;
@@ -1089,23 +1431,25 @@ export default function VacanteDetallePage() {
     setEditErrors({});
     setVacancyCatalogsError(null);
     const resolvedCompanyId = resolveVacancyCompanyId(
-      vacancy && typeof vacancy === "object" ? vacancy : null,
-      companies,
-      vacancyRouteId
+      vacancy && typeof vacancy === "object" ? vacancy : null
     );
     originalCompanyIdAtEditRef.current = resolvedCompanyId;
     setEditCompanyId(resolvedCompanyId);
     hydrateEditFormFromVacancy(vacancy);
     setIsEditing(true);
-  }, [vacancy, hydrateEditFormFromVacancy, companies, vacancyRouteId]);
+  }, [vacancy, hydrateEditFormFromVacancy]);
 
   const handleCopyVacancy = useCallback(async () => {
     if (!vacancy || typeof vacancy !== "object") return;
-    const companyId = resolveVacancyCompanyId(
-      vacancy,
-      companies,
-      vacancyRouteId
-    );
+    const companyId = resolveVacancyCompanyId(vacancy);
+    if (!companyId) {
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: tDetail("errors.companyRequired"),
+      });
+      return;
+    }
     const companyName =
       vacancyCompanyDisplayName === "—" ? "" : vacancyCompanyDisplayName;
     const payload = buildVacancyClipboardPayload(vacancy, companyId, companyName);
@@ -1123,7 +1467,20 @@ export default function VacanteDetallePage() {
       variant: "success",
       message: tDetail("toasts.copied"),
     });
-  }, [vacancy, companies, vacancyRouteId, vacancyCompanyDisplayName, tDetail]);
+  }, [vacancy, vacancyCompanyDisplayName, tDetail]);
+
+  const handleCopyPublicLinkResult = useCallback(
+    (ok) => {
+      setSnackbar({
+        open: true,
+        variant: ok ? "success" : "error",
+        message: ok
+          ? tDetail("toasts.linkCopied")
+          : tDetail("toasts.linkCopyFailed"),
+      });
+    },
+    [tDetail]
+  );
 
   const applyClipboardToEditForm = useCallback((payload) => {
     setEditTitle(payload.title);
@@ -1216,7 +1573,6 @@ export default function VacanteDetallePage() {
   }, []);
 
   const handleSaveVacancy = useCallback(async () => {
-    const vacancyId = Array.isArray(id) ? id[0] : id;
     if (!vacancyId || !vacancy || !readVacancyIsActive(vacancy)) return;
     if (!validateEditForm()) return;
     if (!editCompanyId.trim()) {
@@ -1234,7 +1590,7 @@ export default function VacanteDetallePage() {
     const attributes = {};
 
     validReqs.forEach((r) => {
-      const key = toSnakeCase(r.requirementName);
+      const key = toRequirementStorageKey(r.requirementName);
       if (!key) return;
       requirements[key] = String(r.requirementValue ?? "").trim();
       const scaleNumber = typeof r.scale === "number" ? r.scale : parseInt(r.scale, 10) || 5;
@@ -1292,7 +1648,6 @@ export default function VacanteDetallePage() {
     try {
       if (companyChanged && !hasOtherFormChanges) {
         await patchVacancyClientCompany(vacancyId, editCompanyId);
-        persistVacancyCompanyId(vacancyId, editCompanyId);
         await fetchVacancy(true);
       } else if (hasOtherFormChanges) {
         const payload: Record<string, unknown> = {
@@ -1347,10 +1702,6 @@ export default function VacanteDetallePage() {
           companySelectOptions.find((c) => c.id === editCompanyId)?.name ??
           String(updatedRecord.company ?? vacancy?.company ?? "").trim();
 
-        if (companyChanged) {
-          persistVacancyCompanyId(vacancyId, editCompanyId);
-        }
-
         setVacancy((prev) => ({
           ...(prev && typeof prev === "object" ? prev : {}),
           ...updatedRecord,
@@ -1378,6 +1729,20 @@ export default function VacanteDetallePage() {
           work_arrangement: nextModalitySummary?.displayName ?? null,
         }));
 
+        const nextPublicSlug = readPublicSlug(updatedRecord)
+        if (
+          nextPublicSlug &&
+          pathSegment &&
+          pathSegment !== nextPublicSlug
+        ) {
+          router.replace(
+            buildRecruiterVacancyPath({
+              id: vacancyId,
+              publicSlug: nextPublicSlug,
+            })
+          )
+        }
+
         if (companyChanged) {
           await fetchVacancy(true);
         }
@@ -1399,7 +1764,9 @@ export default function VacanteDetallePage() {
       setSavingVacancy(false);
     }
   }, [
-    id,
+    vacancyId,
+    pathSegment,
+    router,
     vacancy,
     editCompanyId,
     editTitle,
@@ -1424,7 +1791,6 @@ export default function VacanteDetallePage() {
 
   const handleFinishProcess = useCallback(
     async (data: { calification: number; comments: string }) => {
-      const vacancyId = Array.isArray(id) ? id[0] : id
       if (!vacancyId) {
         throw new Error(tDetail("errors.missingId"))
       }
@@ -1469,7 +1835,7 @@ export default function VacanteDetallePage() {
         setFinishingProcess(false)
       }
     },
-    [id, fetchVacancy, tDetail]
+    [vacancyId, fetchVacancy, tDetail]
   )
 
   useEffect(() => {
@@ -1485,11 +1851,18 @@ export default function VacanteDetallePage() {
     void fetchVacancyCatalogs()
   }, [isEditing, fetchVacancyCatalogs]);
 
+  const fallbackKanbanStages = useMemo(
+    () => parseFallbackKanbanStages(tMatching.raw("fallbackKanbanStages")),
+    [tMatching]
+  );
+
   const kanbanStageNames = useMemo(
-    () =>
-      stages.length > 0
-        ? stages.map((s) => s.name).filter(Boolean)
-        : FALLBACK_KANBAN_STAGES,
+    () => stages.map((s) => s.name).filter(Boolean),
+    [stages]
+  );
+
+  const shortcutStages = useMemo(
+    () => stages.filter((stage) => isRejectionShortcutStage(stage)),
     [stages]
   );
 
@@ -1537,7 +1910,7 @@ export default function VacanteDetallePage() {
 
   const loadSmartCandidates = useCallback(
     async (options?: { silent?: boolean }) => {
-      if (!id) return;
+      if (!vacancyId) return;
       if (isVacancyReadOnly && !options?.silent) return;
 
       setLoadingSmart(true);
@@ -1547,7 +1920,7 @@ export default function VacanteDetallePage() {
       }
 
       try {
-        const url = `/api/recruiter/vacancies/${id}/search-candidates?limit=${clampSearchLimit(QUERY_SEARCH_CANDIDATES_LIMIT)}&minScore=0.7`;
+        const url = `/api/recruiter/vacancies/${vacancyId}/search-candidates?limit=${clampSearchLimit(QUERY_SEARCH_CANDIDATES_LIMIT)}&minScore=0.7`;
         const data = await apiClient.post(url, {});
         const list = unwrapListArray(data);
         setSmartCandidates(list);
@@ -1574,7 +1947,7 @@ export default function VacanteDetallePage() {
         setLoadingSmart(false);
       }
     },
-    [id, isVacancyReadOnly, tMatching]
+    [vacancyId, isVacancyReadOnly, tMatching]
   );
 
   const handleSearchSmartRecommendations = useCallback(() => {
@@ -1582,21 +1955,22 @@ export default function VacanteDetallePage() {
   }, [loadSmartCandidates]);
 
   useEffect(() => {
-    if (!id || loading || !isVacancyReadOnly || smartCandidates !== null) return;
+    if (!vacancyId || loading || !isVacancyReadOnly || smartCandidates !== null) return;
     void loadSmartCandidates({ silent: true });
-  }, [id, loading, isVacancyReadOnly, smartCandidates, loadSmartCandidates]);
+  }, [vacancyId, loading, isVacancyReadOnly, smartCandidates, loadSmartCandidates]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!vacancyId) return;
     if (loading) return;
     document.title = formatVacancyDetailDocumentTitle(
       vacancy?.title != null && String(vacancy.title).trim() !== ""
         ? vacancy.title
         : null
     );
-  }, [id, loading, vacancy?.title]);
+  }, [vacancyId, loading, vacancy?.title]);
 
   const statusConfig = vacancy ? getStatusConfig(vacancy.status, t) : getStatusConfig("activa", t);
+  const canSharePublicLink = isVacancyPublicLinkShareable(vacancy);
   /** AI match suggestions from vacancy (for "Posibles candidatos" container). */
   const vacancyCandidates = Array.isArray(vacancy?.aiMatchSuggestions)
     ? vacancy.aiMatchSuggestions
@@ -1661,8 +2035,13 @@ export default function VacanteDetallePage() {
   const displayCandidates = searchResultsToDisplay;
 
   const orderedKanbanStageNames = useMemo(
-    () => resolveOrderedStageNames(kanbanStageNames, applicants),
-    [kanbanStageNames, applicants]
+    () =>
+      resolveOrderedStageNames(
+        kanbanStageNames,
+        applicants,
+        fallbackKanbanStages
+      ),
+    [kanbanStageNames, applicants, fallbackKanbanStages]
   );
 
   const candidatesByStage = useMemo(() => {
@@ -1699,17 +2078,33 @@ export default function VacanteDetallePage() {
   const handleKanbanStageDrop = useCallback(
     async (candidateId, newStage) => {
       if (isVacancyReadOnly) return;
+      if (loadingMoveStage || pendingStageMove) return;
       setApplicationStatusError(null);
-      const applicant = applicants.find(
+      const applicantIndex = applicants.findIndex(
         (m, i) => getCandidateId(m, i) === candidateId
       );
+      const applicant =
+        applicantIndex >= 0 ? applicants[applicantIndex] : null;
       const applicationId = applicant?.applicationId ?? applicant?.application_id;
       const currentStage =
         candidateStageOverrides[candidateId] ??
         normalizeKanbanStage(
           applicant?.applicationStage ?? applicant?.stage,
-          kanbanStageNames
+          orderedKanbanStageNames
         );
+      const currentRef = {
+        id: String(
+          applicant?.applicationStageId ?? applicant?.application_stage_id ?? ""
+        ).trim(),
+        name: currentStage,
+      };
+      const targetMeta = stages.find(
+        (s) => (s.name || "").trim() === (newStage || "").trim()
+      );
+      const targetRef = {
+        id: String(targetMeta?.id ?? "").trim(),
+        name: newStage,
+      };
       const currentStatusId =
         candidateStatusOverrides[candidateId] ??
         applicant?.applicationStatusId ??
@@ -1724,8 +2119,8 @@ export default function VacanteDetallePage() {
         statuses[0]?.id ??
         "";
       const validation = validateStageMove(
-        currentStage,
-        newStage,
+        currentRef,
+        targetRef,
         stages,
         currentStatusId,
         statuses
@@ -1744,60 +2139,201 @@ export default function VacanteDetallePage() {
         return;
       }
 
-      const stageObj = stages.find(
-        (s) => (s.name || "").trim() === (newStage || "").trim()
+      const interviewLeave = validateInterviewStageLeaveMove({
+        current: currentRef,
+        target: targetRef,
+        catalog: stages,
+        interviewDone: readInterviewDoneFromApplicant(applicant),
+        hasInterviewFeedback: readHasInterviewFeedbackFromApplicant(applicant),
+      });
+      if (!interviewLeave.allowed) {
+        const normalized = normalizeStageMoveValidationError(
+          interviewLeave.code,
+          tMatching
+        );
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: normalized.text,
+        });
+        return;
+      }
+
+      const currentName = String(currentStage ?? "").trim().toLowerCase();
+      const nextName = String(newStage ?? "").trim().toLowerCase();
+      if (currentName !== "" && currentName === nextName) return;
+
+      const stageId = targetMeta?.id ?? targetMeta?.uuid;
+      if (!applicationId || !stageId) {
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: tMatching("errors.moveStageFailed"),
+        });
+        return;
+      }
+
+      setPendingStageMove({
+        candidateId,
+        applicationId,
+        stageId,
+        newStage,
+        fromStage: currentStage,
+        displayName: pickApplicantDisplayName(
+          applicant,
+          applicantIndex >= 0 ? applicantIndex : 0
+        ),
+      });
+    },
+    [
+      applicants,
+      stages,
+      statuses,
+      orderedKanbanStageNames,
+      candidateStageOverrides,
+      candidateStatusOverrides,
+      isVacancyReadOnly,
+      loadingMoveStage,
+      pendingStageMove,
+      tMatching,
+    ]
+  );
+
+  const handleCancelPendingStageMove = useCallback(() => {
+    if (loadingMoveStage) return;
+    setPendingStageMove(null);
+  }, [loadingMoveStage]);
+
+  const handleConfirmPendingStageMove = useCallback(async () => {
+    if (!pendingStageMove || loadingMoveStage) return;
+    const { candidateId, applicationId, stageId, newStage } = pendingStageMove;
+
+    setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
+    setLoadingMoveStage(true);
+    try {
+      await apiClient.patch(
+        `/api/recruiter/applications/${applicationId}/move-to-stage`,
+        { stageId, notes: "" }
       );
-      const stageId = stageObj?.id ?? stageObj?.uuid;
+      setSnackbar({
+        open: true,
+        variant: "success",
+        message: tMatching("errors.candidateMovedStage"),
+      });
+      setPendingStageMove(null);
+      /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
+      try {
+        await fetchVacancy(true);
+        setCandidateStageOverrides((prev) => {
+          const next = { ...prev };
+          delete next[candidateId];
+          return next;
+        });
+        setCandidateStatusOverrides((prev) => {
+          const next = { ...prev };
+          delete next[candidateId];
+          return next;
+        });
+      } catch {
+        /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
+      }
+    } catch (err) {
+      const normalized = normalizeMoveStageError(err, tMatching);
+      setSnackbar({
+        open: true,
+        variant: "error",
+        message: normalized.text,
+      });
+      setCandidateStageOverrides((prev) => {
+        const next = { ...prev };
+        delete next[candidateId];
+        return next;
+      });
+      setPendingStageMove(null);
+    } finally {
+      setLoadingMoveStage(false);
+    }
+  }, [pendingStageMove, loadingMoveStage, fetchVacancy, tMatching]);
 
-      setCandidateStageOverrides((prev) => ({ ...prev, [candidateId]: newStage }));
+  const handleKanbanCardDragStart = useCallback(
+    (stage, statusId, interviewDone, hasInterviewFeedback) => {
+      setDragFromStage(stage);
+      setDragFromStatusId(statusId ?? null);
+      setDragFromInterviewDone(interviewDone === true);
+      setDragFromHasInterviewFeedback(hasInterviewFeedback === true);
+    },
+    []
+  );
 
-      if (applicationId && stageId) {
-        setLoadingMoveStage(true);
-        try {
-          await apiClient.patch(
-            `/api/recruiter/applications/${applicationId}/move-to-stage`,
-            { stageId, notes: "" }
-          );
-          setSnackbar({
-            open: true,
-            variant: "success",
-            message: tMatching("errors.candidateMovedStage"),
-          });
-          /* El servidor restablece el estado de postulación al predeterminado; hay que alinear la vista. */
-          try {
-            await fetchVacancy(true);
-            setCandidateStageOverrides((prev) => {
-              const next = { ...prev };
-              delete next[candidateId];
-              return next;
-            });
-            setCandidateStatusOverrides((prev) => {
-              const next = { ...prev };
-              delete next[candidateId];
-              return next;
-            });
-          } catch {
-            /* La etapa ya se guardó; si falla recargar la vacante, los overrides mantienen la UI coherente. */
-          }
-        } catch (err) {
-          const normalized = normalizeMoveStageError(err, tMatching);
-          setSnackbar({
-            open: true,
-            variant: "error",
-            message: normalized.text,
-          });
-          setCandidateStageOverrides((prev) => {
-            const next = { ...prev };
-            delete next[candidateId];
-            return next;
-          });
-        } finally {
-          setLoadingMoveStage(false);
-        }
+  const handleKanbanCardDragEnd = useCallback(() => {
+    setDragFromStage(null);
+    setDragFromStatusId(null);
+    setDragFromInterviewDone(null);
+    setDragFromHasInterviewFeedback(null);
+    setDragOverStage(null);
+  }, []);
+
+  const handleInterviewFeedbackComplete = useCallback(
+    (payload: InterviewFeedbackCompletePayload) => {
+      setSnackbar({
+        open: true,
+        variant: payload.variant,
+        message: payload.message,
+      });
+      if (payload.shouldRefresh) {
+        void fetchVacancy(true);
       }
     },
-    [applicants, stages, statuses, kanbanStageNames, candidateStageOverrides, candidateStatusOverrides, fetchVacancy, isVacancyReadOnly, tMatching]
+    [fetchVacancy]
   );
+
+  const getKanbanDropState = (stage) => {
+    const stageMeta =
+      stages.find(
+        (item) =>
+          String(item.name ?? "").trim().toLowerCase() ===
+          String(stage ?? "").trim().toLowerCase()
+      ) ?? null;
+    const isForeignDrag =
+      dragFromStage != null &&
+      String(dragFromStage).trim().toLowerCase() !==
+        String(stage).trim().toLowerCase();
+    const validation = isForeignDrag
+      ? validateStageMove(
+          dragFromStage,
+          stageMeta ?? stage,
+          stages,
+          dragFromStatusId,
+          statuses
+        )
+      : { allowed: false, code: "skip_not_allowed" };
+    const interviewLeave =
+      isForeignDrag && validation.allowed
+        ? validateInterviewStageLeaveMove({
+            current: dragFromStage,
+            target: stageMeta ?? stage,
+            catalog: stages,
+            interviewDone: dragFromInterviewDone === true,
+            hasInterviewFeedback: dragFromHasInterviewFeedback === true,
+          })
+        : { allowed: true, code: "ok" };
+    const leaveBlocked = interviewLeave.allowed !== true;
+    return {
+      stageMeta,
+      dropAllowed: isForeignDrag && validation.allowed && !leaveBlocked,
+      dropBlockCode: leaveBlocked
+        ? interviewLeave.code
+        : isForeignDrag && !validation.allowed
+          ? validation.code
+          : null,
+      isDragActive: isForeignDrag,
+      columnShortcutStages: shortcutStages.filter(
+        (item) =>
+          String(item.name ?? "").trim().toLowerCase() !==
+          String(stage ?? "").trim().toLowerCase()
+      ),
+    };
+  };
 
   const handleKanbanDragEnter = useCallback((stage) => {
     setDragOverStage(stage);
@@ -1806,6 +2342,27 @@ export default function VacanteDetallePage() {
   const handleKanbanDragLeave = useCallback(() => {
     setDragOverStage(null);
   }, []);
+
+  const handleKanbanDropBlocked = useCallback(
+    (blockCode) => {
+      if (
+        blockCode === "final_status_required" ||
+        blockCode === "interview_not_done" ||
+        blockCode === "interview_feedback_required"
+      ) {
+        const normalized = normalizeStageMoveValidationError(
+          blockCode,
+          tMatching
+        );
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message: normalized.text,
+        });
+      }
+    },
+    [tMatching]
+  );
 
   const handleStatusChange = useCallback(
     async (candidateId, statusId) => {
@@ -1895,7 +2452,7 @@ export default function VacanteDetallePage() {
   }, []);
 
   const handleStartProcess = useCallback(async () => {
-    if (!id || isVacancyReadOnly) return;
+    if (!vacancyId || isVacancyReadOnly) return;
     const candidateProfileIds = vacancyCandidates
       .map((match, index) => (selectedPossibleCandidateIds.has(getCandidateId(match, index)) ? match.candidateProfileId : null))
       .filter((pid) => pid != null && String(pid).trim() !== "");
@@ -1904,7 +2461,7 @@ export default function VacanteDetallePage() {
     setStartProcessError(null);
     try {
       await apiClient.post("/api/recruiter/applications/start", {
-        vacancyId: id,
+        vacancyId,
         candidateProfileIds,
       });
       setSelectedPossibleCandidateIds(new Set());
@@ -1922,7 +2479,7 @@ export default function VacanteDetallePage() {
     } finally {
       setLoadingStartProcess(false);
     }
-  }, [id, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas, isVacancyReadOnly]);
+  }, [vacancyId, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas, isVacancyReadOnly, tMatching]);
 
   /** Selected candidate document IDs to send to the match API. */
   const selectedDocumentIds = displayCandidates
@@ -1930,16 +2487,77 @@ export default function VacanteDetallePage() {
     .filter((docId) => docId != null && String(docId).trim() !== "");
 
   const handleMatch = useCallback(async () => {
-    if (!id || isVacancyReadOnly) return;
-    const docIds = displayCandidates
-      .map((m, i) => (selectedCandidateIds.has(getCandidateId(m, i)) ? m.candidateDocumentId : null))
-      .filter((docId) => docId != null && String(docId).trim() !== "");
-    if (docIds.length === 0) return;
+    if (!vacancyId || isVacancyReadOnly) return;
+    const items = displayCandidates
+      .map((match, index) => {
+        if (!selectedCandidateIds.has(getCandidateId(match, index))) return null;
+        const documentId = match.candidateDocumentId;
+        if (documentId == null || String(documentId).trim() === "") return null;
+        return {
+          documentId: String(documentId),
+          displayName: pickApplicantDisplayName(match, index),
+        };
+      })
+      .filter(Boolean);
+    if (items.length === 0) return;
+
     setLoadingMatch(true);
     setMatchError(null);
+    setMatchProgress({
+      cycleKey: null,
+      isCompleted: false,
+      batchIndex: 0,
+      batchTotal: items.length,
+      currentName: null,
+    });
+
     try {
-      await apiClient.post(`/api/recruiter/vacancies/${id}/match`, docIds);
+      const result = await runVacancyPreliminaryMatchBatch({
+        items,
+        matchOne: async (documentId) => {
+          await apiClient.post(`/api/recruiter/vacancies/${vacancyId}/match`, [documentId]);
+        },
+        onProgress: (progress) => {
+          setMatchProgress({
+            cycleKey: progress.cycleKey,
+            isCompleted: progress.isCompleted,
+            batchIndex: progress.batchIndex,
+            batchTotal: progress.batchTotal,
+            currentName: progress.displayName ?? null,
+          });
+        },
+        getErrorMessage: (err) =>
+          getApiErrorMessage(err) || tMatching("toasts.matchFailed"),
+      });
+
       await fetchVacancy(true);
+
+      if (result.succeeded === 0) {
+        const firstFailure = result.failed[0];
+        const msg =
+          firstFailure?.message ?? tMatching("toasts.matchFailed");
+        setMatchError(msg);
+        setSnackbar({ open: true, variant: "error", message: msg });
+        return;
+      }
+
+      if (result.failed.length > 0) {
+        const names = result.failed
+          .map((item) => item.displayName || item.documentId)
+          .join(", ");
+        setSnackbar({
+          open: true,
+          variant: "success",
+          message: tMatching("toasts.matchPartialSuccess", {
+            succeeded: result.succeeded,
+            total: result.total,
+            names,
+          }),
+        });
+        scrollToPossibleCandidates();
+        return;
+      }
+
       setSnackbar({
         open: true,
         variant: "success",
@@ -1947,13 +2565,29 @@ export default function VacanteDetallePage() {
       });
       scrollToPossibleCandidates();
     } catch (err) {
-      const msg = err?.message ?? err?.detail ?? "No se pudo ejecutar el emparejamiento.";
+      const msg =
+        getApiErrorMessage(err) || tMatching("toasts.matchFailed");
       setMatchError(msg);
       setSnackbar({ open: true, variant: "error", message: msg });
     } finally {
       setLoadingMatch(false);
+      setMatchProgress({
+        cycleKey: null,
+        isCompleted: false,
+        batchIndex: 0,
+        batchTotal: 0,
+        currentName: null,
+      });
     }
-  }, [id, displayCandidates, selectedCandidateIds, fetchVacancy, scrollToPossibleCandidates, isVacancyReadOnly]);
+  }, [
+    vacancyId,
+    displayCandidates,
+    selectedCandidateIds,
+    fetchVacancy,
+    scrollToPossibleCandidates,
+    isVacancyReadOnly,
+    tMatching,
+  ]);
 
   const selectedCount = selectedCandidateIds.size;
 
@@ -1977,22 +2611,18 @@ export default function VacanteDetallePage() {
   const showAdvantagesBlock = showVacancyInfo
   const topRowGridClass = " grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
   const narrativeGridClass = " grid-cols-1 lg:grid-cols-3"
-  const mobileTopRowGridClass = " sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
-  const mobileNarrativeGridClass = " sm:grid-cols-3"
+  const mobileTopRowGridClass = " md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+  const mobileNarrativeGridClass = " md:grid-cols-2 lg:grid-cols-3"
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      {/* Desktop: sidebar + main — fixed height so only main scrolls */}
-      <div className="hidden h-full lg:flex">
-        <RRHHSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <RRHHTopbar
-            variant="desktop"
-            breadcrumbLabel={breadcrumbLabel}
-            breadcrumbTrail={breadcrumbTrail}
-          />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 flex flex-col p-8">
+    <>
+    <RrhhPortalShell
+      breadcrumbLabel={breadcrumbLabel}
+      breadcrumbTrail={breadcrumbTrail}
+      allowHorizontalOverflow
+    >
+      {/* Desktop content */}
+      <div className="hidden min-w-0 flex-col p-8 lg:flex">
               {loading ? (
                 <div
                   className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
@@ -2061,8 +2691,8 @@ export default function VacanteDetallePage() {
                     className="mb-8 rounded-xl border border-border bg-card p-6"
                     aria-label={tDetail("page.vacancyInfoAria")}
                   >
-                    <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                      <div className="flex min-w-0 flex-1 items-start gap-4">
+                    <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+                      <div className="flex min-w-[min(100%,24rem)] max-w-full grow basis-[min(100%,24rem)] items-start gap-4">
                         {companyLogoSrc ? (
                           <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-border bg-background">
                             <img
@@ -2210,12 +2840,12 @@ export default function VacanteDetallePage() {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex max-w-full shrink-0 flex-wrap items-center gap-3">
                         {!isEditing ? (
                           <>
                             {!isVacancyReadOnly ? (
                               <RematchButton
-                                vacancyId={id}
+                                vacancyId={vacancyId}
                                 needsRematch={vacancy.needsRematch}
                                 onSuccess={() => fetchVacancy(true)}
                                 onSnackbar={(message, variant = "success") =>
@@ -2244,14 +2874,14 @@ export default function VacanteDetallePage() {
                               </button>
                             ) : null}
                             <Link
-                              href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
+                              href={entrevistasHref}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                               aria-label={tDetail("actions.interviewsAria")}
                             >
                               {tDetail("actions.interviews")}
                             </Link>
                             <Link
-                              href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
+                              href={resultadosHref}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                               aria-label={tDetail("actions.resultsAria")}
                             >
@@ -2265,6 +2895,20 @@ export default function VacanteDetallePage() {
                             >
                               {tDetail("actions.copy")}
                             </button>
+                            {canSharePublicLink && vacancy?.id ? (
+                              <CopyPublicVacancyLinkButton
+                                vacancy={{
+                                  id: String(vacancy.id),
+                                  publicSlug: readPublicSlug(vacancy),
+                                }}
+                                label={tDetail("actions.copyLink")}
+                                ariaLabel={tDetail("actions.copyLinkAria")}
+                                copiedLabel={tDetail("toasts.linkCopied")}
+                                copyFailedLabel={tDetail("toasts.linkCopyFailed")}
+                                onCopyResult={handleCopyPublicLinkResult}
+                                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              />
+                            ) : null}
                           </>
                         ) : (
                           <>
@@ -2586,25 +3230,33 @@ export default function VacanteDetallePage() {
 
                     {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                     <div className="flex flex-col gap-3">
-                      {loadingMatch ? (
+                      {loadingMatch && matchProgress.cycleKey ? (
                         <div
                           className="w-full max-w-2xl space-y-2"
                           role="status"
                           aria-live="polite"
-                          aria-label={tMatching("reanalyzingEllipsis")}
+                          aria-label={tMatching("aria.analysisProgress")}
                         >
                           <AiDisclosurePillProgress
+                            key={matchProgress.cycleKey}
                             percent={null}
-                            timeBasedTypicalMs={getVacancyPreliminaryMatchTypicalMsForDocCount(
-                              Math.max(1, selectedDocumentIds.length)
-                            )}
+                            timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
                             preliminaryMatchStepLabels
+                            isCompleted={matchProgress.isCompleted}
                             className="mt-0!"
                             aria-label={tMatching("aria.analysisProgress")}
                           />
-                          <p className="font-sans text-sm text-muted-foreground">
-                            {tMatching("reanalyzingEllipsis")}
+                          <p className="font-sans text-sm font-medium text-foreground">
+                            {tMatching("processingCurrentCandidate", {
+                              current: matchProgress.batchIndex,
+                              total: matchProgress.batchTotal,
+                            })}
                           </p>
+                          {matchProgress.currentName ? (
+                            <p className="font-sans text-sm text-muted-foreground">
+                              {matchProgress.currentName}
+                            </p>
+                          ) : null}
                         </div>
                       ) : null}
                       <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
@@ -2764,13 +3416,11 @@ export default function VacanteDetallePage() {
                       ref={etapasSectionDesktopRef}
                       className="flex flex-col gap-3 scroll-mt-4"
                     >
-                      <h2 className="flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
-                        <Users className="h-5 w-5" aria-hidden />
-                        {tMatching("stagesTitle")}
-                        <span className="font-sans text-sm font-normal text-muted-foreground">
-                          ({applicants.length})
-                        </span>
-                      </h2>
+                      <KanbanStagesHeading
+                        applicantCount={applicants.length}
+                        headingClassName="flex items-center gap-2 font-sans text-lg font-semibold text-foreground"
+                        iconClassName="h-5 w-5"
+                      />
                       <MoveStageErrorBanner error={applicationStatusError} />
                       <div
                         className="rounded-xl border border-border bg-card p-6"
@@ -2789,24 +3439,36 @@ export default function VacanteDetallePage() {
                             role="region"
                             aria-label={tMatching("kanbanStagesAria")}
                           >
-                            {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
+                            {candidatesByStage.map(({ stage, candidates: stageCandidates }) => {
+                              const dropState = getKanbanDropState(stage);
+                              return (
                               <KanbanColumn
                                 key={stage}
                                 stage={stage}
+                                stageMeta={dropState.stageMeta}
                                 candidates={stageCandidates}
                                 onDrop={handleKanbanStageDrop}
+                                onDropBlocked={handleKanbanDropBlocked}
                                 onDragEnter={handleKanbanDragEnter}
                                 onDragLeave={handleKanbanDragLeave}
                                 isOver={dragOverStage === stage}
+                                dropAllowed={dropState.dropAllowed}
+                                dropBlockCode={dropState.dropBlockCode}
+                                isDragActive={dropState.isDragActive}
                                 statuses={statuses}
                                 candidateStatusOverrides={candidateStatusOverrides}
                                 onStatusChange={handleStatusChange}
                                 updatingStatusCandidateId={updatingStatusCandidateId}
-                                vacancyId={id != null ? String(id) : null}
+                                vacancyId={vacancyId}
                                 vacancyTitle={vacancy?.title ?? ""}
                                 readOnly={isVacancyReadOnly}
+                                shortcutStages={dropState.columnShortcutStages}
+                                onPipelineDragStart={handleKanbanCardDragStart}
+                                onPipelineDragEnd={handleKanbanCardDragEnd}
+                                onInterviewFeedbackComplete={handleInterviewFeedbackComplete}
                               />
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -2814,20 +3476,10 @@ export default function VacanteDetallePage() {
                   </section>
                 </>
               ) : null}
-            </div>
-          </main>
-        </div>
       </div>
 
-      {/* Tablet & Mobile — fixed height so only main scrolls */}
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <RRHHTopbar
-          variant="tablet"
-          breadcrumbLabel={breadcrumbLabel}
-          breadcrumbTrail={breadcrumbTrail}
-        />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 flex flex-col p-4 md:p-6">
+      {/* Tablet & Mobile content */}
+      <div className="flex min-w-0 flex-col p-4 md:p-6 lg:hidden">
             {loading ? (
               <div
                 className="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center"
@@ -3050,14 +3702,14 @@ export default function VacanteDetallePage() {
                           </button>
                           ) : null}
                           <Link
-                            href={`/portal-rrhh/entrevistas/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}`}
+                            href={entrevistasHref}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                             aria-label={tDetail("actions.interviewsAria")}
                           >
                             {tDetail("actions.interviews")}
                           </Link>
                           <Link
-                            href={`/portal-rrhh/vacantes/${encodeURIComponent(String(Array.isArray(id) ? id[0] : id ?? ""))}/resultados`}
+                            href={resultadosHref}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                             aria-label={tDetail("actions.resultsAria")}
                           >
@@ -3071,6 +3723,20 @@ export default function VacanteDetallePage() {
                           >
                             {tDetail("actions.copy")}
                           </button>
+                          {canSharePublicLink && vacancy?.id ? (
+                            <CopyPublicVacancyLinkButton
+                              vacancy={{
+                                id: String(vacancy.id),
+                                publicSlug: readPublicSlug(vacancy),
+                              }}
+                              label={tDetail("actions.copyLink")}
+                              ariaLabel={tDetail("actions.copyLinkAria")}
+                              copiedLabel={tDetail("toasts.linkCopied")}
+                              copyFailedLabel={tDetail("toasts.linkCopyFailed")}
+                              onCopyResult={handleCopyPublicLinkResult}
+                              className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            />
+                          ) : null}
                         </>
                       ) : (
                         <>
@@ -3399,25 +4065,33 @@ export default function VacanteDetallePage() {
 
                   {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                   <div className="flex flex-col gap-3">
-                    {loadingMatch ? (
+                    {loadingMatch && matchProgress.cycleKey ? (
                       <div
                         className="w-full max-w-2xl space-y-2"
                         role="status"
                         aria-live="polite"
-                        aria-label="Reanalizando con IA"
+                        aria-label={tMatching("aria.analysisProgress")}
                       >
                         <AiDisclosurePillProgress
+                          key={matchProgress.cycleKey}
                           percent={null}
-                          timeBasedTypicalMs={getVacancyPreliminaryMatchTypicalMsForDocCount(
-                            Math.max(1, selectedDocumentIds.length)
-                          )}
+                          timeBasedTypicalMs={VACANCY_PRELIMINARY_MATCH_TYPICAL_MS}
                           preliminaryMatchStepLabels
+                          isCompleted={matchProgress.isCompleted}
                           className="mt-0!"
-                          aria-label="Progreso del análisis preliminar con IA"
+                          aria-label={tMatching("aria.analysisProgress")}
                         />
-                        <p className="font-sans text-sm text-muted-foreground">
-                          Reanalizando con IA…
+                        <p className="font-sans text-sm font-medium text-foreground">
+                          {tMatching("processingCurrentCandidate", {
+                            current: matchProgress.batchIndex,
+                            total: matchProgress.batchTotal,
+                          })}
                         </p>
+                        {matchProgress.currentName ? (
+                          <p className="font-sans text-sm text-muted-foreground">
+                            {matchProgress.currentName}
+                          </p>
+                        ) : null}
                       </div>
                     ) : null}
                     <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
@@ -3577,13 +4251,11 @@ export default function VacanteDetallePage() {
                     ref={etapasSectionMobileRef}
                     className="flex flex-col gap-3 scroll-mt-4"
                   >
-                    <h2 className="flex items-center gap-2 font-sans text-base font-semibold text-foreground">
-                      <Users className="h-4 w-4" aria-hidden />
-                      Etapas
-                      <span className="font-sans text-sm font-normal text-muted-foreground">
-                        ({applicants.length})
-                      </span>
-                    </h2>
+                    <KanbanStagesHeading
+                      applicantCount={applicants.length}
+                      headingClassName="flex items-center gap-2 font-sans text-base font-semibold text-foreground"
+                      iconClassName="h-4 w-4"
+                    />
                     <MoveStageErrorBanner error={applicationStatusError} />
                     <div
                       className="rounded-xl border border-border bg-card p-5"
@@ -3602,24 +4274,36 @@ export default function VacanteDetallePage() {
                           role="region"
                           aria-label={tMatching("kanbanStagesAria")}
                         >
-                          {candidatesByStage.map(({ stage, candidates: stageCandidates }) => (
+                          {candidatesByStage.map(({ stage, candidates: stageCandidates }) => {
+                            const dropState = getKanbanDropState(stage);
+                            return (
                             <KanbanColumn
                               key={stage}
                               stage={stage}
+                              stageMeta={dropState.stageMeta}
                               candidates={stageCandidates}
                               onDrop={handleKanbanStageDrop}
+                              onDropBlocked={handleKanbanDropBlocked}
                               onDragEnter={handleKanbanDragEnter}
                               onDragLeave={handleKanbanDragLeave}
                               isOver={dragOverStage === stage}
+                              dropAllowed={dropState.dropAllowed}
+                              dropBlockCode={dropState.dropBlockCode}
+                              isDragActive={dropState.isDragActive}
                               statuses={statuses}
                               candidateStatusOverrides={candidateStatusOverrides}
                               onStatusChange={handleStatusChange}
                               updatingStatusCandidateId={updatingStatusCandidateId}
-                              vacancyId={id != null ? String(id) : null}
+                              vacancyId={vacancyId}
                               vacancyTitle={vacancy?.title ?? ""}
                               readOnly={isVacancyReadOnly}
+                              shortcutStages={dropState.columnShortcutStages}
+                              onPipelineDragStart={handleKanbanCardDragStart}
+                              onPipelineDragEnd={handleKanbanCardDragEnd}
+                              onInterviewFeedbackComplete={handleInterviewFeedbackComplete}
                             />
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -3627,9 +4311,8 @@ export default function VacanteDetallePage() {
                 </section>
               </>
             ) : null}
-          </div>
-        </main>
       </div>
+    </RrhhPortalShell>
 
       <Snackbar
         open={snackbar.open}
@@ -3650,6 +4333,23 @@ export default function VacanteDetallePage() {
         onClose={handleCancelPaste}
         onConfirm={handleConfirmPaste}
       />
-    </div>
+
+      {pendingStageMove ? (
+        <DeleteConfirmModal
+          isOpen
+          onClose={handleCancelPendingStageMove}
+          onConfirm={handleConfirmPendingStageMove}
+          loading={loadingMoveStage}
+          intent="primary"
+          title={tMatching("kanban.confirmStageMoveTitle")}
+          message={tMatching("kanban.confirmStageMoveMessage", {
+            name: pendingStageMove.displayName,
+            fromStage: pendingStageMove.fromStage,
+            toStage: pendingStageMove.newStage,
+          })}
+          confirmText={tMatching("kanban.confirmStageMoveConfirm")}
+        />
+      ) : null}
+    </>
   );
 }

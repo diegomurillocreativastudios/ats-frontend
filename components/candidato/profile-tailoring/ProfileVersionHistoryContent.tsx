@@ -3,9 +3,8 @@
 import Link from "next/link"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
-import { ArrowLeft, Briefcase, Eye, Loader2, Sparkles, Trash2 } from "lucide-react"
-import CandidateSidebar from "@/components/candidato/CandidateSidebar"
-import CandidateTopbar from "@/components/candidato/CandidateTopbar"
+import { ArrowLeft, Briefcase, Download, Eye, Loader2, Sparkles, Trash2 } from "lucide-react"
+import { CandidatePortalShell } from "@/components/candidato/candidate-portal-shell"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import { Button } from "@/components/ui/Button"
@@ -15,6 +14,7 @@ import { AdaptedProfileEditor } from "@/components/candidato/profile-tailoring/A
 import { VersionLabelEditor } from "@/components/candidato/profile-tailoring/VersionLabelEditor"
 import { useProfileVersions } from "@/hooks/use-profile-versions"
 import { useCandidateProfile } from "@/hooks/useCandidateProfile"
+import { downloadAdaptedCv } from "@/lib/api/candidate-profile-tailor"
 import {
   adaptedProfileToFormState,
   formStateToDisplayProfile,
@@ -64,6 +64,7 @@ export default function ProfileVersionHistoryContent() {
   const [adaptedForm, setAdaptedForm] = useState<FullProfileFormInput | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<ProfileVersionSummary | null>(null)
   const [renamingVersionId, setRenamingVersionId] = useState<string | null>(null)
+  const [downloadingVersionId, setDownloadingVersionId] = useState<string | null>(null)
 
   const handleViewVersion = useCallback(
     async (versionId: string) => {
@@ -101,6 +102,21 @@ export default function ProfileVersionHistoryContent() {
       }
     },
     [saveVersion, showSnackbar, t]
+  )
+
+  const handleDownloadCv = useCallback(
+    async (versionId: string) => {
+      setDownloadingVersionId(versionId)
+      try {
+        await downloadAdaptedCv(versionId)
+        showSnackbar(tRoot("toasts.downloadCvSuccess"), "success")
+      } catch (err: unknown) {
+        showSnackbar(getApiErrorMessage(err) || tRoot("toasts.downloadCvFailed"), "error")
+      } finally {
+        setDownloadingVersionId(null)
+      }
+    },
+    [showSnackbar, tRoot]
   )
 
   const handleDelete = useCallback(async () => {
@@ -262,6 +278,21 @@ export default function ProfileVersionHistoryContent() {
                     </button>
                     <button
                       type="button"
+                      onClick={() => void handleDownloadCv(version.id)}
+                      disabled={downloadingVersionId === version.id}
+                      aria-busy={downloadingVersionId === version.id}
+                      aria-label={t("actions.downloadCv")}
+                      title={t("actions.downloadCv")}
+                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/70 text-muted-foreground motion-safe:transition-colors hover:border-vo-purple/30 hover:bg-vo-purple/5 hover:text-vo-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple/40 focus-visible:ring-offset-2 disabled:opacity-60"
+                    >
+                      {downloadingVersionId === version.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                      ) : (
+                        <Download className="h-3.5 w-3.5" aria-hidden />
+                      )}
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setDeleteTarget(version)}
                       aria-label={t("actions.delete")}
                       title={t("actions.delete")}
@@ -294,6 +325,9 @@ export default function ProfileVersionHistoryContent() {
             vacancyTitle={selectedVersion.vacancyTitle}
             promptVersion={selectedVersion.promptVersion}
             atsComplianceChecklist={selectedVersion.atsComplianceChecklist}
+            showActions
+            onDownloadAdaptedCv={() => void handleDownloadCv(selectedVersion.id)}
+            downloadingCv={downloadingVersionId === selectedVersion.id}
           />
           <details className="rounded-2xl border border-border bg-card">
             <summary className="cursor-pointer list-none px-4 py-3 font-sans text-sm font-medium text-foreground marker:content-none [&::-webkit-details-marker]:hidden">
@@ -323,23 +357,8 @@ export default function ProfileVersionHistoryContent() {
   )
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <div className="hidden h-full lg:flex">
-        <CandidateSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <CandidateTopbar variant="desktop" breadcrumbLabel={t("title")} />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 p-8">{pageContent}</div>
-          </main>
-        </div>
-      </div>
-
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <CandidateTopbar variant="tablet" breadcrumbLabel={t("title")} />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 p-4 md:p-6">{pageContent}</div>
-        </main>
-      </div>
+    <CandidatePortalShell breadcrumbLabel={t("title")}>
+      <div className="min-w-0 p-4 md:p-6 lg:p-8">{pageContent}</div>
 
       <DeleteConfirmModal
         isOpen={deleteTarget != null}
@@ -349,6 +368,6 @@ export default function ProfileVersionHistoryContent() {
         message={t("deleteConfirm.message")}
         loading={mutating}
       />
-    </div>
+    </CandidatePortalShell>
   )
 }

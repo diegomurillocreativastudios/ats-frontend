@@ -2,7 +2,56 @@ import { describe, it, expect, vi, afterEach } from "vitest"
 import {
   GOOGLE_CALENDAR_SETTINGS_PATH,
   getGoogleCalendarFrontendOAuthUrls,
+  isAllowedGoogleOAuthAuthorizeUrl,
 } from "@/lib/google-calendar-oauth-urls"
+
+describe("isAllowedGoogleOAuthAuthorizeUrl", () => {
+  it("accepts official Google OAuth authorize URLs", () => {
+    expect(
+      isAllowedGoogleOAuthAuthorizeUrl(
+        "https://accounts.google.com/o/oauth2/v2/auth?client_id=x"
+      )
+    ).toBe(true)
+    expect(
+      isAllowedGoogleOAuthAuthorizeUrl(
+        "https://accounts.google.com/o/oauth2/auth?client_id=x"
+      )
+    ).toBe(true)
+  })
+
+  it("rejects non-Google hosts, schemes, and lookalikes", () => {
+    expect(isAllowedGoogleOAuthAuthorizeUrl(null)).toBe(false)
+    expect(isAllowedGoogleOAuthAuthorizeUrl("")).toBe(false)
+    expect(
+      isAllowedGoogleOAuthAuthorizeUrl(
+        "http://accounts.google.com/o/oauth2/v2/auth"
+      )
+    ).toBe(false)
+    expect(
+      isAllowedGoogleOAuthAuthorizeUrl(
+        "https://evil.com/o/oauth2/v2/auth"
+      )
+    ).toBe(false)
+    expect(
+      isAllowedGoogleOAuthAuthorizeUrl(
+        "https://accounts.google.com.evil.com/o/oauth2/v2/auth"
+      )
+    ).toBe(false)
+    expect(
+      isAllowedGoogleOAuthAuthorizeUrl(
+        "https://accounts.google.com/login"
+      )
+    ).toBe(false)
+    expect(
+      isAllowedGoogleOAuthAuthorizeUrl("javascript:alert(1)")
+    ).toBe(false)
+    expect(
+      isAllowedGoogleOAuthAuthorizeUrl(
+        "https://user:pass@accounts.google.com/o/oauth2/v2/auth"
+      )
+    ).toBe(false)
+  })
+})
 
 describe("getGoogleCalendarFrontendOAuthUrls", () => {
   afterEach(() => {

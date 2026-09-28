@@ -30,16 +30,17 @@ describe("buildReportTemplateContext", () => {
     expect(ctx.logoUrl).toBe("https://example.com/logo.png")
   })
 
-  it("renders a simple HTML template with report context", () => {
+  it("escapes HTML when interpolating report context values", () => {
     const ctx = buildReportTemplateContext({
       summary: { totalVacancies: 8, totalCandidates: 20 },
-      filters: { clientName: "Todos", from: "—", to: "—" },
+      filters: { clientName: "<script>x</script>", from: "—", to: "—" },
     })
     const html = renderTechnicalSheetHtml(
       "<p>Cliente: {{filters.clientName}} · Vacantes: {{summary.totalVacancies}}</p>",
       ctx
     )
-    expect(html).toContain("Cliente: Todos")
+    expect(html).toContain("Cliente: &lt;script&gt;x&lt;/script&gt;")
     expect(html).toContain("Vacantes: 8")
+    expect(html).not.toMatch(/<script/i)
   })
 })

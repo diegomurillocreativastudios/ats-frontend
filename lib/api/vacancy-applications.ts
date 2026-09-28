@@ -6,6 +6,60 @@ import {
 } from "@/lib/api/query-paging"
 import { unwrapVacancyDetailPayload } from "@/lib/vacancies/normalize-vacancy-detail-from-api"
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    return value as Record<string, unknown>
+  }
+  return null
+}
+
+function pickString(
+  raw: Record<string, unknown> | null,
+  keys: string[]
+): string | null {
+  if (!raw) return null
+  for (const key of keys) {
+    const value = raw[key]
+    if (value != null && String(value).trim() !== "") {
+      return String(value).trim()
+    }
+  }
+  return null
+}
+
+/** Id de postulación para un candidato dentro de `applicants` de la vacante. */
+export function findApplicationIdForCandidate(
+  applicants: unknown[],
+  candidateProfileId: string
+): string | null {
+  const wanted = candidateProfileId.trim()
+  if (!wanted) return null
+  for (const item of applicants) {
+    const row = asRecord(item)
+    const profileId = pickString(row, [
+      "candidateProfileId",
+      "candidate_profile_id",
+    ])
+    if (profileId !== wanted) continue
+    const applicationId = pickString(row, ["applicationId", "application_id"])
+    if (applicationId) return applicationId
+  }
+  return null
+}
+
+export async function resolveApplicationIdForCandidate(
+  vacancyId: string,
+  candidateProfileId: string
+): Promise<string | null> {
+  if (!vacancyId.trim() || !candidateProfileId.trim()) return null
+  try {
+    const applicants = await listAllVacancyApplications(vacancyId)
+    return findApplicationIdForCandidate(applicants, candidateProfileId)
+  } catch {
+    return null
+  }
+}
+
 function applicationsPath(vacancyId: string): string {
   return `/api/recruiter/vacancies/${encodeURIComponent(vacancyId)}/applications`
 }

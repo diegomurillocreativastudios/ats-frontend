@@ -3,8 +3,9 @@ import { render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 
 import IniciarSesion from "@/app/auth/iniciar-sesion/page"
-import ForgotPasswordContent from "@/app/auth/forgot-password/ForgotPasswordContent"
-import RestablecerContrasenaContent from "@/app/restablecer-contrasena/RestablecerContrasenaContent"
+import OlvidasteTuContrasenaContent from "@/app/auth/olvidaste-tu-contrasena/OlvidasteTuContrasenaContent"
+import RestablecerContrasenaContent from "@/app/auth/restablecer-contrasena/RestablecerContrasenaContent"
+import Registrarse from "@/app/auth/registrarse/page"
 import { locales, type Locale } from "@/i18n/routing"
 import esMessages from "@/messages/es.json"
 import enMessages from "@/messages/en.json"
@@ -57,6 +58,11 @@ describe("Login i18n (Etapa 4)", () => {
   it("traduce los textos del login al inglés según el locale", () => {
     renderWithIntl(<IniciarSesion />, "en")
     expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", {
+        name: "Applicant Tracking System for HR Departments",
+      }),
+    ).toBeInTheDocument()
     expect(screen.getByText("Username or email")).toBeInTheDocument()
     expect(screen.getByText("Forgot your password?")).toBeInTheDocument()
   })
@@ -67,11 +73,45 @@ describe("Login i18n (Etapa 4)", () => {
       screen.getByRole("button", { name: "Idioma" }),
     ).toBeInTheDocument()
   })
+
+  it("renderiza el panel de marca, recordar sesión y enlaces legales", () => {
+    renderWithIntl(<IniciarSesion />, "es")
+    expect(screen.getByTestId("auth-login-brand-panel")).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", {
+        name: "Sistema de Gestión de Candidatos para departamentos de RRHH",
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId("auth-login-remember")).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Soporte y Ayuda" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Mostrar contraseña" })).toBeInTheDocument()
+    expect(screen.getByTestId("auth-login-legal-footer")).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Privacidad" })).toBeInTheDocument()
+  })
+
+  it("traduce el panel de marca en español sin dejar textos en inglés", () => {
+    renderWithIntl(<IniciarSesion />, "es")
+    expect(screen.queryByText("Top Applicant")).not.toBeInTheDocument()
+    expect(screen.queryByText("Top Candidate")).not.toBeInTheDocument()
+    expect(screen.queryByText("Senior Tech Recruiter")).not.toBeInTheDocument()
+    expect(screen.queryByText("HR Analytics")).not.toBeInTheDocument()
+    expect(screen.queryByText("Sourcing Activo")).not.toBeInTheDocument()
+    expect(screen.queryByText(/Powered by/i)).not.toBeInTheDocument()
+    expect(screen.getByText("Candidata destacada")).toBeInTheDocument()
+    expect(screen.getByText("Reclutadora técnica sénior")).toBeInTheDocument()
+    expect(screen.getByText("Búsqueda activa")).toBeInTheDocument()
+    expect(screen.getByText("Analítica de RRHH")).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Con tecnología de Creativa Studios LLC" }),
+    ).toBeInTheDocument()
+  })
 })
 
 describe("Recuperar contraseña i18n (Etapa 4)", () => {
   it("renderiza los textos en español desde next-intl", () => {
-    renderWithIntl(<ForgotPasswordContent />, "es")
+    renderWithIntl(<OlvidasteTuContrasenaContent />, "es")
     expect(
       screen.getByRole("heading", { name: "¿Olvidaste tu contraseña?" }),
     ).toBeInTheDocument()
@@ -81,7 +121,7 @@ describe("Recuperar contraseña i18n (Etapa 4)", () => {
   })
 
   it("traduce los textos al inglés y mantiene el selector de idioma", () => {
-    renderWithIntl(<ForgotPasswordContent />, "en")
+    renderWithIntl(<OlvidasteTuContrasenaContent />, "en")
     expect(
       screen.getByRole("heading", { name: "Forgot your password?" }),
     ).toBeInTheDocument()
@@ -121,6 +161,27 @@ describe("Restablecer contraseña i18n (Etapa 4)", () => {
   })
 })
 
+describe("Registro i18n", () => {
+  it("renderiza el paso de correo en español desde next-intl", () => {
+    renderWithIntl(<Registrarse />, "es")
+    expect(
+      screen.getByRole("heading", { name: "Registrarse" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Enviar código" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Idioma" })).toBeInTheDocument()
+  })
+
+  it("traduce el paso de correo al inglés según el locale", () => {
+    renderWithIntl(<Registrarse />, "en")
+    expect(screen.getByRole("heading", { name: "Sign up" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Send code" }),
+    ).toBeInTheDocument()
+  })
+})
+
 describe("Diccionarios auth (Etapa 4)", () => {
   const allMessages: Record<Locale, Record<string, unknown>> = {
     es: esMessages,
@@ -140,6 +201,74 @@ describe("Diccionarios auth (Etapa 4)", () => {
           `${namespace} ausente en ${locale}.json`,
         ).toContain(namespace)
       }
+    }
+  })
+
+  it("mantiene las keys del wizard de registro en los 5 idiomas", () => {
+    const expected = Object.keys(
+      (esMessages.Auth as { register: Record<string, unknown> }).register,
+    ).sort()
+    for (const locale of locales) {
+      const auth = allMessages[locale].Auth as { register: Record<string, unknown> }
+      expect(
+        Object.keys(auth.register).sort(),
+        `Auth.register distinto en ${locale}.json`,
+      ).toEqual(expected)
+    }
+  })
+
+  it("mantiene las keys del login en los 5 idiomas", () => {
+    const expected = Object.keys(
+      (esMessages.Auth as { login: Record<string, unknown> }).login,
+    ).sort()
+    for (const locale of locales) {
+      const auth = allMessages[locale].Auth as { login: Record<string, unknown> }
+      expect(
+        Object.keys(auth.login).sort(),
+        `Auth.login distinto en ${locale}.json`,
+      ).toEqual(expected)
+    }
+  })
+
+  it("define los mismos perfiles rotativos del panel de marca en los 5 idiomas", () => {
+    const expected = ["sofia", "tomas", "irene", "marco", "helena", "julian"]
+    for (const locale of locales) {
+      const login = allMessages[locale].Auth as {
+        login: { previewPersonas: Record<string, Record<string, string>> }
+      }
+      const personas = login.login.previewPersonas
+      expect(Object.keys(personas).sort(), locale).toEqual([...expected].sort())
+      for (const id of expected) {
+        expect(personas[id].name, `${locale}.${id}`).toBeTruthy()
+        expect(personas[id].role, `${locale}.${id}`).toBeTruthy()
+      }
+    }
+  })
+
+  it("no reutiliza el copy en inglés del panel de marca en los otros idiomas", () => {
+    const englishOnly = {
+      previewTopBadge: "Top Applicant",
+      previewRole: "Senior Tech Recruiter",
+      previewTagAnalytics: "HR Analytics",
+      previewTagSourcing: "Active Sourcing",
+      poweredByFooter: "Powered by Creativa Studios LLC",
+      themeBadge: "High-Impact Hiring",
+    }
+    for (const locale of locales) {
+      if (locale === "en") continue
+      const login = (
+        allMessages[locale].Auth as { login: Record<string, string> }
+      ).login
+      expect(login.previewTopBadge, locale).not.toBe(englishOnly.previewTopBadge)
+      expect(login.previewRole, locale).not.toBe(englishOnly.previewRole)
+      expect(login.previewTagAnalytics, locale).not.toBe(
+        englishOnly.previewTagAnalytics,
+      )
+      expect(login.previewTagSourcing, locale).not.toBe(
+        englishOnly.previewTagSourcing,
+      )
+      expect(login.poweredByFooter, locale).not.toBe(englishOnly.poweredByFooter)
+      expect(login.themeBadge, locale).not.toBe(englishOnly.themeBadge)
     }
   })
 })

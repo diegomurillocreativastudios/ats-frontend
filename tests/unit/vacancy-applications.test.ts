@@ -1,5 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
-import { overlayVacancyApplicants } from "@/lib/api/vacancy-applications"
+import {
+  findApplicationIdForCandidate,
+  overlayVacancyApplicants,
+} from "@/lib/api/vacancy-applications"
 import { apiClient } from "@/lib/api"
 
 vi.mock("@/lib/api", () => ({
@@ -46,5 +49,34 @@ describe("overlayVacancyApplicants", () => {
     const original = { id: "vac-1", applicants: [{ candidateProfileId: "nested" }] }
     const merged = await overlayVacancyApplicants("vac-1", original)
     expect(merged).toBe(original)
+  })
+})
+
+describe("findApplicationIdForCandidate", () => {
+  it("encuentra applicationId para el perfil", () => {
+    expect(
+      findApplicationIdForCandidate(
+        [
+          { candidateProfileId: "p1", applicationId: "app-1" },
+          { candidate_profile_id: "p2", application_id: "app-2" },
+        ],
+        "p2"
+      )
+    ).toBe("app-2")
+  })
+
+  it("ignora filas sin applicationId y perfiles distintos", () => {
+    expect(
+      findApplicationIdForCandidate(
+        [{ candidateProfileId: "p1", name: "Ana" }],
+        "p1"
+      )
+    ).toBeNull()
+    expect(
+      findApplicationIdForCandidate(
+        [{ candidateProfileId: "p1", applicationId: "app-1" }],
+        "p9"
+      )
+    ).toBeNull()
   })
 })

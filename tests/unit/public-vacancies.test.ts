@@ -11,6 +11,7 @@ describe("public vacancies API helpers", () => {
       departmentId: "dep-1",
       modalityId: "mod-1",
       page: 2,
+      pageSize: 10,
     })
     const params = new URLSearchParams(query.replace(/^\?/, ""))
 
@@ -19,6 +20,28 @@ describe("public vacancies API helpers", () => {
     expect(params.get("departmentId")).toBe("dep-1")
     expect(params.get("modalityId")).toBe("mod-1")
     expect(params.get("page")).toBe("2")
+    expect(params.get("pageSize")).toBe("10")
+    expect(params.has("filter")).toBe(false)
+  })
+
+  it("includes filter=openVacancies when requested", () => {
+    const query = buildPublicVacanciesQuery({
+      filter: "openVacancies",
+      page: 1,
+      pageSize: 10,
+    })
+    const params = new URLSearchParams(query.replace(/^\?/, ""))
+
+    expect(params.get("filter")).toBe("openVacancies")
+    expect(params.get("page")).toBe("1")
+    expect(params.get("pageSize")).toBe("10")
+  })
+
+  it("omits filter from the query when not set", () => {
+    const query = buildPublicVacanciesQuery({ page: 1 })
+    const params = new URLSearchParams(query.replace(/^\?/, ""))
+
+    expect(params.has("filter")).toBe(false)
   })
 
   it("normalizes paginated vacancies and availableFilters", () => {
@@ -82,6 +105,7 @@ describe("public vacancies API helpers", () => {
     const detail = normalizeOpportunityDetail({
       id: "vac-1",
       title: "UX Designer",
+      publicSlug: "aoj-9920",
       companyName: "Creativa Studios",
       department: {
         id: "dep-2",
@@ -100,6 +124,7 @@ describe("public vacancies API helpers", () => {
     })
 
     expect(detail?.company.name).toBe("Creativa Studios")
+    expect(detail?.publicSlug).toBe("aoj-9920")
     expect(detail?.department?.displayName).toBe("Design")
     expect(detail?.modality?.displayName).toBe("Híbrido")
     expect(detail?.responsibilities).toEqual([
@@ -108,6 +133,23 @@ describe("public vacancies API helpers", () => {
     ])
     expect(detail?.requirements).toEqual(["Figma", "Research"])
     expect(detail?.benefits).toEqual(["Horario flexible"])
+  })
+
+  it("keeps structured requirements from vacancy creation", () => {
+    const detail = normalizeOpportunityDetail({
+      id: "524c0d08-2ead-4721-9e04-e0d7da6f45df",
+      title: "Senior Software Engineer",
+      companyName: "Creativa Studios",
+      requirements: {
+        Seniority: "3 years",
+        TypeScript: "Advanced",
+      },
+    })
+
+    expect(detail?.requirements).toEqual([
+      "Seniority: 3 years",
+      "TypeScript: Advanced",
+    ])
   })
 
   it("does not expose salary in public opportunity detail", () => {

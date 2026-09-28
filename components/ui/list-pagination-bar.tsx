@@ -58,7 +58,7 @@ export function ListPaginationBar({
           <select
             value={pageSize}
             onChange={handlePageSizeChange}
-            className="h-9 rounded-md border border-border bg-card px-2 text-sm"
+            className="h-11 rounded-md border border-border bg-card px-2 text-sm"
             aria-label={labels.pageSizeAria}
             disabled={loading}
           >
@@ -79,7 +79,7 @@ export function ListPaginationBar({
           <Button
             type="button"
             variant="outline"
-            className="h-9 px-3"
+            className="h-11 px-3"
             disabled={page <= 1 || loading}
             onClick={handlePrev}
           >
@@ -88,7 +88,7 @@ export function ListPaginationBar({
           <Button
             type="button"
             variant="outline"
-            className="h-9 px-3"
+            className="h-11 px-3"
             disabled={page >= totalPages || loading}
             onClick={handleNext}
           >

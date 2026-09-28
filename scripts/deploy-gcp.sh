@@ -8,8 +8,6 @@
 # Optional env overrides:
 #   GCP_PROJECT_ID, GCP_REGION, AR_REPO, IMAGE_NAME
 #   NEXT_PUBLIC_API_URL, NEXT_PUBLIC_APP_URL
-#   API_URL, BACKEND_URL
-#   NEXT_PUBLIC_GOOGLE_CALENDAR_SUCCESS_URL, NEXT_PUBLIC_GOOGLE_CALENDAR_ERROR_URL
 
 set -euo pipefail
 
@@ -43,26 +41,25 @@ if [[ -z "${PROJECT_ID}" || "${PROJECT_ID}" == "(unset)" ]]; then
 fi
 
 if [[ -z "${NEXT_PUBLIC_API_URL:-}" ]]; then
-  echo "NEXT_PUBLIC_API_URL is required (backend URL, no trailing slash)." >&2
-  echo "Example: export NEXT_PUBLIC_API_URL=https://api.example.com" >&2
+  echo "NEXT_PUBLIC_API_URL is required (backend API URL, no trailing slash)." >&2
+  echo "Example: export NEXT_PUBLIC_API_URL=https://ats-backend-api-718325001678.us-west2.run.app" >&2
   exit 1
 fi
 
 if [[ -z "${NEXT_PUBLIC_APP_URL:-}" ]]; then
-  echo "Warning: NEXT_PUBLIC_APP_URL is empty. Set it to the Cloud Run public URL after first deploy, then redeploy." >&2
+  echo "Warning: NEXT_PUBLIC_APP_URL is empty (frontend public URL, not the backend)." >&2
+  echo "  First deploy can continue; OAuth/PDF absolute links may use localhost until you set it." >&2
+  echo "  After deploy: export NEXT_PUBLIC_APP_URL=\$(gcloud run services describe ${SERVICE} --region=${REGION} --project=${PROJECT_ID} --format='value(status.url)')" >&2
+  echo "  Then redeploy so the client bundle includes the correct frontend origin." >&2
 fi
 
-# Image tag: git short SHA, or timestamp fallback for dirty/local trees.
-IMAGE_TAG="$(git rev-parse --short HEAD 2>/dev/null || date +%Y%m%d%H%M%S)"
-
-# Server-side backend URL defaults to the public API URL when not set.
-API_URL_VALUE="${API_URL:-${NEXT_PUBLIC_API_URL}}"
-BACKEND_URL_VALUE="${BACKEND_URL:-}"
+# Cloud Build SHORT_SHA override for local submits (triggers set this automatically).
+SHORT_SHA="$(git rev-parse --short HEAD 2>/dev/null || date +%Y%m%d%H%M%S)"
 
 echo "==> Project:  ${PROJECT_ID}"
 echo "==> Region:   ${REGION}"
 echo "==> Service:  ${SERVICE}"
-echo "==> Tag:      ${IMAGE_TAG}"
+echo "==> Tag:      ${SHORT_SHA}"
 echo "==> Registry: ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${IMAGE_NAME}"
 echo "==> API URL:  ${NEXT_PUBLIC_API_URL}"
 echo "==> App URL:  ${NEXT_PUBLIC_APP_URL:-"(empty)"}"
@@ -82,16 +79,12 @@ if ! gcloud artifacts repositories describe "${REPO}" \
 fi
 
 SUBSTITUTIONS="_REGION=${REGION}"
-SUBSTITUTIONS+=",_REPO=${REPO}"
-SUBSTITUTIONS+=",_SERVICE=${SERVICE}"
-SUBSTITUTIONS+=",_IMAGE=${IMAGE_NAME}"
-SUBSTITUTIONS+=",_TAG=${IMAGE_TAG}"
+SUBSTITUTIONS+=",_SERVICE_NAME=${SERVICE}"
+SUBSTITUTIONS+=",_AR_REPOSITORY=${REPO}"
+SUBSTITUTIONS+=",_IMAGE_NAME=${IMAGE_NAME}"
+SUBSTITUTIONS+=",SHORT_SHA=${SHORT_SHA}"
 SUBSTITUTIONS+=",_NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}"
 SUBSTITUTIONS+=",_NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-}"
-SUBSTITUTIONS+=",_NEXT_PUBLIC_GOOGLE_CALENDAR_SUCCESS_URL=${NEXT_PUBLIC_GOOGLE_CALENDAR_SUCCESS_URL:-}"
-SUBSTITUTIONS+=",_NEXT_PUBLIC_GOOGLE_CALENDAR_ERROR_URL=${NEXT_PUBLIC_GOOGLE_CALENDAR_ERROR_URL:-}"
-SUBSTITUTIONS+=",_API_URL=${API_URL_VALUE}"
-SUBSTITUTIONS+=",_BACKEND_URL=${BACKEND_URL_VALUE}"
 
 echo "==> Submitting Cloud Build..."
 gcloud builds submit \

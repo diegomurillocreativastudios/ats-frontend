@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 
 /**
  * Admin companies API (`AdminCompaniesController`).
@@ -94,9 +95,7 @@ export function mapAdminCompany(raw: unknown): AdminCompany {
 
 /** Builds a data URI usable directly in `<img src>` from the inline logo payload. */
 export function buildLogoDataUri(logo: AdminCompanyLogo | null): string | null {
-  if (!logo || !logo.base64) return null
-  const ct = logo.contentType || "image/png"
-  return `data:${ct};base64,${logo.base64}`
+  return buildSafeLogoDataUri(logo)
 }
 
 export async function fetchAdminCompaniesList(

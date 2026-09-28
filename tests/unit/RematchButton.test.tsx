@@ -1,13 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { NextIntlClientProvider } from 'next-intl'
 import RematchButton from '@/components/rrhh/RematchButton'
 import { apiClient } from '@/lib/api'
+import esMessages from '@/messages/es.json'
 
 vi.mock('@/lib/api', () => ({
     apiClient: {
         request: vi.fn(),
     },
 }))
+
+function renderRematch(ui: React.ReactNode) {
+    return render(
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+            {ui}
+        </NextIntlClientProvider>
+    )
+}
 
 describe('RematchButton', () => {
     beforeEach(() => {
@@ -18,7 +28,7 @@ describe('RematchButton', () => {
         vi.mocked(apiClient.request).mockResolvedValueOnce({})
         const onSnackbar = vi.fn()
 
-        render(
+        renderRematch(
             <RematchButton
                 vacancyId="vacancy-1"
                 needsRematch={true}
@@ -45,7 +55,7 @@ describe('RematchButton', () => {
         vi.mocked(apiClient.request).mockRejectedValueOnce(new Error('Network error'))
         const onSnackbar = vi.fn()
 
-        render(
+        renderRematch(
             <RematchButton
                 vacancyId="vacancy-2"
                 needsRematch={true}

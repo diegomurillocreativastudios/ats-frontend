@@ -76,8 +76,8 @@ export function AtsCriteriaComparison({ criteria }: AtsCriteriaComparisonProps) 
         <p className="mt-1 font-sans text-xs text-muted-foreground">{t("criteriaComparisonSubtitle")}</p>
       </div>
 
-      <div className="hidden md:block">
-        <table className="w-full border-collapse">
+      <div className="hidden overflow-x-auto lg:block">
+        <table className="w-full min-w-[640px] border-collapse">
           <thead>
             <tr className="border-b border-border/60 bg-muted/20">
               <th className="px-4 py-3 text-left font-sans text-[11px] font-semibold uppercase tracking-wide text-muted-foreground md:px-5">
@@ -133,7 +133,7 @@ export function AtsCriteriaComparison({ criteria }: AtsCriteriaComparisonProps) 
         </table>
       </div>
 
-      <ul className="flex flex-col gap-4 p-4 md:hidden" role="list">
+      <ul className="flex flex-col gap-4 p-4 lg:hidden" role="list">
         {criteria.map((row) => {
           const Icon = CRITERION_ICONS[row.id] ?? Search
           return (

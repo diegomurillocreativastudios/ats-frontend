@@ -135,14 +135,17 @@ describe("AdminVacancyCatalogContent", () => {
     const deleteDialog = await screen.findByRole("dialog")
     fireEvent.click(within(deleteDialog).getByRole("button", { name: "Eliminar" }))
 
+    const conflictDialog = await screen.findByRole("dialog", {
+      name: /No se puede eliminar modalidad/i,
+    })
     expect(
-      await screen.findByText(
+      within(conflictDialog).getByText(
         "No se puede eliminar porque está asociado a vacantes existentes."
       )
     ).toBeInTheDocument()
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Desactivar en su lugar" })
+      within(conflictDialog).getByRole("button", { name: "Desactivar en su lugar" })
     )
 
     await waitFor(() => {

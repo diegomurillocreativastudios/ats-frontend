@@ -36,6 +36,7 @@ export function VacancySystemPicker({
       const response = await listPublicVacancies({
         search: search.trim() || undefined,
         page: 1,
+        filter: "openVacancies",
       })
       setResults(response.items ?? [])
     } catch (err: unknown) {

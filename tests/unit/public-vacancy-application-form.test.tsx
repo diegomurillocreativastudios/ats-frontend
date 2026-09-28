@@ -1,10 +1,19 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 
 import { PublicVacancyApplicationForm } from "@/components/public/PublicVacancyApplicationForm"
 import { resetPhoneCountriesCache } from "@/lib/phone-countries"
+import enMessages from "@/messages/en.json"
 import esMessages from "@/messages/es.json"
+
+const postFormData = vi.fn()
+
+vi.mock("@/lib/api", () => ({
+  apiClient: {
+    postFormData: (...args: unknown[]) => postFormData(...args),
+  },
+}))
 
 vi.mock("@/lib/api/identity-document-types", () => ({
   listIdentityDocumentTypes: vi.fn(async () => [
@@ -13,32 +22,171 @@ vi.mock("@/lib/api/identity-document-types", () => ({
 }))
 
 vi.mock("@/components/candidato/consent-authorization-modal", () => ({
-  ConsentAuthorizationModal: () => null,
+  ConsentAuthorizationModal: ({
+    isOpen,
+    onAccept,
+  }: {
+    isOpen: boolean
+    onAccept: (payload: Record<string, unknown>) => void
+  }) =>
+    isOpen ? (
+      <button
+        type="button"
+        onClick={() =>
+          onAccept({
+            documentVersion: "v1",
+            documentLocale: "es",
+            firstNames: "Ana",
+            lastNames: "López",
+            signature: "Ana López",
+            identityDocument: "01234567-8",
+            phoneCountryIso2: "SV",
+            phoneNationalNumber: "77778888",
+            clientDeclaredDate: "2026-09-27",
+          })
+        }
+      >
+        mock-accept-consent
+      </button>
+    ) : null,
 }))
 
 vi.mock("@/components/public/ApplyEmailConfirmationModal", () => ({
-  ApplyEmailConfirmationModal: () => null,
+  ApplyEmailConfirmationModal: ({
+    isOpen,
+    onConfirm,
+  }: {
+    isOpen: boolean
+    onConfirm: () => void
+  }) =>
+    isOpen ? (
+      <button type="button" onClick={onConfirm}>
+        mock-confirm-email
+      </button>
+    ) : null,
 }))
 
-vi.mock("@countrystatecity/countries-browser", () => ({
-  getCountries: vi.fn(async () => [
+vi.mock("@/lib/phone-countries-data", () => ({
+  getBundledPhoneCountryRows: () => [
     { iso2: "SV", name: "El Salvador", phonecode: "503" },
     { iso2: "US", name: "United States", phonecode: "1" },
-  ]),
+  ],
 }))
 
-function renderForm() {
+function renderForm(locale: "es" | "en" = "es") {
   return render(
-    <NextIntlClientProvider locale="es" messages={esMessages}>
+    <NextIntlClientProvider
+      locale={locale}
+      messages={locale === "en" ? enMessages : esMessages}
+    >
       <PublicVacancyApplicationForm vacancyId="vac-1" />
     </NextIntlClientProvider>
   )
+}
+
+async function fillAndSubmit(locale: "es" | "en" = "es") {
+  const formCopy = (locale === "en" ? enMessages : esMessages)
+    .PublicOpportunities.applicationForm
+  const labels = formCopy.fields
+  const submitLabel = formCopy.actions.submit
+
+  fireEvent.change(await screen.findByLabelText(labels.firstName), {
+    target: { value: "Ana" },
+  })
+  fireEvent.change(screen.getByLabelText(labels.lastName), {
+    target: { value: "López" },
+  })
+  fireEvent.change(screen.getByLabelText(labels.email), {
+    target: { value: "ana@example.com" },
+  })
+  fireEvent.change(screen.getByLabelText(labels.phone), {
+    target: { value: "77778888" },
+  })
+  const documentType = screen.getByLabelText(labels.documentType)
+  await screen.findByRole("option", { name: "DUI" })
+  fireEvent.change(documentType, { target: { value: "doc-dui" } })
+  fireEvent.change(screen.getByLabelText(labels.documentNumber), {
+    target: { value: "01234567-8" },
+  })
+  const cvInput = document.getElementById("apply-cv") as HTMLInputElement
+  fireEvent.change(cvInput, {
+    target: {
+      files: [new File(["%PDF"], "mi-cv.pdf", { type: "application/pdf" })],
+    },
+  })
+
+  fireEvent.click(screen.getByRole("button", { name: submitLabel }))
+  fireEvent.click(await screen.findByRole("button", { name: "mock-accept-consent" }))
+  fireEvent.click(await screen.findByRole("button", { name: "mock-confirm-email" }))
+}
+
+function getLastFormData(): FormData {
+  return postFormData.mock.calls.at(-1)?.[1] as FormData
 }
 
 describe("PublicVacancyApplicationForm", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     resetPhoneCountriesCache()
+  })
+
+  it("envía outputLanguage según el idioma activo fuera del JSON candidate", async () => {
+    postFormData.mockResolvedValue("ok")
+    renderForm("en")
+
+    await fillAndSubmit("en")
+
+    await waitFor(() =>
+      expect(postFormData).toHaveBeenCalledWith(
+        "/api/candidate/personal-appliance",
+        expect.any(FormData)
+      )
+    )
+    const formData = getLastFormData()
+    expect(formData.get("outputLanguage")).toBe("EN")
+    expect(JSON.parse(String(formData.get("candidate")))).not.toHaveProperty(
+      "outputLanguage"
+    )
+  })
+
+  it("muestra copy localizado en vez de 'revisa los datos' ante 400 errors.outputLanguage", async () => {
+    postFormData.mockRejectedValue(
+      Object.assign(new Error("Solicitud fallida (400)"), {
+        status: 400,
+        body: {
+          message: "The submitted payload is invalid.",
+          errors: { outputLanguage: ["outputLanguage is required."] },
+        },
+      })
+    )
+    renderForm()
+
+    await fillAndSubmit()
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("El idioma de la aplicación no es compatible")
+    expect(screen.queryByText("Revisa los datos indicados.")).not.toBeInTheDocument()
+    expect(screen.queryByText("outputLanguage is required.")).not.toBeInTheDocument()
+  })
+
+  it("muestra copy localizado ante 422 CV_OUTPUT_LANGUAGE_MISMATCH", async () => {
+    postFormData.mockRejectedValue(
+      Object.assign(new Error("x"), {
+        status: 422,
+        body: {
+          message: "CV output could not be produced in the requested language.",
+          code: "CV_OUTPUT_LANGUAGE_MISMATCH",
+          outputLanguage: "ES",
+        },
+      })
+    )
+    renderForm()
+
+    await fillAndSubmit()
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No pudimos procesar tu CV en el idioma seleccionado. Intenta de nuevo."
+    )
   })
 
   it("muestra nombres y apellidos en plural y marca teléfono y documento como requeridos", async () => {

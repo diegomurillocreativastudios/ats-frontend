@@ -1,4 +1,4 @@
-import { getCountries } from "@countrystatecity/countries-browser"
+import { getBundledPhoneCountryRows } from "@/lib/phone-countries-data"
 
 export interface PhoneCountryOption {
   iso2: string
@@ -35,20 +35,17 @@ export function getCachedPhoneCountries(): PhoneCountryOption[] | null {
 }
 
 /**
- * Carga países con prefijo telefónico y los reutiliza (una sola petición CDN por sesión).
+ * Carga países con prefijo telefónico desde el JSON empaquetado (sin CDN).
  */
 export function loadPhoneCountries(): Promise<PhoneCountryOption[]> {
   if (cachedCountries) return Promise.resolve(cachedCountries)
   if (!phoneCountriesPromise) {
-    phoneCountriesPromise = getCountries()
-      .then((rows) => {
-        cachedCountries = mapPhoneCountries(rows)
-        return cachedCountries
-      })
-      .catch((error: unknown) => {
-        phoneCountriesPromise = null
-        throw error
-      })
+    phoneCountriesPromise = Promise.resolve(
+      mapPhoneCountries(getBundledPhoneCountryRows())
+    ).then((rows) => {
+      cachedCountries = rows
+      return cachedCountries
+    })
   }
   return phoneCountriesPromise
 }

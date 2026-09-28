@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import CandidateSidebar from "@/components/candidato/CandidateSidebar";
-import CandidateTopbar from "@/components/candidato/CandidateTopbar";
+import { CandidatePortalShell } from "@/components/candidato/candidate-portal-shell";
 import StatCard from "@/components/candidato/StatCard";
 import NextActivitiesCard from "@/components/candidato/NextActivitiesCard";
 import MyPostulationsCard from "@/components/candidato/MyPostulationsCard";
@@ -28,7 +27,7 @@ export default function CandidatePortalHome() {
   const stats = data?.stats ?? null;
   const activities = data?.activities ?? [];
   const applications = data?.applications ?? [];
-  
+
   const [selectedApplication, setSelectedApplication] = useState<
     CandidatePortalApplicationRow | null
   >(null);
@@ -44,104 +43,49 @@ export default function CandidatePortalHome() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <div className="hidden h-full lg:flex">
-        <CandidateSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <CandidateTopbar variant="desktop" />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 flex flex-col gap-8 p-8">
-              {error ? (
-                <div
-                  role="alert"
-                  className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
-                >
-                  {error}
-                </div>
-              ) : null}
-              <PortalPageHeader
-                title={
-                  userLoading && !data && !error
-                    ? t("loading")
-                    : t("greeting", { name: greetingName })
-                }
-                description={t("description")}
-                className="pb-0"
-              />
-              <section aria-label={t("statsAria")}>
-                <StatCard stats={stats} loading={loading && !data} />
-              </section>
-              
-              <section aria-label={t("processAria")}>
-                <ProcessTrackingCard application={selectedApplication} />
-              </section>
-              
-              <section
-                className="grid gap-6 lg:grid-cols-2"
-                aria-label={t("activitiesApplicationsAria")}
-              >
-                <NextActivitiesCard
-                  activities={activities}
-                  loading={loading && !data}
-                />
-                <MyPostulationsCard
-                  applications={applications}
-                  loading={loading && !data}
-                  onSelectApplication={handleSelectApplication}
-                />
-              </section>
-            </div>
-          </main>
-        </div>
-      </div>
-
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <CandidateTopbar variant="tablet" />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6">
-            {error ? (
-              <div
-                role="alert"
-                className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 font-sans text-sm text-destructive"
-              >
-                {error}
-              </div>
-            ) : null}
-            <PortalPageHeader
-              title={
-                userLoading && !data && !error
-                  ? t("loading")
-                  : t("greeting", { name: greetingName })
-              }
-              description={t("description")}
-              className="pb-0"
-              descriptionClassName="text-sm leading-6 md:text-base"
-            />
-            <section aria-label={t("statsAria")}>
-              <StatCard stats={stats} loading={loading && !data} />
-            </section>
-            
-            <section aria-label={t("processAria")}>
-              <ProcessTrackingCard application={selectedApplication} />
-            </section>
-            
-            <section aria-label={t("upcomingActivitiesAria")}>
-              <NextActivitiesCard
-                activities={activities}
-                loading={loading && !data}
-              />
-            </section>
-            
-            <section aria-label={t("myApplicationsAria")}>
-              <MyPostulationsCard
-                applications={applications}
-                loading={loading && !data}
-                onSelectApplication={handleSelectApplication}
-              />
-            </section>
+    <CandidatePortalShell>
+      <div className="min-w-0 flex flex-col gap-5 p-4 md:gap-6 md:p-6 lg:gap-8 lg:p-8">
+        {error ? (
+          <div
+            role="alert"
+            className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 font-sans text-sm text-destructive md:px-4 md:py-3"
+          >
+            {error}
           </div>
-        </main>
+        ) : null}
+        <PortalPageHeader
+          title={
+            userLoading && !data && !error
+              ? t("loading")
+              : t("greeting", { name: greetingName })
+          }
+          description={t("description")}
+          className="pb-0"
+          descriptionClassName="text-sm leading-6 md:text-base"
+        />
+        <section aria-label={t("statsAria")}>
+          <StatCard stats={stats} loading={loading && !data} />
+        </section>
+
+        <section aria-label={t("processAria")}>
+          <ProcessTrackingCard application={selectedApplication} />
+        </section>
+
+        <section
+          className="grid gap-6 lg:grid-cols-2"
+          aria-label={t("activitiesApplicationsAria")}
+        >
+          <NextActivitiesCard
+            activities={activities}
+            loading={loading && !data}
+          />
+          <MyPostulationsCard
+            applications={applications}
+            loading={loading && !data}
+            onSelectApplication={handleSelectApplication}
+          />
+        </section>
       </div>
-    </div>
+    </CandidatePortalShell>
   );
 }

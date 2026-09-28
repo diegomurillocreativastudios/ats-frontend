@@ -61,4 +61,35 @@ describe("useGoogleCalendar", () => {
       "https://accounts.google.com/o/oauth2/v2/auth?client=test"
     )
   })
+
+  it("connect no navega cuando getGoogleAuthUrl falla", async () => {
+    vi.mocked(calendarLib.checkCalendarStatus).mockResolvedValue({
+      isConnected: false,
+      email: "",
+      connectedAt: null,
+    })
+    vi.mocked(calendarLib.getGoogleAuthUrl).mockRejectedValue(
+      new Error("La URL de autorización de Google no es válida")
+    )
+
+    const { result } = renderHook(() => useGoogleCalendar())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { href: "https://app.example/portal-rrhh/configuracion/calendario" },
+    })
+
+    await result.current.connect()
+
+    expect(window.location.href).toBe(
+      "https://app.example/portal-rrhh/configuracion/calendario"
+    )
+    await waitFor(() => {
+      expect(result.current.error).toContain("no es válida")
+    })
+  })
 })

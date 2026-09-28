@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { getTranslations } from "next-intl/server"
+import { AuthSplitShell } from "@/components/auth/AuthSplitShell"
 import SsoSuccessContent from "./SsoSuccessContent"
 
 export async function generateMetadata() {
@@ -11,18 +12,12 @@ export async function generateMetadata() {
   }
 }
 
-function SsoSuccessFallback() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6">
-      <p className="text-sm text-muted-foreground">…</p>
-    </div>
-  )
-}
-
 export default function SsoSuccessPage() {
   return (
-    <Suspense fallback={<SsoSuccessFallback />}>
-      <SsoSuccessContent />
-    </Suspense>
+    <AuthSplitShell>
+      <Suspense fallback={<p className="text-sm text-slate-500">…</p>}>
+        <SsoSuccessContent />
+      </Suspense>
+    </AuthSplitShell>
   )
 }

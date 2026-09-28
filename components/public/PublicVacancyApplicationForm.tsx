@@ -11,7 +11,7 @@ import {
   type DragEvent,
   type FormEvent,
 } from "react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { CheckCircle2, FileText, LoaderCircle, Mail, X } from "lucide-react"
 import {
   getPublicApplyErrorMessage,
@@ -36,6 +36,11 @@ import {
   type ConsentAuthorizationSubmitPayload,
 } from "@/components/candidato/consent-authorization-modal"
 import { getApiErrorCode } from "@/lib/candidate-auth-consent"
+import {
+  getCvOutputLanguageErrorKind,
+  omitCvOutputLanguageFieldError,
+  toCvOutputLanguage,
+} from "@/lib/cv-output-language"
 import {
   listIdentityDocumentTypes,
   type IdentityDocumentTypeOptionDto,
@@ -306,7 +311,7 @@ function PublicApplicationSubmitProgress({
         percent={isSuccess ? 100 : loadingBarPercent}
       />
 
-      <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-5 sm:gap-2" aria-label={t("aria.submitStatus")}>
+      <ol className="grid grid-cols-1 gap-2 sm:grid-cols-5 sm:gap-2" aria-label={t("aria.submitStatus")}>
         {[1, 2, 3, 4, 5].map((step) => {
           const isComplete = currentStep > step
           const isCurrent = currentStep === step
@@ -357,6 +362,8 @@ export function PublicVacancyApplicationForm({
   onRequestClose?: () => void
 }) {
   const t = useTranslations("PublicOpportunities.applicationForm")
+  const tCvLanguage = useTranslations("CvOutputLanguage")
+  const outputLanguage = toCvOutputLanguage(useLocale())
   const [values, setValues] = useState<PublicVacancyApplicationFormState>(initialState)
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
@@ -583,7 +590,7 @@ export function PublicVacancyApplicationForm({
     }
 
     try {
-      await submitPublicVacancyApplication(vacancyId, payload)
+      await submitPublicVacancyApplication(vacancyId, payload, outputLanguage)
       setValues(initialState)
       setCvFile(null)
       setAcceptedConsent(null)
@@ -602,6 +609,12 @@ export function PublicVacancyApplicationForm({
         typeof err === "object" && err !== null && "retryAfter" in err
           ? Number((err as { retryAfter?: number }).retryAfter)
           : undefined
+
+      const cvLanguageError = getCvOutputLanguageErrorKind(err)
+      if (cvLanguageError) {
+        setServerError(tCvLanguage(cvLanguageError))
+        return
+      }
 
       const consentCode = getApiErrorCode(err)
       if (consentCode === "AUTH_CONSENT_VERSION_MISMATCH") {
@@ -651,7 +664,9 @@ export function PublicVacancyApplicationForm({
       }
 
       if (status === 400) {
-        const fieldMap = parsePublicApplyFieldErrors(body)
+        const fieldMap = omitCvOutputLanguageFieldError(
+          parsePublicApplyFieldErrors(body)
+        )
         if (Object.keys(fieldMap).length > 0) {
           setErrors(fieldMap as Partial<Record<FieldKey, string>>)
           setServerError(t("validation.reviewFields"))
@@ -663,7 +678,7 @@ export function PublicVacancyApplicationForm({
 
       setServerError(getPublicApplyErrorMessage(status, body))
     }
-  }, [cvFile, values, vacancyId, t, acceptedConsent])
+  }, [cvFile, values, vacancyId, t, tCvLanguage, outputLanguage, acceptedConsent])
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -797,10 +812,10 @@ export function PublicVacancyApplicationForm({
       <form
         onSubmit={handleSubmit}
         aria-busy={showProgressOverlay}
-        className={`grid grid-cols-2 gap-x-4 gap-y-5 transition-opacity duration-200 ${showProgressOverlay ? "pointer-events-none select-none opacity-[0.38] blur-[0.5px]" : ""}`}
+        className={`grid grid-cols-1 gap-x-4 gap-y-5 transition-opacity duration-200 sm:grid-cols-2 ${showProgressOverlay ? "pointer-events-none select-none opacity-[0.38] blur-[0.5px]" : ""}`}
       >
       {serverError ? (
-        <p className={`col-span-2 ${errClass}`} role="alert">
+        <p className={`sm:col-span-2 ${errClass}`} role="alert">
           {serverError}
         </p>
       ) : null}
@@ -1028,7 +1043,7 @@ export function PublicVacancyApplicationForm({
         ) : null}
       </div>
 
-      <div className="col-span-2 space-y-2">
+      <div className="space-y-2 sm:col-span-2">
         <label htmlFor="apply-cv" className={labelClass}>
           {t("fields.resume")}
         </label>
@@ -1124,7 +1139,7 @@ export function PublicVacancyApplicationForm({
       </div>
 
       <div
-        className={`col-span-2 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center ${
+        className={`flex flex-col gap-3 border-t pt-4 sm:col-span-2 sm:flex-row sm:items-center ${
           theme === "dark" ? "border-border" : "border-border"
         }`}
       >

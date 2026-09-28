@@ -145,15 +145,15 @@ describe("CandidatosPage (home RRHH) i18n (Etapa 6)", () => {
   it("renderiza la UI estática del listado en inglés", async () => {
     renderWithIntl(<CandidatosPage />, "en")
 
-    expect((await screen.findAllByText("Candidates")).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText("Applicants")).length).toBeGreaterThan(0)
     expect(
-      screen.getAllByText("Review and manage all candidates").length,
+      screen.getAllByText("Review and manage all applicants").length,
     ).toBeGreaterThan(0)
     expect(
-      screen.getAllByPlaceholderText("Search candidates...").length,
+      screen.getAllByPlaceholderText("Search applicants...").length,
     ).toBeGreaterThan(0)
-    expect(screen.getAllByText("Add candidate").length).toBeGreaterThan(0)
-    expect((await screen.findAllByText("No candidates")).length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Add applicant").length).toBeGreaterThan(0)
+    expect((await screen.findAllByText("No applicants")).length).toBeGreaterThan(0)
   })
 })
 
@@ -164,12 +164,17 @@ describe("RRHHConfiguracionPage i18n (Etapa 6)", () => {
     render(ui)
 
     expect(screen.getAllByText("Configuración").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Mi perfil").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Calendario Google").length).toBeGreaterThan(0)
     expect(
-      screen.getByText(
+      screen.getAllByText("Edita el nombre y la foto que se muestran en el portal.")
+        .length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText(
         "Conecta y administra la sincronización de entrevistas.",
-      ),
-    ).toBeInTheDocument()
+      ).length,
+    ).toBeGreaterThan(0)
   })
 
   it("renderiza textos estáticos de configuración en inglés", async () => {
@@ -178,10 +183,12 @@ describe("RRHHConfiguracionPage i18n (Etapa 6)", () => {
     render(ui)
 
     expect(screen.getAllByText("Settings").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("My profile").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Google Calendar").length).toBeGreaterThan(0)
     expect(
-      screen.getByText("Connect and manage interview synchronization."),
-    ).toBeInTheDocument()
+      screen.getAllByText("Connect and manage interview synchronization.")
+        .length,
+    ).toBeGreaterThan(0)
   })
 })
 

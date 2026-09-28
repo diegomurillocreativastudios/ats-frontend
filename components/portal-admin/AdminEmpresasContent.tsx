@@ -41,6 +41,10 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { getApiErrorMessage } from "@/lib/api-error"
 import {
+  QUERY_PAGE_SIZE_DEFAULT,
+  QUERY_PAGE_SIZE_OPTIONS,
+} from "@/lib/api/query-paging"
+import {
   LOGO_ACCEPT,
   LOGO_EXTENSIONS,
   LOGO_TYPES,
@@ -134,7 +138,7 @@ export default function AdminEmpresasContent() {
   const [items, setItems] = useState<AdminCompany[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(QUERY_PAGE_SIZE_DEFAULT)
 
   const [loading, setLoading] = useState(true)
   const [listError, setListError] = useState<string | null>(null)
@@ -434,7 +438,7 @@ export default function AdminEmpresasContent() {
             className="h-9 rounded-md border border-border bg-card px-2 text-sm"
             aria-label={t("pagination.pageSizeAria")}
           >
-            {[20, 50, 100].map((n) => (
+            {QUERY_PAGE_SIZE_OPTIONS.map((n) => (
               <option key={n} value={n}>
                 {n}
               </option>

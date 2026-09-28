@@ -2,8 +2,13 @@
 
 import {
   addMinutesToClockTime,
+  clampDurationMinutesToSameDay,
   combineDatetimeLocal,
+  getMinEndClockAfterStart,
+  getMinStartClockForDate,
   getTodayDateInputValue,
+  isClockTimeBefore,
+  maxSameDayDurationMinutes,
   sameDayMinutesFromStartToEnd,
   splitDatetimeLocal,
 } from "@/lib/interview-datetime"
@@ -20,6 +25,39 @@ export interface InterviewScheduleRowProps {
   disabled?: boolean
   ariaLabelledBy?: string
   errorMessage?: string | null
+  dateAriaLabel?: string
+  startAriaLabel?: string
+  endAriaLabel?: string
+  durationLabel?: string | null
+  /** Fecha mínima `YYYY-MM-DD` (p. ej. hoy al crear). */
+  minDate?: string
+}
+
+function resolveStartTimeForDate(nextDate: string, preferredTime: string): string {
+  const minStart = getMinStartClockForDate(nextDate)
+  const candidate = preferredTime || "09:00"
+  if (minStart === undefined) return candidate
+  if (minStart === null) return candidate
+  if (isClockTimeBefore(candidate, minStart)) return minStart
+  return candidate
+}
+
+function syncDurationForStart(
+  start: string,
+  durationMinutes: string,
+  onDurationMinutesChange: (value: string) => void
+): number {
+  const durationParsed = parseInt(durationMinutes, 10)
+  const hasExplicitDuration =
+    durationMinutes.trim() !== "" &&
+    Number.isFinite(durationParsed) &&
+    durationParsed > 0
+  const preferred = hasExplicitDuration ? durationParsed : 60
+  const clamped = clampDurationMinutesToSameDay(start, preferred)
+  if (String(clamped) !== durationMinutes.trim()) {
+    onDurationMinutesChange(clamped > 0 ? String(clamped) : "")
+  }
+  return clamped
 }
 
 /**
@@ -33,6 +71,11 @@ export function InterviewScheduleRow({
   disabled = false,
   ariaLabelledBy,
   errorMessage,
+  dateAriaLabel = "Fecha de la entrevista",
+  startAriaLabel = "Hora de inicio",
+  endAriaLabel = "Hora de fin",
+  durationLabel = null,
+  minDate,
 }: InterviewScheduleRowProps) {
   const { date, time: startTime } = splitDatetimeLocal(scheduledLocal)
   const durationParsed = parseInt(durationMinutes, 10)
@@ -40,18 +83,25 @@ export function InterviewScheduleRow({
     durationMinutes.trim() !== "" &&
     Number.isFinite(durationParsed) &&
     durationParsed > 0
-  const effectiveDurationMinutes = hasExplicitDuration ? durationParsed : 60
-  const endTime = startTime
-    ? addMinutesToClockTime(startTime, effectiveDurationMinutes)
-    : ""
+  const preferredDuration = hasExplicitDuration ? durationParsed : 60
+  const effectiveDurationMinutes = startTime
+    ? clampDurationMinutesToSameDay(startTime, preferredDuration)
+    : preferredDuration
+  const endTime =
+    startTime && effectiveDurationMinutes > 0
+      ? addMinutesToClockTime(startTime, effectiveDurationMinutes)
+      : ""
+  const minStartTime = date ? getMinStartClockForDate(date) : undefined
+  const minEndTime = startTime ? getMinEndClockAfterStart(startTime) : undefined
 
   const handleDateChange = (nextDate: string) => {
     if (!nextDate) {
       onScheduledLocalChange("")
       return
     }
-    const t = startTime || "09:00"
+    const t = resolveStartTimeForDate(nextDate, startTime || "09:00")
     onScheduledLocalChange(combineDatetimeLocal(nextDate, t))
+    syncDurationForStart(t, durationMinutes, onDurationMinutesChange)
   }
 
   const handleStartChange = (nextStart: string) => {
@@ -60,7 +110,12 @@ export function InterviewScheduleRow({
       return
     }
     const d = date || getTodayDateInputValue()
+    const minStart = getMinStartClockForDate(d)
+    if (minStart === null || (typeof minStart === "string" && isClockTimeBefore(nextStart, minStart))) {
+      return
+    }
     onScheduledLocalChange(combineDatetimeLocal(d, nextStart))
+    syncDurationForStart(nextStart, durationMinutes, onDurationMinutesChange)
   }
 
   const handleEndChange = (nextEnd: string) => {
@@ -68,18 +123,21 @@ export function InterviewScheduleRow({
     let st = startTime
     let d = date
     if (!st) {
-      st = "09:00"
       d = d || getTodayDateInputValue()
+      st = resolveStartTimeForDate(d, "09:00")
       onScheduledLocalChange(combineDatetimeLocal(d, st))
+      syncDurationForStart(st, durationMinutes, onDurationMinutesChange)
     }
+    if (!isClockTimeBefore(st, nextEnd)) return
+    const maxDur = maxSameDayDurationMinutes(st)
     const diff = sameDayMinutesFromStartToEnd(st, nextEnd)
-    if (diff > 0) onDurationMinutesChange(String(diff))
+    if (diff > 0 && diff <= maxDur) onDurationMinutesChange(String(diff))
   }
 
   return (
     <div
       role="group"
-      className="flex flex-wrap items-center gap-2"
+      className="flex flex-col gap-2"
       aria-labelledby={ariaLabelledBy}
       aria-describedby={errorMessage ? "err-when" : undefined}
     >
@@ -87,29 +145,48 @@ export function InterviewScheduleRow({
         value={date}
         onChange={handleDateChange}
         disabled={disabled}
-        ariaLabel="Fecha de la entrevista"
+        ariaLabel={dateAriaLabel}
         errorMessage={errorMessage}
+        minDate={minDate}
+        wrapperClassName="relative w-full"
+        buttonClassName="inline-flex min-h-10 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-left font-sans text-sm text-foreground transition-colors hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-vo-purple disabled:cursor-not-allowed disabled:opacity-60"
       />
-      <QuarterHourTimeSelect
-        value={startTime}
-        onChange={handleStartChange}
-        disabled={disabled}
-        ariaLabel="Hora de inicio"
-        allowEmpty
-        emptyLabel="Inicio"
-      />
-      <span
-        className="select-none font-sans text-sm text-muted-foreground"
-        aria-hidden
-      >
-        —
-      </span>
-      <QuarterHourTimeSelect
-        value={endTime}
-        onChange={handleEndChange}
-        disabled={disabled || !startTime}
-        ariaLabel="Hora de fin"
-      />
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-2">
+        <QuarterHourTimeSelect
+          value={startTime}
+          onChange={handleStartChange}
+          disabled={disabled}
+          ariaLabel={startAriaLabel}
+          allowEmpty
+          emptyLabel="Inicio"
+          className="min-w-0 w-full"
+          inputClassName="w-full min-w-0 max-w-none"
+          minTime={minStartTime}
+        />
+        <span
+          className="select-none font-sans text-sm text-muted-foreground"
+          aria-hidden
+        >
+          —
+        </span>
+        <QuarterHourTimeSelect
+          value={endTime}
+          onChange={handleEndChange}
+          disabled={disabled || !startTime || minEndTime === null}
+          ariaLabel={endAriaLabel}
+          className="min-w-0 w-full"
+          inputClassName="w-full min-w-0 max-w-none"
+          minTime={minEndTime === undefined ? undefined : minEndTime}
+        />
+        {durationLabel ? (
+          <span
+            className="w-14 shrink-0 text-right font-sans text-xs tabular-nums text-muted-foreground"
+            data-testid="interview-schedule-duration"
+          >
+            {durationLabel}
+          </span>
+        ) : null}
+      </div>
     </div>
   )
 }

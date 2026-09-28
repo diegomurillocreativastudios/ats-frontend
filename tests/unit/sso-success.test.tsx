@@ -10,7 +10,16 @@ const replaceStateMock = vi.fn()
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock, push: vi.fn() }),
+  usePathname: () => "/auth/sso/success",
   useSearchParams: () => searchParamsValue,
+}))
+
+vi.mock("@/lib/auth/csrf-client", () => ({
+  csrfHeaders: vi.fn(async (extra?: Record<string, string>) => ({
+    ...(extra ?? {}),
+    "x-csrf-token": "test-csrf",
+  })),
+  ensureCsrfToken: vi.fn(async () => "test-csrf"),
 }))
 
 describe("SsoSuccessContent", () => {

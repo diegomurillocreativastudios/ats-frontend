@@ -1,7 +1,13 @@
-import { getAccessToken } from "@/lib/auth"
+import { extractStructuredApiErrorMessage } from "@/lib/api-error"
+import { csrfHeaders } from "@/lib/auth/csrf-client"
 import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
 
-const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || ""
+/** Incluye application/json y application/problem+json (validación ASP.NET). */
+function isJsonContentType(contentType: string): boolean {
+  return contentType.includes("json")
+}
+
+const BFF_PREFIX = "/api/bff"
 
 const getOrigin = () => {
   if (typeof window !== "undefined") return window.location.origin
@@ -16,32 +22,55 @@ export type ApiClientError = Error & {
   retryAfter?: number
 }
 
-/** Attach Bearer token to request when available (client-side). */
-export const buildHeaders = (
+/**
+ * Resolves a same-origin BFF URL for a backend path.
+ * Absolute http(s) URLs are rejected so the client never attaches session cookies
+ * or CSRF headers to third-party hosts (closes FE-SEC-021).
+ */
+export function resolveBffUrl(endpoint: string): string {
+  const trimmed = endpoint.trim()
+  if (!trimmed) {
+    throw new Error("Endpoint vacío")
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    throw new Error(
+      "apiClient no acepta URLs absolutas; usa rutas relativas al backend"
+    )
+  }
+  const qIndex = trimmed.indexOf("?")
+  const pathPart = qIndex >= 0 ? trimmed.slice(0, qIndex) : trimmed
+  const queryPart = qIndex >= 0 ? trimmed.slice(qIndex) : ""
+  const path = pathPart.startsWith("/") ? pathPart : `/${pathPart}`
+  return `${BFF_PREFIX}${path}${queryPart}`
+}
+
+/** Build headers for same-origin BFF calls (no Bearer; CSRF on mutations). */
+export const buildHeaders = async (
   options: ApiRequestOptions,
   omitContentType = false
-) => {
-  const headers: Record<string, string> = {
+): Promise<Record<string, string>> => {
+  const method = (options.method ?? "GET").toUpperCase()
+  const isMutation = ["POST", "PUT", "PATCH", "DELETE"].includes(method)
+  const base: Record<string, string> = {
     ...(options.headers as Record<string, string> | undefined),
   }
-  if (!omitContentType) {
-    headers["Content-Type"] = "application/json"
+  if (!omitContentType && !base["Content-Type"]) {
+    base["Content-Type"] = "application/json"
   }
-  if (typeof window !== "undefined") {
-    const token = getAccessToken()
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
+  if (isMutation && typeof window !== "undefined") {
+    return csrfHeaders(base)
   }
-  return headers
+  return base
 }
 
 /** Call our Next.js refresh route and return whether it succeeded. */
 const tryRefresh = async () => {
   try {
+    const headers = await csrfHeaders()
     const res = await fetch(`${getOrigin()}/api/auth/refresh`, {
       method: "POST",
       credentials: "include",
+      headers,
     })
     return res.ok
   } catch {
@@ -60,20 +89,17 @@ export const apiClient = {
     options: ApiRequestOptions = {},
     isRetry = false
   ): Promise<ApiResponseMeta> {
-    const baseUrl = getBaseUrl().replace(/\/$/, '');
-    const url = endpoint.startsWith('http')
-      ? endpoint
-      : `${baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    const url = resolveBffUrl(endpoint)
     const isFormData = options.body instanceof FormData
+    const headers = await buildHeaders(options, isFormData)
+    if (isFormData) {
+      delete headers["Content-Type"]
+    }
+
     const config: RequestInit = {
       ...options,
-      headers: buildHeaders(options, isFormData),
-      credentials:
-        options.credentials ??
-        (endpoint.startsWith("http") ? undefined : "omit"),
-    }
-    if (isFormData && config.headers && typeof config.headers === "object") {
-      delete (config.headers as Record<string, string>)["Content-Type"]
+      headers,
+      credentials: "include",
     }
 
     const res = await fetch(url, config)
@@ -81,7 +107,7 @@ export const apiClient = {
     let data: unknown = {}
     if (res.status !== 204 && res.status !== 205) {
       const contentType = res.headers.get("content-type")?.toLowerCase() ?? ""
-      if (contentType.includes("application/json")) {
+      if (isJsonContentType(contentType)) {
         data = await res.json().catch(() => ({}))
       } else {
         data = await res.text().catch(() => "")
@@ -105,11 +131,8 @@ export const apiClient = {
           ? (data as Record<string, unknown>)
           : {}
       const fromText =
-        typeof data === "string" && data.trim() !== "" ? data.trim() : null
-      const fromBody =
-        (typeof payload.message === "string" && payload.message.trim()) ||
-        (typeof payload.error === "string" && payload.error.trim()) ||
-        (typeof payload.detail === "string" && payload.detail.trim())
+        typeof data === "string" ? extractStructuredApiErrorMessage(data) : ""
+      const fromBody = extractStructuredApiErrorMessage(payload)
       const message = fromBody || fromText || `Solicitud fallida (${res.status})`
       const err = new Error(message) as ApiClientError
       err.status = res.status

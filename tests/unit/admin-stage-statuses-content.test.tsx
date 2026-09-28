@@ -3,22 +3,43 @@ import { screen, waitFor } from "@testing-library/react"
 import { AdminStageStatusesContent } from "@/components/portal-admin/AdminStageStatusesContent"
 import { renderWithIntl as render } from "@/tests/helpers/render-with-intl"
 
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/portal-admin/vacantes/estados",
+  useRouter: () => ({ replace: vi.fn() }),
+}))
+
 vi.mock("@/lib/api", () => ({
   apiClient: {
-    get: vi.fn(async () => [
-      {
-        id: "status-active",
-        name: "Active",
-        isDefault: true,
-        final: false,
-      },
-      {
-        id: "status-discarded",
-        name: "Discarded",
-        isDefault: false,
-        final: true,
-      },
-    ]),
+    get: vi.fn(async (url: string) => {
+      if (String(url).includes("/statuses")) {
+        return [
+          {
+            id: "status-active",
+            name: "Active",
+            isDefault: true,
+            final: false,
+          },
+          {
+            id: "status-discarded",
+            name: "Discarded",
+            isDefault: false,
+            final: true,
+          },
+        ]
+      }
+      return [
+        {
+          id: "00000000-0000-0000-0000-000000000001",
+          name: "Applican Tree",
+          isActive: true,
+        },
+        {
+          id: "company-b-id",
+          name: "Acme Corp",
+          isActive: true,
+        },
+      ]
+    }),
     post: vi.fn(),
     put: vi.fn(),
     patch: vi.fn(),
@@ -53,6 +74,12 @@ describe("AdminStageStatusesContent", () => {
     ).toHaveTextContent("Eliminar")
     expect(
       screen.queryByText(/Al mover candidatos entre etapas/i)
+    ).not.toBeInTheDocument()
+
+    expect(
+      screen.queryByRole("combobox", {
+        name: /empresa/i,
+      })
     ).not.toBeInTheDocument()
   })
 })

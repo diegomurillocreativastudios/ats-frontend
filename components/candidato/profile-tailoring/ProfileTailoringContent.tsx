@@ -4,8 +4,7 @@ import Link from "next/link"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import { FileText, History, Loader2, Sparkles, Upload } from "lucide-react"
-import CandidateSidebar from "@/components/candidato/CandidateSidebar"
-import CandidateTopbar from "@/components/candidato/CandidateTopbar"
+import { CandidatePortalShell } from "@/components/candidato/candidate-portal-shell"
 import DocumentsUploadZone from "@/components/candidato/DocumentsUploadZone"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Modal from "@/components/ui/Modal"
@@ -17,7 +16,7 @@ import { ProfileComparisonPanel } from "@/components/candidato/profile-tailoring
 import { VacancySystemPicker } from "@/components/candidato/profile-tailoring/VacancySystemPicker"
 import { useProfileTailoring } from "@/hooks/use-profile-tailoring"
 import { useCandidateProfile } from "@/hooks/useCandidateProfile"
-import { patchProfileVersion } from "@/lib/api/candidate-profile-tailor"
+import { patchProfileVersion, downloadAdaptedCv } from "@/lib/api/candidate-profile-tailor"
 import { buildCandidateProfileSaveBody } from "@/lib/candidate-profile"
 import { formStateToDisplayProfile } from "@/lib/candidate-profile-version"
 import {
@@ -62,6 +61,7 @@ export default function ProfileTailoringContent() {
   const [showTabConfirm, setShowTabConfirm] = useState(false)
   const [showApplyConfirm, setShowApplyConfirm] = useState(false)
   const [savingVersion, setSavingVersion] = useState(false)
+  const [downloadingCv, setDownloadingCv] = useState(false)
   const [processingComplete, setProcessingComplete] = useState(false)
 
   const draftInput = useMemo(
@@ -175,16 +175,32 @@ export default function ProfileTailoringContent() {
     }
   }, [adaptedForm, result?.versionId, showSnackbar, t])
 
-  const handleApplyToMainProfile = useCallback(async () => {
-    if (!adaptedForm) return
+  const handleDownloadAdaptedCv = useCallback(async () => {
+    if (!result?.versionId) return
+    setDownloadingCv(true)
     try {
-      await saveMainProfile(buildCandidateProfileSaveBody(adaptedForm))
+      await downloadAdaptedCv(result.versionId)
+      showSnackbar(t("toasts.downloadCvSuccess"), "success")
+    } catch (err: unknown) {
+      showSnackbar(getApiErrorMessage(err) || t("toasts.downloadCvFailed"), "error")
+    } finally {
+      setDownloadingCv(false)
+    }
+  }, [result?.versionId, showSnackbar, t])
+
+  const handleApplyToMainProfile = useCallback(async () => {
+    if (!adaptedForm || !result?.versionId) return
+    try {
+      await saveMainProfile({
+        ...buildCandidateProfileSaveBody(adaptedForm),
+        appliedFromVersionId: result.versionId,
+      })
       showSnackbar(t("toasts.applySuccess"), "success")
       setShowApplyConfirm(false)
     } catch {
       showSnackbar(t("toasts.applyError"), "error")
     }
-  }, [adaptedForm, saveMainProfile, showSnackbar, t])
+  }, [adaptedForm, result?.versionId, saveMainProfile, showSnackbar, t])
 
   const tabButtonClass = (tab: TabId) =>
     `flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 font-sans text-sm font-medium transition-colors ${
@@ -363,7 +379,9 @@ export default function ProfileTailoringContent() {
             atsComplianceChecklist={result.atsComplianceChecklist}
             showActions
             onApplyAdapted={() => setShowApplyConfirm(true)}
+            onDownloadAdaptedCv={() => void handleDownloadAdaptedCv()}
             applying={savingMainProfile}
+            downloadingCv={downloadingCv}
           />
 
           <details className="rounded-2xl border border-border bg-card">
@@ -397,23 +415,8 @@ export default function ProfileTailoringContent() {
   )
 
   return (
-    <div className="h-screen overflow-hidden bg-background font-sans text-foreground">
-      <div className="hidden h-full lg:flex">
-        <CandidateSidebar />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <CandidateTopbar variant="desktop" breadcrumbLabel={t("title")} />
-          <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="min-w-0 p-8">{pageContent}</div>
-          </main>
-        </div>
-      </div>
-
-      <div className="flex h-full min-w-0 flex-col overflow-hidden lg:hidden">
-        <CandidateTopbar variant="tablet" breadcrumbLabel={t("title")} />
-        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-w-0 p-4 md:p-6">{pageContent}</div>
-        </main>
-      </div>
+    <CandidatePortalShell breadcrumbLabel={t("title")}>
+      <div className="min-w-0 p-4 md:p-6 lg:p-8">{pageContent}</div>
 
       <Modal
         isOpen={showTabConfirm}
@@ -465,6 +468,6 @@ export default function ProfileTailoringContent() {
       >
         <p className="font-sans text-sm text-muted-foreground">{t("applyConfirm.message")}</p>
       </Modal>
-    </div>
+    </CandidatePortalShell>
   )
 }

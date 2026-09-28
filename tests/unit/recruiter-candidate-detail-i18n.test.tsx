@@ -53,7 +53,16 @@ vi.mock("@/components/candidato/candidate-salary-expectation-card", () => ({
 }))
 
 vi.mock("@/lib/auth", () => ({
-  getAccessToken: () => "token",
+  getAccessToken: () => null,
+  getCurrentUser: () => null,
+  AUTH_COOKIES: {
+    access: "ats_access_token",
+    refresh: "ats_refresh_token",
+    expires: "ats_token_expires",
+    user: "ats_user",
+    csrf: "ats_csrf",
+    path: "/",
+  },
 }))
 
 vi.mock("next-intl/server", async () => {
@@ -160,6 +169,7 @@ describe("RecruiterCandidateProfileView i18n (Etapa 14)", () => {
   it("renderiza UI estática en español", () => {
     renderProfileView("es")
     expect(screen.getByText("Editar perfil")).toBeInTheDocument()
+    expect(screen.getByText("Generar ficha técnica")).toBeInTheDocument()
     expect(screen.getByText("Contacto y personales")).toBeInTheDocument()
     expect(screen.getByText("Experiencia laboral")).toBeInTheDocument()
     expect(
@@ -171,6 +181,7 @@ describe("RecruiterCandidateProfileView i18n (Etapa 14)", () => {
   it("renderiza UI estática en inglés", () => {
     renderProfileView("en")
     expect(screen.getByText("Edit profile")).toBeInTheDocument()
+    expect(screen.getByText("Generate technical sheet")).toBeInTheDocument()
     expect(screen.getByText("Contact and personal")).toBeInTheDocument()
     expect(screen.getByText("Work experience")).toBeInTheDocument()
     expect(screen.getByText("No work experience on record.")).toBeInTheDocument()

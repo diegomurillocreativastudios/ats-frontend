@@ -35,6 +35,16 @@ describe("LanguageSwitcher (Etapa 2)", () => {
     expect(screen.getByRole("button", { name: "Idioma" })).toBeInTheDocument()
   })
 
+  it("monta el menú en document.body, por encima de la página y debajo de los modales", () => {
+    renderSwitcher("es")
+    openMenu()
+
+    const listbox = screen.getByRole("listbox", { name: "Idioma" })
+    expect(listbox.parentElement).toBe(document.body)
+    expect(listbox.className).toContain("z-[49]")
+    expect(listbox.className).toContain("fixed")
+  })
+
   it("muestra los 5 idiomas soportados (endónimos) al abrir el menú", () => {
     renderSwitcher("es")
     openMenu()

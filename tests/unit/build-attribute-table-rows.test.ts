@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest"
 import {
   buildAttributeTableRows,
   canonicalAttributeKey,
+  MATCHED_ATTRIBUTE_RECORD_KEYS,
+  pickNamedRecord,
+  toAttributeLevel,
 } from "@/lib/vacancies/build-attribute-table-rows"
 
 describe("canonicalAttributeKey", () => {
@@ -38,5 +41,77 @@ describe("buildAttributeTableRows", () => {
     ])
     expect(rows[0].level).toBe("Avanzado")
     expect(rows[2].score).toBeNull()
+  })
+
+  it("hides boolean presence flags instead of showing true or false", () => {
+    const rows = buildAttributeTableRows(
+      [
+        ["Git", 1],
+        ["HTML", 1],
+        ["CSS", 1],
+        ["Next.js", 0],
+      ],
+      [
+        ["Git", true],
+        ["HTML", "true"],
+        ["CSS", "layout responsivo y estados de UI"],
+        ["React", false],
+      ],
+      (key) => String(key)
+    )
+
+    expect(rows.find((row) => row.key === "Git")?.level).toBeNull()
+    expect(rows.find((row) => row.key === "HTML")?.level).toBeNull()
+    expect(rows.find((row) => row.key === "CSS")?.level).toBe(
+      "layout responsivo y estados de UI"
+    )
+    expect(rows.find((row) => row.key === "React")?.level).toBeNull()
+    expect(rows.find((row) => row.key === "Next.js")?.level).toBeNull()
+  })
+
+  it("reads evidence from nested match objects and ignores presence-only flags", () => {
+    const rows = buildAttributeTableRows(
+      [
+        ["Git", 1],
+        ["CSS", 1],
+        ["TypeScript", 1],
+      ],
+      [
+        ["Git", { matched: true }],
+        ["CSS", { matched: true, evidence: "layout responsivo y estados de UI" }],
+        ["TypeScript", { Level: "True" }],
+      ],
+      (key) => String(key)
+    )
+
+    expect(rows.find((row) => row.key === "Git")?.level).toBeNull()
+    expect(rows.find((row) => row.key === "CSS")?.level).toBe(
+      "layout responsivo y estados de UI"
+    )
+    expect(rows.find((row) => row.key === "TypeScript")?.level).toBeNull()
+  })
+})
+
+describe("toAttributeLevel", () => {
+  it("rejects boolean-like values from the matching payload", () => {
+    expect(toAttributeLevel(true)).toBeNull()
+    expect(toAttributeLevel(false)).toBeNull()
+    expect(toAttributeLevel("True")).toBeNull()
+    expect(toAttributeLevel(" FALSE ")).toBeNull()
+    expect(toAttributeLevel({ matched: true, value: true })).toBeNull()
+    expect(toAttributeLevel("2+ años en producción")).toBe("2+ años en producción")
+  })
+})
+
+describe("pickNamedRecord", () => {
+  it("reads PascalCase matched attributes from a .NET payload", () => {
+    const record = pickNamedRecord(
+      {
+        MatchedAttributes: { Git: true, CSS: "layout responsivo" },
+      },
+      MATCHED_ATTRIBUTE_RECORD_KEYS
+    )
+
+    expect(record).toEqual({ Git: true, CSS: "layout responsivo" })
   })
 })

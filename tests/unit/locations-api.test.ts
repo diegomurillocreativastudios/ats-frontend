@@ -75,6 +75,31 @@ describe("locations API client", () => {
     )
   })
 
+  it("searchLocationCountries unwraps a nested data envelope", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({
+      data: {
+        items: [
+          {
+            iso2: "HN",
+            geonameId: 3,
+            iso3: "HND",
+            names: { display: "Honduras" },
+          },
+        ],
+        page: 1,
+        pageSize: 50,
+        total: 1,
+        totalPages: 1,
+      },
+    })
+
+    const result = await searchLocationCountries()
+
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0]?.iso2).toBe("HN")
+    expect(result.totalPages).toBe(1)
+  })
+
   it("searchLocationDivisions targets divisions route", async () => {
     vi.mocked(apiClient.get).mockResolvedValue({
       items: [],
@@ -93,5 +118,28 @@ describe("locations API client", () => {
     expect(apiClient.get).toHaveBeenCalledWith(
       "/api/locations/countries/SV/divisions?level=1&parentGeonameId=123&page=1&pageSize=50"
     )
+  })
+
+  it("reads numeric shortCode values from divisions", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({
+      items: [
+        {
+          geonameId: 1,
+          countryIso2: "SV",
+          adminLevel: 1,
+          adminCode: "SV.10",
+          shortCode: 10,
+          names: { display: "San Salvador" },
+        },
+      ],
+      page: 1,
+      pageSize: 50,
+      total: 1,
+      totalPages: 1,
+    })
+
+    const result = await searchLocationDivisions({ countryIso2: "SV", level: 1 })
+
+    expect(result.items[0]?.shortCode).toBe("10")
   })
 })

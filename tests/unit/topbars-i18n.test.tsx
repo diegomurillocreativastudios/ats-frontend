@@ -52,7 +52,7 @@ describe("Topbars i18n (Etapa 3)", () => {
 
   it("CandidateTopbar renderiza los mismos textos traducidos en inglés", () => {
     renderWithIntl(<CandidateTopbar />, "en")
-    expect(screen.getByText("Candidate Portal")).toBeInTheDocument()
+    expect(screen.getByText("Applicant Portal")).toBeInTheDocument()
     expect(
       screen.getByRole("button", { name: "Language" }),
     ).toBeInTheDocument()

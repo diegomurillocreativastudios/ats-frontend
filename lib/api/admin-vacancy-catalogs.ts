@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api"
 
-export type VacancyCatalogKind = "departments" | "modalities"
+export type VacancyCatalogKind = "departments" | "modalities" | "softSkills"
 
 export interface VacancyCatalogAdminItem {
   id: string
@@ -21,9 +21,9 @@ export interface VacancyCatalogFormValues {
 }
 
 function getCatalogBasePath(kind: VacancyCatalogKind): string {
-  return kind === "departments"
-    ? "/api/admin/vacancy-departments"
-    : "/api/admin/vacancy-modalities"
+  if (kind === "departments") return "/api/admin/vacancy-departments"
+  if (kind === "modalities") return "/api/admin/vacancy-modalities"
+  return "/api/admin/vacancy-soft-skills"
 }
 
 function toStringValue(value: unknown): string {
@@ -74,6 +74,8 @@ function normalizeListPayload(payload: unknown): VacancyCatalogAdminItem[] {
       record.data ??
       record.departments ??
       record.modalities ??
+      record.softSkills ??
+      record.soft_skills ??
       record.results
 
     if (Array.isArray(items)) {

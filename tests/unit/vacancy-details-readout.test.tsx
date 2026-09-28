@@ -76,6 +76,11 @@ describe("VacancyDetailsReadout", () => {
     expect(screen.getByText("Departamento")).toBeInTheDocument()
     expect(screen.getByText("Security")).toBeInTheDocument()
     expect(screen.getByText("Modalidad")).toBeInTheDocument()
+
+    const value = screen.getByText("Security")
+    expect(value).toHaveClass("wrap-break-word", "min-w-0")
+    expect(value.closest("dl")).toHaveClass("@min-[14rem]/details:grid-cols-[auto_minmax(0,1fr)]")
+    expect(value.closest("dl")?.parentElement).toHaveClass("@container/details")
   })
 })
 

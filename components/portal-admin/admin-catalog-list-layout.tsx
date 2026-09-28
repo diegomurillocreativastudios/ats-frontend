@@ -182,7 +182,7 @@ export function AdminCatalogRowActions({
       <Button
         type="button"
         variant="outline"
-        className="h-8 px-3 py-0 text-xs"
+        className="h-11 px-3 py-0 text-xs"
         onClick={onEdit}
         disabled={disabled}
       >
@@ -192,7 +192,7 @@ export function AdminCatalogRowActions({
       <Button
         type="button"
         variant="outline"
-        className="h-8 px-3 py-0 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+        className="h-11 px-3 py-0 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
         onClick={onDelete}
         disabled={disabled}
       >

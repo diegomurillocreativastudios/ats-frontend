@@ -15,7 +15,6 @@ export default function EtapaModal({
   onSubmit,
   onSnackbar,
   editingStage,
-  companyId,
   setAsDefaultOnCreate = false,
 }) {
   const t = useTranslations("AdminPortal.stages.modal");
@@ -80,7 +79,7 @@ export default function EtapaModal({
           name: name.trim(),
         });
         await apiClient.put(
-          `/api/recruiter/companies/${companyId}/stages/${editingStage.id}`,
+          `/api/recruiter/stages/${editingStage.id}`,
           payload
         );
         showSnackbar(t("toastUpdated"), "success");
@@ -88,7 +87,7 @@ export default function EtapaModal({
         onSubmit?.(false);
       } else {
         const created = await apiClient.post(
-          `/api/recruiter/companies/${companyId}/stages`,
+          `/api/recruiter/stages`,
           { name: name.trim(), isDefault: Boolean(setAsDefaultOnCreate) }
         );
         showSnackbar(t("toastCreated"), "success");

@@ -8,7 +8,9 @@ import {
   Trash2,
   FileText,
 } from "lucide-react";
-import PlantillaModal from "@/components/rrhh/PlantillaModal";
+import PlantillaModal, {
+  type PlantillaSavedResult,
+} from "@/components/rrhh/PlantillaModal";
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal";
 import {
   ADMIN_SURFACE_CLASS,
@@ -23,7 +25,13 @@ import { Button } from "@/components/ui/Button";
 import Snackbar from "@/components/ui/Snackbar";
 import { ListPaginationBar } from "@/components/ui/list-pagination-bar";
 import { apiClient } from "@/lib/api";
-import { QUERY_PAGE_SIZE_DEFAULT, fetchHeaderPagedList } from "@/lib/api/query-paging";
+import {
+  QUERY_FETCH_ALL_MAX_PAGES,
+  QUERY_FETCH_ALL_PAGE_SIZE,
+  QUERY_PAGE_SIZE_DEFAULT,
+  fetchHeaderPagedList,
+} from "@/lib/api/query-paging";
+import { pageNumberForNamedItem } from "@/lib/templates/template-list-page";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 const mapTemplateFromApi = (item, index = 0) => {
@@ -195,13 +203,51 @@ export default function PlantillasPage() {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const handleModalSubmit = () => {
-    if (page !== 1) {
-      setPage(1);
-    } else {
-      fetchTemplates();
+  const findPageForTemplateName = async (name: string) => {
+    const names: string[] = [];
+    let probePage = 1;
+    for (;;) {
+      const result = await fetchHeaderPagedList("/api/Templates", {
+        page: probePage,
+        pageSize: QUERY_FETCH_ALL_PAGE_SIZE,
+      });
+      for (const item of result.items) {
+        const record = item as { name?: unknown };
+        names.push(typeof record?.name === "string" ? record.name : "");
+      }
+      const located = pageNumberForNamedItem(names, name, pageSize);
+      if (located != null) return located;
+      if (!result.hasNextPage || result.items.length === 0) return null;
+      probePage += 1;
+      if (probePage > QUERY_FETCH_ALL_MAX_PAGES) return null;
     }
+  };
+
+  const handleModalSubmit = (saved?: PlantillaSavedResult) => {
     setEditingTemplate(null);
+    if (!saved || saved.wasEditing || !saved.name) {
+      if (page !== 1) {
+        setPage(1);
+      } else {
+        fetchTemplates();
+      }
+      return;
+    }
+
+    setLoading(true);
+    setFetchError(null);
+    void findPageForTemplateName(saved.name)
+      .then((targetPage) => {
+        if (targetPage != null && targetPage !== page) {
+          setPage(targetPage);
+          return;
+        }
+        return fetchTemplates();
+      })
+      .catch((err) => {
+        setFetchError(getApiErrorMessage(err) || t("errors.loadFailed"));
+        setLoading(false);
+      });
   };
 
   const handleEdit = (template) => {

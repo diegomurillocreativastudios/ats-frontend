@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api"
+import { isAllowedGoogleOAuthAuthorizeUrl } from "@/lib/google-calendar-oauth-urls"
 import type {
   CalendarSyncResponse,
   GoogleCalendarStatus,
@@ -122,6 +123,11 @@ export async function getGoogleAuthUrl(): Promise<string> {
   const url = data.authUrl ?? data.auth_url
   if (!url || typeof url !== "string") {
     throw new Error("La respuesta del servidor no incluye authUrl")
+  }
+  if (!isAllowedGoogleOAuthAuthorizeUrl(url)) {
+    throw new Error(
+      "La URL de autorización de Google no es válida. Intenta de nuevo más tarde."
+    )
   }
   return url
 }

@@ -112,6 +112,8 @@ function interviewRow(
     vacancyId: "v1",
     jobTitle: null,
     candidateProfileId,
+    candidateName: null,
+    applicationId: null,
     scheduledAtUtc,
     durationMinutes: 30,
     interviewType: null,

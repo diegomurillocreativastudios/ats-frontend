@@ -38,7 +38,7 @@ function DetailChips({ items }: { items: string[] }) {
       {items.map((item, index) => (
         <li
           key={`${item}-${index}`}
-          className="inline-flex max-w-full items-center rounded-md bg-muted px-2.5 py-1 font-sans text-sm text-foreground"
+          className="inline-flex max-w-full items-center wrap-break-word rounded-md bg-muted px-2.5 py-1 font-sans text-sm text-foreground"
         >
           {item}
         </li>
@@ -53,7 +53,7 @@ function DetailFactList({ items }: { items: string[] }) {
       {items.map((item, index) => (
         <li
           key={`${item}-${index}`}
-          className="ps-1 font-sans text-sm leading-relaxed text-foreground"
+          className="ps-1 font-sans text-sm leading-relaxed wrap-break-word text-foreground"
         >
           {item}
         </li>
@@ -87,17 +87,19 @@ function DetailSections({ sections }: { sections: VacancyDetailSection[] }) {
 
 function DetailPairs({ pairs }: { pairs: VacancyDetailPair[] }) {
   return (
-    <dl className="divide-y divide-border overflow-hidden rounded-lg border border-border">
-      {pairs.map(({ key, value }) => (
-        <div
-          key={`${key}-${value}`}
-          className="grid gap-1 px-3.5 py-3 sm:grid-cols-[minmax(7rem,11rem)_minmax(0,1fr)] sm:items-baseline sm:gap-4"
-        >
-          <dt className="font-sans text-xs font-medium text-muted-foreground">{key}</dt>
-          <dd className="font-sans text-sm leading-relaxed text-foreground">{value}</dd>
-        </div>
-      ))}
-    </dl>
+    <div className="@container/details min-w-0">
+      <dl className="grid min-w-0 grid-cols-1 gap-x-4 divide-y divide-border overflow-hidden rounded-lg border border-border @min-[14rem]/details:grid-cols-[auto_minmax(0,1fr)]">
+        {pairs.map(({ key, value }) => (
+          <div
+            key={`${key}-${value}`}
+            className="col-span-full grid min-w-0 grid-cols-1 gap-y-1 px-3.5 py-3 @min-[14rem]/details:grid-cols-subgrid @min-[14rem]/details:items-baseline"
+          >
+            <dt className="font-sans text-xs font-medium wrap-break-word text-muted-foreground">{key}</dt>
+            <dd className="min-w-0 font-sans text-sm leading-snug wrap-break-word text-foreground">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   )
 }
 
@@ -118,7 +120,7 @@ export function VacancyDetailsReadout({ value }: VacancyDetailsReadoutProps) {
   }
 
   return (
-    <p className="font-sans text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+    <p className="font-sans text-sm leading-relaxed wrap-break-word whitespace-pre-wrap text-muted-foreground">
       {parsed.text}
     </p>
   )
@@ -178,7 +180,7 @@ export function VacancyDetailsCard({
         />
       ) : details ? (
         <div
-          className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1"
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pr-1"
           tabIndex={0}
           aria-label={tDetail("sections.details")}
         >

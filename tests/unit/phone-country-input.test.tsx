@@ -5,16 +5,16 @@ import type { ComponentProps } from "react"
 import { PhoneCountryInput } from "@/components/ui/PhoneCountryInput"
 import { resetPhoneCountriesCache } from "@/lib/phone-countries"
 
-const getCountriesMock = vi.hoisted(() =>
-  vi.fn(async () => [
+const getBundledPhoneCountryRowsMock = vi.hoisted(() =>
+  vi.fn(() => [
     { iso2: "SV", name: "El Salvador", phonecode: "503" },
     { iso2: "US", name: "United States", phonecode: "1" },
     { iso2: "MX", name: "Mexico", phonecode: "52" },
   ])
 )
 
-vi.mock("@countrystatecity/countries-browser", () => ({
-  getCountries: getCountriesMock,
+vi.mock("@/lib/phone-countries-data", () => ({
+  getBundledPhoneCountryRows: getBundledPhoneCountryRowsMock,
 }))
 
 function renderPhone(
@@ -96,6 +96,6 @@ describe("PhoneCountryInput", () => {
     renderPhone()
     await screen.findByRole("button", { name: /El Salvador/ })
 
-    expect(getCountriesMock).toHaveBeenCalledTimes(1)
+    expect(getBundledPhoneCountryRowsMock).toHaveBeenCalledTimes(1)
   })
 })

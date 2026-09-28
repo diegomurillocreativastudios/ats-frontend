@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { getApiErrorMessage } from "@/lib/api-error"
+import { publicApiErrorBody } from "@/lib/security/public-api-error"
+import { logServerError } from "@/lib/security/safe-server-log"
 import { getServerBackendBaseUrl } from "@/lib/server-backend-url"
+
+const GENERIC_RESET_ERROR =
+  "No se pudo restablecer la contraseña. Intenta de nuevo."
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,16 +55,13 @@ export async function POST(request: NextRequest) {
     >
 
     if (!res.ok) {
-      const raw =
-        data.message ??
-        data.detail ??
-        "No se pudo restablecer la contraseña."
-      const text = Array.isArray(raw) ? raw[0] : raw
-      const msg = typeof text === "string" ? text : String(text)
       const headers = new Headers()
       const retryAfter = res.headers.get("retry-after")
       if (retryAfter) headers.set("retry-after", retryAfter)
-      return NextResponse.json({ message: msg }, { status: res.status, headers })
+      return NextResponse.json(
+        publicApiErrorBody(res.status, data, GENERIC_RESET_ERROR),
+        { status: res.status, headers }
+      )
     }
 
     return NextResponse.json({
@@ -68,11 +69,9 @@ export async function POST(request: NextRequest) {
       ...data,
     })
   } catch (err: unknown) {
+    logServerError("reset-password", err)
     return NextResponse.json(
-      {
-        message:
-          getApiErrorMessage(err) || "Error al procesar la solicitud. Intenta de nuevo.",
-      },
+      { message: GENERIC_RESET_ERROR },
       { status: 500 }
     )
   }

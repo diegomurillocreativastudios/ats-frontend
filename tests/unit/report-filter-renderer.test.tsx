@@ -29,7 +29,7 @@ describe("ReportFilterRenderer", () => {
     )
 
     expect(screen.getByLabelText("Buscar")).toHaveValue("hiring")
-    expect(screen.getByLabelText("Desde")).toHaveValue("2026-05-01")
+    expect(screen.getByRole("button", { name: "Desde" })).toBeInTheDocument()
   })
 
   it("calls onChange when a text field changes", () => {

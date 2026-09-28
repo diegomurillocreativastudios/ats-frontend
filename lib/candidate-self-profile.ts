@@ -4,7 +4,8 @@
 
 export interface CandidateLatestResumeDto {
   documentId: string | null
-  storagePath: string | null
+  /** True if backend had a file path; path itself is never kept in client state (FE-SEC-020). */
+  hasFile: boolean
   normalizedData: unknown
   rawText: string | null
   createdAt: string | null
@@ -37,7 +38,16 @@ const SELF_PROFILE_MERGE_SKIP_KEYS = new Set([
   "banReason",
   "isDeleted",
   "deletedAt",
+  "storagePath",
+  "contentSha256",
+  "cvDownloadUrl",
 ])
+
+const toStringOrNull = (value: unknown): string | null => {
+  if (value == null) return null
+  const text = String(value).trim()
+  return text || null
+}
 
 /**
  * Misma lógica que en portal RRHH: normalizedData puede ser objeto o string JSON.
@@ -115,7 +125,28 @@ export interface SelfResumeParseState {
 }
 
 /**
- * Quita vectores y campos redundantes que el backend puede enviar en `/api/candidate/me`.
+ * Strips storagePath / contentSha256 from latestResume for client state (FE-SEC-020).
+ */
+export function sanitizeLatestResume(
+  raw: unknown
+): CandidateLatestResumeDto | null {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return null
+  const row = raw as Record<string, unknown>
+  const storagePath = toStringOrNull(row.storagePath)
+  return {
+    documentId: toStringOrNull(row.documentId),
+    hasFile:
+      Boolean(storagePath) ||
+      row.hasFile === true ||
+      Boolean(toStringOrNull(row.documentId)),
+    normalizedData: row.normalizedData ?? null,
+    rawText: toStringOrNull(row.rawText),
+    createdAt: toStringOrNull(row.createdAt),
+  }
+}
+
+/**
+ * Quita vectores, rutas de storage y campos redundantes de `/api/candidate/me`.
  */
 export const sanitizeCandidateSelfProfileDto = (
   raw: CandidateSelfProfileDto
@@ -130,9 +161,20 @@ export const sanitizeCandidateSelfProfileDto = (
     banReason: _br,
     isDeleted: _idl,
     deletedAt: _da,
+    storagePath: _sp,
+    contentSha256: _sha,
     ...rest
   } = raw as Record<string, unknown>
-  return rest as CandidateSelfProfileDto
+
+  const sanitized: CandidateSelfProfileDto = {
+    ...(rest as CandidateSelfProfileDto),
+  }
+
+  if ("latestResume" in rest) {
+    sanitized.latestResume = sanitizeLatestResume(rest.latestResume)
+  }
+
+  return sanitized
 }
 
 export const getLatestResumeParseState = (

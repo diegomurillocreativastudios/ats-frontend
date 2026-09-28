@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import { AlertTriangle, ArrowLeft, Calendar, Loader2, Tag } from "lucide-react"
 import { RrhhInterviewsShell } from "@/components/rrhh/interviews/rrhh-interviews-shell"
@@ -15,13 +15,15 @@ import {
   VacancyResultadosCandidatesBlock,
   type VacancyResultadosCandidateFiltersState,
 } from "@/components/rrhh/vacancy-resultados/vacancy-resultados-candidates-block"
-import {
-  fetchVacancyResultadosPayload,
-  type VacancyResultadosViewModel,
-} from "@/lib/api/vacancy-resultados"
+import { fetchVacancyResultadosPayload, type VacancyResultadosViewModel } from "@/lib/api/vacancy-resultados"
 import { getInterviewsByVacancy, type Interview } from "@/lib/api/interviews"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatVacancyResultadosDocumentTitle } from "@/lib/pageTitles"
+import { parseFallbackKanbanStages } from "@/lib/rrhh/vacancy-pipeline-stats"
+import { useResolvedRecruiterVacancyPath } from "@/hooks/use-resolved-recruiter-vacancy-path"
+import { buildRecruiterVacancyPath } from "@/lib/vacancies/vacancy-public-path"
+import { getVacancyJobCategoryLabel } from "@/lib/vacancies/vacancy-catalog-labels"
+import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
 
 function formatDisplayDate(iso: string | null): string | null {
   if (!iso) return null
@@ -44,8 +46,17 @@ export default function VacancyResultadosPage() {
   const router = useRouter()
   const t = useTranslations("RecruiterPortal.vacancies.results")
   const tVacancies = useTranslations("RecruiterPortal.vacancies")
+  const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
+  const fallbackKanbanStages = useMemo(
+    () => parseFallbackKanbanStages(tMatching.raw("fallbackKanbanStages")),
+    [tMatching]
+  )
   const raw = params?.id
-  const vacancyId = Array.isArray(raw) ? raw[0] : raw ?? ""
+  const pathSegment = Array.isArray(raw) ? raw[0] : raw ?? ""
+  const resolved = useResolvedRecruiterVacancyPath(pathSegment, {
+    pathSuffix: "resultados",
+  })
+  const vacancyId = resolved.vacancyId
 
   const [model, setModel] = useState<VacancyResultadosViewModel | null>(null)
   const [loading, setLoading] = useState(true)
@@ -59,17 +70,28 @@ export default function VacancyResultadosPage() {
   const [candidateFilters, setCandidateFilters] =
     useState<VacancyResultadosCandidateFiltersState>(defaultFilters)
 
+  const detailHref = buildRecruiterVacancyPath({
+    id: vacancyId || pathSegment,
+    publicSlug: resolved.publicSlug,
+  })
+
   const load = useCallback(async () => {
     if (!vacancyId) {
       setLoading(false)
-      setFetchError(t("errors.missingId"))
-      setModel(null)
+      if (!resolved.loading) {
+        setFetchError(
+          resolved.error ? t("errors.loadFailed") : t("errors.missingId")
+        )
+        setModel(null)
+      }
       return
     }
     setLoading(true)
     setFetchError(null)
     try {
-      const data = await fetchVacancyResultadosPayload(vacancyId)
+      const data = await fetchVacancyResultadosPayload(vacancyId, {
+        fallbackStageNames: fallbackKanbanStages,
+      })
       setModel(data)
     } catch (err: unknown) {
       setFetchError(
@@ -79,11 +101,12 @@ export default function VacancyResultadosPage() {
     } finally {
       setLoading(false)
     }
-  }, [vacancyId, t])
+  }, [vacancyId, resolved.loading, resolved.error, t, fallbackKanbanStages])
 
   useEffect(() => {
+    if (resolved.loading) return
     void load()
-  }, [load])
+  }, [load, resolved.loading])
 
   useEffect(() => {
     if (!vacancyId || !model) {
@@ -105,25 +128,29 @@ export default function VacancyResultadosPage() {
 
   useEffect(() => {
     if (!vacancyId) return
-    if (loading) return
+    if (loading || resolved.loading) return
     document.title = formatVacancyResultadosDocumentTitle(
       fetchError ? null : model?.title ?? null
     )
-  }, [vacancyId, loading, fetchError, model?.title])
+  }, [vacancyId, loading, resolved.loading, fetchError, model?.title])
 
   const trail =
-    vacancyId.length > 0
+    pathSegment.length > 0
       ? [
           { label: tVacancies("breadcrumb"), href: "/portal-rrhh/vacantes" },
           {
-            label: loading ? "…" : model?.title?.trim() || t("page.vacancyFallback"),
-            href: `/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}`,
+            label:
+              loading || resolved.loading
+                ? "…"
+                : model?.title?.trim() || t("page.vacancyFallback"),
+            href: detailHref,
           },
           { label: t("page.breadcrumbResults") },
         ]
       : [{ label: tVacancies("breadcrumb"), href: "/portal-rrhh/vacantes" }]
 
   const handleScheduleFromResultados = (candidateProfileId: string) => {
+    if (!vacancyId) return
     router.push(
       `/portal-rrhh/entrevistas/${encodeURIComponent(vacancyId)}?nueva=1&candidato=${encodeURIComponent(candidateProfileId)}`
     )
@@ -133,15 +160,20 @@ export default function VacancyResultadosPage() {
     ? formatDisplayDate(model.meta.createdAt)
     : null
   const hasApplicants = Boolean(model && model.applicants.length > 0)
+  const pageLoading = resolved.loading || loading
 
   return (
-    <RrhhInterviewsShell breadcrumbLabel={tVacancies("breadcrumb")} breadcrumbTrail={trail}>
+    <RrhhInterviewsShell
+      breadcrumbLabel={tVacancies("breadcrumb")}
+      breadcrumbTrail={trail}
+      lockMainScroll={false}
+    >
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        {!vacancyId ? (
+        {!pathSegment ? (
           <p className="font-sans text-sm text-destructive" role="alert">
             {t("errors.missingId")}
           </p>
-        ) : loading ? (
+        ) : pageLoading ? (
           <div
             className="flex flex-col items-center justify-center gap-3 py-16"
             role="status"
@@ -152,10 +184,10 @@ export default function VacancyResultadosPage() {
               {t("loadingStates.loading")}
             </p>
           </div>
-        ) : fetchError ? (
+        ) : fetchError || resolved.error ? (
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3">
             <p className="font-sans text-sm text-destructive" role="alert">
-              {fetchError}
+              {fetchError || t("errors.loadFailed")}
             </p>
             <button
               type="button"
@@ -165,7 +197,7 @@ export default function VacancyResultadosPage() {
               {tVacancies("actions.retry")}
             </button>
           </div>
-        ) : model ? (
+        ) : model && vacancyId ? (
           <div className="flex flex-col gap-6">
             <header className="flex flex-col gap-4 border-b border-border pb-6 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between">
               <div className="min-w-0 flex-1">
@@ -178,13 +210,16 @@ export default function VacancyResultadosPage() {
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {model.meta.status ? (
                     <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-sans text-xs font-semibold text-emerald-800">
-                      {model.meta.status}
+                      {getVacancyStatusLabel(model.meta.status, tVacancies)}
                     </span>
                   ) : null}
                   {model.meta.jobCategory ? (
                     <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-3 py-1 font-sans text-xs text-foreground">
                       <Tag className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden />
-                      {model.meta.jobCategory}
+                      {getVacancyJobCategoryLabel(
+                        model.meta.jobCategory,
+                        tVacancies
+                      )}
                     </span>
                   ) : null}
                   {model.meta.needsRematch ? (
@@ -221,7 +256,7 @@ export default function VacancyResultadosPage() {
                   {t("actions.interviews")}
                 </Link>
                 <Link
-                  href={`/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}`}
+                  href={detailHref}
                   className="inline-flex w-fit shrink-0 items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                   aria-label={t("actions.backToVacancyAria")}
                 >
@@ -231,16 +266,16 @@ export default function VacancyResultadosPage() {
               </div>
             </header>
 
-            <VacancyResultadosMetaPanel
-              vacancyTitle={model.title}
-              meta={model.meta}
-              hideVacancyHeading
-            />
-
             <VacancyResultadosKpisStrip
               totalApplicants={model.applicants.length}
               scoreSummary={model.scoreSummary}
               byStage={model.byStage}
+            />
+
+            <VacancyResultadosMetaPanel
+              vacancyTitle={model.title}
+              meta={model.meta}
+              hideVacancyHeading
             />
 
             <VacancyResultadosCandidateFiltersBar
@@ -249,28 +284,32 @@ export default function VacancyResultadosPage() {
               onFilterChange={setCandidateFilters}
             />
 
-            <VacancyPipelineCharts
-              componentAverages={model.componentAverages}
-              byStage={model.byStage}
-              scoreBuckets={model.scoreBuckets}
-              scoreSummary={model.scoreSummary}
-              totalApplicants={model.applicants.length}
-            />
-
-            <VacancyResultadosCandidatesBlock
-              vacancyId={vacancyId}
-              applicantsByStageFull={model.applicantsByStageFull}
-              companyStatuses={model.companyStatuses}
-              allApplicants={model.applicants}
-              interviews={interviews}
-              filterState={candidateFilters}
-              onFilterChange={setCandidateFilters}
-              onScheduleInterview={handleScheduleFromResultados}
-              onOpenTechnicalSheet={(id, displayName) => {
-                setTechnicalSheetProfileId(id)
-                setTechnicalSheetCandidateLabel(displayName)
-              }}
-            />
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,22rem)] xl:items-start">
+              <VacancyResultadosCandidatesBlock
+                vacancyId={vacancyId}
+                applicantsByStageFull={model.applicantsByStageFull}
+                companyStatuses={model.companyStatuses}
+                allApplicants={model.applicants}
+                interviews={interviews}
+                filterState={candidateFilters}
+                onFilterChange={setCandidateFilters}
+                onScheduleInterview={handleScheduleFromResultados}
+                onOpenTechnicalSheet={(id, displayName) => {
+                  setTechnicalSheetProfileId(id)
+                  setTechnicalSheetCandidateLabel(displayName)
+                }}
+              />
+              <div className="xl:sticky xl:top-4">
+                <VacancyPipelineCharts
+                  componentAverages={model.componentAverages}
+                  byStage={model.byStage}
+                  scoreBuckets={model.scoreBuckets}
+                  scoreSummary={model.scoreSummary}
+                  totalApplicants={model.applicants.length}
+                  compact
+                />
+              </div>
+            </div>
           </div>
         ) : null}
       </div>

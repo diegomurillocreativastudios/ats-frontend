@@ -16,7 +16,12 @@ import {
   type InterviewTypeOption,
   type VacancyApplicantOption,
 } from "@/lib/api/interviews"
-import { localDatetimeInputToUtcIso } from "@/lib/interview-datetime"
+import {
+  getTodayDateInputValue,
+  isLocalDatetimeInPast,
+  localDatetimeInputToUtcIso,
+  splitDatetimeLocal,
+} from "@/lib/interview-datetime"
 import { InterviewerRecruiterSelect } from "@/components/rrhh/interviews/interviewer-recruiter-select"
 import { InterviewScheduleRow } from "@/components/rrhh/interviews/interview-schedule-controls"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
@@ -41,6 +46,7 @@ export type InterviewFormProps =
 export function InterviewForm(props: InterviewFormProps) {
   const { vacancyId } = props
   const t = useTranslations("RecruiterPortal.interviews.form")
+  const tDetail = useTranslations("RecruiterPortal.interviews.detail")
   const tCommon = useTranslations("Common")
   const { status: calendarStatus } = useGoogleCalendar()
   const isModal = props.mode === "modal"
@@ -178,10 +184,18 @@ export function InterviewForm(props: InterviewFormProps) {
     }
     let scheduledAtUtc = ""
     if (scheduledLocal.trim()) {
-      try {
-        scheduledAtUtc = localDatetimeInputToUtcIso(scheduledLocal)
-      } catch {
-        nextErrors.scheduledLocal = t("validation.invalidDateTime")
+      const { date: scheduledDate } = splitDatetimeLocal(scheduledLocal)
+      const todayYmd = getTodayDateInputValue()
+      if (scheduledDate && scheduledDate < todayYmd) {
+        nextErrors.scheduledLocal = t("validation.pastDateNotAllowed")
+      } else if (isLocalDatetimeInPast(scheduledLocal)) {
+        nextErrors.scheduledLocal = t("validation.pastDateTimeNotAllowed")
+      } else {
+        try {
+          scheduledAtUtc = localDatetimeInputToUtcIso(scheduledLocal)
+        } catch {
+          nextErrors.scheduledLocal = t("validation.invalidDateTime")
+        }
       }
     }
     if (Object.keys(nextErrors).length > 0) {
@@ -329,6 +343,15 @@ export function InterviewForm(props: InterviewFormProps) {
             onDurationMinutesChange={setDurationMinutes}
             ariaLabelledBy="interview-when-label"
             errorMessage={fieldErrors.scheduledLocal ?? null}
+            minDate={getTodayDateInputValue()}
+            durationLabel={
+              Number.isFinite(parseInt(durationMinutes, 10)) &&
+              parseInt(durationMinutes, 10) > 0
+                ? tDetail("durationMinutes", {
+                    minutes: parseInt(durationMinutes, 10),
+                  })
+                : null
+            }
           />
           {fieldErrors.scheduledLocal ? (
             <p id="err-when" className="text-sm text-destructive" role="alert">

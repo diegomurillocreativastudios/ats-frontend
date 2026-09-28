@@ -133,6 +133,22 @@ Esto incluye explícitamente:
 - Contenido ingresado por usuarios e información dinámica de base de datos.
 - Nombres propios y tecnologías.
 
+### Excepción explícita: idioma de salida al procesar un CV (`outputLanguage`)
+
+El backend exige el campo `outputLanguage` (`ES`, `EN`, `IT`, `FR`, `DE`) en toda carga de CV de candidato. El frontend lo deriva del locale global activo mediante `toCvOutputLanguage` (`lib/cv-output-language.ts`; fallback `ES`) y lo envía como campo separado del `FormData` en:
+
+- `POST /Ingest/upload` — `components/candidato/AgregarCandidatoModal.tsx`
+- `POST /api/candidate/{id}/documents` — `app/portal-candidato/documentos/DocumentosContent.tsx`
+- `POST /api/candidate/personal-appliance` — `components/public/PublicVacancyApplicationForm.tsx` → `lib/public-vacancy-apply.ts` (fuera del JSON `candidate`)
+
+Alcance de la excepción:
+
+- Solo decide el idioma de una **nueva** extracción hecha por backend en el momento de la carga.
+- **No** traduce en cliente contenido de IA ya guardado ni cambia cómo se renderiza; cambiar el idioma de la UI después de subir un CV no reprocesa nada.
+- **No** es un envío general del locale al backend: ningún otro endpoint recibe el idioma.
+
+Errores asociados (copy en el namespace `CvOutputLanguage`): `400` con `errors.outputLanguage` (algunos endpoints no envían `code`) y `422` con `code: "CV_OUTPUT_LANGUAGE_MISMATCH"`. Se evalúan antes que los mapeos genéricos de upload y de errores por campo.
+
 ### Patrón canónico (etiqueta traducible + contenido verbatim)
 
 Ejemplo real ya presente en `components/rrhh/vacancy-resultados/vacancy-resultados-candidates-block.tsx`:
@@ -357,7 +373,7 @@ bloqueantes** documentados como deuda técnica.
 
 - **Cookie `NEXT_LOCALE`**, sin prefijo `/en`, `/it`, etc.
 - **Sin** `app/[locale]/` ni cambios a `proxy.ts`.
-- **Sin** envío de locale al backend.
+- **Sin** envío general de locale al backend. Única excepción: `outputLanguage` en cargas de CV de candidato (ver §5, "Excepción explícita").
 - `es.json` fuente de verdad; deep-merge fallback en `i18n/request.ts`.
 
 ### 11.6 Checklist de validación (cierre)

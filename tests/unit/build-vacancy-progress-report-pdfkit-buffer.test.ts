@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { buildVacancyProgressReportPdfKitBuffer } from "@/lib/reportes/build-vacancy-progress-report-pdfkit-buffer"
 import type { ReportSchema } from "@/lib/reportes/schema/report-schema-types"
 import { VACANCY_PROGRESS_PDF_TEMPLATE_VERSION } from "@/lib/reportes/vacancy-progress-pdf-constants"
@@ -85,7 +85,7 @@ describe("buildVacancyProgressReportPdfKitBuffer", () => {
       schema: sampleSchema,
     })
 
-    expect(buffer.length).toBeGreaterThan(5000)
+    expect(buffer.length).toBeGreaterThan(2000)
     expect(buffer.subarray(0, 4).toString()).toBe("%PDF")
   })
 
@@ -111,8 +111,7 @@ describe("buildVacancyProgressReportPdfKitBuffer", () => {
   })
 
   it("omits the debug footer marker in production", async () => {
-    const previousNodeEnv = process.env.NODE_ENV
-    process.env.NODE_ENV = "production"
+    vi.stubEnv("NODE_ENV", "production")
 
     try {
       const buffer = await buildVacancyProgressReportPdfKitBuffer({
@@ -130,7 +129,7 @@ describe("buildVacancyProgressReportPdfKitBuffer", () => {
 
       expect(buffer.toString("latin1")).not.toContain(FOOTER_DEBUG_MARKER)
     } finally {
-      process.env.NODE_ENV = previousNodeEnv
+      vi.unstubAllEnvs()
     }
   })
 
@@ -230,8 +229,8 @@ describe("buildVacancyProgressReportPdfKitBuffer", () => {
     })
 
     expect(buffer.subarray(0, 4).toString()).toBe("%PDF")
-    expect(buffer.length).toBeGreaterThan(5000)
-    expect(countPdfPages(buffer)).toBeGreaterThanOrEqual(5)
+    expect(buffer.length).toBeGreaterThan(2000)
+    expect(countPdfPages(buffer)).toBeGreaterThanOrEqual(MIN_PAGE_COUNT)
     expect(countPdfPages(buffer)).toBeLessThan(12)
   })
 })

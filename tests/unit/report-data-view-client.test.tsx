@@ -88,7 +88,7 @@ describe("ReportDataViewClient", () => {
         vi.mocked(fetchTemplateById).mockReset()
 
         vi.mocked(listRecruiterCompanies).mockResolvedValue([
-            { id: "company-1", name: "Acme Corp" },
+            { id: "company-1", name: "Acme Corp", isActive: true },
         ])
         vi.mocked(listRecruiterVacancies).mockResolvedValue([])
         vi.mocked(fetchTemplateById).mockResolvedValue(null)
@@ -111,6 +111,19 @@ describe("ReportDataViewClient", () => {
         })
 
         expect(screen.queryByRole("table")).not.toBeInTheDocument()
+    })
+
+    it("shows filter fields inline on desktop without a Filtros button", async () => {
+        vi.mocked(fetchRecruiterReportForCatalogItem).mockResolvedValueOnce({
+            rows: [],
+            totalCount: 0,
+            extras: null,
+        })
+
+        renderDataView()
+
+        expect(await screen.findByLabelText(/Cliente/i)).toBeVisible()
+        expect(screen.queryByRole("button", { name: "Filtros" })).not.toBeInTheDocument()
     })
 
     it("reapplies filters when the user clicks Aplicar", async () => {

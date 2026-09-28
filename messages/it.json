@@ -55,13 +55,16 @@
     "interviewTypes": "Tipi",
     "interviewModalities": "Modalità",
     "interviewStatuses": "Stati",
-    "tailorProfile": "Adatta il mio profilo"
+    "tailorProfile": "Adatta il mio profilo",
+    "softSkills": "Competenze trasversali"
   },
   "Topbar": {
     "portalCandidate": "Portale candidato",
     "portalRRHH": "Portale HR",
     "portalAdmin": "Portale amministrazione",
     "openMenu": "Apri menu",
+    "closeMenu": "Chiudi menu",
+    "navigationMenu": "Menu di navigazione",
     "userMenu": "Menu utente",
     "breadcrumb": "Percorso di navigazione",
     "adminShortcut": "Amministrazione"
@@ -83,13 +86,95 @@
   },
   "Auth": {
     "login": {
-      "brandTitle": "Sistema di gestione candidati<br></br>per i reparti HR",
-      "brandSubtitle": "Ottimizza il tuo processo di selezione con l'IA.<br></br>Gestisci candidati, posizioni e valutazioni<br></br>in un unico posto.",
-      "brandTitleSm": "Sistema di gestione<br></br>del reclutamento",
-      "brandSubtitleSm": "Ottimizza il tuo<br></br>processo di selezione con l'IA.",
-      "feature1": "Abbinamento intelligente dei candidati",
-      "feature2": "Processi di assunzione semplificati",
-      "feature3": "Report direzionali in tempo reale",
+      "aiEngineBadge": "Motore IA v4.2 attivo",
+      "themeBadge": "Assunzione ad alto impatto",
+      "brandTitle": "Sistema di gestione candidati per i reparti di risorse umane",
+      "brandSubtitle": "Ottimizza la selezione con punteggio di IA predittiva. Gestisci candidati, posizioni e valutazioni in un unico posto.",
+      "brandTitleSm": "Sistema di gestione del reclutamento",
+      "brandSubtitleSm": "Ottimizza il tuo processo di selezione con l'IA.",
+      "feature1": "Abbinamento intelligente dei candidati con IA e punteggio delle competenze.",
+      "feature2": "Flussi di assunzione ottimizzati e colloqui automatizzati.",
+      "feature3": "Report direzionali in tempo reale con metriche di tempo di copertura.",
+      "previewAria": "Anteprima di una candidata in evidenza",
+      "previewName": "Sofía Carrillo",
+      "previewInitials": "SC",
+      "previewTopBadge": "Candidata in evidenza",
+      "previewRole": "Selezionatrice tecnica senior",
+      "previewMatch": "Affinità IA: 96% • Alta affinità culturale",
+      "previewTagSourcing": "Ricerca attiva",
+      "previewTagAnalytics": "Analisi delle risorse umane",
+      "previewTagEnglish": "Inglese C1",
+      "previewTagEvaluation": "Valutazione completata",
+      "previewPersonas": {
+        "sofia": {
+          "name": "Sofía Carrillo",
+          "initials": "SC",
+          "role": "Selezionatrice tecnica senior",
+          "topBadge": "Candidata in evidenza",
+          "match": "Affinità IA: 96% • Alta affinità culturale",
+          "tag1": "Ricerca attiva",
+          "tag2": "Analisi delle risorse umane",
+          "tag3": "Inglese C1",
+          "evaluation": "Valutazione completata"
+        },
+        "tomas": {
+          "name": "Tomás Herrera",
+          "initials": "TH",
+          "role": "Sviluppatore full stack",
+          "topBadge": "Candidato in evidenza",
+          "match": "Affinità IA: 94% • Architettura solida",
+          "tag1": "TypeScript",
+          "tag2": "React",
+          "tag3": "Node.js",
+          "evaluation": "Valutazione completata"
+        },
+        "irene": {
+          "name": "Irene Solís",
+          "initials": "IS",
+          "role": "Designer UX/UI senior",
+          "topBadge": "Candidata in evidenza",
+          "match": "Affinità IA: 97% • Design centrato sulla persona",
+          "tag1": "Figma",
+          "tag2": "Sistemi di design",
+          "tag3": "Accessibilità",
+          "evaluation": "Valutazione completata"
+        },
+        "marco": {
+          "name": "Marco Bellini",
+          "initials": "MB",
+          "role": "Pilota di Formula 1",
+          "topBadge": "Candidato in evidenza",
+          "match": "Affinità IA: 91% • Alte prestazioni sotto pressione",
+          "tag1": "Telemetria",
+          "tag2": "Qualifica",
+          "tag3": "Resistenza",
+          "evaluation": "Valutazione completata"
+        },
+        "helena": {
+          "name": "Helena Duarte",
+          "initials": "HD",
+          "role": "Medico di medicina generale",
+          "topBadge": "Candidata in evidenza",
+          "match": "Affinità IA: 93% • Cura umana e precisa",
+          "tag1": "Medicina di famiglia",
+          "tag2": "Assistenza primaria",
+          "tag3": "Pronto soccorso",
+          "evaluation": "Valutazione completata"
+        },
+        "julian": {
+          "name": "Julián Castro",
+          "initials": "JC",
+          "role": "Coordinatore marketing",
+          "topBadge": "Candidato in evidenza",
+          "match": "Affinità IA: 95% • Campagne ad alto impatto",
+          "tag1": "Campagne",
+          "tag2": "Contenuti",
+          "tag3": "SEO",
+          "evaluation": "Valutazione completata"
+        }
+      },
+      "teamsSocialProof": "Oltre 450+ team di talenti",
+      "complianceBadge": "GDPR e SOC-2",
       "title": "Accedi",
       "subtitle": "Inserisci le tue credenziali",
       "subtitleExtended": "per accedere al sistema",
@@ -98,6 +183,13 @@
       "passwordLabel": "Password",
       "showPassword": "Mostra password",
       "forgotPasswordLink": "Hai dimenticato la password?",
+      "rememberSession": "Ricorda la mia sessione su questo dispositivo",
+      "supportHelp": "Supporto e assistenza",
+      "supportHelpShort": "Supporto",
+      "legalPrivacy": "Privacy",
+      "legalTerms": "Termini di servizio",
+      "legalSecurity": "Sicurezza",
+      "poweredByFooter": "Con tecnologia di Creativa Studios LLC",
       "submit": "Accedi",
       "submitting": "Accesso in corso...",
       "noAccount": "Non hai un account?",
@@ -178,39 +270,60 @@
       "invalidBrandSubtitle": "Avvia la reimpostazione da \"Hai dimenticato la password?\".",
       "invalidCardTitle": "Non siamo riusciti ad aprire la reimpostazione",
       "invalidCardBody": "Il link non è valido o è scaduto. Torna a \"Hai dimenticato la password?\" per richiederne uno nuovo.",
-      "invalidGoForgot": "Vai a password dimenticata"
+      "invalidGoForgot": "Richiedi un nuovo link"
     },
     "loadingFallback": "Caricamento…",
-    "poweredBy": "Powered by <link>Creativa Studios</link> LLC",
+    "poweredBy": "Con tecnologia di <link>Creativa Studios</link> LLC",
     "register": {
-      "brandTitle": "Únete a la plataforma líder en reclutamiento",
-      "brandSubtitle": "Crea tu cuenta y comienza a optimizar tu proceso de selección con IA.",
-      "brandSubtitleSm": "Crea tu cuenta y optimiza tu selección.",
-      "feature1": "Configuración rápida en minutos",
-      "feature2": "Datos seguros y encriptados",
-      "feature3": "Soporte 24/7 disponible",
-      "tabletTitle": "Sistema de Reclutamiento Inteligente",
-      "title": "Registrarse",
-      "subtitle": "Completa tus datos",
-      "subtitleExtended": "para registrarte",
-      "emailLabel": "Correo electrónico",
+      "brandTitle": "Unisciti alla piattaforma di recruiting di riferimento",
+      "brandSubtitle": "Crea il tuo account e inizia a ottimizzare il processo di selezione con l'IA.",
+      "brandSubtitleSm": "Crea il tuo account e ottimizza la selezione.",
+      "feature1": "Configurazione rapida in pochi minuti",
+      "feature2": "Dati sicuri e crittografati",
+      "feature3": "Supporto disponibile 24/7",
+      "tabletTitle": "Sistema di recruiting intelligente",
+      "title": "Registrati",
+      "stepOf": "Passo {current} di {total}",
+      "subtitle": "Inserisci la tua email per continuare",
+      "subtitleExtended": "e crea il tuo account",
+      "emailStepSubtitle": "Invieremo un codice se l'email è valida.",
+      "emailLabel": "Email",
       "emailPlaceholder": "juan@empresa.com",
-      "passwordLabel": "Contraseña",
-      "passwordPlaceholder": "Mínimo 8 caracteres",
-      "confirmPasswordLabel": "Confirmar contraseña",
-      "confirmPasswordPlaceholder": "Repetir contraseña",
-      "showPasswords": "Mostrar contraseñas",
-      "showPasswordsAria": "Mostrar contraseñas",
-      "submit": "Crear Cuenta",
-      "submitting": "Creando cuenta...",
+      "sendCode": "Invia codice",
+      "sendingCode": "Invio del codice...",
+      "codeTitle": "Inserisci il codice",
+      "codeSubtitle": "Se l'email è valida, ti abbiamo inviato un codice di 6 cifre.",
+      "codeLabel": "Codice di verifica",
+      "codePlaceholder": "000000",
+      "codeDigitAria": "Cifra {current} di {total}",
+      "codeContinue": "Continua",
+      "checkingCode": "Verifica del codice...",
+      "resendLimitHint": "Fino a 3 codici all'ora, con 60 secondi tra un invio e l'altro.",
+      "resendCode": "Reinvia codice",
+      "resendingCode": "Reinvio...",
+      "resendIn": "Reinvia tra {seconds}s",
+      "changeEmail": "Cambia email",
+      "passwordTitle": "Crea la tua password",
+      "passwordSubtitle": "Scegli una password per il tuo account.",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Almeno 8 caratteri",
+      "confirmPasswordLabel": "Conferma password",
+      "confirmPasswordPlaceholder": "Ripeti la password",
+      "showPasswords": "Mostra password",
+      "showPasswordsAria": "Mostra password",
+      "back": "Indietro",
+      "submit": "Crea account",
+      "submitting": "Creazione dell'account...",
       "retryIn": "Riprova tra {seconds}s",
-      "hasAccount": "¿Ya tienes cuenta?",
-      "loginLink": "Inicia sesión",
-      "toastSuccess": "Cuenta creada correctamente. Ya puedes iniciar sesión.",
+      "hasAccount": "Hai già un account?",
+      "loginLink": "Accedi",
+      "toastCodeSent": "Se l'email è valida, ti abbiamo inviato un codice.",
+      "toastSignedIn": "Account creato. Hai effettuato l'accesso.",
       "errors": {
-        "generic": "No se pudo completar el registro. Revisá los datos e intentá de nuevo.",
-        "rateLimited": "Demasiados intentos. Esperá un momento e intentá de nuevo.",
-        "server": "Error del servidor. Intenta más tarde."
+        "generic": "Non è stato possibile completare la registrazione. Controlla i dati e riprova.",
+        "invalidCode": "Il codice non è valido o è scaduto.",
+        "rateLimited": "Troppi tentativi. Attendi un momento e riprova.",
+        "server": "Errore del server. Riprova più tardi."
       }
     }
   },
@@ -220,10 +333,17 @@
     "emailRequired": "L'email è obbligatoria",
     "passwordRequired": "La password è obbligatoria",
     "passwordMinLength": "La password deve contenere almeno 8 caratteri",
-    "passwordsDontMatch": "Le password non coincidono"
+    "passwordsDontMatch": "Le password non coincidono",
+    "invalidCode": "Il codice deve avere 6 cifre"
   },
   "Errors": {
-    "connection": "Errore di connessione. Riprova."
+    "connection": "Errore di connessione. Riprova.",
+    "boundary": {
+      "title": "Qualcosa è andato storto",
+      "description": "Non siamo riusciti a mostrare questa pagina. Puoi riprovare o tornare più tardi.",
+      "retry": "Riprova",
+      "ref": "Ref: {digest}"
+    }
   },
   "Metadata": {
     "auth": {
@@ -277,7 +397,7 @@
       "description": "Amministrazione della piattaforma Applican Tree",
       "companies": {
         "title": "Aziende",
-        "description": "Gestione delle aziende clienti (tenant) della piattaforma"
+        "description": "Gestione delle aziende clienti della piattaforma"
       },
       "users": {
         "title": "Utenti",
@@ -330,6 +450,10 @@
       "configuration": {
         "title": "Impostazioni",
         "description": "Impostazioni generali del portale di amministrazione"
+      },
+      "softSkills": {
+        "title": "Competenze trasversali",
+        "description": "Gestione del catalogo globale delle competenze trasversali per il feedback del colloquio"
       }
     },
     "root": {
@@ -368,6 +492,10 @@
     "recruiterSettings": {
       "title": "ApplicanTree | Portal RRHH | Settings",
       "description": "Settings del portal RRHH"
+    },
+    "recruiterProfile": {
+      "title": "ApplicanTree | Portale RU | Il mio profilo",
+      "description": "Modifica le tue informazioni di recruiter"
     },
     "publicOpportunities": {
       "list": {
@@ -486,22 +614,14 @@
       "title": "Documenti",
       "description": "Carica e gestisci i documenti del tuo processo di selezione",
       "descriptionShort": "Carica e gestisci i tuoi documenti",
-      "completeInfo": "Completa le informazioni",
-      "completeInfoShort": "Completa info",
-      "completeInfoAria": "Completa le informazioni del candidato",
       "loading": "Caricamento documenti...",
       "uploadGeneral": "Carica documento generale",
       "uploading": "Caricamento...",
       "uploadGeneralAria": "Carica i documenti generali del candidato",
       "toastDeleted": "Documento eliminato correttamente.",
       "toastDeleteError": "Impossibile eliminare il documento.",
-      "toastProcessed": "Documento elaborato correttamente.",
-      "toastProcessError": "Errore durante l'elaborazione del documento.",
-      "toastProcessedMany": "{count, plural, one {# documento elaborato correttamente.} other {# documenti elaborati correttamente.}}",
-      "toastProcessManyError": "Errore durante l'elaborazione dei documenti.",
       "toastSelectFile": "Seleziona almeno un file da caricare.",
       "toastNoProfile": "Impossibile identificare il tuo profilo di candidato.",
-      "toastResumeBlocked": "Questo endpoint è solo per documenti generali. Rimuovi o sostituisci i file tipo CV/Resume (ad esempio: {fileName}).",
       "toastGeneralUploaded": "{count, plural, one {Documento generale caricato correttamente.} other {# documenti generali caricati correttamente.}}",
       "toastGeneralUploadError": "Impossibile caricare il documento generale.",
       "upload": {
@@ -605,7 +725,7 @@
           "submit": "Salva le informazioni",
           "success": "Le tue informazioni sono state aggiornate correttamente. Controlla il tuo profilo per vedere i dati.",
           "errorPrefix": "Errore durante il salvataggio delle tue informazioni",
-          "cvRequired": "Devi caricare il tuo CV.",
+          "cvRequired": "Il tuo CV è un campo obbligatorio.",
           "cvHeading": "Il tuo CV",
           "cvDescription": "Carica il tuo CV per completare automaticamente le informazioni del tuo profilo.",
           "aiNote": "Risultato generato dall'IA. Controlla i dati in Il mio profilo prima di candidarti."
@@ -616,7 +736,7 @@
           "success": "Candidato creato ed elaborato correttamente.",
           "successMany": "{count} candidati elaborati correttamente.",
           "errorPrefix": "Errore durante la creazione del candidato",
-          "cvRequired": "Devi caricare il CV del candidato.",
+          "cvRequired": "Il CV del candidato è un campo obbligatorio.",
           "cvHeading": "CV del candidato",
           "cvDescription": "Carica il CV del candidato per creare automaticamente il suo profilo.",
           "aiNote": "Risultato generato dall'IA. Richiede la convalida delle Risorse Umane."
@@ -625,6 +745,9 @@
     },
     "profile": {
       "breadcrumb": "Il mio profilo",
+      "completeInfo": "Completa le informazioni",
+      "completeInfoShort": "Completa info",
+      "completeInfoAria": "Completa le informazioni del candidato",
       "page": {
         "title": "Il mio profilo",
         "description": "Modifica la tua scheda con i dati obbligatori e verifica come si combina con le informazioni dei tuoi documenti.",
@@ -681,7 +804,8 @@
         "cancelAria": "Annulla la modifica senza salvare",
         "save": "Salva modifiche",
         "saving": "Salvataggio…",
-        "requiredHint": "Titolo, riepilogo e documento d'identità sono obbligatori al salvataggio.",
+        "requiredHint": "I campi con asterisco sono obbligatori al salvataggio.",
+        "resumeMissingAria": "Manca il testo del curriculum per poter salvare il profilo",
         "triggerComplete": "Completa il mio profilo",
         "triggerEdit": "Modifica il mio profilo"
       },
@@ -696,7 +820,6 @@
       "hero": {
         "editTitle": "La tua scheda",
         "editDescription": "Modifica nome, titolo e riepilogo nello stesso posto in cui li vedi leggendo il profilo.",
-        "profileSubtitle": "Così appare il tuo profilo professionale nel sistema.",
         "summaryEmpty": "Completa il riepilogo modificando il profilo o dalle informazioni importate dai tuoi documenti.",
         "defaultName": "Candidato"
       },
@@ -748,8 +871,7 @@
         "complianceValueLabel": "Valore"
       },
       "emptyStates": {
-        "enrichedEmptyPrefix": "Non c'è ancora alcun percorso o competenza nella tua scheda. Puoi aggiungerli modificando il profilo o caricando un CV in ",
-        "documentsLink": "Documenti",
+        "enrichedEmptyPrefix": "Non c'è ancora alcun percorso o competenza nella tua scheda. Puoi aggiungerli modificando il profilo o caricando un CV con ",
         "enrichedEmptySuffix": ".",
         "technicalDataWarning": "Parte del tuo profilo è arrivata in un formato che non è stato possibile interpretare come JSON. Se vedi questo, avvisa il supporto.",
         "complianceDash": "—",
@@ -770,9 +892,17 @@
         "links": "Link",
         "references": "Referenze",
         "recognitions": "Riconoscimenti",
+        "resumeMissing": {
+          "emptyTitle": "Nessun testo estratto",
+          "emptyBody": "Carica il file in Documenti per poter salvare il profilo.",
+          "fileWithoutTextTitle": "File senza testo estratto",
+          "fileWithoutTextBody": "Il CV è caricato, ma manca ancora il testo da salvare. Controlla Documenti o contatta l'assistenza.",
+          "uploadCta": "Carica in Documenti",
+          "reviewCta": "Rivedi in Documenti"
+        },
         "labels": {
-          "firstName": "Nome",
-          "lastName": "Cognome",
+          "firstName": "Nomi",
+          "lastName": "Cognomi",
           "headline": "Titolo / headline",
           "summary": "Riepilogo professionale",
           "nationalId": "Documento d'identità",
@@ -791,6 +921,7 @@
           "availability": "Disponibilità",
           "disability": "Disabilità",
           "resumeMarkdown": "Curriculum in testo (markdown)",
+          "resumeText": "Curriculum in testo",
           "company": "Azienda",
           "role": "Ruolo / posizione",
           "start": "Inizio",
@@ -863,7 +994,7 @@
             "futureDate": "La data non può essere nel futuro",
             "tooYoung": "Devi avere almeno 18 anni"
           },
-          "requiredFields": "Titolo, riepilogo e documento di identità sono obbligatori.",
+          "requiredFields": "Nomi, cognomi, titolo, riepilogo e documento di identità sono obbligatori.",
           "resumeRequired": "Il profilo deve includere il curriculum in testo. Carica un CV in Documenti o contatta il supporto."
         }
       },
@@ -907,6 +1038,74 @@
       "fallbacks": {
         "dash": "—",
         "linkPlatform": "Link"
+      },
+      "consent": {
+        "title": "Authorization and consent",
+        "subtitle": "You must accept each section to continue",
+        "progress": "Progress: {accepted} of {total} sections",
+        "acceptSection": "I have read and accept this section",
+        "verifiedBadge": "Authorized",
+        "verifiedBadgeTitle": "Authorization and consent submitted successfully",
+        "footerHint": "Check all 7 sections and complete every field to submit",
+        "footerReady": "Ready to submit the authorization",
+        "cancel": "Cancel",
+        "accept": "Submit authorization",
+        "toasts": {
+          "submitSuccess": "Authorization submitted successfully.",
+          "submitError": "Could not submit the authorization. Please try again.",
+          "validation": "Please review the form data and try again.",
+          "versionMismatch": "The authorization document was updated. Reload the page and try again.",
+          "nationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support.",
+          "profileNotFound": "You do not have a candidate profile yet. Complete your profile and try again.",
+          "forbidden": "Your account is not allowed to submit this authorization."
+        },
+        "sections": {
+          "profileUse": {
+            "title": "Authorization for profile use and presentation",
+            "body": "I freely and voluntarily authorize {companyName} to receive, review, store, analyze, process, and present my curriculum vitae, professional profile, work experience, academic background, skills, salary expectations, availability, references, and other information related to my candidacy.\n\nThis authorization applies to recruitment, selection, headhunting, outsourcing, staffing, professional services, temporary projects, and future job or professional opportunities.\n\nI authorize {companyName} to share my professional profile with current or potential clients, domestic or international, solely for purposes related to evaluation, interview, selection, hiring, project assignment, or provision of outsourced services.\n\nI understand that presenting my profile does not guarantee an interview, job offer, or hiring."
+          },
+          "personalData": {
+            "title": "Personal data protection",
+            "body": "I authorize {companyName} to process my personal and professional data exclusively for recruitment, selection, headhunting, outsourcing, staffing, talent administration, and presentation of job or professional opportunities.\n\n{companyName} commits to using my information confidentially, responsibly, and limited to the purposes stated above.\n\nI may request updating, correction, or deletion of my data by writing to the contact email indicated by {companyName}."
+          },
+          "confidentiality": {
+            "title": "Process confidentiality",
+            "body": "I commit to keeping confidential the information I receive during the process, including data about clients, vacancies, interviews, tests, conditions, proposals, methodologies, contacts, documents, or any information shared by {companyName} or its clients.\n\nThis information must be used only for my participation in the corresponding process."
+          },
+          "communications": {
+            "title": "Channeling of process-related communications",
+            "body": "I acknowledge that {companyName} performs professional management of search, contact, evaluation, selection, and presentation of candidates to its clients.\n\nTherefore, if during the process or within the months following my formal presentation to a client I receive a communication, interview, proposal, or direct offer related to the same vacancy, client, or process managed by {companyName}, I commit to informing {companyName} and channeling the corresponding communication through the company.\n\nThis provision does not limit my right to work, seek employment, participate in other processes, or accept job opportunities. Its purpose is to maintain process traceability, protect information confidentiality, and recognize the professional management performed by {companyName}."
+          },
+          "nonExclusivity": {
+            "title": "Non-exclusivity and freedom to work",
+            "body": "I declare that my participation as a candidate does not imply exclusivity, does not limit my right to work, does not prevent me from participating in other processes, and does not constitute an automatic employment relationship with {companyName} or its clients.\n\nAn employment, commercial, or service relationship will exist only if a contract, offer letter, service agreement, or corresponding onboarding document is later signed."
+          },
+          "electronicSignature": {
+            "title": "Electronic signature and acceptance",
+            "body": "I accept that this form may be signed physically or electronically through platforms such as DocuSign, PandaDoc, or other equivalent tools used by {companyName}.\n\nAn electronic signature, digitized signature, click acceptance, digital confirmation, or validation through an electronic platform will constitute a free and informed expression of my consent for the processing and presentation of my professional profile under this document.\n\n{companyName} may retain the electronic evidence generated by the platform used, including date, time, email address, IP address, audit log, signed document version, and other supporting technical elements.\n\nThis acceptance does not constitute an employment relationship, promise of employment, or hiring obligation."
+          },
+          "acceptance": {
+            "title": "Acceptance (candidate signature and details)",
+            "body": "I declare that I have read and understood this document, that I voluntarily participate in the processes managed by {companyName}, and that I authorize the processing and presentation of my information according to the stated purposes."
+          }
+        },
+        "signature": {
+          "firstNames": "First names",
+          "lastNames": "Last names",
+          "signature": "Signature",
+          "signaturePlaceholder": "Type your full name as your signature",
+          "documentId": "Identity document",
+          "date": "Date",
+          "email": "Email",
+          "phone": "Phone",
+          "phonePlaceholder": "1234-5678",
+          "countryAria": "Country code",
+          "countrySearchPlaceholder": "Search by country, ISO or code (+503)",
+          "countryNoResults": "No countries found",
+          "countryLoading": "Loading countries…",
+          "completeFormFirst": "Complete all form fields before checking this section",
+          "finalConfirm": "I confirm my final acceptance"
+        }
       }
     },
     "profileTailoring": {
@@ -955,7 +1154,9 @@
         "versionSaved": "Version saved successfully.",
         "versionSaveError": "Could not save the version.",
         "applySuccess": "Your main profile was updated.",
-        "applyError": "Could not update your main profile."
+        "applyError": "Could not update your main profile.",
+        "downloadCvSuccess": "CV adattato scaricato.",
+        "downloadCvFailed": "Impossibile scaricare il CV adattato."
       },
       "actions": {
         "saveVersion": "Save to this version",
@@ -1066,7 +1267,8 @@
           },
           "viewOriginalCv": "Vedi CV originale",
           "viewAdaptedCv": "Vedi CV adattato",
-          "exportComparison": "Esporta confronto",
+          "downloadAdaptedCv": "Scarica CV adattato",
+          "downloadingCv": "Download del CV…",
           "applyAdaptedVersion": "Applica versione adattata",
           "applying": "Applicazione…",
           "categories": {
@@ -1146,6 +1348,7 @@
         },
         "actions": {
           "view": "View",
+          "downloadCv": "Scarica CV adattato",
           "delete": "Delete"
         },
         "toasts": {
@@ -1195,6 +1398,8 @@
       },
       "filters": {
         "legend": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri del report",
         "hint": "I valori vengono inviati come query param all'API dei report."
       },
       "actions": {
@@ -1311,7 +1516,7 @@
         "loadingData": "Caricamento dati report…",
         "errorNoTemplate": "Nessun modello di report trovato con quell'identificatore.",
         "errorNoConfig": "Questo modello non ha ancora la configurazione del report. Contatta l'amministratore o usa un report dall'elenco.",
-        "errorNoContent": "Il modello non ha contenuto HTML. Configura contentTemplate in Amministrazione → Modelli.",
+        "errorNoContent": "Il modello non ha uno schema JSON valido. Configura contentTemplate in Amministrazione → Modelli.",
         "errorNoData": "Nessun dato per i filtri selezionati. Prova ad ampliare l'intervallo o a cambiare il cliente.",
         "errorForbidden": "Non hai i permessi per visualizzare questo report.",
         "errorGeneric": "Impossibile caricare il report.",
@@ -1385,6 +1590,8 @@
     "candidateDetail": {
       "page": {
         "loadingProfile": "Caricamento profilo...",
+        "errorNotFoundTitle": "Non abbiamo trovato questo candidato",
+        "errorLoadTitle": "Impossibile caricare il profilo",
         "backToCandidates": "Torna ai candidati",
         "backToCandidatesAria": "Torna ai candidati",
         "interviews": "Colloqui",
@@ -1447,6 +1654,8 @@
         "downloadCv": "Scarica CV",
         "downloadingCv": "Download in corso…",
         "downloadCvAria": "Scarica CV in PDF",
+        "generateTechnicalSheet": "Genera scheda tecnica",
+        "generateTechnicalSheetAria": "Genera la scheda tecnica di questo candidato",
         "cancel": "Annulla",
         "cancelAria": "Annulla la modifica senza salvare",
         "save": "Salva modifiche",
@@ -1473,6 +1682,7 @@
       "errors": {
         "loadProfileFailed": "Impossibile caricare il profilo del candidato.",
         "candidateUnavailable": "Questo candidato non è disponibile oppure non hai accesso.",
+        "invalidCandidateId": "Questo collegamento non corrisponde a un candidato valido.",
         "missingCandidateId": "Manca l'identificatore del candidato.",
         "downloadFailed": "Errore durante il download.",
         "downloadCvFailed": "Impossibile scaricare il CV.",
@@ -1506,9 +1716,17 @@
         "links": "Link",
         "references": "Referenze",
         "recognitions": "Riconoscimenti",
+        "resumeMissing": {
+          "emptyTitle": "Nessun testo estratto",
+          "emptyBody": "Carica il file in Documenti per poter salvare il profilo.",
+          "fileWithoutTextTitle": "File senza testo estratto",
+          "fileWithoutTextBody": "Il CV è caricato, ma manca ancora il testo da salvare. Controlla Documenti o contatta l'assistenza.",
+          "uploadCta": "Carica in Documenti",
+          "reviewCta": "Rivedi in Documenti"
+        },
         "labels": {
-          "firstName": "Nome",
-          "lastName": "Cognome",
+          "firstName": "Nomi",
+          "lastName": "Cognomi",
           "headline": "Titolo / headline",
           "summary": "Riepilogo professionale",
           "nationalId": "Documento d'identità",
@@ -1527,6 +1745,7 @@
           "availability": "Disponibilità",
           "disability": "Disabilità",
           "resumeMarkdown": "Curriculum in testo (markdown)",
+          "resumeText": "Curriculum in testo",
           "company": "Azienda",
           "role": "Ruolo / posizione",
           "start": "Inizio",
@@ -1599,7 +1818,7 @@
             "futureDate": "La data non può essere nel futuro",
             "tooYoung": "Devi avere almeno 18 anni"
           },
-          "requiredFields": "Titolo, riepilogo e documento di identità sono obbligatori.",
+          "requiredFields": "Nomi, cognomi, titolo, riepilogo e documento di identità sono obbligatori.",
           "resumeRequired": "Il profilo deve includere il curriculum in testo. Carica un CV o contatta il supporto."
         }
       },
@@ -1661,26 +1880,80 @@
       "portalCrumb": "Portale RU",
       "title": "Impostazioni",
       "description": "Centralizza qui le impostazioni funzionali del portale RU.",
+      "profile": {
+        "title": "Il mio profilo",
+        "description": "Modifica il nome e la foto visualizzati nel portale."
+      },
       "googleCalendar": {
         "title": "Google Calendar",
         "description": "Connetti e gestisci la sincronizzazione dei colloqui."
       },
+      "profilePage": {
+        "title": "Il mio profilo",
+        "pageDescription": "Aggiorna il nome visibile e la foto. Email e ruolo arrivano dal tuo account.",
+        "formHint": "Questi dati e la tua foto compaiono nel menu account e nei colloqui che pianifichi.",
+        "photoLabel": "Foto del profilo",
+        "photoHint": "PNG, JPEG, WebP o GIF. Massimo 5 MB.",
+        "photoAlt": "Foto del profilo di {name}",
+        "photoAdd": "Aggiungi foto",
+        "photoChange": "Cambia foto",
+        "photoRemove": "Elimina foto",
+        "photoRemoving": "Eliminazione…",
+        "photoUploading": "Caricamento…",
+        "photoUploadedToast": "Foto del profilo aggiornata.",
+        "photoRemovedToast": "Foto del profilo eliminata.",
+        "photoFailed": "Impossibile aggiornare la foto.",
+        "photoInvalidType": "La foto deve essere PNG, JPEG, WebP o GIF.",
+        "photoTooLarge": "La foto non può superare 5 MB.",
+        "photoEmpty": "La foto è vuota.",
+        "nameLabel": "Nome visibile",
+        "namePlaceholder": "Come vuoi apparire nel portale",
+        "required": "Inserisci il tuo nome.",
+        "tooShort": "Il nome deve avere almeno 2 caratteri.",
+        "tooLong": "Il nome non può superare 80 caratteri.",
+        "invalid": "Il nome non è valido.",
+        "rateLimited": "Troppi tentativi. Riprova più tardi.",
+        "emailLabel": "Email",
+        "emailHint": "L'email non si può cambiare da qui.",
+        "roleLabel": "Ruolo",
+        "roleUnknown": "Nessun ruolo",
+        "save": "Salva modifiche",
+        "saving": "Salvataggio…",
+        "savedToast": "Profilo aggiornato.",
+        "saveFailed": "Impossibile salvare il profilo.",
+        "loadFailed": "Impossibile caricare i tuoi dati."
+      },
       "calendarPage": {
         "title": "Calendario",
         "description": "Collega Google Calendar per sincronizzare i colloqui e inviare inviti automatici.",
-        "pageDescription": "Collega Google Calendar per sincronizzare i colloqui da Applican Tree.",
+        "pageDescription": "Sincronizza colloqui e inviti con il tuo Google Calendar.",
         "connectedToast": "Google Calendar collegato correttamente.",
         "syncing": "Sincronizzazione…",
         "syncInterviews": "Sincronizza colloqui",
-        "connectedAs": "Connesso come {email} (il tuo account)",
-        "notConnected": "Google Calendar non è connesso.",
+        "connectedAs": "Connesso come {email}",
+        "notConnected": "Non connesso",
+        "statusConnected": "Connesso",
         "connectHint": "Collega il tuo account per sincronizzare i colloqui.",
-        "connectDescription": "Collegandoti, autorizzi Applican Tree a creare eventi e inviti nel tuo Google Calendar (in base all'implementazione del backend).",
-        "connectedServerHint": "I colloqui con data possono essere creati o aggiornati nel tuo calendario secondo la configurazione del server.",
+        "connectDescription": "Collegandoti, autorizzi Applican Tree a creare eventi di colloquio e inviti nel tuo Google Calendar.",
+        "connectedHint": "I colloqui con data vengono creati o aggiornati nel calendario. Gli eventi già creati non vengono eliminati se ti disconnetti.",
+        "benefitsTitle": "Cosa potrai fare",
+        "benefitEvents": "Creare eventi di colloquio nel tuo calendario",
+        "benefitInvites": "Inviare inviti al candidato con data e ora",
+        "benefitVideo": "Aggiungere un link per la videoconferenza quando il colloquio è virtuale",
+        "trustNote": "Chiediamo solo il permesso di creare e aggiornare eventi di colloquio. Non usiamo il tuo calendario per altro.",
+        "connectedSince": "Connesso il {date}",
+        "accountLabel": "Account Google",
         "syncFailed": "Impossibile sincronizzare il calendario.",
         "syncResultPartial": "Sincronizzato: {synced} ok, {failed} con errore.",
         "syncResultSuccess": "Sincronizzato: {synced} colloquio/i.",
-        "accountFallback": "il tuo account"
+        "accountFallback": "il tuo account",
+        "oauthErrors": {
+          "missing_code": "Manca il codice di autorizzazione Google. Prova a collegarti di nuovo.",
+          "session_expired": "La sessione è scaduta. Accedi di nuovo e collega il calendario.",
+          "connect_denied": "L'accesso a Google Calendar non è stato autorizzato.",
+          "callback_failed": "Impossibile completare la connessione a Google Calendar. Riprova.",
+          "generic": "Impossibile collegare Google Calendar. Riprova."
+        }
       },
       "calendarConnect": {
         "label": "Collega Google Calendar",
@@ -1718,6 +1991,7 @@
       },
       "filters": {
         "regionLabel": "Filtri posizioni",
+        "toggle": "Filtri",
         "name": "Nome",
         "searchPlaceholder": "Cerca posizione...",
         "company": "Azienda",
@@ -1726,7 +2000,8 @@
         "department": "Reparto",
         "allFemale": "Tutte",
         "allMale": "Tutti",
-        "filterByAria": "Filtra per {label}"
+        "filterByAria": "Filtra per {label}",
+        "clearFilters": "Cancella filtri"
       },
       "cards": {
         "untitled": "Senza titolo",
@@ -1740,6 +2015,9 @@
         "closed": "Chiusa",
         "paused": "In pausa",
         "draft": "Bozza"
+      },
+      "catalogFallbacks": {
+        "uncategorized": "Senza categoria"
       },
       "actions": {
         "create": "Nuova posizione",
@@ -1799,7 +2077,9 @@
           },
           "client": {
             "label": "Cliente / azienda",
-            "ariaLabel": "Cliente o azienda della posizione"
+            "ariaLabel": "Cliente o azienda della posizione",
+            "loading": "Caricamento aziende…",
+            "empty": "Nessuna azienda disponibile"
           },
           "country": {
             "label": "Paese a cui si applica la posizione"
@@ -1912,6 +2192,8 @@
           "resultsAria": "Vedi risultati e metriche di questa posizione",
           "copy": "Copia",
           "copyAria": "Copia questa posizione",
+          "copyLink": "Copia link",
+          "copyLinkAria": "Copia il link pubblico di questa posizione",
           "addRequirement": "Aggiungi",
           "addRequirementAria": "Aggiungi requisito",
           "companyChangeHint": "Cambiare il cliente non modifica lo stato della posizione né le candidature esistenti."
@@ -1933,7 +2215,9 @@
           "saved": "Modifiche salvate correttamente.",
           "finishSuccess": "Processo concluso correttamente.",
           "copied": "Posizione copiata.",
-          "copyFailed": "Impossibile copiare la posizione."
+          "copyFailed": "Impossibile copiare la posizione.",
+          "linkCopied": "Link pubblico copiato.",
+          "linkCopyFailed": "Impossibile copiare il link pubblico."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2006,7 +2290,7 @@
         },
         "filters": {
           "heading": "Filtri candidati",
-          "description": "Si applicano all'elenco principale sotto i grafici.",
+          "description": "Si applicano all'elenco dei candidati.",
           "searchAria": "Cerca per nome o email",
           "searchPlaceholder": "Cerca per nome o email…",
           "applicationStatus": "Stato candidatura",
@@ -2060,7 +2344,7 @@
         "charts": {
           "noApplicants": "Non ci sono ancora candidati per questa posizione. Quando ci saranno candidati nella board, vedrai qui la distribuzione per fase e punteggio.",
           "heading": "Indicatori grafici",
-          "description": "Vista compatta della pipeline e dell'abbinamento; l'elenco operativo è sotto.",
+          "description": "Distribuzione per fase e abbinamento accanto all'elenco dei candidati.",
           "byStageHeading": "Candidati per fase",
           "byStageDescription": "Conteggio per fase attuale di ogni candidatura.",
           "scoreDistributionHeading": "Distribuzione punteggi",
@@ -2078,7 +2362,7 @@
         "meta": {
           "srOnlyContext": "Contesto posizione: {title}",
           "company": "Azienda",
-          "countryCode": "Paese (codice)",
+          "countryCode": "Paese",
           "department": "Dipartimento",
           "modality": "Modalità",
           "created": "Creata",
@@ -2090,8 +2374,8 @@
           "viewFullDescription": "Vedi descrizione completa",
           "expandHint": "(clic per espandere)",
           "technicalDetails": "Dettagli tecnici",
-          "technicalDetailsHint": "(requisiti, suggerimenti IA)",
-          "requirementsPayload": "Requisiti (payload)",
+          "technicalDetailsHint": "(pesi, requisiti, suggerimenti IA)",
+          "requirementsPayload": "Requisiti",
           "noRequirements": "Nessun requisito nel payload.",
           "emptyRequirements": "Requisiti vuoti (oggetto senza chiavi). L'abbinamento può basarsi solo sul testo libero della descrizione.",
           "aiSuggestionsHeading": "Suggerimenti IA ({count})",
@@ -2111,6 +2395,7 @@
         "starting": "Avvio…",
         "searchResults": "Risultati di ricerca",
         "reanalyzingEllipsis": "Rianalisi con IA…",
+        "processingCurrentCandidate": "Elaborazione candidato {current} di {total}",
         "updatingSearchEllipsis": "Aggiornamento ricerca IA…",
         "searchLoadingHint": "L'operazione può richiedere alcuni secondi. Non chiudere questa pagina.",
         "searchLoadingStepScanning": "Esplorazione del bacino di talenti",
@@ -2146,6 +2431,7 @@
           "attributes": "Attributi",
           "attributesDetail": "Dettaglio attributi ({count})",
           "attributesZeroHint": "Uno 0% non sempre abbassa il punteggio combinato: attualità o anni pertinenti si misurano a parte.",
+          "attributeLevelFallback": "Nessun dettaglio",
           "qualitativeScore": "Punteggio qualitativo",
           "semanticSimilarity": "Similarità semantica",
           "attributeMatch": "Corrispondenza attributi",
@@ -2185,7 +2471,58 @@
           "score": "Punteggio",
           "columnAria": "Colonna {stage}",
           "moveStageAria": "Sposta {name} in un'altra fase",
-          "statusAria": "Stato di {name}"
+          "statusAria": "Stato di {name}",
+          "dropNotAllowedTooltip": "Puoi solo avanzare di una fase, o scartare",
+          "finalStatusRequiredTooltip": "Per avanzare o spostare a una fase finale, lo stato di candidatura deve essere contrassegnato come finale",
+          "moveToStage": "Sposta a {stageName}",
+          "moveToStageAria": "Sposta {name} a {stageName}",
+          "moveToShortcutPlaceholder": "Sposta a…",
+          "shortcutColumnAria": "Colonna di scarto {stage}",
+          "hiredColumnAria": "Colonna di assunzione {stage}",
+          "confirmStageMoveTitle": "Conferma cambio di fase",
+          "confirmStageMoveMessage": "Spostare {name} da «{fromStage}» a «{toStage}»?",
+          "confirmStageMoveConfirm": "Conferma spostamento"
+        },
+        "interviewFeedback": {
+          "button": "Feedback del colloquio",
+          "buttonAria": "Aggiungi feedback del colloquio per {name}",
+          "modalTitle": "Feedback del colloquio",
+          "modalDescription": "Valuta ogni competenza da 1 a 10 e lascia un commento. Questa valutazione aggiorna il punteggio di corrispondenza.",
+          "fieldLabel": "Commento",
+          "placeholder": "Punti di forza osservati, rischi o dubbi, e se consigli di avanzare, un altro colloquio o di non continuare.",
+          "required": "Il commento è obbligatorio.",
+          "submit": "Salva valutazione",
+          "submitting": "Salvataggio…",
+          "successIncreased": "Il punteggio è aumentato da {previous}% a {next}%.",
+          "successDecreased": "Il punteggio è cambiato da {previous}% a {next}%.",
+          "changePoints": "Variazione: {signedDelta} punti.",
+          "successUnchanged": "Feedback salvato. Il punteggio resta al {score}%.",
+          "successUnchangedNoWeight": "Feedback salvato. Il punteggio non è cambiato perché il componente qualitativo non ha peso in questa vacante.",
+          "conflictNotInterview": "Il feedback si applica solo nella fase Colloquio.",
+          "conflictVacancyNotEditable": "La vacante non è più modificabile. La bacheca verrà aggiornata.",
+          "errorInvalid": "Il feedback non è valido. Controlla il testo e riprova.",
+          "errorForbidden": "Non hai i permessi per inviare questo feedback.",
+          "errorNotFound": "La candidatura non esiste più.",
+          "errorScoringFailed": "Impossibile ricalcolare il punteggio. Il feedback non è stato salvato.",
+          "errorGeneric": "Impossibile inviare il feedback. Riprova.",
+          "softSkillsTitle": "Competenze trasversali",
+          "technicalSkillsTitle": "Competenze tecniche",
+          "scoreUnset": "—",
+          "notScored": "Non valutato",
+          "scoreValue": "{score}/10",
+          "scoreChipAria": "{skill}: {score}",
+          "expectedLevel": "Livello atteso: {level}",
+          "scaleLegend": "1–3 basso · 4–6 medio · 7–8 alto · 9–10 eccellente",
+          "progressSkills": "{scored} di {total, plural, one {# competenza} other {# competenze}}",
+          "progressCommentReady": "commento pronto",
+          "progressCommentMissing": "manca il commento",
+          "scoresRequired": "Completa tutti i punteggi da 1 a 10 prima di inviare.",
+          "loadingForm": "Caricamento del modulo di feedback…",
+          "historyTitle": "Cronologia del feedback",
+          "historyBy": "Di {name}",
+          "historyAnonymous": "Voce precedente",
+          "historyScore": "{previous}% → {next}% ({signedDelta})",
+          "conflictInterviewNotDone": "Segna il colloquio come effettuato prima di continuare."
         },
         "aria": {
           "matchedCandidates": "Candidati con corrispondenza",
@@ -2203,6 +2540,7 @@
         },
         "toasts": {
           "matchSuccess": "Corrispondenza eseguita correttamente.",
+          "matchPartialSuccess": "Analizzati {succeeded} di {total}. Impossibile analizzare: {names}.",
           "matchFailed": "Impossibile eseguire la corrispondenza.",
           "loadMatchFailed": "Impossibile caricare la corrispondenza.",
           "processStarted": "Processo avviato…",
@@ -2222,8 +2560,9 @@
         },
         "errors": {
           "moveStageFailed": "Impossibile spostare il candidato di fase.",
-          "stageSkipNotAllowed": "Puoi spostare il candidato solo alla fase consecutiva (precedente o successiva). Non sono ammessi salti.",
-          "finalStatusRequiredForStageMove": "Per passare alla fase successiva, il candidato deve essere in uno stato di candidatura contrassegnato come finale.",
+          "stageSkipNotAllowed": "Puoi solo avanzare di una fase, o scartare.",
+          "stageMoveConflict": "I candidati possono passare solo alla fase successiva della pipeline, o a una fase finale che non è quella di assunzione.",
+          "finalStatusRequiredForStageMove": "Per passare alla fase successiva o a una fase finale, il candidato deve essere in uno stato di candidatura contrassegnato come finale.",
           "missingDefaultApplicationStatus": "Manca lo stato di candidatura predefinito dell'azienda. Il server ne ha bisogno quando si spostano candidati tra le fasi. Configuralo in Fasi (stati) o chiedi a un amministratore di farlo.",
           "updateApplicationStatusFailed": "Impossibile aggiornare lo stato della candidatura.",
           "candidateMovedStage": "Candidato spostato di fase.",
@@ -2234,7 +2573,9 @@
           "searchNoResults": "Nessun candidato trovato nella ricerca.",
           "searchAlreadyInPipeline": "I candidati trovati sono già in Candidati possibili o Fasi.",
           "goToStagesAria": "Vai alla sezione Fasi per gestire gli stati di candidatura",
-          "openProfileAria": "Apri il profilo del candidato in una nuova scheda"
+          "openProfileAria": "Apri il profilo del candidato in una nuova scheda",
+          "interviewNotDone": "Segna il colloquio come effettuato prima di continuare.",
+          "interviewFeedbackRequired": "Invia il feedback del colloquio prima di avanzare di fase."
         },
         "scoreTooltips": {
           "semanticSimilarity": "Misura quanto il contenuto del CV è allineato alla descrizione della posizione, usando il confronto semantico del testo.",
@@ -2244,7 +2585,18 @@
         "emptyApplicants": "Non ci sono ancora candidati su questa posizione.",
         "kanbanBoardAria": "Contenitore della board Kanban",
         "kanbanStagesAria": "Fasi dei candidati",
-        "goToStagesLink": "Vai alle Fasi e gestisci gli stati"
+        "fallbackKanbanStages": [
+          "Sourced",
+          "Applied",
+          "Screening",
+          "Interview",
+          "Offer",
+          "Hired",
+          "Rejected"
+        ],
+        "goToStagesLink": "Vai alle Fasi e gestisci gli stati",
+        "manageStagesAria": "Gestisci il catalogo globale delle fasi",
+        "manageStages": "Gestisci le fasi"
       },
       "rematch": {
         "ariaLabel": "Ricalibra corrispondenze",
@@ -2381,7 +2733,9 @@
         "validation": {
           "selectCandidate": "Seleziona un candidato",
           "indicateDateTime": "Indica data e ora",
-          "invalidDateTime": "Data o ora non valida"
+          "invalidDateTime": "Data o ora non valida",
+          "pastDateNotAllowed": "Non puoi programmare un colloquio in una data già trascorsa",
+          "pastDateTimeNotAllowed": "Non puoi programmare un colloquio a un'ora già trascorsa"
         },
         "actions": {
           "schedule": "Programma colloquio",
@@ -2389,16 +2743,30 @@
           "cancel": "Annulla"
         }
       },
-      "detail": {
+        "detail": {
         "pageTitle": "Colloquio",
         "backToInterviews": "← Torna ai colloqui",
         "loading": "Caricamento colloquio…",
         "loadFailed": "Impossibile caricare il colloquio.",
         "close": "Chiudi",
         "backToList": "Torna all'elenco",
+        "candidateFallback": "Candidato",
+        "vacancyFallback": "Posizione",
+        "durationMinutes": "{minutes} min",
+        "descriptionPlaceholder": "Agenda, link o contesto per chi conduce il colloquio…",
+        "sessionLinks": "Link e calendario",
+        "meetLink": "Google Meet",
+        "openMeet": "Apri Meet",
+        "copyMeet": "Copia link",
+        "meetCopied": "Link Meet copiato.",
+        "meetCopyFailed": "Impossibile copiare il link.",
+        "completedNoFeedback": "Colloquio completato. Registra la valutazione dalla bacheca della vacancy.",
         "fields": {
           "status": "Stato",
           "dateTime": "Data e ora",
+          "date": "Data",
+          "startTime": "Inizio",
+          "endTime": "Fine",
           "type": "Tipo",
           "modality": "Modalità",
           "interviewer": "Intervistatore",
@@ -2407,7 +2775,9 @@
         "statusAria": "Stato del colloquio",
         "terminalReadOnly": "Questo colloquio è chiuso (stato terminale). I dati sono in sola lettura.",
         "validation": {
-          "invalidDateTime": "La data o l'ora non è valida. Controlla il campo orario."
+          "invalidDateTime": "La data o l'ora non è valida. Controlla il campo orario.",
+          "pastDateNotAllowed": "Non puoi programmare un colloquio in una data già trascorsa",
+          "pastDateTimeNotAllowed": "Non puoi programmare un colloquio a un'ora già trascorsa"
         },
         "actions": {
           "save": "Salva modifiche",
@@ -2415,6 +2785,17 @@
           "discard": "Annulla modifiche",
           "delete": "Elimina",
           "deleteAria": "Elimina colloquio"
+        },
+        "statusConfirm": {
+          "completeTitle": "Segna come completato",
+          "completeMessage": "Il colloquio verrà segnato come completato. Poi potrai registrare la valutazione.",
+          "completeConfirm": "Segna completato",
+          "cancelTitle": "Annulla colloquio",
+          "cancelMessage": "Il colloquio verrà annullato e non sarà più modificabile.",
+          "cancelConfirm": "Annulla colloquio",
+          "noShowTitle": "Segna come assente",
+          "noShowMessage": "Il colloquio verrà chiuso perché la persona non si è presentata. Non sarà più modificabile.",
+          "noShowConfirm": "Segna assente"
         },
         "deleteConfirm": {
           "title": "Elimina colloquio",
@@ -2509,7 +2890,15 @@
           "updated": "Stato del colloquio aggiornato correttamente.",
           "deleted": "Stato del colloquio eliminato correttamente.",
           "deleteTitle": "Elimina stato del colloquio",
-          "deleteMessage": "Eliminare «{name}»? Consentito solo se non ci sono colloqui che usano questo stato."
+          "deleteMessage": "Eliminare «{name}»? Consentito solo se non ci sono colloqui che usano questo stato.",
+          "interviewDone": "Colloquio effettuato",
+          "interviewDoneActive": "{name}: colloquio effettuato attivo",
+          "markInterviewDone": "Segna {name} come colloquio effettuato",
+          "interviewDoneMarked": "Stato segnato come colloquio effettuato.",
+          "interviewDoneUnmarked": "Stato deselezionato come colloquio effettuato.",
+          "interviewDoneTransferTitle": "Cambia colloquio effettuato",
+          "interviewDoneTransferMessage": "Solo uno stato può segnare il colloquio come effettuato. Se continui, «{previous}» verrà disattivato e «{next}» verrà attivato.",
+          "interviewDoneTransferConfirm": "Cambia"
         },
         "modalities": {
           "title": "Modalità di colloquio",
@@ -2637,7 +3026,7 @@
     "companies": {
       "page": {
         "title": "Aziende",
-        "description": "Gestione dei clienti (tenant). Creando un'azienda vengono generati automaticamente stati e fasi della pipeline."
+        "description": "Gestione dei clienti. Creando un'azienda vengono generati automaticamente stati e fasi della pipeline."
       },
       "table": {
         "logo": "Logo",
@@ -2727,18 +3116,37 @@
     "users": {
       "page": {
         "title": "Utenti",
-        "description": "Elenco e amministrazione degli account del portale."
+        "description": "Elenco e amministrazione degli account del portale.",
+        "headerRegionLabel": "Intestazione utenti",
+        "listRegionLabel": "Elenco utenti",
+        "filtersAndListRegionLabel": "Filtri ed elenco"
       },
       "filters": {
         "regionAria": "Filtri",
-        "emailLabel": "Email (contiene)",
-        "emailPlaceholder": "es. @azienda.com",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri utenti",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Cerca per email...",
         "roleLabel": "Ruolo",
         "allRoles": "Tutti",
+        "allLockouts": "Tutti",
         "lockedOnly": "Solo bloccati",
         "lockoutLabel": "Blocco",
         "apply": "Applica filtri",
-        "clear": "Cancella"
+        "clear": "Cancella",
+        "clearFilters": "Cancella filtri",
+        "filterByAria": "Filtra per {label}"
+      },
+      "cards": {
+        "cardAria": "Utente: {email}",
+        "cardLockedAria": "Utente bloccato: {email}",
+        "rolesLabel": "Ruoli",
+        "statusLabel": "Stato",
+        "noRoles": "Nessun ruolo",
+        "confirmed": "Confermato",
+        "unconfirmed": "Non confermato",
+        "locked": "Bloccato",
+        "unlocked": "Attivo"
       },
       "table": {
         "email": "Email",
@@ -2761,17 +3169,28 @@
         "pageSizeAria": "Utenti per pagina",
         "refreshAria": "Aggiorna elenco",
         "regionAria": "Paginazione",
-        "summary": "Pagina {page} di {total}"
+        "summary": "Pagina {page} di {total}",
+        "prev": "Precedente",
+        "next": "Successivo",
+        "count": "{count, plural, one {# utente} other {# utenti}}"
       },
       "emptyStates": {
         "noResults": "Nessun utente corrisponde ai filtri attuali.",
+        "noUsers": "Nessun utente trovato",
+        "noUsersFiltered": "Nessun utente corrisponde ai filtri applicati",
         "description": "Prova a modificare i filtri o crea un nuovo utente."
+      },
+      "loadingStates": {
+        "loading": "Caricamento utenti..."
       },
       "actions": {
         "create": "Nuovo utente",
+        "createShort": "Nuovo",
+        "createAria": "Crea nuovo utente",
         "refresh": "Aggiorna",
         "retry": "Riprova",
         "manage": "Gestisci",
+        "manageAria": "Gestisci utente {email}",
         "prev": "Precedente",
         "next": "Successivo"
       },
@@ -2789,9 +3208,12 @@
         "title": "Dettaglio utente",
         "emailLabel": "Email",
         "userNameLabel": "Nome utente",
+        "createdAtLabel": "Creato",
         "accountHeading": "Stato dell'account",
         "lockedCheckbox": "Account bloccato",
         "emailConfirmed": "Email confermata",
+        "emailConfirmedHint": "Questa email è già verificata.",
+        "emailPendingHint": "Questa email non è ancora verificata.",
         "readOnly": "Sola lettura",
         "lockAction": "Blocca account",
         "unlockAction": "Sblocca account",
@@ -2859,7 +3281,8 @@
       "fields": {
         "defaultStage": "Fase predefinita",
         "finalStage": "Fase finale",
-        "hiredStage": "Fase di assunzione"
+        "hiredStage": "Fase di assunzione",
+        "interviewStage": "Fase colloquio"
       },
       "switches": {
         "defaultActive": "{name}: fase predefinita attiva",
@@ -2867,7 +3290,9 @@
         "finalActive": "{name}: fase finale attiva",
         "markFinal": "Segna {name} come fase finale",
         "hiredActive": "{name}: fase di assunzione attiva",
-        "markHired": "Segna {name} come fase di assunzione"
+        "markHired": "Segna {name} come fase di assunzione",
+        "interviewActive": "{name}: fase colloquio attiva",
+        "markInterview": "Segna {name} come fase colloquio"
       },
       "loadingStates": {
         "savingOrder": "Salvataggio ordine...",
@@ -2885,6 +3310,11 @@
         "defaultUpdateFailed": "Impossibile aggiornare la fase predefinita. Riprova.",
         "updateFailed": "Impossibile aggiornare la fase. Riprova.",
         "hiredUpdateFailed": "Impossibile aggiornare la fase di assunzione. Riprova.",
+        "interviewUpdateFailed": "Impossibile aggiornare la fase colloquio. Riprova.",
+        "interviewCannotCombineFinal": "Una fase colloquio non può essere una fase finale.",
+        "interviewCannotCombineHired": "Una fase colloquio non può essere una fase di assunzione.",
+        "finalCannotCombineInterview": "Una fase colloquio non può essere contrassegnata come finale.",
+        "hiredCannotCombineInterview": "Una fase colloquio non può essere contrassegnata come fase di assunzione.",
         "forbidden": "Non hai i permessi per modificare questa fase.",
         "notFound": "La fase non esiste più. Ricaricamento elenco...",
         "deleteFailed": "Impossibile eliminare la fase. Riprova.",
@@ -2898,6 +3328,8 @@
         "finalUnmarked": "Fase non più contrassegnata come finale.",
         "hiredMarked": "Fase contrassegnata come fase di assunzione.",
         "hiredUnmarked": "Fase non più contrassegnata come fase di assunzione.",
+        "interviewMarked": "Fase contrassegnata come fase colloquio.",
+        "interviewUnmarked": "Fase non più contrassegnata come fase colloquio.",
         "deleted": "Fase eliminata correttamente.",
         "orderSaved": "Ordine salvato correttamente."
       },
@@ -3044,9 +3476,9 @@
         "contentTemplateLabel": "Modello di contenuto",
         "outputFormatLabel": "Formato di output",
         "isTechnicalSheet": "Modello scheda tecnica",
-        "technicalSheetHint": "Solo un modello di tipo documento può essere contrassegnato come scheda tecnica.",
+        "technicalSheetHint": "Il contenuto deve essere uno schema JSON (come i report), non HTML. Solo un modello di tipo documento può essere contrassegnato come scheda tecnica.",
         "isReport": "Modello report",
-        "reportHint": "Collega questo modello a un report del catalogo per generare PDF dal portale HR.",
+        "reportHint": "Collega questo modello a un report del catalogo. Il contenuto deve essere uno schema JSON (non HTML).",
         "reportTypeLabel": "Tipo di report",
         "descriptionLabel": "Descrizione",
         "isRequired": "Obbligatorio",
@@ -3054,6 +3486,7 @@
         "subjectPlaceholder": "Es.: Il tuo colloquio è stato programmato",
         "contentPlaceholder": "Scrivi il contenuto del modello...",
         "contentTemplatePlaceholder": "Es.: {htmlExample}",
+        "contentTemplatePlaceholderJson": "Es.: {jsonExample}",
         "descriptionPlaceholder": "Es.: Completa queste informazioni tecniche...",
         "reportCatalogLoadFailed": "Impossibile caricare il catalogo report.",
         "reportCatalogLoading": "Caricamento report…",
@@ -3068,6 +3501,8 @@
           "subjectRequired": "L'oggetto è obbligatorio",
           "contentRequired": "Il contenuto è obbligatorio",
           "contentTemplateRequired": "Il modello di contenuto è obbligatorio",
+          "contentTemplateJsonInvalid": "La scheda tecnica deve essere un JSON di schema valido (version, kind, sections).",
+          "contentTemplateReportJsonInvalid": "Il modello report deve essere un JSON di schema valido (version, reportKey, sections).",
           "reportTypeRequired": "Seleziona un tipo di report valido dal catalogo.",
           "descriptionRequired": "La descrizione è obbligatoria"
         },
@@ -3171,6 +3606,25 @@
         "deactivateSuccess": "Modalità disattivata.",
         "deleteSuccess": "Modalità eliminata.",
         "deleteConflictMessage": "Impossibile eliminare perché associata a posizioni esistenti.",
+        "formCreateTitle": "Nuova {singularCapitalized}",
+        "formEditTitle": "Modifica {singular}",
+        "deleteTitle": "Elimina {singular}"
+      },
+      "softSkills": {
+        "title": "Competenze trasversali",
+        "singular": "competenza trasversale",
+        "singularCapitalized": "Competenza trasversale",
+        "plural": "competenze trasversali",
+        "article": "la",
+        "createCta": "Crea competenza trasversale",
+        "emptyMessage": "Nessuna competenza trasversale creata ancora",
+        "headingDescription": "Gestisci il catalogo globale delle competenze trasversali usate nel feedback del colloquio.",
+        "createSuccess": "Competenza trasversale creata.",
+        "updateSuccess": "Competenza trasversale aggiornata.",
+        "activateSuccess": "Competenza trasversale attivata.",
+        "deactivateSuccess": "Competenza trasversale disattivata.",
+        "deleteSuccess": "Competenza trasversale eliminata.",
+        "deleteConflictMessage": "Impossibile eliminare perché associata a valutazioni storiche.",
         "formCreateTitle": "Nuova {singularCapitalized}",
         "formEditTitle": "Modifica {singular}",
         "deleteTitle": "Elimina {singular}"
@@ -3402,6 +3856,10 @@
       "roleFallback": "Administrador"
     }
   },
+  "CvOutputLanguage": {
+    "invalid": "La lingua dell'app non è supportata per elaborare il CV. Passa a spagnolo, inglese, italiano, francese o tedesco e riprova.",
+    "mismatch": "Non siamo riusciti a elaborare il tuo CV nella lingua selezionata. Riprova."
+  },
   "PublicOpportunities": {
     "page": {
       "portalTitle": "Portale opportunità",
@@ -3482,6 +3940,10 @@
       "moreVacanciesLink": "Vedi altre opportunità",
       "readyTitle": "Sei pronto per questa opportunità?",
       "readyBody": "Completa la candidatura in pochi minuti. Il team di selezione riceve il tuo profilo in modo sicuro.",
+      "copyLink": "Copia link",
+      "copyLinkAria": "Copia il link pubblico di questa posizione",
+      "linkCopied": "Link copiato",
+      "linkCopyFailed": "Impossibile copiare il link",
       "documentTitle": "ApplicanTree | Portale opportunità | {title}"
     },
     "applicationForm": {

@@ -24,6 +24,62 @@ function measureHtmlBlock(doc: Document, html: string): number {
   return h
 }
 
+function cloneListWithItems(list: Element, items: Element[]): string {
+  const clone = list.cloneNode(false) as HTMLElement
+  for (const item of items) {
+    clone.appendChild(item.cloneNode(true))
+  }
+  return clone.outerHTML
+}
+
+function splitOversizedListSection(
+  sec: Element,
+  doc: Document,
+  maxPx: number,
+  h0: number
+): TechnicalSheetBlock[] | null {
+  const children = [...sec.children]
+  const h2 = children.find((c) => c.tagName === "H2")
+  const rest = children.filter((c) => c.tagName !== "H2")
+  if (rest.length !== 1 || rest[0].tagName !== "UL") return null
+
+  const list = rest[0]
+  const items = [...list.children].filter((c) => c.tagName === "LI")
+  if (items.length < 2) return null
+
+  const blocks: TechnicalSheetBlock[] = []
+  let chunk: Element[] = []
+  let isFirst = true
+
+  const flush = () => {
+    if (chunk.length === 0) return
+    const listHtml = cloneListWithItems(list, chunk)
+    const frag = (isFirst && h2 ? h2.outerHTML : "") + listHtml
+    isFirst = false
+    blocks.push({ html: frag, h: measureHtmlBlock(doc, frag) })
+    chunk = []
+  }
+
+  for (const item of items) {
+    const trial = [...chunk, item]
+    const listHtml = cloneListWithItems(list, trial)
+    const frag = (isFirst && h2 && chunk.length === 0 ? h2.outerHTML : "") + listHtml
+    const h = measureHtmlBlock(doc, frag)
+    if (h > maxPx && chunk.length > 0) {
+      flush()
+      chunk = [item]
+      continue
+    }
+    chunk = trial
+  }
+  flush()
+
+  if (blocks.length === 0) return null
+  // If we could not shrink below a single oversized block, keep original.
+  if (blocks.length === 1 && blocks[0].h >= h0) return null
+  return blocks
+}
+
 function buildFlatBlocks(article: Element, doc: Document, maxPx: number): TechnicalSheetBlock[] {
   const sections = [...article.querySelectorAll(":scope > section")]
   if (sections.length === 0) {
@@ -38,6 +94,12 @@ function buildFlatBlocks(article: Element, doc: Document, maxPx: number): Techni
     const h0 = measureHtmlBlock(doc, outer)
     if (h0 <= maxPx) {
       blocks.push({ html: outer, h: h0 })
+      continue
+    }
+
+    const listSplit = splitOversizedListSection(sec, doc, maxPx, h0)
+    if (listSplit) {
+      blocks.push(...listSplit)
       continue
     }
 

@@ -54,6 +54,36 @@ function renderProfileView(locale: Locale) {
   )
 }
 
+const emptyEnrichedProfile = {
+  firstName: "Ana",
+  lastName: "López",
+  headline: "Dev",
+  summary: "Resumen",
+  nationalId: "1",
+  resumeMarkdown: "",
+} as never
+
+function renderEmptyEnrichedView(
+  locale: Locale,
+  onCompleteInformation?: () => void,
+) {
+  return render(
+    <NextIntlClientProvider locale={locale} messages={messagesByLocale[locale]}>
+      <CandidateSelfProfileView
+        candidateProfile={emptyEnrichedProfile}
+        selfProfile={null}
+        profileNotFound={false}
+        sessionRole="Candidato"
+        onSaveProfile={vi.fn(async () => {})}
+        savingProfile={false}
+        saveProfileError={null}
+        clearSaveProfileError={vi.fn()}
+        onCompleteInformation={onCompleteInformation}
+      />
+    </NextIntlClientProvider>,
+  )
+}
+
 describe("CandidateSelfProfileView i18n (Etapa 5D)", () => {
   it("renderiza textos estáticos de la vista en español", () => {
     renderProfileView("es")
@@ -61,9 +91,7 @@ describe("CandidateSelfProfileView i18n (Etapa 5D)", () => {
     expect(screen.getByText("Guardar cambios")).toBeInTheDocument()
     expect(screen.getByText("Pretensión salarial")).toBeInTheDocument()
     expect(
-      screen.getByText(
-        "Titular, resumen y documento de identidad son obligatorios al guardar.",
-      ),
+      screen.getByText("Los campos con asterisco son obligatorios al guardar."),
     ).toBeInTheDocument()
   })
 
@@ -73,10 +101,37 @@ describe("CandidateSelfProfileView i18n (Etapa 5D)", () => {
     expect(screen.getByText("Save changes")).toBeInTheDocument()
     expect(screen.getByText("Salary expectation")).toBeInTheDocument()
     expect(
-      screen.getByText(
-        "Headline, summary and ID document are required when saving.",
-      ),
+      screen.getByText("Fields marked with an asterisk are required when saving."),
     ).toBeInTheDocument()
+  })
+})
+
+describe("Aviso de ficha sin trayectoria", () => {
+  it("apunta a Completar información y no a Documentos", () => {
+    const handleCompleteInformation = vi.fn()
+    renderEmptyEnrichedView("es", handleCompleteInformation)
+
+    expect(
+      screen.getByText(/Aún no hay trayectoria ni competencias en tu ficha/),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/subiendo un CV con/)).toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "Documentos" })).not.toBeInTheDocument()
+
+    const action = screen.getByRole("button", {
+      name: "Completar información del candidato",
+    })
+    action.click()
+    expect(handleCompleteInformation).toHaveBeenCalledTimes(1)
+  })
+
+  it("traduce el aviso en inglés hacia Complete information", () => {
+    renderEmptyEnrichedView("en")
+
+    expect(
+      screen.getByText(/There is no background or skills in your record yet/),
+    ).toBeInTheDocument()
+    expect(screen.getByText("Complete information")).toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "Documents" })).not.toBeInTheDocument()
   })
 })
 
@@ -220,6 +275,22 @@ describe("Namespace CandidatePortal.profile (Etapa 5D)", () => {
     }
   })
 
+  it("expone las claves del botón Completar información en los 5 idiomas", () => {
+    const expectedKeys = ["completeInfo", "completeInfoShort", "completeInfoAria"]
+    for (const locale of locales) {
+      const profile = (
+        (messagesByLocale[locale] as Record<string, unknown>)
+          .CandidatePortal as Record<string, unknown>
+      ).profile as Record<string, unknown>
+      for (const key of expectedKeys) {
+        expect(
+          Object.keys(profile),
+          `${key} ausente en CandidatePortal.profile de ${locale}.json`,
+        ).toContain(key)
+      }
+    }
+  })
+
   it("conserva las opciones de formulario migradas en los 5 idiomas", () => {
     for (const locale of locales) {
       const options = (
@@ -231,6 +302,21 @@ describe("Namespace CandidatePortal.profile (Etapa 5D)", () => {
       expect(Object.keys(options)).toEqual(
         expect.arrayContaining(["gender", "maritalStatus", "availability"]),
       )
+    }
+  })
+
+  it("incluye el campo de currículum en texto en los 5 idiomas", () => {
+    for (const locale of locales) {
+      const profile = (
+        (messagesByLocale[locale] as Record<string, unknown>)
+          .CandidatePortal as Record<string, unknown>
+      ).profile as Record<string, unknown>
+      const actions = profile.actions as Record<string, unknown>
+      const form = profile.form as Record<string, unknown>
+      const labels = form.labels as Record<string, unknown>
+      expect(actions).toHaveProperty("resumeMissingAria")
+      expect(labels).toHaveProperty("resumeText")
+      expect(form).toHaveProperty("resumeMissing")
     }
   })
 })

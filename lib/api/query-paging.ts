@@ -2,10 +2,10 @@ import { apiClient } from "@/lib/api"
 
 /** Server-side QueryLimits (BE-SEC-026): pageSize max 100. */
 export const QUERY_PAGE_SIZE_MAX = 100
-export const QUERY_PAGE_SIZE_DEFAULT = 50
+export const QUERY_PAGE_SIZE_DEFAULT = 10
 export const QUERY_FETCH_ALL_PAGE_SIZE = 100
 export const QUERY_FETCH_ALL_MAX_PAGES = 50
-export const QUERY_PAGE_SIZE_OPTIONS = [20, 50, 100] as const
+export const QUERY_PAGE_SIZE_OPTIONS = [10, 50, 100] as const
 /** POST search-candidates limit max. */
 export const QUERY_SEARCH_LIMIT_MAX = 50
 export const QUERY_SEARCH_CANDIDATES_LIMIT = 20

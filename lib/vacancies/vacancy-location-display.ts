@@ -1,4 +1,4 @@
-import { getStateByCode, type IState } from "@countrystatecity/countries-browser"
+import { getBundledStateByCode, type BundledState } from "@/lib/locations/bundled-catalog"
 import {
   getLocationCatalogStatus,
   searchLocationDivisions,
@@ -136,7 +136,7 @@ function shouldPreferNativeName(countryCode: string, englishName: string, native
 }
 
 export function formatVacancyStateLabel(
-  state: Pick<IState, "iso2" | "name" | "native" | "translations">,
+  state: Pick<BundledState, "iso2" | "name" | "native" | "translations">,
   countryCode: string
 ): string {
   const country = countryCode.trim().toUpperCase()
@@ -194,7 +194,7 @@ async function resolveVacancyStateDisplayNameUncached(
   country: string,
   state: string
 ): Promise<string | null> {
-  const stateData = await getStateByCode(country, state)
+  const stateData = await getBundledStateByCode(country, state)
   if (stateData) return formatVacancyStateLabel(stateData, country)
 
   const geoNamesLabel = await resolveGeoNamesDivisionDisplayName(country, state)

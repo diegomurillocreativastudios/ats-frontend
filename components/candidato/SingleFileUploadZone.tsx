@@ -66,6 +66,12 @@ interface SingleFileUploadZoneProps {
   disabled?: boolean
   /** ID del input para asociar con un label externo. */
   inputId?: string
+  /** Marca el dropzone como inválido (p. ej. campo obligatorio vacío). */
+  hasError?: boolean
+  /** `id` del mensaje de error externo para `aria-describedby`. */
+  describedBy?: string
+  /** Indica que el dropzone es obligatorio. */
+  isRequired?: boolean
 }
 
 /**
@@ -86,6 +92,9 @@ export default function SingleFileUploadZone({
   typeErrorMessage,
   disabled = false,
   inputId,
+  hasError = false,
+  describedBy,
+  isRequired = false,
 }: SingleFileUploadZoneProps) {
   const t = useTranslations("CandidatePortal.documents.singleUpload")
   const resolvedPrimaryText = primaryText ?? t("dropPrompt")
@@ -190,10 +199,15 @@ export default function SingleFileUploadZone({
         tabIndex={disabled ? -1 : 0}
         aria-disabled={disabled || undefined}
         aria-label={resolvedAriaLabel}
-        className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed bg-muted p-5 transition-colors md:gap-3 md:p-6 ${
+        aria-invalid={hasError || undefined}
+        aria-describedby={describedBy}
+        aria-required={isRequired || undefined}
+        className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-5 transition-colors md:gap-3 md:p-6 ${
           isDragging
             ? "border-vo-purple bg-ats-arena/70"
-            : "border-border hover:border-muted-foreground/30"
+            : hasError
+              ? "border-destructive bg-destructive/5"
+              : "border-border bg-muted hover:border-muted-foreground/30"
         } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
         onClick={handleClick}
         onKeyDown={handleKeyDown}

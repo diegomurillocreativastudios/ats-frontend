@@ -50,8 +50,8 @@ vi.mock("@/lib/api/interviews", () => ({
 }))
 
 vi.mock("next/navigation", () => ({
-  useParams: () => ({ id: "vac-results-1" }),
-  useRouter: () => ({ push: vi.fn() }),
+  useParams: () => ({ id: "1d2f9cbe-9079-4794-8569-eff14f0f8943" }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }))
 
 import VacancyResultadosPage from "@/app/portal-rrhh/vacantes/[id]/resultados/page"
@@ -74,13 +74,13 @@ function renderWithIntl(ui: React.ReactNode, locale: Locale) {
 }
 
 const mockViewModel: VacancyResultadosViewModel = {
-  vacancyId: "vac-results-1",
+  vacancyId: "1d2f9cbe-9079-4794-8569-eff14f0f8943",
   title: "Senior Backend Engineer",
   meta: {
     description: null,
-    status: "activa",
+    status: "Open",
     createdAt: null,
-    jobCategory: null,
+    jobCategory: "Uncategorized",
     company: "Acme Corp",
     countryCode: null,
     vacancyDepartmentLabel: null,
@@ -144,6 +144,16 @@ describe("VacancyResultadosPage i18n (Etapa 18)", () => {
     )
     renderWithIntl(<VacancyResultadosPage />, "en")
     expect(screen.getByText("Loading results…")).toBeInTheDocument()
+  })
+
+  it("traduce estados y categoría sentinel del API en español", async () => {
+    vi.mocked(fetchVacancyResultadosPayload).mockResolvedValue(mockViewModel)
+    renderWithIntl(<VacancyResultadosPage />, "es")
+    expect(await screen.findByText("Resultados de la vacante")).toBeInTheDocument()
+    expect(screen.getByText("Activa")).toBeInTheDocument()
+    expect(screen.getByText("Sin categoría")).toBeInTheDocument()
+    expect(screen.queryByText("Open")).not.toBeInTheDocument()
+    expect(screen.queryByText("Uncategorized")).not.toBeInTheDocument()
   })
 
   it("renderiza encabezado estático en inglés con data dinámica verbatim", async () => {

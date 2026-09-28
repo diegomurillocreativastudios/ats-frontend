@@ -26,15 +26,30 @@ const getErrorStatus = (err: unknown): number => {
   return 0
 }
 
-const mapLoadError = (
+export interface RecruiterCandidateLoadError {
+  message: string
+  canRetry: boolean
+}
+
+/**
+ * Traduce un error de carga del detalle de candidato a copy de producto.
+ * Un 400 (GUID inválido) no se reintenta: el enlace no va a volverse válido.
+ */
+export function mapRecruiterCandidateLoadError(
   err: unknown,
   t: (key: string) => string,
-): string => {
+): RecruiterCandidateLoadError {
   const status = getErrorStatus(err)
-  if (status === 401 || status === 403 || status === 404) {
-    return t("errors.candidateUnavailable")
+  if (status === 400) {
+    return { message: t("errors.invalidCandidateId"), canRetry: false }
   }
-  return getApiErrorMessage(err) || t("errors.loadProfileFailed")
+  if (status === 401 || status === 403 || status === 404) {
+    return { message: t("errors.candidateUnavailable"), canRetry: false }
+  }
+  return {
+    message: getApiErrorMessage(err) || t("errors.loadProfileFailed"),
+    canRetry: true,
+  }
 }
 
 const mapSaveError = (
@@ -58,14 +73,14 @@ export function useRecruiterCandidateProfile(candidateId: string | null) {
   const [profile, setProfile] = useState<RecruiterCandidateDetailState | null>(null)
   const [canonicalProfile, setCanonicalProfile] = useState<CandidateProfile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [fetchError, setFetchError] = useState<string | null>(null)
+  const [fetchError, setFetchError] = useState<RecruiterCandidateLoadError | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     if (!candidateId) {
       setLoading(false)
-      setFetchError(t("errors.missingCandidateId"))
+      setFetchError({ message: t("errors.missingCandidateId"), canRetry: false })
       setProfile(null)
       setCanonicalProfile(null)
       return
@@ -98,7 +113,7 @@ export function useRecruiterCandidateProfile(candidateId: string | null) {
         canonicalRaw != null ? normalizeCandidateProfileFromApi(canonicalRaw) : null
       )
     } catch (err: unknown) {
-      setFetchError(mapLoadError(err, t))
+      setFetchError(mapRecruiterCandidateLoadError(err, t))
       setProfile(null)
       setCanonicalProfile(null)
     } finally {

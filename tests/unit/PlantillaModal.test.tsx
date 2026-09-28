@@ -129,7 +129,6 @@ describe('PlantillaModal', () => {
 
         fireEvent.change(screen.getByLabelText(/Tipo de plantilla/i), { target: { value: 'Document' } })
         fireEvent.change(screen.getByLabelText(/Nombre/i), { target: { value: 'Reporte mensual' } })
-        fireEvent.change(screen.getByLabelText(/Plantilla de contenido/i), { target: { value: '<h1>R</h1>' } })
         fireEvent.click(screen.getByLabelText(/Es plantilla de reporte/i))
 
         fireEvent.click(screen.getByRole('button', { name: /Crear plantilla/i }))
@@ -140,7 +139,6 @@ describe('PlantillaModal', () => {
                 expect.objectContaining({
                     $type: 'Document',
                     name: 'Reporte mensual',
-                    contentTemplate: '<h1>R</h1>',
                     isReport: true,
                     isTechnicalSheet: false,
                     slug: 'reporte-mensual',
@@ -149,6 +147,7 @@ describe('PlantillaModal', () => {
         })
 
         const sentPayload = vi.mocked(apiClient.post).mock.calls[0][1] as Record<string, unknown>
+        expect(String(sentPayload.contentTemplate)).toContain('"reportKey"')
         expect(sentPayload.reportKey).toBeUndefined()
         expect(saveReportBinding).not.toHaveBeenCalled()
     })
@@ -164,7 +163,6 @@ describe('PlantillaModal', () => {
 
         fireEvent.change(screen.getByLabelText(/Tipo de plantilla/i), { target: { value: 'Document' } })
         fireEvent.change(screen.getByLabelText(/Nombre/i), { target: { value: 'Ficha tecnica CV' } })
-        fireEvent.change(screen.getByLabelText(/Plantilla de contenido/i), { target: { value: '<p>FT</p>' } })
         fireEvent.click(screen.getByLabelText(/Es plantilla de ficha técnica/i))
 
         fireEvent.click(screen.getByRole('button', { name: /Crear plantilla/i }))
@@ -175,12 +173,13 @@ describe('PlantillaModal', () => {
                 expect.objectContaining({
                     $type: 'Document',
                     name: 'Ficha tecnica CV',
-                    contentTemplate: '<p>FT</p>',
                     isTechnicalSheet: true,
                     slug: 'ficha-tecnica-cv',
                 })
             )
         })
+        const sentPayload = vi.mocked(apiClient.post).mock.calls[0][1] as Record<string, unknown>
+        expect(String(sentPayload.contentTemplate)).toContain('"kind": "technical-sheet"')
     })
 
     it('should send the correct payload with $type and slug for a new questionnaire template', async () => {

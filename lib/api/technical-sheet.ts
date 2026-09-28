@@ -1,6 +1,5 @@
-import { apiClient } from "@/lib/api"
+import { apiClient, resolveBffUrl } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
-import { getAccessToken } from "@/lib/auth"
 
 export interface TechnicalSheetPayload {
   generatedAtUtc?: string
@@ -18,8 +17,6 @@ export interface TechnicalSheetPayload {
   interviewList?: unknown[]
   [key: string]: unknown
 }
-
-const getBaseUrl = () => (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "")
 
 export const buildTechnicalSheetBasePath = (
   vacancyId: string,
@@ -59,24 +56,18 @@ const triggerBlobDownload = (blob: Blob, filename: string) => {
   URL.revokeObjectURL(objUrl)
 }
 
-const fetchBinaryAuthenticated = async (url: string): Promise<Response> => {
-  const token = getAccessToken()
-  return fetch(url, {
-    method: "GET",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    credentials: "omit",
-  })
-}
-
 export const downloadTechnicalSheetHtml = async (
   vacancyId: string,
   candidateProfileId: string,
   filename: string
 ): Promise<void> => {
-  const base = getBaseUrl()
-  const path = `${buildTechnicalSheetBasePath(vacancyId, candidateProfileId)}.html?download=1`
-  const url = `${base}${path}`
-  const res = await fetchBinaryAuthenticated(url)
+  const url = resolveBffUrl(
+    `${buildTechnicalSheetBasePath(vacancyId, candidateProfileId)}.html?download=1`
+  )
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  })
   if (!res.ok) {
     const err = new Error(`HTML ${res.status}`) as Error & { status: number }
     err.status = res.status
@@ -94,12 +85,10 @@ export const buildTechnicalSheetNextPdfAppPath = (
 
 export interface DownloadTechnicalSheetPdfFromNextOptions {
   vacancyTitle?: string | null
-  /** HTML paginado de la vista previa; el PDF coincide con lo mostrado en pantalla. */
-  previewHtml?: string | null
 }
 
 /**
- * Descarga el PDF de ficha técnica generado en el servidor (Chromium).
+ * Descarga el PDF de ficha técnica generado en el servidor (PDFKit + esquema JSON).
  */
 export const downloadTechnicalSheetPdfFromNextRoute = async (
   vacancyId: string,
@@ -113,13 +102,9 @@ export const downloadTechnicalSheetPdfFromNextRoute = async (
   if (title) params.set("vacancyTitle", title)
   const qs = params.toString()
   const url = qs ? `${path}?${qs}` : path
-  const previewHtml = options?.previewHtml?.trim() ?? ""
-  const usePreview = previewHtml.length > 0
   const res = await fetch(url, {
-    method: usePreview ? "POST" : "GET",
-    credentials: "same-origin",
-    headers: usePreview ? { "Content-Type": "application/json" } : undefined,
-    body: usePreview ? JSON.stringify({ previewHtml }) : undefined,
+    method: "GET",
+    credentials: "include",
   })
   if (!res.ok) {
     let message = `Error ${res.status}`
@@ -146,4 +131,44 @@ export const slugifyVacancyForFilename = (title: string): string => {
     .replace(/^-+|-+$/g, "")
     .slice(0, 48)
   return slug || "vacante"
+}
+
+export const buildCandidateProfileTechnicalSheetPdfPath = (candidateId: string) =>
+  `/api/recruiter/candidates/${encodeURIComponent(candidateId)}/technical-sheet/pdf`
+
+/**
+ * PDF de ficha técnica desde el perfil del candidato (sin vacante).
+ * El servidor vuelve a leer el perfil; no acepta payload del cliente.
+ */
+export const downloadCandidateProfileTechnicalSheetPdf = async (
+  candidateId: string,
+  filename: string
+): Promise<void> => {
+  const cid = candidateId.trim()
+  if (!cid) {
+    const err = new Error("candidateId required") as Error & { status: number }
+    err.status = 400
+    throw err
+  }
+  const url = buildCandidateProfileTechnicalSheetPdfPath(cid)
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  })
+  if (!res.ok) {
+    let message = `Error ${res.status}`
+    try {
+      const j = await res.json()
+      const parsed = getApiErrorMessage(j)
+      if (parsed) message = parsed
+    } catch {
+      /* ignore */
+    }
+    const err = new Error(message) as Error & { status: number }
+    err.status = res.status
+    throw err
+  }
+  const blob = await res.blob()
+  const name = filename.endsWith(".pdf") ? filename : `${filename}.pdf`
+  triggerBlobDownload(blob, name)
 }

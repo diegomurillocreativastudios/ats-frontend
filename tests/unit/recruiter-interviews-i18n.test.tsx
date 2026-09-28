@@ -196,7 +196,7 @@ describe("EntrevistasVacancyError i18n (Etapa 11)", () => {
     expect(screen.getByText("Reintentar")).toBeInTheDocument()
   })
 
-  it("prioriza el mensaje crudo del error sobre el fallback", () => {
+  it("nunca muestra el mensaje crudo del error (FE-SEC-022)", () => {
     renderWithIntl(
       <EntrevistasVacancyError
         error={new Error("Boom backend")}
@@ -204,10 +204,10 @@ describe("EntrevistasVacancyError i18n (Etapa 11)", () => {
       />,
       "en"
     )
-    expect(screen.getByText("Boom backend")).toBeInTheDocument()
+    expect(screen.queryByText("Boom backend")).not.toBeInTheDocument()
     expect(
-      screen.queryByText("An error occurred while loading the interviews.")
-    ).not.toBeInTheDocument()
+      screen.getByText("An error occurred while loading the interviews.")
+    ).toBeInTheDocument()
   })
 })
 
@@ -239,6 +239,35 @@ describe("RecruiterPortal.interviews namespace parity (Etapa 11)", () => {
         Object.keys(ns),
         `interviews ausente en ${locale}.json`
       ).toContain("interviews")
+    }
+  })
+
+  it("mantiene las claves de detalle del modal en los 5 idiomas", () => {
+    const keys = [
+      "candidateFallback",
+      "durationMinutes",
+      "descriptionPlaceholder",
+      "sessionLinks",
+      "copyMeet",
+      "completedNoFeedback",
+    ]
+    for (const locale of locales) {
+      const detail = (
+        (
+          messagesByLocale[locale].RecruiterPortal as {
+            interviews: { detail: Record<string, unknown> }
+          }
+        ).interviews.detail
+      )
+      for (const key of keys) {
+        expect(detail[key], `${key} ausente en ${locale}`).toBeTruthy()
+      }
+      const confirm = detail.statusConfirm as Record<string, string>
+      expect(confirm.completeTitle, locale).toBeTruthy()
+      expect(confirm.noShowConfirm, locale).toBeTruthy()
+      expect((detail.fields as Record<string, string>).description).not.toMatch(
+        /Descripcion$/
+      )
     }
   })
 

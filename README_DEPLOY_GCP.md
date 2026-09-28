@@ -165,7 +165,7 @@ Flujo equivalente sin script:
 gcloud builds submit \
   --project="$GCP_PROJECT_ID" \
   --config=cloudbuild.yaml \
-  --substitutions=_SERVICE=ats-frontend-staging,_TAG=$(git rev-parse --short HEAD),_NEXT_PUBLIC_API_URL=https://TU_BACKEND,_NEXT_PUBLIC_APP_URL=https://TU_FRONTEND \
+  --substitutions=_SERVICE_NAME=ats-frontend-staging,_AR_REPOSITORY=ats-frontend,_IMAGE_NAME=ats-frontend,SHORT_SHA=$(git rev-parse --short HEAD),_NEXT_PUBLIC_API_URL=https://TU_BACKEND,_NEXT_PUBLIC_APP_URL=https://TU_FRONTEND \
   .
 ```
 
@@ -336,8 +336,8 @@ Misma imagen base y mismo `cloudbuild.yaml`; solo cambian servicio y substitutio
 ## 13. Notas técnicas
 
 - **Standalone:** `next.config.mjs` usa `output: "standalone"`. El `Dockerfile` copia `.next/standalone`, `.next/static` y `public`.
-- **PDF / Chromium:** en build Docker se usa `SKIP_CHROMIUM_PACK=1`. `@sparticuz/chromium` viaja con el trace de Next (`outputFileTracingIncludes` / `serverExternalPackages`). Si PDFs fallan en Cloud Run, considera subir memoria del servicio (p. ej. `2Gi`) solo para ese entorno.
-- **Headers grandes:** el contenedor arranca con `NODE_OPTIONS=--max-http-header-size=65536` (alineado con `npm start` local).
+- **PDF / Chromium:** no hay pack público (`/chromium-pack.tar`). En Cloud Run el binario va con el trace de Next (`@sparticuz/chromium` / `PUPPETEER_EXECUTABLE_PATH`). Si PDFs fallan, considera subir memoria del servicio (p. ej. `2Gi`). Vercel sigue siendo destino paralelo: `vercel.json` fija memoria y duración de las rutas PDF.
+- **Headers HTTP:** Node usa el tope por defecto (~16 KiB). No subir `--max-http-header-size` sin documentar el motivo.
 - **Sin secretos en git:** `.dockerignore` excluye `.env*`. `.gitignore` ya ignora `.env*`.
 
 ---

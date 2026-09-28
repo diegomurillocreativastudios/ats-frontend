@@ -23,7 +23,7 @@ export const PORTAL_HOME_HREF: Record<PortalKey, string> = {
 }
 
 /**
- * Portals the session role may enter. Matches proxy guards and the admin layout.
+ * Portals the session role may enter. Fail-closed: unknown/null role → none.
  * Oportunidades is public, but only staff get it as a selectable "vista".
  */
 export function getAccessiblePortalKeys(
@@ -38,7 +38,7 @@ export function getAccessiblePortalKeys(
   if (isCandidateRole(role)) {
     return ["candidate"]
   }
-  return ["candidate", "opportunities", "rrhh"]
+  return []
 }
 
 /**
