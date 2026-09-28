@@ -1,5 +1,9 @@
 import fs from "node:fs"
 import path from "node:path"
+import {
+  authProbeFailureHint,
+  isRetryableAuthProbeFailure,
+} from "./helpers/auth-probe"
 
 const AUTH_STATE_FILE = path.join(
   process.cwd(),
@@ -64,8 +68,9 @@ async function verifyBackendAuth(): Promise<E2EAuthState> {
   }
 
   const { email, password } = credentials
-  const maxAttempts = process.env.CI ? 6 : 2
+  const maxAttempts = process.env.CI ? 8 : 2
   let lastDetail = "sin respuesta del servidor"
+  let lastStatus: number | null = null
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -85,22 +90,38 @@ async function verifyBackendAuth(): Promise<E2EAuthState> {
       }
 
       const payload = await response.json().catch(() => ({}))
+      lastStatus = response.status
       lastDetail =
         (typeof payload.detail === "string" && payload.detail) ||
         (typeof payload.message === "string" && payload.message) ||
         `HTTP ${response.status}`
 
-      const isLocked = lastDetail.toLowerCase().includes("bloqueada")
-      if (isLocked && attempt < maxAttempts) {
+      if (
+        isRetryableAuthProbeFailure({
+          httpStatus: response.status,
+          detail: lastDetail,
+        }) &&
+        attempt < maxAttempts
+      ) {
+        console.warn(
+          `[e2e] Intento ${attempt}/${maxAttempts} falló (${lastDetail}). Reintentando...`
+        )
         await sleep(15_000)
         continue
       }
 
       break
     } catch (error) {
+      lastStatus = null
       lastDetail =
         error instanceof Error ? error.message : "Error de red al contactar el API"
-      if (attempt < maxAttempts) {
+      if (
+        isRetryableAuthProbeFailure({ httpStatus: null, detail: lastDetail }) &&
+        attempt < maxAttempts
+      ) {
+        console.warn(
+          `[e2e] Intento ${attempt}/${maxAttempts} falló (${lastDetail}). Reintentando...`
+        )
         await sleep(15_000)
       }
     }
@@ -112,8 +133,7 @@ async function verifyBackendAuth(): Promise<E2EAuthState> {
     message:
       `No se pudo autenticar contra ${apiUrl} con el usuario demo (${email}). ` +
       `Detalle: ${lastDetail}. ` +
-      "Configurá los secrets E2E_DEMO_EMAIL y E2E_DEMO_PASSWORD en GitHub, " +
-      "o restablecé el usuario de prueba en el backend.",
+      authProbeFailureHint(lastStatus),
   }
 }
 
