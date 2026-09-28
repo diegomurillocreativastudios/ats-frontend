@@ -164,6 +164,55 @@ describe("VacancyListCard i18n (Etapa 7)", () => {
 
     expect(screen.getByText("Sin título")).toBeInTheDocument()
   })
+
+  it("marca 'No publicada' sin estilizarla como solo lectura", () => {
+    const unpublished = mapVacancyFromApi({
+      id: "vac-3",
+      title: "Analista oculto",
+      company: "Acme",
+      isActive: true,
+      isPublished: false,
+    })
+    renderWithIntl(
+      <VacancyListCard vacancy={unpublished} onRefresh={() => {}} onSnackbar={() => {}} />,
+      "es",
+    )
+
+    expect(screen.getByText("No publicada")).toBeInTheDocument()
+    expect(
+      screen.getByRole("article", { name: "Vacante: Analista oculto" }),
+    ).not.toHaveAttribute("data-read-only")
+  })
+
+  it("no muestra el badge cuando la vacante está publicada", () => {
+    renderWithIntl(
+      <VacancyListCard vacancy={baseVacancy} onRefresh={() => {}} onSnackbar={() => {}} />,
+      "en",
+    )
+
+    expect(screen.queryByText("Unpublished")).not.toBeInTheDocument()
+  })
+})
+
+describe("RecruiterPortal.vacancies publication keys", () => {
+  it("expone las claves de publicación en los 5 idiomas", () => {
+    for (const locale of locales) {
+      const vacancies = (
+        messagesByLocale[locale].RecruiterPortal as Record<string, unknown>
+      ).vacancies as Record<string, Record<string, Record<string, unknown>>>
+      expect(vacancies.cards.unpublished, `cards.unpublished en ${locale}`).toBeTruthy()
+      expect(
+        Object.keys(vacancies.detail.publication).sort(),
+        `detail.publication en ${locale}`,
+      ).toEqual(
+        ["badge", "helperPublished", "helperUnpublished", "label", "readOnlyHint"],
+      )
+      expect(vacancies.detail.toasts.published, locale).toBeTruthy()
+      expect(vacancies.detail.toasts.unpublished, locale).toBeTruthy()
+      expect(vacancies.detail.errors.publicationConflict, locale).toBeTruthy()
+      expect(vacancies.detail.errors.publicationFailed, locale).toBeTruthy()
+    }
+  })
 })
 
 describe("RecruiterPortal.vacancies namespace parity (Etapa 7)", () => {

@@ -3,6 +3,7 @@
 import type { ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
+import { VacancyUnpublishedBadge } from "@/components/rrhh/vacancy-unpublished-badge"
 
 interface VacancyReadOnlyIdentityProps {
   title: string
@@ -15,6 +16,8 @@ interface VacancyReadOnlyIdentityProps {
   statusLabel: string
   statusClassName: string
   titleClassName: string
+  /** Shown next to the status when the vacancy is hidden from candidates. */
+  unpublishedLabel?: string
 }
 
 function IdentityFact({ label, children }: { label: string; children: ReactNode }) {
@@ -40,6 +43,7 @@ export function VacancyReadOnlyIdentity({
   statusLabel,
   statusClassName,
   titleClassName,
+  unpublishedLabel,
 }: VacancyReadOnlyIdentityProps) {
   const t = useTranslations("RecruiterPortal.vacancies.detail.headerMeta")
 
@@ -55,6 +59,7 @@ export function VacancyReadOnlyIdentity({
           >
             {statusLabel}
           </span>
+          {unpublishedLabel ? <VacancyUnpublishedBadge label={unpublishedLabel} /> : null}
         </div>
         <p className="min-w-0 wrap-break-word font-sans text-sm font-medium text-foreground">{companyName}</p>
       </div>

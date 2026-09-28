@@ -90,10 +90,25 @@ describe("FE-SEC-019 AI controls pins", () => {
       join(ROOT, "hooks/use-profile-tailoring.ts"),
       "utf8"
     )
-    expect(hook).toMatch(/status === 422/)
-    expect(hook).toMatch(/No se creó ninguna versión/)
+    expect(hook).toMatch(/getProfileTailoringErrorMessage\(/)
+    expect(hook).toMatch(/tErrors\("unprocessable"\)/)
     expect(hook).not.toMatch(/JSON\.parse\(/)
     expect(hook).not.toMatch(/repair|coerce|fixJson/i)
+
+    const errorMapper = readFileSync(
+      join(ROOT, "lib/profile-tailoring-error.ts"),
+      "utf8"
+    )
+    expect(errorMapper).toMatch(/status === 422/)
+    expect(errorMapper).not.toMatch(/JSON\.parse\(/)
+    expect(errorMapper).not.toMatch(/repair|coerce|fixJson/i)
+
+    const esMessages = JSON.parse(
+      readFileSync(join(ROOT, "messages/es.json"), "utf8")
+    )
+    expect(esMessages.CandidatePortal.profileTailoring.errors.unprocessable).toMatch(
+      /No se creó ninguna versión/
+    )
 
     const normalize = readFileSync(
       join(ROOT, "lib/candidate-profile-version.ts"),

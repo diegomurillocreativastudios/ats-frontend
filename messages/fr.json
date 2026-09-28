@@ -1183,7 +1183,9 @@
         }
       },
       "errors": {
-        "unprocessable": "L'IA n'a pas pu générer un profil adapté valide. Aucune version n'a été créée."
+        "unprocessable": "L'IA n'a pas pu générer un profil adapté valide. Aucune version n'a été créée.",
+        "vacancyUnavailable": "L'offre sélectionnée n'est plus disponible. Choisissez une autre offre ou collez la description.",
+        "processFailed": "Impossible de traiter le profil pour cette offre."
       },
       "comparison": {
         "title": "Comparaison de profil",
@@ -2008,7 +2010,8 @@
         "candidates": "Candidats",
         "cardAria": "Poste : {title}",
         "cardReadOnlyAria": "Poste inactif, lecture seule : {title}",
-        "logoAlt": "Logo de {company}"
+        "logoAlt": "Logo de {company}",
+        "unpublished": "Non publiée"
       },
       "statuses": {
         "active": "Active",
@@ -2107,6 +2110,10 @@
             "valueAria": "Exigence {index} - Valeur",
             "scaleAria": "Exigence {index} - Niveau moyen de 1 à 10",
             "removeAria": "Supprimer l'exigence {index}"
+          },
+          "isPublished": {
+            "label": "Publiée sur le portail des opportunités",
+            "helper": "Si vous la désactivez, les candidats ne verront pas l'offre. Vous pourrez la publier plus tard."
           }
         },
         "actions": {
@@ -2206,7 +2213,9 @@
           "loadFailed": "Le poste n'a pas pu être chargé.",
           "saveFailed": "Le poste n'a pas pu être enregistré.",
           "companyRequired": "Sélectionnez une entreprise cliente.",
-          "finishFailed": "Le processus n'a pas pu être terminé."
+          "finishFailed": "Le processus n'a pas pu être terminé.",
+          "publicationConflict": "Cette offre ne peut plus être modifiée car elle est clôturée ou en lecture seule.",
+          "publicationFailed": "Impossible de modifier la publication de l'offre."
         },
         "fallbacks": {
           "unspecified": "Non spécifié"
@@ -2217,7 +2226,9 @@
           "copied": "Poste copié.",
           "copyFailed": "Impossible de copier le poste.",
           "linkCopied": "Lien public copié.",
-          "linkCopyFailed": "Impossible de copier le lien public."
+          "linkCopyFailed": "Impossible de copier le lien public.",
+          "published": "Offre publiée sur le portail des opportunités.",
+          "unpublished": "Offre masquée pour les candidats."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2258,6 +2269,13 @@
           "commentsHelper": "Vous pouvez ajouter des observations ou des notes sur le déroulement du processus.",
           "validationRating": "La note doit être comprise entre 1 et 5 étoiles.",
           "errorFallback": "Erreur lors de la fin du processus"
+        },
+        "publication": {
+          "label": "Publiée sur le portail des opportunités",
+          "helperPublished": "Les candidats peuvent voir cette offre et postuler.",
+          "helperUnpublished": "Masquée pour les candidats. Vous gérez toujours les candidatures et le processus normalement.",
+          "readOnlyHint": "Une offre clôturée ou en lecture seule ne peut pas être publiée ni masquée.",
+          "badge": "Non publiée"
         }
       },
       "results": {
@@ -2743,7 +2761,7 @@
           "cancel": "Annuler"
         }
       },
-        "detail": {
+      "detail": {
         "pageTitle": "Entretien",
         "backToInterviews": "← Retour aux entretiens",
         "loading": "Chargement de l'entretien…",
@@ -3981,7 +3999,8 @@
         "consentSubmitFailed": "Nous n'avons pas pu enregistrer votre autorisation et consentement. Veuillez réessayer.",
         "consentValidation": "Veuillez vérifier l'autorisation et le consentement, puis réessayer.",
         "consentVersionMismatch": "Le document d'autorisation a été mis à jour. Rechargez la page et réessayez.",
-        "consentNationalIdConflict": "Ce document d'identité est déjà associé à un autre profil. Utilisez une autre valeur ou contactez le support."
+        "consentNationalIdConflict": "Ce document d'identité est déjà associé à un autre profil. Utilisez une autre valeur ou contactez le support.",
+        "vacancyUnavailable": "Cette offre n'est plus disponible. Vos données n'ont pas été envoyées."
       },
       "fields": {
         "firstName": "Prénoms *",
@@ -4094,6 +4113,11 @@
       "checklistData": "Renseignez prénoms, noms de famille et e-mail avec des données réelles.",
       "formSectionLabel": "Formulaire de candidature",
       "documentTitle": "ApplicanTree | Portail opportunités | Postuler à {title}"
+    },
+    "unavailable": {
+      "title": "Cette offre n’est plus disponible",
+      "body": "Le poste a peut-être déjà été pourvu. Découvrez d’autres opportunités qui pourraient vous correspondre.",
+      "cta": "Voir les offres disponibles"
     }
   },
   "PrivacyPolicy": {

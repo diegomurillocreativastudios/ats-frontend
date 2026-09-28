@@ -36,8 +36,10 @@ import {
   resolveVacancyCompanyId,
 } from "@/lib/api/recruiter-companies"
 import {
+  isVacancyReadOnlyConflict,
   mapVacancyCompanyPatchError,
   patchVacancyClientCompany,
+  patchVacancyIsPublished,
 } from "@/lib/api/recruiter-vacancies"
 import { finishVacancyProcess } from "@/lib/api/recruiter-vacancy-finish"
 import { fetchRecruiterVacancyByPathSegment } from "@/lib/api/recruiter-vacancy-by-path"
@@ -46,7 +48,10 @@ import {
   clampSearchLimit,
   unwrapListArray,
 } from "@/lib/api/query-paging"
-import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  extractStructuredApiErrorMessage,
+  getApiErrorMessage,
+} from "@/lib/api-error"
 import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
 import { formatApplicationSourceBadge } from "@/lib/application-source"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
@@ -68,6 +73,7 @@ import { VacancyDelimitedText } from "@/components/rrhh/vacancy-delimited-text"
 import { VacancyDetailsCard } from "@/components/rrhh/vacancy-details-readout"
 import { VacancySalaryCard } from "@/components/rrhh/vacancy-salary-card"
 import { VacancyReadOnlyIdentity } from "@/components/rrhh/vacancy-read-only-identity"
+import { VacancyPublicationSwitch } from "@/components/rrhh/vacancy-publication-switch"
 import { CandidateProfileModal } from "@/components/rrhh/candidate-profile-modal"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
 import {
@@ -111,6 +117,7 @@ import {
 } from "@/lib/api/recruiter-candidate-cv"
 import { getInitials } from "@/lib/getInitials";
 import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active";
+import { readVacancyIsPublished } from "@/lib/vacancies/read-vacancy-is-published";
 import {
   getVacancyRecruiterReadOnlyReason,
   isVacancyRecruiterReadOnly,
@@ -1108,6 +1115,7 @@ export default function VacanteDetallePage() {
   const [updatingStatusCandidateId, setUpdatingStatusCandidateId] = useState(null);
   const [finishProcessModalOpen, setFinishProcessModalOpen] = useState(false);
   const [finishingProcess, setFinishingProcess] = useState(false);
+  const [updatingPublication, setUpdatingPublication] = useState(false);
   const [pasteConfirmOpen, setPasteConfirmOpen] = useState(false);
 
   const possibleCandidatesSectionDesktopRef = useRef(null);
@@ -1971,6 +1979,74 @@ export default function VacanteDetallePage() {
 
   const statusConfig = vacancy ? getStatusConfig(vacancy.status, t) : getStatusConfig("activa", t);
   const canSharePublicLink = isVacancyPublicLinkShareable(vacancy);
+  const vacancyIsPublished = readVacancyIsPublished(vacancy);
+  const isPublicationLocked =
+    isVacancyReadOnly || savingVacancy || finishingProcess;
+
+  const handleTogglePublication = useCallback(
+    async (next: boolean) => {
+      if (!vacancyId || isVacancyReadOnly || updatingPublication) return;
+      setUpdatingPublication(true);
+      try {
+        const updated = await patchVacancyIsPublished(vacancyId, next);
+        const confirmed =
+          updated && typeof updated === "object" && !Array.isArray(updated)
+            ? readVacancyIsPublished({ isPublished: next, ...updated })
+            : next;
+        setVacancy((prev) => ({
+          ...(prev && typeof prev === "object" ? prev : {}),
+          isPublished: confirmed,
+          is_published: confirmed,
+        }));
+        setSnackbar({
+          open: true,
+          variant: "success",
+          message: confirmed
+            ? tDetail("toasts.published")
+            : tDetail("toasts.unpublished"),
+        });
+      } catch (err) {
+        if (isVacancyReadOnlyConflict(err)) {
+          await fetchVacancy(true);
+          setSnackbar({
+            open: true,
+            variant: "error",
+            message: tDetail("errors.publicationConflict"),
+          });
+          return;
+        }
+        setSnackbar({
+          open: true,
+          variant: "error",
+          message:
+            extractStructuredApiErrorMessage(err) ||
+            tDetail("errors.publicationFailed"),
+        });
+      } finally {
+        setUpdatingPublication(false);
+      }
+    },
+    [vacancyId, isVacancyReadOnly, updatingPublication, fetchVacancy, tDetail]
+  );
+
+  const renderPublicationSwitch = () => (
+    <VacancyPublicationSwitch
+      checked={vacancyIsPublished}
+      onCheckedChange={handleTogglePublication}
+      label={tDetail("publication.label")}
+      description={
+        vacancyIsPublished
+          ? tDetail("publication.helperPublished")
+          : tDetail("publication.helperUnpublished")
+      }
+      disabled={isPublicationLocked}
+      disabledReason={
+        isVacancyReadOnly ? tDetail("publication.readOnlyHint") : undefined
+      }
+      isBusy={updatingPublication}
+      className="rounded-lg border border-border bg-card px-3 py-2.5"
+    />
+  );
   /** AI match suggestions from vacancy (for "Posibles candidatos" container). */
   const vacancyCandidates = Array.isArray(vacancy?.aiMatchSuggestions)
     ? vacancy.aiMatchSuggestions
@@ -2836,8 +2912,14 @@ export default function VacanteDetallePage() {
                               statusLabel={statusConfig.label}
                               statusClassName={`${statusConfig.bgClass} ${statusConfig.textClass}`}
                               titleClassName="text-2xl"
+                              unpublishedLabel={
+                                vacancyIsPublished ? undefined : tDetail("publication.badge")
+                              }
                             />
                           )}
+                          {!isEditing ? (
+                            <div className="mt-4 max-w-md">{renderPublicationSwitch()}</div>
+                          ) : null}
                         </div>
                       </div>
                       <div className="flex max-w-full shrink-0 flex-wrap items-center gap-3">
@@ -3684,8 +3766,14 @@ export default function VacanteDetallePage() {
                             statusLabel={statusConfig.label}
                             statusClassName={`${statusConfig.bgClass} ${statusConfig.textClass}`}
                             titleClassName="text-xl"
+                            unpublishedLabel={
+                              vacancyIsPublished ? undefined : tDetail("publication.badge")
+                            }
                           />
                         )}
+                        {!isEditing ? (
+                          <div className="mt-4">{renderPublicationSwitch()}</div>
+                        ) : null}
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">

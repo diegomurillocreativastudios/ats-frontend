@@ -1183,7 +1183,9 @@
         }
       },
       "errors": {
-        "unprocessable": "Die KI konnte kein gültiges angepasstes Profil erzeugen. Es wurde keine Version erstellt."
+        "unprocessable": "Die KI konnte kein gültiges angepasstes Profil erzeugen. Es wurde keine Version erstellt.",
+        "vacancyUnavailable": "Die ausgewählte Stelle ist nicht mehr verfügbar. Wähle eine andere Stelle oder füge die Beschreibung ein.",
+        "processFailed": "Das Profil konnte für die Stelle nicht verarbeitet werden."
       },
       "comparison": {
         "title": "Profilvergleich",
@@ -2008,7 +2010,8 @@
         "candidates": "Kandidaten",
         "cardAria": "Stelle: {title}",
         "cardReadOnlyAria": "Inaktive Stelle, nur Ansicht: {title}",
-        "logoAlt": "Logo von {company}"
+        "logoAlt": "Logo von {company}",
+        "unpublished": "Nicht veröffentlicht"
       },
       "statuses": {
         "active": "Aktiv",
@@ -2107,6 +2110,10 @@
             "valueAria": "Anforderung {index} - Wert",
             "scaleAria": "Anforderung {index} - Durchschnittliches Niveau von 1 bis 10",
             "removeAria": "Anforderung {index} entfernen"
+          },
+          "isPublished": {
+            "label": "Im Stellenportal veröffentlicht",
+            "helper": "Wenn du dies deaktivierst, sehen Bewerber die Stelle nicht. Du kannst sie später veröffentlichen."
           }
         },
         "actions": {
@@ -2206,7 +2213,9 @@
           "loadFailed": "Die Stelle konnte nicht geladen werden.",
           "saveFailed": "Die Stelle konnte nicht gespeichert werden.",
           "companyRequired": "Wähle ein Kundenunternehmen aus.",
-          "finishFailed": "Der Prozess konnte nicht abgeschlossen werden."
+          "finishFailed": "Der Prozess konnte nicht abgeschlossen werden.",
+          "publicationConflict": "Diese Stelle kann nicht mehr geändert werden, da sie abgeschlossen oder schreibgeschützt ist.",
+          "publicationFailed": "Die Veröffentlichung der Stelle konnte nicht geändert werden."
         },
         "fallbacks": {
           "unspecified": "Nicht angegeben"
@@ -2217,7 +2226,9 @@
           "copied": "Stelle kopiert.",
           "copyFailed": "Die Stelle konnte nicht kopiert werden.",
           "linkCopied": "Öffentlicher Link kopiert.",
-          "linkCopyFailed": "Der öffentliche Link konnte nicht kopiert werden."
+          "linkCopyFailed": "Der öffentliche Link konnte nicht kopiert werden.",
+          "published": "Stelle im Stellenportal veröffentlicht.",
+          "unpublished": "Stelle für Bewerber ausgeblendet."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2258,6 +2269,13 @@
           "commentsHelper": "Du kannst Beobachtungen oder Notizen zum Verlauf des Prozesses hinzufügen.",
           "validationRating": "Die Bewertung muss zwischen 1 und 5 Sternen liegen.",
           "errorFallback": "Fehler beim Abschließen des Prozesses"
+        },
+        "publication": {
+          "label": "Im Stellenportal veröffentlicht",
+          "helperPublished": "Bewerber können diese Stelle sehen und sich bewerben.",
+          "helperUnpublished": "Für Bewerber ausgeblendet. Bewerbungen und Prozess verwaltest du weiterhin wie gewohnt.",
+          "readOnlyHint": "Eine abgeschlossene oder schreibgeschützte Stelle kann weder veröffentlicht noch ausgeblendet werden.",
+          "badge": "Nicht veröffentlicht"
         }
       },
       "results": {
@@ -2743,7 +2761,7 @@
           "cancel": "Abbrechen"
         }
       },
-        "detail": {
+      "detail": {
         "pageTitle": "Vorstellungsgespräch",
         "backToInterviews": "← Zurück zu Gesprächen",
         "loading": "Gespräch wird geladen…",
@@ -3981,7 +3999,8 @@
         "consentSubmitFailed": "Wir konnten Ihre Autorisierung und Einwilligung nicht speichern. Bitte versuchen Sie es erneut.",
         "consentValidation": "Bitte überprüfen Sie die Autorisierung und Einwilligung und versuchen Sie es erneut.",
         "consentVersionMismatch": "Das Autorisierungsdokument wurde aktualisiert. Laden Sie die Seite neu und versuchen Sie es erneut.",
-        "consentNationalIdConflict": "Dieses Ausweisdokument ist bereits mit einem anderen Profil verknüpft. Verwenden Sie einen anderen Wert oder kontaktieren Sie den Support."
+        "consentNationalIdConflict": "Dieses Ausweisdokument ist bereits mit einem anderen Profil verknüpft. Verwenden Sie einen anderen Wert oder kontaktieren Sie den Support.",
+        "vacancyUnavailable": "Diese Stelle ist nicht mehr verfügbar. Deine Daten wurden nicht gesendet."
       },
       "fields": {
         "firstName": "Vornamen *",
@@ -4094,6 +4113,11 @@
       "checklistData": "Geben Sie Vornamen, Nachnamen und E-Mail mit echten Daten an.",
       "formSectionLabel": "Bewerbungsformular",
       "documentTitle": "ApplicanTree | Stellenportal | Bewerbung für {title}"
+    },
+    "unavailable": {
+      "title": "Diese Stelle ist nicht mehr verfügbar",
+      "body": "Die Stelle wurde möglicherweise bereits besetzt. Entdecke andere Stellen, die zu dir passen könnten.",
+      "cta": "Verfügbare Stellen ansehen"
     }
   },
   "PrivacyPolicy": {

@@ -1,5 +1,6 @@
 import { readCompanyIsActiveForVacancy } from "@/lib/vacancies/read-company-is-active"
 import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active"
+import { readVacancyIsPublished } from "@/lib/vacancies/read-vacancy-is-published"
 import { formatVacancyCountryLabel } from "@/lib/vacancies/vacancy-location-display"
 import { normalizeCountryCode, readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
 import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
@@ -41,6 +42,7 @@ export interface VacancyListItem {
   countryLabel: string
   stateCode: string | null
   isActive: boolean
+  isPublished: boolean
   logoSrc: string | null
 }
 
@@ -199,6 +201,7 @@ export const mapVacancyFromApi = (
     stateCode,
     isActive:
       readVacancyIsActive(item) && readCompanyIsActiveForVacancy(item),
+    isPublished: readVacancyIsPublished(item),
     logoSrc: resolveLogoSrc(item),
   }
 }

@@ -443,11 +443,29 @@ export async function listPublicVacancies(
   return normalizeOpportunityListResponse(data)
 }
 
+/**
+ * Unpublished and missing vacancies both answer 404; only that status means "not found".
+ */
+async function getPublicVacancyOrNull(path: string): Promise<OpportunityVacancyDetail | null> {
+  try {
+    const data = await apiClient.get(path)
+    return normalizeOpportunityDetail(data)
+  } catch (error) {
+    if (
+      error != null &&
+      typeof error === "object" &&
+      (error as { status?: unknown }).status === 404
+    ) {
+      return null
+    }
+    throw error
+  }
+}
+
 export async function getPublicVacancyDetail(
   vacancyId: string
 ): Promise<OpportunityVacancyDetail | null> {
-  const data = await apiClient.get(`/api/vacantes/${encodeURIComponent(vacancyId)}`)
-  return normalizeOpportunityDetail(data)
+  return getPublicVacancyOrNull(`/api/vacantes/${encodeURIComponent(vacancyId)}`)
 }
 
 /**
@@ -463,8 +481,7 @@ export async function getPublicVacancyByPathSegment(
     return getPublicVacancyDetail(segment)
   }
 
-  const data = await apiClient.get(
+  return getPublicVacancyOrNull(
     `/api/vacantes/by-public-slug/${encodeURIComponent(segment)}`
   )
-  return normalizeOpportunityDetail(data)
 }

@@ -38,5 +38,28 @@ describe("VacancyReadOnlyIdentity", () => {
     expect(facts).toHaveClass("grid-cols-1", "@min-[22rem]/identity:grid-cols-2")
     expect(facts?.parentElement).toHaveClass("@container/identity")
     expect(screen.getByRole("heading", { name: "Piloto titular de Fórmula 1" })).toHaveClass("wrap-break-word")
+    expect(screen.queryByText("No publicada")).not.toBeInTheDocument()
+  })
+
+  it("shows the unpublished badge next to the status when provided", () => {
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <VacancyReadOnlyIdentity
+          title="Analista"
+          companyName="Creativa"
+          department="Operaciones"
+          modality="Remoto"
+          createdAtLabel="Creada el 1 sep 2026"
+          statusLabel="Activa"
+          statusClassName="bg-emerald-100 text-emerald-800"
+          titleClassName="text-2xl"
+          unpublishedLabel={esMessages.RecruiterPortal.vacancies.detail.publication.badge}
+        />
+      </NextIntlClientProvider>
+    )
+
+    const badge = screen.getByText("No publicada")
+    expect(badge).toBeInTheDocument()
+    expect(badge.parentElement).toBe(screen.getByText("Activa").parentElement)
   })
 })

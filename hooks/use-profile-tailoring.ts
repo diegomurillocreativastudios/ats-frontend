@@ -1,13 +1,13 @@
 "use client"
 
 import { useCallback, useState, type SetStateAction } from "react"
+import { useTranslations } from "next-intl"
 import { tailorProfileToVacancy } from "@/lib/api/candidate-profile-tailor"
 import {
   adaptedProfileToFormState,
   type TailorToVacancyResult,
 } from "@/lib/candidate-profile-version"
-import { getApiErrorMessage } from "@/lib/api-error"
-import { getUploadApiErrorMessage } from "@/lib/upload-constraints"
+import { getProfileTailoringErrorMessage } from "@/lib/profile-tailoring-error"
 import type { FullProfileFormInput } from "@/lib/candidate-profile"
 import {
   resolveExclusiveVacancySource,
@@ -24,6 +24,7 @@ export interface UseProfileTailoringState {
 }
 
 export function useProfileTailoring() {
+  const tErrors = useTranslations("CandidatePortal.profileTailoring.errors")
   const [result, setResult] = useState<TailorToVacancyResult | null>(null)
   const [adaptedForm, setAdaptedForm] = useState<FullProfileFormInput | null>(null)
   const [processing, setProcessing] = useState(false)
@@ -85,26 +86,19 @@ export function useProfileTailoring() {
         loadFromTailorResult(data)
         return data
       } catch (err: unknown) {
-        const status =
-          typeof err === "object" && err !== null && "status" in err
-            ? (err as { status?: number }).status
-            : undefined
-        const serverMessage = getApiErrorMessage(err)
-        const uploadMessage = getUploadApiErrorMessage(err)
-        const message =
-          status === 422
-            ? serverMessage ||
-              "La IA no pudo generar un perfil adaptado válido. No se creó ninguna versión."
-            : status === 413 || status === 415 || status === 400
-              ? uploadMessage
-              : serverMessage || "No se pudo procesar el perfil para la vacante."
-        setError(message)
+        setError(
+          getProfileTailoringErrorMessage(err, {
+            unprocessable: tErrors("unprocessable"),
+            vacancyUnavailable: tErrors("vacancyUnavailable"),
+            fallback: tErrors("processFailed"),
+          })
+        )
         return null
       } finally {
         setProcessing(false)
       }
     },
-    [loadFromTailorResult]
+    [loadFromTailorResult, tErrors]
   )
 
   const patchAdaptedForm = useCallback((patch: Partial<FullProfileFormInput>) => {
