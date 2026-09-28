@@ -3856,6 +3856,10 @@
       "roleFallback": "Administrador"
     }
   },
+  "CvOutputLanguage": {
+    "invalid": "El idioma de la aplicación no es compatible para procesar el CV. Cambia a español, inglés, italiano, francés o alemán e intenta de nuevo.",
+    "mismatch": "No pudimos procesar tu CV en el idioma seleccionado. Intenta de nuevo."
+  },
   "PublicOpportunities": {
     "page": {
       "portalTitle": "Portal de oportunidades",

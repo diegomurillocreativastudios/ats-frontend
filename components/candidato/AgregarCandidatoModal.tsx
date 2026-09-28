@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Loader2, Sparkles } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import SingleFileUploadZone from "@/components/candidato/SingleFileUploadZone";
@@ -17,6 +17,11 @@ import {
 } from "@/lib/api/identity-document-types";
 import { apiClient } from "@/lib/api";
 import { getApiErrorMessage } from "@/lib/api-error";
+import {
+  CV_OUTPUT_LANGUAGE_FIELD,
+  getCvOutputLanguageErrorKind,
+  toCvOutputLanguage,
+} from "@/lib/cv-output-language";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { canStaffBulkPdfCvUpload } from "@/lib/roles";
 import {
@@ -97,6 +102,8 @@ export default function AgregarCandidatoModal({
   });
   const requiresIdentityDocuments = !allowsStaffCvUpload;
   const t = useTranslations("CandidatePortal.documents.modal");
+  const tCvLanguage = useTranslations("CvOutputLanguage");
+  const outputLanguage = toCvOutputLanguage(useLocale());
   const copy = {
     title: t(`${variant}.title`),
     submitLabel: t(`${variant}.submit`),
@@ -270,6 +277,7 @@ export default function AgregarCandidatoModal({
           );
         }
         formData.append("EntityType", "Candidate");
+        formData.append(CV_OUTPUT_LANGUAGE_FIELD, outputLanguage);
 
         await apiClient.postFormData("/Ingest/upload", formData);
 
@@ -298,7 +306,9 @@ export default function AgregarCandidatoModal({
           : copy.successMessage;
       onSnackbar?.(successMessage, "success");
     } catch (err: unknown) {
+      const cvLanguageError = getCvOutputLanguageErrorKind(err);
       const message =
+        (cvLanguageError ? tCvLanguage(cvLanguageError) : "") ||
         getUploadApiErrorMessage(err) ||
         getApiErrorMessage(err) ||
         (variant === "self"

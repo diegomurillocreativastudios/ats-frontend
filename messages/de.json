@@ -3856,6 +3856,10 @@
       "roleFallback": "Administrador"
     }
   },
+  "CvOutputLanguage": {
+    "invalid": "Die App-Sprache wird für die Verarbeitung des Lebenslaufs nicht unterstützt. Wechsle zu Spanisch, Englisch, Italienisch, Französisch oder Deutsch und versuche es erneut.",
+    "mismatch": "Wir konnten deinen Lebenslauf nicht in der ausgewählten Sprache verarbeiten. Bitte versuche es erneut."
+  },
   "PublicOpportunities": {
     "page": {
       "portalTitle": "Stellenportal",

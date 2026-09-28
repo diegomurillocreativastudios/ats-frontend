@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useState } from "react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Upload } from "lucide-react"
 import { CandidatePortalShell } from "@/components/candidato/candidate-portal-shell"
 import DocumentsUploadZone, {
@@ -12,11 +12,18 @@ import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { useCandidateSnackbar } from "@/components/candidato/candidate-portal-snackbar"
 import { apiClient } from "@/lib/api"
 import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  CV_OUTPUT_LANGUAGE_FIELD,
+  getCvOutputLanguageErrorKind,
+  toCvOutputLanguage,
+} from "@/lib/cv-output-language"
 import { getUploadApiErrorMessage } from "@/lib/upload-constraints"
 import { useCandidateDocuments } from "@/hooks/useCandidateDocuments"
 
 export default function DocumentosContent() {
   const t = useTranslations("CandidatePortal.documents")
+  const tCvLanguage = useTranslations("CvOutputLanguage")
+  const outputLanguage = toCvOutputLanguage(useLocale())
   const [isUploadingGeneralDocument, setIsUploadingGeneralDocument] = useState(false)
   const { showSnackbar } = useCandidateSnackbar()
   const { candidateId, documents, loading, error, refetch, deleteDocument } =
@@ -53,6 +60,7 @@ export default function DocumentosContent() {
         for (const file of files) {
           const formData = new FormData()
           formData.append("File", file)
+          formData.append(CV_OUTPUT_LANGUAGE_FIELD, outputLanguage)
           await apiClient.postFormData(
             `/api/candidate/${encodeURIComponent(candidateId)}/documents`,
             formData
@@ -65,7 +73,9 @@ export default function DocumentosContent() {
           "success"
         )
       } catch (err: unknown) {
+        const cvLanguageError = getCvOutputLanguageErrorKind(err)
         const message =
+          (cvLanguageError ? tCvLanguage(cvLanguageError) : "") ||
           getUploadApiErrorMessage(err) ||
           getApiErrorMessage(err) ||
           t("toastGeneralUploadError")
@@ -74,7 +84,7 @@ export default function DocumentosContent() {
         setIsUploadingGeneralDocument(false)
       }
     },
-    [candidateId, refetch, showSnackbar, t]
+    [candidateId, outputLanguage, refetch, showSnackbar, t, tCvLanguage]
   )
 
   const renderGeneralUploadLeft = ({

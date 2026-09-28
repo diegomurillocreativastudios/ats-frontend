@@ -3856,6 +3856,10 @@
       "roleFallback": "Administrador"
     }
   },
+  "CvOutputLanguage": {
+    "invalid": "La langue de l'application n'est pas prise en charge pour traiter le CV. Passez à l'espagnol, l'anglais, l'italien, le français ou l'allemand, puis réessayez.",
+    "mismatch": "Nous n'avons pas pu traiter votre CV dans la langue sélectionnée. Veuillez réessayer."
+  },
   "PublicOpportunities": {
     "page": {
       "portalTitle": "Portail des opportunités",

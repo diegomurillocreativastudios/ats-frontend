@@ -139,8 +139,9 @@ describe("public vacancy apply helpers", () => {
       source: "linkedin",
       notes: "hola",
       cvFile: file,
-    })
+    }, "EN")
     expect(fd.get("vacancyId")).toBe("vacancy-123")
+    expect(fd.get("outputLanguage")).toBe("EN")
     expect(fd.get("cvFile")).toBe(file)
     const candidate = JSON.parse(String(fd.get("candidate") ?? "{}")) as Record<
       string,
@@ -151,6 +152,7 @@ describe("public vacancy apply helpers", () => {
     expect(candidate.email).toBe("a@b.co")
     expect(candidate.source).toBe("linkedin")
     expect(candidate.notes).toBe("hola")
+    expect(candidate).not.toHaveProperty("outputLanguage")
   })
 
   it("appends authConsent JSON when provided", () => {
@@ -181,7 +183,8 @@ describe("public vacancy apply helpers", () => {
       email: "a@b.co",
       cvFile: file,
       authConsent,
-    })
+    }, "DE")
     expect(JSON.parse(String(fd.get("authConsent") ?? "{}"))).toEqual(authConsent)
+    expect(fd.get("outputLanguage")).toBe("DE")
   })
 })
