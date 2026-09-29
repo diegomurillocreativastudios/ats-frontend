@@ -189,6 +189,24 @@ describe("PublicVacancyApplicationForm", () => {
     )
   })
 
+  it("muestra copy localizado de vacante no disponible ante 404", async () => {
+    postFormData.mockRejectedValue(
+      Object.assign(new Error("Vacancy not found."), {
+        status: 404,
+        body: { message: "Vacancy not found." },
+      })
+    )
+    renderForm()
+
+    await fillAndSubmit()
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent(
+      esMessages.PublicOpportunities.applicationForm.validation.vacancyUnavailable
+    )
+    expect(alert).not.toHaveTextContent("Vacancy not found.")
+  })
+
   it("muestra nombres y apellidos en plural y marca teléfono y documento como requeridos", async () => {
     renderForm()
 

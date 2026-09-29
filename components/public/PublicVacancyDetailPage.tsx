@@ -11,6 +11,7 @@ import {
 } from "@/lib/api/public-vacancies"
 import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
 import { PublicOpportunitiesShell } from "@/components/public/PublicOpportunitiesShell"
+import { PublicVacancyUnavailable } from "@/components/public/PublicVacancyUnavailable"
 import { VacancyIdentityFacts } from "@/components/public/vacancy-identity-facts"
 import {
   PublicVacancyOutline,
@@ -58,6 +59,7 @@ export function PublicVacancyDetailPage({
   const [vacancy, setVacancy] = useState<OpportunityVacancyDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isUnavailable, setIsUnavailable] = useState(false)
   const queryString = searchParams.toString()
 
   const backHref = useMemo(() => {
@@ -70,6 +72,7 @@ export function PublicVacancyDetailPage({
     const loadVacancy = async () => {
       setIsLoading(true)
       setErrorMessage(null)
+      setIsUnavailable(false)
 
       try {
         const nextVacancy = await getPublicVacancyByPathSegment(vacancyId)
@@ -77,7 +80,7 @@ export function PublicVacancyDetailPage({
         if (isCancelled) return
         if (!nextVacancy) {
           setVacancy(null)
-          setErrorMessage(t("notFound"))
+          setIsUnavailable(true)
           return
         }
 
@@ -157,17 +160,21 @@ export function PublicVacancyDetailPage({
     >
       <div className="relative flex w-full flex-col px-4 pb-12 pt-8 sm:px-6 lg:px-8">
         <div className={publicOpportunitiesTheme.shellDirectory}>
-          <div className="mb-8">
-            <Link
-              href={backHref}
-              className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ats-cobre focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden />
-              {t("back")}
-            </Link>
-          </div>
+          {isUnavailable ? null : (
+            <div className="mb-8">
+              <Link
+                href={backHref}
+                className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ats-cobre focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden />
+                {t("back")}
+              </Link>
+            </div>
+          )}
 
-          {errorMessage ? (
+          {isUnavailable ? (
+            <PublicVacancyUnavailable href={backHref} />
+          ) : errorMessage ? (
             <div>
               <p className="text-sm text-ats-terracotta-soft" role="alert">
                 {errorMessage}

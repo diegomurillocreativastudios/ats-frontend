@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/recruiter-companies";
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields";
 import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confirm-modal";
+import { VacancyPublicationSwitch } from "@/components/rrhh/vacancy-publication-switch";
 import { appendVacancyLocationToPayload } from "@/lib/vacancies/vacancy-location";
 import {
   clipboardPayloadToRequirementRows,
@@ -47,6 +48,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [vacancyDepartmentId, setVacancyDepartmentId] = useState("");
   const [vacancyModalityId, setVacancyModalityId] = useState("");
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
+  const [isPublished, setIsPublished] = useState(true);
   const [companyOptions, setCompanyOptions] = useState<RecruiterCompanyOption[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [loadingCompanies, setLoadingCompanies] = useState(false);
@@ -247,6 +249,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     if (vacancyModalityId) {
       payload.vacancyModalityId = vacancyModalityId
     }
+    if (!isPublished) {
+      payload.isPublished = false
+    }
 
     setLoading(true);
     setSubmitError(null);
@@ -277,6 +282,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     setVacancyModalityId("");
     setSelectedCompanyId("");
     setRequerimientos([createEmptyRequirement()]);
+    setIsPublished(true);
     setErrors({});
     setSubmitError(null);
     companyTouchedRef.current = false;
@@ -295,6 +301,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     if (stateCode.trim() !== "") return true
     if (vacancyDepartmentId !== "") return true
     if (vacancyModalityId !== "") return true
+    if (!isPublished) return true
     return requerimientos.some(
       (req) => req.requirementName.trim() !== "" || req.requirementValue.trim() !== ""
     )
@@ -642,6 +649,14 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             {catalogLoadError || t("errors.catalogsLoadFailed")} {t("errors.catalogsLoadFallbackSuffix")}
           </div>
         ) : null}
+
+        <VacancyPublicationSwitch
+          checked={isPublished}
+          onCheckedChange={setIsPublished}
+          label={t("fields.isPublished.label")}
+          description={t("fields.isPublished.helper")}
+          disabled={loading}
+        />
 
         {submitError && (
           <div

@@ -630,6 +630,11 @@ export function PublicVacancyApplicationForm({
         return
       }
 
+      if (status === 404) {
+        setServerError(t("validation.vacancyUnavailable"))
+        return
+      }
+
       if (status === 429) {
         const seconds = parseRetryAfterSeconds(
           retryAfter != null && Number.isFinite(retryAfter)

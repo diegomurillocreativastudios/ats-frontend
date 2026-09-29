@@ -33,6 +33,7 @@ const baseVacancy = (overrides: Partial<VacancyListItem>): VacancyListItem => ({
   countryLabel: "El Salvador",
   stateCode: null,
   isActive: true,
+  isPublished: true,
   logoSrc: null,
   ...overrides,
 })

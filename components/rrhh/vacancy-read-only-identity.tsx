@@ -3,7 +3,6 @@
 import type { ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
-
 interface VacancyReadOnlyIdentityProps {
   title: string
   companyName: string
@@ -15,6 +14,8 @@ interface VacancyReadOnlyIdentityProps {
   statusLabel: string
   statusClassName: string
   titleClassName: string
+  /** Rendered in the title row after the status (e.g. the publication switch). */
+  titleAccessory?: ReactNode
 }
 
 function IdentityFact({ label, children }: { label: string; children: ReactNode }) {
@@ -40,13 +41,14 @@ export function VacancyReadOnlyIdentity({
   statusLabel,
   statusClassName,
   titleClassName,
+  titleAccessory,
 }: VacancyReadOnlyIdentityProps) {
   const t = useTranslations("RecruiterPortal.vacancies.detail.headerMeta")
 
   return (
     <div className="@container/identity flex min-w-0 flex-col gap-4">
       <div className="flex min-w-0 flex-col gap-1.5">
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
           <h1 className={`min-w-0 wrap-break-word font-sans font-bold text-foreground ${titleClassName}`}>
             {title}
           </h1>
@@ -55,6 +57,7 @@ export function VacancyReadOnlyIdentity({
           >
             {statusLabel}
           </span>
+          {titleAccessory}
         </div>
         <p className="min-w-0 wrap-break-word font-sans text-sm font-medium text-foreground">{companyName}</p>
       </div>

@@ -164,6 +164,59 @@ describe("VacancyListCard i18n (Etapa 7)", () => {
 
     expect(screen.getByText("Sin título")).toBeInTheDocument()
   })
+
+  it("marca 'Archivado' sin estilizarla como solo lectura", () => {
+    const archived = mapVacancyFromApi({
+      id: "vac-3",
+      title: "Analista oculto",
+      company: "Acme",
+      isActive: true,
+      isPublished: false,
+    })
+    renderWithIntl(
+      <VacancyListCard vacancy={archived} onRefresh={() => {}} onSnackbar={() => {}} />,
+      "es",
+    )
+
+    const badge = screen.getByText("Archivado")
+    expect(badge).toHaveAttribute("data-published", "false")
+    expect(screen.queryByText("Publicado")).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("article", { name: "Vacante: Analista oculto" }),
+    ).not.toHaveAttribute("data-read-only")
+  })
+
+  it("muestra 'Publicado' cuando la vacante está publicada", () => {
+    renderWithIntl(
+      <VacancyListCard vacancy={baseVacancy} onRefresh={() => {}} onSnackbar={() => {}} />,
+      "es",
+    )
+
+    expect(screen.getByText("Publicado")).toHaveAttribute("data-published", "true")
+    expect(screen.queryByText("Archivado")).not.toBeInTheDocument()
+  })
+})
+
+describe("RecruiterPortal.vacancies publication keys", () => {
+  it("expone las claves de publicación en los 5 idiomas", () => {
+    for (const locale of locales) {
+      const vacancies = (
+        messagesByLocale[locale].RecruiterPortal as Record<string, unknown>
+      ).vacancies as Record<string, Record<string, Record<string, unknown>>>
+      expect(vacancies.cards.published, `cards.published en ${locale}`).toBeTruthy()
+      expect(vacancies.cards.archived, `cards.archived en ${locale}`).toBeTruthy()
+      expect(
+        Object.keys(vacancies.detail.publication).sort(),
+        `detail.publication en ${locale}`,
+      ).toEqual(
+        ["archived", "helperArchived", "helperPublished", "published", "readOnlyHint"],
+      )
+      expect(vacancies.detail.toasts.published, locale).toBeTruthy()
+      expect(vacancies.detail.toasts.archived, locale).toBeTruthy()
+      expect(vacancies.detail.errors.publicationConflict, locale).toBeTruthy()
+      expect(vacancies.detail.errors.publicationFailed, locale).toBeTruthy()
+    }
+  })
 })
 
 describe("RecruiterPortal.vacancies namespace parity (Etapa 7)", () => {

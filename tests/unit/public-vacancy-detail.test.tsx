@@ -5,12 +5,13 @@ import { NextIntlClientProvider } from "next-intl"
 import { PublicVacancyDetailPage } from "@/components/public/PublicVacancyDetailPage"
 import esMessages from "@/messages/es.json"
 
-const { getPublicVacancyByPathSegmentMock } = vi.hoisted(() => ({
+const { getPublicVacancyByPathSegmentMock, routerMock } = vi.hoisted(() => ({
   getPublicVacancyByPathSegmentMock: vi.fn(),
+  routerMock: { push: vi.fn(), replace: vi.fn(), refresh: vi.fn() },
 }))
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => routerMock,
   usePathname: () => "/portal-oportunidades/vac-1",
   useSearchParams: () => new URLSearchParams(),
 }))
@@ -138,5 +139,27 @@ describe("PublicVacancyDetailPage", () => {
     const main = screen.getByRole("main")
     expect(main.className).toContain("overflow-y-auto")
     expect(main.contains(nav)).toBe(false)
+  })
+
+  it("muestra vacante no encontrada cuando la vacante no está publicada", async () => {
+    getPublicVacancyByPathSegmentMock.mockResolvedValueOnce(null)
+
+    renderDetail()
+
+    const copy = esMessages.PublicOpportunities.unavailable
+    expect(
+      await screen.findByRole("heading", { level: 1, name: copy.title })
+    ).toBeInTheDocument()
+    expect(screen.getByText(copy.body)).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: copy.cta })).toHaveAttribute(
+      "href",
+      "/portal-oportunidades"
+    )
+    expect(
+      document.querySelector('img[src="/ilustrations/undraw_searching_pqji.svg"]')
+    ).toHaveAttribute("alt", "")
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "Postularme" })).not.toBeInTheDocument()
+    expect(document.querySelector("article")).toBeNull()
   })
 })

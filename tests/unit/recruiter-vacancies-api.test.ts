@@ -1,7 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import {
+  isVacancyReadOnlyConflict,
   mapVacancyCompanyPatchError,
   patchVacancyClientCompany,
+  patchVacancyIsPublished,
   listRecruiterVacanciesPage,
 } from "@/lib/api/recruiter-vacancies"
 
@@ -48,6 +50,42 @@ describe("patchVacancyClientCompany", () => {
     await expect(patchVacancyClientCompany("", "co-2")).rejects.toThrow(
       "Faltan el id de la vacante o la empresa cliente."
     )
+  })
+})
+
+describe("patchVacancyIsPublished", () => {
+  beforeEach(() => {
+    apiPatch.mockReset()
+  })
+
+  it("calls PATCH with only isPublished", async () => {
+    apiPatch.mockResolvedValue({ id: "vac-1", isPublished: false })
+
+    await patchVacancyIsPublished("vac-1", false)
+    await patchVacancyIsPublished("vac-1", true)
+
+    expect(apiPatch).toHaveBeenNthCalledWith(1, "/api/recruiter/vacancies/vac-1", {
+      isPublished: false,
+    })
+    expect(apiPatch).toHaveBeenNthCalledWith(2, "/api/recruiter/vacancies/vac-1", {
+      isPublished: true,
+    })
+  })
+
+  it("throws when the vacancy id is missing", async () => {
+    await expect(patchVacancyIsPublished("  ", true)).rejects.toThrow(
+      "Falta el id de la vacante."
+    )
+    expect(apiPatch).not.toHaveBeenCalled()
+  })
+})
+
+describe("isVacancyReadOnlyConflict", () => {
+  it("detects 409 responses only", () => {
+    expect(isVacancyReadOnlyConflict({ status: 409 })).toBe(true)
+    expect(isVacancyReadOnlyConflict({ status: 404 })).toBe(false)
+    expect(isVacancyReadOnlyConflict(new Error("x"))).toBe(false)
+    expect(isVacancyReadOnlyConflict(null)).toBe(false)
   })
 })
 

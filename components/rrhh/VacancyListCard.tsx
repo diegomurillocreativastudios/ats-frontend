@@ -12,6 +12,7 @@ import {
   Palette,
 } from "lucide-react"
 import RematchButton from "@/components/rrhh/RematchButton"
+import { VacancyPublicationBadge } from "@/components/rrhh/vacancy-publication-badge"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
 import type { VacancyListItem, VacancyListStatusKey } from "@/lib/vacancies/map-vacancy-list-item"
 import { buildRecruiterVacancyPath } from "@/lib/vacancies/vacancy-public-path"
@@ -178,6 +179,10 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
           >
             {statusLabel}
           </span>
+          <VacancyPublicationBadge
+            isPublished={vacancy.isPublished}
+            label={vacancy.isPublished ? t("cards.published") : t("cards.archived")}
+          />
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {!isReadOnly ? (

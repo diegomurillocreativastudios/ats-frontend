@@ -4,6 +4,7 @@
  */
 
 import { readVacancyIsActive } from "@/lib/vacancies/read-vacancy-is-active"
+import { readVacancyIsPublished } from "@/lib/vacancies/read-vacancy-is-published"
 import { resolveVacancyStatusKey } from "@/lib/vacancies/vacancy-status-labels"
 
 const GUID_RE =
@@ -82,11 +83,12 @@ export function buildPublicVacancyAbsoluteUrl(
 
 /**
  * Whether a recruiter vacancy can expose its public opportunities link:
- * status must be open/activa and `isActive` must be true.
+ * status must be open/activa, `isActive` must be true, and it must be published.
  */
 export function isVacancyPublicLinkShareable(vacancy: unknown): boolean {
   if (vacancy == null || typeof vacancy !== "object") return false
   if (!readVacancyIsActive(vacancy)) return false
+  if (!readVacancyIsPublished(vacancy)) return false
   const record = vacancy as Record<string, unknown>
   const status = record.status ?? record.state ?? record.vacancyStatus
   const key = resolveVacancyStatusKey(

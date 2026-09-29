@@ -51,3 +51,26 @@ export async function patchVacancyClientCompany(
     companyId: company,
   })
 }
+
+/**
+ * Publishes or unpublishes a vacancy on the public portal (`PATCH { isPublished }`).
+ * Never combine with other fields: omitting `isPublished` elsewhere keeps the current value.
+ */
+export async function patchVacancyIsPublished(
+  vacancyId: string,
+  isPublished: boolean
+): Promise<unknown> {
+  const id = String(vacancyId ?? "").trim()
+  if (!id) {
+    throw new Error("Falta el id de la vacante.")
+  }
+  return apiClient.patch(`/api/recruiter/vacancies/${encodeURIComponent(id)}`, {
+    isPublished,
+  })
+}
+
+/** Whether a vacancy mutation failed because the vacancy is finished or read-only. */
+export function isVacancyReadOnlyConflict(error: unknown): boolean {
+  if (error == null || typeof error !== "object") return false
+  return (error as { status?: unknown }).status === 409
+}

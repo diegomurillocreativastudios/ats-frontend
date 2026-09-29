@@ -1183,7 +1183,9 @@
         }
       },
       "errors": {
-        "unprocessable": "L'IA non ha potuto generare un profilo adattato valido. Nessuna versione è stata creata."
+        "unprocessable": "L'IA non ha potuto generare un profilo adattato valido. Nessuna versione è stata creata.",
+        "vacancyUnavailable": "La posizione selezionata non è più disponibile. Scegli un'altra posizione o incolla la descrizione.",
+        "processFailed": "Impossibile elaborare il profilo per la posizione."
       },
       "comparison": {
         "title": "Confronto profilo",
@@ -2008,7 +2010,9 @@
         "candidates": "Candidati",
         "cardAria": "Posizione: {title}",
         "cardReadOnlyAria": "Posizione inattiva, sola lettura: {title}",
-        "logoAlt": "Logo di {company}"
+        "logoAlt": "Logo di {company}",
+        "published": "Pubblicata",
+        "archived": "Archiviata"
       },
       "statuses": {
         "active": "Attiva",
@@ -2107,6 +2111,10 @@
             "valueAria": "Requisito {index} - Valore",
             "scaleAria": "Requisito {index} - Livello medio da 1 a 10",
             "removeAria": "Elimina requisito {index}"
+          },
+          "isPublished": {
+            "label": "Pubblica sul portale delle opportunità",
+            "helper": "Se la disattivi, la posizione viene salvata come Archiviata: i candidati non la vedranno e potrai pubblicarla in seguito."
           }
         },
         "actions": {
@@ -2206,7 +2214,9 @@
           "loadFailed": "Impossibile caricare la posizione.",
           "saveFailed": "Impossibile salvare la posizione.",
           "companyRequired": "Seleziona un'azienda cliente.",
-          "finishFailed": "Impossibile concludere il processo."
+          "finishFailed": "Impossibile concludere il processo.",
+          "publicationConflict": "Questa posizione non può più essere modificata perché è conclusa o in sola lettura.",
+          "publicationFailed": "Impossibile modificare la pubblicazione della posizione."
         },
         "fallbacks": {
           "unspecified": "Non specificato"
@@ -2217,7 +2227,9 @@
           "copied": "Posizione copiata.",
           "copyFailed": "Impossibile copiare la posizione.",
           "linkCopied": "Link pubblico copiato.",
-          "linkCopyFailed": "Impossibile copiare il link pubblico."
+          "linkCopyFailed": "Impossibile copiare il link pubblico.",
+          "published": "Posizione pubblicata sul portale delle opportunità.",
+          "archived": "Posizione archiviata: non compare più sul portale delle opportunità."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2258,6 +2270,13 @@
           "commentsHelper": "Puoi aggiungere osservazioni o note su come è andato il processo.",
           "validationRating": "La valutazione deve essere tra 1 e 5 stelle.",
           "errorFallback": "Errore nella conclusione del processo"
+        },
+        "publication": {
+          "published": "Pubblicata",
+          "archived": "Archiviata",
+          "helperPublished": "Visibile sul portale delle opportunità: i candidati possono vederla e candidarsi.",
+          "helperArchived": "Nascosta sul portale delle opportunità. Il processo di selezione resta attivo.",
+          "readOnlyHint": "Una posizione conclusa o in sola lettura non può essere né pubblicata né archiviata."
         }
       },
       "results": {
@@ -2743,7 +2762,7 @@
           "cancel": "Annulla"
         }
       },
-        "detail": {
+      "detail": {
         "pageTitle": "Colloquio",
         "backToInterviews": "← Torna ai colloqui",
         "loading": "Caricamento colloquio…",
@@ -3981,7 +4000,8 @@
         "consentSubmitFailed": "Non siamo riusciti a salvare la tua autorizzazione e il consenso. Riprova.",
         "consentValidation": "Controlla l'autorizzazione e il consenso e riprova.",
         "consentVersionMismatch": "Il documento di autorizzazione è stato aggiornato. Ricarica la pagina e riprova.",
-        "consentNationalIdConflict": "Quel documento di identità è già collegato a un altro profilo. Usa un altro valore o contatta l'assistenza."
+        "consentNationalIdConflict": "Quel documento di identità è già collegato a un altro profilo. Usa un altro valore o contatta l'assistenza.",
+        "vacancyUnavailable": "Questa posizione non è più disponibile. I tuoi dati non sono stati inviati."
       },
       "fields": {
         "firstName": "Nomi *",
@@ -4094,6 +4114,11 @@
       "checklistData": "Completa nomi, cognomi ed email con dati reali.",
       "formSectionLabel": "Modulo di candidatura",
       "documentTitle": "ApplicanTree | Portale opportunità | Candidati a {title}"
+    },
+    "unavailable": {
+      "title": "Questa offerta non è più disponibile",
+      "body": "La posizione potrebbe essere già stata coperta. Scopri altre opportunità che potrebbero fare al caso tuo.",
+      "cta": "Vedi le offerte disponibili"
     }
   },
   "PrivacyPolicy": {

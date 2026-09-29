@@ -1183,7 +1183,9 @@
         }
       },
       "errors": {
-        "unprocessable": "AI could not generate a valid tailored profile. No version was created."
+        "unprocessable": "AI could not generate a valid tailored profile. No version was created.",
+        "vacancyUnavailable": "The selected vacancy is no longer available. Choose another vacancy or paste the description.",
+        "processFailed": "Could not process the profile for the vacancy."
       },
       "comparison": {
         "title": "Profile comparison",
@@ -2008,7 +2010,9 @@
         "candidates": "Applicants",
         "cardAria": "Vacancy: {title}",
         "cardReadOnlyAria": "Inactive vacancy, read-only: {title}",
-        "logoAlt": "{company} logo"
+        "logoAlt": "{company} logo",
+        "published": "Published",
+        "archived": "Archived"
       },
       "statuses": {
         "active": "Active",
@@ -2107,6 +2111,10 @@
             "valueAria": "Requirement {index} - Value",
             "scaleAria": "Requirement {index} - Average level from 1 to 10",
             "removeAria": "Remove requirement {index}"
+          },
+          "isPublished": {
+            "label": "Publish on the opportunities portal",
+            "helper": "If you turn this off, the vacancy is saved as Archived: candidates will not see it and you can publish it later."
           }
         },
         "actions": {
@@ -2206,7 +2214,9 @@
           "loadFailed": "The vacancy could not be loaded.",
           "saveFailed": "The vacancy could not be saved.",
           "companyRequired": "Select a client company.",
-          "finishFailed": "The process could not be finished."
+          "finishFailed": "The process could not be finished.",
+          "publicationConflict": "This vacancy can no longer be changed because it is finished or read-only.",
+          "publicationFailed": "Could not change the vacancy publication."
         },
         "fallbacks": {
           "unspecified": "Not specified"
@@ -2217,7 +2227,9 @@
           "copied": "Vacancy copied.",
           "copyFailed": "Could not copy the vacancy.",
           "linkCopied": "Public link copied.",
-          "linkCopyFailed": "Could not copy the public link."
+          "linkCopyFailed": "Could not copy the public link.",
+          "published": "Vacancy published on the opportunities portal.",
+          "archived": "Vacancy archived: it no longer appears on the opportunities portal."
         },
         "readOnlyBanner": {
           "vacancy": {
@@ -2258,6 +2270,13 @@
           "commentsHelper": "You can add observations or notes about how the process went.",
           "validationRating": "Rating must be between 1 and 5 stars.",
           "errorFallback": "Error finishing the process"
+        },
+        "publication": {
+          "published": "Published",
+          "archived": "Archived",
+          "helperPublished": "Visible on the opportunities portal: candidates can see it and apply.",
+          "helperArchived": "Hidden from the opportunities portal. The recruitment process stays active.",
+          "readOnlyHint": "A finished or read-only vacancy cannot be published or archived."
         }
       },
       "results": {
@@ -3981,7 +4000,8 @@
         "consentSubmitFailed": "We could not save your authorization and consent. Please try again.",
         "consentValidation": "Please review the authorization and consent and try again.",
         "consentVersionMismatch": "The authorization document was updated. Reload the page and try again.",
-        "consentNationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support."
+        "consentNationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support.",
+        "vacancyUnavailable": "This vacancy is no longer available. Your details were not sent."
       },
       "fields": {
         "firstName": "First names *",
@@ -4094,6 +4114,11 @@
       "checklistData": "Complete first names, last names, and email with real data.",
       "formSectionLabel": "Application form",
       "documentTitle": "ApplicanTree | Opportunities Portal | Apply to {title}"
+    },
+    "unavailable": {
+      "title": "This job opening is no longer available",
+      "body": "The position may have already been filled. Take a look at other opportunities that could be a good fit for you.",
+      "cta": "See available jobs"
     }
   },
   "PrivacyPolicy": {

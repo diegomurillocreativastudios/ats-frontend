@@ -143,4 +143,25 @@ describe("isVacancyPublicLinkShareable", () => {
     ).toBe(false)
     expect(isVacancyPublicLinkShareable(null)).toBe(false)
   })
+
+  it("rejects unpublished vacancies even when open and active", () => {
+    expect(
+      isVacancyPublicLinkShareable({ status: "open", isActive: true, isPublished: false })
+    ).toBe(false)
+    expect(
+      isVacancyPublicLinkShareable({ status: "open", isActive: true, is_published: false })
+    ).toBe(false)
+    expect(
+      isVacancyPublicLinkShareable({ status: "open", isActive: true, isPublished: true })
+    ).toBe(true)
+  })
+
+  it("keeps closed or inactive vacancies non-shareable when published", () => {
+    expect(
+      isVacancyPublicLinkShareable({ status: "closed", isActive: true, isPublished: true })
+    ).toBe(false)
+    expect(
+      isVacancyPublicLinkShareable({ status: "open", isActive: false, isPublished: true })
+    ).toBe(false)
+  })
 })
