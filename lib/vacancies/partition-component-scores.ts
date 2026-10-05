@@ -21,6 +21,16 @@ export const SCORE_KEYS_SEMANTIC = [
   "semantic_score",
 ] as const
 
+/** Context signals weighted on their own; never shown as attribute rows. */
+export const SCORE_KEYS_CONTEXT = [
+  "recency",
+  "Recency",
+  "relevant_years",
+  "RelevantYears",
+  "relevantYears",
+  "Relevant years",
+] as const
+
 export type ScoreEntry = [string, unknown]
 
 export interface PartitionedComponentScores {
@@ -34,6 +44,7 @@ const RESERVED_SCORE_KEYS = new Set<string>([
   ...SCORE_KEYS_AGGREGATE,
   ...SCORE_KEYS_QUALITATIVE,
   ...SCORE_KEYS_SEMANTIC,
+  ...SCORE_KEYS_CONTEXT,
 ])
 
 function findScoreEntry(

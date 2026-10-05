@@ -1,11 +1,54 @@
 import { describe, expect, it } from "vitest"
 import {
+  buildAttributeRowsFromAssessments,
   buildAttributeTableRows,
   canonicalAttributeKey,
   MATCHED_ATTRIBUTE_RECORD_KEYS,
   pickNamedRecord,
+  pickRequirementAssessments,
   toAttributeLevel,
 } from "@/lib/vacancies/build-attribute-table-rows"
+
+describe("pickRequirementAssessments", () => {
+  it("reads camelCase and PascalCase arrays and drops malformed items", () => {
+    expect(
+      pickRequirementAssessments({
+        requirementAssessments: [
+          { key: "ingles", verdict: "Met", score: 1, evidence: "Inglés B2" },
+          { verdict: "Met" },
+          "nope",
+        ],
+      })
+    ).toEqual([
+      { key: "ingles", verdict: "Met", score: 1, evidence: "Inglés B2", candidateValue: null },
+    ])
+    expect(
+      pickRequirementAssessments({
+        RequirementAssessments: [{ Key: "sql", Verdict: "NotMet", Score: 0 }],
+      })
+    ).toEqual([{ key: "sql", verdict: "NotMet", score: 0, evidence: null, candidateValue: null }])
+    expect(pickRequirementAssessments({ componentScores: {} })).toEqual([])
+  })
+})
+
+describe("buildAttributeRowsFromAssessments", () => {
+  it("builds one row per requirement with verdict and evidence, unavailable without a score", () => {
+    const rows = buildAttributeRowsFromAssessments(
+      [
+        { key: "ingles", verdict: "Met", score: 1, evidence: "Inglés intermedio-alto (B2)", candidateValue: null },
+        { key: "power_bi", verdict: "Unavailable", score: null, evidence: null, candidateValue: null },
+        { key: "sql", verdict: "Partial", score: 0.5, evidence: null, candidateValue: "básico" },
+      ],
+      (key) => key.toUpperCase()
+    )
+
+    expect(rows).toEqual([
+      { key: "ingles", label: "INGLES", level: "Inglés intermedio-alto (B2)", score: 1, verdict: "Met" },
+      { key: "power_bi", label: "POWER_BI", level: null, score: null, verdict: "Unavailable" },
+      { key: "sql", label: "SQL", level: "básico", score: 0.5, verdict: "Partial" },
+    ])
+  })
+})
 
 describe("canonicalAttributeKey", () => {
   it("merges attr_ prefixes with snake_case keys", () => {

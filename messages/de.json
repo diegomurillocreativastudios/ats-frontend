@@ -2104,12 +2104,12 @@
           "requirements": {
             "label": "Anforderungen",
             "namePlaceholder": "Name (z. B.: Führerschein)",
-            "valuePlaceholder": "Wert (z. B.: Schwer)",
+            "valuePlaceholder": "Erwartetes Niveau oder Kriterium (z. B. B2, fortgeschritten, 3+ Jahre)",
             "importanceLabel": "Wichtigkeit (1-10)",
-            "helper": "Jede Anforderung hat einen Namen, einen Wert und ein durchschnittliches Niveau von 1 bis 10.",
+            "helper": "Im Namen steht, was verlangt wird (z. B. Englisch), im Kriterium das erwartete Niveau (z. B. B2). Die Wichtigkeit (1-10) gibt das Gewicht der Anforderung an, nicht das Niveau des Kandidaten.",
             "nameAria": "Anforderung {index} - Name",
-            "valueAria": "Anforderung {index} - Wert",
-            "scaleAria": "Anforderung {index} - Durchschnittliches Niveau von 1 bis 10",
+            "valueAria": "Anforderung {index} - Erwartetes Niveau oder Kriterium",
+            "scaleAria": "Anforderung {index} - Wichtigkeit von 1 bis 10",
             "removeAria": "Anforderung {index} entfernen"
           },
           "isPublished": {
@@ -2139,7 +2139,7 @@
           "nameRequired": "Der Name ist erforderlich",
           "descriptionRequired": "Die Beschreibung ist erforderlich",
           "companyRequired": "Wähle ein Kundenunternehmen aus",
-          "requirementValueRequired": "Wert erforderlich",
+          "requirementValueRequired": "Erwartetes Niveau oder Kriterium erforderlich",
           "requirementNameRequired": "Name erforderlich"
         },
         "errors": {
@@ -2449,7 +2449,7 @@
           "aiDisclosure": "Der folgende Inhalt wurde von KI generiert und unverändert angezeigt.",
           "attributes": "Attribute",
           "attributesDetail": "Attributdetails ({count})",
-          "attributesZeroHint": "Ein Wert von 0 % senkt nicht immer den Gesamtwert: Aktualität oder relevante Jahre werden getrennt gemessen.",
+          "attributesZeroHint": "0 % senkt die Gesamtwertung nicht immer: Pflichtanforderungen werden separat bewertet.",
           "attributeLevelFallback": "Kein Detail",
           "qualitativeScore": "Qualitative Punktzahl",
           "semanticSimilarity": "Semantische Ähnlichkeit",
@@ -2471,7 +2471,13 @@
           "viewFullProfile": "Vollständiges Profil anzeigen",
           "close": "Schließen",
           "profileAria": "Profil von {name}",
-          "closeProfileAria": "Profil schließen"
+          "closeProfileAria": "Profil schließen",
+          "verdictMet": "Erfüllt",
+          "verdictPartial": "Teilweise erfüllt",
+          "verdictNotMet": "Nicht erfüllt",
+          "verdictUnavailable": "Nicht bewertet",
+          "manualReviewNotice": "Eine Pflichtanforderung konnte im Lebenslauf nicht geprüft werden: manuelle Prüfung erforderlich.",
+          "attributesExcludedHint": "Nur {coverage} der Anforderungen konnten bewertet werden; die Attribute wurden nicht in die Gesamtpunktzahl einbezogen."
         },
         "scoreKeys": {
           "qualitative": "Qualitative Punktzahl",

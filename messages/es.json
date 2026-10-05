@@ -2104,12 +2104,12 @@
           "requirements": {
             "label": "Requerimientos",
             "namePlaceholder": "Nombre (ej: Licencia de conducir)",
-            "valuePlaceholder": "Valor (ej: Pesada)",
+            "valuePlaceholder": "Nivel o criterio esperado (ej: B2, avanzado, 3+ años)",
             "importanceLabel": "Importancia (1-10)",
-            "helper": "Cada requerimiento tiene un nombre, un valor y un nivel promedio del 1 al 10.",
+            "helper": "Escribe en el nombre qué se requiere (ej: Inglés) y en el criterio el nivel esperado (ej: B2). La importancia (1-10) indica cuánto pesa ese requisito, no el nivel del candidato.",
             "nameAria": "Requerimiento {index} - Nombre",
-            "valueAria": "Requerimiento {index} - Valor",
-            "scaleAria": "Requerimiento {index} - Nivel promedio del 1 al 10",
+            "valueAria": "Requerimiento {index} - Nivel o criterio esperado",
+            "scaleAria": "Requerimiento {index} - Importancia del 1 al 10",
             "removeAria": "Eliminar requerimiento {index}"
           },
           "isPublished": {
@@ -2139,7 +2139,7 @@
           "nameRequired": "El nombre es requerido",
           "descriptionRequired": "La descripción es requerida",
           "companyRequired": "Selecciona una empresa cliente",
-          "requirementValueRequired": "Valor requerido",
+          "requirementValueRequired": "Nivel o criterio esperado requerido",
           "requirementNameRequired": "Nombre requerido"
         },
         "errors": {
@@ -2449,7 +2449,7 @@
           "aiDisclosure": "El contenido siguiente fue generado por IA y se muestra sin modificar.",
           "attributes": "Atributos",
           "attributesDetail": "Detalle de atributos ({count})",
-          "attributesZeroHint": "Un 0% no siempre baja el agregado: actualidad o años relevantes se miden aparte.",
+          "attributesZeroHint": "Un 0% no siempre baja el conjunto: los requisitos obligatorios se evalúan aparte.",
           "attributeLevelFallback": "Sin detalle",
           "qualitativeScore": "Puntaje cualitativo",
           "semanticSimilarity": "Similitud semántica",
@@ -2471,7 +2471,13 @@
           "viewFullProfile": "Ver perfil completo",
           "close": "Cerrar",
           "profileAria": "Perfil de {name}",
-          "closeProfileAria": "Cerrar perfil"
+          "closeProfileAria": "Cerrar perfil",
+          "verdictMet": "Cumple",
+          "verdictPartial": "Cumple parcialmente",
+          "verdictNotMet": "No cumple",
+          "verdictUnavailable": "No evaluado",
+          "manualReviewNotice": "Un requisito obligatorio no pudo verificarse con el CV: requiere revisión manual.",
+          "attributesExcludedHint": "Solo se pudo evaluar el {coverage} de los requisitos; los atributos no se incluyeron en el puntaje total."
         },
         "scoreKeys": {
           "qualitative": "Puntaje cualitativo",

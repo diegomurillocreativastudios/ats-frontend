@@ -2104,12 +2104,12 @@
           "requirements": {
             "label": "Exigences",
             "namePlaceholder": "Nom (ex. : Permis de conduire)",
-            "valuePlaceholder": "Valeur (ex. : Lourd)",
+            "valuePlaceholder": "Niveau ou critère attendu (ex : B2, avancé, 3+ ans)",
             "importanceLabel": "Importance (1-10)",
-            "helper": "Chaque exigence a un nom, une valeur et un niveau moyen de 1 à 10.",
+            "helper": "Indiquez dans le nom ce qui est requis (ex : Anglais) et dans le critère le niveau attendu (ex : B2). L'importance (1-10) indique le poids de l'exigence, pas le niveau du candidat.",
             "nameAria": "Exigence {index} - Nom",
-            "valueAria": "Exigence {index} - Valeur",
-            "scaleAria": "Exigence {index} - Niveau moyen de 1 à 10",
+            "valueAria": "Exigence {index} - Niveau ou critère attendu",
+            "scaleAria": "Exigence {index} - Importance de 1 à 10",
             "removeAria": "Supprimer l'exigence {index}"
           },
           "isPublished": {
@@ -2139,7 +2139,7 @@
           "nameRequired": "Le nom est requis",
           "descriptionRequired": "La description est requise",
           "companyRequired": "Sélectionnez une entreprise cliente",
-          "requirementValueRequired": "Valeur requise",
+          "requirementValueRequired": "Niveau ou critère attendu requis",
           "requirementNameRequired": "Nom requis"
         },
         "errors": {
@@ -2449,7 +2449,7 @@
           "aiDisclosure": "Le contenu suivant a été généré par IA et est affiché sans modification.",
           "attributes": "Attributs",
           "attributesDetail": "Détail des attributs ({count})",
-          "attributesZeroHint": "Un 0 % ne baisse pas toujours le score combiné : récence ou années pertinentes sont mesurées à part.",
+          "attributesZeroHint": "Un 0 % ne fait pas toujours baisser l'ensemble : les exigences obligatoires sont évaluées à part.",
           "attributeLevelFallback": "Sans détail",
           "qualitativeScore": "Score qualitatif",
           "semanticSimilarity": "Similarité sémantique",
@@ -2471,7 +2471,13 @@
           "viewFullProfile": "Voir le profil complet",
           "close": "Fermer",
           "profileAria": "Profil de {name}",
-          "closeProfileAria": "Fermer le profil"
+          "closeProfileAria": "Fermer le profil",
+          "verdictMet": "Conforme",
+          "verdictPartial": "Partiellement conforme",
+          "verdictNotMet": "Non conforme",
+          "verdictUnavailable": "Non évalué",
+          "manualReviewNotice": "Une exigence obligatoire n'a pas pu être vérifiée dans le CV : revue manuelle requise.",
+          "attributesExcludedHint": "Seuls {coverage} des exigences ont pu être évalués ; les attributs n'ont pas été inclus dans le score total."
         },
         "scoreKeys": {
           "qualitative": "Score qualitatif",
