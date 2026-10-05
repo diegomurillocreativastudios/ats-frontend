@@ -967,7 +967,21 @@
         "empty": "No hay vacantes que coincidan con tu búsqueda.",
         "resultsAria": "Resultados de vacantes",
         "selectedFallback": "Vacante seleccionada",
-        "clear": "Quitar"
+        "clear": "Quitar",
+        "useThisVacancy": "Usar esta vacante",
+        "selectedBadge": "Seleccionada",
+        "detailLoading": "Cargando detalles de la vacante…",
+        "detailError": "No se pudieron cargar los detalles de la vacante.",
+        "detailEmpty": "Esta vacante no tiene más detalles publicados.",
+        "sections": {
+          "description": "Descripción",
+          "details": "Detalles",
+          "advantages": "Ventajas",
+          "responsibilities": "Responsabilidades",
+          "requirements": "Requisitos",
+          "benefits": "Beneficios",
+          "salary": "Salario"
+        }
       },
       "history": {
         "title": "Historial de versiones",

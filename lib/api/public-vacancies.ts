@@ -77,6 +77,8 @@ export interface OpportunityVacancyDetail extends OpportunityVacancySummary {
   responsibilities?: string[]
   requirements?: string[]
   benefits?: string[]
+  /** Present only when the public payload includes a salary field. */
+  salary?: string
 }
 
 export interface OpportunityPagination {
@@ -411,6 +413,9 @@ export function normalizeOpportunityDetail(payload: unknown): OpportunityVacancy
     ),
     requirements: normalizePublicRequirements(record.requirements ?? record.skills),
     benefits: toStringArray(record.benefits),
+    salary: toOptionalString(
+      record.salary ?? record.salaryRange ?? record.salary_range
+    ),
   }
 }
 

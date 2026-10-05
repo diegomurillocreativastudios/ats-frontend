@@ -77,32 +77,59 @@ export interface TailorToVacancyInput {
   vacancyTitle?: string | null
 }
 
+/**
+ * Multipart body only for the file source. The backend route is
+ * `/api/candidate/profile/tailor-to-vacancy/multipart` and accepts
+ * `vacancyFile` plus an optional `label`.
+ */
 function buildTailorFormData(input: TailorToVacancyInput): FormData {
   const formData = new FormData()
   const { source } = input
-  if (source.kind === "file") {
-    formData.append("vacancyFile", source.file)
-  } else if (source.kind === "text") {
-    formData.append("vacancyText", source.text)
-  } else {
-    formData.append("vacancyId", source.vacancyId)
+  if (source.kind !== "file") {
+    throw new Error("buildTailorFormData solo acepta origen de archivo.")
   }
+  formData.append("vacancyFile", source.file)
   if (input.label?.trim()) {
     formData.append("label", input.label.trim())
   }
-  if (source.kind === "platform" && input.vacancyTitle?.trim()) {
-    formData.append("vacancyTitle", input.vacancyTitle.trim())
-  }
   return formData
+}
+
+/**
+ * JSON body for text and platform sources. The backend route is
+ * `/api/candidate/profile/tailor-to-vacancy` and only accepts
+ * `application/json`. `vacancyTitle` is resolved server-side from `vacancyId`
+ * and no longer travels in the payload.
+ */
+function buildTailorJson(
+  input: TailorToVacancyInput
+): Record<string, string> {
+  const { source } = input
+  const body: Record<string, string> = {}
+  if (source.kind === "text") {
+    body.vacancyText = source.text
+  } else if (source.kind === "platform") {
+    body.vacancyId = source.vacancyId
+  }
+  if (input.label?.trim()) {
+    body.label = input.label.trim()
+  }
+  return body
 }
 
 export async function tailorProfileToVacancy(
   input: TailorToVacancyInput
 ): Promise<TailorToVacancyResult> {
-  const raw = await apiClient.postFormData(
-    "/api/candidate/profile/tailor-to-vacancy",
-    buildTailorFormData(input)
-  )
+  const raw =
+    input.source.kind === "file"
+      ? await apiClient.postFormData(
+          "/api/candidate/profile/tailor-to-vacancy/multipart",
+          buildTailorFormData(input)
+        )
+      : await apiClient.post(
+          "/api/candidate/profile/tailor-to-vacancy",
+          buildTailorJson(input)
+        )
   const result = normalizeTailorToVacancyResult(raw)
   if (!result) {
     throw new Error("Respuesta inválida del servidor al adecuar el perfil.")

@@ -1332,7 +1332,21 @@
         "empty": "No jobs match your search.",
         "resultsAria": "Resultados de vacantes",
         "selectedFallback": "Selected job",
-        "clear": "Remove"
+        "clear": "Remove",
+        "useThisVacancy": "Use this job",
+        "selectedBadge": "Selected",
+        "detailLoading": "Loading job details…",
+        "detailError": "Could not load job details.",
+        "detailEmpty": "This job has no extra details published.",
+        "sections": {
+          "description": "Description",
+          "details": "Details",
+          "advantages": "Advantages",
+          "responsibilities": "Responsibilities",
+          "requirements": "Requirements",
+          "benefits": "Benefits",
+          "salary": "Salary"
+        }
       },
       "history": {
         "title": "Version history",

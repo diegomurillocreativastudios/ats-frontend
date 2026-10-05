@@ -2,19 +2,24 @@
 
 Contrato consumido por `ats-frontend`. Implementación en `ats-backend` (pendiente).
 
-## POST `/api/candidate/profile/tailor-to-vacancy`
+## Rutas por fuente
 
-**Content-Type:** `multipart/form-data`  
-**Auth:** Bearer JWT (candidato)
+Dos endpoints según el origen de la vacante. El frontend elige la ruta y el `Content-Type` en `tailorProfileToVacancy` (`lib/api/candidate-profile-tailor.ts`).
 
-Exactamente **una** fuente:
+| Pestaña UI | Método y ruta | `Content-Type` | Cuerpo |
+|---|---|---|---|
+| Vacante del sistema | `POST /api/candidate/profile/tailor-to-vacancy` | `application/json` | `{ "vacancyId": "...", "label"?: "..." }` |
+| Texto | `POST /api/candidate/profile/tailor-to-vacancy` | `application/json` | `{ "vacancyText": "...", "label"?: "..." }` |
+| Archivo | `POST /api/candidate/profile/tailor-to-vacancy/multipart` | `multipart/form-data` | `vacancyFile` (`.pdf`, `.docx`, `.md`, máx. 10 MB) + `label?` |
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `vacancyFile` | File | `.pdf`, `.docx`, `.md` (máx. 10 MB) |
-| `vacancyText` | string | Texto pegado (máx. 50 000 caracteres) |
-| `vacancyId` | string (UUID) | Vacante publicada |
-| `label` | string? | Etiqueta opcional de la versión |
+**Auth:** Bearer JWT (candidato) en ambas rutas. El Backend for Frontend (`app/api/bff/[...path]/route.ts`) reenvía cuerpo y `Content-Type` sin transformarlos.
+
+### Validaciones
+
+- Exactamente **una** fuente por request. La UI ya la garantiza con `resolveExclusiveVacancySource`.
+- `vacancyText`: máx. 50 000 caracteres.
+- `vacancyId`: UUID de vacante publicada. El backend resuelve `vacancyTitle` server-side; el frontend no lo envía.
+- `label`: opcional en ambas rutas.
 
 **Response 200:**
 

@@ -152,17 +152,29 @@ describe("public vacancies API helpers", () => {
     ])
   })
 
-  it("does not expose salary in public opportunity detail", () => {
-    const detail = normalizeOpportunityDetail({
+  it("maps salary from the public payload and omits it when absent", () => {
+    const withSalary = normalizeOpportunityDetail({
       id: "vac-1",
       title: "Backend Engineer",
       companyName: "Creativa Studios",
       salary: "$2,500 - $3,500",
-      salaryRange: "$2,500 - $3,500",
+    })
+    const fromRange = normalizeOpportunityDetail({
+      id: "vac-2",
+      title: "Backend Engineer",
+      companyName: "Creativa Studios",
+      salary_range: "800-1200",
+    })
+    const withoutSalary = normalizeOpportunityDetail({
+      id: "vac-3",
+      title: "Backend Engineer",
+      companyName: "Creativa Studios",
+      salary: "   ",
     })
 
-    expect(detail).not.toBeNull()
-    expect(detail).not.toHaveProperty("salary")
+    expect(withSalary?.salary).toBe("$2,500 - $3,500")
+    expect(fromRange?.salary).toBe("800-1200")
+    expect(withoutSalary?.salary).toBeUndefined()
   })
 
 })

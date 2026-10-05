@@ -211,7 +211,7 @@ export default function ProfileTailoringContent() {
 
   const pageContent = (
     <div
-      className={`mx-auto flex flex-col gap-8 ${result && adaptedForm ? "max-w-[90rem]" : "max-w-6xl"}`}
+      className="mx-auto flex w-full max-w-360 flex-col gap-8"
     >
       <PortalPageHeader
         title={t("title")}
