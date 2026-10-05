@@ -514,6 +514,10 @@
     "privacyPolicy": {
       "title": "Privacy Policy | Applicantree ATS",
       "description": "Privacy Policy for Applicantree ATS."
+    },
+    "recruiterDashboard": {
+      "title": "ApplicanTree | HR Portal | Home",
+      "description": "Pending items and reminders dashboard for the HR portal"
     }
   },
   "PortalSelection": {
@@ -2994,20 +2998,172 @@
       }
     },
     "dashboard": {
-      "statsAria": "Dashboard statistics",
-      "activeCandidates": "Active applicants",
-      "openVacancies": "Open vacancies",
-      "interviewsToday": "Interviews today",
-      "hiresThisMonth": "Hires this month",
-      "recentActivityAria": "Recent activity",
-      "recentActivityTitle": "Recent activity",
-      "recentCandidatesAria": "Recent applicants",
-      "recentCandidatesTitle": "Recent applicants",
-      "newCandidatesBadge": "{count} new",
-      "mockBadges": {
-        "interview": "Interview",
-        "evaluation": "Evaluacion",
-        "hired": "Contratado"
+      "breadcrumb": "Home",
+      "title": "Human Resources dashboard",
+      "description": "Prioritize the vacancies, interviews and applicants that need your attention.",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing…",
+      "loading": "Loading dashboard…",
+      "updatedAt": "Updated at {time}",
+      "metricsTitle": "Overview",
+      "metrics": {
+        "activeVacancies": "Active vacancies",
+        "upcomingInterviews": "Upcoming interviews",
+        "staleCandidates": "Stalled applicants",
+        "pendingEvaluations": "Pending evaluations"
+      },
+      "metricLinkAria": "{label}: {value}. View details",
+      "metricUpcomingWindow": "Next {days} days",
+      "metricPartial": "Partial count: the real total may be higher",
+      "metricUnavailable": "Data not available yet",
+      "metricError": "Could not be loaded",
+      "valueUnavailable": "no data",
+      "remindersTitle": "Pending items",
+      "remindersDescription": "Sorted by urgency and date.",
+      "remindersEmpty": "Nothing pending right now.",
+      "severity": {
+        "critical": "Urgent",
+        "action": "To do",
+        "upcoming": "Upcoming",
+        "info": "Informational"
+      },
+      "nextAt": "Next: {date}",
+      "oldestAt": "Oldest: {date}",
+      "partialNote": "Based on {analyzed} of {total} records; the real total may be higher.",
+      "errorNote": "This data could not be loaded. Try refreshing the dashboard.",
+      "unavailableTitle": "Reminders in preparation",
+      "unavailableDescription": "We don't have data to calculate these yet. Meanwhile, you can review the related module.",
+      "unavailableBadge": "No data",
+      "inactiveVacanciesRule": "Considered inactive after {days} days.",
+      "openModule": "Open module",
+      "openModuleAria": "Open module related to {title}",
+      "shortcutsTitle": "Shortcuts",
+      "shortcuts": {
+        "candidates": {
+          "title": "Applicants",
+          "description": "Search profiles and log follow-ups."
+        },
+        "vacancies": {
+          "title": "Vacancies",
+          "description": "Manage each vacancy's pipeline."
+        },
+        "interviews": {
+          "title": "Interviews",
+          "description": "Schedule and review interviews."
+        },
+        "calendar": {
+          "title": "Calendar",
+          "description": "Connect and review your calendar."
+        },
+        "reports": {
+          "title": "Reports",
+          "description": "Check indicators and export reports."
+        }
+      },
+      "reminders": {
+        "upcomingInterviews": {
+          "title": "Upcoming interviews",
+          "description": "{count, plural, one {# interview scheduled} other {# interviews scheduled}} in the next {days} days.",
+          "action": "View interviews"
+        },
+        "unconfirmedInterviews": {
+          "title": "Interviews awaiting confirmation",
+          "action": "Confirm interviews",
+          "description": "{count, plural, one {# interview awaiting confirmation} other {# interviews awaiting confirmation}}."
+        },
+        "newCandidates": {
+          "title": "New applicants to review",
+          "action": "Review applications",
+          "description": "{count, plural, one {# new application to review} other {# new applications to review}}."
+        },
+        "staleCandidates": {
+          "title": "Stalled applicants",
+          "description": "{count, plural, one {# applicant} other {# applicants}} without a stage change in {days} days or more.",
+          "action": "Review applicants"
+        },
+        "vacanciesClosingSoon": {
+          "title": "Vacancies closing soon",
+          "action": "View vacancies",
+          "description": "{count, plural, one {# vacancy closing soon} other {# vacancies closing soon}}."
+        },
+        "inactiveVacancies": {
+          "title": "Vacancies without recent activity",
+          "action": "View vacancies",
+          "description": "{count, plural, one {# vacancy without recent activity} other {# vacancies without recent activity}}."
+        },
+        "pendingEvaluations": {
+          "title": "Pending technical evaluations",
+          "description": "{count, plural, one {# evaluation not completed} other {# evaluations not completed}}.",
+          "action": "View evaluations"
+        },
+        "pendingTechnicalSheets": {
+          "title": "Pending technical sheets",
+          "action": "View sheets",
+          "description": "{count, plural, one {# technical sheet pending} other {# technical sheets pending}}."
+        },
+        "pendingApprovals": {
+          "title": "Pending approvals",
+          "action": "View vacancies",
+          "description": "No information available yet."
+        },
+        "overdueFollowUps": {
+          "title": "Overdue follow-ups",
+          "action": "View applicants",
+          "description": "{count, plural, one {# overdue follow-up} other {# overdue follow-ups}}."
+        },
+        "pendingConsents": {
+          "title": "Pending consents",
+          "description": "{count, plural, one {# consent pending} other {# consents pending}}.",
+          "action": "View consents"
+        },
+        "pendingDocuments": {
+          "title": "Pending documents",
+          "description": "{count, plural, one {# document pending} other {# documents pending}}.",
+          "action": "View documents"
+        }
+      },
+      "panelError": {
+        "title": "The dashboard could not be loaded",
+        "description": "Please retry in a few seconds or refresh the page.",
+        "retry": "Retry"
+      },
+      "reminderDetail": {
+        "title": "Pending: {label}",
+        "description": "Review the detail and open each case to handle it.",
+        "backToDashboard": "Back to dashboard",
+        "loading": "Loading pending items…",
+        "empty": "There are no pending items for this reminder.",
+        "error": "We couldn't load the detail. Try again.",
+        "unavailable": "This reminder has no data yet.",
+        "openRow": "Open",
+        "openRowAria": "Open {label}",
+        "columns": {
+          "candidate": "Applicant",
+          "vacancy": "Vacancy",
+          "company": "Company",
+          "dueAt": "Date",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "invalidKey": {
+          "breadcrumb": "Unknown reminder",
+          "title": "Unknown reminder",
+          "description": "That URL does not match any dashboard reminder."
+        },
+        "pagination": {
+          "perPage": "Per page",
+          "pageSizeAria": "Page size",
+          "regionAria": "Pending items pagination",
+          "summary": "Page {page} of {total}",
+          "prev": "Previous",
+          "next": "Next",
+          "count": "{count, plural, one {# pending} other {# pending}}"
+        },
+        "metadata": {
+          "title": "ApplicanTree | HR Portal | {label}",
+          "invalidTitle": "ApplicanTree | HR Portal | Unknown reminder",
+          "invalidDescription": "The requested reminder does not exist."
+        }
       }
     },
     "technicalSheet": {

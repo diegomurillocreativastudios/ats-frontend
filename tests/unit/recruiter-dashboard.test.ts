@@ -1,0 +1,336 @@
+import { describe, expect, it } from "vitest"
+
+import {
+  DASHBOARD_METRIC_KEYS,
+  DASHBOARD_REMINDER_KEYS,
+  DASHBOARD_STALE_CANDIDATE_DAYS,
+  DASHBOARD_UPCOMING_INTERVIEW_DAYS,
+  RECRUITER_DASHBOARD_LINKS,
+  isActionableReminder,
+  isDashboardMetricKey,
+  isDashboardReminderKey,
+  normalizeRecruiterDashboard,
+  normalizeReminderDetail,
+  reminderDetailLink,
+  reminderIncludesCandidate,
+  resolveReminderRowHref,
+  sortDashboardReminders,
+  type DashboardReminder,
+  type DashboardReminderKey,
+} from "@/lib/rrhh/recruiter-dashboard"
+
+const NOW = new Date("2026-10-05T16:00:00.000Z")
+
+function metric(model: ReturnType<typeof normalizeRecruiterDashboard>, key: string) {
+  const found = model.metrics.find((item) => item.key === key)
+  if (!found) throw new Error(`missing metric ${key}`)
+  return found
+}
+
+function reminder(
+  model: ReturnType<typeof normalizeRecruiterDashboard>,
+  key: string
+) {
+  const found = model.reminders.find((item) => item.key === key)
+  if (!found) throw new Error(`missing reminder ${key}`)
+  return found
+}
+
+describe("normalizeRecruiterDashboard", () => {
+  it("devuelve la fecha del backend y expone todas las claves de métrica y recordatorio", () => {
+    const model = normalizeRecruiterDashboard(
+      {
+        generatedAt: "2026-10-05T16:30:00.000Z",
+        metrics: [],
+        reminders: [],
+      },
+      NOW
+    )
+    expect(model.generatedAt).toBe("2026-10-05T16:30:00.000Z")
+    expect(model.metrics.map((m) => m.key)).toEqual([...DASHBOARD_METRIC_KEYS])
+    expect(model.reminders.map((r) => r.key)).toEqual([...DASHBOARD_REMINDER_KEYS])
+  })
+
+  it("usa el instante actual si el backend no envía generatedAt", () => {
+    const model = normalizeRecruiterDashboard({}, NOW)
+    expect(model.generatedAt).toBe(NOW.toISOString())
+  })
+
+  it("marca las métricas ausentes como no disponibles sin inventar ceros", () => {
+    const model = normalizeRecruiterDashboard({}, NOW)
+    for (const m of model.metrics) {
+      expect(m.value).toBeNull()
+      expect(m.sourceState).toBe("unavailable")
+    }
+    expect(metric(model, "activeVacancies").href).toBe(RECRUITER_DASHBOARD_LINKS.vacancies)
+    expect(metric(model, "upcomingInterviews").href).toBe(
+      reminderDetailLink("upcomingInterviews")
+    )
+  })
+
+  it("conserva el conteo exacto y el estado de la métrica cuando el backend lo informa", () => {
+    const model = normalizeRecruiterDashboard(
+      {
+        metrics: [
+          { key: "activeVacancies", count: 6, sourceState: "ready" },
+          { key: "pendingEvaluations", count: 3, sourceState: "ready" },
+        ],
+      },
+      NOW
+    )
+    expect(metric(model, "activeVacancies")).toMatchObject({
+      value: 6,
+      sourceState: "ready",
+    })
+    expect(metric(model, "pendingEvaluations")).toMatchObject({
+      value: 3,
+      sourceState: "ready",
+    })
+  })
+
+  it("deja los recordatorios como no disponibles cuando el backend no los envía", () => {
+    const model = normalizeRecruiterDashboard({}, NOW)
+    for (const r of model.reminders) {
+      expect(r.sourceState).toBe("unavailable")
+      expect(r.count).toBeNull()
+    }
+    expect(reminder(model, "pendingConsents").href).toBeNull()
+  })
+
+  it("resuelve el enlace al detalle cuando el recordatorio tiene conteo", () => {
+    const model = normalizeRecruiterDashboard(
+      {
+        reminders: [
+          {
+            key: "staleCandidates",
+            count: 4,
+            sourceState: "ready",
+            dueAt: "2026-09-01T00:00:00.000Z",
+            context: { days: 14, analyzed: 4, total: 12 },
+          },
+          {
+            key: "pendingApprovals",
+            count: null,
+            sourceState: "unavailable",
+          },
+          {
+            key: "upcomingInterviews",
+            count: 0,
+            sourceState: "ready",
+          },
+        ],
+      },
+      NOW
+    )
+    expect(reminder(model, "staleCandidates")).toMatchObject({
+      count: 4,
+      sourceState: "ready",
+      severity: "critical",
+      dueAt: "2026-09-01T00:00:00.000Z",
+      href: reminderDetailLink("staleCandidates"),
+      context: { days: 14, analyzed: 4, total: 12 },
+    })
+    expect(reminder(model, "pendingApprovals").href).toBe(
+      RECRUITER_DASHBOARD_LINKS.vacancies
+    )
+    expect(reminder(model, "upcomingInterviews").href).toBeNull()
+  })
+
+  it("aplica contextos por defecto cuando el backend no los envía", () => {
+    const model = normalizeRecruiterDashboard(
+      {
+        reminders: [
+          { key: "upcomingInterviews", count: 2, sourceState: "ready" },
+          { key: "staleCandidates", count: 1, sourceState: "ready" },
+        ],
+      },
+      NOW
+    )
+    expect(reminder(model, "upcomingInterviews").context).toEqual({
+      days: DASHBOARD_UPCOMING_INTERVIEW_DAYS,
+    })
+    expect(reminder(model, "staleCandidates").context).toEqual({
+      days: DASHBOARD_STALE_CANDIDATE_DAYS,
+    })
+  })
+})
+
+describe("isActionableReminder", () => {
+  const base: DashboardReminder = {
+    key: "staleCandidates",
+    count: 0,
+    severity: "critical",
+    href: "/x",
+    sourceState: "ready",
+    dueAt: null,
+    context: null,
+  }
+
+  it("oculta recordatorios en cero o no disponibles y muestra errores", () => {
+    expect(isActionableReminder(base)).toBe(false)
+    expect(isActionableReminder({ ...base, count: 2 })).toBe(true)
+    expect(isActionableReminder({ ...base, count: 2, sourceState: "partial" })).toBe(true)
+    expect(
+      isActionableReminder({ ...base, sourceState: "unavailable", count: null })
+    ).toBe(false)
+    expect(isActionableReminder({ ...base, sourceState: "error", count: null })).toBe(true)
+  })
+})
+
+describe("sortDashboardReminders", () => {
+  it("ordena por severidad, fecha y etiqueta de forma determinista", () => {
+    const make = (
+      key: DashboardReminderKey,
+      severity: DashboardReminder["severity"],
+      dueAt: string | null
+    ): DashboardReminder => ({
+      key,
+      severity,
+      dueAt,
+      count: 1,
+      href: null,
+      sourceState: "ready",
+      context: null,
+    })
+    const labels: Record<string, string> = {
+      upcomingInterviews: "C",
+      pendingEvaluations: "B",
+      newCandidates: "A",
+      staleCandidates: "Z",
+    }
+    const sorted = sortDashboardReminders(
+      [
+        make("upcomingInterviews", "upcoming", "2026-10-06T00:00:00Z"),
+        make("pendingEvaluations", "action", null),
+        make("newCandidates", "action", null),
+        make("staleCandidates", "critical", "2026-09-01T00:00:00Z"),
+      ],
+      (key) => labels[key]
+    )
+    expect(sorted.map((item) => item.key)).toEqual([
+      "staleCandidates",
+      "newCandidates",
+      "pendingEvaluations",
+      "upcomingInterviews",
+    ])
+  })
+})
+
+describe("isDashboardReminderKey / isDashboardMetricKey", () => {
+  it("acepta solo claves conocidas", () => {
+    expect(isDashboardReminderKey("staleCandidates")).toBe(true)
+    expect(isDashboardReminderKey("not-a-key")).toBe(false)
+    expect(isDashboardReminderKey(null)).toBe(false)
+    expect(isDashboardMetricKey("activeVacancies")).toBe(true)
+    expect(isDashboardMetricKey("pendingDocuments")).toBe(false)
+  })
+})
+
+describe("normalizeReminderDetail", () => {
+  it("filtra ítems inválidos y conserva campos opcionales", () => {
+    const detail = normalizeReminderDetail("staleCandidates", {
+      sourceState: "ready",
+      totalCount: 2,
+      items: [
+        {
+          id: "app-1",
+          candidateProfileId: "cand-1",
+          candidateName: "Ana",
+          vacancyId: "vac-1",
+          vacancyTitle: "Backend",
+          companyName: "Acme",
+          dueAt: "2026-09-10T00:00:00Z",
+          statusLabel: "En revisión",
+        },
+        { candidateName: "sin id" },
+      ],
+    })
+    expect(detail).toEqual({
+      key: "staleCandidates",
+      sourceState: "ready",
+      totalCount: 2,
+      items: [
+        {
+          id: "app-1",
+          applicationId: null,
+          candidateProfileId: "cand-1",
+          candidateName: "Ana",
+          vacancyId: "vac-1",
+          vacancyTitle: "Backend",
+          companyName: "Acme",
+          dueAt: "2026-09-10T00:00:00Z",
+          statusLabel: "En revisión",
+        },
+      ],
+    })
+  })
+
+  it("marca como no disponible cuando el backend lo indica", () => {
+    const detail = normalizeReminderDetail("pendingApprovals", {
+      sourceState: "unavailable",
+      totalCount: null,
+      items: [],
+    })
+    expect(detail.sourceState).toBe("unavailable")
+    expect(detail.items).toEqual([])
+  })
+})
+
+describe("resolveReminderRowHref", () => {
+  const baseItem = {
+    id: "x",
+    applicationId: null,
+    candidateProfileId: null,
+    candidateName: null,
+    vacancyId: null,
+    vacancyTitle: null,
+    companyName: null,
+    dueAt: null,
+    statusLabel: null,
+  }
+
+  it("apunta a entrevistas, candidatos y vacantes según la clave", () => {
+    expect(
+      resolveReminderRowHref("upcomingInterviews", { ...baseItem, id: "iv-1" })
+    ).toBe("/portal-rrhh/interviews/iv-1")
+    expect(
+      resolveReminderRowHref("staleCandidates", {
+        ...baseItem,
+        candidateProfileId: "cand-1",
+      })
+    ).toBe("/portal-rrhh/candidatos/cand-1")
+    expect(
+      resolveReminderRowHref("vacanciesClosingSoon", {
+        ...baseItem,
+        vacancyId: "vac-9",
+      })
+    ).toBe("/portal-rrhh/vacantes/vac-9")
+    expect(resolveReminderRowHref("pendingApprovals", baseItem)).toBeNull()
+    expect(resolveReminderRowHref("staleCandidates", baseItem)).toBeNull()
+  })
+})
+
+describe("reminderIncludesCandidate", () => {
+  it("devuelve falso para recordatorios de vacante", () => {
+    expect(reminderIncludesCandidate("vacanciesClosingSoon")).toBe(false)
+    expect(reminderIncludesCandidate("inactiveVacancies")).toBe(false)
+  })
+
+  it("devuelve verdadero para el resto de recordatorios", () => {
+    const peopleKeys: DashboardReminderKey[] = [
+      "upcomingInterviews",
+      "unconfirmedInterviews",
+      "newCandidates",
+      "staleCandidates",
+      "pendingEvaluations",
+      "pendingTechnicalSheets",
+      "pendingApprovals",
+      "overdueFollowUps",
+      "pendingConsents",
+      "pendingDocuments",
+    ]
+    for (const key of peopleKeys) {
+      expect(reminderIncludesCandidate(key)).toBe(true)
+    }
+  })
+})

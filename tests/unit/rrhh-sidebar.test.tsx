@@ -47,6 +47,22 @@ describe("RRHHSidebar", () => {
       "aria-current",
       "page",
     )
+    expect(screen.getByRole("link", { name: "Inicio" })).not.toHaveAttribute(
+      "aria-current",
+    )
+  })
+
+  it("marca Inicio solo en la raíz del portal", () => {
+    usePathnameMock.mockReturnValue("/portal-rrhh")
+    renderSidebar()
+
+    expect(screen.getByRole("link", { name: "Inicio" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    )
+    expect(screen.getByRole("link", { name: "Candidatos" })).not.toHaveAttribute(
+      "aria-current",
+    )
   })
 
   it("separa Configuración de los destinos principales", () => {
@@ -55,6 +71,7 @@ describe("RRHHSidebar", () => {
     const menu = screen.getByRole("navigation", { name: "Menú RRHH" })
     const links = within(menu).getAllByRole("link")
     expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "/portal-rrhh",
       "/portal-rrhh/candidatos",
       "/portal-rrhh/vacantes",
       "/portal-rrhh/entrevistas",

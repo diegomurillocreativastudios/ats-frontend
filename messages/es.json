@@ -514,6 +514,10 @@
     "privacyPolicy": {
       "title": "Política de privacidad | Applicantree ATS",
       "description": "Política de privacidad de Applicantree ATS."
+    },
+    "recruiterDashboard": {
+      "title": "ApplicanTree | Portal RRHH | Inicio",
+      "description": "Panel de pendientes y recordatorios del portal RRHH"
     }
   },
   "PortalSelection": {
@@ -2994,20 +2998,172 @@
       }
     },
     "dashboard": {
-      "statsAria": "Estadísticas del dashboard",
-      "activeCandidates": "Candidatos Activos",
-      "openVacancies": "Vacantes Abiertas",
-      "interviewsToday": "Entrevistas Hoy",
-      "hiresThisMonth": "Contrataciones Mes",
-      "recentActivityAria": "Actividad reciente",
-      "recentActivityTitle": "Actividad Reciente",
-      "recentCandidatesAria": "Candidatos recientes",
-      "recentCandidatesTitle": "Candidatos Recientes",
-      "newCandidatesBadge": "{count} nuevos",
-      "mockBadges": {
-        "interview": "Entrevista",
-        "evaluation": "Evaluación",
-        "hired": "Contratado"
+      "breadcrumb": "Inicio",
+      "title": "Panel de Recursos Humanos",
+      "description": "Prioriza vacantes, entrevistas y candidatos que necesitan tu atención.",
+      "refresh": "Actualizar",
+      "refreshing": "Actualizando…",
+      "loading": "Cargando panel…",
+      "updatedAt": "Actualizado a las {time}",
+      "metricsTitle": "Resumen",
+      "metrics": {
+        "activeVacancies": "Vacantes activas",
+        "upcomingInterviews": "Entrevistas próximas",
+        "staleCandidates": "Candidatos estancados",
+        "pendingEvaluations": "Evaluaciones pendientes"
+      },
+      "metricLinkAria": "{label}: {value}. Ver detalle",
+      "metricUpcomingWindow": "Próximos {days} días",
+      "metricPartial": "Conteo parcial: el total real puede ser mayor",
+      "metricUnavailable": "Dato aún no disponible",
+      "metricError": "No se pudo cargar",
+      "valueUnavailable": "sin dato",
+      "remindersTitle": "Pendientes por atender",
+      "remindersDescription": "Ordenados por urgencia y fecha.",
+      "remindersEmpty": "No hay pendientes por ahora.",
+      "severity": {
+        "critical": "Urgente",
+        "action": "Por atender",
+        "upcoming": "Próximo",
+        "info": "Informativo"
+      },
+      "nextAt": "Próxima: {date}",
+      "oldestAt": "Más antiguo: {date}",
+      "partialNote": "Basado en {analyzed} de {total} registros; el total real puede ser mayor.",
+      "errorNote": "No se pudo cargar este dato. Intenta actualizar el panel.",
+      "unavailableTitle": "Recordatorios en preparación",
+      "unavailableDescription": "Aún no contamos con datos para calcularlos. Mientras tanto, puedes revisar el módulo relacionado.",
+      "unavailableBadge": "Sin datos",
+      "inactiveVacanciesRule": "Se considerará sin actividad tras {days} días.",
+      "openModule": "Abrir módulo",
+      "openModuleAria": "Abrir módulo relacionado con {title}",
+      "shortcutsTitle": "Accesos rápidos",
+      "shortcuts": {
+        "candidates": {
+          "title": "Candidatos",
+          "description": "Busca perfiles y registra seguimientos."
+        },
+        "vacancies": {
+          "title": "Vacantes",
+          "description": "Gestiona el pipeline de cada vacante."
+        },
+        "interviews": {
+          "title": "Entrevistas",
+          "description": "Agenda y revisa entrevistas."
+        },
+        "calendar": {
+          "title": "Calendario",
+          "description": "Conecta y revisa tu calendario."
+        },
+        "reports": {
+          "title": "Reportes",
+          "description": "Consulta indicadores y exporta reportes."
+        }
+      },
+      "reminders": {
+        "upcomingInterviews": {
+          "title": "Entrevistas próximas",
+          "description": "{count, plural, one {# entrevista programada} other {# entrevistas programadas}} en los próximos {days} días.",
+          "action": "Ver entrevistas"
+        },
+        "unconfirmedInterviews": {
+          "title": "Entrevistas pendientes de confirmar",
+          "action": "Confirmar entrevistas",
+          "description": "{count, plural, one {# entrevista por confirmar} other {# entrevistas por confirmar}}."
+        },
+        "newCandidates": {
+          "title": "Candidatos nuevos por revisar",
+          "action": "Revisar postulaciones",
+          "description": "{count, plural, one {# postulación nueva por revisar} other {# postulaciones nuevas por revisar}}."
+        },
+        "staleCandidates": {
+          "title": "Candidatos estancados",
+          "description": "{count, plural, one {# candidato} other {# candidatos}} sin cambiar de etapa en {days} días o más.",
+          "action": "Revisar candidatos"
+        },
+        "vacanciesClosingSoon": {
+          "title": "Vacantes próximas a cerrar",
+          "action": "Ver vacantes",
+          "description": "{count, plural, one {# vacante próxima a cerrar} other {# vacantes próximas a cerrar}}."
+        },
+        "inactiveVacancies": {
+          "title": "Vacantes sin actividad reciente",
+          "action": "Ver vacantes",
+          "description": "{count, plural, one {# vacante sin actividad reciente} other {# vacantes sin actividad reciente}}."
+        },
+        "pendingEvaluations": {
+          "title": "Evaluaciones técnicas pendientes",
+          "description": "{count, plural, one {# evaluación sin completar} other {# evaluaciones sin completar}}.",
+          "action": "Ver evaluaciones"
+        },
+        "pendingTechnicalSheets": {
+          "title": "Fichas técnicas pendientes",
+          "action": "Ver fichas",
+          "description": "{count, plural, one {# ficha técnica pendiente} other {# fichas técnicas pendientes}}."
+        },
+        "pendingApprovals": {
+          "title": "Aprobaciones pendientes",
+          "action": "Ver vacantes",
+          "description": "Sin información disponible por ahora."
+        },
+        "overdueFollowUps": {
+          "title": "Seguimientos atrasados",
+          "action": "Ver candidatos",
+          "description": "{count, plural, one {# seguimiento atrasado} other {# seguimientos atrasados}}."
+        },
+        "pendingConsents": {
+          "title": "Consentimientos pendientes",
+          "description": "{count, plural, one {# consentimiento pendiente} other {# consentimientos pendientes}}.",
+          "action": "Ver consentimientos"
+        },
+        "pendingDocuments": {
+          "title": "Documentos pendientes",
+          "description": "{count, plural, one {# documento pendiente} other {# documentos pendientes}}.",
+          "action": "Ver documentos"
+        }
+      },
+      "panelError": {
+        "title": "No pudimos cargar el panel",
+        "description": "Reintenta en unos segundos o actualiza la página.",
+        "retry": "Reintentar"
+      },
+      "reminderDetail": {
+        "title": "Pendientes: {label}",
+        "description": "Revisa el detalle y abre cada caso para atenderlo.",
+        "backToDashboard": "Volver al panel",
+        "loading": "Cargando pendientes…",
+        "empty": "No hay pendientes para este recordatorio.",
+        "error": "No se pudo cargar el detalle. Intenta de nuevo.",
+        "unavailable": "Este recordatorio aún no tiene datos disponibles.",
+        "openRow": "Abrir",
+        "openRowAria": "Abrir {label}",
+        "columns": {
+          "candidate": "Candidato",
+          "vacancy": "Vacante",
+          "company": "Empresa",
+          "dueAt": "Fecha",
+          "status": "Estado",
+          "actions": "Acciones"
+        },
+        "invalidKey": {
+          "breadcrumb": "Recordatorio desconocido",
+          "title": "Recordatorio desconocido",
+          "description": "La dirección no corresponde a un recordatorio del panel."
+        },
+        "pagination": {
+          "perPage": "Por página",
+          "pageSizeAria": "Tamaño de página",
+          "regionAria": "Paginación de pendientes",
+          "summary": "Página {page} de {total}",
+          "prev": "Anterior",
+          "next": "Siguiente",
+          "count": "{count, plural, one {# pendiente} other {# pendientes}}"
+        },
+        "metadata": {
+          "title": "ApplicanTree | Portal RRHH | {label}",
+          "invalidTitle": "ApplicanTree | Portal RRHH | Recordatorio desconocido",
+          "invalidDescription": "El recordatorio solicitado no existe."
+        }
       }
     },
     "technicalSheet": {

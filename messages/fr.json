@@ -514,6 +514,10 @@
     "privacyPolicy": {
       "title": "Politique de confidentialité | Applicantree ATS",
       "description": "Politique de confidentialité d'Applicantree ATS."
+    },
+    "recruiterDashboard": {
+      "title": "ApplicanTree | Portail RH | Accueil",
+      "description": "Tableau de bord des tâches et rappels du portail RH"
     }
   },
   "PortalSelection": {
@@ -2994,20 +2998,172 @@
       }
     },
     "dashboard": {
-      "statsAria": "Statistiques du tableau de bord",
-      "activeCandidates": "Candidats actifs",
-      "openVacancies": "Postes ouverts",
-      "interviewsToday": "Entretiens aujourd'hui",
-      "hiresThisMonth": "Embauches du mois",
-      "recentActivityAria": "Activité récente",
-      "recentActivityTitle": "Activité récente",
-      "recentCandidatesAria": "Candidats récents",
-      "recentCandidatesTitle": "Candidats récents",
-      "newCandidatesBadge": "{count} nouveaux",
-      "mockBadges": {
-        "interview": "Interview",
-        "evaluation": "Evaluacion",
-        "hired": "Contratado"
+      "breadcrumb": "Accueil",
+      "title": "Tableau de bord Ressources humaines",
+      "description": "Priorisez les postes, entretiens et candidats qui demandent votre attention.",
+      "refresh": "Actualiser",
+      "refreshing": "Actualisation…",
+      "loading": "Chargement du tableau de bord…",
+      "updatedAt": "Mis à jour à {time}",
+      "metricsTitle": "Synthèse",
+      "metrics": {
+        "activeVacancies": "Postes actifs",
+        "upcomingInterviews": "Entretiens à venir",
+        "staleCandidates": "Candidats bloqués",
+        "pendingEvaluations": "Évaluations en attente"
+      },
+      "metricLinkAria": "{label} : {value}. Voir le détail",
+      "metricUpcomingWindow": "{days} prochains jours",
+      "metricPartial": "Décompte partiel : le total réel peut être supérieur",
+      "metricUnavailable": "Donnée pas encore disponible",
+      "metricError": "Chargement impossible",
+      "valueUnavailable": "aucune donnée",
+      "remindersTitle": "À traiter",
+      "remindersDescription": "Triés par urgence et par date.",
+      "remindersEmpty": "Rien à traiter pour le moment.",
+      "severity": {
+        "critical": "Urgent",
+        "action": "À traiter",
+        "upcoming": "À venir",
+        "info": "Information"
+      },
+      "nextAt": "Prochain : {date}",
+      "oldestAt": "Plus ancien : {date}",
+      "partialNote": "Basé sur {analyzed} sur {total} enregistrements ; le total réel peut être supérieur.",
+      "errorNote": "Cette donnée n'a pas pu être chargée. Essayez d'actualiser le tableau de bord.",
+      "unavailableTitle": "Rappels en préparation",
+      "unavailableDescription": "Les données nécessaires ne sont pas encore disponibles. En attendant, vous pouvez consulter le module concerné.",
+      "unavailableBadge": "Aucune donnée",
+      "inactiveVacanciesRule": "Considéré inactif après {days} jours.",
+      "openModule": "Ouvrir le module",
+      "openModuleAria": "Ouvrir le module lié à {title}",
+      "shortcutsTitle": "Accès rapides",
+      "shortcuts": {
+        "candidates": {
+          "title": "Candidats",
+          "description": "Recherchez des profils et notez les suivis."
+        },
+        "vacancies": {
+          "title": "Postes",
+          "description": "Gérez le pipeline de chaque poste."
+        },
+        "interviews": {
+          "title": "Entretiens",
+          "description": "Planifiez et consultez les entretiens."
+        },
+        "calendar": {
+          "title": "Calendrier",
+          "description": "Connectez et consultez votre calendrier."
+        },
+        "reports": {
+          "title": "Rapports",
+          "description": "Consultez les indicateurs et exportez des rapports."
+        }
+      },
+      "reminders": {
+        "upcomingInterviews": {
+          "title": "Entretiens à venir",
+          "description": "{count, plural, one {# entretien planifié} other {# entretiens planifiés}} dans les {days} prochains jours.",
+          "action": "Voir les entretiens"
+        },
+        "unconfirmedInterviews": {
+          "title": "Entretiens à confirmer",
+          "action": "Confirmer les entretiens",
+          "description": "{count, plural, one {# entretien à confirmer} other {# entretiens à confirmer}}."
+        },
+        "newCandidates": {
+          "title": "Nouveaux candidats à examiner",
+          "action": "Examiner les candidatures",
+          "description": "{count, plural, one {# nouvelle candidature à examiner} other {# nouvelles candidatures à examiner}}."
+        },
+        "staleCandidates": {
+          "title": "Candidats bloqués",
+          "description": "{count, plural, one {# candidat} other {# candidats}} sans changement d'étape depuis {days} jours ou plus.",
+          "action": "Examiner les candidats"
+        },
+        "vacanciesClosingSoon": {
+          "title": "Postes bientôt clôturés",
+          "action": "Voir les postes",
+          "description": "{count, plural, one {# poste bientôt clôturé} other {# postes bientôt clôturés}}."
+        },
+        "inactiveVacancies": {
+          "title": "Postes sans activité récente",
+          "action": "Voir les postes",
+          "description": "{count, plural, one {# poste sans activité récente} other {# postes sans activité récente}}."
+        },
+        "pendingEvaluations": {
+          "title": "Évaluations techniques en attente",
+          "description": "{count, plural, one {# évaluation non terminée} other {# évaluations non terminées}}.",
+          "action": "Voir les évaluations"
+        },
+        "pendingTechnicalSheets": {
+          "title": "Fiches techniques en attente",
+          "action": "Voir les fiches",
+          "description": "{count, plural, one {# fiche technique en attente} other {# fiches techniques en attente}}."
+        },
+        "pendingApprovals": {
+          "title": "Approbations en attente",
+          "action": "Voir les postes",
+          "description": "Aucune information disponible pour l'instant."
+        },
+        "overdueFollowUps": {
+          "title": "Suivis en retard",
+          "action": "Voir les candidats",
+          "description": "{count, plural, one {# suivi en retard} other {# suivis en retard}}."
+        },
+        "pendingConsents": {
+          "title": "Consentements en attente",
+          "description": "{count, plural, one {# consentement en attente} other {# consentements en attente}}.",
+          "action": "Voir les consentements"
+        },
+        "pendingDocuments": {
+          "title": "Documents en attente",
+          "description": "{count, plural, one {# document en attente} other {# documents en attente}}.",
+          "action": "Voir les documents"
+        }
+      },
+      "panelError": {
+        "title": "Impossible de charger le tableau de bord",
+        "description": "Réessayez dans quelques secondes ou actualisez la page.",
+        "retry": "Réessayer"
+      },
+      "reminderDetail": {
+        "title": "À traiter : {label}",
+        "description": "Consultez le détail et ouvrez chaque cas pour le traiter.",
+        "backToDashboard": "Retour au tableau de bord",
+        "loading": "Chargement des éléments à traiter…",
+        "empty": "Rien à traiter pour ce rappel.",
+        "error": "Impossible de charger le détail. Réessayez.",
+        "unavailable": "Ce rappel n'a pas encore de données.",
+        "openRow": "Ouvrir",
+        "openRowAria": "Ouvrir {label}",
+        "columns": {
+          "candidate": "Candidat",
+          "vacancy": "Poste",
+          "company": "Entreprise",
+          "dueAt": "Date",
+          "status": "Statut",
+          "actions": "Actions"
+        },
+        "invalidKey": {
+          "breadcrumb": "Rappel inconnu",
+          "title": "Rappel inconnu",
+          "description": "L'adresse ne correspond à aucun rappel du tableau de bord."
+        },
+        "pagination": {
+          "perPage": "Par page",
+          "pageSizeAria": "Taille de page",
+          "regionAria": "Pagination des éléments à traiter",
+          "summary": "Page {page} sur {total}",
+          "prev": "Précédent",
+          "next": "Suivant",
+          "count": "{count, plural, one {# à traiter} other {# à traiter}}"
+        },
+        "metadata": {
+          "title": "ApplicanTree | Portail RH | {label}",
+          "invalidTitle": "ApplicanTree | Portail RH | Rappel inconnu",
+          "invalidDescription": "Le rappel demandé n'existe pas."
+        }
       }
     },
     "technicalSheet": {

@@ -514,6 +514,10 @@
     "privacyPolicy": {
       "title": "Informativa sulla privacy | Applicantree ATS",
       "description": "Informativa sulla privacy di Applicantree ATS."
+    },
+    "recruiterDashboard": {
+      "title": "ApplicanTree | Portale HR | Home",
+      "description": "Dashboard di attività e promemoria del portale HR"
     }
   },
   "PortalSelection": {
@@ -2994,20 +2998,172 @@
       }
     },
     "dashboard": {
-      "statsAria": "Statistiche della dashboard",
-      "activeCandidates": "Candidati attivi",
-      "openVacancies": "Posizioni aperte",
-      "interviewsToday": "Colloqui oggi",
-      "hiresThisMonth": "Assunzioni del mese",
-      "recentActivityAria": "Attività recente",
-      "recentActivityTitle": "Attività recente",
-      "recentCandidatesAria": "Candidati recenti",
-      "recentCandidatesTitle": "Candidati recenti",
-      "newCandidatesBadge": "{count} nuovi",
-      "mockBadges": {
-        "interview": "Interview",
-        "evaluation": "Evaluacion",
-        "hired": "Contratado"
+      "breadcrumb": "Home",
+      "title": "Dashboard Risorse umane",
+      "description": "Dai priorità a posizioni, colloqui e candidati che richiedono la tua attenzione.",
+      "refresh": "Aggiorna",
+      "refreshing": "Aggiornamento…",
+      "loading": "Caricamento dashboard…",
+      "updatedAt": "Aggiornato alle {time}",
+      "metricsTitle": "Riepilogo",
+      "metrics": {
+        "activeVacancies": "Posizioni attive",
+        "upcomingInterviews": "Colloqui imminenti",
+        "staleCandidates": "Candidati fermi",
+        "pendingEvaluations": "Valutazioni in sospeso"
+      },
+      "metricLinkAria": "{label}: {value}. Vedi dettaglio",
+      "metricUpcomingWindow": "Prossimi {days} giorni",
+      "metricPartial": "Conteggio parziale: il totale reale può essere maggiore",
+      "metricUnavailable": "Dato non ancora disponibile",
+      "metricError": "Impossibile caricare",
+      "valueUnavailable": "nessun dato",
+      "remindersTitle": "Da gestire",
+      "remindersDescription": "Ordinati per urgenza e data.",
+      "remindersEmpty": "Nessuna attività in sospeso al momento.",
+      "severity": {
+        "critical": "Urgente",
+        "action": "Da fare",
+        "upcoming": "Imminente",
+        "info": "Informativo"
+      },
+      "nextAt": "Prossimo: {date}",
+      "oldestAt": "Più vecchio: {date}",
+      "partialNote": "Basato su {analyzed} di {total} record; il totale reale può essere maggiore.",
+      "errorNote": "Impossibile caricare questo dato. Prova ad aggiornare la dashboard.",
+      "unavailableTitle": "Promemoria in preparazione",
+      "unavailableDescription": "Non abbiamo ancora i dati per calcolarli. Nel frattempo puoi consultare il modulo correlato.",
+      "unavailableBadge": "Nessun dato",
+      "inactiveVacanciesRule": "Considerata inattiva dopo {days} giorni.",
+      "openModule": "Apri modulo",
+      "openModuleAria": "Apri il modulo relativo a {title}",
+      "shortcutsTitle": "Accessi rapidi",
+      "shortcuts": {
+        "candidates": {
+          "title": "Candidati",
+          "description": "Cerca profili e registra i follow-up."
+        },
+        "vacancies": {
+          "title": "Posizioni",
+          "description": "Gestisci la pipeline di ogni posizione."
+        },
+        "interviews": {
+          "title": "Colloqui",
+          "description": "Pianifica e consulta i colloqui."
+        },
+        "calendar": {
+          "title": "Calendario",
+          "description": "Collega e consulta il tuo calendario."
+        },
+        "reports": {
+          "title": "Report",
+          "description": "Consulta indicatori ed esporta report."
+        }
+      },
+      "reminders": {
+        "upcomingInterviews": {
+          "title": "Colloqui imminenti",
+          "description": "{count, plural, one {# colloquio programmato} other {# colloqui programmati}} nei prossimi {days} giorni.",
+          "action": "Vedi colloqui"
+        },
+        "unconfirmedInterviews": {
+          "title": "Colloqui da confermare",
+          "action": "Conferma colloqui",
+          "description": "{count, plural, one {# colloquio da confermare} other {# colloqui da confermare}}."
+        },
+        "newCandidates": {
+          "title": "Nuovi candidati da esaminare",
+          "action": "Esamina candidature",
+          "description": "{count, plural, one {# nuova candidatura da esaminare} other {# nuove candidature da esaminare}}."
+        },
+        "staleCandidates": {
+          "title": "Candidati fermi",
+          "description": "{count, plural, one {# candidato} other {# candidati}} senza cambio di fase da {days} giorni o più.",
+          "action": "Esamina candidati"
+        },
+        "vacanciesClosingSoon": {
+          "title": "Posizioni in chiusura",
+          "action": "Vedi posizioni",
+          "description": "{count, plural, one {# posizione in chiusura} other {# posizioni in chiusura}}."
+        },
+        "inactiveVacancies": {
+          "title": "Posizioni senza attività recente",
+          "action": "Vedi posizioni",
+          "description": "{count, plural, one {# posizione senza attività recente} other {# posizioni senza attività recente}}."
+        },
+        "pendingEvaluations": {
+          "title": "Valutazioni tecniche in sospeso",
+          "description": "{count, plural, one {# valutazione non completata} other {# valutazioni non completate}}.",
+          "action": "Vedi valutazioni"
+        },
+        "pendingTechnicalSheets": {
+          "title": "Schede tecniche in sospeso",
+          "action": "Vedi schede",
+          "description": "{count, plural, one {# scheda tecnica in sospeso} other {# schede tecniche in sospeso}}."
+        },
+        "pendingApprovals": {
+          "title": "Approvazioni in sospeso",
+          "action": "Vedi posizioni",
+          "description": "Nessuna informazione disponibile al momento."
+        },
+        "overdueFollowUps": {
+          "title": "Follow-up in ritardo",
+          "action": "Vedi candidati",
+          "description": "{count, plural, one {# follow-up in ritardo} other {# follow-up in ritardo}}."
+        },
+        "pendingConsents": {
+          "title": "Consensi in sospeso",
+          "description": "{count, plural, one {# consenso in sospeso} other {# consensi in sospeso}}.",
+          "action": "Vedi consensi"
+        },
+        "pendingDocuments": {
+          "title": "Documenti in sospeso",
+          "description": "{count, plural, one {# documento in sospeso} other {# documenti in sospeso}}.",
+          "action": "Vedi documenti"
+        }
+      },
+      "panelError": {
+        "title": "Impossibile caricare la dashboard",
+        "description": "Riprova tra pochi secondi o aggiorna la pagina.",
+        "retry": "Riprova"
+      },
+      "reminderDetail": {
+        "title": "In sospeso: {label}",
+        "description": "Rivedi il dettaglio e apri ciascun caso per gestirlo.",
+        "backToDashboard": "Torna alla dashboard",
+        "loading": "Caricamento in corso…",
+        "empty": "Nessun elemento in sospeso per questo promemoria.",
+        "error": "Impossibile caricare il dettaglio. Riprova.",
+        "unavailable": "Questo promemoria non ha ancora dati disponibili.",
+        "openRow": "Apri",
+        "openRowAria": "Apri {label}",
+        "columns": {
+          "candidate": "Candidato",
+          "vacancy": "Posizione",
+          "company": "Azienda",
+          "dueAt": "Data",
+          "status": "Stato",
+          "actions": "Azioni"
+        },
+        "invalidKey": {
+          "breadcrumb": "Promemoria sconosciuto",
+          "title": "Promemoria sconosciuto",
+          "description": "L'URL non corrisponde ad alcun promemoria della dashboard."
+        },
+        "pagination": {
+          "perPage": "Per pagina",
+          "pageSizeAria": "Dimensione pagina",
+          "regionAria": "Paginazione elementi in sospeso",
+          "summary": "Pagina {page} di {total}",
+          "prev": "Precedente",
+          "next": "Successivo",
+          "count": "{count, plural, one {# in sospeso} other {# in sospeso}}"
+        },
+        "metadata": {
+          "title": "ApplicanTree | Portale HR | {label}",
+          "invalidTitle": "ApplicanTree | Portale HR | Promemoria sconosciuto",
+          "invalidDescription": "Il promemoria richiesto non esiste."
+        }
       }
     },
     "technicalSheet": {

@@ -21,7 +21,7 @@ import {
 
 const DESKTOP_PADDING = "px-8"
 const MOBILE_PADDING = "px-4"
-const RRHH_HOME_HREF = "/portal-rrhh/candidatos"
+const RRHH_HOME_HREF = "/portal-rrhh"
 
 interface RRHHTopbarProps {
   variant?: "desktop" | "tablet" | "mobile"

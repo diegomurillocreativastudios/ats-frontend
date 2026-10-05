@@ -82,7 +82,7 @@ describe("Topbars i18n (Etapa 3)", () => {
     expect(screen.getAllByText("Portal RRHH")).toHaveLength(1)
     expect(screen.getByRole("link", { name: "Portal RRHH" })).toHaveAttribute(
       "href",
-      "/portal-rrhh/candidatos",
+      "/portal-rrhh",
     )
     expect(screen.getByText("Configuración")).toHaveAttribute(
       "aria-current",

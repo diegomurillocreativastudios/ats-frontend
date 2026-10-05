@@ -2,14 +2,17 @@
 
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Users, Briefcase, Calendar, BarChart3, Cog } from "lucide-react"
+import { LayoutDashboard, Users, Briefcase, Calendar, BarChart3, Cog } from "lucide-react"
 import {
   PortalSidebarFrame,
   SidebarNavItem,
   SidebarUserFooter,
 } from "@/components/navigation/portal-sidebar"
 
+const RRHH_HOME_HREF = "/portal-rrhh"
+
 const primaryNavItems = [
+  { href: RRHH_HOME_HREF, labelKey: "home", icon: LayoutDashboard },
   { href: "/portal-rrhh/candidatos", labelKey: "candidates", icon: Users },
   { href: "/portal-rrhh/vacantes", labelKey: "vacancies", icon: Briefcase },
   { href: "/portal-rrhh/entrevistas", labelKey: "interviews", icon: Calendar },
@@ -23,6 +26,9 @@ const settingsNavItem = {
 } as const
 
 function isRrhhNavActive(pathname: string, href: string): boolean {
+  if (href === RRHH_HOME_HREF) {
+    return pathname === RRHH_HOME_HREF
+  }
   if (href === "/portal-rrhh/entrevistas") {
     return (
       pathname.startsWith("/portal-rrhh/entrevistas") ||

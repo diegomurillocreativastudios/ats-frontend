@@ -514,6 +514,10 @@
     "privacyPolicy": {
       "title": "Datenschutzerklärung | Applicantree ATS",
       "description": "Datenschutzerklärung für Applicantree ATS."
+    },
+    "recruiterDashboard": {
+      "title": "ApplicanTree | HR-Portal | Startseite",
+      "description": "Dashboard mit offenen Aufgaben und Erinnerungen des HR-Portals"
     }
   },
   "PortalSelection": {
@@ -2994,20 +2998,172 @@
       }
     },
     "dashboard": {
-      "statsAria": "Dashboard-Statistiken",
-      "activeCandidates": "Aktive Kandidaten",
-      "openVacancies": "Offene Stellen",
-      "interviewsToday": "Interviews heute",
-      "hiresThisMonth": "Einstellungen diesen Monat",
-      "recentActivityAria": "Letzte Aktivität",
-      "recentActivityTitle": "Letzte Aktivität",
-      "recentCandidatesAria": "Neueste Kandidaten",
-      "recentCandidatesTitle": "Neueste Kandidaten",
-      "newCandidatesBadge": "{count} neu",
-      "mockBadges": {
-        "interview": "Interview",
-        "evaluation": "Evaluacion",
-        "hired": "Contratado"
+      "breadcrumb": "Startseite",
+      "title": "Personal-Dashboard",
+      "description": "Priorisiere Stellen, Interviews und Kandidaten, die deine Aufmerksamkeit brauchen.",
+      "refresh": "Aktualisieren",
+      "refreshing": "Wird aktualisiert…",
+      "loading": "Dashboard wird geladen…",
+      "updatedAt": "Aktualisiert um {time}",
+      "metricsTitle": "Übersicht",
+      "metrics": {
+        "activeVacancies": "Aktive Stellen",
+        "upcomingInterviews": "Anstehende Interviews",
+        "staleCandidates": "Stagnierende Kandidaten",
+        "pendingEvaluations": "Offene Bewertungen"
+      },
+      "metricLinkAria": "{label}: {value}. Details anzeigen",
+      "metricUpcomingWindow": "Nächste {days} Tage",
+      "metricPartial": "Teilzählung: Die tatsächliche Summe kann höher sein",
+      "metricUnavailable": "Daten noch nicht verfügbar",
+      "metricError": "Konnte nicht geladen werden",
+      "valueUnavailable": "keine Daten",
+      "remindersTitle": "Offene Aufgaben",
+      "remindersDescription": "Nach Dringlichkeit und Datum sortiert.",
+      "remindersEmpty": "Derzeit keine offenen Aufgaben.",
+      "severity": {
+        "critical": "Dringend",
+        "action": "Zu erledigen",
+        "upcoming": "Anstehend",
+        "info": "Information"
+      },
+      "nextAt": "Nächstes: {date}",
+      "oldestAt": "Ältestes: {date}",
+      "partialNote": "Basierend auf {analyzed} von {total} Datensätzen; die tatsächliche Summe kann höher sein.",
+      "errorNote": "Diese Daten konnten nicht geladen werden. Aktualisiere das Dashboard.",
+      "unavailableTitle": "Erinnerungen in Vorbereitung",
+      "unavailableDescription": "Für die Berechnung fehlen noch Daten. Du kannst inzwischen das zugehörige Modul prüfen.",
+      "unavailableBadge": "Keine Daten",
+      "inactiveVacanciesRule": "Gilt nach {days} Tagen als inaktiv.",
+      "openModule": "Modul öffnen",
+      "openModuleAria": "Modul zu {title} öffnen",
+      "shortcutsTitle": "Schnellzugriffe",
+      "shortcuts": {
+        "candidates": {
+          "title": "Kandidaten",
+          "description": "Profile suchen und Nachverfolgungen erfassen."
+        },
+        "vacancies": {
+          "title": "Stellen",
+          "description": "Die Pipeline jeder Stelle verwalten."
+        },
+        "interviews": {
+          "title": "Interviews",
+          "description": "Interviews planen und prüfen."
+        },
+        "calendar": {
+          "title": "Kalender",
+          "description": "Kalender verbinden und prüfen."
+        },
+        "reports": {
+          "title": "Berichte",
+          "description": "Kennzahlen ansehen und Berichte exportieren."
+        }
+      },
+      "reminders": {
+        "upcomingInterviews": {
+          "title": "Anstehende Interviews",
+          "description": "{count, plural, one {# Interview geplant} other {# Interviews geplant}} in den nächsten {days} Tagen.",
+          "action": "Interviews ansehen"
+        },
+        "unconfirmedInterviews": {
+          "title": "Interviews ohne Bestätigung",
+          "action": "Interviews bestätigen",
+          "description": "{count, plural, one {# Interview ohne Bestätigung} other {# Interviews ohne Bestätigung}}."
+        },
+        "newCandidates": {
+          "title": "Neue Kandidaten zur Prüfung",
+          "action": "Bewerbungen prüfen",
+          "description": "{count, plural, one {# neue Bewerbung zu prüfen} other {# neue Bewerbungen zu prüfen}}."
+        },
+        "staleCandidates": {
+          "title": "Stagnierende Kandidaten",
+          "description": "{count, plural, one {# Kandidat} other {# Kandidaten}} seit {days} Tagen oder länger ohne Phasenwechsel.",
+          "action": "Kandidaten prüfen"
+        },
+        "vacanciesClosingSoon": {
+          "title": "Bald schließende Stellen",
+          "action": "Stellen ansehen",
+          "description": "{count, plural, one {# bald schließende Stelle} other {# bald schließende Stellen}}."
+        },
+        "inactiveVacancies": {
+          "title": "Stellen ohne aktuelle Aktivität",
+          "action": "Stellen ansehen",
+          "description": "{count, plural, one {# Stelle ohne aktuelle Aktivität} other {# Stellen ohne aktuelle Aktivität}}."
+        },
+        "pendingEvaluations": {
+          "title": "Offene technische Bewertungen",
+          "description": "{count, plural, one {# Bewertung nicht abgeschlossen} other {# Bewertungen nicht abgeschlossen}}.",
+          "action": "Bewertungen ansehen"
+        },
+        "pendingTechnicalSheets": {
+          "title": "Offene technische Datenblätter",
+          "action": "Datenblätter ansehen",
+          "description": "{count, plural, one {# technisches Datenblatt offen} other {# technische Datenblätter offen}}."
+        },
+        "pendingApprovals": {
+          "title": "Offene Freigaben",
+          "action": "Stellen ansehen",
+          "description": "Noch keine Informationen verfügbar."
+        },
+        "overdueFollowUps": {
+          "title": "Überfällige Nachverfolgungen",
+          "action": "Kandidaten ansehen",
+          "description": "{count, plural, one {# überfällige Nachverfolgung} other {# überfällige Nachverfolgungen}}."
+        },
+        "pendingConsents": {
+          "title": "Offene Einwilligungen",
+          "description": "{count, plural, one {# offene Einwilligung} other {# offene Einwilligungen}}.",
+          "action": "Einwilligungen ansehen"
+        },
+        "pendingDocuments": {
+          "title": "Offene Dokumente",
+          "description": "{count, plural, one {# offenes Dokument} other {# offene Dokumente}}.",
+          "action": "Dokumente ansehen"
+        }
+      },
+      "panelError": {
+        "title": "Das Dashboard konnte nicht geladen werden",
+        "description": "Bitte in wenigen Sekunden erneut versuchen oder Seite neu laden.",
+        "retry": "Erneut versuchen"
+      },
+      "reminderDetail": {
+        "title": "Offen: {label}",
+        "description": "Prüfe die Details und öffne jeden Fall, um ihn zu bearbeiten.",
+        "backToDashboard": "Zurück zum Dashboard",
+        "loading": "Offene Punkte werden geladen…",
+        "empty": "Keine offenen Punkte für diese Erinnerung.",
+        "error": "Details konnten nicht geladen werden. Erneut versuchen.",
+        "unavailable": "Für diese Erinnerung sind noch keine Daten verfügbar.",
+        "openRow": "Öffnen",
+        "openRowAria": "{label} öffnen",
+        "columns": {
+          "candidate": "Kandidat",
+          "vacancy": "Stelle",
+          "company": "Unternehmen",
+          "dueAt": "Datum",
+          "status": "Status",
+          "actions": "Aktionen"
+        },
+        "invalidKey": {
+          "breadcrumb": "Unbekannte Erinnerung",
+          "title": "Unbekannte Erinnerung",
+          "description": "Die URL entspricht keiner Dashboard-Erinnerung."
+        },
+        "pagination": {
+          "perPage": "Pro Seite",
+          "pageSizeAria": "Seitengröße",
+          "regionAria": "Paginierung offene Punkte",
+          "summary": "Seite {page} von {total}",
+          "prev": "Zurück",
+          "next": "Weiter",
+          "count": "{count, plural, one {# offen} other {# offen}}"
+        },
+        "metadata": {
+          "title": "ApplicanTree | HR-Portal | {label}",
+          "invalidTitle": "ApplicanTree | HR-Portal | Unbekannte Erinnerung",
+          "invalidDescription": "Die angeforderte Erinnerung existiert nicht."
+        }
       }
     },
     "technicalSheet": {
