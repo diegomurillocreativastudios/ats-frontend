@@ -541,6 +541,9 @@ export function CandidateProfileModal({
                           accentClass="text-amber-800"
                         />
                       </div>
+                      <p className="mb-3 font-sans text-xs leading-relaxed text-slate-600">
+                        {tModal("qualitativeScoreHint")}
+                      </p>
                       <ul className="flex flex-col gap-2.5" role="list">
                         <ScoreBarRow
                           label={getScoreLabel(qualitativeEntry[0])}
@@ -584,6 +587,9 @@ export function CandidateProfileModal({
 
               {hasSplitQualitative ? (
                 <div className="flex flex-col gap-4">
+                  <p className="font-sans text-xs leading-relaxed text-slate-600">
+                    {tModal("checklistHint")}
+                  </p>
                   {qualitativeReasoningPositive != null && (
                     <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/50">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">

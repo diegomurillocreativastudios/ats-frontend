@@ -1,3 +1,21 @@
+const REQUIREMENT_PRIORITY_TERMS = new Set([
+  "alta",
+  "alto",
+  "media",
+  "medio",
+  "baja",
+  "bajo",
+])
+
+/**
+ * Importance words recruiters sometimes store in the expected-level slot.
+ * They are not a proficiency level.
+ */
+export function isRequirementPriorityTerm(value: unknown): boolean {
+  const text = String(value ?? "").trim().toLowerCase()
+  return REQUIREMENT_PRIORITY_TERMS.has(text)
+}
+
 const KNOWN_REQUIREMENT_KEYS: Record<string, string> = {
   reactjs: "React.js",
   nextjs: "Next.js",

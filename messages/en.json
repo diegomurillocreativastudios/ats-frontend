@@ -2504,6 +2504,8 @@
           "routePrefix": "Route:",
           "strengths": "Strengths",
           "considerations": "Points to consider",
+          "checklistHint": "Strengths and points to consider come from the requirement checklist. They do not replace the general reading.",
+          "qualitativeScoreHint": "General reading of the profile. It does not by itself say whether each requirement is met.",
           "qualitativeReasoning": "Qualitative reasoning",
           "totalMatchScore": "Total matching score:",
           "totalMatchScoreShort": "Match",

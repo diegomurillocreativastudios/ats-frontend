@@ -2504,6 +2504,8 @@
           "routePrefix": "Ruta:",
           "strengths": "Fortalezas",
           "considerations": "Aspectos a considerar",
+          "checklistHint": "Fortalezas y aspectos a considerar salen del checklist de requisitos. No reemplazan la lectura general.",
+          "qualitativeScoreHint": "Lectura general del perfil. No indica por sí sola si cada requisito se cumple.",
           "qualitativeReasoning": "Razonamiento cualitativo",
           "totalMatchScore": "Puntaje total del emparejamiento:",
           "totalMatchScoreShort": "Emparejamiento",

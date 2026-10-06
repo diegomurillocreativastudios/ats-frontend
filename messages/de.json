@@ -2504,6 +2504,8 @@
           "routePrefix": "Pfad:",
           "strengths": "Stärken",
           "considerations": "Zu berücksichtigende Aspekte",
+          "checklistHint": "Stärken und zu berücksichtigende Aspekte stammen aus der Anforderungsliste. Sie ersetzen nicht die allgemeine Einschätzung.",
+          "qualitativeScoreHint": "Allgemeine Einschätzung des Profils. Sie sagt für sich nicht, ob jede Anforderung erfüllt ist.",
           "qualitativeReasoning": "Qualitative Begründung",
           "totalMatchScore": "Gesamte Matching-Punktzahl:",
           "totalMatchScoreShort": "Abgleich",

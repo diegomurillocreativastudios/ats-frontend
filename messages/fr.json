@@ -2504,6 +2504,8 @@
           "routePrefix": "Parcours :",
           "strengths": "Points forts",
           "considerations": "Points à considérer",
+          "checklistHint": "Les points forts et les points à considérer viennent de la liste des exigences. Ils ne remplacent pas la lecture générale.",
+          "qualitativeScoreHint": "Lecture générale du profil. Elle ne dit pas à elle seule si chaque exigence est remplie.",
           "qualitativeReasoning": "Raisonnement qualitatif",
           "totalMatchScore": "Score total de correspondance :",
           "totalMatchScoreShort": "Correspondance",

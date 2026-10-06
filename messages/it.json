@@ -2504,6 +2504,8 @@
           "routePrefix": "Percorso:",
           "strengths": "Punti di forza",
           "considerations": "Aspetti da considerare",
+          "checklistHint": "I punti di forza e gli aspetti da considerare derivano dalla lista dei requisiti. Non sostituiscono la lettura generale.",
+          "qualitativeScoreHint": "Lettura generale del profilo. Da sola non dice se ogni requisito è soddisfatto.",
           "qualitativeReasoning": "Ragionamento qualitativo",
           "totalMatchScore": "Punteggio totale di corrispondenza:",
           "totalMatchScoreShort": "Corrispondenza",

@@ -76,6 +76,13 @@ describe("CandidateProfileModal", () => {
     expect(screen.queryByText(/Ruta:/)).not.toBeInTheDocument()
     expect(screen.queryByText("analisis_de_datos")).not.toBeInTheDocument()
 
+    expect(
+      screen.getByText(/salen del checklist de requisitos/)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/No indica por sí sola si cada requisito se cumple/)
+    ).toBeInTheDocument()
+
     const strengthsSection = screen.getByRole("heading", { name: "Fortalezas" }).closest("div")
     expect(strengthsSection).not.toBeNull()
     expect(
