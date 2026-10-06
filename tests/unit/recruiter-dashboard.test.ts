@@ -130,10 +130,34 @@ describe("normalizeRecruiterDashboard", () => {
       href: reminderDetailLink("staleCandidates"),
       context: { days: 14, analyzed: 4, total: 12 },
     })
-    expect(reminder(model, "pendingApprovals").href).toBe(
-      RECRUITER_DASHBOARD_LINKS.vacancies
-    )
+    expect(reminder(model, "pendingApprovals").href).toBeNull()
+    expect(reminder(model, "pendingApprovals").sourceState).toBe("unavailable")
     expect(reminder(model, "upcomingInterviews").href).toBeNull()
+  })
+
+  it("deja sin enlace las pendientes sin pantalla aunque el servidor las marque listas", () => {
+    const model = normalizeRecruiterDashboard(
+      {
+        reminders: [
+          { key: "pendingDocuments", count: 3, sourceState: "ready" },
+          { key: "pendingConsents", count: 2, sourceState: "partial" },
+          { key: "pendingEvaluations", count: null, sourceState: "unavailable" },
+        ],
+      },
+      NOW
+    )
+    expect(reminder(model, "pendingDocuments")).toMatchObject({
+      count: 3,
+      sourceState: "unavailable",
+      href: null,
+    })
+    expect(reminder(model, "pendingConsents")).toMatchObject({
+      sourceState: "unavailable",
+      href: null,
+    })
+    expect(reminder(model, "pendingEvaluations").href).toBe(
+      RECRUITER_DASHBOARD_LINKS.technicalEvaluationsReport
+    )
   })
 
   it("aplica contextos por defecto cuando el backend no los envía", () => {
@@ -236,6 +260,7 @@ describe("normalizeReminderDetail", () => {
           id: "app-1",
           candidateProfileId: "cand-1",
           candidateName: "Ana",
+          candidateTitle: "Backend Engineer",
           vacancyId: "vac-1",
           vacancyTitle: "Backend",
           companyName: "Acme",
@@ -255,6 +280,7 @@ describe("normalizeReminderDetail", () => {
           applicationId: null,
           candidateProfileId: "cand-1",
           candidateName: "Ana",
+          candidateTitle: "Backend Engineer",
           vacancyId: "vac-1",
           vacancyTitle: "Backend",
           companyName: "Acme",
@@ -262,7 +288,19 @@ describe("normalizeReminderDetail", () => {
           statusLabel: "En revisión",
         },
       ],
+      context: null,
     })
+  })
+
+  it("conserva el contexto parcial del detalle", () => {
+    const detail = normalizeReminderDetail("staleCandidates", {
+      sourceState: "partial",
+      totalCount: 4,
+      analyzed: 2,
+      total: 9,
+      items: [],
+    })
+    expect(detail.context).toEqual({ analyzed: 2, total: 9 })
   })
 
   it("marca como no disponible cuando el backend lo indica", () => {
@@ -273,6 +311,7 @@ describe("normalizeReminderDetail", () => {
     })
     expect(detail.sourceState).toBe("unavailable")
     expect(detail.items).toEqual([])
+    expect(detail.context).toBeNull()
   })
 })
 
@@ -282,6 +321,7 @@ describe("resolveReminderRowHref", () => {
     applicationId: null,
     candidateProfileId: null,
     candidateName: null,
+    candidateTitle: null,
     vacancyId: null,
     vacancyTitle: null,
     companyName: null,
@@ -294,17 +334,68 @@ describe("resolveReminderRowHref", () => {
       resolveReminderRowHref("upcomingInterviews", { ...baseItem, id: "iv-1" })
     ).toBe("/portal-rrhh/interviews/iv-1")
     expect(
+      resolveReminderRowHref("upcomingInterviews", {
+        ...baseItem,
+        id: "iv-1",
+        vacancyId: "vac-1",
+      })
+    ).toBe("/portal-rrhh/interviews/iv-1?vacancyId=vac-1")
+    expect(
+      resolveReminderRowHref("pendingEvaluations", {
+        ...baseItem,
+        candidateProfileId: "cand-5",
+        vacancyId: "vac-5",
+      })
+    ).toBe("/portal-rrhh/vacantes/vac-5")
+    expect(
+      resolveReminderRowHref("inactiveVacancies", { ...baseItem, id: "vac-8" })
+    ).toBe("/portal-rrhh/vacantes/vac-8")
+    expect(
+      resolveReminderRowHref("pendingDocuments", {
+        ...baseItem,
+        candidateProfileId: "cand-9",
+      })
+    ).toBeNull()
+    expect(
       resolveReminderRowHref("staleCandidates", {
         ...baseItem,
         candidateProfileId: "cand-1",
+        vacancyId: "vac-1",
       })
-    ).toBe("/portal-rrhh/candidatos/cand-1")
+    ).toBe("/portal-rrhh/vacantes/vac-1")
+    expect(
+      resolveReminderRowHref("newCandidates", {
+        ...baseItem,
+        candidateProfileId: "cand-2",
+        vacancyId: "vac-2",
+      })
+    ).toBe("/portal-rrhh/vacantes/vac-2")
+    expect(
+      resolveReminderRowHref("overdueFollowUps", {
+        ...baseItem,
+        candidateProfileId: "cand-3",
+        vacancyId: "vac-3",
+      })
+    ).toBe("/portal-rrhh/vacantes/vac-3")
     expect(
       resolveReminderRowHref("vacanciesClosingSoon", {
         ...baseItem,
         vacancyId: "vac-9",
       })
     ).toBe("/portal-rrhh/vacantes/vac-9")
+    expect(
+      resolveReminderRowHref("pendingTechnicalSheets", {
+        ...baseItem,
+        candidateProfileId: "cand-4",
+        vacancyId: "vac-4",
+      })
+    ).toBe("/portal-rrhh/vacantes/vac-4/candidatos/cand-4/technical-sheet")
+    expect(
+      resolveReminderRowHref("pendingTechnicalSheets", {
+        ...baseItem,
+        candidateProfileId: "cand-4",
+      })
+    ).toBeNull()
     expect(resolveReminderRowHref("pendingApprovals", baseItem)).toBeNull()
     expect(resolveReminderRowHref("staleCandidates", baseItem)).toBeNull()
   })

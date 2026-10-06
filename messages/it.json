@@ -3074,7 +3074,7 @@
       "partialNote": "Basato su {analyzed} di {total} record; il totale reale può essere maggiore.",
       "errorNote": "Impossibile caricare questo dato. Prova ad aggiornare la dashboard.",
       "unavailableTitle": "Promemoria in preparazione",
-      "unavailableDescription": "Non abbiamo ancora i dati per calcolarli. Nel frattempo puoi consultare il modulo correlato.",
+      "unavailableDescription": "Non abbiamo ancora i dati per calcolarli.",
       "unavailableBadge": "Nessun dato",
       "inactiveVacanciesRule": "Considerata inattiva dopo {days} giorni.",
       "openModule": "Apri modulo",
@@ -3110,7 +3110,7 @@
         },
         "unconfirmedInterviews": {
           "title": "Colloqui da confermare",
-          "action": "Conferma colloqui",
+          "action": "Vedi colloqui",
           "description": "{count, plural, one {# colloquio da confermare} other {# colloqui da confermare}}."
         },
         "newCandidates": {
@@ -3177,13 +3177,25 @@
         "empty": "Nessun elemento in sospeso per questo promemoria.",
         "error": "Impossibile caricare il dettaglio. Riprova.",
         "unavailable": "Questo promemoria non ha ancora dati disponibili.",
-        "openRow": "Apri",
-        "openRowAria": "Apri {label}",
+        "partialGeneric": "Conteggio parziale: il totale reale può essere maggiore.",
+        "inactiveStatus": "Inattiva",
+        "rowActions": {
+          "interview": "Apri colloquio",
+          "interviewAria": "Apri colloquio: {label}",
+          "vacancy": "Apri posizione",
+          "vacancyAria": "Apri posizione: {label}",
+          "sheet": "Apri scheda",
+          "sheetAria": "Apri scheda: {label}"
+        },
         "columns": {
           "candidate": "Candidato",
           "vacancy": "Posizione",
           "company": "Azienda",
           "dueAt": "Data",
+          "dateTime": "Data e ora",
+          "since": "Dal",
+          "closing": "Chiusura",
+          "lastActivity": "Ultima attività",
           "status": "Stato",
           "actions": "Azioni"
         },

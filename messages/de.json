@@ -3074,7 +3074,7 @@
       "partialNote": "Basierend auf {analyzed} von {total} Datensätzen; die tatsächliche Summe kann höher sein.",
       "errorNote": "Diese Daten konnten nicht geladen werden. Aktualisiere das Dashboard.",
       "unavailableTitle": "Erinnerungen in Vorbereitung",
-      "unavailableDescription": "Für die Berechnung fehlen noch Daten. Du kannst inzwischen das zugehörige Modul prüfen.",
+      "unavailableDescription": "Für die Berechnung fehlen noch Daten.",
       "unavailableBadge": "Keine Daten",
       "inactiveVacanciesRule": "Gilt nach {days} Tagen als inaktiv.",
       "openModule": "Modul öffnen",
@@ -3110,7 +3110,7 @@
         },
         "unconfirmedInterviews": {
           "title": "Interviews ohne Bestätigung",
-          "action": "Interviews bestätigen",
+          "action": "Interviews ansehen",
           "description": "{count, plural, one {# Interview ohne Bestätigung} other {# Interviews ohne Bestätigung}}."
         },
         "newCandidates": {
@@ -3177,13 +3177,25 @@
         "empty": "Keine offenen Punkte für diese Erinnerung.",
         "error": "Details konnten nicht geladen werden. Erneut versuchen.",
         "unavailable": "Für diese Erinnerung sind noch keine Daten verfügbar.",
-        "openRow": "Öffnen",
-        "openRowAria": "{label} öffnen",
+        "partialGeneric": "Teilzählung: Die tatsächliche Summe kann höher sein.",
+        "inactiveStatus": "Inaktiv",
+        "rowActions": {
+          "interview": "Interview öffnen",
+          "interviewAria": "Interview öffnen: {label}",
+          "vacancy": "Stelle öffnen",
+          "vacancyAria": "Stelle öffnen: {label}",
+          "sheet": "Datenblatt öffnen",
+          "sheetAria": "Datenblatt öffnen: {label}"
+        },
         "columns": {
           "candidate": "Kandidat",
           "vacancy": "Stelle",
           "company": "Unternehmen",
           "dueAt": "Datum",
+          "dateTime": "Datum und Uhrzeit",
+          "since": "Seit",
+          "closing": "Abschluss",
+          "lastActivity": "Letzte Aktivität",
           "status": "Status",
           "actions": "Aktionen"
         },

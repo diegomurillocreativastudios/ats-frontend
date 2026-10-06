@@ -3074,7 +3074,7 @@
       "partialNote": "Based on {analyzed} of {total} records; the real total may be higher.",
       "errorNote": "This data could not be loaded. Try refreshing the dashboard.",
       "unavailableTitle": "Reminders in preparation",
-      "unavailableDescription": "We don't have data to calculate these yet. Meanwhile, you can review the related module.",
+      "unavailableDescription": "We don't have data to calculate these yet.",
       "unavailableBadge": "No data",
       "inactiveVacanciesRule": "Considered inactive after {days} days.",
       "openModule": "Open module",
@@ -3110,7 +3110,7 @@
         },
         "unconfirmedInterviews": {
           "title": "Interviews awaiting confirmation",
-          "action": "Confirm interviews",
+          "action": "View interviews",
           "description": "{count, plural, one {# interview awaiting confirmation} other {# interviews awaiting confirmation}}."
         },
         "newCandidates": {
@@ -3177,13 +3177,25 @@
         "empty": "There are no pending items for this reminder.",
         "error": "We couldn't load the detail. Try again.",
         "unavailable": "This reminder has no data yet.",
-        "openRow": "Open",
-        "openRowAria": "Open {label}",
+        "partialGeneric": "Partial count: the real total may be higher.",
+        "inactiveStatus": "Inactive",
+        "rowActions": {
+          "interview": "Open interview",
+          "interviewAria": "Open interview: {label}",
+          "vacancy": "Open vacancy",
+          "vacancyAria": "Open vacancy: {label}",
+          "sheet": "Open technical sheet",
+          "sheetAria": "Open technical sheet: {label}"
+        },
         "columns": {
           "candidate": "Applicant",
           "vacancy": "Vacancy",
           "company": "Company",
           "dueAt": "Date",
+          "dateTime": "Date and time",
+          "since": "Since",
+          "closing": "Closing",
+          "lastActivity": "Last activity",
           "status": "Status",
           "actions": "Actions"
         },

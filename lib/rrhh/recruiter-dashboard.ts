@@ -112,12 +112,23 @@ const REMINDER_FALLBACK_LINK: Record<DashboardReminderKey, string | null> = {
   staleCandidates: RECRUITER_DASHBOARD_LINKS.candidates,
   vacanciesClosingSoon: RECRUITER_DASHBOARD_LINKS.vacancies,
   inactiveVacancies: RECRUITER_DASHBOARD_LINKS.vacancies,
-  pendingEvaluations: RECRUITER_DASHBOARD_LINKS.vacancies,
+  pendingEvaluations: RECRUITER_DASHBOARD_LINKS.technicalEvaluationsReport,
   pendingTechnicalSheets: RECRUITER_DASHBOARD_LINKS.vacancies,
-  pendingApprovals: RECRUITER_DASHBOARD_LINKS.vacancies,
+  pendingApprovals: null,
   overdueFollowUps: RECRUITER_DASHBOARD_LINKS.candidates,
   pendingConsents: null,
   pendingDocuments: null,
+}
+
+/** Pendientes sin pantalla propia: siempre en preparación, sin enlace. */
+const WITHHELD_REMINDER_KEYS: ReadonlySet<DashboardReminderKey> = new Set([
+  "pendingApprovals",
+  "pendingDocuments",
+  "pendingConsents",
+])
+
+export function isWithheldDashboardReminder(key: DashboardReminderKey): boolean {
+  return WITHHELD_REMINDER_KEYS.has(key)
 }
 
 const METRIC_LINK: Record<DashboardMetricKey, string> = {
@@ -180,7 +191,8 @@ function normalizeReminders(raw: unknown): DashboardReminder[] {
   const byKey = indexByKey(raw)
   return DASHBOARD_REMINDER_KEYS.map((key) => {
     const entry = byKey.get(key)
-    const sourceState = entry ? pickSourceState(entry) : "unavailable"
+    const reportedState = entry ? pickSourceState(entry) : "unavailable"
+    const sourceState = isWithheldDashboardReminder(key) ? "unavailable" : reportedState
     const count = entry ? pickCount(entry) : null
     const dueAt = entry ? readString(entry, ["dueAt", "DueAt"]) : null
     const context = entry ? pickContext(entry) : null
@@ -191,7 +203,9 @@ function normalizeReminders(raw: unknown): DashboardReminder[] {
       severity: REMINDER_SEVERITY[key],
       dueAt: dueAt ?? null,
       context: enrichContext(key, context),
-      href: resolveReminderHref(key, sourceState, count),
+      href: isWithheldDashboardReminder(key)
+        ? null
+        : resolveReminderHref(key, sourceState, count),
     }
   })
 }
@@ -335,6 +349,7 @@ export interface ReminderDetailItem {
   applicationId: string | null
   candidateProfileId: string | null
   candidateName: string | null
+  candidateTitle: string | null
   vacancyId: string | null
   vacancyTitle: string | null
   companyName: string | null
@@ -347,6 +362,7 @@ export interface ReminderDetailModel {
   sourceState: DashboardSourceState
   totalCount: number | null
   items: ReminderDetailItem[]
+  context: DashboardReminderContext | null
 }
 
 export function normalizeReminderDetail(
@@ -361,7 +377,20 @@ export function normalizeReminderDetail(
   const totalCount = readInt(record, ["totalCount", "TotalCount"])
   const itemsRaw = record.items ?? record.Items ?? record.rows ?? record.Rows
   const items = Array.isArray(itemsRaw) ? itemsRaw.map(normalizeDetailItem).filter(nonNull) : []
-  return { key, sourceState, totalCount, items }
+  return { key, sourceState, totalCount, items, context: pickDetailContext(record) }
+}
+
+function pickDetailContext(record: Record<string, unknown>): DashboardReminderContext | null {
+  const nested = pickContext(record)
+  const flat = pickContext({
+    context: {
+      analyzed: record.analyzed ?? record.Analyzed,
+      total: record.total ?? record.Total,
+      days: record.days ?? record.Days,
+    },
+  })
+  if (!nested && !flat) return null
+  return { ...(flat ?? {}), ...(nested ?? {}) }
 }
 
 function normalizeDetailItem(raw: unknown): ReminderDetailItem | null {
@@ -377,6 +406,7 @@ function normalizeDetailItem(raw: unknown): ReminderDetailItem | null {
       "CandidateProfileId",
     ]),
     candidateName: readString(record, ["candidateName", "CandidateName"]),
+    candidateTitle: readString(record, ["candidateTitle", "CandidateTitle"]),
     vacancyId: readString(record, ["vacancyId", "VacancyId"]),
     vacancyTitle: readString(record, ["vacancyTitle", "VacancyTitle"]),
     companyName: readString(record, ["companyName", "CompanyName"]),
@@ -398,6 +428,63 @@ export function reminderIncludesCandidate(key: DashboardReminderKey): boolean {
   return !REMINDERS_WITHOUT_CANDIDATE.has(key)
 }
 
+export type ReminderDateColumnKey =
+  | "dateTime"
+  | "since"
+  | "closing"
+  | "lastActivity"
+  | "date"
+
+export function reminderDateColumnKey(key: DashboardReminderKey): ReminderDateColumnKey {
+  switch (key) {
+    case "upcomingInterviews":
+    case "unconfirmedInterviews":
+      return "dateTime"
+    case "staleCandidates":
+      return "since"
+    case "vacanciesClosingSoon":
+      return "closing"
+    case "inactiveVacancies":
+      return "lastActivity"
+    default:
+      return "date"
+  }
+}
+
+export function reminderIncludesTime(key: DashboardReminderKey): boolean {
+  return reminderDateColumnKey(key) === "dateTime"
+}
+
+export type ReminderRowActionKey = "interview" | "vacancy" | "sheet"
+
+export function reminderRowActionKey(key: DashboardReminderKey): ReminderRowActionKey | null {
+  switch (key) {
+    case "upcomingInterviews":
+    case "unconfirmedInterviews":
+      return "interview"
+    case "pendingTechnicalSheets":
+      return "sheet"
+    case "pendingApprovals":
+    case "pendingDocuments":
+    case "pendingConsents":
+      return null
+    default:
+      return "vacancy"
+  }
+}
+
+export type ReminderStatusKind = "interview" | "vacancy" | "plain"
+
+export function reminderStatusKind(key: DashboardReminderKey): ReminderStatusKind {
+  if (key === "upcomingInterviews" || key === "unconfirmedInterviews") return "interview"
+  if (key === "vacanciesClosingSoon" || key === "inactiveVacancies") return "vacancy"
+  return "plain"
+}
+
+export function isInactiveVacancyStatusToken(value: string): boolean {
+  return value.trim().toLowerCase() === "inactive"
+}
+
 export function resolveReminderRowHref(
   key: DashboardReminderKey,
   item: ReminderDetailItem
@@ -405,21 +492,32 @@ export function resolveReminderRowHref(
   switch (key) {
     case "upcomingInterviews":
     case "unconfirmedInterviews":
-      return `/portal-rrhh/interviews/${item.id}`
+      return interviewRowHref(item)
     case "vacanciesClosingSoon":
     case "inactiveVacancies":
-      return item.vacancyId ? `/portal-rrhh/vacantes/${item.vacancyId}` : null
+      return vacancyRowHref(item.vacancyId ?? item.id)
     case "newCandidates":
     case "staleCandidates":
-    case "pendingTechnicalSheets":
-    case "pendingDocuments":
-    case "pendingEvaluations":
     case "overdueFollowUps":
-    case "pendingConsents":
-      return item.candidateProfileId
-        ? `/portal-rrhh/candidatos/${item.candidateProfileId}`
+    case "pendingEvaluations":
+      return item.vacancyId ? vacancyRowHref(item.vacancyId) : null
+    case "pendingTechnicalSheets":
+      return item.vacancyId && item.candidateProfileId
+        ? `/portal-rrhh/vacantes/${encodeURIComponent(item.vacancyId)}/candidatos/${encodeURIComponent(item.candidateProfileId)}/technical-sheet`
         : null
+    case "pendingDocuments":
+    case "pendingConsents":
     case "pendingApprovals":
       return null
   }
+}
+
+function interviewRowHref(item: ReminderDetailItem): string {
+  const path = `/portal-rrhh/interviews/${encodeURIComponent(item.id)}`
+  if (!item.vacancyId) return path
+  return `${path}?vacancyId=${encodeURIComponent(item.vacancyId)}`
+}
+
+function vacancyRowHref(vacancyId: string): string {
+  return `/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}`
 }

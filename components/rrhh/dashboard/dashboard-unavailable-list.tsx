@@ -34,7 +34,7 @@ export function DashboardUnavailableList({
                   {t("unavailableBadge")}
                 </span>
               </div>
-              {reminder.context?.days ? (
+              {reminder.key === "inactiveVacancies" && reminder.context?.days ? (
                 <p className="mt-1 font-sans text-xs text-muted-foreground">
                   {t("inactiveVacanciesRule", { days: reminder.context.days })}
                 </p>

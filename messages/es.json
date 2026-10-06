@@ -3074,7 +3074,7 @@
       "partialNote": "Basado en {analyzed} de {total} registros; el total real puede ser mayor.",
       "errorNote": "No se pudo cargar este dato. Intenta actualizar el panel.",
       "unavailableTitle": "Recordatorios en preparación",
-      "unavailableDescription": "Aún no contamos con datos para calcularlos. Mientras tanto, puedes revisar el módulo relacionado.",
+      "unavailableDescription": "Aún no contamos con datos para calcularlos.",
       "unavailableBadge": "Sin datos",
       "inactiveVacanciesRule": "Se considerará sin actividad tras {days} días.",
       "openModule": "Abrir módulo",
@@ -3110,7 +3110,7 @@
         },
         "unconfirmedInterviews": {
           "title": "Entrevistas pendientes de confirmar",
-          "action": "Confirmar entrevistas",
+          "action": "Ver entrevistas",
           "description": "{count, plural, one {# entrevista por confirmar} other {# entrevistas por confirmar}}."
         },
         "newCandidates": {
@@ -3177,13 +3177,25 @@
         "empty": "No hay pendientes para este recordatorio.",
         "error": "No se pudo cargar el detalle. Intenta de nuevo.",
         "unavailable": "Este recordatorio aún no tiene datos disponibles.",
-        "openRow": "Abrir",
-        "openRowAria": "Abrir {label}",
+        "partialGeneric": "Conteo parcial: el total real puede ser mayor.",
+        "inactiveStatus": "Inactiva",
+        "rowActions": {
+          "interview": "Abrir entrevista",
+          "interviewAria": "Abrir entrevista: {label}",
+          "vacancy": "Abrir vacante",
+          "vacancyAria": "Abrir vacante: {label}",
+          "sheet": "Abrir ficha",
+          "sheetAria": "Abrir ficha: {label}"
+        },
         "columns": {
           "candidate": "Candidato",
           "vacancy": "Vacante",
           "company": "Empresa",
           "dueAt": "Fecha",
+          "dateTime": "Fecha y hora",
+          "since": "Desde",
+          "closing": "Cierre",
+          "lastActivity": "Última actividad",
           "status": "Estado",
           "actions": "Acciones"
         },

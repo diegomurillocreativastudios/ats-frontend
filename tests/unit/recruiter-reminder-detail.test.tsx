@@ -58,6 +58,7 @@ describe("ReminderDetailView", () => {
           id: "app-1",
           candidateProfileId: "cand-1",
           candidateName: "Ana",
+          vacancyId: "vac-1",
           vacancyTitle: "Backend",
           companyName: "Acme",
           dueAt: "2026-09-10T00:00:00.000Z",
@@ -73,12 +74,54 @@ describe("ReminderDetailView", () => {
     )
 
     await screen.findAllByText("Ana")
-    const openLinks = screen.getAllByRole("link", { name: /Abrir( Ana)?/ })
-      .filter((link) => link.getAttribute("href") === "/portal-rrhh/candidatos/cand-1")
+    expect(
+      screen.getByRole("columnheader", { name: "Desde" })
+    ).toBeInTheDocument()
+    const openLinks = screen.getAllByRole("link", { name: /Abrir vacante/ })
+      .filter((link) => link.getAttribute("href") === "/portal-rrhh/vacantes/vac-1")
     expect(openLinks.length).toBeGreaterThan(0)
     expect(
       screen.getByRole("navigation", { name: "Paginación de pendientes" })
     ).toBeInTheDocument()
+  })
+
+  it("no consulta al backend cuando el recordatorio no tiene pantalla", async () => {
+    renderView("pendingConsents")
+
+    expect(
+      await screen.findByText("Este recordatorio aún no tiene datos disponibles.")
+    ).toBeInTheDocument()
+    expect(apiGetMock).not.toHaveBeenCalled()
+    expect(screen.queryByRole("columnheader", { name: "Título" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("table")).not.toBeInTheDocument()
+  })
+
+  it("nombra la fecha según el pendiente y traduce el estado inactivo", async () => {
+    apiGetMock.mockResolvedValueOnce({
+      key: "inactiveVacancies",
+      sourceState: "ready",
+      totalCount: 1,
+      items: [
+        {
+          id: "vac-1",
+          vacancyTitle: "React Frontend Developer",
+          companyName: "ApplicanTree",
+          dueAt: "2026-03-27T00:00:00.000Z",
+          statusLabel: "Inactive",
+        },
+      ],
+    })
+    renderView("inactiveVacancies")
+
+    expect(
+      await screen.findByRole("columnheader", { name: "Última actividad" })
+    ).toBeInTheDocument()
+    expect(screen.getAllByText("Inactiva").length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByRole("link", { name: /Abrir vacante/ }).some(
+        (link) => link.getAttribute("href") === "/portal-rrhh/vacantes/vac-1"
+      )
+    ).toBe(true)
   })
 
   it("oculta la columna Candidato cuando el recordatorio es de vacante", async () => {
@@ -108,13 +151,7 @@ describe("ReminderDetailView", () => {
     ).toBeInTheDocument()
   })
 
-  it("muestra el estado no disponible cuando el backend lo indica", async () => {
-    apiGetMock.mockResolvedValueOnce({
-      key: "pendingApprovals",
-      sourceState: "unavailable",
-      totalCount: null,
-      items: [],
-    })
+  it("muestra aprobaciones pendientes sin consultar al backend", async () => {
     renderView("pendingApprovals")
 
     expect(
@@ -122,6 +159,7 @@ describe("ReminderDetailView", () => {
         "Este recordatorio aún no tiene datos disponibles."
       )
     ).toBeInTheDocument()
+    expect(apiGetMock).not.toHaveBeenCalled()
     expect(
       screen.queryByRole("navigation", { name: "Paginación de pendientes" })
     ).not.toBeInTheDocument()

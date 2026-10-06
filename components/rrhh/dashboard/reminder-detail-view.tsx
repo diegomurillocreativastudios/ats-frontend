@@ -13,14 +13,45 @@ import {
 } from "@/lib/api/recruiter-dashboard"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { QUERY_PAGE_SIZE_MAX } from "@/lib/api/query-paging"
+import { getInterviewStatusLabel } from "@/lib/interviews/interview-status-labels"
+import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels"
 import {
   RECRUITER_DASHBOARD_LINKS,
   isDashboardReminderKey,
+  isInactiveVacancyStatusToken,
+  isWithheldDashboardReminder,
+  reminderDateColumnKey,
   reminderIncludesCandidate,
+  reminderIncludesTime,
+  reminderRowActionKey,
+  reminderStatusKind,
   resolveReminderRowHref,
   type DashboardReminderKey,
   type ReminderDetailModel,
+  type ReminderRowActionKey,
 } from "@/lib/rrhh/recruiter-dashboard"
+
+const DATE_COLUMN_LABEL = {
+  dateTime: "columns.dateTime",
+  since: "columns.since",
+  closing: "columns.closing",
+  lastActivity: "columns.lastActivity",
+} as const
+
+const ROW_ACTION_LABEL: Record<ReminderRowActionKey, "rowActions.interview" | "rowActions.vacancy" | "rowActions.sheet"> = {
+  interview: "rowActions.interview",
+  vacancy: "rowActions.vacancy",
+  sheet: "rowActions.sheet",
+}
+
+const ROW_ACTION_ARIA: Record<
+  ReminderRowActionKey,
+  "rowActions.interviewAria" | "rowActions.vacancyAria" | "rowActions.sheetAria"
+> = {
+  interview: "rowActions.interviewAria",
+  vacancy: "rowActions.vacancyAria",
+  sheet: "rowActions.sheetAria",
+}
 
 interface ReminderDetailViewProps {
   rawKey: string
@@ -36,7 +67,48 @@ export function ReminderDetailView({ rawKey }: ReminderDetailViewProps) {
     return <InvalidKeyShell />
   }
 
+  if (isWithheldDashboardReminder(rawKey)) {
+    return <WithheldReminderShell reminderKey={rawKey} />
+  }
+
   return <KnownReminderDetail reminderKey={rawKey} t={t} tDetail={tDetail} />
+}
+
+function WithheldReminderShell({ reminderKey }: { reminderKey: DashboardReminderKey }) {
+  const t = useTranslations("RecruiterPortal.dashboard")
+  const tDetail = useTranslations("RecruiterPortal.dashboard.reminderDetail")
+  const label = t(`reminders.${reminderKey}.title`)
+
+  return (
+    <RrhhPortalShell
+      breadcrumbLabel={label}
+      breadcrumbTrail={[
+        { label: t("breadcrumb"), href: RECRUITER_DASHBOARD_LINKS.home },
+        { label },
+      ]}
+    >
+      <div className="flex min-w-0 flex-col gap-6 px-4 py-6 md:px-6 lg:px-8">
+        <PortalPageHeader
+          title={tDetail("title", { label })}
+          description={tDetail("description")}
+          layout="split"
+          actions={
+            <Link
+              href={RECRUITER_DASHBOARD_LINKS.home}
+              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-card px-4 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              {tDetail("backToDashboard")}
+            </Link>
+          }
+        />
+        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-4 py-16 text-center">
+          <Hourglass className="h-8 w-8 text-muted-foreground" aria-hidden />
+          <p className="font-sans text-sm text-muted-foreground">{tDetail("unavailable")}</p>
+        </div>
+      </div>
+    </RrhhPortalShell>
+  )
 }
 
 function InvalidKeyShell() {
@@ -123,8 +195,12 @@ function KnownReminderDetail({ reminderKey, t, tDetail }: KnownReminderDetailPro
   }
 
   const showPagination = Boolean(
-    data && data.sourceState === "ready" && !error
+    data &&
+      (data.sourceState === "ready" || data.sourceState === "partial") &&
+      !error
   )
+
+  const partialNote = partialNoteText(data, t, tDetail)
 
   return (
     <RrhhPortalShell
@@ -154,6 +230,9 @@ function KnownReminderDetail({ reminderKey, t, tDetail }: KnownReminderDetailPro
         </section>
         <section className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-2 md:px-6 lg:px-8">
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+            {partialNote ? (
+              <p className="font-sans text-sm text-muted-foreground">{partialNote}</p>
+            ) : null}
             <DetailBody
               reminderKey={reminderKey}
               data={data}
@@ -249,6 +328,13 @@ interface ReminderDetailTableProps {
 
 function ReminderDetailTable({ reminderKey, data, tDetail }: ReminderDetailTableProps) {
   const format = useFormatter()
+  const tInterviews = useTranslations("RecruiterPortal.interviews")
+  const tVacancies = useTranslations("RecruiterPortal.vacancies")
+  const dateColumn = reminderDateColumnKey(reminderKey)
+  const dateHeader =
+    dateColumn === "date" ? tDetail("columns.dueAt") : tDetail(DATE_COLUMN_LABEL[dateColumn])
+  const actionKey = reminderRowActionKey(reminderKey)
+  const actionLabel = actionKey ? tDetail(ROW_ACTION_LABEL[actionKey]) : null
 
   const rows = useMemo(
     () =>
@@ -258,15 +344,19 @@ function ReminderDetailTable({ reminderKey, data, tDetail }: ReminderDetailTable
         dueText: item.dueAt
           ? format.dateTime(new Date(item.dueAt), {
               dateStyle: "medium",
-              timeStyle:
-                reminderKey === "upcomingInterviews" ||
-                reminderKey === "unconfirmedInterviews"
-                  ? "short"
-                  : undefined,
+              timeStyle: reminderIncludesTime(reminderKey) ? "short" : undefined,
             })
           : null,
+        statusText: formatReminderStatus(
+          reminderKey,
+          item.statusLabel,
+          tDetail,
+          tInterviews,
+          tVacancies
+        ),
+        rowLabel: item.candidateName ?? item.vacancyTitle ?? item.id,
       })),
-    [data.items, reminderKey, format]
+    [data.items, reminderKey, format, tDetail, tInterviews, tVacancies]
   )
 
   const dash = "—"
@@ -284,15 +374,15 @@ function ReminderDetailTable({ reminderKey, data, tDetail }: ReminderDetailTable
               ) : null}
               <TableHead>{tDetail("columns.vacancy")}</TableHead>
               <TableHead>{tDetail("columns.company")}</TableHead>
-              <TableHead>{tDetail("columns.dueAt")}</TableHead>
+              <TableHead>{dateHeader}</TableHead>
               <TableHead>{tDetail("columns.status")}</TableHead>
-              <TableHead className="w-24 text-right">
+              <TableHead className="text-right">
                 {tDetail("columns.actions")}
               </TableHead>
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ item, href, dueText }) => (
+            {rows.map(({ item, href, dueText, statusText, rowLabel }) => (
               <tr key={item.id}>
                 {showCandidate ? (
                   <TableCell>{item.candidateName ?? dash}</TableCell>
@@ -300,22 +390,14 @@ function ReminderDetailTable({ reminderKey, data, tDetail }: ReminderDetailTable
                 <TableCell>{item.vacancyTitle ?? dash}</TableCell>
                 <TableCell>{item.companyName ?? dash}</TableCell>
                 <TableCell>{dueText ?? dash}</TableCell>
-                <TableCell>{item.statusLabel ?? dash}</TableCell>
+                <TableCell>{statusText ?? dash}</TableCell>
                 <TableCell className="text-right">
-                  {href ? (
-                    <Link
+                  {href && actionKey && actionLabel ? (
+                    <RowLink
                       href={href}
-                      aria-label={tDetail("openRowAria", {
-                        label:
-                          item.candidateName ??
-                          item.vacancyTitle ??
-                          item.id,
-                      })}
-                      className="inline-flex min-h-11 items-center gap-1 rounded-md px-3 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
-                    >
-                      {tDetail("openRow")}
-                      <ArrowUpRight className="h-4 w-4" aria-hidden />
-                    </Link>
+                      label={actionLabel}
+                      ariaLabel={tDetail(ROW_ACTION_ARIA[actionKey], { label: rowLabel })}
+                    />
                   ) : (
                     <span className="font-sans text-xs text-muted-foreground">
                       {dash}
@@ -328,7 +410,7 @@ function ReminderDetailTable({ reminderKey, data, tDetail }: ReminderDetailTable
         </table>
       </div>
       <ul className="flex flex-col divide-y divide-border md:hidden">
-        {rows.map(({ item, href, dueText }) => (
+        {rows.map(({ item, href, dueText, statusText, rowLabel }) => (
           <li key={item.id} className="flex flex-col gap-2 p-4">
             <p className="font-sans text-sm font-semibold text-foreground">
               {item.candidateName ?? item.vacancyTitle ?? dash}
@@ -344,19 +426,24 @@ function ReminderDetailTable({ reminderKey, data, tDetail }: ReminderDetailTable
               </p>
             ) : null}
             <div className="flex flex-wrap items-center gap-2 font-sans text-xs text-muted-foreground">
-              {dueText ? <span>{dueText}</span> : null}
-              {item.statusLabel ? (
+              {dueText ? (
+                <span>
+                  {dateHeader}: {dueText}
+                </span>
+              ) : null}
+              {statusText ? (
                 <span className="rounded-full bg-muted px-2 py-0.5 text-foreground">
-                  {item.statusLabel}
+                  {statusText}
                 </span>
               ) : null}
             </div>
-            {href ? (
+            {href && actionKey && actionLabel ? (
               <Link
                 href={href}
+                aria-label={tDetail(ROW_ACTION_ARIA[actionKey], { label: rowLabel })}
                 className="mt-1 inline-flex min-h-11 w-fit items-center gap-1 rounded-md bg-muted px-3 font-sans text-sm font-medium text-foreground hover:bg-muted/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
               >
-                {tDetail("openRow")}
+                {actionLabel}
                 <ArrowUpRight className="h-4 w-4" aria-hidden />
               </Link>
             ) : null}
@@ -366,6 +453,58 @@ function ReminderDetailTable({ reminderKey, data, tDetail }: ReminderDetailTable
       </div>
     </div>
   )
+}
+
+function RowLink({
+  href,
+  label,
+  ariaLabel,
+}: {
+  href: string
+  label: string
+  ariaLabel: string
+}) {
+  return (
+    <Link
+      href={href}
+      aria-label={ariaLabel}
+      className="inline-flex min-h-11 items-center gap-1 whitespace-nowrap rounded-md px-3 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+    >
+      {label}
+      <ArrowUpRight className="h-4 w-4" aria-hidden />
+    </Link>
+  )
+}
+
+function partialNoteText(
+  data: ReminderDetailModel | null,
+  t: ReturnType<typeof useTranslations<"RecruiterPortal.dashboard">>,
+  tDetail: ReturnType<typeof useTranslations<"RecruiterPortal.dashboard.reminderDetail">>
+): string | null {
+  if (!data || data.sourceState !== "partial") return null
+  const analyzed = data.context?.analyzed
+  const total = data.context?.total
+  if (analyzed != null && total != null) {
+    return t("partialNote", { analyzed, total })
+  }
+  return tDetail("partialGeneric")
+}
+
+function formatReminderStatus(
+  key: DashboardReminderKey,
+  raw: string | null,
+  tDetail: ReturnType<typeof useTranslations<"RecruiterPortal.dashboard.reminderDetail">>,
+  tInterviews: ReturnType<typeof useTranslations<"RecruiterPortal.interviews">>,
+  tVacancies: ReturnType<typeof useTranslations<"RecruiterPortal.vacancies">>
+): string | null {
+  if (!raw) return null
+  if (key === "inactiveVacancies" && isInactiveVacancyStatusToken(raw)) {
+    return tDetail("inactiveStatus")
+  }
+  const kind = reminderStatusKind(key)
+  if (kind === "interview") return getInterviewStatusLabel(raw, tInterviews)
+  if (kind === "vacancy") return getVacancyStatusLabel(raw, tVacancies)
+  return raw
 }
 
 function TableHead({

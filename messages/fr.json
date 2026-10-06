@@ -3074,7 +3074,7 @@
       "partialNote": "Basé sur {analyzed} sur {total} enregistrements ; le total réel peut être supérieur.",
       "errorNote": "Cette donnée n'a pas pu être chargée. Essayez d'actualiser le tableau de bord.",
       "unavailableTitle": "Rappels en préparation",
-      "unavailableDescription": "Les données nécessaires ne sont pas encore disponibles. En attendant, vous pouvez consulter le module concerné.",
+      "unavailableDescription": "Les données nécessaires ne sont pas encore disponibles.",
       "unavailableBadge": "Aucune donnée",
       "inactiveVacanciesRule": "Considéré inactif après {days} jours.",
       "openModule": "Ouvrir le module",
@@ -3110,7 +3110,7 @@
         },
         "unconfirmedInterviews": {
           "title": "Entretiens à confirmer",
-          "action": "Confirmer les entretiens",
+          "action": "Voir les entretiens",
           "description": "{count, plural, one {# entretien à confirmer} other {# entretiens à confirmer}}."
         },
         "newCandidates": {
@@ -3177,13 +3177,25 @@
         "empty": "Rien à traiter pour ce rappel.",
         "error": "Impossible de charger le détail. Réessayez.",
         "unavailable": "Ce rappel n'a pas encore de données.",
-        "openRow": "Ouvrir",
-        "openRowAria": "Ouvrir {label}",
+        "partialGeneric": "Décompte partiel : le total réel peut être supérieur.",
+        "inactiveStatus": "Inactive",
+        "rowActions": {
+          "interview": "Ouvrir l'entretien",
+          "interviewAria": "Ouvrir l'entretien : {label}",
+          "vacancy": "Ouvrir le poste",
+          "vacancyAria": "Ouvrir le poste : {label}",
+          "sheet": "Ouvrir la fiche",
+          "sheetAria": "Ouvrir la fiche : {label}"
+        },
         "columns": {
           "candidate": "Candidat",
           "vacancy": "Poste",
           "company": "Entreprise",
           "dueAt": "Date",
+          "dateTime": "Date et heure",
+          "since": "Depuis",
+          "closing": "Clôture",
+          "lastActivity": "Dernière activité",
           "status": "Statut",
           "actions": "Actions"
         },
