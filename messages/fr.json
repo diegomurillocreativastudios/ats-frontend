@@ -56,7 +56,8 @@
     "interviewModalities": "Modalités",
     "interviewStatuses": "Statuts",
     "tailorProfile": "Adapter mon profil",
-    "softSkills": "Compétences transversales"
+    "softSkills": "Compétences transversales",
+    "dataProtectionLaws": "Lois de protection des données"
   },
   "Topbar": {
     "portalCandidate": "Portail candidat",
@@ -454,6 +455,10 @@
       "softSkills": {
         "title": "Compétences transversales",
         "description": "Gestion du catalogue global des compétences transversales pour le feedback d'entretien"
+      },
+      "dataProtectionLaws": {
+        "title": "Lois de protection des données",
+        "description": "Gestion des lois de protection des données liées aux offres"
       }
     },
     "root": {
@@ -2118,6 +2123,15 @@
             "label": "Modalité",
             "ariaLabel": "Modalité du poste"
           },
+          "dataProtectionLaws": {
+            "label": "Lois de protection des données",
+            "helper": "Choisissez au moins une loi. Le pays en suggère une ; vous pouvez changer la sélection.",
+            "placeholder": "Sélectionnez une ou plusieurs lois",
+            "empty": "Aucune loi active.",
+            "inactive": "Inactive",
+            "loading": "Chargement des lois…",
+            "loadFailed": "Impossible de charger les lois."
+          },
           "unspecifiedOption": "Non spécifié",
           "requirements": {
             "label": "Exigences",
@@ -2158,7 +2172,8 @@
           "descriptionRequired": "La description est requise",
           "companyRequired": "Sélectionnez une entreprise cliente",
           "requirementValueRequired": "Niveau ou critère attendu requis",
-          "requirementNameRequired": "Nom requis"
+          "requirementNameRequired": "Nom requis",
+          "lawsRequired": "Sélectionnez au moins une loi de protection des données."
         },
         "errors": {
           "createFailed": "Impossible de créer le poste. Veuillez réessayer.",
@@ -2196,10 +2211,16 @@
           "importanceAria": "Importance {value} sur 10",
           "unspecified": "—"
         },
+        "laws": {
+          "none": "Aucune loi liée",
+          "active": "Active",
+          "inactive": "Inactive"
+        },
         "headerMeta": {
           "department": "Département",
           "modality": "Modalité",
           "location": "Lieu",
+          "laws": "Lois de protection des données",
           "created": "Créée le {date}"
         },
         "actions": {
@@ -3823,6 +3844,91 @@
         "formCreateTitle": "Nouvelle {singularCapitalized}",
         "formEditTitle": "Modifier la {singular}",
         "deleteTitle": "Supprimer la {singular}"
+      }
+    },
+    "dataProtectionLaws": {
+      "page": {
+        "title": "Lois de protection des données",
+        "description": "Tenez à jour les lois que les recruteurs lient à chaque offre. Le texte juridique est enregistré ici.",
+        "createCta": "Créer une loi"
+      },
+      "table": {
+        "name": "Nom",
+        "jurisdiction": "Territoire",
+        "actions": "Actions",
+        "active": "Active",
+        "inactive": "Inactive",
+        "missingBody": "Sans texte juridique"
+      },
+      "form": {
+        "createTitle": "Nouvelle loi",
+        "editTitle": "Modifier la loi",
+        "nameLabel": "Nom",
+        "codeLabel": "Code",
+        "codePlaceholder": "ley-proteccion-datos-el-salvador",
+        "jurisdictionLabel": "Territoire",
+        "jurisdictionSv": "El Salvador",
+        "jurisdictionEu": "Union européenne",
+        "jurisdictionOther": "Autre",
+        "jurisdictionOtherLabel": "Code du territoire",
+        "referenceLabel": "Référence officielle",
+        "summaryLabel": "Résumé",
+        "localeLabel": "Langue du texte",
+        "locales": {
+          "es": "Espagnol",
+          "en": "Anglais",
+          "de": "Allemand",
+          "fr": "Français",
+          "it": "Italien"
+        },
+        "bodyLabel": "Texte juridique en vigueur",
+        "bodyPlaceholder": "Rédigez le texte qui s'applique à cette loi.",
+        "activeLabel": "Loi active",
+        "activeHint": "Une loi inactive ne peut pas être ajoutée à de nouvelles offres. Les offres qui l'utilisent déjà conservent le lien.",
+        "save": "Enregistrer",
+        "saveChanges": "Enregistrer les modifications"
+      },
+      "validation": {
+        "nameRequired": "Le nom est requis.",
+        "nameMax": "Le nom ne peut pas dépasser {max} caractères.",
+        "codeRequired": "Le code est requis.",
+        "codeMax": "Le code ne peut pas dépasser {max} caractères.",
+        "codePattern": "Utilisez des minuscules, des chiffres et des tirets.",
+        "jurisdictionRequired": "Le territoire est requis.",
+        "jurisdictionPattern": "Utilisez 2 à 8 lettres ou chiffres.",
+        "referenceMax": "La référence ne peut pas dépasser {max} caractères.",
+        "summaryMax": "Le résumé ne peut pas dépasser {max} caractères.",
+        "localeRequired": "Choisissez une langue."
+      },
+      "errors": {
+        "loadCatalog": "Impossible de charger le catalogue.",
+        "saveFailed": "Impossible d'enregistrer la loi.",
+        "deleteFailed": "Impossible de supprimer la loi.",
+        "deleteConflict": "Impossible de supprimer cette loi car des offres y sont liées. Désactivez-la si elle ne doit plus servir aux nouvelles offres."
+      },
+      "toasts": {
+        "created": "Loi créée.",
+        "updated": "Loi mise à jour.",
+        "deleted": "Loi supprimée."
+      },
+      "emptyStates": {
+        "noItems": "Aucune loi pour le moment",
+        "createHint": "Lorsqu'une loi existe, les recruteurs peuvent la lier à une offre."
+      },
+      "deleteConfirm": {
+        "title": "Supprimer la loi",
+        "message": "Supprimer cette loi ? C'est possible seulement si aucune offre ne l'utilise."
+      },
+      "actions": {
+        "refresh": "Actualiser",
+        "retry": "Réessayer",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "cancel": "Annuler"
+      },
+      "aria": {
+        "loadError": "Erreur de chargement des lois",
+        "list": "Liste des lois de protection des données"
       }
     },
     "documentTypes": {

@@ -56,7 +56,8 @@
     "interviewModalities": "Modalities",
     "interviewStatuses": "Statuses",
     "tailorProfile": "Tailor my Profile",
-    "softSkills": "Soft skills"
+    "softSkills": "Soft skills",
+    "dataProtectionLaws": "Data protection laws"
   },
   "Topbar": {
     "portalCandidate": "Applicant Portal",
@@ -454,6 +455,10 @@
       "softSkills": {
         "title": "Soft skills",
         "description": "Manage the global catalog of soft skills for interview feedback"
+      },
+      "dataProtectionLaws": {
+        "title": "Data protection laws",
+        "description": "Manage the data protection laws linked to vacancies"
       }
     },
     "root": {
@@ -2118,6 +2123,15 @@
             "label": "Modality",
             "ariaLabel": "Vacancy modality"
           },
+          "dataProtectionLaws": {
+            "label": "Data protection laws",
+            "helper": "Choose at least one. The country suggests a law; you can change the selection.",
+            "placeholder": "Select one or more laws",
+            "empty": "There are no active laws.",
+            "inactive": "Inactive",
+            "loading": "Loading laws…",
+            "loadFailed": "Could not load the laws."
+          },
           "unspecifiedOption": "Unspecified",
           "requirements": {
             "label": "Requirements",
@@ -2158,7 +2172,8 @@
           "descriptionRequired": "Description is required",
           "companyRequired": "Select a client company",
           "requirementValueRequired": "Expected level or criterion is required",
-          "requirementNameRequired": "Name required"
+          "requirementNameRequired": "Name required",
+          "lawsRequired": "Select at least one data protection law."
         },
         "errors": {
           "createFailed": "The vacancy could not be created. Please try again.",
@@ -2196,10 +2211,16 @@
           "importanceAria": "Importance {value} out of 10",
           "unspecified": "—"
         },
+        "laws": {
+          "none": "No linked laws",
+          "active": "Active",
+          "inactive": "Inactive"
+        },
         "headerMeta": {
           "department": "Department",
           "modality": "Work mode",
           "location": "Location",
+          "laws": "Data protection laws",
           "created": "Created {date}"
         },
         "actions": {
@@ -3823,6 +3844,91 @@
         "formCreateTitle": "New {singularCapitalized}",
         "formEditTitle": "Edit {singular}",
         "deleteTitle": "Delete {singular}"
+      }
+    },
+    "dataProtectionLaws": {
+      "page": {
+        "title": "Data protection laws",
+        "description": "Maintain the laws recruiters link to each vacancy. The legal text is stored here.",
+        "createCta": "Create law"
+      },
+      "table": {
+        "name": "Name",
+        "jurisdiction": "Jurisdiction",
+        "actions": "Actions",
+        "active": "Active",
+        "inactive": "Inactive",
+        "missingBody": "No legal text"
+      },
+      "form": {
+        "createTitle": "New law",
+        "editTitle": "Edit law",
+        "nameLabel": "Name",
+        "codeLabel": "Code",
+        "codePlaceholder": "ley-proteccion-datos-el-salvador",
+        "jurisdictionLabel": "Jurisdiction",
+        "jurisdictionSv": "El Salvador",
+        "jurisdictionEu": "European Union",
+        "jurisdictionOther": "Other",
+        "jurisdictionOtherLabel": "Jurisdiction code",
+        "referenceLabel": "Official reference",
+        "summaryLabel": "Summary",
+        "localeLabel": "Text language",
+        "locales": {
+          "es": "Spanish",
+          "en": "English",
+          "de": "German",
+          "fr": "French",
+          "it": "Italian"
+        },
+        "bodyLabel": "Current legal text",
+        "bodyPlaceholder": "Write the text that applies to this law.",
+        "activeLabel": "Active law",
+        "activeHint": "An inactive law cannot be added to new vacancies. Vacancies that already use it keep the link.",
+        "save": "Save",
+        "saveChanges": "Save changes"
+      },
+      "validation": {
+        "nameRequired": "Name is required.",
+        "nameMax": "Name cannot exceed {max} characters.",
+        "codeRequired": "Code is required.",
+        "codeMax": "Code cannot exceed {max} characters.",
+        "codePattern": "Use lowercase letters, numbers, and hyphens.",
+        "jurisdictionRequired": "Jurisdiction is required.",
+        "jurisdictionPattern": "Use 2 to 8 letters or numbers.",
+        "referenceMax": "Reference cannot exceed {max} characters.",
+        "summaryMax": "Summary cannot exceed {max} characters.",
+        "localeRequired": "Choose a language."
+      },
+      "errors": {
+        "loadCatalog": "Could not load the catalog.",
+        "saveFailed": "Could not save the law.",
+        "deleteFailed": "Could not delete the law.",
+        "deleteConflict": "This law cannot be deleted because vacancies are linked to it. Deactivate it if it should not be used on new vacancies."
+      },
+      "toasts": {
+        "created": "Law created.",
+        "updated": "Law updated.",
+        "deleted": "Law deleted."
+      },
+      "emptyStates": {
+        "noItems": "No laws yet",
+        "createHint": "Once a law exists, recruiters can link it to a vacancy."
+      },
+      "deleteConfirm": {
+        "title": "Delete law",
+        "message": "Delete this law? It can be deleted only when no vacancy uses it."
+      },
+      "actions": {
+        "refresh": "Refresh",
+        "retry": "Retry",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel"
+      },
+      "aria": {
+        "loadError": "Error loading laws",
+        "list": "Data protection laws list"
       }
     },
     "documentTypes": {

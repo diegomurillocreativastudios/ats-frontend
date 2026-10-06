@@ -18,6 +18,10 @@ export const ADMIN_PORTAL_NAV_ITEMS = [
         href: "/portal-admin/vacantes/habilidades-blandas",
         labelKey: "softSkills",
       },
+      {
+        href: "/portal-admin/vacantes/leyes-proteccion-datos",
+        labelKey: "dataProtectionLaws",
+      },
       { href: "/portal-admin/empresas", labelKey: "companies" },
     ],
   },

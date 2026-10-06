@@ -56,7 +56,8 @@
     "interviewModalities": "Modalitäten",
     "interviewStatuses": "Status",
     "tailorProfile": "Profil anpassen",
-    "softSkills": "Soft Skills"
+    "softSkills": "Soft Skills",
+    "dataProtectionLaws": "Datenschutzgesetze"
   },
   "Topbar": {
     "portalCandidate": "Kandidatenportal",
@@ -454,6 +455,10 @@
       "softSkills": {
         "title": "Soft Skills",
         "description": "Verwaltung des globalen Katalogs von Soft Skills für Interview-Feedback"
+      },
+      "dataProtectionLaws": {
+        "title": "Datenschutzgesetze",
+        "description": "Verwaltung der Datenschutzgesetze, die mit Stellen verknüpft werden"
       }
     },
     "root": {
@@ -2118,6 +2123,15 @@
             "label": "Arbeitsmodell",
             "ariaLabel": "Arbeitsmodell der Stelle"
           },
+          "dataProtectionLaws": {
+            "label": "Datenschutzgesetze",
+            "helper": "Wähle mindestens ein Gesetz. Das Land schlägt eines vor; die Auswahl kannst du ändern.",
+            "placeholder": "Ein oder mehrere Gesetze auswählen",
+            "empty": "Es gibt keine aktiven Gesetze.",
+            "inactive": "Inaktiv",
+            "loading": "Gesetze werden geladen…",
+            "loadFailed": "Die Gesetze konnten nicht geladen werden."
+          },
           "unspecifiedOption": "Nicht angegeben",
           "requirements": {
             "label": "Anforderungen",
@@ -2158,7 +2172,8 @@
           "descriptionRequired": "Die Beschreibung ist erforderlich",
           "companyRequired": "Wähle ein Kundenunternehmen aus",
           "requirementValueRequired": "Erwartetes Niveau oder Kriterium erforderlich",
-          "requirementNameRequired": "Name erforderlich"
+          "requirementNameRequired": "Name erforderlich",
+          "lawsRequired": "Wähle mindestens ein Datenschutzgesetz."
         },
         "errors": {
           "createFailed": "Die Stelle konnte nicht erstellt werden. Bitte versuche es erneut.",
@@ -2196,10 +2211,16 @@
           "importanceAria": "Wichtigkeit {value} von 10",
           "unspecified": "—"
         },
+        "laws": {
+          "none": "Keine verknüpften Gesetze",
+          "active": "Aktiv",
+          "inactive": "Inaktiv"
+        },
         "headerMeta": {
           "department": "Abteilung",
           "modality": "Arbeitsmodell",
           "location": "Standort",
+          "laws": "Datenschutzgesetze",
           "created": "Erstellt am {date}"
         },
         "actions": {
@@ -3823,6 +3844,91 @@
         "formCreateTitle": "Neuer {singularCapitalized}",
         "formEditTitle": "{singular} bearbeiten",
         "deleteTitle": "{singular} löschen"
+      }
+    },
+    "dataProtectionLaws": {
+      "page": {
+        "title": "Datenschutzgesetze",
+        "description": "Pflegen Sie die Gesetze, die Recruiter mit jeder Stelle verknüpfen. Der Rechtstext wird hier gespeichert.",
+        "createCta": "Gesetz anlegen"
+      },
+      "table": {
+        "name": "Name",
+        "jurisdiction": "Zuständigkeit",
+        "actions": "Aktionen",
+        "active": "Aktiv",
+        "inactive": "Inaktiv",
+        "missingBody": "Ohne Rechtstext"
+      },
+      "form": {
+        "createTitle": "Neues Gesetz",
+        "editTitle": "Gesetz bearbeiten",
+        "nameLabel": "Name",
+        "codeLabel": "Code",
+        "codePlaceholder": "ley-proteccion-datos-el-salvador",
+        "jurisdictionLabel": "Zuständigkeit",
+        "jurisdictionSv": "El Salvador",
+        "jurisdictionEu": "Europäische Union",
+        "jurisdictionOther": "Andere",
+        "jurisdictionOtherLabel": "Code der Zuständigkeit",
+        "referenceLabel": "Offizielle Referenz",
+        "summaryLabel": "Zusammenfassung",
+        "localeLabel": "Sprache des Textes",
+        "locales": {
+          "es": "Spanisch",
+          "en": "Englisch",
+          "de": "Deutsch",
+          "fr": "Französisch",
+          "it": "Italienisch"
+        },
+        "bodyLabel": "Aktueller Rechtstext",
+        "bodyPlaceholder": "Schreiben Sie den Text, der für dieses Gesetz gilt.",
+        "activeLabel": "Gesetz aktiv",
+        "activeHint": "Ein inaktives Gesetz kann neuen Stellen nicht hinzugefügt werden. Stellen, die es bereits nutzen, behalten die Verknüpfung.",
+        "save": "Speichern",
+        "saveChanges": "Änderungen speichern"
+      },
+      "validation": {
+        "nameRequired": "Der Name ist erforderlich.",
+        "nameMax": "Der Name darf höchstens {max} Zeichen haben.",
+        "codeRequired": "Der Code ist erforderlich.",
+        "codeMax": "Der Code darf höchstens {max} Zeichen haben.",
+        "codePattern": "Verwenden Sie Kleinbuchstaben, Zahlen und Bindestriche.",
+        "jurisdictionRequired": "Die Zuständigkeit ist erforderlich.",
+        "jurisdictionPattern": "Verwenden Sie 2 bis 8 Buchstaben oder Zahlen.",
+        "referenceMax": "Die Referenz darf höchstens {max} Zeichen haben.",
+        "summaryMax": "Die Zusammenfassung darf höchstens {max} Zeichen haben.",
+        "localeRequired": "Wählen Sie eine Sprache."
+      },
+      "errors": {
+        "loadCatalog": "Der Katalog konnte nicht geladen werden.",
+        "saveFailed": "Das Gesetz konnte nicht gespeichert werden.",
+        "deleteFailed": "Das Gesetz konnte nicht gelöscht werden.",
+        "deleteConflict": "Das Gesetz kann nicht gelöscht werden, weil Stellen verknüpft sind. Deaktivieren Sie es, wenn es für neue Stellen nicht mehr gelten soll."
+      },
+      "toasts": {
+        "created": "Gesetz erstellt.",
+        "updated": "Gesetz aktualisiert.",
+        "deleted": "Gesetz gelöscht."
+      },
+      "emptyStates": {
+        "noItems": "Noch keine Gesetze",
+        "createHint": "Sobald ein Gesetz existiert, können Recruiter es mit einer Stelle verknüpfen."
+      },
+      "deleteConfirm": {
+        "title": "Gesetz löschen",
+        "message": "Dieses Gesetz löschen? Das ist nur möglich, wenn keine Stelle es verwendet."
+      },
+      "actions": {
+        "refresh": "Aktualisieren",
+        "retry": "Erneut versuchen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "cancel": "Abbrechen"
+      },
+      "aria": {
+        "loadError": "Fehler beim Laden der Gesetze",
+        "list": "Liste der Datenschutzgesetze"
       }
     },
     "documentTypes": {

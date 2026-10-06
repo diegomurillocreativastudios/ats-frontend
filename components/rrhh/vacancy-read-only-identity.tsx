@@ -3,6 +3,8 @@
 import type { ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { VacancyLocationLabel } from "@/components/shared/VacancyLocationLabel"
+import type { VacancyDataProtectionLaw } from "@/lib/vacancies/vacancy-data-protection-laws"
+
 interface VacancyReadOnlyIdentityProps {
   title: string
   companyName: string
@@ -10,6 +12,7 @@ interface VacancyReadOnlyIdentityProps {
   modality: string
   countryCode?: string | null
   stateCode?: string | null
+  laws?: VacancyDataProtectionLaw[]
   createdAtLabel: string
   statusLabel: string
   statusClassName: string
@@ -37,6 +40,7 @@ export function VacancyReadOnlyIdentity({
   modality,
   countryCode,
   stateCode,
+  laws = [],
   createdAtLabel,
   statusLabel,
   statusClassName,
@@ -44,6 +48,7 @@ export function VacancyReadOnlyIdentity({
   titleAccessory,
 }: VacancyReadOnlyIdentityProps) {
   const t = useTranslations("RecruiterPortal.vacancies.detail.headerMeta")
+  const tLaws = useTranslations("RecruiterPortal.vacancies.detail.laws")
 
   return (
     <div className="@container/identity flex min-w-0 flex-col gap-4">
@@ -66,6 +71,21 @@ export function VacancyReadOnlyIdentity({
         <IdentityFact label={t("modality")}>{modality}</IdentityFact>
         <IdentityFact label={t("location")}>
           <VacancyLocationLabel countryCode={countryCode} stateCode={stateCode} />
+        </IdentityFact>
+        <IdentityFact label={t("laws")}>
+          {laws.length === 0 ? (
+            tLaws("none")
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {laws.map((law) => (
+                <li key={law.id}>
+                  {law.displayName || law.code}
+                  {law.jurisdictionCode ? ` · ${law.jurisdictionCode}` : ""}
+                  {` · ${law.isActive ? tLaws("active") : tLaws("inactive")}`}
+                </li>
+              ))}
+            </ul>
+          )}
         </IdentityFact>
       </dl>
       <p className="min-w-0 wrap-break-word font-sans text-xs text-muted-foreground">{createdAtLabel}</p>

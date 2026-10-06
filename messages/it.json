@@ -56,7 +56,8 @@
     "interviewModalities": "Modalità",
     "interviewStatuses": "Stati",
     "tailorProfile": "Adatta il mio profilo",
-    "softSkills": "Competenze trasversali"
+    "softSkills": "Competenze trasversali",
+    "dataProtectionLaws": "Leggi sulla protezione dei dati"
   },
   "Topbar": {
     "portalCandidate": "Portale candidato",
@@ -454,6 +455,10 @@
       "softSkills": {
         "title": "Competenze trasversali",
         "description": "Gestione del catalogo globale delle competenze trasversali per il feedback del colloquio"
+      },
+      "dataProtectionLaws": {
+        "title": "Leggi sulla protezione dei dati",
+        "description": "Gestione delle leggi sulla protezione dei dati collegate alle offerte"
       }
     },
     "root": {
@@ -2118,6 +2123,15 @@
             "label": "Modalità",
             "ariaLabel": "Modalità della posizione"
           },
+          "dataProtectionLaws": {
+            "label": "Leggi sulla protezione dei dati",
+            "helper": "Scegli almeno una legge. Il paese ne suggerisce una; puoi cambiare la selezione.",
+            "placeholder": "Seleziona una o più leggi",
+            "empty": "Non ci sono leggi attive.",
+            "inactive": "Inattiva",
+            "loading": "Caricamento delle leggi…",
+            "loadFailed": "Impossibile caricare le leggi."
+          },
           "unspecifiedOption": "Non specificato",
           "requirements": {
             "label": "Requisiti",
@@ -2158,7 +2172,8 @@
           "descriptionRequired": "La descrizione è obbligatoria",
           "companyRequired": "Seleziona un'azienda cliente",
           "requirementValueRequired": "Livello o criterio atteso obbligatorio",
-          "requirementNameRequired": "Nome obbligatorio"
+          "requirementNameRequired": "Nome obbligatorio",
+          "lawsRequired": "Seleziona almeno una legge sulla protezione dei dati."
         },
         "errors": {
           "createFailed": "Impossibile creare la posizione. Riprova.",
@@ -2196,10 +2211,16 @@
           "importanceAria": "Importanza {value} su 10",
           "unspecified": "—"
         },
+        "laws": {
+          "none": "Nessuna legge collegata",
+          "active": "Attiva",
+          "inactive": "Inattiva"
+        },
         "headerMeta": {
           "department": "Dipartimento",
           "modality": "Modalità",
           "location": "Sede",
+          "laws": "Leggi sulla protezione dei dati",
           "created": "Creata il {date}"
         },
         "actions": {
@@ -3823,6 +3844,91 @@
         "formCreateTitle": "Nuova {singularCapitalized}",
         "formEditTitle": "Modifica {singular}",
         "deleteTitle": "Elimina {singular}"
+      }
+    },
+    "dataProtectionLaws": {
+      "page": {
+        "title": "Leggi sulla protezione dei dati",
+        "description": "Mantieni le leggi che i recruiter collegano a ogni offerta. Il testo legale si salva qui.",
+        "createCta": "Crea legge"
+      },
+      "table": {
+        "name": "Nome",
+        "jurisdiction": "Ambito",
+        "actions": "Azioni",
+        "active": "Attiva",
+        "inactive": "Inattiva",
+        "missingBody": "Senza testo legale"
+      },
+      "form": {
+        "createTitle": "Nuova legge",
+        "editTitle": "Modifica legge",
+        "nameLabel": "Nome",
+        "codeLabel": "Codice",
+        "codePlaceholder": "ley-proteccion-datos-el-salvador",
+        "jurisdictionLabel": "Ambito",
+        "jurisdictionSv": "El Salvador",
+        "jurisdictionEu": "Unione europea",
+        "jurisdictionOther": "Altro",
+        "jurisdictionOtherLabel": "Codice dell'ambito",
+        "referenceLabel": "Riferimento ufficiale",
+        "summaryLabel": "Riepilogo",
+        "localeLabel": "Lingua del testo",
+        "locales": {
+          "es": "Spagnolo",
+          "en": "Inglese",
+          "de": "Tedesco",
+          "fr": "Francese",
+          "it": "Italiano"
+        },
+        "bodyLabel": "Testo legale vigente",
+        "bodyPlaceholder": "Scrivi il testo che si applica a questa legge.",
+        "activeLabel": "Legge attiva",
+        "activeHint": "Una legge inattiva non si può aggiungere alle nuove offerte. Le offerte che la usano già conservano il collegamento.",
+        "save": "Salva",
+        "saveChanges": "Salva modifiche"
+      },
+      "validation": {
+        "nameRequired": "Il nome è obbligatorio.",
+        "nameMax": "Il nome non può superare {max} caratteri.",
+        "codeRequired": "Il codice è obbligatorio.",
+        "codeMax": "Il codice non può superare {max} caratteri.",
+        "codePattern": "Usa lettere minuscole, numeri e trattini.",
+        "jurisdictionRequired": "L'ambito è obbligatorio.",
+        "jurisdictionPattern": "Usa da 2 a 8 lettere o numeri.",
+        "referenceMax": "Il riferimento non può superare {max} caratteri.",
+        "summaryMax": "Il riepilogo non può superare {max} caratteri.",
+        "localeRequired": "Scegli una lingua."
+      },
+      "errors": {
+        "loadCatalog": "Impossibile caricare il catalogo.",
+        "saveFailed": "Impossibile salvare la legge.",
+        "deleteFailed": "Impossibile eliminare la legge.",
+        "deleteConflict": "Impossibile eliminare la legge perché ci sono offerte collegate. Disattivala se non deve più essere usata nelle nuove offerte."
+      },
+      "toasts": {
+        "created": "Legge creata.",
+        "updated": "Legge aggiornata.",
+        "deleted": "Legge eliminata."
+      },
+      "emptyStates": {
+        "noItems": "Nessuna legge ancora",
+        "createHint": "Quando esiste una legge, i recruiter possono collegarla a un'offerta."
+      },
+      "deleteConfirm": {
+        "title": "Elimina legge",
+        "message": "Eliminare questa legge? Si può eliminare solo se nessuna offerta la usa."
+      },
+      "actions": {
+        "refresh": "Aggiorna",
+        "retry": "Riprova",
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "cancel": "Annulla"
+      },
+      "aria": {
+        "loadError": "Errore nel caricamento delle leggi",
+        "list": "Elenco delle leggi sulla protezione dei dati"
       }
     },
     "documentTypes": {

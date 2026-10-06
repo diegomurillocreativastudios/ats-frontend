@@ -93,6 +93,11 @@ describe("admin portal nav", () => {
         "/portal-admin/vacantes/habilidades-blandas",
       ),
     ).toBe("softSkills")
+    expect(
+      resolveAdminPortalNavLabelKey(
+        "/portal-admin/vacantes/leyes-proteccion-datos",
+      ),
+    ).toBe("dataProtectionLaws")
     expect(resolveAdminPortalNavLabelKey("/portal-admin/empresas")).toBe(
       "companies",
     )
@@ -176,6 +181,17 @@ describe("admin portal nav", () => {
     expect(resolveAdminPortalBreadcrumbTrail("/portal-admin/empresas")).toEqual([
       { href: "/portal-admin/vacantes", labelKey: "vacancies" },
       { href: "/portal-admin/empresas", labelKey: "companies" },
+    ])
+    expect(
+      resolveAdminPortalBreadcrumbTrail(
+        "/portal-admin/vacantes/leyes-proteccion-datos",
+      ),
+    ).toEqual([
+      { href: "/portal-admin/vacantes", labelKey: "vacancies" },
+      {
+        href: "/portal-admin/vacantes/leyes-proteccion-datos",
+        labelKey: "dataProtectionLaws",
+      },
     ])
   })
 })

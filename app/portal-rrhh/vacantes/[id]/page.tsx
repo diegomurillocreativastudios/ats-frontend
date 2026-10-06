@@ -28,6 +28,7 @@ import Snackbar from "@/components/ui/Snackbar";
 import { CopyPublicVacancyLinkButton } from "@/components/shared/copy-public-vacancy-link-button";
 import { apiClient } from "@/lib/api"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
+import { listRecruiterDataProtectionLaws } from "@/lib/api/data-protection-laws"
 import {
   adminStagesCatalogHref,
   listCompanyApplicantStatuses,
@@ -61,6 +62,7 @@ import { VacancyFinishedSummary } from "@/components/rrhh/VacancyFinishedSummary
 import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProcessModal"
 import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confirm-modal"
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
+import { VacancyDataProtectionLawsField } from "@/components/rrhh/VacancyDataProtectionLawsField"
 import { RequirementsDisplay } from "@/components/rrhh/requirements-display"
 import { toRequirementStorageKey } from "@/lib/vacancies/format-requirement-key"
 import {
@@ -128,6 +130,17 @@ import {
   normalizeStateCode,
   readVacancyStateCode,
 } from "@/lib/vacancies/vacancy-location";
+import {
+  normalizeDataProtectionLawIds,
+  sameDataProtectionLawIds,
+  suggestDataProtectionLawIds,
+} from "@/lib/vacancies/data-protection-law-suggestion";
+import {
+  mergeLinkedLawOptions,
+  readVacancyDataProtectionLawIds,
+  readVacancyDataProtectionLaws,
+  type VacancyDataProtectionLaw,
+} from "@/lib/vacancies/vacancy-data-protection-laws";
 import { formatVacancyDetailDocumentTitle } from "@/lib/pageTitles";
 import {
   getVacancyDepartmentId,
@@ -1062,6 +1075,10 @@ export default function VacanteDetallePage() {
   const [editStateCode, setEditStateCode] = useState("");
   const [editVacancyDepartmentId, setEditVacancyDepartmentId] = useState("");
   const [editVacancyModalityId, setEditVacancyModalityId] = useState("");
+  const [editDataProtectionLawIds, setEditDataProtectionLawIds] = useState<string[]>([]);
+  const [lawOptions, setLawOptions] = useState<VacancyDataProtectionLaw[]>([]);
+  const [loadingLaws, setLoadingLaws] = useState(false);
+  const [lawsLoadError, setLawsLoadError] = useState<string | null>(null);
   const [editCompanyId, setEditCompanyId] = useState("");
   const [editRequirements, setEditRequirements] = useState(() => [createEmptyRequirement()]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
@@ -1124,6 +1141,7 @@ export default function VacanteDetallePage() {
   const etapasSectionMobileRef = useRef(null);
   const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
   const originalCompanyIdAtEditRef = useRef("");
+  const lawSelectionTouchedRef = useRef(false);
 
   const vacancyDepartmentSummary = useMemo(
     () =>
@@ -1267,6 +1285,29 @@ export default function VacanteDetallePage() {
     }
   }, [t])
 
+  useEffect(() => {
+    let cancelled = false
+    const loadLaws = async () => {
+      setLoadingLaws(true)
+      setLawsLoadError(null)
+      try {
+        const laws = await listRecruiterDataProtectionLaws()
+        if (!cancelled) setLawOptions(laws)
+      } catch (err) {
+        if (!cancelled) {
+          setLawOptions([])
+          setLawsLoadError(getApiErrorMessage(err) || t("form.fields.dataProtectionLaws.loadFailed"))
+        }
+      } finally {
+        if (!cancelled) setLoadingLaws(false)
+      }
+    }
+    void loadLaws()
+    return () => {
+      cancelled = true
+    }
+  }, [t])
+
   const fetchVacancy = useCallback(async (silentFlag?: unknown) => {
     const silent = silentFlag === true
     if (!pathSegment) {
@@ -1371,6 +1412,16 @@ export default function VacanteDetallePage() {
     setEditAdvantages(v.advantages == null ? "" : String(v.advantages));
     setEditVacancyDepartmentId(getVacancyDepartmentId(v))
     setEditVacancyModalityId(getVacancyModalityId(v))
+    const linkedLawIds = readVacancyDataProtectionLawIds(v)
+    if (linkedLawIds.length > 0) {
+      setEditDataProtectionLawIds(linkedLawIds)
+    } else {
+      const country =
+        ccRaw != null && String(ccRaw).trim() !== ""
+          ? String(ccRaw).trim().toUpperCase()
+          : ""
+      setEditDataProtectionLawIds(suggestDataProtectionLawIds(country, lawOptions))
+    }
 
     const rawReqs = v.requirements;
     const reqObj =
@@ -1415,7 +1466,7 @@ export default function VacanteDetallePage() {
         };
       })
     );
-  }, []);
+  }, [lawOptions]);
 
   const validateEditForm = useCallback(() => {
     const nextErrors: Record<string, string> = {};
@@ -1429,15 +1480,20 @@ export default function VacanteDetallePage() {
       if (!hasName && hasValue) nextErrors[`req-name-${req.id}`] = t("form.validation.requirementNameRequired");
     });
 
+    if (normalizeDataProtectionLawIds(editDataProtectionLawIds).length === 0) {
+      nextErrors.laws = t("form.validation.lawsRequired");
+    }
+
     setEditErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
-  }, [editTitle, editDescription, editRequirements, t]);
+  }, [editTitle, editDescription, editRequirements, editDataProtectionLawIds, t]);
 
   const handleEditVacancy = useCallback(() => {
     if (!vacancy || !readVacancyIsActive(vacancy)) return;
     setSaveVacancyError(null);
     setEditErrors({});
     setVacancyCatalogsError(null);
+    lawSelectionTouchedRef.current = false;
     const resolvedCompanyId = resolveVacancyCompanyId(
       vacancy && typeof vacancy === "object" ? vacancy : null
     );
@@ -1446,6 +1502,14 @@ export default function VacanteDetallePage() {
     hydrateEditFormFromVacancy(vacancy);
     setIsEditing(true);
   }, [vacancy, hydrateEditFormFromVacancy]);
+
+  useEffect(() => {
+    if (!isEditing || lawSelectionTouchedRef.current) return
+    if (readVacancyDataProtectionLawIds(vacancy).length > 0) return
+    setEditDataProtectionLawIds(
+      suggestDataProtectionLawIds(editCountryCode, lawOptions)
+    )
+  }, [isEditing, vacancy, editCountryCode, lawOptions])
 
   const handleCopyVacancy = useCallback(async () => {
     if (!vacancy || typeof vacancy !== "object") return;
@@ -1515,6 +1579,8 @@ export default function VacanteDetallePage() {
       )
     );
     setEditRequirements(clipboardPayloadToRequirementRows(payload.requirements));
+    lawSelectionTouchedRef.current = true;
+    setEditDataProtectionLawIds(payload.dataProtectionLawIds);
     setEditErrors({});
   }, [mergedDepartmentOptions, mergedModalityOptions]);
 
@@ -1642,6 +1708,10 @@ export default function VacanteDetallePage() {
       nextStateCode !== currentStateCode ||
       nextDepartmentId !== (getVacancyDepartmentId(vacancy) || null) ||
       nextModalityId !== (getVacancyModalityId(vacancy) || null) ||
+      !sameDataProtectionLawIds(
+        editDataProtectionLawIds,
+        readVacancyDataProtectionLawIds(vacancy)
+      ) ||
       JSON.stringify(requirements) !==
         JSON.stringify(
           vacancy?.requirements &&
@@ -1676,6 +1746,7 @@ export default function VacanteDetallePage() {
           countryCode: editCountryCode,
           stateCode: editStateCode,
         });
+        payload.dataProtectionLawIds = normalizeDataProtectionLawIds(editDataProtectionLawIds);
         if (companyChanged) {
           payload.companyId = editCompanyId;
         }
@@ -1735,6 +1806,18 @@ export default function VacanteDetallePage() {
           modality: nextModalitySummary?.displayName ?? null,
           workArrangement: nextModalitySummary?.displayName ?? null,
           work_arrangement: nextModalitySummary?.displayName ?? null,
+          dataProtectionLawIds: payload.dataProtectionLawIds,
+          dataProtectionLaws:
+            readVacancyDataProtectionLaws(updatedRecord).length > 0
+              ? readVacancyDataProtectionLaws(updatedRecord)
+              : normalizeDataProtectionLawIds(editDataProtectionLawIds)
+                  .map((id) =>
+                    mergeLinkedLawOptions(
+                      lawOptions,
+                      readVacancyDataProtectionLaws(vacancy)
+                    ).find((law) => law.id === id)
+                  )
+                  .filter((law): law is VacancyDataProtectionLaw => law != null),
         }));
 
         const nextPublicSlug = readPublicSlug(updatedRecord)
@@ -1786,6 +1869,8 @@ export default function VacanteDetallePage() {
     editStateCode,
     editVacancyDepartmentId,
     editVacancyModalityId,
+    editDataProtectionLawIds,
+    lawOptions,
     editRequirements,
     validateEditForm,
     fetchVacancy,
@@ -2671,6 +2756,15 @@ export default function VacanteDetallePage() {
 
   const selectedCount = selectedCandidateIds.size;
 
+  const linkedLaws = useMemo(
+    () => readVacancyDataProtectionLaws(vacancy),
+    [vacancy]
+  );
+  const lawFieldOptions = useMemo(
+    () => mergeLinkedLawOptions(lawOptions, linkedLaws),
+    [lawOptions, linkedLaws]
+  );
+
   const breadcrumbLabel = vacancy?.title ? vacancy.title : tDetail("page.fallbackTitle");
 
   const breadcrumbTrail = useMemo(
@@ -2901,7 +2995,27 @@ export default function VacanteDetallePage() {
                                   {vacancyCatalogsError}
                                 </p>
                               ) : null}
-                            </div>
+                            <VacancyDataProtectionLawsField
+                              laws={lawFieldOptions}
+                              selectedIds={editDataProtectionLawIds}
+                              onChange={(ids) => {
+                                lawSelectionTouchedRef.current = true
+                                setEditDataProtectionLawIds(ids)
+                              }}
+                              legend={t("form.fields.dataProtectionLaws.label")}
+                              helper={t("form.fields.dataProtectionLaws.helper")}
+                              placeholder={t("form.fields.dataProtectionLaws.placeholder")}
+                              emptyLabel={t("form.fields.dataProtectionLaws.empty")}
+                              inactiveLabel={t("form.fields.dataProtectionLaws.inactive")}
+                              loadingLabel={t("form.fields.dataProtectionLaws.loading")}
+                              loadErrorLabel={t("form.fields.dataProtectionLaws.loadFailed")}
+                              loading={loadingLaws}
+                              loadError={lawsLoadError}
+                              error={editErrors.laws}
+                              errorId="edit-vacancy-laws-error-desktop"
+                              disabled={savingVacancy}
+                            />
+                          </div>
                           ) : (
                             <VacancyReadOnlyIdentity
                               title={emptyToDash(vacancy.title)}
@@ -2910,6 +3024,7 @@ export default function VacanteDetallePage() {
                               modality={getVacancyModalityLabel(vacancy)}
                               countryCode={vacancy.countryCode ?? vacancy.country_code}
                               stateCode={vacancy.stateCode ?? vacancy.state_code}
+                              laws={linkedLaws}
                               createdAtLabel={tDetail("headerMeta.created", {
                                 date: formatShortDate(vacancy.createdAt, locale),
                               })}
@@ -3750,6 +3865,26 @@ export default function VacanteDetallePage() {
                                 {vacancyCatalogsError}
                               </p>
                             ) : null}
+                            <VacancyDataProtectionLawsField
+                              laws={lawFieldOptions}
+                              selectedIds={editDataProtectionLawIds}
+                              onChange={(ids) => {
+                                lawSelectionTouchedRef.current = true
+                                setEditDataProtectionLawIds(ids)
+                              }}
+                              legend={t("form.fields.dataProtectionLaws.label")}
+                              helper={t("form.fields.dataProtectionLaws.helper")}
+                              placeholder={t("form.fields.dataProtectionLaws.placeholder")}
+                              emptyLabel={t("form.fields.dataProtectionLaws.empty")}
+                              inactiveLabel={t("form.fields.dataProtectionLaws.inactive")}
+                              loadingLabel={t("form.fields.dataProtectionLaws.loading")}
+                              loadErrorLabel={t("form.fields.dataProtectionLaws.loadFailed")}
+                              loading={loadingLaws}
+                              loadError={lawsLoadError}
+                              error={editErrors.laws}
+                              errorId="edit-vacancy-laws-error-mobile"
+                              disabled={savingVacancy}
+                            />
                           </div>
                         ) : (
                           <VacancyReadOnlyIdentity
@@ -3759,6 +3894,7 @@ export default function VacanteDetallePage() {
                             modality={getVacancyModalityLabel(vacancy)}
                             countryCode={vacancy.countryCode ?? vacancy.country_code}
                             stateCode={vacancy.stateCode ?? vacancy.state_code}
+                            laws={linkedLaws}
                             createdAtLabel={tDetail("headerMeta.created", {
                               date: formatShortDate(vacancy.createdAt, locale),
                             })}

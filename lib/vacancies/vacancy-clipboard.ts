@@ -6,6 +6,7 @@ import {
 } from "@/lib/vacancy-catalogs"
 import { toRequirementImportance } from "@/lib/vacancies/format-requirement-key"
 import { readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
+import { readVacancyDataProtectionLawIds } from "@/lib/vacancies/vacancy-data-protection-laws"
 
 export const VACANCY_CLIPBOARD_STORAGE_KEY = "ats:vacancy-clipboard"
 export const VACANCY_CLIPBOARD_VERSION = 1 as const
@@ -38,6 +39,7 @@ export interface VacancyClipboardPayload {
   companyId: string
   companyName: string
   requirements: VacancyClipboardRequirement[]
+  dataProtectionLawIds: string[]
 }
 
 export interface VacancyClipboardRequirementRow {
@@ -121,6 +123,13 @@ export function parseVacancyClipboardPayload(
   if (value.version !== VACANCY_CLIPBOARD_VERSION) return null
   if (!Array.isArray(value.requirements)) return null
   if (!value.requirements.every(isValidRequirement)) return null
+  if (
+    value.dataProtectionLawIds != null &&
+    (!Array.isArray(value.dataProtectionLawIds) ||
+      !value.dataProtectionLawIds.every((id) => typeof id === "string"))
+  ) {
+    return null
+  }
 
   for (const key of PAYLOAD_STRING_KEYS) {
     if (typeof value[key] !== "string") return null
@@ -148,6 +157,9 @@ export function parseVacancyClipboardPayload(
       requirementValue: requirement.requirementValue,
       scale: requirement.scale,
     })),
+    dataProtectionLawIds: Array.isArray(value.dataProtectionLawIds)
+      ? value.dataProtectionLawIds.filter((id) => id.trim() !== "")
+      : [],
   }
 }
 
@@ -229,6 +241,7 @@ export function buildVacancyClipboardPayload(
     companyId: readTrimmedString(companyId),
     companyName: resolvedCompanyName,
     requirements: extractRequirements(record),
+    dataProtectionLawIds: readVacancyDataProtectionLawIds(record),
   }
 }
 

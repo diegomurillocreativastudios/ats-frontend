@@ -114,6 +114,9 @@ describe("AdminSidebar", () => {
       "href",
       "/portal-admin/empresas",
     )
+    expect(
+      within(vacancies).getByRole("link", { name: "Leyes de protección de datos" }),
+    ).toHaveAttribute("href", "/portal-admin/vacantes/leyes-proteccion-datos")
     expect(within(menu).getByRole("link", { name: "Tipos" })).toHaveAttribute(
       "href",
       "/portal-admin/entrevistas/tipos",

@@ -167,6 +167,7 @@ precomputados
 prefs
 Prefs
 presioná
+proteccion
 Probá
 puntaje
 puntajes

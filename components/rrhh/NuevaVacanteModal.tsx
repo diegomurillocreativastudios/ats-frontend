@@ -12,9 +12,17 @@ import {
   type RecruiterCompanyOption,
 } from "@/lib/api/recruiter-companies";
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields";
+import { VacancyDataProtectionLawsField } from "@/components/rrhh/VacancyDataProtectionLawsField";
 import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confirm-modal";
 import { VacancyPublicationSwitch } from "@/components/rrhh/vacancy-publication-switch";
 import { appendVacancyLocationToPayload } from "@/lib/vacancies/vacancy-location";
+import { listRecruiterDataProtectionLaws } from "@/lib/api/data-protection-laws";
+import { getApiErrorMessage } from "@/lib/api-error";
+import {
+  normalizeDataProtectionLawIds,
+  suggestDataProtectionLawIds,
+} from "@/lib/vacancies/data-protection-law-suggestion";
+import type { VacancyDataProtectionLaw } from "@/lib/vacancies/vacancy-data-protection-laws";
 import {
   clipboardPayloadToRequirementRows,
   readVacancyClipboard,
@@ -47,6 +55,10 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [stateCode, setStateCode] = useState("");
   const [vacancyDepartmentId, setVacancyDepartmentId] = useState("");
   const [vacancyModalityId, setVacancyModalityId] = useState("");
+  const [dataProtectionLawIds, setDataProtectionLawIds] = useState<string[]>([]);
+  const [lawOptions, setLawOptions] = useState<VacancyDataProtectionLaw[]>([]);
+  const [loadingLaws, setLoadingLaws] = useState(false);
+  const [lawsLoadError, setLawsLoadError] = useState<string | null>(null);
   const [requerimientos, setRequerimientos] = useState([createEmptyRequirement()]);
   const [isPublished, setIsPublished] = useState(true);
   const [companyOptions, setCompanyOptions] = useState<RecruiterCompanyOption[]>([]);
@@ -62,6 +74,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [submitError, setSubmitError] = useState(null);
   const [pasteConfirmOpen, setPasteConfirmOpen] = useState(false);
   const companyTouchedRef = useRef(false);
+  const lawSelectionTouchedRef = useRef(false);
   const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
 
   useEffect(() => {
@@ -125,13 +138,35 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
       }
     }
 
+    const loadLaws = async () => {
+      setLoadingLaws(true)
+      setLawsLoadError(null)
+      try {
+        const laws = await listRecruiterDataProtectionLaws()
+        if (cancelled) return
+        setLawOptions(laws)
+      } catch (error) {
+        if (cancelled) return
+        setLawOptions([])
+        setLawsLoadError(getApiErrorMessage(error))
+      } finally {
+        if (!cancelled) setLoadingLaws(false)
+      }
+    }
+
     void loadCompanies()
     void loadCatalogs()
+    void loadLaws()
 
     return () => {
       cancelled = true
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen || lawSelectionTouchedRef.current) return
+    setDataProtectionLawIds(suggestDataProtectionLawIds(countryCode, lawOptions))
+  }, [isOpen, countryCode, lawOptions])
 
   useEffect(() => {
     if (!isOpen) {
@@ -182,6 +217,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     }
     if (!selectedCompanyId.trim()) {
       nextErrors.empresa = t("validation.companyRequired");
+    }
+    if (normalizeDataProtectionLawIds(dataProtectionLawIds).length === 0) {
+      nextErrors.laws = t("validation.lawsRequired");
     }
     requerimientos.forEach((req) => {
       const hasName = !!req.requirementName.trim();
@@ -249,6 +287,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     if (vacancyModalityId) {
       payload.vacancyModalityId = vacancyModalityId
     }
+    payload.dataProtectionLawIds = normalizeDataProtectionLawIds(dataProtectionLawIds)
     if (!isPublished) {
       payload.isPublished = false
     }
@@ -280,6 +319,8 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     setStateCode("");
     setVacancyDepartmentId("");
     setVacancyModalityId("");
+    setDataProtectionLawIds([]);
+    lawSelectionTouchedRef.current = false;
     setSelectedCompanyId("");
     setRequerimientos([createEmptyRequirement()]);
     setIsPublished(true);
@@ -301,6 +342,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     if (stateCode.trim() !== "") return true
     if (vacancyDepartmentId !== "") return true
     if (vacancyModalityId !== "") return true
+    if (dataProtectionLawIds.length > 0) return true
     if (!isPublished) return true
     return requerimientos.some(
       (req) => req.requirementName.trim() !== "" || req.requirementValue.trim() !== ""
@@ -341,6 +383,8 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
       setSelectedCompanyId(resolvedCompanyId)
     }
     setRequerimientos(clipboardPayloadToRequirementRows(payload.requirements))
+    lawSelectionTouchedRef.current = true
+    setDataProtectionLawIds(payload.dataProtectionLawIds)
     setErrors({})
     onSnackbar?.(t("toasts.pasted"), "success")
   }
@@ -640,6 +684,27 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
             </select>
           </div>
         </div>
+
+        <VacancyDataProtectionLawsField
+          laws={lawOptions}
+          selectedIds={dataProtectionLawIds}
+          onChange={(ids) => {
+            lawSelectionTouchedRef.current = true
+            setDataProtectionLawIds(ids)
+          }}
+          legend={t("fields.dataProtectionLaws.label")}
+          helper={t("fields.dataProtectionLaws.helper")}
+          placeholder={t("fields.dataProtectionLaws.placeholder")}
+          emptyLabel={t("fields.dataProtectionLaws.empty")}
+          inactiveLabel={t("fields.dataProtectionLaws.inactive")}
+          loadingLabel={t("fields.dataProtectionLaws.loading")}
+          loadErrorLabel={t("fields.dataProtectionLaws.loadFailed")}
+          loading={loadingLaws}
+          loadError={lawsLoadError}
+          error={errors.laws}
+          errorId="vacante-laws-error"
+          disabled={loading}
+        />
 
         {catalogLoadError !== null ? (
           <div

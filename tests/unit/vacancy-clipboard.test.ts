@@ -96,6 +96,7 @@ describe("buildVacancyClipboardPayload", () => {
       companyId: "company-xyz",
       companyName: "Aero Cliente",
       requirements: [{ requirementName: "licencia", requirementValue: "Pesada", scale: 8 }],
+      dataProtectionLawIds: [],
     })
     expect(payload).not.toHaveProperty("id")
     expect(payload).not.toHaveProperty("uuid")
@@ -121,6 +122,20 @@ describe("buildVacancyClipboardPayload", () => {
     expect(payload.companyId).toBe("")
     expect(payload.companyName).toBe("")
     expect(payload.vacancyDepartmentName).toBe("")
+    expect(payload.dataProtectionLawIds).toEqual([])
+  })
+
+  it("copies linked law identifiers", () => {
+    const payload = buildVacancyClipboardPayload(
+      {
+        ...sourceVacancy,
+        dataProtectionLaws: [
+          { id: "law-sv", displayName: "Ley de El Salvador", jurisdictionCode: "SV", isActive: true },
+        ],
+      },
+      "company-xyz"
+    )
+    expect(payload.dataProtectionLawIds).toEqual(["law-sv"])
   })
 })
 
@@ -145,6 +160,19 @@ describe("parseVacancyClipboardPayload", () => {
     expect(parsed).not.toHaveProperty("id")
     expect(parsed).not.toHaveProperty("status")
     expect(parsed?.title).toBe("Piloto titular")
+  })
+
+  it("keeps older copies that do not include law identifiers", () => {
+    const { dataProtectionLawIds, ...legacy } = validPayload()
+    void dataProtectionLawIds
+    const parsed = parseVacancyClipboardPayload(legacy)
+    expect(parsed?.dataProtectionLawIds).toEqual([])
+  })
+
+  it("rejects a law identifier list that is not text", () => {
+    expect(
+      parseVacancyClipboardPayload({ ...validPayload(), dataProtectionLawIds: [1] })
+    ).toBeNull()
   })
 
   it("accepts older payloads that omit catalog and company labels", () => {
