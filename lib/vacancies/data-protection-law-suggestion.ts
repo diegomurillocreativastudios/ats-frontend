@@ -71,11 +71,15 @@ export function suggestDataProtectionLawIds(
   return ids
 }
 
-/** Drops blanks and repeated identifiers, keeping the first occurrence. */
-export function normalizeDataProtectionLawIds(ids: readonly string[]): string[] {
+/** Drops blanks and repeated identifiers, keeping the first occurrence. A missing list is empty. */
+export function normalizeDataProtectionLawIds(
+  ids: readonly string[] | null | undefined,
+): string[] {
+  if (!Array.isArray(ids)) return []
   const seen = new Set<string>()
   const result: string[] = []
   for (const id of ids) {
+    if (typeof id !== "string") continue
     const trimmed = id.trim()
     if (trimmed === "" || seen.has(trimmed)) continue
     seen.add(trimmed)

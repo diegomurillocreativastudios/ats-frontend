@@ -1580,7 +1580,7 @@ export default function VacanteDetallePage() {
     );
     setEditRequirements(clipboardPayloadToRequirementRows(payload.requirements));
     lawSelectionTouchedRef.current = true;
-    setEditDataProtectionLawIds(payload.dataProtectionLawIds);
+    setEditDataProtectionLawIds(normalizeDataProtectionLawIds(payload.dataProtectionLawIds));
     setEditErrors({});
   }, [mergedDepartmentOptions, mergedModalityOptions]);
 

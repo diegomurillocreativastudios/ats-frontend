@@ -37,6 +37,11 @@ describe("normalizeDataProtectionLawIds", () => {
     expect(normalizeDataProtectionLawIds([" a ", "a", "", "b"])).toEqual(["a", "b"])
   })
 
+  it("treats a missing list as empty", () => {
+    expect(normalizeDataProtectionLawIds(undefined)).toEqual([])
+    expect(normalizeDataProtectionLawIds(null)).toEqual([])
+  })
+
   it("treats the same identifiers as equal regardless of order", () => {
     expect(sameDataProtectionLawIds(["b", "a"], ["a", "b"])).toBe(true)
     expect(sameDataProtectionLawIds(["a"], ["a", "b"])).toBe(false)

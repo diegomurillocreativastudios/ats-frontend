@@ -26,6 +26,22 @@ vi.mock("@/lib/api/recruiter-companies", () => ({
   ]),
 }))
 
+vi.mock("@/lib/api/data-protection-laws", () => ({
+  listRecruiterDataProtectionLaws: vi.fn(async () => [
+    {
+      id: "law-sv",
+      code: "ley-proteccion-datos-el-salvador",
+      displayName: "Ley de El Salvador",
+      jurisdictionCode: "SV",
+      officialReference: "",
+      summary: "",
+      locale: "es",
+      body: "",
+      isActive: true,
+    },
+  ]),
+}))
+
 vi.mock("@/components/rrhh/VacancyLocationFields", () => ({
   VacancyLocationFields: () => <div data-testid="vacancy-location-fields" />,
 }))
@@ -75,6 +91,8 @@ async function fillRequiredFields() {
     target: { value: "Construir interfaces" },
   })
   await screen.findByRole("option", { name: "Creativa" })
+  fireEvent.click(await screen.findByRole("button", { name: /Leyes de protección de datos/ }))
+  fireEvent.click(await screen.findByRole("checkbox", { name: /Ley de El Salvador/ }))
 }
 
 function submit() {
@@ -102,6 +120,7 @@ describe("NuevaVacanteModal publication", () => {
     const [path, payload] = apiPost.mock.calls[0]
     expect(path).toBe("/api/recruiter/vacancies")
     expect(payload).not.toHaveProperty("isPublished")
+    expect(payload.dataProtectionLawIds).toEqual(["law-sv"])
   })
 
   it("sends isPublished: false when the recruiter turns the switch off", async () => {
@@ -152,6 +171,7 @@ describe("NuevaVacanteModal publication", () => {
       companyId: "",
       companyName: "",
       requirements: [],
+      dataProtectionLawIds: ["law-sv"],
     })
     renderModal()
 

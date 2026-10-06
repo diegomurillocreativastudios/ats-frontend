@@ -384,7 +384,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     }
     setRequerimientos(clipboardPayloadToRequirementRows(payload.requirements))
     lawSelectionTouchedRef.current = true
-    setDataProtectionLawIds(payload.dataProtectionLawIds)
+    setDataProtectionLawIds(normalizeDataProtectionLawIds(payload.dataProtectionLawIds))
     setErrors({})
     onSnackbar?.(t("toasts.pasted"), "success")
   }
