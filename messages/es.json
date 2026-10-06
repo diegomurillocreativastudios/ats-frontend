@@ -462,7 +462,7 @@
       }
     },
     "root": {
-      "description": "Portal del candidato - Resumen de tu proceso de selección"
+      "description": "Explorá vacantes activas y postulate en ApplicanTree."
     },
     "candidatePortal": {
       "home": {
@@ -505,20 +505,25 @@
     "publicOpportunities": {
       "list": {
         "title": "ApplicanTree | Portal Oportunidades",
-        "description": "Explorá vacantes activas por departamento y modalidad"
+        "description": "Explorá vacantes activas por departamento y modalidad en ApplicanTree."
       },
       "detail": {
         "title": "ApplicanTree | Portal Oportunidades | Vacante",
-        "description": "Detalle público de una vacante activa"
+        "description": "Detalle público de una vacante activa en ApplicanTree."
       },
       "apply": {
         "title": "ApplicanTree | Portal Oportunidades | Aplicar",
-        "description": "Formulario público para aplicar a una vacante activa"
+        "description": "Formulario público para aplicar a una vacante activa en ApplicanTree."
       }
     },
     "privacyPolicy": {
-      "title": "Política de privacidad | Applicantree ATS",
-      "description": "Política de privacidad de Applicantree ATS."
+      "title": "Política de privacidad | ApplicanTree",
+      "description": "Política de privacidad de ApplicanTree."
+    },
+    "notFound": {
+      "title": "Página no encontrada",
+      "description": "La página que buscás no existe en ApplicanTree.",
+      "back": "Ver vacantes"
     },
     "recruiterDashboard": {
       "title": "ApplicanTree | Portal RRHH | Inicio",

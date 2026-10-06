@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { getTranslations } from "next-intl/server"
+import { NOINDEX_NOFOLLOW } from "@/lib/seo/public-metadata"
 import { requirePortalRecruiterUser } from "@/lib/server-session-user"
 
 export const dynamic = "force-dynamic"
@@ -9,6 +10,7 @@ export async function generateMetadata() {
   return {
     title: { absolute: t("title") },
     description: t("description"),
+    robots: NOINDEX_NOFOLLOW,
   }
 }
 

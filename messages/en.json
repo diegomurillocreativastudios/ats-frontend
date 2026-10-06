@@ -462,7 +462,7 @@
       }
     },
     "root": {
-      "description": "Applicant portal — Overview of your selection process"
+      "description": "Browse open roles and apply on ApplicanTree."
     },
     "candidatePortal": {
       "home": {
@@ -505,20 +505,25 @@
     "publicOpportunities": {
       "list": {
         "title": "ApplicanTree | Opportunities Portal",
-        "description": "Browse active vacancies by department and work mode"
+        "description": "Browse active vacancies by department and work mode on ApplicanTree."
       },
       "detail": {
         "title": "ApplicanTree | Opportunities Portal | Vacancy",
-        "description": "Public details of an active vacancy"
+        "description": "Public details of an active vacancy on ApplicanTree."
       },
       "apply": {
         "title": "ApplicanTree | Opportunities Portal | Apply",
-        "description": "Public form to apply for an active vacancy"
+        "description": "Public form to apply for an active vacancy on ApplicanTree."
       }
     },
     "privacyPolicy": {
-      "title": "Privacy Policy | Applicantree ATS",
-      "description": "Privacy Policy for Applicantree ATS."
+      "title": "Privacy policy | ApplicanTree",
+      "description": "Privacy policy of ApplicanTree."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for does not exist on ApplicanTree.",
+      "back": "View vacancies"
     },
     "recruiterDashboard": {
       "title": "ApplicanTree | HR Portal | Home",

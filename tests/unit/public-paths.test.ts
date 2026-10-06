@@ -26,4 +26,9 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/auth/sso/success")).toBe(true)
     expect(isPublicPath("/auth/sso/success/")).toBe(true)
   })
+
+  it("allows crawler files without auth", () => {
+    expect(isPublicPath("/robots.txt")).toBe(true)
+    expect(isPublicPath("/sitemap.xml")).toBe(true)
+  })
 })

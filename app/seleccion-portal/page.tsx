@@ -11,6 +11,7 @@ import {
 } from "@/lib/portal-access"
 import LanguageSwitcher from "@/components/language-switcher"
 import ProductBrand from "@/components/branding/ProductBrand"
+import { NOINDEX_NOFOLLOW } from "@/lib/seo/public-metadata"
 
 interface PortalCardCopy {
   nameKey: "candidateName" | "opportunitiesName" | "rrhhName" | "adminName"
@@ -86,6 +87,7 @@ export async function generateMetadata() {
   return {
     title: t("title"),
     description: t("description"),
+    robots: NOINDEX_NOFOLLOW,
   }
 }
 

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { getTranslations } from "next-intl/server"
 import { PortalAdminShell } from "@/components/portal-admin/PortalAdminShell"
+import { NOINDEX_NOFOLLOW } from "@/lib/seo/public-metadata"
 import { requirePortalAdminUser } from "@/lib/server-session-user"
 
 export const dynamic = "force-dynamic"
@@ -10,6 +11,7 @@ export async function generateMetadata() {
   return {
     title: t("title"),
     description: t("description"),
+    robots: NOINDEX_NOFOLLOW,
   }
 }
 

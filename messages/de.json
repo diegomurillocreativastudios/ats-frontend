@@ -462,7 +462,7 @@
       }
     },
     "root": {
-      "description": "Portal del candidate - Resumen de tu proceso de seleccion"
+      "description": "Aktive Stellen entdecken und sich bei ApplicanTree bewerben."
     },
     "candidatePortal": {
       "home": {
@@ -505,20 +505,25 @@
     "publicOpportunities": {
       "list": {
         "title": "ApplicanTree | Stellenportal",
-        "description": "Aktive Stellen nach Abteilung und Arbeitsmodell durchsuchen"
+        "description": "Aktive Stellen nach Abteilung und Arbeitsmodell auf ApplicanTree durchsuchen."
       },
       "detail": {
         "title": "ApplicanTree | Stellenportal | Stellenangebot",
-        "description": "Öffentliche Details einer aktiven Stelle"
+        "description": "Öffentliche Details einer aktiven Stelle auf ApplicanTree."
       },
       "apply": {
         "title": "ApplicanTree | Stellenportal | Bewerben",
-        "description": "Öffentliches Formular zur Bewerbung auf eine aktive Stelle"
+        "description": "Öffentliches Formular zur Bewerbung auf eine aktive Stelle bei ApplicanTree."
       }
     },
     "privacyPolicy": {
-      "title": "Datenschutzerklärung | Applicantree ATS",
-      "description": "Datenschutzerklärung für Applicantree ATS."
+      "title": "Datenschutzerklärung | ApplicanTree",
+      "description": "Datenschutzerklärung von ApplicanTree."
+    },
+    "notFound": {
+      "title": "Seite nicht gefunden",
+      "description": "Die gesuchte Seite gibt es bei ApplicanTree nicht.",
+      "back": "Stellen ansehen"
     },
     "recruiterDashboard": {
       "title": "ApplicanTree | HR-Portal | Startseite",
