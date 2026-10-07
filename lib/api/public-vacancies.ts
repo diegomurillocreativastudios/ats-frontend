@@ -405,7 +405,7 @@ export function normalizeOpportunityDetail(payload: unknown): OpportunityVacancy
   const summary = normalizeOpportunitySummary(payload)
   const record = getRecord(payload)
 
-  if (!summary || !record) return summary
+  if (!summary || !record) return null
 
   return {
     ...summary,
