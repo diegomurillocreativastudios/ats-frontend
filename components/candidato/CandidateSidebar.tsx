@@ -2,12 +2,13 @@
 
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Sparkles, Home, User, FileText, Calendar } from "lucide-react"
+import { Sparkles, Home, User, FileText, Calendar, Briefcase } from "lucide-react"
 import {
   PortalSidebarFrame,
   SidebarNavItem,
   SidebarUserFooter,
 } from "@/components/navigation/portal-sidebar"
+import { PORTAL_HOME_HREF } from "@/lib/portal-access"
 
 const navItems = [
   { href: "/portal-candidato", labelKey: "home", icon: Home },
@@ -19,6 +20,11 @@ const navItems = [
   },
   { href: "/portal-candidato/documentos", labelKey: "documents", icon: FileText },
   { href: "/portal-candidato/entrevistas", labelKey: "interviews", icon: Calendar },
+  {
+    href: PORTAL_HOME_HREF.opportunities,
+    labelKey: "opportunitiesPortal",
+    icon: Briefcase,
+  },
 ] as const
 
 function isCandidateNavActive(pathname: string, href: string): boolean {

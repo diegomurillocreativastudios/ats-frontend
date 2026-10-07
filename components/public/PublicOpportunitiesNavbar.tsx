@@ -1,13 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { Grid3x3 } from "lucide-react"
+import { Grid3x3, User } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { ApplicanTreeLogo } from "@/components/branding/ApplicanTreeLogo"
 import LanguageSwitcher from "@/components/language-switcher"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
+import { PORTAL_HOME_HREF } from "@/lib/portal-access"
 import { publicOpportunitiesTheme as theme } from "@/lib/public-opportunities-theme"
-import { canChangePortal } from "@/lib/roles"
+import { canChangePortal, isCandidateRole } from "@/lib/roles"
 
 interface PublicOpportunitiesNavbarProps {
   className?: string
@@ -20,6 +21,8 @@ export function PublicOpportunitiesNavbar({
   const { user, loading } = useCurrentUser()
   const showChangePortal =
     !loading && Boolean(user) && canChangePortal(user?.role)
+  const showCandidatePortal =
+    !loading && Boolean(user) && isCandidateRole(user?.role)
 
   return (
     <nav
@@ -39,6 +42,16 @@ export function PublicOpportunitiesNavbar({
 
         <div className="relative flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher triggerClassName={theme.navAction} />
+          {showCandidatePortal ? (
+            <Link
+              href={PORTAL_HOME_HREF.candidate}
+              className={theme.navAction}
+              aria-label={t("ariaGoToCandidatePortal")}
+            >
+              <User className="h-4 w-4" aria-hidden />
+              <span>{t("goToCandidatePortal")}</span>
+            </Link>
+          ) : null}
           {showChangePortal ? (
             <Link
               href="/seleccion-portal"

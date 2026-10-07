@@ -1,3 +1,5 @@
+import { readApplicationId } from "@/lib/recruiter/interview-stage"
+
 /** Postulante tal como viene en `vacancy.applicants` (Kanban). */
 export interface VacancyApplicantLike {
   applicationStage?: string | null
@@ -146,6 +148,20 @@ export function getCandidateId(match: VacancyApplicantLike, index: number): stri
     match?.id ??
     `candidate-${index}`
   )
+}
+
+/**
+ * Stable list id for a kanban **application** row.
+ * Prefers `applicationId` so multiple applications for the same profile render as
+ * separate cards (and drag/status target the correct row).
+ *
+ * Do **not** use for talent-pool search or AI suggestion selection — use
+ * {@link getCandidateId} there (profile/document identity).
+ */
+export function getKanbanRowId(match: VacancyApplicantLike, index: number): string {
+  const applicationId = readApplicationId(match)
+  if (applicationId) return applicationId
+  return `${getCandidateId(match, index)}::row-${index}`
 }
 
 function readFiniteScore(value: unknown): number | null {

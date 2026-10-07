@@ -199,6 +199,8 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
                   showLocation
                   departmentLabel={hasDepartment ? departmentLabel : null}
                   modalityLabel={vacancy.modality?.displayName ?? tDetail("unspecified")}
+                  laws={vacancy.dataProtectionLaws}
+                  lawsLabel={tDetail("lawsLabel")}
                 />
 
                 <div className="border-t border-border pt-4">

@@ -3,6 +3,8 @@ import {
   buildApplicantComponentScoreAverages,
   extractApplicantComponentScores01,
   getApplicantPrimaryScore01,
+  getCandidateId,
+  getKanbanRowId,
   parseFallbackKanbanStages,
   resolveOrderedStageNames,
   type VacancyApplicantLike,
@@ -119,5 +121,38 @@ describe("getApplicantPrimaryScore01", () => {
 
   it("falls back to semanticScore only for legacy payloads", () => {
     expect(getApplicantPrimaryScore01({ semanticScore: 0.68 })).toBe(0.68)
+  })
+})
+
+describe("getKanbanRowId", () => {
+  it("uses distinct applicationIds when the same profile has multiple applications", () => {
+    const a: VacancyApplicantLike = {
+      candidateProfileId: "profile-1",
+      candidateDocumentId: "doc-1",
+      applicationId: "app-a",
+    }
+    const b: VacancyApplicantLike = {
+      candidateProfileId: "profile-1",
+      candidateDocumentId: "doc-1",
+      applicationId: "app-b",
+    }
+    expect(getCandidateId(a, 0)).toBe(getCandidateId(b, 1))
+    expect(getKanbanRowId(a, 0)).toBe("app-a")
+    expect(getKanbanRowId(b, 1)).toBe("app-b")
+    expect(getKanbanRowId(a, 0)).not.toBe(getKanbanRowId(b, 1))
+  })
+
+  it("reads application_id snake_case", () => {
+    expect(
+      getKanbanRowId({ application_id: "app-snake", candidateProfileId: "p1" }, 0)
+    ).toBe("app-snake")
+  })
+
+  it("falls back to profile id plus index when applicationId is missing", () => {
+    const a: VacancyApplicantLike = { candidateProfileId: "profile-1" }
+    const b: VacancyApplicantLike = { candidateProfileId: "profile-1" }
+    expect(getKanbanRowId(a, 0)).toBe("profile-1::row-0")
+    expect(getKanbanRowId(b, 1)).toBe("profile-1::row-1")
+    expect(getKanbanRowId(a, 0)).not.toBe(getKanbanRowId(b, 1))
   })
 })

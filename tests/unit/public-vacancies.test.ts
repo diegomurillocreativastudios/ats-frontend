@@ -177,4 +177,34 @@ describe("public vacancies API helpers", () => {
     expect(withoutSalary?.salary).toBeUndefined()
   })
 
+  it("maps embedded data protection laws and defaults to an empty list", () => {
+    const withLaws = normalizeOpportunityDetail({
+      id: "vac-1",
+      title: "Backend Engineer",
+      companyName: "Creativa Studios",
+      data_protection_laws: [
+        {
+          id: "law-sv",
+          code: "lpd-sv",
+          display_name: "Ley de Protección de Datos",
+          jurisdiction_code: "sv",
+        },
+      ],
+    })
+    const withoutLaws = normalizeOpportunityDetail({
+      id: "vac-2",
+      title: "Backend Engineer",
+      companyName: "Creativa Studios",
+    })
+
+    expect(withLaws?.dataProtectionLaws).toEqual([
+      expect.objectContaining({
+        id: "law-sv",
+        displayName: "Ley de Protección de Datos",
+        jurisdictionCode: "SV",
+      }),
+    ])
+    expect(withoutLaws?.dataProtectionLaws).toEqual([])
+  })
+
 })

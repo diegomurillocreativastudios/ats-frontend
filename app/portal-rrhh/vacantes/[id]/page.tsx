@@ -93,6 +93,7 @@ import { VACANCY_PRELIMINARY_MATCH_TYPICAL_MS } from "@/lib/apply-loading-bar"
 import {
   getApplicantPrimaryScore01,
   getCandidateId,
+  getKanbanRowId,
   normalizeKanbanStage,
   parseFallbackKanbanStages,
   pickApplicantDisplayName,
@@ -2180,9 +2181,9 @@ function VacanteDetallePage() {
 
     if (applicants.length > 0 && finalStageNames.size > 0) {
       return applicants.some((applicant, index) => {
-        const candidateId = getCandidateId(applicant, index)
+        const rowId = getKanbanRowId(applicant, index)
         const rawStageName =
-          candidateStageOverrides[candidateId] ??
+          candidateStageOverrides[rowId] ??
           applicant?.applicationStage ??
           applicant?.stage ??
           applicant?.stageName ??
@@ -2235,7 +2236,7 @@ function VacanteDetallePage() {
       return columnStages.map((stage) => ({ stage, candidates: [] }));
     }
     const withMeta = applicants.map((match, i) => {
-      const candidateId = getCandidateId(match, i);
+      const candidateId = getKanbanRowId(match, i);
       const stage =
         candidateStageOverrides[candidateId] ??
         normalizeKanbanStage(
@@ -2263,7 +2264,7 @@ function VacanteDetallePage() {
       if (loadingMoveStage || pendingStageMove) return;
       setApplicationStatusError(null);
       const applicantIndex = applicants.findIndex(
-        (m, i) => getCandidateId(m, i) === candidateId
+        (m, i) => getKanbanRowId(m, i) === candidateId
       );
       const applicant =
         applicantIndex >= 0 ? applicants[applicantIndex] : null;
@@ -2551,7 +2552,7 @@ function VacanteDetallePage() {
       if (isVacancyReadOnly) return;
       setApplicationStatusError(null);
       const applicant = applicants.find(
-        (m, i) => getCandidateId(m, i) === candidateId
+        (m, i) => getKanbanRowId(m, i) === candidateId
       );
       const applicationId = applicant?.applicationId ?? applicant?.application_id;
       if (!applicationId) {

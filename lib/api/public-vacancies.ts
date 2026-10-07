@@ -12,6 +12,10 @@ import {
   getVacancyModalitySummary,
   type VacancyCatalogSummary,
 } from "@/lib/vacancy-catalogs"
+import {
+  readVacancyDataProtectionLaws,
+  type VacancyDataProtectionLaw,
+} from "@/lib/vacancies/vacancy-data-protection-laws"
 
 export interface OpportunityFilterOption {
   id: string
@@ -79,6 +83,8 @@ export interface OpportunityVacancyDetail extends OpportunityVacancySummary {
   benefits?: string[]
   /** Present only when the public payload includes a salary field. */
   salary?: string
+  /** Embedded when the public payload includes data protection laws. */
+  dataProtectionLaws: VacancyDataProtectionLaw[]
 }
 
 export interface OpportunityPagination {
@@ -416,6 +422,7 @@ export function normalizeOpportunityDetail(payload: unknown): OpportunityVacancy
     salary: toOptionalString(
       record.salary ?? record.salaryRange ?? record.salary_range
     ),
+    dataProtectionLaws: readVacancyDataProtectionLaws(record),
   }
 }
 

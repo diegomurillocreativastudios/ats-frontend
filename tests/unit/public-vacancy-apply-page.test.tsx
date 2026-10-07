@@ -69,6 +69,7 @@ describe("PublicVacancyApplyPage", () => {
       stateCode: "SS",
       department: { id: "dep-1", code: "career", displayName: "Estrategia de carrera" },
       modality: { id: "mod-1", code: "onsite", displayName: "Presencial" },
+      dataProtectionLaws: [],
     })
   })
 
