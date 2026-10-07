@@ -7,15 +7,23 @@ import {
   normalizeRecruiterDashboard,
   type RecruiterDashboardModel,
 } from "@/lib/rrhh/recruiter-dashboard"
+import type { VacancyDashboardSnapshot } from "@/lib/rrhh/recruiter-vacancy-dashboard"
 import esMessages from "@/messages/es.json"
 
-const { useRecruiterDashboardMock, reloadMock } = vi.hoisted(() => ({
-  useRecruiterDashboardMock: vi.fn(),
-  reloadMock: vi.fn(),
-}))
+const { useRecruiterDashboardMock, reloadMock, useRecruiterVacancyDashboardMock, reloadVacanciesMock } =
+  vi.hoisted(() => ({
+    useRecruiterDashboardMock: vi.fn(),
+    reloadMock: vi.fn(),
+    useRecruiterVacancyDashboardMock: vi.fn(),
+    reloadVacanciesMock: vi.fn(),
+  }))
 
 vi.mock("@/hooks/use-recruiter-dashboard", () => ({
   useRecruiterDashboard: useRecruiterDashboardMock,
+}))
+
+vi.mock("@/hooks/use-recruiter-vacancy-dashboard", () => ({
+  useRecruiterVacancyDashboard: useRecruiterVacancyDashboardMock,
 }))
 
 vi.mock("@/hooks/useCurrentUser", () => ({
@@ -53,6 +61,28 @@ function buildModel(
   )
 }
 
+const EMPTY_VACANCY_SNAPSHOT: VacancyDashboardSnapshot = {
+  activeVacancies: 0,
+  withoutCandidates: 0,
+  overdue: 0,
+  unpublished: 0,
+  attention: [],
+  progressPartial: null,
+  listPartial: null,
+}
+
+function mockVacancyHook(
+  data: VacancyDashboardSnapshot | null = EMPTY_VACANCY_SNAPSHOT,
+  options: { isLoading?: boolean; error?: string | null } = {}
+) {
+  useRecruiterVacancyDashboardMock.mockReturnValue({
+    data,
+    isLoading: options.isLoading ?? false,
+    error: options.error ?? null,
+    reload: reloadVacanciesMock,
+  })
+}
+
 function mockHook(
   data: RecruiterDashboardModel | null,
   options: { isLoading?: boolean; error?: string | null } = {}
@@ -75,7 +105,9 @@ function renderDashboard() {
 
 beforeEach(() => {
   reloadMock.mockClear()
+  reloadVacanciesMock.mockClear()
   useRecruiterDashboardMock.mockReset()
+  mockVacancyHook()
 })
 
 describe("RecruiterDashboard", () => {
@@ -91,6 +123,24 @@ describe("RecruiterDashboard", () => {
   })
 
   it("muestra indicadores, recordatorios accionables y accesos directos", () => {
+    mockVacancyHook({
+      ...EMPTY_VACANCY_SNAPSHOT,
+      activeVacancies: 4,
+      withoutCandidates: 1,
+      overdue: 2,
+      unpublished: 3,
+      attention: [
+        {
+          vacancyId: "v1",
+          title: "Analista",
+          clientName: "Norte",
+          daysOpen: 30,
+          candidateCount: 0,
+          signal: "critical",
+          href: "/portal-rrhh/vacantes/analista",
+        },
+      ],
+    })
     mockHook(
       buildModel({
         reminders: [
@@ -106,11 +156,26 @@ describe("RecruiterDashboard", () => {
     )
     renderDashboard()
 
+    const vacancies = screen.getByRole("region", { name: "Vacantes" })
     expect(
-      screen.getByRole("link", { name: "Vacantes activas: 6. Ver detalle" })
-    ).toHaveAttribute("href", "/portal-rrhh/vacantes")
+      within(vacancies).getByRole("link", { name: "Vacantes activas: 4. Ver detalle" })
+    ).toHaveAttribute("href", "/portal-rrhh/vacantes?vista=activas")
+    expect(
+      within(vacancies).getByRole("link", { name: "Sin postulaciones: 1. Ver detalle" })
+    ).toHaveAttribute("href", "/portal-rrhh/vacantes?vista=sin-postulaciones")
+    expect(
+      within(vacancies).getByRole("link", { name: "Fuera de plazo: 2. Ver detalle" })
+    ).toHaveAttribute("href", "/portal-rrhh/vacantes?vista=fuera-de-plazo")
+    expect(
+      within(vacancies).getByRole("link", { name: "No publicadas: 3. Ver detalle" })
+    ).toHaveAttribute("href", "/portal-rrhh/vacantes?vista=no-publicadas")
+    expect(
+      within(vacancies).getByRole("link", { name: "Abrir vacante Analista" })
+    ).toHaveAttribute("href", "/portal-rrhh/vacantes/analista")
+    expect(within(vacancies).getByText("Crítica")).toBeInTheDocument()
 
-    const reminders = screen.getByRole("region", { name: "Pendientes por atender" })
+    const candidates = screen.getByRole("region", { name: "Candidatos" })
+    const reminders = within(candidates).getByRole("region", { name: "Pendientes por atender" })
     const stale = within(reminders).getByRole("article", { name: "Candidatos estancados" })
     expect(within(stale).getByText("Urgente")).toBeInTheDocument()
     expect(
@@ -146,7 +211,12 @@ describe("RecruiterDashboard", () => {
     const section = screen.getByRole("region", { name: "Recordatorios en preparación" })
     expect(within(section).getByText("Consentimientos pendientes")).toBeInTheDocument()
     expect(within(section).getByText("Seguimientos atrasados")).toBeInTheDocument()
+    expect(within(section).queryByText("Vacantes próximas a cerrar")).not.toBeInTheDocument()
     expect(within(section).getAllByText("Sin datos").length).toBeGreaterThan(0)
+
+    const vacancies = screen.getByRole("region", { name: "Vacantes" })
+    expect(within(vacancies).getByText("Vacantes próximas a cerrar")).toBeInTheDocument()
+    expect(within(vacancies).getByText("Vacantes sin actividad reciente")).toBeInTheDocument()
   })
 
   it("muestra el error general y permite reintentar cuando falla el panel", () => {
@@ -155,7 +225,27 @@ describe("RecruiterDashboard", () => {
 
     const alert = screen.getByRole("alert")
     expect(alert).toHaveTextContent("No pudimos cargar el panel")
+    expect(screen.getByRole("region", { name: "Vacantes" })).toBeInTheDocument()
     fireEvent.click(within(alert).getByRole("button", { name: "Reintentar" }))
     expect(reloadMock).toHaveBeenCalledTimes(1)
+    expect(reloadVacanciesMock).not.toHaveBeenCalled()
+  })
+
+  it("mantiene candidatos cuando falla el recorte de vacantes", () => {
+    mockHook(buildModel())
+    mockVacancyHook(null, { error: "vacantes" })
+    renderDashboard()
+
+    const vacancies = screen.getByRole("region", { name: "Vacantes" })
+    expect(within(vacancies).getByRole("alert")).toHaveTextContent(
+      "No pudimos cargar las señales de vacantes"
+    )
+    expect(
+      within(vacancies).getByRole("link", { name: "Vacantes activas: sin dato. Ver detalle" })
+    ).toHaveAttribute("href", "/portal-rrhh/vacantes?vista=activas")
+    const candidates = screen.getByRole("region", { name: "Candidatos" })
+    expect(
+      within(candidates).getByRole("region", { name: "Pendientes por atender" })
+    ).toBeInTheDocument()
   })
 })

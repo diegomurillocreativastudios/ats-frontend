@@ -25,6 +25,7 @@ import {
   reminderIncludesTime,
   reminderRowActionKey,
   reminderStatusKind,
+  reminderWindowDays,
   resolveReminderRowHref,
   type DashboardReminderKey,
   type ReminderDetailModel,
@@ -172,6 +173,7 @@ function KnownReminderDetail({ reminderKey, t, tDetail }: KnownReminderDetailPro
 
   const label = t(`reminders.${reminderKey}.title`)
   const title = tDetail("title", { label })
+  const windowDays = reminderWindowDays(reminderKey, data?.context ?? null)
 
   const handlePageChange = (next: number) => setPage(next)
   const handlePageSizeChange = (next: number) => {
@@ -227,6 +229,11 @@ function KnownReminderDetail({ reminderKey, t, tDetail }: KnownReminderDetailPro
               </Link>
             }
           />
+          {windowDays != null ? (
+            <p className="mt-3 font-sans text-sm text-muted-foreground">
+              {reminderWindowText(reminderKey, windowDays, tDetail)}
+            </p>
+          ) : null}
         </section>
         <section className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-2 md:px-6 lg:px-8">
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
@@ -258,6 +265,21 @@ function KnownReminderDetail({ reminderKey, t, tDetail }: KnownReminderDetailPro
       </div>
     </RrhhPortalShell>
   )
+}
+
+function reminderWindowText(
+  key: DashboardReminderKey,
+  days: number,
+  tDetail: ReturnType<typeof useTranslations<"RecruiterPortal.dashboard.reminderDetail">>
+): string | null {
+  if (
+    key !== "upcomingInterviews" &&
+    key !== "staleCandidates" &&
+    key !== "inactiveVacancies"
+  ) {
+    return null
+  }
+  return tDetail(`window.${key}`, { days })
 }
 
 interface DetailBodyProps {

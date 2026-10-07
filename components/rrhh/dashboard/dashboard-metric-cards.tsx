@@ -18,11 +18,13 @@ import {
 interface DashboardMetricCardsProps {
   metrics: DashboardMetric[]
   isLoading: boolean
+  skeletonKeys?: readonly DashboardMetricKey[]
 }
 
 export function DashboardMetricCards({
   metrics,
   isLoading,
+  skeletonKeys = METRIC_ORDER,
 }: DashboardMetricCardsProps) {
   const t = useTranslations("RecruiterPortal.dashboard")
 
@@ -32,7 +34,7 @@ export function DashboardMetricCards({
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
         aria-busy="true"
       >
-        {METRIC_ORDER.map((key) => (
+        {skeletonKeys.map((key) => (
           <div
             key={key}
             className="h-32 animate-pulse rounded-xl border border-border bg-muted/60 motion-reduce:animate-none"
@@ -54,7 +56,13 @@ export function DashboardMetricCards({
   )
 }
 
-function DashboardMetricCard({ metric }: { metric: DashboardMetric }) {
+export function DashboardMetricCard({
+  metric,
+  note,
+}: {
+  metric: DashboardMetric
+  note?: string | null
+}) {
   const t = useTranslations("RecruiterPortal.dashboard")
   const Icon = METRIC_ICONS[metric.key]
   const label = t(`metrics.${metric.key}`)
@@ -82,7 +90,11 @@ function DashboardMetricCard({ metric }: { metric: DashboardMetric }) {
         <p className="font-sans text-3xl font-bold leading-none tracking-tight text-foreground">
           {hasValue ? metric.value : "—"}
         </p>
-        <MetricStateNote metric={metric} />
+        {note ? (
+          <p className="mt-2 font-sans text-xs text-muted-foreground">{note}</p>
+        ) : (
+          <MetricStateNote metric={metric} />
+        )}
       </div>
     </Link>
   )

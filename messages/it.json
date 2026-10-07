@@ -2065,6 +2065,15 @@
         "noVacancies": "Nessuna posizione trovata",
         "noVacanciesFiltered": "Nessuna posizione trovata con i filtri applicati"
       },
+      "views": {
+        "activas": "Posizioni attive in mostra.",
+        "sin-postulaciones": "Posizioni senza candidature in mostra.",
+        "fuera-de-plazo": "Posizioni fuori termine in mostra.",
+        "no-publicadas": "Posizioni non pubblicate in mostra.",
+        "backToList": "Vedi tutte le posizioni",
+        "empty": "Nessuna posizione corrisponde a questo criterio.",
+        "untitled": "Posizione senza titolo"
+      },
       "loadingStates": {
         "loading": "Caricamento posizioni..."
       },
@@ -3079,6 +3088,39 @@
       "inactiveVacanciesRule": "Considerata inattiva dopo {days} giorni.",
       "openModule": "Apri modulo",
       "openModuleAria": "Apri il modulo relativo a {title}",
+      "containers": {
+        "vacancies": "Posizioni",
+        "candidates": "Candidati"
+      },
+      "vacancies": {
+        "description": "Segnali delle posizioni aperte che richiedono follow-up.",
+        "metrics": {
+          "withoutCandidates": "Senza candidature",
+          "overdue": "Fuori termine",
+          "unpublished": "Non pubblicate"
+        },
+        "attentionTitle": "Posizioni che richiedono attenzione",
+        "attentionEmpty": "Nessuna posizione di questa pagina richiede attenzione.",
+        "signals": {
+          "critical": "Critica",
+          "attention": "Attenzione",
+          "overdue": "Fuori termine",
+          "unpublished": "Non pubblicata"
+        },
+        "daysOpen": "{days, plural, one {# giorno aperta} other {# giorni aperta}}",
+        "candidateCount": "{count, plural, one {# candidatura} other {# candidature}}",
+        "openVacancy": "Apri posizione",
+        "openVacancyAria": "Apri posizione {title}",
+        "untitled": "Posizione senza titolo",
+        "partialProgress": "Avanzamento posizioni: basato su {analyzed} di {total} record; il totale reale può essere maggiore.",
+        "partialList": "Elenco posizioni: basato su {analyzed} di {total} record; il totale reale può essere maggiore.",
+        "loading": "Caricamento posizioni…",
+        "panelError": {
+          "title": "Non è stato possibile caricare i segnali delle posizioni",
+          "description": "Il blocco candidati resta disponibile.",
+          "retry": "Riprova"
+        }
+      },
       "shortcutsTitle": "Accessi rapidi",
       "shortcuts": {
         "candidates": {
@@ -3179,6 +3221,11 @@
         "unavailable": "Questo promemoria non ha ancora dati disponibili.",
         "partialGeneric": "Conteggio parziale: il totale reale può essere maggiore.",
         "inactiveStatus": "Inattiva",
+        "window": {
+          "upcomingInterviews": "Prossimi {days} giorni.",
+          "staleCandidates": "Senza cambio di fase da {days} giorni o più.",
+          "inactiveVacancies": "Senza attività dopo {days} giorni."
+        },
         "rowActions": {
           "interview": "Apri colloquio",
           "interviewAria": "Apri colloquio: {label}",

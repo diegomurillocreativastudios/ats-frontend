@@ -2065,6 +2065,15 @@
         "noVacancies": "Keine Stellen gefunden",
         "noVacanciesFiltered": "Keine Stellen mit den angewendeten Filtern gefunden"
       },
+      "views": {
+        "activas": "Aktive Stellen werden angezeigt.",
+        "sin-postulaciones": "Stellen ohne Bewerbungen werden angezeigt.",
+        "fuera-de-plazo": "Überfällige Stellen werden angezeigt.",
+        "no-publicadas": "Nicht veröffentlichte Stellen werden angezeigt.",
+        "backToList": "Alle Stellen anzeigen",
+        "empty": "Keine Stelle entspricht diesem Kriterium.",
+        "untitled": "Stelle ohne Titel"
+      },
       "loadingStates": {
         "loading": "Stellen werden geladen..."
       },
@@ -3079,6 +3088,39 @@
       "inactiveVacanciesRule": "Gilt nach {days} Tagen als inaktiv.",
       "openModule": "Modul öffnen",
       "openModuleAria": "Modul zu {title} öffnen",
+      "containers": {
+        "vacancies": "Stellen",
+        "candidates": "Kandidaten"
+      },
+      "vacancies": {
+        "description": "Signale zu offenen Stellen, die Nachverfolgung brauchen.",
+        "metrics": {
+          "withoutCandidates": "Ohne Bewerbungen",
+          "overdue": "Überfällig",
+          "unpublished": "Nicht veröffentlicht"
+        },
+        "attentionTitle": "Stellen, die Aufmerksamkeit brauchen",
+        "attentionEmpty": "Keine Stelle auf dieser Seite braucht Aufmerksamkeit.",
+        "signals": {
+          "critical": "Kritisch",
+          "attention": "Aufmerksamkeit",
+          "overdue": "Überfällig",
+          "unpublished": "Nicht veröffentlicht"
+        },
+        "daysOpen": "{days, plural, one {# Tag offen} other {# Tage offen}}",
+        "candidateCount": "{count, plural, one {# Bewerbung} other {# Bewerbungen}}",
+        "openVacancy": "Stelle öffnen",
+        "openVacancyAria": "Stelle {title} öffnen",
+        "untitled": "Stelle ohne Titel",
+        "partialProgress": "Stellenfortschritt: basierend auf {analyzed} von {total} Datensätzen; die tatsächliche Summe kann höher sein.",
+        "partialList": "Stellenliste: basierend auf {analyzed} von {total} Datensätzen; die tatsächliche Summe kann höher sein.",
+        "loading": "Stellen werden geladen…",
+        "panelError": {
+          "title": "Die Stellensignale konnten nicht geladen werden",
+          "description": "Der Kandidatenblock bleibt verfügbar.",
+          "retry": "Erneut versuchen"
+        }
+      },
       "shortcutsTitle": "Schnellzugriffe",
       "shortcuts": {
         "candidates": {
@@ -3179,6 +3221,11 @@
         "unavailable": "Für diese Erinnerung sind noch keine Daten verfügbar.",
         "partialGeneric": "Teilzählung: Die tatsächliche Summe kann höher sein.",
         "inactiveStatus": "Inaktiv",
+        "window": {
+          "upcomingInterviews": "Nächste {days} Tage.",
+          "staleCandidates": "Seit {days} Tagen oder länger ohne Etappenwechsel.",
+          "inactiveVacancies": "Ohne Aktivität nach {days} Tagen."
+        },
         "rowActions": {
           "interview": "Interview öffnen",
           "interviewAria": "Interview öffnen: {label}",

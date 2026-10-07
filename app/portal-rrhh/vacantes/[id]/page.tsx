@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeft,
@@ -655,9 +655,10 @@ const KanbanCard = ({
         draggable={!readOnly}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        className={`flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md ${readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"}`}
+        data-candidate-profile-id={sheetCandidateProfileId ?? undefined}
+        className={`flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md data-[focused-candidate=true]:ring-2 data-[focused-candidate=true]:ring-vo-purple data-[focused-candidate=true]:ring-offset-2 ${readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"}`}
         role={readOnly ? undefined : "button"}
-        tabIndex={readOnly ? undefined : 0}
+        tabIndex={readOnly ? -1 : 0}
         aria-label={readOnly ? undefined : tMatching("kanban.moveStageAria", { name: displayName })}
         aria-describedby={`kanban-card-${candidateId}`}
       >
@@ -1048,7 +1049,7 @@ const KanbanColumn = ({
   );
 };
 
-export default function VacanteDetallePage() {
+function VacanteDetallePage() {
   const t = useTranslations("RecruiterPortal.vacancies");
   const tDetail = useTranslations("RecruiterPortal.vacancies.detail");
   const tForm = useTranslations("RecruiterPortal.vacancies.form");
@@ -1056,6 +1057,8 @@ export default function VacanteDetallePage() {
   const locale = useLocale();
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const focusedCandidateId = searchParams.get("candidato")?.trim() ?? "";
   const pathSegmentRaw = params?.id ?? null;
   const pathSegment = Array.isArray(pathSegmentRaw)
     ? pathSegmentRaw[0]
@@ -1284,6 +1287,20 @@ export default function VacanteDetallePage() {
       setLoadingVacancyCatalogs(false)
     }
   }, [t])
+
+  useEffect(() => {
+    if (focusedCandidateId === "" || loading) return
+    const selector = `[data-candidate-profile-id="${CSS.escape(focusedCandidateId)}"]`
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>(selector))
+    document.querySelectorAll<HTMLElement>("[data-focused-candidate]").forEach((node) => {
+      node.removeAttribute("data-focused-candidate")
+    })
+    const visible = nodes.find((node) => node.getClientRects().length > 0) ?? null
+    if (!visible) return
+    visible.setAttribute("data-focused-candidate", "true")
+    visible.scrollIntoView({ block: "center" })
+    visible.focus({ preventScroll: true })
+  }, [focusedCandidateId, loading, vacancy])
 
   useEffect(() => {
     let cancelled = false
@@ -4569,5 +4586,13 @@ export default function VacanteDetallePage() {
         />
       ) : null}
     </>
+  );
+}
+
+export default function VacanteDetalleRoute() {
+  return (
+    <Suspense fallback={null}>
+      <VacanteDetallePage />
+    </Suspense>
   );
 }

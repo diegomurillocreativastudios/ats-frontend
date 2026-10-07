@@ -13,6 +13,7 @@ import {
   normalizeReminderDetail,
   reminderDetailLink,
   reminderIncludesCandidate,
+  reminderWindowDays,
   resolveReminderRowHref,
   sortDashboardReminders,
   type DashboardReminder,
@@ -62,7 +63,9 @@ describe("normalizeRecruiterDashboard", () => {
       expect(m.value).toBeNull()
       expect(m.sourceState).toBe("unavailable")
     }
-    expect(metric(model, "activeVacancies").href).toBe(RECRUITER_DASHBOARD_LINKS.vacancies)
+    expect(metric(model, "activeVacancies").href).toBe(
+      RECRUITER_DASHBOARD_LINKS.vacanciesActivas
+    )
     expect(metric(model, "upcomingInterviews").href).toBe(
       reminderDetailLink("upcomingInterviews")
     )
@@ -176,6 +179,14 @@ describe("normalizeRecruiterDashboard", () => {
     expect(reminder(model, "staleCandidates").context).toEqual({
       days: DASHBOARD_STALE_CANDIDATE_DAYS,
     })
+  })
+
+  it("usa el plazo del detalle y, si falta, el valor por defecto", () => {
+    expect(reminderWindowDays("upcomingInterviews", null)).toBe(
+      DASHBOARD_UPCOMING_INTERVIEW_DAYS
+    )
+    expect(reminderWindowDays("staleCandidates", { days: 30 })).toBe(30)
+    expect(reminderWindowDays("newCandidates", { days: 3 })).toBeNull()
   })
 })
 
@@ -346,6 +357,12 @@ describe("resolveReminderRowHref", () => {
         candidateProfileId: "cand-5",
         vacancyId: "vac-5",
       })
+    ).toBe("/portal-rrhh/vacantes/vac-5?candidato=cand-5")
+    expect(
+      resolveReminderRowHref("pendingEvaluations", {
+        ...baseItem,
+        vacancyId: "vac-5",
+      })
     ).toBe("/portal-rrhh/vacantes/vac-5")
     expect(
       resolveReminderRowHref("inactiveVacancies", { ...baseItem, id: "vac-8" })
@@ -362,21 +379,21 @@ describe("resolveReminderRowHref", () => {
         candidateProfileId: "cand-1",
         vacancyId: "vac-1",
       })
-    ).toBe("/portal-rrhh/vacantes/vac-1")
+    ).toBe("/portal-rrhh/vacantes/vac-1?candidato=cand-1")
     expect(
       resolveReminderRowHref("newCandidates", {
         ...baseItem,
         candidateProfileId: "cand-2",
         vacancyId: "vac-2",
       })
-    ).toBe("/portal-rrhh/vacantes/vac-2")
+    ).toBe("/portal-rrhh/vacantes/vac-2?candidato=cand-2")
     expect(
       resolveReminderRowHref("overdueFollowUps", {
         ...baseItem,
         candidateProfileId: "cand-3",
         vacancyId: "vac-3",
       })
-    ).toBe("/portal-rrhh/vacantes/vac-3")
+    ).toBe("/portal-rrhh/vacantes/vac-3?candidato=cand-3")
     expect(
       resolveReminderRowHref("vacanciesClosingSoon", {
         ...baseItem,

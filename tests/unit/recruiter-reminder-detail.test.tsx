@@ -74,11 +74,12 @@ describe("ReminderDetailView", () => {
     )
 
     await screen.findAllByText("Ana")
+    expect(screen.getByText("Sin cambiar de etapa en 14 días o más.")).toBeInTheDocument()
     expect(
       screen.getByRole("columnheader", { name: "Desde" })
     ).toBeInTheDocument()
     const openLinks = screen.getAllByRole("link", { name: /Abrir vacante/ })
-      .filter((link) => link.getAttribute("href") === "/portal-rrhh/vacantes/vac-1")
+      .filter((link) => link.getAttribute("href") === "/portal-rrhh/vacantes/vac-1?candidato=cand-1")
     expect(openLinks.length).toBeGreaterThan(0)
     expect(
       screen.getByRole("navigation", { name: "Paginación de pendientes" })

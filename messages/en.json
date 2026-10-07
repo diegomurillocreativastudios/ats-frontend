@@ -2065,6 +2065,15 @@
         "noVacancies": "No vacancies found",
         "noVacanciesFiltered": "No vacancies found with the applied filters"
       },
+      "views": {
+        "activas": "Showing active vacancies.",
+        "sin-postulaciones": "Showing vacancies with no applications.",
+        "fuera-de-plazo": "Showing vacancies past their deadline.",
+        "no-publicadas": "Showing unpublished vacancies.",
+        "backToList": "View all vacancies",
+        "empty": "No vacancy matches this criterion.",
+        "untitled": "Untitled vacancy"
+      },
       "loadingStates": {
         "loading": "Loading vacancies..."
       },
@@ -3079,6 +3088,39 @@
       "inactiveVacanciesRule": "Considered inactive after {days} days.",
       "openModule": "Open module",
       "openModuleAria": "Open module related to {title}",
+      "containers": {
+        "vacancies": "Vacancies",
+        "candidates": "Applicants"
+      },
+      "vacancies": {
+        "description": "Signals for open vacancies that need follow-up.",
+        "metrics": {
+          "withoutCandidates": "No applications",
+          "overdue": "Past deadline",
+          "unpublished": "Unpublished"
+        },
+        "attentionTitle": "Vacancies that need attention",
+        "attentionEmpty": "No vacancy on this page needs attention.",
+        "signals": {
+          "critical": "Critical",
+          "attention": "Needs attention",
+          "overdue": "Past deadline",
+          "unpublished": "Unpublished"
+        },
+        "daysOpen": "{days, plural, one {# day open} other {# days open}}",
+        "candidateCount": "{count, plural, one {# application} other {# applications}}",
+        "openVacancy": "Open vacancy",
+        "openVacancyAria": "Open vacancy {title}",
+        "untitled": "Untitled vacancy",
+        "partialProgress": "Vacancy progress: based on {analyzed} of {total} records; the real total may be higher.",
+        "partialList": "Vacancy list: based on {analyzed} of {total} records; the real total may be higher.",
+        "loading": "Loading vacancies…",
+        "panelError": {
+          "title": "We couldn't load the vacancy signals",
+          "description": "The applicants block is still available.",
+          "retry": "Try again"
+        }
+      },
       "shortcutsTitle": "Shortcuts",
       "shortcuts": {
         "candidates": {
@@ -3179,6 +3221,11 @@
         "unavailable": "This reminder has no data yet.",
         "partialGeneric": "Partial count: the real total may be higher.",
         "inactiveStatus": "Inactive",
+        "window": {
+          "upcomingInterviews": "Next {days} days.",
+          "staleCandidates": "No stage change for {days} days or more.",
+          "inactiveVacancies": "No activity after {days} days."
+        },
         "rowActions": {
           "interview": "Open interview",
           "interviewAria": "Open interview: {label}",

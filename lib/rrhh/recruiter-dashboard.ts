@@ -6,6 +6,7 @@ export const RECRUITER_DASHBOARD_LINKS = {
   home: "/portal-rrhh",
   candidates: "/portal-rrhh/candidatos",
   vacancies: "/portal-rrhh/vacantes",
+  vacanciesActivas: "/portal-rrhh/vacantes?vista=activas",
   interviews: "/portal-rrhh/entrevistas",
   calendar: "/portal-rrhh/configuracion/calendario",
   reports: "/portal-rrhh/reportes",
@@ -45,6 +46,17 @@ export type DashboardReminderKey =
   | "overdueFollowUps"
   | "pendingConsents"
   | "pendingDocuments"
+
+export const DASHBOARD_VACANCY_REMINDER_KEYS = [
+  "vacanciesClosingSoon",
+  "inactiveVacancies",
+] as const satisfies readonly DashboardReminderKey[]
+
+const VACANCY_REMINDER_KEY_SET: ReadonlySet<string> = new Set(DASHBOARD_VACANCY_REMINDER_KEYS)
+
+export function isVacancyDashboardReminder(key: DashboardReminderKey): boolean {
+  return VACANCY_REMINDER_KEY_SET.has(key)
+}
 
 export const DASHBOARD_REMINDER_KEYS: readonly DashboardReminderKey[] = [
   "upcomingInterviews",
@@ -132,7 +144,7 @@ export function isWithheldDashboardReminder(key: DashboardReminderKey): boolean 
 }
 
 const METRIC_LINK: Record<DashboardMetricKey, string> = {
-  activeVacancies: RECRUITER_DASHBOARD_LINKS.vacancies,
+  activeVacancies: RECRUITER_DASHBOARD_LINKS.vacanciesActivas,
   upcomingInterviews: reminderDetailLink("upcomingInterviews"),
   staleCandidates: reminderDetailLink("staleCandidates"),
   pendingEvaluations: reminderDetailLink("pendingEvaluations"),
@@ -273,6 +285,25 @@ function enrichContext(
   const defaults = DEFAULT_REMINDER_CONTEXT[key]
   if (!defaults && !context) return null
   return { ...(defaults ?? {}), ...(context ?? {}) }
+}
+
+export function reminderWindowDays(
+  key: DashboardReminderKey,
+  context: DashboardReminderContext | null
+): number | null {
+  if (!isReminderWindowKey(key)) return null
+  if (context?.days != null) return context.days
+  return DEFAULT_REMINDER_CONTEXT[key]?.days ?? null
+}
+
+function isReminderWindowKey(
+  key: DashboardReminderKey
+): key is "upcomingInterviews" | "staleCandidates" | "inactiveVacancies" {
+  return (
+    key === "upcomingInterviews" ||
+    key === "staleCandidates" ||
+    key === "inactiveVacancies"
+  )
 }
 
 const DEFAULT_REMINDER_CONTEXT: Partial<
@@ -500,7 +531,9 @@ export function resolveReminderRowHref(
     case "staleCandidates":
     case "overdueFollowUps":
     case "pendingEvaluations":
-      return item.vacancyId ? vacancyRowHref(item.vacancyId) : null
+      return item.vacancyId
+        ? vacancyRowHref(item.vacancyId, item.candidateProfileId)
+        : null
     case "pendingTechnicalSheets":
       return item.vacancyId && item.candidateProfileId
         ? `/portal-rrhh/vacantes/${encodeURIComponent(item.vacancyId)}/candidatos/${encodeURIComponent(item.candidateProfileId)}/technical-sheet`
@@ -518,6 +551,9 @@ function interviewRowHref(item: ReminderDetailItem): string {
   return `${path}?vacancyId=${encodeURIComponent(item.vacancyId)}`
 }
 
-function vacancyRowHref(vacancyId: string): string {
-  return `/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}`
+function vacancyRowHref(vacancyId: string, candidateProfileId?: string | null): string {
+  const path = `/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}`
+  const candidate = candidateProfileId?.trim() ?? ""
+  if (candidate === "") return path
+  return `${path}?candidato=${encodeURIComponent(candidate)}`
 }

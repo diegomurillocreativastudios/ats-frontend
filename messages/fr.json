@@ -2065,6 +2065,15 @@
         "noVacancies": "Aucun poste trouvé",
         "noVacanciesFiltered": "Aucun poste trouvé avec les filtres appliqués"
       },
+      "views": {
+        "activas": "Postes actifs affichés.",
+        "sin-postulaciones": "Postes sans candidatures affichés.",
+        "fuera-de-plazo": "Postes hors délai affichés.",
+        "no-publicadas": "Postes non publiés affichés.",
+        "backToList": "Voir tous les postes",
+        "empty": "Aucun poste ne correspond à ce critère.",
+        "untitled": "Poste sans titre"
+      },
       "loadingStates": {
         "loading": "Chargement des postes..."
       },
@@ -3079,6 +3088,39 @@
       "inactiveVacanciesRule": "Considéré inactif après {days} jours.",
       "openModule": "Ouvrir le module",
       "openModuleAria": "Ouvrir le module lié à {title}",
+      "containers": {
+        "vacancies": "Postes",
+        "candidates": "Candidats"
+      },
+      "vacancies": {
+        "description": "Signaux des postes ouverts qui demandent un suivi.",
+        "metrics": {
+          "withoutCandidates": "Sans candidatures",
+          "overdue": "Hors délai",
+          "unpublished": "Non publiés"
+        },
+        "attentionTitle": "Postes qui demandent attention",
+        "attentionEmpty": "Aucun poste de cette page ne demande attention.",
+        "signals": {
+          "critical": "Critique",
+          "attention": "Attention",
+          "overdue": "Hors délai",
+          "unpublished": "Non publié"
+        },
+        "daysOpen": "{days, plural, one {# jour ouvert} other {# jours ouverts}}",
+        "candidateCount": "{count, plural, one {# candidature} other {# candidatures}}",
+        "openVacancy": "Ouvrir le poste",
+        "openVacancyAria": "Ouvrir le poste {title}",
+        "untitled": "Poste sans titre",
+        "partialProgress": "Avancement des postes : basé sur {analyzed} sur {total} enregistrements ; le total réel peut être supérieur.",
+        "partialList": "Liste des postes : basé sur {analyzed} sur {total} enregistrements ; le total réel peut être supérieur.",
+        "loading": "Chargement des postes…",
+        "panelError": {
+          "title": "Impossible de charger les signaux des postes",
+          "description": "Le bloc des candidats reste disponible.",
+          "retry": "Réessayer"
+        }
+      },
       "shortcutsTitle": "Accès rapides",
       "shortcuts": {
         "candidates": {
@@ -3179,6 +3221,11 @@
         "unavailable": "Ce rappel n'a pas encore de données.",
         "partialGeneric": "Décompte partiel : le total réel peut être supérieur.",
         "inactiveStatus": "Inactive",
+        "window": {
+          "upcomingInterviews": "Prochains {days} jours.",
+          "staleCandidates": "Sans changement d'étape depuis {days} jours ou plus.",
+          "inactiveVacancies": "Sans activité après {days} jours."
+        },
         "rowActions": {
           "interview": "Ouvrir l'entretien",
           "interviewAria": "Ouvrir l'entretien : {label}",

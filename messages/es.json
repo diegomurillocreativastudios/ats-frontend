@@ -2065,6 +2065,15 @@
         "noVacancies": "No se encontraron vacantes",
         "noVacanciesFiltered": "No se encontraron vacantes con los filtros aplicados"
       },
+      "views": {
+        "activas": "Mostrando vacantes activas.",
+        "sin-postulaciones": "Mostrando vacantes sin postulaciones.",
+        "fuera-de-plazo": "Mostrando vacantes fuera de plazo.",
+        "no-publicadas": "Mostrando vacantes no publicadas.",
+        "backToList": "Ver todas las vacantes",
+        "empty": "Ninguna vacante con este criterio.",
+        "untitled": "Vacante sin título"
+      },
       "loadingStates": {
         "loading": "Cargando vacantes..."
       },
@@ -3079,6 +3088,39 @@
       "inactiveVacanciesRule": "Se considerará sin actividad tras {days} días.",
       "openModule": "Abrir módulo",
       "openModuleAria": "Abrir módulo relacionado con {title}",
+      "containers": {
+        "vacancies": "Vacantes",
+        "candidates": "Candidatos"
+      },
+      "vacancies": {
+        "description": "Señales de las vacantes abiertas que necesitan seguimiento.",
+        "metrics": {
+          "withoutCandidates": "Sin postulaciones",
+          "overdue": "Fuera de plazo",
+          "unpublished": "No publicadas"
+        },
+        "attentionTitle": "Vacantes que necesitan atención",
+        "attentionEmpty": "Ninguna vacante de esta página necesita atención.",
+        "signals": {
+          "critical": "Crítica",
+          "attention": "Atención",
+          "overdue": "Fuera de plazo",
+          "unpublished": "No publicada"
+        },
+        "daysOpen": "{days, plural, one {# día abierta} other {# días abierta}}",
+        "candidateCount": "{count, plural, one {# postulación} other {# postulaciones}}",
+        "openVacancy": "Abrir vacante",
+        "openVacancyAria": "Abrir vacante {title}",
+        "untitled": "Vacante sin título",
+        "partialProgress": "Avance de vacantes: basado en {analyzed} de {total} registros; el total real puede ser mayor.",
+        "partialList": "Listado de vacantes: basado en {analyzed} de {total} registros; el total real puede ser mayor.",
+        "loading": "Cargando vacantes…",
+        "panelError": {
+          "title": "No pudimos cargar las señales de vacantes",
+          "description": "El bloque de candidatos sigue disponible.",
+          "retry": "Reintentar"
+        }
+      },
       "shortcutsTitle": "Accesos rápidos",
       "shortcuts": {
         "candidates": {
@@ -3179,6 +3221,11 @@
         "unavailable": "Este recordatorio aún no tiene datos disponibles.",
         "partialGeneric": "Conteo parcial: el total real puede ser mayor.",
         "inactiveStatus": "Inactiva",
+        "window": {
+          "upcomingInterviews": "Próximos {days} días.",
+          "staleCandidates": "Sin cambiar de etapa en {days} días o más.",
+          "inactiveVacancies": "Sin actividad tras {days} días."
+        },
         "rowActions": {
           "interview": "Abrir entrevista",
           "interviewAria": "Abrir entrevista: {label}",

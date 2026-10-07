@@ -1,17 +1,35 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { Suspense, useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Plus, Briefcase } from "lucide-react";
 import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell";
 import NuevaVacanteModal from "@/components/rrhh/NuevaVacanteModal";
 import { VacancyListCard } from "@/components/rrhh/VacancyListCard";
 import { VacancyListFilters } from "@/components/rrhh/VacancyListFilters";
+import {
+  VacancyViewBanner,
+  VacancyViewEmpty,
+  VacancyViewList,
+} from "@/components/rrhh/vacancy-view-results";
 import PortalPageHeader from "@/components/ui/PortalPageHeader";
 import Snackbar from "@/components/ui/Snackbar";
 import { ListPaginationBar } from "@/components/ui/list-pagination-bar";
 import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { listRecruiterVacanciesPage } from "@/lib/api/recruiter-vacancies";
+import { loadVacancyListSources } from "@/lib/rrhh/load-vacancy-list-views";
+import {
+  isProgressVacancyListView,
+  parseVacancyListView,
+  selectActiveVacancies,
+  selectOverdueRows,
+  selectUnpublishedVacancies,
+  selectWithoutCandidateRows,
+  toProgressViewRows,
+  type VacancyProgressViewRow,
+} from "@/lib/rrhh/vacancy-list-views";
 import {
   EMPTY_VACANCY_LIST_FILTERS,
   filterVacancyList,
@@ -117,8 +135,60 @@ function VacancyListSection({
   );
 }
 
-export default function VacantesPage() {
+function ViewLoading() {
   const t = useTranslations("RecruiterPortal.vacancies");
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
+      <div
+        className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
+        aria-hidden
+      />
+      <p className="font-sans text-sm text-muted-foreground">{t("loadingStates.loading")}</p>
+    </div>
+  );
+}
+
+function ViewError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const t = useTranslations("RecruiterPortal.vacancies");
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card py-16 text-center">
+      <p className="font-sans text-sm text-destructive" role="alert">
+        {message}
+      </p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="inline-flex min-h-11 items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
+      >
+        {t("actions.retry")}
+      </button>
+    </div>
+  );
+}
+
+export default function VacantesPage() {
+  return (
+    <Suspense fallback={<VacantesPageFallback />}>
+      <VacantesPageContent />
+    </Suspense>
+  );
+}
+
+function VacantesPageFallback() {
+  const t = useTranslations("RecruiterPortal.vacancies");
+  return (
+    <RrhhPortalShell breadcrumbLabel={t("breadcrumb")}>
+      <p className="px-4 py-6 font-sans text-sm text-muted-foreground">
+        {t("loadingStates.loading")}
+      </p>
+    </RrhhPortalShell>
+  );
+}
+
+function VacantesPageContent() {
+  const t = useTranslations("RecruiterPortal.vacancies");
+  const searchParams = useSearchParams();
+  const view = parseVacancyListView(searchParams.get("vista"));
   const [vacancies, setVacancies] = useState<VacancyListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -127,6 +197,11 @@ export default function VacantesPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [filters, setFilters] = useState<VacancyFiltersState>(EMPTY_VACANCY_LIST_FILTERS);
   const [statusFilter] = useState("todas");
+  const [viewListItems, setViewListItems] = useState<VacancyListItem[]>([]);
+  const [viewProgressRows, setViewProgressRows] = useState<VacancyProgressViewRow[]>([]);
+  const [viewPartial, setViewPartial] = useState<{ analyzed: number; total: number } | null>(
+    null
+  );
   const [isNuevaVacanteOpen, setIsNuevaVacanteOpen] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -167,11 +242,66 @@ export default function VacantesPage() {
   }, [t, page, pageSize]);
 
   useEffect(() => {
+    if (view) return;
     fetchVacancies();
-  }, [fetchVacancies]);
+  }, [fetchVacancies, view]);
+
+  const viewRequest = useRef(0);
+
+  const loadView = useCallback(async () => {
+    if (!view) return;
+    const requestId = ++viewRequest.current;
+    setLoading(true);
+    setFetchError(null);
+    try {
+      const loaded = await loadVacancyListSources();
+      if (viewRequest.current !== requestId) return;
+      if (isProgressVacancyListView(view)) {
+        const rows =
+          view === "sin-postulaciones"
+            ? selectWithoutCandidateRows(loaded.progressRows)
+            : selectOverdueRows(loaded.progressRows);
+        setViewProgressRows(toProgressViewRows(rows, loaded.listItems));
+        setViewListItems([]);
+        setViewPartial(
+          loaded.progressTruncated
+            ? { analyzed: loaded.progressRows.length, total: loaded.progressTotal }
+            : null
+        );
+      } else {
+        const items =
+          view === "activas"
+            ? selectActiveVacancies(loaded.listItems)
+            : selectUnpublishedVacancies(loaded.listItems);
+        setViewListItems(items);
+        setViewProgressRows([]);
+        setViewPartial(
+          loaded.listTruncated
+            ? { analyzed: loaded.listItems.length, total: loaded.listTotal }
+            : null
+        );
+      }
+    } catch (err: unknown) {
+      if (viewRequest.current !== requestId) return;
+      setFetchError(getApiErrorMessage(err) || t("errors.loadFailed"));
+      setViewListItems([]);
+      setViewProgressRows([]);
+      setViewPartial(null);
+    } finally {
+      if (viewRequest.current === requestId) setLoading(false);
+    }
+  }, [t, view]);
+
+  useEffect(() => {
+    if (!view) return;
+    setPage(1);
+    void loadView();
+  }, [loadView, view]);
 
   const handleNuevaVacanteSubmit = () => {
-    if (page !== 1) {
+    if (view) {
+      void loadView();
+    } else if (page !== 1) {
       setPage(1);
     } else {
       fetchVacancies();
@@ -190,7 +320,13 @@ export default function VacantesPage() {
     setPage(1);
   };
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize) || 1);
+  const viewItemCount = view
+    ? isProgressVacancyListView(view)
+      ? viewProgressRows.length
+      : viewListItems.length
+    : totalCount;
+  const listTotalCount = view ? viewItemCount : totalCount;
+  const totalPages = Math.max(1, Math.ceil(listTotalCount / pageSize) || 1);
   const paginationLabels = {
     perPage: t("pagination.perPage"),
     pageSizeAria: t("pagination.pageSizeAria"),
@@ -198,8 +334,11 @@ export default function VacantesPage() {
     summary: t("pagination.summary", { page, total: totalPages }),
     prev: t("pagination.prev"),
     next: t("pagination.next"),
-    count: t("pagination.count", { count: totalCount }),
+    count: t("pagination.count", { count: listTotalCount }),
   };
+  const pageStart = (page - 1) * pageSize;
+  const pagedViewList = viewListItems.slice(pageStart, pageStart + pageSize);
+  const pagedViewProgress = viewProgressRows.slice(pageStart, pageStart + pageSize);
 
   const filteredVacancies = useMemo(() => {
     const filtered = filterVacancyList(vacancies, filters);
@@ -237,28 +376,52 @@ export default function VacantesPage() {
       aria-label={t("page.listRegionLabel")}
     >
       <div className="shrink-0">
-        <VacancyListFilters
-          value={filters}
-          onChange={setFilters}
-          disabled={loading}
-        />
+        {view ? (
+          <VacancyViewBanner view={view} partial={viewPartial} />
+        ) : (
+          <VacancyListFilters
+            value={filters}
+            onChange={setFilters}
+            disabled={loading}
+          />
+        )}
       </div>
-      <VacancyListSection
-        loading={loading}
-        fetchError={fetchError}
-        filteredVacancies={filteredVacancies}
-        filters={filters}
-        onRetry={fetchVacancies}
-        onCreate={() => setIsNuevaVacanteOpen(true)}
-        onRefresh={fetchVacancies}
-        onSnackbar={handleSnackbar}
-      />
-      {!loading && !fetchError ? (
+      {view ? (
+        loading ? (
+          <ViewLoading />
+        ) : fetchError ? (
+          <ViewError message={fetchError} onRetry={() => void loadView()} />
+        ) : viewItemCount === 0 ? (
+          <VacancyViewEmpty />
+        ) : (
+          <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
+            <VacancyViewList
+              view={view}
+              listItems={pagedViewList}
+              progressRows={pagedViewProgress}
+              onRefresh={() => void loadView()}
+              onSnackbar={handleSnackbar}
+            />
+          </div>
+        )
+      ) : (
+        <VacancyListSection
+          loading={loading}
+          fetchError={fetchError}
+          filteredVacancies={filteredVacancies}
+          filters={filters}
+          onRetry={fetchVacancies}
+          onCreate={() => setIsNuevaVacanteOpen(true)}
+          onRefresh={fetchVacancies}
+          onSnackbar={handleSnackbar}
+        />
+      )}
+      {!loading && !fetchError && (!view || viewItemCount > 0) ? (
         <div className="shrink-0">
           <ListPaginationBar
             page={page}
             pageSize={pageSize}
-            totalCount={totalCount}
+            totalCount={listTotalCount}
             loading={loading}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
