@@ -18,6 +18,8 @@ export interface ApplicationStage {
 
 export interface CandidatePortalApplicationRow {
   id: string
+  /** Vacancy Guid for linking portal rows to the public vacancy. */
+  vacancyId?: string
   jobTitle: string
   companyLine: string
   statusLabel: string

@@ -2550,6 +2550,10 @@
         },
         "kanban": {
           "score": "Score",
+          "analysis": "Analysis",
+          "analysisAria": "View AI analysis for {name}",
+          "sourcePersonalAria": "Personal application (self-apply)",
+          "sourceRecruiterAria": "Candidate uploaded by recruiter",
           "columnAria": "Column {stage}",
           "moveStageAria": "Move {name} to another stage",
           "statusAria": "Status of {name}",
@@ -4351,7 +4355,10 @@
         "consentValidation": "Please review the authorization and consent and try again.",
         "consentVersionMismatch": "The authorization document was updated. Reload the page and try again.",
         "consentNationalIdConflict": "That identity document is already linked to another profile. Use a different value or contact support.",
-        "vacancyUnavailable": "This vacancy is no longer available. Your details were not sent."
+        "vacancyUnavailable": "This vacancy is no longer available. Your details were not sent.",
+        "alreadyApplied": "You already applied to this vacancy. Check status in your candidate portal.",
+        "alreadyAppliedCta": "Go to candidate portal",
+        "consentRequired": "You need to accept the authorization and consent to apply."
       },
       "fields": {
         "firstName": "First names *",
@@ -4465,7 +4472,36 @@
       "checklistEmail": "Use the same email associated with your applicant account.",
       "checklistData": "Complete first names, last names, and email with real data.",
       "formSectionLabel": "Application form",
-      "documentTitle": "ApplicanTree | Opportunities Portal | Apply to {title}"
+      "documentTitle": "ApplicanTree | Opportunities Portal | Apply to {title}",
+      "alreadyApplied": {
+        "title": "You're already in process",
+        "body": "You already applied to this vacancy. You can track status from your candidate portal.",
+        "cta": "Go to candidate portal"
+      },
+      "loggedIn": {
+        "sectionLabel": "Apply with your profile",
+        "formSectionLabel": "Complete the missing details",
+        "title": "Confirm your application",
+        "body": "We will use the details and CV from your applicant profile. You do not need to fill out the full form again.",
+        "cta": "Apply with my profile",
+        "editDetails": "Complete or edit details",
+        "cvOnFile": "CV saved on your profile",
+        "cvDownloadFailed": "We could not load the CV from your profile. Upload it again or edit your details.",
+        "submitFailed": "We could not submit your application. Please try again.",
+        "beforeSubmit": "With your account",
+        "checklistProfile": "Your profile details will be sent automatically.",
+        "checklistCv": "We will use the CV saved on your profile.",
+        "checklistReview": "Review the summary and confirm with one click.",
+        "checklistComplete": "Complete any fields still missing from your profile.",
+        "checklistCvUpload": "Attach a PDF CV if you do not have one saved yet.",
+        "fields": {
+          "name": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "document": "ID document",
+          "cv": "Resume"
+        }
+      }
     },
     "unavailable": {
       "title": "This job opening is no longer available",

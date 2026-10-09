@@ -8,7 +8,9 @@ import {
   ArrowLeft,
   ArrowRight,
   Ban,
+  Brain,
   Briefcase,
+  Building2,
   CheckSquare,
   FileText,
   Gift,
@@ -54,7 +56,10 @@ import {
   getApiErrorMessage,
 } from "@/lib/api-error"
 import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
-import { formatApplicationSourceBadge } from "@/lib/application-source"
+import {
+  formatApplicationSourceBadge,
+  isPersonalApplicationSource,
+} from "@/lib/application-source"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
@@ -565,8 +570,10 @@ const KanbanCard = ({
 }) => {
   const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
+  const locale = useLocale();
   const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false);
   const [interviewFeedbackOpen, setInterviewFeedbackOpen] = useState(false);
+  const [analysisModalOpen, setAnalysisModalOpen] = useState(false);
   const sheetCandidateProfileId =
     match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
       ? String(match.candidateProfileId).trim()
@@ -579,9 +586,9 @@ const KanbanCard = ({
   );
   const rawScore = getApplicantPrimaryScore01(match);
   const score = rawScore != null ? (rawScore * 100).toFixed(0) : "—";
-  const applicationSourceLabel = formatApplicationSourceBadge(
-    match.applicationSource ?? match.application_source
-  );
+  const applicationSourceRaw = match.applicationSource ?? match.application_source;
+  const isPersonalSource = isPersonalApplicationSource(applicationSourceRaw);
+  const applicationSourceLabel = formatApplicationSourceBadge(applicationSourceRaw);
   const applicationId = readApplicationId(match);
   const interviewDone = readInterviewDoneFromApplicant(match);
   const hasInterviewFeedback = readHasInterviewFeedbackFromApplicant(match);
@@ -700,10 +707,36 @@ const KanbanCard = ({
             <span className="text-muted-foreground">{tMatching("kanban.score")}</span>
             <span className="font-semibold tabular-nums text-foreground">{score}</span>
           </div>
-          <span className="inline-flex shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-foreground">
-            {applicationSourceLabel}
+          <span
+            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-muted-foreground"
+            title={applicationSourceLabel}
+            aria-label={
+              isPersonalSource
+                ? tMatching("kanban.sourcePersonalAria")
+                : tMatching("kanban.sourceRecruiterAria")
+            }
+          >
+            {isPersonalSource ? (
+              <User className="h-3.5 w-3.5" aria-hidden />
+            ) : (
+              <Building2 className="h-3.5 w-3.5" aria-hidden />
+            )}
           </span>
         </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setAnalysisModalOpen(true);
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+          aria-label={tMatching("kanban.analysisAria", { name: displayName })}
+        >
+          <Brain className="h-3.5 w-3.5" aria-hidden />
+          {tMatching("kanban.analysis")}
+        </button>
 
         {hasStatuses ? (
           <select
@@ -804,6 +837,14 @@ const KanbanCard = ({
           candidateLabel={displayName}
           vacancyLabel={vacancyTitle}
           onComplete={onInterviewFeedbackComplete}
+        />
+      ) : null}
+      {analysisModalOpen ? (
+        <CandidateProfileModal
+          match={match}
+          candidateId={candidateId}
+          uploadedAtLabel={`${tMatching("uploadedPrefix")} ${formatDate(match.uploadedAt, locale)}`}
+          onClose={() => setAnalysisModalOpen(false)}
         />
       ) : null}
     </>

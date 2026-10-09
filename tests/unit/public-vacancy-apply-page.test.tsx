@@ -1,13 +1,22 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
-import { render, screen, within } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 
 import { PublicVacancyApplyPage } from "@/components/public/PublicVacancyApplyPage"
 import esMessages from "@/messages/es.json"
 
-const { getPublicVacancyByPathSegmentMock, routerMock } = vi.hoisted(() => ({
+const {
+  getPublicVacancyByPathSegmentMock,
+  routerMock,
+  useCurrentUserMock,
+  apiGetMock,
+  fetchApplicationByVacancyMock,
+} = vi.hoisted(() => ({
   getPublicVacancyByPathSegmentMock: vi.fn(),
   routerMock: { push: vi.fn(), replace: vi.fn(), refresh: vi.fn() },
+  useCurrentUserMock: vi.fn(),
+  apiGetMock: vi.fn(),
+  fetchApplicationByVacancyMock: vi.fn(),
 }))
 
 vi.mock("next/navigation", () => ({
@@ -21,7 +30,14 @@ vi.mock("@/i18n/navigation", () => ({
 }))
 
 vi.mock("@/hooks/useCurrentUser", () => ({
-  useCurrentUser: () => ({ user: null, loading: false }),
+  useCurrentUser: () => useCurrentUserMock(),
+}))
+
+vi.mock("@/lib/api", () => ({
+  apiClient: {
+    get: (...args: unknown[]) => apiGetMock(...args),
+  },
+  resolveBffUrl: (path: string) => path,
 }))
 
 vi.mock("@/lib/api/public-vacancies", async (importOriginal) => {
@@ -32,6 +48,11 @@ vi.mock("@/lib/api/public-vacancies", async (importOriginal) => {
   }
 })
 
+vi.mock("@/lib/candidate-application-by-vacancy", () => ({
+  fetchCandidateApplicationByVacancy: (...args: unknown[]) =>
+    fetchApplicationByVacancyMock(...args),
+}))
+
 vi.mock("@/components/shared/VacancyLocationLabel", () => ({
   VacancyLocationLabel: () => <span>El Salvador, San Salvador</span>,
 }))
@@ -41,7 +62,31 @@ vi.mock("@/components/public/ApplyPrivacyNoticeDialog", () => ({
 }))
 
 vi.mock("@/components/public/PublicVacancyApplicationForm", () => ({
-  PublicVacancyApplicationForm: () => <div>formulario de postulación</div>,
+  PublicVacancyApplicationForm: ({
+    isEmailLocked,
+  }: {
+    isEmailLocked?: boolean
+  }) => (
+    <div>
+      formulario de postulación
+      {isEmailLocked ? <span>email-locked</span> : null}
+    </div>
+  ),
+}))
+
+vi.mock("@/components/public/PublicVacancyLoggedInApplyConfirm", () => ({
+  PublicVacancyLoggedInApplyConfirm: ({
+    onEditDetails,
+  }: {
+    onEditDetails: () => void
+  }) => (
+    <div>
+      confirmación logueada
+      <button type="button" onClick={onEditDetails}>
+        editar datos mock
+      </button>
+    </div>
+  ),
 }))
 
 function renderApply() {
@@ -52,9 +97,28 @@ function renderApply() {
   )
 }
 
+const readyProfile = {
+  id: "cand-1",
+  firstName: "Ana",
+  lastName: "López",
+  headline: "",
+  summary: "",
+  resumeMarkdown: "",
+  nationalId: "01234567-8",
+  identityDocumentTypeId: "11111111-1111-1111-1111-111111111111",
+  email: "ana@example.com",
+  phoneNumber: "77778888",
+  hasCvFile: true,
+  authAndConsentVerification: true,
+}
+
 describe("PublicVacancyApplyPage", () => {
   beforeEach(() => {
     getPublicVacancyByPathSegmentMock.mockReset()
+    apiGetMock.mockReset()
+    fetchApplicationByVacancyMock.mockReset()
+    fetchApplicationByVacancyMock.mockResolvedValue({ hasApplied: false })
+    useCurrentUserMock.mockReturnValue({ user: null, loading: false })
     getPublicVacancyByPathSegmentMock.mockResolvedValue({
       id: "vac-1",
       publicSlug: null,
@@ -153,6 +217,97 @@ describe("PublicVacancyApplyPage", () => {
     expect(
       screen.queryByRole("link", { name: esMessages.PublicOpportunities.apply.backToDetail })
     ).not.toBeInTheDocument()
+    expect(screen.queryByText("formulario de postulación")).not.toBeInTheDocument()
+  })
+
+  it("muestra confirmación rápida para candidato logueado con perfil completo", async () => {
+    useCurrentUserMock.mockReturnValue({
+      user: {
+        id: "u1",
+        name: "Ana",
+        email: "ana@example.com",
+        role: "candidate",
+        hasPhoto: false,
+      },
+      loading: false,
+    })
+    apiGetMock.mockResolvedValue(readyProfile)
+
+    renderApply()
+
+    await waitFor(() => {
+      expect(fetchApplicationByVacancyMock).toHaveBeenCalledWith("vac-1")
+    })
+    await waitFor(() => {
+      expect(screen.getByText("confirmación logueada")).toBeInTheDocument()
+    })
+    expect(screen.queryByText("formulario de postulación")).not.toBeInTheDocument()
+    expect(
+      screen.getByText(
+        esMessages.PublicOpportunities.apply.loggedIn.checklistProfile
+      )
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "editar datos mock" }))
+    expect(await screen.findByText("formulario de postulación")).toBeInTheDocument()
+    expect(screen.getByText("email-locked")).toBeInTheDocument()
+  })
+
+  it("usa formulario con prefill cuando el candidato no tiene CV guardado", async () => {
+    useCurrentUserMock.mockReturnValue({
+      user: {
+        id: "u1",
+        name: "Ana",
+        email: "ana@example.com",
+        role: "candidate",
+        hasPhoto: false,
+      },
+      loading: false,
+    })
+    apiGetMock.mockResolvedValue({ ...readyProfile, hasCvFile: false })
+
+    renderApply()
+
+    await waitFor(() => {
+      expect(fetchApplicationByVacancyMock).toHaveBeenCalledWith("vac-1")
+    })
+    await waitFor(() => {
+      expect(screen.getByText("formulario de postulación")).toBeInTheDocument()
+    })
+    expect(screen.getByText("email-locked")).toBeInTheDocument()
+    expect(screen.queryByText("confirmación logueada")).not.toBeInTheDocument()
+  })
+
+  it("bloquea el CTA cuando el candidato ya postuló a la vacante", async () => {
+    useCurrentUserMock.mockReturnValue({
+      user: {
+        id: "u1",
+        name: "Ana",
+        email: "ana@example.com",
+        role: "candidate",
+        hasPhoto: false,
+      },
+      loading: false,
+    })
+    apiGetMock.mockResolvedValue(readyProfile)
+    fetchApplicationByVacancyMock.mockResolvedValue({
+      hasApplied: true,
+      applicationId: "app-1",
+    })
+
+    renderApply()
+
+    expect(
+      await screen.findByRole("heading", {
+        name: esMessages.PublicOpportunities.apply.alreadyApplied.title,
+      })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", {
+        name: esMessages.PublicOpportunities.apply.alreadyApplied.cta,
+      })
+    ).toHaveAttribute("href", "/portal-candidato")
+    expect(screen.queryByText("confirmación logueada")).not.toBeInTheDocument()
     expect(screen.queryByText("formulario de postulación")).not.toBeInTheDocument()
   })
 })

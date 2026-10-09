@@ -27,6 +27,17 @@ function pickString(
   return null
 }
 
+function readArrayField(
+  root: Record<string, unknown>,
+  keys: string[]
+): unknown[] {
+  for (const key of keys) {
+    const value = root[key]
+    if (Array.isArray(value)) return value
+  }
+  return []
+}
+
 /** Id de postulación para un candidato dentro de `applicants` de la vacante. */
 export function findApplicationIdForCandidate(
   applicants: unknown[],
@@ -81,7 +92,89 @@ export async function listAllVacancyApplications(
 }
 
 /**
- * Replaces nested `applicants` with the paginated applications list.
+ * Index rich GetVacancy match rows (applicants + aiMatchSuggestions) so
+ * `/applications` overlay can keep IA analysis while taking stage/status from apps.
+ */
+export function indexRichVacancyMatchRows(
+  root: Record<string, unknown>
+): {
+  byApplicationId: Map<string, Record<string, unknown>>
+  byProfileId: Map<string, Record<string, unknown>>
+} {
+  const byApplicationId = new Map<string, Record<string, unknown>>()
+  const byProfileId = new Map<string, Record<string, unknown>>()
+
+  const richRows = [
+    ...readArrayField(root, ["applicants", "Applicants"]),
+    ...readArrayField(root, [
+      "aiMatchSuggestions",
+      "AiMatchSuggestions",
+      "matches",
+      "Matches",
+    ]),
+  ]
+
+  for (const item of richRows) {
+    const row = asRecord(item)
+    if (!row) continue
+    const applicationId = pickString(row, [
+      "applicationId",
+      "application_id",
+      "ApplicationId",
+    ])
+    const profileId = pickString(row, [
+      "candidateProfileId",
+      "candidate_profile_id",
+      "CandidateProfileId",
+    ])
+    if (applicationId && !byApplicationId.has(applicationId)) {
+      byApplicationId.set(applicationId, row)
+    }
+    if (profileId && !byProfileId.has(profileId)) {
+      byProfileId.set(profileId, row)
+    }
+  }
+
+  return { byApplicationId, byProfileId }
+}
+
+/**
+ * Merge slim ApplicationDto over a rich CandidateMatchDto when available.
+ * Application fields (stage, status, interview flags, score) win; analysis fields
+ * from GetVacancy are preserved when the applications list omits them.
+ */
+export function mergeApplicationWithRichMatch(
+  applicationRow: unknown,
+  richIndex: {
+    byApplicationId: Map<string, Record<string, unknown>>
+    byProfileId: Map<string, Record<string, unknown>>
+  }
+): Record<string, unknown> {
+  const app = asRecord(applicationRow) ?? {}
+  const applicationId = pickString(app, [
+    "applicationId",
+    "application_id",
+    "ApplicationId",
+    "id",
+    "Id",
+  ])
+  const profileId = pickString(app, [
+    "candidateProfileId",
+    "candidate_profile_id",
+    "CandidateProfileId",
+  ])
+
+  const rich =
+    (applicationId ? richIndex.byApplicationId.get(applicationId) : undefined) ??
+    (profileId ? richIndex.byProfileId.get(profileId) : undefined)
+
+  if (!rich) return { ...app }
+  return { ...rich, ...app }
+}
+
+/**
+ * Overlays paginated applications onto vacancy detail while preserving match
+ * analysis from GetVacancy (`applicants` + `aiMatchSuggestions`).
  * Falls back to the original payload if the applications request fails.
  */
 export async function overlayVacancyApplicants(
@@ -89,9 +182,15 @@ export async function overlayVacancyApplicants(
   vacancyPayload: unknown
 ): Promise<unknown> {
   try {
-    const applicants = await listAllVacancyApplications(vacancyId)
+    const applications = await listAllVacancyApplications(vacancyId)
     const root = unwrapVacancyDetailPayload(vacancyPayload)
-    if (!root) return { applicants }
+    if (!root) return { applicants: applications }
+
+    const richIndex = indexRichVacancyMatchRows(root)
+    const applicants = applications.map((row) =>
+      mergeApplicationWithRichMatch(row, richIndex)
+    )
+
     return { ...root, applicants, Applicants: applicants }
   } catch {
     return vacancyPayload

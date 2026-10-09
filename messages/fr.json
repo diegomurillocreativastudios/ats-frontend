@@ -2550,6 +2550,10 @@
         },
         "kanban": {
           "score": "Score",
+          "analysis": "Analyse",
+          "analysisAria": "Voir l'analyse IA de {name}",
+          "sourcePersonalAria": "Candidature personnelle (auto-candidature)",
+          "sourceRecruiterAria": "Candidat ajouté par le recruteur",
           "columnAria": "Colonne {stage}",
           "moveStageAria": "Déplacer {name} vers une autre étape",
           "statusAria": "Statut de {name}",
@@ -4351,7 +4355,10 @@
         "consentValidation": "Veuillez vérifier l'autorisation et le consentement, puis réessayer.",
         "consentVersionMismatch": "Le document d'autorisation a été mis à jour. Rechargez la page et réessayez.",
         "consentNationalIdConflict": "Ce document d'identité est déjà associé à un autre profil. Utilisez une autre valeur ou contactez le support.",
-        "vacancyUnavailable": "Cette offre n'est plus disponible. Vos données n'ont pas été envoyées."
+        "vacancyUnavailable": "Cette offre n'est plus disponible. Vos données n'ont pas été envoyées.",
+        "alreadyApplied": "Vous avez déjà postulé à cette offre. Consultez l'état dans votre portail candidat.",
+        "alreadyAppliedCta": "Aller au portail candidat",
+        "consentRequired": "Vous devez accepter l'autorisation et le consentement pour postuler."
       },
       "fields": {
         "firstName": "Prénoms *",
@@ -4465,7 +4472,36 @@
       "checklistEmail": "Utilisez le même e-mail associé à votre compte candidat.",
       "checklistData": "Renseignez prénoms, noms de famille et e-mail avec des données réelles.",
       "formSectionLabel": "Formulaire de candidature",
-      "documentTitle": "ApplicanTree | Portail opportunités | Postuler à {title}"
+      "documentTitle": "ApplicanTree | Portail opportunités | Postuler à {title}",
+      "alreadyApplied": {
+        "title": "Vous êtes déjà en processus",
+        "body": "Vous avez déjà postulé à cette offre. Suivez l'état depuis votre portail candidat.",
+        "cta": "Aller au portail candidat"
+      },
+      "loggedIn": {
+        "sectionLabel": "Candidature avec votre profil",
+        "formSectionLabel": "Compléter les informations manquantes",
+        "title": "Confirmer votre candidature",
+        "body": "Nous utiliserons les informations et le CV de votre profil candidat. Vous n’avez pas besoin de remplir à nouveau le formulaire complet.",
+        "cta": "Postuler avec mon profil",
+        "editDetails": "Compléter ou modifier les informations",
+        "cvOnFile": "CV enregistré dans votre profil",
+        "cvDownloadFailed": "Impossible de récupérer le CV de votre profil. Téléversez-le à nouveau ou modifiez vos informations.",
+        "submitFailed": "Impossible d’envoyer la candidature. Réessayez.",
+        "beforeSubmit": "Avec votre compte",
+        "checklistProfile": "Les données de votre profil seront envoyées automatiquement.",
+        "checklistCv": "Nous utiliserons le CV enregistré dans votre profil.",
+        "checklistReview": "Vérifiez le résumé et confirmez en un clic.",
+        "checklistComplete": "Complétez les champs encore manquants dans votre profil.",
+        "checklistCvUpload": "Joignez un CV en PDF si vous n’en avez pas encore enregistré.",
+        "fields": {
+          "name": "Nom",
+          "email": "E-mail",
+          "phone": "Téléphone",
+          "document": "Pièce d’identité",
+          "cv": "CV"
+        }
+      }
     },
     "unavailable": {
       "title": "Cette offre n’est plus disponible",

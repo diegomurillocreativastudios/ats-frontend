@@ -12,10 +12,12 @@ import {
   type FormEvent,
 } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { CheckCircle2, FileText, LoaderCircle, Mail, X } from "lucide-react"
+import { FileText, LoaderCircle, Mail, X } from "lucide-react"
+import { PORTAL_HOME_HREF } from "@/lib/portal-access"
 import {
   getPublicApplyErrorMessage,
   isAllowedCvFile,
+  isAlreadyAppliedConflict,
   isCvFileWithinSizeLimit,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
@@ -28,8 +30,15 @@ import {
   APPLY_LONG_WAIT_HINT_MS,
   getLoadingBarPercent,
 } from "@/lib/apply-loading-bar"
-import { ApplyStyleProgressBar } from "@/components/public/apply-style-progress-bar"
+import {
+  PublicApplicationSubmitProgress,
+  applySubmitProgressPanelClass,
+} from "@/components/public/public-application-submit-progress"
 import { ApplyEmailConfirmationModal } from "@/components/public/ApplyEmailConfirmationModal"
+import {
+  DEFAULT_APPLY_PHONE_COUNTRY_ISO2,
+  type PublicApplyProfileFields,
+} from "@/lib/public-vacancy-apply-from-profile"
 import {
   ConsentAuthorizationModal,
   type ConsentAuthorizationInitialValues,
@@ -48,9 +57,17 @@ import {
 import { PhoneCountryInput } from "@/components/ui/PhoneCountryInput"
 import { PDF_ONLY_ACCEPT } from "@/lib/upload-constraints"
 
-const DEFAULT_PHONE_COUNTRY_ISO2 = "SV"
+const DEFAULT_PHONE_COUNTRY_ISO2 = DEFAULT_APPLY_PHONE_COUNTRY_ISO2
 
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
+
+export type PublicVacancyApplicationFormInitialValues = Partial<
+  PublicApplyProfileFields & {
+    documentTypeId: string
+    source: string
+    notes: string
+  }
+>
 
 const SOURCE_OPTION_KEYS = ["social", "friends", "jobFair", "other"] as const
 
@@ -198,176 +215,55 @@ function CvDropzoneGlyph() {
   )
 }
 
-function getLoadingStepFromPercent(percent: number): 1 | 2 | 3 | 4 {
-  if (percent < 24) return 1
-  if (percent < 48) return 2
-  if (percent < 72) return 3
-  return 4
-}
-
-function applySubmitProgressPanelClass(
-  theme: PublicVacancyApplicationFormTheme,
-  opts: { absolute?: boolean } = {}
-): string {
-  const position = opts.absolute ? "absolute inset-0 z-20 " : ""
-  if (theme === "dark") {
-    return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-[inherit] border border-ats-cobre/25 bg-[linear-gradient(180deg,rgba(32,33,36,0.97)_0%,rgba(32,33,36,0.99)_100%)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl ring-1 ring-white/10`
+function mergeInitialFormState(
+  seed?: PublicVacancyApplicationFormInitialValues | null
+): PublicVacancyApplicationFormState {
+  if (!seed) return initialState
+  return {
+    firstName: seed.firstName?.trim() ?? "",
+    lastName: seed.lastName?.trim() ?? "",
+    email: seed.email?.trim() ?? "",
+    phone: seed.phone?.trim() ?? "",
+    phoneCountryIso2:
+      seed.phoneCountryIso2?.trim().toUpperCase() || DEFAULT_PHONE_COUNTRY_ISO2,
+    documentTypeId: seed.documentTypeId?.trim() ?? "",
+    nationalId: seed.nationalId?.trim() ?? "",
+    linkedinUrl: seed.linkedinUrl?.trim() ?? "",
+    websiteUrl: seed.websiteUrl?.trim() ?? "",
+    source: seed.source?.trim() ?? "",
+    notes: seed.notes?.trim() ?? "",
   }
-  return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-lg border border-border bg-white/97 p-6 shadow-xl backdrop-blur-md ring-1 ring-ats-terracotta/15`
-}
-
-function PublicApplicationSubmitProgress({
-  theme,
-  mode,
-  loadingBarPercent = 0,
-  showLongWaitHint = false,
-}: {
-  theme: PublicVacancyApplicationFormTheme
-  mode: "loading" | "success"
-  /** 0–92 (tope del algoritmo compartido con `getLoadingBarPercent`) mientras `mode === "loading"`. */
-  loadingBarPercent?: number
-  showLongWaitHint?: boolean
-}) {
-  const t = useTranslations("PublicOpportunities.applicationForm")
-  const isDark = theme === "dark"
-  const isSuccess = mode === "success"
-  const currentStep = isSuccess ? 5 : getLoadingStepFromPercent(loadingBarPercent)
-  const stepLabels = [
-    t("steps.creation"),
-    t("steps.analysis"),
-    t("steps.application"),
-    t("steps.saved"),
-    t("steps.success"),
-  ]
-  const activeLabel = stepLabels[currentStep - 1] ?? ""
-
-  return (
-    <div
-      className="mx-auto w-full max-w-lg space-y-6"
-      role="status"
-      aria-live="polite"
-      aria-relevant="additions text"
-      aria-busy={!isSuccess}
-    >
-      <div className="flex flex-col items-center text-center">
-        <div
-          className={
-            isDark
-              ? "flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-muted/45 shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
-              : "flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-muted/60 shadow-sm"
-          }
-          aria-hidden
-        >
-          {isSuccess ? (
-            <CheckCircle2
-              className={
-                isDark ? "h-8 w-8 text-ats-cobre" : "h-8 w-8 text-ats-cobre"
-              }
-            />
-          ) : (
-            <LoaderCircle
-              className={
-                isDark
-                  ? "h-7 w-7 animate-spin text-ats-cobre"
-                  : "h-7 w-7 animate-spin text-ats-terracotta"
-              }
-            />
-          )}
-        </div>
-        <p
-          className={
-            isDark
-              ? "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-foreground/50"
-              : "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
-          }
-        >
-          {isSuccess ? t("steps.ready") : t("steps.processingTitle")}
-        </p>
-        <p
-          className={
-            isDark
-              ? "mt-2 text-lg font-semibold text-foreground"
-              : "mt-2 text-lg font-semibold text-foreground"
-          }
-        >
-          {activeLabel}
-        </p>
-        {!isSuccess && showLongWaitHint ? (
-          <p
-            className={
-              isDark
-                ? "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
-                : "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
-            }
-          >
-            {t("steps.processingLongWait")}
-          </p>
-        ) : null}
-      </div>
-
-      <ApplyStyleProgressBar
-        theme="light"
-        mode={isSuccess ? "success" : "loading"}
-        percent={isSuccess ? 100 : loadingBarPercent}
-      />
-
-      <ol className="grid grid-cols-1 gap-2 sm:grid-cols-5 sm:gap-2" aria-label={t("aria.submitStatus")}>
-        {[1, 2, 3, 4, 5].map((step) => {
-          const isComplete = currentStep > step
-          const isCurrent = currentStep === step
-          const isSuccessStep = step === 5
-          const label = stepLabels[step - 1] ?? ""
-          return (
-            <li
-              key={step}
-              className={
-                isDark
-                  ? `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
-                      isCurrent
-                        ? isSuccessStep
-                          ? "border-ats-cobre/60 bg-ats-cobre/12 text-ats-cobre"
-                          : "border-ats-cobre/50 bg-muted/45 text-foreground"
-                        : isComplete
-                          ? "border-border bg-white/4 text-muted-foreground"
-                          : "border-white/8 bg-muted/20 text-muted-foreground"
-                    }`
-                  : `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
-                      isCurrent
-                        ? isSuccessStep
-                          ? "border-ats-cobre/50 bg-ats-cobre/10 text-ats-cobre"
-                          : "border-ats-terracotta/50 bg-ats-terracotta/8 text-foreground"
-                        : isComplete
-                          ? "border-border bg-muted/50 text-muted-foreground"
-                          : "border-border/60 bg-background text-muted-foreground/60"
-                    }`
-              }
-            >
-              {label}
-            </li>
-          )
-        })}
-      </ol>
-    </div>
-  )
 }
 
 export function PublicVacancyApplicationForm({
   vacancyId,
   theme = "light",
   onRequestClose,
+  initialValues,
+  isEmailLocked = false,
+  skipEmailConfirmation = false,
 }: {
   vacancyId: string
   theme?: PublicVacancyApplicationFormTheme
   /** Tras éxito o al cerrar desde el modal. */
   onRequestClose?: () => void
+  /** Prefill from candidate profile (logged-in fallback). */
+  initialValues?: PublicVacancyApplicationFormInitialValues | null
+  /** When true, email comes from the account and cannot be edited. */
+  isEmailLocked?: boolean
+  /** Logged-in apply: consent then submit, without email confirm modal. */
+  skipEmailConfirmation?: boolean
 }) {
   const t = useTranslations("PublicOpportunities.applicationForm")
   const tCvLanguage = useTranslations("CvOutputLanguage")
   const outputLanguage = toCvOutputLanguage(useLocale())
-  const [values, setValues] = useState<PublicVacancyApplicationFormState>(initialState)
+  const [values, setValues] = useState<PublicVacancyApplicationFormState>(() =>
+    mergeInitialFormState(initialValues)
+  )
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [serverError, setServerError] = useState<string | null>(null)
+  const [showAlreadyAppliedLink, setShowAlreadyAppliedLink] = useState(false)
   const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0)
   const [submitPhase, setSubmitPhase] = useState<"idle" | "loading" | "success">("idle")
   const [loadingOverlay, setLoadingOverlay] = useState({ percent: 0, longWait: false })
@@ -448,11 +344,12 @@ export function PublicVacancyApplicationForm({
     ) => {
       const { name, value } = event.target
       const key = name as keyof PublicVacancyApplicationFormState
+      if (isEmailLocked && key === "email") return
       setValues((prev) => ({ ...prev, [key]: value }))
       setErrors((prev) => ({ ...prev, [key]: undefined, cvFile: undefined }))
       setServerError(null)
     },
-    []
+    [isEmailLocked]
   )
 
   const handlePhoneChange = useCallback((phone: string) => {
@@ -565,28 +462,32 @@ export function PublicVacancyApplicationForm({
     t,
   ])
 
-  const executeSubmit = useCallback(async () => {
-    if (!cvFile || !acceptedConsent) return
+  const executeSubmit = useCallback(async (
+    consentOverride?: ConsentAuthorizationSubmitPayload
+  ) => {
+    const authConsent = consentOverride ?? acceptedConsent?.payload
+    if (!cvFile || !authConsent) return
 
     setSubmitPhase("loading")
     setLoadingOverlay({ percent: 0, longWait: false })
     setServerError(null)
+    setShowAlreadyAppliedLink(false)
     setErrors({})
     setIsConfirmEmailModalOpen(false)
 
     const payload: PublicVacancyApplyValues = {
-      firstName: values.firstName,
-      lastName: values.lastName,
+      firstName: consentOverride?.firstNames ?? values.firstName,
+      lastName: consentOverride?.lastNames ?? values.lastName,
       email: values.email,
-      phone: values.phone,
+      phone: consentOverride?.phoneNationalNumber || values.phone,
       documentTypeId: values.documentTypeId,
-      nationalId: values.nationalId,
+      nationalId: consentOverride?.identityDocument || values.nationalId,
       linkedinUrl: values.linkedinUrl,
       websiteUrl: values.websiteUrl,
       source: values.source,
       notes: values.notes,
       cvFile,
-      authConsent: acceptedConsent.payload,
+      authConsent,
     }
 
     try {
@@ -627,6 +528,12 @@ export function PublicVacancyApplicationForm({
       }
       if (consentCode === "AUTH_CONSENT_VALIDATION") {
         setServerError(t("validation.consentValidation"))
+        return
+      }
+
+      if (isAlreadyAppliedConflict(status, body)) {
+        setServerError(t("validation.alreadyApplied"))
+        setShowAlreadyAppliedLink(true)
         return
       }
 
@@ -699,13 +606,25 @@ export function PublicVacancyApplicationForm({
 
       const snapshot = buildApplyConsentSnapshot(values)
       if (acceptedConsent?.snapshot === snapshot) {
+        if (skipEmailConfirmation) {
+          void executeSubmit()
+          return
+        }
         setIsConfirmEmailModalOpen(true)
         return
       }
 
       setIsConsentModalOpen(true)
     },
-    [submitPhase, rateLimitSecondsLeft, validateClient, values, acceptedConsent]
+    [
+      submitPhase,
+      rateLimitSecondsLeft,
+      validateClient,
+      values,
+      acceptedConsent,
+      skipEmailConfirmation,
+      executeSubmit,
+    ]
   )
 
   const consentInitialValues = useMemo<ConsentAuthorizationInitialValues>(
@@ -755,9 +674,20 @@ export function PublicVacancyApplicationForm({
         }),
       })
       setIsConsentModalOpen(false)
+      if (skipEmailConfirmation) {
+        await executeSubmit(payload)
+        return
+      }
       setIsConfirmEmailModalOpen(true)
     },
-    [values.email, values.phone, values.phoneCountryIso2, values.nationalId]
+    [
+      values.email,
+      values.phone,
+      values.phoneCountryIso2,
+      values.nationalId,
+      skipEmailConfirmation,
+      executeSubmit,
+    ]
   )
 
   if (submitPhase === "success") {
@@ -820,9 +750,17 @@ export function PublicVacancyApplicationForm({
         className={`grid grid-cols-1 gap-x-4 gap-y-5 transition-opacity duration-200 sm:grid-cols-2 ${showProgressOverlay ? "pointer-events-none select-none opacity-[0.38] blur-[0.5px]" : ""}`}
       >
       {serverError ? (
-        <p className={`sm:col-span-2 ${errClass}`} role="alert">
-          {serverError}
-        </p>
+        <div className="sm:col-span-2 space-y-2" role="alert">
+          <p className={errClass}>{serverError}</p>
+          {showAlreadyAppliedLink ? (
+            <Link
+              href={PORTAL_HOME_HREF.candidate}
+              className="inline-flex text-sm font-medium text-ats-cobre underline-offset-4 hover:underline"
+            >
+              {t("validation.alreadyAppliedCta")}
+            </Link>
+          ) : null}
+        </div>
       ) : null}
 
       <div className="space-y-2">
@@ -880,7 +818,8 @@ export function PublicVacancyApplicationForm({
             value={values.email}
             onChange={handleChange}
             className={inputClass}
-            disabled={disabled}
+            disabled={disabled || isEmailLocked}
+            readOnly={isEmailLocked}
             autoComplete="email"
             placeholder={t("placeholders.email")}
             aria-invalid={Boolean(errors.email)}
@@ -1187,7 +1126,9 @@ export function PublicVacancyApplicationForm({
     
     <ApplyEmailConfirmationModal
       isOpen={isConfirmEmailModalOpen}
-      onConfirm={executeSubmit}
+      onConfirm={() => {
+        void executeSubmit()
+      }}
       onCancel={() => setIsConfirmEmailModalOpen(false)}
       email={values.email}
       theme={theme}

@@ -2550,6 +2550,10 @@
         },
         "kanban": {
           "score": "Punteggio",
+          "analysis": "Analisi",
+          "analysisAria": "Vedi analisi IA di {name}",
+          "sourcePersonalAria": "Candidatura personale (auto-candidatura)",
+          "sourceRecruiterAria": "Candidato caricato dal recruiter",
           "columnAria": "Colonna {stage}",
           "moveStageAria": "Sposta {name} in un'altra fase",
           "statusAria": "Stato di {name}",
@@ -4351,7 +4355,10 @@
         "consentValidation": "Controlla l'autorizzazione e il consenso e riprova.",
         "consentVersionMismatch": "Il documento di autorizzazione è stato aggiornato. Ricarica la pagina e riprova.",
         "consentNationalIdConflict": "Quel documento di identità è già collegato a un altro profilo. Usa un altro valore o contatta l'assistenza.",
-        "vacancyUnavailable": "Questa posizione non è più disponibile. I tuoi dati non sono stati inviati."
+        "vacancyUnavailable": "Questa posizione non è più disponibile. I tuoi dati non sono stati inviati.",
+        "alreadyApplied": "Hai già candidatura per questa posizione. Controlla lo stato nel portale candidato.",
+        "alreadyAppliedCta": "Vai al portale candidato",
+        "consentRequired": "Devi accettare l'autorizzazione e il consenso per candidarti."
       },
       "fields": {
         "firstName": "Nomi *",
@@ -4465,7 +4472,36 @@
       "checklistEmail": "Usa la stessa email associata al tuo account candidato.",
       "checklistData": "Completa nomi, cognomi ed email con dati reali.",
       "formSectionLabel": "Modulo di candidatura",
-      "documentTitle": "ApplicanTree | Portale opportunità | Candidati a {title}"
+      "documentTitle": "ApplicanTree | Portale opportunità | Candidati a {title}",
+      "alreadyApplied": {
+        "title": "Sei già in processo",
+        "body": "Hai già candidatura per questa posizione. Puoi seguire lo stato dal tuo portale candidato.",
+        "cta": "Vai al portale candidato"
+      },
+      "loggedIn": {
+        "sectionLabel": "Candidatura con il tuo profilo",
+        "formSectionLabel": "Completa i dati mancanti",
+        "title": "Conferma la candidatura",
+        "body": "Useremo i dati e il CV del tuo profilo candidato. Non serve compilare di nuovo tutto il modulo.",
+        "cta": "Candidati con il mio profilo",
+        "editDetails": "Completa o modifica i dati",
+        "cvOnFile": "CV salvato nel tuo profilo",
+        "cvDownloadFailed": "Non è stato possibile recuperare il CV dal profilo. Caricalo di nuovo o modifica i dati.",
+        "submitFailed": "Non è stato possibile inviare la candidatura. Riprova.",
+        "beforeSubmit": "Con il tuo account",
+        "checklistProfile": "I dati del tuo profilo verranno inviati automaticamente.",
+        "checklistCv": "Useremo il CV salvato nel tuo profilo.",
+        "checklistReview": "Controlla il riepilogo e conferma con un clic.",
+        "checklistComplete": "Completa i campi ancora mancanti nel profilo.",
+        "checklistCvUpload": "Allega un CV in PDF se non ne hai ancora uno salvato.",
+        "fields": {
+          "name": "Nome",
+          "email": "Email",
+          "phone": "Telefono",
+          "document": "Documento",
+          "cv": "CV"
+        }
+      }
     },
     "unavailable": {
       "title": "Questa offerta non è più disponibile",

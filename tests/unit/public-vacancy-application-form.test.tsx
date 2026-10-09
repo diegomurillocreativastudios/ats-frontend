@@ -291,4 +291,29 @@ describe("PublicVacancyApplicationForm", () => {
     expect(await screen.findByText("mi-cv.pdf")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Quitar mi-cv.pdf" })).toBeInTheDocument()
   })
+
+  it("precarga datos y bloquea el correo cuando isEmailLocked", async () => {
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <PublicVacancyApplicationForm
+          vacancyId="vac-1"
+          initialValues={{
+            firstName: "Ana",
+            lastName: "López",
+            email: "ana@example.com",
+            phone: "77778888",
+            nationalId: "01234567-8",
+          }}
+          isEmailLocked
+          skipEmailConfirmation
+        />
+      </NextIntlClientProvider>
+    )
+
+    const email = await screen.findByLabelText(/Correo/)
+    expect(email).toHaveValue("ana@example.com")
+    expect(email).toHaveAttribute("readonly")
+    expect(screen.getByLabelText("Nombres *")).toHaveValue("Ana")
+    expect(screen.getByLabelText("Apellidos *")).toHaveValue("López")
+  })
 })

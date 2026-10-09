@@ -53,6 +53,32 @@ function getApiMessage(record: Record<string, unknown> | null): string | null {
   return trimmed !== "" ? trimmed : null
 }
 
+function getBodyTextMessage(body: unknown): string | null {
+  if (typeof body === "string") {
+    // ASP.NET may return a JSON string; strip surrounding quotes if present.
+    const trimmed = body.trim().replace(/^"(.*)"$/s, "$1").trim()
+    return trimmed !== "" ? trimmed : null
+  }
+  return getApiMessage(getRecord(body))
+}
+
+function mapIdentityDocumentApplyError(message: string | null): string | null {
+  if (!message) return null
+  if (/documentType(Code|Id).*required|required.*documentType(Code|Id)/i.test(message)) {
+    return "Seleccioná el tipo de documento de identidad e intentá de nuevo."
+  }
+  if (/nationalId is required when documentType/i.test(message)) {
+    return "Ingresá el número de documento de identidad e intentá de nuevo."
+  }
+  if (/documentTypeCode is invalid|documentTypeId is invalid/i.test(message)) {
+    return "El tipo de documento no es válido. Elegí otra opción del listado."
+  }
+  if (/documentTypeCode and documentTypeId must reference/i.test(message)) {
+    return "El tipo de documento no es consistente. Revisá el formulario."
+  }
+  return null
+}
+
 /** Extrae mapa campo → mensaje desde cuerpos típicos de validación .NET / ASP.NET. */
 export function parsePublicApplyFieldErrors(body: unknown): Record<string, string> {
   const record = getRecord(body)
@@ -84,12 +110,59 @@ export function parsePublicApplyFieldErrors(body: unknown): Record<string, strin
   return {}
 }
 
+/** Código estable del backend cuando ya existe postulación (o match legacy). */
+export const ALREADY_APPLIED_CODE = "ALREADY_APPLIED"
+
+/** Código cuando falta consentimiento vigente y no se envió AuthConsent. */
+export const AUTH_CONSENT_REQUIRED_CODE = "AUTH_CONSENT_REQUIRED"
+
+const ALREADY_APPLIED_MESSAGE =
+  "Ya postulaste a esta vacante. Revisá el estado en tu portal de candidato."
+
+const AUTH_CONSENT_REQUIRED_MESSAGE =
+  "Necesitás aceptar la autorización y consentimiento para postular."
+
+/** True cuando el API rechaza por postulación duplicada (no otros 409 de consent). */
+export function isAlreadyAppliedConflict(
+  status: number,
+  body: unknown
+): boolean {
+  if (status !== 409) return false
+  const record = getRecord(body)
+  const code =
+    record && typeof record.code === "string" ? record.code.trim() : ""
+  if (code === ALREADY_APPLIED_CODE) return true
+  const fromApi = getApiMessage(record)
+  if (fromApi && /already applied/i.test(fromApi)) return true
+  if (typeof body === "string" && /already applied/i.test(body)) return true
+  return false
+}
+
+/** True cuando el backend exige reaceptar / enviar AuthConsent. */
+export function isAuthConsentRequiredError(
+  status: number,
+  body: unknown
+): boolean {
+  const record = getRecord(body)
+  const code =
+    record && typeof record.code === "string" ? record.code.trim() : ""
+  if (code === AUTH_CONSENT_REQUIRED_CODE) return true
+  if (status !== 400) return false
+  const fieldMap = parsePublicApplyFieldErrors(body)
+  return Boolean(
+    fieldMap.AuthConsent ?? fieldMap.authConsent ?? fieldMap["authConsent"]
+  )
+}
+
 export function getPublicApplyErrorMessage(status: number, body: unknown): string {
   const record = getRecord(body)
   const code =
     record && typeof record.code === "string" ? record.code.trim() : ""
-  const fromApi = getApiMessage(record)
+  const fromApi = getBodyTextMessage(body)
 
+  if (code === AUTH_CONSENT_REQUIRED_CODE || isAuthConsentRequiredError(status, body)) {
+    return AUTH_CONSENT_REQUIRED_MESSAGE
+  }
   if (code === "AUTH_CONSENT_VERSION_MISMATCH") {
     return "El documento de autorización se actualizó. Recarga la página e intenta de nuevo."
   }
@@ -98,6 +171,15 @@ export function getPublicApplyErrorMessage(status: number, body: unknown): strin
   }
   if (code === "AUTH_CONSENT_VALIDATION") {
     return "Revisa la autorización y consentimiento e intenta de nuevo."
+  }
+
+  if (isAlreadyAppliedConflict(status, body)) {
+    return ALREADY_APPLIED_MESSAGE
+  }
+
+  const identityError = mapIdentityDocumentApplyError(fromApi)
+  if (identityError) {
+    return identityError
   }
 
   if (status === 403) {

@@ -2550,6 +2550,10 @@
         },
         "kanban": {
           "score": "Puntaje",
+          "analysis": "Análisis",
+          "analysisAria": "Ver análisis de IA de {name}",
+          "sourcePersonalAria": "Postulación personal (autoaplicación)",
+          "sourceRecruiterAria": "Candidato subido por reclutador",
           "columnAria": "Columna {stage}",
           "moveStageAria": "Mover {name} a otra etapa",
           "statusAria": "Estado de {name}",
@@ -4351,7 +4355,10 @@
         "consentValidation": "Revisa la autorización y consentimiento e intenta de nuevo.",
         "consentVersionMismatch": "El documento de autorización se actualizó. Recarga la página e intenta de nuevo.",
         "consentNationalIdConflict": "Ese documento de identidad ya está asociado a otro perfil. Usa otro valor o contacta soporte.",
-        "vacancyUnavailable": "Esta vacante ya no está disponible. Tus datos no se enviaron."
+        "vacancyUnavailable": "Esta vacante ya no está disponible. Tus datos no se enviaron.",
+        "alreadyApplied": "Ya postulaste a esta vacante. Revisá el estado en tu portal de candidato.",
+        "alreadyAppliedCta": "Ir al portal de candidato",
+        "consentRequired": "Necesitás aceptar la autorización y consentimiento para postular."
       },
       "fields": {
         "firstName": "Nombres *",
@@ -4465,7 +4472,36 @@
       "checklistEmail": "Usá el mismo correo asociado a tu cuenta de candidato.",
       "checklistData": "Completá nombres, apellidos y correo con datos reales.",
       "formSectionLabel": "Formulario de postulación",
-      "documentTitle": "ApplicanTree | Portal Oportunidades | Aplicar a {title}"
+      "documentTitle": "ApplicanTree | Portal Oportunidades | Aplicar a {title}",
+      "alreadyApplied": {
+        "title": "Ya estás en proceso",
+        "body": "Ya postulaste a esta vacante. Podés seguir el estado desde tu portal de candidato.",
+        "cta": "Ir al portal de candidato"
+      },
+      "loggedIn": {
+        "sectionLabel": "Postulación con tu perfil",
+        "formSectionLabel": "Completá los datos faltantes",
+        "title": "Confirmá tu postulación",
+        "body": "Usaremos los datos y el CV de tu perfil de candidato. No hace falta volver a completar el formulario completo.",
+        "cta": "Postularme con mi perfil",
+        "editDetails": "Completar o editar datos",
+        "cvOnFile": "CV guardado en tu perfil",
+        "cvDownloadFailed": "No se pudo obtener el CV de tu perfil. Subilo de nuevo o editá tus datos.",
+        "submitFailed": "No se pudo enviar la postulación. Intentá de nuevo.",
+        "beforeSubmit": "Con tu cuenta",
+        "checklistProfile": "Tus datos de perfil se enviarán automáticamente.",
+        "checklistCv": "Usaremos el CV guardado en tu perfil.",
+        "checklistReview": "Revisá el resumen y confirmá con un clic.",
+        "checklistComplete": "Completá los campos que aún faltan en tu perfil.",
+        "checklistCvUpload": "Adjuntá un CV en PDF si todavía no tenés uno guardado.",
+        "fields": {
+          "name": "Nombre",
+          "email": "Correo",
+          "phone": "Teléfono",
+          "document": "Documento",
+          "cv": "Currículum"
+        }
+      }
     },
     "unavailable": {
       "title": "Esta vacante ya no está disponible",

@@ -8,6 +8,11 @@ export function normalizeApplicationSource(raw: unknown): number {
   return 0
 }
 
+/** True cuando la postulación es autoaplicación (Personal). */
+export function isPersonalApplicationSource(raw: unknown): boolean {
+  return normalizeApplicationSource(raw) === 1
+}
+
 export function mapApplicationSourceLabel(source: number): string {
   if (source === 1) return "Personal"
   return "Recruiter"

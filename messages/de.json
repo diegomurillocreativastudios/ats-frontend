@@ -2550,6 +2550,10 @@
         },
         "kanban": {
           "score": "Punktzahl",
+          "analysis": "Analyse",
+          "analysisAria": "KI-Analyse für {name} anzeigen",
+          "sourcePersonalAria": "Persönliche Bewerbung (Selbstbewerbung)",
+          "sourceRecruiterAria": "Vom Recruiter hochgeladener Kandidat",
           "columnAria": "Spalte {stage}",
           "moveStageAria": "{name} in eine andere Phase verschieben",
           "statusAria": "Status von {name}",
@@ -4351,7 +4355,10 @@
         "consentValidation": "Bitte überprüfen Sie die Autorisierung und Einwilligung und versuchen Sie es erneut.",
         "consentVersionMismatch": "Das Autorisierungsdokument wurde aktualisiert. Laden Sie die Seite neu und versuchen Sie es erneut.",
         "consentNationalIdConflict": "Dieses Ausweisdokument ist bereits mit einem anderen Profil verknüpft. Verwenden Sie einen anderen Wert oder kontaktieren Sie den Support.",
-        "vacancyUnavailable": "Diese Stelle ist nicht mehr verfügbar. Deine Daten wurden nicht gesendet."
+        "vacancyUnavailable": "Diese Stelle ist nicht mehr verfügbar. Deine Daten wurden nicht gesendet.",
+        "alreadyApplied": "Du hast dich bereits beworben. Den Status findest du im Kandidatenportal.",
+        "alreadyAppliedCta": "Zum Kandidatenportal",
+        "consentRequired": "Du musst die Autorisierung und Einwilligung akzeptieren, um dich zu bewerben."
       },
       "fields": {
         "firstName": "Vornamen *",
@@ -4465,7 +4472,36 @@
       "checklistEmail": "Verwenden Sie dieselbe E-Mail wie bei Ihrem Kandidatenkonto.",
       "checklistData": "Geben Sie Vornamen, Nachnamen und E-Mail mit echten Daten an.",
       "formSectionLabel": "Bewerbungsformular",
-      "documentTitle": "ApplicanTree | Stellenportal | Bewerbung für {title}"
+      "documentTitle": "ApplicanTree | Stellenportal | Bewerbung für {title}",
+      "alreadyApplied": {
+        "title": "Du bist bereits im Prozess",
+        "body": "Du hast dich bereits auf diese Stelle beworben. Den Status findest du in deinem Kandidatenportal.",
+        "cta": "Zum Kandidatenportal"
+      },
+      "loggedIn": {
+        "sectionLabel": "Bewerbung mit Ihrem Profil",
+        "formSectionLabel": "Fehlende Angaben ergänzen",
+        "title": "Bewerbung bestätigen",
+        "body": "Wir verwenden die Daten und den Lebenslauf aus Ihrem Bewerberprofil. Sie müssen das vollständige Formular nicht erneut ausfüllen.",
+        "cta": "Mit meinem Profil bewerben",
+        "editDetails": "Angaben ergänzen oder bearbeiten",
+        "cvOnFile": "Lebenslauf in Ihrem Profil gespeichert",
+        "cvDownloadFailed": "Der Lebenslauf konnte nicht aus Ihrem Profil geladen werden. Laden Sie ihn erneut hoch oder bearbeiten Sie Ihre Angaben.",
+        "submitFailed": "Die Bewerbung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+        "beforeSubmit": "Mit Ihrem Konto",
+        "checklistProfile": "Ihre Profildaten werden automatisch übermittelt.",
+        "checklistCv": "Wir verwenden den in Ihrem Profil gespeicherten Lebenslauf.",
+        "checklistReview": "Prüfen Sie die Zusammenfassung und bestätigen Sie mit einem Klick.",
+        "checklistComplete": "Ergänzen Sie noch fehlende Felder in Ihrem Profil.",
+        "checklistCvUpload": "Laden Sie einen PDF-Lebenslauf hoch, falls noch keiner gespeichert ist.",
+        "fields": {
+          "name": "Name",
+          "email": "E-Mail",
+          "phone": "Telefon",
+          "document": "Ausweisdokument",
+          "cv": "Lebenslauf"
+        }
+      }
     },
     "unavailable": {
       "title": "Diese Stelle ist nicht mehr verfügbar",

@@ -28,6 +28,8 @@ export interface CandidateProfile {
   summary: string
   resumeMarkdown: string
   nationalId: string
+  /** Tipo de documento de identidad (UUID del catálogo), si el backend lo envía. */
+  identityDocumentTypeId?: string | null
   country?: string | null
   birthDate?: string | null
   birthCity?: string | null
@@ -99,6 +101,17 @@ export function normalizeCandidateProfileFromApi(raw: unknown): CandidateProfile
     summary: toTrimmedString(o.summary),
     resumeMarkdown: toTrimmedString(o.resumeMarkdown),
     nationalId: toTrimmedString(o.nationalId),
+    identityDocumentTypeId: (() => {
+      const rawId = toNullableString(
+        o.identityDocumentTypeId ??
+          o.IdentityDocumentTypeId ??
+          o.documentTypeId
+      )
+      if (!rawId) return null
+      // Guid.Empty is not a usable catalog id for personal-appliance.
+      if (/^0{8}-0{4}-0{4}-0{4}-0{12}$/i.test(rawId)) return null
+      return rawId
+    })(),
     country: toNullableString(o.country),
     birthDate:
       o.birthDate == null || o.birthDate === ""
