@@ -151,6 +151,67 @@ export function getCandidateId(match: VacancyApplicantLike, index: number): stri
 }
 
 /**
+ * All stable person ids on a match/applicant row (profile + document, camel/snake).
+ * Used to dedupe the same person across AI suggestions, search, and Kanban applicants
+ * when payloads expose different id fields.
+ */
+export function collectPersonIdentityKeys(
+  match: VacancyApplicantLike | Record<string, unknown> | null | undefined
+): string[] {
+  if (!match || typeof match !== "object") return []
+  const record = match as Record<string, unknown>
+  const raw = [
+    record.candidateProfileId,
+    record.candidate_profile_id,
+    record.candidateDocumentId,
+    record.candidate_document_id,
+  ]
+  const keys: string[] = []
+  const seen = new Set<string>()
+  for (const value of raw) {
+    if (value == null) continue
+    const key = String(value).trim()
+    if (key === "" || seen.has(key)) continue
+    seen.add(key)
+    keys.push(key)
+  }
+  return keys
+}
+
+/** Union of {@link collectPersonIdentityKeys} across many rows. */
+export function buildPersonIdentityKeySet(
+  matches: readonly (VacancyApplicantLike | Record<string, unknown> | null | undefined)[]
+): Set<string> {
+  const set = new Set<string>()
+  for (const match of matches) {
+    for (const key of collectPersonIdentityKeys(match)) set.add(key)
+  }
+  return set
+}
+
+/** True when any person id on `match` appears in `identityKeys`. */
+export function isPersonInIdentitySet(
+  match: VacancyApplicantLike | Record<string, unknown> | null | undefined,
+  identityKeys: Set<string>
+): boolean {
+  if (identityKeys.size === 0) return false
+  return collectPersonIdentityKeys(match).some((key) => identityKeys.has(key))
+}
+
+/**
+ * AI suggestions / talent-pool rows that are not already in the vacancy process (Kanban).
+ * Hides duplicates when the backend still returns included people in `aiMatchSuggestions`.
+ */
+export function filterCandidatesNotInProcess<T extends VacancyApplicantLike>(
+  candidates: readonly T[],
+  applicants: readonly VacancyApplicantLike[]
+): T[] {
+  const inProcess = buildPersonIdentityKeySet(applicants)
+  if (inProcess.size === 0) return [...candidates]
+  return candidates.filter((match) => !isPersonInIdentitySet(match, inProcess))
+}
+
+/**
  * Stable list id for a kanban **application** row.
  * Prefers `applicationId` so multiple applications for the same profile render as
  * separate cards (and drag/status target the correct row).

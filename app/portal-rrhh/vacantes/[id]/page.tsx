@@ -91,9 +91,12 @@ import {
 import { VacancyAiSearchLoadingState } from "@/components/rrhh/vacancy-ai-search-loading-state"
 import { VACANCY_PRELIMINARY_MATCH_TYPICAL_MS } from "@/lib/apply-loading-bar"
 import {
+  buildPersonIdentityKeySet,
+  filterCandidatesNotInProcess,
   getApplicantPrimaryScore01,
   getCandidateId,
   getKanbanRowId,
+  isPersonInIdentitySet,
   normalizeKanbanStage,
   parseFallbackKanbanStages,
   pickApplicantDisplayName,
@@ -2201,17 +2204,23 @@ function VacanteDetallePage() {
     return canFinishProcess && !isVacancyDone && !isVacancyReadOnly
   }, [canFinishProcess, isVacancyDone, isVacancyReadOnly])
 
-  /** Stable key for matching (same person in search vs aiMatchSuggestions). */
-  const getMatchKey = (m) => m?.candidateDocumentId ?? m?.candidateProfileId ?? null;
+  /**
+   * Posibles candidatos: AI suggestions minus anyone already in Etapas.
+   * Backend may still return included people in aiMatchSuggestions after "Incluir al proceso".
+   */
+  const possibleCandidatesToDisplay = useMemo(
+    () => filterCandidatesNotInProcess(vacancyCandidates, applicants),
+    [vacancyCandidates, applicants]
+  );
 
   /** Search results to show: exclude anyone already in aiMatchSuggestions or applicants. */
   const searchResultsToDisplay = useMemo(() => {
     if (smartCandidates == null || smartCandidates.length === 0) return [];
-    const existingKeys = new Set([
-      ...vacancyCandidates.map((m) => getMatchKey(m)).filter(Boolean),
-      ...applicants.map((m) => getMatchKey(m)).filter(Boolean),
+    const existingKeys = buildPersonIdentityKeySet([
+      ...vacancyCandidates,
+      ...applicants,
     ]);
-    return smartCandidates.filter((m) => !existingKeys.has(getMatchKey(m)));
+    return smartCandidates.filter((m) => !isPersonInIdentitySet(m, existingKeys));
   }, [smartCandidates, vacancyCandidates, applicants]);
 
   /** Candidates from Search only (for selection and Match button in Search container). */
@@ -2636,7 +2645,7 @@ function VacanteDetallePage() {
 
   const handleStartProcess = useCallback(async () => {
     if (!vacancyId || isVacancyReadOnly) return;
-    const candidateProfileIds = vacancyCandidates
+    const candidateProfileIds = possibleCandidatesToDisplay
       .map((match, index) => (selectedPossibleCandidateIds.has(getCandidateId(match, index)) ? match.candidateProfileId : null))
       .filter((pid) => pid != null && String(pid).trim() !== "");
     if (candidateProfileIds.length === 0) return;
@@ -2662,7 +2671,7 @@ function VacanteDetallePage() {
     } finally {
       setLoadingStartProcess(false);
     }
-  }, [vacancyId, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas, isVacancyReadOnly, tMatching]);
+  }, [vacancyId, possibleCandidatesToDisplay, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas, isVacancyReadOnly, tMatching]);
 
   /** Selected candidate document IDs to send to the match API. */
   const selectedDocumentIds = displayCandidates
@@ -3563,7 +3572,7 @@ function VacanteDetallePage() {
                           <Users className="h-5 w-5" aria-hidden />
                           {tMatching("possibleCandidates")}
                           <span className="font-sans text-sm font-normal text-muted-foreground">
-                            ({vacancyCandidates.length})
+                            ({possibleCandidatesToDisplay.length})
                           </span>
                         </h2>
                         <AiDisclosureBadge label={tMatching("preliminaryAnalysisBadge")} />
@@ -3595,7 +3604,7 @@ function VacanteDetallePage() {
                         className="rounded-xl border border-border bg-card p-6"
                         aria-label={tMatching("aria.possibleCandidates")}
                       >
-                        {vacancyCandidates.length === 0 ? (
+                        {possibleCandidatesToDisplay.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
@@ -3604,7 +3613,7 @@ function VacanteDetallePage() {
                           </div>
                         ) : (
                           <ul className="flex flex-col gap-4" role="list">
-                            {vacancyCandidates.map((match, index) => {
+                            {possibleCandidatesToDisplay.map((match, index) => {
                               const candidateId = getCandidateId(match, index);
                               return (
                                 <li key={candidateId}>
@@ -4420,7 +4429,7 @@ function VacanteDetallePage() {
                         <Users className="h-4 w-4" aria-hidden />
                         {tMatching("possibleCandidates")}
                         <span className="font-sans text-sm font-normal text-muted-foreground">
-                          ({vacancyCandidates.length})
+                          ({possibleCandidatesToDisplay.length})
                         </span>
                       </h2>
                       <AiDisclosureBadge label={tMatching("preliminaryAnalysisBadge")} />
@@ -4452,7 +4461,7 @@ function VacanteDetallePage() {
                       className="rounded-xl border border-border bg-card p-5"
                       aria-label={tMatching("aria.possibleCandidates")}
                     >
-                      {vacancyCandidates.length === 0 ? (
+                      {possibleCandidatesToDisplay.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
@@ -4461,7 +4470,7 @@ function VacanteDetallePage() {
                         </div>
                       ) : (
                         <ul className="flex flex-col gap-4" role="list">
-                          {vacancyCandidates.map((match, index) => {
+                          {possibleCandidatesToDisplay.map((match, index) => {
                             const candidateId = getCandidateId(match, index);
                             return (
                               <li key={candidateId}>

@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest"
 import {
   buildApplicantComponentScoreAverages,
+  buildPersonIdentityKeySet,
+  collectPersonIdentityKeys,
   extractApplicantComponentScores01,
+  filterCandidatesNotInProcess,
   getApplicantPrimaryScore01,
   getCandidateId,
   getKanbanRowId,
+  isPersonInIdentitySet,
   parseFallbackKanbanStages,
   resolveOrderedStageNames,
   type VacancyApplicantLike,
@@ -121,6 +125,69 @@ describe("getApplicantPrimaryScore01", () => {
 
   it("falls back to semanticScore only for legacy payloads", () => {
     expect(getApplicantPrimaryScore01({ semanticScore: 0.68 })).toBe(0.68)
+  })
+})
+
+describe("filterCandidatesNotInProcess", () => {
+  it("excludes suggestions that share candidateProfileId with an applicant", () => {
+    const suggestions: VacancyApplicantLike[] = [
+      { candidateProfileId: "profile-jessica", name: "Jessica", totalScore: 0.82 },
+      { candidateProfileId: "profile-other", name: "Other", totalScore: 0.7 },
+    ]
+    const applicants: VacancyApplicantLike[] = [
+      { candidateProfileId: "profile-jessica", applicationId: "app-1", totalScore: 0.82 },
+    ]
+    const filtered = filterCandidatesNotInProcess(suggestions, applicants)
+    expect(filtered).toHaveLength(1)
+    expect(filtered[0]?.candidateProfileId).toBe("profile-other")
+  })
+
+  it("excludes when suggestion has profile+document and applicant only has profile", () => {
+    const suggestions: VacancyApplicantLike[] = [
+      {
+        candidateProfileId: "profile-1",
+        candidateDocumentId: "doc-1",
+        name: "Jessica",
+      },
+      { candidateProfileId: "profile-2", candidateDocumentId: "doc-2", name: "Keep" },
+    ]
+    const applicants: VacancyApplicantLike[] = [
+      { candidateProfileId: "profile-1", applicationId: "app-1" },
+    ]
+    const filtered = filterCandidatesNotInProcess(suggestions, applicants)
+    expect(filtered.map((m) => m.candidateProfileId)).toEqual(["profile-2"])
+  })
+
+  it("excludes when suggestion has only document and applicant has same document", () => {
+    const suggestions: VacancyApplicantLike[] = [
+      { candidateDocumentId: "doc-shared", name: "Dup" },
+      { candidateDocumentId: "doc-new", name: "New" },
+    ]
+    const applicants: VacancyApplicantLike[] = [
+      { candidateDocumentId: "doc-shared", applicationId: "app-1" },
+    ]
+    expect(filterCandidatesNotInProcess(suggestions, applicants)).toEqual([
+      { candidateDocumentId: "doc-new", name: "New" },
+    ])
+  })
+
+  it("keeps unrelated suggestions when applicants are empty", () => {
+    const suggestions: VacancyApplicantLike[] = [
+      { candidateProfileId: "p1", name: "A" },
+    ]
+    expect(filterCandidatesNotInProcess(suggestions, [])).toEqual(suggestions)
+  })
+
+  it("matches snake_case identity fields", () => {
+    const keys = collectPersonIdentityKeys({
+      candidate_profile_id: "p-snake",
+      candidate_document_id: "d-snake",
+    })
+    expect(keys).toEqual(["p-snake", "d-snake"])
+    const set = buildPersonIdentityKeySet([{ candidateProfileId: "p-snake" }])
+    expect(isPersonInIdentitySet({ candidate_document_id: "d-other", candidate_profile_id: "p-snake" }, set)).toBe(
+      true
+    )
   })
 })
 
