@@ -56,7 +56,8 @@ function getApiMessage(record: Record<string, unknown> | null): string | null {
 function getBodyTextMessage(body: unknown): string | null {
   if (typeof body === "string") {
     // ASP.NET may return a JSON string; strip surrounding quotes if present.
-    const trimmed = body.trim().replace(/^"(.*)"$/s, "$1").trim()
+    // Use [\s\S] instead of the `s` flag (tsconfig target is ES2017).
+    const trimmed = body.trim().replace(/^"([\s\S]*)"$/, "$1").trim()
     return trimmed !== "" ? trimmed : null
   }
   return getApiMessage(getRecord(body))
