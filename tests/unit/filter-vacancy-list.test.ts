@@ -18,6 +18,11 @@ const baseVacancy = (overrides: Partial<VacancyListItem>): VacancyListItem => ({
   departmentId: "11111111-1111-1111-1111-111111111111",
   modality: "Presencial",
   modalityId: "22222222-2222-2222-2222-222222222222",
+  vacancyType: "Headhunting",
+  vacancyTypeId: "55555555-5555-5555-5555-555555555555",
+  presentationDueAtUtc: null,
+  presentationDueAtLabel: null,
+  isPresentationOverdue: false,
   location: "—",
   requirementsSummary: "",
   requirementsRaw: null,
@@ -71,9 +76,26 @@ describe("filterVacancyList", () => {
       modalityId: "22222222-2222-2222-2222-222222222222",
       countryCode: "SV",
       departmentId: "11111111-1111-1111-1111-111111111111",
+      vacancyTypeId: "",
     })
     expect(result).toHaveLength(1)
     expect(result[0]?.id).toBe("v1")
+  })
+
+  it("filters by vacancy type", () => {
+    const withTypes = [
+      ...items,
+      baseVacancy({
+        id: "v3",
+        vacancyTypeId: "66666666-6666-6666-6666-666666666666",
+        vacancyType: "Outsourcing",
+      }),
+    ]
+    const result = filterVacancyList(withTypes, {
+      ...EMPTY_VACANCY_LIST_FILTERS,
+      vacancyTypeId: "66666666-6666-6666-6666-666666666666",
+    })
+    expect(result.map((item) => item.id)).toEqual(["v3"])
   })
 })
 

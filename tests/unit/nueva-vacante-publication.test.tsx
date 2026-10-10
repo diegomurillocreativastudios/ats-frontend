@@ -17,7 +17,21 @@ vi.mock("@/lib/api", () => ({
 }))
 
 vi.mock("@/lib/api/admin-vacancy-catalogs", () => ({
-  listAdminVacancyCatalog: vi.fn(async () => []),
+  listAdminVacancyCatalog: vi.fn(async (kind: string) => {
+    if (kind === "vacancyTypes") {
+      return [
+        {
+          id: "type-hh",
+          code: "headhunting",
+          displayName: "Headhunting",
+          sortOrder: 1,
+          isActive: true,
+          presentationSlaDays: 3,
+        },
+      ]
+    }
+    return []
+  }),
 }))
 
 vi.mock("@/lib/api/recruiter-companies", () => ({
@@ -91,6 +105,12 @@ async function fillRequiredFields() {
     target: { value: "Construir interfaces" },
   })
   await screen.findByRole("option", { name: "Creativa" })
+  const typeSelect = await screen.findByLabelText(/^Tipo de vacante$/)
+  await screen.findByRole("option", { name: "Headhunting" })
+  fireEvent.change(typeSelect, { target: { value: "type-hh" } })
+  fireEvent.change(screen.getByLabelText(/Fecha límite de presentación de candidatos/), {
+    target: { value: "2026-10-12" },
+  })
   fireEvent.click(await screen.findByRole("button", { name: /Leyes de protección de datos/ }))
   fireEvent.click(await screen.findByRole("checkbox", { name: /Ley de El Salvador/ }))
 }
@@ -121,6 +141,8 @@ describe("NuevaVacanteModal publication", () => {
     expect(path).toBe("/api/recruiter/vacancies")
     expect(payload).not.toHaveProperty("isPublished")
     expect(payload.dataProtectionLawIds).toEqual(["law-sv"])
+    expect(payload.vacancyTypeId).toBe("type-hh")
+    expect(payload.presentationDueAtUtc).toBeTruthy()
   })
 
   it("sends isPublished: false when the recruiter turns the switch off", async () => {
@@ -168,6 +190,10 @@ describe("NuevaVacanteModal publication", () => {
       vacancyModalityId: "",
       vacancyModalityCode: "",
       vacancyModalityName: "",
+      vacancyTypeId: "type-hh",
+      vacancyTypeCode: "headhunting",
+      vacancyTypeName: "Headhunting",
+      presentationDueAtUtc: "2026-10-12T23:59:59.999Z",
       companyId: "",
       companyName: "",
       requirements: [],

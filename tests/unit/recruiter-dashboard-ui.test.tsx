@@ -211,11 +211,13 @@ describe("RecruiterDashboard", () => {
     const section = screen.getByRole("region", { name: "Recordatorios en preparación" })
     expect(within(section).getByText("Consentimientos pendientes")).toBeInTheDocument()
     expect(within(section).getByText("Seguimientos atrasados")).toBeInTheDocument()
-    expect(within(section).queryByText("Vacantes próximas a cerrar")).not.toBeInTheDocument()
+    expect(within(section).queryByText("Próximas a vencer presentación")).not.toBeInTheDocument()
+    expect(within(section).queryByText("Fuera de plazo de presentación")).not.toBeInTheDocument()
     expect(within(section).getAllByText("Sin datos").length).toBeGreaterThan(0)
 
     const vacancies = screen.getByRole("region", { name: "Vacantes" })
-    expect(within(vacancies).getByText("Vacantes próximas a cerrar")).toBeInTheDocument()
+    expect(within(vacancies).getByText("Próximas a vencer presentación")).toBeInTheDocument()
+    expect(within(vacancies).getByText("Fuera de plazo de presentación")).toBeInTheDocument()
     expect(within(vacancies).getByText("Vacantes sin actividad reciente")).toBeInTheDocument()
   })
 

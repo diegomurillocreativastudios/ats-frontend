@@ -53,6 +53,7 @@
     "companies": "Empresas",
     "departments": "Departamentos",
     "modalities": "Modalidades",
+    "vacancyTypes": "Tipos de vacante",
     "documentTypes": "Tipos de documento",
     "interviewTypes": "Tipos",
     "interviewModalities": "Modalidades",
@@ -424,6 +425,10 @@
       "modalities": {
         "title": "Modalidades",
         "description": "Gestión del catálogo global de modalidades de vacantes"
+      },
+      "vacancyTypes": {
+        "title": "Tipos de vacante",
+        "description": "Gestión del catálogo de tipos de vacante y plazos de presentación"
       },
       "documentTypes": {
         "title": "Tipos de Documento",
@@ -2033,7 +2038,8 @@
         "allFemale": "Todas",
         "allMale": "Todos",
         "filterByAria": "Filtrar por {label}",
-        "clearFilters": "Limpiar filtros"
+        "clearFilters": "Limpiar filtros",
+        "vacancyType": "Tipo"
       },
       "cards": {
         "untitled": "Sin título",
@@ -2042,7 +2048,9 @@
         "cardReadOnlyAria": "Vacante inactiva, solo consulta: {title}",
         "logoAlt": "Logo de {company}",
         "published": "Publicado",
-        "archived": "Archivado"
+        "archived": "Archivado",
+        "presentationDue": "Presentación: {date}",
+        "presentationOverdue": "Presentación vencida: {date}"
       },
       "statuses": {
         "active": "Activa",
@@ -2070,7 +2078,7 @@
       "views": {
         "activas": "Mostrando vacantes activas.",
         "sin-postulaciones": "Mostrando vacantes sin postulaciones.",
-        "fuera-de-plazo": "Mostrando vacantes fuera de plazo.",
+        "fuera-de-plazo": "Mostrando vacantes fuera de plazo de presentación.",
         "no-publicadas": "Mostrando vacantes no publicadas.",
         "backToList": "Ver todas las vacantes",
         "empty": "Ninguna vacante con este criterio.",
@@ -2131,6 +2139,16 @@
             "label": "Estado / provincia"
           },
           "locationHelper": "Opcional. Elige país y estado o provincia donde aplica la vacante.",
+          "vacancyType": {
+            "label": "Tipo de vacante",
+            "ariaLabel": "Tipo de vacante",
+            "placeholder": "Selecciona un tipo"
+          },
+          "presentationDueAt": {
+            "label": "Fecha límite de presentación",
+            "ariaLabel": "Fecha límite de presentación de candidatos",
+            "helper": "Compromiso interno para presentar candidatos. Se sugiere según el tipo de vacante."
+          },
           "department": {
             "label": "Área (catálogo)",
             "ariaLabel": "Área de la vacante en catálogo"
@@ -2187,6 +2205,9 @@
           "nameRequired": "El nombre es requerido",
           "descriptionRequired": "La descripción es requerida",
           "companyRequired": "Selecciona una empresa cliente",
+          "vacancyTypeRequired": "Selecciona un tipo de vacante",
+          "presentationDueAtRequired": "La fecha límite de presentación es requerida",
+          "presentationDueAtInvalid": "Ingresa una fecha válida",
           "requirementValueRequired": "Nivel o criterio esperado requerido",
           "requirementNameRequired": "Nombre requerido",
           "lawsRequired": "Selecciona al menos una ley de protección de datos."
@@ -2195,8 +2216,8 @@
           "createFailed": "No se pudo crear la vacante. Intenta de nuevo.",
           "companiesLoadFailed": "No se pudieron cargar los clientes.",
           "companiesLoadFallbackSuffix": "Se usará la compañía predeterminada.",
-          "catalogsLoadFailed": "No se pudieron cargar departamentos y modalidades.",
-          "catalogsLoadFallbackSuffix": "La vacante se puede crear igualmente sin estos campos."
+          "catalogsLoadFailed": "No se pudieron cargar catálogos de vacante.",
+          "catalogsLoadFallbackSuffix": "Revisa la conexión e intenta de nuevo."
         }
       },
       "detail": {
@@ -2237,7 +2258,10 @@
           "modality": "Modalidad",
           "location": "Ubicación",
           "laws": "Leyes de protección de datos",
-          "created": "Creada el {date}"
+          "created": "Creada el {date}",
+          "vacancyType": "Tipo de vacante",
+          "presentationDueAt": "Fecha límite de presentación",
+          "presentationDueOverdue": "Vencida ({date})"
         },
         "actions": {
           "backToVacancies": "Volver a vacantes",
@@ -3171,11 +3195,6 @@
           "description": "{count, plural, one {# candidato} other {# candidatos}} sin cambiar de etapa en {days} días o más.",
           "action": "Revisar candidatos"
         },
-        "vacanciesClosingSoon": {
-          "title": "Vacantes próximas a cerrar",
-          "action": "Ver vacantes",
-          "description": "{count, plural, one {# vacante próxima a cerrar} other {# vacantes próximas a cerrar}}."
-        },
         "inactiveVacancies": {
           "title": "Vacantes sin actividad reciente",
           "action": "Ver vacantes",
@@ -3210,6 +3229,16 @@
           "title": "Documentos pendientes",
           "description": "{count, plural, one {# documento pendiente} other {# documentos pendientes}}.",
           "action": "Ver documentos"
+        },
+        "vacanciesPresentationDueSoon": {
+          "title": "Próximas a vencer presentación",
+          "action": "Ver vacantes",
+          "description": "{count, plural, one {# vacante próxima a vencer su plazo de presentación} other {# vacantes próximas a vencer su plazo de presentación}}."
+        },
+        "vacanciesPresentationOverdue": {
+          "title": "Fuera de plazo de presentación",
+          "action": "Ver vacantes",
+          "description": "{count, plural, one {# vacante fuera de plazo de presentación} other {# vacantes fuera de plazo de presentación}}."
         }
       },
       "panelError": {
@@ -3247,10 +3276,10 @@
           "dueAt": "Fecha",
           "dateTime": "Fecha y hora",
           "since": "Desde",
-          "closing": "Cierre",
           "lastActivity": "Última actividad",
           "status": "Estado",
-          "actions": "Acciones"
+          "actions": "Acciones",
+          "presentationDue": "Presentación"
         },
         "invalidKey": {
           "breadcrumb": "Recordatorio desconocido",
@@ -3804,8 +3833,10 @@
         "table": {
           "name": "Nombre",
           "description": "Descripción",
+          "presentationSlaDays": "Plazo (días)",
           "actions": "Acciones"
         },
+        "presentationSlaDaysValue": "{days, plural, one {# día} other {# días}}",
         "actions": {
           "refresh": "Refrescar",
           "retry": "Reintentar",
@@ -3827,6 +3858,8 @@
         "form": {
           "nameLabel": "Nombre",
           "descriptionLabel": "Descripción",
+          "presentationSlaDaysLabel": "Días de plazo de presentación",
+          "presentationSlaDaysPlaceholder": "Ej. 3",
           "namePlaceholder": "Nombre del {singular}",
           "descriptionPlaceholder": "Descripción breve del {singular}",
           "loading": "Cargando {singular}..."
@@ -3836,7 +3869,9 @@
           "codeRequired": "El código es obligatorio.",
           "codePattern": "Usa solo minúsculas, números y guiones.",
           "sortOrderRequired": "El orden es obligatorio.",
-          "sortOrderInvalid": "Ingresa un número entero válido."
+          "sortOrderInvalid": "Ingresa un número entero válido.",
+          "presentationSlaDaysRequired": "Los días de plazo son obligatorios.",
+          "presentationSlaDaysInvalid": "Ingresa un entero mayor que 0."
         },
         "errors": {
           "loadCatalog": "No se pudo cargar el catálogo.",
@@ -3914,6 +3949,25 @@
         "deleteSuccess": "Habilidad blanda eliminada.",
         "deleteConflictMessage": "No se puede eliminar porque tiene calificaciones históricas asociadas.",
         "formCreateTitle": "{singularCapitalized} nueva",
+        "formEditTitle": "Editar {singular}",
+        "deleteTitle": "Eliminar {singular}"
+      },
+      "vacancyTypes": {
+        "title": "Tipos de vacante",
+        "singular": "tipo de vacante",
+        "singularCapitalized": "Tipo de vacante",
+        "plural": "tipos de vacante",
+        "article": "el",
+        "createCta": "Crear tipo de vacante",
+        "emptyMessage": "Aún no hay tipos de vacante creados",
+        "headingDescription": "Gestiona los tipos de vacante y el plazo interno de presentación de candidatos.",
+        "createSuccess": "Tipo de vacante creado.",
+        "updateSuccess": "Tipo de vacante actualizado.",
+        "activateSuccess": "Tipo de vacante activado.",
+        "deactivateSuccess": "Tipo de vacante desactivado.",
+        "deleteSuccess": "Tipo de vacante eliminado.",
+        "deleteConflictMessage": "No se puede eliminar porque está asociado a vacantes existentes.",
+        "formCreateTitle": "{singularCapitalized} nuevo",
         "formEditTitle": "Editar {singular}",
         "deleteTitle": "Eliminar {singular}"
       }

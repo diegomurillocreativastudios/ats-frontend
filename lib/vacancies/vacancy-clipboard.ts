@@ -3,6 +3,9 @@ import {
   getVacancyDepartmentSummary,
   getVacancyModalityId,
   getVacancyModalitySummary,
+  getVacancyPresentationDueAtUtc,
+  getVacancyTypeId,
+  getVacancyTypeSummary,
 } from "@/lib/vacancy-catalogs"
 import { toRequirementImportance } from "@/lib/vacancies/format-requirement-key"
 import { readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
@@ -36,6 +39,10 @@ export interface VacancyClipboardPayload {
   vacancyModalityId: string
   vacancyModalityCode: string
   vacancyModalityName: string
+  vacancyTypeId: string
+  vacancyTypeCode: string
+  vacancyTypeName: string
+  presentationDueAtUtc: string
   companyId: string
   companyName: string
   requirements: VacancyClipboardRequirement[]
@@ -150,6 +157,10 @@ export function parseVacancyClipboardPayload(
     vacancyModalityId: value.vacancyModalityId as string,
     vacancyModalityCode: readOptionalString(value.vacancyModalityCode),
     vacancyModalityName: readOptionalString(value.vacancyModalityName),
+    vacancyTypeId: readOptionalString(value.vacancyTypeId),
+    vacancyTypeCode: readOptionalString(value.vacancyTypeCode),
+    vacancyTypeName: readOptionalString(value.vacancyTypeName),
+    presentationDueAtUtc: readOptionalString(value.presentationDueAtUtc),
     companyId: value.companyId as string,
     companyName: readOptionalString(value.companyName),
     requirements: value.requirements.map((requirement) => ({
@@ -218,6 +229,7 @@ export function buildVacancyClipboardPayload(
   const countryCode = readTrimmedString(countryRaw).toUpperCase()
   const departmentSummary = getVacancyDepartmentSummary(record)
   const modalitySummary = getVacancyModalitySummary(record)
+  const typeSummary = getVacancyTypeSummary(record)
   const resolvedCompanyName =
     readTrimmedString(companyName) ||
     readTrimmedString(record.company) ||
@@ -238,6 +250,10 @@ export function buildVacancyClipboardPayload(
     vacancyModalityId: getVacancyModalityId(record),
     vacancyModalityCode: readTrimmedString(modalitySummary?.code),
     vacancyModalityName: readTrimmedString(modalitySummary?.displayName),
+    vacancyTypeId: getVacancyTypeId(record),
+    vacancyTypeCode: readTrimmedString(typeSummary?.code),
+    vacancyTypeName: readTrimmedString(typeSummary?.displayName),
+    presentationDueAtUtc: getVacancyPresentationDueAtUtc(record) ?? "",
     companyId: readTrimmedString(companyId),
     companyName: resolvedCompanyName,
     requirements: extractRequirements(record),

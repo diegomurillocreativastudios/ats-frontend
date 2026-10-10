@@ -158,9 +158,20 @@ import {
   getVacancyModalityId,
   getVacancyModalityLabel,
   getVacancyModalitySummary,
+  getVacancyPresentationDueAtUtc,
+  getVacancyTypeId,
+  getVacancyTypeLabel,
+  getVacancyTypeSummary,
   mapActiveCatalogItemsToOptions,
   mergeCatalogOption,
 } from "@/lib/vacancy-catalogs";
+import {
+  dateInputValueToPresentationDueAtUtc,
+  formatPresentationDueAtLabel,
+  isPresentationDueOverdue,
+  presentationDueAtUtcToDateInputValue,
+  suggestPresentationDueAtUtc,
+} from "@/lib/vacancies/presentation-due-at";
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels";
 import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles";
 import {
@@ -1123,6 +1134,8 @@ function VacanteDetallePage() {
   const [editStateCode, setEditStateCode] = useState("");
   const [editVacancyDepartmentId, setEditVacancyDepartmentId] = useState("");
   const [editVacancyModalityId, setEditVacancyModalityId] = useState("");
+  const [editVacancyTypeId, setEditVacancyTypeId] = useState("");
+  const [editPresentationDueDate, setEditPresentationDueDate] = useState("");
   const [editDataProtectionLawIds, setEditDataProtectionLawIds] = useState<string[]>([]);
   const [lawOptions, setLawOptions] = useState<VacancyDataProtectionLaw[]>([]);
   const [loadingLaws, setLoadingLaws] = useState(false);
@@ -1134,6 +1147,7 @@ function VacanteDetallePage() {
   const [saveVacancyError, setSaveVacancyError] = useState(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [modalityOptions, setModalityOptions] = useState([]);
+  const [typeOptions, setTypeOptions] = useState([]);
   const [loadingVacancyCatalogs, setLoadingVacancyCatalogs] = useState(false);
   const [vacancyCatalogsError, setVacancyCatalogsError] = useState(null);
   const [snackbar, setSnackbar] = useState({
@@ -1190,6 +1204,7 @@ function VacanteDetallePage() {
   const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
   const originalCompanyIdAtEditRef = useRef("");
   const lawSelectionTouchedRef = useRef(false);
+  const presentationDueTouchedRef = useRef(false);
 
   const vacancyDepartmentSummary = useMemo(
     () =>
@@ -1207,6 +1222,22 @@ function VacanteDetallePage() {
     [vacancy]
   );
 
+  const vacancyTypeSummary = useMemo(
+    () =>
+      getVacancyTypeSummary(
+        vacancy && typeof vacancy === "object" ? vacancy : null
+      ),
+    [vacancy]
+  );
+
+  const vacancyPresentationDueAtUtc = useMemo(
+    () =>
+      getVacancyPresentationDueAtUtc(
+        vacancy && typeof vacancy === "object" ? vacancy : null
+      ),
+    [vacancy]
+  );
+
   const mergedDepartmentOptions = useMemo(
     () => mergeCatalogOption(departmentOptions, vacancyDepartmentSummary),
     [departmentOptions, vacancyDepartmentSummary]
@@ -1215,6 +1246,11 @@ function VacanteDetallePage() {
   const mergedModalityOptions = useMemo(
     () => mergeCatalogOption(modalityOptions, vacancyModalitySummary),
     [modalityOptions, vacancyModalitySummary]
+  );
+
+  const mergedTypeOptions = useMemo(
+    () => mergeCatalogOption(typeOptions, vacancyTypeSummary),
+    [typeOptions, vacancyTypeSummary]
   );
 
   const createCatalogSummary = useCallback((option) => {
@@ -1314,16 +1350,19 @@ function VacanteDetallePage() {
     setVacancyCatalogsError(null)
 
     try {
-      const [departments, modalities] = await Promise.all([
+      const [departments, modalities, vacancyTypes] = await Promise.all([
         listAdminVacancyCatalog("departments"),
         listAdminVacancyCatalog("modalities"),
+        listAdminVacancyCatalog("vacancyTypes"),
       ])
 
       setDepartmentOptions(mapActiveCatalogItemsToOptions(departments))
       setModalityOptions(mapActiveCatalogItemsToOptions(modalities))
+      setTypeOptions(mapActiveCatalogItemsToOptions(vacancyTypes))
     } catch (err) {
       setDepartmentOptions([])
       setModalityOptions([])
+      setTypeOptions([])
       setVacancyCatalogsError(
         getApiErrorMessage(err) ||
           t("form.errors.catalogsLoadFailed")
@@ -1474,6 +1513,11 @@ function VacanteDetallePage() {
     setEditAdvantages(v.advantages == null ? "" : String(v.advantages));
     setEditVacancyDepartmentId(getVacancyDepartmentId(v))
     setEditVacancyModalityId(getVacancyModalityId(v))
+    setEditVacancyTypeId(getVacancyTypeId(v))
+    setEditPresentationDueDate(
+      presentationDueAtUtcToDateInputValue(getVacancyPresentationDueAtUtc(v))
+    )
+    presentationDueTouchedRef.current = false
     const linkedLawIds = readVacancyDataProtectionLawIds(v)
     if (linkedLawIds.length > 0) {
       setEditDataProtectionLawIds(linkedLawIds)
@@ -1534,6 +1578,14 @@ function VacanteDetallePage() {
     const nextErrors: Record<string, string> = {};
     if (!String(editTitle ?? "").trim()) nextErrors.title = t("form.validation.nameRequired");
     if (!String(editDescription ?? "").trim()) nextErrors.description = t("form.validation.descriptionRequired");
+    if (!String(editVacancyTypeId ?? "").trim()) {
+      nextErrors.vacancyType = t("form.validation.vacancyTypeRequired");
+    }
+    if (!String(editPresentationDueDate ?? "").trim()) {
+      nextErrors.presentationDueAt = t("form.validation.presentationDueAtRequired");
+    } else if (!dateInputValueToPresentationDueAtUtc(editPresentationDueDate)) {
+      nextErrors.presentationDueAt = t("form.validation.presentationDueAtInvalid");
+    }
 
     editRequirements.forEach((req) => {
       const hasName = !!String(req.requirementName ?? "").trim();
@@ -1548,7 +1600,15 @@ function VacanteDetallePage() {
 
     setEditErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
-  }, [editTitle, editDescription, editRequirements, editDataProtectionLawIds, t]);
+  }, [
+    editTitle,
+    editDescription,
+    editVacancyTypeId,
+    editPresentationDueDate,
+    editRequirements,
+    editDataProtectionLawIds,
+    t,
+  ]);
 
   const handleEditVacancy = useCallback(() => {
     if (!vacancy || !readVacancyIsActive(vacancy)) return;
@@ -1640,11 +1700,34 @@ function VacanteDetallePage() {
         mergedModalityOptions
       )
     );
+    const resolvedTypeId = resolveClipboardCatalogId(
+      payload.vacancyTypeId ?? "",
+      payload.vacancyTypeCode ?? "",
+      payload.vacancyTypeName ?? "",
+      mergedTypeOptions
+    );
+    setEditVacancyTypeId(resolvedTypeId);
+    const pastedDueAt = String(payload.presentationDueAtUtc ?? "").trim();
+    if (pastedDueAt !== "") {
+      presentationDueTouchedRef.current = true;
+      setEditPresentationDueDate(
+        presentationDueAtUtcToDateInputValue(pastedDueAt)
+      );
+    } else if (resolvedTypeId !== "") {
+      presentationDueTouchedRef.current = false;
+      const selected = mergedTypeOptions.find((option) => option.id === resolvedTypeId);
+      const slaDays = selected?.presentationSlaDays;
+      if (slaDays != null && slaDays >= 1) {
+        setEditPresentationDueDate(
+          presentationDueAtUtcToDateInputValue(suggestPresentationDueAtUtc(slaDays))
+        );
+      }
+    }
     setEditRequirements(clipboardPayloadToRequirementRows(payload.requirements));
     lawSelectionTouchedRef.current = true;
     setEditDataProtectionLawIds(normalizeDataProtectionLawIds(payload.dataProtectionLawIds));
     setEditErrors({});
-  }, [mergedDepartmentOptions, mergedModalityOptions]);
+  }, [mergedDepartmentOptions, mergedModalityOptions, mergedTypeOptions]);
 
   const handleRequestPaste = useCallback(async () => {
     const payload = await readVacancyClipboard();
@@ -1756,6 +1839,10 @@ function VacanteDetallePage() {
     );
     const nextDepartmentId = editVacancyDepartmentId || null;
     const nextModalityId = editVacancyModalityId || null;
+    const nextTypeId = editVacancyTypeId || null;
+    const nextPresentationDueAtUtc =
+      dateInputValueToPresentationDueAtUtc(editPresentationDueDate);
+    const currentPresentationDueAtUtc = getVacancyPresentationDueAtUtc(vacancy);
 
     const hasOtherFormChanges =
       nextTitle !== String(vacancy?.title ?? "").trim() ||
@@ -1770,6 +1857,8 @@ function VacanteDetallePage() {
       nextStateCode !== currentStateCode ||
       nextDepartmentId !== (getVacancyDepartmentId(vacancy) || null) ||
       nextModalityId !== (getVacancyModalityId(vacancy) || null) ||
+      nextTypeId !== (getVacancyTypeId(vacancy) || null) ||
+      nextPresentationDueAtUtc !== currentPresentationDueAtUtc ||
       !sameDataProtectionLawIds(
         editDataProtectionLawIds,
         readVacancyDataProtectionLawIds(vacancy)
@@ -1803,6 +1892,8 @@ function VacanteDetallePage() {
           },
           vacancyDepartmentId: nextDepartmentId,
           vacancyModalityId: nextModalityId,
+          vacancyTypeId: nextTypeId,
+          presentationDueAtUtc: nextPresentationDueAtUtc,
         };
         appendVacancyLocationToPayload(payload, {
           countryCode: editCountryCode,
@@ -1828,6 +1919,9 @@ function VacanteDetallePage() {
         const selectedModality = mergedModalityOptions.find(
           (option) => option.id === editVacancyModalityId
         );
+        const selectedType = mergedTypeOptions.find(
+          (option) => option.id === editVacancyTypeId
+        );
 
         const nextDepartmentSummary =
           getVacancyDepartmentSummary(updatedRecord) ??
@@ -1838,6 +1932,16 @@ function VacanteDetallePage() {
           getVacancyModalitySummary(updatedRecord) ??
           createCatalogSummary(selectedModality) ??
           null;
+
+        const selectedTypeSummary = createCatalogSummary(selectedType)
+        const nextTypeSummary =
+          getVacancyTypeSummary(updatedRecord) ??
+          (selectedTypeSummary
+            ? {
+                ...selectedTypeSummary,
+                presentationSlaDays: selectedType?.presentationSlaDays ?? null,
+              }
+            : null);
 
         const nextCompanyName =
           companySelectOptions.find((c) => c.id === editCompanyId)?.name ??
@@ -1868,6 +1972,12 @@ function VacanteDetallePage() {
           modality: nextModalitySummary?.displayName ?? null,
           workArrangement: nextModalitySummary?.displayName ?? null,
           work_arrangement: nextModalitySummary?.displayName ?? null,
+          vacancyTypeId: editVacancyTypeId || null,
+          vacancy_type_id: editVacancyTypeId || null,
+          vacancyType: nextTypeSummary,
+          vacancy_type: nextTypeSummary,
+          presentationDueAtUtc: nextPresentationDueAtUtc,
+          presentation_due_at_utc: nextPresentationDueAtUtc,
           dataProtectionLawIds: payload.dataProtectionLawIds,
           dataProtectionLaws:
             readVacancyDataProtectionLaws(updatedRecord).length > 0
@@ -1931,6 +2041,8 @@ function VacanteDetallePage() {
     editStateCode,
     editVacancyDepartmentId,
     editVacancyModalityId,
+    editVacancyTypeId,
+    editPresentationDueDate,
     editDataProtectionLawIds,
     lawOptions,
     editRequirements,
@@ -1938,6 +2050,7 @@ function VacanteDetallePage() {
     fetchVacancy,
     mergedDepartmentOptions,
     mergedModalityOptions,
+    mergedTypeOptions,
     createCatalogSummary,
     companySelectOptions,
     t,
@@ -3018,6 +3131,86 @@ function VacanteDetallePage() {
                               />
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-type-desktop">
+                                    {t("form.fields.vacancyType.label")}
+                                  </label>
+                                  <select
+                                    id="edit-vacancy-type-desktop"
+                                    value={editVacancyTypeId}
+                                    onChange={(e) => {
+                                      const nextTypeId = e.target.value
+                                      setEditVacancyTypeId(nextTypeId)
+                                      setEditErrors((prev) => {
+                                        const next = { ...prev }
+                                        delete next.vacancyType
+                                        return next
+                                      })
+                                      if (!presentationDueTouchedRef.current && nextTypeId !== "") {
+                                        const selected = mergedTypeOptions.find(
+                                          (option) => option.id === nextTypeId
+                                        )
+                                        const slaDays = selected?.presentationSlaDays
+                                        if (slaDays != null && slaDays >= 1) {
+                                          setEditPresentationDueDate(
+                                            presentationDueAtUtcToDateInputValue(
+                                              suggestPresentationDueAtUtc(slaDays)
+                                            )
+                                          )
+                                        }
+                                      }
+                                    }}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label={t("form.fields.vacancyType.ariaLabel")}
+                                    aria-invalid={Boolean(editErrors.vacancyType)}
+                                    disabled={loadingVacancyCatalogs}
+                                  >
+                                    <option value="">{t("form.fields.vacancyType.placeholder")}</option>
+                                    {mergedTypeOptions.map((option) => (
+                                      <option key={option.id} value={option.id}>
+                                        {option.displayName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {editErrors.vacancyType ? (
+                                    <p className="font-sans text-sm text-vo-pink" role="alert">
+                                      {editErrors.vacancyType}
+                                    </p>
+                                  ) : null}
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-presentation-due-desktop">
+                                    {t("form.fields.presentationDueAt.label")}
+                                  </label>
+                                  <input
+                                    id="edit-vacancy-presentation-due-desktop"
+                                    type="date"
+                                    value={editPresentationDueDate}
+                                    onChange={(e) => {
+                                      presentationDueTouchedRef.current = true
+                                      setEditPresentationDueDate(e.target.value)
+                                      setEditErrors((prev) => {
+                                        const next = { ...prev }
+                                        delete next.presentationDueAt
+                                        return next
+                                      })
+                                    }}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label={t("form.fields.presentationDueAt.ariaLabel")}
+                                    aria-invalid={Boolean(editErrors.presentationDueAt)}
+                                    disabled={savingVacancy}
+                                  />
+                                  <p className="font-sans text-xs text-muted-foreground">
+                                    {t("form.fields.presentationDueAt.helper")}
+                                  </p>
+                                  {editErrors.presentationDueAt ? (
+                                    <p className="font-sans text-sm text-vo-pink" role="alert">
+                                      {editErrors.presentationDueAt}
+                                    </p>
+                                  ) : null}
+                                </div>
+                              </div>
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-desktop">
                                     {t("form.fields.department.label")}
                                   </label>
@@ -3090,6 +3283,14 @@ function VacanteDetallePage() {
                               companyName={vacancyCompanyDisplayName}
                               department={getVacancyDepartmentLabel(vacancy)}
                               modality={getVacancyModalityLabel(vacancy)}
+                              vacancyType={getVacancyTypeLabel(vacancy)}
+                              presentationDueAtLabel={formatPresentationDueAtLabel(
+                                vacancyPresentationDueAtUtc,
+                                locale
+                              )}
+                              isPresentationOverdue={isPresentationDueOverdue(
+                                vacancyPresentationDueAtUtc
+                              )}
                               countryCode={vacancy.countryCode ?? vacancy.country_code}
                               stateCode={vacancy.stateCode ?? vacancy.state_code}
                               laws={linkedLaws}
@@ -3888,6 +4089,86 @@ function VacanteDetallePage() {
                               />
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-type-mobile">
+                                    {t("form.fields.vacancyType.label")}
+                                  </label>
+                                  <select
+                                    id="edit-vacancy-type-mobile"
+                                    value={editVacancyTypeId}
+                                    onChange={(e) => {
+                                      const nextTypeId = e.target.value
+                                      setEditVacancyTypeId(nextTypeId)
+                                      setEditErrors((prev) => {
+                                        const next = { ...prev }
+                                        delete next.vacancyType
+                                        return next
+                                      })
+                                      if (!presentationDueTouchedRef.current && nextTypeId !== "") {
+                                        const selected = mergedTypeOptions.find(
+                                          (option) => option.id === nextTypeId
+                                        )
+                                        const slaDays = selected?.presentationSlaDays
+                                        if (slaDays != null && slaDays >= 1) {
+                                          setEditPresentationDueDate(
+                                            presentationDueAtUtcToDateInputValue(
+                                              suggestPresentationDueAtUtc(slaDays)
+                                            )
+                                          )
+                                        }
+                                      }
+                                    }}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label={t("form.fields.vacancyType.ariaLabel")}
+                                    aria-invalid={Boolean(editErrors.vacancyType)}
+                                    disabled={loadingVacancyCatalogs}
+                                  >
+                                    <option value="">{t("form.fields.vacancyType.placeholder")}</option>
+                                    {mergedTypeOptions.map((option) => (
+                                      <option key={option.id} value={option.id}>
+                                        {option.displayName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {editErrors.vacancyType ? (
+                                    <p className="font-sans text-sm text-vo-pink" role="alert">
+                                      {editErrors.vacancyType}
+                                    </p>
+                                  ) : null}
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-presentation-due-mobile">
+                                    {t("form.fields.presentationDueAt.label")}
+                                  </label>
+                                  <input
+                                    id="edit-vacancy-presentation-due-mobile"
+                                    type="date"
+                                    value={editPresentationDueDate}
+                                    onChange={(e) => {
+                                      presentationDueTouchedRef.current = true
+                                      setEditPresentationDueDate(e.target.value)
+                                      setEditErrors((prev) => {
+                                        const next = { ...prev }
+                                        delete next.presentationDueAt
+                                        return next
+                                      })
+                                    }}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label={t("form.fields.presentationDueAt.ariaLabel")}
+                                    aria-invalid={Boolean(editErrors.presentationDueAt)}
+                                    disabled={savingVacancy}
+                                  />
+                                  <p className="font-sans text-xs text-muted-foreground">
+                                    {t("form.fields.presentationDueAt.helper")}
+                                  </p>
+                                  {editErrors.presentationDueAt ? (
+                                    <p className="font-sans text-sm text-vo-pink" role="alert">
+                                      {editErrors.presentationDueAt}
+                                    </p>
+                                  ) : null}
+                                </div>
+                              </div>
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-mobile">
                                     {t("form.fields.department.label")}
                                   </label>
@@ -3960,6 +4241,14 @@ function VacanteDetallePage() {
                             companyName={vacancyCompanyDisplayName}
                             department={getVacancyDepartmentLabel(vacancy)}
                             modality={getVacancyModalityLabel(vacancy)}
+                            vacancyType={getVacancyTypeLabel(vacancy)}
+                            presentationDueAtLabel={formatPresentationDueAtLabel(
+                              vacancyPresentationDueAtUtc,
+                              locale
+                            )}
+                            isPresentationOverdue={isPresentationDueOverdue(
+                              vacancyPresentationDueAtUtc
+                            )}
                             countryCode={vacancy.countryCode ?? vacancy.country_code}
                             stateCode={vacancy.stateCode ?? vacancy.state_code}
                             laws={linkedLaws}

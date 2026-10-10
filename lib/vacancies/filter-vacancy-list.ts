@@ -6,6 +6,7 @@ export interface VacancyListFilters {
   modalityId: string
   countryCode: string
   departmentId: string
+  vacancyTypeId: string
 }
 
 export const EMPTY_VACANCY_LIST_FILTERS: VacancyListFilters = {
@@ -14,6 +15,7 @@ export const EMPTY_VACANCY_LIST_FILTERS: VacancyListFilters = {
   modalityId: "",
   countryCode: "",
   departmentId: "",
+  vacancyTypeId: "",
 }
 
 export const hasActiveVacancyListFilters = (filters: VacancyListFilters): boolean =>
@@ -22,7 +24,8 @@ export const hasActiveVacancyListFilters = (filters: VacancyListFilters): boolea
       filters.companyId ||
       filters.modalityId ||
       filters.countryCode ||
-      filters.departmentId
+      filters.departmentId ||
+      filters.vacancyTypeId
   )
 
 export const filterVacancyList = (
@@ -46,6 +49,10 @@ export const filterVacancyList = (
     }
 
     if (filters.departmentId && vacancy.departmentId !== filters.departmentId) {
+      return false
+    }
+
+    if (filters.vacancyTypeId && vacancy.vacancyTypeId !== filters.vacancyTypeId) {
       return false
     }
 

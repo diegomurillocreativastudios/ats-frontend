@@ -35,8 +35,9 @@ import {
 const DATE_COLUMN_LABEL = {
   dateTime: "columns.dateTime",
   since: "columns.since",
-  closing: "columns.closing",
+  presentationDue: "columns.presentationDue",
   lastActivity: "columns.lastActivity",
+  date: "columns.dueAt",
 } as const
 
 const ROW_ACTION_LABEL: Record<ReminderRowActionKey, "rowActions.interview" | "rowActions.vacancy" | "rowActions.sheet"> = {

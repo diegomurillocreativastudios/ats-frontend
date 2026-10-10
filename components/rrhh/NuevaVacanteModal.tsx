@@ -30,8 +30,16 @@ import {
   resolveClipboardCompanyId,
   type VacancyClipboardPayload,
 } from "@/lib/vacancies/vacancy-clipboard";
-import { mapActiveCatalogItemsToOptions } from "@/lib/vacancy-catalogs";
+import {
+  mapActiveCatalogItemsToOptions,
+  type VacancyCatalogSelectOption,
+} from "@/lib/vacancy-catalogs";
 import { toRequirementStorageKey } from "@/lib/vacancies/format-requirement-key";
+import {
+  dateInputValueToPresentationDueAtUtc,
+  presentationDueAtUtcToDateInputValue,
+  suggestPresentationDueAtUtc,
+} from "@/lib/vacancies/presentation-due-at";
 
 const REQUIREMENT_SCALE_MIN = 1;
 const REQUIREMENT_SCALE_MAX = 10;
@@ -55,6 +63,8 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [stateCode, setStateCode] = useState("");
   const [vacancyDepartmentId, setVacancyDepartmentId] = useState("");
   const [vacancyModalityId, setVacancyModalityId] = useState("");
+  const [vacancyTypeId, setVacancyTypeId] = useState("");
+  const [presentationDueDate, setPresentationDueDate] = useState("");
   const [dataProtectionLawIds, setDataProtectionLawIds] = useState<string[]>([]);
   const [lawOptions, setLawOptions] = useState<VacancyDataProtectionLaw[]>([]);
   const [loadingLaws, setLoadingLaws] = useState(false);
@@ -65,8 +75,9 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [loadingCompanies, setLoadingCompanies] = useState(false);
   const [companyLoadError, setCompanyLoadError] = useState<string | null>(null);
-  const [departmentOptions, setDepartmentOptions] = useState([]);
-  const [modalityOptions, setModalityOptions] = useState([]);
+  const [departmentOptions, setDepartmentOptions] = useState<VacancyCatalogSelectOption[]>([]);
+  const [modalityOptions, setModalityOptions] = useState<VacancyCatalogSelectOption[]>([]);
+  const [typeOptions, setTypeOptions] = useState<VacancyCatalogSelectOption[]>([]);
   const [loadingCatalogs, setLoadingCatalogs] = useState(false);
   const [catalogLoadError, setCatalogLoadError] = useState(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -75,6 +86,7 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
   const [pasteConfirmOpen, setPasteConfirmOpen] = useState(false);
   const companyTouchedRef = useRef(false);
   const lawSelectionTouchedRef = useRef(false);
+  const presentationDueTouchedRef = useRef(false);
   const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
 
   useEffect(() => {
@@ -115,19 +127,22 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
       setCatalogLoadError(null)
 
       try {
-        const [departments, modalities] = await Promise.all([
+        const [departments, modalities, vacancyTypes] = await Promise.all([
           listAdminVacancyCatalog("departments"),
           listAdminVacancyCatalog("modalities"),
+          listAdminVacancyCatalog("vacancyTypes"),
         ])
 
         if (cancelled) return
 
         setDepartmentOptions(mapActiveCatalogItemsToOptions(departments))
         setModalityOptions(mapActiveCatalogItemsToOptions(modalities))
+        setTypeOptions(mapActiveCatalogItemsToOptions(vacancyTypes))
       } catch (error) {
         if (cancelled) return
         setDepartmentOptions([])
         setModalityOptions([])
+        setTypeOptions([])
         setCatalogLoadError(
           error?.message ||
             error?.detail ||
@@ -207,10 +222,39 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     );
   };
 
+  const applySuggestedPresentationDue = (typeId: string) => {
+    const selected = typeOptions.find((option) => option.id === typeId)
+    const slaDays = selected?.presentationSlaDays
+    if (slaDays == null || slaDays < 1) return
+    setPresentationDueDate(
+      presentationDueAtUtcToDateInputValue(suggestPresentationDueAtUtc(slaDays))
+    )
+  }
+
+  const handleVacancyTypeChange = (nextTypeId: string) => {
+    setVacancyTypeId(nextTypeId)
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next.vacancyType
+      return next
+    })
+    if (!presentationDueTouchedRef.current && nextTypeId !== "") {
+      applySuggestedPresentationDue(nextTypeId)
+    }
+  }
+
   const validate = () => {
     const nextErrors: Record<string, string> = {};
     if (!nombre.trim()) {
       nextErrors.nombre = t("validation.nameRequired");
+    }
+    if (!vacancyTypeId.trim()) {
+      nextErrors.vacancyType = t("validation.vacancyTypeRequired");
+    }
+    if (!presentationDueDate.trim()) {
+      nextErrors.presentationDueAt = t("validation.presentationDueAtRequired");
+    } else if (!dateInputValueToPresentationDueAtUtc(presentationDueDate)) {
+      nextErrors.presentationDueAt = t("validation.presentationDueAtInvalid");
     }
     if (!descripcion.trim()) {
       nextErrors.descripcion = t("validation.descriptionRequired");
@@ -281,6 +325,12 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
       },
     };
     appendVacancyLocationToPayload(payload, { countryCode, stateCode });
+    payload.vacancyTypeId = vacancyTypeId.trim()
+    const presentationDueAtUtc =
+      dateInputValueToPresentationDueAtUtc(presentationDueDate)
+    if (presentationDueAtUtc) {
+      payload.presentationDueAtUtc = presentationDueAtUtc
+    }
     if (vacancyDepartmentId) {
       payload.vacancyDepartmentId = vacancyDepartmentId
     }
@@ -319,8 +369,11 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     setStateCode("");
     setVacancyDepartmentId("");
     setVacancyModalityId("");
+    setVacancyTypeId("");
+    setPresentationDueDate("");
     setDataProtectionLawIds([]);
     lawSelectionTouchedRef.current = false;
+    presentationDueTouchedRef.current = false;
     setSelectedCompanyId("");
     setRequerimientos([createEmptyRequirement()]);
     setIsPublished(true);
@@ -342,6 +395,8 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
     if (stateCode.trim() !== "") return true
     if (vacancyDepartmentId !== "") return true
     if (vacancyModalityId !== "") return true
+    if (vacancyTypeId !== "") return true
+    if (presentationDueDate !== "") return true
     if (dataProtectionLawIds.length > 0) return true
     if (!isPublished) return true
     return requerimientos.some(
@@ -373,6 +428,21 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
         modalityOptions
       )
     )
+    const resolvedTypeId = resolveClipboardCatalogId(
+      payload.vacancyTypeId ?? "",
+      payload.vacancyTypeCode ?? "",
+      payload.vacancyTypeName ?? "",
+      typeOptions
+    )
+    setVacancyTypeId(resolvedTypeId)
+    const pastedDueAt = String(payload.presentationDueAtUtc ?? "").trim()
+    if (pastedDueAt !== "") {
+      presentationDueTouchedRef.current = true
+      setPresentationDueDate(presentationDueAtUtcToDateInputValue(pastedDueAt))
+    } else if (resolvedTypeId !== "") {
+      presentationDueTouchedRef.current = false
+      applySuggestedPresentationDue(resolvedTypeId)
+    }
     const resolvedCompanyId = resolveClipboardCompanyId(
       payload.companyId,
       payload.companyName,
@@ -634,6 +704,88 @@ export default function NuevaVacanteModal({ isOpen, onClose, onSubmit, onSnackba
           loadStatesErrorLabel={tLocation("loadStatesError")}
           disabled={loading}
         />
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="vacante-type"
+              className="font-sans text-sm font-medium text-foreground"
+            >
+              {t("fields.vacancyType.label")}
+            </label>
+            <select
+              id="vacante-type"
+              value={vacancyTypeId}
+              onChange={(e) => handleVacancyTypeChange(e.target.value)}
+              required
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={t("fields.vacancyType.ariaLabel")}
+              aria-invalid={Boolean(errors.vacancyType)}
+              aria-describedby={errors.vacancyType ? "vacante-type-error" : undefined}
+              disabled={loading || loadingCatalogs}
+            >
+              <option value="">{t("fields.vacancyType.placeholder")}</option>
+              {typeOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.displayName}
+                </option>
+              ))}
+            </select>
+            {errors.vacancyType ? (
+              <p id="vacante-type-error" className="font-sans text-sm text-vo-pink" role="alert">
+                {errors.vacancyType}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="vacante-presentation-due"
+              className="font-sans text-sm font-medium text-foreground"
+            >
+              {t("fields.presentationDueAt.label")}
+            </label>
+            <input
+              id="vacante-presentation-due"
+              type="date"
+              value={presentationDueDate}
+              onChange={(e) => {
+                presentationDueTouchedRef.current = true
+                setPresentationDueDate(e.target.value)
+                setErrors((prev) => {
+                  const next = { ...prev }
+                  delete next.presentationDueAt
+                  return next
+                })
+              }}
+              required
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={t("fields.presentationDueAt.ariaLabel")}
+              aria-invalid={Boolean(errors.presentationDueAt)}
+              aria-describedby={
+                errors.presentationDueAt
+                  ? "vacante-presentation-due-error"
+                  : "vacante-presentation-due-helper"
+              }
+              disabled={loading}
+            />
+            <p
+              id="vacante-presentation-due-helper"
+              className="font-sans text-xs text-muted-foreground"
+            >
+              {t("fields.presentationDueAt.helper")}
+            </p>
+            {errors.presentationDueAt ? (
+              <p
+                id="vacante-presentation-due-error"
+                className="font-sans text-sm text-vo-pink"
+                role="alert"
+              >
+                {errors.presentationDueAt}
+              </p>
+            ) : null}
+          </div>
+        </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-2">

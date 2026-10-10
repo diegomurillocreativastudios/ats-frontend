@@ -10,6 +10,9 @@ interface VacancyReadOnlyIdentityProps {
   companyName: string
   department: string
   modality: string
+  vacancyType?: string
+  presentationDueAtLabel?: string | null
+  isPresentationOverdue?: boolean
   countryCode?: string | null
   stateCode?: string | null
   laws?: VacancyDataProtectionLaw[]
@@ -38,6 +41,9 @@ export function VacancyReadOnlyIdentity({
   companyName,
   department,
   modality,
+  vacancyType = "",
+  presentationDueAtLabel = null,
+  isPresentationOverdue = false,
   countryCode,
   stateCode,
   laws = [],
@@ -49,6 +55,13 @@ export function VacancyReadOnlyIdentity({
 }: VacancyReadOnlyIdentityProps) {
   const t = useTranslations("RecruiterPortal.vacancies.detail.headerMeta")
   const tLaws = useTranslations("RecruiterPortal.vacancies.detail.laws")
+  const typeLabel = vacancyType.trim() === "" ? "—" : vacancyType
+  const dueLabel =
+    presentationDueAtLabel == null || presentationDueAtLabel.trim() === ""
+      ? "—"
+      : isPresentationOverdue
+        ? t("presentationDueOverdue", { date: presentationDueAtLabel })
+        : presentationDueAtLabel
 
   return (
     <div className="@container/identity flex min-w-0 flex-col gap-4">
@@ -67,6 +80,12 @@ export function VacancyReadOnlyIdentity({
         <p className="min-w-0 wrap-break-word font-sans text-sm font-medium text-foreground">{companyName}</p>
       </div>
       <dl className="grid grid-cols-1 gap-x-6 gap-y-3 @min-[22rem]/identity:grid-cols-2 @min-[40rem]/identity:grid-cols-3">
+        <IdentityFact label={t("vacancyType")}>{typeLabel}</IdentityFact>
+        <IdentityFact label={t("presentationDueAt")}>
+          <span className={isPresentationOverdue ? "text-destructive" : undefined}>
+            {dueLabel}
+          </span>
+        </IdentityFact>
         <IdentityFact label={t("department")}>{department}</IdentityFact>
         <IdentityFact label={t("modality")}>{modality}</IdentityFact>
         <IdentityFact label={t("location")}>

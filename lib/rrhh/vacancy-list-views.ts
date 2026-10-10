@@ -68,7 +68,23 @@ export function parseVacancyListView(value: string | null | undefined): VacancyL
 }
 
 export function isProgressVacancyListView(view: VacancyListView): boolean {
-  return view === "sin-postulaciones" || view === "fuera-de-plazo"
+  return view === "sin-postulaciones"
+}
+
+/** Open list items past their presentation deadline. */
+export function selectPresentationOverdueVacancies<
+  T extends { status: VacancyListStatusKey; presentationDueAtUtc: string | null },
+>(items: readonly T[], now: Date = new Date()): T[] {
+  const nowMs = now.getTime()
+  return items.filter((item) => {
+    if (item.status !== "activa") return false
+    if (item.presentationDueAtUtc == null || item.presentationDueAtUtc.trim() === "") {
+      return false
+    }
+    const due = new Date(item.presentationDueAtUtc)
+    if (Number.isNaN(due.getTime())) return false
+    return due.getTime() < nowMs
+  })
 }
 
 export function createPagedLoadState<T>(): PagedLoadState<T> {

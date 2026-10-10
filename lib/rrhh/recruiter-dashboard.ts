@@ -7,6 +7,7 @@ export const RECRUITER_DASHBOARD_LINKS = {
   candidates: "/portal-rrhh/candidatos",
   vacancies: "/portal-rrhh/vacantes",
   vacanciesActivas: "/portal-rrhh/vacantes?vista=activas",
+  vacanciesPresentationOverdue: "/portal-rrhh/vacantes?vista=fuera-de-plazo",
   interviews: "/portal-rrhh/entrevistas",
   calendar: "/portal-rrhh/configuracion/calendario",
   reports: "/portal-rrhh/reportes",
@@ -38,7 +39,8 @@ export type DashboardReminderKey =
   | "unconfirmedInterviews"
   | "newCandidates"
   | "staleCandidates"
-  | "vacanciesClosingSoon"
+  | "vacanciesPresentationDueSoon"
+  | "vacanciesPresentationOverdue"
   | "inactiveVacancies"
   | "pendingEvaluations"
   | "pendingTechnicalSheets"
@@ -48,7 +50,8 @@ export type DashboardReminderKey =
   | "pendingDocuments"
 
 export const DASHBOARD_VACANCY_REMINDER_KEYS = [
-  "vacanciesClosingSoon",
+  "vacanciesPresentationDueSoon",
+  "vacanciesPresentationOverdue",
   "inactiveVacancies",
 ] as const satisfies readonly DashboardReminderKey[]
 
@@ -58,12 +61,21 @@ export function isVacancyDashboardReminder(key: DashboardReminderKey): boolean {
   return VACANCY_REMINDER_KEY_SET.has(key)
 }
 
+/** Plazos de presentación: siempre visibles en el panel Vacantes (también en cero). */
+export function isPresentationSlaReminder(key: DashboardReminderKey): boolean {
+  return (
+    key === "vacanciesPresentationDueSoon" ||
+    key === "vacanciesPresentationOverdue"
+  )
+}
+
 export const DASHBOARD_REMINDER_KEYS: readonly DashboardReminderKey[] = [
   "upcomingInterviews",
   "unconfirmedInterviews",
   "newCandidates",
   "staleCandidates",
-  "vacanciesClosingSoon",
+  "vacanciesPresentationDueSoon",
+  "vacanciesPresentationOverdue",
   "inactiveVacancies",
   "pendingEvaluations",
   "pendingTechnicalSheets",
@@ -105,6 +117,7 @@ export interface RecruiterDashboardModel {
 const REMINDER_SEVERITY: Record<DashboardReminderKey, DashboardSeverity> = {
   staleCandidates: "critical",
   overdueFollowUps: "critical",
+  vacanciesPresentationOverdue: "critical",
   unconfirmedInterviews: "action",
   newCandidates: "action",
   pendingEvaluations: "action",
@@ -113,7 +126,7 @@ const REMINDER_SEVERITY: Record<DashboardReminderKey, DashboardSeverity> = {
   pendingConsents: "action",
   pendingDocuments: "action",
   upcomingInterviews: "upcoming",
-  vacanciesClosingSoon: "upcoming",
+  vacanciesPresentationDueSoon: "upcoming",
   inactiveVacancies: "info",
 }
 
@@ -122,7 +135,9 @@ const REMINDER_FALLBACK_LINK: Record<DashboardReminderKey, string | null> = {
   unconfirmedInterviews: RECRUITER_DASHBOARD_LINKS.interviews,
   newCandidates: RECRUITER_DASHBOARD_LINKS.candidates,
   staleCandidates: RECRUITER_DASHBOARD_LINKS.candidates,
-  vacanciesClosingSoon: RECRUITER_DASHBOARD_LINKS.vacancies,
+  vacanciesPresentationDueSoon: RECRUITER_DASHBOARD_LINKS.vacancies,
+  vacanciesPresentationOverdue:
+    RECRUITER_DASHBOARD_LINKS.vacanciesPresentationOverdue,
   inactiveVacancies: RECRUITER_DASHBOARD_LINKS.vacancies,
   pendingEvaluations: RECRUITER_DASHBOARD_LINKS.technicalEvaluationsReport,
   pendingTechnicalSheets: RECRUITER_DASHBOARD_LINKS.vacancies,
@@ -212,7 +227,7 @@ function normalizeReminders(raw: unknown): DashboardReminder[] {
       key,
       count,
       sourceState,
-      severity: REMINDER_SEVERITY[key],
+      severity: resolveReminderSeverity(key, sourceState, count),
       dueAt: dueAt ?? null,
       context: enrichContext(key, context),
       href: isWithheldDashboardReminder(key)
@@ -222,6 +237,22 @@ function normalizeReminders(raw: unknown): DashboardReminder[] {
   })
 }
 
+function resolveReminderSeverity(
+  key: DashboardReminderKey,
+  sourceState: DashboardSourceState,
+  count: number | null
+): DashboardSeverity {
+  const base = REMINDER_SEVERITY[key]
+  if (
+    isPresentationSlaReminder(key) &&
+    (sourceState === "ready" || sourceState === "partial") &&
+    (count == null || count === 0)
+  ) {
+    return "info"
+  }
+  return base
+}
+
 function resolveReminderHref(
   key: DashboardReminderKey,
   sourceState: DashboardSourceState,
@@ -229,6 +260,8 @@ function resolveReminderHref(
 ): string | null {
   if (sourceState === "ready" || sourceState === "partial") {
     if (count != null && count > 0) return reminderDetailLink(key)
+    // Plazos de presentación: enlace al listado aunque el conteo sea 0.
+    if (isPresentationSlaReminder(key)) return REMINDER_FALLBACK_LINK[key]
     return null
   }
   if (sourceState === "error") return null
@@ -345,6 +378,8 @@ export function isActionableReminder(reminder: DashboardReminder): boolean {
   if (reminder.sourceState !== "ready" && reminder.sourceState !== "partial") {
     return false
   }
+  // Obligatorios en Vacantes: se muestran aunque el backend reporte 0.
+  if (isPresentationSlaReminder(reminder.key)) return true
   return reminder.count != null && reminder.count > 0
 }
 
@@ -451,7 +486,8 @@ function nonNull<T>(value: T | null): value is T {
 }
 
 const REMINDERS_WITHOUT_CANDIDATE: ReadonlySet<DashboardReminderKey> = new Set([
-  "vacanciesClosingSoon",
+  "vacanciesPresentationDueSoon",
+  "vacanciesPresentationOverdue",
   "inactiveVacancies",
 ])
 
@@ -462,7 +498,7 @@ export function reminderIncludesCandidate(key: DashboardReminderKey): boolean {
 export type ReminderDateColumnKey =
   | "dateTime"
   | "since"
-  | "closing"
+  | "presentationDue"
   | "lastActivity"
   | "date"
 
@@ -473,8 +509,9 @@ export function reminderDateColumnKey(key: DashboardReminderKey): ReminderDateCo
       return "dateTime"
     case "staleCandidates":
       return "since"
-    case "vacanciesClosingSoon":
-      return "closing"
+    case "vacanciesPresentationDueSoon":
+    case "vacanciesPresentationOverdue":
+      return "presentationDue"
     case "inactiveVacancies":
       return "lastActivity"
     default:
@@ -508,7 +545,13 @@ export type ReminderStatusKind = "interview" | "vacancy" | "plain"
 
 export function reminderStatusKind(key: DashboardReminderKey): ReminderStatusKind {
   if (key === "upcomingInterviews" || key === "unconfirmedInterviews") return "interview"
-  if (key === "vacanciesClosingSoon" || key === "inactiveVacancies") return "vacancy"
+  if (
+    key === "vacanciesPresentationDueSoon" ||
+    key === "vacanciesPresentationOverdue" ||
+    key === "inactiveVacancies"
+  ) {
+    return "vacancy"
+  }
   return "plain"
 }
 
@@ -524,7 +567,8 @@ export function resolveReminderRowHref(
     case "upcomingInterviews":
     case "unconfirmedInterviews":
       return interviewRowHref(item)
-    case "vacanciesClosingSoon":
+    case "vacanciesPresentationDueSoon":
+    case "vacanciesPresentationOverdue":
     case "inactiveVacancies":
       return vacancyRowHref(item.vacancyId ?? item.id)
     case "newCandidates":

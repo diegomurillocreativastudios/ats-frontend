@@ -52,5 +52,6 @@ function toListItem(item: VacancyListItem): VacancyDashboardListItem {
     status: item.status,
     isPublished: item.isPublished,
     candidates: item.candidates,
+    presentationDueAtUtc: item.presentationDueAtUtc,
   }
 }

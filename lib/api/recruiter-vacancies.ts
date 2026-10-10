@@ -9,11 +9,43 @@ import {
 
 const RECRUITER_VACANCIES_PATH = "/api/recruiter/vacancies"
 
-export async function listRecruiterVacanciesPage(params: {
+export interface ListRecruiterVacanciesQuery {
   page?: number
   pageSize?: number
-} = {}): Promise<HeaderPagedResult<unknown>> {
-  return fetchHeaderPagedList(RECRUITER_VACANCIES_PATH, params)
+  vacancyTypeId?: string
+  presentationOverdue?: boolean
+  presentationDueWithinDays?: number
+}
+
+function buildRecruiterVacanciesPath(query: ListRecruiterVacanciesQuery = {}): string {
+  const search = new URLSearchParams()
+  const vacancyTypeId = query.vacancyTypeId?.trim()
+  if (vacancyTypeId) search.set("vacancyTypeId", vacancyTypeId)
+  if (query.presentationOverdue === true) {
+    search.set("presentationOverdue", "true")
+  }
+  if (
+    query.presentationDueWithinDays != null &&
+    Number.isFinite(query.presentationDueWithinDays) &&
+    query.presentationDueWithinDays > 0
+  ) {
+    search.set(
+      "presentationDueWithinDays",
+      String(Math.floor(query.presentationDueWithinDays))
+    )
+  }
+  const qs = search.toString()
+  return qs === "" ? RECRUITER_VACANCIES_PATH : `${RECRUITER_VACANCIES_PATH}?${qs}`
+}
+
+export async function listRecruiterVacanciesPage(
+  params: ListRecruiterVacanciesQuery = {}
+): Promise<HeaderPagedResult<unknown>> {
+  const { page, pageSize, ...filters } = params
+  return fetchHeaderPagedList(buildRecruiterVacanciesPath(filters), {
+    page,
+    pageSize,
+  })
 }
 
 export async function listAllRecruiterVacancies(): Promise<unknown[]> {

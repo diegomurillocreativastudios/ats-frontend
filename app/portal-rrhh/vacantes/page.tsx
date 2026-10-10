@@ -19,12 +19,14 @@ import { ListPaginationBar } from "@/components/ui/list-pagination-bar";
 import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { listRecruiterVacanciesPage } from "@/lib/api/recruiter-vacancies";
-import { loadVacancyListSources } from "@/lib/rrhh/load-vacancy-list-views";
+import {
+  loadPresentationOverdueVacancies,
+  loadVacancyListSources,
+} from "@/lib/rrhh/load-vacancy-list-views";
 import {
   isProgressVacancyListView,
   parseVacancyListView,
   selectActiveVacancies,
-  selectOverdueRows,
   selectUnpublishedVacancies,
   selectWithoutCandidateRows,
   toProgressViewRows,
@@ -254,13 +256,23 @@ function VacantesPageContent() {
     setLoading(true);
     setFetchError(null);
     try {
+      if (view === "fuera-de-plazo") {
+        const overdue = await loadPresentationOverdueVacancies();
+        if (viewRequest.current !== requestId) return;
+        setViewListItems(overdue.items);
+        setViewProgressRows([]);
+        setViewPartial(
+          overdue.truncated
+            ? { analyzed: overdue.items.length, total: overdue.totalCount }
+            : null
+        );
+        return;
+      }
+
       const loaded = await loadVacancyListSources();
       if (viewRequest.current !== requestId) return;
       if (isProgressVacancyListView(view)) {
-        const rows =
-          view === "sin-postulaciones"
-            ? selectWithoutCandidateRows(loaded.progressRows)
-            : selectOverdueRows(loaded.progressRows);
+        const rows = selectWithoutCandidateRows(loaded.progressRows);
         setViewProgressRows(toProgressViewRows(rows, loaded.listItems));
         setViewListItems([]);
         setViewPartial(

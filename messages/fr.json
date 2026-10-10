@@ -58,7 +58,8 @@
     "interviewStatuses": "Statuts",
     "tailorProfile": "Adapter mon profil",
     "softSkills": "Compétences transversales",
-    "dataProtectionLaws": "Lois de protection des données"
+    "dataProtectionLaws": "Lois de protection des données",
+    "vacancyTypes": "Types de poste"
   },
   "Topbar": {
     "portalCandidate": "Portail candidat",
@@ -460,6 +461,10 @@
       "dataProtectionLaws": {
         "title": "Lois de protection des données",
         "description": "Gestion des lois de protection des données liées aux offres"
+      },
+      "vacancyTypes": {
+        "title": "Types de poste",
+        "description": "Gestion des types de poste et des délais de présentation"
       }
     },
     "root": {
@@ -2033,7 +2038,8 @@
         "allFemale": "Tous",
         "allMale": "Tous",
         "filterByAria": "Filtrer par {label}",
-        "clearFilters": "Effacer les filtres"
+        "clearFilters": "Effacer les filtres",
+        "vacancyType": "Type"
       },
       "cards": {
         "untitled": "Sans titre",
@@ -2042,7 +2048,9 @@
         "cardReadOnlyAria": "Poste inactif, lecture seule : {title}",
         "logoAlt": "Logo de {company}",
         "published": "Publiée",
-        "archived": "Archivée"
+        "archived": "Archivée",
+        "presentationDue": "Présentation : {date}",
+        "presentationOverdue": "Présentation en retard : {date}"
       },
       "statuses": {
         "active": "Active",
@@ -2070,7 +2078,7 @@
       "views": {
         "activas": "Postes actifs affichés.",
         "sin-postulaciones": "Postes sans candidatures affichés.",
-        "fuera-de-plazo": "Postes hors délai affichés.",
+        "fuera-de-plazo": "Affichage des postes hors délai de présentation.",
         "no-publicadas": "Postes non publiés affichés.",
         "backToList": "Voir tous les postes",
         "empty": "Aucun poste ne correspond à ce critère.",
@@ -2163,6 +2171,16 @@
           "isPublished": {
             "label": "Publier sur le portail des opportunités",
             "helper": "Si vous la désactivez, l'offre est enregistrée comme Archivée : les candidats ne la verront pas et vous pourrez la publier plus tard."
+          },
+          "vacancyType": {
+            "label": "Type de poste",
+            "ariaLabel": "Type de poste",
+            "placeholder": "Sélectionnez un type"
+          },
+          "presentationDueAt": {
+            "label": "Date limite de présentation",
+            "ariaLabel": "Date limite de présentation des candidats",
+            "helper": "Engagement interne pour présenter des candidats. Suggestion selon le type de poste."
           }
         },
         "actions": {
@@ -2189,14 +2207,17 @@
           "companyRequired": "Sélectionnez une entreprise cliente",
           "requirementValueRequired": "Niveau ou critère attendu requis",
           "requirementNameRequired": "Nom requis",
-          "lawsRequired": "Sélectionnez au moins une loi de protection des données."
+          "lawsRequired": "Sélectionnez au moins une loi de protection des données.",
+          "vacancyTypeRequired": "Sélectionnez un type de poste",
+          "presentationDueAtRequired": "La date limite de présentation est obligatoire",
+          "presentationDueAtInvalid": "Saisissez une date valide"
         },
         "errors": {
           "createFailed": "Impossible de créer le poste. Veuillez réessayer.",
           "companiesLoadFailed": "Impossible de charger les clients.",
           "companiesLoadFallbackSuffix": "L'entreprise par défaut sera utilisée.",
-          "catalogsLoadFailed": "Impossible de charger les services et les modalités.",
-          "catalogsLoadFallbackSuffix": "Le poste peut tout de même être créé sans ces champs."
+          "catalogsLoadFailed": "Impossible de charger les catalogues de poste.",
+          "catalogsLoadFallbackSuffix": "Vérifiez la connexion et réessayez."
         }
       },
       "detail": {
@@ -2237,7 +2258,10 @@
           "modality": "Modalité",
           "location": "Lieu",
           "laws": "Lois de protection des données",
-          "created": "Créée le {date}"
+          "created": "Créée le {date}",
+          "vacancyType": "Type de poste",
+          "presentationDueAt": "Date limite de présentation",
+          "presentationDueOverdue": "En retard ({date})"
         },
         "actions": {
           "backToVacancies": "Retour aux postes",
@@ -3171,11 +3195,6 @@
           "description": "{count, plural, one {# candidat} other {# candidats}} sans changement d'étape depuis {days} jours ou plus.",
           "action": "Examiner les candidats"
         },
-        "vacanciesClosingSoon": {
-          "title": "Postes bientôt clôturés",
-          "action": "Voir les postes",
-          "description": "{count, plural, one {# poste bientôt clôturé} other {# postes bientôt clôturés}}."
-        },
         "inactiveVacancies": {
           "title": "Postes sans activité récente",
           "action": "Voir les postes",
@@ -3210,6 +3229,16 @@
           "title": "Documents en attente",
           "description": "{count, plural, one {# document en attente} other {# documents en attente}}.",
           "action": "Voir les documents"
+        },
+        "vacanciesPresentationDueSoon": {
+          "title": "Présentation bientôt due",
+          "action": "Voir les postes",
+          "description": "{count, plural, one {# poste dont le délai de présentation approche} other {# postes dont le délai de présentation approche}}."
+        },
+        "vacanciesPresentationOverdue": {
+          "title": "Présentation en retard",
+          "action": "Voir les postes",
+          "description": "{count, plural, one {# poste hors délai de présentation} other {# postes hors délai de présentation}}."
         }
       },
       "panelError": {
@@ -3247,10 +3276,10 @@
           "dueAt": "Date",
           "dateTime": "Date et heure",
           "since": "Depuis",
-          "closing": "Clôture",
           "lastActivity": "Dernière activité",
           "status": "Statut",
-          "actions": "Actions"
+          "actions": "Actions",
+          "presentationDue": "Présentation"
         },
         "invalidKey": {
           "breadcrumb": "Rappel inconnu",
@@ -3804,7 +3833,8 @@
         "table": {
           "name": "Nom",
           "description": "Description",
-          "actions": "Actions"
+          "actions": "Actions",
+          "presentationSlaDays": "Délai (jours)"
         },
         "actions": {
           "refresh": "Actualiser",
@@ -3829,14 +3859,18 @@
           "descriptionLabel": "Description",
           "namePlaceholder": "Nom du {singular}",
           "descriptionPlaceholder": "Brève description du {singular}",
-          "loading": "Chargement du {singular}…"
+          "loading": "Chargement du {singular}…",
+          "presentationSlaDaysLabel": "Jours de délai de présentation",
+          "presentationSlaDaysPlaceholder": "ex. 3"
         },
         "validation": {
           "nameRequired": "Le nom est obligatoire.",
           "codeRequired": "Le code est obligatoire.",
           "codePattern": "Utilisez uniquement des minuscules, des chiffres et des tirets.",
           "sortOrderRequired": "L'ordre est obligatoire.",
-          "sortOrderInvalid": "Saisissez un nombre entier valide."
+          "sortOrderInvalid": "Saisissez un nombre entier valide.",
+          "presentationSlaDaysRequired": "Les jours de délai sont obligatoires.",
+          "presentationSlaDaysInvalid": "Saisissez un entier supérieur à 0."
         },
         "errors": {
           "loadCatalog": "Impossible de charger le catalogue.",
@@ -3858,7 +3892,8 @@
           "loadError": "Erreur lors du chargement des {plural}",
           "list": "Liste des {plural}"
         },
-        "dash": "—"
+        "dash": "—",
+        "presentationSlaDaysValue": "{days, plural, one {# jour} other {# jours}}"
       },
       "departments": {
         "title": "Départements",
@@ -3916,6 +3951,25 @@
         "formCreateTitle": "Nouvelle {singularCapitalized}",
         "formEditTitle": "Modifier la {singular}",
         "deleteTitle": "Supprimer la {singular}"
+      },
+      "vacancyTypes": {
+        "title": "Types de poste",
+        "singular": "type de poste",
+        "singularCapitalized": "Type de poste",
+        "plural": "types de poste",
+        "article": "le",
+        "createCta": "Créer un type de poste",
+        "emptyMessage": "Aucun type de poste créé pour le moment",
+        "headingDescription": "Gérez les types de poste et le délai interne de présentation des candidats.",
+        "createSuccess": "Type de poste créé.",
+        "updateSuccess": "Type de poste mis à jour.",
+        "activateSuccess": "Type de poste activé.",
+        "deactivateSuccess": "Type de poste désactivé.",
+        "deleteSuccess": "Type de poste supprimé.",
+        "deleteConflictMessage": "Impossible de supprimer car il est lié à des postes existants.",
+        "formCreateTitle": "Nouveau {singularCapitalized}",
+        "formEditTitle": "Modifier {singular}",
+        "deleteTitle": "Supprimer {singular}"
       }
     },
     "dataProtectionLaws": {

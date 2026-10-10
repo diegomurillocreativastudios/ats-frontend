@@ -58,7 +58,8 @@
     "interviewStatuses": "Statuses",
     "tailorProfile": "Tailor my Profile",
     "softSkills": "Soft skills",
-    "dataProtectionLaws": "Data protection laws"
+    "dataProtectionLaws": "Data protection laws",
+    "vacancyTypes": "Vacancy types"
   },
   "Topbar": {
     "portalCandidate": "Applicant Portal",
@@ -460,6 +461,10 @@
       "dataProtectionLaws": {
         "title": "Data protection laws",
         "description": "Manage the data protection laws linked to vacancies"
+      },
+      "vacancyTypes": {
+        "title": "Vacancy types",
+        "description": "Manage vacancy types and presentation deadlines"
       }
     },
     "root": {
@@ -2033,7 +2038,8 @@
         "allFemale": "All",
         "allMale": "All",
         "filterByAria": "Filter by {label}",
-        "clearFilters": "Clear filters"
+        "clearFilters": "Clear filters",
+        "vacancyType": "Type"
       },
       "cards": {
         "untitled": "Untitled",
@@ -2042,7 +2048,9 @@
         "cardReadOnlyAria": "Inactive vacancy, read-only: {title}",
         "logoAlt": "{company} logo",
         "published": "Published",
-        "archived": "Archived"
+        "archived": "Archived",
+        "presentationDue": "Presentation: {date}",
+        "presentationOverdue": "Presentation overdue: {date}"
       },
       "statuses": {
         "active": "Active",
@@ -2070,7 +2078,7 @@
       "views": {
         "activas": "Showing active vacancies.",
         "sin-postulaciones": "Showing vacancies with no applications.",
-        "fuera-de-plazo": "Showing vacancies past their deadline.",
+        "fuera-de-plazo": "Showing vacancies past the presentation deadline.",
         "no-publicadas": "Showing unpublished vacancies.",
         "backToList": "View all vacancies",
         "empty": "No vacancy matches this criterion.",
@@ -2163,6 +2171,16 @@
           "isPublished": {
             "label": "Publish on the opportunities portal",
             "helper": "If you turn this off, the vacancy is saved as Archived: candidates will not see it and you can publish it later."
+          },
+          "vacancyType": {
+            "label": "Vacancy type",
+            "ariaLabel": "Vacancy type",
+            "placeholder": "Select a type"
+          },
+          "presentationDueAt": {
+            "label": "Presentation deadline",
+            "ariaLabel": "Candidate presentation deadline",
+            "helper": "Internal commitment to present candidates. Suggested from the vacancy type."
           }
         },
         "actions": {
@@ -2189,14 +2207,17 @@
           "companyRequired": "Select a client company",
           "requirementValueRequired": "Expected level or criterion is required",
           "requirementNameRequired": "Name required",
-          "lawsRequired": "Select at least one data protection law."
+          "lawsRequired": "Select at least one data protection law.",
+          "vacancyTypeRequired": "Select a vacancy type",
+          "presentationDueAtRequired": "Presentation deadline is required",
+          "presentationDueAtInvalid": "Enter a valid date"
         },
         "errors": {
           "createFailed": "The vacancy could not be created. Please try again.",
           "companiesLoadFailed": "Clients could not be loaded.",
           "companiesLoadFallbackSuffix": "The default company will be used.",
-          "catalogsLoadFailed": "Departments and modalities could not be loaded.",
-          "catalogsLoadFallbackSuffix": "The vacancy can still be created without these fields."
+          "catalogsLoadFailed": "Could not load vacancy catalogs.",
+          "catalogsLoadFallbackSuffix": "Check your connection and try again."
         }
       },
       "detail": {
@@ -2237,7 +2258,10 @@
           "modality": "Work mode",
           "location": "Location",
           "laws": "Data protection laws",
-          "created": "Created {date}"
+          "created": "Created {date}",
+          "vacancyType": "Vacancy type",
+          "presentationDueAt": "Presentation deadline",
+          "presentationDueOverdue": "Overdue ({date})"
         },
         "actions": {
           "backToVacancies": "Back to vacancies",
@@ -3171,11 +3195,6 @@
           "description": "{count, plural, one {# applicant} other {# applicants}} without a stage change in {days} days or more.",
           "action": "Review applicants"
         },
-        "vacanciesClosingSoon": {
-          "title": "Vacancies closing soon",
-          "action": "View vacancies",
-          "description": "{count, plural, one {# vacancy closing soon} other {# vacancies closing soon}}."
-        },
         "inactiveVacancies": {
           "title": "Vacancies without recent activity",
           "action": "View vacancies",
@@ -3210,6 +3229,16 @@
           "title": "Pending documents",
           "description": "{count, plural, one {# document pending} other {# documents pending}}.",
           "action": "View documents"
+        },
+        "vacanciesPresentationDueSoon": {
+          "title": "Presentation due soon",
+          "action": "View vacancies",
+          "description": "{count, plural, one {# vacancy nearing its presentation deadline} other {# vacancies nearing their presentation deadline}}."
+        },
+        "vacanciesPresentationOverdue": {
+          "title": "Presentation overdue",
+          "action": "View vacancies",
+          "description": "{count, plural, one {# vacancy past its presentation deadline} other {# vacancies past their presentation deadline}}."
         }
       },
       "panelError": {
@@ -3247,10 +3276,10 @@
           "dueAt": "Date",
           "dateTime": "Date and time",
           "since": "Since",
-          "closing": "Closing",
           "lastActivity": "Last activity",
           "status": "Status",
-          "actions": "Actions"
+          "actions": "Actions",
+          "presentationDue": "Presentation"
         },
         "invalidKey": {
           "breadcrumb": "Unknown reminder",
@@ -3804,7 +3833,8 @@
         "table": {
           "name": "Name",
           "description": "Description",
-          "actions": "Actions"
+          "actions": "Actions",
+          "presentationSlaDays": "SLA (days)"
         },
         "actions": {
           "refresh": "Refresh",
@@ -3829,14 +3859,18 @@
           "descriptionLabel": "Description",
           "namePlaceholder": "Name of the {singular}",
           "descriptionPlaceholder": "Brief description of the {singular}",
-          "loading": "Loading {singular}..."
+          "loading": "Loading {singular}...",
+          "presentationSlaDaysLabel": "Presentation deadline days",
+          "presentationSlaDaysPlaceholder": "e.g. 3"
         },
         "validation": {
           "nameRequired": "Name is required.",
           "codeRequired": "Code is required.",
           "codePattern": "Use lowercase letters, numbers and hyphens only.",
           "sortOrderRequired": "Sort order is required.",
-          "sortOrderInvalid": "Enter a valid integer."
+          "sortOrderInvalid": "Enter a valid integer.",
+          "presentationSlaDaysRequired": "Presentation deadline days are required.",
+          "presentationSlaDaysInvalid": "Enter an integer greater than 0."
         },
         "errors": {
           "loadCatalog": "Could not load the catalog.",
@@ -3858,7 +3892,8 @@
           "loadError": "Error loading {plural}",
           "list": "List of {plural}"
         },
-        "dash": "—"
+        "dash": "—",
+        "presentationSlaDaysValue": "{days, plural, one {# day} other {# days}}"
       },
       "departments": {
         "title": "Departments",
@@ -3913,6 +3948,25 @@
         "deactivateSuccess": "Soft skill deactivated.",
         "deleteSuccess": "Soft skill deleted.",
         "deleteConflictMessage": "Cannot delete because it is linked to historical ratings.",
+        "formCreateTitle": "New {singularCapitalized}",
+        "formEditTitle": "Edit {singular}",
+        "deleteTitle": "Delete {singular}"
+      },
+      "vacancyTypes": {
+        "title": "Vacancy types",
+        "singular": "vacancy type",
+        "singularCapitalized": "Vacancy type",
+        "plural": "vacancy types",
+        "article": "the",
+        "createCta": "Create vacancy type",
+        "emptyMessage": "No vacancy types created yet",
+        "headingDescription": "Manage vacancy types and the internal candidate presentation deadline.",
+        "createSuccess": "Vacancy type created.",
+        "updateSuccess": "Vacancy type updated.",
+        "activateSuccess": "Vacancy type activated.",
+        "deactivateSuccess": "Vacancy type deactivated.",
+        "deleteSuccess": "Vacancy type deleted.",
+        "deleteConflictMessage": "Cannot delete because it is linked to existing vacancies.",
         "formCreateTitle": "New {singularCapitalized}",
         "formEditTitle": "Edit {singular}",
         "deleteTitle": "Delete {singular}"

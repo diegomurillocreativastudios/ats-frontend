@@ -5,8 +5,9 @@ import {
   createPagedLoadState,
   foldPagedBatch,
   parseVacancyListView,
+  isProgressVacancyListView,
   selectActiveVacancies,
-  selectOverdueRows,
+  selectPresentationOverdueVacancies,
   selectUnpublishedVacancies,
   selectWithoutCandidateRows,
   toProgressViewRows,
@@ -29,6 +30,11 @@ function listItem(
     departmentId: "",
     modality: "",
     modalityId: "",
+    vacancyType: "",
+    vacancyTypeId: "",
+    presentationDueAtUtc: null,
+    presentationDueAtLabel: null,
+    isPresentationOverdue: false,
     location: "",
     requirementsSummary: "",
     requirementsRaw: null,
@@ -88,7 +94,7 @@ describe("vistas de vacantes", () => {
     expect(selectUnpublishedVacancies(items).map((item) => item.id)).toEqual(["hidden-1"])
   })
 
-  it("separa sin postulaciones y fuera de plazo, y enlaza con el slug", () => {
+  it("separa sin postulaciones y enlaza con el slug", () => {
     const rows = [
       progressRow({
         vacancyId: "hidden-1",
@@ -116,8 +122,9 @@ describe("vistas de vacantes", () => {
       }),
     ]
 
+    expect(isProgressVacancyListView("sin-postulaciones")).toBe(true)
+    expect(isProgressVacancyListView("fuera-de-plazo")).toBe(false)
     expect(selectWithoutCandidateRows(rows).map((row) => row.vacancyId)).toEqual(["hidden-1"])
-    expect(selectOverdueRows(rows, NOW).map((row) => row.vacancyId)).toEqual(["slow-1"])
     expect(toProgressViewRows(selectWithoutCandidateRows(rows), items, NOW)).toEqual([
       {
         vacancyId: "hidden-1",
@@ -128,6 +135,32 @@ describe("vistas de vacantes", () => {
         href: "/portal-rrhh/vacantes/oculta",
       },
     ])
+  })
+
+  it("selecciona vacantes activas con presentationDueAtUtc vencida", () => {
+    const overdueItems = [
+      listItem({
+        id: "due-1",
+        status: "activa",
+        isPublished: true,
+        presentationDueAtUtc: "2026-10-01T23:59:59.999Z",
+      }),
+      listItem({
+        id: "ok-1",
+        status: "activa",
+        isPublished: true,
+        presentationDueAtUtc: "2026-10-20T23:59:59.999Z",
+      }),
+      listItem({
+        id: "closed-due",
+        status: "cerrada",
+        isPublished: true,
+        presentationDueAtUtc: "2026-10-01T23:59:59.999Z",
+      }),
+    ]
+    expect(
+      selectPresentationOverdueVacancies(overdueItems, NOW).map((item) => item.id)
+    ).toEqual(["due-1"])
   })
 })
 

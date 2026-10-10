@@ -138,6 +138,48 @@ describe("normalizeRecruiterDashboard", () => {
     expect(reminder(model, "upcomingInterviews").href).toBeNull()
   })
 
+  it("muestra plazos de presentación en cero como informativos con enlace de listado", () => {
+    const model = normalizeRecruiterDashboard(
+      {
+        reminders: [
+          { key: "vacanciesPresentationDueSoon", count: 0, sourceState: "ready" },
+          { key: "vacanciesPresentationOverdue", count: 0, sourceState: "ready" },
+        ],
+      },
+      NOW
+    )
+    expect(reminder(model, "vacanciesPresentationDueSoon")).toMatchObject({
+      count: 0,
+      severity: "info",
+      href: RECRUITER_DASHBOARD_LINKS.vacancies,
+    })
+    expect(reminder(model, "vacanciesPresentationOverdue")).toMatchObject({
+      count: 0,
+      severity: "info",
+      href: RECRUITER_DASHBOARD_LINKS.vacanciesPresentationOverdue,
+    })
+
+    const withCount = normalizeRecruiterDashboard(
+      {
+        reminders: [
+          { key: "vacanciesPresentationOverdue", count: 2, sourceState: "ready" },
+          { key: "vacanciesPresentationDueSoon", count: 1, sourceState: "partial" },
+        ],
+      },
+      NOW
+    )
+    expect(reminder(withCount, "vacanciesPresentationOverdue")).toMatchObject({
+      count: 2,
+      severity: "critical",
+      href: reminderDetailLink("vacanciesPresentationOverdue"),
+    })
+    expect(reminder(withCount, "vacanciesPresentationDueSoon")).toMatchObject({
+      count: 1,
+      severity: "upcoming",
+      href: reminderDetailLink("vacanciesPresentationDueSoon"),
+    })
+  })
+
   it("deja sin enlace las pendientes sin pantalla aunque el servidor las marque listas", () => {
     const model = normalizeRecruiterDashboard(
       {
@@ -209,6 +251,33 @@ describe("isActionableReminder", () => {
       isActionableReminder({ ...base, sourceState: "unavailable", count: null })
     ).toBe(false)
     expect(isActionableReminder({ ...base, sourceState: "error", count: null })).toBe(true)
+  })
+
+  it("mantiene visibles los plazos de presentación aunque el conteo sea 0", () => {
+    expect(
+      isActionableReminder({
+        ...base,
+        key: "vacanciesPresentationDueSoon",
+        count: 0,
+        severity: "info",
+      })
+    ).toBe(true)
+    expect(
+      isActionableReminder({
+        ...base,
+        key: "vacanciesPresentationOverdue",
+        count: 0,
+        severity: "info",
+      })
+    ).toBe(true)
+    expect(
+      isActionableReminder({
+        ...base,
+        key: "vacanciesPresentationOverdue",
+        count: null,
+        sourceState: "unavailable",
+      })
+    ).toBe(false)
   })
 })
 
@@ -395,11 +464,17 @@ describe("resolveReminderRowHref", () => {
       })
     ).toBe("/portal-rrhh/vacantes/vac-3?candidato=cand-3")
     expect(
-      resolveReminderRowHref("vacanciesClosingSoon", {
+      resolveReminderRowHref("vacanciesPresentationOverdue", {
         ...baseItem,
         vacancyId: "vac-9",
       })
     ).toBe("/portal-rrhh/vacantes/vac-9")
+    expect(
+      resolveReminderRowHref("vacanciesPresentationDueSoon", {
+        ...baseItem,
+        vacancyId: "vac-10",
+      })
+    ).toBe("/portal-rrhh/vacantes/vac-10")
     expect(
       resolveReminderRowHref("pendingTechnicalSheets", {
         ...baseItem,
@@ -420,7 +495,8 @@ describe("resolveReminderRowHref", () => {
 
 describe("reminderIncludesCandidate", () => {
   it("devuelve falso para recordatorios de vacante", () => {
-    expect(reminderIncludesCandidate("vacanciesClosingSoon")).toBe(false)
+    expect(reminderIncludesCandidate("vacanciesPresentationDueSoon")).toBe(false)
+    expect(reminderIncludesCandidate("vacanciesPresentationOverdue")).toBe(false)
     expect(reminderIncludesCandidate("inactiveVacancies")).toBe(false)
   })
 

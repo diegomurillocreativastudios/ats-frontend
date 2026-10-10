@@ -34,6 +34,22 @@ export async function loadVacancyListSources(): Promise<LoadedVacancySources> {
   }
 }
 
+/** Loads vacancies with presentation deadline overdue (server filter). */
+export async function loadPresentationOverdueVacancies(): Promise<{
+  items: VacancyListItem[]
+  totalCount: number
+  truncated: boolean
+}> {
+  const load = await loadUntilCapped((page, pageSize) =>
+    loadVacancyListPage(page, pageSize, { presentationOverdue: true })
+  )
+  return {
+    items: load.items,
+    totalCount: load.totalCount,
+    truncated: load.truncated,
+  }
+}
+
 async function loadUntilCapped<T>(
   fetchPage: (page: number, pageSize: number) => Promise<PagedBatch<T>>
 ): Promise<{ items: T[]; totalCount: number; truncated: boolean }> {
@@ -51,9 +67,14 @@ async function loadUntilCapped<T>(
 
 async function loadVacancyListPage(
   page: number,
-  pageSize: number
+  pageSize: number,
+  filters: {
+    vacancyTypeId?: string
+    presentationOverdue?: boolean
+    presentationDueWithinDays?: number
+  } = {}
 ): Promise<PagedBatch<VacancyListItem>> {
-  const result = await listRecruiterVacanciesPage({ page, pageSize })
+  const result = await listRecruiterVacanciesPage({ page, pageSize, ...filters })
   const offset = (page - 1) * pageSize
   return {
     items: result.items.map((item, index) =>

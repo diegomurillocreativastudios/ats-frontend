@@ -28,6 +28,7 @@ function listItem(
     status: "activa",
     isPublished: true,
     candidates: 0,
+    presentationDueAtUtc: null,
     ...overrides,
   }
 }
@@ -84,6 +85,11 @@ describe("buildVacancyDashboardSnapshot", () => {
           isPublished: false,
         }),
         listItem({
+          id: "overdue-1",
+          title: "Alfa",
+          presentationDueAtUtc: "2026-09-01T23:59:59.999Z",
+        }),
+        listItem({
           id: "draft-hidden",
           status: "borrador",
           isPublished: false,
@@ -99,9 +105,9 @@ describe("buildVacancyDashboardSnapshot", () => {
     })
 
     expect(snapshot.withoutCandidates).toBe(1)
-    expect(snapshot.overdue).toBe(2)
+    expect(snapshot.overdue).toBe(1)
     expect(snapshot.unpublished).toBe(2)
-    expect(snapshot.activeVacancies).toBe(2)
+    expect(snapshot.activeVacancies).toBe(3)
     expect(snapshot.progressPartial).toBeNull()
     expect(snapshot.listPartial).toBeNull()
     expect(snapshot.attention.map((row) => row.vacancyId)).toEqual([

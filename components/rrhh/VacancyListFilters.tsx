@@ -38,6 +38,9 @@ export function VacancyListFilters({
   const [modalityOptions, setModalityOptions] = useState<
     { id: string; displayName: string }[]
   >([])
+  const [typeOptions, setTypeOptions] = useState<{ id: string; displayName: string }[]>(
+    []
+  )
   const [loadingOptions, setLoadingOptions] = useState(true)
 
   const countryOptions = useMemo(() => getCountryIso2SelectOptions(), [])
@@ -49,20 +52,23 @@ export function VacancyListFilters({
     const load = async () => {
       setLoadingOptions(true)
       try {
-        const [companies, departments, modalities] = await Promise.all([
+        const [companies, departments, modalities, vacancyTypes] = await Promise.all([
           listRecruiterCompanies(),
           listAdminVacancyCatalog("departments"),
           listAdminVacancyCatalog("modalities"),
+          listAdminVacancyCatalog("vacancyTypes"),
         ])
         if (cancelled) return
         setCompanyOptions(companies)
         setDepartmentOptions(mapActiveCatalogItemsToOptions(departments))
         setModalityOptions(mapActiveCatalogItemsToOptions(modalities))
+        setTypeOptions(mapActiveCatalogItemsToOptions(vacancyTypes))
       } catch {
         if (!cancelled) {
           setCompanyOptions([])
           setDepartmentOptions([])
           setModalityOptions([])
+          setTypeOptions([])
         }
       } finally {
         if (!cancelled) setLoadingOptions(false)
@@ -92,7 +98,7 @@ export function VacancyListFilters({
       disabled={disabled}
       desktopClassName="w-full rounded-xl border border-border bg-card p-3 md:p-4"
     >
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
             <FilterField id="vacancy-filter-search" label={t("name")}>
               <div className="relative">
                 <Search
@@ -120,6 +126,20 @@ export function VacancyListFilters({
               disabled={disabled || loadingOptions}
               emptyLabel={t("allFemale")}
               options={companyOptions.map((c) => ({ value: c.id, label: c.name }))}
+            />
+
+            <FilterSelect
+              id="vacancy-filter-type"
+              label={t("vacancyType")}
+              ariaLabel={t("filterByAria", { label: t("vacancyType") })}
+              value={value.vacancyTypeId}
+              onChange={(vacancyTypeId) => patch({ vacancyTypeId })}
+              disabled={disabled || loadingOptions}
+              emptyLabel={t("allMale")}
+              options={typeOptions.map((option) => ({
+                value: option.id,
+                label: option.displayName,
+              }))}
             />
 
             <FilterSelect

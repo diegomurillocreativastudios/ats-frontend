@@ -6,10 +6,9 @@ import {
 } from "@/lib/reportes-metrics"
 import { buildRecruiterVacancyPath } from "@/lib/vacancies/vacancy-public-path"
 import type { VacancyListStatusKey } from "@/lib/vacancies/map-vacancy-list-item"
-import { DASHBOARD_SLOW_VACANCY_DAYS } from "@/lib/rrhh/recruiter-dashboard"
 import {
   selectActiveVacancies,
-  selectOverdueRows,
+  selectPresentationOverdueVacancies,
   selectUnpublishedVacancies,
   selectWithoutCandidateRows,
 } from "@/lib/rrhh/vacancy-list-views"
@@ -30,6 +29,7 @@ export interface VacancyDashboardListItem {
   status: VacancyListStatusKey
   isPublished: boolean
   candidates: number
+  presentationDueAtUtc: string | null
 }
 
 export interface VacancyAttentionRow {
@@ -79,16 +79,28 @@ export function buildVacancyDashboardSnapshot(
   const listById = indexList(input.listItems)
   const openRows = input.progressRows.filter(isOpenProgressRow)
   const withoutCandidates = selectWithoutCandidateRows(input.progressRows).length
-  const overdue = selectOverdueRows(input.progressRows, now).length
+  const overdueItems = selectPresentationOverdueVacancies(input.listItems, now)
+  const overdue = overdueItems.length
   const unpublishedItems = selectUnpublishedVacancies(input.listItems)
   const attentionById = new Map<string, VacancyAttentionRow>()
+
+  for (const item of overdueItems) {
+    const vacancyId = item.id.trim()
+    if (vacancyId === "") continue
+    const progress = openRows.find((row) => readVacancyId(row) === vacancyId) ?? null
+    considerAttention(
+      attentionById,
+      toPresentationOverdueRow(item, progress, now)
+    )
+  }
 
   for (const row of openRows) {
     const vacancyId = readVacancyId(row)
     if (!vacancyId) continue
+    if (attentionById.has(vacancyId)) continue
     const listItem = listById.get(vacancyId) ?? null
     const signal = signalForOpenRow(row, listItem, now)
-    if (!signal) continue
+    if (!signal || signal === "overdue") continue
     considerAttention(attentionById, toAttentionRow(row, listItem, vacancyId, signal, now))
   }
 
@@ -133,10 +145,37 @@ function signalForOpenRow(
   const health = getVacancyHealth(row, now)
   if (health === "critica") return "critical"
   if (health === "atencion") return "attention"
-  const days = vacancyDaysOpenForDisplay(row, now)
-  if (days != null && days >= DASHBOARD_SLOW_VACANCY_DAYS) return "overdue"
+  if (
+    listItem?.presentationDueAtUtc &&
+    listItem.status === "activa" &&
+    !Number.isNaN(new Date(listItem.presentationDueAtUtc).getTime()) &&
+    new Date(listItem.presentationDueAtUtc).getTime() < now.getTime()
+  ) {
+    return "overdue"
+  }
   if (listItem && isUnpublishedActive(listItem)) return "unpublished"
   return null
+}
+
+function toPresentationOverdueRow(
+  item: VacancyDashboardListItem,
+  progress: VacancyProgressByClientRow | null,
+  now: Date
+): VacancyAttentionRow {
+  const vacancyId = item.id.trim()
+  return {
+    vacancyId,
+    title: readTitle(item.title) ?? "",
+    clientName: readTitle(item.company),
+    daysOpen: progress ? vacancyDaysOpenForDisplay(progress, now) : null,
+    candidateCount:
+      progress != null ? candidateCount(progress) : item.candidates,
+    signal: "overdue",
+    href: buildRecruiterVacancyPath({
+      id: vacancyId,
+      publicSlug: item.publicSlug,
+    }),
+  }
 }
 
 function toAttentionRow(

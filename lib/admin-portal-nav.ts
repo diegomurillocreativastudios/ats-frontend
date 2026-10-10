@@ -14,6 +14,7 @@ export const ADMIN_PORTAL_NAV_ITEMS = [
       { href: "/portal-admin/vacantes/estados", labelKey: "stageStatuses" },
       { href: "/portal-admin/vacantes/departamentos", labelKey: "departments" },
       { href: "/portal-admin/vacantes/modalidades", labelKey: "modalities" },
+      { href: "/portal-admin/vacantes/tipos", labelKey: "vacancyTypes" },
       {
         href: "/portal-admin/vacantes/habilidades-blandas",
         labelKey: "softSkills",
