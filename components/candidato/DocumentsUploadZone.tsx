@@ -1,6 +1,17 @@
 "use client"
 
-import { useRef, useState, useCallback, useEffect, type ReactNode, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
+import {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useId,
+  type ReactNode,
+  type ChangeEvent,
+  type DragEvent,
+  type KeyboardEvent,
+} from "react"
+import { flushSync } from "react-dom"
 import { useTranslations } from "next-intl"
 import { Upload, X, Sparkles, Loader2, Check } from "lucide-react"
 import { getApiErrorMessage, isSilentError } from "@/lib/api-error"
@@ -70,6 +81,21 @@ function createStagedFileId(file: File): string {
 /** Identity for duplicate detection in the staging queue (name + size + mtime). */
 function stagedFileKey(file: File): string {
   return `${file.name.trim().toLowerCase()}|${file.size}|${file.lastModified}`
+}
+
+/** Collect File objects from a drop — `files` first, then `items` as fallback. */
+function filesFromDataTransfer(dataTransfer: DataTransfer | null): File[] {
+  if (!dataTransfer) return []
+  if (dataTransfer.files?.length) return Array.from(dataTransfer.files)
+  if (!dataTransfer.items?.length) return []
+  const fromItems: File[] = []
+  for (let i = 0; i < dataTransfer.items.length; i++) {
+    const item = dataTransfer.items[i]
+    if (item.kind !== "file") continue
+    const file = item.getAsFile()
+    if (file) fromItems.push(file)
+  }
+  return fromItems
 }
 
 interface StagedFile {
@@ -191,11 +217,14 @@ export default function DocumentsUploadZone({
   isRequired = false,
 }: DocumentsUploadZoneProps = {}) {
   const t = useTranslations("CandidatePortal.documents.upload")
+  const reactId = useId()
+  const resolvedInputId = `documents-upload-${reactId}`
   const inputRef = useRef<HTMLInputElement>(null)
+  const dragDepthRef = useRef(0)
   const [isDragging, setIsDragging] = useState(false)
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([])
-  const stagedFilesRef = useRef(stagedFiles)
-  const [inputEpoch, setInputEpoch] = useState(0)
+  /** Mutator-only mirror of stagedFiles — never written during render. */
+  const stagedFilesRef = useRef<StagedFile[]>([])
   const [error, setError] = useState<string | null>(null)
   const [processingIndex, setProcessingIndex] = useState<number | null>(null)
   const [isProcessingAll, setIsProcessingAll] = useState(false)
@@ -203,10 +232,9 @@ export default function DocumentsUploadZone({
   const onFilesChangeRef = useRef(onFilesChange)
   const files = stagedFiles.map((entry) => entry.file)
 
-  stagedFilesRef.current = stagedFiles
-
-  const bumpInputEpoch = useCallback(() => {
-    setInputEpoch((epoch) => epoch + 1)
+  const clearNativeInputValue = useCallback(() => {
+    const input = inputRef.current
+    if (input) input.value = ""
   }, [])
 
   useEffect(() => {
@@ -216,6 +244,15 @@ export default function DocumentsUploadZone({
   useEffect(() => {
     onFilesChangeRef.current?.(stagedFiles.map((entry) => entry.file))
   }, [stagedFiles])
+
+  useEffect(() => {
+    const endDrag = () => {
+      dragDepthRef.current = 0
+      setIsDragging(false)
+    }
+    window.addEventListener("dragend", endDrag)
+    return () => window.removeEventListener("dragend", endDrag)
+  }, [])
 
   const effectiveAcceptedTypes =
     Array.isArray(acceptedTypes) && acceptedTypes.length > 0
@@ -228,7 +265,6 @@ export default function DocumentsUploadZone({
 
   const processFiles = useCallback((fileList: File[]) => {
     if (!fileList?.length) return
-    setError(null)
     const newEntries: StagedFile[] = []
     let firstError: string | null = null
     for (let i = 0; i < fileList.length; i++) {
@@ -249,22 +285,35 @@ export default function DocumentsUploadZone({
       }
     }
 
-    const limit = maxFiles != null && maxFiles > 0 ? maxFiles : null
-    const result = mergeStagedWithoutDuplicates(
-      stagedFilesRef.current,
-      newEntries,
-      limit
-    )
-
-    if (firstError) setError(firstError)
-    else if (result.skippedDuplicates > 0) {
-      setError(t("errorDuplicate", { count: result.skippedDuplicates }))
+    if (newEntries.length === 0) {
+      if (firstError) setError(firstError)
+      clearNativeInputValue()
+      return
     }
 
-    setStagedFiles(result.next)
-    bumpInputEpoch()
+    const limit = maxFiles != null && maxFiles > 0 ? maxFiles : null
+    let skippedDuplicates = 0
+
+    // Commit queue + ref in one synchronous turn so a follow-up drop/click
+    // never merges against a stale queue after clear/remove.
+    flushSync(() => {
+      setStagedFiles((prev) => {
+        const result = mergeStagedWithoutDuplicates(prev, newEntries, limit)
+        skippedDuplicates = result.skippedDuplicates
+        stagedFilesRef.current = result.next
+        return result.next
+      })
+    })
+
+    if (firstError) setError(firstError)
+    else if (skippedDuplicates > 0) {
+      setError(t("errorDuplicate", { count: skippedDuplicates }))
+    } else {
+      setError(null)
+    }
+    clearNativeInputValue()
   }, [
-    bumpInputEpoch,
+    clearNativeInputValue,
     effectiveAcceptedTypes,
     effectiveAcceptedExtensions,
     maxFiles,
@@ -272,76 +321,91 @@ export default function DocumentsUploadZone({
     t,
   ])
 
-  const handleClick = () => {
-    setError(null);
-    inputRef.current?.click();
-  };
+  /** Clear native value only — avoid setState here (re-render can cancel the file dialog). */
+  const preparePicker = useCallback(() => {
+    clearNativeInputValue()
+  }, [clearNativeInputValue])
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLLabelElement>) => {
     if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      handleClick();
+      e.preventDefault()
+      preparePicker()
+      inputRef.current?.click()
     }
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files;
-    if (selected?.length) processFiles(Array.from(selected));
+    const selected = e.target.files
+    if (!selected?.length) return
+    const copied = Array.from(selected)
+    e.target.value = ""
+    processFiles(copied)
   };
 
-  const handleDragEnter = (e: DragEvent) => {
+  const handleDragEnter = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.dataTransfer) e.dataTransfer.dropEffect = "copy"
+    dragDepthRef.current += 1
     setIsDragging(true)
   }
 
-  const handleDragOver = (e: DragEvent) => {
+  const handleDragOver = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.dataTransfer) e.dataTransfer.dropEffect = "copy"
-    setIsDragging(true)
   }
 
-  const handleDragLeave = (e: DragEvent) => {
+  const handleDragLeave = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault()
     e.stopPropagation()
-    const rel = e.relatedTarget
-    if (rel instanceof Node && e.currentTarget.contains(rel)) return
-    setIsDragging(false)
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1)
+    if (dragDepthRef.current === 0) setIsDragging(false)
   }
 
-  const handleDrop = (e: DragEvent) => {
+  const handleDrop = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault()
     e.stopPropagation()
+    dragDepthRef.current = 0
     setIsDragging(false)
-    const dropped = e.dataTransfer?.files
-    if (dropped?.length) processFiles(Array.from(dropped))
+    const dropped = filesFromDataTransfer(e.dataTransfer)
+    if (dropped.length) processFiles(dropped)
   }
 
   const removeFile = (index: number) => {
-    setStagedFiles((prev) => prev.filter((_, i) => i !== index))
-    setError(null)
-    setProcessedIndices((prev) => {
-      const next = new Set<number>()
-      prev.forEach((i) => {
-        if (i < index) next.add(i)
-        if (i > index) next.add(i - 1)
+    flushSync(() => {
+      const next = stagedFilesRef.current.filter((_, i) => i !== index)
+      stagedFilesRef.current = next
+      setStagedFiles(next)
+      setError(null)
+      setIsDragging(false)
+      dragDepthRef.current = 0
+      setProcessedIndices((prev) => {
+        const nextIndices = new Set<number>()
+        prev.forEach((i) => {
+          if (i < index) nextIndices.add(i)
+          if (i > index) nextIndices.add(i - 1)
+        })
+        return nextIndices
       })
-      return next
+      if (processingIndex === index) setProcessingIndex(null)
+      else if (processingIndex !== null && processingIndex > index)
+        setProcessingIndex((p) => (p !== null ? p - 1 : null))
     })
-    if (processingIndex === index) setProcessingIndex(null)
-    else if (processingIndex !== null && processingIndex > index)
-      setProcessingIndex((p) => (p !== null ? p - 1 : null))
-    bumpInputEpoch()
+    clearNativeInputValue()
   }
 
   const clearAll = () => {
-    setStagedFiles([])
-    setError(null)
-    setProcessedIndices(new Set())
-    setProcessingIndex(null)
-    bumpInputEpoch()
+    flushSync(() => {
+      stagedFilesRef.current = []
+      setStagedFiles([])
+      setError(null)
+      setIsDragging(false)
+      dragDepthRef.current = 0
+      setProcessedIndices(new Set())
+      setProcessingIndex(null)
+    })
+    clearNativeInputValue()
   }
 
   const resolvedLeftActions =
@@ -439,17 +503,28 @@ export default function DocumentsUploadZone({
 
   return (
     <div className="flex flex-col gap-4">
-      <div
-        role="button"
+      <input
+        id={resolvedInputId}
+        ref={inputRef}
+        type="file"
+        accept={accept || PDF_DOCX_ACCEPT}
+        multiple
+        className="sr-only"
+        tabIndex={-1}
+        data-testid="documents-upload-input"
+        onChange={handleInputChange}
+      />
+      <label
+        htmlFor={resolvedInputId}
         tabIndex={0}
-        className={`relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-5 transition-colors md:gap-3 md:p-6 ${
+        className={`relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-5 transition-colors md:gap-3 md:p-6 ${
           isDragging
             ? "border-vo-purple bg-ats-arena/70"
             : hasError
               ? "border-destructive bg-destructive/5"
               : "border-border bg-muted hover:border-muted-foreground/30"
         }`}
-        onClick={handleClick}
+        onClick={preparePicker}
         onKeyDown={handleKeyDown}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
@@ -460,18 +535,6 @@ export default function DocumentsUploadZone({
         aria-describedby={describedBy}
         aria-required={isRequired || undefined}
       >
-        <input
-          key={inputEpoch}
-          ref={inputRef}
-          type="file"
-          accept={accept || PDF_DOCX_ACCEPT}
-          multiple
-          className="sr-only"
-          aria-hidden
-          tabIndex={-1}
-          data-upload-epoch={inputEpoch}
-          onChange={handleInputChange}
-        />
         <div className="pointer-events-none flex flex-col items-center justify-center gap-2 md:gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted-foreground/10 md:h-12 md:w-12">
             <Upload className="h-5 w-5 text-muted-foreground md:h-6 md:w-6" aria-hidden />
@@ -483,7 +546,7 @@ export default function DocumentsUploadZone({
             {helperText || t("helperDefault")}
           </p>
         </div>
-      </div>
+      </label>
 
       {error && (
         <p className="font-sans text-sm text-destructive" role="alert">

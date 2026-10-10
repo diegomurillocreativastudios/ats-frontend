@@ -11,7 +11,10 @@ import { renderWithIntl } from "@/tests/helpers/render-with-intl"
  */
 describe("DocumentsUploadZone process button visibility", () => {
   const getFileInput = () =>
-    document.querySelector('input[type="file"]') as HTMLInputElement
+    screen.getByTestId("documents-upload-input") as HTMLInputElement
+
+  const getDropzone = () =>
+    screen.getByLabelText(/Arrastra archivos o haz clic/i)
 
   const stagePdf = (fileName: string, lastModified = 1_700_000_000_000) => {
     const input = getFileInput()
@@ -24,9 +27,7 @@ describe("DocumentsUploadZone process button visibility", () => {
   }
 
   const dropFiles = (files: File[]) => {
-    const dropzone = screen.getByRole("button", {
-      name: /Arrastra archivos o haz clic/i,
-    })
+    const dropzone = getDropzone()
     const dataTransfer = {
       files,
       items: files.map((file) => ({
@@ -73,16 +74,13 @@ describe("DocumentsUploadZone process button visibility", () => {
     expect(screen.queryByText("Procesar")).not.toBeInTheDocument()
   })
 
-  it("incrementa data-upload-epoch tras Quitar todos", () => {
+  it("limpia el input nativo tras Quitar todos", () => {
     renderWithIntl(<DocumentsUploadZone />)
 
     stagePdf("CV-epoch.pdf")
-    const epochBefore = getFileInput().getAttribute("data-upload-epoch")
-    expect(epochBefore).toBeTruthy()
-
+    const input = getFileInput()
     fireEvent.click(screen.getByRole("button", { name: "Quitar todos" }))
-    const epochAfter = getFileInput().getAttribute("data-upload-epoch")
-    expect(Number(epochAfter)).toBeGreaterThan(Number(epochBefore))
+    expect(input.value).toBe("")
   })
 
   it("vuelve a mostrar un archivo tras Quitar todos y subir el mismo nombre", () => {
@@ -155,5 +153,94 @@ describe("DocumentsUploadZone process button visibility", () => {
       screen.getByText("Ese archivo ya está en la lista."),
     ).toBeInTheDocument()
     expect(screen.getAllByText("CV_Jose_Portillo.pdf")).toHaveLength(1)
+  })
+
+  it("vuelve a encolar tras quitar un solo archivo con el mismo File", () => {
+    renderWithIntl(<DocumentsUploadZone />)
+
+    const shared = new File(["%PDF"], "CV_unico.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+    fireEvent.change(getFileInput(), { target: { files: [shared] } })
+    expect(screen.getByText("CV_unico.pdf")).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Quitar CV_unico\.pdf/i }),
+    )
+    expect(screen.queryByText("CV_unico.pdf")).not.toBeInTheDocument()
+
+    fireEvent.change(getFileInput(), { target: { files: [shared] } })
+    expect(screen.getByText("CV_unico.pdf")).toBeInTheDocument()
+    expect(
+      screen.queryByText(/ya está en la lista|ya estaban en la lista/i),
+    ).not.toBeInTheDocument()
+  })
+
+  it("tras Quitar todos, un drop inmediato no marca duplicado falso", () => {
+    renderWithIntl(<DocumentsUploadZone />)
+
+    const shared = new File(["%PDF"], "CV_race.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+    dropFiles([shared])
+    expect(screen.getByText("CV_race.pdf")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Quitar todos" }))
+    dropFiles([shared])
+
+    expect(screen.getByText("CV_race.pdf")).toBeInTheDocument()
+    expect(screen.getByText("1 archivo seleccionado")).toBeInTheDocument()
+    expect(
+      screen.queryByText("Ese archivo ya está en la lista."),
+    ).not.toBeInTheDocument()
+  })
+
+  it("permite subir y quitar el mismo PDF muchas veces seguidas", () => {
+    renderWithIntl(<DocumentsUploadZone />)
+
+    const shared = new File(["%PDF"], "CV_ciclo.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+
+    for (let cycle = 0; cycle < 12; cycle++) {
+      fireEvent.change(getFileInput(), { target: { files: [shared] } })
+      expect(screen.getByText("CV_ciclo.pdf")).toBeInTheDocument()
+      expect(
+        screen.queryByText(/ya está en la lista|ya estaban en la lista/i),
+      ).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole("button", { name: "Quitar todos" }))
+      expect(screen.queryByText("CV_ciclo.pdf")).not.toBeInTheDocument()
+    }
+
+    dropFiles([shared])
+    expect(screen.getByText("CV_ciclo.pdf")).toBeInTheDocument()
+    expect(screen.getByText("1 archivo seleccionado")).toBeInTheDocument()
+  })
+
+  it("acepta drop cuando solo vienen items de DataTransfer", () => {
+    renderWithIntl(<DocumentsUploadZone />)
+
+    const shared = new File(["%PDF"], "CV_items.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+    const dropzone = getDropzone()
+    const dataTransfer = {
+      files: [] as File[],
+      items: [
+        {
+          kind: "file",
+          type: shared.type,
+          getAsFile: () => shared,
+        },
+      ],
+      types: ["Files"],
+    }
+    fireEvent.drop(dropzone, { dataTransfer })
+    expect(screen.getByText("CV_items.pdf")).toBeInTheDocument()
   })
 })
