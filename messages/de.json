@@ -646,6 +646,7 @@
         "helperDefault": "PDF, DOCX bis zu 15 MB",
         "errorTypeNotAllowed": "Typ nicht zulässig. Nur PDF oder DOCX.",
         "errorTooLarge": "Die Datei überschreitet 15 MB ({size}).",
+        "errorDuplicate": "{count, plural, one {Diese Datei ist bereits in der Liste.} other {# Dateien waren bereits in der Liste und wurden übersprungen.}}",
         "selectedCount": "{count, plural, one {# Datei ausgewählt} other {# Dateien ausgewählt}}",
         "selectedListAria": "Liste der ausgewählten Dateien",
         "processAll": "Alle verarbeiten",

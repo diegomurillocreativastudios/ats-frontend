@@ -10,6 +10,7 @@ import {
   type ChangeEvent,
   type DragEvent,
   type FormEvent,
+  type KeyboardEvent,
 } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { FileText, LoaderCircle, Mail, X } from "lucide-react"
@@ -395,14 +396,28 @@ export function PublicVacancyApplicationForm({
 
   const handleCvDropzoneClick = useCallback(() => {
     if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+    // Reset before opening so selecting the same path fires `change` again.
+    if (cvInputRef.current) cvInputRef.current.value = ""
     cvInputRef.current?.click()
   }, [rateLimitSecondsLeft, submitPhase])
+
+  const handleCvDragEnter = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"
+      setIsCvDragging(true)
+    },
+    [rateLimitSecondsLeft, submitPhase]
+  )
 
   const handleCvDragOver = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
       if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
       event.preventDefault()
       event.stopPropagation()
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"
       setIsCvDragging(true)
     },
     [rateLimitSecondsLeft, submitPhase]
@@ -425,6 +440,17 @@ export function PublicVacancyApplicationForm({
       applyCvFile(event.dataTransfer?.files?.[0] ?? null, cvInputRef.current)
     },
     [applyCvFile, rateLimitSecondsLeft, submitPhase]
+  )
+
+  const handleCvDropzoneKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        handleCvDropzoneClick()
+      }
+    },
+    [handleCvDropzoneClick, rateLimitSecondsLeft, submitPhase]
   )
 
   const handleRemoveCvFile = useCallback(() => {
@@ -991,16 +1017,17 @@ export function PublicVacancyApplicationForm({
         <label htmlFor="apply-cv" className={labelClass}>
           {t("fields.resume")}
         </label>
-        <div
-          className="relative"
-          onDragOver={handleCvDragOver}
-          onDragLeave={handleCvDragLeave}
-          onDrop={handleCvDrop}
-        >
-          <button
-            type="button"
-            disabled={disabled}
+        <div className="relative">
+          <div
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled || undefined}
             onClick={handleCvDropzoneClick}
+            onKeyDown={handleCvDropzoneKeyDown}
+            onDragEnter={handleCvDragEnter}
+            onDragOver={handleCvDragOver}
+            onDragLeave={handleCvDragLeave}
+            onDrop={handleCvDrop}
             aria-label={
               isCvDragging
                 ? t("file.dropActive")
@@ -1019,35 +1046,37 @@ export function PublicVacancyApplicationForm({
               disabled,
             })}
           >
-            {cvFile ? (
-              <FileText
-                className={
-                  theme === "dark"
-                    ? "mx-auto size-12 text-ats-cobre"
-                    : "mx-auto size-12 text-ats-terracotta"
-                }
-                strokeWidth={1.5}
-                aria-hidden
-              />
-            ) : (
-              <CvDropzoneGlyph />
-            )}
-            <span className="mt-2 block text-sm font-semibold text-foreground">
-              {isCvDragging
-                ? t("file.dropActive")
-                : cvFile
-                  ? cvFile.name
-                  : t("file.selectPdf")}
-            </span>
-            <span
-              id="apply-cv-helper"
-              className="mt-1 block text-xs text-muted-foreground"
-            >
-              {cvFile
-                ? `${formatCvFileSize(cvFile.size)} · ${t("file.changeFile")}`
-                : t("file.helper")}
-            </span>
-          </button>
+            <div className="pointer-events-none">
+              {cvFile ? (
+                <FileText
+                  className={
+                    theme === "dark"
+                      ? "mx-auto size-12 text-ats-cobre"
+                      : "mx-auto size-12 text-ats-terracotta"
+                  }
+                  strokeWidth={1.5}
+                  aria-hidden
+                />
+              ) : (
+                <CvDropzoneGlyph />
+              )}
+              <span className="mt-2 block text-sm font-semibold text-foreground">
+                {isCvDragging
+                  ? t("file.dropActive")
+                  : cvFile
+                    ? cvFile.name
+                    : t("file.selectPdf")}
+              </span>
+              <span
+                id="apply-cv-helper"
+                className="mt-1 block text-xs text-muted-foreground"
+              >
+                {cvFile
+                  ? `${formatCvFileSize(cvFile.size)} · ${t("file.changeFile")}`
+                  : t("file.helper")}
+              </span>
+            </div>
+          </div>
           {cvFile ? (
             <button
               type="button"
@@ -1055,8 +1084,8 @@ export function PublicVacancyApplicationForm({
               disabled={disabled}
               className={
                 theme === "dark"
-                  ? "absolute right-3 top-3 rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                  : "absolute right-3 top-3 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                  ? "pointer-events-auto absolute right-3 top-3 z-10 rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                  : "pointer-events-auto absolute right-3 top-3 z-10 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
               }
               aria-label={t("file.removeAria", { fileName: cvFile.name })}
             >
@@ -1070,7 +1099,7 @@ export function PublicVacancyApplicationForm({
             type="file"
             accept={PDF_ONLY_ACCEPT}
             onChange={handleFileChange}
-            className="sr-only"
+            className="pointer-events-none sr-only"
             tabIndex={-1}
             disabled={disabled}
           />
