@@ -258,10 +258,33 @@ describe("PublicVacancyApplicationForm", () => {
     expect(Boolean(flagImg) || Boolean(flagEmoji)).toBe(true)
   })
 
+  const getCvInput = () =>
+    screen.getByTestId("apply-cv-input") as HTMLInputElement
+
+  const getCvDropzone = () =>
+    screen.getByRole("button", { name: /Seleccionar PDF|CV_|mi-cv/i })
+
+  const dropCvFile = (file: File) => {
+    const dataTransfer = {
+      files: [file],
+      items: [
+        {
+          kind: "file",
+          type: file.type,
+          getAsFile: () => file,
+        },
+      ],
+      types: ["Files"],
+    }
+    fireEvent.drop(getCvDropzone(), { dataTransfer })
+  }
+
   it("muestra el dropzone de currículum con el texto de selección y la ayuda", async () => {
     renderForm()
 
-    expect(await screen.findByRole("button", { name: "Seleccionar PDF" })).toBeInTheDocument()
+    expect(
+      await screen.findByRole("button", { name: "Seleccionar PDF" })
+    ).toBeInTheDocument()
     expect(
       screen.getByText("Solo se acepta formato PDF (máx. 15 MB).")
     ).toBeInTheDocument()
@@ -270,7 +293,7 @@ describe("PublicVacancyApplicationForm", () => {
   it("rechaza un currículum que no es PDF", async () => {
     renderForm()
 
-    const input = document.getElementById("apply-cv") as HTMLInputElement
+    const input = getCvInput()
     const file = new File(["cv"], "mi-cv.docx", {
       type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     })
@@ -284,12 +307,93 @@ describe("PublicVacancyApplicationForm", () => {
   it("muestra el nombre del archivo al seleccionar un PDF válido", async () => {
     renderForm()
 
-    const input = document.getElementById("apply-cv") as HTMLInputElement
+    const input = getCvInput()
     const file = new File(["cv"], "mi-cv.pdf", { type: "application/pdf" })
     fireEvent.change(input, { target: { files: [file] } })
 
     expect(await screen.findByText("mi-cv.pdf")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Quitar mi-cv.pdf" })).toBeInTheDocument()
+  })
+
+  it("vuelve a aceptar el mismo PDF tras quitarlo", async () => {
+    renderForm()
+
+    const shared = new File(["%PDF"], "CV_reupload.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+    fireEvent.change(getCvInput(), { target: { files: [shared] } })
+    expect(await screen.findByText("CV_reupload.pdf")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Quitar CV_reupload.pdf" }))
+    expect(screen.queryByText("CV_reupload.pdf")).not.toBeInTheDocument()
+    expect(getCvInput().value).toBe("")
+
+    fireEvent.change(getCvInput(), { target: { files: [shared] } })
+    expect(await screen.findByText("CV_reupload.pdf")).toBeInTheDocument()
+  })
+
+  it("vuelve a listar el mismo File tras quitarlo vía drop", async () => {
+    renderForm()
+
+    const shared = new File(["%PDF"], "CV_Jose_Portillo.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+    dropCvFile(shared)
+    expect(await screen.findByText("CV_Jose_Portillo.pdf")).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Quitar CV_Jose_Portillo.pdf" })
+    )
+    expect(screen.queryByText("CV_Jose_Portillo.pdf")).not.toBeInTheDocument()
+
+    dropCvFile(shared)
+    expect(await screen.findByText("CV_Jose_Portillo.pdf")).toBeInTheDocument()
+  })
+
+  it("acepta drop cuando solo vienen items de DataTransfer", async () => {
+    renderForm()
+
+    const shared = new File(["%PDF"], "CV_items.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+    const dropzone = await screen.findByLabelText("Seleccionar PDF")
+    fireEvent.drop(dropzone, {
+      dataTransfer: {
+        files: [] as File[],
+        items: [
+          {
+            kind: "file",
+            type: shared.type,
+            getAsFile: () => shared,
+          },
+        ],
+        types: ["Files"],
+      },
+    })
+    expect(await screen.findByText("CV_items.pdf")).toBeInTheDocument()
+  })
+
+  it("permite subir y quitar el mismo PDF muchas veces seguidas", async () => {
+    renderForm()
+
+    const shared = new File(["%PDF"], "CV_ciclo.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+
+    for (let cycle = 0; cycle < 8; cycle++) {
+      fireEvent.change(getCvInput(), { target: { files: [shared] } })
+      expect(await screen.findByText("CV_ciclo.pdf")).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole("button", { name: "Quitar CV_ciclo.pdf" }))
+      expect(screen.queryByText("CV_ciclo.pdf")).not.toBeInTheDocument()
+    }
+
+    dropCvFile(shared)
+    expect(await screen.findByText("CV_ciclo.pdf")).toBeInTheDocument()
   })
 
   it("precarga datos y bloquea el correo cuando isEmailLocked", async () => {

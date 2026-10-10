@@ -12,6 +12,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react"
+import { flushSync } from "react-dom"
 import { useLocale, useTranslations } from "next-intl"
 import { FileText, LoaderCircle, Mail, X } from "lucide-react"
 import { PORTAL_HOME_HREF } from "@/lib/portal-access"
@@ -59,6 +60,21 @@ import { PhoneCountryInput } from "@/components/ui/PhoneCountryInput"
 import { PDF_ONLY_ACCEPT } from "@/lib/upload-constraints"
 
 const DEFAULT_PHONE_COUNTRY_ISO2 = DEFAULT_APPLY_PHONE_COUNTRY_ISO2
+
+/** Collect File objects from a drop — `files` first, then `items` as fallback. */
+function filesFromDataTransfer(dataTransfer: DataTransfer | null): File[] {
+  if (!dataTransfer) return []
+  if (dataTransfer.files?.length) return Array.from(dataTransfer.files)
+  if (!dataTransfer.items?.length) return []
+  const fromItems: File[] = []
+  for (let i = 0; i < dataTransfer.items.length; i++) {
+    const item = dataTransfer.items[i]
+    if (item.kind !== "file") continue
+    const file = item.getAsFile()
+    if (file) fromItems.push(file)
+  }
+  return fromItems
+}
 
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
 
@@ -276,9 +292,24 @@ export function PublicVacancyApplicationForm({
   } | null>(null)
   const loadingStartedAtRef = useRef(0)
   const cvInputRef = useRef<HTMLInputElement>(null)
+  const cvDragDepthRef = useRef(0)
   const [isCvDragging, setIsCvDragging] = useState(false)
   const [documentTypes, setDocumentTypes] = useState<IdentityDocumentTypeOptionDto[]>([])
   const [isLoadingDocumentTypes, setIsLoadingDocumentTypes] = useState(true)
+
+  const clearCvNativeInputValue = useCallback(() => {
+    const input = cvInputRef.current
+    if (input) input.value = ""
+  }, [])
+
+  useEffect(() => {
+    const endDrag = () => {
+      cvDragDepthRef.current = 0
+      setIsCvDragging(false)
+    }
+    window.addEventListener("dragend", endDrag)
+    return () => window.removeEventListener("dragend", endDrag)
+  }, [])
 
   const inputClass = themeFieldClass(theme)
   const selectClass = themeSelectClass(theme)
@@ -365,41 +396,64 @@ export function PublicVacancyApplicationForm({
   }, [])
 
   const applyCvFile = useCallback(
-    (file: File | null, input?: HTMLInputElement | null) => {
+    (file: File | null) => {
       if (file && !isAllowedCvFile(file)) {
-        if (input) input.value = ""
-        setCvFile(null)
-        setErrors((prev) => ({ ...prev, cvFile: t("validation.fileType") }))
-        setServerError(null)
+        flushSync(() => {
+          setCvFile(null)
+          setErrors((prev) => ({ ...prev, cvFile: t("validation.fileType") }))
+          setServerError(null)
+          setIsCvDragging(false)
+          cvDragDepthRef.current = 0
+        })
+        clearCvNativeInputValue()
         return
       }
       if (file && !isCvFileWithinSizeLimit(file)) {
-        if (input) input.value = ""
-        setCvFile(null)
-        setErrors((prev) => ({ ...prev, cvFile: t("validation.fileTooLarge") }))
-        setServerError(null)
+        flushSync(() => {
+          setCvFile(null)
+          setErrors((prev) => ({ ...prev, cvFile: t("validation.fileTooLarge") }))
+          setServerError(null)
+          setIsCvDragging(false)
+          cvDragDepthRef.current = 0
+        })
+        clearCvNativeInputValue()
         return
       }
-      setCvFile(file)
-      setErrors((prev) => ({ ...prev, cvFile: undefined }))
-      setServerError(null)
+      // Commit in one synchronous turn so clear → immediate re-drop never races.
+      flushSync(() => {
+        setCvFile(file)
+        setErrors((prev) => ({ ...prev, cvFile: undefined }))
+        setServerError(null)
+        setIsCvDragging(false)
+        cvDragDepthRef.current = 0
+      })
+      clearCvNativeInputValue()
     },
-    [t]
+    [clearCvNativeInputValue, t]
   )
 
   const handleFileChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      applyCvFile(event.target.files?.[0] ?? null, event.target)
+      const selected = event.target.files?.[0] ?? null
+      event.target.value = ""
+      if (!selected) return
+      applyCvFile(selected)
     },
     [applyCvFile]
   )
 
-  const handleCvDropzoneClick = useCallback(() => {
+  /** Clear native value only — avoid setState here (re-render can cancel the file dialog). */
+  const prepareCvPicker = useCallback(() => {
+    if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+    clearCvNativeInputValue()
+  }, [clearCvNativeInputValue, rateLimitSecondsLeft, submitPhase])
+
+  const openCvPicker = useCallback(() => {
     if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
     // Reset before opening so selecting the same path fires `change` again.
-    if (cvInputRef.current) cvInputRef.current.value = ""
+    prepareCvPicker()
     cvInputRef.current?.click()
-  }, [rateLimitSecondsLeft, submitPhase])
+  }, [prepareCvPicker, rateLimitSecondsLeft, submitPhase])
 
   const handleCvDragEnter = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
@@ -407,6 +461,7 @@ export function PublicVacancyApplicationForm({
       event.preventDefault()
       event.stopPropagation()
       if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"
+      cvDragDepthRef.current += 1
       setIsCvDragging(true)
     },
     [rateLimitSecondsLeft, submitPhase]
@@ -418,7 +473,6 @@ export function PublicVacancyApplicationForm({
       event.preventDefault()
       event.stopPropagation()
       if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"
-      setIsCvDragging(true)
     },
     [rateLimitSecondsLeft, submitPhase]
   )
@@ -426,9 +480,8 @@ export function PublicVacancyApplicationForm({
   const handleCvDragLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    const related = event.relatedTarget
-    if (related instanceof Node && event.currentTarget.contains(related)) return
-    setIsCvDragging(false)
+    cvDragDepthRef.current = Math.max(0, cvDragDepthRef.current - 1)
+    if (cvDragDepthRef.current === 0) setIsCvDragging(false)
   }, [])
 
   const handleCvDrop = useCallback(
@@ -436,8 +489,10 @@ export function PublicVacancyApplicationForm({
       if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
       event.preventDefault()
       event.stopPropagation()
+      cvDragDepthRef.current = 0
       setIsCvDragging(false)
-      applyCvFile(event.dataTransfer?.files?.[0] ?? null, cvInputRef.current)
+      const dropped = filesFromDataTransfer(event.dataTransfer)
+      if (dropped.length) applyCvFile(dropped[0] ?? null)
     },
     [applyCvFile, rateLimitSecondsLeft, submitPhase]
   )
@@ -447,15 +502,14 @@ export function PublicVacancyApplicationForm({
       if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault()
-        handleCvDropzoneClick()
+        openCvPicker()
       }
     },
-    [handleCvDropzoneClick, rateLimitSecondsLeft, submitPhase]
+    [openCvPicker, rateLimitSecondsLeft, submitPhase]
   )
 
   const handleRemoveCvFile = useCallback(() => {
     if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
-    if (cvInputRef.current) cvInputRef.current.value = ""
     applyCvFile(null)
   }, [applyCvFile, rateLimitSecondsLeft, submitPhase])
 
@@ -1018,11 +1072,16 @@ export function PublicVacancyApplicationForm({
           {t("fields.resume")}
         </label>
         <div className="relative">
+          {/*
+            Dropzone stays a div (not label[htmlFor]): dropping onto a label
+            tied to <input type="file"> often opens the picker instead of
+            accepting the file. Click still opens via prepare + input.click().
+          */}
           <div
             role="button"
             tabIndex={disabled ? -1 : 0}
             aria-disabled={disabled || undefined}
-            onClick={handleCvDropzoneClick}
+            onClick={openCvPicker}
             onKeyDown={handleCvDropzoneKeyDown}
             onDragEnter={handleCvDragEnter}
             onDragOver={handleCvDragOver}
@@ -1038,7 +1097,7 @@ export function PublicVacancyApplicationForm({
             aria-describedby={
               errors.cvFile ? "apply-cv-helper apply-cv-err" : "apply-cv-helper"
             }
-            aria-invalid={Boolean(errors.cvFile)}
+            aria-invalid={Boolean(errors.cvFile) || undefined}
             className={themeCvDropzoneClass(theme, {
               isDragging: isCvDragging,
               hasFile: Boolean(cvFile),
@@ -1102,6 +1161,7 @@ export function PublicVacancyApplicationForm({
             className="pointer-events-none sr-only"
             tabIndex={-1}
             disabled={disabled}
+            data-testid="apply-cv-input"
           />
         </div>
         {errors.cvFile ? (
