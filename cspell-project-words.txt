@@ -169,6 +169,7 @@ precomputados
 prefs
 Prefs
 presioná
+presentacion
 proteccion
 Probá
 puntaje

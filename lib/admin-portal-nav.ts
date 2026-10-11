@@ -56,6 +56,10 @@ export const ADMIN_PORTAL_NAV_ITEMS = [
         href: "/portal-admin/administracion/tipos-de-documento",
         labelKey: "documentTypes",
       },
+      {
+        href: "/portal-admin/administracion/recordatorios-presentacion",
+        labelKey: "presentationReminders",
+      },
     ],
   },
 ] as const

@@ -53,6 +53,7 @@
     "departments": "Départements",
     "modalities": "Modalités",
     "documentTypes": "Types de document",
+    "presentationReminders": "Rappels de présentation",
     "interviewTypes": "Types",
     "interviewModalities": "Modalités",
     "interviewStatuses": "Statuts",
@@ -429,6 +430,10 @@
       "documentTypes": {
         "title": "Types de document",
         "description": "Gestion du catalogue global des types de document d'identité"
+      },
+      "presentationReminders": {
+        "title": "Rappels de présentation",
+        "description": "Types de poste et envoi automatique par modèle Notification, plus envoi manuel aux recruteurs"
       },
       "interviewsCatalog": {
         "title": "Entretiens",
@@ -4277,6 +4282,80 @@
       "regionAria": "Paramètres du portail admin",
       "title": "Paramètres",
       "description": "Cette vue est prête à centraliser les paramètres du portail admin."
+    },
+    "presentationReminders": {
+      "page": {
+        "title": "Rappels de présentation",
+        "description": "Ajoutez des lignes avec modèle Notification, un type de poste et envoi automatique ; utilisez Envoyer maintenant sur chaque ligne si besoin."
+      },
+      "loading": "Chargement des paramètres…",
+      "templates": {
+        "title": "Modèles et types de poste",
+        "description": "Ajoutez des lignes, choisissez un modèle Notification (répétition autorisée), un type de poste et l'envoi automatique, et envoyez depuis chaque ligne.",
+        "tableAria": "Paramètres de rappel par modèle",
+        "columns": {
+          "template": "Modèle",
+          "vacancyTypes": "Type de poste",
+          "autoSend": "Envoi automatique"
+        },
+        "add": "Ajouter",
+        "remove": "Supprimer la ligne",
+        "selectTemplate": "Sélectionner un modèle",
+        "unsaved": "Non enregistré",
+        "unsavedHint": "Modifications non enregistrées. Cliquez sur Enregistrer les paramètres.",
+        "emptyRows": "Aucune ligne configurée. Ajoutez-en une pour commencer.",
+        "noneOption": "Sélectionner un type",
+        "autoSendEnabled": "Envoi automatique activé",
+        "timeOfDay": "Heure",
+        "timeZone": "Fuseau horaire"
+      },
+      "manual": {
+        "title": "Envoyer maintenant",
+        "description": "Utilise les paramètres enregistrés de la ligne (modèle et type de poste).",
+        "needsBinding": "Ajoutez au moins une ligne avec un modèle et un type de poste, puis enregistrez avant d'envoyer."
+      },
+      "empty": {
+        "noTemplates": "Il n'y a aucun modèle Notification. Créez-les dans Modèles pour pouvoir les assigner ici.",
+        "goToTemplates": "Aller aux Modèles",
+        "noVacancyTypes": "Il n'y a aucun type de poste actif. Créez-les dans le catalogue des types.",
+        "goToVacancyTypes": "Aller aux Types de poste"
+      },
+      "scopes": {
+        "label": "Portée du rappel",
+        "dueSoon": {
+          "label": "Bientôt dues",
+          "helper": "Uniquement les postes dont l'échéance de présentation arrive bientôt."
+        },
+        "overdue": {
+          "label": "Hors délai",
+          "helper": "Uniquement les postes dont l'échéance de présentation est déjà dépassée."
+        },
+        "all": {
+          "label": "Les deux",
+          "helper": "Inclut les postes bientôt dus et hors délai."
+        }
+      },
+      "actions": {
+        "save": "Enregistrer les paramètres",
+        "send": "Envoyer le rappel par e-mail",
+        "retry": "Réessayer"
+      },
+      "confirm": {
+        "title": "Envoyer le rappel",
+        "message": "Un digest sera envoyé à tous les recruteurs avec les paramètres enregistrés.",
+        "confirm": "Envoyer"
+      },
+      "errors": {
+        "loadFailed": "Impossible de charger les paramètres des rappels de présentation.",
+        "loadAria": "Erreur lors du chargement des rappels de présentation"
+      },
+      "toasts": {
+        "saved": "Paramètres enregistrés.",
+        "saveError": "Impossible d'enregistrer les paramètres.",
+        "success": "Rappel envoyé : {sent} envoyés, {failed} échoués, {recipients} destinataires.",
+        "skipped": "{reason} (envoyés : {sent}, échoués : {failed}, destinataires : {recipients})",
+        "error": "Impossible d'envoyer le rappel."
+      }
     },
     "shell": {
       "userFallback": "Usuario",

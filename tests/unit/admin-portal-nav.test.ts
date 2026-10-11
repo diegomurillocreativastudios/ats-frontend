@@ -130,6 +130,11 @@ describe("admin portal nav", () => {
         "/portal-admin/administracion/tipos-de-documento",
       ),
     ).toBe("documentTypes")
+    expect(
+      resolveAdminPortalNavLabelKey(
+        "/portal-admin/administracion/recordatorios-presentacion",
+      ),
+    ).toBe("presentationReminders")
     expect(resolveAdminPortalNavLabelKey("/portal-admin/entrevistas/general")).toBe(
       "interviewsCalendar",
     )
@@ -171,6 +176,17 @@ describe("admin portal nav", () => {
     ).toEqual([
       { href: "/portal-admin/administracion", labelKey: "administration" },
       { href: "/portal-admin/administracion/usuarios", labelKey: "users" },
+    ])
+    expect(
+      resolveAdminPortalBreadcrumbTrail(
+        "/portal-admin/administracion/recordatorios-presentacion",
+      ),
+    ).toEqual([
+      { href: "/portal-admin/administracion", labelKey: "administration" },
+      {
+        href: "/portal-admin/administracion/recordatorios-presentacion",
+        labelKey: "presentationReminders",
+      },
     ])
     expect(
       resolveAdminPortalBreadcrumbTrail("/portal-admin/entrevistas/general"),

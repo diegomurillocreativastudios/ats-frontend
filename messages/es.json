@@ -55,6 +55,7 @@
     "modalities": "Modalidades",
     "vacancyTypes": "Tipos de vacante",
     "documentTypes": "Tipos de documento",
+    "presentationReminders": "Recordatorios de presentación",
     "interviewTypes": "Tipos",
     "interviewModalities": "Modalidades",
     "interviewStatuses": "Estados",
@@ -433,6 +434,10 @@
       "documentTypes": {
         "title": "Tipos de Documento",
         "description": "Gestión del catálogo global de tipos de documento de identidad"
+      },
+      "presentationReminders": {
+        "title": "Recordatorios de presentación",
+        "description": "Tipos de vacante y envío automático por plantilla Notification, más envío manual a reclutadores"
       },
       "interviewsCatalog": {
         "title": "Entrevistas",
@@ -4277,6 +4282,80 @@
       "regionAria": "Configuración del portal admin",
       "title": "Configuracion",
       "description": "Esta vista queda lista para centralizar las configuraciones del portal admin."
+    },
+    "presentationReminders": {
+      "page": {
+        "title": "Recordatorios de presentación",
+        "description": "Agrega filas con plantilla Notification, un tipo de vacante y envío automático; usa Enviar ahora en cada fila cuando lo necesites."
+      },
+      "loading": "Cargando configuración…",
+      "templates": {
+        "title": "Plantillas y tipos de vacante",
+        "description": "Agrega filas, elige una plantilla Notification (puedes repetirla), un tipo de vacante y el envío automático, y envía desde cada fila.",
+        "tableAria": "Configuración de recordatorios por plantilla",
+        "columns": {
+          "template": "Plantilla",
+          "vacancyTypes": "Tipo de vacante",
+          "autoSend": "Envío automático"
+        },
+        "add": "Agregar",
+        "remove": "Quitar fila",
+        "selectTemplate": "Seleccionar plantilla",
+        "unsaved": "Sin guardar",
+        "unsavedHint": "Hay cambios sin guardar. Pulsa Guardar configuración.",
+        "emptyRows": "No hay filas configuradas. Agrega una para empezar.",
+        "noneOption": "Seleccionar tipo",
+        "autoSendEnabled": "Envío automático activo",
+        "timeOfDay": "Hora",
+        "timeZone": "Zona horaria"
+      },
+      "manual": {
+        "title": "Enviar ahora",
+        "description": "Usa la configuración guardada de la fila (plantilla y tipo de vacante).",
+        "needsBinding": "Agrega al menos una fila con plantilla y un tipo de vacante, y guarda antes de enviar."
+      },
+      "empty": {
+        "noTemplates": "No hay plantillas de tipo Notification. Créalas en Plantillas para poder asignarlas.",
+        "goToTemplates": "Ir a Plantillas",
+        "noVacancyTypes": "No hay tipos de vacante activos. Créalos en el catálogo de tipos.",
+        "goToVacancyTypes": "Ir a Tipos de vacante"
+      },
+      "scopes": {
+        "label": "Alcance del recordatorio",
+        "dueSoon": {
+          "label": "Próximas a vencer",
+          "helper": "Solo vacantes con plazo de presentación próximo a vencer."
+        },
+        "overdue": {
+          "label": "Fuera de plazo",
+          "helper": "Solo vacantes cuyo plazo de presentación ya venció."
+        },
+        "all": {
+          "label": "Ambas",
+          "helper": "Incluye próximas a vencer y fuera de plazo."
+        }
+      },
+      "actions": {
+        "save": "Guardar configuración",
+        "send": "Enviar recordatorio por email",
+        "retry": "Reintentar"
+      },
+      "confirm": {
+        "title": "Enviar recordatorio",
+        "message": "Se enviará un digest a todos los reclutadores usando la configuración guardada.",
+        "confirm": "Enviar"
+      },
+      "errors": {
+        "loadFailed": "No se pudo cargar la configuración de recordatorios.",
+        "loadAria": "Error al cargar recordatorios de presentación"
+      },
+      "toasts": {
+        "saved": "Configuración guardada.",
+        "saveError": "No se pudo guardar la configuración.",
+        "success": "Recordatorio enviado: {sent} enviados, {failed} fallidos, {recipients} destinatarios.",
+        "skipped": "{reason} (enviados: {sent}, fallidos: {failed}, destinatarios: {recipients})",
+        "error": "No se pudo enviar el recordatorio."
+      }
     },
     "shell": {
       "userFallback": "Usuario",

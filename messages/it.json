@@ -53,6 +53,7 @@
     "departments": "Reparti",
     "modalities": "Modalità",
     "documentTypes": "Tipi di documento",
+    "presentationReminders": "Promemoria di presentazione",
     "interviewTypes": "Tipi",
     "interviewModalities": "Modalità",
     "interviewStatuses": "Stati",
@@ -429,6 +430,10 @@
       "documentTypes": {
         "title": "Tipi di documento",
         "description": "Gestione del catalogo globale dei tipi di documento di identità"
+      },
+      "presentationReminders": {
+        "title": "Promemoria di presentazione",
+        "description": "Tipi di posizione e invio automatico per modello Notification, più invio manuale ai recruiter"
       },
       "interviewsCatalog": {
         "title": "Colloqui",
@@ -4277,6 +4282,80 @@
       "regionAria": "Impostazioni del portale admin",
       "title": "Impostazioni",
       "description": "Questa vista è pronta per centralizzare le impostazioni del portale admin."
+    },
+    "presentationReminders": {
+      "page": {
+        "title": "Promemoria di presentazione",
+        "description": "Aggiungi righe con modello Notification, un tipo di posizione e invio automatico; usa Invia ora su ogni riga quando serve."
+      },
+      "loading": "Caricamento impostazioni…",
+      "templates": {
+        "title": "Modelli e tipi di posizione",
+        "description": "Aggiungi righe, scegli un modello Notification (puoi ripeterlo), un tipo di posizione e l'invio automatico e invia da ogni riga.",
+        "tableAria": "Impostazioni promemoria per modello",
+        "columns": {
+          "template": "Modello",
+          "vacancyTypes": "Tipo di posizione",
+          "autoSend": "Invio automatico"
+        },
+        "add": "Aggiungi",
+        "remove": "Rimuovi riga",
+        "selectTemplate": "Seleziona modello",
+        "unsaved": "Non salvato",
+        "unsavedHint": "Ci sono modifiche non salvate. Premi Salva impostazioni.",
+        "emptyRows": "Nessuna riga configurata. Aggiungine una per iniziare.",
+        "noneOption": "Seleziona tipo",
+        "autoSendEnabled": "Invio automatico attivo",
+        "timeOfDay": "Ora",
+        "timeZone": "Fuso orario"
+      },
+      "manual": {
+        "title": "Invia ora",
+        "description": "Usa le impostazioni salvate della riga (modello e tipo di posizione).",
+        "needsBinding": "Aggiungi almeno una riga con modello e un tipo di posizione, poi salva prima di inviare."
+      },
+      "empty": {
+        "noTemplates": "Non ci sono modelli Notification. Creali in Modelli per poterli assegnare qui.",
+        "goToTemplates": "Vai a Modelli",
+        "noVacancyTypes": "Non ci sono tipi di posizione attivi. Creali nel catalogo dei tipi.",
+        "goToVacancyTypes": "Vai ai Tipi di posizione"
+      },
+      "scopes": {
+        "label": "Ambito del promemoria",
+        "dueSoon": {
+          "label": "In scadenza",
+          "helper": "Solo posizioni con scadenza di presentazione imminente."
+        },
+        "overdue": {
+          "label": "Fuori termine",
+          "helper": "Solo posizioni con scadenza di presentazione già scaduta."
+        },
+        "all": {
+          "label": "Entrambe",
+          "helper": "Include posizioni in scadenza e fuori termine."
+        }
+      },
+      "actions": {
+        "save": "Salva impostazioni",
+        "send": "Invia promemoria via email",
+        "retry": "Riprova"
+      },
+      "confirm": {
+        "title": "Invia promemoria",
+        "message": "Verrà inviato un digest a tutti i recruiter con le impostazioni salvate.",
+        "confirm": "Invia"
+      },
+      "errors": {
+        "loadFailed": "Impossibile caricare le impostazioni dei promemoria di presentazione.",
+        "loadAria": "Errore nel caricamento dei promemoria di presentazione"
+      },
+      "toasts": {
+        "saved": "Impostazioni salvate.",
+        "saveError": "Impossibile salvare le impostazioni.",
+        "success": "Promemoria inviato: {sent} inviati, {failed} non riusciti, {recipients} destinatari.",
+        "skipped": "{reason} (inviati: {sent}, non riusciti: {failed}, destinatari: {recipients})",
+        "error": "Impossibile inviare il promemoria."
+      }
     },
     "shell": {
       "userFallback": "Usuario",

@@ -53,6 +53,7 @@
     "departments": "Abteilungen",
     "modalities": "Modalitäten",
     "documentTypes": "Dokumenttypen",
+    "presentationReminders": "Präsentationserinnerungen",
     "interviewTypes": "Typen",
     "interviewModalities": "Modalitäten",
     "interviewStatuses": "Status",
@@ -429,6 +430,10 @@
       "documentTypes": {
         "title": "Dokumenttypen",
         "description": "Verwaltung des globalen Katalogs für Ausweisdokumenttypen"
+      },
+      "presentationReminders": {
+        "title": "Präsentationserinnerungen",
+        "description": "Vakanztypen und automatischer Versand pro Notification-Vorlage sowie manueller Versand an Recruiter"
       },
       "interviewsCatalog": {
         "title": "Interviews",
@@ -4277,6 +4282,80 @@
       "regionAria": "Einstellungen des Admin-Portals",
       "title": "Einstellungen",
       "description": "Diese Ansicht ist bereit, die Einstellungen des Admin-Portals zu zentralisieren."
+    },
+    "presentationReminders": {
+      "page": {
+        "title": "Präsentationserinnerungen",
+        "description": "Füge Zeilen mit Notification-Vorlage, einem Vakanztyp und automatischem Versand hinzu; nutze Jetzt senden in jeder Zeile bei Bedarf."
+      },
+      "loading": "Einstellungen werden geladen…",
+      "templates": {
+        "title": "Vorlagen und Vakanztypen",
+        "description": "Füge Zeilen hinzu, wähle eine Notification-Vorlage (Wiederholung erlaubt), einen Vakanztyp und den automatischen Versand und sende pro Zeile.",
+        "tableAria": "Erinnerungseinstellungen nach Vorlage",
+        "columns": {
+          "template": "Vorlage",
+          "vacancyTypes": "Vakanztyp",
+          "autoSend": "Automatischer Versand"
+        },
+        "add": "Hinzufügen",
+        "remove": "Zeile entfernen",
+        "selectTemplate": "Vorlage auswählen",
+        "unsaved": "Nicht gespeichert",
+        "unsavedHint": "Es gibt ungespeicherte Änderungen. Klicke auf Einstellungen speichern.",
+        "emptyRows": "Noch keine Zeilen konfiguriert. Füge eine hinzu, um zu starten.",
+        "noneOption": "Typ auswählen",
+        "autoSendEnabled": "Automatischer Versand aktiv",
+        "timeOfDay": "Uhrzeit",
+        "timeZone": "Zeitzone"
+      },
+      "manual": {
+        "title": "Jetzt senden",
+        "description": "Nutzt die gespeicherten Einstellungen der Zeile (Vorlage und Vakanztyp).",
+        "needsBinding": "Füge mindestens eine Zeile mit Vorlage und Vakanztyp hinzu und speichere, bevor du sendest."
+      },
+      "empty": {
+        "noTemplates": "Es gibt keine Notification-Vorlagen. Erstelle sie unter Vorlagen, um sie hier zuzuweisen.",
+        "goToTemplates": "Zu Vorlagen",
+        "noVacancyTypes": "Es gibt keine aktiven Vakanztypen. Erstelle sie im Katalog der Vakanztypen.",
+        "goToVacancyTypes": "Zu Vakanztypen"
+      },
+      "scopes": {
+        "label": "Umfang der Erinnerung",
+        "dueSoon": {
+          "label": "Bald fällig",
+          "helper": "Nur Stellen mit bald ablaufender Präsentationsfrist."
+        },
+        "overdue": {
+          "label": "Überfällig",
+          "helper": "Nur Stellen, deren Präsentationsfrist bereits abgelaufen ist."
+        },
+        "all": {
+          "label": "Beides",
+          "helper": "Enthält bald fällige und überfällige Stellen."
+        }
+      },
+      "actions": {
+        "save": "Einstellungen speichern",
+        "send": "Erinnerung per E-Mail senden",
+        "retry": "Erneut versuchen"
+      },
+      "confirm": {
+        "title": "Erinnerung senden",
+        "message": "Ein Digest wird mit den gespeicherten Einstellungen an alle Recruiter gesendet.",
+        "confirm": "Senden"
+      },
+      "errors": {
+        "loadFailed": "Einstellungen für Präsentationserinnerungen konnten nicht geladen werden.",
+        "loadAria": "Fehler beim Laden der Präsentationserinnerungen"
+      },
+      "toasts": {
+        "saved": "Einstellungen gespeichert.",
+        "saveError": "Einstellungen konnten nicht gespeichert werden.",
+        "success": "Erinnerung gesendet: {sent} gesendet, {failed} fehlgeschlagen, {recipients} Empfänger.",
+        "skipped": "{reason} (gesendet: {sent}, fehlgeschlagen: {failed}, Empfänger: {recipients})",
+        "error": "Die Erinnerung konnte nicht gesendet werden."
+      }
     },
     "shell": {
       "userFallback": "Usuario",

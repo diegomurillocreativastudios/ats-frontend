@@ -78,6 +78,14 @@ describe("AdminSidebar", () => {
     expect(
       within(administration).getByRole("link", { name: "Tipos de documento" }),
     ).toHaveAttribute("href", "/portal-admin/administracion/tipos-de-documento")
+    expect(
+      within(administration).getByRole("link", {
+        name: "Recordatorios de presentación",
+      }),
+    ).toHaveAttribute(
+      "href",
+      "/portal-admin/administracion/recordatorios-presentacion",
+    )
   })
 
   it("expone los catálogos de vacantes y entrevistas sin expandir", () => {

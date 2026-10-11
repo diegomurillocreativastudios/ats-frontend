@@ -12,6 +12,7 @@ import {
   Handshake,
   IdCard,
   ListChecks,
+  Mail,
   Scale,
   Shield,
   Tags,
@@ -52,6 +53,7 @@ const NAV_ICONS: Record<
   interviewStatuses: ListChecks,
   users: Users,
   documentTypes: IdCard,
+  presentationReminders: Mail,
   companies: Building2,
   interviewsCalendar: Calendar,
 }

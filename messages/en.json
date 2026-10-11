@@ -53,6 +53,7 @@
     "departments": "Departments",
     "modalities": "Modalities",
     "documentTypes": "Document types",
+    "presentationReminders": "Presentation reminders",
     "interviewTypes": "Types",
     "interviewModalities": "Modalities",
     "interviewStatuses": "Statuses",
@@ -429,6 +430,10 @@
       "documentTypes": {
         "title": "Document Types",
         "description": "Manage the global catalog of identity document types"
+      },
+      "presentationReminders": {
+        "title": "Presentation reminders",
+        "description": "Vacancy types and automatic send per Notification template, plus manual send to recruiters"
       },
       "interviewsCatalog": {
         "title": "Interviews",
@@ -4277,6 +4282,80 @@
       "regionAria": "Admin portal settings",
       "title": "Settings",
       "description": "This view is ready to centralize the admin portal settings."
+    },
+    "presentationReminders": {
+      "page": {
+        "title": "Presentation reminders",
+        "description": "Add rows with a Notification template, one vacancy type, and automatic send; use Send now on each row when you need it."
+      },
+      "loading": "Loading settings…",
+      "templates": {
+        "title": "Templates and vacancy types",
+        "description": "Add rows, choose a Notification template (you can repeat it), one vacancy type and automatic send, and send from each row.",
+        "tableAria": "Reminder settings by template",
+        "columns": {
+          "template": "Template",
+          "vacancyTypes": "Vacancy type",
+          "autoSend": "Automatic send"
+        },
+        "add": "Add",
+        "remove": "Remove row",
+        "selectTemplate": "Select template",
+        "unsaved": "Unsaved",
+        "unsavedHint": "You have unsaved changes. Click Save settings.",
+        "emptyRows": "No rows configured yet. Add one to get started.",
+        "noneOption": "Select type",
+        "autoSendEnabled": "Automatic send enabled",
+        "timeOfDay": "Time",
+        "timeZone": "Time zone"
+      },
+      "manual": {
+        "title": "Send now",
+        "description": "Uses the saved settings for the row (template and vacancy type).",
+        "needsBinding": "Add at least one row with a template and a vacancy type, then save before sending."
+      },
+      "empty": {
+        "noTemplates": "There are no Notification templates. Create them under Templates to assign them here.",
+        "goToTemplates": "Go to Templates",
+        "noVacancyTypes": "There are no active vacancy types. Create them in the vacancy types catalog.",
+        "goToVacancyTypes": "Go to Vacancy types"
+      },
+      "scopes": {
+        "label": "Reminder scope",
+        "dueSoon": {
+          "label": "Due soon",
+          "helper": "Only vacancies with a presentation deadline coming up soon."
+        },
+        "overdue": {
+          "label": "Overdue",
+          "helper": "Only vacancies whose presentation deadline has already passed."
+        },
+        "all": {
+          "label": "Both",
+          "helper": "Includes due soon and overdue vacancies."
+        }
+      },
+      "actions": {
+        "save": "Save settings",
+        "send": "Send reminder email",
+        "retry": "Retry"
+      },
+      "confirm": {
+        "title": "Send reminder",
+        "message": "A digest will be sent to all recruiters using the saved settings.",
+        "confirm": "Send"
+      },
+      "errors": {
+        "loadFailed": "Could not load presentation reminder settings.",
+        "loadAria": "Error loading presentation reminders"
+      },
+      "toasts": {
+        "saved": "Settings saved.",
+        "saveError": "Could not save settings.",
+        "success": "Reminder sent: {sent} sent, {failed} failed, {recipients} recipients.",
+        "skipped": "{reason} (sent: {sent}, failed: {failed}, recipients: {recipients})",
+        "error": "Could not send the reminder."
+      }
     },
     "shell": {
       "userFallback": "Usuario",

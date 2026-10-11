@@ -70,6 +70,7 @@ const ADMIN_PATH_LABEL = {
   estados: "Estados",
   administracion: "Administración",
   "tipos-de-documento": "Tipos de documento",
+  "recordatorios-presentacion": "Recordatorios de presentación",
 }
 
 /** Listado de entrevistas de una vacante: `/portal-rrhh/entrevistas/<vacancyId>`. */
