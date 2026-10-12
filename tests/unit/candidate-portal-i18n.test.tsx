@@ -98,6 +98,39 @@ describe("NextActivitiesCard i18n (Etapa 5B)", () => {
     renderWithIntl(<NextActivitiesCard activities={[]} loading={false} />, "en")
     expect(screen.getByText("You have no upcoming activities")).toBeInTheDocument()
   })
+
+  it("enlaza actividades de tipo interview a /portal-candidato/entrevistas", () => {
+    renderWithIntl(
+      <NextActivitiesCard
+        activities={[
+          {
+            id: "act-1",
+            kind: "interview",
+            title: "Entrevista — Desarrollador .NET",
+            detailLine: "Programada: 14 oct 2026 15:00 (UTC)",
+            statusLabel: "Programada",
+            statusTone: "confirmed",
+          },
+          {
+            id: "act-2",
+            kind: "evaluation",
+            title: "Evaluación técnica",
+            detailLine: "Pendiente",
+            statusLabel: "Pendiente",
+            statusTone: "pending",
+          },
+        ]}
+        loading={false}
+      />,
+      "es",
+    )
+
+    const interviewLink = screen.getByRole("link", { name: "Ver entrevistas" })
+    expect(interviewLink).toHaveAttribute("href", "/portal-candidato/entrevistas")
+    expect(interviewLink).toHaveTextContent("Entrevista — Desarrollador .NET")
+
+    expect(screen.getByText("Evaluación técnica").closest("a")).toBeNull()
+  })
 })
 
 describe("MyPostulationsCard i18n (Etapa 5B)", () => {

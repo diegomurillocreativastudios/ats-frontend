@@ -8,8 +8,8 @@ const STAT_CONFIG = [
     labelKey: "activeApplications",
     descriptionKey: "activeApplicationsDesc",
     icon: Briefcase,
-    iconBg: "bg-blue-100",
-    iconColor: "text-blue-600",
+    iconBg: "bg-emerald-100",
+    iconColor: "text-emerald-700",
   },
   {
     key: "pendingEvaluations" as const,

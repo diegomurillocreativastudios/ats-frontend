@@ -583,7 +583,8 @@
     "activities": {
       "title": "Prossime attività",
       "emptyTitle": "Non hai attività in programma",
-      "emptyDescription": "Quando avrai colloqui, valutazioni o appuntamenti programmati, appariranno qui."
+      "emptyDescription": "Quando avrai colloqui, valutazioni o appuntamenti programmati, appariranno qui.",
+      "interviewLinkAria": "Vedi i colloqui"
     },
     "applications": {
       "title": "Le mie candidature",

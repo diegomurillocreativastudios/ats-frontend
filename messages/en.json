@@ -583,7 +583,8 @@
     "activities": {
       "title": "Upcoming activities",
       "emptyTitle": "You have no upcoming activities",
-      "emptyDescription": "When you have interviews, evaluations or scheduled appointments, they'll appear here."
+      "emptyDescription": "When you have interviews, evaluations or scheduled appointments, they'll appear here.",
+      "interviewLinkAria": "View interviews"
     },
     "applications": {
       "title": "My applications",

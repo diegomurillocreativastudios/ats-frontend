@@ -12,7 +12,7 @@ const typeClasses: Record<ToastProps["type"], string> = {
   success:
     "border-green-400 bg-green-400 text-white",
   error: "border-red-400 bg-red-400 text-white",
-  info: "border-blue-400 bg-blue-400 text-white",
+  info: "border-ats-cobre bg-ats-cobre text-white",
   warning:
     "border-yellow-500 bg-yellow-500 text-white",
 }

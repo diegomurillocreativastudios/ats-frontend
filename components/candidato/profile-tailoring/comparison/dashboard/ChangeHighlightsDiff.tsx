@@ -70,7 +70,7 @@ function ChangeDiffCard({ item }: { item: ProfileChangeHighlight }) {
       </div>
       <div className="grid grid-cols-1 gap-0 md:grid-cols-2">
         <div className="border-b border-border/50 p-4 md:border-b-0 md:border-r">
-          <p className="mb-2 font-sans text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
+          <p className="mb-2 font-sans text-xs font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
             {t("beforeLabel")}
           </p>
           <DiffText
@@ -93,7 +93,7 @@ function ChangeDiffCard({ item }: { item: ProfileChangeHighlight }) {
         </div>
       </div>
       {item.reason?.trim() ? (
-        <div className="border-t border-border/60 bg-sky-500/5 px-4 py-3">
+        <div className="border-t border-border/60 bg-emerald-500/5 px-4 py-3">
           <p className="font-sans text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             {t("reasonLabel")}
           </p>

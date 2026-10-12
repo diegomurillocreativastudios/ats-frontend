@@ -72,7 +72,7 @@ export interface CandidateProfileMatch {
 
 const VERDICT_BADGE_CLASSES: Record<RequirementVerdict, string> = {
   Met: "bg-emerald-100 text-emerald-800",
-  Partial: "bg-sky-100 text-sky-800",
+  Partial: "bg-emerald-100 text-emerald-800",
   NotMet: "bg-amber-100 text-amber-900",
   Unavailable: "bg-slate-200 text-slate-700",
 }
@@ -188,7 +188,7 @@ function ScoreBarRow({
     <li
       className={
         isTotalRow
-          ? "flex flex-col gap-1 rounded-lg border border-sky-200/80 bg-sky-50/70 px-3 py-3"
+          ? "flex flex-col gap-1 rounded-lg border border-emerald-200/80 bg-emerald-50/70 px-3 py-3"
           : "flex flex-col gap-1"
       }
     >
@@ -474,8 +474,8 @@ export function CandidateProfileModal({
               {hasScoreSections && (
                 <div className="flex flex-col gap-5">
                   {hasAttributeBlock && (
-                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-sky-200/60">
-                      <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/60">
+                      <h3 className="mb-3.5 font-sans text-sm font-semibold text-emerald-900">
                         {tModal("attributes")}
                       </h3>
                       {requiresManualReview && (
@@ -504,7 +504,7 @@ export function CandidateProfileModal({
                             barClass={
                               typeof row.score === "number" && row.score <= 0
                                 ? "bg-amber-500"
-                                : "bg-sky-500"
+                                : "bg-ats-terracotta"
                             }
                             valueClass="text-slate-900"
                             barTrackClass="bg-slate-300/80"
@@ -520,7 +520,7 @@ export function CandidateProfileModal({
                             label={getScoreLabel(aggregateEntry[0])}
                             value={aggregateEntry[1]}
                             labelClass="text-slate-800"
-                            barClass="bg-sky-600"
+                            barClass="bg-ats-cobre"
                             valueClass="text-slate-900"
                             barTrackClass="bg-slate-300/80"
                             isTotalRow

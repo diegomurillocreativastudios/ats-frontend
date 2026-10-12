@@ -9,7 +9,7 @@ interface CategoryBarsProps {
 }
 
 const BAR_COLORS = {
-  current: "bg-indigo-500",
+  current: "bg-gray-500",
   adapted: "bg-emerald-500",
 } as const
 

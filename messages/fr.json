@@ -583,7 +583,8 @@
     "activities": {
       "title": "Prochaines activités",
       "emptyTitle": "Vous n'avez aucune activité à venir",
-      "emptyDescription": "Lorsque vous aurez des entretiens, des évaluations ou des rendez-vous programmés, ils apparaîtront ici."
+      "emptyDescription": "Lorsque vous aurez des entretiens, des évaluations ou des rendez-vous programmés, ils apparaîtront ici.",
+      "interviewLinkAria": "Voir les entretiens"
     },
     "applications": {
       "title": "Mes candidatures",

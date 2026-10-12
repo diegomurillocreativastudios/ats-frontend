@@ -143,7 +143,7 @@ export function getConversionTone(
     return {
       tone: "medium",
       badgeLabel: "Conversión media",
-      badgeClassName: "border-sky-300/80 bg-sky-50 text-sky-900 dark:bg-sky-950/40 dark:text-sky-100",
+      badgeClassName: "border-emerald-300/80 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100",
     }
   }
   return {

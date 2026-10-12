@@ -20,8 +20,8 @@ function StageStatusIcon({ status }: { status: string }) {
   
   if (status === "current") {
     return (
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-        <Circle className="h-5 w-5 fill-blue-600 text-blue-600" aria-hidden />
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100">
+        <Circle className="h-5 w-5 fill-emerald-600 text-emerald-600" aria-hidden />
       </div>
     )
   }
@@ -48,7 +48,7 @@ function StageCard({
     <div
       className={`flex min-w-[140px] flex-col gap-3 rounded-lg border p-4 transition-all md:min-w-[160px] ${
         isCurrent
-          ? "border-blue-300 bg-blue-50 shadow-sm"
+          ? "border-emerald-300 bg-emerald-50 shadow-sm"
           : isCompleted
             ? "border-emerald-200 bg-emerald-50/50"
             : "border-gray-200 bg-background"
@@ -58,7 +58,7 @@ function StageCard({
         <span
           className={`font-sans text-xs font-semibold ${
             isCurrent
-              ? "text-blue-600"
+              ? "text-emerald-600"
               : isCompleted
                 ? "text-emerald-600"
                 : "text-gray-500"
@@ -73,7 +73,7 @@ function StageCard({
         <p
           className={`font-sans text-sm font-semibold leading-tight ${
             isCurrent
-              ? "text-blue-900"
+              ? "text-emerald-900"
               : isCompleted
                 ? "text-emerald-900"
                 : "text-gray-700"
@@ -84,7 +84,7 @@ function StageCard({
         <p
           className={`font-sans text-xs ${
             isCurrent
-              ? "text-blue-600"
+              ? "text-emerald-600"
               : isCompleted
                 ? "text-emerald-600"
                 : "text-gray-500"
@@ -183,7 +183,7 @@ export default function ProcessTrackingCard({
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
             <div
-              className="h-full rounded-full bg-linear-to-r from-blue-500 to-blue-600 transition-all duration-300"
+              className="h-full rounded-full bg-linear-to-r from-ats-terracotta to-ats-cobre transition-all duration-300"
               style={{ width: `${progressPercentage}%` }}
               role="progressbar"
               aria-valuenow={progressPercentage}

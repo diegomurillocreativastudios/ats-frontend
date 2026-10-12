@@ -583,7 +583,8 @@
     "activities": {
       "title": "Anstehende Aktivitäten",
       "emptyTitle": "Du hast keine anstehenden Aktivitäten",
-      "emptyDescription": "Wenn du Gespräche, Bewertungen oder geplante Termine hast, erscheinen sie hier."
+      "emptyDescription": "Wenn du Gespräche, Bewertungen oder geplante Termine hast, erscheinen sie hier.",
+      "interviewLinkAria": "Interviews anzeigen"
     },
     "applications": {
       "title": "Meine Bewerbungen",

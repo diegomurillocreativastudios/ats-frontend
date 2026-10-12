@@ -13,14 +13,14 @@ const TONE_CLASSES = {
   default: "border-border/70 bg-white",
   warning: "border-amber-500/25 bg-amber-500/5",
   success: "border-emerald-500/25 bg-emerald-500/5",
-  info: "border-sky-500/25 bg-sky-500/5",
+  info: "border-emerald-500/25 bg-emerald-500/5",
 } as const
 
 const ICON_CLASSES = {
   default: "bg-muted text-muted-foreground",
   warning: "bg-amber-500/12 text-amber-600",
   success: "bg-emerald-500/12 text-emerald-600",
-  info: "bg-sky-500/12 text-sky-600",
+  info: "bg-emerald-500/12 text-emerald-600",
 } as const
 
 export function InsightCard({ icon: Icon, title, value, tone = "default" }: InsightCardProps) {

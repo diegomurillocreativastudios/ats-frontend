@@ -110,7 +110,7 @@ export function vacancyHealthBadgeClass(level: VacancyHealthLevel): string {
     critica: `${base} border-red-200 bg-red-50 text-red-800`,
     atencion: `${base} border-amber-200 bg-amber-50 text-amber-900`,
     saludable: `${base} border-emerald-200 bg-emerald-50 text-emerald-900`,
-    nueva: `${base} border-sky-200 bg-sky-50 text-sky-900`,
+    nueva: `${base} border-emerald-200 bg-emerald-50 text-emerald-900`,
     neutral: `${base} border-border bg-muted/60 text-muted-foreground`,
   }
   return map[level]

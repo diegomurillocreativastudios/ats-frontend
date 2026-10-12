@@ -9,10 +9,10 @@ interface ScoreRingProps {
 
 const VARIANT_COLORS = {
   current: {
-    stroke: "stroke-indigo-500",
-    track: "stroke-indigo-500/15",
-    text: "text-indigo-600 dark:text-indigo-300",
-    glow: "from-indigo-500/10 to-transparent",
+    stroke: "stroke-gray-500",
+    track: "stroke-gray-500/15",
+    text: "text-gray-700 dark:text-gray-300",
+    glow: "from-gray-500/10 to-transparent",
   },
   adapted: {
     stroke: "stroke-emerald-500",
