@@ -1021,6 +1021,79 @@
         "notFoundTitle": "Question not found",
         "notFoundDescription": "There is no question with that identifier in the demo."
       }
+    },
+    "links": {
+      "title": "Links",
+      "description": "Associate a published version with an open vacancy. Linking does not assign candidates or send invitations.",
+      "scopeNotice": "Linking does not assign, does not create applications, and does not send email. It only makes the assessment available to assign later.",
+      "form": {
+        "title": "New link",
+        "version": "Published version",
+        "versionPlaceholder": "Select a version",
+        "vacancy": "Vacancy",
+        "vacancyPlaceholder": "Select a vacancy",
+        "companySummary": "Company: {company}",
+        "companyEmpty": "Select a vacancy to see the company.",
+        "excludedVacancies": "Unavailable vacancies: {list}.",
+        "excludedVacancyItem": "{title} (closed)",
+        "excludedListSeparator": "; ",
+        "submit": "Link"
+      },
+      "validation": {
+        "versionRequired": "Select a published version.",
+        "vacancyRequired": "Select an open vacancy."
+      },
+      "list": {
+        "title": "Existing links",
+        "test": "Assessment",
+        "version": "Version",
+        "versionValue": "v{number}",
+        "vacancy": "Vacancy",
+        "company": "Company",
+        "status": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "linkedAt": "Date",
+        "actions": "Actions",
+        "deactivate": "Deactivate",
+        "reactivate": "Reactivate"
+      },
+      "confirm": {
+        "createTitle": "Confirm link",
+        "createDescription": "You will link {version} to {vacancy}. Candidates will not be assigned and no email will be sent.",
+        "createConfirm": "Link",
+        "deactivateTitle": "Deactivate link",
+        "deactivateDescription": "You will deactivate {version} on {vacancy}. History is kept and you can reactivate later.",
+        "deactivateConfirm": "Deactivate",
+        "reactivateTitle": "Reactivate link",
+        "reactivateDescription": "You will reactivate {version} on {vacancy}. It still will not assign candidates or send email.",
+        "reactivateConfirm": "Reactivate",
+        "cancel": "Cancel"
+      },
+      "toasts": {
+        "linked": "Link created in demo mode.",
+        "deactivated": "Link deactivated in demo mode.",
+        "reactivated": "Link reactivated in demo mode."
+      },
+      "errors": {
+        "generic": "Could not complete the demo action.",
+        "scenario_error": "The simulated service returned an error.",
+        "not_found": "The requested resource was not found.",
+        "duplicate_link": "A link already exists for that version and vacancy.",
+        "vacancy_closed": "The vacancy is closed and cannot be linked.",
+        "version_not_published": "Only published versions can be linked.",
+        "test_not_published": "Only published assessments can be linked."
+      },
+      "states": {
+        "loading": "Loading links…",
+        "emptyTitle": "No demo data",
+        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "errorTitle": "Could not load links",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry",
+        "listEmptyTitle": "No links",
+        "listEmptyDescription": "No versions are linked to vacancies in this demo yet."
+      }
     }
   },
   "CandidatePortal": {

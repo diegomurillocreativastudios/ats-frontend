@@ -17,6 +17,7 @@ import {
   resolveQuestionsForVersion,
 } from "@/lib/pruebas/evaluations"
 import { formatDurationMinutes, formatMockDate } from "@/lib/pruebas/formatters"
+import { resolveLatestPublishedVersionId } from "@/lib/pruebas/links"
 import {
   getTest,
   listLinks,
@@ -98,6 +99,11 @@ export function PruebasEvaluationDetail({
   const linkRows = useMemo(
     () => resolveLinksForTest(testId, versions, links, vacancies),
     [testId, versions, links, vacancies],
+  )
+
+  const latestPublishedVersionId = useMemo(
+    () => resolveLatestPublishedVersionId(testId, versions),
+    [testId, versions],
   )
 
   if (isLoading) {
@@ -191,7 +197,11 @@ export function PruebasEvaluationDetail({
             ) : null}
             {canLink ? (
               <Link
-                href={`${PRUEBAS_HOME_HREF}/vinculaciones`}
+                href={
+                  latestPublishedVersionId
+                    ? `${PRUEBAS_HOME_HREF}/vinculaciones?version=${encodeURIComponent(latestPublishedVersionId)}`
+                    : `${PRUEBAS_HOME_HREF}/vinculaciones`
+                }
                 className="inline-flex h-11 items-center rounded-md bg-vo-purple px-4 font-sans text-sm font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
               >
                 {t("detail.linkVacancy")}

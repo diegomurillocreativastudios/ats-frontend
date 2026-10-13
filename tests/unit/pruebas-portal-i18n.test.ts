@@ -72,6 +72,15 @@ describe("PruebasPortal i18n (UI-02)", () => {
       expect(sortedKeys(portal.questionsBank.validation)).toEqual(
         sortedKeys(esMessages.PruebasPortal.questionsBank.validation),
       )
+      expect(sortedKeys(portal.links)).toEqual(
+        sortedKeys(esMessages.PruebasPortal.links),
+      )
+      expect(sortedKeys(portal.links.form)).toEqual(
+        sortedKeys(esMessages.PruebasPortal.links.form),
+      )
+      expect(sortedKeys(portal.links.errors)).toEqual(
+        sortedKeys(esMessages.PruebasPortal.links.errors),
+      )
 
       const metadata = messages.Metadata as typeof esMessages.Metadata
       expect(sortedKeys(metadata.pruebasPortal)).toEqual(

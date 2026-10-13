@@ -161,6 +161,8 @@ export interface MockAssessmentLink {
   vacancyId: string
   testVersionId: string
   active: boolean
+  /** ISO timestamp when the link was created. Deactivate does not change it. */
+  linkedAt: string
 }
 
 export interface MockAssignment {

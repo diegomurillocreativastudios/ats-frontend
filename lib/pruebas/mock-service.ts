@@ -3,7 +3,10 @@ import {
   type DashboardFilters,
   type DashboardSnapshot,
 } from "@/lib/pruebas/dashboard"
-import { evaluateEligibility } from "@/lib/pruebas/eligibility"
+import {
+  evaluateEligibility,
+  isVacancyClosed,
+} from "@/lib/pruebas/eligibility"
 import { MOCK_NOW } from "@/lib/pruebas/mock-fixtures"
 import {
   emptyStoreSnapshot,
@@ -233,6 +236,11 @@ export async function listApplications() {
 export async function listVacancies() {
   const store = await gate()
   return [...store.vacancies]
+}
+
+export async function listCompanies() {
+  const store = await gate()
+  return [...store.companies]
 }
 
 export async function listCandidates() {
@@ -516,15 +524,31 @@ export async function createLink(input: {
   if (!version?.publishedAt) {
     throw new MockServiceError("version_not_published")
   }
+  const test = store.tests.find((item) => item.id === version.testId)
+  if (!test || test.lifecycleStatus !== "published") {
+    throw new MockServiceError("test_not_published")
+  }
   const vacancy = store.vacancies.find((item) => item.id === input.vacancyId)
   if (!vacancy) {
     throw new MockServiceError("not_found")
+  }
+  if (isVacancyClosed(vacancy)) {
+    throw new MockServiceError("vacancy_closed")
+  }
+  const duplicate = store.links.find(
+    (item) =>
+      item.vacancyId === input.vacancyId &&
+      item.testVersionId === input.testVersionId,
+  )
+  if (duplicate) {
+    throw new MockServiceError("duplicate_link")
   }
   const link = {
     id: `link-${store.links.length + 1}`,
     vacancyId: input.vacancyId,
     testVersionId: input.testVersionId,
     active: true,
+    linkedAt: MOCK_NOW,
   }
   store.links.push(link)
   return link

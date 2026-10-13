@@ -1021,6 +1021,79 @@
         "notFoundTitle": "Question introuvable",
         "notFoundDescription": "Il n’existe pas de question avec cet identifiant dans la démo."
       }
+    },
+    "links": {
+      "title": "Associations",
+      "description": "Associe une version publiée à une offre ouverte. Associer n’assigne pas de candidats et n’envoie pas d’invitations.",
+      "scopeNotice": "Associer n’assigne pas, ne crée pas de candidatures et n’envoie pas d’e-mails. Cela rend seulement l’évaluation disponible pour une assignation ultérieure.",
+      "form": {
+        "title": "Nouvelle association",
+        "version": "Version publiée",
+        "versionPlaceholder": "Sélectionner une version",
+        "vacancy": "Offre",
+        "vacancyPlaceholder": "Sélectionner une offre",
+        "companySummary": "Entreprise : {company}",
+        "companyEmpty": "Sélectionne une offre pour voir l’entreprise.",
+        "excludedVacancies": "Offres indisponibles : {list}.",
+        "excludedVacancyItem": "{title} (fermée)",
+        "excludedListSeparator": " ; ",
+        "submit": "Associer"
+      },
+      "validation": {
+        "versionRequired": "Sélectionne une version publiée.",
+        "vacancyRequired": "Sélectionne une offre ouverte."
+      },
+      "list": {
+        "title": "Associations existantes",
+        "test": "Évaluation",
+        "version": "Version",
+        "versionValue": "v{number}",
+        "vacancy": "Offre",
+        "company": "Entreprise",
+        "status": "État",
+        "statusActive": "Actif",
+        "statusInactive": "Inactif",
+        "linkedAt": "Date",
+        "actions": "Actions",
+        "deactivate": "Désactiver",
+        "reactivate": "Réactiver"
+      },
+      "confirm": {
+        "createTitle": "Confirmer l’association",
+        "createDescription": "Tu vas associer {version} à {vacancy}. Aucun candidat ne sera assigné et aucun e-mail ne sera envoyé.",
+        "createConfirm": "Associer",
+        "deactivateTitle": "Désactiver l’association",
+        "deactivateDescription": "Tu vas désactiver {version} sur {vacancy}. L’historique est conservé et tu pourras réactiver plus tard.",
+        "deactivateConfirm": "Désactiver",
+        "reactivateTitle": "Réactiver l’association",
+        "reactivateDescription": "Tu vas réactiver {version} sur {vacancy}. Cela n’assigne toujours pas de candidats et n’envoie pas d’e-mails.",
+        "reactivateConfirm": "Réactiver",
+        "cancel": "Annuler"
+      },
+      "toasts": {
+        "linked": "Association créée en mode démonstration.",
+        "deactivated": "Association désactivée en mode démonstration.",
+        "reactivated": "Association réactivée en mode démonstration."
+      },
+      "errors": {
+        "generic": "Impossible de terminer l’action de démonstration.",
+        "scenario_error": "Le service simulé a renvoyé une erreur.",
+        "not_found": "La ressource demandée est introuvable.",
+        "duplicate_link": "Une association existe déjà pour cette version et cette offre.",
+        "vacancy_closed": "L’offre est fermée et ne peut pas être associée.",
+        "version_not_published": "Seules les versions publiées peuvent être associées.",
+        "test_not_published": "Seules les évaluations publiées peuvent être associées."
+      },
+      "states": {
+        "loading": "Chargement des associations…",
+        "emptyTitle": "Aucune donnée de démonstration",
+        "emptyDescription": "Le scénario simulé est vide. Réinitialise les données de démonstration pour continuer.",
+        "errorTitle": "Impossible de charger les associations",
+        "errorDescription": "Le service simulé a renvoyé une erreur. Réessaie.",
+        "retry": "Réessayer",
+        "listEmptyTitle": "Aucune association",
+        "listEmptyDescription": "Aucune version n’est encore associée à une offre dans cette démonstration."
+      }
     }
   },
   "CandidatePortal": {

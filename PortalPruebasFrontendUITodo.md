@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-06 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-07 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -260,13 +260,13 @@ hooks/pruebas/
 
 ### Fase UI-07 — Vincular pruebas publicadas a vacantes
 
-- [ ] `/vinculaciones`: selector de versión publicada, selector de vacante disponible y resumen de empresa.
-- [ ] Tabla/lista de vínculos existentes, estado activo/inactivo, fecha, acciones y desactivar sin borrar historial.
-- [ ] Explicar claramente: **vincular no asigna, no crea postulaciones y no envía emails**.
-- [ ] Filtrar vacantes cerradas/no permitidas en demo; mostrar explicación de ineligibilidad.
-- [ ] Validar enlace duplicado, prueba sin publicar y vacante inactiva en mock.
-- [ ] Diálogo confirmatorio de vincular/desactivar; éxito/error simulados.
-- [ ] Vista Desktop, Tablet y Mobile, incluidas listas y vacíos.
+- [x] `/vinculaciones`: selector de versión publicada, selector de vacante disponible y resumen de empresa. 2026-10-13: `PruebasLinksScreen` + `lib/pruebas/links.ts`.
+- [x] Tabla/lista de vínculos existentes, estado activo/inactivo, fecha, acciones y desactivar sin borrar historial. `linkedAt` en mock; `setLinkActive` no borra.
+- [x] Explicar claramente: **vincular no asigna, no crea postulaciones y no envía emails**.
+- [x] Filtrar vacantes cerradas/no permitidas en demo; mostrar explicación de ineligibilidad.
+- [x] Validar enlace duplicado, prueba sin publicar y vacante inactiva en mock. Códigos `duplicate_link`, `vacancy_closed`, `version_not_published`, `test_not_published`.
+- [x] Diálogo confirmatorio de vincular/desactivar; éxito/error simulados.
+- [x] Vista Desktop, Tablet y Mobile, incluidas listas y vacíos. Tabla `lg+`, tarjetas por debajo.
 
 **Criterio:** toda asociación en la UI corresponde a una versión publicada y una vacante válida.
 

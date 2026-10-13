@@ -319,12 +319,14 @@ export function createMockFixtures(): MockPruebasStore {
         vacancyId: MOCK_IDS.vacancyOpen,
         testVersionId: MOCK_IDS.versionTechnicalV1,
         active: true,
+        linkedAt: "2026-09-20T10:00:00.000Z",
       },
       {
         id: MOCK_IDS.linkInactive,
         vacancyId: MOCK_IDS.vacancyOpen,
         testVersionId: MOCK_IDS.versionPsychoV1,
         active: false,
+        linkedAt: "2026-09-22T14:30:00.000Z",
       },
     ],
     assignments: [

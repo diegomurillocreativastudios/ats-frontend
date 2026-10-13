@@ -1021,6 +1021,79 @@
         "notFoundTitle": "Domanda non trovata",
         "notFoundDescription": "Non esiste una domanda con questo identificatore nella demo."
       }
+    },
+    "links": {
+      "title": "Collegamenti",
+      "description": "Associa una versione pubblicata a una posizione aperta. Collegare non assegna candidati e non invia inviti.",
+      "scopeNotice": "Collegare non assegna, non crea candidature e non invia e-mail. Rende solo la valutazione disponibile per assegnarla in seguito.",
+      "form": {
+        "title": "Nuovo collegamento",
+        "version": "Versione pubblicata",
+        "versionPlaceholder": "Seleziona una versione",
+        "vacancy": "Posizione",
+        "vacancyPlaceholder": "Seleziona una posizione",
+        "companySummary": "Azienda: {company}",
+        "companyEmpty": "Seleziona una posizione per vedere l'azienda.",
+        "excludedVacancies": "Posizioni non disponibili: {list}.",
+        "excludedVacancyItem": "{title} (chiusa)",
+        "excludedListSeparator": "; ",
+        "submit": "Collega"
+      },
+      "validation": {
+        "versionRequired": "Seleziona una versione pubblicata.",
+        "vacancyRequired": "Seleziona una posizione aperta."
+      },
+      "list": {
+        "title": "Collegamenti esistenti",
+        "test": "Valutazione",
+        "version": "Versione",
+        "versionValue": "v{number}",
+        "vacancy": "Posizione",
+        "company": "Azienda",
+        "status": "Stato",
+        "statusActive": "Attivo",
+        "statusInactive": "Inattivo",
+        "linkedAt": "Data",
+        "actions": "Azioni",
+        "deactivate": "Disattiva",
+        "reactivate": "Riattiva"
+      },
+      "confirm": {
+        "createTitle": "Conferma collegamento",
+        "createDescription": "Collegherai {version} a {vacancy}. Non verranno assegnati candidati né inviate e-mail.",
+        "createConfirm": "Collega",
+        "deactivateTitle": "Disattiva collegamento",
+        "deactivateDescription": "Disattiverai {version} su {vacancy}. La cronologia resta e potrai riattivarlo dopo.",
+        "deactivateConfirm": "Disattiva",
+        "reactivateTitle": "Riattiva collegamento",
+        "reactivateDescription": "Riattiverai {version} su {vacancy}. Continuerà a non assegnare candidati né inviare e-mail.",
+        "reactivateConfirm": "Riattiva",
+        "cancel": "Annulla"
+      },
+      "toasts": {
+        "linked": "Collegamento creato in modalità demo.",
+        "deactivated": "Collegamento disattivato in modalità demo.",
+        "reactivated": "Collegamento riattivato in modalità demo."
+      },
+      "errors": {
+        "generic": "Impossibile completare l'azione demo.",
+        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "not_found": "La risorsa richiesta non è stata trovata.",
+        "duplicate_link": "Esiste già un collegamento per quella versione e posizione.",
+        "vacancy_closed": "La posizione è chiusa e non può essere collegata.",
+        "version_not_published": "Si possono collegare solo versioni pubblicate.",
+        "test_not_published": "Si possono collegare solo valutazioni pubblicate."
+      },
+      "states": {
+        "loading": "Caricamento dei collegamenti…",
+        "emptyTitle": "Nessun dato demo",
+        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati demo per continuare.",
+        "errorTitle": "Impossibile caricare i collegamenti",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "listEmptyTitle": "Nessun collegamento",
+        "listEmptyDescription": "In questa demo non ci sono ancora versioni collegate a posizioni."
+      }
     }
   },
   "CandidatePortal": {

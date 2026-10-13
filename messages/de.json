@@ -1021,6 +1021,79 @@
         "notFoundTitle": "Frage nicht gefunden",
         "notFoundDescription": "Es gibt keine Frage mit dieser Kennung in der Demo."
       }
+    },
+    "links": {
+      "title": "Verknüpfungen",
+      "description": "Verknüpfe eine veröffentlichte Version mit einer offenen Stelle. Verknüpfen weist keine Kandidaten zu und sendet keine Einladungen.",
+      "scopeNotice": "Verknüpfen weist nicht zu, erstellt keine Bewerbungen und sendet keine E-Mails. Es macht die Bewertung nur später zuweisbar.",
+      "form": {
+        "title": "Neue Verknüpfung",
+        "version": "Veröffentlichte Version",
+        "versionPlaceholder": "Version auswählen",
+        "vacancy": "Stelle",
+        "vacancyPlaceholder": "Stelle auswählen",
+        "companySummary": "Unternehmen: {company}",
+        "companyEmpty": "Wähle eine Stelle, um das Unternehmen zu sehen.",
+        "excludedVacancies": "Nicht verfügbare Stellen: {list}.",
+        "excludedVacancyItem": "{title} (geschlossen)",
+        "excludedListSeparator": "; ",
+        "submit": "Verknüpfen"
+      },
+      "validation": {
+        "versionRequired": "Wähle eine veröffentlichte Version.",
+        "vacancyRequired": "Wähle eine offene Stelle."
+      },
+      "list": {
+        "title": "Bestehende Verknüpfungen",
+        "test": "Bewertung",
+        "version": "Version",
+        "versionValue": "v{number}",
+        "vacancy": "Stelle",
+        "company": "Unternehmen",
+        "status": "Status",
+        "statusActive": "Aktiv",
+        "statusInactive": "Inaktiv",
+        "linkedAt": "Datum",
+        "actions": "Aktionen",
+        "deactivate": "Deaktivieren",
+        "reactivate": "Reaktivieren"
+      },
+      "confirm": {
+        "createTitle": "Verknüpfung bestätigen",
+        "createDescription": "Du verknüpfst {version} mit {vacancy}. Es werden keine Kandidaten zugewiesen und keine E-Mails gesendet.",
+        "createConfirm": "Verknüpfen",
+        "deactivateTitle": "Verknüpfung deaktivieren",
+        "deactivateDescription": "Du deaktivierst {version} für {vacancy}. Der Verlauf bleibt erhalten und du kannst später reaktivieren.",
+        "deactivateConfirm": "Deaktivieren",
+        "reactivateTitle": "Verknüpfung reaktivieren",
+        "reactivateDescription": "Du reaktivierst {version} für {vacancy}. Es weist weiterhin keine Kandidaten zu und sendet keine E-Mails.",
+        "reactivateConfirm": "Reaktivieren",
+        "cancel": "Abbrechen"
+      },
+      "toasts": {
+        "linked": "Verknüpfung im Demomodus erstellt.",
+        "deactivated": "Verknüpfung im Demomodus deaktiviert.",
+        "reactivated": "Verknüpfung im Demomodus reaktiviert."
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "not_found": "Die angeforderte Ressource wurde nicht gefunden.",
+        "duplicate_link": "Für diese Version und Stelle existiert bereits eine Verknüpfung.",
+        "vacancy_closed": "Die Stelle ist geschlossen und kann nicht verknüpft werden.",
+        "version_not_published": "Nur veröffentlichte Versionen können verknüpft werden.",
+        "test_not_published": "Nur veröffentlichte Bewertungen können verknüpft werden."
+      },
+      "states": {
+        "loading": "Verknüpfungen werden geladen…",
+        "emptyTitle": "Keine Demodaten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demodaten zurück, um fortzufahren.",
+        "errorTitle": "Verknüpfungen konnten nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Versuche es erneut.",
+        "retry": "Erneut versuchen",
+        "listEmptyTitle": "Keine Verknüpfungen",
+        "listEmptyDescription": "In dieser Demo sind noch keine Versionen mit Stellen verknüpft."
+      }
     }
   },
   "CandidatePortal": {

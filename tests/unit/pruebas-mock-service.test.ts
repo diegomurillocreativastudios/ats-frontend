@@ -6,6 +6,7 @@ import {
   MockServiceError,
   assign,
   createCompatibleQuestion,
+  createLink,
   createQuestion,
   debugSnapshotStore,
   duplicateTest,
@@ -19,6 +20,7 @@ import {
   listVersions,
   publishTest,
   resetMockStore,
+  setLinkActive,
   setMockScenario,
   updateDraftTest,
   updateQuestion,
@@ -207,6 +209,63 @@ describe("duplicateTest", () => {
     const copyVersions = await listVersions(copy.id)
     expect(copyVersions[0]?.questionIds).toEqual(draftVersion.questionIds)
     expect(copyVersions[0]?.instructions).toBe(draftVersion.instructions)
+  })
+})
+
+describe("createLink and setLinkActive", () => {
+  it("rejects duplicate pairs including inactive links", async () => {
+    setMockScenario("populated")
+    const before = (await listLinks()).length
+    await expect(
+      createLink({
+        vacancyId: MOCK_IDS.vacancyOpen,
+        testVersionId: MOCK_IDS.versionPsychoV1,
+      }),
+    ).rejects.toMatchObject({ code: "duplicate_link" })
+    expect((await listLinks()).length).toBe(before)
+  })
+
+  it("rejects closed vacancies and unpublished versions", async () => {
+    setMockScenario("populated")
+    await expect(
+      createLink({
+        vacancyId: MOCK_IDS.vacancyClosed,
+        testVersionId: MOCK_IDS.versionTechnicalV1,
+      }),
+    ).rejects.toMatchObject({ code: "vacancy_closed" })
+
+    await expect(
+      createLink({
+        vacancyId: MOCK_IDS.vacancyOpen,
+        testVersionId: MOCK_IDS.versionDraft,
+      }),
+    ).rejects.toMatchObject({ code: "version_not_published" })
+
+    await expect(
+      createLink({
+        vacancyId: MOCK_IDS.vacancyOpen,
+        testVersionId: MOCK_IDS.versionArchivedV1,
+      }),
+    ).rejects.toMatchObject({ code: "test_not_published" })
+  })
+
+  it("creates a link after publishing a draft and can deactivate without deleting", async () => {
+    setMockScenario("populated")
+    await publishTest(MOCK_IDS.testDraft)
+    const publishedVersion = (await listVersions(MOCK_IDS.testDraft)).find(
+      (item) => item.publishedAt,
+    )!
+    const link = await createLink({
+      vacancyId: MOCK_IDS.vacancyOpen,
+      testVersionId: publishedVersion.id,
+    })
+    expect(link.active).toBe(true)
+    expect(link.linkedAt).toBe(MOCK_NOW)
+
+    const deactivated = await setLinkActive(link.id, false)
+    expect(deactivated.active).toBe(false)
+    expect(deactivated.linkedAt).toBe(MOCK_NOW)
+    expect((await listLinks()).some((item) => item.id === link.id)).toBe(true)
   })
 })
 
