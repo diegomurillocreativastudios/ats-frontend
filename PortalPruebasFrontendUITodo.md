@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-07 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-08 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -272,15 +272,15 @@ hooks/pruebas/
 
 ### Fase UI-08 — Asignación a postulaciones elegibles
 
-- [ ] `/asignaciones/nueva`: seleccionar vacante → seleccionar versión vinculada activa → consultar candidatos elegibles.
-- [ ] La lista debe contener **solo `MockApplication` activas de ESA vacante**; no mostrar perfiles sin postulación en la tabla de elegibles.
-- [ ] Filtrar Hired/Rejected/Withdrawn/Discarded, vacante cerrada o eliminada, vínculo inactivo, intentos/duplicados según política demo.
-- [ ] Selección individual y múltiple, contador y vista previa de destinatarios.
-- [ ] Configurar vencimiento (valor demo predeterminado: 14 días, si así figura en el plan de backend), intentos y resumen de invitación **sin enviarla realmente**.
-- [ ] Confirmación con resumen y operación mock de lote todo-o-nada con mensaje de éxito/rechazo.
-- [ ] Desde detalle vacante/candidato RRHH agregar **punto de entrada visual** a asignación, sin cambiar API real ni lógica de reclutamiento.
-- [ ] Agregar estados de no elegibles, duplicados, ninguna postulación activa, error simulado.
-- [ ] Tres variantes responsive, selección y CTA visibles.
+- [x] `/asignaciones/nueva`: seleccionar vacante → seleccionar versión vinculada activa → consultar candidatos elegibles. 2026-10-13: `PruebasAssignmentsScreen` + `lib/pruebas/assignments.ts`; misma pantalla en `/asignaciones`.
+- [x] La lista debe contener **solo `MockApplication` activas de ESA vacante**; no mostrar perfiles sin postulación en la tabla de elegibles.
+- [x] Filtrar Hired/Rejected/Withdrawn/Discarded, vacante cerrada o eliminada, vínculo inactivo, intentos/duplicados según política demo.
+- [x] Selección individual y múltiple, contador y vista previa de destinatarios.
+- [x] Configurar vencimiento (valor demo predeterminado: 14 días, si así figura en el plan de backend), intentos y resumen de invitación **sin enviarla realmente**.
+- [x] Confirmación con resumen y operación mock de lote todo-o-nada con mensaje de éxito/rechazo.
+- [x] Desde detalle vacante/candidato RRHH agregar **punto de entrada visual** a asignación, sin cambiar API real ni lógica de reclutamiento.
+- [x] Agregar estados de no elegibles, duplicados, ninguna postulación activa, error simulado.
+- [x] Tres variantes responsive, selección y CTA visibles.
 
 **Criterio:** ningún candidato sin postulación activa a la vacante recibe una asignación ni siquiera en demo.
 
@@ -385,8 +385,8 @@ hooks/pruebas/
 | Detalle y versiones | `/portal-pruebas/evaluaciones/[testId]` | ☑ | ☑ | ☑ | published/archived |
 | Banco preguntas | `/portal-pruebas/preguntas` | ☑ | ☑ | ☑ | loading/empty/error |
 | Editores de preguntas | `/portal-pruebas/preguntas/nueva`, `/[questionId]/editar` | ☑ | ☑ | ☑ | per kind/errors |
-| Vínculos con vacantes | `/portal-pruebas/vinculaciones` | ☐ | ☐ | ☐ | linked/unlinked/inactive |
-| Asignación | `/portal-pruebas/asignaciones/nueva` | ☐ | ☐ | ☐ | eligible/empty/conflict/success |
+| Vínculos con vacantes | `/portal-pruebas/vinculaciones` | ☑ | ☑ | ☑ | linked/unlinked/inactive |
+| Asignación | `/portal-pruebas/asignaciones/nueva` | ☑ | ☑ | ☑ | eligible/empty/conflict/success |
 | Seguimiento | `/portal-pruebas/seguimiento` | ☐ | ☐ | ☐ | statuses/actions |
 | Revisión manual | `/portal-pruebas/revision/[assignmentId]` | ☐ | ☐ | ☐ | pending/reviewed |
 | Resultados técnicos | `/portal-pruebas/resultados/[assignmentId]` | ☐ | ☐ | ☐ | scored/no result |
@@ -467,3 +467,5 @@ Esta etapa estará **terminada** únicamente cuando:
 - UI-04 reemplazó el placeholder de evaluaciones con listado, detalle y versiones; `duplicateTest` + `lib/pruebas/evaluations.ts`; placeholders de editor para UI-05; sin BFF.
 - UI-05 reemplazó placeholders de nueva/editar con el asistente de cinco pasos; `evaluation-editor.ts` + `createCompatibleQuestion`; sin BFF.
 - UI-06 reemplazó el placeholder del banco con listado y editor por tipo; `question-editor.ts` + `createQuestion`/`updateQuestion`; sin BFF.
+- UI-07 reemplazó el placeholder de vinculaciones con selector, tabla y activar/desactivar; `links.ts` + `createLink`/`setLinkActive`; sin BFF.
+- UI-08 reemplazó el placeholder de asignaciones con selección de elegibles y lote todo-o-nada; `assignments.ts` + `assign()`; enlaces visuales desde RRHH; sin BFF.

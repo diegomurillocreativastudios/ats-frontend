@@ -1477,6 +1477,7 @@ function VacanteDetallePage() {
     vacancyId != null && vacancyId !== ""
       ? `/portal-rrhh/entrevistas/${encodeURIComponent(vacancyId)}`
       : "/portal-rrhh/entrevistas";
+  const assignTestHref = "/portal-pruebas/asignaciones";
 
   useEffect(() => {
     let cancelled = false;
@@ -3346,6 +3347,13 @@ function VacanteDetallePage() {
                               {tDetail("actions.interviews")}
                             </Link>
                             <Link
+                              href={assignTestHref}
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              aria-label={tDetail("actions.assignTestAria")}
+                            >
+                              {tDetail("actions.assignTest")}
+                            </Link>
+                            <Link
                               href={resultadosHref}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
                               aria-label={tDetail("actions.resultsAria")}
@@ -4282,6 +4290,13 @@ function VacanteDetallePage() {
                             aria-label={tDetail("actions.interviewsAria")}
                           >
                             {tDetail("actions.interviews")}
+                          </Link>
+                          <Link
+                            href={assignTestHref}
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            aria-label={tDetail("actions.assignTestAria")}
+                          >
+                            {tDetail("actions.assignTest")}
                           </Link>
                           <Link
                             href={resultadosHref}

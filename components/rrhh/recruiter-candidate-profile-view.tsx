@@ -7,11 +7,13 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react"
+import Link from "next/link"
 import { useTranslations } from "next-intl"
 import {
   Award,
   Briefcase,
   Building2,
+  ClipboardList,
   Download,
   FileText,
   GraduationCap,
@@ -427,6 +429,14 @@ export function RecruiterCandidateProfileView({
                 </div>
               ) : null}
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
+                <Link
+                  href="/portal-pruebas/asignaciones"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                  aria-label={t("actions.assignTestAria")}
+                >
+                  <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
+                  {t("actions.assignTest")}
+                </Link>
                 <button
                   type="button"
                   onClick={handleCancelEdit}
@@ -490,6 +500,14 @@ export function RecruiterCandidateProfileView({
                   </button>
                 </>
               ) : null}
+              <Link
+                href="/portal-pruebas/asignaciones"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                aria-label={t("actions.assignTestAria")}
+              >
+                <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
+                {t("actions.assignTest")}
+              </Link>
               <button
                 type="button"
                 onClick={handleOpenEdit}

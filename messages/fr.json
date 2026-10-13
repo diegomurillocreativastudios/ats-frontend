@@ -1094,6 +1094,92 @@
         "listEmptyTitle": "Aucune association",
         "listEmptyDescription": "Aucune version n’est encore associée à une offre dans cette démonstration."
       }
+    },
+    "assignments": {
+      "title": "Affectations",
+      "description": "Affectez une version liée aux candidatures actives de l’offre. Aucun e-mail n’est envoyé en démonstration.",
+      "scopeNotice": "Affecter n’envoie pas d’e-mails et ne crée pas de candidatures. Cela enregistre uniquement des invitations simulées pour les candidats éligibles de cette offre.",
+      "form": {
+        "title": "Nouvelle affectation",
+        "vacancy": "Offre",
+        "vacancyPlaceholder": "Sélectionnez une offre",
+        "version": "Version liée active",
+        "versionPlaceholder": "Sélectionnez une version",
+        "companySummary": "Entreprise : {company}",
+        "companyEmpty": "Sélectionnez une offre pour voir l’entreprise.",
+        "excludedVacancies": "Offres indisponibles : {list}.",
+        "excludedVacancyItem": "{title} (fermée)",
+        "excludedListSeparator": "; ",
+        "noActiveLinks": "Cette offre n’a aucune version avec un lien actif. Liez d’abord une évaluation publiée.",
+        "expiresAt": "Expire le",
+        "expiresHint": "Valeur de démonstration : {days} jours à partir de l’horloge simulée.",
+        "attempts": "Tentatives autorisées",
+        "submit": "Affecter la sélection"
+      },
+      "validation": {
+        "vacancyRequired": "Sélectionnez une offre ouverte.",
+        "versionRequired": "Sélectionnez une version avec un lien actif.",
+        "selectionRequired": "Sélectionnez au moins un candidat éligible.",
+        "expiresInvalid": "La date d’expiration ne peut pas être antérieure à aujourd’hui en démonstration.",
+        "attemptsInvalid": "Les tentatives doivent être un entier supérieur ou égal à 1."
+      },
+      "candidates": {
+        "title": "Candidatures de l’offre",
+        "select": "Sélectionner",
+        "selectAria": "Sélectionner {name}",
+        "name": "Candidat",
+        "email": "E-mail",
+        "stage": "Étape",
+        "eligibility": "Éligibilité",
+        "eligible": "Éligible",
+        "selectedCount": "{count, plural, one {# sélectionné} other {# sélectionnés}}",
+        "selectEligible": "Sélectionner les éligibles",
+        "clearSelection": "Effacer la sélection"
+      },
+      "reasons": {
+        "vacancy_mismatch": "Offre différente",
+        "application_inactive": "Candidature inactive",
+        "application_final": "Statut final",
+        "vacancy_closed": "Offre fermée",
+        "link_inactive": "Lien inactif",
+        "test_not_published": "Évaluation non publiée",
+        "duplicate_assignment": "Déjà affecté",
+        "unknown": "Non éligible"
+      },
+      "preview": {
+        "title": "Aperçu des destinataires",
+        "summary": "{version} · {vacancy} · expire le {expires} · {attempts, plural, one {# tentative} other {# tentatives}}",
+        "noEmail": "Aucun e-mail ne sera envoyé. Seule l’affectation de démonstration est créée."
+      },
+      "confirm": {
+        "title": "Confirmer l’affectation",
+        "description": "Vous allez affecter {count, plural, one {# candidat} other {# candidats}} à {version} pour {vacancy}. Expire le {expires}. Tentatives : {attempts}. Aucun e-mail ne sera envoyé.",
+        "confirm": "Affecter",
+        "cancel": "Annuler"
+      },
+      "toasts": {
+        "assigned": "{count, plural, one {# affectation créée en mode démonstration.} other {# affectations créées en mode démonstration.}}",
+        "rejected": "Aucune affectation n’a été créée. {details}",
+        "failureItem": "{name} : {reason}",
+        "failureSeparator": "; "
+      },
+      "errors": {
+        "generic": "L’action de démonstration n’a pas pu être terminée.",
+        "scenario_error": "Le service simulé a renvoyé une erreur.",
+        "link_missing": "Il n’y a pas de lien actif pour cette version et cette offre."
+      },
+      "states": {
+        "loading": "Chargement des affectations…",
+        "emptyTitle": "Aucune donnée de démonstration",
+        "emptyDescription": "Le scénario simulé est vide. Réinitialisez les données de démonstration pour continuer.",
+        "errorTitle": "Impossible de charger les affectations",
+        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "retry": "Réessayer",
+        "selectPromptTitle": "Choisissez l’offre et la version",
+        "selectPromptDescription": "Sélectionnez une offre ouverte et une version avec un lien actif pour voir les candidatures éligibles.",
+        "noApplicationsTitle": "Aucune candidature",
+        "noApplicationsDescription": "Il n’y a aucune candidature pour cette offre dans la démonstration."
+      }
     }
   },
   "CandidatePortal": {
@@ -2236,6 +2322,8 @@
         "downloadCvAria": "Télécharger le CV en PDF",
         "generateTechnicalSheet": "Générer la fiche technique",
         "generateTechnicalSheetAria": "Générer la fiche technique de ce candidat",
+        "assignTest": "Affecter une évaluation",
+        "assignTestAria": "Aller aux affectations d’évaluations (démonstration)",
         "cancel": "Annuler",
         "cancelAria": "Annuler la modification sans enregistrer",
         "save": "Enregistrer les modifications",
@@ -2818,6 +2906,8 @@
           "finishProcessAria": "Terminer le processus du poste",
           "interviews": "Entretiens",
           "interviewsAria": "Voir les entretiens de ce poste",
+          "assignTest": "Affecter une évaluation",
+          "assignTestAria": "Aller aux affectations d’évaluations (démonstration)",
           "results": "Résultats",
           "resultsAria": "Voir les résultats et métriques de ce poste",
           "copy": "Copier",

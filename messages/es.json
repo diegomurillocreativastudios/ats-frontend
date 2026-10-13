@@ -1094,6 +1094,92 @@
         "listEmptyTitle": "Sin vínculos",
         "listEmptyDescription": "Aún no hay versiones vinculadas a vacantes en esta demostración."
       }
+    },
+    "assignments": {
+      "title": "Asignaciones",
+      "description": "Asigna una versión vinculada a postulaciones activas de la vacante. No se envían correos en la demostración.",
+      "scopeNotice": "Asignar no envía correos ni crea postulaciones. Solo registra invitaciones simuladas para candidatos elegibles de esa vacante.",
+      "form": {
+        "title": "Nueva asignación",
+        "vacancy": "Vacante",
+        "vacancyPlaceholder": "Selecciona una vacante",
+        "version": "Versión vinculada activa",
+        "versionPlaceholder": "Selecciona una versión",
+        "companySummary": "Empresa: {company}",
+        "companyEmpty": "Selecciona una vacante para ver la empresa.",
+        "excludedVacancies": "Vacantes no disponibles: {list}.",
+        "excludedVacancyItem": "{title} (cerrada)",
+        "excludedListSeparator": "; ",
+        "noActiveLinks": "Esta vacante no tiene versiones con vínculo activo. Vincula una prueba publicada primero.",
+        "expiresAt": "Vence el",
+        "expiresHint": "Valor de demostración: {days} días desde la fecha simulada.",
+        "attempts": "Intentos permitidos",
+        "submit": "Asignar seleccionados"
+      },
+      "validation": {
+        "vacancyRequired": "Selecciona una vacante abierta.",
+        "versionRequired": "Selecciona una versión con vínculo activo.",
+        "selectionRequired": "Selecciona al menos un candidato elegible.",
+        "expiresInvalid": "La fecha de vencimiento no puede ser anterior a hoy en la demostración.",
+        "attemptsInvalid": "Los intentos deben ser un entero mayor o igual a 1."
+      },
+      "candidates": {
+        "title": "Postulaciones de la vacante",
+        "select": "Seleccionar",
+        "selectAria": "Seleccionar a {name}",
+        "name": "Candidato",
+        "email": "Correo",
+        "stage": "Etapa",
+        "eligibility": "Elegibilidad",
+        "eligible": "Elegible",
+        "selectedCount": "{count, plural, one {# seleccionado} other {# seleccionados}}",
+        "selectEligible": "Seleccionar elegibles",
+        "clearSelection": "Limpiar selección"
+      },
+      "reasons": {
+        "vacancy_mismatch": "Vacante distinta",
+        "application_inactive": "Postulación inactiva",
+        "application_final": "Estado final",
+        "vacancy_closed": "Vacante cerrada",
+        "link_inactive": "Vínculo inactivo",
+        "test_not_published": "Prueba no publicada",
+        "duplicate_assignment": "Ya asignado",
+        "unknown": "No elegible"
+      },
+      "preview": {
+        "title": "Vista previa de destinatarios",
+        "summary": "{version} · {vacancy} · vence {expires} · {attempts, plural, one {# intento} other {# intentos}}",
+        "noEmail": "No se enviará ningún correo. Solo se crea la asignación en la demostración."
+      },
+      "confirm": {
+        "title": "Confirmar asignación",
+        "description": "Vas a asignar {count, plural, one {# candidato} other {# candidatos}} a {version} en {vacancy}. Vence el {expires}. Intentos: {attempts}. No se enviarán correos.",
+        "confirm": "Asignar",
+        "cancel": "Cancelar"
+      },
+      "toasts": {
+        "assigned": "{count, plural, one {# asignación creada en modo demostración.} other {# asignaciones creadas en modo demostración.}}",
+        "rejected": "No se creó ninguna asignación. {details}",
+        "failureItem": "{name}: {reason}",
+        "failureSeparator": "; "
+      },
+      "errors": {
+        "generic": "No se pudo completar la acción de demostración.",
+        "scenario_error": "El servicio simulado devolvió un error.",
+        "link_missing": "No hay un vínculo activo para esa versión y vacante."
+      },
+      "states": {
+        "loading": "Cargando asignaciones…",
+        "emptyTitle": "No hay datos de demostración",
+        "emptyDescription": "El escenario simulado está vacío. Restablece los datos de demostración para continuar.",
+        "errorTitle": "No se pudieron cargar las asignaciones",
+        "errorDescription": "El servicio simulado devolvió un error. Intenta de nuevo.",
+        "retry": "Reintentar",
+        "selectPromptTitle": "Elige vacante y versión",
+        "selectPromptDescription": "Selecciona una vacante abierta y una versión con vínculo activo para ver postulaciones elegibles.",
+        "noApplicationsTitle": "Sin postulaciones",
+        "noApplicationsDescription": "No hay postulaciones a esta vacante en la demostración."
+      }
     }
   },
   "CandidatePortal": {
@@ -2236,6 +2322,8 @@
         "downloadCvAria": "Descargar CV en PDF",
         "generateTechnicalSheet": "Generar ficha técnica",
         "generateTechnicalSheetAria": "Generar ficha técnica del candidato",
+        "assignTest": "Asignar prueba",
+        "assignTestAria": "Ir a asignaciones de pruebas (demostración)",
         "cancel": "Cancelar",
         "cancelAria": "Cancelar edición sin guardar",
         "save": "Guardar cambios",
@@ -2818,6 +2906,8 @@
           "finishProcessAria": "Finalizar proceso de la vacante",
           "interviews": "Entrevistas",
           "interviewsAria": "Ver entrevistas de esta vacante",
+          "assignTest": "Asignar prueba",
+          "assignTestAria": "Ir a asignaciones de pruebas (demostración)",
           "results": "Resultados",
           "resultsAria": "Ver resultados y métricas de esta vacante",
           "copy": "Copiar",

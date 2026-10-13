@@ -22,7 +22,11 @@ import {
   vacancyCanonicalPath,
   type PublicVacancySeoSource,
 } from "@/lib/seo/public-metadata"
-import { readMetadataBase, readPublicOrigin } from "@/lib/seo/site-origin"
+import {
+  readMetadataBase,
+  readPublicOrigin,
+  resolveMetadataBase,
+} from "@/lib/seo/site-origin"
 import {
   listOpenPublicVacancies,
   loadPublicVacancyBySegment,
@@ -205,6 +209,28 @@ describe("public SEO metadata", () => {
     expect(readMetadataBase("")).toBeUndefined()
     expect(readMetadataBase("not a url")).toBeUndefined()
     expect(readPublicOrigin("https://app.example.com/")).toBe("https://app.example.com")
+  })
+
+  it("resolves metadataBase from the public URL, then Vercel, then localhost outside production", () => {
+    expect(
+      resolveMetadataBase({
+        appUrl: "https://app.example.com/",
+        nodeEnv: "production",
+      })?.href
+    ).toBe("https://app.example.com/")
+    expect(
+      resolveMetadataBase({
+        appUrl: "",
+        vercelUrl: "preview.example.com",
+        nodeEnv: "production",
+      })?.href
+    ).toBe("https://preview.example.com/")
+    expect(
+      resolveMetadataBase({ appUrl: "", vercelUrl: "", nodeEnv: "development" })?.href
+    ).toBe("http://localhost:3000/")
+    expect(
+      resolveMetadataBase({ appUrl: "", vercelUrl: "", nodeEnv: "production" })
+    ).toBeUndefined()
   })
 
   it("keeps public metadata copy and the not-found keys in every locale", () => {

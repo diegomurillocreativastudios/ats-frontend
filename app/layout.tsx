@@ -7,7 +7,7 @@ import { APP_NAME } from "@/lib/app-brand"
 import {
   DEFAULT_SOCIAL_IMAGE,
   readGoogleSiteVerification,
-  readMetadataBase,
+  resolveMetadataBase,
 } from "@/lib/seo/site-origin"
 import "./globals.css"
 import PageTitle from "@/components/PageTitle"
@@ -35,7 +35,7 @@ const fraunces = Fraunces({
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata.root")
   const description = t("description")
-  const metadataBase = readMetadataBase()
+  const metadataBase = resolveMetadataBase()
   const google = readGoogleSiteVerification()
 
   return {

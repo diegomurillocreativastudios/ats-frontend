@@ -1094,6 +1094,92 @@
         "listEmptyTitle": "Nessun collegamento",
         "listEmptyDescription": "In questa demo non ci sono ancora versioni collegate a posizioni."
       }
+    },
+    "assignments": {
+      "title": "Assegnazioni",
+      "description": "Assegna una versione collegata alle candidature attive della posizione. Nella demo non vengono inviate e-mail.",
+      "scopeNotice": "Assegnare non invia e-mail né crea candidature. Registra solo inviti simulati per i candidati idonei di quella posizione.",
+      "form": {
+        "title": "Nuova assegnazione",
+        "vacancy": "Posizione",
+        "vacancyPlaceholder": "Seleziona una posizione",
+        "version": "Versione collegata attiva",
+        "versionPlaceholder": "Seleziona una versione",
+        "companySummary": "Azienda: {company}",
+        "companyEmpty": "Seleziona una posizione per vedere l’azienda.",
+        "excludedVacancies": "Posizioni non disponibili: {list}.",
+        "excludedVacancyItem": "{title} (chiusa)",
+        "excludedListSeparator": "; ",
+        "noActiveLinks": "Questa posizione non ha versioni con collegamento attivo. Collega prima una prova pubblicata.",
+        "expiresAt": "Scade il",
+        "expiresHint": "Valore demo: {days} giorni dall’orologio simulato.",
+        "attempts": "Tentativi consentiti",
+        "submit": "Assegna selezionati"
+      },
+      "validation": {
+        "vacancyRequired": "Seleziona una posizione aperta.",
+        "versionRequired": "Seleziona una versione con collegamento attivo.",
+        "selectionRequired": "Seleziona almeno un candidato idoneo.",
+        "expiresInvalid": "La data di scadenza non può essere precedente a oggi nella demo.",
+        "attemptsInvalid": "I tentativi devono essere un intero maggiore o uguale a 1."
+      },
+      "candidates": {
+        "title": "Candidature della posizione",
+        "select": "Seleziona",
+        "selectAria": "Seleziona {name}",
+        "name": "Candidato",
+        "email": "E-mail",
+        "stage": "Fase",
+        "eligibility": "Idoneità",
+        "eligible": "Idoneo",
+        "selectedCount": "{count, plural, one {# selezionato} other {# selezionati}}",
+        "selectEligible": "Seleziona idonei",
+        "clearSelection": "Cancella selezione"
+      },
+      "reasons": {
+        "vacancy_mismatch": "Posizione diversa",
+        "application_inactive": "Candidatura inattiva",
+        "application_final": "Stato finale",
+        "vacancy_closed": "Posizione chiusa",
+        "link_inactive": "Collegamento inattivo",
+        "test_not_published": "Prova non pubblicata",
+        "duplicate_assignment": "Già assegnato",
+        "unknown": "Non idoneo"
+      },
+      "preview": {
+        "title": "Anteprima destinatari",
+        "summary": "{version} · {vacancy} · scade {expires} · {attempts, plural, one {# tentativo} other {# tentativi}}",
+        "noEmail": "Non verrà inviata alcuna e-mail. Viene creata solo l’assegnazione demo."
+      },
+      "confirm": {
+        "title": "Conferma assegnazione",
+        "description": "Assegnerai {count, plural, one {# candidato} other {# candidati}} a {version} su {vacancy}. Scade il {expires}. Tentativi: {attempts}. Non verranno inviate e-mail.",
+        "confirm": "Assegna",
+        "cancel": "Annulla"
+      },
+      "toasts": {
+        "assigned": "{count, plural, one {# assegnazione creata in modalità demo.} other {# assegnazioni create in modalità demo.}}",
+        "rejected": "Non è stata creata alcuna assegnazione. {details}",
+        "failureItem": "{name}: {reason}",
+        "failureSeparator": "; "
+      },
+      "errors": {
+        "generic": "Impossibile completare l’azione demo.",
+        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "link_missing": "Non esiste un collegamento attivo per quella versione e posizione."
+      },
+      "states": {
+        "loading": "Caricamento assegnazioni…",
+        "emptyTitle": "Nessun dato demo",
+        "emptyDescription": "Lo scenario simulato è vuoto. Ripristina i dati demo per continuare.",
+        "errorTitle": "Impossibile caricare le assegnazioni",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "selectPromptTitle": "Scegli posizione e versione",
+        "selectPromptDescription": "Seleziona una posizione aperta e una versione con collegamento attivo per vedere le candidature idonee.",
+        "noApplicationsTitle": "Nessuna candidatura",
+        "noApplicationsDescription": "Non ci sono candidature per questa posizione nella demo."
+      }
     }
   },
   "CandidatePortal": {
@@ -2236,6 +2322,8 @@
         "downloadCvAria": "Scarica CV in PDF",
         "generateTechnicalSheet": "Genera scheda tecnica",
         "generateTechnicalSheetAria": "Genera la scheda tecnica di questo candidato",
+        "assignTest": "Assegna prova",
+        "assignTestAria": "Vai alle assegnazioni delle prove (demo)",
         "cancel": "Annulla",
         "cancelAria": "Annulla la modifica senza salvare",
         "save": "Salva modifiche",
@@ -2818,6 +2906,8 @@
           "finishProcessAria": "Concludi il processo della posizione",
           "interviews": "Colloqui",
           "interviewsAria": "Vedi i colloqui di questa posizione",
+          "assignTest": "Assegna prova",
+          "assignTestAria": "Vai alle assegnazioni delle prove (demo)",
           "results": "Risultati",
           "resultsAria": "Vedi risultati e metriche di questa posizione",
           "copy": "Copia",

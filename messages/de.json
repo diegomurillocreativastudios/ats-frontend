@@ -1094,6 +1094,92 @@
         "listEmptyTitle": "Keine Verknüpfungen",
         "listEmptyDescription": "In dieser Demo sind noch keine Versionen mit Stellen verknüpft."
       }
+    },
+    "assignments": {
+      "title": "Zuweisungen",
+      "description": "Weise eine verknüpfte Version aktiven Bewerbungen der Stelle zu. In der Demo werden keine E-Mails gesendet.",
+      "scopeNotice": "Zuweisen sendet keine E-Mails und erstellt keine Bewerbungen. Es speichert nur simulierte Einladungen für berechtigte Kandidaten dieser Stelle.",
+      "form": {
+        "title": "Neue Zuweisung",
+        "vacancy": "Stelle",
+        "vacancyPlaceholder": "Stelle auswählen",
+        "version": "Aktive verknüpfte Version",
+        "versionPlaceholder": "Version auswählen",
+        "companySummary": "Unternehmen: {company}",
+        "companyEmpty": "Wähle eine Stelle, um das Unternehmen zu sehen.",
+        "excludedVacancies": "Nicht verfügbare Stellen: {list}.",
+        "excludedVacancyItem": "{title} (geschlossen)",
+        "excludedListSeparator": "; ",
+        "noActiveLinks": "Diese Stelle hat keine Versionen mit aktiver Verknüpfung. Verknüpfe zuerst eine veröffentlichte Prüfung.",
+        "expiresAt": "Läuft ab am",
+        "expiresHint": "Demo-Standard: {days} Tage ab der simulierten Uhrzeit.",
+        "attempts": "Erlaubte Versuche",
+        "submit": "Auswahl zuweisen"
+      },
+      "validation": {
+        "vacancyRequired": "Wähle eine offene Stelle.",
+        "versionRequired": "Wähle eine Version mit aktiver Verknüpfung.",
+        "selectionRequired": "Wähle mindestens einen berechtigten Kandidaten.",
+        "expiresInvalid": "Das Ablaufdatum darf nicht vor dem Demo-Heute liegen.",
+        "attemptsInvalid": "Versuche müssen eine ganze Zahl größer oder gleich 1 sein."
+      },
+      "candidates": {
+        "title": "Bewerbungen dieser Stelle",
+        "select": "Auswählen",
+        "selectAria": "{name} auswählen",
+        "name": "Kandidat",
+        "email": "E-Mail",
+        "stage": "Phase",
+        "eligibility": "Berechtigung",
+        "eligible": "Berechtigt",
+        "selectedCount": "{count, plural, one {# ausgewählt} other {# ausgewählt}}",
+        "selectEligible": "Berechtigte auswählen",
+        "clearSelection": "Auswahl löschen"
+      },
+      "reasons": {
+        "vacancy_mismatch": "Andere Stelle",
+        "application_inactive": "Inaktive Bewerbung",
+        "application_final": "Endstatus",
+        "vacancy_closed": "Stelle geschlossen",
+        "link_inactive": "Verknüpfung inaktiv",
+        "test_not_published": "Prüfung nicht veröffentlicht",
+        "duplicate_assignment": "Bereits zugewiesen",
+        "unknown": "Nicht berechtigt"
+      },
+      "preview": {
+        "title": "Vorschau der Empfänger",
+        "summary": "{version} · {vacancy} · läuft ab {expires} · {attempts, plural, one {# Versuch} other {# Versuche}}",
+        "noEmail": "Es wird keine E-Mail gesendet. Es wird nur die Demo-Zuweisung erstellt."
+      },
+      "confirm": {
+        "title": "Zuweisung bestätigen",
+        "description": "Du weist {count, plural, one {# Kandidaten} other {# Kandidaten}} {version} für {vacancy} zu. Läuft ab am {expires}. Versuche: {attempts}. Es werden keine E-Mails gesendet.",
+        "confirm": "Zuweisen",
+        "cancel": "Abbrechen"
+      },
+      "toasts": {
+        "assigned": "{count, plural, one {# Zuweisung im Demo-Modus erstellt.} other {# Zuweisungen im Demo-Modus erstellt.}}",
+        "rejected": "Es wurde keine Zuweisung erstellt. {details}",
+        "failureItem": "{name}: {reason}",
+        "failureSeparator": "; "
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "link_missing": "Für diese Version und Stelle gibt es keine aktive Verknüpfung."
+      },
+      "states": {
+        "loading": "Zuweisungen werden geladen…",
+        "emptyTitle": "Keine Demo-Daten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demo-Daten zurück, um fortzufahren.",
+        "errorTitle": "Zuweisungen konnten nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "selectPromptTitle": "Stelle und Version wählen",
+        "selectPromptDescription": "Wähle eine offene Stelle und eine Version mit aktiver Verknüpfung, um berechtigte Bewerbungen zu sehen.",
+        "noApplicationsTitle": "Keine Bewerbungen",
+        "noApplicationsDescription": "Für diese Stelle gibt es in der Demo keine Bewerbungen."
+      }
     }
   },
   "CandidatePortal": {
@@ -2236,6 +2322,8 @@
         "downloadCvAria": "Lebenslauf als PDF herunterladen",
         "generateTechnicalSheet": "Technisches Blatt erstellen",
         "generateTechnicalSheetAria": "Technisches Blatt dieses Kandidaten erstellen",
+        "assignTest": "Prüfung zuweisen",
+        "assignTestAria": "Zu Zuweisungen von Prüfungen (Demo)",
         "cancel": "Abbrechen",
         "cancelAria": "Bearbeitung ohne Speichern abbrechen",
         "save": "Änderungen speichern",
@@ -2818,6 +2906,8 @@
           "finishProcessAria": "Stellenprozess abschließen",
           "interviews": "Vorstellungsgespräche",
           "interviewsAria": "Vorstellungsgespräche dieser Stelle anzeigen",
+          "assignTest": "Prüfung zuweisen",
+          "assignTestAria": "Zu Zuweisungen von Prüfungen (Demo)",
           "results": "Ergebnisse",
           "resultsAria": "Ergebnisse und Kennzahlen dieser Stelle anzeigen",
           "copy": "Kopieren",

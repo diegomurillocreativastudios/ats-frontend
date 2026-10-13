@@ -1094,6 +1094,92 @@
         "listEmptyTitle": "No links",
         "listEmptyDescription": "No versions are linked to vacancies in this demo yet."
       }
+    },
+    "assignments": {
+      "title": "Assignments",
+      "description": "Assign a linked version to active applications for the vacancy. No email is sent in the demo.",
+      "scopeNotice": "Assigning does not send email or create applications. It only records simulated invitations for eligible candidates of that vacancy.",
+      "form": {
+        "title": "New assignment",
+        "vacancy": "Vacancy",
+        "vacancyPlaceholder": "Select a vacancy",
+        "version": "Active linked version",
+        "versionPlaceholder": "Select a version",
+        "companySummary": "Company: {company}",
+        "companyEmpty": "Select a vacancy to see the company.",
+        "excludedVacancies": "Unavailable vacancies: {list}.",
+        "excludedVacancyItem": "{title} (closed)",
+        "excludedListSeparator": "; ",
+        "noActiveLinks": "This vacancy has no versions with an active link. Link a published assessment first.",
+        "expiresAt": "Expires on",
+        "expiresHint": "Demo default: {days} days from the simulated clock.",
+        "attempts": "Allowed attempts",
+        "submit": "Assign selected"
+      },
+      "validation": {
+        "vacancyRequired": "Select an open vacancy.",
+        "versionRequired": "Select a version with an active link.",
+        "selectionRequired": "Select at least one eligible candidate.",
+        "expiresInvalid": "The expiry date cannot be earlier than the demo today.",
+        "attemptsInvalid": "Attempts must be an integer greater than or equal to 1."
+      },
+      "candidates": {
+        "title": "Applications for this vacancy",
+        "select": "Select",
+        "selectAria": "Select {name}",
+        "name": "Candidate",
+        "email": "Email",
+        "stage": "Stage",
+        "eligibility": "Eligibility",
+        "eligible": "Eligible",
+        "selectedCount": "{count, plural, one {# selected} other {# selected}}",
+        "selectEligible": "Select eligible",
+        "clearSelection": "Clear selection"
+      },
+      "reasons": {
+        "vacancy_mismatch": "Different vacancy",
+        "application_inactive": "Inactive application",
+        "application_final": "Final status",
+        "vacancy_closed": "Closed vacancy",
+        "link_inactive": "Inactive link",
+        "test_not_published": "Assessment not published",
+        "duplicate_assignment": "Already assigned",
+        "unknown": "Not eligible"
+      },
+      "preview": {
+        "title": "Recipient preview",
+        "summary": "{version} · {vacancy} · expires {expires} · {attempts, plural, one {# attempt} other {# attempts}}",
+        "noEmail": "No email will be sent. Only the demo assignment is created."
+      },
+      "confirm": {
+        "title": "Confirm assignment",
+        "description": "You will assign {count, plural, one {# candidate} other {# candidates}} to {version} on {vacancy}. Expires {expires}. Attempts: {attempts}. No email will be sent.",
+        "confirm": "Assign",
+        "cancel": "Cancel"
+      },
+      "toasts": {
+        "assigned": "{count, plural, one {# assignment created in demo mode.} other {# assignments created in demo mode.}}",
+        "rejected": "No assignments were created. {details}",
+        "failureItem": "{name}: {reason}",
+        "failureSeparator": "; "
+      },
+      "errors": {
+        "generic": "The demo action could not be completed.",
+        "scenario_error": "The simulated service returned an error.",
+        "link_missing": "There is no active link for that version and vacancy."
+      },
+      "states": {
+        "loading": "Loading assignments…",
+        "emptyTitle": "No demo data",
+        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "errorTitle": "Could not load assignments",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry",
+        "selectPromptTitle": "Choose vacancy and version",
+        "selectPromptDescription": "Select an open vacancy and a version with an active link to see eligible applications.",
+        "noApplicationsTitle": "No applications",
+        "noApplicationsDescription": "There are no applications for this vacancy in the demo."
+      }
     }
   },
   "CandidatePortal": {
@@ -2236,6 +2322,8 @@
         "downloadCvAria": "Download CV as PDF",
         "generateTechnicalSheet": "Generate technical sheet",
         "generateTechnicalSheetAria": "Generate this candidate's technical sheet",
+        "assignTest": "Assign assessment",
+        "assignTestAria": "Go to assessment assignments (demo)",
         "cancel": "Cancel",
         "cancelAria": "Cancel editing without saving",
         "save": "Save changes",
@@ -2818,6 +2906,8 @@
           "finishProcessAria": "Finish vacancy process",
           "interviews": "Interviews",
           "interviewsAria": "View interviews for this vacancy",
+          "assignTest": "Assign assessment",
+          "assignTestAria": "Go to assessment assignments (demo)",
           "results": "Results",
           "resultsAria": "View results and metrics for this vacancy",
           "copy": "Copy",
