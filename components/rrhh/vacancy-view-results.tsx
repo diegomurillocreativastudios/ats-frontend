@@ -5,9 +5,10 @@ import { useTranslations } from "next-intl"
 import { Briefcase } from "lucide-react"
 import { VacancyListCard } from "@/components/rrhh/VacancyListCard"
 import type { VacancyListItem } from "@/lib/vacancies/map-vacancy-list-item"
-import type {
-  VacancyListView,
-  VacancyProgressViewRow,
+import {
+  isProgressVacancyListView,
+  type VacancyListView,
+  type VacancyProgressViewRow,
 } from "@/lib/rrhh/vacancy-list-views"
 
 export function VacancyViewBanner({
@@ -57,7 +58,9 @@ export function VacancyViewList({
   const t = useTranslations("RecruiterPortal.vacancies.views")
   const tProgress = useTranslations("RecruiterPortal.dashboard.vacancies")
 
-  if (view === "activas" || view === "no-publicadas") {
+  // Card list: activas, no-publicadas, fuera-de-plazo (server-filtered listItems).
+  // Progress rows: only sin-postulaciones.
+  if (!isProgressVacancyListView(view)) {
     return (
       <ul className="flex flex-col gap-3" role="list">
         {listItems.map((vacancy) => (
