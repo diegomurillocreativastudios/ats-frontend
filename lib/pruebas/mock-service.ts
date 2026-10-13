@@ -104,6 +104,109 @@ export async function listQuestions(): Promise<MockQuestion[]> {
   return [...store.questions]
 }
 
+export async function getQuestion(questionId: string): Promise<MockQuestion> {
+  const store = await gate()
+  const question = store.questions.find((item) => item.id === questionId)
+  if (!question) {
+    throw new MockServiceError("not_found")
+  }
+  return question
+}
+
+/**
+ * True when the question id appears on any published version snapshot.
+ * Demo-only: published versions keep ids, not prompt copies.
+ */
+export function isQuestionUsedByPublishedVersion(
+  questionId: string,
+  versions: readonly MockAssessmentVersion[],
+): boolean {
+  return versions.some(
+    (version) =>
+      version.publishedAt !== undefined &&
+      version.questionIds.includes(questionId),
+  )
+}
+
+function withBankId(input: MockQuestion, id: string): MockQuestion {
+  switch (input.kind) {
+    case "single_choice": {
+      const correctIndex = Math.max(
+        0,
+        input.options.findIndex((option) => option.id === input.correctOptionId),
+      )
+      const options = input.options.map((option, index) => ({
+        id: `${id}-opt-${index + 1}`,
+        label: option.label,
+      }))
+      return {
+        ...input,
+        id,
+        options,
+        correctOptionId:
+          options[correctIndex]?.id ?? options[0]?.id ?? `${id}-opt-1`,
+      }
+    }
+    case "multiple_choice": {
+      const options = input.options.map((option, index) => ({
+        id: `${id}-opt-${index + 1}`,
+        label: option.label,
+      }))
+      const idByOld = new Map(
+        input.options.map((option, index) => [option.id, options[index]!.id]),
+      )
+      const correctOptionIds = input.correctOptionIds
+        .map((oldId) => idByOld.get(oldId))
+        .filter((value): value is string => Boolean(value))
+      return {
+        ...input,
+        id,
+        options,
+        correctOptionIds:
+          correctOptionIds.length > 0
+            ? correctOptionIds
+            : options[0]
+              ? [options[0].id]
+              : [],
+      }
+    }
+    case "true_false":
+      return { ...input, id }
+    case "likert":
+      return { ...input, id }
+    case "numeric":
+      return { ...input, id }
+    case "open":
+      return { ...input, id }
+  }
+}
+
+export async function createQuestion(
+  input: MockQuestion,
+): Promise<MockQuestion> {
+  await gate()
+  const store = requirePopulatedStore()
+  const id = `q-bank-${store.questions.length + 1}`
+  const question = withBankId(input, id)
+  store.questions.push(question)
+  return question
+}
+
+export async function updateQuestion(
+  questionId: string,
+  input: MockQuestion,
+): Promise<MockQuestion> {
+  await gate()
+  const store = requirePopulatedStore()
+  const index = store.questions.findIndex((item) => item.id === questionId)
+  if (index < 0) {
+    throw new MockServiceError("not_found")
+  }
+  const question = { ...input, id: questionId } as MockQuestion
+  store.questions[index] = question
+  return question
+}
+
 export async function listVersions(testId?: string): Promise<MockAssessmentVersion[]> {
   const store = await gate()
   if (!testId) {

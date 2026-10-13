@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-05 completadas** (kit + mocks + shell + dashboard + evaluaciones listado/detalle/versiones + editor/wizard).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-06 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -244,17 +244,17 @@ hooks/pruebas/
 
 ### Fase UI-06 — Banco de preguntas y editor por tipo
 
-- [ ] `/preguntas`: listados, categorías, búsquedas, filtros, paginación, preview y acciones.
-- [ ] `/preguntas/nueva` y `/preguntas/[questionId]/editar`: editor tipado según categoría.
-- [ ] Opción única: opciones + correcta + puntos.
-- [ ] Opción múltiple: varias correctas + regla de puntuación.
-- [ ] Verdadero/falso: respuesta correcta + puntos.
-- [ ] Likert: escala, dimensión, sentido/inversión de ítem, sin "correcta".
-- [ ] Numérica: respuesta y tolerancia simulada (si plan de backend la pospone, señalizar demo/futura).
-- [ ] Abierta: rúbrica y puntos máximos; requiere revisión manual.
-- [ ] Vista previa de cada tipo como lo verá candidato.
-- [ ] Confirmaciones al abandonar cambios y validaciones.
-- [ ] Estados loading/empty/error y las tres variantes responsive.
+- [x] `/preguntas`: listados, categorías, búsquedas, filtros, paginación, preview y acciones. 2026-10-13: `PruebasQuestionsList` + `lib/pruebas/question-editor.ts`.
+- [x] `/preguntas/nueva` y `/preguntas/[questionId]/editar`: editor tipado según categoría. `PruebasQuestionEditor`.
+- [x] Opción única: opciones + correcta + puntos.
+- [x] Opción múltiple: varias correctas + regla de puntuación. Copy todo-o-nada; un solo `points`.
+- [x] Verdadero/falso: respuesta correcta + puntos.
+- [x] Likert: escala fija 1–5, dimensión, inversión de ítem, sin "correcta" ni puntos.
+- [x] Numérica: respuesta y tolerancia simulada con aviso de demostración.
+- [x] Abierta: rúbrica y puntos máximos; aviso de revisión manual posterior.
+- [x] Vista previa de cada tipo como lo verá candidato. Diálogo en listado + panel en editor.
+- [x] Confirmaciones al abandonar cambios y validaciones. Solo al cancelar con cambios.
+- [x] Estados loading/empty/error y las tres variantes responsive. Tabla `lg+`, tarjetas por debajo.
 
 **Criterio:** los seis editores no presentan campos incompatibles entre tipos; las preguntas sirven en wizard y demo de candidato.
 
@@ -383,8 +383,8 @@ hooks/pruebas/
 | Lista de evaluaciones | `/portal-pruebas/evaluaciones` | ☑ | ☑ | ☑ | loading/empty/error |
 | Crear / editar (todos los pasos) | `/portal-pruebas/evaluaciones/nueva`, `/[testId]/editar` | ☑ | ☑ | ☑ | draft/validation/error |
 | Detalle y versiones | `/portal-pruebas/evaluaciones/[testId]` | ☑ | ☑ | ☑ | published/archived |
-| Banco preguntas | `/portal-pruebas/preguntas` | ☐ | ☐ | ☐ | loading/empty/error |
-| Editores de preguntas | `/portal-pruebas/preguntas/nueva`, `/[questionId]/editar` | ☐ | ☐ | ☐ | per kind/errors |
+| Banco preguntas | `/portal-pruebas/preguntas` | ☑ | ☑ | ☑ | loading/empty/error |
+| Editores de preguntas | `/portal-pruebas/preguntas/nueva`, `/[questionId]/editar` | ☑ | ☑ | ☑ | per kind/errors |
 | Vínculos con vacantes | `/portal-pruebas/vinculaciones` | ☐ | ☐ | ☐ | linked/unlinked/inactive |
 | Asignación | `/portal-pruebas/asignaciones/nueva` | ☐ | ☐ | ☐ | eligible/empty/conflict/success |
 | Seguimiento | `/portal-pruebas/seguimiento` | ☐ | ☐ | ☐ | statuses/actions |
@@ -466,3 +466,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - UI-03 reemplazó el placeholder del dashboard con métricas, filtros, gráficas y atención; `lib/pruebas/dashboard.ts` + `getDashboard`; sin BFF.
 - UI-04 reemplazó el placeholder de evaluaciones con listado, detalle y versiones; `duplicateTest` + `lib/pruebas/evaluations.ts`; placeholders de editor para UI-05; sin BFF.
 - UI-05 reemplazó placeholders de nueva/editar con el asistente de cinco pasos; `evaluation-editor.ts` + `createCompatibleQuestion`; sin BFF.
+- UI-06 reemplazó el placeholder del banco con listado y editor por tipo; `question-editor.ts` + `createQuestion`/`updateQuestion`; sin BFF.

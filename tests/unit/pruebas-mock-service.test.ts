@@ -1,14 +1,18 @@
 import { afterEach, describe, expect, it } from "vitest"
 
 import { MOCK_IDS, MOCK_NOW } from "@/lib/pruebas/mock-fixtures"
+import { blankQuestion } from "@/lib/pruebas/question-editor"
 import {
   MockServiceError,
   assign,
   createCompatibleQuestion,
+  createQuestion,
   debugSnapshotStore,
   duplicateTest,
   editPublishedTest,
+  getQuestion,
   getTest,
+  isQuestionUsedByPublishedVersion,
   listLinks,
   listQuestions,
   listTests,
@@ -17,6 +21,7 @@ import {
   resetMockStore,
   setMockScenario,
   updateDraftTest,
+  updateQuestion,
 } from "@/lib/pruebas/mock-service"
 
 afterEach(() => {
@@ -123,6 +128,40 @@ describe("createCompatibleQuestion", () => {
       expect(psycho.dimension).toBe("Análisis")
     }
     expect((await listQuestions()).length).toBe(before + 2)
+  })
+})
+
+describe("question bank CRUD", () => {
+  it("creates, reads and updates with q-bank ids", async () => {
+    setMockScenario("populated")
+    const created = await createQuestion({
+      ...blankQuestion("true_false", "Todo primo es impar"),
+      correct: false,
+      points: 1,
+    })
+    expect(created.id.startsWith("q-bank-")).toBe(true)
+    expect(created.kind).toBe("true_false")
+
+    const fetched = await getQuestion(created.id)
+    expect(fetched.prompt).toBe("Todo primo es impar")
+
+    const updated = await updateQuestion(created.id, {
+      ...fetched,
+      prompt: "Todo primo mayor que 2 es impar",
+    })
+    expect(updated.prompt).toBe("Todo primo mayor que 2 es impar")
+    expect(updated.id).toBe(created.id)
+  })
+
+  it("detects when a seed question is used by a published version", async () => {
+    setMockScenario("populated")
+    const versions = await listVersions()
+    expect(
+      isQuestionUsedByPublishedVersion(MOCK_IDS.qSingle, versions),
+    ).toBe(true)
+    expect(
+      isQuestionUsedByPublishedVersion("q-missing", versions),
+    ).toBe(false)
   })
 })
 

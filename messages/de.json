@@ -894,6 +894,133 @@
         },
         "detailEditDraft": "Bearbeiten und Entwurf erstellen"
       }
+    },
+    "questionsBank": {
+      "title": "Fragenkatalog",
+      "description": "Wiederverwendbare Demo-Fragen für technische und psychometrische Bewertungen.",
+      "create": "Neue Frage",
+      "createTitle": "Neue Frage",
+      "editTitle": "Frage bearbeiten",
+      "editorDescription": "Typ und Felder konfigurieren. Die Vorschau zeigt, was die Kandidatin oder der Kandidat sieht.",
+      "publishedWarning": "Diese Frage gehört zu mindestens einer veröffentlichten Version. Änderungen erscheinen dort, weil die Demo die Kennung speichert, nicht eine Kopie des Textes.",
+      "search": "Nach Fragetext suchen",
+      "searchPlaceholder": "Fragetext",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Filter des Fragenkatalogs",
+        "kind": "Typ",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen"
+      },
+      "kind": {
+        "single_choice": "Einzelauswahl",
+        "multiple_choice": "Mehrfachauswahl",
+        "true_false": "Wahr oder falsch",
+        "likert": "Likert",
+        "numeric": "Numerisch",
+        "open": "Offen"
+      },
+      "table": {
+        "prompt": "Fragetext",
+        "kind": "Typ",
+        "actions": "Aktionen",
+        "preview": "Vorschau",
+        "edit": "Bearbeiten"
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Anzahl pro Seite",
+        "regionAria": "Seitennummerierung des Fragenkatalogs",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count} Fragen"
+      },
+      "fields": {
+        "kind": "Fragetyp",
+        "prompt": "Fragetext",
+        "options": "Optionen",
+        "addOption": "Option hinzufügen",
+        "optionPlaceholder": "Option {index}",
+        "optionLabel": "Text der Option {index}",
+        "markCorrect": "Option {index} als richtig markieren",
+        "correct": "Richtig",
+        "correctAnswer": "Richtige Antwort",
+        "true": "Wahr",
+        "false": "Falsch",
+        "points": "Punkte",
+        "maxPoints": "Maximale Punkte",
+        "dimension": "Dimension",
+        "reversed": "Umgekehrtes Item",
+        "expected": "Erwartete Antwort",
+        "tolerance": "Toleranz",
+        "rubric": "Bewertungsraster",
+        "moveUp": "Option {index} nach oben",
+        "moveDown": "Option {index} nach unten",
+        "removeOption": "Option {index} entfernen"
+      },
+      "hints": {
+        "multipleChoiceScoring": "Die Bewertung ist alles oder nichts: Punkte nur, wenn alle richtigen und keine falschen Optionen gewählt sind.",
+        "likertScale": "Die Demo-Likert-Skala ist fest von 1 bis 5. Es gibt keine richtige Antwort und keine Punkte.",
+        "numericDemo": "Die Toleranz dient nur der Demo. Die echte Bewertung kommt mit dem Backend.",
+        "openReview": "Offene Antworten brauchen eine manuelle Prüfung. Diese Warteschlange folgt in einer späteren Phase."
+      },
+      "validation": {
+        "promptRequired": "Gib einen Fragetext ein.",
+        "promptTooLong": "Der Fragetext darf höchstens 500 Zeichen haben.",
+        "optionsMin": "Füge mindestens zwei Optionen hinzu.",
+        "optionLabelRequired": "Jede Option braucht einen Text.",
+        "correctOptionRequired": "Markiere die richtige Option.",
+        "correctOptionsRequired": "Markiere mindestens eine richtige Option.",
+        "pointsRange": "Punkte müssen eine ganze Zahl zwischen 1 und 100 sein.",
+        "dimensionRequired": "Gib die Dimension des Items an.",
+        "expectedRequired": "Gib die erwartete numerische Antwort an.",
+        "toleranceRange": "Die Toleranz muss null oder eine positive Zahl sein.",
+        "rubricRequired": "Gib das Bewertungsraster ein."
+      },
+      "preview": {
+        "title": "Kandidaten-Vorschau",
+        "hint": "So sieht die Kandidatin oder der Kandidat die Frage. Richtige Antworten und Punkte bleiben verborgen.",
+        "emptyPrompt": "Der Fragetext erscheint hier.",
+        "emptyOption": "Option ohne Text",
+        "trueLabel": "Wahr",
+        "falseLabel": "Falsch",
+        "likertScaleAria": "Skala von 1 bis 5",
+        "numericLabel": "Deine Antwort",
+        "openLabel": "Deine Antwort"
+      },
+      "actions": {
+        "cancel": "Abbrechen",
+        "save": "Speichern",
+        "backToList": "Zurück zum Katalog"
+      },
+      "discard": {
+        "title": "Änderungen verwerfen",
+        "description": "Es gibt ungespeicherte Änderungen. Beim Verlassen gehen sie in dieser Demo verloren.",
+        "confirm": "Verwerfen",
+        "cancel": "Weiter bearbeiten"
+      },
+      "toasts": {
+        "saved": "Frage im Demo-Modus gespeichert.",
+        "error": "Die Demo-Aktion konnte nicht abgeschlossen werden."
+      },
+      "errors": {
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "not_found": "Frage nicht gefunden."
+      },
+      "states": {
+        "loading": "Fragenkatalog wird geladen…",
+        "emptyTitle": "Keine Demo-Fragen",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demo-Daten zurück, um fortzufahren.",
+        "errorTitle": "Katalog konnte nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Frage entspricht den Filtern. Passe die Filter an oder setze sie zurück.",
+        "notFoundTitle": "Frage nicht gefunden",
+        "notFoundDescription": "Es gibt keine Frage mit dieser Kennung in der Demo."
+      }
     }
   },
   "CandidatePortal": {

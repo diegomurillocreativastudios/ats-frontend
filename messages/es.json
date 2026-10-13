@@ -894,6 +894,133 @@
         },
         "detailEditDraft": "Editar y crear borrador"
       }
+    },
+    "questionsBank": {
+      "title": "Banco de preguntas",
+      "description": "Preguntas reutilizables de demostración para evaluaciones técnicas y psicométricas.",
+      "create": "Nueva pregunta",
+      "createTitle": "Nueva pregunta",
+      "editTitle": "Editar pregunta",
+      "editorDescription": "Configura el tipo y los campos. La vista previa muestra lo que verá el candidato.",
+      "publishedWarning": "Esta pregunta forma parte de al menos una versión publicada. Los cambios se verán en esas versiones porque la demostración guarda el identificador, no una copia del enunciado.",
+      "search": "Buscar por enunciado",
+      "searchPlaceholder": "Texto de la pregunta",
+      "filters": {
+        "title": "Filtros",
+        "toggle": "Filtros",
+        "regionLabel": "Filtros del banco de preguntas",
+        "kind": "Tipo",
+        "all": "Todos",
+        "clear": "Limpiar filtros"
+      },
+      "kind": {
+        "single_choice": "Opción única",
+        "multiple_choice": "Opción múltiple",
+        "true_false": "Verdadero o falso",
+        "likert": "Likert",
+        "numeric": "Numérica",
+        "open": "Abierta"
+      },
+      "table": {
+        "prompt": "Enunciado",
+        "kind": "Tipo",
+        "actions": "Acciones",
+        "preview": "Vista previa",
+        "edit": "Editar"
+      },
+      "pagination": {
+        "perPage": "Por página",
+        "pageSizeAria": "Cantidad por página",
+        "regionAria": "Paginación del banco",
+        "summary": "Página {page} de {totalPages}",
+        "prev": "Anterior",
+        "next": "Siguiente",
+        "count": "{count} preguntas"
+      },
+      "fields": {
+        "kind": "Tipo de pregunta",
+        "prompt": "Enunciado",
+        "options": "Opciones",
+        "addOption": "Añadir opción",
+        "optionPlaceholder": "Opción {index}",
+        "optionLabel": "Texto de la opción {index}",
+        "markCorrect": "Marcar opción {index} como correcta",
+        "correct": "Correcta",
+        "correctAnswer": "Respuesta correcta",
+        "true": "Verdadero",
+        "false": "Falso",
+        "points": "Puntos",
+        "maxPoints": "Puntos máximos",
+        "dimension": "Dimensión",
+        "reversed": "Ítem invertido",
+        "expected": "Respuesta esperada",
+        "tolerance": "Tolerancia",
+        "rubric": "Rúbrica",
+        "moveUp": "Subir opción {index}",
+        "moveDown": "Bajar opción {index}",
+        "removeOption": "Eliminar opción {index}"
+      },
+      "hints": {
+        "multipleChoiceScoring": "La puntuación es todo o nada: se otorgan los puntos solo si se marcan todas las opciones correctas y ninguna incorrecta.",
+        "likertScale": "La escala Likert en demostración es fija de 1 a 5. No hay respuesta correcta ni puntos.",
+        "numericDemo": "La tolerancia es solo demostración. El motor real de calificación llegará al conectar el backend.",
+        "openReview": "Las respuestas abiertas requieren revisión manual. Esa cola se implementará en una fase posterior."
+      },
+      "validation": {
+        "promptRequired": "Escribe un enunciado.",
+        "promptTooLong": "El enunciado no puede superar 500 caracteres.",
+        "optionsMin": "Añade al menos dos opciones.",
+        "optionLabelRequired": "Cada opción necesita un texto.",
+        "correctOptionRequired": "Marca la opción correcta.",
+        "correctOptionsRequired": "Marca al menos una opción correcta.",
+        "pointsRange": "Los puntos deben ser un entero entre 1 y 100.",
+        "dimensionRequired": "Indica la dimensión del ítem.",
+        "expectedRequired": "Indica la respuesta numérica esperada.",
+        "toleranceRange": "La tolerancia debe ser cero o un número positivo.",
+        "rubricRequired": "Escribe la rúbrica de evaluación."
+      },
+      "preview": {
+        "title": "Vista previa del candidato",
+        "hint": "Así verá el candidato la pregunta. No se muestran respuestas correctas ni puntuaciones.",
+        "emptyPrompt": "El enunciado aparecerá aquí.",
+        "emptyOption": "Opción sin texto",
+        "trueLabel": "Verdadero",
+        "falseLabel": "Falso",
+        "likertScaleAria": "Escala de 1 a 5",
+        "numericLabel": "Tu respuesta",
+        "openLabel": "Tu respuesta"
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "backToList": "Volver al banco"
+      },
+      "discard": {
+        "title": "Descartar cambios",
+        "description": "Hay cambios sin guardar. Si sales ahora, se perderán en esta demostración.",
+        "confirm": "Descartar",
+        "cancel": "Seguir editando"
+      },
+      "toasts": {
+        "saved": "Pregunta guardada en modo demostración.",
+        "error": "No se pudo completar la acción de demostración."
+      },
+      "errors": {
+        "scenario_error": "El servicio simulado devolvió un error.",
+        "not_found": "No se encontró la pregunta."
+      },
+      "states": {
+        "loading": "Cargando el banco de preguntas…",
+        "emptyTitle": "No hay preguntas de demostración",
+        "emptyDescription": "El escenario simulado está vacío. Restablece los datos de demostración para continuar.",
+        "errorTitle": "No se pudo cargar el banco",
+        "errorDescription": "El servicio simulado devolvió un error. Intenta de nuevo.",
+        "retry": "Reintentar",
+        "filterEmptyTitle": "Sin coincidencias",
+        "filterEmptyDescription": "Ninguna pregunta cumple los filtros. Ajusta o limpia los filtros.",
+        "notFoundTitle": "Pregunta no encontrada",
+        "notFoundDescription": "No existe una pregunta con ese identificador en la demostración."
+      }
     }
   },
   "CandidatePortal": {

@@ -894,6 +894,133 @@
         },
         "detailEditDraft": "Edit and create draft"
       }
+    },
+    "questionsBank": {
+      "title": "Question bank",
+      "description": "Reusable demo questions for technical and psychometric assessments.",
+      "create": "New question",
+      "createTitle": "New question",
+      "editTitle": "Edit question",
+      "editorDescription": "Configure the type and fields. The preview shows what the candidate will see.",
+      "publishedWarning": "This question is part of at least one published version. Changes will appear in those versions because the demo stores the identifier, not a copy of the prompt.",
+      "search": "Search by prompt",
+      "searchPlaceholder": "Question text",
+      "filters": {
+        "title": "Filters",
+        "toggle": "Filters",
+        "regionLabel": "Question bank filters",
+        "kind": "Type",
+        "all": "All",
+        "clear": "Clear filters"
+      },
+      "kind": {
+        "single_choice": "Single choice",
+        "multiple_choice": "Multiple choice",
+        "true_false": "True or false",
+        "likert": "Likert",
+        "numeric": "Numeric",
+        "open": "Open"
+      },
+      "table": {
+        "prompt": "Prompt",
+        "kind": "Type",
+        "actions": "Actions",
+        "preview": "Preview",
+        "edit": "Edit"
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Items per page",
+        "regionAria": "Question bank pagination",
+        "summary": "Page {page} of {totalPages}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count} questions"
+      },
+      "fields": {
+        "kind": "Question type",
+        "prompt": "Prompt",
+        "options": "Options",
+        "addOption": "Add option",
+        "optionPlaceholder": "Option {index}",
+        "optionLabel": "Option {index} text",
+        "markCorrect": "Mark option {index} as correct",
+        "correct": "Correct",
+        "correctAnswer": "Correct answer",
+        "true": "True",
+        "false": "False",
+        "points": "Points",
+        "maxPoints": "Maximum points",
+        "dimension": "Dimension",
+        "reversed": "Reversed item",
+        "expected": "Expected answer",
+        "tolerance": "Tolerance",
+        "rubric": "Rubric",
+        "moveUp": "Move option {index} up",
+        "moveDown": "Move option {index} down",
+        "removeOption": "Remove option {index}"
+      },
+      "hints": {
+        "multipleChoiceScoring": "Scoring is all-or-nothing: points are awarded only if all correct options and no incorrect ones are selected.",
+        "likertScale": "The demo Likert scale is fixed from 1 to 5. There is no correct answer or points.",
+        "numericDemo": "Tolerance is demo-only. Real scoring arrives when the backend is connected.",
+        "openReview": "Open answers require manual review. That queue will be implemented in a later phase."
+      },
+      "validation": {
+        "promptRequired": "Enter a prompt.",
+        "promptTooLong": "The prompt cannot exceed 500 characters.",
+        "optionsMin": "Add at least two options.",
+        "optionLabelRequired": "Every option needs a label.",
+        "correctOptionRequired": "Mark the correct option.",
+        "correctOptionsRequired": "Mark at least one correct option.",
+        "pointsRange": "Points must be an integer between 1 and 100.",
+        "dimensionRequired": "Enter the item dimension.",
+        "expectedRequired": "Enter the expected numeric answer.",
+        "toleranceRange": "Tolerance must be zero or a positive number.",
+        "rubricRequired": "Enter the evaluation rubric."
+      },
+      "preview": {
+        "title": "Candidate preview",
+        "hint": "This is how the candidate will see the question. Correct answers and scores are hidden.",
+        "emptyPrompt": "The prompt will appear here.",
+        "emptyOption": "Option without text",
+        "trueLabel": "True",
+        "falseLabel": "False",
+        "likertScaleAria": "Scale from 1 to 5",
+        "numericLabel": "Your answer",
+        "openLabel": "Your answer"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "backToList": "Back to bank"
+      },
+      "discard": {
+        "title": "Discard changes",
+        "description": "There are unsaved changes. If you leave now, they will be lost in this demo.",
+        "confirm": "Discard",
+        "cancel": "Keep editing"
+      },
+      "toasts": {
+        "saved": "Question saved in demo mode.",
+        "error": "Could not complete the demo action."
+      },
+      "errors": {
+        "scenario_error": "The simulated service returned an error.",
+        "not_found": "Question not found."
+      },
+      "states": {
+        "loading": "Loading the question bank…",
+        "emptyTitle": "No demo questions",
+        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "errorTitle": "Could not load the bank",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry",
+        "filterEmptyTitle": "No matches",
+        "filterEmptyDescription": "No questions match the filters. Adjust or clear the filters.",
+        "notFoundTitle": "Question not found",
+        "notFoundDescription": "There is no question with that identifier in the demo."
+      }
     }
   },
   "CandidatePortal": {
