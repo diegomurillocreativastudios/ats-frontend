@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00 y UI-01 completadas** (kit + mocks tipados; sin rutas de producto).  
+> **Estado:** Plan de trabajo; **Fase UI-00, UI-01 y UI-02 completadas** (kit + mocks tipados + shell/navegación con placeholders).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -165,8 +165,8 @@ hooks/pruebas/
 **Mapa confirmado**
 
 - Sección 2 vigente, sin cambios de nombre. Entrada: `/portal-pruebas` (dashboard).
-- Carpetas: `lib/pruebas/` y `components/pruebas/shared/` existen desde UI-01. Pendientes: `app/portal-pruebas/`, `hooks/pruebas/`, demo `app/pruebas/[demoToken]/`.
-- `pruebas` no está en `PORTAL_KEYS` (`candidate | opportunities | rrhh | admin`). Enchufar portal y home es UI-02; no tocar `lib/portal-access.ts` en UI-00.
+- Carpetas: `lib/pruebas/`, `components/pruebas/shared/` (UI-01) y `app/portal-pruebas/` + `components/pruebas/layout/` (UI-02). Pendientes: `hooks/pruebas/`, demo `app/pruebas/[demoToken]/`.
+- `pruebas` está en `PORTAL_KEYS` con home `/portal-pruebas` (UI-02); accesible a reclutador y administración.
 - Baterías: ruta `baterias/` solo si se activa UI-14.
 
 **Entregable:** mapa de rutas/componentes y lista de archivos a crear.  
@@ -187,17 +187,17 @@ hooks/pruebas/
 
 ### Fase UI-02 — Portal, layout, navegación e i18n
 
-- [ ] Crear `app/portal-pruebas/layout.tsx` y shell reutilizando patrones actuales de RRHH/Admin.
-- [ ] Sidebar con Dashboard, Evaluaciones, Banco de preguntas, Vinculaciones, Asignaciones, Seguimiento, Revisión, Resultados y Reportes (agrupar lógicamente para evitar saturación).
-- [ ] Topbar con breadcrumbs reales, cuenta, branding y selector de idioma.
-- [ ] Drawer abierto/cerrado para Tablet y Mobile, foco/escape/cierre y overlay.
-- [ ] Integrar Portal Pruebas a selección de portales y navegación de regreso sin otorgar permisos nuevos por accidente.
-- [ ] Reutilizar guard server-side para **roles existentes Recruiter/Admin**; permisos finos se implementarán en plan de conexión cuando backend los soporte.
-- [ ] Definir `PortalKey` y `PORTAL_HOME_HREF` coherentemente con `lib/portal-access.ts`.
-- [ ] Crear namespace `PruebasPortal` y copy real en `es/en/it/de/fr`; no hardcodear UI.
-- [ ] Añadir metadata traducida y textos en navegación / selector.
-- [ ] Añadir indicador `Demostración — datos simulados` visible sin obstaculizar trabajo.
-- [ ] Confirmar navegación keyboard y responsive 320/390/768/1024/1440.
+- [x] Crear `app/portal-pruebas/layout.tsx` y shell reutilizando patrones actuales de RRHH/Admin. 2026-10-13: `PruebasPortalShell` + `requirePortalRecruiterUser`.
+- [x] Sidebar con Dashboard, Evaluaciones, Banco de preguntas, Vinculaciones, Asignaciones, Seguimiento, Revisión, Resultados y Reportes (agrupar lógicamente para evitar saturación). Grupos: Inicio / Contenido / Operación / Cierre.
+- [x] Topbar con breadcrumbs reales, cuenta, branding y selector de idioma.
+- [x] Drawer abierto/cerrado para Tablet y Mobile, foco/escape/cierre y overlay. Reutiliza `PortalNavDrawer`.
+- [x] Integrar Portal Pruebas a selección de portales y navegación de regreso sin otorgar permisos nuevos por accidente. Clave `pruebas` solo reclutador/admin.
+- [x] Reutilizar guard server-side para **roles existentes Recruiter/Admin**; permisos finos se implementarán en plan de conexión cuando backend los soporte.
+- [x] Definir `PortalKey` y `PORTAL_HOME_HREF` coherentemente con `lib/portal-access.ts`.
+- [x] Crear namespace `PruebasPortal` y copy real en `es/en/it/de/fr`; no hardcodear UI.
+- [x] Añadir metadata traducida y textos en navegación / selector.
+- [x] Añadir indicador `Demostración — datos simulados` visible sin obstaculizar trabajo. `MockDemoNotice` en el shell.
+- [x] Confirmar navegación keyboard y responsive 320/390/768/1024/1440. Mismo chrome que RRHH/Admin; verificación visual completa en fases de producto.
 
 **Entregable:** portal accesible a staff autorizado con shell y rutas placeholder navegables.  
 **Criterio:** mantiene seguridad actual, no agrega acceso público no protegido por accidente.
@@ -462,3 +462,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - Auditoría frontend `APPLICANTTREE_FRONTEND_UI_AUDIT.md`: reutilización de shell, tokens CSS, BFF e i18n.
 - Auditoría de diseño `PortalPruebasDesignAudit.md`: corregir gaps funcionales, responsive y accesibilidad al traducir Pen.dev a UI real.
 - UI-01 añadió `lib/pruebas/*`, `components/pruebas/shared/*` y tests unitarios; sin rutas de producto ni BFF.
+- UI-02 añadió `app/portal-pruebas/` (placeholders), `components/pruebas/layout/*`, clave `pruebas` en selección de portales e i18n; sin BFF.

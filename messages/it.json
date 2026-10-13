@@ -71,7 +71,8 @@
     "navigationMenu": "Menu di navigazione",
     "userMenu": "Menu utente",
     "breadcrumb": "Percorso di navigazione",
-    "adminShortcut": "Amministrazione"
+    "adminShortcut": "Amministrazione",
+    "portalPruebas": "Portale Prove"
   },
   "Sidebar": {
     "goHome": "Vai alla home",
@@ -86,7 +87,9 @@
     "accountMenu": "Menu account",
     "roleAdmin": "Amministratore",
     "roleRecruiter": "Recruiter",
-    "roleCandidate": "Candidato"
+    "roleCandidate": "Candidato",
+    "ariaPruebas": "Navigazione Portale Prove",
+    "menuPruebas": "Menu prove"
   },
   "Auth": {
     "login": {
@@ -539,6 +542,10 @@
     "recruiterDashboard": {
       "title": "ApplicanTree | Portale HR | Home",
       "description": "Dashboard di attività e promemoria del portale HR"
+    },
+    "pruebasPortal": {
+      "title": "ApplicanTree | Portale Prove",
+      "description": "Valutazioni tecniche e psicometriche con dati dimostrativi"
     }
   },
   "PortalSelection": {
@@ -557,7 +564,31 @@
     "rrhhAria": "Vai al portale di reclutamento HR",
     "adminName": "Portale amministrazione",
     "adminDesc": "Utenti e configurazione della piattaforma",
-    "adminAria": "Vai al portale di amministrazione"
+    "adminAria": "Vai al portale di amministrazione",
+    "pruebasName": "Portale Prove",
+    "pruebasDesc": "Valutazioni, assegnazioni e risultati (demo)",
+    "pruebasAria": "Vai al portale prove"
+  },
+  "PruebasPortal": {
+    "demoNotice": "Dimostrazione — dati simulati",
+    "placeholder": "Questa sezione sarà completata in una fase successiva. Per ora conferma solo il percorso e la navigazione del portale.",
+    "nav": {
+      "groups": {
+        "home": "Inizio",
+        "content": "Contenuti",
+        "operations": "Operazioni",
+        "closing": "Chiusura"
+      },
+      "dashboard": "Dashboard",
+      "evaluations": "Valutazioni",
+      "questions": "Banca domande",
+      "links": "Collegamenti",
+      "assignments": "Assegnazioni",
+      "tracking": "Monitoraggio",
+      "review": "Revisione",
+      "results": "Risultati",
+      "reports": "Report"
+    }
   },
   "CandidatePortal": {
     "home": {

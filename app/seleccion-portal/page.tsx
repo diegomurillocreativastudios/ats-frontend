@@ -1,6 +1,13 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { Briefcase, Shield, Sparkles, Users, type LucideIcon } from "lucide-react"
+import {
+  Briefcase,
+  ClipboardCheck,
+  Shield,
+  Sparkles,
+  Users,
+  type LucideIcon,
+} from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { getServerSessionUser } from "@/lib/server-session-user"
 import {
@@ -14,9 +21,24 @@ import ProductBrand from "@/components/branding/ProductBrand"
 import { NOINDEX_NOFOLLOW } from "@/lib/seo/public-metadata"
 
 interface PortalCardCopy {
-  nameKey: "candidateName" | "opportunitiesName" | "rrhhName" | "adminName"
-  descKey: "candidateDesc" | "opportunitiesDesc" | "rrhhDesc" | "adminDesc"
-  ariaKey: "candidateAria" | "opportunitiesAria" | "rrhhAria" | "adminAria"
+  nameKey:
+    | "candidateName"
+    | "opportunitiesName"
+    | "rrhhName"
+    | "pruebasName"
+    | "adminName"
+  descKey:
+    | "candidateDesc"
+    | "opportunitiesDesc"
+    | "rrhhDesc"
+    | "pruebasDesc"
+    | "adminDesc"
+  ariaKey:
+    | "candidateAria"
+    | "opportunitiesAria"
+    | "rrhhAria"
+    | "pruebasAria"
+    | "adminAria"
 }
 
 interface PortalCardConfig {
@@ -61,6 +83,17 @@ const PORTAL_CARDS: Record<PortalKey, PortalCardConfig> = {
       ariaKey: "rrhhAria",
     },
   },
+  pruebas: {
+    href: PORTAL_HOME_HREF.pruebas,
+    testId: "portal-selector-pruebas",
+    icon: ClipboardCheck,
+    iconWrapClass: "bg-emerald-500/15 text-emerald-800",
+    copy: {
+      nameKey: "pruebasName",
+      descKey: "pruebasDesc",
+      ariaKey: "pruebasAria",
+    },
+  },
   admin: {
     href: PORTAL_HOME_HREF.admin,
     testId: "portal-selector-admin",
@@ -75,6 +108,7 @@ const PORTAL_CARDS: Record<PortalKey, PortalCardConfig> = {
 }
 
 function portalGridClass(count: number): string {
+  if (count >= 5) return "sm:grid-cols-2 lg:grid-cols-3"
   if (count >= 4) return "sm:grid-cols-2 lg:grid-cols-4"
   if (count === 3) return "sm:grid-cols-2 md:grid-cols-3"
   if (count === 2) return "sm:grid-cols-2"

@@ -71,7 +71,8 @@
     "navigationMenu": "Navigation menu",
     "userMenu": "User menu",
     "breadcrumb": "Breadcrumb",
-    "adminShortcut": "Administration"
+    "adminShortcut": "Administration",
+    "portalPruebas": "Assessments Portal"
   },
   "Sidebar": {
     "goHome": "Go to home",
@@ -86,7 +87,9 @@
     "accountMenu": "Account menu",
     "roleAdmin": "Administrator",
     "roleRecruiter": "Recruiter",
-    "roleCandidate": "Applicant"
+    "roleCandidate": "Applicant",
+    "ariaPruebas": "Assessments Portal navigation",
+    "menuPruebas": "Assessments menu"
   },
   "Auth": {
     "login": {
@@ -539,6 +542,10 @@
     "recruiterDashboard": {
       "title": "ApplicanTree | HR Portal | Home",
       "description": "Pending items and reminders dashboard for the HR portal"
+    },
+    "pruebasPortal": {
+      "title": "ApplicanTree | Assessments Portal",
+      "description": "Technical and psychometric assessments with demo data"
     }
   },
   "PortalSelection": {
@@ -557,7 +564,31 @@
     "rrhhAria": "Go to the HR recruitment portal",
     "adminName": "Administration Portal",
     "adminDesc": "Users and platform settings",
-    "adminAria": "Go to the administration portal"
+    "adminAria": "Go to the administration portal",
+    "pruebasName": "Assessments Portal",
+    "pruebasDesc": "Assessments, assignments and results (demo)",
+    "pruebasAria": "Go to the assessments portal"
+  },
+  "PruebasPortal": {
+    "demoNotice": "Demo — simulated data",
+    "placeholder": "This section will be completed in a later phase. For now it only confirms the route and portal navigation.",
+    "nav": {
+      "groups": {
+        "home": "Home",
+        "content": "Content",
+        "operations": "Operations",
+        "closing": "Closing"
+      },
+      "dashboard": "Dashboard",
+      "evaluations": "Assessments",
+      "questions": "Question bank",
+      "links": "Vacancy links",
+      "assignments": "Assignments",
+      "tracking": "Tracking",
+      "review": "Review",
+      "results": "Results",
+      "reports": "Reports"
+    }
   },
   "CandidatePortal": {
     "home": {

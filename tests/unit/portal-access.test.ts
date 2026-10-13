@@ -9,23 +9,26 @@ import {
 } from "@/lib/portal-access"
 
 describe("getAccessiblePortalKeys", () => {
-  it("da al admin las cuatro vistas", () => {
+  it("da al admin las cinco vistas incluyendo pruebas", () => {
     expect(getAccessiblePortalKeys("Admin")).toEqual([
       "candidate",
       "opportunities",
       "rrhh",
+      "pruebas",
       "admin",
     ])
   })
 
-  it("da al reclutador oportunidades y RRHH", () => {
+  it("da al reclutador oportunidades, RRHH y pruebas", () => {
     expect(getAccessiblePortalKeys("Recruiter")).toEqual([
       "opportunities",
       "rrhh",
+      "pruebas",
     ])
     expect(getAccessiblePortalKeys("Human Resources")).toEqual([
       "opportunities",
       "rrhh",
+      "pruebas",
     ])
   })
 
@@ -38,6 +41,10 @@ describe("getAccessiblePortalKeys", () => {
     expect(getAccessiblePortalKeys(null)).toEqual([])
     expect(getAccessiblePortalKeys(undefined)).toEqual([])
     expect(getAccessiblePortalKeys("")).toEqual([])
+  })
+
+  it("expone el home del portal de pruebas", () => {
+    expect(PORTAL_HOME_HREF.pruebas).toBe("/portal-pruebas")
   })
 })
 

@@ -71,7 +71,8 @@
     "navigationMenu": "Navigationsmenü",
     "userMenu": "Benutzermenü",
     "breadcrumb": "Brotkrümelnavigation",
-    "adminShortcut": "Verwaltung"
+    "adminShortcut": "Verwaltung",
+    "portalPruebas": "Portal Prüfungen"
   },
   "Sidebar": {
     "goHome": "Zur Startseite",
@@ -86,7 +87,9 @@
     "accountMenu": "Kontomenü",
     "roleAdmin": "Administrator",
     "roleRecruiter": "Recruiter",
-    "roleCandidate": "Kandidat"
+    "roleCandidate": "Kandidat",
+    "ariaPruebas": "Navigation Portal Prüfungen",
+    "menuPruebas": "Prüfungen-Menü"
   },
   "Auth": {
     "login": {
@@ -539,6 +542,10 @@
     "recruiterDashboard": {
       "title": "ApplicanTree | HR-Portal | Startseite",
       "description": "Dashboard mit offenen Aufgaben und Erinnerungen des HR-Portals"
+    },
+    "pruebasPortal": {
+      "title": "ApplicanTree | Portal Prüfungen",
+      "description": "Technische und psychometrische Prüfungen mit Demodaten"
     }
   },
   "PortalSelection": {
@@ -557,7 +564,31 @@
     "rrhhAria": "Zum HR-Recruiting-Portal",
     "adminName": "Verwaltungsportal",
     "adminDesc": "Benutzer und Plattformkonfiguration",
-    "adminAria": "Zum Verwaltungsportal"
+    "adminAria": "Zum Verwaltungsportal",
+    "pruebasName": "Portal Prüfungen",
+    "pruebasDesc": "Prüfungen, Zuweisungen und Ergebnisse (Demo)",
+    "pruebasAria": "Zum Prüfungen-Portal gehen"
+  },
+  "PruebasPortal": {
+    "demoNotice": "Demo — simulierte Daten",
+    "placeholder": "Dieser Bereich wird in einer späteren Phase fertiggestellt. Derzeit bestätigt er nur die Route und die Portalnavigation.",
+    "nav": {
+      "groups": {
+        "home": "Start",
+        "content": "Inhalt",
+        "operations": "Betrieb",
+        "closing": "Abschluss"
+      },
+      "dashboard": "Dashboard",
+      "evaluations": "Prüfungen",
+      "questions": "Fragenkatalog",
+      "links": "Verknüpfungen",
+      "assignments": "Zuweisungen",
+      "tracking": "Nachverfolgung",
+      "review": "Überprüfung",
+      "results": "Ergebnisse",
+      "reports": "Berichte"
+    }
   },
   "CandidatePortal": {
     "home": {

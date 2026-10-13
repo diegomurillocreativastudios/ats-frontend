@@ -71,7 +71,8 @@
     "navigationMenu": "Menu de navigation",
     "userMenu": "Menu utilisateur",
     "breadcrumb": "Fil d'Ariane",
-    "adminShortcut": "Administration"
+    "adminShortcut": "Administration",
+    "portalPruebas": "Portail Évaluations"
   },
   "Sidebar": {
     "goHome": "Aller à l'accueil",
@@ -86,7 +87,9 @@
     "accountMenu": "Menu du compte",
     "roleAdmin": "Administrateur",
     "roleRecruiter": "Recruteur",
-    "roleCandidate": "Candidat"
+    "roleCandidate": "Candidat",
+    "ariaPruebas": "Navigation Portail Évaluations",
+    "menuPruebas": "Menu évaluations"
   },
   "Auth": {
     "login": {
@@ -539,6 +542,10 @@
     "recruiterDashboard": {
       "title": "ApplicanTree | Portail RH | Accueil",
       "description": "Tableau de bord des tâches et rappels du portail RH"
+    },
+    "pruebasPortal": {
+      "title": "ApplicanTree | Portail Évaluations",
+      "description": "Évaluations techniques et psychométriques avec données de démonstration"
     }
   },
   "PortalSelection": {
@@ -557,7 +564,31 @@
     "rrhhAria": "Aller au portail de recrutement RH",
     "adminName": "Portail administration",
     "adminDesc": "Utilisateurs et configuration de la plateforme",
-    "adminAria": "Aller au portail d'administration"
+    "adminAria": "Aller au portail d'administration",
+    "pruebasName": "Portail Évaluations",
+    "pruebasDesc": "Évaluations, affectations et résultats (démonstration)",
+    "pruebasAria": "Aller au portail des évaluations"
+  },
+  "PruebasPortal": {
+    "demoNotice": "Démonstration — données simulées",
+    "placeholder": "Cette section sera complétée dans une phase ultérieure. Pour l’instant, elle confirme uniquement la route et la navigation du portail.",
+    "nav": {
+      "groups": {
+        "home": "Accueil",
+        "content": "Contenu",
+        "operations": "Opération",
+        "closing": "Clôture"
+      },
+      "dashboard": "Tableau de bord",
+      "evaluations": "Évaluations",
+      "questions": "Banque de questions",
+      "links": "Liaisons",
+      "assignments": "Affectations",
+      "tracking": "Suivi",
+      "review": "Révision",
+      "results": "Résultats",
+      "reports": "Rapports"
+    }
   },
   "CandidatePortal": {
     "home": {

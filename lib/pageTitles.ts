@@ -19,8 +19,20 @@ const BASE_TITLE = APP_NAME
 const PORTAL_RRHH = "Portal RRHH"
 const PORTAL_CANDIDATO = "Portal Candidato"
 const PORTAL_ADMIN = "Portal Admin"
+const PORTAL_PRUEBAS = "Portal Pruebas"
 const CUENTA = "Cuenta"
 const OPORTUNIDADES = "Portal Oportunidades"
+
+const PRUEBAS_PATH_LABEL = {
+  evaluaciones: "Evaluaciones",
+  preguntas: "Banco de preguntas",
+  vinculaciones: "Vinculaciones",
+  asignaciones: "Asignaciones",
+  seguimiento: "Seguimiento",
+  revision: "Revisión",
+  resultados: "Resultados",
+  reportes: "Reportes",
+}
 
 /** Une partes con " | " (siempre incluye el prefijo ApplicanTree). */
 function joinDocumentTitle(...parts) {
@@ -253,6 +265,27 @@ function titlePortalAdmin(normalizedPath) {
   return joinDocumentTitle(BASE_TITLE, PORTAL_ADMIN, ...labels)
 }
 
+function titlePortalPruebas(normalizedPath) {
+  const prefix = "/portal-pruebas"
+  if (!normalizedPath.startsWith(prefix)) return null
+
+  const rest = normalizedPath.slice(prefix.length)
+  const segs = rest.split("/").filter(Boolean)
+  if (segs.length === 0) {
+    return joinDocumentTitle(BASE_TITLE, PORTAL_PRUEBAS, "Dashboard")
+  }
+
+  const labels = []
+  for (const s of segs) {
+    if (isUuidSegment(s)) continue
+    labels.push(PRUEBAS_PATH_LABEL[s] ?? segmentToTitle(s))
+  }
+  if (labels.length === 0) {
+    return joinDocumentTitle(BASE_TITLE, PORTAL_PRUEBAS, "Dashboard")
+  }
+  return joinDocumentTitle(BASE_TITLE, PORTAL_PRUEBAS, ...labels)
+}
+
 /**
  * Título del documento según la ruta: `ApplicanTree | [portal o Cuenta] | [pantalla …]`;
  * rutas bajo `/auth/` usan `ApplicanTree | <pantalla>` sin segmento «Cuenta».
@@ -278,6 +311,9 @@ export const getPageTitle = (pathname) => {
 
   const adm = titlePortalAdmin(normalizedPath)
   if (adm) return adm
+
+  const pruebas = titlePortalPruebas(normalizedPath)
+  if (pruebas) return pruebas
 
   if (isOpportunityDetailPath(normalizedPath)) {
     return getOpportunityDetailStaticTitle()
