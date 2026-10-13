@@ -258,10 +258,12 @@ export function TechnicalSheetPanel({
   const busy = loading
   const iframeDoc = paginatedSrcDoc ?? templateHtml
 
+  // page: fill the portal main column (never 90vw — that overflows under the sidebar).
+  // modal: viewport-relative box centered in the dialog overlay.
   const shell =
     variant === "page"
-      ? `w-full max-w-4xl flex-col rounded-2xl border border-border bg-background text-foreground shadow-sm ${className}`
-      : `relative flex h-[90vh] w-[90vw] max-h-[90vh] max-w-[90vw] flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl ring-1 ring-black/5 ${className}`
+      ? `min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-sm ${className}`
+      : `relative h-[90vh] w-[90vw] max-h-[90vh] max-w-[90vw] flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl ring-1 ring-black/5 ${className}`
 
   const candidateLine =
     candidateLabel != null && String(candidateLabel).trim() !== ""

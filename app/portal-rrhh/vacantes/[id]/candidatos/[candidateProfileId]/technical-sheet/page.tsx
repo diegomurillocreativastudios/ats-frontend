@@ -99,17 +99,22 @@ export default function VacancyCandidateTechnicalSheetPage() {
   }
 
   return (
-    <RrhhPortalShell breadcrumbLabel="RRHH" breadcrumbTrail={trail}>
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4 md:p-8">
+    <RrhhPortalShell
+      breadcrumbLabel="RRHH"
+      breadcrumbTrail={trail}
+      lockMainScroll
+    >
+      <div className="mx-auto flex h-full min-h-0 w-full min-w-0 max-w-4xl flex-col gap-4 p-4 md:gap-6 md:p-8">
         <Link
           href={backHref}
-          className="inline-flex w-fit items-center gap-2 rounded-sm font-sans text-sm font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+          className="inline-flex w-fit shrink-0 items-center gap-2 rounded-sm font-sans text-sm font-medium text-vo-purple hover:underline focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
           {t("actions.backToVacancy")}
         </Link>
         <TechnicalSheetPanel
           enabled
+          variant="page"
           vacancyId={vacancyId}
           candidateProfileId={candidateProfileId}
           vacancyTitle={vacancySummary.title}

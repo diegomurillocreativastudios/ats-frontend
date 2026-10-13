@@ -103,6 +103,34 @@ describe("TechnicalSheetPanel i18n (Etapa 19)", () => {
     vi.clearAllMocks()
   })
 
+  it("en variant=page no usa ancho 90vw (evita solape con el sidebar del portal)", () => {
+    vi.mocked(fetchTemplatesList).mockImplementation(() => new Promise(() => {}))
+    vi.mocked(fetchTechnicalSheetJson).mockImplementation(() => new Promise(() => {}))
+
+    const { container } = renderWithIntl(
+      <TechnicalSheetPanel enabled variant="page" {...defaultProps} />,
+      "es",
+    )
+    const region = container.querySelector('[role="region"]')
+    expect(region).toBeTruthy()
+    const className = region?.className ?? ""
+    expect(className).not.toMatch(/w-\[90vw\]/)
+    expect(className).toMatch(/\bw-full\b/)
+    expect(className).toMatch(/\bmin-w-0\b/)
+  })
+
+  it("en variant=modal conserva la caja 90vw del diálogo", () => {
+    vi.mocked(fetchTemplatesList).mockImplementation(() => new Promise(() => {}))
+    vi.mocked(fetchTechnicalSheetJson).mockImplementation(() => new Promise(() => {}))
+
+    const { container } = renderWithIntl(
+      <TechnicalSheetPanel enabled variant="modal" {...defaultProps} />,
+      "es",
+    )
+    const region = container.querySelector('[role="region"]')
+    expect(region?.className ?? "").toMatch(/w-\[90vw\]/)
+  })
+
   it("muestra error de plantilla ausente traducido en inglés", async () => {
     vi.mocked(fetchTemplatesList).mockResolvedValue([])
     vi.mocked(fetchTechnicalSheetJson).mockResolvedValue({})

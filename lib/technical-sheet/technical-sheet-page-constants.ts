@@ -6,13 +6,13 @@ export const TECHNICAL_SHEET_PAGE_HEIGHT_PX = 1056
 export const TECHNICAL_SHEET_CONTENT_TOP_PX = 125
 export const TECHNICAL_SHEET_CONTENT_BOTTOM_PX = 105
 export const TECHNICAL_SHEET_CONTENT_LEFT_PX = 105
-export const TECHNICAL_SHEET_CONTENT_RIGHT_PX = 75
+export const TECHNICAL_SHEET_CONTENT_RIGHT_PX = 96
 
 /** 1056 − 125 − 105 = 826 — altura máxima de bloques por página (paginación). */
 export const TECHNICAL_SHEET_CONTENT_AVAILABLE_HEIGHT_PX =
   TECHNICAL_SHEET_PAGE_HEIGHT_PX - TECHNICAL_SHEET_CONTENT_TOP_PX - TECHNICAL_SHEET_CONTENT_BOTTOM_PX
 
-/** 816 − 105 − 75 = 636 — ancho del flujo de texto (medición y caja de contenido). */
+/** 816 − 105 − 96 = 615 — ancho del flujo de texto (medición y caja de contenido). */
 export const TECHNICAL_SHEET_CONTENT_INNER_WIDTH_PX =
   TECHNICAL_SHEET_PAGE_WIDTH_PX - TECHNICAL_SHEET_CONTENT_LEFT_PX - TECHNICAL_SHEET_CONTENT_RIGHT_PX
 
