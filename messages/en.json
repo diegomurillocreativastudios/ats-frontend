@@ -588,6 +588,80 @@
       "review": "Review",
       "results": "Results",
       "reports": "Reports"
+    },
+    "dashboard": {
+      "title": "Assessments dashboard",
+      "description": "Summary of assignments and reviews using demonstration data.",
+      "metricsAria": "Assignment metrics",
+      "metrics": {
+        "assigned": "Assigned",
+        "pending": "Pending",
+        "inProgress": "In progress",
+        "completed": "Completed",
+        "expired": "Expired",
+        "pendingReview": "Pending review"
+      },
+      "shortcuts": {
+        "title": "Quick actions",
+        "evaluations": "Create or view assessments",
+        "links": "Link to vacancies",
+        "assignments": "Assign candidates",
+        "results": "View results"
+      },
+      "filters": {
+        "title": "Filters",
+        "toggle": "Filters",
+        "regionLabel": "Dashboard filters",
+        "company": "Company",
+        "vacancy": "Vacancy",
+        "kind": "Category",
+        "status": "Status",
+        "assignedFrom": "Assigned from",
+        "assignedTo": "Assigned to",
+        "all": "All",
+        "clear": "Clear filters",
+        "kindTechnical": "Technical",
+        "kindPsychometric": "Psychometric",
+        "statusPending": "Pending",
+        "statusInProgress": "In progress",
+        "statusCompleted": "Completed",
+        "statusExpired": "Expired",
+        "statusCancelled": "Cancelled"
+      },
+      "charts": {
+        "activityTitle": "Assignments by day",
+        "activityLegend": "Assigned",
+        "activityEmpty": "No assignments in the current range.",
+        "activitySummary": "Assignments-by-day summary",
+        "distributionTitle": "Distribution by status",
+        "distributionEmpty": "No statuses to show."
+      },
+      "attention": {
+        "title": "Needs attention",
+        "dueSoonTitle": "Due soon",
+        "dueSoonEmpty": "No assignment expires in the next 14 days.",
+        "reviewTitle": "Manual review",
+        "reviewEmpty": "No results pending review.",
+        "expiresLabel": "Expires {date}",
+        "openTracking": "Go to tracking",
+        "openReview": "Go to review"
+      },
+      "activity": {
+        "title": "Recent activity",
+        "empty": "No recent activity for the current filters.",
+        "assignedLabel": "Assigned {date}",
+        "openItem": "Open"
+      },
+      "states": {
+        "loading": "Loading dashboard…",
+        "emptyTitle": "No demonstration data",
+        "emptyDescription": "The simulated scenario is empty. Reset the demonstration data to continue.",
+        "errorTitle": "Could not load the dashboard",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry",
+        "filterEmptyTitle": "No matches",
+        "filterEmptyDescription": "No assignment matches the filters. Adjust or clear them."
+      }
     }
   },
   "CandidatePortal": {

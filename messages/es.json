@@ -588,6 +588,80 @@
       "review": "Revisión",
       "results": "Resultados",
       "reports": "Reportes"
+    },
+    "dashboard": {
+      "title": "Dashboard de pruebas",
+      "description": "Resumen de asignaciones y revisiones con datos de demostración.",
+      "metricsAria": "Métricas de asignaciones",
+      "metrics": {
+        "assigned": "Asignadas",
+        "pending": "Pendientes",
+        "inProgress": "En progreso",
+        "completed": "Completadas",
+        "expired": "Vencidas",
+        "pendingReview": "Pendientes de revisión"
+      },
+      "shortcuts": {
+        "title": "Accesos rápidos",
+        "evaluations": "Crear o ver evaluaciones",
+        "links": "Vincular a vacantes",
+        "assignments": "Asignar candidatos",
+        "results": "Ver resultados"
+      },
+      "filters": {
+        "title": "Filtros",
+        "toggle": "Filtros",
+        "regionLabel": "Filtros del dashboard",
+        "company": "Empresa",
+        "vacancy": "Vacante",
+        "kind": "Categoría",
+        "status": "Estado",
+        "assignedFrom": "Asignada desde",
+        "assignedTo": "Asignada hasta",
+        "all": "Todas",
+        "clear": "Limpiar filtros",
+        "kindTechnical": "Técnica",
+        "kindPsychometric": "Psicométrica",
+        "statusPending": "Pendiente",
+        "statusInProgress": "En progreso",
+        "statusCompleted": "Completada",
+        "statusExpired": "Vencida",
+        "statusCancelled": "Cancelada"
+      },
+      "charts": {
+        "activityTitle": "Asignaciones por día",
+        "activityLegend": "Asignadas",
+        "activityEmpty": "No hay asignaciones en el rango actual.",
+        "activitySummary": "Resumen de asignaciones por día",
+        "distributionTitle": "Distribución por estado",
+        "distributionEmpty": "No hay estados para mostrar."
+      },
+      "attention": {
+        "title": "Necesitan atención",
+        "dueSoonTitle": "Próximas a vencer",
+        "dueSoonEmpty": "Ninguna asignación vence en los próximos 14 días.",
+        "reviewTitle": "Revisión manual",
+        "reviewEmpty": "No hay resultados pendientes de revisión.",
+        "expiresLabel": "Vence {date}",
+        "openTracking": "Ir a seguimiento",
+        "openReview": "Ir a revisión"
+      },
+      "activity": {
+        "title": "Actividad reciente",
+        "empty": "No hay actividad reciente con los filtros actuales.",
+        "assignedLabel": "Asignada {date}",
+        "openItem": "Abrir"
+      },
+      "states": {
+        "loading": "Cargando el dashboard…",
+        "emptyTitle": "No hay datos de demostración",
+        "emptyDescription": "El escenario simulado está vacío. Restablece los datos de demostración para continuar.",
+        "errorTitle": "No se pudo cargar el dashboard",
+        "errorDescription": "El servicio simulado devolvió un error. Intenta de nuevo.",
+        "retry": "Reintentar",
+        "filterEmptyTitle": "Sin coincidencias",
+        "filterEmptyDescription": "Ninguna asignación cumple los filtros. Ajusta o limpia los filtros."
+      }
     }
   },
   "CandidatePortal": {

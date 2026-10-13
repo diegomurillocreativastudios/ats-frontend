@@ -588,6 +588,80 @@
       "review": "Revisione",
       "results": "Risultati",
       "reports": "Report"
+    },
+    "dashboard": {
+      "title": "Dashboard valutazioni",
+      "description": "Riepilogo di assegnazioni e revisioni con dati dimostrativi.",
+      "metricsAria": "Metriche delle assegnazioni",
+      "metrics": {
+        "assigned": "Assegnate",
+        "pending": "In attesa",
+        "inProgress": "In corso",
+        "completed": "Completate",
+        "expired": "Scadute",
+        "pendingReview": "In attesa di revisione"
+      },
+      "shortcuts": {
+        "title": "Azioni rapide",
+        "evaluations": "Crea o vedi valutazioni",
+        "links": "Collega alle vacanti",
+        "assignments": "Assegna candidati",
+        "results": "Vedi risultati"
+      },
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri della dashboard",
+        "company": "Azienda",
+        "vacancy": "Vacante",
+        "kind": "Categoria",
+        "status": "Stato",
+        "assignedFrom": "Assegnata da",
+        "assignedTo": "Assegnata fino a",
+        "all": "Tutte",
+        "clear": "Pulisci filtri",
+        "kindTechnical": "Tecnica",
+        "kindPsychometric": "Psicometrica",
+        "statusPending": "In attesa",
+        "statusInProgress": "In corso",
+        "statusCompleted": "Completata",
+        "statusExpired": "Scaduta",
+        "statusCancelled": "Annullata"
+      },
+      "charts": {
+        "activityTitle": "Assegnazioni per giorno",
+        "activityLegend": "Assegnate",
+        "activityEmpty": "Nessuna assegnazione nell’intervallo attuale.",
+        "activitySummary": "Riepilogo assegnazioni per giorno",
+        "distributionTitle": "Distribuzione per stato",
+        "distributionEmpty": "Nessuno stato da mostrare."
+      },
+      "attention": {
+        "title": "Richiedono attenzione",
+        "dueSoonTitle": "In scadenza",
+        "dueSoonEmpty": "Nessuna assegnazione scade nei prossimi 14 giorni.",
+        "reviewTitle": "Revisione manuale",
+        "reviewEmpty": "Nessun risultato in attesa di revisione.",
+        "expiresLabel": "Scade {date}",
+        "openTracking": "Vai al monitoraggio",
+        "openReview": "Vai alla revisione"
+      },
+      "activity": {
+        "title": "Attività recente",
+        "empty": "Nessuna attività recente con i filtri attuali.",
+        "assignedLabel": "Assegnata {date}",
+        "openItem": "Apri"
+      },
+      "states": {
+        "loading": "Caricamento della dashboard…",
+        "emptyTitle": "Nessun dato dimostrativo",
+        "emptyDescription": "Lo scenario simulato è vuoto. Ripristina i dati dimostrativi per continuare.",
+        "errorTitle": "Impossibile caricare la dashboard",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna assegnazione soddisfa i filtri. Modificali o puliscili."
+      }
     }
   },
   "CandidatePortal": {

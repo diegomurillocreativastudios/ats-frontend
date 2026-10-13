@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00, UI-01 y UI-02 completadas** (kit + mocks tipados + shell/navegación con placeholders).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-03 completadas** (kit + mocks + shell + dashboard con datos simulados).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -204,14 +204,14 @@ hooks/pruebas/
 
 ### Fase UI-03 — Dashboard completo
 
-- [ ] Métricas: asignadas, pendientes, en progreso, completadas, vencidas y pendientes de revisión.
-- [ ] Acciones rápidas: crear evaluación, vincular, asignar, revisar resultados.
-- [ ] Filtros por empresa permitida en demo, vacante, categoría, estado y fechas.
-- [ ] Gráfica de actividad con Recharts, leyendas y etiquetas claras.
-- [ ] Distribución por estados (distinguir estados de asignación frente a prueba).
-- [ ] Sección "Necesitan atención": próximas a vencer, revisión manual y fallos de demo.
-- [ ] Actividad reciente con acción que lleva al detalle correspondiente.
-- [ ] Variantes loading / vacío / error + responsive real.
+- [x] Métricas: asignadas, pendientes, en progreso, completadas, vencidas y pendientes de revisión. 2026-10-13: `buildDashboard` + tarjetas; seed 3/1/0/1/1/0.
+- [x] Acciones rápidas: crear evaluación, vincular, asignar, revisar resultados. Enlaces a secciones existentes (evaluaciones, vinculaciones, asignaciones, resultados).
+- [x] Filtros por empresa permitida en demo, vacante, categoría, estado y fechas. `ResponsiveFilters` + recálculo en memoria.
+- [x] Gráfica de actividad con Recharts, leyendas y etiquetas claras. Serie «Asignadas» por día UTC + resumen sr-only.
+- [x] Distribución por estados (distinguir estados de asignación frente a prueba). Dona solo de `AssignmentStatus`.
+- [x] Sección "Necesitan atención": próximas a vencer, revisión manual y fallos de demo. Ventana 14 días; revisión vía `reviewStatus`.
+- [x] Actividad reciente con acción que lleva al detalle correspondiente. Completadas → resultados; resto → seguimiento.
+- [x] Variantes loading / vacío / error + responsive real. Escenarios mock + vacío local de filtros; chrome responsive del shell.
 
 **Criterio:** dashboard coherente con fixtures; filtros actualizan números y listados simulados.
 
@@ -379,7 +379,7 @@ hooks/pruebas/
 
 | Pantalla | Ruta propuesta | Desktop | Tablet | Mobile | Estado UI |
 |---|---|:---:|:---:|:---:|---|
-| Portal Dashboard | `/portal-pruebas` | ☐ | ☐ | ☐ | loading/empty/error |
+| Portal Dashboard | `/portal-pruebas` | ☑ | ☑ | ☑ | loading/empty/error |
 | Lista de evaluaciones | `/portal-pruebas/evaluaciones` | ☐ | ☐ | ☐ | loading/empty/error |
 | Crear / editar (todos los pasos) | `/portal-pruebas/evaluaciones/nueva`, `/[testId]/editar` | ☐ | ☐ | ☐ | draft/validation/error |
 | Detalle y versiones | `/portal-pruebas/evaluaciones/[testId]` | ☐ | ☐ | ☐ | published/archived |
@@ -463,3 +463,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - Auditoría de diseño `PortalPruebasDesignAudit.md`: corregir gaps funcionales, responsive y accesibilidad al traducir Pen.dev a UI real.
 - UI-01 añadió `lib/pruebas/*`, `components/pruebas/shared/*` y tests unitarios; sin rutas de producto ni BFF.
 - UI-02 añadió `app/portal-pruebas/` (placeholders), `components/pruebas/layout/*`, clave `pruebas` en selección de portales e i18n; sin BFF.
+- UI-03 reemplazó el placeholder del dashboard con métricas, filtros, gráficas y atención; `lib/pruebas/dashboard.ts` + `getDashboard`; sin BFF.

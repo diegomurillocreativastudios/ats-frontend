@@ -1,5 +1,5 @@
-import { PruebasSectionPlaceholder } from "@/components/pruebas/layout/pruebas-section-placeholder"
+import { PruebasDashboard } from "@/components/pruebas/dashboard/pruebas-dashboard"
 
 export default function PortalPruebasDashboardPage() {
-  return <PruebasSectionPlaceholder navKey="dashboard" />
+  return <PruebasDashboard />
 }

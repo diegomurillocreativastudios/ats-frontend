@@ -588,6 +588,80 @@
       "review": "Révision",
       "results": "Résultats",
       "reports": "Rapports"
+    },
+    "dashboard": {
+      "title": "Tableau de bord des évaluations",
+      "description": "Résumé des affectations et des révisions avec des données de démonstration.",
+      "metricsAria": "Indicateurs des affectations",
+      "metrics": {
+        "assigned": "Affectées",
+        "pending": "En attente",
+        "inProgress": "En cours",
+        "completed": "Terminées",
+        "expired": "Expirées",
+        "pendingReview": "En attente de révision"
+      },
+      "shortcuts": {
+        "title": "Accès rapides",
+        "evaluations": "Créer ou voir les évaluations",
+        "links": "Lier aux postes",
+        "assignments": "Affecter des candidats",
+        "results": "Voir les résultats"
+      },
+      "filters": {
+        "title": "Filtres",
+        "toggle": "Filtres",
+        "regionLabel": "Filtres du tableau de bord",
+        "company": "Entreprise",
+        "vacancy": "Poste",
+        "kind": "Catégorie",
+        "status": "Statut",
+        "assignedFrom": "Affectée depuis",
+        "assignedTo": "Affectée jusqu’au",
+        "all": "Toutes",
+        "clear": "Effacer les filtres",
+        "kindTechnical": "Technique",
+        "kindPsychometric": "Psychométrique",
+        "statusPending": "En attente",
+        "statusInProgress": "En cours",
+        "statusCompleted": "Terminée",
+        "statusExpired": "Expirée",
+        "statusCancelled": "Annulée"
+      },
+      "charts": {
+        "activityTitle": "Affectations par jour",
+        "activityLegend": "Affectées",
+        "activityEmpty": "Aucune affectation dans la plage actuelle.",
+        "activitySummary": "Résumé des affectations par jour",
+        "distributionTitle": "Répartition par statut",
+        "distributionEmpty": "Aucun statut à afficher."
+      },
+      "attention": {
+        "title": "Nécessitent une attention",
+        "dueSoonTitle": "Bientôt échéantes",
+        "dueSoonEmpty": "Aucune affectation n’expire dans les 14 prochains jours.",
+        "reviewTitle": "Révision manuelle",
+        "reviewEmpty": "Aucun résultat en attente de révision.",
+        "expiresLabel": "Expire le {date}",
+        "openTracking": "Aller au suivi",
+        "openReview": "Aller à la révision"
+      },
+      "activity": {
+        "title": "Activité récente",
+        "empty": "Aucune activité récente avec les filtres actuels.",
+        "assignedLabel": "Affectée le {date}",
+        "openItem": "Ouvrir"
+      },
+      "states": {
+        "loading": "Chargement du tableau de bord…",
+        "emptyTitle": "Aucune donnée de démonstration",
+        "emptyDescription": "Le scénario simulé est vide. Réinitialisez les données de démonstration pour continuer.",
+        "errorTitle": "Impossible de charger le tableau de bord",
+        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "retry": "Réessayer",
+        "filterEmptyTitle": "Aucune correspondance",
+        "filterEmptyDescription": "Aucune affectation ne correspond aux filtres. Ajustez-les ou effacez-les."
+      }
     }
   },
   "CandidatePortal": {

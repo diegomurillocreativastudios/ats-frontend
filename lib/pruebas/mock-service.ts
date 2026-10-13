@@ -1,3 +1,8 @@
+import {
+  buildDashboard,
+  type DashboardFilters,
+  type DashboardSnapshot,
+} from "@/lib/pruebas/dashboard"
 import { evaluateEligibility } from "@/lib/pruebas/eligibility"
 import { MOCK_NOW } from "@/lib/pruebas/mock-fixtures"
 import {
@@ -70,6 +75,13 @@ function requirePopulatedStore(): MockPruebasStore {
     throw new MockServiceError("scenario_error")
   }
   return getMockStore()
+}
+
+export async function getDashboard(
+  filters: DashboardFilters = {},
+): Promise<DashboardSnapshot> {
+  const store = await gate()
+  return buildDashboard(store, filters, MOCK_NOW)
 }
 
 export async function listTests(): Promise<MockAssessmentTest[]> {

@@ -588,6 +588,80 @@
       "review": "Überprüfung",
       "results": "Ergebnisse",
       "reports": "Berichte"
+    },
+    "dashboard": {
+      "title": "Prüfungs-Dashboard",
+      "description": "Überblick über Zuweisungen und Überprüfungen mit Demodaten.",
+      "metricsAria": "Kennzahlen zu Zuweisungen",
+      "metrics": {
+        "assigned": "Zugewiesen",
+        "pending": "Ausstehend",
+        "inProgress": "In Bearbeitung",
+        "completed": "Abgeschlossen",
+        "expired": "Abgelaufen",
+        "pendingReview": "Prüfung ausstehend"
+      },
+      "shortcuts": {
+        "title": "Schnellzugriffe",
+        "evaluations": "Prüfungen erstellen oder ansehen",
+        "links": "Mit Stellen verknüpfen",
+        "assignments": "Kandidaten zuweisen",
+        "results": "Ergebnisse ansehen"
+      },
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Dashboard-Filter",
+        "company": "Unternehmen",
+        "vacancy": "Stelle",
+        "kind": "Kategorie",
+        "status": "Status",
+        "assignedFrom": "Zugewiesen ab",
+        "assignedTo": "Zugewiesen bis",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen",
+        "kindTechnical": "Technisch",
+        "kindPsychometric": "Psychometrisch",
+        "statusPending": "Ausstehend",
+        "statusInProgress": "In Bearbeitung",
+        "statusCompleted": "Abgeschlossen",
+        "statusExpired": "Abgelaufen",
+        "statusCancelled": "Abgebrochen"
+      },
+      "charts": {
+        "activityTitle": "Zuweisungen pro Tag",
+        "activityLegend": "Zugewiesen",
+        "activityEmpty": "Keine Zuweisungen im aktuellen Zeitraum.",
+        "activitySummary": "Zusammenfassung der Zuweisungen pro Tag",
+        "distributionTitle": "Verteilung nach Status",
+        "distributionEmpty": "Keine Status zum Anzeigen."
+      },
+      "attention": {
+        "title": "Benötigen Aufmerksamkeit",
+        "dueSoonTitle": "Bald fällig",
+        "dueSoonEmpty": "Keine Zuweisung läuft in den nächsten 14 Tagen ab.",
+        "reviewTitle": "Manuelle Prüfung",
+        "reviewEmpty": "Keine Ergebnisse mit ausstehender Prüfung.",
+        "expiresLabel": "Fällig {date}",
+        "openTracking": "Zur Nachverfolgung",
+        "openReview": "Zur Überprüfung"
+      },
+      "activity": {
+        "title": "Letzte Aktivität",
+        "empty": "Keine aktuelle Aktivität mit den Filtern.",
+        "assignedLabel": "Zugewiesen {date}",
+        "openItem": "Öffnen"
+      },
+      "states": {
+        "loading": "Dashboard wird geladen…",
+        "emptyTitle": "Keine Demodaten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setzen Sie die Demodaten zurück, um fortzufahren.",
+        "errorTitle": "Dashboard konnte nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zuweisung entspricht den Filtern. Passen Sie sie an oder setzen Sie sie zurück."
+      }
     }
   },
   "CandidatePortal": {
