@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-04 completadas** (kit + mocks + shell + dashboard + evaluaciones listado/detalle/versiones).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-05 completadas** (kit + mocks + shell + dashboard + evaluaciones listado/detalle/versiones + editor/wizard).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -230,15 +230,15 @@ hooks/pruebas/
 
 ### Fase UI-05 — Editor/wizard de evaluación
 
-- [ ] `/evaluaciones/nueva` y `/evaluaciones/[testId]/editar` con stepper adaptativo: Información → Configuración → Preguntas → Vista previa → Publicación.
-- [ ] Campos: nombre, descripción, tipo técnica/psicométrica, categoría, instrucciones, duración, intentos y política de caducidad visual.
-- [ ] Validaciones client-side y mensajes accesibles por paso.
-- [ ] Guardar borrador, navegar atrás/adelante conservando valores y simulación de errores de guardado.
-- [ ] Adjuntar preguntas existentes, agregar nuevas y reordenar usando UI accesible (alternativa a drag/drop).
-- [ ] Puntajes técnicos y dimensión/regla del instrumento para psicométricas claramente separados.
-- [ ] Vista previa candidata antes de publicación; resumen de número exacto de preguntas, duración, intentos.
-- [ ] Publicación muestra número de versión y aviso de snapshot inmutable; editar publicada crea borrador nuevo.
-- [ ] Diseñar e implementar responsivo cada paso, incluidos errores y confirmaciones.
+- [x] `/evaluaciones/nueva` y `/evaluaciones/[testId]/editar` con stepper adaptativo: Información → Configuración → Preguntas → Vista previa → Publicación. 2026-10-13: `PruebasEvaluationEditor` + `lib/pruebas/evaluation-editor.ts`.
+- [x] Campos: nombre, descripción, tipo técnica/psicométrica, categoría, instrucciones, duración, intentos y política de caducidad visual. Tipo = categoría; caducidad = aviso fijo 14 días.
+- [x] Validaciones client-side y mensajes accesibles por paso.
+- [x] Guardar borrador, navegar atrás/adelante conservando valores y simulación de errores de guardado. Casilla «Simular fallo de guardado».
+- [x] Adjuntar preguntas existentes, agregar nuevas y reordenar usando UI accesible (alternativa a drag/drop). `createCompatibleQuestion` + subir/bajar.
+- [x] Puntajes técnicos y dimensión/regla del instrumento para psicométricas claramente separados. Matriz técnica vs Likert.
+- [x] Vista previa candidata antes de publicación; resumen de número exacto de preguntas, duración, intentos.
+- [x] Publicación muestra número de versión y aviso de snapshot inmutable; editar publicada crea borrador nuevo. Confirmación en `/editar` vía `editPublishedTest`.
+- [x] Diseñar e implementar responsivo cada paso, incluidos errores y confirmaciones.
 
 **Criterio:** es posible crear una prueba técnica y una psicométrica demostrativas completas sin salir del frontend.
 
@@ -381,7 +381,7 @@ hooks/pruebas/
 |---|---|:---:|:---:|:---:|---|
 | Portal Dashboard | `/portal-pruebas` | ☑ | ☑ | ☑ | loading/empty/error |
 | Lista de evaluaciones | `/portal-pruebas/evaluaciones` | ☑ | ☑ | ☑ | loading/empty/error |
-| Crear / editar (todos los pasos) | `/portal-pruebas/evaluaciones/nueva`, `/[testId]/editar` | ☐ | ☐ | ☐ | draft/validation/error |
+| Crear / editar (todos los pasos) | `/portal-pruebas/evaluaciones/nueva`, `/[testId]/editar` | ☑ | ☑ | ☑ | draft/validation/error |
 | Detalle y versiones | `/portal-pruebas/evaluaciones/[testId]` | ☑ | ☑ | ☑ | published/archived |
 | Banco preguntas | `/portal-pruebas/preguntas` | ☐ | ☐ | ☐ | loading/empty/error |
 | Editores de preguntas | `/portal-pruebas/preguntas/nueva`, `/[questionId]/editar` | ☐ | ☐ | ☐ | per kind/errors |
@@ -465,3 +465,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - UI-02 añadió `app/portal-pruebas/` (placeholders), `components/pruebas/layout/*`, clave `pruebas` en selección de portales e i18n; sin BFF.
 - UI-03 reemplazó el placeholder del dashboard con métricas, filtros, gráficas y atención; `lib/pruebas/dashboard.ts` + `getDashboard`; sin BFF.
 - UI-04 reemplazó el placeholder de evaluaciones con listado, detalle y versiones; `duplicateTest` + `lib/pruebas/evaluations.ts`; placeholders de editor para UI-05; sin BFF.
+- UI-05 reemplazó placeholders de nueva/editar con el asistente de cinco pasos; `evaluation-editor.ts` + `createCompatibleQuestion`; sin BFF.

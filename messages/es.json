@@ -799,9 +799,100 @@
         "snapshot": "Snapshot",
         "readonlyNotice": "Esta versión publicada no se puede editar aquí."
       },
-      "editorPlaceholder": {
-        "title": "Editor de evaluación",
-        "description": "El asistente de creación y edición se implementará en una fase posterior. Por ahora solo confirma la ruta."
+      "editor": {
+        "createTitle": "Nueva evaluación",
+        "createDescription": "Asistente de demostración para crear y publicar una prueba técnica o psicométrica.",
+        "editTitle": "Editar evaluación",
+        "editDescription": "Edita el borrador simulado. Publicar congela una versión inmutable en la demostración.",
+        "steps": {
+          "info": "Información",
+          "config": "Configuración",
+          "questions": "Preguntas",
+          "preview": "Vista previa",
+          "publish": "Publicación",
+          "navLabel": "Pasos del asistente"
+        },
+        "fields": {
+          "title": "Nombre",
+          "description": "Descripción",
+          "kind": "Tipo",
+          "kindTechnical": "Técnica",
+          "kindPsychometric": "Psicométrica",
+          "instructions": "Instrucciones",
+          "duration": "Duración (minutos)",
+          "maxAttempts": "Intentos máximos",
+          "expiryNotice": "Al asignar en la demostración, la invitación vence a los {days} días. Este valor no se guarda aquí."
+        },
+        "errors": {
+          "titleRequired": "Escribe un nombre.",
+          "titleTooLong": "El nombre no puede superar {max} caracteres.",
+          "descriptionRequired": "Escribe una descripción.",
+          "descriptionTooLong": "La descripción no puede superar {max} caracteres.",
+          "kindRequired": "Elige el tipo de evaluación.",
+          "instructionsRequired": "Escribe las instrucciones.",
+          "durationInvalid": "La duración debe ser un entero entre {min} y {max}.",
+          "attemptsInvalid": "Los intentos deben ser un entero entre {min} y {max}.",
+          "questionsRequired": "Añade al menos una pregunta compatible.",
+          "questionsIncompatible": "Hay preguntas incompatibles con el tipo elegido. Quítalas o cambia el tipo.",
+          "notFoundTitle": "Evaluación no encontrada",
+          "notFoundDescription": "El identificador no existe o la evaluación está archivada y no se puede editar.",
+          "backToList": "Volver al listado",
+          "saveFailed": "No se pudo guardar el borrador de demostración. Revisa e intenta de nuevo."
+        },
+        "questions": {
+          "bankTitle": "Banco disponible",
+          "attachedTitle": "Preguntas de la evaluación",
+          "attach": "Añadir",
+          "remove": "Quitar",
+          "moveUp": "Subir",
+          "moveDown": "Bajar",
+          "addNew": "Crear pregunta mínima",
+          "emptyBank": "No hay preguntas compatibles disponibles.",
+          "emptyAttached": "Aún no hay preguntas en esta evaluación.",
+          "incompatibleBadge": "Incompatible"
+        },
+        "preview": {
+          "staffTitle": "Resumen para el personal",
+          "candidateTitle": "Vista del candidato",
+          "questionCount": "{count} preguntas",
+          "duration": "Duración: {minutes} min",
+          "attempts": "Intentos: {count}",
+          "expiry": "Caducidad de asignación (demo): {days} días",
+          "totalPoints": "Puntaje total: {points}",
+          "dimensions": "Dimensiones: {list}",
+          "noDimensions": "Sin dimensiones",
+          "candidateHint": "Así verá el candidato las preguntas. No se muestran respuestas correctas ni puntuaciones internas."
+        },
+        "publish": {
+          "summaryTitle": "Listo para publicar",
+          "versionNotice": "Se publicará la versión {number}. Este snapshot quedará congelado en la demostración. Editar después creará un borrador nuevo.",
+          "confirmTitle": "Publicar evaluación",
+          "confirmDescription": "Se congela la versión {number} en la demostración. Esto no se guarda en un servidor real.",
+          "confirm": "Publicar",
+          "cancel": "Cancelar"
+        },
+        "clonePublished": {
+          "title": "Crear borrador desde la versión publicada",
+          "description": "La versión publicada se mantiene intacta. Se abrirá un borrador nuevo para editar en la demostración.",
+          "confirm": "Crear borrador",
+          "cancel": "Cancelar"
+        },
+        "actions": {
+          "back": "Atrás",
+          "next": "Siguiente",
+          "saveDraft": "Guardar borrador",
+          "publish": "Publicar",
+          "simulateSaveFail": "Simular fallo de guardado",
+          "saving": "Guardando…",
+          "publishing": "Publicando…"
+        },
+        "toasts": {
+          "saved": "Borrador guardado en modo demostración.",
+          "published": "Evaluación publicada en modo demostración.",
+          "cloned": "Se creó un borrador a partir de la versión publicada.",
+          "error": "No se pudo completar la acción de demostración."
+        },
+        "detailEditDraft": "Editar y crear borrador"
       }
     }
   },

@@ -799,9 +799,100 @@
         "snapshot": "Snapshot",
         "readonlyNotice": "Questa versione pubblicata non può essere modificata qui."
       },
-      "editorPlaceholder": {
-        "title": "Editor valutazione",
-        "description": "La procedura guidata di creazione e modifica sarà implementata in una fase successiva. Per ora conferma solo il percorso."
+      "editor": {
+        "createTitle": "Nuova valutazione",
+        "createDescription": "Procedura guidata dimostrativa per creare e pubblicare un test tecnico o psicometrico.",
+        "editTitle": "Modifica valutazione",
+        "editDescription": "Modifica la bozza simulata. Pubblicare congela una versione immutabile nella dimostrazione.",
+        "steps": {
+          "info": "Informazioni",
+          "config": "Configurazione",
+          "questions": "Domande",
+          "preview": "Anteprima",
+          "publish": "Pubblicazione",
+          "navLabel": "Passaggi della procedura"
+        },
+        "fields": {
+          "title": "Nome",
+          "description": "Descrizione",
+          "kind": "Tipo",
+          "kindTechnical": "Tecnica",
+          "kindPsychometric": "Psicometrica",
+          "instructions": "Istruzioni",
+          "duration": "Durata (minuti)",
+          "maxAttempts": "Tentativi massimi",
+          "expiryNotice": "Nell'assegnazione in dimostrazione, l'invito scade dopo {days} giorni. Questo valore non viene salvato qui."
+        },
+        "errors": {
+          "titleRequired": "Inserisci un nome.",
+          "titleTooLong": "Il nome non può superare {max} caratteri.",
+          "descriptionRequired": "Inserisci una descrizione.",
+          "descriptionTooLong": "La descrizione non può superare {max} caratteri.",
+          "kindRequired": "Scegli il tipo di valutazione.",
+          "instructionsRequired": "Inserisci le istruzioni.",
+          "durationInvalid": "La durata deve essere un intero tra {min} e {max}.",
+          "attemptsInvalid": "I tentativi devono essere un intero tra {min} e {max}.",
+          "questionsRequired": "Aggiungi almeno una domanda compatibile.",
+          "questionsIncompatible": "Ci sono domande incompatibili con il tipo scelto. Rimuovile o cambia il tipo.",
+          "notFoundTitle": "Valutazione non trovata",
+          "notFoundDescription": "L'identificatore non esiste o la valutazione è archiviata e non può essere modificata.",
+          "backToList": "Torna all'elenco",
+          "saveFailed": "Impossibile salvare la bozza dimostrativa. Controlla e riprova."
+        },
+        "questions": {
+          "bankTitle": "Banca disponibile",
+          "attachedTitle": "Domande della valutazione",
+          "attach": "Aggiungi",
+          "remove": "Rimuovi",
+          "moveUp": "Su",
+          "moveDown": "Giù",
+          "addNew": "Crea domanda minima",
+          "emptyBank": "Nessuna domanda compatibile disponibile.",
+          "emptyAttached": "Ancora nessuna domanda in questa valutazione.",
+          "incompatibleBadge": "Incompatibile"
+        },
+        "preview": {
+          "staffTitle": "Riepilogo per il personale",
+          "candidateTitle": "Vista candidato",
+          "questionCount": "{count} domande",
+          "duration": "Durata: {minutes} min",
+          "attempts": "Tentativi: {count}",
+          "expiry": "Scadenza assegnazione (demo): {days} giorni",
+          "totalPoints": "Punteggio totale: {points}",
+          "dimensions": "Dimensioni: {list}",
+          "noDimensions": "Nessuna dimensione",
+          "candidateHint": "Così il candidato vedrà le domande. Non si mostrano risposte corrette né punteggi interni."
+        },
+        "publish": {
+          "summaryTitle": "Pronto per pubblicare",
+          "versionNotice": "Verrà pubblicata la versione {number}. Questo snapshot resterà congelato nella dimostrazione. Modificare dopo creerà una nuova bozza.",
+          "confirmTitle": "Pubblica valutazione",
+          "confirmDescription": "La versione {number} verrà congelata nella dimostrazione. Questo non viene salvato su un server reale.",
+          "confirm": "Pubblica",
+          "cancel": "Annulla"
+        },
+        "clonePublished": {
+          "title": "Crea bozza dalla versione pubblicata",
+          "description": "La versione pubblicata resta intatta. Si aprirà una nuova bozza da modificare nella dimostrazione.",
+          "confirm": "Crea bozza",
+          "cancel": "Annulla"
+        },
+        "actions": {
+          "back": "Indietro",
+          "next": "Avanti",
+          "saveDraft": "Salva bozza",
+          "publish": "Pubblica",
+          "simulateSaveFail": "Simula errore di salvataggio",
+          "saving": "Salvataggio…",
+          "publishing": "Pubblicazione…"
+        },
+        "toasts": {
+          "saved": "Bozza salvata in modalità dimostrazione.",
+          "published": "Valutazione pubblicata in modalità dimostrazione.",
+          "cloned": "È stata creata una bozza dalla versione pubblicata.",
+          "error": "Impossibile completare l'azione dimostrativa."
+        },
+        "detailEditDraft": "Modifica e crea bozza"
       }
     }
   },

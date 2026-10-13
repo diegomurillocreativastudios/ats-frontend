@@ -17,6 +17,7 @@ import {
   waitWhileLoading,
 } from "@/lib/pruebas/mock-store"
 import type {
+  AssessmentKind,
   AssignFailure,
   AssignResult,
   MockAssessmentTest,
@@ -150,6 +151,42 @@ export async function getResultByAssignment(
     throw new MockServiceError("not_found")
   }
   return result
+}
+
+/**
+ * Creates a minimal bank question compatible with the assessment kind.
+ * Technical → single choice; psychometric → Likert.
+ */
+export async function createCompatibleQuestion(
+  assessmentKind: AssessmentKind,
+): Promise<MockQuestion> {
+  await gate()
+  const store = requirePopulatedStore()
+  const id = `q-demo-${store.questions.length + 1}`
+  const question: MockQuestion =
+    assessmentKind === "psychometric"
+      ? {
+          id,
+          kind: "likert",
+          prompt: "Indica tu grado de acuerdo con el enunciado de demostración.",
+          scaleMin: 1,
+          scaleMax: 5,
+          dimension: "Análisis",
+          reversed: false,
+        }
+      : {
+          id,
+          kind: "single_choice",
+          prompt: "Pregunta de demostración: selecciona la opción correcta.",
+          options: [
+            { id: `${id}-a`, label: "Opción A" },
+            { id: `${id}-b`, label: "Opción B" },
+          ],
+          correctOptionId: `${id}-a`,
+          points: 1,
+        }
+  store.questions.push(question)
+  return question
 }
 
 export async function createDraftTest(input: {

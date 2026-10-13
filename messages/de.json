@@ -799,9 +799,100 @@
         "snapshot": "Snapshot",
         "readonlyNotice": "Diese veröffentlichte Version kann hier nicht bearbeitet werden."
       },
-      "editorPlaceholder": {
-        "title": "Bewertungseditor",
-        "description": "Der Erstellungs- und Bearbeitungsassistent wird in einer späteren Phase umgesetzt. Hier wird nur die Route bestätigt."
+      "editor": {
+        "createTitle": "Neue Bewertung",
+        "createDescription": "Demo-Assistent zum Erstellen und Veröffentlichen eines technischen oder psychometrischen Tests.",
+        "editTitle": "Bewertung bearbeiten",
+        "editDescription": "Bearbeite den simulierten Entwurf. Veröffentlichen friert eine unveränderliche Version in der Demo ein.",
+        "steps": {
+          "info": "Informationen",
+          "config": "Konfiguration",
+          "questions": "Fragen",
+          "preview": "Vorschau",
+          "publish": "Veröffentlichung",
+          "navLabel": "Assistentenschritte"
+        },
+        "fields": {
+          "title": "Name",
+          "description": "Beschreibung",
+          "kind": "Typ",
+          "kindTechnical": "Technisch",
+          "kindPsychometric": "Psychometrisch",
+          "instructions": "Anweisungen",
+          "duration": "Dauer (Minuten)",
+          "maxAttempts": "Maximale Versuche",
+          "expiryNotice": "Bei der Zuweisung in der Demo läuft die Einladung nach {days} Tagen ab. Dieser Wert wird hier nicht gespeichert."
+        },
+        "errors": {
+          "titleRequired": "Gib einen Namen ein.",
+          "titleTooLong": "Der Name darf {max} Zeichen nicht überschreiten.",
+          "descriptionRequired": "Gib eine Beschreibung ein.",
+          "descriptionTooLong": "Die Beschreibung darf {max} Zeichen nicht überschreiten.",
+          "kindRequired": "Wähle den Bewertungstyp.",
+          "instructionsRequired": "Gib die Anweisungen ein.",
+          "durationInvalid": "Die Dauer muss eine ganze Zahl zwischen {min} und {max} sein.",
+          "attemptsInvalid": "Die Versuche müssen eine ganze Zahl zwischen {min} und {max} sein.",
+          "questionsRequired": "Füge mindestens eine kompatible Frage hinzu.",
+          "questionsIncompatible": "Einige Fragen sind mit dem gewählten Typ unverträglich. Entferne sie oder ändere den Typ.",
+          "notFoundTitle": "Bewertung nicht gefunden",
+          "notFoundDescription": "Die Kennung existiert nicht oder die Bewertung ist archiviert und kann nicht bearbeitet werden.",
+          "backToList": "Zurück zur Liste",
+          "saveFailed": "Der Demo-Entwurf konnte nicht gespeichert werden. Prüfe und versuche es erneut."
+        },
+        "questions": {
+          "bankTitle": "Verfügbare Bank",
+          "attachedTitle": "Fragen der Bewertung",
+          "attach": "Hinzufügen",
+          "remove": "Entfernen",
+          "moveUp": "Nach oben",
+          "moveDown": "Nach unten",
+          "addNew": "Minimale Frage erstellen",
+          "emptyBank": "Keine kompatiblen Fragen verfügbar.",
+          "emptyAttached": "Noch keine Fragen in dieser Bewertung.",
+          "incompatibleBadge": "Unverträglich"
+        },
+        "preview": {
+          "staffTitle": "Zusammenfassung für Personal",
+          "candidateTitle": "Kandidatensicht",
+          "questionCount": "{count} Fragen",
+          "duration": "Dauer: {minutes} Min.",
+          "attempts": "Versuche: {count}",
+          "expiry": "Ablauf der Zuweisung (Demo): {days} Tage",
+          "totalPoints": "Gesamtpunktzahl: {points}",
+          "dimensions": "Dimensionen: {list}",
+          "noDimensions": "Keine Dimensionen",
+          "candidateHint": "So sieht die Kandidatin die Fragen. Korrekte Antworten und interne Punkte werden nicht angezeigt."
+        },
+        "publish": {
+          "summaryTitle": "Bereit zur Veröffentlichung",
+          "versionNotice": "Version {number} wird veröffentlicht. Dieser Snapshot wird in der Demo eingefroren. Späteres Bearbeiten erzeugt einen neuen Entwurf.",
+          "confirmTitle": "Bewertung veröffentlichen",
+          "confirmDescription": "Version {number} wird in der Demo eingefroren. Dies wird nicht auf einem echten Server gespeichert.",
+          "confirm": "Veröffentlichen",
+          "cancel": "Abbrechen"
+        },
+        "clonePublished": {
+          "title": "Entwurf aus veröffentlichter Version erstellen",
+          "description": "Die veröffentlichte Version bleibt unverändert. Ein neuer Entwurf wird zum Bearbeiten in der Demo geöffnet.",
+          "confirm": "Entwurf erstellen",
+          "cancel": "Abbrechen"
+        },
+        "actions": {
+          "back": "Zurück",
+          "next": "Weiter",
+          "saveDraft": "Entwurf speichern",
+          "publish": "Veröffentlichen",
+          "simulateSaveFail": "Speicherfehler simulieren",
+          "saving": "Wird gespeichert…",
+          "publishing": "Wird veröffentlicht…"
+        },
+        "toasts": {
+          "saved": "Entwurf im Demomodus gespeichert.",
+          "published": "Bewertung im Demomodus veröffentlicht.",
+          "cloned": "Aus der veröffentlichten Version wurde ein Entwurf erstellt.",
+          "error": "Die Demoaktion konnte nicht abgeschlossen werden."
+        },
+        "detailEditDraft": "Bearbeiten und Entwurf erstellen"
       }
     }
   },

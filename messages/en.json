@@ -799,9 +799,100 @@
         "snapshot": "Snapshot",
         "readonlyNotice": "This published version cannot be edited here."
       },
-      "editorPlaceholder": {
-        "title": "Assessment editor",
-        "description": "The create and edit wizard will be implemented in a later phase. For now this only confirms the route."
+      "editor": {
+        "createTitle": "New evaluation",
+        "createDescription": "Demo wizard to create and publish a technical or psychometric test.",
+        "editTitle": "Edit evaluation",
+        "editDescription": "Edit the simulated draft. Publishing freezes an immutable version in the demo.",
+        "steps": {
+          "info": "Information",
+          "config": "Configuration",
+          "questions": "Questions",
+          "preview": "Preview",
+          "publish": "Publication",
+          "navLabel": "Wizard steps"
+        },
+        "fields": {
+          "title": "Name",
+          "description": "Description",
+          "kind": "Type",
+          "kindTechnical": "Technical",
+          "kindPsychometric": "Psychometric",
+          "instructions": "Instructions",
+          "duration": "Duration (minutes)",
+          "maxAttempts": "Maximum attempts",
+          "expiryNotice": "When assigning in the demo, the invitation expires after {days} days. This value is not saved here."
+        },
+        "errors": {
+          "titleRequired": "Enter a name.",
+          "titleTooLong": "The name cannot exceed {max} characters.",
+          "descriptionRequired": "Enter a description.",
+          "descriptionTooLong": "The description cannot exceed {max} characters.",
+          "kindRequired": "Choose the evaluation type.",
+          "instructionsRequired": "Enter the instructions.",
+          "durationInvalid": "Duration must be an integer between {min} and {max}.",
+          "attemptsInvalid": "Attempts must be an integer between {min} and {max}.",
+          "questionsRequired": "Add at least one compatible question.",
+          "questionsIncompatible": "Some questions are incompatible with the selected type. Remove them or change the type.",
+          "notFoundTitle": "Evaluation not found",
+          "notFoundDescription": "The identifier does not exist or the evaluation is archived and cannot be edited.",
+          "backToList": "Back to list",
+          "saveFailed": "Could not save the demo draft. Review and try again."
+        },
+        "questions": {
+          "bankTitle": "Available bank",
+          "attachedTitle": "Evaluation questions",
+          "attach": "Add",
+          "remove": "Remove",
+          "moveUp": "Move up",
+          "moveDown": "Move down",
+          "addNew": "Create minimal question",
+          "emptyBank": "No compatible questions available.",
+          "emptyAttached": "No questions on this evaluation yet.",
+          "incompatibleBadge": "Incompatible"
+        },
+        "preview": {
+          "staffTitle": "Staff summary",
+          "candidateTitle": "Candidate view",
+          "questionCount": "{count} questions",
+          "duration": "Duration: {minutes} min",
+          "attempts": "Attempts: {count}",
+          "expiry": "Assignment expiry (demo): {days} days",
+          "totalPoints": "Total score: {points}",
+          "dimensions": "Dimensions: {list}",
+          "noDimensions": "No dimensions",
+          "candidateHint": "This is how the candidate will see the questions. Correct answers and internal scores are hidden."
+        },
+        "publish": {
+          "summaryTitle": "Ready to publish",
+          "versionNotice": "Version {number} will be published. This snapshot will be frozen in the demo. Editing later creates a new draft.",
+          "confirmTitle": "Publish evaluation",
+          "confirmDescription": "Version {number} will be frozen in the demo. This is not saved on a real server.",
+          "confirm": "Publish",
+          "cancel": "Cancel"
+        },
+        "clonePublished": {
+          "title": "Create draft from published version",
+          "description": "The published version stays intact. A new draft will open for editing in the demo.",
+          "confirm": "Create draft",
+          "cancel": "Cancel"
+        },
+        "actions": {
+          "back": "Back",
+          "next": "Next",
+          "saveDraft": "Save draft",
+          "publish": "Publish",
+          "simulateSaveFail": "Simulate save failure",
+          "saving": "Saving…",
+          "publishing": "Publishing…"
+        },
+        "toasts": {
+          "saved": "Draft saved in demo mode.",
+          "published": "Evaluation published in demo mode.",
+          "cloned": "A draft was created from the published version.",
+          "error": "Could not complete the demo action."
+        },
+        "detailEditDraft": "Edit and create draft"
       }
     }
   },

@@ -4,11 +4,13 @@ import { MOCK_IDS, MOCK_NOW } from "@/lib/pruebas/mock-fixtures"
 import {
   MockServiceError,
   assign,
+  createCompatibleQuestion,
   debugSnapshotStore,
   duplicateTest,
   editPublishedTest,
   getTest,
   listLinks,
+  listQuestions,
   listTests,
   listVersions,
   publishTest,
@@ -106,6 +108,21 @@ describe("publish and edit immutability", () => {
       (item) => item.id === MOCK_IDS.versionTechnicalV1
     )!
     expect(v1.questionIds).toHaveLength(6)
+  })
+})
+
+describe("createCompatibleQuestion", () => {
+  it("creates single choice for technical and likert for psychometric", async () => {
+    setMockScenario("populated")
+    const before = (await listQuestions()).length
+    const technical = await createCompatibleQuestion("technical")
+    expect(technical.kind).toBe("single_choice")
+    const psycho = await createCompatibleQuestion("psychometric")
+    expect(psycho.kind).toBe("likert")
+    if (psycho.kind === "likert") {
+      expect(psycho.dimension).toBe("Análisis")
+    }
+    expect((await listQuestions()).length).toBe(before + 2)
   })
 })
 

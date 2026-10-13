@@ -150,6 +150,8 @@ export function PruebasEvaluationDetail({
   }
 
   const canLink = test.lifecycleStatus === "published"
+  const canEditPublished = test.lifecycleStatus === "published"
+  const canEditDraft = test.lifecycleStatus === "draft"
   const versionLabel = currentVersion
     ? currentVersion.publishedAt
       ? t("detail.versionLabel", { number: currentVersion.versionNumber })
@@ -171,6 +173,22 @@ export function PruebasEvaluationDetail({
             >
               {t("detail.openVersions")}
             </Link>
+            {canEditDraft ? (
+              <Link
+                href={`${PRUEBAS_HOME_HREF}/evaluaciones/${test.id}/editar`}
+                className="inline-flex h-11 items-center rounded-md border border-border bg-background px-4 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+              >
+                {t("actions.edit")}
+              </Link>
+            ) : null}
+            {canEditPublished ? (
+              <Link
+                href={`${PRUEBAS_HOME_HREF}/evaluaciones/${test.id}/editar`}
+                className="inline-flex h-11 items-center rounded-md border border-border bg-background px-4 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+              >
+                {t("editor.detailEditDraft")}
+              </Link>
+            ) : null}
             {canLink ? (
               <Link
                 href={`${PRUEBAS_HOME_HREF}/vinculaciones`}

@@ -799,9 +799,100 @@
         "snapshot": "Instantané",
         "readonlyNotice": "Cette version publiée ne peut pas être modifiée ici."
       },
-      "editorPlaceholder": {
-        "title": "Éditeur d'évaluation",
-        "description": "L'assistant de création et d'édition sera mis en œuvre dans une phase ultérieure. Pour l'instant, cela confirme uniquement la route."
+      "editor": {
+        "createTitle": "Nouvelle évaluation",
+        "createDescription": "Assistant de démonstration pour créer et publier un test technique ou psychométrique.",
+        "editTitle": "Modifier l'évaluation",
+        "editDescription": "Modifiez le brouillon simulé. Publier fige une version immuable dans la démonstration.",
+        "steps": {
+          "info": "Informations",
+          "config": "Configuration",
+          "questions": "Questions",
+          "preview": "Aperçu",
+          "publish": "Publication",
+          "navLabel": "Étapes de l'assistant"
+        },
+        "fields": {
+          "title": "Nom",
+          "description": "Description",
+          "kind": "Type",
+          "kindTechnical": "Technique",
+          "kindPsychometric": "Psychométrique",
+          "instructions": "Instructions",
+          "duration": "Durée (minutes)",
+          "maxAttempts": "Tentatives maximales",
+          "expiryNotice": "Lors de l'affectation en démonstration, l'invitation expire après {days} jours. Cette valeur n'est pas enregistrée ici."
+        },
+        "errors": {
+          "titleRequired": "Saisissez un nom.",
+          "titleTooLong": "Le nom ne peut pas dépasser {max} caractères.",
+          "descriptionRequired": "Saisissez une description.",
+          "descriptionTooLong": "La description ne peut pas dépasser {max} caractères.",
+          "kindRequired": "Choisissez le type d'évaluation.",
+          "instructionsRequired": "Saisissez les instructions.",
+          "durationInvalid": "La durée doit être un entier entre {min} et {max}.",
+          "attemptsInvalid": "Les tentatives doivent être un entier entre {min} et {max}.",
+          "questionsRequired": "Ajoutez au moins une question compatible.",
+          "questionsIncompatible": "Certaines questions sont incompatibles avec le type choisi. Retirez-les ou changez le type.",
+          "notFoundTitle": "Évaluation introuvable",
+          "notFoundDescription": "L'identifiant n'existe pas ou l'évaluation est archivée et ne peut pas être modifiée.",
+          "backToList": "Retour à la liste",
+          "saveFailed": "Impossible d'enregistrer le brouillon de démonstration. Vérifiez et réessayez."
+        },
+        "questions": {
+          "bankTitle": "Banque disponible",
+          "attachedTitle": "Questions de l'évaluation",
+          "attach": "Ajouter",
+          "remove": "Retirer",
+          "moveUp": "Monter",
+          "moveDown": "Descendre",
+          "addNew": "Créer une question minimale",
+          "emptyBank": "Aucune question compatible disponible.",
+          "emptyAttached": "Aucune question dans cette évaluation pour l'instant.",
+          "incompatibleBadge": "Incompatible"
+        },
+        "preview": {
+          "staffTitle": "Résumé pour le personnel",
+          "candidateTitle": "Vue candidat",
+          "questionCount": "{count} questions",
+          "duration": "Durée : {minutes} min",
+          "attempts": "Tentatives : {count}",
+          "expiry": "Expiration d'affectation (démo) : {days} jours",
+          "totalPoints": "Score total : {points}",
+          "dimensions": "Dimensions : {list}",
+          "noDimensions": "Aucune dimension",
+          "candidateHint": "Ainsi le candidat verra les questions. Les réponses correctes et scores internes sont masqués."
+        },
+        "publish": {
+          "summaryTitle": "Prêt à publier",
+          "versionNotice": "La version {number} sera publiée. Cet instantané sera figé dans la démonstration. Modifier ensuite créera un nouveau brouillon.",
+          "confirmTitle": "Publier l'évaluation",
+          "confirmDescription": "La version {number} sera figée dans la démonstration. Ceci n'est pas enregistré sur un vrai serveur.",
+          "confirm": "Publier",
+          "cancel": "Annuler"
+        },
+        "clonePublished": {
+          "title": "Créer un brouillon depuis la version publiée",
+          "description": "La version publiée reste intacte. Un nouveau brouillon s'ouvrira pour l'édition en démonstration.",
+          "confirm": "Créer le brouillon",
+          "cancel": "Annuler"
+        },
+        "actions": {
+          "back": "Retour",
+          "next": "Suivant",
+          "saveDraft": "Enregistrer le brouillon",
+          "publish": "Publier",
+          "simulateSaveFail": "Simuler un échec d'enregistrement",
+          "saving": "Enregistrement…",
+          "publishing": "Publication…"
+        },
+        "toasts": {
+          "saved": "Brouillon enregistré en mode démonstration.",
+          "published": "Évaluation publiée en mode démonstration.",
+          "cloned": "Un brouillon a été créé à partir de la version publiée.",
+          "error": "Impossible de terminer l'action de démonstration."
+        },
+        "detailEditDraft": "Modifier et créer un brouillon"
       }
     }
   },
