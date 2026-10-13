@@ -662,6 +662,147 @@
         "filterEmptyTitle": "Nessuna corrispondenza",
         "filterEmptyDescription": "Nessuna assegnazione soddisfa i filtri. Modificali o puliscili."
       }
+    },
+    "evaluations": {
+      "title": "Valutazioni",
+      "description": "Inventario delle prove con dati di dimostrazione. Solo stati di definizione: bozza, pubblicata e archiviata.",
+      "create": "Nuova valutazione",
+      "search": "Cerca per titolo",
+      "searchPlaceholder": "Nome della valutazione",
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri delle valutazioni",
+        "kind": "Categoria",
+        "status": "Stato",
+        "all": "Tutte",
+        "clear": "Pulisci filtri",
+        "kindTechnical": "Tecnica",
+        "kindPsychometric": "Psicometrica",
+        "statusDraft": "Bozza",
+        "statusPublished": "Pubblicata",
+        "statusArchived": "Archiviata"
+      },
+      "table": {
+        "title": "Titolo",
+        "kind": "Categoria",
+        "status": "Stato",
+        "createdAt": "Creata",
+        "actions": "Azioni",
+        "view": "Vedi",
+        "openActions": "Apri azioni di {title}"
+      },
+      "actions": {
+        "view": "Vedi",
+        "edit": "Modifica bozza",
+        "duplicate": "Duplica",
+        "publish": "Pubblica",
+        "archive": "Archivia",
+        "versions": "Versioni"
+      },
+      "status": {
+        "draft": "Bozza",
+        "published": "Pubblicata",
+        "archived": "Archiviata"
+      },
+      "kind": {
+        "technical": "Tecnica",
+        "psychometric": "Psicometrica"
+      },
+      "questionKind": {
+        "single_choice": "Scelta singola",
+        "multiple_choice": "Scelta multipla",
+        "true_false": "Vero o falso",
+        "likert": "Likert",
+        "numeric": "Numerica",
+        "open": "Aperta"
+      },
+      "duplicateTitle": "Copia di {title}",
+      "confirmPublish": {
+        "title": "Pubblica valutazione",
+        "description": "Una versione viene congelata nella dimostrazione. Modificarla dopo non altera questo snapshot. Non viene salvato su un server reale.",
+        "confirm": "Pubblica",
+        "cancel": "Annulla"
+      },
+      "confirmArchive": {
+        "title": "Archivia valutazione",
+        "description": "La valutazione passerà ad Archiviata nella dimostrazione. Potrai ancora visualizzarla e duplicarla.",
+        "confirm": "Archivia",
+        "cancel": "Annulla"
+      },
+      "toasts": {
+        "published": "Valutazione pubblicata in modalità dimostrazione.",
+        "archived": "Valutazione archiviata in modalità dimostrazione.",
+        "duplicated": "È stata creata una copia in bozza.",
+        "error": "Non è stato possibile completare l'azione di dimostrazione."
+      },
+      "errors": {
+        "not_found": "Valutazione non trovata.",
+        "test_archived": "La valutazione è archiviata e non può essere pubblicata.",
+        "no_draft": "Non c'è una bozza pronta da pubblicare.",
+        "scenario_error": "Il servizio simulato ha restituito un errore."
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Risultati per pagina",
+        "regionAria": "Paginazione delle valutazioni",
+        "summary": "Pagina {page} di {totalPages}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count} valutazioni"
+      },
+      "states": {
+        "loading": "Caricamento valutazioni…",
+        "emptyTitle": "Nessun dato di dimostrazione",
+        "emptyDescription": "Lo scenario simulato è vuoto. Ripristina i dati di dimostrazione per continuare.",
+        "errorTitle": "Impossibile caricare le valutazioni",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna valutazione soddisfa i filtri. Modificali o puliscili.",
+        "notFoundTitle": "Valutazione non trovata",
+        "notFoundDescription": "Questo identificatore non esiste nei dati di dimostrazione.",
+        "backToList": "Torna all'elenco"
+      },
+      "detail": {
+        "title": "Dettaglio valutazione",
+        "summary": "Riepilogo",
+        "configuration": "Configurazione",
+        "questions": "Domande",
+        "links": "Collegamenti alle posizioni",
+        "linkVacancy": "Collega posizione",
+        "linkVacancyDisabled": "Solo le valutazioni pubblicate possono essere collegate.",
+        "instructions": "Istruzioni",
+        "duration": "Durata",
+        "durationValue": "{minutes} min",
+        "maxAttempts": "Tentativi massimi",
+        "versionLabel": "Versione {number}",
+        "draftVersion": "Bozza",
+        "noVersion": "Nessuna configurazione di versione.",
+        "noQuestions": "Questa versione non ha domande.",
+        "noLinks": "Nessuna posizione collegata.",
+        "linkActive": "Attivo",
+        "linkInactive": "Inattivo",
+        "points": "{points} pt",
+        "dimension": "Dimensione: {dimension}",
+        "createdAt": "Creata",
+        "openVersions": "Vedi versioni"
+      },
+      "versions": {
+        "title": "Versioni",
+        "description": "Cronologia delle versioni simulata. Gli snapshot pubblicati sono di sola lettura.",
+        "listLabel": "Cronologia versioni",
+        "selectPrompt": "Seleziona una versione per vedere lo snapshot.",
+        "publishedAt": "Pubblicata {date}",
+        "draftLabel": "Bozza",
+        "versionNumber": "Versione {number}",
+        "snapshot": "Snapshot",
+        "readonlyNotice": "Questa versione pubblicata non può essere modificata qui."
+      },
+      "editorPlaceholder": {
+        "title": "Editor valutazione",
+        "description": "La procedura guidata di creazione e modifica sarà implementata in una fase successiva. Per ora conferma solo il percorso."
+      }
     }
   },
   "CandidatePortal": {

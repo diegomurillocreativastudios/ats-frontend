@@ -662,6 +662,147 @@
         "filterEmptyTitle": "Keine Treffer",
         "filterEmptyDescription": "Keine Zuweisung entspricht den Filtern. Passen Sie sie an oder setzen Sie sie zurück."
       }
+    },
+    "evaluations": {
+      "title": "Bewertungen",
+      "description": "Bewertungsinventar mit Demodaten. Nur Definitionsstatus: Entwurf, veröffentlicht und archiviert.",
+      "create": "Neue Bewertung",
+      "search": "Nach Titel suchen",
+      "searchPlaceholder": "Name der Bewertung",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Filter für Bewertungen",
+        "kind": "Kategorie",
+        "status": "Status",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen",
+        "kindTechnical": "Technisch",
+        "kindPsychometric": "Psychometrisch",
+        "statusDraft": "Entwurf",
+        "statusPublished": "Veröffentlicht",
+        "statusArchived": "Archiviert"
+      },
+      "table": {
+        "title": "Titel",
+        "kind": "Kategorie",
+        "status": "Status",
+        "createdAt": "Erstellt",
+        "actions": "Aktionen",
+        "view": "Ansehen",
+        "openActions": "Aktionen für {title} öffnen"
+      },
+      "actions": {
+        "view": "Ansehen",
+        "edit": "Entwurf bearbeiten",
+        "duplicate": "Duplizieren",
+        "publish": "Veröffentlichen",
+        "archive": "Archivieren",
+        "versions": "Versionen"
+      },
+      "status": {
+        "draft": "Entwurf",
+        "published": "Veröffentlicht",
+        "archived": "Archiviert"
+      },
+      "kind": {
+        "technical": "Technisch",
+        "psychometric": "Psychometrisch"
+      },
+      "questionKind": {
+        "single_choice": "Einzelauswahl",
+        "multiple_choice": "Mehrfachauswahl",
+        "true_false": "Wahr oder falsch",
+        "likert": "Likert",
+        "numeric": "Numerisch",
+        "open": "Offen"
+      },
+      "duplicateTitle": "Kopie von {title}",
+      "confirmPublish": {
+        "title": "Bewertung veröffentlichen",
+        "description": "Eine Version wird in der Demo eingefroren. Späteres Bearbeiten ändert diesen Snapshot nicht. Es wird nichts auf einem echten Server gespeichert.",
+        "confirm": "Veröffentlichen",
+        "cancel": "Abbrechen"
+      },
+      "confirmArchive": {
+        "title": "Bewertung archivieren",
+        "description": "Die Bewertung wird in der Demo archiviert. Sie können sie weiterhin ansehen und duplizieren.",
+        "confirm": "Archivieren",
+        "cancel": "Abbrechen"
+      },
+      "toasts": {
+        "published": "Bewertung im Demo-Modus veröffentlicht.",
+        "archived": "Bewertung im Demo-Modus archiviert.",
+        "duplicated": "Eine Entwurfskopie wurde erstellt.",
+        "error": "Die Demo-Aktion konnte nicht abgeschlossen werden."
+      },
+      "errors": {
+        "not_found": "Die Bewertung wurde nicht gefunden.",
+        "test_archived": "Die Bewertung ist archiviert und kann nicht veröffentlicht werden.",
+        "no_draft": "Es gibt keinen Entwurf zum Veröffentlichen.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben."
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Ergebnisse pro Seite",
+        "regionAria": "Paginierung der Bewertungen",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count} Bewertungen"
+      },
+      "states": {
+        "loading": "Bewertungen werden geladen…",
+        "emptyTitle": "Keine Demodaten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setzen Sie die Demodaten zurück, um fortzufahren.",
+        "errorTitle": "Bewertungen konnten nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Versuchen Sie es erneut.",
+        "retry": "Erneut versuchen",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Bewertung entspricht den Filtern. Passen Sie sie an oder setzen Sie sie zurück.",
+        "notFoundTitle": "Bewertung nicht gefunden",
+        "notFoundDescription": "Diese Kennung existiert nicht in den Demodaten.",
+        "backToList": "Zurück zur Liste"
+      },
+      "detail": {
+        "title": "Bewertungsdetail",
+        "summary": "Zusammenfassung",
+        "configuration": "Konfiguration",
+        "questions": "Fragen",
+        "links": "Stellenverknüpfungen",
+        "linkVacancy": "Stelle verknüpfen",
+        "linkVacancyDisabled": "Nur veröffentlichte Bewertungen können verknüpft werden.",
+        "instructions": "Anweisungen",
+        "duration": "Dauer",
+        "durationValue": "{minutes} Min.",
+        "maxAttempts": "Maximale Versuche",
+        "versionLabel": "Version {number}",
+        "draftVersion": "Entwurf",
+        "noVersion": "Keine Versionskonfiguration.",
+        "noQuestions": "Diese Version hat keine Fragen.",
+        "noLinks": "Keine Stellen verknüpft.",
+        "linkActive": "Aktiv",
+        "linkInactive": "Inaktiv",
+        "points": "{points} Pkt.",
+        "dimension": "Dimension: {dimension}",
+        "createdAt": "Erstellt",
+        "openVersions": "Versionen ansehen"
+      },
+      "versions": {
+        "title": "Versionen",
+        "description": "Simulierter Versionsverlauf. Veröffentlichte Snapshots sind schreibgeschützt.",
+        "listLabel": "Versionsverlauf",
+        "selectPrompt": "Wählen Sie eine Version, um den Snapshot anzuzeigen.",
+        "publishedAt": "Veröffentlicht {date}",
+        "draftLabel": "Entwurf",
+        "versionNumber": "Version {number}",
+        "snapshot": "Snapshot",
+        "readonlyNotice": "Diese veröffentlichte Version kann hier nicht bearbeitet werden."
+      },
+      "editorPlaceholder": {
+        "title": "Bewertungseditor",
+        "description": "Der Erstellungs- und Bearbeitungsassistent wird in einer späteren Phase umgesetzt. Hier wird nur die Route bestätigt."
+      }
     }
   },
   "CandidatePortal": {

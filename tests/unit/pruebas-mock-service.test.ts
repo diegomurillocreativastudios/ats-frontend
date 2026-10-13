@@ -5,9 +5,12 @@ import {
   MockServiceError,
   assign,
   debugSnapshotStore,
+  duplicateTest,
   editPublishedTest,
   getTest,
+  listLinks,
   listTests,
+  listVersions,
   publishTest,
   resetMockStore,
   setMockScenario,
@@ -103,6 +106,51 @@ describe("publish and edit immutability", () => {
       (item) => item.id === MOCK_IDS.versionTechnicalV1
     )!
     expect(v1.questionIds).toHaveLength(6)
+  })
+})
+
+describe("duplicateTest", () => {
+  it("creates a draft copy without mutating the source or copying links", async () => {
+    setMockScenario("populated")
+    const sourceBefore = await getTest(MOCK_IDS.testTechnical)
+    const linksBefore = await listLinks()
+    const sourceVersionsBefore = await listVersions(MOCK_IDS.testTechnical)
+
+    const copy = await duplicateTest(
+      MOCK_IDS.testTechnical,
+      "Copia de Razonamiento lógico",
+    )
+
+    expect(copy.lifecycleStatus).toBe("draft")
+    expect(copy.title).toBe("Copia de Razonamiento lógico")
+    expect(copy.id).not.toBe(MOCK_IDS.testTechnical)
+
+    const sourceAfter = await getTest(MOCK_IDS.testTechnical)
+    expect(sourceAfter).toEqual(sourceBefore)
+
+    const copyVersions = await listVersions(copy.id)
+    expect(copyVersions).toHaveLength(1)
+    expect(copyVersions[0]?.publishedAt).toBeUndefined()
+    expect(copyVersions[0]?.questionIds).toEqual(
+      sourceVersionsBefore.find((item) => item.publishedAt)?.questionIds,
+    )
+
+    const linksAfter = await listLinks()
+    expect(linksAfter).toEqual(linksBefore)
+    expect(
+      linksAfter.every((link) => link.testVersionId !== copyVersions[0]?.id),
+    ).toBe(true)
+  })
+
+  it("duplicates a draft from its unpublished version", async () => {
+    setMockScenario("populated")
+    const draftVersions = await listVersions(MOCK_IDS.testDraft)
+    const draftVersion = draftVersions.find((item) => !item.publishedAt)!
+
+    const copy = await duplicateTest(MOCK_IDS.testDraft, "Copia borrador")
+    const copyVersions = await listVersions(copy.id)
+    expect(copyVersions[0]?.questionIds).toEqual(draftVersion.questionIds)
+    expect(copyVersions[0]?.instructions).toBe(draftVersion.instructions)
   })
 })
 

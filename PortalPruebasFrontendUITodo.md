@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-03 completadas** (kit + mocks + shell + dashboard con datos simulados).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-04 completadas** (kit + mocks + shell + dashboard + evaluaciones listado/detalle/versiones).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -217,14 +217,14 @@ hooks/pruebas/
 
 ### Fase UI-04 — Evaluaciones: listado, detalle y ciclo de vida
 
-- [ ] `/evaluaciones`: tabla Desktop; tarjetas o presentación adaptada en Mobile; búsqueda, filtros y paginación local.
-- [ ] Estados de prueba únicamente: Borrador, Publicada, Archivada.
-- [ ] Acciones según estado: ver, editar borrador, duplicar, publicar, archivar y consultar versiones.
-- [ ] `/evaluaciones/[testId]`: resumen, configuración, preguntas y vínculos; botón para vincular vacante.
-- [ ] `/evaluaciones/[testId]/versiones`: historial simulado de versiones y vista de snapshot publicado.
-- [ ] Confirmar publicación/archivo con diálogo; mostrar Snackbar de demo.
-- [ ] Pantallas loading, vacío, error y entidad inexistente.
-- [ ] Desktop, Tablet, Mobile, incluyendo listado largo y menú de acciones.
+- [x] `/evaluaciones`: tabla Desktop; tarjetas o presentación adaptada en Mobile; búsqueda, filtros y paginación local. 2026-10-13: `PruebasEvaluationsList` + `lib/pruebas/evaluations.ts`.
+- [x] Estados de prueba únicamente: Borrador, Publicada, Archivada.
+- [x] Acciones según estado: ver, editar borrador, duplicar, publicar, archivar y consultar versiones. Matriz en `EVALUATION_ACTIONS_BY_STATUS`; `duplicateTest` en mock-service.
+- [x] `/evaluaciones/[testId]`: resumen, configuración, preguntas y vínculos; botón para vincular vacante (solo publicadas → `/vinculaciones`).
+- [x] `/evaluaciones/[testId]/versiones`: historial simulado de versiones y vista de snapshot publicado (solo lectura).
+- [x] Confirmar publicación/archivo con diálogo; mostrar Snackbar de demo.
+- [x] Pantallas loading, vacío, error y entidad inexistente.
+- [x] Desktop, Tablet, Mobile, incluyendo listado largo y menú de acciones. Tabla `lg+`, tarjetas por debajo; placeholders `nueva` y `editar` para UI-05.
 
 **Criterio:** cambiar estado en mock actualiza las vistas relacionadas sin contradicciones.
 
@@ -380,9 +380,9 @@ hooks/pruebas/
 | Pantalla | Ruta propuesta | Desktop | Tablet | Mobile | Estado UI |
 |---|---|:---:|:---:|:---:|---|
 | Portal Dashboard | `/portal-pruebas` | ☑ | ☑ | ☑ | loading/empty/error |
-| Lista de evaluaciones | `/portal-pruebas/evaluaciones` | ☐ | ☐ | ☐ | loading/empty/error |
+| Lista de evaluaciones | `/portal-pruebas/evaluaciones` | ☑ | ☑ | ☑ | loading/empty/error |
 | Crear / editar (todos los pasos) | `/portal-pruebas/evaluaciones/nueva`, `/[testId]/editar` | ☐ | ☐ | ☐ | draft/validation/error |
-| Detalle y versiones | `/portal-pruebas/evaluaciones/[testId]` | ☐ | ☐ | ☐ | published/archived |
+| Detalle y versiones | `/portal-pruebas/evaluaciones/[testId]` | ☑ | ☑ | ☑ | published/archived |
 | Banco preguntas | `/portal-pruebas/preguntas` | ☐ | ☐ | ☐ | loading/empty/error |
 | Editores de preguntas | `/portal-pruebas/preguntas/nueva`, `/[questionId]/editar` | ☐ | ☐ | ☐ | per kind/errors |
 | Vínculos con vacantes | `/portal-pruebas/vinculaciones` | ☐ | ☐ | ☐ | linked/unlinked/inactive |
@@ -464,3 +464,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - UI-01 añadió `lib/pruebas/*`, `components/pruebas/shared/*` y tests unitarios; sin rutas de producto ni BFF.
 - UI-02 añadió `app/portal-pruebas/` (placeholders), `components/pruebas/layout/*`, clave `pruebas` en selección de portales e i18n; sin BFF.
 - UI-03 reemplazó el placeholder del dashboard con métricas, filtros, gráficas y atención; `lib/pruebas/dashboard.ts` + `getDashboard`; sin BFF.
+- UI-04 reemplazó el placeholder de evaluaciones con listado, detalle y versiones; `duplicateTest` + `lib/pruebas/evaluations.ts`; placeholders de editor para UI-05; sin BFF.

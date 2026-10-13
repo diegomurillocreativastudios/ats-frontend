@@ -662,6 +662,147 @@
         "filterEmptyTitle": "No matches",
         "filterEmptyDescription": "No assignment matches the filters. Adjust or clear them."
       }
+    },
+    "evaluations": {
+      "title": "Assessments",
+      "description": "Assessment inventory with demo data. Definition states only: draft, published, and archived.",
+      "create": "New assessment",
+      "search": "Search by title",
+      "searchPlaceholder": "Assessment name",
+      "filters": {
+        "title": "Filters",
+        "toggle": "Filters",
+        "regionLabel": "Assessment filters",
+        "kind": "Category",
+        "status": "Status",
+        "all": "All",
+        "clear": "Clear filters",
+        "kindTechnical": "Technical",
+        "kindPsychometric": "Psychometric",
+        "statusDraft": "Draft",
+        "statusPublished": "Published",
+        "statusArchived": "Archived"
+      },
+      "table": {
+        "title": "Title",
+        "kind": "Category",
+        "status": "Status",
+        "createdAt": "Created",
+        "actions": "Actions",
+        "view": "View",
+        "openActions": "Open actions for {title}"
+      },
+      "actions": {
+        "view": "View",
+        "edit": "Edit draft",
+        "duplicate": "Duplicate",
+        "publish": "Publish",
+        "archive": "Archive",
+        "versions": "Versions"
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published",
+        "archived": "Archived"
+      },
+      "kind": {
+        "technical": "Technical",
+        "psychometric": "Psychometric"
+      },
+      "questionKind": {
+        "single_choice": "Single choice",
+        "multiple_choice": "Multiple choice",
+        "true_false": "True or false",
+        "likert": "Likert",
+        "numeric": "Numeric",
+        "open": "Open"
+      },
+      "duplicateTitle": "Copy of {title}",
+      "confirmPublish": {
+        "title": "Publish assessment",
+        "description": "A version is frozen in the demo. Editing later does not change this snapshot. Nothing is saved to a real server.",
+        "confirm": "Publish",
+        "cancel": "Cancel"
+      },
+      "confirmArchive": {
+        "title": "Archive assessment",
+        "description": "The assessment will become Archived in the demo. You can still view and duplicate it.",
+        "confirm": "Archive",
+        "cancel": "Cancel"
+      },
+      "toasts": {
+        "published": "Assessment published in demo mode.",
+        "archived": "Assessment archived in demo mode.",
+        "duplicated": "A draft copy was created.",
+        "error": "The demo action could not be completed."
+      },
+      "errors": {
+        "not_found": "The assessment was not found.",
+        "test_archived": "The assessment is archived and cannot be published.",
+        "no_draft": "There is no draft ready to publish.",
+        "scenario_error": "The simulated service returned an error."
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Results per page",
+        "regionAria": "Assessment pagination",
+        "summary": "Page {page} of {totalPages}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count} assessments"
+      },
+      "states": {
+        "loading": "Loading assessments…",
+        "emptyTitle": "No demo data",
+        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "errorTitle": "Could not load assessments",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry",
+        "filterEmptyTitle": "No matches",
+        "filterEmptyDescription": "No assessment matches the filters. Adjust or clear them.",
+        "notFoundTitle": "Assessment not found",
+        "notFoundDescription": "This identifier does not exist in the demo data.",
+        "backToList": "Back to list"
+      },
+      "detail": {
+        "title": "Assessment detail",
+        "summary": "Summary",
+        "configuration": "Configuration",
+        "questions": "Questions",
+        "links": "Vacancy links",
+        "linkVacancy": "Link vacancy",
+        "linkVacancyDisabled": "Only published assessments can be linked.",
+        "instructions": "Instructions",
+        "duration": "Duration",
+        "durationValue": "{minutes} min",
+        "maxAttempts": "Max attempts",
+        "versionLabel": "Version {number}",
+        "draftVersion": "Draft",
+        "noVersion": "No version configuration.",
+        "noQuestions": "This version has no questions.",
+        "noLinks": "No vacancies linked.",
+        "linkActive": "Active",
+        "linkInactive": "Inactive",
+        "points": "{points} pts",
+        "dimension": "Dimension: {dimension}",
+        "createdAt": "Created",
+        "openVersions": "View versions"
+      },
+      "versions": {
+        "title": "Versions",
+        "description": "Simulated version history. Published snapshots are read-only.",
+        "listLabel": "Version history",
+        "selectPrompt": "Select a version to view the snapshot.",
+        "publishedAt": "Published {date}",
+        "draftLabel": "Draft",
+        "versionNumber": "Version {number}",
+        "snapshot": "Snapshot",
+        "readonlyNotice": "This published version cannot be edited here."
+      },
+      "editorPlaceholder": {
+        "title": "Assessment editor",
+        "description": "The create and edit wizard will be implemented in a later phase. For now this only confirms the route."
+      }
     }
   },
   "CandidatePortal": {

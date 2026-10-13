@@ -315,6 +315,57 @@ export async function archiveTest(testId: string): Promise<MockAssessmentTest> {
   return test
 }
 
+/**
+ * Creates a new draft test from an existing one. Does not copy links or assignments.
+ * Source test stays unchanged.
+ */
+export async function duplicateTest(
+  testId: string,
+  title: string,
+): Promise<MockAssessmentTest> {
+  await gate()
+  const store = requirePopulatedStore()
+  const source = store.tests.find((item) => item.id === testId)
+  if (!source) {
+    throw new MockServiceError("not_found")
+  }
+
+  const sourceVersions = store.versions.filter((version) => version.testId === testId)
+  const unpublished = sourceVersions.find((version) => version.publishedAt === undefined)
+  const publishedLatest = [...sourceVersions]
+    .filter((version) => version.publishedAt)
+    .sort((a, b) => b.versionNumber - a.versionNumber)[0]
+  const template = unpublished ?? publishedLatest
+  if (!template) {
+    throw new MockServiceError("no_draft")
+  }
+
+  const newId = `test-dup-${store.tests.length + 1}`
+  const copy: MockAssessmentTest = {
+    id: newId,
+    companyId: source.companyId,
+    title,
+    description: source.description,
+    kind: source.kind,
+    lifecycleStatus: "draft",
+    draftVersion: 0,
+    createdAt: MOCK_NOW,
+  }
+  const draftVersion: MockAssessmentVersion = {
+    id: `ver-${newId}-v0`,
+    testId: newId,
+    versionNumber: 0,
+    instructions: template.instructions,
+    durationMinutes: template.durationMinutes,
+    maxAttempts: template.maxAttempts,
+    questionIds: [...template.questionIds],
+  }
+
+  store.tests.push(copy)
+  store.versions.push(draftVersion)
+  return copy
+}
+
 export async function createLink(input: {
   vacancyId: string
   testVersionId: string

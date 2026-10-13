@@ -662,6 +662,147 @@
         "filterEmptyTitle": "Aucune correspondance",
         "filterEmptyDescription": "Aucune affectation ne correspond aux filtres. Ajustez-les ou effacez-les."
       }
+    },
+    "evaluations": {
+      "title": "Évaluations",
+      "description": "Inventaire des tests avec données de démonstration. États de définition uniquement : brouillon, publiée et archivée.",
+      "create": "Nouvelle évaluation",
+      "search": "Rechercher par titre",
+      "searchPlaceholder": "Nom de l'évaluation",
+      "filters": {
+        "title": "Filtres",
+        "toggle": "Filtres",
+        "regionLabel": "Filtres des évaluations",
+        "kind": "Catégorie",
+        "status": "État",
+        "all": "Toutes",
+        "clear": "Effacer les filtres",
+        "kindTechnical": "Technique",
+        "kindPsychometric": "Psychométrique",
+        "statusDraft": "Brouillon",
+        "statusPublished": "Publiée",
+        "statusArchived": "Archivée"
+      },
+      "table": {
+        "title": "Titre",
+        "kind": "Catégorie",
+        "status": "État",
+        "createdAt": "Créée",
+        "actions": "Actions",
+        "view": "Voir",
+        "openActions": "Ouvrir les actions de {title}"
+      },
+      "actions": {
+        "view": "Voir",
+        "edit": "Modifier le brouillon",
+        "duplicate": "Dupliquer",
+        "publish": "Publier",
+        "archive": "Archiver",
+        "versions": "Versions"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "published": "Publiée",
+        "archived": "Archivée"
+      },
+      "kind": {
+        "technical": "Technique",
+        "psychometric": "Psychométrique"
+      },
+      "questionKind": {
+        "single_choice": "Choix unique",
+        "multiple_choice": "Choix multiple",
+        "true_false": "Vrai ou faux",
+        "likert": "Likert",
+        "numeric": "Numérique",
+        "open": "Ouverte"
+      },
+      "duplicateTitle": "Copie de {title}",
+      "confirmPublish": {
+        "title": "Publier l'évaluation",
+        "description": "Une version est figée dans la démonstration. La modifier plus tard ne change pas cet instantané. Rien n'est enregistré sur un vrai serveur.",
+        "confirm": "Publier",
+        "cancel": "Annuler"
+      },
+      "confirmArchive": {
+        "title": "Archiver l'évaluation",
+        "description": "L'évaluation passera à Archivée dans la démonstration. Vous pourrez encore la consulter et la dupliquer.",
+        "confirm": "Archiver",
+        "cancel": "Annuler"
+      },
+      "toasts": {
+        "published": "Évaluation publiée en mode démonstration.",
+        "archived": "Évaluation archivée en mode démonstration.",
+        "duplicated": "Une copie en brouillon a été créée.",
+        "error": "L'action de démonstration n'a pas pu être terminée."
+      },
+      "errors": {
+        "not_found": "L'évaluation est introuvable.",
+        "test_archived": "L'évaluation est archivée et ne peut pas être publiée.",
+        "no_draft": "Aucun brouillon prêt à publier.",
+        "scenario_error": "Le service simulé a renvoyé une erreur."
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "pageSizeAria": "Résultats par page",
+        "regionAria": "Pagination des évaluations",
+        "summary": "Page {page} sur {totalPages}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "count": "{count} évaluations"
+      },
+      "states": {
+        "loading": "Chargement des évaluations…",
+        "emptyTitle": "Aucune donnée de démonstration",
+        "emptyDescription": "Le scénario simulé est vide. Réinitialisez les données de démonstration pour continuer.",
+        "errorTitle": "Impossible de charger les évaluations",
+        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "retry": "Réessayer",
+        "filterEmptyTitle": "Aucune correspondance",
+        "filterEmptyDescription": "Aucune évaluation ne correspond aux filtres. Ajustez-les ou effacez-les.",
+        "notFoundTitle": "Évaluation introuvable",
+        "notFoundDescription": "Cet identifiant n'existe pas dans les données de démonstration.",
+        "backToList": "Retour à la liste"
+      },
+      "detail": {
+        "title": "Détail de l'évaluation",
+        "summary": "Résumé",
+        "configuration": "Configuration",
+        "questions": "Questions",
+        "links": "Liens avec des postes",
+        "linkVacancy": "Lier un poste",
+        "linkVacancyDisabled": "Seules les évaluations publiées peuvent être liées.",
+        "instructions": "Instructions",
+        "duration": "Durée",
+        "durationValue": "{minutes} min",
+        "maxAttempts": "Tentatives maximales",
+        "versionLabel": "Version {number}",
+        "draftVersion": "Brouillon",
+        "noVersion": "Aucune configuration de version.",
+        "noQuestions": "Cette version n'a pas de questions.",
+        "noLinks": "Aucun poste lié.",
+        "linkActive": "Actif",
+        "linkInactive": "Inactif",
+        "points": "{points} pts",
+        "dimension": "Dimension : {dimension}",
+        "createdAt": "Créée",
+        "openVersions": "Voir les versions"
+      },
+      "versions": {
+        "title": "Versions",
+        "description": "Historique de versions simulé. Les instantanés publiés sont en lecture seule.",
+        "listLabel": "Historique des versions",
+        "selectPrompt": "Sélectionnez une version pour voir l'instantané.",
+        "publishedAt": "Publiée {date}",
+        "draftLabel": "Brouillon",
+        "versionNumber": "Version {number}",
+        "snapshot": "Instantané",
+        "readonlyNotice": "Cette version publiée ne peut pas être modifiée ici."
+      },
+      "editorPlaceholder": {
+        "title": "Éditeur d'évaluation",
+        "description": "L'assistant de création et d'édition sera mis en œuvre dans une phase ultérieure. Pour l'instant, cela confirme uniquement la route."
+      }
     }
   },
   "CandidatePortal": {
