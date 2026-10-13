@@ -1,0 +1,144 @@
+import { afterEach, describe, expect, it } from "vitest"
+
+import { MOCK_IDS, MOCK_NOW } from "@/lib/pruebas/mock-fixtures"
+import {
+  MockServiceError,
+  assign,
+  debugSnapshotStore,
+  editPublishedTest,
+  getTest,
+  listTests,
+  publishTest,
+  resetMockStore,
+  setMockScenario,
+  updateDraftTest,
+} from "@/lib/pruebas/mock-service"
+
+afterEach(() => {
+  resetMockStore()
+})
+
+describe("mock-service scenarios", () => {
+  it("populated lists seeded tests", async () => {
+    setMockScenario("populated")
+    const tests = await listTests()
+    expect(tests.length).toBeGreaterThan(0)
+    expect(tests.some((item) => item.id === MOCK_IDS.testTechnical)).toBe(true)
+  })
+
+  it("empty returns no rows and not_found on get", async () => {
+    setMockScenario("empty")
+    await expect(listTests()).resolves.toEqual([])
+    await expect(getTest(MOCK_IDS.testTechnical)).rejects.toMatchObject({
+      code: "not_found",
+    })
+  })
+
+  it("error rejects with scenario_error without mutating", async () => {
+    setMockScenario("populated")
+    const before = debugSnapshotStore().assignments.length
+    setMockScenario("error")
+    await expect(listTests()).rejects.toBeInstanceOf(MockServiceError)
+    await expect(listTests()).rejects.toMatchObject({ code: "scenario_error" })
+    setMockScenario("populated")
+    expect(debugSnapshotStore().assignments.length).toBe(before)
+  })
+
+  it("loading hangs until the scenario changes", async () => {
+    setMockScenario("loading")
+    let resolved = false
+    const pending = listTests().then((tests) => {
+      resolved = true
+      return tests
+    })
+    await Promise.resolve()
+    expect(resolved).toBe(false)
+    setMockScenario("populated")
+    const tests = await pending
+    expect(resolved).toBe(true)
+    expect(tests.length).toBeGreaterThan(0)
+  })
+})
+
+describe("publish and edit immutability", () => {
+  it("publish freezes the version and edit clones a draft", async () => {
+    setMockScenario("populated")
+    const publishedBefore = debugSnapshotStore().versions.find(
+      (item) => item.id === MOCK_IDS.versionTechnicalV1
+    )!
+    const publishedSnapshot = {
+      publishedAt: publishedBefore.publishedAt,
+      questionIds: [...publishedBefore.questionIds],
+      versionNumber: publishedBefore.versionNumber,
+    }
+
+    const { draft } = await editPublishedTest(MOCK_IDS.testTechnical)
+    expect(draft.publishedAt).toBeUndefined()
+    expect(draft.questionIds).toEqual(publishedSnapshot.questionIds)
+
+    const frozen = debugSnapshotStore().versions.find(
+      (item) => item.id === MOCK_IDS.versionTechnicalV1
+    )!
+    expect(frozen.publishedAt).toBe(publishedSnapshot.publishedAt)
+    expect(frozen.questionIds).toEqual(publishedSnapshot.questionIds)
+    expect(frozen.versionNumber).toBe(publishedSnapshot.versionNumber)
+
+    await updateDraftTest(MOCK_IDS.testTechnical, {
+      title: "Razonamiento lógico (revisión)",
+      questionIds: [MOCK_IDS.qSingle],
+    })
+
+    const stillFrozen = debugSnapshotStore().versions.find(
+      (item) => item.id === MOCK_IDS.versionTechnicalV1
+    )!
+    expect(stillFrozen.questionIds).toHaveLength(6)
+    expect(stillFrozen.questionIds).toEqual(publishedSnapshot.questionIds)
+
+    const republished = await publishTest(MOCK_IDS.testTechnical)
+    expect(republished.versionNumber).toBe(2)
+    expect(republished.publishedAt).toBe(MOCK_NOW)
+    expect(republished.questionIds).toEqual([MOCK_IDS.qSingle])
+
+    const v1 = debugSnapshotStore().versions.find(
+      (item) => item.id === MOCK_IDS.versionTechnicalV1
+    )!
+    expect(v1.questionIds).toHaveLength(6)
+  })
+})
+
+describe("assign all-or-nothing", () => {
+  it("rejects the whole batch when any application is ineligible", async () => {
+    setMockScenario("populated")
+    const before = debugSnapshotStore().assignments.length
+    const result = await assign({
+      vacancyId: MOCK_IDS.vacancyOpen,
+      testVersionId: MOCK_IDS.versionTechnicalV1,
+      applicationIds: [MOCK_IDS.appSofia, MOCK_IDS.appMaria],
+      expiresAt: "2026-10-27T18:00:00.000Z",
+    })
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.failures.some((item) => item.reason === "duplicate_assignment")).toBe(
+        true
+      )
+    }
+    expect(debugSnapshotStore().assignments.length).toBe(before)
+  })
+
+  it("creates assignments when every application is eligible", async () => {
+    setMockScenario("populated")
+    const before = debugSnapshotStore().assignments.length
+    const result = await assign({
+      vacancyId: MOCK_IDS.vacancyOpen,
+      testVersionId: MOCK_IDS.versionTechnicalV1,
+      applicationIds: [MOCK_IDS.appSofia],
+      expiresAt: "2026-10-27T18:00:00.000Z",
+    })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.assignments).toHaveLength(1)
+      expect(result.assignments[0].applicationId).toBe(MOCK_IDS.appSofia)
+    }
+    expect(debugSnapshotStore().assignments.length).toBe(before + 1)
+  })
+})

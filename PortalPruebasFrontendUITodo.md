@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **no se ha implementado código con este documento**.  
+> **Estado:** Plan de trabajo; **Fase UI-00 y UI-01 completadas** (kit + mocks tipados; sin rutas de producto).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -110,31 +110,31 @@ hooks/pruebas/
 
 ### 3.1 Entidades tipadas mínimas
 
-- [ ] `MockCompany { id, name }`.
-- [ ] `MockVacancy { id, companyId, title, status, isDone, isDeleted }`.
-- [ ] `MockCandidateProfile { id, fullName, email }`.
-- [ ] `MockApplication { id, candidateProfileId, vacancyId, stage, status, isActive }`.
-- [ ] `MockAssessmentTest { id, companyId?, title, description, kind, lifecycleStatus, draftVersion, createdAt }`.
-- [ ] `MockAssessmentVersion { id, testId, versionNumber, instructions, durationMinutes, maxAttempts, publishedAt?, questionIds[] }`.
-- [ ] `MockQuestion` unión discriminada: opción única, múltiple, verdadero/falso, Likert, numérica y abierta; configuración de scoring específica por tipo.
-- [ ] `MockAssessmentLink { id, vacancyId, testVersionId, active }`.
-- [ ] `MockAssignment { id, applicationId, testVersionId, status, assignedAt, expiresAt, allowedAttempts }`.
-- [ ] `MockSession { id, assignmentId, attemptNumber, startedAt, deadlineAt, status, answers }`.
-- [ ] `MockResult { id, assignmentId, score?, maxScore?, categoryScores?, dimensionScores?, reviewStatus }`.
-- [ ] `MockReview { assignmentId, questionId, rubric, reviewerNotes?, pointsAwarded?, status }`.
+- [x] `MockCompany { id, name }`.
+- [x] `MockVacancy { id, companyId, title, status, isDone, isDeleted }`.
+- [x] `MockCandidateProfile { id, fullName, email }`.
+- [x] `MockApplication { id, candidateProfileId, vacancyId, stage, status, isActive }`.
+- [x] `MockAssessmentTest { id, companyId?, title, description, kind, lifecycleStatus, draftVersion, createdAt }`.
+- [x] `MockAssessmentVersion { id, testId, versionNumber, instructions, durationMinutes, maxAttempts, publishedAt?, questionIds[] }`.
+- [x] `MockQuestion` unión discriminada: opción única, múltiple, verdadero/falso, Likert, numérica y abierta; configuración de scoring específica por tipo.
+- [x] `MockAssessmentLink { id, vacancyId, testVersionId, active }`.
+- [x] `MockAssignment { id, applicationId, testVersionId, status, assignedAt, expiresAt, allowedAttempts }`.
+- [x] `MockSession { id, assignmentId, attemptNumber, startedAt, deadlineAt, status, answers }`.
+- [x] `MockResult { id, assignmentId, score?, maxScore?, categoryScores?, dimensionScores?, reviewStatus }`.
+- [x] `MockReview { assignmentId, questionId, rubric, reviewerNotes?, pointsAwarded?, status }`.
 
 ### 3.2 Reglas simuladas y consistencia
 
-- [ ] Configurar fixtures **deterministas** y coherentes entre pantallas: mismas vacantes, nombres, cantidad de preguntas, puntuaciones y estados en los tres tamaños.
-- [ ] Publicación = snapshot/version publicada inmutable **en mock**; editar una prueba publicada crea un nuevo borrador/versión.
-- [ ] Distinguir `test.lifecycleStatus` (`draft | published | archived`) de `assignment.status` (`pending | in_progress | completed | expired | cancelled`, con revisión/calificación aparte).
-- [ ] Listar candidatos elegibles **solo** desde `MockApplication` con vacante correcta, postulación activa, estado no final, vacante vigente y versión vinculada activa.
-- [ ] Mostrar errores simulados para vacante cerrada, postulación cerrada, test archivado, duplicados, expiración e intentos agotados.
-- [ ] Utilizar IDs estables; no depender de aleatoriedad para snapshots de diseño/tests.
-- [ ] Implementar un **mock-service asíncrono** (promesas resueltas localmente con latencia configurable) con operaciones de listado, creación, edición, publicación, vínculo, asignación, sesiones, revisión y resultados.
-- [ ] Centralizar todo acceso a datos de demo en `mock-service` para permitir reemplazo posterior por repositorios/servicios HTTP **sin reescribir componentes de presentación**.
-- [ ] Preferir estado de memoria o provider local; si se usa `localStorage`, aislarlo a demo, versionar esquema y ofrecer "Restablecer datos de demostración". Nunca almacenar tokens reales ni datos sensibles.
-- [ ] Manejar loading/empty/error mediante escenarios simulados con UI visible y accesible.
+- [x] Configurar fixtures **deterministas** y coherentes entre pantallas: mismas vacantes, nombres, cantidad de preguntas, puntuaciones y estados en los tres tamaños.
+- [x] Publicación = snapshot/version publicada inmutable **en mock**; editar una prueba publicada crea un nuevo borrador/versión.
+- [x] Distinguir `test.lifecycleStatus` (`draft | published | archived`) de `assignment.status` (`pending | in_progress | completed | expired | cancelled`, con revisión/calificación aparte).
+- [x] Listar candidatos elegibles **solo** desde `MockApplication` con vacante correcta, postulación activa, estado no final, vacante vigente y versión vinculada activa.
+- [ ] Mostrar errores simulados para vacante cerrada, postulación cerrada, test archivado, duplicados, expiración e intentos agotados. *(UI-01: códigos tipados en `eligibility` / `mock-service`; pantallas en fases posteriores.)*
+- [x] Utilizar IDs estables; no depender de aleatoriedad para snapshots de diseño/tests.
+- [x] Implementar un **mock-service asíncrono** (promesas resueltas localmente con latencia configurable) con operaciones de listado, creación, edición, publicación, vínculo, asignación, sesiones, revisión y resultados.
+- [x] Centralizar todo acceso a datos de demo en `mock-service` para permitir reemplazo posterior por repositorios/servicios HTTP **sin reescribir componentes de presentación**.
+- [x] Preferir estado de memoria o provider local; si se usa `localStorage`, aislarlo a demo, versionar esquema y ofrecer "Restablecer datos de demostración". Nunca almacenar tokens reales ni datos sensibles. *(UI-01: memoria + `resetMockStore`; sin `localStorage`.)*
+- [x] Manejar loading/empty/error mediante escenarios simulados con UI visible y accesible. *(Escenarios en servicio + `EmptyState` / `ErrorState` / `LoadingSkeleton`; cableado a páginas en UI-02+.)*
 
 ---
 
@@ -165,7 +165,7 @@ hooks/pruebas/
 **Mapa confirmado**
 
 - Sección 2 vigente, sin cambios de nombre. Entrada: `/portal-pruebas` (dashboard).
-- Carpetas a crear en fases posteriores (aún no existen): `app/portal-pruebas/`, `components/pruebas/`, `lib/pruebas/`, `hooks/pruebas/`, y demo `app/pruebas/[demoToken]/`.
+- Carpetas: `lib/pruebas/` y `components/pruebas/shared/` existen desde UI-01. Pendientes: `app/portal-pruebas/`, `hooks/pruebas/`, demo `app/pruebas/[demoToken]/`.
 - `pruebas` no está en `PORTAL_KEYS` (`candidate | opportunities | rrhh | admin`). Enchufar portal y home es UI-02; no tocar `lib/portal-access.ts` en UI-00.
 - Baterías: ruta `baterias/` solo si se activa UI-14.
 
@@ -174,13 +174,13 @@ hooks/pruebas/
 
 ### Fase UI-01 — Design system y mocks
 
-- [ ] Crear tipos y fixtures de dominio de UI.
-- [ ] Crear `mock-service` y control de escenarios: poblado/vacío/error/cargando.
-- [ ] Crear utilidades de formato de fecha, duración, puntuaciones y estados.
-- [ ] Crear `AssessmentStatusBadge`, `AssessmentTypeBadge`, `AssessmentCard`, `MockDemoNotice`, `EmptyState`, `ErrorState`, `LoadingSkeleton`, `ConfirmDialog` reutilizando `components/ui`.
-- [ ] Revisar consistencia tipográfica Inter / Manrope, tokens verdes y glass real.
-- [ ] Verificar contraste de texto y botones; evitar grises hardcodeados de bajo contraste.
-- [ ] Preparar diagramas/semántica de estados sin mezclar evaluación con asignación.
+- [x] Crear tipos y fixtures de dominio de UI. 2026-10-13: `lib/pruebas/types.ts`, `mock-fixtures.ts` (MOCK_NOW, 6 preguntas técnicas, Análisis = 81).
+- [x] Crear `mock-service` y control de escenarios: poblado/vacío/error/cargando. `mock-store.ts` + `mock-service.ts`; publicar congela; editar clona; asignar todo-o-nada.
+- [x] Crear utilidades de formato de fecha, duración, puntuaciones y estados. `formatters.ts` (sin frases de producto / sin next-intl).
+- [x] Crear `AssessmentStatusBadge`, `AssessmentTypeBadge`, `AssessmentCard`, `MockDemoNotice`, `EmptyState`, `ErrorState`, `LoadingSkeleton`, `ConfirmDialog` reutilizando `components/ui`. Solo `ConfirmDialog` es cliente.
+- [x] Revisar consistencia tipográfica Inter / Manrope, tokens verdes y glass real. `font-sans` / `font-display`, `glass-card`, verdes de marca.
+- [x] Verificar contraste de texto y botones; evitar grises hardcodeados de bajo contraste. Sin `#9CA39C` / `#6B7280` / `#F3F4F6`; pastillas con `text-emerald-900` / `text-foreground`.
+- [x] Preparar diagramas/semántica de estados sin mezclar evaluación con asignación. Uniones tipadas + `AssessmentStatusBadge` solo `draft | published | archived`.
 
 **Entregable:** kit UI y servicios simulados tipados.  
 **Criterio:** ningún componente visual depende de una API; variantes consistentes y accesibles.
@@ -461,4 +461,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - `PortalPruebasTodo.md`: las reglas de elegibilidad y versión son fuente funcional; backend nativo sin Evalart.
 - Auditoría frontend `APPLICANTTREE_FRONTEND_UI_AUDIT.md`: reutilización de shell, tokens CSS, BFF e i18n.
 - Auditoría de diseño `PortalPruebasDesignAudit.md`: corregir gaps funcionales, responsive y accesibilidad al traducir Pen.dev a UI real.
-- **No se ha escrito ni modificado código de aplicación por la creación de este documento.**
+- UI-01 añadió `lib/pruebas/*`, `components/pruebas/shared/*` y tests unitarios; sin rutas de producto ni BFF.

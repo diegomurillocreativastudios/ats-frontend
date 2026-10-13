@@ -1,0 +1,504 @@
+import { evaluateEligibility } from "@/lib/pruebas/eligibility"
+import { MOCK_NOW } from "@/lib/pruebas/mock-fixtures"
+import {
+  emptyStoreSnapshot,
+  getMockRuntime,
+  getMockStore,
+  replaceMockStore,
+  resetMockStore,
+  setMockLatencyMs,
+  setMockScenario,
+  snapshotStore,
+  waitWhileLoading,
+} from "@/lib/pruebas/mock-store"
+import type {
+  AssignFailure,
+  AssignResult,
+  MockAssessmentTest,
+  MockAssessmentVersion,
+  MockAssignment,
+  MockPruebasStore,
+  MockQuestion,
+  MockResult,
+  MockReview,
+  MockSession,
+} from "@/lib/pruebas/types"
+
+export {
+  resetMockStore,
+  setMockLatencyMs,
+  setMockScenario,
+} from "@/lib/pruebas/mock-store"
+
+export class MockServiceError extends Error {
+  readonly code: string
+
+  constructor(code: string, message = code) {
+    super(message)
+    this.name = "MockServiceError"
+    this.code = code
+  }
+}
+
+async function gate(): Promise<MockPruebasStore> {
+  await waitWhileLoading()
+  const { scenario, latencyMs } = getMockRuntime()
+  if (latencyMs > 0) {
+    await delay(latencyMs)
+  }
+  if (scenario === "error") {
+    throw new MockServiceError("scenario_error")
+  }
+  if (scenario === "empty") {
+    return emptyStoreSnapshot()
+  }
+  return getMockStore()
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+function requirePopulatedStore(): MockPruebasStore {
+  const { scenario } = getMockRuntime()
+  if (scenario === "empty") {
+    throw new MockServiceError("not_found")
+  }
+  if (scenario === "error") {
+    throw new MockServiceError("scenario_error")
+  }
+  return getMockStore()
+}
+
+export async function listTests(): Promise<MockAssessmentTest[]> {
+  const store = await gate()
+  return [...store.tests]
+}
+
+export async function getTest(testId: string): Promise<MockAssessmentTest> {
+  const store = await gate()
+  const test = store.tests.find((item) => item.id === testId)
+  if (!test) {
+    throw new MockServiceError("not_found")
+  }
+  return test
+}
+
+export async function listQuestions(): Promise<MockQuestion[]> {
+  const store = await gate()
+  return [...store.questions]
+}
+
+export async function listVersions(testId?: string): Promise<MockAssessmentVersion[]> {
+  const store = await gate()
+  if (!testId) {
+    return [...store.versions]
+  }
+  return store.versions.filter((version) => version.testId === testId)
+}
+
+export async function listLinks() {
+  const store = await gate()
+  return [...store.links]
+}
+
+export async function listAssignments() {
+  const store = await gate()
+  return [...store.assignments]
+}
+
+export async function listApplications() {
+  const store = await gate()
+  return [...store.applications]
+}
+
+export async function listVacancies() {
+  const store = await gate()
+  return [...store.vacancies]
+}
+
+export async function listCandidates() {
+  const store = await gate()
+  return [...store.candidates]
+}
+
+export async function listResults(): Promise<MockResult[]> {
+  const store = await gate()
+  return [...store.results]
+}
+
+export async function getResultByAssignment(
+  assignmentId: string
+): Promise<MockResult> {
+  const store = await gate()
+  const result = store.results.find((item) => item.assignmentId === assignmentId)
+  if (!result) {
+    throw new MockServiceError("not_found")
+  }
+  return result
+}
+
+export async function createDraftTest(input: {
+  title: string
+  description: string
+  kind: MockAssessmentTest["kind"]
+  companyId?: string
+}): Promise<MockAssessmentTest> {
+  await gate()
+  const store = requirePopulatedStore()
+  const test: MockAssessmentTest = {
+    id: `test-${store.tests.length + 1}`,
+    companyId: input.companyId,
+    title: input.title,
+    description: input.description,
+    kind: input.kind,
+    lifecycleStatus: "draft",
+    draftVersion: 0,
+    createdAt: MOCK_NOW,
+  }
+  const version: MockAssessmentVersion = {
+    id: `ver-${test.id}-v0`,
+    testId: test.id,
+    versionNumber: 0,
+    instructions: "",
+    durationMinutes: 45,
+    maxAttempts: 1,
+    questionIds: [],
+  }
+  store.tests.push(test)
+  store.versions.push(version)
+  return test
+}
+
+export async function updateDraftTest(
+  testId: string,
+  patch: Partial<
+    Pick<MockAssessmentTest, "title" | "description" | "kind" | "companyId">
+  > & {
+    instructions?: string
+    durationMinutes?: number
+    maxAttempts?: number
+    questionIds?: string[]
+  }
+): Promise<MockAssessmentTest> {
+  await gate()
+  const store = requirePopulatedStore()
+  const test = store.tests.find((item) => item.id === testId)
+  if (!test) {
+    throw new MockServiceError("not_found")
+  }
+  if (test.lifecycleStatus !== "draft") {
+    throw new MockServiceError("not_draft")
+  }
+  if (patch.title !== undefined) test.title = patch.title
+  if (patch.description !== undefined) test.description = patch.description
+  if (patch.kind !== undefined) test.kind = patch.kind
+  if (patch.companyId !== undefined) test.companyId = patch.companyId
+
+  const draft = store.versions.find(
+    (version) =>
+      version.testId === testId && version.publishedAt === undefined
+  )
+  if (draft) {
+    if (patch.instructions !== undefined) draft.instructions = patch.instructions
+    if (patch.durationMinutes !== undefined) {
+      draft.durationMinutes = patch.durationMinutes
+    }
+    if (patch.maxAttempts !== undefined) draft.maxAttempts = patch.maxAttempts
+    if (patch.questionIds !== undefined) draft.questionIds = [...patch.questionIds]
+  }
+  return test
+}
+
+/**
+ * Freezes the current draft into an immutable published version.
+ */
+export async function publishTest(testId: string): Promise<MockAssessmentVersion> {
+  await gate()
+  const store = requirePopulatedStore()
+  const test = store.tests.find((item) => item.id === testId)
+  if (!test) {
+    throw new MockServiceError("not_found")
+  }
+  if (test.lifecycleStatus === "archived") {
+    throw new MockServiceError("test_archived")
+  }
+  const draft = store.versions.find(
+    (version) =>
+      version.testId === testId && version.publishedAt === undefined
+  )
+  if (!draft) {
+    throw new MockServiceError("no_draft")
+  }
+  const nextNumber =
+    Math.max(
+      0,
+      ...store.versions
+        .filter((version) => version.testId === testId && version.publishedAt)
+        .map((version) => version.versionNumber)
+    ) + 1
+
+  draft.versionNumber = nextNumber
+  draft.publishedAt = MOCK_NOW
+  test.lifecycleStatus = "published"
+  test.draftVersion = nextNumber
+  return { ...draft, questionIds: [...draft.questionIds] }
+}
+
+/**
+ * Clones the latest published version into a new draft. Published snapshot stays frozen.
+ */
+export async function editPublishedTest(
+  testId: string
+): Promise<{ test: MockAssessmentTest; draft: MockAssessmentVersion }> {
+  await gate()
+  const store = requirePopulatedStore()
+  const test = store.tests.find((item) => item.id === testId)
+  if (!test) {
+    throw new MockServiceError("not_found")
+  }
+  if (test.lifecycleStatus !== "published") {
+    throw new MockServiceError("not_published")
+  }
+  const published = store.versions
+    .filter((version) => version.testId === testId && version.publishedAt)
+    .sort((a, b) => b.versionNumber - a.versionNumber)[0]
+  if (!published) {
+    throw new MockServiceError("no_published_version")
+  }
+  const snapshot = { ...published, questionIds: [...published.questionIds] }
+  const draft: MockAssessmentVersion = {
+    id: `ver-${testId}-draft-${published.versionNumber + 1}`,
+    testId,
+    versionNumber: 0,
+    instructions: published.instructions,
+    durationMinutes: published.durationMinutes,
+    maxAttempts: published.maxAttempts,
+    questionIds: [...published.questionIds],
+  }
+  store.versions.push(draft)
+  test.lifecycleStatus = "draft"
+  // Ensure published row was not mutated
+  const stillFrozen = store.versions.find((version) => version.id === published.id)
+  if (
+    !stillFrozen ||
+    stillFrozen.publishedAt !== snapshot.publishedAt ||
+    stillFrozen.questionIds.join("|") !== snapshot.questionIds.join("|")
+  ) {
+    throw new MockServiceError("publish_integrity")
+  }
+  return { test, draft }
+}
+
+export async function archiveTest(testId: string): Promise<MockAssessmentTest> {
+  await gate()
+  const store = requirePopulatedStore()
+  const test = store.tests.find((item) => item.id === testId)
+  if (!test) {
+    throw new MockServiceError("not_found")
+  }
+  test.lifecycleStatus = "archived"
+  return test
+}
+
+export async function createLink(input: {
+  vacancyId: string
+  testVersionId: string
+}): Promise<MockPruebasStore["links"][number]> {
+  await gate()
+  const store = requirePopulatedStore()
+  const version = store.versions.find((item) => item.id === input.testVersionId)
+  if (!version?.publishedAt) {
+    throw new MockServiceError("version_not_published")
+  }
+  const vacancy = store.vacancies.find((item) => item.id === input.vacancyId)
+  if (!vacancy) {
+    throw new MockServiceError("not_found")
+  }
+  const link = {
+    id: `link-${store.links.length + 1}`,
+    vacancyId: input.vacancyId,
+    testVersionId: input.testVersionId,
+    active: true,
+  }
+  store.links.push(link)
+  return link
+}
+
+export async function setLinkActive(
+  linkId: string,
+  active: boolean
+): Promise<MockPruebasStore["links"][number]> {
+  await gate()
+  const store = requirePopulatedStore()
+  const link = store.links.find((item) => item.id === linkId)
+  if (!link) {
+    throw new MockServiceError("not_found")
+  }
+  link.active = active
+  return link
+}
+
+/**
+ * All-or-nothing batch assign. No rows created when any application fails eligibility.
+ */
+export async function assign(input: {
+  vacancyId: string
+  testVersionId: string
+  applicationIds: string[]
+  expiresAt: string
+  allowedAttempts?: number
+}): Promise<AssignResult> {
+  await gate()
+  const store = requirePopulatedStore()
+  const version = store.versions.find((item) => item.id === input.testVersionId)
+  if (!version) {
+    throw new MockServiceError("not_found")
+  }
+  const test = store.tests.find((item) => item.id === version.testId)
+  if (!test) {
+    throw new MockServiceError("not_found")
+  }
+  const link = store.links.find(
+    (item) =>
+      item.vacancyId === input.vacancyId &&
+      item.testVersionId === input.testVersionId
+  )
+  if (!link) {
+    throw new MockServiceError("link_missing")
+  }
+  const vacancy = store.vacancies.find((item) => item.id === input.vacancyId)
+  if (!vacancy) {
+    throw new MockServiceError("not_found")
+  }
+
+  const failures: AssignFailure[] = []
+  const pending: MockAssignment[] = []
+
+  for (const applicationId of input.applicationIds) {
+    const application = store.applications.find((item) => item.id === applicationId)
+    if (!application) {
+      failures.push({ applicationId, reason: "application_inactive" })
+      continue
+    }
+    const result = evaluateEligibility({
+      application,
+      vacancy,
+      link,
+      test,
+      version,
+      existingAssignments: store.assignments,
+      targetVacancyId: input.vacancyId,
+    })
+    if (!result.ok) {
+      failures.push({ applicationId, reason: result.reason })
+      continue
+    }
+    pending.push({
+      id: `asg-${store.assignments.length + pending.length + 1}`,
+      applicationId,
+      testVersionId: input.testVersionId,
+      status: "pending",
+      assignedAt: MOCK_NOW,
+      expiresAt: input.expiresAt,
+      allowedAttempts: input.allowedAttempts ?? 1,
+    })
+  }
+
+  if (failures.length > 0) {
+    return { ok: false, failures }
+  }
+
+  store.assignments.push(...pending)
+  return { ok: true, assignments: pending.map((item) => ({ ...item })) }
+}
+
+export async function createSession(input: {
+  assignmentId: string
+  startedAt: string
+  deadlineAt: string
+}): Promise<MockSession> {
+  await gate()
+  const store = requirePopulatedStore()
+  const assignment = store.assignments.find(
+    (item) => item.id === input.assignmentId
+  )
+  if (!assignment) {
+    throw new MockServiceError("not_found")
+  }
+  const attemptNumber =
+    store.sessions.filter((session) => session.assignmentId === assignment.id)
+      .length + 1
+  const session: MockSession = {
+    id: `ses-${store.sessions.length + 1}`,
+    assignmentId: assignment.id,
+    attemptNumber,
+    startedAt: input.startedAt,
+    deadlineAt: input.deadlineAt,
+    status: "in_progress",
+    answers: [],
+  }
+  store.sessions.push(session)
+  assignment.status = "in_progress"
+  return session
+}
+
+export async function submitSession(
+  sessionId: string
+): Promise<MockSession> {
+  await gate()
+  const store = requirePopulatedStore()
+  const session = store.sessions.find((item) => item.id === sessionId)
+  if (!session) {
+    throw new MockServiceError("not_found")
+  }
+  session.status = "submitted"
+  const assignment = store.assignments.find(
+    (item) => item.id === session.assignmentId
+  )
+  if (assignment) {
+    assignment.status = "completed"
+  }
+  return session
+}
+
+export async function saveReview(review: MockReview): Promise<MockReview> {
+  await gate()
+  const store = requirePopulatedStore()
+  const index = store.reviews.findIndex(
+    (item) =>
+      item.assignmentId === review.assignmentId &&
+      item.questionId === review.questionId
+  )
+  if (index >= 0) {
+    store.reviews[index] = review
+  } else {
+    store.reviews.push(review)
+  }
+  return review
+}
+
+export async function upsertResult(result: MockResult): Promise<MockResult> {
+  await gate()
+  const store = requirePopulatedStore()
+  const index = store.results.findIndex(
+    (item) => item.assignmentId === result.assignmentId
+  )
+  if (index >= 0) {
+    store.results[index] = result
+  } else {
+    store.results.push(result)
+  }
+  return result
+}
+
+/** Debug helper for tests: deep clone of current store. */
+export function debugSnapshotStore(): MockPruebasStore {
+  return snapshotStore()
+}
+
+export function debugReplaceStore(next: MockPruebasStore): void {
+  replaceMockStore(next)
+}
