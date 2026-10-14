@@ -39,7 +39,10 @@ import {
   listQuestionsForTest,
   updateQuestionForTest,
 } from "@/lib/api/recruiter-assessments-questions"
-import { normalizeAssessmentQuestion } from "@/lib/api/recruiter-assessments-tests"
+import {
+  normalizeAssessmentQuestion,
+  type AssessmentQuestionView,
+} from "@/lib/api/recruiter-assessments-tests"
 
 beforeEach(() => {
   listAssessmentTests.mockReset()
@@ -120,17 +123,17 @@ describe("get/create/update for test", () => {
 
 describe("filterQuestionsLocally", () => {
   it("filters by kind and query", () => {
-    const rows = [
+    const rows: AssessmentQuestionView[] = [
       {
         id: "1",
-        kind: "open" as const,
+        kind: "open",
         prompt: "Describe leadership",
         rubric: "x",
         maxPoints: 5,
       },
       {
         id: "2",
-        kind: "likert" as const,
+        kind: "likert",
         prompt: "I adapt quickly",
         scaleMin: 1,
         scaleMax: 5,
