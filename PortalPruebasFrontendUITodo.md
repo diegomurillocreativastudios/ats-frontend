@@ -482,8 +482,9 @@ Al finalizar entrega: resumen, rutas/archivos, comprobación responsive, pruebas
 
 ## 7. Preparación obligatoria para futuro ToDo de integración (NO IMPLEMENTAR AHORA)
 
-- [ ] Documentar mapping previsto entre tipos mock y entidades/DTOs reales .NET.
-- [ ] Inventariar cada llamada esperada: pruebas, versiones, preguntas, vínculos, elegibles, asignaciones, sesiones, guardado, envío, revisión, resultados y reportes.
+- [x] Documentar mapping previsto entre tipos mock y entidades/DTOs reales .NET. (parcial: preguntas — mappers en `recruiter-assessments-tests.ts`; banco UI = preguntas del `openDraft` de una prueba via `tests/{testId}`)
+- [x] Inventariar llamadas de **preguntas**: anidadas a `GET/POST/PATCH/DELETE …/tests/{testId}/questions…` (no hay banco top-level). UI banco = selector de prueba + draft.
+- [ ] Inventariar el resto de llamadas esperadas: vínculos, elegibles, asignaciones, sesiones, guardado, envío, revisión, resultados y reportes.
 - [ ] Registrar estados y errores que deberá resolver backend (401/403/404/409/422/429, vencimiento, duplicado, concurrencia).
 - [ ] Registrar decisiones de token firmado/guest flow, expiración, intentos y seguridad multiempresa.
 - [ ] Definir sustitución por adaptadores `lib/api/pruebas-*` usando BFF same-origin y CSRF al llegar a la etapa de conexión.

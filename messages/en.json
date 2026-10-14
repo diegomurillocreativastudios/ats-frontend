@@ -910,12 +910,12 @@
     },
     "questionsBank": {
       "title": "Question bank",
-      "description": "Reusable demo questions for technical and psychometric assessments.",
+      "description": "Questions on an assessment draft. Choose a test to list, create, and edit.",
       "create": "New question",
       "createTitle": "New question",
       "editTitle": "Edit question",
       "editorDescription": "Configure the type and fields. The preview shows what the candidate will see.",
-      "publishedWarning": "This question is part of at least one published version. Changes will appear in those versions because the demo stores the identifier, not a copy of the prompt.",
+      "publishedWarning": "If this question is already used in a published version, saving creates a copy (new identifier). Historical results do not change.",
       "search": "Search by prompt",
       "searchPlaceholder": "Question text",
       "filters": {
@@ -924,7 +924,9 @@
         "regionLabel": "Question bank filters",
         "kind": "Type",
         "all": "All",
-        "clear": "Clear filters"
+        "clear": "Clear filters",
+        "test": "Assessment",
+        "selectTest": "Select an assessment"
       },
       "kind": {
         "single_choice": "Single choice",
@@ -975,9 +977,9 @@
       },
       "hints": {
         "multipleChoiceScoring": "Scoring is all-or-nothing: points are awarded only if all correct options and no incorrect ones are selected.",
-        "likertScale": "The demo Likert scale is fixed from 1 to 5. There is no correct answer or points.",
-        "numericDemo": "Tolerance is demo-only. Real scoring arrives when the backend is connected.",
-        "openReview": "Open answers require manual review. That queue will be implemented in a later phase."
+        "likertScale": "The Likert scale is fixed from 1 to 5. There is no correct answer or points.",
+        "numericDemo": "Tolerance defines the accepted margin around the expected value.",
+        "openReview": "Open answers require manual review in the review queue."
       },
       "validation": {
         "promptRequired": "Enter a prompt.",
@@ -1010,29 +1012,37 @@
       },
       "discard": {
         "title": "Discard changes",
-        "description": "There are unsaved changes. If you leave now, they will be lost in this demo.",
+        "description": "There are unsaved changes. If you leave now, they will be lost.",
         "confirm": "Discard",
         "cancel": "Keep editing"
       },
       "toasts": {
-        "saved": "Question saved in demo mode.",
-        "error": "Could not complete the demo action."
+        "saved": "Question saved.",
+        "cloned": "A copy of the question was saved because it was used in a published version.",
+        "error": "Could not complete the action."
       },
       "errors": {
-        "scenario_error": "The simulated service returned an error.",
+        "scenario_error": "The request could not be completed.",
         "not_found": "Question not found."
       },
       "states": {
         "loading": "Loading the question bank…",
-        "emptyTitle": "No demo questions",
-        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "emptyTitle": "No questions on this draft",
+        "emptyDescription": "Add the first question to the selected assessment.",
         "errorTitle": "Could not load the bank",
-        "errorDescription": "The simulated service returned an error. Try again.",
+        "errorDescription": "There was a problem loading questions. Try again.",
         "retry": "Retry",
         "filterEmptyTitle": "No matches",
         "filterEmptyDescription": "No questions match the filters. Adjust or clear the filters.",
         "notFoundTitle": "Question not found",
-        "notFoundDescription": "There is no question with that identifier in the demo."
+        "notFoundDescription": "There is no question with that identifier, or you do not have access.",
+        "noTestsTitle": "No assessments",
+        "noTestsDescription": "Create an assessment to add questions to its draft.",
+        "createTest": "Create assessment",
+        "selectTestTitle": "Select an assessment",
+        "selectTestDescription": "Questions live on each test draft. Choose one to continue.",
+        "missingTestTitle": "Assessment required",
+        "missingTestDescription": "Open the bank from a selected assessment to create or edit questions."
       }
     },
     "links": {

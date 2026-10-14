@@ -21,6 +21,15 @@ export const QUESTION_KINDS: readonly QuestionKind[] = [
   "open",
 ] as const
 
+/** Bank MVP kinds (excludes numeric — not supported by BE yet). */
+export const BANK_QUESTION_KINDS: readonly QuestionKind[] = [
+  "single_choice",
+  "multiple_choice",
+  "true_false",
+  "likert",
+  "open",
+] as const
+
 export const PROMPT_MAX = 500
 export const POINTS_MIN = 1
 export const POINTS_MAX = 100

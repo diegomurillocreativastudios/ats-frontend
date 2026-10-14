@@ -14,7 +14,10 @@ const TESTS_PATH = "/api/recruiter/assessments/tests"
 
 export type AssessmentTestView = MockAssessmentTest
 export type AssessmentVersionView = MockAssessmentVersion
-export type AssessmentQuestionView = MockQuestion
+/** UI question plus optional draft-link id used by reorder. */
+export type AssessmentQuestionView = MockQuestion & {
+  versionQuestionId?: string
+}
 
 export interface AssessmentTestDetailView {
   test: AssessmentTestView
@@ -238,9 +241,25 @@ function mapStatus(raw: string | null): AssessmentLifecycleStatus {
   return STATUS_FROM_API[raw] ?? "draft"
 }
 
-function mapQuestionKind(raw: string | null): QuestionKind | null {
-  if (!raw) return null
-  return QUESTION_KIND_FROM_API[raw] ?? null
+/** BE enum: SingleChoice=0 … OpenText=4 */
+const QUESTION_KIND_FROM_NUMBER: Record<number, QuestionKind> = {
+  0: "single_choice",
+  1: "multiple_choice",
+  2: "true_false",
+  3: "likert",
+  4: "open",
+}
+
+function mapQuestionKind(raw: string | number | null): QuestionKind | null {
+  if (raw == null) return null
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return QUESTION_KIND_FROM_NUMBER[raw] ?? null
+  }
+  const asString = String(raw).trim()
+  if (/^\d+$/.test(asString)) {
+    return QUESTION_KIND_FROM_NUMBER[Number(asString)] ?? null
+  }
+  return QUESTION_KIND_FROM_API[asString] ?? null
 }
 
 export function normalizeAssessmentTest(
@@ -278,31 +297,79 @@ function mapOptions(raw: unknown): MockQuestionOption[] {
       const record = asRecord(item)
       if (!record) return null
       const id =
-        pickString(record, ["id", "optionId"]) ?? `opt-${index + 1}`
-      const label = pickString(record, ["label", "text", "value"]) ?? ""
+        pickString(record, ["id", "optionId", "Id", "OptionId"]) ??
+        `opt-${index + 1}`
+      const label =
+        pickString(record, ["label", "text", "value", "Label", "Text", "Value"]) ??
+        ""
       return { id, label }
     })
     .filter((item): item is MockQuestionOption => item != null)
 }
 
+function pickOptionsRaw(record: Record<string, unknown>): unknown {
+  return record.options ?? record.Options
+}
+
+function correctIdsFromOptions(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .map((item) => {
+      const record = asRecord(item)
+      if (!record) return null
+      const isCorrect =
+        pickBoolean(record, ["isCorrect", "IsCorrect", "correct", "Correct"]) ??
+        false
+      if (!isCorrect) return null
+      return pickString(record, ["id", "optionId", "Id", "OptionId"])
+    })
+    .filter((value): value is string => Boolean(value))
+}
+
 export function normalizeAssessmentQuestion(
   raw: unknown,
 ): AssessmentQuestionView | null {
-  const record = asRecord(raw)
+  const wrapped = asRecord(raw)
+  const nestedQuestion = wrapped
+    ? (asRecord(wrapped.question) ?? asRecord(wrapped.Question))
+    : null
+  const record = nestedQuestion ?? wrapped
   if (!record) return null
-  const id = pickString(record, ["id", "questionId"])
+  const versionQuestionId =
+    pickString(record, ["versionQuestionId", "VersionQuestionId"]) ?? undefined
+  // Prefer questionId when the DTO is a version link (also has versionQuestionId / id).
+  const id =
+    pickString(record, ["questionId", "QuestionId"]) ??
+    pickString(record, ["id", "Id"])
   if (!id) return null
-  const kind = mapQuestionKind(
-    pickString(record, ["type", "kind", "questionType"]),
-  )
+  const typeRaw = record.type ?? record.Type ?? record.kind ?? record.Kind ??
+    record.questionType ?? record.QuestionType
+  const kind =
+    typeof typeRaw === "number"
+      ? mapQuestionKind(typeRaw)
+      : mapQuestionKind(
+          typeRaw != null && String(typeRaw).trim() !== ""
+            ? String(typeRaw).trim()
+            : null,
+        )
   if (!kind) return null
-  const prompt = pickString(record, ["prompt", "text", "stem"]) ?? ""
+  const prompt =
+    pickString(record, ["prompt", "text", "stem", "Prompt", "Text", "Stem"]) ??
+    ""
+  const optionsRaw = pickOptionsRaw(record)
+  const linkMeta = versionQuestionId ? { versionQuestionId } : {}
 
   switch (kind) {
     case "single_choice": {
-      const options = mapOptions(record.options)
+      const options = mapOptions(optionsRaw)
+      const fromFlags = correctIdsFromOptions(optionsRaw)
       const correctOptionId =
-        pickString(record, ["correctOptionId", "correctOption"]) ??
+        pickString(record, [
+          "correctOptionId",
+          "correctOption",
+          "CorrectOptionId",
+        ]) ??
+        fromFlags[0] ??
         options[0]?.id ??
         ""
       return {
@@ -311,38 +378,65 @@ export function normalizeAssessmentQuestion(
         prompt,
         options,
         correctOptionId,
-        points: Math.max(0, pickNumber(record, ["points", "score"], 1)),
+        points: Math.max(
+          0,
+          pickNumber(record, ["points", "score", "Points", "Score"], 1),
+        ),
+        ...linkMeta,
       }
     }
     case "multiple_choice": {
-      const options = mapOptions(record.options)
-      const correctRaw = record.correctOptionIds ?? record.correctOptions
-      const correctOptionIds = Array.isArray(correctRaw)
+      const options = mapOptions(optionsRaw)
+      const correctRaw =
+        record.correctOptionIds ??
+        record.correctOptions ??
+        record.CorrectOptionIds ??
+        record.CorrectOptions
+      const fromArray = Array.isArray(correctRaw)
         ? correctRaw.map((value) => String(value)).filter(Boolean)
         : []
+      const fromFlags = correctIdsFromOptions(optionsRaw)
+      const correctOptionIds =
+        fromArray.length > 0
+          ? fromArray
+          : fromFlags.length > 0
+            ? fromFlags
+            : options[0]
+              ? [options[0].id]
+              : []
       return {
         id,
         kind,
         prompt,
         options,
-        correctOptionIds:
-          correctOptionIds.length > 0
-            ? correctOptionIds
-            : options[0]
-              ? [options[0].id]
-              : [],
-        points: Math.max(0, pickNumber(record, ["points", "score"], 1)),
+        correctOptionIds,
+        points: Math.max(
+          0,
+          pickNumber(record, ["points", "score", "Points", "Score"], 1),
+        ),
+        ...linkMeta,
       }
     }
     case "true_false": {
       const correct =
-        pickBoolean(record, ["correct", "isCorrect", "expected"]) ?? true
+        pickBoolean(record, [
+          "correct",
+          "isCorrect",
+          "expected",
+          "Correct",
+          "IsCorrect",
+          "Expected",
+        ]) ?? true
       return {
         id,
         kind,
         prompt,
         correct,
-        points: Math.max(0, pickNumber(record, ["points", "score"], 1)),
+        points: Math.max(
+          0,
+          pickNumber(record, ["points", "score", "Points", "Score"], 1),
+        ),
+        ...linkMeta,
       }
     }
     case "likert": {
@@ -352,8 +446,25 @@ export function normalizeAssessmentQuestion(
         prompt,
         scaleMin: 1,
         scaleMax: 5,
-        dimension: pickString(record, ["dimension", "trait"]) ?? "—",
-        reversed: pickBoolean(record, ["reversed", "isReversed"]) ?? false,
+        dimension:
+          pickString(record, [
+            "dimensionKey",
+            "dimension",
+            "trait",
+            "DimensionKey",
+            "Dimension",
+            "Trait",
+          ]) ?? "—",
+        reversed:
+          pickBoolean(record, [
+            "reverseScored",
+            "reversed",
+            "isReversed",
+            "ReverseScored",
+            "Reversed",
+            "IsReversed",
+          ]) ?? false,
+        ...linkMeta,
       }
     }
     case "numeric": {
@@ -361,9 +472,17 @@ export function normalizeAssessmentQuestion(
         id,
         kind,
         prompt,
-        expected: pickNumber(record, ["expected", "expectedValue"], 0),
-        tolerance: pickNumber(record, ["tolerance"], 0),
-        points: Math.max(0, pickNumber(record, ["points", "score"], 1)),
+        expected: pickNumber(
+          record,
+          ["expected", "expectedValue", "Expected", "ExpectedValue"],
+          0,
+        ),
+        tolerance: pickNumber(record, ["tolerance", "Tolerance"], 0),
+        points: Math.max(
+          0,
+          pickNumber(record, ["points", "score", "Points", "Score"], 1),
+        ),
+        ...linkMeta,
       }
     }
     case "open": {
@@ -371,8 +490,22 @@ export function normalizeAssessmentQuestion(
         id,
         kind,
         prompt,
-        rubric: pickString(record, ["rubric", "scoringRubric"]) ?? "",
-        maxPoints: Math.max(0, pickNumber(record, ["maxPoints", "points"], 1)),
+        rubric:
+          pickString(record, [
+            "rubric",
+            "scoringRubric",
+            "Rubric",
+            "ScoringRubric",
+          ]) ?? "",
+        maxPoints: Math.max(
+          0,
+          pickNumber(
+            record,
+            ["maxPoints", "points", "MaxPoints", "Points"],
+            1,
+          ),
+        ),
+        ...linkMeta,
       }
     }
   }
@@ -541,7 +674,10 @@ export function normalizeVersionSnapshot(
   return { version, questions }
 }
 
-function questionToApiBody(question: MockQuestion): Record<string, unknown> {
+/** Outbound wire body for BE (no option ids — server assigns GUIDs). */
+export function questionToApiBody(
+  question: MockQuestion,
+): Record<string, unknown> {
   const base = {
     type: QUESTION_KIND_TO_API[question.kind],
     prompt: question.prompt,
@@ -551,22 +687,26 @@ function questionToApiBody(question: MockQuestion): Record<string, unknown> {
       return {
         ...base,
         options: question.options.map((option) => ({
-          id: option.id,
           label: option.label,
+          value: option.label,
+          isCorrect: option.id === question.correctOptionId,
+          weight: 1,
         })),
-        correctOptionId: question.correctOptionId,
         points: question.points,
       }
-    case "multiple_choice":
+    case "multiple_choice": {
+      const correct = new Set(question.correctOptionIds)
       return {
         ...base,
         options: question.options.map((option) => ({
-          id: option.id,
           label: option.label,
+          value: option.label,
+          isCorrect: correct.has(option.id),
+          weight: 1,
         })),
-        correctOptionIds: question.correctOptionIds,
         points: question.points,
       }
+    }
     case "true_false":
       return {
         ...base,
@@ -578,8 +718,8 @@ function questionToApiBody(question: MockQuestion): Record<string, unknown> {
         ...base,
         scaleMin: question.scaleMin,
         scaleMax: question.scaleMax,
-        dimension: question.dimension,
-        reversed: question.reversed,
+        dimensionKey: question.dimension,
+        reverseScored: question.reversed,
       }
     case "numeric":
       return {
@@ -595,6 +735,10 @@ function questionToApiBody(question: MockQuestion): Record<string, unknown> {
         maxPoints: question.maxPoints,
       }
   }
+}
+
+export function questionKindToApi(kind: QuestionKind): string {
+  return QUESTION_KIND_TO_API[kind]
 }
 
 export function buildCompatibleQuestionDraft(
@@ -739,6 +883,21 @@ export async function getAssessmentVersionSnapshot(
   return snapshot
 }
 
+function pickQuestionFromDetailOrRaw(
+  raw: unknown,
+  fallbackId?: string,
+): AssessmentQuestionView | null {
+  const direct = normalizeAssessmentQuestion(raw)
+  if (direct) return direct
+  const detail = normalizeAssessmentTestDetail(raw)
+  if (!detail || detail.currentQuestions.length === 0) return null
+  if (fallbackId) {
+    const match = detail.currentQuestions.find((item) => item.id === fallbackId)
+    if (match) return match
+  }
+  return detail.currentQuestions[detail.currentQuestions.length - 1] ?? null
+}
+
 export async function createAssessmentQuestion(
   testId: string,
   question: MockQuestion,
@@ -747,7 +906,7 @@ export async function createAssessmentQuestion(
     testPath(testId, "/questions"),
     questionToApiBody(question),
   )
-  const created = normalizeAssessmentQuestion(raw)
+  const created = pickQuestionFromDetailOrRaw(raw)
   if (!created) {
     throw new Error("Respuesta de pregunta inválida")
   }
@@ -763,7 +922,7 @@ export async function updateAssessmentQuestion(
     testPath(testId, `/questions/${encodeURIComponent(questionId)}`),
     questionToApiBody(question),
   )
-  const updated = normalizeAssessmentQuestion(raw)
+  const updated = pickQuestionFromDetailOrRaw(raw, questionId)
   if (!updated) {
     return { ...question, id: questionId }
   }
@@ -779,11 +938,28 @@ export async function deleteAssessmentQuestion(
   )
 }
 
+/**
+ * Reorders draft questions. Pass version-link ids when available
+ * (`versionQuestionId` from the detail DTO); falls back to question ids.
+ */
 export async function reorderAssessmentQuestions(
   testId: string,
-  questionIds: string[],
+  orderedIds: string[],
 ): Promise<void> {
   await apiClient.put(testPath(testId, "/questions/order"), {
-    questionIds,
+    versionQuestionIds: orderedIds,
+    questionIds: orderedIds,
+  })
+}
+
+/** Resolve reorder payload ids preferring versionQuestionId. */
+export function resolveVersionQuestionOrderIds(
+  orderedQuestionIds: string[],
+  questions: readonly AssessmentQuestionView[],
+): string[] {
+  const byId = new Map(questions.map((question) => [question.id, question]))
+  return orderedQuestionIds.map((id) => {
+    const question = byId.get(id)
+    return question?.versionQuestionId ?? id
   })
 }

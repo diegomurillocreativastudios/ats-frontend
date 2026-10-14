@@ -910,12 +910,12 @@
     },
     "questionsBank": {
       "title": "Banque de questions",
-      "description": "Questions de démonstration réutilisables pour les évaluations techniques et psychométriques.",
+      "description": "Questions du brouillon d’une évaluation. Choisissez une épreuve pour lister, créer et modifier.",
       "create": "Nouvelle question",
       "createTitle": "Nouvelle question",
       "editTitle": "Modifier la question",
       "editorDescription": "Configurez le type et les champs. L’aperçu montre ce que verra le candidat.",
-      "publishedWarning": "Cette question fait partie d’au moins une version publiée. Les modifications y apparaîtront, car la démo enregistre l’identifiant et non une copie de l’énoncé.",
+      "publishedWarning": "Si cette question est déjà utilisée dans une version publiée, l’enregistrement crée une copie (nouvel identifiant). Les résultats historiques ne changent pas.",
       "search": "Rechercher par énoncé",
       "searchPlaceholder": "Texte de la question",
       "filters": {
@@ -924,7 +924,9 @@
         "regionLabel": "Filtres de la banque de questions",
         "kind": "Type",
         "all": "Tous",
-        "clear": "Effacer les filtres"
+        "clear": "Effacer les filtres",
+        "test": "Évaluation",
+        "selectTest": "Sélectionnez une évaluation"
       },
       "kind": {
         "single_choice": "Choix unique",
@@ -975,9 +977,9 @@
       },
       "hints": {
         "multipleChoiceScoring": "Le score est tout ou rien : les points sont accordés seulement si toutes les options correctes et aucune incorrecte sont cochées.",
-        "likertScale": "L’échelle Likert de démonstration est fixe de 1 à 5. Pas de bonne réponse ni de points.",
-        "numericDemo": "La tolérance est uniquement pour la démo. Le moteur réel arrivera avec le backend.",
-        "openReview": "Les réponses ouvertes nécessitent une révision manuelle. Cette file sera ajoutée plus tard."
+        "likertScale": "L’échelle Likert est fixe de 1 à 5. Pas de bonne réponse ni de points.",
+        "numericDemo": "La tolérance définit la marge acceptée autour de la valeur attendue.",
+        "openReview": "Les réponses ouvertes nécessitent une révision manuelle dans la file de révision."
       },
       "validation": {
         "promptRequired": "Saisissez un énoncé.",
@@ -1010,29 +1012,37 @@
       },
       "discard": {
         "title": "Abandonner les modifications",
-        "description": "Il y a des modifications non enregistrées. Si vous quittez maintenant, elles seront perdues dans cette démo.",
+        "description": "Il y a des modifications non enregistrées. Si vous quittez maintenant, elles seront perdues.",
         "confirm": "Abandonner",
         "cancel": "Continuer l’édition"
       },
       "toasts": {
-        "saved": "Question enregistrée en mode démonstration.",
-        "error": "Impossible de terminer l’action de démonstration."
+        "saved": "Question enregistrée.",
+        "cloned": "Une copie de la question a été enregistrée car elle était utilisée dans une version publiée.",
+        "error": "Impossible de terminer l’action."
       },
       "errors": {
-        "scenario_error": "Le service simulé a renvoyé une erreur.",
+        "scenario_error": "La demande n’a pas pu être terminée.",
         "not_found": "Question introuvable."
       },
       "states": {
         "loading": "Chargement de la banque de questions…",
-        "emptyTitle": "Aucune question de démonstration",
-        "emptyDescription": "Le scénario simulé est vide. Réinitialisez les données de démonstration pour continuer.",
+        "emptyTitle": "Aucune question dans ce brouillon",
+        "emptyDescription": "Ajoutez la première question à l’évaluation sélectionnée.",
         "errorTitle": "Impossible de charger la banque",
-        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "errorDescription": "Un problème est survenu lors du chargement des questions. Réessayez.",
         "retry": "Réessayer",
         "filterEmptyTitle": "Aucun résultat",
         "filterEmptyDescription": "Aucune question ne correspond aux filtres. Ajustez ou effacez les filtres.",
         "notFoundTitle": "Question introuvable",
-        "notFoundDescription": "Il n’existe pas de question avec cet identifiant dans la démo."
+        "notFoundDescription": "Il n’existe pas de question avec cet identifiant, ou vous n’y avez pas accès.",
+        "noTestsTitle": "Aucune évaluation",
+        "noTestsDescription": "Créez une évaluation pour ajouter des questions à son brouillon.",
+        "createTest": "Créer une évaluation",
+        "selectTestTitle": "Sélectionnez une évaluation",
+        "selectTestDescription": "Les questions vivent dans le brouillon de chaque épreuve. Choisissez-en une pour continuer.",
+        "missingTestTitle": "Évaluation manquante",
+        "missingTestDescription": "Ouvrez la banque depuis une évaluation sélectionnée pour créer ou modifier des questions."
       }
     },
     "links": {

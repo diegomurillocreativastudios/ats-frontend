@@ -910,12 +910,12 @@
     },
     "questionsBank": {
       "title": "Banca delle domande",
-      "description": "Domande di dimostrazione riutilizzabili per valutazioni tecniche e psicometriche.",
+      "description": "Domande della bozza di una valutazione. Scegli una prova per elencare, creare e modificare.",
       "create": "Nuova domanda",
       "createTitle": "Nuova domanda",
       "editTitle": "Modifica domanda",
       "editorDescription": "Configura il tipo e i campi. L’anteprima mostra ciò che vedrà il candidato.",
-      "publishedWarning": "Questa domanda fa parte di almeno una versione pubblicata. Le modifiche si vedranno lì perché la demo salva l’identificatore, non una copia del testo.",
+      "publishedWarning": "Se questa domanda è già usata in una versione pubblicata, il salvataggio crea una copia (nuovo identificatore). I risultati storici non cambiano.",
       "search": "Cerca per testo",
       "searchPlaceholder": "Testo della domanda",
       "filters": {
@@ -924,7 +924,9 @@
         "regionLabel": "Filtri della banca delle domande",
         "kind": "Tipo",
         "all": "Tutti",
-        "clear": "Cancella filtri"
+        "clear": "Cancella filtri",
+        "test": "Valutazione",
+        "selectTest": "Seleziona una valutazione"
       },
       "kind": {
         "single_choice": "Scelta singola",
@@ -975,9 +977,9 @@
       },
       "hints": {
         "multipleChoiceScoring": "Il punteggio è tutto o niente: i punti solo se si selezionano tutte le opzioni corrette e nessuna errata.",
-        "likertScale": "La scala Likert di demo è fissa da 1 a 5. Non ci sono risposta corretta né punti.",
-        "numericDemo": "La tolleranza è solo dimostrativa. Il motore reale arriverà con il backend.",
-        "openReview": "Le risposte aperte richiedono revisione manuale. Quella coda arriverà in una fase successiva."
+        "likertScale": "La scala Likert è fissa da 1 a 5. Non ci sono risposta corretta né punti.",
+        "numericDemo": "La tolleranza definisce il margine accettato rispetto al valore atteso.",
+        "openReview": "Le risposte aperte richiedono revisione manuale nella coda di revisione."
       },
       "validation": {
         "promptRequired": "Inserisci un testo.",
@@ -1010,29 +1012,37 @@
       },
       "discard": {
         "title": "Annulla le modifiche",
-        "description": "Ci sono modifiche non salvate. Se esci ora, andranno perse in questa demo.",
+        "description": "Ci sono modifiche non salvate. Se esci ora, andranno perse.",
         "confirm": "Annulla",
         "cancel": "Continua a modificare"
       },
       "toasts": {
-        "saved": "Domanda salvata in modalità dimostrazione.",
-        "error": "Impossibile completare l’azione di dimostrazione."
+        "saved": "Domanda salvata.",
+        "cloned": "È stata salvata una copia della domanda perché era usata in una versione pubblicata.",
+        "error": "Impossibile completare l’azione."
       },
       "errors": {
-        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "scenario_error": "Non è stato possibile completare la richiesta.",
         "not_found": "Domanda non trovata."
       },
       "states": {
         "loading": "Caricamento della banca delle domande…",
-        "emptyTitle": "Nessuna domanda di dimostrazione",
-        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati di dimostrazione per continuare.",
+        "emptyTitle": "Nessuna domanda in questa bozza",
+        "emptyDescription": "Aggiungi la prima domanda alla valutazione selezionata.",
         "errorTitle": "Impossibile caricare la banca",
-        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "errorDescription": "Si è verificato un problema nel caricamento delle domande. Riprova.",
         "retry": "Riprova",
         "filterEmptyTitle": "Nessuna corrispondenza",
         "filterEmptyDescription": "Nessuna domanda soddisfa i filtri. Modifica o cancella i filtri.",
         "notFoundTitle": "Domanda non trovata",
-        "notFoundDescription": "Non esiste una domanda con questo identificatore nella demo."
+        "notFoundDescription": "Non esiste una domanda con questo identificatore oppure non hai accesso.",
+        "noTestsTitle": "Nessuna valutazione",
+        "noTestsDescription": "Crea una valutazione per aggiungere domande alla sua bozza.",
+        "createTest": "Crea valutazione",
+        "selectTestTitle": "Seleziona una valutazione",
+        "selectTestDescription": "Le domande stanno nella bozza di ogni prova. Scegline una per continuare.",
+        "missingTestTitle": "Valutazione mancante",
+        "missingTestDescription": "Apri la banca da una valutazione selezionata per creare o modificare domande."
       }
     },
     "links": {

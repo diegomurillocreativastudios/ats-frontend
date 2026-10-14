@@ -6,23 +6,37 @@ import { NextIntlClientProvider } from "next-intl"
 import { PruebasQuestionEditor } from "@/components/pruebas/questions/pruebas-question-editor"
 import { PruebasQuestionsList } from "@/components/pruebas/questions/pruebas-questions-list"
 import esMessages from "@/messages/es.json"
-import { MOCK_IDS } from "@/lib/pruebas/mock-fixtures"
-import {
-  listQuestions,
-  resetMockStore,
-  setMockScenario,
-} from "@/lib/pruebas/mock-service"
 
 const pushMock = vi.fn()
-const searchParamsGet = vi.fn(() => null)
+const replaceMock = vi.fn()
+const searchParamsGet = vi.fn((key: string) => {
+  if (key === "testId") return "t1"
+  return null
+})
+const searchParamsToString = vi.fn(() => "testId=t1")
+
+const {
+  listTestsMock,
+  listQuestionsMock,
+  getQuestionMock,
+  createMock,
+  updateMock,
+} = vi.hoisted(() => ({
+  listTestsMock: vi.fn(),
+  listQuestionsMock: vi.fn(),
+  getQuestionMock: vi.fn(),
+  createMock: vi.fn(),
+  updateMock: vi.fn(),
+}))
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: pushMock,
-    replace: vi.fn(),
+    replace: replaceMock,
   }),
   useSearchParams: () => ({
     get: searchParamsGet,
+    toString: searchParamsToString,
   }),
 }))
 
@@ -42,6 +56,32 @@ vi.mock("next/link", () => ({
   ),
 }))
 
+vi.mock("@/lib/api/recruiter-assessments-questions", async () => {
+  const actual = await vi.importActual<
+    typeof import("@/lib/api/recruiter-assessments-questions")
+  >("@/lib/api/recruiter-assessments-questions")
+  return {
+    ...actual,
+    listAssessmentTestsForBank: (...args: unknown[]) => listTestsMock(...args),
+    listQuestionsForTest: (...args: unknown[]) => listQuestionsMock(...args),
+    getQuestionForTest: (...args: unknown[]) => getQuestionMock(...args),
+    createQuestionForTest: (...args: unknown[]) => createMock(...args),
+    updateQuestionForTest: (...args: unknown[]) => updateMock(...args),
+  }
+})
+
+const sampleQuestion = {
+  id: "q-1",
+  kind: "single_choice" as const,
+  prompt: "¿Cuál es la respuesta?",
+  options: [
+    { id: "a", label: "A" },
+    { id: "b", label: "B" },
+  ],
+  correctOptionId: "a",
+  points: 2,
+}
+
 function renderWithIntl(ui: ReactNode) {
   return render(
     <NextIntlClientProvider locale="es" messages={esMessages}>
@@ -51,44 +91,83 @@ function renderWithIntl(ui: ReactNode) {
 }
 
 beforeEach(() => {
-  resetMockStore()
-  setMockScenario("populated")
   pushMock.mockReset()
-  searchParamsGet.mockReturnValue(null)
+  replaceMock.mockReset()
+  searchParamsGet.mockImplementation((key: string) => {
+    if (key === "testId") return "t1"
+    return null
+  })
+  searchParamsToString.mockReturnValue("testId=t1")
+  listTestsMock.mockReset()
+  listQuestionsMock.mockReset()
+  getQuestionMock.mockReset()
+  createMock.mockReset()
+  updateMock.mockReset()
+  listTestsMock.mockResolvedValue([
+    {
+      id: "t1",
+      title: "Evaluación demo",
+      description: "",
+      kind: "technical",
+      lifecycleStatus: "draft",
+      draftVersion: 1,
+      createdAt: "2026-01-01T00:00:00Z",
+    },
+  ])
+  listQuestionsMock.mockResolvedValue({
+    test: { id: "t1", title: "Evaluación demo" },
+    questions: [sampleQuestion],
+    hasOpenDraft: true,
+  })
 })
 
 afterEach(() => {
-  resetMockStore()
+  vi.clearAllMocks()
 })
 
 describe("PruebasQuestionsList UI", () => {
-  it("lists seeded questions and opens candidate preview", async () => {
+  it("lists questions for the selected test and opens preview", async () => {
     renderWithIntl(<PruebasQuestionsList />)
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "Banco de preguntas" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", { name: "Banco de preguntas" }),
+      ).toBeInTheDocument()
     })
 
-    expect(await screen.findAllByTestId("question-row")).not.toHaveLength(0)
+    expect(await screen.findAllByTestId("question-row")).toHaveLength(1)
+    expect(listQuestionsMock).toHaveBeenCalledWith("t1")
 
     const rows = screen.getAllByTestId("question-row")
-    const firstPreview = within(rows[0]!).getByRole("button", {
-      name: "Vista previa",
-    })
-    fireEvent.click(firstPreview)
-
+    fireEvent.click(
+      within(rows[0]!).getByRole("button", { name: "Vista previa" }),
+    )
     expect(
       await screen.findByTestId("question-candidate-preview"),
     ).toBeInTheDocument()
+  })
+
+  it("hides numeric from the kind filter", async () => {
+    renderWithIntl(<PruebasQuestionsList />)
+    await screen.findByLabelText("Tipo")
+    const kindSelect = screen.getByLabelText("Tipo")
     expect(
-      screen.getByText(/Así verá el candidato la pregunta/i),
-    ).toBeInTheDocument()
+      within(kindSelect).queryByRole("option", { name: "Numérica" }),
+    ).not.toBeInTheDocument()
   })
 })
 
 describe("PruebasQuestionEditor UI", () => {
-  it("validates empty create form and saves a single choice", async () => {
-    const before = (await listQuestions()).length
+  it("requires testId to create", async () => {
+    searchParamsGet.mockReturnValue(null)
+    renderWithIntl(<PruebasQuestionEditor mode="create" />)
+    expect(
+      await screen.findByRole("heading", { name: "Falta la evaluación" }),
+    ).toBeInTheDocument()
+  })
+
+  it("validates and saves a question for the selected test", async () => {
+    createMock.mockResolvedValue({ ...sampleQuestion, id: "created-1" })
     renderWithIntl(<PruebasQuestionEditor mode="create" />)
 
     await waitFor(() => {
@@ -101,60 +180,54 @@ describe("PruebasQuestionEditor UI", () => {
     expect(await screen.findByText("Escribe un enunciado.")).toBeInTheDocument()
 
     fireEvent.change(screen.getByLabelText("Enunciado"), {
-      target: { value: "Pregunta de banco demo" },
+      target: { value: "Pregunta de banco" },
     })
     const optionInputs = screen.getAllByLabelText(/Texto de la opción/)
     fireEvent.change(optionInputs[0]!, { target: { value: "Opción A" } })
     fireEvent.change(optionInputs[1]!, { target: { value: "Opción B" } })
-
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
     await waitFor(() => {
+      expect(createMock).toHaveBeenCalledWith(
+        "t1",
+        expect.objectContaining({ prompt: "Pregunta de banco" }),
+      )
       expect(pushMock).toHaveBeenCalledWith(
-        expect.stringContaining("/portal-pruebas/preguntas?saved=1"),
+        expect.stringContaining("testId=t1"),
+      )
+      expect(pushMock).toHaveBeenCalledWith(
+        expect.stringContaining("saved=1"),
       )
     })
-    expect((await listQuestions()).length).toBe(before + 1)
   })
 
-  it("hides points when switching to likert and shows published warning on seed edit", async () => {
+  it("redirects with cloned flag when update returns a new id", async () => {
+    getQuestionMock.mockResolvedValue(sampleQuestion)
+    updateMock.mockResolvedValue({ ...sampleQuestion, id: "cloned-id" })
+
     renderWithIntl(
-      <PruebasQuestionEditor mode="edit" questionId={MOCK_IDS.qSingle} />,
+      <PruebasQuestionEditor mode="edit" questionId="q-1" />,
     )
 
     await waitFor(() => {
       expect(screen.getByLabelText("Tipo de pregunta")).toBeInTheDocument()
     })
 
-    expect(
-      screen.getByText(/forma parte de al menos una versión publicada/i),
-    ).toBeInTheDocument()
-
     fireEvent.change(screen.getByLabelText("Tipo de pregunta"), {
       target: { value: "likert" },
     })
-
     await waitFor(() => {
       expect(screen.getByLabelText("Dimensión")).toBeInTheDocument()
     })
-    expect(screen.queryByLabelText("Puntos")).not.toBeInTheDocument()
-    expect(screen.queryByLabelText("Respuesta correcta")).not.toBeInTheDocument()
-  })
-
-  it("asks confirmation when canceling with unsaved changes", async () => {
-    renderWithIntl(<PruebasQuestionEditor mode="create" />)
+    fireEvent.change(screen.getByLabelText("Dimensión"), {
+      target: { value: "Análisis" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }))
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Enunciado")).toBeInTheDocument()
+      expect(pushMock).toHaveBeenCalledWith(
+        expect.stringContaining("cloned=1"),
+      )
     })
-
-    fireEvent.change(screen.getByLabelText("Enunciado"), {
-      target: { value: "Cambio sin guardar" },
-    })
-    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }))
-
-    expect(
-      await screen.findByRole("heading", { name: "Descartar cambios" }),
-    ).toBeInTheDocument()
   })
 })

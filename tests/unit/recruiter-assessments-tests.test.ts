@@ -98,6 +98,21 @@ describe("normalizeAssessmentQuestion", () => {
       maxPoints: 5,
     })
   })
+
+  it("maps dimensionKey and reverseScored for Likert", () => {
+    const question = normalizeAssessmentQuestion({
+      id: "qL",
+      type: "Likert",
+      prompt: "Agree?",
+      dimensionKey: "Focus",
+      reverseScored: true,
+    })
+    expect(question).toMatchObject({
+      kind: "likert",
+      dimension: "Focus",
+      reversed: true,
+    })
+  })
 })
 
 describe("normalizeAssessmentTestDetail", () => {

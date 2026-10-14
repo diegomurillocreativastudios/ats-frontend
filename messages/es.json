@@ -910,12 +910,12 @@
     },
     "questionsBank": {
       "title": "Banco de preguntas",
-      "description": "Preguntas reutilizables de demostración para evaluaciones técnicas y psicométricas.",
+      "description": "Preguntas del borrador de una evaluación. Elige una prueba para listar, crear y editar.",
       "create": "Nueva pregunta",
       "createTitle": "Nueva pregunta",
       "editTitle": "Editar pregunta",
       "editorDescription": "Configura el tipo y los campos. La vista previa muestra lo que verá el candidato.",
-      "publishedWarning": "Esta pregunta forma parte de al menos una versión publicada. Los cambios se verán en esas versiones porque la demostración guarda el identificador, no una copia del enunciado.",
+      "publishedWarning": "Si esta pregunta ya se usa en una versión publicada, al guardar se creará una copia (nuevo identificador). Los resultados históricos no cambian.",
       "search": "Buscar por enunciado",
       "searchPlaceholder": "Texto de la pregunta",
       "filters": {
@@ -924,7 +924,9 @@
         "regionLabel": "Filtros del banco de preguntas",
         "kind": "Tipo",
         "all": "Todos",
-        "clear": "Limpiar filtros"
+        "clear": "Limpiar filtros",
+        "test": "Evaluación",
+        "selectTest": "Selecciona una evaluación"
       },
       "kind": {
         "single_choice": "Opción única",
@@ -975,9 +977,9 @@
       },
       "hints": {
         "multipleChoiceScoring": "La puntuación es todo o nada: se otorgan los puntos solo si se marcan todas las opciones correctas y ninguna incorrecta.",
-        "likertScale": "La escala Likert en demostración es fija de 1 a 5. No hay respuesta correcta ni puntos.",
-        "numericDemo": "La tolerancia es solo demostración. El motor real de calificación llegará al conectar el backend.",
-        "openReview": "Las respuestas abiertas requieren revisión manual. Esa cola se implementará en una fase posterior."
+        "likertScale": "La escala Likert es fija de 1 a 5. No hay respuesta correcta ni puntos.",
+        "numericDemo": "La tolerancia define el margen aceptado respecto al valor esperado.",
+        "openReview": "Las respuestas abiertas requieren revisión manual en la cola de revisión."
       },
       "validation": {
         "promptRequired": "Escribe un enunciado.",
@@ -1010,29 +1012,37 @@
       },
       "discard": {
         "title": "Descartar cambios",
-        "description": "Hay cambios sin guardar. Si sales ahora, se perderán en esta demostración.",
+        "description": "Hay cambios sin guardar. Si sales ahora, se perderán.",
         "confirm": "Descartar",
         "cancel": "Seguir editando"
       },
       "toasts": {
-        "saved": "Pregunta guardada en modo demostración.",
-        "error": "No se pudo completar la acción de demostración."
+        "saved": "Pregunta guardada.",
+        "cloned": "Se guardó una copia de la pregunta porque estaba en uso en una versión publicada.",
+        "error": "No se pudo completar la acción."
       },
       "errors": {
-        "scenario_error": "El servicio simulado devolvió un error.",
+        "scenario_error": "No se pudo completar la solicitud.",
         "not_found": "No se encontró la pregunta."
       },
       "states": {
         "loading": "Cargando el banco de preguntas…",
-        "emptyTitle": "No hay preguntas de demostración",
-        "emptyDescription": "El escenario simulado está vacío. Restablece los datos de demostración para continuar.",
+        "emptyTitle": "Sin preguntas en este borrador",
+        "emptyDescription": "Añade la primera pregunta a la evaluación seleccionada.",
         "errorTitle": "No se pudo cargar el banco",
-        "errorDescription": "El servicio simulado devolvió un error. Intenta de nuevo.",
+        "errorDescription": "Hubo un problema al cargar las preguntas. Intenta de nuevo.",
         "retry": "Reintentar",
         "filterEmptyTitle": "Sin coincidencias",
         "filterEmptyDescription": "Ninguna pregunta cumple los filtros. Ajusta o limpia los filtros.",
         "notFoundTitle": "Pregunta no encontrada",
-        "notFoundDescription": "No existe una pregunta con ese identificador en la demostración."
+        "notFoundDescription": "No existe una pregunta con ese identificador o no tienes acceso.",
+        "noTestsTitle": "No hay evaluaciones",
+        "noTestsDescription": "Crea una evaluación para poder añadir preguntas a su borrador.",
+        "createTest": "Crear evaluación",
+        "selectTestTitle": "Selecciona una evaluación",
+        "selectTestDescription": "Las preguntas viven en el borrador de cada prueba. Elige una para continuar.",
+        "missingTestTitle": "Falta la evaluación",
+        "missingTestDescription": "Abre el banco desde una evaluación seleccionada para crear o editar preguntas."
       }
     },
     "links": {

@@ -30,6 +30,7 @@ import {
   publishAssessmentTest,
   reorderAssessmentQuestions,
   resolveAssessmentErrorMessage,
+  resolveVersionQuestionOrderIds,
   updateAssessmentTest,
   type AssessmentQuestionView,
   type AssessmentTestView,
@@ -470,7 +471,10 @@ export function PruebasEvaluationEditor({
       if (!testId) return
       setIsMutatingQuestion(true)
       try {
-        await reorderAssessmentQuestions(testId, nextIds)
+        await reorderAssessmentQuestions(
+          testId,
+          resolveVersionQuestionOrderIds(nextIds, questions),
+        )
         setSavedSnapshot((current) => ({
           ...current,
           questionIds: nextIds,
@@ -482,7 +486,7 @@ export function PruebasEvaluationEditor({
         setIsMutatingQuestion(false)
       }
     },
-    [form.questionIds, patchForm, showToast, tEval, testId],
+    [form.questionIds, patchForm, questions, showToast, tEval, testId],
   )
 
   if (isBooting) {

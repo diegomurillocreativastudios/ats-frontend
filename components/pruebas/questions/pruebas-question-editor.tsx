@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 
@@ -12,14 +12,22 @@ import { ErrorState } from "@/components/pruebas/shared/error-state"
 import { LoadingSkeleton } from "@/components/pruebas/shared/loading-skeleton"
 import { Button } from "@/components/ui/Button"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
+import Snackbar from "@/components/ui/Snackbar"
+import { getApiErrorMessage } from "@/lib/api-error"
+import {
+  createQuestionForTest,
+  getAssessmentQuestionHttpStatus,
+  getQuestionForTest,
+  updateQuestionForTest,
+} from "@/lib/api/recruiter-assessments-questions"
 import {
   addOption,
+  BANK_QUESTION_KINDS,
   blankQuestion,
   isQuestionValid,
   moveOption,
   normalizeQuestionForSave,
   PROMPT_MAX,
-  QUESTION_KINDS,
   questionsEqual,
   removeOption,
   switchQuestionKind,
@@ -27,14 +35,6 @@ import {
   type QuestionFieldErrorKey,
   type QuestionFieldErrors,
 } from "@/lib/pruebas/question-editor"
-import {
-  createQuestion,
-  getQuestion,
-  isQuestionUsedByPublishedVersion,
-  listVersions,
-  MockServiceError,
-  updateQuestion,
-} from "@/lib/pruebas/mock-service"
 import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
 import type { MockQuestion, QuestionKind } from "@/lib/pruebas/types"
 
@@ -55,17 +55,23 @@ export function PruebasQuestionEditor({
 }: PruebasQuestionEditorProps) {
   const t = useTranslations("PruebasPortal.questionsBank")
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const testId = searchParams.get("testId")?.trim() ?? ""
+
+  const listHref = testId
+    ? `${PRUEBAS_HOME_HREF}/preguntas?testId=${encodeURIComponent(testId)}`
+    : `${PRUEBAS_HOME_HREF}/preguntas`
 
   const [form, setForm] = useState<MockQuestion>(() =>
     blankQuestion("single_choice"),
   )
   const [baseline, setBaseline] = useState<MockQuestion | null>(null)
-  const [isLoading, setIsLoading] = useState(mode === "edit")
+  const [isLoading, setIsLoading] = useState(mode === "edit" && Boolean(testId))
   const [loadError, setLoadError] = useState<"not_found" | "load" | null>(null)
-  const [usedInPublished, setUsedInPublished] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<QuestionFieldErrors>({})
   const [isSaving, setIsSaving] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const isDirty = useMemo(() => {
     if (!baseline) return mode === "create" && form.prompt.trim().length > 0
@@ -73,19 +79,15 @@ export function PruebasQuestionEditor({
   }, [baseline, form, mode])
 
   const load = useCallback(async () => {
-    if (mode !== "edit" || !questionId) return
+    if (mode !== "edit" || !questionId || !testId) return
     setIsLoading(true)
     setLoadError(null)
     try {
-      const [question, versions] = await Promise.all([
-        getQuestion(questionId),
-        listVersions(),
-      ])
+      const question = await getQuestionForTest(testId, questionId)
       setForm(question)
       setBaseline(question)
-      setUsedInPublished(isQuestionUsedByPublishedVersion(questionId, versions))
     } catch (error) {
-      if (error instanceof MockServiceError && error.code === "not_found") {
+      if (getAssessmentQuestionHttpStatus(error) === 404) {
         setLoadError("not_found")
       } else {
         setLoadError("load")
@@ -93,7 +95,7 @@ export function PruebasQuestionEditor({
     } finally {
       setIsLoading(false)
     }
-  }, [mode, questionId])
+  }, [mode, questionId, testId])
 
   useEffect(() => {
     void load()
@@ -104,11 +106,13 @@ export function PruebasQuestionEditor({
       const blank = blankQuestion("single_choice")
       setForm(blank)
       setBaseline(blank)
-      setUsedInPublished(false)
     }
   }, [mode])
 
   const setKind = (kind: QuestionKind) => {
+    if (!(BANK_QUESTION_KINDS as readonly string[]).includes(kind)) {
+      return
+    }
     setForm((current) => switchQuestionKind(current, kind))
     setFieldErrors({})
   }
@@ -121,26 +125,67 @@ export function PruebasQuestionEditor({
       setShowDiscardConfirm(true)
       return
     }
-    router.push(`${PRUEBAS_HOME_HREF}/preguntas`)
+    router.push(listHref)
   }
 
   const handleSave = async () => {
+    if (!testId) return
     const errors = validateQuestion(form)
     setFieldErrors(errors)
     if (!isQuestionValid(form)) return
     setIsSaving(true)
+    setSaveError(null)
     try {
       const payload = normalizeQuestionForSave(form)
+      const savedQuery = `testId=${encodeURIComponent(testId)}&saved=1`
       if (mode === "create") {
-        await createQuestion(payload)
-      } else if (questionId) {
-        await updateQuestion(questionId, payload)
+        await createQuestionForTest(testId, payload)
+        router.push(`${PRUEBAS_HOME_HREF}/preguntas?${savedQuery}`)
+        return
       }
-      router.push(`${PRUEBAS_HOME_HREF}/preguntas?saved=1`)
-    } catch {
-      setFieldErrors((current) => ({ ...current }))
+      if (questionId) {
+        const updated = await updateQuestionForTest(
+          testId,
+          questionId,
+          payload,
+        )
+        const cloned = updated.id !== questionId
+        router.push(
+          cloned
+            ? `${PRUEBAS_HOME_HREF}/preguntas?${savedQuery}&cloned=1`
+            : `${PRUEBAS_HOME_HREF}/preguntas?${savedQuery}`,
+        )
+        return
+      }
+    } catch (error) {
+      const status = getAssessmentQuestionHttpStatus(error)
+      setSaveError(
+        status === 403 || status === 400 || status === 409
+          ? getApiErrorMessage(error) || t("toasts.error")
+          : t("toasts.error"),
+      )
       setIsSaving(false)
     }
+  }
+
+  if (!testId) {
+    return (
+      <div className="flex flex-col gap-6 px-4 py-6 md:px-6 lg:px-8">
+        <EmptyState
+          title={t("states.missingTestTitle")}
+          description={t("states.missingTestDescription")}
+          action={
+            <Button
+              variant="outline"
+              className="min-h-11"
+              onClick={() => router.push(`${PRUEBAS_HOME_HREF}/preguntas`)}
+            >
+              {t("actions.backToList")}
+            </Button>
+          }
+        />
+      </div>
+    )
   }
 
   if (isLoading) {
@@ -169,7 +214,7 @@ export function PruebasQuestionEditor({
             <Button
               variant="outline"
               className="min-h-11"
-              onClick={() => router.push(`${PRUEBAS_HOME_HREF}/preguntas`)}
+              onClick={() => router.push(listHref)}
             >
               {t("actions.backToList")}
             </Button>
@@ -207,7 +252,7 @@ export function PruebasQuestionEditor({
         description={t("editorDescription")}
       />
 
-      {usedInPublished ? (
+      {mode === "edit" ? (
         <div
           role="status"
           className="rounded-xl border border-amber-700/30 bg-amber-50 px-4 py-3 font-sans text-sm text-foreground"
@@ -238,7 +283,7 @@ export function PruebasQuestionEditor({
               value={form.kind}
               onChange={(event) => setKind(event.target.value as QuestionKind)}
             >
-              {QUESTION_KINDS.map((kind) => (
+              {BANK_QUESTION_KINDS.map((kind) => (
                 <option key={kind} value={kind}>
                   {t(`kind.${kind}`)}
                 </option>
@@ -595,9 +640,16 @@ export function PruebasQuestionEditor({
         cancelLabel={t("discard.cancel")}
         onConfirm={() => {
           setShowDiscardConfirm(false)
-          router.push(`${PRUEBAS_HOME_HREF}/preguntas`)
+          router.push(listHref)
         }}
         onClose={() => setShowDiscardConfirm(false)}
+      />
+
+      <Snackbar
+        open={saveError !== null}
+        variant="error"
+        message={saveError ?? ""}
+        onClose={() => setSaveError(null)}
       />
     </div>
   )
