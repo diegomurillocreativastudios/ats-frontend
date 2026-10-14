@@ -25,7 +25,6 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { PruebasRrhhTestsPanel } from "@/components/pruebas/reports/pruebas-rrhh-tests-panel";
 import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell";
 import { buildAssignTestHref } from "@/lib/pruebas/reports";
 import Snackbar from "@/components/ui/Snackbar";
@@ -3704,8 +3703,6 @@ function VacanteDetallePage() {
                       </p>
                     )}
 
-                    <PruebasRrhhTestsPanel />
-
                     {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                     <div className="flex flex-col gap-3">
                       {loadingMatch && matchProgress.cycleKey ? (
@@ -4657,8 +4654,6 @@ function VacanteDetallePage() {
                       {smartError} Puedes continuar con filtros y revisión manual.
                     </p>
                   )}
-
-                  <PruebasRrhhTestsPanel />
 
                   {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                   <div className="flex flex-col gap-3">

@@ -72,7 +72,6 @@ import {
   downloadRecruiterCandidateCv,
   isRecruiterCandidateCvError,
 } from "@/lib/api/recruiter-candidate-cv"
-import { PruebasRrhhTestsPanel } from "@/components/pruebas/reports/pruebas-rrhh-tests-panel"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
 import { buildAssignTestHref } from "@/lib/pruebas/reports"
 import { buildTechnicalSheetPayloadFromRecruiterProfile } from "@/lib/technical-sheet/profile-to-technical-sheet-payload"
@@ -533,8 +532,6 @@ export function RecruiterCandidateProfileView({
           </div>
         )}
       </section>
-
-      <PruebasRrhhTestsPanel />
 
       <section
         id="rrhh-perfil-resumen"
