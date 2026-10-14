@@ -595,7 +595,7 @@
     },
     "dashboard": {
       "title": "Tableau de bord des évaluations",
-      "description": "Résumé des affectations et des révisions avec des données de démonstration.",
+      "description": "Résumé des affectations et des révisions d’évaluations.",
       "metricsAria": "Indicateurs des affectations",
       "metrics": {
         "assigned": "Affectées",
@@ -603,6 +603,7 @@
         "inProgress": "En cours",
         "completed": "Terminées",
         "expired": "Expirées",
+        "cancelled": "Annulées",
         "pendingReview": "En attente de révision"
       },
       "shortcuts": {
@@ -630,7 +631,8 @@
         "statusInProgress": "En cours",
         "statusCompleted": "Terminée",
         "statusExpired": "Expirée",
-        "statusCancelled": "Annulée"
+        "statusCancelled": "Annulée",
+        "statusPendingManualReview": "Révision manuelle"
       },
       "charts": {
         "activityTitle": "Affectations par jour",
@@ -658,10 +660,10 @@
       },
       "states": {
         "loading": "Chargement du tableau de bord…",
-        "emptyTitle": "Aucune donnée de démonstration",
-        "emptyDescription": "Le scénario simulé est vide. Réinitialisez les données de démonstration pour continuer.",
+        "emptyTitle": "Aucune affectation",
+        "emptyDescription": "Il n’y a pas encore d’évaluations affectées dans votre périmètre autorisé. Affectez un test ou ajustez les filtres plus tard.",
         "errorTitle": "Impossible de charger le tableau de bord",
-        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "errorDescription": "Nous n’avons pas pu charger le résumé. Réessayez dans quelques secondes.",
         "retry": "Réessayer",
         "filterEmptyTitle": "Aucune correspondance",
         "filterEmptyDescription": "Aucune affectation ne correspond aux filtres. Ajustez-les ou effacez-les."

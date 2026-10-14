@@ -595,7 +595,7 @@
     },
     "dashboard": {
       "title": "Assessments dashboard",
-      "description": "Summary of assignments and reviews using demonstration data.",
+      "description": "Summary of assessment assignments and reviews.",
       "metricsAria": "Assignment metrics",
       "metrics": {
         "assigned": "Assigned",
@@ -603,6 +603,7 @@
         "inProgress": "In progress",
         "completed": "Completed",
         "expired": "Expired",
+        "cancelled": "Cancelled",
         "pendingReview": "Pending review"
       },
       "shortcuts": {
@@ -630,7 +631,8 @@
         "statusInProgress": "In progress",
         "statusCompleted": "Completed",
         "statusExpired": "Expired",
-        "statusCancelled": "Cancelled"
+        "statusCancelled": "Cancelled",
+        "statusPendingManualReview": "Manual review"
       },
       "charts": {
         "activityTitle": "Assignments by day",
@@ -658,10 +660,10 @@
       },
       "states": {
         "loading": "Loading dashboard…",
-        "emptyTitle": "No demonstration data",
-        "emptyDescription": "The simulated scenario is empty. Reset the demonstration data to continue.",
+        "emptyTitle": "No assignments",
+        "emptyDescription": "There are no assessment assignments in your authorized scope yet. Assign a test or adjust filters later.",
         "errorTitle": "Could not load the dashboard",
-        "errorDescription": "The simulated service returned an error. Try again.",
+        "errorDescription": "We could not load the summary. Try again in a few seconds.",
         "retry": "Retry",
         "filterEmptyTitle": "No matches",
         "filterEmptyDescription": "No assignment matches the filters. Adjust or clear them."

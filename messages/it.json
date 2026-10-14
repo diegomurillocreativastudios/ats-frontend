@@ -595,7 +595,7 @@
     },
     "dashboard": {
       "title": "Dashboard valutazioni",
-      "description": "Riepilogo di assegnazioni e revisioni con dati dimostrativi.",
+      "description": "Riepilogo di assegnazioni e revisioni delle valutazioni.",
       "metricsAria": "Metriche delle assegnazioni",
       "metrics": {
         "assigned": "Assegnate",
@@ -603,6 +603,7 @@
         "inProgress": "In corso",
         "completed": "Completate",
         "expired": "Scadute",
+        "cancelled": "Annullate",
         "pendingReview": "In attesa di revisione"
       },
       "shortcuts": {
@@ -630,7 +631,8 @@
         "statusInProgress": "In corso",
         "statusCompleted": "Completata",
         "statusExpired": "Scaduta",
-        "statusCancelled": "Annullata"
+        "statusCancelled": "Annullata",
+        "statusPendingManualReview": "Revisione manuale"
       },
       "charts": {
         "activityTitle": "Assegnazioni per giorno",
@@ -658,10 +660,10 @@
       },
       "states": {
         "loading": "Caricamento della dashboard…",
-        "emptyTitle": "Nessun dato dimostrativo",
-        "emptyDescription": "Lo scenario simulato è vuoto. Ripristina i dati dimostrativi per continuare.",
+        "emptyTitle": "Nessuna assegnazione",
+        "emptyDescription": "Non ci sono ancora valutazioni assegnate nel tuo ambito autorizzato. Assegna un test o regola i filtri più avanti.",
         "errorTitle": "Impossibile caricare la dashboard",
-        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "errorDescription": "Non siamo riusciti a caricare il riepilogo. Riprova tra pochi secondi.",
         "retry": "Riprova",
         "filterEmptyTitle": "Nessuna corrispondenza",
         "filterEmptyDescription": "Nessuna assegnazione soddisfa i filtri. Modificali o puliscili."

@@ -21,22 +21,24 @@ import { ErrorState } from "@/components/pruebas/shared/error-state"
 import { LoadingSkeleton } from "@/components/pruebas/shared/loading-skeleton"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { ResponsiveFilters } from "@/components/ui/responsive-filters"
-import type {
-  DashboardFilters,
-  DashboardSnapshot,
-} from "@/lib/pruebas/dashboard"
-import { formatMockDate } from "@/lib/pruebas/formatters"
+import { getApiErrorMessage } from "@/lib/api-error"
 import {
-  getDashboard,
-  MockServiceError,
-} from "@/lib/pruebas/mock-service"
+  fetchAssessmentsDashboard,
+  hasAssessmentsDashboardFilters,
+  type AssessmentsDashboardFilters,
+  type AssessmentsDashboardStatusFilter,
+  type AssessmentsDashboardView,
+} from "@/lib/api/recruiter-assessments-dashboard"
+import { fetchRecruiterVacancyOptions } from "@/lib/api/admin-interviews-calendar"
+import { listRecruiterCompanies } from "@/lib/api/recruiter-companies"
+import { formatMockDate } from "@/lib/pruebas/formatters"
 import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
-import type { AssessmentKind, AssignmentStatus } from "@/lib/pruebas/types"
+import type { AssessmentKind } from "@/lib/pruebas/types"
 
 const CONTROL_CLASS =
   "h-11 w-full rounded-md border border-border bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
 
-const EMPTY_FILTERS: DashboardFilters = {
+const EMPTY_FILTERS: AssessmentsDashboardFilters = {
   companyId: null,
   vacancyId: null,
   kind: null,
@@ -45,7 +47,7 @@ const EMPTY_FILTERS: DashboardFilters = {
   assignedTo: null,
 }
 
-type MetricKey = keyof DashboardSnapshot["counts"]
+type MetricKey = keyof AssessmentsDashboardView["counts"]
 
 const METRIC_KEYS: MetricKey[] = [
   "assigned",
@@ -53,6 +55,7 @@ const METRIC_KEYS: MetricKey[] = [
   "inProgress",
   "completed",
   "expired",
+  "cancelled",
   "pendingReview",
 ]
 
@@ -79,38 +82,71 @@ const SHORTCUTS = [
   },
 ]
 
-function filtersHaveValues(filters: DashboardFilters): boolean {
-  return Boolean(
-    filters.companyId ||
-      filters.vacancyId ||
-      filters.kind ||
-      filters.assignmentStatus ||
-      filters.assignedFrom ||
-      filters.assignedTo,
-  )
+interface CatalogOption {
+  id: string
+  label: string
+}
+
+interface VacancyCatalogOption extends CatalogOption {
+  companyId: string | null
 }
 
 export function PruebasDashboard() {
   const t = useTranslations("PruebasPortal.dashboard")
   const locale = useLocale()
-  const [filters, setFilters] = useState<DashboardFilters>(EMPTY_FILTERS)
-  const [snapshot, setSnapshot] = useState<DashboardSnapshot | null>(null)
+  const [filters, setFilters] = useState<AssessmentsDashboardFilters>(EMPTY_FILTERS)
+  const [snapshot, setSnapshot] = useState<AssessmentsDashboardView | null>(null)
+  const [companies, setCompanies] = useState<CatalogOption[]>([])
+  const [vacancies, setVacancies] = useState<VacancyCatalogOption[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [reloadToken, setReloadToken] = useState(0)
 
-  const load = useCallback(async (nextFilters: DashboardFilters) => {
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const [companyList, vacancyList] = await Promise.all([
+          listRecruiterCompanies(),
+          fetchRecruiterVacancyOptions(),
+        ])
+        if (cancelled) return
+        setCompanies(
+          companyList
+            .filter((item) => item.isActive)
+            .map((item) => ({ id: item.id, label: item.name }))
+            .sort((a, b) => a.label.localeCompare(b.label)),
+        )
+        setVacancies(
+          vacancyList
+            .map((item) => ({
+              id: item.id,
+              label: item.title,
+              companyId: item.companyId,
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label)),
+        )
+      } catch {
+        if (cancelled) return
+        setCompanies([])
+        setVacancies([])
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const load = useCallback(async (nextFilters: AssessmentsDashboardFilters) => {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await getDashboard(nextFilters)
+      const data = await fetchAssessmentsDashboard(nextFilters)
       setSnapshot(data)
     } catch (cause) {
-      setSnapshot(null)
-      if (cause instanceof MockServiceError) {
-        setError(cause.code)
-      } else {
-        setError("unknown")
+      setError(getApiErrorMessage(cause))
+      if (!hasAssessmentsDashboardFilters(nextFilters)) {
+        setSnapshot(null)
       }
     } finally {
       setIsLoading(false)
@@ -122,12 +158,13 @@ export function PruebasDashboard() {
   }, [filters, load, reloadToken])
 
   const vacancyOptions = useMemo(() => {
-    const all = snapshot?.filterOptions.vacancies ?? []
-    if (!filters.companyId) return all
-    return all.filter((item) => item.companyId === filters.companyId)
-  }, [filters.companyId, snapshot?.filterOptions.vacancies])
+    if (!filters.companyId) return vacancies
+    return vacancies.filter(
+      (item) => item.companyId != null && item.companyId === filters.companyId,
+    )
+  }, [filters.companyId, vacancies])
 
-  const patchFilters = (patch: Partial<DashboardFilters>) => {
+  const patchFilters = (patch: Partial<AssessmentsDashboardFilters>) => {
     setFilters((previous) => {
       const next = { ...previous, ...patch }
       if (patch.companyId !== undefined && patch.companyId !== previous.companyId) {
@@ -145,6 +182,10 @@ export function PruebasDashboard() {
     setReloadToken((value) => value + 1)
   }
 
+  const filtersActive = hasAssessmentsDashboardFilters(filters)
+  const showFullPageError = Boolean(error && !snapshot && !filtersActive)
+  const showInlineError = Boolean(error && (snapshot || filtersActive))
+
   if (isLoading && !snapshot && !error) {
     return (
       <div className="flex flex-col gap-6 px-4 py-6 md:px-6 lg:px-8">
@@ -159,7 +200,7 @@ export function PruebasDashboard() {
     )
   }
 
-  if (error) {
+  if (showFullPageError) {
     return (
       <div className="flex flex-col gap-6 px-4 py-6 md:px-6 lg:px-8">
         <PortalPageHeader
@@ -169,7 +210,7 @@ export function PruebasDashboard() {
         />
         <ErrorState
           title={t("states.errorTitle")}
-          description={t("states.errorDescription")}
+          description={error || t("states.errorDescription")}
           action={
             <button
               type="button"
@@ -184,27 +225,10 @@ export function PruebasDashboard() {
     )
   }
 
-  if (snapshot?.isStoreEmpty) {
-    return (
-      <div className="flex flex-col gap-6 px-4 py-6 md:px-6 lg:px-8">
-        <PortalPageHeader
-          id="pruebas-dashboard"
-          title={t("title")}
-          description={t("description")}
-        />
-        <EmptyState
-          title={t("states.emptyTitle")}
-          description={t("states.emptyDescription")}
-        />
-      </div>
-    )
-  }
-
-  if (!snapshot) {
-    return null
-  }
-
-  const counts = snapshot.counts
+  const counts = snapshot?.counts
+  const showEmptyGlobal = Boolean(snapshot?.isEmpty)
+  const showFilterEmpty = Boolean(snapshot?.isFilterEmpty)
+  const showMetricsAndLists = Boolean(snapshot) && !showEmptyGlobal
 
   return (
     <div className="flex flex-col gap-8 px-4 py-6 md:px-6 lg:px-8">
@@ -218,7 +242,7 @@ export function PruebasDashboard() {
         toggleLabel={t("filters.toggle")}
         title={t("filters.title")}
         regionLabel={t("filters.regionLabel")}
-        hasActiveFilters={filtersHaveValues(filters)}
+        hasActiveFilters={filtersActive}
         disabled={isLoading}
         desktopClassName="w-full rounded-xl border border-border bg-card p-3 md:p-4"
       >
@@ -233,7 +257,7 @@ export function PruebasDashboard() {
               }
             >
               <option value="">{t("filters.all")}</option>
-              {snapshot.filterOptions.companies.map((company) => (
+              {companies.map((company) => (
                 <option key={company.id} value={company.id}>
                   {company.label}
                 </option>
@@ -286,7 +310,7 @@ export function PruebasDashboard() {
               onChange={(event) =>
                 patchFilters({
                   assignmentStatus: (event.target.value ||
-                    null) as AssignmentStatus | null,
+                    null) as AssessmentsDashboardStatusFilter | null,
                 })
               }
             >
@@ -298,6 +322,9 @@ export function PruebasDashboard() {
               <option value="completed">{t("filters.statusCompleted")}</option>
               <option value="expired">{t("filters.statusExpired")}</option>
               <option value="cancelled">{t("filters.statusCancelled")}</option>
+              <option value="pending_manual_review">
+                {t("filters.statusPendingManualReview")}
+              </option>
             </select>
           </FilterField>
 
@@ -328,7 +355,7 @@ export function PruebasDashboard() {
             />
           </FilterField>
         </div>
-        {filtersHaveValues(filters) ? (
+        {filtersActive ? (
           <div className="mt-3">
             <button
               type="button"
@@ -341,7 +368,30 @@ export function PruebasDashboard() {
         ) : null}
       </ResponsiveFilters>
 
-      {snapshot.isFilterEmpty ? (
+      {showInlineError ? (
+        <ErrorState
+          title={t("states.errorTitle")}
+          description={error || t("states.errorDescription")}
+          action={
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="inline-flex min-h-11 items-center rounded-md bg-vo-purple px-4 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+            >
+              {t("states.retry")}
+            </button>
+          }
+        />
+      ) : null}
+
+      {showEmptyGlobal ? (
+        <EmptyState
+          title={t("states.emptyTitle")}
+          description={t("states.emptyDescription")}
+        />
+      ) : null}
+
+      {showFilterEmpty ? (
         <EmptyState
           title={t("states.filterEmptyTitle")}
           description={t("states.filterEmptyDescription")}
@@ -357,23 +407,153 @@ export function PruebasDashboard() {
         />
       ) : null}
 
-      <ul
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
-        aria-label={t("metricsAria")}
-      >
-        {METRIC_KEYS.map((key) => (
-          <li key={key}>
-            <article className="glass-card flex h-full min-h-28 flex-col justify-between rounded-2xl p-4">
-              <span className="font-sans text-sm font-medium text-muted-foreground">
-                {t(`metrics.${key}`)}
-              </span>
-              <span className="font-display text-3xl font-semibold text-foreground">
-                {counts[key]}
-              </span>
-            </article>
-          </li>
-        ))}
-      </ul>
+      {showMetricsAndLists && counts && snapshot ? (
+        <>
+          <ul
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+            aria-label={t("metricsAria")}
+          >
+            {METRIC_KEYS.map((key) => (
+              <li key={key}>
+                <article className="glass-card flex h-full min-h-28 flex-col justify-between rounded-2xl p-4">
+                  <span className="font-sans text-sm font-medium text-muted-foreground">
+                    {t(`metrics.${key}`)}
+                  </span>
+                  <span className="font-display text-3xl font-semibold text-foreground">
+                    {counts[key]}
+                  </span>
+                </article>
+              </li>
+            ))}
+          </ul>
+
+          <PruebasDashboardCharts
+            activitySeries={snapshot.activitySeries}
+            statusDistribution={snapshot.statusDistribution}
+          />
+
+          <section
+            className="grid gap-4 lg:grid-cols-2"
+            aria-labelledby="pruebas-dashboard-attention-heading"
+          >
+            <div className="glass-card rounded-2xl p-4 sm:p-5">
+              <h2
+                id="pruebas-dashboard-attention-heading"
+                className="mb-1 font-display text-base font-semibold text-foreground"
+              >
+                {t("attention.title")}
+              </h2>
+              <h3 className="mb-3 font-sans text-sm font-semibold text-foreground">
+                {t("attention.dueSoonTitle")}
+              </h3>
+              {snapshot.dueSoon.length === 0 ? (
+                <p className="font-sans text-sm text-muted-foreground" role="status">
+                  {t("attention.dueSoonEmpty")}
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-3">
+                  {snapshot.dueSoon.map((item) => (
+                    <li key={item.assignmentId}>
+                      <Link
+                        href={item.href}
+                        className="flex min-h-11 flex-col gap-1 rounded-xl border border-border bg-background px-3 py-3 transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                      >
+                        <span className="font-sans text-sm font-medium text-foreground">
+                          {item.candidateName}
+                        </span>
+                        <span className="font-sans text-xs text-muted-foreground">
+                          {item.vacancyTitle} · {item.testTitle}
+                        </span>
+                        {item.expiresAt ? (
+                          <span className="font-sans text-xs text-muted-foreground">
+                            {t("attention.expiresLabel", {
+                              date: new Intl.DateTimeFormat(locale, {
+                                dateStyle: "medium",
+                              }).format(new Date(item.expiresAt)),
+                            })}
+                          </span>
+                        ) : null}
+                        <span className="font-sans text-xs font-medium text-emerald-800">
+                          {t("attention.openTracking")}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <h3 className="mb-3 mt-6 font-sans text-sm font-semibold text-foreground">
+                {t("attention.reviewTitle")}
+              </h3>
+              {snapshot.pendingReviews.length === 0 ? (
+                <p className="font-sans text-sm text-muted-foreground" role="status">
+                  {t("attention.reviewEmpty")}
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-3">
+                  {snapshot.pendingReviews.map((item) => (
+                    <li key={item.assignmentId}>
+                      <Link
+                        href={item.href}
+                        className="flex min-h-11 flex-col gap-1 rounded-xl border border-border bg-background px-3 py-3 transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                      >
+                        <span className="font-sans text-sm font-medium text-foreground">
+                          {item.candidateName}
+                        </span>
+                        <span className="font-sans text-xs text-muted-foreground">
+                          {item.vacancyTitle} · {item.testTitle}
+                        </span>
+                        <span className="font-sans text-xs font-medium text-emerald-800">
+                          {t("attention.openReview")}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="glass-card rounded-2xl p-4 sm:p-5">
+              <h2 className="mb-3 font-display text-base font-semibold text-foreground">
+                {t("activity.title")}
+              </h2>
+              {snapshot.recentActivity.length === 0 ? (
+                <p className="font-sans text-sm text-muted-foreground" role="status">
+                  {t("activity.empty")}
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-3">
+                  {snapshot.recentActivity.map((item) => (
+                    <li key={item.assignmentId}>
+                      <Link
+                        href={item.href}
+                        className="flex min-h-11 flex-col gap-1 rounded-xl border border-border bg-background px-3 py-3 transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                      >
+                        <span className="font-sans text-sm font-medium text-foreground">
+                          {item.candidateName}
+                        </span>
+                        <span className="font-sans text-xs text-muted-foreground">
+                          {item.testTitle} · {item.vacancyTitle}
+                        </span>
+                        {item.assignedAt ? (
+                          <span className="font-sans text-xs text-muted-foreground">
+                            {t("activity.assignedLabel", {
+                              date: formatMockDate(item.assignedAt, locale),
+                            })}
+                          </span>
+                        ) : null}
+                        <span className="font-sans text-xs font-medium text-emerald-800">
+                          {t("activity.openItem")}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
+        </>
+      ) : null}
 
       <section aria-labelledby="pruebas-dashboard-shortcuts-heading">
         <h2
@@ -398,128 +578,6 @@ export function PruebasDashboard() {
             )
           })}
         </ul>
-      </section>
-
-      <PruebasDashboardCharts
-        activitySeries={snapshot.activitySeries}
-        statusDistribution={snapshot.statusDistribution}
-      />
-
-      <section
-        className="grid gap-4 lg:grid-cols-2"
-        aria-labelledby="pruebas-dashboard-attention-heading"
-      >
-        <div className="glass-card rounded-2xl p-4 sm:p-5">
-          <h2
-            id="pruebas-dashboard-attention-heading"
-            className="mb-1 font-display text-base font-semibold text-foreground"
-          >
-            {t("attention.title")}
-          </h2>
-          <h3 className="mb-3 font-sans text-sm font-semibold text-foreground">
-            {t("attention.dueSoonTitle")}
-          </h3>
-          {snapshot.dueSoon.length === 0 ? (
-            <p className="font-sans text-sm text-muted-foreground" role="status">
-              {t("attention.dueSoonEmpty")}
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {snapshot.dueSoon.map((item) => (
-                <li key={item.assignmentId}>
-                  <Link
-                    href={item.href}
-                    className="flex min-h-11 flex-col gap-1 rounded-xl border border-border bg-background px-3 py-3 transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
-                  >
-                    <span className="font-sans text-sm font-medium text-foreground">
-                      {item.candidateName}
-                    </span>
-                    <span className="font-sans text-xs text-muted-foreground">
-                      {item.vacancyTitle} · {item.testTitle}
-                    </span>
-                    <span className="font-sans text-xs text-muted-foreground">
-                      {t("attention.expiresLabel", {
-                        date: new Intl.DateTimeFormat(locale, {
-                          dateStyle: "medium",
-                        }).format(new Date(item.expiresAt)),
-                      })}
-                    </span>
-                    <span className="font-sans text-xs font-medium text-emerald-800">
-                      {t("attention.openTracking")}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <h3 className="mb-3 mt-6 font-sans text-sm font-semibold text-foreground">
-            {t("attention.reviewTitle")}
-          </h3>
-          {snapshot.pendingReviews.length === 0 ? (
-            <p className="font-sans text-sm text-muted-foreground" role="status">
-              {t("attention.reviewEmpty")}
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {snapshot.pendingReviews.map((item) => (
-                <li key={item.assignmentId}>
-                  <Link
-                    href={item.href}
-                    className="flex min-h-11 flex-col gap-1 rounded-xl border border-border bg-background px-3 py-3 transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
-                  >
-                    <span className="font-sans text-sm font-medium text-foreground">
-                      {item.candidateName}
-                    </span>
-                    <span className="font-sans text-xs text-muted-foreground">
-                      {item.vacancyTitle} · {item.testTitle}
-                    </span>
-                    <span className="font-sans text-xs font-medium text-emerald-800">
-                      {t("attention.openReview")}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="glass-card rounded-2xl p-4 sm:p-5">
-          <h2 className="mb-3 font-display text-base font-semibold text-foreground">
-            {t("activity.title")}
-          </h2>
-          {snapshot.recentActivity.length === 0 ? (
-            <p className="font-sans text-sm text-muted-foreground" role="status">
-              {t("activity.empty")}
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {snapshot.recentActivity.map((item) => (
-                <li key={item.assignmentId}>
-                  <Link
-                    href={item.href}
-                    className="flex min-h-11 flex-col gap-1 rounded-xl border border-border bg-background px-3 py-3 transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
-                  >
-                    <span className="font-sans text-sm font-medium text-foreground">
-                      {item.candidateName}
-                    </span>
-                    <span className="font-sans text-xs text-muted-foreground">
-                      {item.testTitle} · {item.vacancyTitle}
-                    </span>
-                    <span className="font-sans text-xs text-muted-foreground">
-                      {t("activity.assignedLabel", {
-                        date: formatMockDate(item.assignedAt, locale),
-                      })}
-                    </span>
-                    <span className="font-sans text-xs font-medium text-emerald-800">
-                      {t("activity.openItem")}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
       </section>
     </div>
   )

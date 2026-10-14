@@ -15,9 +15,9 @@ import {
   YAxis,
 } from "recharts"
 import type {
-  DashboardActivityPoint,
-  DashboardStatusSlice,
-} from "@/lib/pruebas/dashboard"
+  AssessmentsDashboardActivityPoint,
+  AssessmentsDashboardStatusSlice,
+} from "@/lib/api/recruiter-assessments-dashboard"
 import type { AssignmentStatus } from "@/lib/pruebas/types"
 
 const COLOR_ASSIGNED = "#6EB940"
@@ -30,8 +30,8 @@ const STATUS_COLORS: Record<AssignmentStatus, string> = {
 }
 
 export interface PruebasDashboardChartsProps {
-  activitySeries: DashboardActivityPoint[]
-  statusDistribution: DashboardStatusSlice[]
+  activitySeries: AssessmentsDashboardActivityPoint[]
+  statusDistribution: AssessmentsDashboardStatusSlice[]
 }
 
 function statusLabelKey(
@@ -63,10 +63,17 @@ export function PruebasDashboardCharts({
   const t = useTranslations("PruebasPortal.dashboard")
   const tFilters = useTranslations("PruebasPortal.dashboard.filters")
 
-  const pieData = statusDistribution.map((slice) => ({
-    ...slice,
-    name: tFilters(statusLabelKey(slice.status)),
-  }))
+  const statusTotal = statusDistribution.reduce(
+    (sum, slice) => sum + slice.count,
+    0,
+  )
+  const pieData =
+    statusTotal > 0
+      ? statusDistribution.map((slice) => ({
+          ...slice,
+          name: tFilters(statusLabelKey(slice.status)),
+        }))
+      : []
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
