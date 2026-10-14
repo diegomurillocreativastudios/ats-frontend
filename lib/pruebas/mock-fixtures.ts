@@ -44,6 +44,7 @@ export const MOCK_IDS = {
   assignmentElenaPending: "asg-elena-pending",
   sessionCarlosSubmitted: "ses-carlos-submitted",
   sessionAnaInProgress: "ses-ana-in-progress",
+  sessionDiegoSubmitted: "ses-diego-submitted",
   resultPsycho: "res-sofia-psycho",
   resultDiegoPending: "res-diego-pending",
   eventMariaReminded: "evt-maria-reminded",
@@ -490,6 +491,22 @@ export function createMockFixtures(): MockPruebasStore {
         deadlineAt: "2026-11-15T18:00:00.000Z",
         status: "in_progress",
         answers: [{ questionId: MOCK_IDS.qSingle, value: "opt-b" }],
+      },
+      {
+        id: MOCK_IDS.sessionDiegoSubmitted,
+        assignmentId: MOCK_IDS.assignmentDiegoPendingReview,
+        attemptNumber: 1,
+        startedAt: "2026-10-10T10:00:00.000Z",
+        deadlineAt: "2026-10-10T10:45:00.000Z",
+        status: "submitted",
+        answers: [
+          { questionId: MOCK_IDS.qSingle, value: "opt-b" },
+          {
+            questionId: MOCK_IDS.qOpen,
+            value:
+              "En un sprint prioricé pruebas de regresión sobre una entrega anticipada para evitar defectos en producción.",
+          },
+        ],
       },
     ],
     results: [

@@ -1243,7 +1243,8 @@
         "extendDate": "Nuova data di scadenza",
         "extendHint": "La data deve essere successiva all’orologio della demo.",
         "simulateFailure": "Simula errore dell’operazione",
-        "openCandidate": "Apri esperienza candidato"
+        "openCandidate": "Apri esperienza candidato",
+        "openReview": "Apri revisione manuale"
       },
       "timeline": {
         "title": "Cronologia",
@@ -1252,7 +1253,8 @@
           "reminded": "Promemoria simulato",
           "cancelled": "Assegnazione annullata",
           "extended": "Scadenza prolungata",
-          "retried": "Nuovo tentativo autorizzato"
+          "retried": "Nuovo tentativo autorizzato",
+          "reviewed": "Revisione manuale completata"
         }
       },
       "confirm": {
@@ -1297,6 +1299,86 @@
         "retry": "Riprova",
         "filterEmptyTitle": "Nessuna corrispondenza",
         "filterEmptyDescription": "Nessuna assegnazione soddisfa i filtri. Modifica o cancella i filtri."
+      }
+    },
+    "review": {
+      "title": "Revisione manuale",
+      "description": "Valuta le risposte aperte in attesa con la rubrica della dimostrazione.",
+      "scopeNotice": "La valutazione è simulata. Non modifica il punteggio di idoneità né decide un’assunzione.",
+      "pendingCount": "{count, plural, one {# in attesa} other {# in attesa}}",
+      "filteredCount": "{count, plural, one {# visibile} other {# visibili}}",
+      "search": "Cerca",
+      "searchPlaceholder": "Candidato o posizione",
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri di revisione",
+        "vacancy": "Posizione",
+        "all": "Tutte",
+        "clear": "Pulisci filtri"
+      },
+      "table": {
+        "candidate": "Candidato",
+        "vacancy": "Posizione",
+        "version": "Versione",
+        "openQuestions": "Aperte",
+        "completedAt": "Inviata",
+        "actions": "Azioni",
+        "open": "Revisiona"
+      },
+      "detail": {
+        "title": "Revisione di {name}",
+        "titleFallback": "Revisione manuale",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToQueue": "Torna alla coda",
+        "instructions": "Istruzioni della valutazione",
+        "questionLabel": "Domanda aperta {index}",
+        "answer": "Risposta del candidato",
+        "noAnswer": "Nessuna risposta",
+        "rubric": "Rubrica",
+        "maxPoints": "Massimo: {max} punti",
+        "points": "Punti assegnati",
+        "pointsHint": "Intero da 0 a {max}.",
+        "notes": "Osservazioni (facoltativo)",
+        "save": "Salva",
+        "saving": "Salvataggio…",
+        "finish": "Termina revisione"
+      },
+      "validation": {
+        "pointsRequired": "Indica i punti assegnati.",
+        "pointsInvalid": "Usa un intero da 0 a {max}."
+      },
+      "confirm": {
+        "finishTitle": "Termina revisione",
+        "finishDescription": "Stai per segnare come revisionata la valutazione di {name}. Il monitoraggio non la mostrerà più come in attesa.",
+        "finishConfirm": "Termina",
+        "dismiss": "Indietro"
+      },
+      "toasts": {
+        "saved": "Bozza di revisione salvata in modalità dimostrazione.",
+        "finished": "Revisione terminata in modalità dimostrazione.",
+        "validationFailed": "Correggi i punti non validi prima di continuare."
+      },
+      "errors": {
+        "generic": "Non è stato possibile completare l’azione di dimostrazione.",
+        "not_found": "Revisione non trovata.",
+        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "action_not_allowed": "Questa azione non è disponibile nello stato attuale.",
+        "invalid_points": "I punti indicati non sono validi."
+      },
+      "states": {
+        "loading": "Caricamento della coda di revisione…",
+        "emptyTitle": "Nessun dato di dimostrazione",
+        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati di dimostrazione per continuare.",
+        "queueEmptyTitle": "Niente in attesa di revisione",
+        "queueEmptyDescription": "Non ci sono risultati con risposte aperte in attesa nella demo.",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna riga soddisfa i filtri. Modificali o puliscili.",
+        "errorTitle": "Impossibile caricare la revisione",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "notFoundTitle": "Revisione non disponibile",
+        "notFoundDescription": "Questa assegnazione non è in coda di revisione o è già stata valutata."
       }
     },
     "candidate": {

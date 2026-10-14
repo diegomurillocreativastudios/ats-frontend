@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-10 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento + experiencia candidato demo).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-11 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento + experiencia candidato demo + cola de revisión manual).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -313,12 +313,12 @@ hooks/pruebas/
 
 ### Fase UI-11 — Cola de revisión manual
 
-- [ ] `/revision`: cola de evaluaciones con respuestas abiertas pendientes, filtros y contadores.
-- [ ] `/revision/[assignmentId]`: respuesta, instrucciones, rúbrica, máximo de puntos, calificación manual y observaciones.
-- [ ] Guardar revisión en mock; mostrar avance y finalizar revisión.
-- [ ] Prevenir puntuaciones inválidas y mostrar confirmación de finalización.
-- [ ] Actualizar estados de seguimiento/resultados demo.
-- [ ] Responsive y estados vacío/cargando/error.
+- [x] `/revision`: cola de evaluaciones con respuestas abiertas pendientes, filtros y contadores. 2026-10-13: `PruebasReviewQueueScreen` + `lib/pruebas/review.ts`; cola = resultado `pending` + versión con pregunta abierta.
+- [x] `/revision/[assignmentId]`: respuesta, instrucciones, rúbrica, máximo de puntos, calificación manual y observaciones. `PruebasReviewDetailScreen`.
+- [x] Guardar revisión en mock; mostrar avance y finalizar revisión. `saveReviewDrafts` / `finishReview`.
+- [x] Prevenir puntuaciones inválidas y mostrar confirmación de finalización. Enteros `0..maxPoints`; diálogo al finalizar.
+- [x] Actualizar estados de seguimiento/resultados demo. Evento `reviewed`; enlace desde seguimiento; `submitSession` crea resultado `pending` si hay pregunta abierta.
+- [x] Responsive y estados vacío/cargando/error. Tabla `lg+`, tarjetas por debajo.
 
 **Criterio:** se pueden simular revisiones manuales coherentes sin calcularlas en backend.
 
@@ -388,7 +388,7 @@ hooks/pruebas/
 | Vínculos con vacantes | `/portal-pruebas/vinculaciones` | ☑ | ☑ | ☑ | linked/unlinked/inactive |
 | Asignación | `/portal-pruebas/asignaciones/nueva` | ☑ | ☑ | ☑ | eligible/empty/conflict/success |
 | Seguimiento | `/portal-pruebas/seguimiento` | ☑ | ☑ | ☑ | statuses/actions |
-| Revisión manual | `/portal-pruebas/revision/[assignmentId]` | ☐ | ☐ | ☐ | pending/reviewed |
+| Revisión manual | `/portal-pruebas/revision/[assignmentId]` | ☑ | ☑ | ☑ | pending/reviewed |
 | Resultados técnicos | `/portal-pruebas/resultados/[assignmentId]` | ☐ | ☐ | ☐ | scored/no result |
 | Resultados psicométricos | `/portal-pruebas/resultados/[assignmentId]` | ☐ | ☐ | ☐ | dimensions |
 | Reportes | `/portal-pruebas/reportes` | ☐ | ☐ | ☐ | loading/empty/error |
@@ -471,3 +471,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - UI-08 reemplazó el placeholder de asignaciones con selección de elegibles y lote todo-o-nada; `assignments.ts` + `assign()`; enlaces visuales desde RRHH; sin BFF.
 - UI-09 reemplazó el placeholder de seguimiento con lista, detalle modal y acciones simuladas; `tracking.ts` + `trackingEvents`; sin BFF.
 - UI-10 añadió `/pruebas/[demoToken]` (sesión staff, sin sidebar), `candidate-session.ts`, `saveSessionAnswers` y enlace desde seguimiento; sin excepción pública ni BFF.
+- UI-11 reemplazó el placeholder de revisión con cola y ficha; `review.ts` + `saveReviewDrafts`/`finishReview`; sesión sembrada de Diego; sin BFF.

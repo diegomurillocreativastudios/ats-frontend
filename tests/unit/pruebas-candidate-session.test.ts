@@ -231,7 +231,7 @@ describe("candidate mock service", () => {
     expect(view.screen).toBe("welcome")
   })
 
-  it("saves answers and submits without creating a result", async () => {
+  it("saves answers and submits creating a pending result when open questions exist", async () => {
     const beforeResults = debugSnapshotStore().results.length
     const saved = await saveSessionAnswers(MOCK_IDS.sessionAnaInProgress, [
       { questionId: MOCK_IDS.qSingle, value: "opt-a" },
@@ -246,7 +246,12 @@ describe("candidate mock service", () => {
       store.assignments.find((item) => item.id === MOCK_IDS.assignmentAnaInProgress)
         ?.status,
     ).toBe("completed")
-    expect(store.results.length).toBe(beforeResults)
+    expect(store.results.length).toBe(beforeResults + 1)
+    const created = store.results.find(
+      (item) => item.assignmentId === MOCK_IDS.assignmentAnaInProgress,
+    )
+    expect(created?.reviewStatus).toBe("pending")
+    expect(created?.score).toBeUndefined()
   })
 
   it("keeps eight assignments after seeding Ana session", () => {

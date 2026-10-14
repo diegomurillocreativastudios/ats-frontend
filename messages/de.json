@@ -1243,7 +1243,8 @@
         "extendDate": "Neues Ablaufdatum",
         "extendHint": "Das Datum muss nach der Demo-Uhr liegen.",
         "simulateFailure": "Fehler der Operation simulieren",
-        "openCandidate": "Kandidatenerfahrung öffnen"
+        "openCandidate": "Kandidatenerfahrung öffnen",
+        "openReview": "Manuelle Bewertung öffnen"
       },
       "timeline": {
         "title": "Zeitlinie",
@@ -1252,7 +1253,8 @@
           "reminded": "Simulierte Erinnerung",
           "cancelled": "Zuweisung abgebrochen",
           "extended": "Frist verlängert",
-          "retried": "Wiederholung erlaubt"
+          "retried": "Wiederholung erlaubt",
+          "reviewed": "Manuelle Bewertung abgeschlossen"
         }
       },
       "confirm": {
@@ -1297,6 +1299,86 @@
         "retry": "Erneut versuchen",
         "filterEmptyTitle": "Keine Treffer",
         "filterEmptyDescription": "Keine Zuweisung entspricht den Filtern. Passe die Filter an oder setze sie zurück."
+      }
+    },
+    "review": {
+      "title": "Manuelle Bewertung",
+      "description": "Bewerte offene Antworten anhand der Demo-Rubrik.",
+      "scopeNotice": "Die Bewertung ist simuliert. Sie ändert weder den Match-Score noch entscheidet sie über eine Einstellung.",
+      "pendingCount": "{count, plural, one {# ausstehend} other {# ausstehend}}",
+      "filteredCount": "{count, plural, one {# sichtbar} other {# sichtbar}}",
+      "search": "Suchen",
+      "searchPlaceholder": "Kandidat oder Stelle",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Bewertungsfilter",
+        "vacancy": "Stelle",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen"
+      },
+      "table": {
+        "candidate": "Kandidat",
+        "vacancy": "Stelle",
+        "version": "Version",
+        "openQuestions": "Offen",
+        "completedAt": "Eingereicht",
+        "actions": "Aktionen",
+        "open": "Bewerten"
+      },
+      "detail": {
+        "title": "Bewertung von {name}",
+        "titleFallback": "Manuelle Bewertung",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToQueue": "Zurück zur Warteschlange",
+        "instructions": "Anweisungen der Bewertung",
+        "questionLabel": "Offene Frage {index}",
+        "answer": "Antwort des Kandidaten",
+        "noAnswer": "Keine Antwort",
+        "rubric": "Rubrik",
+        "maxPoints": "Maximum: {max} Punkte",
+        "points": "Vergebene Punkte",
+        "pointsHint": "Ganzzahl von 0 bis {max}.",
+        "notes": "Anmerkungen (optional)",
+        "save": "Speichern",
+        "saving": "Speichern…",
+        "finish": "Bewertung abschließen"
+      },
+      "validation": {
+        "pointsRequired": "Gib die vergebenen Punkte an.",
+        "pointsInvalid": "Verwende eine Ganzzahl von 0 bis {max}."
+      },
+      "confirm": {
+        "finishTitle": "Bewertung abschließen",
+        "finishDescription": "Du markierst die Bewertung von {name} als geprüft. Die Nachverfolgung zeigt sie nicht mehr als ausstehend.",
+        "finishConfirm": "Abschließen",
+        "dismiss": "Zurück"
+      },
+      "toasts": {
+        "saved": "Bewertungsentwurf im Demo-Modus gespeichert.",
+        "finished": "Bewertung im Demo-Modus abgeschlossen.",
+        "validationFailed": "Korrigiere ungültige Punkte, bevor du fortfährst."
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "not_found": "Die Bewertung wurde nicht gefunden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "action_not_allowed": "Diese Aktion ist im aktuellen Status nicht verfügbar.",
+        "invalid_points": "Die angegebenen Punkte sind ungültig."
+      },
+      "states": {
+        "loading": "Bewertungswarteschlange wird geladen…",
+        "emptyTitle": "Keine Demo-Daten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demo-Daten zurück, um fortzufahren.",
+        "queueEmptyTitle": "Nichts zur Bewertung ausstehend",
+        "queueEmptyDescription": "Es gibt keine Ergebnisse mit ausstehenden offenen Antworten in der Demo.",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zeile entspricht den Filtern. Passe sie an oder setze sie zurück.",
+        "errorTitle": "Bewertung konnte nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "notFoundTitle": "Bewertung nicht verfügbar",
+        "notFoundDescription": "Diese Zuweisung ist nicht in der Warteschlange oder wurde bereits bewertet."
       }
     },
     "candidate": {

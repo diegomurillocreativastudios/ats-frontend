@@ -1243,7 +1243,8 @@
         "extendDate": "New expiry date",
         "extendHint": "The date must be after the demo clock.",
         "simulateFailure": "Simulate operation failure",
-        "openCandidate": "Open candidate experience"
+        "openCandidate": "Open candidate experience",
+        "openReview": "Open manual review"
       },
       "timeline": {
         "title": "Timeline",
@@ -1252,7 +1253,8 @@
           "reminded": "Simulated reminder",
           "cancelled": "Assignment cancelled",
           "extended": "Deadline extended",
-          "retried": "Retry authorized"
+          "retried": "Retry authorized",
+          "reviewed": "Manual review finished"
         }
       },
       "confirm": {
@@ -1297,6 +1299,86 @@
         "retry": "Retry",
         "filterEmptyTitle": "No matches",
         "filterEmptyDescription": "No assignments match the filters. Adjust or clear the filters."
+      }
+    },
+    "review": {
+      "title": "Manual review",
+      "description": "Score pending open answers using the demo rubric.",
+      "scopeNotice": "Scoring is simulated. It does not change match score or decide hiring.",
+      "pendingCount": "{count, plural, one {# pending} other {# pending}}",
+      "filteredCount": "{count, plural, one {# visible} other {# visible}}",
+      "search": "Search",
+      "searchPlaceholder": "Candidate or vacancy",
+      "filters": {
+        "title": "Filters",
+        "toggle": "Filters",
+        "regionLabel": "Review filters",
+        "vacancy": "Vacancy",
+        "all": "All",
+        "clear": "Clear filters"
+      },
+      "table": {
+        "candidate": "Candidate",
+        "vacancy": "Vacancy",
+        "version": "Version",
+        "openQuestions": "Open",
+        "completedAt": "Submitted",
+        "actions": "Actions",
+        "open": "Review"
+      },
+      "detail": {
+        "title": "Review for {name}",
+        "titleFallback": "Manual review",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToQueue": "Back to queue",
+        "instructions": "Assessment instructions",
+        "questionLabel": "Open question {index}",
+        "answer": "Candidate answer",
+        "noAnswer": "No answer",
+        "rubric": "Rubric",
+        "maxPoints": "Maximum: {max} points",
+        "points": "Points awarded",
+        "pointsHint": "Integer from 0 to {max}.",
+        "notes": "Notes (optional)",
+        "save": "Save",
+        "saving": "Saving…",
+        "finish": "Finish review"
+      },
+      "validation": {
+        "pointsRequired": "Enter the points awarded.",
+        "pointsInvalid": "Use an integer from 0 to {max}."
+      },
+      "confirm": {
+        "finishTitle": "Finish review",
+        "finishDescription": "You are about to mark {name}'s assessment as reviewed. Tracking will stop showing it as pending.",
+        "finishConfirm": "Finish",
+        "dismiss": "Back"
+      },
+      "toasts": {
+        "saved": "Review draft saved in demo mode.",
+        "finished": "Review finished in demo mode.",
+        "validationFailed": "Fix invalid points before continuing."
+      },
+      "errors": {
+        "generic": "The demo action could not be completed.",
+        "not_found": "The review was not found.",
+        "scenario_error": "The simulated service returned an error.",
+        "action_not_allowed": "That action is not available in the current status.",
+        "invalid_points": "The points entered are not valid."
+      },
+      "states": {
+        "loading": "Loading review queue…",
+        "emptyTitle": "No demo data",
+        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "queueEmptyTitle": "Nothing pending review",
+        "queueEmptyDescription": "There are no results with pending open answers in the demo.",
+        "filterEmptyTitle": "No matches",
+        "filterEmptyDescription": "No rows match the filters. Adjust or clear them.",
+        "errorTitle": "Could not load review",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry",
+        "notFoundTitle": "Review unavailable",
+        "notFoundDescription": "This assignment is not in the review queue or was already scored."
       }
     },
     "candidate": {

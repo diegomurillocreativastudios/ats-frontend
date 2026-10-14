@@ -40,6 +40,7 @@ export type TrackingEventKind =
   | "cancelled"
   | "extended"
   | "retried"
+  | "reviewed"
 
 /** Visible only when assignment.status === "completed". */
 export type TrackingQualificationLabel =

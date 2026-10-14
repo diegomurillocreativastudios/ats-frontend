@@ -26,6 +26,11 @@ import {
   waitWhileLoading,
 } from "@/lib/pruebas/mock-store"
 import {
+  listOpenQuestionsForVersion,
+  parseReviewPoints,
+  versionHasOpenQuestion,
+} from "@/lib/pruebas/review"
+import {
   getTrackingActions,
   isApplicationClosedForTracking,
 } from "@/lib/pruebas/tracking"
@@ -278,6 +283,16 @@ export async function listCandidates() {
 export async function listResults(): Promise<MockResult[]> {
   const store = await gate()
   return [...store.results]
+}
+
+export async function listReviews(
+  assignmentId?: string,
+): Promise<MockReview[]> {
+  const store = await gate()
+  const reviews = assignmentId
+    ? store.reviews.filter((review) => review.assignmentId === assignmentId)
+    : store.reviews
+  return reviews.map((review) => ({ ...review }))
 }
 
 export async function getResultByAssignment(
@@ -932,23 +947,229 @@ export async function submitSession(sessionId: string): Promise<MockSession> {
   requireOpenApplicationForAssignment(store, assignment)
   session.status = "submitted"
   assignment.status = "completed"
+
+  const version = store.versions.find(
+    (item) => item.id === assignment.testVersionId,
+  )
+  const existingResult = store.results.find(
+    (item) => item.assignmentId === assignment.id,
+  )
+  if (
+    !existingResult &&
+    version &&
+    versionHasOpenQuestion(version, store.questions)
+  ) {
+    store.results.push({
+      id: `res-${store.results.length + 1}`,
+      assignmentId: assignment.id,
+      reviewStatus: "pending",
+    })
+  }
+
   return { ...session, answers: [...session.answers] }
 }
 
+function requirePendingOpenReviewContext(assignmentId: string): {
+  store: MockPruebasStore
+  assignment: MockAssignment
+  version: MockAssessmentVersion
+  result: MockResult
+  openQuestions: ReturnType<typeof listOpenQuestionsForVersion>
+} {
+  const store = requirePopulatedStore()
+  const assignment = store.assignments.find((item) => item.id === assignmentId)
+  if (!assignment) {
+    throw new MockServiceError("not_found")
+  }
+  const result = store.results.find((item) => item.assignmentId === assignmentId)
+  if (!result || result.reviewStatus !== "pending") {
+    throw new MockServiceError("action_not_allowed")
+  }
+  const version = store.versions.find(
+    (item) => item.id === assignment.testVersionId,
+  )
+  if (!version || !versionHasOpenQuestion(version, store.questions)) {
+    throw new MockServiceError("action_not_allowed")
+  }
+  return {
+    store,
+    assignment,
+    version,
+    result,
+    openQuestions: listOpenQuestionsForVersion(version, store.questions),
+  }
+}
+
+export async function saveReviewDrafts(input: {
+  assignmentId: string
+  items: readonly {
+    questionId: string
+    pointsAwarded: number
+    reviewerNotes?: string
+  }[]
+}): Promise<MockReview[]> {
+  await gate()
+  const { store, openQuestions } = requirePendingOpenReviewContext(
+    input.assignmentId,
+  )
+  const openById = new Map(openQuestions.map((question) => [question.id, question]))
+
+  if (input.items.length !== openQuestions.length) {
+    throw new MockServiceError("invalid_points")
+  }
+
+  const nextReviews: MockReview[] = []
+  for (const item of input.items) {
+    const question = openById.get(item.questionId)
+    if (!question) {
+      throw new MockServiceError("invalid_points")
+    }
+    const parsed = parseReviewPoints(
+      String(item.pointsAwarded),
+      question.maxPoints,
+    )
+    if (
+      !parsed.ok ||
+      !Number.isInteger(item.pointsAwarded) ||
+      item.pointsAwarded !== parsed.points
+    ) {
+      throw new MockServiceError("invalid_points")
+    }
+    const review: MockReview = {
+      assignmentId: input.assignmentId,
+      questionId: item.questionId,
+      rubric: question.rubric,
+      pointsAwarded: parsed.points,
+      reviewerNotes: item.reviewerNotes?.trim() || undefined,
+      status: "pending",
+    }
+    nextReviews.push(review)
+  }
+
+  for (const review of nextReviews) {
+    const index = store.reviews.findIndex(
+      (item) =>
+        item.assignmentId === review.assignmentId &&
+        item.questionId === review.questionId,
+    )
+    if (index >= 0) {
+      store.reviews[index] = review
+    } else {
+      store.reviews.push(review)
+    }
+  }
+
+  return nextReviews.map((review) => ({ ...review }))
+}
+
+/**
+ * Upserts one open-question review while the assignment stays pending.
+ * Prefer `saveReviewDrafts` from the UI (all open items at once).
+ */
 export async function saveReview(review: MockReview): Promise<MockReview> {
   await gate()
-  const store = requirePopulatedStore()
+  const { store, openQuestions } = requirePendingOpenReviewContext(
+    review.assignmentId,
+  )
+  const question = openQuestions.find(
+    (item) => item.id === review.questionId,
+  )
+  if (!question) {
+    throw new MockServiceError("invalid_points")
+  }
+  const parsed = parseReviewPoints(
+    String(review.pointsAwarded ?? ""),
+    question.maxPoints,
+  )
+  if (!parsed.ok) {
+    throw new MockServiceError("invalid_points")
+  }
+  const next: MockReview = {
+    assignmentId: review.assignmentId,
+    questionId: review.questionId,
+    rubric: question.rubric,
+    pointsAwarded: parsed.points,
+    reviewerNotes: review.reviewerNotes?.trim() || undefined,
+    status: "pending",
+  }
   const index = store.reviews.findIndex(
     (item) =>
-      item.assignmentId === review.assignmentId &&
-      item.questionId === review.questionId
+      item.assignmentId === next.assignmentId &&
+      item.questionId === next.questionId,
   )
   if (index >= 0) {
-    store.reviews[index] = review
+    store.reviews[index] = next
   } else {
-    store.reviews.push(review)
+    store.reviews.push(next)
   }
-  return review
+  return { ...next }
+}
+
+export async function finishReview(input: {
+  assignmentId: string
+  items: readonly {
+    questionId: string
+    pointsAwarded: number
+    reviewerNotes?: string
+  }[]
+}): Promise<{ reviews: MockReview[]; result: MockResult }> {
+  await gate()
+  const { store, result, openQuestions } = requirePendingOpenReviewContext(
+    input.assignmentId,
+  )
+  const openById = new Map(openQuestions.map((question) => [question.id, question]))
+
+  if (input.items.length !== openQuestions.length) {
+    throw new MockServiceError("invalid_points")
+  }
+
+  const nextReviews: MockReview[] = []
+  for (const item of input.items) {
+    const question = openById.get(item.questionId)
+    if (!question) {
+      throw new MockServiceError("invalid_points")
+    }
+    const parsed = parseReviewPoints(
+      String(item.pointsAwarded),
+      question.maxPoints,
+    )
+    if (
+      !parsed.ok ||
+      !Number.isInteger(item.pointsAwarded) ||
+      item.pointsAwarded !== parsed.points
+    ) {
+      throw new MockServiceError("invalid_points")
+    }
+    nextReviews.push({
+      assignmentId: input.assignmentId,
+      questionId: item.questionId,
+      rubric: question.rubric,
+      pointsAwarded: parsed.points,
+      reviewerNotes: item.reviewerNotes?.trim() || undefined,
+      status: "reviewed",
+    })
+  }
+
+  for (const review of nextReviews) {
+    const index = store.reviews.findIndex(
+      (item) =>
+        item.assignmentId === review.assignmentId &&
+        item.questionId === review.questionId,
+    )
+    if (index >= 0) {
+      store.reviews[index] = review
+    } else {
+      store.reviews.push(review)
+    }
+  }
+
+  result.reviewStatus = "reviewed"
+  appendTrackingEvent(store, input.assignmentId, "reviewed")
+
+  return {
+    reviews: nextReviews.map((review) => ({ ...review })),
+    result: { ...result },
+  }
 }
 
 export async function upsertResult(result: MockResult): Promise<MockResult> {

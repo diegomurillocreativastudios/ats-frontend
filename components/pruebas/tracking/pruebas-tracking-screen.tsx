@@ -32,6 +32,7 @@ import {
   remindAssignment,
   retryAssignment,
 } from "@/lib/pruebas/mock-service"
+import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
 import {
   buildTrackingRows,
   canPerformTrackingAction,
@@ -827,13 +828,24 @@ export function PruebasTrackingScreen() {
               </p>
             ) : null}
 
-            <Link
-              href={`/pruebas/${selectedRow.assignment.id}`}
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-vo-purple/40 bg-vo-purple/10 px-4 font-sans text-sm font-medium text-emerald-900 hover:bg-vo-purple/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
-              data-testid="tracking-open-candidate"
-            >
-              {t("detail.openCandidate")}
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link
+                href={`/pruebas/${selectedRow.assignment.id}`}
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-vo-purple/40 bg-vo-purple/10 px-4 font-sans text-sm font-medium text-emerald-900 hover:bg-vo-purple/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                data-testid="tracking-open-candidate"
+              >
+                {t("detail.openCandidate")}
+              </Link>
+              {selectedRow.qualification === "pending_review" ? (
+                <Link
+                  href={`${PRUEBAS_HOME_HREF}/revision/${selectedRow.assignment.id}`}
+                  className="inline-flex min-h-11 items-center justify-center rounded-md border border-amber-300 bg-amber-50 px-4 font-sans text-sm font-medium text-amber-800 hover:bg-amber-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                  data-testid="tracking-open-review"
+                >
+                  {t("detail.openReview")}
+                </Link>
+              ) : null}
+            </div>
 
             {canPerformTrackingAction(selectedRow.actions, "extend") ? (
               <div className="flex flex-col gap-1.5">
