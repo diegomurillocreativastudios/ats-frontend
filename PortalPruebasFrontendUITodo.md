@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-12 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento + experiencia candidato demo + cola de revisión manual + resultados técnicos y psicométricos).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-13 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento + experiencia candidato demo + cola de revisión manual + resultados técnicos y psicométricos + reportes y navegación desde RRHH).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -337,15 +337,64 @@ hooks/pruebas/
 
 ### Fase UI-13 — Reportes y navegación desde RRHH
 
-- [ ] `/reportes`: catálogo, filtros, listado, vista previa **con datos simulados**.
-- [ ] Aplicar patrones de Reportes RRHH existentes; no generar ni subir PDFs reales.
-- [ ] Botones Exportar señalizados como "Disponible al conectar backend" o generación puramente local etiquetada demo si se aprueba.
-- [ ] Agregar pestaña/sección visual "Pruebas" en ficha de postulación del Portal RRHH usando datos mock; no contaminar `Application.MatchScore` ni endpoints reales.
-- [ ] Añadir CTA de asignación desde vacante y ficha del candidato cuando corresponde; manejar navegación ida/vuelta.
-- [ ] Reutilizar `PortalPageHeader`, breadcrumbs, filtros y páginas de carga/vacío/error.
-- [ ] Responsive completo de vistas nuevas y puntos de entrada de RRHH.
+#### En una frase
 
-**Criterio:** fluye entre RRHH y Portal Pruebas visualmente sin modificar operaciones del backend actual.
+El reclutador ve tres reportes de demostración en `/portal-pruebas/reportes` y, desde la vacante y el perfil del candidato en Recursos Humanos, un panel de ejemplos simulados con ida y vuelta, sin archivos ni datos reales de pruebas.
+
+#### Lo que ya funciona
+
+- La ruta `/portal-pruebas/reportes` existe como placeholder y el menú ya apunta a ella.
+- Resultados, seguimiento y el escenario mock (`loading` / `empty` / `error`) ya alimentan listados con los mismos fixtures.
+- UI-08 ya enlaza «Asignar prueba» desde el detalle de vacante y el perfil del candidato hacia `/portal-pruebas/asignaciones`. Esa pantalla ya lee `vacancyId` por query, pero esos enlaces no lo envían.
+- Exportar en el detalle de resultados ya está deshabilitado, con texto de «disponible al conectar el backend».
+
+#### Los 4 problemas
+
+1. Reportes sigue en placeholder. El catálogo, los filtros y la vista previa no están definidos, y reutilizar el hub de Recursos Humanos llamaría al catálogo real y al generador de PDF.
+2. Los identificadores de vacante y candidato de Recursos Humanos no coinciden con los del mock. Unir por id dejaría el panel vacío; unir por nombre dependería de datos del servidor.
+3. «Asignar prueba» no ofrece volver a la pantalla de Recursos Humanos de la que salió el reclutador.
+4. La exportación quedó como alternativa abierta (botón deshabilitado o archivo local). Hay que cerrarla antes de implementar.
+
+#### Qué hay que hacer
+
+1. [x] Sustituir el placeholder por una sola pantalla: tres tarjetas de catálogo y, debajo, la vista previa del reporte elegido. Claves fijas: `assignments-by-status`, `technical-scores`, `psychometric-dimensions`. 2026-10-13: `PruebasReportsScreen`.
+2. [x] Calcular las tres vistas en `lib/pruebas/reports.ts` solo desde asignaciones, postulaciones, vacantes, pruebas, versiones y resultados del mock. Filtros compartidos: vacante y rango de `assignedAt`. Paginación local de 10, tabla desde `lg` y tarjetas por debajo.
+3. [x] Gráfica Recharts por reporte (barras de estado, puntuación técnica, dimensiones), con leyenda y resumen para lector de pantalla. La psicométrica usa la escala 0–100 ya definida y no muestra semáforo ni porcentaje de idoneidad.
+4. [x] Dejar PDF y CSV deshabilitados, con el mismo aviso que en resultados. No generar archivo, ni diálogo de descarga, ni llamada a `lib/reportes`.
+5. [x] Añadir un panel de solo lectura «Pruebas» en el perfil del candidato (entre el hero y el resumen) y una sola vez en cada árbol de layout del detalle de vacante, antes de la búsqueda de candidatos. El panel lista los ejemplos sembrados del mock, con aviso de demostración, y enlaza el detalle de resultados si la asignación está `completed`; si no, a seguimiento. `PruebasRrhhTestsPanel`.
+6. [x] Actualizar los cuatro enlaces existentes de «Asignar prueba» a `/portal-pruebas/asignaciones?returnTo=` con la ruta actual. En asignaciones, mostrar «Volver» solo si `returnTo` es una ruta relativa que empieza por `/portal-rrhh/` y no contiene esquema ni `//`. `parseSafeRrhhReturnTo`.
+7. [x] Copiar las cadenas en `PruebasPortal.reports` y en las claves de Recursos Humanos que hagan falta, en es, en, de, fr e it.
+8. [x] Tests de unidad del agregado y de la pantalla (catálogo, filtros vacíos, export deshabilitado, escenario de error, panel y `returnTo` válido o rechazado).
+
+#### Fuera de alcance
+
+- Baterías (UI-14), recorrido de punta a punta y Playwright (UI-15).
+- Generar o subir PDF o CSV, y cualquier uso de `lib/reportes`, `ReportsHubClient` o `/api/bff`.
+- Pasar el id real de la vacante al selector mock, elegir candidatos automáticamente, o casar la postulación abierta con una fila del mock.
+- Escribir `MatchScore`, rematch, ficha técnica o tipos de la API de postulaciones.
+- Una ruta distinta por reporte.
+
+#### Hecho cuando
+
+- Elegir cada tarjeta cambia la tabla y la gráfica con cifras tomadas de los fixtures (Diego 12/20 en técnicas; dimensiones de Sofía en psicométricas; conteos de estado en asignaciones).
+- Vacante o fechas sin filas muestran vacío; el escenario `error` muestra el estado de error ya usado en resultados.
+- PDF y CSV no se pueden activar y el texto dice que estarán disponibles al conectar el backend.
+- Desde vacante y perfil se ve el panel de ejemplos, «Asignar prueba» abre asignaciones, y «Volver» regresa a esa pantalla de Recursos Humanos.
+- Un `returnTo` con `https:`, otro host o una ruta fuera de `/portal-rrhh/` no pinta el enlace.
+- `npm test` de los archivos nuevos pasa. No aparece `fetch` hacia pruebas.
+
+#### Anexo: referencias técnicas
+
+- Reemplazar `app/portal-pruebas/reportes/page.tsx` (hoy `PruebasSectionPlaceholder`).
+- Pantalla nueva: `components/pruebas/reports/pruebas-reports-screen.tsx`. Lógica: `lib/pruebas/reports.ts`.
+- Patrón visual a copiar: `components/pruebas/results/pruebas-results-list-screen.tsx` (`PortalPageHeader`, `ResponsiveFilters`, `ListPaginationBar`, `EmptyState`, `ErrorState`, `LoadingSkeleton`). Gráficas como `pruebas-results-charts.tsx`.
+- Export deshabilitado: `pruebas-results-detail-screen.tsx` (`data-testid="results-export"` y `detail.exportUnavailable`).
+- Panel: componente presentacional en `components/pruebas/reports/` montado desde `components/rrhh/recruiter-candidate-profile-view.tsx` (tras el hero, antes de `#rrhh-perfil-resumen`) y desde `app/portal-rrhh/vacantes/[id]/page.tsx` (los dos árboles, cerca de las líneas del buscador de candidatos).
+- Enlaces actuales sin retorno: `assignTestHref` en la vacante (dos `Link`) y dos `href="/portal-pruebas/asignaciones"` en el perfil.
+- Query ya leída en `components/pruebas/assignments/pruebas-assignments-screen.tsx` (`useSearchParams`). Añadir ahí la lectura de `returnTo`; no rellenar `vacancyId` desde Recursos Humanos.
+- Datos: `lib/pruebas/mock-service.ts` y `buildResultsListRows` en `lib/pruebas/results.ts`. El reporte de estados cuenta `assignment.status` de todas las asignaciones filtradas, no solo las `completed`.
+- Tests: `tests/unit/pruebas-reports.test.ts`, `tests/unit/pruebas-reports-ui.test.tsx`.
+- Menú: `lib/pruebas/portal-nav.ts` ya tiene `reports`. No hace falta otra entrada.
 
 ### Fase UI-14 — Baterías (OPCIONAL / posterior al MVP)
 
@@ -391,7 +440,7 @@ hooks/pruebas/
 | Revisión manual | `/portal-pruebas/revision/[assignmentId]` | ☑ | ☑ | ☑ | pending/reviewed |
 | Resultados técnicos | `/portal-pruebas/resultados/[assignmentId]` | ☑ | ☑ | ☑ | scored/no result |
 | Resultados psicométricos | `/portal-pruebas/resultados/[assignmentId]` | ☑ | ☑ | ☑ | dimensions |
-| Reportes | `/portal-pruebas/reportes` | ☐ | ☐ | ☐ | loading/empty/error |
+| Reportes | `/portal-pruebas/reportes` | ☑ | ☑ | ☑ | loading/empty/error |
 | Candidato bienvenida | `/pruebas/[demoToken]` (demo) | ☑ | ☑ | ☑ | eligible/invalid |
 | Candidato resolver/enviar | `/pruebas/[demoToken]` (demo) | ☑ | ☑ | ☑ | in-progress/submit |
 | Candidato finalización / bloqueos | `/pruebas/[demoToken]` (demo) | ☑ | ☑ | ☑ | done/expired/etc. |

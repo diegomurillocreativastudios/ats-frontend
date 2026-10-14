@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import {
   Award,
@@ -71,7 +72,9 @@ import {
   downloadRecruiterCandidateCv,
   isRecruiterCandidateCvError,
 } from "@/lib/api/recruiter-candidate-cv"
+import { PruebasRrhhTestsPanel } from "@/components/pruebas/reports/pruebas-rrhh-tests-panel"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
+import { buildAssignTestHref } from "@/lib/pruebas/reports"
 import { buildTechnicalSheetPayloadFromRecruiterProfile } from "@/lib/technical-sheet/profile-to-technical-sheet-payload"
 import { getApiErrorMessage } from "@/lib/api-error"
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv"
@@ -155,6 +158,10 @@ export function RecruiterCandidateProfileView({
   clearSaveProfileError,
 }: RecruiterCandidateProfileViewProps) {
   const t = useTranslations("RecruiterPortal.candidateDetail")
+  const pathname = usePathname()
+  const assignTestHref = buildAssignTestHref(
+    pathname || "/portal-rrhh/candidatos",
+  )
   const nd = (profile?.normalizedData ?? {}) as Record<string, unknown>
 
   const {
@@ -430,7 +437,7 @@ export function RecruiterCandidateProfileView({
               ) : null}
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
                 <Link
-                  href="/portal-pruebas/asignaciones"
+                  href={assignTestHref}
                   className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
                   aria-label={t("actions.assignTestAria")}
                 >
@@ -501,7 +508,7 @@ export function RecruiterCandidateProfileView({
                 </>
               ) : null}
               <Link
-                href="/portal-pruebas/asignaciones"
+                href={assignTestHref}
                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
                 aria-label={t("actions.assignTestAria")}
               >
@@ -526,6 +533,8 @@ export function RecruiterCandidateProfileView({
           </div>
         )}
       </section>
+
+      <PruebasRrhhTestsPanel />
 
       <section
         id="rrhh-perfil-resumen"

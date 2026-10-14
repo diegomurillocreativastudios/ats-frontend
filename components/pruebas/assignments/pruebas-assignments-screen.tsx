@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 
@@ -34,6 +35,7 @@ import {
   listVersions,
   MockServiceError,
 } from "@/lib/pruebas/mock-service"
+import { parseSafeRrhhReturnTo } from "@/lib/pruebas/reports"
 import type {
   EligibilityReason,
   MockApplication,
@@ -63,6 +65,7 @@ export function PruebasAssignmentsScreen() {
   const t = useTranslations("PruebasPortal.assignments")
   const locale = useLocale()
   const searchParams = useSearchParams()
+  const returnTo = parseSafeRrhhReturnTo(searchParams.get("returnTo"))
 
   const [applications, setApplications] = useState<MockApplication[]>([])
   const [assignments, setAssignments] = useState<MockAssignment[]>([])
@@ -420,11 +423,23 @@ export function PruebasAssignmentsScreen() {
 
   return (
     <div className="flex flex-col gap-8 px-4 py-6 md:px-6 lg:px-8">
-      <PortalPageHeader
-        id="pruebas-assignments"
-        title={t("title")}
-        description={t("description")}
-      />
+      <div className="flex flex-col gap-3">
+        {returnTo ? (
+          <Link
+            href={returnTo}
+            className="inline-flex min-h-11 w-fit items-center justify-center rounded-md border border-border bg-background px-4 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+            data-testid="assignments-back-to-rrhh"
+            aria-label={t("backToRrhhAria")}
+          >
+            {t("backToRrhh")}
+          </Link>
+        ) : null}
+        <PortalPageHeader
+          id="pruebas-assignments"
+          title={t("title")}
+          description={t("description")}
+        />
+      </div>
 
       <aside
         className="rounded-xl border border-border bg-muted/40 px-4 py-3 font-sans text-sm text-foreground"

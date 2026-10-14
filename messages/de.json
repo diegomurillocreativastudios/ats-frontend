@@ -1103,6 +1103,8 @@
       "title": "Zuweisungen",
       "description": "Weise eine verknüpfte Version aktiven Bewerbungen der Stelle zu. In der Demo werden keine E-Mails gesendet.",
       "scopeNotice": "Zuweisen sendet keine E-Mails und erstellt keine Bewerbungen. Es speichert nur simulierte Einladungen für berechtigte Kandidaten dieser Stelle.",
+      "backToRrhh": "Zurück",
+      "backToRrhhAria": "Zurück zu Personalwesen",
       "form": {
         "title": "Neue Zuweisung",
         "vacancy": "Stelle",
@@ -1491,6 +1493,105 @@
         "retry": "Erneut versuchen",
         "notFoundTitle": "Ergebnis nicht verfügbar",
         "notFoundDescription": "Diese Zuweisung existiert nicht oder ist in der Demo noch nicht abgeschlossen."
+      }
+    },
+    "reports": {
+      "title": "Berichte",
+      "description": "Demo-Berichtskatalog mit simulierter Vorschau. Es werden keine Dateien erzeugt.",
+      "scopeNotice": "Berichte nutzen simulierte Portal-Pruebas-Daten. Sie ändern keinen Match-Score und erzeugen weder PDF noch CSV.",
+      "catalogAria": "Berichtskatalog",
+      "catalog": {
+        "assignments-by-status": {
+          "title": "Zuweisungen nach Status",
+          "description": "Zählung und Liste der Zuweisungen gefiltert nach Stelle und Datum."
+        },
+        "technical-scores": {
+          "title": "Technische Punktzahlen",
+          "description": "Technische Ergebnisse mit Punktzahl und Maximum aus dem Fixture."
+        },
+        "psychometric-dimensions": {
+          "title": "Psychometrische Dimensionen",
+          "description": "Instrumentdimensionen auf einer Skala von 0 bis 100."
+        }
+      },
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Berichtsfilter",
+        "vacancy": "Stelle",
+        "assignedFrom": "Zugewiesen von",
+        "assignedTo": "Zugewiesen bis",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen"
+      },
+      "status": {
+        "pending": "Ausstehend",
+        "in_progress": "In Bearbeitung",
+        "completed": "Abgeschlossen",
+        "expired": "Abgelaufen",
+        "cancelled": "Abgebrochen"
+      },
+      "table": {
+        "candidate": "Kandidat",
+        "vacancy": "Stelle",
+        "test": "Bewertung",
+        "status": "Status",
+        "score": "Punktzahl",
+        "maxScore": "Maximum",
+        "dimension": "Dimension",
+        "assignedAt": "Zugewiesen",
+        "scoreValue": "{score} / {max}"
+      },
+      "charts": {
+        "statusTitle": "Zuweisungen nach Status",
+        "statusSummary": "Zusammenfassung der Zuweisungen nach Status",
+        "technicalTitle": "Technische Punktzahl",
+        "technicalSummary": "Zusammenfassung der technischen Punktzahlen",
+        "dimensionsTitle": "Instrumentdimensionen",
+        "dimensionsSummary": "Zusammenfassung der psychometrischen Dimensionen",
+        "dimensionsFootnote": "Demo-Instrumentskala: 0 bis 100. Dies ist kein Eignungsprozentsatz und keine Einstellungsentscheidung.",
+        "empty": "Keine Diagrammdaten für die aktuellen Filter."
+      },
+      "export": {
+        "pdf": "PDF exportieren",
+        "csv": "CSV exportieren",
+        "unavailable": "Verfügbar nach Backend-Anbindung"
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Berichtspaginierung",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Zeile} other {# Zeilen}}"
+      },
+      "count": "{count, plural, one {# Zeile} other {# Zeilen}}",
+      "filteredCount": "{count, plural, one {# sichtbar} other {# sichtbar}}",
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben."
+      },
+      "states": {
+        "loading": "Berichte werden geladen…",
+        "emptyTitle": "Keine Demodaten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demodaten zurück, um fortzufahren.",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zeile erfüllt die Filter. Passe sie an oder setze sie zurück.",
+        "errorTitle": "Berichte konnten nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Versuche es erneut.",
+        "retry": "Erneut versuchen"
+      },
+      "panel": {
+        "title": "Tests",
+        "description": "Simulierte Beispiele aus Portal Pruebas. Sie gehören nicht zur geöffneten Bewerbung.",
+        "candidate": "Kandidat",
+        "test": "Bewertung",
+        "status": "Status",
+        "open": "Ansehen",
+        "openResults": "Ergebnis ansehen",
+        "openTracking": "Nachverfolgung ansehen",
+        "empty": "Es gibt keine Testbeispiele in der Demo."
       }
     },
     "candidate": {

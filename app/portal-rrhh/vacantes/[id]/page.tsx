@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeft,
@@ -25,7 +25,9 @@ import {
   User,
   Users,
 } from "lucide-react";
+import { PruebasRrhhTestsPanel } from "@/components/pruebas/reports/pruebas-rrhh-tests-panel";
 import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell";
+import { buildAssignTestHref } from "@/lib/pruebas/reports";
 import Snackbar from "@/components/ui/Snackbar";
 import { CopyPublicVacancyLinkButton } from "@/components/shared/copy-public-vacancy-link-button";
 import { apiClient } from "@/lib/api"
@@ -1112,6 +1114,7 @@ function VacanteDetallePage() {
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
   const locale = useLocale();
   const params = useParams();
+  const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const focusedCandidateId = searchParams.get("candidato")?.trim() ?? "";
@@ -1477,7 +1480,7 @@ function VacanteDetallePage() {
     vacancyId != null && vacancyId !== ""
       ? `/portal-rrhh/entrevistas/${encodeURIComponent(vacancyId)}`
       : "/portal-rrhh/entrevistas";
-  const assignTestHref = "/portal-pruebas/asignaciones";
+  const assignTestHref = buildAssignTestHref(pathname || "/portal-rrhh/vacantes");
 
   useEffect(() => {
     let cancelled = false;
@@ -3701,6 +3704,8 @@ function VacanteDetallePage() {
                       </p>
                     )}
 
+                    <PruebasRrhhTestsPanel />
+
                     {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                     <div className="flex flex-col gap-3">
                       {loadingMatch && matchProgress.cycleKey ? (
@@ -4652,6 +4657,8 @@ function VacanteDetallePage() {
                       {smartError} Puedes continuar con filtros y revisión manual.
                     </p>
                   )}
+
+                  <PruebasRrhhTestsPanel />
 
                   {/* 1. Search container: only result of Search button (exclude already in Posibles candidatos) */}
                   <div className="flex flex-col gap-3">

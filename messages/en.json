@@ -1103,6 +1103,8 @@
       "title": "Assignments",
       "description": "Assign a linked version to active applications for the vacancy. No email is sent in the demo.",
       "scopeNotice": "Assigning does not send email or create applications. It only records simulated invitations for eligible candidates of that vacancy.",
+      "backToRrhh": "Back",
+      "backToRrhhAria": "Back to Human Resources",
       "form": {
         "title": "New assignment",
         "vacancy": "Vacancy",
@@ -1491,6 +1493,105 @@
         "retry": "Retry",
         "notFoundTitle": "Result unavailable",
         "notFoundDescription": "This assignment does not exist or is not completed in the demo."
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "description": "Demo report catalog with a simulated preview. No files are generated.",
+      "scopeNotice": "Reports use simulated Portal Pruebas data. They do not change the match score or generate PDF or CSV files.",
+      "catalogAria": "Report catalog",
+      "catalog": {
+        "assignments-by-status": {
+          "title": "Assignments by status",
+          "description": "Counts and list of assignments filtered by vacancy and date."
+        },
+        "technical-scores": {
+          "title": "Technical scores",
+          "description": "Technical results with score and maximum from the fixture."
+        },
+        "psychometric-dimensions": {
+          "title": "Psychometric dimensions",
+          "description": "Instrument dimensions on a 0 to 100 scale."
+        }
+      },
+      "filters": {
+        "title": "Filters",
+        "toggle": "Filters",
+        "regionLabel": "Report filters",
+        "vacancy": "Vacancy",
+        "assignedFrom": "Assigned from",
+        "assignedTo": "Assigned to",
+        "all": "All",
+        "clear": "Clear filters"
+      },
+      "status": {
+        "pending": "Pending",
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      },
+      "table": {
+        "candidate": "Candidate",
+        "vacancy": "Vacancy",
+        "test": "Assessment",
+        "status": "Status",
+        "score": "Score",
+        "maxScore": "Maximum",
+        "dimension": "Dimension",
+        "assignedAt": "Assigned",
+        "scoreValue": "{score} / {max}"
+      },
+      "charts": {
+        "statusTitle": "Assignments by status",
+        "statusSummary": "Summary of assignments by status",
+        "technicalTitle": "Technical score",
+        "technicalSummary": "Summary of technical scores",
+        "dimensionsTitle": "Instrument dimensions",
+        "dimensionsSummary": "Summary of psychometric dimensions",
+        "dimensionsFootnote": "Demo instrument scale: 0 to 100. This is not a suitability percentage or a hiring decision.",
+        "empty": "No chart data for the current filters."
+      },
+      "export": {
+        "pdf": "Export PDF",
+        "csv": "Export CSV",
+        "unavailable": "Available when the backend is connected"
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Report pagination",
+        "summary": "Page {page} of {totalPages}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# row} other {# rows}}"
+      },
+      "count": "{count, plural, one {# row} other {# rows}}",
+      "filteredCount": "{count, plural, one {# visible} other {# visible}}",
+      "errors": {
+        "generic": "The demo action could not be completed.",
+        "scenario_error": "The simulated service returned an error."
+      },
+      "states": {
+        "loading": "Loading reports…",
+        "emptyTitle": "No demo data",
+        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "filterEmptyTitle": "No matches",
+        "filterEmptyDescription": "No rows match the filters. Adjust or clear the filters.",
+        "errorTitle": "Reports could not be loaded",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry"
+      },
+      "panel": {
+        "title": "Assessments",
+        "description": "Simulated examples from Portal Pruebas. They do not match the open application.",
+        "candidate": "Candidate",
+        "test": "Assessment",
+        "status": "Status",
+        "open": "View",
+        "openResults": "View result",
+        "openTracking": "View tracking",
+        "empty": "There are no assessment examples in the demo."
       }
     },
     "candidate": {

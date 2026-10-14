@@ -1103,6 +1103,8 @@
       "title": "Affectations",
       "description": "Affectez une version liée aux candidatures actives de l’offre. Aucun e-mail n’est envoyé en démonstration.",
       "scopeNotice": "Affecter n’envoie pas d’e-mails et ne crée pas de candidatures. Cela enregistre uniquement des invitations simulées pour les candidats éligibles de cette offre.",
+      "backToRrhh": "Retour",
+      "backToRrhhAria": "Retour aux Ressources humaines",
       "form": {
         "title": "Nouvelle affectation",
         "vacancy": "Offre",
@@ -1491,6 +1493,105 @@
         "retry": "Réessayer",
         "notFoundTitle": "Résultat indisponible",
         "notFoundDescription": "Cette affectation n’existe pas ou n’est pas encore terminée dans la démonstration."
+      }
+    },
+    "reports": {
+      "title": "Rapports",
+      "description": "Catalogue de rapports de démonstration avec aperçu simulé. Aucun fichier n’est généré.",
+      "scopeNotice": "Les rapports utilisent des données simulées du portail Pruebas. Ils ne modifient pas le score d’adéquation et ne génèrent ni PDF ni CSV.",
+      "catalogAria": "Catalogue de rapports",
+      "catalog": {
+        "assignments-by-status": {
+          "title": "Affectations par statut",
+          "description": "Comptage et liste des affectations filtrées par offre et date."
+        },
+        "technical-scores": {
+          "title": "Scores techniques",
+          "description": "Résultats techniques avec score et maximum du jeu de données."
+        },
+        "psychometric-dimensions": {
+          "title": "Dimensions psychométriques",
+          "description": "Dimensions de l’instrument sur une échelle de 0 à 100."
+        }
+      },
+      "filters": {
+        "title": "Filtres",
+        "toggle": "Filtres",
+        "regionLabel": "Filtres des rapports",
+        "vacancy": "Offre",
+        "assignedFrom": "Affectée depuis",
+        "assignedTo": "Affectée jusqu’au",
+        "all": "Toutes",
+        "clear": "Effacer les filtres"
+      },
+      "status": {
+        "pending": "En attente",
+        "in_progress": "En cours",
+        "completed": "Terminée",
+        "expired": "Expirée",
+        "cancelled": "Annulée"
+      },
+      "table": {
+        "candidate": "Candidat",
+        "vacancy": "Offre",
+        "test": "Évaluation",
+        "status": "Statut",
+        "score": "Score",
+        "maxScore": "Maximum",
+        "dimension": "Dimension",
+        "assignedAt": "Affectée",
+        "scoreValue": "{score} / {max}"
+      },
+      "charts": {
+        "statusTitle": "Affectations par statut",
+        "statusSummary": "Résumé des affectations par statut",
+        "technicalTitle": "Score technique",
+        "technicalSummary": "Résumé des scores techniques",
+        "dimensionsTitle": "Dimensions de l’instrument",
+        "dimensionsSummary": "Résumé des dimensions psychométriques",
+        "dimensionsFootnote": "Échelle de l’instrument en démonstration : 0 à 100. Ce n’est pas un pourcentage d’adéquation ni une décision d’embauche.",
+        "empty": "Aucune donnée de graphique pour les filtres actuels."
+      },
+      "export": {
+        "pdf": "Exporter PDF",
+        "csv": "Exporter CSV",
+        "unavailable": "Disponible lors de la connexion au backend"
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "pageSizeAria": "Taille de page",
+        "regionAria": "Pagination du rapport",
+        "summary": "Page {page} sur {totalPages}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "count": "{count, plural, one {# ligne} other {# lignes}}"
+      },
+      "count": "{count, plural, one {# ligne} other {# lignes}}",
+      "filteredCount": "{count, plural, one {# visible} other {# visibles}}",
+      "errors": {
+        "generic": "L’action de démonstration n’a pas pu être terminée.",
+        "scenario_error": "Le service simulé a renvoyé une erreur."
+      },
+      "states": {
+        "loading": "Chargement des rapports…",
+        "emptyTitle": "Aucune donnée de démonstration",
+        "emptyDescription": "Le scénario simulé est vide. Réinitialisez les données de démonstration pour continuer.",
+        "filterEmptyTitle": "Aucune correspondance",
+        "filterEmptyDescription": "Aucune ligne ne correspond aux filtres. Ajustez ou effacez les filtres.",
+        "errorTitle": "Impossible de charger les rapports",
+        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "retry": "Réessayer"
+      },
+      "panel": {
+        "title": "Évaluations",
+        "description": "Exemples simulés du portail Pruebas. Ils ne correspondent pas à la candidature ouverte.",
+        "candidate": "Candidat",
+        "test": "Évaluation",
+        "status": "Statut",
+        "open": "Voir",
+        "openResults": "Voir le résultat",
+        "openTracking": "Voir le suivi",
+        "empty": "Il n’y a pas d’exemples d’évaluations dans la démonstration."
       }
     },
     "candidate": {

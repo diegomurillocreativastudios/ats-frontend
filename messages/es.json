@@ -1103,6 +1103,8 @@
       "title": "Asignaciones",
       "description": "Asigna una versión vinculada a postulaciones activas de la vacante. No se envían correos en la demostración.",
       "scopeNotice": "Asignar no envía correos ni crea postulaciones. Solo registra invitaciones simuladas para candidatos elegibles de esa vacante.",
+      "backToRrhh": "Volver",
+      "backToRrhhAria": "Volver a Recursos Humanos",
       "form": {
         "title": "Nueva asignación",
         "vacancy": "Vacante",
@@ -1491,6 +1493,105 @@
         "retry": "Reintentar",
         "notFoundTitle": "Resultado no disponible",
         "notFoundDescription": "Esta asignación no existe o aún no está completada en la demostración."
+      }
+    },
+    "reports": {
+      "title": "Reportes",
+      "description": "Catálogo de reportes de demostración con vista previa simulada. No se generan archivos.",
+      "scopeNotice": "Los reportes usan datos simulados del Portal Pruebas. No modifican la puntuación de idoneidad ni generan PDF o CSV.",
+      "catalogAria": "Catálogo de reportes",
+      "catalog": {
+        "assignments-by-status": {
+          "title": "Asignaciones por estado",
+          "description": "Conteo y listado de asignaciones filtradas por vacante y fecha."
+        },
+        "technical-scores": {
+          "title": "Puntuaciones técnicas",
+          "description": "Resultados técnicos con puntuación y máximo del fixture."
+        },
+        "psychometric-dimensions": {
+          "title": "Dimensiones psicométricas",
+          "description": "Dimensiones del instrumento en escala 0 a 100."
+        }
+      },
+      "filters": {
+        "title": "Filtros",
+        "toggle": "Filtros",
+        "regionLabel": "Filtros de reportes",
+        "vacancy": "Vacante",
+        "assignedFrom": "Asignada desde",
+        "assignedTo": "Asignada hasta",
+        "all": "Todas",
+        "clear": "Limpiar filtros"
+      },
+      "status": {
+        "pending": "Pendiente",
+        "in_progress": "En progreso",
+        "completed": "Completada",
+        "expired": "Vencida",
+        "cancelled": "Cancelada"
+      },
+      "table": {
+        "candidate": "Candidato",
+        "vacancy": "Vacante",
+        "test": "Prueba",
+        "status": "Estado",
+        "score": "Puntuación",
+        "maxScore": "Máximo",
+        "dimension": "Dimensión",
+        "assignedAt": "Asignada",
+        "scoreValue": "{score} / {max}"
+      },
+      "charts": {
+        "statusTitle": "Asignaciones por estado",
+        "statusSummary": "Resumen de asignaciones por estado",
+        "technicalTitle": "Puntuación técnica",
+        "technicalSummary": "Resumen de puntuaciones técnicas",
+        "dimensionsTitle": "Dimensiones del instrumento",
+        "dimensionsSummary": "Resumen de dimensiones psicométricas",
+        "dimensionsFootnote": "Escala del instrumento en la demostración: 0 a 100. No es un porcentaje de idoneidad ni una decisión de contratación.",
+        "empty": "No hay datos para la gráfica con los filtros actuales."
+      },
+      "export": {
+        "pdf": "Exportar PDF",
+        "csv": "Exportar CSV",
+        "unavailable": "Disponible al conectar backend"
+      },
+      "pagination": {
+        "perPage": "Por página",
+        "pageSizeAria": "Tamaño de página",
+        "regionAria": "Paginación del reporte",
+        "summary": "Página {page} de {totalPages}",
+        "prev": "Anterior",
+        "next": "Siguiente",
+        "count": "{count, plural, one {# fila} other {# filas}}"
+      },
+      "count": "{count, plural, one {# fila} other {# filas}}",
+      "filteredCount": "{count, plural, one {# visible} other {# visibles}}",
+      "errors": {
+        "generic": "No se pudo completar la acción de demostración.",
+        "scenario_error": "El servicio simulado devolvió un error."
+      },
+      "states": {
+        "loading": "Cargando reportes…",
+        "emptyTitle": "No hay datos de demostración",
+        "emptyDescription": "El escenario simulado está vacío. Restablece los datos de demostración para continuar.",
+        "filterEmptyTitle": "Sin coincidencias",
+        "filterEmptyDescription": "Ninguna fila cumple los filtros. Ajusta o limpia los filtros.",
+        "errorTitle": "No se pudieron cargar los reportes",
+        "errorDescription": "El servicio simulado devolvió un error. Intenta de nuevo.",
+        "retry": "Reintentar"
+      },
+      "panel": {
+        "title": "Pruebas",
+        "description": "Ejemplos simulados del Portal Pruebas. No corresponden a la postulación abierta.",
+        "candidate": "Candidato",
+        "test": "Prueba",
+        "status": "Estado",
+        "open": "Ver",
+        "openResults": "Ver resultado",
+        "openTracking": "Ver seguimiento",
+        "empty": "No hay ejemplos de pruebas en la demostración."
       }
     },
     "candidate": {

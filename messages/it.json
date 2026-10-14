@@ -1103,6 +1103,8 @@
       "title": "Assegnazioni",
       "description": "Assegna una versione collegata alle candidature attive della posizione. Nella demo non vengono inviate e-mail.",
       "scopeNotice": "Assegnare non invia e-mail né crea candidature. Registra solo inviti simulati per i candidati idonei di quella posizione.",
+      "backToRrhh": "Indietro",
+      "backToRrhhAria": "Torna alle Risorse umane",
       "form": {
         "title": "Nuova assegnazione",
         "vacancy": "Posizione",
@@ -1491,6 +1493,105 @@
         "retry": "Riprova",
         "notFoundTitle": "Risultato non disponibile",
         "notFoundDescription": "Questa assegnazione non esiste o non è ancora completata nella dimostrazione."
+      }
+    },
+    "reports": {
+      "title": "Report",
+      "description": "Catalogo di report dimostrativi con anteprima simulata. Non vengono generati file.",
+      "scopeNotice": "I report usano dati simulati del portale Pruebas. Non modificano il punteggio di idoneità e non generano PDF o CSV.",
+      "catalogAria": "Catalogo report",
+      "catalog": {
+        "assignments-by-status": {
+          "title": "Assegnazioni per stato",
+          "description": "Conteggio e elenco delle assegnazioni filtrate per posizione e data."
+        },
+        "technical-scores": {
+          "title": "Punteggi tecnici",
+          "description": "Risultati tecnici con punteggio e massimo del fixture."
+        },
+        "psychometric-dimensions": {
+          "title": "Dimensioni psicometriche",
+          "description": "Dimensioni dello strumento su una scala da 0 a 100."
+        }
+      },
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri dei report",
+        "vacancy": "Posizione",
+        "assignedFrom": "Assegnata da",
+        "assignedTo": "Assegnata fino a",
+        "all": "Tutte",
+        "clear": "Pulisci filtri"
+      },
+      "status": {
+        "pending": "In attesa",
+        "in_progress": "In corso",
+        "completed": "Completata",
+        "expired": "Scaduta",
+        "cancelled": "Annullata"
+      },
+      "table": {
+        "candidate": "Candidato",
+        "vacancy": "Posizione",
+        "test": "Valutazione",
+        "status": "Stato",
+        "score": "Punteggio",
+        "maxScore": "Massimo",
+        "dimension": "Dimensione",
+        "assignedAt": "Assegnata",
+        "scoreValue": "{score} / {max}"
+      },
+      "charts": {
+        "statusTitle": "Assegnazioni per stato",
+        "statusSummary": "Riepilogo delle assegnazioni per stato",
+        "technicalTitle": "Punteggio tecnico",
+        "technicalSummary": "Riepilogo dei punteggi tecnici",
+        "dimensionsTitle": "Dimensioni dello strumento",
+        "dimensionsSummary": "Riepilogo delle dimensioni psicometriche",
+        "dimensionsFootnote": "Scala dello strumento in dimostrazione: da 0 a 100. Non è una percentuale di idoneità né una decisione di assunzione.",
+        "empty": "Nessun dato per il grafico con i filtri attuali."
+      },
+      "export": {
+        "pdf": "Esporta PDF",
+        "csv": "Esporta CSV",
+        "unavailable": "Disponibile quando si collega il backend"
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione del report",
+        "summary": "Pagina {page} di {totalPages}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# riga} other {# righe}}"
+      },
+      "count": "{count, plural, one {# riga} other {# righe}}",
+      "filteredCount": "{count, plural, one {# visibile} other {# visibili}}",
+      "errors": {
+        "generic": "Impossibile completare l’azione di dimostrazione.",
+        "scenario_error": "Il servizio simulato ha restituito un errore."
+      },
+      "states": {
+        "loading": "Caricamento report…",
+        "emptyTitle": "Nessun dato di dimostrazione",
+        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati di dimostrazione per continuare.",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna riga soddisfa i filtri. Modificali o puliscili.",
+        "errorTitle": "Impossibile caricare i report",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova"
+      },
+      "panel": {
+        "title": "Prove",
+        "description": "Esempi simulati del portale Pruebas. Non corrispondono alla candidatura aperta.",
+        "candidate": "Candidato",
+        "test": "Valutazione",
+        "status": "Stato",
+        "open": "Vedi",
+        "openResults": "Vedi risultato",
+        "openTracking": "Vedi monitoraggio",
+        "empty": "Non ci sono esempi di prove nella dimostrazione."
       }
     },
     "candidate": {
