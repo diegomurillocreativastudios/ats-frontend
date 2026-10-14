@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 
@@ -825,6 +826,14 @@ export function PruebasTrackingScreen() {
                   : t("detail.applicationInactive")}
               </p>
             ) : null}
+
+            <Link
+              href={`/pruebas/${selectedRow.assignment.id}`}
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-vo-purple/40 bg-vo-purple/10 px-4 font-sans text-sm font-medium text-emerald-900 hover:bg-vo-purple/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+              data-testid="tracking-open-candidate"
+            >
+              {t("detail.openCandidate")}
+            </Link>
 
             {canPerformTrackingAction(selectedRow.actions, "extend") ? (
               <div className="flex flex-col gap-1.5">

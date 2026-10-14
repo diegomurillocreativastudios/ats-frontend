@@ -5,6 +5,11 @@ import {
 } from "@/lib/pruebas/dashboard"
 import { expiresAtIsoFromYmd, isExpiresAtValid } from "@/lib/pruebas/assignments"
 import {
+  resolveCandidateDemo,
+  type CandidateDemoView,
+} from "@/lib/pruebas/candidate-session"
+import {
+  canStartSession,
   evaluateEligibility,
   isVacancyClosed,
 } from "@/lib/pruebas/eligibility"
@@ -815,6 +820,35 @@ export async function retryAssignment(
   return { ...assignment }
 }
 
+function requireOpenApplicationForAssignment(
+  store: MockPruebasStore,
+  assignment: MockAssignment,
+): void {
+  const application = store.applications.find(
+    (item) => item.id === assignment.applicationId,
+  )
+  const closed = isApplicationClosedForTracking(application)
+  if (closed.closed) {
+    throw new MockServiceError("application_closed")
+  }
+}
+
+export async function getCandidateDemo(
+  demoToken: string,
+  wallClockMs: number = Date.now(),
+): Promise<CandidateDemoView> {
+  const store = await gate()
+  if (getMockRuntime().scenario === "empty") {
+    return { screen: "invalid" }
+  }
+  return resolveCandidateDemo({
+    store,
+    demoToken,
+    nowIso: MOCK_NOW,
+    wallClockMs,
+  })
+}
+
 export async function createSession(input: {
   assignmentId: string
   startedAt: string
@@ -823,14 +857,24 @@ export async function createSession(input: {
   await gate()
   const store = requirePopulatedStore()
   const assignment = store.assignments.find(
-    (item) => item.id === input.assignmentId
+    (item) => item.id === input.assignmentId,
   )
   if (!assignment) {
     throw new MockServiceError("not_found")
   }
-  const attemptNumber =
-    store.sessions.filter((session) => session.assignmentId === assignment.id)
-      .length + 1
+  requireOpenApplicationForAssignment(store, assignment)
+  const sessionsForAssignment = store.sessions.filter(
+    (session) => session.assignmentId === assignment.id,
+  )
+  const start = canStartSession({
+    assignment,
+    sessionsForAssignment,
+    now: MOCK_NOW,
+  })
+  if (!start.ok) {
+    throw new MockServiceError(start.reason)
+  }
+  const attemptNumber = sessionsForAssignment.length + 1
   const session: MockSession = {
     id: `ses-${store.sessions.length + 1}`,
     assignmentId: assignment.id,
@@ -842,11 +886,12 @@ export async function createSession(input: {
   }
   store.sessions.push(session)
   assignment.status = "in_progress"
-  return session
+  return { ...session, answers: [...session.answers] }
 }
 
-export async function submitSession(
-  sessionId: string
+export async function saveSessionAnswers(
+  sessionId: string,
+  answers: MockSession["answers"],
 ): Promise<MockSession> {
   await gate()
   const store = requirePopulatedStore()
@@ -854,14 +899,40 @@ export async function submitSession(
   if (!session) {
     throw new MockServiceError("not_found")
   }
-  session.status = "submitted"
-  const assignment = store.assignments.find(
-    (item) => item.id === session.assignmentId
-  )
-  if (assignment) {
-    assignment.status = "completed"
+  if (session.status !== "in_progress") {
+    throw new MockServiceError("action_not_allowed")
   }
-  return session
+  const assignment = store.assignments.find(
+    (item) => item.id === session.assignmentId,
+  )
+  if (!assignment) {
+    throw new MockServiceError("not_found")
+  }
+  requireOpenApplicationForAssignment(store, assignment)
+  session.answers = answers.map((answer) => ({ ...answer }))
+  return { ...session, answers: [...session.answers] }
+}
+
+export async function submitSession(sessionId: string): Promise<MockSession> {
+  await gate()
+  const store = requirePopulatedStore()
+  const session = store.sessions.find((item) => item.id === sessionId)
+  if (!session) {
+    throw new MockServiceError("not_found")
+  }
+  if (session.status !== "in_progress") {
+    throw new MockServiceError("action_not_allowed")
+  }
+  const assignment = store.assignments.find(
+    (item) => item.id === session.assignmentId,
+  )
+  if (!assignment) {
+    throw new MockServiceError("not_found")
+  }
+  requireOpenApplicationForAssignment(store, assignment)
+  session.status = "submitted"
+  assignment.status = "completed"
+  return { ...session, answers: [...session.answers] }
 }
 
 export async function saveReview(review: MockReview): Promise<MockReview> {

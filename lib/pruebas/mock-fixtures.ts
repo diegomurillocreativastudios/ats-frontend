@@ -43,6 +43,7 @@ export const MOCK_IDS = {
   assignmentNoraCancelled: "asg-nora-cancelled",
   assignmentElenaPending: "asg-elena-pending",
   sessionCarlosSubmitted: "ses-carlos-submitted",
+  sessionAnaInProgress: "ses-ana-in-progress",
   resultPsycho: "res-sofia-psycho",
   resultDiegoPending: "res-diego-pending",
   eventMariaReminded: "evt-maria-reminded",
@@ -480,6 +481,15 @@ export function createMockFixtures(): MockPruebasStore {
         deadlineAt: "2026-09-21T11:00:00.000Z",
         status: "submitted",
         answers: [],
+      },
+      {
+        id: MOCK_IDS.sessionAnaInProgress,
+        assignmentId: MOCK_IDS.assignmentAnaInProgress,
+        attemptNumber: 1,
+        startedAt: "2026-10-12T10:00:00.000Z",
+        deadlineAt: "2026-11-15T18:00:00.000Z",
+        status: "in_progress",
+        answers: [{ questionId: MOCK_IDS.qSingle, value: "opt-b" }],
       },
     ],
     results: [

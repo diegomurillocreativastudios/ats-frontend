@@ -546,6 +546,10 @@
     "pruebasPortal": {
       "title": "ApplicanTree | Portal Prüfungen",
       "description": "Technische und psychometrische Prüfungen mit Demodaten"
+    },
+    "pruebasCandidateDemo": {
+      "title": "Bewertung ablegen (Demo) | ApplicanTree",
+      "description": "Kandidatenerfahrung zum Ablegen von Tests im Demomodus."
     }
   },
   "PortalSelection": {
@@ -1238,7 +1242,8 @@
         "applicationFinal": "Die Bewerbung ist in einem Endstatus. Abbrechen ist nur bei zulässigem Status möglich.",
         "extendDate": "Neues Ablaufdatum",
         "extendHint": "Das Datum muss nach der Demo-Uhr liegen.",
-        "simulateFailure": "Fehler der Operation simulieren"
+        "simulateFailure": "Fehler der Operation simulieren",
+        "openCandidate": "Kandidatenerfahrung öffnen"
       },
       "timeline": {
         "title": "Zeitlinie",
@@ -1292,6 +1297,87 @@
         "retry": "Erneut versuchen",
         "filterEmptyTitle": "Keine Treffer",
         "filterEmptyDescription": "Keine Zuweisung entspricht den Filtern. Passe die Filter an oder setze sie zurück."
+      }
+    },
+    "candidate": {
+      "welcome": {
+        "vacancy": "Stelle: {title}",
+        "duration": "Dauer",
+        "durationValue": "{minutes} Minuten",
+        "expires": "Zuweisung endet",
+        "instructions": "Anweisungen",
+        "privacy": "Demomodus: Ihre Antworten werden nur in dieser simulierten lokalen Sitzung gespeichert. Sie werden nicht an einen Server gesendet und nicht für Einstellungsentscheidungen verwendet.",
+        "start": "Starten",
+        "resume": "Fortsetzen"
+      },
+      "taking": {
+        "progress": "Frage {current} von {total}",
+        "timer": "Verbleibende Zeit: {time}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "submit": "Bewertung absenden",
+        "required": "Beantworten Sie diese Frage, bevor Sie fortfahren.",
+        "saveFailed": "Antworten konnten in der Demo nicht gespeichert werden. Bitte erneut versuchen.",
+        "submitFailed": "Die Bewertung konnte in der Demo nicht gesendet werden."
+      },
+      "question": {
+        "optionsAria": "Antwortoptionen",
+        "trueFalseAria": "Wahr oder falsch",
+        "likertAria": "Zustimmungsskala",
+        "trueLabel": "Wahr",
+        "falseLabel": "Falsch",
+        "numericLabel": "Ihre numerische Antwort",
+        "openLabel": "Ihre Antwort"
+      },
+      "confirm": {
+        "title": "Bewertung absenden",
+        "description": "Sie senden Ihre Antworten im Demomodus. Sie sehen danach keine Punkte oder Lösungen.",
+        "submit": "Absenden",
+        "cancel": "Weiter beantworten"
+      },
+      "done": {
+        "title": "Bewertung gesendet",
+        "description": "Ihre Antworten wurden in der Demo erfasst. Das Ergebnis wird dem Kandidaten nicht angezeigt."
+      },
+      "blocked": {
+        "invalid": {
+          "title": "Ungültiger Link",
+          "description": "Für diesen Link wurde keine Demo-Zuweisung gefunden."
+        },
+        "applicationClosed": {
+          "title": "Bewerbung geschlossen",
+          "description": "Diese Bewerbung ist nicht mehr aktiv. Sie können diese Bewertung nicht ablegen."
+        },
+        "cancelled": {
+          "title": "Zuweisung storniert",
+          "description": "Diese Zuweisung wurde in der Demo storniert."
+        },
+        "expired": {
+          "title": "Zuweisung abgelaufen",
+          "description": "Die Frist für diese Zuweisung ist abgelaufen."
+        },
+        "timeUp": {
+          "title": "Zeit abgelaufen",
+          "description": "Die Zeit für diese Sitzung ist abgelaufen. Sie können keine weiteren Antworten senden."
+        },
+        "attemptsExhausted": {
+          "title": "Keine Versuche mehr",
+          "description": "Sie haben alle erlaubten Versuche für diese Zuweisung verwendet."
+        }
+      },
+      "demo": {
+        "simulateSaveFailure": "Speicherfehler simulieren",
+        "simulateTimeUp": "Zeitablauf simulieren"
+      },
+      "actions": {
+        "back": "Zurück",
+        "exit": "Zur Nachverfolgung"
+      },
+      "states": {
+        "loading": "Kandidatenerfahrung wird geladen…",
+        "errorTitle": "Demo konnte nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen"
       }
     }
   },

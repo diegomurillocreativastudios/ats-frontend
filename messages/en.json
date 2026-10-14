@@ -546,6 +546,10 @@
     "pruebasPortal": {
       "title": "ApplicanTree | Assessments Portal",
       "description": "Technical and psychometric assessments with demo data"
+    },
+    "pruebasCandidateDemo": {
+      "title": "Take assessment (demo) | ApplicanTree",
+      "description": "Candidate assessment-taking experience in demo mode."
     }
   },
   "PortalSelection": {
@@ -1238,7 +1242,8 @@
         "applicationFinal": "The application is in a final status. You can only cancel when the status allows it.",
         "extendDate": "New expiry date",
         "extendHint": "The date must be after the demo clock.",
-        "simulateFailure": "Simulate operation failure"
+        "simulateFailure": "Simulate operation failure",
+        "openCandidate": "Open candidate experience"
       },
       "timeline": {
         "title": "Timeline",
@@ -1292,6 +1297,87 @@
         "retry": "Retry",
         "filterEmptyTitle": "No matches",
         "filterEmptyDescription": "No assignments match the filters. Adjust or clear the filters."
+      }
+    },
+    "candidate": {
+      "welcome": {
+        "vacancy": "Vacancy: {title}",
+        "duration": "Duration",
+        "durationValue": "{minutes} minutes",
+        "expires": "Assignment expires",
+        "instructions": "Instructions",
+        "privacy": "Demo mode: your answers are stored only in this simulated local session. They are not sent to a server and are not used to decide hiring.",
+        "start": "Start",
+        "resume": "Continue"
+      },
+      "taking": {
+        "progress": "Question {current} of {total}",
+        "timer": "Time left: {time}",
+        "prev": "Previous",
+        "next": "Next",
+        "submit": "Submit assessment",
+        "required": "Answer this question before continuing.",
+        "saveFailed": "Answers could not be saved in the demo. Try again.",
+        "submitFailed": "The assessment could not be submitted in the demo."
+      },
+      "question": {
+        "optionsAria": "Answer options",
+        "trueFalseAria": "True or false",
+        "likertAria": "Agreement scale",
+        "trueLabel": "True",
+        "falseLabel": "False",
+        "numericLabel": "Your numeric answer",
+        "openLabel": "Your answer"
+      },
+      "confirm": {
+        "title": "Submit assessment",
+        "description": "You are about to submit your answers in demo mode. You will not see scores or solutions when done.",
+        "submit": "Submit",
+        "cancel": "Keep answering"
+      },
+      "done": {
+        "title": "Assessment submitted",
+        "description": "Your answers were recorded in the demo. The candidate does not see the result."
+      },
+      "blocked": {
+        "invalid": {
+          "title": "Invalid link",
+          "description": "We could not find a demo assignment for this link."
+        },
+        "applicationClosed": {
+          "title": "Application closed",
+          "description": "This application is no longer active. You cannot take this assessment."
+        },
+        "cancelled": {
+          "title": "Assignment cancelled",
+          "description": "This assignment was cancelled in the demo."
+        },
+        "expired": {
+          "title": "Assignment expired",
+          "description": "The deadline for this assignment has passed."
+        },
+        "timeUp": {
+          "title": "Time is up",
+          "description": "This session ran out of time. You cannot submit more answers."
+        },
+        "attemptsExhausted": {
+          "title": "No attempts left",
+          "description": "You have used all allowed attempts for this assignment."
+        }
+      },
+      "demo": {
+        "simulateSaveFailure": "Simulate save failure",
+        "simulateTimeUp": "Simulate time up"
+      },
+      "actions": {
+        "back": "Back",
+        "exit": "Exit to tracking"
+      },
+      "states": {
+        "loading": "Loading candidate experience…",
+        "errorTitle": "Could not load the demo",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry"
       }
     }
   },

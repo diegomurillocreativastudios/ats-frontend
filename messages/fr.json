@@ -546,6 +546,10 @@
     "pruebasPortal": {
       "title": "ApplicanTree | Portail Évaluations",
       "description": "Évaluations techniques et psychométriques avec données de démonstration"
+    },
+    "pruebasCandidateDemo": {
+      "title": "Passer l’évaluation (démo) | ApplicanTree",
+      "description": "Expérience candidat pour passer une évaluation en mode démonstration."
     }
   },
   "PortalSelection": {
@@ -1238,7 +1242,8 @@
         "applicationFinal": "La candidature est dans un état final. Vous ne pouvez annuler que si l’état le permet.",
         "extendDate": "Nouvelle date d’expiration",
         "extendHint": "La date doit être postérieure à l’horloge de démonstration.",
-        "simulateFailure": "Simuler un échec de l’opération"
+        "simulateFailure": "Simuler un échec de l’opération",
+        "openCandidate": "Ouvrir l’expérience candidat"
       },
       "timeline": {
         "title": "Chronologie",
@@ -1292,6 +1297,87 @@
         "retry": "Réessayer",
         "filterEmptyTitle": "Aucun résultat",
         "filterEmptyDescription": "Aucune affectation ne correspond aux filtres. Ajustez ou effacez les filtres."
+      }
+    },
+    "candidate": {
+      "welcome": {
+        "vacancy": "Poste : {title}",
+        "duration": "Durée",
+        "durationValue": "{minutes} minutes",
+        "expires": "Expiration de l’affectation",
+        "instructions": "Instructions",
+        "privacy": "Mode démonstration : vos réponses sont enregistrées uniquement dans cette session locale simulée. Elles ne sont pas envoyées à un serveur et ne servent pas à une décision d’embauche.",
+        "start": "Commencer",
+        "resume": "Continuer"
+      },
+      "taking": {
+        "progress": "Question {current} sur {total}",
+        "timer": "Temps restant : {time}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "submit": "Envoyer l’évaluation",
+        "required": "Répondez à cette question avant de continuer.",
+        "saveFailed": "Impossible d’enregistrer les réponses dans la démo. Réessayez.",
+        "submitFailed": "Impossible d’envoyer l’évaluation dans la démo."
+      },
+      "question": {
+        "optionsAria": "Options de réponse",
+        "trueFalseAria": "Vrai ou faux",
+        "likertAria": "Échelle d’accord",
+        "trueLabel": "Vrai",
+        "falseLabel": "Faux",
+        "numericLabel": "Votre réponse numérique",
+        "openLabel": "Votre réponse"
+      },
+      "confirm": {
+        "title": "Envoyer l’évaluation",
+        "description": "Vous allez envoyer vos réponses en mode démonstration. Vous ne verrez ni score ni solutions à la fin.",
+        "submit": "Envoyer",
+        "cancel": "Continuer à répondre"
+      },
+      "done": {
+        "title": "Évaluation envoyée",
+        "description": "Vos réponses ont été enregistrées dans la démo. Le résultat n’est pas affiché au candidat."
+      },
+      "blocked": {
+        "invalid": {
+          "title": "Lien non valide",
+          "description": "Aucune affectation de démonstration n’a été trouvée pour ce lien."
+        },
+        "applicationClosed": {
+          "title": "Candidature fermée",
+          "description": "Cette candidature n’est plus active. Vous ne pouvez pas passer cette évaluation."
+        },
+        "cancelled": {
+          "title": "Affectation annulée",
+          "description": "Cette affectation a été annulée dans la démo."
+        },
+        "expired": {
+          "title": "Affectation expirée",
+          "description": "Le délai de cette affectation est dépassé."
+        },
+        "timeUp": {
+          "title": "Temps écoulé",
+          "description": "Le temps de cette session est écoulé. Vous ne pouvez plus envoyer de réponses."
+        },
+        "attemptsExhausted": {
+          "title": "Tentatives épuisées",
+          "description": "Vous avez utilisé toutes les tentatives autorisées pour cette affectation."
+        }
+      },
+      "demo": {
+        "simulateSaveFailure": "Simuler un échec d’enregistrement",
+        "simulateTimeUp": "Simuler le temps écoulé"
+      },
+      "actions": {
+        "back": "Retour",
+        "exit": "Quitter vers le suivi"
+      },
+      "states": {
+        "loading": "Chargement de l’expérience candidat…",
+        "errorTitle": "Impossible de charger la démo",
+        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "retry": "Réessayer"
       }
     }
   },

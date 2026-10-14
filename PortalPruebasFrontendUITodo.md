@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-09 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-10 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento + experiencia candidato demo).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -298,16 +298,16 @@ hooks/pruebas/
 
 ### Fase UI-10 — Portal del candidato: experiencia de resolución
 
-- [ ] Definir ruta de demo segura **sin agregar excepción pública general en `proxy.ts`** ni simular bypass de auth. Si se requiere ruta pública futura, documentar como pendiente de integración.
-- [ ] Bienvenida: prueba, vacante, instrucciones, duración, privacidad y comenzar.
-- [ ] Preguntas: render de todos los tipos definidos, navegación anterior/siguiente, respuestas obligatorias según configuración, progreso y estado de guardado **local simulado**.
-- [ ] Temporizador confiable en demo basado en deadline local, control de expiración y reanudación local cuando se permita.
-- [ ] Última pregunta → "Enviar evaluación" → diálogo de confirmación → envío mock → finalización.
-- [ ] Evitar mostrar soluciones, puntajes internos y resultados confidenciales al candidato.
-- [ ] Diseñar estados: acceso inválido, vencida, cancelada, intento agotado, postulación cerrada antes/durante, guardado fallido, sesión interrumpida y tiempo agotado.
-- [ ] Definir salidas seguras: "Salir" y "Volver" con destino real en demo, no rutas inexistentes.
-- [ ] Vista sin sidebar de staff; CTA táctiles ≥44 px; WCAG focus, radio groups, keyboard.
-- [ ] Las tres variantes 1440×900, 768×1024, 390×844; extra a 320 px.
+- [x] Definir ruta de demo segura **sin agregar excepción pública general en `proxy.ts`** ni simular bypass de auth. Si se requiere ruta pública futura, documentar como pendiente de integración. 2026-10-13: `/pruebas/[demoToken]` con `requirePortalRecruiterUser`; sin excepción en `public-paths`. Ruta pública firmada queda para el ToDo de integración.
+- [x] Bienvenida: prueba, vacante, instrucciones, duración, privacidad y comenzar. `PruebasCandidateScreen`.
+- [x] Preguntas: render de todos los tipos definidos, navegación anterior/siguiente, respuestas obligatorias según configuración, progreso y estado de guardado **local simulado**. `CandidateQuestionForm` + `saveSessionAnswers`.
+- [x] Temporizador confiable en demo basado en deadline local, control de expiración y reanudación local cuando se permita. Countdown con `Date.now()`; Ana reanuda con sesión sembrada.
+- [x] Última pregunta → "Enviar evaluación" → diálogo de confirmación → envío mock → finalización. `submitSession` sin `MockResult`.
+- [x] Evitar mostrar soluciones, puntajes internos y resultados confidenciales al candidato.
+- [x] Diseñar estados: acceso inválido, vencida, cancelada, intento agotado, postulación cerrada antes/durante, guardado fallido, sesión interrumpida y tiempo agotado. Orden fijo en `resolveCandidateDemo`; casillas de fallo de guardado y tiempo agotado.
+- [x] Definir salidas seguras: "Salir" y "Volver" con destino real en demo, no rutas inexistentes. Salir → `/portal-pruebas/seguimiento`; Volver → bienvenida.
+- [x] Vista sin sidebar de staff; CTA táctiles ≥44 px; WCAG focus, radio groups, keyboard.
+- [x] Las tres variantes 1440×900, 768×1024, 390×844; extra a 320 px. Layout apilado bajo `lg`; mismos patrones de toque `min-h-11`.
 
 **Criterio:** un evaluador puede recorrer de inicio a envío completo, provocar y probar estados especiales con fixtures.
 
@@ -392,9 +392,9 @@ hooks/pruebas/
 | Resultados técnicos | `/portal-pruebas/resultados/[assignmentId]` | ☐ | ☐ | ☐ | scored/no result |
 | Resultados psicométricos | `/portal-pruebas/resultados/[assignmentId]` | ☐ | ☐ | ☐ | dimensions |
 | Reportes | `/portal-pruebas/reportes` | ☐ | ☐ | ☐ | loading/empty/error |
-| Candidato bienvenida | `/pruebas/[demoToken]` (demo) | ☐ | ☐ | ☐ | eligible/invalid |
-| Candidato resolver/enviar | `/pruebas/[demoToken]` (demo) | ☐ | ☐ | ☐ | in-progress/submit |
-| Candidato finalización / bloqueos | `/pruebas/[demoToken]` (demo) | ☐ | ☐ | ☐ | done/expired/etc. |
+| Candidato bienvenida | `/pruebas/[demoToken]` (demo) | ☑ | ☑ | ☑ | eligible/invalid |
+| Candidato resolver/enviar | `/pruebas/[demoToken]` (demo) | ☑ | ☑ | ☑ | in-progress/submit |
+| Candidato finalización / bloqueos | `/pruebas/[demoToken]` (demo) | ☑ | ☑ | ☑ | done/expired/etc. |
 | Baterías opcionales | `/portal-pruebas/baterias` | ☐ | ☐ | ☐ | optional |
 
 > **Cada fila:** implementar los tres viewports, controles funcionales en modo demo y estados aplicables. Donde el diseño Pen.dev no incluyera una variante, derivarla de patrones reales de ApplicanTree, sin nuevas convenciones arbitrarias.
@@ -470,3 +470,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - UI-07 reemplazó el placeholder de vinculaciones con selector, tabla y activar/desactivar; `links.ts` + `createLink`/`setLinkActive`; sin BFF.
 - UI-08 reemplazó el placeholder de asignaciones con selección de elegibles y lote todo-o-nada; `assignments.ts` + `assign()`; enlaces visuales desde RRHH; sin BFF.
 - UI-09 reemplazó el placeholder de seguimiento con lista, detalle modal y acciones simuladas; `tracking.ts` + `trackingEvents`; sin BFF.
+- UI-10 añadió `/pruebas/[demoToken]` (sesión staff, sin sidebar), `candidate-session.ts`, `saveSessionAnswers` y enlace desde seguimiento; sin excepción pública ni BFF.

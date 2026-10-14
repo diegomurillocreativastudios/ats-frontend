@@ -546,6 +546,10 @@
     "pruebasPortal": {
       "title": "ApplicanTree | Portal Pruebas",
       "description": "Evaluaciones técnicas y psicométricas con datos de demostración"
+    },
+    "pruebasCandidateDemo": {
+      "title": "Resolver evaluación (demostración) | ApplicanTree",
+      "description": "Experiencia de resolución de pruebas en modo demostración."
     }
   },
   "PortalSelection": {
@@ -1238,7 +1242,8 @@
         "applicationFinal": "La postulación está en un estado final. Solo puedes cancelar si el estado lo permite.",
         "extendDate": "Nueva fecha de vencimiento",
         "extendHint": "La fecha debe ser posterior al reloj de demostración.",
-        "simulateFailure": "Simular fallo de la operación"
+        "simulateFailure": "Simular fallo de la operación",
+        "openCandidate": "Abrir experiencia de candidato"
       },
       "timeline": {
         "title": "Línea de tiempo",
@@ -1292,6 +1297,87 @@
         "retry": "Reintentar",
         "filterEmptyTitle": "Sin coincidencias",
         "filterEmptyDescription": "Ninguna asignación cumple los filtros. Ajusta o limpia los filtros."
+      }
+    },
+    "candidate": {
+      "welcome": {
+        "vacancy": "Vacante: {title}",
+        "duration": "Duración",
+        "durationValue": "{minutes} minutos",
+        "expires": "Vence la asignación",
+        "instructions": "Instrucciones",
+        "privacy": "Modo demostración: tus respuestas se guardan solo en esta sesión local simulada. No se envían a un servidor ni se usan para decidir una contratación.",
+        "start": "Comenzar",
+        "resume": "Continuar"
+      },
+      "taking": {
+        "progress": "Pregunta {current} de {total}",
+        "timer": "Tiempo restante: {time}",
+        "prev": "Anterior",
+        "next": "Siguiente",
+        "submit": "Enviar evaluación",
+        "required": "Responde esta pregunta antes de continuar.",
+        "saveFailed": "No se pudieron guardar las respuestas en la demostración. Intenta de nuevo.",
+        "submitFailed": "No se pudo enviar la evaluación en la demostración."
+      },
+      "question": {
+        "optionsAria": "Opciones de respuesta",
+        "trueFalseAria": "Verdadero o falso",
+        "likertAria": "Escala de acuerdo",
+        "trueLabel": "Verdadero",
+        "falseLabel": "Falso",
+        "numericLabel": "Tu respuesta numérica",
+        "openLabel": "Tu respuesta"
+      },
+      "confirm": {
+        "title": "Enviar evaluación",
+        "description": "Vas a enviar tus respuestas en modo demostración. No verás puntajes ni soluciones al terminar.",
+        "submit": "Enviar",
+        "cancel": "Seguir respondiendo"
+      },
+      "done": {
+        "title": "Evaluación enviada",
+        "description": "Tus respuestas quedaron registradas en la demostración. No se muestra el resultado al candidato."
+      },
+      "blocked": {
+        "invalid": {
+          "title": "Enlace no válido",
+          "description": "No encontramos una asignación de demostración con este enlace."
+        },
+        "applicationClosed": {
+          "title": "Postulación cerrada",
+          "description": "La postulación ya no está activa. No puedes resolver esta evaluación."
+        },
+        "cancelled": {
+          "title": "Asignación cancelada",
+          "description": "Esta asignación fue cancelada en la demostración."
+        },
+        "expired": {
+          "title": "Asignación vencida",
+          "description": "El plazo de esta asignación ya terminó."
+        },
+        "timeUp": {
+          "title": "Tiempo agotado",
+          "description": "Se acabó el tiempo de esta sesión. No puedes enviar más respuestas."
+        },
+        "attemptsExhausted": {
+          "title": "Intentos agotados",
+          "description": "Ya usaste todos los intentos permitidos para esta asignación."
+        }
+      },
+      "demo": {
+        "simulateSaveFailure": "Simular fallo de guardado",
+        "simulateTimeUp": "Simular tiempo agotado"
+      },
+      "actions": {
+        "back": "Volver",
+        "exit": "Salir al seguimiento"
+      },
+      "states": {
+        "loading": "Cargando experiencia de candidato…",
+        "errorTitle": "No se pudo cargar la demostración",
+        "errorDescription": "El servicio simulado devolvió un error. Intenta de nuevo.",
+        "retry": "Reintentar"
       }
     }
   },

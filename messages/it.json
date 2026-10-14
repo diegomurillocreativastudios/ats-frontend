@@ -546,6 +546,10 @@
     "pruebasPortal": {
       "title": "ApplicanTree | Portale Prove",
       "description": "Valutazioni tecniche e psicometriche con dati dimostrativi"
+    },
+    "pruebasCandidateDemo": {
+      "title": "Svolgi valutazione (demo) | ApplicanTree",
+      "description": "Esperienza candidato per svolgere una valutazione in modalità dimostrazione."
     }
   },
   "PortalSelection": {
@@ -1238,7 +1242,8 @@
         "applicationFinal": "La candidatura è in uno stato finale. Puoi annullare solo se lo stato lo consente.",
         "extendDate": "Nuova data di scadenza",
         "extendHint": "La data deve essere successiva all’orologio della demo.",
-        "simulateFailure": "Simula errore dell’operazione"
+        "simulateFailure": "Simula errore dell’operazione",
+        "openCandidate": "Apri esperienza candidato"
       },
       "timeline": {
         "title": "Cronologia",
@@ -1292,6 +1297,87 @@
         "retry": "Riprova",
         "filterEmptyTitle": "Nessuna corrispondenza",
         "filterEmptyDescription": "Nessuna assegnazione soddisfa i filtri. Modifica o cancella i filtri."
+      }
+    },
+    "candidate": {
+      "welcome": {
+        "vacancy": "Posizione: {title}",
+        "duration": "Durata",
+        "durationValue": "{minutes} minuti",
+        "expires": "Scadenza assegnazione",
+        "instructions": "Istruzioni",
+        "privacy": "Modalità dimostrazione: le risposte sono salvate solo in questa sessione locale simulata. Non vengono inviate a un server e non servono per decisioni di assunzione.",
+        "start": "Inizia",
+        "resume": "Continua"
+      },
+      "taking": {
+        "progress": "Domanda {current} di {total}",
+        "timer": "Tempo rimanente: {time}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "submit": "Invia valutazione",
+        "required": "Rispondi a questa domanda prima di continuare.",
+        "saveFailed": "Non è stato possibile salvare le risposte nella demo. Riprova.",
+        "submitFailed": "Non è stato possibile inviare la valutazione nella demo."
+      },
+      "question": {
+        "optionsAria": "Opzioni di risposta",
+        "trueFalseAria": "Vero o falso",
+        "likertAria": "Scala di accordo",
+        "trueLabel": "Vero",
+        "falseLabel": "Falso",
+        "numericLabel": "La tua risposta numerica",
+        "openLabel": "La tua risposta"
+      },
+      "confirm": {
+        "title": "Invia valutazione",
+        "description": "Stai per inviare le risposte in modalità dimostrazione. Non vedrai punteggi né soluzioni al termine.",
+        "submit": "Invia",
+        "cancel": "Continua a rispondere"
+      },
+      "done": {
+        "title": "Valutazione inviata",
+        "description": "Le risposte sono state registrate nella demo. Il risultato non viene mostrato al candidato."
+      },
+      "blocked": {
+        "invalid": {
+          "title": "Link non valido",
+          "description": "Non abbiamo trovato un’assegnazione demo per questo link."
+        },
+        "applicationClosed": {
+          "title": "Candidatura chiusa",
+          "description": "Questa candidatura non è più attiva. Non puoi svolgere questa valutazione."
+        },
+        "cancelled": {
+          "title": "Assegnazione annullata",
+          "description": "Questa assegnazione è stata annullata nella demo."
+        },
+        "expired": {
+          "title": "Assegnazione scaduta",
+          "description": "Il termine di questa assegnazione è scaduto."
+        },
+        "timeUp": {
+          "title": "Tempo scaduto",
+          "description": "Il tempo di questa sessione è terminato. Non puoi inviare altre risposte."
+        },
+        "attemptsExhausted": {
+          "title": "Tentativi esauriti",
+          "description": "Hai usato tutti i tentativi consentiti per questa assegnazione."
+        }
+      },
+      "demo": {
+        "simulateSaveFailure": "Simula errore di salvataggio",
+        "simulateTimeUp": "Simula tempo scaduto"
+      },
+      "actions": {
+        "back": "Indietro",
+        "exit": "Esci al monitoraggio"
+      },
+      "states": {
+        "loading": "Caricamento esperienza candidato…",
+        "errorTitle": "Impossibile caricare la demo",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova"
       }
     }
   },
