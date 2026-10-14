@@ -137,7 +137,7 @@ export default async function SeleccionPortalPage() {
       <div className="absolute right-3 top-3 z-50 md:right-4 md:top-4">
         <LanguageSwitcher />
       </div>
-      <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col px-4 py-3 md:px-6 md:py-4">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col justify-center px-3 py-3 md:px-6 md:py-4">
         <header className="shrink-0 text-center">
           <div className="flex justify-center">
             <ProductBrand

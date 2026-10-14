@@ -148,7 +148,7 @@ export default function PortalSelectionGallery({
   if (!isClient) {
     return (
       <div
-        className="flex min-h-0 w-full flex-1"
+        className="mt-3 h-[min(64dvh,640px)] w-full shrink-0"
         aria-busy="true"
         aria-label={galleryLabel}
       />
@@ -156,32 +156,34 @@ export default function PortalSelectionGallery({
   }
 
   if (!canUseGallery) {
-    return <PortalLinkGrid portals={portals} enterLabel={enterLabel} />
+    return (
+      <div className="mt-3 max-h-[min(64dvh,640px)] min-h-0 w-full shrink-0 overflow-y-auto">
+        <PortalLinkGrid portals={portals} enterLabel={enterLabel} />
+      </div>
+    )
   }
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col">
-      <div className="min-h-0 w-full flex-1">
-        <CircularGallery
-          items={galleryItems}
-          bend={2.2}
-          borderRadius={0.05}
-          scrollEase={0.05}
-          openOnClick={false}
-          autoScroll={0}
-          itemSize={0.78}
-          itemAspect={0.72}
-          gap={0.1}
-          fadeEdges={0.04}
-          imageInset={0.1}
-          font="bold 26px Manrope"
-          textColor="#57585B"
-          aria-label={galleryLabel}
-          onItemClick={(item) => {
-            if (item.href) router.push(item.href)
-          }}
-        />
-      </div>
+    <div className="mt-3 h-[min(64dvh,640px)] w-full shrink-0">
+      <CircularGallery
+        items={galleryItems}
+        bend={1.9}
+        borderRadius={0.05}
+        scrollEase={0.05}
+        openOnClick={false}
+        autoScroll={0}
+        itemSize={1}
+        itemAspect={0.72}
+        gap={0.12}
+        fadeEdges={0}
+        imageInset={0.1}
+        font="bold 26px Manrope"
+        textColor="#57585B"
+        aria-label={galleryLabel}
+        onItemClick={(item) => {
+          if (item.href) router.push(item.href)
+        }}
+      />
     </div>
   )
 }
