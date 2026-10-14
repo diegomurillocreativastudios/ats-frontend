@@ -544,11 +544,11 @@
       "description": "Panel de pendientes y recordatorios del portal RRHH"
     },
     "pruebasPortal": {
-      "title": "ApplicanTree | Portal Pruebas",
+      "title": "Portal Pruebas",
       "description": "Evaluaciones técnicas y psicométricas con datos de demostración"
     },
     "pruebasCandidateDemo": {
-      "title": "Resolver evaluación (demostración) | ApplicanTree",
+      "title": "Resolver evaluación (demostración)",
       "description": "Experiencia de resolución de pruebas en modo demostración."
     }
   },

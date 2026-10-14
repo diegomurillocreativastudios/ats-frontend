@@ -74,6 +74,11 @@ describe("public SEO metadata", () => {
       shouldLeaveDocumentTitleToServer("/portal-oportunidades/analista-datos/aplicar")
     ).toBe(true)
     expect(shouldLeaveDocumentTitleToServer("/privacy-policy/")).toBe(true)
+    expect(shouldLeaveDocumentTitleToServer("/pruebas/asg-maria-dup")).toBe(true)
+    expect(shouldLeaveDocumentTitleToServer("/pruebas")).toBe(true)
+    expect(shouldLeaveDocumentTitleToServer("/portal-pruebas/asignaciones")).toBe(
+      false,
+    )
     expect(shouldLeaveDocumentTitleToServer("/portal-rrhh/vacantes")).toBe(false)
     expect(shouldLeaveDocumentTitleToServer("/")).toBe(false)
   })

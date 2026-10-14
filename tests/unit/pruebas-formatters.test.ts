@@ -14,9 +14,13 @@ describe("pruebas formatters", () => {
     const value = formatMockDate("2026-10-13T18:00:00.000Z", "en-US", {
       dateStyle: "medium",
       timeStyle: undefined,
-      timeZone: "UTC",
     })
     expect(value).toContain("2026")
+  })
+
+  it("formats demo times in UTC so SSR and client match", () => {
+    const value = formatMockDate("2026-10-12T09:00:00.000Z", "es")
+    expect(value).toMatch(/9:00|09:00/)
   })
 
   it("returns empty string for invalid dates", () => {

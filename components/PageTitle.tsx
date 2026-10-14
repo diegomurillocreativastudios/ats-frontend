@@ -39,8 +39,22 @@ export default function PageTitle() {
       if (document.title !== expected) document.title = expected;
     };
     apply();
-    const t = setTimeout(apply, 0);
-    return () => clearTimeout(t);
+    // Next.js may re-apply layout metadata after paint; reassert briefly.
+    const timeouts = [0, 50, 200].map((ms) => setTimeout(apply, ms));
+    const titleEl = document.querySelector("title");
+    const observer =
+      titleEl && typeof MutationObserver !== "undefined"
+        ? new MutationObserver(apply)
+        : null;
+    observer?.observe(titleEl, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+    return () => {
+      for (const timeout of timeouts) clearTimeout(timeout);
+      observer?.disconnect();
+    };
   }, [pathname]);
 
   return null;

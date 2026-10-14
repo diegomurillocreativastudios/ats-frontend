@@ -544,11 +544,11 @@
       "description": "Pending items and reminders dashboard for the HR portal"
     },
     "pruebasPortal": {
-      "title": "ApplicanTree | Assessments Portal",
+      "title": "Assessments Portal",
       "description": "Technical and psychometric assessments with demo data"
     },
     "pruebasCandidateDemo": {
-      "title": "Take assessment (demo) | ApplicanTree",
+      "title": "Take assessment (demo)",
       "description": "Candidate assessment-taking experience in demo mode."
     }
   },

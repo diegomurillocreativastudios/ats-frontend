@@ -17,4 +17,13 @@ describe("getPageTitle — Portal Pruebas", () => {
       "ApplicanTree | Portal Pruebas | Banco de preguntas",
     )
   })
+
+  it("omite ids opacos de demostración en el título", () => {
+    expect(getPageTitle("/portal-pruebas/evaluaciones/test-razonamiento")).toBe(
+      "ApplicanTree | Portal Pruebas | Evaluaciones",
+    )
+    expect(
+      getPageTitle("/portal-pruebas/revision/asg-diego-pending-review"),
+    ).toBe("ApplicanTree | Portal Pruebas | Revisión")
+  })
 })

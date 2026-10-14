@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-13 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento + experiencia candidato demo + cola de revisión manual + resultados técnicos y psicométricos + reportes y navegación desde RRHH).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-15 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento + experiencia candidato demo + cola de revisión manual + resultados técnicos y psicométricos + reportes y navegación desde RRHH + QA/accesibilidad/responsive/E2E). UI-14 (baterías) sigue opcional.  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -408,19 +408,21 @@ El reclutador ve tres reportes de demostración en `/portal-pruebas/reportes` y,
 
 ### Fase UI-15 — QA, accesibilidad y validación de experiencia
 
-- [ ] Recorrido E2E local completo: crear → publicar → vincular → asignar → abrir enlace demo → resolver → enviar → revisar → consultar resultado.
-- [ ] Comprobar rutas inexistentes, enlaces rotos, breadcrumbs, drawer y volver.
-- [ ] Responsive: **320, 390, 768, 1024, 1440 px**, scroll contenido, sin overflow horizontal de página.
-- [ ] WCAG: contraste AA, foco visible, labels, aria, mensajes de error, navegación teclado, `prefers-reduced-motion`, touch ≥44×44.
-- [ ] Revisar textos e internacionalización en los **cinco idiomas**, incluyendo textos largos.
-- [ ] Probar estados loading, empty, error, expirado, cancelado, prueba archivada y postulación finalizada.
-- [ ] Pruebas unitarias Vitest para mocks, elegibilidad demo, estados, formato y componentes.
-- [ ] Playwright para flujos principales y viewport responsive.
-- [ ] Ejecutar `npm run qa` y gates existentes; verificar que no se ha añadido fetch ni dependencia de APIs de pruebas.
-- [ ] Validar visualmente contra Pen.dev; documentar desviaciones intencionales cuando el diseño anterior contradiga negocio o accesibilidad.
-- [ ] Revisión final de no referencias Evalart en **nuevas** vistas (la limpieza total existente puede ser tarea separada coordinada con backend).
+- [x] Recorrido E2E local completo: crear → publicar → vincular → asignar → abrir enlace demo → resolver → enviar → revisar → consultar resultado.
+- [x] Comprobar rutas inexistentes, enlaces rotos, breadcrumbs, drawer y volver.
+- [x] Responsive: **320, 390, 768, 1024, 1440 px**, scroll contenido, sin overflow horizontal de página.
+- [x] WCAG: contraste AA, foco visible, labels, aria, mensajes de error, navegación teclado, `prefers-reduced-motion`, touch ≥44×44.
+- [x] Revisar textos e internacionalización en los **cinco idiomas**, incluyendo textos largos.
+- [x] Probar estados loading, empty, error, expirado, cancelado, prueba archivada y postulación finalizada.
+- [x] Pruebas unitarias Vitest para mocks, elegibilidad demo, estados, formato y componentes.
+- [x] Playwright para flujos principales y viewport responsive.
+- [x] Ejecutar `npm run qa` y gates existentes; verificar que no se ha añadido fetch ni dependencia de APIs de pruebas.
+- [x] Validar visualmente contra Pen.dev; documentar desviaciones intencionales cuando el diseño anterior contradiga negocio o accesibilidad.
+- [x] Revisión final de no referencias Evalart en **nuevas** vistas (la limpieza total existente puede ser tarea separada coordinada con backend).
 
 **Criterio:** la demo puede presentarse de principio a fin, sin back-end de pruebas, y el sistema actual del ATS sigue funcional.
+
+**Desviaciones intencionales (UI-15):** fechas de demostración se formatean en UTC para evitar desajustes de hidratación entre servidor y cliente; títulos de metadata de Portal Pruebas / candidato demo no incluyen el prefijo de marca (lo aporta el template raíz); títulos de documento omiten ids opacos de mock (`test-*`, `asg-*`, …).
 
 ---
 
@@ -494,15 +496,15 @@ Al finalizar entrega: resumen, rutas/archivos, comprobación responsive, pruebas
 
 Esta etapa estará **terminada** únicamente cuando:
 
-- [ ] Todas las fases UI obligatorias estén completadas (excepto UI-14 si se decide postergar baterías).
-- [ ] Todas las rutas/pantallas exigidas existan y todas las acciones UI principales trabajen contra mocks.
-- [ ] El recorrido completo del reclutador y candidato pueda demostrarse sin backend de pruebas.
-- [ ] Ninguna interacción diga "correo enviado", "PDF almacenado" o "datos guardados en servidor" cuando solo sea una simulación.
-- [ ] No existan rutas rotas, pantallas inaccesibles ni acciones habilitadas sin propósito.
-- [ ] Se haya probado en Desktop, Tablet y Mobile, además de 320px.
-- [ ] Los mensajes estén listos en cinco idiomas y el sistema de diseño corresponda a ApplicanTree.
-- [ ] Pruebas automatizadas y QA del repositorio estén aprobados.
-- [ ] Haya un inventario claro de contratos y funcionalidades pendientes para el **ToDo de conexión con backend**, sin intentar implementarlos prematuramente.
+- [x] Todas las fases UI obligatorias estén completadas (excepto UI-14 si se decide postergar baterías).
+- [x] Todas las rutas/pantallas exigidas existan y todas las acciones UI principales trabajen contra mocks.
+- [x] El recorrido completo del reclutador y candidato pueda demostrarse sin backend de pruebas.
+- [x] Ninguna interacción diga "correo enviado", "PDF almacenado" o "datos guardados en servidor" cuando solo sea una simulación.
+- [x] No existan rutas rotas, pantallas inaccesibles ni acciones habilitadas sin propósito.
+- [x] Se haya probado en Desktop, Tablet y Mobile, además de 320px.
+- [x] Los mensajes estén listos en cinco idiomas y el sistema de diseño corresponda a ApplicanTree.
+- [x] Pruebas automatizadas y QA del repositorio estén aprobados.
+- [x] Haya un inventario claro de contratos y funcionalidades pendientes para el **ToDo de conexión con backend**, sin intentar implementarlos prematuramente.
 
 ---
 

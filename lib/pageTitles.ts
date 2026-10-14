@@ -46,6 +46,12 @@ function isUuidSegment(s) {
   )
 }
 
+/** Opaque demo ids under Portal Pruebas (`test-razonamiento`, `asg-maria-dup`, …). */
+function isOpaqueRouteIdSegment(s) {
+  if (isUuidSegment(s)) return true
+  return /^(test|asg|q|ver|app|vac|cand|link|co|ses|res|evt)-/i.test(String(s))
+}
+
 const RRHH_PATH_LABEL = {
   entrevistas: "Entrevistas",
   vacantes: "Vacantes",
@@ -277,7 +283,7 @@ function titlePortalPruebas(normalizedPath) {
 
   const labels = []
   for (const s of segs) {
-    if (isUuidSegment(s)) continue
+    if (isOpaqueRouteIdSegment(s)) continue
     labels.push(PRUEBAS_PATH_LABEL[s] ?? segmentToTitle(s))
   }
   if (labels.length === 0) {

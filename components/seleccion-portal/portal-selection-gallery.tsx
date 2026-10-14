@@ -59,14 +59,6 @@ const PORTAL_VISUALS: Record<
   },
 }
 
-export const PORTAL_SELECTION_IMAGES: Record<PortalKey, string> = {
-  candidate: '/ilustrations/undraw_contract-signed_vutk.svg',
-  opportunities: '/ilustrations/undraw_searching_pqji.svg',
-  rrhh: '/ilustrations/undraw_document-review_lfir.svg',
-  pruebas: '/ilustrations/undraw_online-revenue_6egl.svg',
-  admin: '/treeApplicant.svg',
-}
-
 function portalGridClass(count: number): string {
   if (count >= 5) return 'sm:grid-cols-2 lg:grid-cols-3'
   if (count >= 4) return 'sm:grid-cols-2 lg:grid-cols-4'
@@ -96,7 +88,9 @@ function PortalLinkGrid({
   enterLabel: string
 }) {
   return (
-    <div className={`grid gap-4 md:gap-6 ${portalGridClass(portals.length)}`}>
+    <div
+      className={`grid flex-1 min-h-0 gap-3 overflow-y-auto md:gap-4 ${portalGridClass(portals.length)}`}
+    >
       {portals.map((portal) => {
         const visuals = PORTAL_VISUALS[portal.key]
         const Icon = visuals.icon
@@ -105,21 +99,21 @@ function PortalLinkGrid({
             key={portal.key}
             href={portal.href}
             data-testid={portal.testId}
-            className="group glass-iridescent-card glass-card-hover iridescent-hover flex flex-col rounded-2xl p-6 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+            className="group glass-iridescent-card glass-card-hover iridescent-hover flex flex-col rounded-2xl p-4 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 focus-visible:ring-offset-transparent sm:p-6"
             aria-label={portal.ariaLabel}
           >
             <span
-              className={`flex h-12 w-12 items-center justify-center rounded-lg ${visuals.iconWrapClass}`}
+              className={`flex h-10 w-10 items-center justify-center rounded-lg sm:h-12 sm:w-12 ${visuals.iconWrapClass}`}
             >
-              <Icon className="h-6 w-6" aria-hidden />
+              <Icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
             </span>
-            <span className="mt-4 font-sans text-lg font-semibold text-foreground group-hover:text-vo-purple">
+            <span className="mt-3 font-sans text-base font-semibold text-foreground group-hover:text-vo-purple sm:mt-4 sm:text-lg">
               {portal.name}
             </span>
-            <span className="mt-2 font-sans text-sm text-muted-foreground">
+            <span className="mt-1 font-sans text-sm text-muted-foreground sm:mt-2">
               {portal.description}
             </span>
-            <span className="mt-4 font-sans text-sm font-medium text-vo-purple group-hover:underline">
+            <span className="mt-3 font-sans text-sm font-medium text-vo-purple group-hover:underline sm:mt-4">
               {enterLabel}
             </span>
           </Link>
@@ -135,7 +129,6 @@ export default function PortalSelectionGallery({
   enterLabel,
 }: PortalSelectionGalleryProps) {
   const router = useRouter()
-  const [activeIndex, setActiveIndex] = useState(0)
   const isClient = useSyncExternalStore(subscribeWebGl, () => true, () => false)
   const canUseGallery = isClient && supportsWebGl2()
 
@@ -146,37 +139,16 @@ export default function PortalSelectionGallery({
         text: portal.name,
         description: portal.description,
         alt: portal.ariaLabel,
+        testId: portal.testId,
         href: portal.href,
       })),
     [portals],
   )
 
-  /** Always-visible controls: e2e selectors and a reliable enter path without scrolling the arc. */
-  const portalJumpLinks = (
-    <nav
-      className="mt-4 flex flex-wrap items-center justify-center gap-2"
-      aria-label={galleryLabel}
-    >
-      {portals.map((portal) => (
-        <Link
-          key={portal.key}
-          href={portal.href}
-          data-testid={portal.testId}
-          className="rounded-full border border-border/80 bg-white/70 px-3 py-1.5 font-sans text-xs font-medium text-foreground shadow-sm transition-colors hover:border-vo-purple/40 hover:text-vo-purple focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple"
-          aria-label={portal.ariaLabel}
-        >
-          {portal.name}
-        </Link>
-      ))}
-    </nav>
-  )
-
-  const activePortal = portals[activeIndex] ?? portals[0]
-
   if (!isClient) {
     return (
       <div
-        className="h-[min(70vh,640px)] min-h-[420px] w-full"
+        className="flex min-h-0 w-full flex-1"
         aria-busy="true"
         aria-label={galleryLabel}
       />
@@ -188,33 +160,28 @@ export default function PortalSelectionGallery({
   }
 
   return (
-    <div className="flex w-full flex-col">
-      <div className="h-[min(70vh,640px)] min-h-[420px] w-full">
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      <div className="min-h-0 w-full flex-1">
         <CircularGallery
           items={galleryItems}
-          bend={3}
+          bend={2.2}
           borderRadius={0.05}
           scrollEase={0.05}
           openOnClick={false}
           autoScroll={0}
-          font="bold 30px Manrope"
+          itemSize={0.78}
+          itemAspect={0.72}
+          gap={0.1}
+          fadeEdges={0.04}
+          imageInset={0.1}
+          font="bold 26px Manrope"
           textColor="#57585B"
           aria-label={galleryLabel}
-          onActiveChange={setActiveIndex}
           onItemClick={(item) => {
             if (item.href) router.push(item.href)
           }}
         />
       </div>
-      {activePortal ? (
-        <div className="mt-2 px-2 text-center">
-          <p className="font-sans text-sm text-muted-foreground md:text-base">
-            {activePortal.description}
-          </p>
-          <p className="mt-2 font-sans text-sm font-medium text-vo-purple">{enterLabel}</p>
-        </div>
-      ) : null}
-      {portalJumpLinks}
     </div>
   )
 }

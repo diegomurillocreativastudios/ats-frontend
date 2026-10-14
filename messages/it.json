@@ -544,11 +544,11 @@
       "description": "Dashboard di attività e promemoria del portale HR"
     },
     "pruebasPortal": {
-      "title": "ApplicanTree | Portale Prove",
+      "title": "Portale Prove",
       "description": "Valutazioni tecniche e psicometriche con dati dimostrativi"
     },
     "pruebasCandidateDemo": {
-      "title": "Svolgi valutazione (demo) | ApplicanTree",
+      "title": "Svolgi valutazione (demo)",
       "description": "Esperienza candidato per svolgere una valutazione in modalità dimostrazione."
     }
   },

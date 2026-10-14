@@ -258,6 +258,8 @@ export interface CircularGalleryProps {
   autoScroll?: number
   openOnClick?: boolean
   intro?: boolean
+  /** Fraction of the card kept as margin around the image (0–0.4). Uses contain + cream pad. */
+  imageInset?: number
   onItemClick?: (item: CircularGalleryItem, index: number) => void
   onActiveChange?: (index: number) => void
   dpr?: number
@@ -287,6 +289,7 @@ export function CircularGallery({
   autoScroll = 0,
   openOnClick = true,
   intro = true,
+  imageInset = 0,
   onItemClick,
   onActiveChange,
   dpr,
@@ -323,6 +326,7 @@ export function CircularGallery({
     autoScroll,
     openOnClick,
     intro,
+    imageInset: clamp(imageInset, 0, 0.4),
     onItemClick,
     onActiveChange,
     dpr,
@@ -461,14 +465,19 @@ export function CircularGallery({
       textures.set(url, entry)
       const image = new Image()
       if (/^https?:\/\//i.test(url)) image.crossOrigin = 'anonymous'
-      image.onload = () => {
-        if (!textures.has(url) || gl.isContextLost()) return
+      const upload = () => {
+        if (!textures.has(url) || entry.loaded || gl.isContextLost()) return
         try {
           const texture = gl.createTexture()
           gl.bindTexture(gl.TEXTURE_2D, texture)
           gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
-          const width = Math.max(1, image.naturalWidth || image.width)
-          const height = Math.max(1, image.naturalHeight || image.height)
+          const naturalW = Math.max(1, image.naturalWidth || image.width)
+          const naturalH = Math.max(1, image.naturalHeight || image.height)
+          const inset = settingsRef.current.imageInset
+          const targetAspect = settingsRef.current.itemAspect
+          const base = 1024
+          const width = inset > 0 ? Math.max(1, Math.round(base * targetAspect)) : naturalW
+          const height = inset > 0 ? base : naturalH
           const offscreen = document.createElement('canvas')
           offscreen.width = width
           offscreen.height = height
@@ -476,7 +485,20 @@ export function CircularGallery({
           if (ctx) {
             ctx.fillStyle = TEXTURE_BG
             ctx.fillRect(0, 0, width, height)
-            ctx.drawImage(image, 0, 0, width, height)
+            const maxW = width * (1 - inset * 2)
+            const maxH = height * (1 - inset * 2)
+            const imgAspect = naturalW / naturalH
+            const boxAspect = maxW / maxH
+            let drawW = maxW
+            let drawH = maxH
+            if (imgAspect > boxAspect) {
+              drawH = maxW / imgAspect
+            } else {
+              drawW = maxH * imgAspect
+            }
+            const dx = (width - drawW) / 2
+            const dy = (height - drawH) / 2
+            ctx.drawImage(image, dx, dy, drawW, drawH)
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, offscreen)
           } else {
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
@@ -498,10 +520,12 @@ export function CircularGallery({
           textures.delete(url)
         }
       }
+      image.onload = upload
       image.onerror = () => {
         textures.delete(url)
       }
       image.src = url
+      if (image.complete && image.naturalWidth > 0) upload()
       return entry
     }
 

@@ -544,11 +544,11 @@
       "description": "Dashboard mit offenen Aufgaben und Erinnerungen des HR-Portals"
     },
     "pruebasPortal": {
-      "title": "ApplicanTree | Portal Prüfungen",
+      "title": "Portal Prüfungen",
       "description": "Technische und psychometrische Prüfungen mit Demodaten"
     },
     "pruebasCandidateDemo": {
-      "title": "Bewertung ablegen (Demo) | ApplicanTree",
+      "title": "Bewertung ablegen (Demo)",
       "description": "Kandidatenerfahrung zum Ablegen von Tests im Demomodus."
     }
   },

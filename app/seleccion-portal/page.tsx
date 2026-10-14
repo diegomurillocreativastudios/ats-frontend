@@ -10,9 +10,9 @@ import {
 import LanguageSwitcher from "@/components/language-switcher"
 import ProductBrand from "@/components/branding/ProductBrand"
 import PortalSelectionGallery, {
-  PORTAL_SELECTION_IMAGES,
   type PortalSelectionItem,
 } from "@/components/seleccion-portal/portal-selection-gallery"
+import { PORTAL_SELECTION_IMAGES } from "@/lib/portal-selection-images"
 import { NOINDEX_NOFOLLOW } from "@/lib/seo/public-metadata"
 
 interface PortalCardCopy {
@@ -128,7 +128,7 @@ export default async function SeleccionPortalPage() {
   })
 
   return (
-    <div className="app-premium-bg relative min-h-screen overflow-hidden font-sans text-foreground">
+    <div className="app-premium-bg relative h-dvh overflow-hidden font-sans text-foreground">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
         <div className="ambient-orb ambient-orb--green left-[-120px] top-[-60px] h-[440px] w-[440px]" />
         <div className="ambient-orb ambient-orb--violet right-[-140px] top-[10%] h-[460px] w-[460px]" />
@@ -137,19 +137,20 @@ export default async function SeleccionPortalPage() {
       <div className="absolute right-3 top-3 z-50 md:right-4 md:top-4">
         <LanguageSwitcher />
       </div>
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-4 py-12 md:px-6">
-        <header className="mb-6 text-center md:mb-8">
+      <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col px-4 py-3 md:px-6 md:py-4">
+        <header className="shrink-0 text-center">
           <div className="flex justify-center">
             <ProductBrand
               layout="stacked"
               tone="onLight"
-              density="authMobileLogin"
+              density="authMobileRegister"
+              className="origin-top scale-90"
             />
           </div>
-          <h1 className="mt-6 font-sans text-2xl font-bold tracking-tight md:text-3xl">
+          <h1 className="mt-2 mb-1 font-sans text-xl font-bold tracking-tight md:text-2xl">
             {t("title")}
           </h1>
-          <p className="mt-2 font-sans text-sm text-muted-foreground md:text-base">
+          <p className="mt-1 font-sans text-sm text-muted-foreground md:text-base">
             {t("subtitle")}
           </p>
         </header>
@@ -159,10 +160,6 @@ export default async function SeleccionPortalPage() {
           galleryLabel={t("subtitle")}
           enterLabel={t("enter")}
         />
-
-        <p className="mt-8 text-center font-sans text-xs text-muted-foreground md:mt-10">
-          {t("footer")}
-        </p>
       </div>
     </div>
   )

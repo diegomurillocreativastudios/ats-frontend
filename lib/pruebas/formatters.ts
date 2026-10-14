@@ -7,6 +7,7 @@ import type {
 
 /**
  * Formats an ISO timestamp with the given locale. No product copy.
+ * Uses UTC so server and client render the same string (avoids hydration drift).
  */
 export function formatMockDate(
   iso: string,
@@ -20,6 +21,7 @@ export function formatMockDate(
   return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: "UTC",
     ...options,
   }).format(date)
 }

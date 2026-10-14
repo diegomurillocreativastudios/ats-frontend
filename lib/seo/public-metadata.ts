@@ -37,6 +37,10 @@ export function shouldLeaveDocumentTitleToServer(pathname: string): boolean {
       ? pathname.slice(0, -1)
       : pathname
   if (normalized === "/privacy-policy") return true
+  // Candidate demo tokens are opaque ids; keep layout metadata titles.
+  if (normalized === "/pruebas" || normalized.startsWith("/pruebas/")) {
+    return true
+  }
   return (
     normalized === "/portal-oportunidades" ||
     normalized.startsWith("/portal-oportunidades/")

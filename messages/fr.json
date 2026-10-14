@@ -544,11 +544,11 @@
       "description": "Tableau de bord des tâches et rappels du portail RH"
     },
     "pruebasPortal": {
-      "title": "ApplicanTree | Portail Évaluations",
+      "title": "Portail Évaluations",
       "description": "Évaluations techniques et psychométriques avec données de démonstration"
     },
     "pruebasCandidateDemo": {
-      "title": "Passer l’évaluation (démo) | ApplicanTree",
+      "title": "Passer l’évaluation (démo)",
       "description": "Expérience candidat pour passer une évaluation en mode démonstration."
     }
   },
