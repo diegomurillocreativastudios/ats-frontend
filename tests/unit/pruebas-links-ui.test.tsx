@@ -45,7 +45,7 @@ afterEach(() => {
 })
 
 describe("PruebasLinksScreen UI", () => {
-  it("shows scope notice, excluded closed vacancy, and seeded rows", async () => {
+  it("shows excluded closed vacancy and seeded rows", async () => {
     renderWithIntl(<PruebasLinksScreen />)
 
     await waitFor(() => {
@@ -54,9 +54,6 @@ describe("PruebasLinksScreen UI", () => {
       ).toBeInTheDocument()
     })
 
-    expect(screen.getByTestId("links-scope-notice")).toHaveTextContent(
-      /no asigna/i,
-    )
     expect(screen.getByTestId("links-excluded-vacancies")).toHaveTextContent(
       /Inventario de almacén \(cerrada\)/i,
     )

@@ -574,7 +574,6 @@
     "pruebasAria": "Go to the assessments portal"
   },
   "PruebasPortal": {
-    "demoNotice": "Demo — simulated data",
     "placeholder": "This section will be completed in a later phase. For now it only confirms the route and portal navigation.",
     "nav": {
       "groups": {
@@ -1048,7 +1047,6 @@
     "links": {
       "title": "Links",
       "description": "Associate a published version with an open vacancy. Linking does not assign candidates or send invitations.",
-      "scopeNotice": "Linking does not assign, does not create applications, and does not send email. It only makes the assessment available to assign later.",
       "form": {
         "title": "New link",
         "version": "Published version",
@@ -1121,7 +1119,6 @@
     "assignments": {
       "title": "Assignments",
       "description": "Assign a linked version to active applications for the vacancy. No email is sent in the demo.",
-      "scopeNotice": "Assigning does not send email or create applications. It only records simulated invitations for eligible candidates of that vacancy.",
       "backToRrhh": "Back",
       "backToRrhhAria": "Back to Human Resources",
       "form": {
@@ -1209,7 +1206,6 @@
     "tracking": {
       "title": "Tracking",
       "description": "Review assignment status and manage deadlines or retries in demo mode.",
-      "scopeNotice": "Tracking actions are simulated. A reminder does not send a real email.",
       "search": "Search",
       "searchPlaceholder": "Candidate, vacancy, or assessment",
       "filters": {
@@ -1326,7 +1322,6 @@
     "review": {
       "title": "Manual review",
       "description": "Score pending open answers using the demo rubric.",
-      "scopeNotice": "Scoring is simulated. It does not change match score or decide hiring.",
       "pendingCount": "{count, plural, one {# pending} other {# pending}}",
       "filteredCount": "{count, plural, one {# visible} other {# visible}}",
       "search": "Search",
@@ -1406,7 +1401,6 @@
     "results": {
       "title": "Results",
       "description": "Browse technical and psychometric results with demo data.",
-      "scopeNotice": "Results are simulated. They do not change match score or decide hiring.",
       "count": "{count, plural, one {# result} other {# results}}",
       "filteredCount": "{count, plural, one {# visible} other {# visible}}",
       "search": "Search",
@@ -1517,7 +1511,6 @@
     "reports": {
       "title": "Reports",
       "description": "Demo report catalog with a simulated preview. No files are generated.",
-      "scopeNotice": "Reports use simulated Portal Pruebas data. They do not change the match score or generate PDF or CSV files.",
       "catalogAria": "Report catalog",
       "catalog": {
         "assignments-by-status": {

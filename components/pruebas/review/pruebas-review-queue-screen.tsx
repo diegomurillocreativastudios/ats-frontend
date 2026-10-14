@@ -208,13 +208,6 @@ export function PruebasReviewQueueScreen() {
     <div className="flex flex-col gap-6 px-4 py-6 md:px-6 lg:px-8">
       <PortalPageHeader title={t("title")} description={t("description")} />
 
-      <p
-        className="rounded-lg border border-vo-purple/30 bg-vo-purple/10 px-3 py-2 font-sans text-sm text-emerald-900"
-        data-testid="review-scope-notice"
-      >
-        {t("scopeNotice")}
-      </p>
-
       <div
         className="flex flex-wrap items-center gap-3"
         data-testid="review-pending-count"

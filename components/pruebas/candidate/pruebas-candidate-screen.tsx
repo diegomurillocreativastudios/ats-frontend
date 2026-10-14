@@ -9,7 +9,6 @@ import { ConfirmDialog } from "@/components/pruebas/shared/confirm-dialog"
 import { EmptyState } from "@/components/pruebas/shared/empty-state"
 import { ErrorState } from "@/components/pruebas/shared/error-state"
 import { LoadingSkeleton } from "@/components/pruebas/shared/loading-skeleton"
-import { MockDemoNotice } from "@/components/pruebas/shared/mock-demo-notice"
 import { Button } from "@/components/ui/Button"
 import {
   answersMapFromSession,
@@ -47,7 +46,6 @@ export function PruebasCandidateScreen({
   demoToken,
 }: PruebasCandidateScreenProps) {
   const t = useTranslations("PruebasPortal.candidate")
-  const tPortal = useTranslations("PruebasPortal")
   const locale = useLocale()
 
   const [isLoading, setIsLoading] = useState(true)
@@ -288,7 +286,6 @@ export function PruebasCandidateScreen({
   if (isLoading) {
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">
-        <MockDemoNotice label={tPortal("demoNotice")} />
         <LoadingSkeleton rows={4} />
         <p className="sr-only">{t("states.loading")}</p>
       </div>
@@ -298,7 +295,6 @@ export function PruebasCandidateScreen({
   if (hasError) {
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-8">
-        <MockDemoNotice label={tPortal("demoNotice")} />
         <ErrorState
           title={t("states.errorTitle")}
           description={t("states.errorDescription")}
@@ -327,7 +323,6 @@ export function PruebasCandidateScreen({
         className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8"
         data-testid="candidate-done"
       >
-        <MockDemoNotice label={tPortal("demoNotice")} />
         <EmptyState
           title={t("done.title")}
           description={t("done.description")}
@@ -355,7 +350,6 @@ export function PruebasCandidateScreen({
         className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8"
         data-testid="candidate-welcome"
       >
-        <MockDemoNotice label={tPortal("demoNotice")} />
         <header className="flex flex-col gap-2">
           <h1 className="font-display text-2xl font-semibold text-foreground">
             {payload.test.title}
@@ -425,7 +419,6 @@ export function PruebasCandidateScreen({
       className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-8"
       data-testid="candidate-taking"
     >
-      <MockDemoNotice label={tPortal("demoNotice")} />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-display text-xl font-semibold text-foreground">
@@ -560,7 +553,6 @@ function CandidateBlockedView({
   onRetry: () => void
 }) {
   const t = useTranslations("PruebasPortal.candidate")
-  const tPortal = useTranslations("PruebasPortal")
 
   const key =
     screen === "invalid"
@@ -582,7 +574,6 @@ function CandidateBlockedView({
       className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8"
       data-testid={`candidate-blocked-${screen}`}
     >
-      <MockDemoNotice label={tPortal("demoNotice")} />
       <EmptyState
         title={t(`blocked.${key}.title`)}
         description={t(`blocked.${key}.description`)}

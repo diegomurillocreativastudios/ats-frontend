@@ -460,13 +460,6 @@ export function PruebasTrackingScreen() {
     >
       <PortalPageHeader title={t("title")} description={t("description")} />
 
-      <p
-        className="rounded-xl border border-border bg-card px-4 py-3 font-sans text-sm text-muted-foreground"
-        data-testid="tracking-scope-notice"
-      >
-        {t("scopeNotice")}
-      </p>
-
       <ResponsiveFilters
         toggleLabel={t("filters.toggle")}
         title={t("filters.title")}

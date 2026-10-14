@@ -264,13 +264,6 @@ export function PruebasResultsDetailScreen() {
         {t("detail.exportUnavailable")}
       </p>
 
-      <p
-        className="rounded-lg border border-vo-purple/30 bg-vo-purple/10 px-3 py-2 font-sans text-sm text-emerald-900"
-        data-testid="results-scope-notice"
-      >
-        {t("scopeNotice")}
-      </p>
-
       <div className="flex flex-wrap gap-2">
         <AssessmentTypeBadge
           kind={detail.kind}

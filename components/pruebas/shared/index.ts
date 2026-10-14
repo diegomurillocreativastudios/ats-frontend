@@ -10,9 +10,6 @@ export type { AssessmentTypeBadgeProps } from "@/components/pruebas/shared/asses
 export { AssessmentCard } from "@/components/pruebas/shared/assessment-card"
 export type { AssessmentCardProps } from "@/components/pruebas/shared/assessment-card"
 
-export { MockDemoNotice } from "@/components/pruebas/shared/mock-demo-notice"
-export type { MockDemoNoticeProps } from "@/components/pruebas/shared/mock-demo-notice"
-
 export { EmptyState } from "@/components/pruebas/shared/empty-state"
 export type { EmptyStateProps } from "@/components/pruebas/shared/empty-state"
 

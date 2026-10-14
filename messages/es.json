@@ -574,7 +574,6 @@
     "pruebasAria": "Ir al portal de pruebas"
   },
   "PruebasPortal": {
-    "demoNotice": "Demostración — datos simulados",
     "placeholder": "Esta sección se completará en una fase posterior. Por ahora solo confirma la ruta y la navegación del portal.",
     "nav": {
       "groups": {
@@ -1048,7 +1047,6 @@
     "links": {
       "title": "Vinculaciones",
       "description": "Asocia una versión publicada con una vacante abierta. Vincular no asigna candidatos ni envía invitaciones.",
-      "scopeNotice": "Vincular no asigna, no crea postulaciones y no envía correos. Solo deja la prueba disponible para asignar después.",
       "form": {
         "title": "Nueva vinculación",
         "version": "Versión publicada",
@@ -1121,7 +1119,6 @@
     "assignments": {
       "title": "Asignaciones",
       "description": "Asigna una versión vinculada a postulaciones activas de la vacante. No se envían correos en la demostración.",
-      "scopeNotice": "Asignar no envía correos ni crea postulaciones. Solo registra invitaciones simuladas para candidatos elegibles de esa vacante.",
       "backToRrhh": "Volver",
       "backToRrhhAria": "Volver a Recursos Humanos",
       "form": {
@@ -1209,7 +1206,6 @@
     "tracking": {
       "title": "Seguimiento",
       "description": "Consulta el estado de las asignaciones y gestiona plazos o reintentos en modo demostración.",
-      "scopeNotice": "Las acciones de seguimiento son simuladas. Un recordatorio no envía correo real.",
       "search": "Buscar",
       "searchPlaceholder": "Candidato, vacante o evaluación",
       "filters": {
@@ -1326,7 +1322,6 @@
     "review": {
       "title": "Revisión manual",
       "description": "Califica respuestas abiertas pendientes con la rúbrica de la demostración.",
-      "scopeNotice": "La calificación es simulada. No altera la puntuación de idoneidad ni decide una contratación.",
       "pendingCount": "{count, plural, one {# pendiente} other {# pendientes}}",
       "filteredCount": "{count, plural, one {# visible} other {# visibles}}",
       "search": "Buscar",
@@ -1406,7 +1401,6 @@
     "results": {
       "title": "Resultados",
       "description": "Consulta resultados técnicos y psicométricos con datos de demostración.",
-      "scopeNotice": "Los resultados son simulados. No modifican la puntuación de idoneidad ni deciden una contratación.",
       "count": "{count, plural, one {# resultado} other {# resultados}}",
       "filteredCount": "{count, plural, one {# visible} other {# visibles}}",
       "search": "Buscar",
@@ -1517,7 +1511,6 @@
     "reports": {
       "title": "Reportes",
       "description": "Catálogo de reportes de demostración con vista previa simulada. No se generan archivos.",
-      "scopeNotice": "Los reportes usan datos simulados del Portal Pruebas. No modifican la puntuación de idoneidad ni generan PDF o CSV.",
       "catalogAria": "Catálogo de reportes",
       "catalog": {
         "assignments-by-status": {

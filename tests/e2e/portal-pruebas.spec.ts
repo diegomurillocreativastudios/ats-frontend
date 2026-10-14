@@ -34,9 +34,6 @@ test.describe("Portal Pruebas demo E2E (UI-15)", () => {
         name: /dashboard de pruebas|assessments dashboard/i,
       }),
     ).toBeVisible()
-    await expect(
-      page.getByText(/demostración|demonstration|demo/i).first(),
-    ).toBeVisible()
 
     await page.goto(
       "/portal-pruebas/asignaciones?returnTo=%2Fportal-rrhh%2Fvacantes",

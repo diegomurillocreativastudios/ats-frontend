@@ -6,7 +6,6 @@ import {
   AssessmentStatusBadge,
 } from "@/components/pruebas/shared/assessment-status-badge"
 import { AssessmentTypeBadge } from "@/components/pruebas/shared/assessment-type-badge"
-import { MockDemoNotice } from "@/components/pruebas/shared/mock-demo-notice"
 
 describe("AssessmentStatusBadge", () => {
   it("only accepts lifecycle statuses", () => {
@@ -46,14 +45,5 @@ describe("AssessmentTypeBadge", () => {
     const badge = screen.getByTestId("assessment-type-badge")
     expect(badge).toHaveTextContent("Técnica")
     expect(badge).toHaveAttribute("data-status", "technical")
-  })
-})
-
-describe("MockDemoNotice", () => {
-  it("exposes a status role with the given label", () => {
-    render(<MockDemoNotice label="Demostración — datos simulados" />)
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Demostración — datos simulados"
-    )
   })
 })

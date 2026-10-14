@@ -63,7 +63,7 @@ async function selectOpenVacancyAndTechnicalVersion() {
 }
 
 describe("PruebasAssignmentsScreen UI", () => {
-  it("shows scope notice, excludes closed vacancy, and omits inactive linked version", async () => {
+  it("excludes closed vacancy and omits inactive linked version", async () => {
     renderWithIntl(<PruebasAssignmentsScreen />)
 
     await waitFor(() => {
@@ -72,9 +72,6 @@ describe("PruebasAssignmentsScreen UI", () => {
       ).toBeInTheDocument()
     })
 
-    expect(screen.getByTestId("assignments-scope-notice")).toHaveTextContent(
-      /no envía correos/i,
-    )
     expect(screen.getByTestId("assignments-excluded-vacancies")).toHaveTextContent(
       /Inventario de almacén \(cerrada\)/i,
     )

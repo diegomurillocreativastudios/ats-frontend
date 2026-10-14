@@ -52,9 +52,6 @@ describe("PruebasTrackingScreen UI", () => {
       ).toBeInTheDocument()
     })
 
-    expect(screen.getByTestId("tracking-scope-notice")).toHaveTextContent(
-      /no envía correo real/i,
-    )
     expect(screen.getAllByTestId("tracking-row").length).toBe(8)
 
     await openAssignment(MOCK_IDS.assignmentCarlosExpired)

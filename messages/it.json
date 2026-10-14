@@ -574,7 +574,6 @@
     "pruebasAria": "Vai al portale prove"
   },
   "PruebasPortal": {
-    "demoNotice": "Dimostrazione — dati simulati",
     "placeholder": "Questa sezione sarà completata in una fase successiva. Per ora conferma solo il percorso e la navigazione del portale.",
     "nav": {
       "groups": {
@@ -1048,7 +1047,6 @@
     "links": {
       "title": "Collegamenti",
       "description": "Associa una versione pubblicata a una posizione aperta. Collegare non assegna candidati e non invia inviti.",
-      "scopeNotice": "Collegare non assegna, non crea candidature e non invia e-mail. Rende solo la valutazione disponibile per assegnarla in seguito.",
       "form": {
         "title": "Nuovo collegamento",
         "version": "Versione pubblicata",
@@ -1121,7 +1119,6 @@
     "assignments": {
       "title": "Assegnazioni",
       "description": "Assegna una versione collegata alle candidature attive della posizione. Nella demo non vengono inviate e-mail.",
-      "scopeNotice": "Assegnare non invia e-mail né crea candidature. Registra solo inviti simulati per i candidati idonei di quella posizione.",
       "backToRrhh": "Indietro",
       "backToRrhhAria": "Torna alle Risorse umane",
       "form": {
@@ -1209,7 +1206,6 @@
     "tracking": {
       "title": "Monitoraggio",
       "description": "Consulta lo stato delle assegnazioni e gestisci scadenze o nuovi tentativi in modalità dimostrazione.",
-      "scopeNotice": "Le azioni di monitoraggio sono simulate. Un promemoria non invia un’e-mail reale.",
       "search": "Cerca",
       "searchPlaceholder": "Candidato, posizione o valutazione",
       "filters": {
@@ -1326,7 +1322,6 @@
     "review": {
       "title": "Revisione manuale",
       "description": "Valuta le risposte aperte in attesa con la rubrica della dimostrazione.",
-      "scopeNotice": "La valutazione è simulata. Non modifica il punteggio di idoneità né decide un’assunzione.",
       "pendingCount": "{count, plural, one {# in attesa} other {# in attesa}}",
       "filteredCount": "{count, plural, one {# visibile} other {# visibili}}",
       "search": "Cerca",
@@ -1406,7 +1401,6 @@
     "results": {
       "title": "Risultati",
       "description": "Consulta i risultati tecnici e psicometrici con dati di dimostrazione.",
-      "scopeNotice": "I risultati sono simulati. Non modificano il punteggio di idoneità né decidono un’assunzione.",
       "count": "{count, plural, one {# risultato} other {# risultati}}",
       "filteredCount": "{count, plural, one {# visibile} other {# visibili}}",
       "search": "Cerca",
@@ -1517,7 +1511,6 @@
     "reports": {
       "title": "Report",
       "description": "Catalogo di report dimostrativi con anteprima simulata. Non vengono generati file.",
-      "scopeNotice": "I report usano dati simulati del portale Pruebas. Non modificano il punteggio di idoneità e non generano PDF o CSV.",
       "catalogAria": "Catalogo report",
       "catalog": {
         "assignments-by-status": {

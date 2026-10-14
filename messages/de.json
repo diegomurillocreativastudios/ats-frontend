@@ -574,7 +574,6 @@
     "pruebasAria": "Zum Prüfungen-Portal gehen"
   },
   "PruebasPortal": {
-    "demoNotice": "Demo — simulierte Daten",
     "placeholder": "Dieser Bereich wird in einer späteren Phase fertiggestellt. Derzeit bestätigt er nur die Route und die Portalnavigation.",
     "nav": {
       "groups": {
@@ -1048,7 +1047,6 @@
     "links": {
       "title": "Verknüpfungen",
       "description": "Verknüpfe eine veröffentlichte Version mit einer offenen Stelle. Verknüpfen weist keine Kandidaten zu und sendet keine Einladungen.",
-      "scopeNotice": "Verknüpfen weist nicht zu, erstellt keine Bewerbungen und sendet keine E-Mails. Es macht die Bewertung nur später zuweisbar.",
       "form": {
         "title": "Neue Verknüpfung",
         "version": "Veröffentlichte Version",
@@ -1121,7 +1119,6 @@
     "assignments": {
       "title": "Zuweisungen",
       "description": "Weise eine verknüpfte Version aktiven Bewerbungen der Stelle zu. In der Demo werden keine E-Mails gesendet.",
-      "scopeNotice": "Zuweisen sendet keine E-Mails und erstellt keine Bewerbungen. Es speichert nur simulierte Einladungen für berechtigte Kandidaten dieser Stelle.",
       "backToRrhh": "Zurück",
       "backToRrhhAria": "Zurück zu Personalwesen",
       "form": {
@@ -1209,7 +1206,6 @@
     "tracking": {
       "title": "Nachverfolgung",
       "description": "Prüfe den Status der Zuweisungen und verwalte Fristen oder Wiederholungen im Demo-Modus.",
-      "scopeNotice": "Nachverfolgungsaktionen sind simuliert. Eine Erinnerung sendet keine echte E-Mail.",
       "search": "Suchen",
       "searchPlaceholder": "Kandidat, Stelle oder Bewertung",
       "filters": {
@@ -1326,7 +1322,6 @@
     "review": {
       "title": "Manuelle Bewertung",
       "description": "Bewerte offene Antworten anhand der Demo-Rubrik.",
-      "scopeNotice": "Die Bewertung ist simuliert. Sie ändert weder den Match-Score noch entscheidet sie über eine Einstellung.",
       "pendingCount": "{count, plural, one {# ausstehend} other {# ausstehend}}",
       "filteredCount": "{count, plural, one {# sichtbar} other {# sichtbar}}",
       "search": "Suchen",
@@ -1406,7 +1401,6 @@
     "results": {
       "title": "Ergebnisse",
       "description": "Technische und psychometrische Ergebnisse mit Demo-Daten ansehen.",
-      "scopeNotice": "Ergebnisse sind simuliert. Sie ändern keinen Match-Score und entscheiden keine Einstellung.",
       "count": "{count, plural, one {# Ergebnis} other {# Ergebnisse}}",
       "filteredCount": "{count, plural, one {# sichtbar} other {# sichtbar}}",
       "search": "Suchen",
@@ -1517,7 +1511,6 @@
     "reports": {
       "title": "Berichte",
       "description": "Demo-Berichtskatalog mit simulierter Vorschau. Es werden keine Dateien erzeugt.",
-      "scopeNotice": "Berichte nutzen simulierte Portal-Pruebas-Daten. Sie ändern keinen Match-Score und erzeugen weder PDF noch CSV.",
       "catalogAria": "Berichtskatalog",
       "catalog": {
         "assignments-by-status": {

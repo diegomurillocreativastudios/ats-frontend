@@ -258,13 +258,6 @@ export function PruebasResultsListScreen() {
     <div className="flex flex-col gap-6 px-4 py-6 md:px-6 lg:px-8">
       <PortalPageHeader title={t("title")} description={t("description")} />
 
-      <p
-        className="rounded-lg border border-vo-purple/30 bg-vo-purple/10 px-3 py-2 font-sans text-sm text-emerald-900"
-        data-testid="results-scope-notice"
-      >
-        {t("scopeNotice")}
-      </p>
-
       <div className="flex flex-wrap items-center gap-3" data-testid="results-count">
         <span className="inline-flex min-h-11 items-center rounded-full border border-emerald-300 bg-emerald-50 px-3 font-sans text-sm font-medium text-emerald-900">
           {t("count", { count: rows.length })}

@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 
-import { MockDemoNotice } from "@/components/pruebas/shared/mock-demo-notice"
 import {
   listApplications,
   listAssignments,
@@ -30,7 +29,6 @@ const STATUS_STYLES: Record<AssignmentStatus, string> = {
 
 export function PruebasRrhhTestsPanel() {
   const t = useTranslations("PruebasPortal.reports")
-  const tPortal = useTranslations("PruebasPortal")
   const [rows, setRows] = useState<RrhhTestsPanelRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -92,7 +90,6 @@ export function PruebasRrhhTestsPanel() {
         <p className="font-sans text-sm text-muted-foreground">
           {t("panel.description")}
         </p>
-        <MockDemoNotice label={tPortal("demoNotice")} />
       </div>
 
       {isLoading ? (

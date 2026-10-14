@@ -574,7 +574,6 @@
     "pruebasAria": "Aller au portail des évaluations"
   },
   "PruebasPortal": {
-    "demoNotice": "Démonstration — données simulées",
     "placeholder": "Cette section sera complétée dans une phase ultérieure. Pour l’instant, elle confirme uniquement la route et la navigation du portail.",
     "nav": {
       "groups": {
@@ -1048,7 +1047,6 @@
     "links": {
       "title": "Associations",
       "description": "Associe une version publiée à une offre ouverte. Associer n’assigne pas de candidats et n’envoie pas d’invitations.",
-      "scopeNotice": "Associer n’assigne pas, ne crée pas de candidatures et n’envoie pas d’e-mails. Cela rend seulement l’évaluation disponible pour une assignation ultérieure.",
       "form": {
         "title": "Nouvelle association",
         "version": "Version publiée",
@@ -1121,7 +1119,6 @@
     "assignments": {
       "title": "Affectations",
       "description": "Affectez une version liée aux candidatures actives de l’offre. Aucun e-mail n’est envoyé en démonstration.",
-      "scopeNotice": "Affecter n’envoie pas d’e-mails et ne crée pas de candidatures. Cela enregistre uniquement des invitations simulées pour les candidats éligibles de cette offre.",
       "backToRrhh": "Retour",
       "backToRrhhAria": "Retour aux Ressources humaines",
       "form": {
@@ -1209,7 +1206,6 @@
     "tracking": {
       "title": "Suivi",
       "description": "Consultez l’état des affectations et gérez les délais ou les nouvelles tentatives en mode démonstration.",
-      "scopeNotice": "Les actions de suivi sont simulées. Un rappel n’envoie pas de véritable e-mail.",
       "search": "Rechercher",
       "searchPlaceholder": "Candidat, offre ou évaluation",
       "filters": {
@@ -1326,7 +1322,6 @@
     "review": {
       "title": "Révision manuelle",
       "description": "Notez les réponses ouvertes en attente avec la grille de la démonstration.",
-      "scopeNotice": "La notation est simulée. Elle ne modifie pas le score d’adéquation et ne décide pas d’un recrutement.",
       "pendingCount": "{count, plural, one {# en attente} other {# en attente}}",
       "filteredCount": "{count, plural, one {# visible} other {# visibles}}",
       "search": "Rechercher",
@@ -1406,7 +1401,6 @@
     "results": {
       "title": "Résultats",
       "description": "Consultez les résultats techniques et psychométriques avec des données de démonstration.",
-      "scopeNotice": "Les résultats sont simulés. Ils ne modifient pas le score d’adéquation et ne décident pas d’une embauche.",
       "count": "{count, plural, one {# résultat} other {# résultats}}",
       "filteredCount": "{count, plural, one {# visible} other {# visibles}}",
       "search": "Rechercher",
@@ -1517,7 +1511,6 @@
     "reports": {
       "title": "Rapports",
       "description": "Catalogue de rapports de démonstration avec aperçu simulé. Aucun fichier n’est généré.",
-      "scopeNotice": "Les rapports utilisent des données simulées du portail Pruebas. Ils ne modifient pas le score d’adéquation et ne génèrent ni PDF ni CSV.",
       "catalogAria": "Catalogue de rapports",
       "catalog": {
         "assignments-by-status": {

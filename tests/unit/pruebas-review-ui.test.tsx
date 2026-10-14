@@ -50,9 +50,6 @@ describe("PruebasReviewQueueScreen UI", () => {
       ).toBeInTheDocument()
     })
 
-    expect(screen.getByTestId("review-scope-notice")).toHaveTextContent(
-      /no altera la puntuación de idoneidad/i,
-    )
     expect(screen.getAllByTestId("review-queue-row").length).toBeGreaterThan(0)
     expect(
       screen.getAllByTestId(`review-open-${MOCK_IDS.assignmentDiegoPendingReview}`)

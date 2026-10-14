@@ -38,7 +38,7 @@ beforeEach(() => {
 })
 
 describe("PruebasPortalShell", () => {
-  it("fija el viewport y oculta el aviso de demostración en Inicio", () => {
+  it("fija el viewport y renderiza el contenido principal", () => {
     const { container } = renderShell()
     const shell = container.firstElementChild
     expect(shell?.className).toContain("h-dvh")
@@ -46,24 +46,8 @@ describe("PruebasPortalShell", () => {
 
     const mains = screen.getAllByRole("main")
     expect(mains).toHaveLength(1)
-    expect(within(mains[0]).queryByTestId("mock-demo-notice")).not.toBeInTheDocument()
     expect(within(mains[0]).getByText("Contenido de prueba")).toBeInTheDocument()
-  })
-
-  it("oculta el aviso de demostración en Evaluaciones", () => {
-    usePathnameMock.mockReturnValue("/portal-pruebas/evaluaciones")
-    renderShell()
-
     expect(screen.queryByTestId("mock-demo-notice")).not.toBeInTheDocument()
-  })
-
-  it("muestra el aviso de demostración fuera de Inicio y Evaluaciones", () => {
-    usePathnameMock.mockReturnValue("/portal-pruebas/preguntas")
-    renderShell()
-
-    expect(screen.getByTestId("mock-demo-notice")).toHaveTextContent(
-      "Demostración — datos simulados",
-    )
   })
 
   it("muestra el sidebar a partir de lg y el topbar compacto por debajo", () => {

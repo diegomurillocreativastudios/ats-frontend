@@ -314,14 +314,6 @@ export function PruebasLinksScreen() {
         description={t("description")}
       />
 
-      <aside
-        className="rounded-xl border border-border bg-muted/40 px-4 py-3 font-sans text-sm text-foreground"
-        role="note"
-        data-testid="links-scope-notice"
-      >
-        {t("scopeNotice")}
-      </aside>
-
       <section
         aria-labelledby="pruebas-links-form-heading"
         className="glass-card flex flex-col gap-4 rounded-2xl p-4 md:p-6"

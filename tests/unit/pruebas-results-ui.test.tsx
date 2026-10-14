@@ -48,9 +48,6 @@ describe("PruebasResultsListScreen UI", () => {
       ).toBeInTheDocument()
     })
 
-    expect(screen.getByTestId("results-scope-notice")).toHaveTextContent(
-      /no modifican la puntuación de idoneidad/i,
-    )
     expect(
       screen.getAllByTestId(`results-open-${MOCK_IDS.assignmentSofiaPending}`)
         .length,
