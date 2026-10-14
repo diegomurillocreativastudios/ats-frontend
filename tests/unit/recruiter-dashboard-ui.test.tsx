@@ -7,23 +7,15 @@ import {
   normalizeRecruiterDashboard,
   type RecruiterDashboardModel,
 } from "@/lib/rrhh/recruiter-dashboard"
-import type { VacancyDashboardSnapshot } from "@/lib/rrhh/recruiter-vacancy-dashboard"
 import esMessages from "@/messages/es.json"
 
-const { useRecruiterDashboardMock, reloadMock, useRecruiterVacancyDashboardMock, reloadVacanciesMock } =
-  vi.hoisted(() => ({
-    useRecruiterDashboardMock: vi.fn(),
-    reloadMock: vi.fn(),
-    useRecruiterVacancyDashboardMock: vi.fn(),
-    reloadVacanciesMock: vi.fn(),
-  }))
+const { useRecruiterDashboardMock, reloadMock } = vi.hoisted(() => ({
+  useRecruiterDashboardMock: vi.fn(),
+  reloadMock: vi.fn(),
+}))
 
 vi.mock("@/hooks/use-recruiter-dashboard", () => ({
   useRecruiterDashboard: useRecruiterDashboardMock,
-}))
-
-vi.mock("@/hooks/use-recruiter-vacancy-dashboard", () => ({
-  useRecruiterVacancyDashboard: useRecruiterVacancyDashboardMock,
 }))
 
 vi.mock("@/hooks/useCurrentUser", () => ({
@@ -44,6 +36,7 @@ function buildModel(
   overrides: Partial<{
     metrics: Array<Record<string, unknown>>
     reminders: Array<Record<string, unknown>>
+    vacancyAttention: Array<Record<string, unknown>>
   }> = {}
 ): RecruiterDashboardModel {
   return normalizeRecruiterDashboard(
@@ -54,33 +47,15 @@ function buildModel(
         { key: "upcomingInterviews", count: 2, sourceState: "ready" },
         { key: "staleCandidates", count: 1, sourceState: "ready" },
         { key: "pendingEvaluations", count: 0, sourceState: "ready" },
+        { key: "vacanciesWithoutCandidates", count: 0, sourceState: "ready" },
+        { key: "vacanciesPresentationOverdue", count: 0, sourceState: "ready" },
+        { key: "vacanciesUnpublished", count: 0, sourceState: "ready" },
       ],
       reminders: overrides.reminders ?? [],
+      vacancyAttention: overrides.vacancyAttention ?? [],
     },
     NOW
   )
-}
-
-const EMPTY_VACANCY_SNAPSHOT: VacancyDashboardSnapshot = {
-  activeVacancies: 0,
-  withoutCandidates: 0,
-  overdue: 0,
-  unpublished: 0,
-  attention: [],
-  progressPartial: null,
-  listPartial: null,
-}
-
-function mockVacancyHook(
-  data: VacancyDashboardSnapshot | null = EMPTY_VACANCY_SNAPSHOT,
-  options: { isLoading?: boolean; error?: string | null } = {}
-) {
-  useRecruiterVacancyDashboardMock.mockReturnValue({
-    data,
-    isLoading: options.isLoading ?? false,
-    error: options.error ?? null,
-    reload: reloadVacanciesMock,
-  })
 }
 
 function mockHook(
@@ -105,9 +80,7 @@ function renderDashboard() {
 
 beforeEach(() => {
   reloadMock.mockClear()
-  reloadVacanciesMock.mockClear()
   useRecruiterDashboardMock.mockReset()
-  mockVacancyHook()
 })
 
 describe("RecruiterDashboard", () => {
@@ -123,26 +96,28 @@ describe("RecruiterDashboard", () => {
   })
 
   it("muestra indicadores, recordatorios accionables y accesos directos", () => {
-    mockVacancyHook({
-      ...EMPTY_VACANCY_SNAPSHOT,
-      activeVacancies: 4,
-      withoutCandidates: 1,
-      overdue: 2,
-      unpublished: 3,
-      attention: [
-        {
-          vacancyId: "v1",
-          title: "Analista",
-          clientName: "Norte",
-          daysOpen: 30,
-          candidateCount: 0,
-          signal: "critical",
-          href: "/portal-rrhh/vacantes/analista",
-        },
-      ],
-    })
     mockHook(
       buildModel({
+        metrics: [
+          { key: "activeVacancies", count: 4, sourceState: "ready" },
+          { key: "upcomingInterviews", count: 2, sourceState: "ready" },
+          { key: "staleCandidates", count: 1, sourceState: "ready" },
+          { key: "pendingEvaluations", count: 0, sourceState: "ready" },
+          { key: "vacanciesWithoutCandidates", count: 1, sourceState: "ready" },
+          { key: "vacanciesPresentationOverdue", count: 2, sourceState: "ready" },
+          { key: "vacanciesUnpublished", count: 3, sourceState: "ready" },
+        ],
+        vacancyAttention: [
+          {
+            vacancyId: "v1",
+            title: "Analista",
+            clientName: "Norte",
+            daysOpen: 30,
+            candidateCount: 0,
+            signal: "critical",
+            publicSlug: "analista",
+          },
+        ],
         reminders: [
           {
             key: "staleCandidates",
@@ -170,11 +145,19 @@ describe("RecruiterDashboard", () => {
       within(vacancies).getByRole("link", { name: "No publicadas: 3. Ver detalle" })
     ).toHaveAttribute("href", "/portal-rrhh/vacantes?vista=no-publicadas")
     expect(
+      within(vacancies).getByRole("heading", {
+        name: "Vacantes que necesitan atención",
+      })
+    ).toBeInTheDocument()
+    expect(
       within(vacancies).getByRole("link", { name: "Abrir vacante Analista" })
     ).toHaveAttribute("href", "/portal-rrhh/vacantes/analista")
     expect(within(vacancies).getByText("Crítica")).toBeInTheDocument()
 
     const candidates = screen.getByRole("region", { name: "Candidatos" })
+    expect(
+      within(candidates).queryByRole("link", { name: /Sin postulaciones/ })
+    ).not.toBeInTheDocument()
     const reminders = within(candidates).getByRole("region", { name: "Pendientes por atender" })
     const stale = within(reminders).getByRole("article", { name: "Candidatos estancados" })
     expect(within(stale).getByText("Urgente")).toBeInTheDocument()
@@ -230,24 +213,13 @@ describe("RecruiterDashboard", () => {
     expect(screen.getByRole("region", { name: "Vacantes" })).toBeInTheDocument()
     fireEvent.click(within(alert).getByRole("button", { name: "Reintentar" }))
     expect(reloadMock).toHaveBeenCalledTimes(1)
-    expect(reloadVacanciesMock).not.toHaveBeenCalled()
   })
 
-  it("mantiene candidatos cuando falla el recorte de vacantes", () => {
+  it("al refrescar solo recarga el dashboard", () => {
     mockHook(buildModel())
-    mockVacancyHook(null, { error: "vacantes" })
     renderDashboard()
 
-    const vacancies = screen.getByRole("region", { name: "Vacantes" })
-    expect(within(vacancies).getByRole("alert")).toHaveTextContent(
-      "No pudimos cargar las señales de vacantes"
-    )
-    expect(
-      within(vacancies).getByRole("link", { name: "Vacantes activas: sin dato. Ver detalle" })
-    ).toHaveAttribute("href", "/portal-rrhh/vacantes?vista=activas")
-    const candidates = screen.getByRole("region", { name: "Candidatos" })
-    expect(
-      within(candidates).getByRole("region", { name: "Pendientes por atender" })
-    ).toBeInTheDocument()
+    fireEvent.click(screen.getByRole("button", { name: "Actualizar" }))
+    expect(reloadMock).toHaveBeenCalledTimes(1)
   })
 })

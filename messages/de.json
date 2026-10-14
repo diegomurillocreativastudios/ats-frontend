@@ -4230,7 +4230,10 @@
         "activeVacancies": "Aktive Stellen",
         "upcomingInterviews": "Anstehende Interviews",
         "staleCandidates": "Stagnierende Kandidaten",
-        "pendingEvaluations": "Offene Bewertungen"
+        "pendingEvaluations": "Offene Bewertungen",
+        "vacanciesWithoutCandidates": "Ohne Bewerbungen",
+        "vacanciesPresentationOverdue": "Präsentationsfrist überschritten",
+        "vacanciesUnpublished": "Nicht veröffentlicht"
       },
       "metricLinkAria": "{label}: {value}. Details anzeigen",
       "metricUpcomingWindow": "Nächste {days} Tage",

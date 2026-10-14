@@ -11,28 +11,19 @@ import { DashboardShortcuts } from "@/components/rrhh/dashboard/dashboard-shortc
 import { DashboardUnavailableList } from "@/components/rrhh/dashboard/dashboard-unavailable-list"
 import { DashboardVacanciesPanel } from "@/components/rrhh/dashboard/dashboard-vacancies-panel"
 import { useRecruiterDashboard } from "@/hooks/use-recruiter-dashboard"
-import { useRecruiterVacancyDashboard } from "@/hooks/use-recruiter-vacancy-dashboard"
 import {
   isActionableReminder,
+  isVacancyDashboardMetric,
   isVacancyDashboardReminder,
-  RECRUITER_DASHBOARD_LINKS,
   sortDashboardReminders,
-  type DashboardMetric,
   type DashboardMetricKey,
   type DashboardReminderKey,
 } from "@/lib/rrhh/recruiter-dashboard"
-import type { VacancyDashboardSnapshot } from "@/lib/rrhh/recruiter-vacancy-dashboard"
 
 export function RecruiterDashboard() {
   const t = useTranslations("RecruiterPortal.dashboard")
   const format = useFormatter()
   const { data, isLoading, error, reload } = useRecruiterDashboard()
-  const {
-    data: vacancySnapshot,
-    isLoading: isVacancyLoading,
-    error: vacancyError,
-    reload: reloadVacancies,
-  } = useRecruiterVacancyDashboard()
 
   const { actionable, unavailable } = useMemo(() => {
     const reminders = data?.reminders ?? []
@@ -62,22 +53,27 @@ export function RecruiterDashboard() {
   const vacancyUnavailable = unavailable.filter((reminder) =>
     isVacancyDashboardReminder(reminder.key)
   )
-  const candidateMetrics = (data?.metrics ?? []).filter(
-    (metric) => metric.key !== "activeVacancies"
+  const metrics = data?.metrics ?? []
+  const candidateMetrics = metrics.filter(
+    (metric) => !isVacancyDashboardMetric(metric.key)
   )
-  const activeMetric = buildActiveVacanciesMetric({
-    snapshot: vacancySnapshot,
-    isLoading: isVacancyLoading,
-    error: vacancyError,
-  })
+  const activeMetric =
+    metrics.find((metric) => metric.key === "activeVacancies") ?? null
+  const countMetrics = {
+    withoutCandidates:
+      metrics.find((metric) => metric.key === "vacanciesWithoutCandidates") ??
+      null,
+    overdue:
+      metrics.find(
+        (metric) => metric.key === "vacanciesPresentationOverdue"
+      ) ?? null,
+    unpublished:
+      metrics.find((metric) => metric.key === "vacanciesUnpublished") ?? null,
+  }
+  const vacancyAttention = data?.vacancyAttention ?? []
 
   const handleReload = () => {
     void reload()
-    void reloadVacancies()
-  }
-
-  const handleVacancyRetry = () => {
-    void reloadVacancies()
   }
 
   const updatedText = data
@@ -103,14 +99,14 @@ export function RecruiterDashboard() {
               <button
                 type="button"
                 onClick={handleReload}
-                disabled={isLoading || isVacancyLoading}
+                disabled={isLoading}
                 className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-card px-4 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <RefreshCw
-                  className={`h-4 w-4 ${isLoading || isVacancyLoading ? "animate-spin motion-reduce:animate-none" : ""}`}
+                  className={`h-4 w-4 ${isLoading ? "animate-spin motion-reduce:animate-none" : ""}`}
                   aria-hidden
                 />
-                {isLoading || isVacancyLoading ? t("refreshing") : t("refresh")}
+                {isLoading ? t("refreshing") : t("refresh")}
               </button>
               {updatedText ? (
                 <span className="font-sans text-xs text-muted-foreground">
@@ -128,13 +124,11 @@ export function RecruiterDashboard() {
         >
           <DashboardVacanciesPanel
             activeMetric={activeMetric}
-            isActiveLoading={isLoading && !data}
-            snapshot={vacancySnapshot}
-            isLoading={isVacancyLoading}
-            error={vacancyError}
+            countMetrics={countMetrics}
+            vacancyAttention={vacancyAttention}
+            isLoading={isLoading && !data}
             actionableReminders={vacancyActionable}
             unavailableReminders={vacancyUnavailable}
-            onRetry={handleVacancyRetry}
           />
         </DashboardContainer>
 
@@ -258,29 +252,3 @@ const CANDIDATE_METRIC_KEYS: readonly DashboardMetricKey[] = [
   "staleCandidates",
   "pendingEvaluations",
 ]
-
-function buildActiveVacanciesMetric({
-  snapshot,
-  isLoading,
-  error,
-}: {
-  snapshot: VacancyDashboardSnapshot | null
-  isLoading: boolean
-  error: string | null
-}): DashboardMetric | null {
-  if (isLoading && !snapshot) return null
-  if (!snapshot) {
-    return {
-      key: "activeVacancies",
-      value: null,
-      sourceState: error ? "error" : "unavailable",
-      href: RECRUITER_DASHBOARD_LINKS.vacanciesActivas,
-    }
-  }
-  return {
-    key: "activeVacancies",
-    value: snapshot.activeVacancies,
-    sourceState: snapshot.listPartial ? "partial" : "ready",
-    href: RECRUITER_DASHBOARD_LINKS.vacanciesActivas,
-  }
-}

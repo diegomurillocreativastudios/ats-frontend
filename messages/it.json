@@ -4230,7 +4230,10 @@
         "activeVacancies": "Posizioni attive",
         "upcomingInterviews": "Colloqui imminenti",
         "staleCandidates": "Candidati fermi",
-        "pendingEvaluations": "Valutazioni in sospeso"
+        "pendingEvaluations": "Valutazioni in sospeso",
+        "vacanciesWithoutCandidates": "Senza candidature",
+        "vacanciesPresentationOverdue": "Fuori termine di presentazione",
+        "vacanciesUnpublished": "Non pubblicate"
       },
       "metricLinkAria": "{label}: {value}. Vedi dettaglio",
       "metricUpcomingWindow": "Prossimi {days} giorni",

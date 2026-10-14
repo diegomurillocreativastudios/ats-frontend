@@ -4230,7 +4230,10 @@
         "activeVacancies": "Active vacancies",
         "upcomingInterviews": "Upcoming interviews",
         "staleCandidates": "Stalled applicants",
-        "pendingEvaluations": "Pending evaluations"
+        "pendingEvaluations": "Pending evaluations",
+        "vacanciesWithoutCandidates": "Without applications",
+        "vacanciesPresentationOverdue": "Past presentation deadline",
+        "vacanciesUnpublished": "Unpublished"
       },
       "metricLinkAria": "{label}: {value}. View details",
       "metricUpcomingWindow": "Next {days} days",

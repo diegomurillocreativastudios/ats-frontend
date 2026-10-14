@@ -6,7 +6,10 @@ import {
   Briefcase,
   CalendarClock,
   ClipboardCheck,
+  EyeOff,
   Hourglass,
+  Timer,
+  UserRoundX,
   type LucideIcon,
 } from "lucide-react"
 import {
@@ -126,6 +129,9 @@ const METRIC_ORDER: DashboardMetricKey[] = [
   "upcomingInterviews",
   "staleCandidates",
   "pendingEvaluations",
+  "vacanciesWithoutCandidates",
+  "vacanciesPresentationOverdue",
+  "vacanciesUnpublished",
 ]
 
 const METRIC_ICONS: Record<DashboardMetricKey, LucideIcon> = {
@@ -133,6 +139,9 @@ const METRIC_ICONS: Record<DashboardMetricKey, LucideIcon> = {
   upcomingInterviews: CalendarClock,
   staleCandidates: Hourglass,
   pendingEvaluations: ClipboardCheck,
+  vacanciesWithoutCandidates: UserRoundX,
+  vacanciesPresentationOverdue: Timer,
+  vacanciesUnpublished: EyeOff,
 }
 
 const METRIC_STATE_NOTES = {

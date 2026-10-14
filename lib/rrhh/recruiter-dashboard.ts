@@ -1,3 +1,5 @@
+import { buildRecruiterVacancyPath } from "@/lib/vacancies/vacancy-public-path"
+
 export const DASHBOARD_UPCOMING_INTERVIEW_DAYS = 7
 export const DASHBOARD_STALE_CANDIDATE_DAYS = 14
 export const DASHBOARD_SLOW_VACANCY_DAYS = 21
@@ -7,7 +9,9 @@ export const RECRUITER_DASHBOARD_LINKS = {
   candidates: "/portal-rrhh/candidatos",
   vacancies: "/portal-rrhh/vacantes",
   vacanciesActivas: "/portal-rrhh/vacantes?vista=activas",
+  vacanciesWithoutCandidates: "/portal-rrhh/vacantes?vista=sin-postulaciones",
   vacanciesPresentationOverdue: "/portal-rrhh/vacantes?vista=fuera-de-plazo",
+  vacanciesUnpublished: "/portal-rrhh/vacantes?vista=no-publicadas",
   interviews: "/portal-rrhh/entrevistas",
   calendar: "/portal-rrhh/configuracion/calendario",
   reports: "/portal-rrhh/reportes",
@@ -17,22 +21,52 @@ export const RECRUITER_DASHBOARD_LINKS = {
 
 export const REMINDER_DETAIL_PREFIX = "/portal-rrhh/recordatorios"
 
+export const VACANCY_DASHBOARD_ATTENTION_LIMIT = 6
+
 export type DashboardSourceState = "ready" | "partial" | "unavailable" | "error"
 
 export type DashboardSeverity = "critical" | "action" | "upcoming" | "info"
+
+export type DashboardVacancyAttentionSignal =
+  | "critical"
+  | "attention"
+  | "overdue"
+  | "unpublished"
 
 export type DashboardMetricKey =
   | "activeVacancies"
   | "upcomingInterviews"
   | "staleCandidates"
   | "pendingEvaluations"
+  | "vacanciesWithoutCandidates"
+  | "vacanciesPresentationOverdue"
+  | "vacanciesUnpublished"
 
 export const DASHBOARD_METRIC_KEYS: readonly DashboardMetricKey[] = [
   "activeVacancies",
   "upcomingInterviews",
   "staleCandidates",
   "pendingEvaluations",
+  "vacanciesWithoutCandidates",
+  "vacanciesPresentationOverdue",
+  "vacanciesUnpublished",
 ] as const
+
+/** Metrics shown only in the Vacantes home block (not under Candidatos). */
+export const DASHBOARD_VACANCY_METRIC_KEYS = [
+  "activeVacancies",
+  "vacanciesWithoutCandidates",
+  "vacanciesPresentationOverdue",
+  "vacanciesUnpublished",
+] as const satisfies readonly DashboardMetricKey[]
+
+const VACANCY_METRIC_KEY_SET: ReadonlySet<string> = new Set(
+  DASHBOARD_VACANCY_METRIC_KEYS
+)
+
+export function isVacancyDashboardMetric(key: DashboardMetricKey): boolean {
+  return VACANCY_METRIC_KEY_SET.has(key)
+}
 
 export type DashboardReminderKey =
   | "upcomingInterviews"
@@ -108,10 +142,22 @@ export interface DashboardReminder {
   context: DashboardReminderContext | null
 }
 
+export interface DashboardVacancyAttentionRow {
+  vacancyId: string
+  publicSlug: string | null
+  title: string
+  clientName: string | null
+  daysOpen: number | null
+  candidateCount: number
+  signal: DashboardVacancyAttentionSignal
+  href: string
+}
+
 export interface RecruiterDashboardModel {
   generatedAt: string
   metrics: DashboardMetric[]
   reminders: DashboardReminder[]
+  vacancyAttention: DashboardVacancyAttentionRow[]
 }
 
 const REMINDER_SEVERITY: Record<DashboardReminderKey, DashboardSeverity> = {
@@ -163,6 +209,10 @@ const METRIC_LINK: Record<DashboardMetricKey, string> = {
   upcomingInterviews: reminderDetailLink("upcomingInterviews"),
   staleCandidates: reminderDetailLink("staleCandidates"),
   pendingEvaluations: reminderDetailLink("pendingEvaluations"),
+  vacanciesWithoutCandidates: RECRUITER_DASHBOARD_LINKS.vacanciesWithoutCandidates,
+  vacanciesPresentationOverdue:
+    RECRUITER_DASHBOARD_LINKS.vacanciesPresentationOverdue,
+  vacanciesUnpublished: RECRUITER_DASHBOARD_LINKS.vacanciesUnpublished,
 }
 
 const METRIC_KEY_SET: ReadonlySet<string> = new Set(DASHBOARD_METRIC_KEYS)
@@ -172,6 +222,12 @@ const SOURCE_STATE_SET: ReadonlySet<string> = new Set([
   "partial",
   "unavailable",
   "error",
+])
+const VACANCY_ATTENTION_SIGNAL_SET: ReadonlySet<string> = new Set([
+  "critical",
+  "attention",
+  "overdue",
+  "unpublished",
 ])
 
 export function reminderDetailLink(key: DashboardReminderKey): string {
@@ -198,7 +254,40 @@ export function normalizeRecruiterDashboard(
   const generatedAt = readString(record, ["generatedAt", "GeneratedAt"]) ?? now.toISOString()
   const metrics = normalizeMetrics(record.metrics ?? record.Metrics)
   const reminders = normalizeReminders(record.reminders ?? record.Reminders)
-  return { generatedAt, metrics, reminders }
+  const vacancyAttention = normalizeVacancyAttention(
+    record.vacancyAttention ?? record.VacancyAttention
+  )
+  return { generatedAt, metrics, reminders, vacancyAttention }
+}
+
+function normalizeVacancyAttention(raw: unknown): DashboardVacancyAttentionRow[] {
+  if (!Array.isArray(raw)) return []
+  const rows: DashboardVacancyAttentionRow[] = []
+  const seen = new Set<string>()
+  for (const item of raw) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue
+    const record = item as Record<string, unknown>
+    const vacancyId = readString(record, ["vacancyId", "VacancyId"])
+    if (!vacancyId || seen.has(vacancyId)) continue
+    const signalRaw = readString(record, ["signal", "Signal"])
+    if (!signalRaw || !VACANCY_ATTENTION_SIGNAL_SET.has(signalRaw)) continue
+    const title = readString(record, ["title", "Title"]) ?? ""
+    const publicSlug = readString(record, ["publicSlug", "PublicSlug"])
+    const candidateCount = readInt(record, ["candidateCount", "CandidateCount"]) ?? 0
+    seen.add(vacancyId)
+    rows.push({
+      vacancyId,
+      publicSlug,
+      title,
+      clientName: readString(record, ["clientName", "ClientName"]),
+      daysOpen: readInt(record, ["daysOpen", "DaysOpen"]),
+      candidateCount,
+      signal: signalRaw as DashboardVacancyAttentionSignal,
+      href: buildRecruiterVacancyPath({ id: vacancyId, publicSlug }),
+    })
+    if (rows.length >= VACANCY_DASHBOARD_ATTENTION_LIMIT) break
+  }
+  return rows
 }
 
 function normalizeMetrics(raw: unknown): DashboardMetric[] {

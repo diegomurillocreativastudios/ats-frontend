@@ -6,124 +6,85 @@ import { EyeOff, Timer, UserRoundX, type LucideIcon } from "lucide-react"
 import { DashboardMetricCard } from "@/components/rrhh/dashboard/dashboard-metric-cards"
 import { DashboardReminderList } from "@/components/rrhh/dashboard/dashboard-reminder-list"
 import { DashboardUnavailableList } from "@/components/rrhh/dashboard/dashboard-unavailable-list"
+import type {
+  DashboardMetric,
+  DashboardReminder,
+  DashboardVacancyAttentionRow,
+} from "@/lib/rrhh/recruiter-dashboard"
 import { vacancyListViewPath, type VacancyListView } from "@/lib/rrhh/vacancy-list-views"
-import type { DashboardMetric, DashboardReminder } from "@/lib/rrhh/recruiter-dashboard"
-import type { VacancyDashboardPartial, VacancyDashboardSnapshot } from "@/lib/rrhh/recruiter-vacancy-dashboard"
 
 interface DashboardVacanciesPanelProps {
   activeMetric: DashboardMetric | null
-  isActiveLoading: boolean
-  snapshot: VacancyDashboardSnapshot | null
+  countMetrics: {
+    withoutCandidates: DashboardMetric | null
+    overdue: DashboardMetric | null
+    unpublished: DashboardMetric | null
+  }
+  vacancyAttention: DashboardVacancyAttentionRow[]
   isLoading: boolean
-  error: string | null
   actionableReminders: DashboardReminder[]
   unavailableReminders: DashboardReminder[]
-  onRetry: () => void
 }
 
 export function DashboardVacanciesPanel({
   activeMetric,
-  isActiveLoading,
-  snapshot,
+  countMetrics,
+  vacancyAttention,
   isLoading,
-  error,
   actionableReminders,
   unavailableReminders,
-  onRetry,
 }: DashboardVacanciesPanelProps) {
   const t = useTranslations("RecruiterPortal.dashboard")
-  const showSnapshotSkeleton = isLoading && !snapshot
-  const showSnapshotError = Boolean(error) && !snapshot
 
   return (
     <div className="flex flex-col gap-6">
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <li>
-          {isActiveLoading && !activeMetric ? (
+          {isLoading && !activeMetric ? (
             <MetricSkeleton />
           ) : activeMetric ? (
-            <DashboardMetricCard
-              metric={activeMetric}
-              note={
-                snapshot?.listPartial
-                  ? t("vacancies.partialList", partialValues(snapshot.listPartial))
-                  : null
-              }
-            />
+            <DashboardMetricCard metric={activeMetric} />
           ) : (
             <MetricSkeleton />
           )}
         </li>
-        {COUNT_CARDS.map((card) => (
-          <li key={card.key}>
-            {showSnapshotSkeleton ? (
-              <MetricSkeleton />
-            ) : (
-              <CountCard
-                label={t(`vacancies.metrics.${card.key}`)}
-                value={snapshot ? snapshot[card.key] : null}
-                icon={card.icon}
-                href={vacancyListViewPath(card.view)}
-                note={countCardNote(card.key, snapshot, showSnapshotError, t)}
-                noteIsError={showSnapshotError}
-              />
-            )}
-          </li>
-        ))}
+        {COUNT_CARDS.map((card) => {
+          const metric = countMetrics[card.key]
+          return (
+            <li key={card.key}>
+              {isLoading && !metric ? (
+                <MetricSkeleton />
+              ) : (
+                <CountCard
+                  label={t(`vacancies.metrics.${card.key}`)}
+                  value={metric?.value ?? null}
+                  icon={card.icon}
+                  href={vacancyListViewPath(card.view)}
+                  note={countCardNote(metric, t)}
+                  noteIsError={metric?.sourceState === "error"}
+                />
+              )}
+            </li>
+          )
+        })}
       </ul>
 
-      {snapshot?.progressPartial ? (
-        <p className="font-sans text-xs text-muted-foreground">
-          {t("vacancies.partialProgress", partialValues(snapshot.progressPartial))}
-        </p>
-      ) : null}
-      {snapshot?.listPartial ? (
-        <p className="font-sans text-xs text-muted-foreground">
-          {t("vacancies.partialList", partialValues(snapshot.listPartial))}
-        </p>
-      ) : null}
-
-      {showSnapshotError ? (
-        <div
-          role="alert"
-          className="flex flex-col gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div className="font-sans text-sm text-destructive">
-            <p className="font-semibold">{t("vacancies.panelError.title")}</p>
-            <p>{t("vacancies.panelError.description")}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onRetry}
-            disabled={isLoading}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-md bg-vo-purple px-4 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {t("vacancies.panelError.retry")}
-          </button>
-        </div>
-      ) : null}
-
-      {actionableReminders.length > 0 ? (
-        <DashboardReminderList reminders={actionableReminders} isLoading={false} />
+      {isLoading || actionableReminders.length > 0 ? (
+        <DashboardReminderList
+          reminders={actionableReminders}
+          isLoading={isLoading && actionableReminders.length === 0}
+        />
       ) : null}
       {unavailableReminders.length > 0 ? (
         <DashboardUnavailableList reminders={unavailableReminders} />
       ) : null}
 
-      {showSnapshotSkeleton ? (
-        <p className="font-sans text-sm text-muted-foreground" role="status">
-          {t("vacancies.loading")}
-        </p>
-      ) : null}
-
-      {snapshot && !showSnapshotError ? (
-        <VacancyAttentionList snapshot={snapshot} />
-      ) : null}
+      {!isLoading ? <VacancyAttentionList rows={vacancyAttention} /> : null}
     </div>
   )
 }
 
-function VacancyAttentionList({ snapshot }: { snapshot: VacancyDashboardSnapshot }) {
+function VacancyAttentionList({ rows }: { rows: DashboardVacancyAttentionRow[] }) {
   const t = useTranslations("RecruiterPortal.dashboard")
 
   return (
@@ -131,13 +92,13 @@ function VacancyAttentionList({ snapshot }: { snapshot: VacancyDashboardSnapshot
       <h3 className="font-sans text-sm font-semibold text-foreground">
         {t("vacancies.attentionTitle")}
       </h3>
-      {snapshot.attention.length === 0 ? (
+      {rows.length === 0 ? (
         <p className="font-sans text-sm text-muted-foreground">
           {t("vacancies.attentionEmpty")}
         </p>
       ) : (
         <ol className="flex flex-col gap-3">
-          {snapshot.attention.map((row) => {
+          {rows.map((row) => {
             const title = row.title.trim() !== "" ? row.title : t("vacancies.untitled")
             return (
               <li key={row.vacancyId}>
@@ -251,23 +212,13 @@ const COUNT_CARDS: Array<{
   { key: "unpublished", view: "no-publicadas", icon: EyeOff },
 ]
 
-function partialValues(partial: VacancyDashboardPartial) {
-  return { analyzed: partial.analyzed, total: partial.total }
-}
-
 function countCardNote(
-  key: "withoutCandidates" | "overdue" | "unpublished",
-  snapshot: VacancyDashboardSnapshot | null,
-  isError: boolean,
+  metric: DashboardMetric | null,
   t: ReturnType<typeof useTranslations<"RecruiterPortal.dashboard">>
 ): string | null {
-  if (isError) return t("metricError")
-  if (!snapshot) return null
-  if (key === "unpublished" && snapshot.listPartial) {
-    return t("vacancies.partialList", partialValues(snapshot.listPartial))
-  }
-  if (key !== "unpublished" && snapshot.progressPartial) {
-    return t("vacancies.partialProgress", partialValues(snapshot.progressPartial))
-  }
-  return null
+  if (!metric) return t("metricUnavailable")
+  if (metric.sourceState === "ready") return null
+  if (metric.sourceState === "partial") return t("metricPartial")
+  if (metric.sourceState === "error") return t("metricError")
+  return t("metricUnavailable")
 }

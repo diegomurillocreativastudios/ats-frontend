@@ -71,6 +71,67 @@ describe("normalizeRecruiterDashboard", () => {
     )
   })
 
+  it("normaliza métricas de vacantes y vacancyAttention desde el dashboard", () => {
+    const model = normalizeRecruiterDashboard(
+      {
+        metrics: [
+          { key: "vacanciesWithoutCandidates", value: 3, sourceState: "ready" },
+          { key: "vacanciesPresentationOverdue", value: 2, sourceState: "ready" },
+          { key: "vacanciesUnpublished", value: 1, sourceState: "ready" },
+        ],
+        vacancyAttention: [
+          {
+            vacancyId: "11111111-1111-1111-1111-111111111111",
+            publicSlug: "analista-norte",
+            title: "Analista",
+            clientName: "Norte",
+            daysOpen: 30,
+            candidateCount: 0,
+            signal: "critical",
+          },
+          {
+            vacancyId: "11111111-1111-1111-1111-111111111111",
+            title: "Duplicada",
+            signal: "attention",
+            candidateCount: 1,
+          },
+          {
+            vacancyId: "22222222-2222-2222-2222-222222222222",
+            title: "Sin señal",
+            candidateCount: 0,
+          },
+        ],
+      },
+      NOW
+    )
+    expect(metric(model, "vacanciesWithoutCandidates")).toMatchObject({
+      value: 3,
+      sourceState: "ready",
+      href: RECRUITER_DASHBOARD_LINKS.vacanciesWithoutCandidates,
+    })
+    expect(metric(model, "vacanciesPresentationOverdue")).toMatchObject({
+      value: 2,
+      href: RECRUITER_DASHBOARD_LINKS.vacanciesPresentationOverdue,
+    })
+    expect(metric(model, "vacanciesUnpublished")).toMatchObject({
+      value: 1,
+      href: RECRUITER_DASHBOARD_LINKS.vacanciesUnpublished,
+    })
+    expect(model.vacancyAttention).toHaveLength(1)
+    expect(model.vacancyAttention[0]).toMatchObject({
+      vacancyId: "11111111-1111-1111-1111-111111111111",
+      publicSlug: "analista-norte",
+      title: "Analista",
+      signal: "critical",
+      href: "/portal-rrhh/vacantes/analista-norte",
+    })
+  })
+
+  it("deja vacancyAttention vacío cuando el backend no lo envía", () => {
+    const model = normalizeRecruiterDashboard({}, NOW)
+    expect(model.vacancyAttention).toEqual([])
+  })
+
   it("conserva el conteo exacto y el estado de la métrica cuando el backend lo informa", () => {
     const model = normalizeRecruiterDashboard(
       {
