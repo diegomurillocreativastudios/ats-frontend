@@ -17,6 +17,14 @@ import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { ResponsiveFilters } from "@/components/ui/responsive-filters"
 import Snackbar from "@/components/ui/Snackbar"
 import {
+  archiveAssessmentTest,
+  duplicateAssessmentTest,
+  listAssessmentTests,
+  publishAssessmentTest,
+  resolveAssessmentErrorMessage,
+  type AssessmentTestView,
+} from "@/lib/api/recruiter-assessments-tests"
+import {
   canPerformEvaluationAction,
   filterEvaluations,
   getEvaluationActions,
@@ -25,18 +33,10 @@ import {
   type EvaluationListFilters,
 } from "@/lib/pruebas/evaluations"
 import { formatMockDate } from "@/lib/pruebas/formatters"
-import {
-  archiveTest,
-  duplicateTest,
-  listTests,
-  MockServiceError,
-  publishTest,
-} from "@/lib/pruebas/mock-service"
 import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
 import type {
   AssessmentKind,
   AssessmentLifecycleStatus,
-  MockAssessmentTest,
 } from "@/lib/pruebas/types"
 
 const CONTROL_CLASS =
@@ -62,28 +62,11 @@ function filtersHaveValues(filters: EvaluationListFilters): boolean {
   )
 }
 
-const KNOWN_ERROR_CODES = new Set([
-  "not_found",
-  "test_archived",
-  "no_draft",
-  "scenario_error",
-])
-
-function resolveErrorMessage(
-  error: unknown,
-  t: (key: string) => string,
-): string {
-  if (error instanceof MockServiceError && KNOWN_ERROR_CODES.has(error.code)) {
-    return t(`errors.${error.code}`)
-  }
-  return t("toasts.error")
-}
-
 export function PruebasEvaluationsList() {
   const t = useTranslations("PruebasPortal.evaluations")
   const locale = useLocale()
 
-  const [tests, setTests] = useState<MockAssessmentTest[]>([])
+  const [tests, setTests] = useState<AssessmentTestView[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isStoreEmpty, setIsStoreEmpty] = useState(false)
@@ -91,7 +74,7 @@ export function PruebasEvaluationsList() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [confirmKind, setConfirmKind] = useState<ConfirmKind>(null)
-  const [confirmTest, setConfirmTest] = useState<MockAssessmentTest | null>(
+  const [confirmTest, setConfirmTest] = useState<AssessmentTestView | null>(
     null,
   )
   const [isConfirmLoading, setIsConfirmLoading] = useState(false)
@@ -105,13 +88,13 @@ export function PruebasEvaluationsList() {
     setIsLoading(true)
     setLoadError(null)
     try {
-      const rows = await listTests()
+      const rows = await listAssessmentTests()
       setTests(rows)
       setIsStoreEmpty(rows.length === 0)
     } catch (error) {
       setTests([])
       setIsStoreEmpty(false)
-      setLoadError(resolveErrorMessage(error, t))
+      setLoadError(resolveAssessmentErrorMessage(error, t))
     } finally {
       setIsLoading(false)
     }
@@ -155,7 +138,7 @@ export function PruebasEvaluationsList() {
 
   const handleMenuAction = async (
     action: EvaluationAction,
-    test: MockAssessmentTest,
+    test: AssessmentTestView,
   ) => {
     if (action === "publish") {
       setConfirmKind("publish")
@@ -169,14 +152,14 @@ export function PruebasEvaluationsList() {
     }
     if (action === "duplicate") {
       try {
-        await duplicateTest(
+        await duplicateAssessmentTest(
           test.id,
           t("duplicateTitle", { title: test.title }),
         )
         showToast("success", t("toasts.duplicated"))
         await load()
       } catch (error) {
-        showToast("error", resolveErrorMessage(error, t))
+        showToast("error", resolveAssessmentErrorMessage(error, t))
       }
     }
   }
@@ -186,17 +169,17 @@ export function PruebasEvaluationsList() {
     setIsConfirmLoading(true)
     try {
       if (confirmKind === "publish") {
-        await publishTest(confirmTest.id)
+        await publishAssessmentTest(confirmTest.id)
         showToast("success", t("toasts.published"))
       } else {
-        await archiveTest(confirmTest.id)
+        await archiveAssessmentTest(confirmTest.id)
         showToast("success", t("toasts.archived"))
       }
       setConfirmKind(null)
       setConfirmTest(null)
       await load()
     } catch (error) {
-      showToast("error", resolveErrorMessage(error, t))
+      showToast("error", resolveAssessmentErrorMessage(error, t))
     } finally {
       setIsConfirmLoading(false)
     }

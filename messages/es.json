@@ -671,7 +671,7 @@
     },
     "evaluations": {
       "title": "Evaluaciones",
-      "description": "Inventario de pruebas con datos de demostración. Solo estados de definición: borrador, publicada y archivada.",
+      "description": "Inventario de pruebas técnicas y psicométricas. Estados de definición: borrador, publicada y archivada.",
       "create": "Nueva evaluación",
       "search": "Buscar por título",
       "searchPlaceholder": "Nombre de la evaluación",
@@ -726,27 +726,33 @@
       "duplicateTitle": "Copia de {title}",
       "confirmPublish": {
         "title": "Publicar evaluación",
-        "description": "Se congela una versión en la demostración. Editar después no altera este snapshot. Esto no se guarda en un servidor real.",
+        "description": "Se congela una versión inmutable. Editar después no altera este snapshot.",
         "confirm": "Publicar",
         "cancel": "Cancelar"
       },
       "confirmArchive": {
         "title": "Archivar evaluación",
-        "description": "La evaluación pasará a Archivada en la demostración. Podrás seguir viéndola y duplicándola.",
+        "description": "La evaluación pasará a Archivada. Podrás seguir viéndola y duplicándola.",
         "confirm": "Archivar",
         "cancel": "Cancelar"
       },
       "toasts": {
-        "published": "Evaluación publicada en modo demostración.",
-        "archived": "Evaluación archivada en modo demostración.",
+        "published": "Evaluación publicada.",
+        "archived": "Evaluación archivada.",
         "duplicated": "Se creó una copia en borrador.",
-        "error": "No se pudo completar la acción de demostración."
+        "error": "No se pudo completar la acción."
       },
       "errors": {
         "not_found": "No se encontró la evaluación.",
+        "not_draft": "Solo se puede editar un borrador.",
+        "not_published": "Solo se puede abrir un borrador desde una evaluación publicada.",
         "test_archived": "La evaluación está archivada y no se puede publicar.",
         "no_draft": "No hay un borrador listo para publicar.",
-        "scenario_error": "El servicio simulado devolvió un error."
+        "no_published_version": "No hay una versión publicada para clonar.",
+        "questions_required": "Añade al menos una pregunta antes de publicar.",
+        "questions_incompatible": "Hay preguntas incompatibles con la categoría.",
+        "publish_integrity": "No se pudo publicar sin alterar versiones existentes.",
+        "scenario_error": "Ocurrió un error al procesar la solicitud."
       },
       "pagination": {
         "perPage": "Por página",
@@ -759,15 +765,15 @@
       },
       "states": {
         "loading": "Cargando evaluaciones…",
-        "emptyTitle": "No hay datos de demostración",
-        "emptyDescription": "El escenario simulado está vacío. Restablece los datos de demostración para continuar.",
+        "emptyTitle": "Aún no hay evaluaciones",
+        "emptyDescription": "Crea la primera evaluación técnica o psicométrica para empezar.",
         "errorTitle": "No se pudieron cargar las evaluaciones",
-        "errorDescription": "El servicio simulado devolvió un error. Intenta de nuevo.",
+        "errorDescription": "No se pudo obtener el catálogo. Intenta de nuevo.",
         "retry": "Reintentar",
         "filterEmptyTitle": "Sin coincidencias",
         "filterEmptyDescription": "Ninguna evaluación cumple los filtros. Ajusta o limpia los filtros.",
         "notFoundTitle": "Evaluación no encontrada",
-        "notFoundDescription": "El identificador no existe en los datos de demostración.",
+        "notFoundDescription": "El identificador no existe o no tienes acceso.",
         "backToList": "Volver al listado"
       },
       "detail": {
@@ -778,6 +784,7 @@
         "links": "Vínculos con vacantes",
         "linkVacancy": "Vincular vacante",
         "linkVacancyDisabled": "Solo las evaluaciones publicadas se pueden vincular.",
+        "linksCtaDescription": "Los vínculos se gestionan desde Vinculaciones, asociados a una vacante.",
         "instructions": "Instrucciones",
         "duration": "Duración",
         "durationValue": "{minutes} min",
@@ -786,7 +793,7 @@
         "draftVersion": "Borrador",
         "noVersion": "No hay configuración de versión.",
         "noQuestions": "Esta versión no tiene preguntas.",
-        "noLinks": "No hay vacantes vinculadas.",
+        "noLinks": "No hay vacantes vinculadas aquí.",
         "linkActive": "Activo",
         "linkInactive": "Inactivo",
         "points": "{points} pts",
@@ -796,20 +803,21 @@
       },
       "versions": {
         "title": "Versiones",
-        "description": "Historial simulado de versiones. Los snapshots publicados son de solo lectura.",
+        "description": "Historial de versiones. Los snapshots publicados son de solo lectura.",
         "listLabel": "Historial de versiones",
         "selectPrompt": "Selecciona una versión para ver el snapshot.",
         "publishedAt": "Publicada {date}",
         "draftLabel": "Borrador",
         "versionNumber": "Versión {number}",
         "snapshot": "Snapshot",
-        "readonlyNotice": "Esta versión publicada no se puede editar aquí."
+        "readonlyNotice": "Esta versión publicada no se puede editar aquí.",
+        "snapshotUnavailable": "No se pudo cargar el snapshot de preguntas de esta versión."
       },
       "editor": {
         "createTitle": "Nueva evaluación",
-        "createDescription": "Asistente de demostración para crear y publicar una prueba técnica o psicométrica.",
+        "createDescription": "Crea y publica una prueba técnica o psicométrica.",
         "editTitle": "Editar evaluación",
-        "editDescription": "Edita el borrador simulado. Publicar congela una versión inmutable en la demostración.",
+        "editDescription": "Edita el borrador. Publicar congela una versión inmutable.",
         "steps": {
           "info": "Información",
           "config": "Configuración",
@@ -827,7 +835,7 @@
           "instructions": "Instrucciones",
           "duration": "Duración (minutos)",
           "maxAttempts": "Intentos máximos",
-          "expiryNotice": "Al asignar en la demostración, la invitación vence a los {days} días. Este valor no se guarda aquí."
+          "expiryNotice": "Al asignar, la invitación suele vencer a los {days} días. Este valor no se configura aquí."
         },
         "errors": {
           "titleRequired": "Escribe un nombre.",
@@ -841,9 +849,9 @@
           "questionsRequired": "Añade al menos una pregunta compatible.",
           "questionsIncompatible": "Hay preguntas incompatibles con el tipo elegido. Quítalas o cambia el tipo.",
           "notFoundTitle": "Evaluación no encontrada",
-          "notFoundDescription": "El identificador no existe o la evaluación está archivada y no se puede editar.",
+          "notFoundDescription": "El identificador no existe, no tienes acceso o la evaluación está archivada.",
           "backToList": "Volver al listado",
-          "saveFailed": "No se pudo guardar el borrador de demostración. Revisa e intenta de nuevo."
+          "saveFailed": "No se pudo guardar el borrador. Completa la información e intenta de nuevo."
         },
         "questions": {
           "bankTitle": "Banco disponible",
@@ -863,7 +871,7 @@
           "questionCount": "{count} preguntas",
           "duration": "Duración: {minutes} min",
           "attempts": "Intentos: {count}",
-          "expiry": "Caducidad de asignación (demo): {days} días",
+          "expiry": "Caducidad típica de asignación: {days} días",
           "totalPoints": "Puntaje total: {points}",
           "dimensions": "Dimensiones: {list}",
           "noDimensions": "Sin dimensiones",
@@ -871,15 +879,15 @@
         },
         "publish": {
           "summaryTitle": "Listo para publicar",
-          "versionNotice": "Se publicará la versión {number}. Este snapshot quedará congelado en la demostración. Editar después creará un borrador nuevo.",
+          "versionNotice": "Se publicará la versión {number}. Este snapshot quedará congelado. Editar después creará un borrador nuevo.",
           "confirmTitle": "Publicar evaluación",
-          "confirmDescription": "Se congela la versión {number} en la demostración. Esto no se guarda en un servidor real.",
+          "confirmDescription": "Se congela la versión {number}. Editar después no altera este snapshot.",
           "confirm": "Publicar",
           "cancel": "Cancelar"
         },
         "clonePublished": {
           "title": "Crear borrador desde la versión publicada",
-          "description": "La versión publicada se mantiene intacta. Se abrirá un borrador nuevo para editar en la demostración.",
+          "description": "La versión publicada se mantiene intacta. Se abrirá un borrador nuevo para editar.",
           "confirm": "Crear borrador",
           "cancel": "Cancelar"
         },
@@ -888,15 +896,14 @@
           "next": "Siguiente",
           "saveDraft": "Guardar borrador",
           "publish": "Publicar",
-          "simulateSaveFail": "Simular fallo de guardado",
           "saving": "Guardando…",
           "publishing": "Publicando…"
         },
         "toasts": {
-          "saved": "Borrador guardado en modo demostración.",
-          "published": "Evaluación publicada en modo demostración.",
+          "saved": "Borrador guardado.",
+          "published": "Evaluación publicada.",
           "cloned": "Se creó un borrador a partir de la versión publicada.",
-          "error": "No se pudo completar la acción de demostración."
+          "error": "No se pudo completar la acción."
         },
         "detailEditDraft": "Editar y crear borrador"
       }

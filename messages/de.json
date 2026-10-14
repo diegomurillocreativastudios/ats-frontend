@@ -671,7 +671,7 @@
     },
     "evaluations": {
       "title": "Bewertungen",
-      "description": "Bewertungsinventar mit Demodaten. Nur Definitionsstatus: Entwurf, veröffentlicht und archiviert.",
+      "description": "Katalog technischer und psychometrischer Tests. Definitionsstatus: Entwurf, veröffentlicht und archiviert.",
       "create": "Neue Bewertung",
       "search": "Nach Titel suchen",
       "searchPlaceholder": "Name der Bewertung",
@@ -726,27 +726,33 @@
       "duplicateTitle": "Kopie von {title}",
       "confirmPublish": {
         "title": "Bewertung veröffentlichen",
-        "description": "Eine Version wird in der Demo eingefroren. Späteres Bearbeiten ändert diesen Snapshot nicht. Es wird nichts auf einem echten Server gespeichert.",
+        "description": "Eine unveränderliche Version wird eingefroren. Späteres Bearbeiten ändert diesen Snapshot nicht.",
         "confirm": "Veröffentlichen",
         "cancel": "Abbrechen"
       },
       "confirmArchive": {
         "title": "Bewertung archivieren",
-        "description": "Die Bewertung wird in der Demo archiviert. Sie können sie weiterhin ansehen und duplizieren.",
+        "description": "Die Bewertung wird archiviert. Sie können sie weiterhin ansehen und duplizieren.",
         "confirm": "Archivieren",
         "cancel": "Abbrechen"
       },
       "toasts": {
-        "published": "Bewertung im Demo-Modus veröffentlicht.",
-        "archived": "Bewertung im Demo-Modus archiviert.",
-        "duplicated": "Eine Entwurfskopie wurde erstellt.",
-        "error": "Die Demo-Aktion konnte nicht abgeschlossen werden."
+        "published": "Bewertung veröffentlicht.",
+        "archived": "Bewertung archiviert.",
+        "duplicated": "Eine Entwurfs-Kopie wurde erstellt.",
+        "error": "Die Aktion konnte nicht abgeschlossen werden."
       },
       "errors": {
         "not_found": "Die Bewertung wurde nicht gefunden.",
+        "not_draft": "Nur ein Entwurf kann bearbeitet werden.",
+        "not_published": "Ein Entwurf kann nur aus einer veröffentlichten Bewertung geöffnet werden.",
         "test_archived": "Die Bewertung ist archiviert und kann nicht veröffentlicht werden.",
         "no_draft": "Es gibt keinen Entwurf zum Veröffentlichen.",
-        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben."
+        "no_published_version": "Es gibt keine veröffentlichte Version zum Klonen.",
+        "questions_required": "Fügen Sie vor dem Veröffentlichen mindestens eine Frage hinzu.",
+        "questions_incompatible": "Einige Fragen sind mit der Kategorie nicht kompatibel.",
+        "publish_integrity": "Veröffentlichen ohne Änderung bestehender Versionen nicht möglich.",
+        "scenario_error": "Die Aktion konnte nicht abgeschlossen werden."
       },
       "pagination": {
         "perPage": "Pro Seite",
@@ -759,15 +765,15 @@
       },
       "states": {
         "loading": "Bewertungen werden geladen…",
-        "emptyTitle": "Keine Demodaten",
-        "emptyDescription": "Das simulierte Szenario ist leer. Setzen Sie die Demodaten zurück, um fortzufahren.",
+        "emptyTitle": "Noch keine Bewertungen",
+        "emptyDescription": "Erstellen Sie die erste technische oder psychometrische Bewertung, um zu starten.",
         "errorTitle": "Bewertungen konnten nicht geladen werden",
-        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Versuchen Sie es erneut.",
+        "errorDescription": "Der Katalog konnte nicht geladen werden. Bitte erneut versuchen.",
         "retry": "Erneut versuchen",
         "filterEmptyTitle": "Keine Treffer",
         "filterEmptyDescription": "Keine Bewertung entspricht den Filtern. Passen Sie sie an oder setzen Sie sie zurück.",
         "notFoundTitle": "Bewertung nicht gefunden",
-        "notFoundDescription": "Diese Kennung existiert nicht in den Demodaten.",
+        "notFoundDescription": "Die Kennung existiert nicht oder Sie haben keinen Zugriff.",
         "backToList": "Zurück zur Liste"
       },
       "detail": {
@@ -786,30 +792,32 @@
         "draftVersion": "Entwurf",
         "noVersion": "Keine Versionskonfiguration.",
         "noQuestions": "Diese Version hat keine Fragen.",
-        "noLinks": "Keine Stellen verknüpft.",
+        "noLinks": "Hier werden keine Stellenverknüpfungen angezeigt.",
         "linkActive": "Aktiv",
         "linkInactive": "Inaktiv",
         "points": "{points} Pkt.",
         "dimension": "Dimension: {dimension}",
         "createdAt": "Erstellt",
-        "openVersions": "Versionen ansehen"
+        "openVersions": "Versionen ansehen",
+        "linksCtaDescription": "Verknüpfungen werden unter Verknüpfungen verwaltet und einer Stelle zugeordnet."
       },
       "versions": {
         "title": "Versionen",
-        "description": "Simulierter Versionsverlauf. Veröffentlichte Snapshots sind schreibgeschützt.",
+        "description": "Versionsverlauf. Veröffentlichte Snapshots sind schreibgeschützt.",
         "listLabel": "Versionsverlauf",
         "selectPrompt": "Wählen Sie eine Version, um den Snapshot anzuzeigen.",
         "publishedAt": "Veröffentlicht {date}",
         "draftLabel": "Entwurf",
         "versionNumber": "Version {number}",
         "snapshot": "Snapshot",
-        "readonlyNotice": "Diese veröffentlichte Version kann hier nicht bearbeitet werden."
+        "readonlyNotice": "Diese veröffentlichte Version kann hier nicht bearbeitet werden.",
+        "snapshotUnavailable": "Der Fragen-Snapshot dieser Version konnte nicht geladen werden."
       },
       "editor": {
         "createTitle": "Neue Bewertung",
-        "createDescription": "Demo-Assistent zum Erstellen und Veröffentlichen eines technischen oder psychometrischen Tests.",
+        "createDescription": "Erstellen und veröffentlichen Sie einen technischen oder psychometrischen Test.",
         "editTitle": "Bewertung bearbeiten",
-        "editDescription": "Bearbeite den simulierten Entwurf. Veröffentlichen friert eine unveränderliche Version in der Demo ein.",
+        "editDescription": "Bearbeiten Sie den Entwurf. Veröffentlichen friert eine unveränderliche Version ein.",
         "steps": {
           "info": "Informationen",
           "config": "Konfiguration",
@@ -863,7 +871,7 @@
           "questionCount": "{count} Fragen",
           "duration": "Dauer: {minutes} Min.",
           "attempts": "Versuche: {count}",
-          "expiry": "Ablauf der Zuweisung (Demo): {days} Tage",
+          "expiry": "Typische Ablaufzeit der Zuweisung: {days} Tage",
           "totalPoints": "Gesamtpunktzahl: {points}",
           "dimensions": "Dimensionen: {list}",
           "noDimensions": "Keine Dimensionen",
@@ -871,15 +879,15 @@
         },
         "publish": {
           "summaryTitle": "Bereit zur Veröffentlichung",
-          "versionNotice": "Version {number} wird veröffentlicht. Dieser Snapshot wird in der Demo eingefroren. Späteres Bearbeiten erzeugt einen neuen Entwurf.",
+          "versionNotice": "Version {number} wird veröffentlicht. Dieser Snapshot wird eingefroren. Späteres Bearbeiten erstellt einen neuen Entwurf.",
           "confirmTitle": "Bewertung veröffentlichen",
-          "confirmDescription": "Version {number} wird in der Demo eingefroren. Dies wird nicht auf einem echten Server gespeichert.",
+          "confirmDescription": "Version {number} wird eingefroren. Späteres Bearbeiten ändert diesen Snapshot nicht.",
           "confirm": "Veröffentlichen",
           "cancel": "Abbrechen"
         },
         "clonePublished": {
           "title": "Entwurf aus veröffentlichter Version erstellen",
-          "description": "Die veröffentlichte Version bleibt unverändert. Ein neuer Entwurf wird zum Bearbeiten in der Demo geöffnet.",
+          "description": "Die veröffentlichte Version bleibt unverändert. Ein neuer Entwurf wird zum Bearbeiten geöffnet.",
           "confirm": "Entwurf erstellen",
           "cancel": "Abbrechen"
         },
@@ -888,15 +896,14 @@
           "next": "Weiter",
           "saveDraft": "Entwurf speichern",
           "publish": "Veröffentlichen",
-          "simulateSaveFail": "Speicherfehler simulieren",
           "saving": "Wird gespeichert…",
           "publishing": "Wird veröffentlicht…"
         },
         "toasts": {
-          "saved": "Entwurf im Demomodus gespeichert.",
-          "published": "Bewertung im Demomodus veröffentlicht.",
+          "saved": "Entwurf gespeichert.",
+          "published": "Bewertung veröffentlicht.",
           "cloned": "Aus der veröffentlichten Version wurde ein Entwurf erstellt.",
-          "error": "Die Demoaktion konnte nicht abgeschlossen werden."
+          "error": "Die Aktion konnte nicht abgeschlossen werden."
         },
         "detailEditDraft": "Bearbeiten und Entwurf erstellen"
       }

@@ -8,22 +8,16 @@ import { ErrorState } from "@/components/pruebas/shared/error-state"
 import { LoadingSkeleton } from "@/components/pruebas/shared/loading-skeleton"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import {
-  resolveQuestionsForVersion,
-  sortVersionsDesc,
-} from "@/lib/pruebas/evaluations"
+  getAssessmentApiErrorCode,
+  getAssessmentTestDetail,
+  getAssessmentVersionSnapshot,
+  type AssessmentQuestionView,
+  type AssessmentTestView,
+  type AssessmentVersionView,
+} from "@/lib/api/recruiter-assessments-tests"
+import { sortVersionsDesc } from "@/lib/pruebas/evaluations"
 import { formatDurationMinutes, formatMockDate } from "@/lib/pruebas/formatters"
-import {
-  getTest,
-  listQuestions,
-  listVersions,
-  MockServiceError,
-} from "@/lib/pruebas/mock-service"
 import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
-import type {
-  MockAssessmentTest,
-  MockAssessmentVersion,
-  MockQuestion,
-} from "@/lib/pruebas/types"
 
 interface PruebasEvaluationVersionsProps {
   testId: string
@@ -35,34 +29,36 @@ export function PruebasEvaluationVersions({
   const t = useTranslations("PruebasPortal.evaluations")
   const locale = useLocale()
 
-  const [test, setTest] = useState<MockAssessmentTest | null>(null)
-  const [versions, setVersions] = useState<MockAssessmentVersion[]>([])
-  const [questions, setQuestions] = useState<MockQuestion[]>([])
+  const [test, setTest] = useState<AssessmentTestView | null>(null)
+  const [versions, setVersions] = useState<AssessmentVersionView[]>([])
+  const [openDraftId, setOpenDraftId] = useState<string | null>(null)
+  const [draftQuestions, setDraftQuestions] = useState<
+    AssessmentQuestionView[]
+  >([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedQuestions, setSelectedQuestions] = useState<
+    AssessmentQuestionView[]
+  >([])
+  const [snapshotUnavailable, setSnapshotUnavailable] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSnapshotLoading, setIsSnapshotLoading] = useState(false)
   const [errorCode, setErrorCode] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setIsLoading(true)
     setErrorCode(null)
     try {
-      const [testRow, versionRows, questionRows] = await Promise.all([
-        getTest(testId),
-        listVersions(testId),
-        listQuestions(),
-      ])
-      const sorted = sortVersionsDesc(versionRows)
-      setTest(testRow)
+      const detail = await getAssessmentTestDetail(testId)
+      const sorted = sortVersionsDesc(detail.versions)
+      setTest(detail.test)
       setVersions(sorted)
-      setQuestions(questionRows)
+      setOpenDraftId(detail.openDraft?.id ?? null)
+      setDraftQuestions(detail.currentQuestions)
       setSelectedId((current) => current ?? sorted[0]?.id ?? null)
     } catch (error) {
       setTest(null)
-      if (error instanceof MockServiceError) {
-        setErrorCode(error.code)
-      } else {
-        setErrorCode("scenario_error")
-      }
+      const code = getAssessmentApiErrorCode(error)
+      setErrorCode(code === "not_found" ? "not_found" : "load_error")
     } finally {
       setIsLoading(false)
     }
@@ -77,10 +73,52 @@ export function PruebasEvaluationVersions({
     [versions, selectedId],
   )
 
-  const selectedQuestions = useMemo(
-    () => resolveQuestionsForVersion(selected, questions),
-    [selected, questions],
-  )
+  useEffect(() => {
+    if (!selectedId || !test) return
+    let cancelled = false
+
+    async function loadSnapshot() {
+      setIsSnapshotLoading(true)
+      setSnapshotUnavailable(false)
+      setSelectedQuestions([])
+
+      if (openDraftId && selectedId === openDraftId && draftQuestions.length > 0) {
+        if (!cancelled) {
+          setSelectedQuestions(draftQuestions)
+          setIsSnapshotLoading(false)
+        }
+        return
+      }
+
+      try {
+        const snapshot = await getAssessmentVersionSnapshot(testId, selectedId!)
+        if (cancelled) return
+        setSelectedQuestions(snapshot.questions)
+        setVersions((current) =>
+          current.map((version) =>
+            version.id === snapshot.version.id
+              ? {
+                  ...version,
+                  ...snapshot.version,
+                  questionIds: snapshot.questions.map((q) => q.id),
+                }
+              : version,
+          ),
+        )
+      } catch {
+        if (cancelled) return
+        setSnapshotUnavailable(true)
+        setSelectedQuestions([])
+      } finally {
+        if (!cancelled) setIsSnapshotLoading(false)
+      }
+    }
+
+    void loadSnapshot()
+    return () => {
+      cancelled = true
+    }
+  }, [draftQuestions, openDraftId, selectedId, test, testId])
 
   if (isLoading) {
     return (
@@ -110,7 +148,7 @@ export function PruebasEvaluationVersions({
           description={
             isNotFound
               ? t("states.notFoundDescription")
-              : t(`errors.${errorCode}` as "errors.scenario_error")
+              : t("states.errorDescription")
           }
           action={
             <Link
@@ -243,7 +281,15 @@ export function PruebasEvaluationVersions({
                 <h3 className="font-sans text-sm font-semibold text-foreground">
                   {t("detail.questions")}
                 </h3>
-                {selectedQuestions.length === 0 ? (
+                {isSnapshotLoading ? (
+                  <p className="mt-2 font-sans text-sm text-muted-foreground">
+                    {t("states.loading")}
+                  </p>
+                ) : snapshotUnavailable ? (
+                  <p className="mt-2 font-sans text-sm text-muted-foreground">
+                    {t("versions.snapshotUnavailable")}
+                  </p>
+                ) : selectedQuestions.length === 0 ? (
                   <p className="mt-2 font-sans text-sm text-muted-foreground">
                     {t("detail.noQuestions")}
                   </p>

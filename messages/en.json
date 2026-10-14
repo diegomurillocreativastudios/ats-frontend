@@ -671,7 +671,7 @@
     },
     "evaluations": {
       "title": "Assessments",
-      "description": "Assessment inventory with demo data. Definition states only: draft, published, and archived.",
+      "description": "Catalog of technical and psychometric tests. Definition statuses: draft, published, and archived.",
       "create": "New assessment",
       "search": "Search by title",
       "searchPlaceholder": "Assessment name",
@@ -726,27 +726,33 @@
       "duplicateTitle": "Copy of {title}",
       "confirmPublish": {
         "title": "Publish assessment",
-        "description": "A version is frozen in the demo. Editing later does not change this snapshot. Nothing is saved to a real server.",
+        "description": "An immutable version is frozen. Editing later does not change this snapshot.",
         "confirm": "Publish",
         "cancel": "Cancel"
       },
       "confirmArchive": {
         "title": "Archive assessment",
-        "description": "The assessment will become Archived in the demo. You can still view and duplicate it.",
+        "description": "The evaluation will become Archived. You can still view and duplicate it.",
         "confirm": "Archive",
         "cancel": "Cancel"
       },
       "toasts": {
-        "published": "Assessment published in demo mode.",
-        "archived": "Assessment archived in demo mode.",
+        "published": "Evaluation published.",
+        "archived": "Evaluation archived.",
         "duplicated": "A draft copy was created.",
-        "error": "The demo action could not be completed."
+        "error": "The action could not be completed."
       },
       "errors": {
         "not_found": "The assessment was not found.",
+        "not_draft": "Only a draft can be edited.",
+        "not_published": "A draft can only be opened from a published evaluation.",
         "test_archived": "The assessment is archived and cannot be published.",
         "no_draft": "There is no draft ready to publish.",
-        "scenario_error": "The simulated service returned an error."
+        "no_published_version": "There is no published version to clone.",
+        "questions_required": "Add at least one question before publishing.",
+        "questions_incompatible": "Some questions are incompatible with the category.",
+        "publish_integrity": "Could not publish without altering existing versions.",
+        "scenario_error": "The action could not be completed."
       },
       "pagination": {
         "perPage": "Per page",
@@ -759,15 +765,15 @@
       },
       "states": {
         "loading": "Loading assessments…",
-        "emptyTitle": "No demo data",
-        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "emptyTitle": "No evaluations yet",
+        "emptyDescription": "Create the first technical or psychometric evaluation to get started.",
         "errorTitle": "Could not load assessments",
-        "errorDescription": "The simulated service returned an error. Try again.",
+        "errorDescription": "The catalog could not be loaded. Try again.",
         "retry": "Retry",
         "filterEmptyTitle": "No matches",
         "filterEmptyDescription": "No assessment matches the filters. Adjust or clear them.",
         "notFoundTitle": "Assessment not found",
-        "notFoundDescription": "This identifier does not exist in the demo data.",
+        "notFoundDescription": "The identifier does not exist or you do not have access.",
         "backToList": "Back to list"
       },
       "detail": {
@@ -786,30 +792,32 @@
         "draftVersion": "Draft",
         "noVersion": "No version configuration.",
         "noQuestions": "This version has no questions.",
-        "noLinks": "No vacancies linked.",
+        "noLinks": "No vacancy links shown here.",
         "linkActive": "Active",
         "linkInactive": "Inactive",
         "points": "{points} pts",
         "dimension": "Dimension: {dimension}",
         "createdAt": "Created",
-        "openVersions": "View versions"
+        "openVersions": "View versions",
+        "linksCtaDescription": "Links are managed from Links, associated with a vacancy."
       },
       "versions": {
         "title": "Versions",
-        "description": "Simulated version history. Published snapshots are read-only.",
+        "description": "Version history. Published snapshots are read-only.",
         "listLabel": "Version history",
         "selectPrompt": "Select a version to view the snapshot.",
         "publishedAt": "Published {date}",
         "draftLabel": "Draft",
         "versionNumber": "Version {number}",
         "snapshot": "Snapshot",
-        "readonlyNotice": "This published version cannot be edited here."
+        "readonlyNotice": "This published version cannot be edited here.",
+        "snapshotUnavailable": "The question snapshot for this version could not be loaded."
       },
       "editor": {
         "createTitle": "New evaluation",
-        "createDescription": "Demo wizard to create and publish a technical or psychometric test.",
+        "createDescription": "Create and publish a technical or psychometric test.",
         "editTitle": "Edit evaluation",
-        "editDescription": "Edit the simulated draft. Publishing freezes an immutable version in the demo.",
+        "editDescription": "Edit the draft. Publishing freezes an immutable version.",
         "steps": {
           "info": "Information",
           "config": "Configuration",
@@ -863,7 +871,7 @@
           "questionCount": "{count} questions",
           "duration": "Duration: {minutes} min",
           "attempts": "Attempts: {count}",
-          "expiry": "Assignment expiry (demo): {days} days",
+          "expiry": "Typical assignment expiry: {days} days",
           "totalPoints": "Total score: {points}",
           "dimensions": "Dimensions: {list}",
           "noDimensions": "No dimensions",
@@ -871,15 +879,15 @@
         },
         "publish": {
           "summaryTitle": "Ready to publish",
-          "versionNotice": "Version {number} will be published. This snapshot will be frozen in the demo. Editing later creates a new draft.",
+          "versionNotice": "Version {number} will be published. This snapshot will be frozen. Editing later creates a new draft.",
           "confirmTitle": "Publish evaluation",
-          "confirmDescription": "Version {number} will be frozen in the demo. This is not saved on a real server.",
+          "confirmDescription": "Version {number} will be frozen. Editing later does not change this snapshot.",
           "confirm": "Publish",
           "cancel": "Cancel"
         },
         "clonePublished": {
           "title": "Create draft from published version",
-          "description": "The published version stays intact. A new draft will open for editing in the demo.",
+          "description": "The published version stays intact. A new draft will open for editing.",
           "confirm": "Create draft",
           "cancel": "Cancel"
         },
@@ -888,15 +896,14 @@
           "next": "Next",
           "saveDraft": "Save draft",
           "publish": "Publish",
-          "simulateSaveFail": "Simulate save failure",
           "saving": "Saving…",
           "publishing": "Publishing…"
         },
         "toasts": {
-          "saved": "Draft saved in demo mode.",
-          "published": "Evaluation published in demo mode.",
+          "saved": "Draft saved.",
+          "published": "Evaluation published.",
           "cloned": "A draft was created from the published version.",
-          "error": "Could not complete the demo action."
+          "error": "The action could not be completed."
         },
         "detailEditDraft": "Edit and create draft"
       }

@@ -50,8 +50,15 @@ describe("PruebasPortalShell", () => {
     expect(within(mains[0]).getByText("Contenido de prueba")).toBeInTheDocument()
   })
 
-  it("muestra el aviso de demostración fuera de Inicio", () => {
+  it("oculta el aviso de demostración en Evaluaciones", () => {
     usePathnameMock.mockReturnValue("/portal-pruebas/evaluaciones")
+    renderShell()
+
+    expect(screen.queryByTestId("mock-demo-notice")).not.toBeInTheDocument()
+  })
+
+  it("muestra el aviso de demostración fuera de Inicio y Evaluaciones", () => {
+    usePathnameMock.mockReturnValue("/portal-pruebas/preguntas")
     renderShell()
 
     expect(screen.getByTestId("mock-demo-notice")).toHaveTextContent(

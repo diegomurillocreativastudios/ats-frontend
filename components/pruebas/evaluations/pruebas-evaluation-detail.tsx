@@ -11,29 +11,19 @@ import { ErrorState } from "@/components/pruebas/shared/error-state"
 import { LoadingSkeleton } from "@/components/pruebas/shared/loading-skeleton"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import {
+  getAssessmentApiErrorCode,
+  getAssessmentTestDetail,
+  type AssessmentQuestionView,
+  type AssessmentTestView,
+  type AssessmentVersionView,
+} from "@/lib/api/recruiter-assessments-tests"
+import {
   questionPointsOrDimension,
   resolveCurrentVersion,
-  resolveLinksForTest,
-  resolveQuestionsForVersion,
 } from "@/lib/pruebas/evaluations"
 import { formatDurationMinutes, formatMockDate } from "@/lib/pruebas/formatters"
 import { resolveLatestPublishedVersionId } from "@/lib/pruebas/links"
-import {
-  getTest,
-  listLinks,
-  listQuestions,
-  listVacancies,
-  listVersions,
-  MockServiceError,
-} from "@/lib/pruebas/mock-service"
 import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
-import type {
-  MockAssessmentLink,
-  MockAssessmentTest,
-  MockAssessmentVersion,
-  MockQuestion,
-  MockVacancy,
-} from "@/lib/pruebas/types"
 
 interface PruebasEvaluationDetailProps {
   testId: string
@@ -45,11 +35,9 @@ export function PruebasEvaluationDetail({
   const t = useTranslations("PruebasPortal.evaluations")
   const locale = useLocale()
 
-  const [test, setTest] = useState<MockAssessmentTest | null>(null)
-  const [versions, setVersions] = useState<MockAssessmentVersion[]>([])
-  const [questions, setQuestions] = useState<MockQuestion[]>([])
-  const [links, setLinks] = useState<MockAssessmentLink[]>([])
-  const [vacancies, setVacancies] = useState<MockVacancy[]>([])
+  const [test, setTest] = useState<AssessmentTestView | null>(null)
+  const [versions, setVersions] = useState<AssessmentVersionView[]>([])
+  const [questions, setQuestions] = useState<AssessmentQuestionView[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorCode, setErrorCode] = useState<string | null>(null)
 
@@ -57,26 +45,14 @@ export function PruebasEvaluationDetail({
     setIsLoading(true)
     setErrorCode(null)
     try {
-      const [testRow, versionRows, questionRows, linkRows, vacancyRows] =
-        await Promise.all([
-          getTest(testId),
-          listVersions(testId),
-          listQuestions(),
-          listLinks(),
-          listVacancies(),
-        ])
-      setTest(testRow)
-      setVersions(versionRows)
-      setQuestions(questionRows)
-      setLinks(linkRows)
-      setVacancies(vacancyRows)
+      const detail = await getAssessmentTestDetail(testId)
+      setTest(detail.test)
+      setVersions(detail.versions)
+      setQuestions(detail.currentQuestions)
     } catch (error) {
       setTest(null)
-      if (error instanceof MockServiceError) {
-        setErrorCode(error.code)
-      } else {
-        setErrorCode("scenario_error")
-      }
+      const code = getAssessmentApiErrorCode(error)
+      setErrorCode(code === "not_found" ? "not_found" : "load_error")
     } finally {
       setIsLoading(false)
     }
@@ -91,15 +67,10 @@ export function PruebasEvaluationDetail({
     [versions, testId],
   )
 
-  const versionQuestions = useMemo(
-    () => resolveQuestionsForVersion(currentVersion, questions),
-    [currentVersion, questions],
-  )
-
-  const linkRows = useMemo(
-    () => resolveLinksForTest(testId, versions, links, vacancies),
-    [testId, versions, links, vacancies],
-  )
+  const versionQuestions = useMemo(() => {
+    if (questions.length > 0) return questions
+    return []
+  }, [questions])
 
   const latestPublishedVersionId = useMemo(
     () => resolveLatestPublishedVersionId(testId, versions),
@@ -136,7 +107,7 @@ export function PruebasEvaluationDetail({
           description={
             isNotFound
               ? t("states.notFoundDescription")
-              : t(`errors.${errorCode}` as "errors.scenario_error")
+              : t("states.errorDescription")
           }
           action={
             <Link
@@ -369,35 +340,29 @@ export function PruebasEvaluationDetail({
         >
           {t("detail.links")}
         </h2>
-        {linkRows.length === 0 ? (
-          <EmptyState
-            title={t("detail.noLinks")}
-            description={
-              canLink
-                ? undefined
-                : t("detail.linkVacancyDisabled")
-            }
-            className="mt-3 border-0 bg-transparent p-0"
-          />
-        ) : (
-          <ul className="mt-4 flex flex-col gap-2">
-            {linkRows.map(({ link, vacancyTitle }) => (
-              <li
-                key={link.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border px-3 py-3"
+        <EmptyState
+          title={t("detail.noLinks")}
+          description={
+            canLink
+              ? t("detail.linksCtaDescription")
+              : t("detail.linkVacancyDisabled")
+          }
+          className="mt-3 border-0 bg-transparent p-0"
+          action={
+            canLink ? (
+              <Link
+                href={
+                  latestPublishedVersionId
+                    ? `${PRUEBAS_HOME_HREF}/vinculaciones?version=${encodeURIComponent(latestPublishedVersionId)}`
+                    : `${PRUEBAS_HOME_HREF}/vinculaciones`
+                }
+                className="inline-flex min-h-11 items-center rounded-md bg-vo-purple px-4 font-sans text-sm font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
               >
-                <span className="font-sans text-sm text-foreground">
-                  {vacancyTitle}
-                </span>
-                <span className="font-sans text-xs font-medium text-muted-foreground">
-                  {link.active
-                    ? t("detail.linkActive")
-                    : t("detail.linkInactive")}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+                {t("detail.linkVacancy")}
+              </Link>
+            ) : undefined
+          }
+        />
       </section>
     </div>
   )

@@ -57,6 +57,7 @@ describe("question compatibility", () => {
   it("allows scored kinds for technical and only likert for psychometric", () => {
     expect(isQuestionCompatible("technical", "single_choice")).toBe(true)
     expect(isQuestionCompatible("technical", "open")).toBe(true)
+    expect(isQuestionCompatible("technical", "numeric")).toBe(false)
     expect(isQuestionCompatible("technical", "likert")).toBe(false)
     expect(isQuestionCompatible("psychometric", "likert")).toBe(true)
     expect(isQuestionCompatible("psychometric", "numeric")).toBe(false)

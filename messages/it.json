@@ -671,7 +671,7 @@
     },
     "evaluations": {
       "title": "Valutazioni",
-      "description": "Inventario delle prove con dati di dimostrazione. Solo stati di definizione: bozza, pubblicata e archiviata.",
+      "description": "Catalogo di prove tecniche e psicometriche. Stati di definizione: bozza, pubblicata e archiviata.",
       "create": "Nuova valutazione",
       "search": "Cerca per titolo",
       "searchPlaceholder": "Nome della valutazione",
@@ -726,27 +726,33 @@
       "duplicateTitle": "Copia di {title}",
       "confirmPublish": {
         "title": "Pubblica valutazione",
-        "description": "Una versione viene congelata nella dimostrazione. Modificarla dopo non altera questo snapshot. Non viene salvato su un server reale.",
+        "description": "Si congela una versione immutabile. Modificare dopo non altera questo snapshot.",
         "confirm": "Pubblica",
         "cancel": "Annulla"
       },
       "confirmArchive": {
         "title": "Archivia valutazione",
-        "description": "La valutazione passerà ad Archiviata nella dimostrazione. Potrai ancora visualizzarla e duplicarla.",
+        "description": "La valutazione passerà ad Archiviata. Potrai ancora visualizzarla e duplicarla.",
         "confirm": "Archivia",
         "cancel": "Annulla"
       },
       "toasts": {
-        "published": "Valutazione pubblicata in modalità dimostrazione.",
-        "archived": "Valutazione archiviata in modalità dimostrazione.",
+        "published": "Valutazione pubblicata.",
+        "archived": "Valutazione archiviata.",
         "duplicated": "È stata creata una copia in bozza.",
-        "error": "Non è stato possibile completare l'azione di dimostrazione."
+        "error": "Impossibile completare l’azione."
       },
       "errors": {
         "not_found": "Valutazione non trovata.",
+        "not_draft": "Si può modificare solo una bozza.",
+        "not_published": "Una bozza si può aprire solo da una valutazione pubblicata.",
         "test_archived": "La valutazione è archiviata e non può essere pubblicata.",
         "no_draft": "Non c'è una bozza pronta da pubblicare.",
-        "scenario_error": "Il servizio simulato ha restituito un errore."
+        "no_published_version": "Non c’è una versione pubblicata da clonare.",
+        "questions_required": "Aggiungi almeno una domanda prima di pubblicare.",
+        "questions_incompatible": "Alcune domande sono incompatibili con la categoria.",
+        "publish_integrity": "Impossibile pubblicare senza alterare le versioni esistenti.",
+        "scenario_error": "Impossibile completare l’azione."
       },
       "pagination": {
         "perPage": "Per pagina",
@@ -759,15 +765,15 @@
       },
       "states": {
         "loading": "Caricamento valutazioni…",
-        "emptyTitle": "Nessun dato di dimostrazione",
-        "emptyDescription": "Lo scenario simulato è vuoto. Ripristina i dati di dimostrazione per continuare.",
+        "emptyTitle": "Ancora nessuna valutazione",
+        "emptyDescription": "Crea la prima valutazione tecnica o psicometrica per iniziare.",
         "errorTitle": "Impossibile caricare le valutazioni",
-        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "errorDescription": "Impossibile caricare il catalogo. Riprova.",
         "retry": "Riprova",
         "filterEmptyTitle": "Nessuna corrispondenza",
         "filterEmptyDescription": "Nessuna valutazione soddisfa i filtri. Modificali o puliscili.",
         "notFoundTitle": "Valutazione non trovata",
-        "notFoundDescription": "Questo identificatore non esiste nei dati di dimostrazione.",
+        "notFoundDescription": "L’identificatore non esiste o non hai accesso.",
         "backToList": "Torna all'elenco"
       },
       "detail": {
@@ -786,30 +792,32 @@
         "draftVersion": "Bozza",
         "noVersion": "Nessuna configurazione di versione.",
         "noQuestions": "Questa versione non ha domande.",
-        "noLinks": "Nessuna posizione collegata.",
+        "noLinks": "Nessun collegamento a posizioni mostrato qui.",
         "linkActive": "Attivo",
         "linkInactive": "Inattivo",
         "points": "{points} pt",
         "dimension": "Dimensione: {dimension}",
         "createdAt": "Creata",
-        "openVersions": "Vedi versioni"
+        "openVersions": "Vedi versioni",
+        "linksCtaDescription": "I collegamenti si gestiscono da Collegamenti, associati a una posizione."
       },
       "versions": {
         "title": "Versioni",
-        "description": "Cronologia delle versioni simulata. Gli snapshot pubblicati sono di sola lettura.",
+        "description": "Cronologia delle versioni. Gli snapshot pubblicati sono di sola lettura.",
         "listLabel": "Cronologia versioni",
         "selectPrompt": "Seleziona una versione per vedere lo snapshot.",
         "publishedAt": "Pubblicata {date}",
         "draftLabel": "Bozza",
         "versionNumber": "Versione {number}",
         "snapshot": "Snapshot",
-        "readonlyNotice": "Questa versione pubblicata non può essere modificata qui."
+        "readonlyNotice": "Questa versione pubblicata non può essere modificata qui.",
+        "snapshotUnavailable": "Impossibile caricare lo snapshot delle domande di questa versione."
       },
       "editor": {
         "createTitle": "Nuova valutazione",
-        "createDescription": "Procedura guidata dimostrativa per creare e pubblicare un test tecnico o psicometrico.",
+        "createDescription": "Crea e pubblica una prova tecnica o psicometrica.",
         "editTitle": "Modifica valutazione",
-        "editDescription": "Modifica la bozza simulata. Pubblicare congela una versione immutabile nella dimostrazione.",
+        "editDescription": "Modifica la bozza. Pubblicare congela una versione immutabile.",
         "steps": {
           "info": "Informazioni",
           "config": "Configurazione",
@@ -863,7 +871,7 @@
           "questionCount": "{count} domande",
           "duration": "Durata: {minutes} min",
           "attempts": "Tentativi: {count}",
-          "expiry": "Scadenza assegnazione (demo): {days} giorni",
+          "expiry": "Scadenza tipica dell’assegnazione: {days} giorni",
           "totalPoints": "Punteggio totale: {points}",
           "dimensions": "Dimensioni: {list}",
           "noDimensions": "Nessuna dimensione",
@@ -871,15 +879,15 @@
         },
         "publish": {
           "summaryTitle": "Pronto per pubblicare",
-          "versionNotice": "Verrà pubblicata la versione {number}. Questo snapshot resterà congelato nella dimostrazione. Modificare dopo creerà una nuova bozza.",
+          "versionNotice": "Verrà pubblicata la versione {number}. Questo snapshot resterà congelato. Modificare dopo creerà una nuova bozza.",
           "confirmTitle": "Pubblica valutazione",
-          "confirmDescription": "La versione {number} verrà congelata nella dimostrazione. Questo non viene salvato su un server reale.",
+          "confirmDescription": "Si congela la versione {number}. Modificare dopo non altera questo snapshot.",
           "confirm": "Pubblica",
           "cancel": "Annulla"
         },
         "clonePublished": {
           "title": "Crea bozza dalla versione pubblicata",
-          "description": "La versione pubblicata resta intatta. Si aprirà una nuova bozza da modificare nella dimostrazione.",
+          "description": "La versione pubblicata resta intatta. Si aprirà una nuova bozza da modificare.",
           "confirm": "Crea bozza",
           "cancel": "Annulla"
         },
@@ -888,15 +896,14 @@
           "next": "Avanti",
           "saveDraft": "Salva bozza",
           "publish": "Pubblica",
-          "simulateSaveFail": "Simula errore di salvataggio",
           "saving": "Salvataggio…",
           "publishing": "Pubblicazione…"
         },
         "toasts": {
-          "saved": "Bozza salvata in modalità dimostrazione.",
-          "published": "Valutazione pubblicata in modalità dimostrazione.",
+          "saved": "Bozza salvata.",
+          "published": "Valutazione pubblicata.",
           "cloned": "È stata creata una bozza dalla versione pubblicata.",
-          "error": "Impossibile completare l'azione dimostrativa."
+          "error": "Impossibile completare l’azione."
         },
         "detailEditDraft": "Modifica e crea bozza"
       }

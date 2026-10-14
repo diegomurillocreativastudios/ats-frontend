@@ -29,7 +29,6 @@ export const TECHNICAL_QUESTION_KINDS: readonly QuestionKind[] = [
   "single_choice",
   "multiple_choice",
   "true_false",
-  "numeric",
   "open",
 ] as const
 

@@ -12,24 +12,31 @@ interface PruebasPortalShellProps {
   children: ReactNode
 }
 
-function isPruebasHomePath(pathname: string | null): boolean {
-  if (!pathname) return false
-  const normalized =
-    pathname.length > 1 && pathname.endsWith("/")
-      ? pathname.slice(0, -1)
-      : pathname
-  return normalized === PRUEBAS_HOME_HREF
+function normalizePathname(pathname: string | null): string {
+  if (!pathname) return ""
+  return pathname.length > 1 && pathname.endsWith("/")
+    ? pathname.slice(0, -1)
+    : pathname
+}
+
+function isPruebasLiveDataPath(pathname: string | null): boolean {
+  const normalized = normalizePathname(pathname)
+  if (normalized === PRUEBAS_HOME_HREF) return true
+  return (
+    normalized === `${PRUEBAS_HOME_HREF}/evaluaciones` ||
+    normalized.startsWith(`${PRUEBAS_HOME_HREF}/evaluaciones/`)
+  )
 }
 
 /**
  * Viewport-locked shell for Portal Pruebas: sidebar from lg, compact topbar
- * below that, demo notice once above page content (except Inicio, which uses
- * live dashboard data), and a single scrolling main.
+ * below that, demo notice once above page content (except live sections:
+ * Inicio and Evaluaciones), and a single scrolling main.
  */
 export function PruebasPortalShell({ children }: PruebasPortalShellProps) {
   const t = useTranslations("PruebasPortal")
   const pathname = usePathname()
-  const showDemoNotice = !isPruebasHomePath(pathname)
+  const showDemoNotice = !isPruebasLiveDataPath(pathname)
 
   return (
     <div className="flex h-dvh max-h-dvh min-h-0 overflow-hidden overscroll-y-none bg-background font-sans text-foreground">

@@ -671,7 +671,7 @@
     },
     "evaluations": {
       "title": "Évaluations",
-      "description": "Inventaire des tests avec données de démonstration. États de définition uniquement : brouillon, publiée et archivée.",
+      "description": "Catalogue de tests techniques et psychométriques. Statuts de définition : brouillon, publié et archivé.",
       "create": "Nouvelle évaluation",
       "search": "Rechercher par titre",
       "searchPlaceholder": "Nom de l'évaluation",
@@ -726,27 +726,33 @@
       "duplicateTitle": "Copie de {title}",
       "confirmPublish": {
         "title": "Publier l'évaluation",
-        "description": "Une version est figée dans la démonstration. La modifier plus tard ne change pas cet instantané. Rien n'est enregistré sur un vrai serveur.",
+        "description": "Une version immuable est figée. Une modification ultérieure n’altère pas ce snapshot.",
         "confirm": "Publier",
         "cancel": "Annuler"
       },
       "confirmArchive": {
         "title": "Archiver l'évaluation",
-        "description": "L'évaluation passera à Archivée dans la démonstration. Vous pourrez encore la consulter et la dupliquer.",
+        "description": "L’évaluation passera à Archivée. Vous pourrez toujours la consulter et la dupliquer.",
         "confirm": "Archiver",
         "cancel": "Annuler"
       },
       "toasts": {
-        "published": "Évaluation publiée en mode démonstration.",
-        "archived": "Évaluation archivée en mode démonstration.",
+        "published": "Évaluation publiée.",
+        "archived": "Évaluation archivée.",
         "duplicated": "Une copie en brouillon a été créée.",
-        "error": "L'action de démonstration n'a pas pu être terminée."
+        "error": "L’action n’a pas pu être terminée."
       },
       "errors": {
         "not_found": "L'évaluation est introuvable.",
+        "not_draft": "Seul un brouillon peut être modifié.",
+        "not_published": "Un brouillon ne peut être ouvert qu’à partir d’une évaluation publiée.",
         "test_archived": "L'évaluation est archivée et ne peut pas être publiée.",
         "no_draft": "Aucun brouillon prêt à publier.",
-        "scenario_error": "Le service simulé a renvoyé une erreur."
+        "no_published_version": "Aucune version publiée à cloner.",
+        "questions_required": "Ajoutez au moins une question avant de publier.",
+        "questions_incompatible": "Certaines questions sont incompatibles avec la catégorie.",
+        "publish_integrity": "Impossible de publier sans altérer les versions existantes.",
+        "scenario_error": "L’action n’a pas pu être terminée."
       },
       "pagination": {
         "perPage": "Par page",
@@ -759,15 +765,15 @@
       },
       "states": {
         "loading": "Chargement des évaluations…",
-        "emptyTitle": "Aucune donnée de démonstration",
-        "emptyDescription": "Le scénario simulé est vide. Réinitialisez les données de démonstration pour continuer.",
+        "emptyTitle": "Aucune évaluation pour le moment",
+        "emptyDescription": "Créez la première évaluation technique ou psychométrique pour commencer.",
         "errorTitle": "Impossible de charger les évaluations",
-        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "errorDescription": "Impossible de charger le catalogue. Réessayez.",
         "retry": "Réessayer",
         "filterEmptyTitle": "Aucune correspondance",
         "filterEmptyDescription": "Aucune évaluation ne correspond aux filtres. Ajustez-les ou effacez-les.",
         "notFoundTitle": "Évaluation introuvable",
-        "notFoundDescription": "Cet identifiant n'existe pas dans les données de démonstration.",
+        "notFoundDescription": "L’identifiant n’existe pas ou vous n’y avez pas accès.",
         "backToList": "Retour à la liste"
       },
       "detail": {
@@ -786,30 +792,32 @@
         "draftVersion": "Brouillon",
         "noVersion": "Aucune configuration de version.",
         "noQuestions": "Cette version n'a pas de questions.",
-        "noLinks": "Aucun poste lié.",
+        "noLinks": "Aucun lien d’offre affiché ici.",
         "linkActive": "Actif",
         "linkInactive": "Inactif",
         "points": "{points} pts",
         "dimension": "Dimension : {dimension}",
         "createdAt": "Créée",
-        "openVersions": "Voir les versions"
+        "openVersions": "Voir les versions",
+        "linksCtaDescription": "Les liens se gèrent depuis Liens, associés à une offre."
       },
       "versions": {
         "title": "Versions",
-        "description": "Historique de versions simulé. Les instantanés publiés sont en lecture seule.",
+        "description": "Historique des versions. Les snapshots publiés sont en lecture seule.",
         "listLabel": "Historique des versions",
         "selectPrompt": "Sélectionnez une version pour voir l'instantané.",
         "publishedAt": "Publiée {date}",
         "draftLabel": "Brouillon",
         "versionNumber": "Version {number}",
         "snapshot": "Instantané",
-        "readonlyNotice": "Cette version publiée ne peut pas être modifiée ici."
+        "readonlyNotice": "Cette version publiée ne peut pas être modifiée ici.",
+        "snapshotUnavailable": "Impossible de charger le snapshot des questions de cette version."
       },
       "editor": {
         "createTitle": "Nouvelle évaluation",
-        "createDescription": "Assistant de démonstration pour créer et publier un test technique ou psychométrique.",
+        "createDescription": "Créez et publiez un test technique ou psychométrique.",
         "editTitle": "Modifier l'évaluation",
-        "editDescription": "Modifiez le brouillon simulé. Publier fige une version immuable dans la démonstration.",
+        "editDescription": "Modifiez le brouillon. Publier fige une version immuable.",
         "steps": {
           "info": "Informations",
           "config": "Configuration",
@@ -863,7 +871,7 @@
           "questionCount": "{count} questions",
           "duration": "Durée : {minutes} min",
           "attempts": "Tentatives : {count}",
-          "expiry": "Expiration d'affectation (démo) : {days} jours",
+          "expiry": "Expiration typique d’affectation : {days} jours",
           "totalPoints": "Score total : {points}",
           "dimensions": "Dimensions : {list}",
           "noDimensions": "Aucune dimension",
@@ -871,15 +879,15 @@
         },
         "publish": {
           "summaryTitle": "Prêt à publier",
-          "versionNotice": "La version {number} sera publiée. Cet instantané sera figé dans la démonstration. Modifier ensuite créera un nouveau brouillon.",
+          "versionNotice": "La version {number} sera publiée. Ce snapshot sera figé. Une modification ultérieure créera un nouveau brouillon.",
           "confirmTitle": "Publier l'évaluation",
-          "confirmDescription": "La version {number} sera figée dans la démonstration. Ceci n'est pas enregistré sur un vrai serveur.",
+          "confirmDescription": "La version {number} sera figée. Une modification ultérieure n’altère pas ce snapshot.",
           "confirm": "Publier",
           "cancel": "Annuler"
         },
         "clonePublished": {
           "title": "Créer un brouillon depuis la version publiée",
-          "description": "La version publiée reste intacte. Un nouveau brouillon s'ouvrira pour l'édition en démonstration.",
+          "description": "La version publiée reste intacte. Un nouveau brouillon s’ouvrira pour édition.",
           "confirm": "Créer le brouillon",
           "cancel": "Annuler"
         },
@@ -888,15 +896,14 @@
           "next": "Suivant",
           "saveDraft": "Enregistrer le brouillon",
           "publish": "Publier",
-          "simulateSaveFail": "Simuler un échec d'enregistrement",
           "saving": "Enregistrement…",
           "publishing": "Publication…"
         },
         "toasts": {
-          "saved": "Brouillon enregistré en mode démonstration.",
-          "published": "Évaluation publiée en mode démonstration.",
+          "saved": "Brouillon enregistré.",
+          "published": "Évaluation publiée.",
           "cloned": "Un brouillon a été créé à partir de la version publiée.",
-          "error": "Impossible de terminer l'action de démonstration."
+          "error": "L’action n’a pas pu être terminée."
         },
         "detailEditDraft": "Modifier et créer un brouillon"
       }

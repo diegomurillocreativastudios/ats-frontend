@@ -20,6 +20,22 @@ import { Button } from "@/components/ui/Button"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
 import {
+  buildCompatibleQuestionDraft,
+  createAssessmentQuestion,
+  createAssessmentTest,
+  deleteAssessmentQuestion,
+  getAssessmentApiErrorCode,
+  getAssessmentTestDetail,
+  openAssessmentTestDraft,
+  publishAssessmentTest,
+  reorderAssessmentQuestions,
+  resolveAssessmentErrorMessage,
+  updateAssessmentTest,
+  type AssessmentQuestionView,
+  type AssessmentTestView,
+  type AssessmentVersionView,
+} from "@/lib/api/recruiter-assessments-tests"
+import {
   ATTEMPTS_MAX,
   ATTEMPTS_MIN,
   DEMO_EXPIRY_DAYS,
@@ -28,9 +44,7 @@ import {
   DURATION_MIN,
   EDITOR_STEPS,
   TITLE_MAX,
-  attachQuestionId,
   emptyEditorForm,
-  filterCompatibleQuestions,
   formsEqual,
   incompatibleQuestionIds,
   isQuestionCompatible,
@@ -47,24 +61,8 @@ import {
   type StepFieldErrors,
 } from "@/lib/pruebas/evaluation-editor"
 import { resolveCurrentVersion } from "@/lib/pruebas/evaluations"
-import {
-  createCompatibleQuestion,
-  createDraftTest,
-  editPublishedTest,
-  getTest,
-  listQuestions,
-  listVersions,
-  MockServiceError,
-  publishTest,
-  updateDraftTest,
-} from "@/lib/pruebas/mock-service"
 import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
-import type {
-  AssessmentKind,
-  MockAssessmentTest,
-  MockAssessmentVersion,
-  MockQuestion,
-} from "@/lib/pruebas/types"
+import type { AssessmentKind, MockQuestion } from "@/lib/pruebas/types"
 
 const CONTROL_CLASS =
   "h-11 w-full rounded-md border border-border bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
@@ -120,21 +118,21 @@ export function PruebasEvaluationEditor({
   const [testId, setTestId] = useState<string | null>(
     mode === "edit" ? (initialTestId ?? null) : null,
   )
-  const [test, setTest] = useState<MockAssessmentTest | null>(null)
-  const [versions, setVersions] = useState<MockAssessmentVersion[]>([])
-  const [bank, setBank] = useState<MockQuestion[]>([])
+  const [test, setTest] = useState<AssessmentTestView | null>(null)
+  const [versions, setVersions] = useState<AssessmentVersionView[]>([])
+  const [questions, setQuestions] = useState<AssessmentQuestionView[]>([])
   const [form, setForm] = useState<EvaluationEditorForm>(emptyEditorForm())
   const [savedSnapshot, setSavedSnapshot] = useState<EvaluationEditorForm>(
     emptyEditorForm(),
   )
   const [step, setStep] = useState<EditorStepId>("info")
   const [fieldErrors, setFieldErrors] = useState<StepFieldErrors>({})
-  const [simulateSaveFail, setSimulateSaveFail] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
   const [awaitingClone, setAwaitingClone] = useState(false)
   const [isCloning, setIsCloning] = useState(false)
+  const [isMutatingQuestion, setIsMutatingQuestion] = useState(false)
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
     variant: "success",
@@ -148,26 +146,32 @@ export function PruebasEvaluationEditor({
     [],
   )
 
-  const hydrateFromTest = useCallback(
-    (
-      loaded: MockAssessmentTest,
-      loadedVersions: MockAssessmentVersion[],
-      loadedBank: MockQuestion[],
-    ) => {
-      const current = resolveCurrentVersion(loadedVersions, loaded.id)
+  const hydrateFromDetail = useCallback(
+    (detail: {
+      test: AssessmentTestView
+      versions: AssessmentVersionView[]
+      currentQuestions: AssessmentQuestionView[]
+    }) => {
+      const current = resolveCurrentVersion(detail.versions, detail.test.id)
+      const questionIds =
+        detail.currentQuestions.length > 0
+          ? detail.currentQuestions.map((question) => question.id)
+          : current
+            ? [...current.questionIds]
+            : []
       const nextForm: EvaluationEditorForm = {
-        title: loaded.title,
-        description: loaded.description,
-        kind: loaded.kind,
+        title: detail.test.title,
+        description: detail.test.description,
+        kind: detail.test.kind,
         instructions: current?.instructions ?? "",
         durationMinutes: current?.durationMinutes ?? 45,
         maxAttempts: current?.maxAttempts ?? 1,
-        questionIds: current ? [...current.questionIds] : [],
+        questionIds,
       }
-      setTest(loaded)
-      setTestId(loaded.id)
-      setVersions(loadedVersions)
-      setBank(loadedBank)
+      setTest(detail.test)
+      setTestId(detail.test.id)
+      setVersions(detail.versions)
+      setQuestions(detail.currentQuestions)
       setForm(nextForm)
       setSavedSnapshot(nextForm)
     },
@@ -180,16 +184,8 @@ export function PruebasEvaluationEditor({
     async function bootCreate() {
       setIsBooting(true)
       setBootError(null)
-      try {
-        const loadedBank = await listQuestions()
-        if (cancelled) return
-        setBank(loadedBank)
-        setIsBooting(false)
-      } catch {
-        if (cancelled) return
-        setBootError("load")
-        setIsBooting(false)
-      }
+      setQuestions([])
+      setIsBooting(false)
     }
 
     async function bootEdit() {
@@ -201,34 +197,30 @@ export function PruebasEvaluationEditor({
       setIsBooting(true)
       setBootError(null)
       try {
-        const [loaded, loadedVersions, loadedBank] = await Promise.all([
-          getTest(initialTestId),
-          listVersions(initialTestId),
-          listQuestions(),
-        ])
+        const detail = await getAssessmentTestDetail(initialTestId)
         if (cancelled) return
-        if (loaded.lifecycleStatus === "archived") {
+        if (detail.test.lifecycleStatus === "archived") {
           setBootError("not_found")
           setIsBooting(false)
           return
         }
-        if (loaded.lifecycleStatus === "published") {
-          setTest(loaded)
-          setVersions(loadedVersions)
-          setBank(loadedBank)
+        if (
+          detail.test.lifecycleStatus === "published" &&
+          !detail.openDraft
+        ) {
+          setTest(detail.test)
+          setVersions(detail.versions)
+          setQuestions(detail.currentQuestions)
           setAwaitingClone(true)
           setIsBooting(false)
           return
         }
-        hydrateFromTest(loaded, loadedVersions, loadedBank)
+        hydrateFromDetail(detail)
         setIsBooting(false)
       } catch (error) {
         if (cancelled) return
-        if (error instanceof MockServiceError && error.code === "not_found") {
-          setBootError("not_found")
-        } else {
-          setBootError("load")
-        }
+        const code = getAssessmentApiErrorCode(error)
+        setBootError(code === "not_found" ? "not_found" : "load")
         setIsBooting(false)
       }
     }
@@ -242,7 +234,7 @@ export function PruebasEvaluationEditor({
     return () => {
       cancelled = true
     }
-  }, [hydrateFromTest, initialTestId, mode])
+  }, [hydrateFromDetail, initialTestId, mode])
 
   const stepIndex = EDITOR_STEPS.indexOf(step)
   const nextVersion = useMemo(
@@ -251,22 +243,15 @@ export function PruebasEvaluationEditor({
   )
 
   const attachedQuestions = useMemo(() => {
-    const byId = new Map(bank.map((question) => [question.id, question]))
+    const byId = new Map(questions.map((question) => [question.id, question]))
     return form.questionIds
       .map((id) => byId.get(id))
       .filter((question): question is MockQuestion => Boolean(question))
-  }, [bank, form.questionIds])
-
-  const bankAvailable = useMemo(() => {
-    const attached = new Set(form.questionIds)
-    return filterCompatibleQuestions(form.kind, bank).filter(
-      (question) => !attached.has(question.id),
-    )
-  }, [bank, form.kind, form.questionIds])
+  }, [form.questionIds, questions])
 
   const badQuestionIds = useMemo(
-    () => incompatibleQuestionIds(form.kind, form.questionIds, bank),
-    [bank, form.kind, form.questionIds],
+    () => incompatibleQuestionIds(form.kind, form.questionIds, questions),
+    [form.kind, form.questionIds, questions],
   )
 
   const isDirty = !formsEqual(form, savedSnapshot)
@@ -280,32 +265,23 @@ export function PruebasEvaluationEditor({
     if (!initialTestId) return
     setIsCloning(true)
     try {
-      const { test: cloned } = await editPublishedTest(initialTestId)
-      const [loadedVersions, loadedBank] = await Promise.all([
-        listVersions(cloned.id),
-        listQuestions(),
-      ])
-      hydrateFromTest(cloned, loadedVersions, loadedBank)
+      const detail = await openAssessmentTestDraft(initialTestId)
+      hydrateFromDetail(detail)
       setAwaitingClone(false)
       showToast("success", t("toasts.cloned"))
-    } catch {
-      showToast("error", t("toasts.error"))
+    } catch (error) {
+      showToast("error", resolveAssessmentErrorMessage(error, tEval))
     } finally {
       setIsCloning(false)
     }
-  }, [hydrateFromTest, initialTestId, showToast, t])
+  }, [hydrateFromDetail, initialTestId, showToast, t, tEval])
 
   const persistDraft = useCallback(async (): Promise<string | null> => {
-    if (simulateSaveFail) {
-      showToast("error", t("errors.saveFailed"))
-      return null
-    }
-
     setIsSaving(true)
     try {
       let id = testId
       if (!id) {
-        const created = await createDraftTest({
+        const created = await createAssessmentTest({
           title: form.title.trim(),
           description: form.description.trim(),
           kind: form.kind,
@@ -316,61 +292,67 @@ export function PruebasEvaluationEditor({
         router.replace(`${PRUEBAS_HOME_HREF}/evaluaciones/${created.id}/editar`)
       }
 
-      const updated = await updateDraftTest(id, {
+      const updated = await updateAssessmentTest(id, {
         title: form.title.trim(),
         description: form.description.trim(),
         kind: form.kind,
         instructions: form.instructions.trim(),
         durationMinutes: form.durationMinutes,
         maxAttempts: form.maxAttempts,
-        questionIds: form.questionIds,
       })
-      const loadedVersions = await listVersions(id)
+      const detail = await getAssessmentTestDetail(id)
       setTest(updated)
-      setVersions(loadedVersions)
+      setVersions(detail.versions)
+      setQuestions(detail.currentQuestions)
       const snapshot: EvaluationEditorForm = {
         ...form,
         title: form.title.trim(),
         description: form.description.trim(),
         instructions: form.instructions.trim(),
+        questionIds:
+          detail.currentQuestions.length > 0
+            ? detail.currentQuestions.map((question) => question.id)
+            : form.questionIds,
       }
       setForm(snapshot)
       setSavedSnapshot(snapshot)
       showToast("success", t("toasts.saved"))
       return id
-    } catch {
-      showToast("error", t("toasts.error"))
+    } catch (error) {
+      showToast("error", resolveAssessmentErrorMessage(error, tEval))
       return null
     } finally {
       setIsSaving(false)
     }
-  }, [form, router, showToast, simulateSaveFail, t, testId])
+  }, [form, router, showToast, t, tEval, testId])
 
   const handleSaveDraft = useCallback(async () => {
-    const errors = validateStep(step, form, bank)
-    if (Object.keys(errors).length > 0 && (step === "info" || step === "config" || step === "questions")) {
+    const errors = validateStep(step, form, questions)
+    if (
+      Object.keys(errors).length > 0 &&
+      (step === "info" || step === "config" || step === "questions")
+    ) {
       setFieldErrors(errors)
       return
     }
-    // Allow save from any step if info+config are valid enough for create
-    const infoErrors = validateStep("info", form, bank)
+    const infoErrors = validateStep("info", form, questions)
     if (Object.keys(infoErrors).length > 0) {
       setStep("info")
       setFieldErrors(infoErrors)
       return
     }
     await persistDraft()
-  }, [bank, form, persistDraft, step])
+  }, [form, persistDraft, questions, step])
 
   const handleNext = useCallback(() => {
-    const errors = validateStep(step, form, bank)
+    const errors = validateStep(step, form, questions)
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors)
       return
     }
     const next = EDITOR_STEPS[stepIndex + 1]
     if (next) setStep(next)
-  }, [bank, form, step, stepIndex])
+  }, [form, questions, step, stepIndex])
 
   const handleBack = useCallback(() => {
     const prev = EDITOR_STEPS[stepIndex - 1]
@@ -381,11 +363,11 @@ export function PruebasEvaluationEditor({
   }, [stepIndex])
 
   const handlePublish = useCallback(async () => {
-    const errors = validateStep("publish", form, bank)
+    const errors = validateStep("publish", form, questions)
     if (Object.keys(errors).length > 0) {
-      if (!isStepValid("info", form, bank)) setStep("info")
-      else if (!isStepValid("config", form, bank)) setStep("config")
-      else if (!isStepValid("questions", form, bank)) setStep("questions")
+      if (!isStepValid("info", form, questions)) setStep("info")
+      else if (!isStepValid("config", form, questions)) setStep("config")
+      else if (!isStepValid("questions", form, questions)) setStep("questions")
       setFieldErrors(errors)
       setShowPublishConfirm(false)
       return
@@ -402,29 +384,106 @@ export function PruebasEvaluationEditor({
           return
         }
       }
-      await publishTest(id)
+      await publishAssessmentTest(id)
       showToast("success", t("toasts.published"))
       setShowPublishConfirm(false)
       router.push(`${PRUEBAS_HOME_HREF}/evaluaciones/${id}`)
-    } catch {
-      showToast("error", t("toasts.error"))
+    } catch (error) {
+      showToast("error", resolveAssessmentErrorMessage(error, tEval))
       setShowPublishConfirm(false)
     } finally {
       setIsPublishing(false)
     }
-  }, [bank, form, isDirty, persistDraft, router, showToast, t, testId])
+  }, [form, isDirty, persistDraft, questions, router, showToast, t, tEval, testId])
+
+  const ensureTestId = useCallback(async (): Promise<string | null> => {
+    if (testId) return testId
+    const infoErrors = validateStep("info", form, questions)
+    if (Object.keys(infoErrors).length > 0) {
+      setStep("info")
+      setFieldErrors(infoErrors)
+      showToast("error", t("errors.saveFailed"))
+      return null
+    }
+    return persistDraft()
+  }, [form, persistDraft, questions, showToast, t, testId])
 
   const handleAddNewQuestion = useCallback(async () => {
+    setIsMutatingQuestion(true)
     try {
-      const question = await createCompatibleQuestion(form.kind)
-      setBank((current) => [...current, question])
+      const id = await ensureTestId()
+      if (!id) return
+      const draft = buildCompatibleQuestionDraft(form.kind)
+      const created = await createAssessmentQuestion(id, draft)
+      setQuestions((current) => [...current, created])
       patchForm({
-        questionIds: attachQuestionId(form.questionIds, question.id),
+        questionIds: [...form.questionIds, created.id],
       })
-    } catch {
-      showToast("error", t("toasts.error"))
+      setSavedSnapshot((current) => ({
+        ...current,
+        questionIds: [...current.questionIds, created.id],
+      }))
+    } catch (error) {
+      showToast("error", resolveAssessmentErrorMessage(error, tEval))
+    } finally {
+      setIsMutatingQuestion(false)
     }
-  }, [form.kind, form.questionIds, patchForm, showToast, t])
+  }, [ensureTestId, form.kind, form.questionIds, patchForm, showToast, tEval])
+
+  const handleRemoveQuestion = useCallback(
+    async (questionId: string) => {
+      if (!testId) {
+        patchForm({
+          questionIds: removeQuestionId(form.questionIds, questionId),
+        })
+        setQuestions((current) =>
+          current.filter((question) => question.id !== questionId),
+        )
+        return
+      }
+      setIsMutatingQuestion(true)
+      try {
+        await deleteAssessmentQuestion(testId, questionId)
+        const nextIds = removeQuestionId(form.questionIds, questionId)
+        setQuestions((current) =>
+          current.filter((question) => question.id !== questionId),
+        )
+        patchForm({ questionIds: nextIds })
+        setSavedSnapshot((current) => ({
+          ...current,
+          questionIds: nextIds,
+        }))
+      } catch (error) {
+        showToast("error", resolveAssessmentErrorMessage(error, tEval))
+      } finally {
+        setIsMutatingQuestion(false)
+      }
+    },
+    [form.questionIds, patchForm, showToast, tEval, testId],
+  )
+
+  const handleMoveQuestion = useCallback(
+    async (index: number, direction: "up" | "down") => {
+      const nextIds = reorderQuestionIds(form.questionIds, index, direction)
+      if (nextIds.every((id, i) => id === form.questionIds[i])) return
+      patchForm({ questionIds: nextIds })
+      if (!testId) return
+      setIsMutatingQuestion(true)
+      try {
+        await reorderAssessmentQuestions(testId, nextIds)
+        setSavedSnapshot((current) => ({
+          ...current,
+          questionIds: nextIds,
+        }))
+      } catch (error) {
+        patchForm({ questionIds: form.questionIds })
+        showToast("error", resolveAssessmentErrorMessage(error, tEval))
+      } finally {
+        setIsMutatingQuestion(false)
+      }
+    },
+    [form.questionIds, patchForm, showToast, tEval, testId],
+  )
 
   if (isBooting) {
     return (
@@ -559,30 +618,17 @@ export function PruebasEvaluationEditor({
           <QuestionsStep
             form={form}
             errors={fieldErrors}
-            bankAvailable={bankAvailable}
             attachedQuestions={attachedQuestions}
             badQuestionIds={badQuestionIds}
+            disabled={isMutatingQuestion || isSaving}
             t={t}
             tEval={tEval}
-            onAttach={(id) =>
-              patchForm({
-                questionIds: attachQuestionId(form.questionIds, id),
-              })
-            }
-            onRemove={(id) =>
-              patchForm({
-                questionIds: removeQuestionId(form.questionIds, id),
-              })
-            }
-            onMove={(index, direction) =>
-              patchForm({
-                questionIds: reorderQuestionIds(
-                  form.questionIds,
-                  index,
-                  direction,
-                ),
-              })
-            }
+            onRemove={(id) => {
+              void handleRemoveQuestion(id)
+            }}
+            onMove={(index, direction) => {
+              void handleMoveQuestion(index, direction)
+            }}
             onAddNew={() => {
               void handleAddNewQuestion()
             }}
@@ -601,22 +647,17 @@ export function PruebasEvaluationEditor({
       </div>
 
       <div className="flex flex-col gap-4 border-t border-border pt-4">
-        <label className="inline-flex min-h-11 cursor-pointer items-center gap-3 font-sans text-sm text-foreground">
-          <input
-            type="checkbox"
-            className="size-5 rounded border-border text-vo-purple focus-visible:ring-2 focus-visible:ring-vo-purple"
-            checked={simulateSaveFail}
-            onChange={(event) => setSimulateSaveFail(event.target.checked)}
-          />
-          {t("actions.simulateSaveFail")}
-        </label>
-
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
               className="min-h-11"
-              disabled={stepIndex === 0 || isSaving || isPublishing}
+              disabled={
+                stepIndex === 0 ||
+                isSaving ||
+                isPublishing ||
+                isMutatingQuestion
+              }
               onClick={handleBack}
             >
               {t("actions.back")}
@@ -625,7 +666,7 @@ export function PruebasEvaluationEditor({
               <Button
                 variant="primary"
                 className="min-h-11"
-                disabled={isSaving || isPublishing}
+                disabled={isSaving || isPublishing || isMutatingQuestion}
                 onClick={handleNext}
               >
                 {t("actions.next")}
@@ -636,7 +677,7 @@ export function PruebasEvaluationEditor({
             <Button
               variant="outline"
               className="min-h-11"
-              disabled={isSaving || isPublishing}
+              disabled={isSaving || isPublishing || isMutatingQuestion}
               loading={isSaving}
               onClick={() => {
                 void handleSaveDraft()
@@ -648,7 +689,7 @@ export function PruebasEvaluationEditor({
               <Button
                 variant="primary"
                 className="min-h-11"
-                disabled={isSaving || isPublishing}
+                disabled={isSaving || isPublishing || isMutatingQuestion}
                 onClick={() => setShowPublishConfirm(true)}
               >
                 {t("actions.publish")}
@@ -870,24 +911,22 @@ function ConfigStep({
 function QuestionsStep({
   form,
   errors,
-  bankAvailable,
   attachedQuestions,
   badQuestionIds,
+  disabled,
   t,
   tEval,
-  onAttach,
   onRemove,
   onMove,
   onAddNew,
 }: {
   form: EvaluationEditorForm
   errors: StepFieldErrors
-  bankAvailable: MockQuestion[]
   attachedQuestions: MockQuestion[]
   badQuestionIds: string[]
+  disabled: boolean
   t: ReturnType<typeof useTranslations>
   tEval: ReturnType<typeof useTranslations>
-  onAttach: (id: string) => void
   onRemove: (id: string) => void
   onMove: (index: number, direction: "up" | "down") => void
   onAddNew: () => void
@@ -915,7 +954,12 @@ function QuestionsStep({
           >
             {t("questions.attachedTitle")}
           </h2>
-          <Button variant="outline" className="min-h-11" onClick={onAddNew}>
+          <Button
+            variant="outline"
+            className="min-h-11"
+            disabled={disabled}
+            onClick={onAddNew}
+          >
             <Plus className="size-4" aria-hidden />
             {t("questions.addNew")}
           </Button>
@@ -955,20 +999,23 @@ function QuestionsStep({
                   <div className="flex flex-wrap gap-1">
                     <IconAction
                       label={t("questions.moveUp")}
-                      disabled={index === 0}
+                      disabled={disabled || index === 0}
                       onClick={() => onMove(index, "up")}
                     >
                       <ChevronUp className="size-4" />
                     </IconAction>
                     <IconAction
                       label={t("questions.moveDown")}
-                      disabled={index === form.questionIds.length - 1}
+                      disabled={
+                        disabled || index === form.questionIds.length - 1
+                      }
                       onClick={() => onMove(index, "down")}
                     >
                       <ChevronDown className="size-4" />
                     </IconAction>
                     <IconAction
                       label={t("questions.remove")}
+                      disabled={disabled}
                       onClick={() => onRemove(id)}
                     >
                       <Trash2 className="size-4" />
@@ -977,45 +1024,6 @@ function QuestionsStep({
                 </li>
               )
             })}
-          </ul>
-        )}
-      </section>
-
-      <section className="flex flex-col gap-3" aria-labelledby="bank-title">
-        <h2
-          id="bank-title"
-          className="font-display text-base font-semibold text-foreground"
-        >
-          {t("questions.bankTitle")}
-        </h2>
-        {bankAvailable.length === 0 ? (
-          <p className="font-sans text-sm text-muted-foreground">
-            {t("questions.emptyBank")}
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {bankAvailable.map((question) => (
-              <li
-                key={question.id}
-                className="flex flex-col gap-2 rounded-md border border-border bg-background p-3 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="font-sans text-sm text-foreground">
-                    {question.prompt}
-                  </p>
-                  <p className="font-sans text-xs text-muted-foreground">
-                    {tEval(`questionKind.${question.kind}`)}
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  className="min-h-11"
-                  onClick={() => onAttach(question.id)}
-                >
-                  {t("questions.attach")}
-                </Button>
-              </li>
-            ))}
           </ul>
         )}
       </section>
