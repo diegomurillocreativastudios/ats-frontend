@@ -1,8 +1,14 @@
 /** Pure helpers for the question bank create/edit forms (UI demo). */
 
 import type {
+  MockLikertQuestion,
+  MockMultipleChoiceQuestion,
+  MockNumericQuestion,
+  MockOpenQuestion,
   MockQuestion,
   MockQuestionOption,
+  MockSingleChoiceQuestion,
+  MockTrueFalseQuestion,
   QuestionKind,
 } from "@/lib/pruebas/types"
 
@@ -45,6 +51,41 @@ function blankOptions(prefix: string): MockQuestionOption[] {
 }
 
 /** Blank form for a kind; prompt is preserved when switching types. */
+export function blankQuestion(
+  kind: "single_choice",
+  prompt?: string,
+  idPrefix?: string,
+): MockSingleChoiceQuestion
+export function blankQuestion(
+  kind: "multiple_choice",
+  prompt?: string,
+  idPrefix?: string,
+): MockMultipleChoiceQuestion
+export function blankQuestion(
+  kind: "true_false",
+  prompt?: string,
+  idPrefix?: string,
+): MockTrueFalseQuestion
+export function blankQuestion(
+  kind: "likert",
+  prompt?: string,
+  idPrefix?: string,
+): MockLikertQuestion
+export function blankQuestion(
+  kind: "numeric",
+  prompt?: string,
+  idPrefix?: string,
+): MockNumericQuestion
+export function blankQuestion(
+  kind: "open",
+  prompt?: string,
+  idPrefix?: string,
+): MockOpenQuestion
+export function blankQuestion(
+  kind: QuestionKind,
+  prompt?: string,
+  idPrefix?: string,
+): MockQuestion
 export function blankQuestion(
   kind: QuestionKind,
   prompt = "",

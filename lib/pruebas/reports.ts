@@ -414,14 +414,14 @@ export function statusChartPoints(
   }))
 }
 
-export function paginateReportRows<T>(
-  items: readonly T[],
+export function paginateReportRows<T extends readonly unknown[]>(
+  items: T,
   page: number,
   pageSize: number,
-): T[] {
+): T {
   const safePage = Math.max(1, page)
   const start = (safePage - 1) * pageSize
-  return items.slice(start, start + pageSize)
+  return items.slice(start, start + pageSize) as unknown as T
 }
 
 export function listVacancyOptionsFromStore(

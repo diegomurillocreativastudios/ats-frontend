@@ -284,7 +284,7 @@ describe("assign all-or-nothing", () => {
       expiresAt: "2026-10-27T18:00:00.000Z",
     })
     expect(result.ok).toBe(false)
-    if (!result.ok) {
+    if (result.ok === false) {
       expect(result.failures.some((item) => item.reason === "duplicate_assignment")).toBe(
         true
       )

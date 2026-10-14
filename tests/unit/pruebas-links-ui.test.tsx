@@ -14,7 +14,7 @@ import {
 } from "@/lib/pruebas/mock-service"
 import { waitForDialogClosed } from "@/tests/helpers/wait-for-dialog-closed"
 
-const searchParamsGet = vi.fn(() => null)
+const searchParamsGet = vi.fn<(key: string) => string | null>(() => null)
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({

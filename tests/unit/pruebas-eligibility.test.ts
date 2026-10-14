@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   canStartSession,
   evaluateEligibility,
+  type EligibilityContext,
 } from "@/lib/pruebas/eligibility"
 import { MOCK_IDS, MOCK_NOW, createMockFixtures } from "@/lib/pruebas/mock-fixtures"
 import type {
@@ -15,7 +16,7 @@ import type {
   MockVacancy,
 } from "@/lib/pruebas/types"
 
-function baseContext() {
+function baseContext(): EligibilityContext {
   const store = createMockFixtures()
   const application = store.applications.find((item) => item.id === MOCK_IDS.appSofia)!
   const vacancy = store.vacancies.find((item) => item.id === MOCK_IDS.vacancyOpen)!

@@ -311,7 +311,7 @@ export function PruebasAssignmentsScreen() {
         expiresAt: expiresAtIsoFromYmd(expiresYmd, MOCK_NOW),
         allowedAttempts,
       })
-      if (!result.ok) {
+      if (result.ok === false) {
         const names = result.failures
           .map((failure) => {
             const row = rows.find(

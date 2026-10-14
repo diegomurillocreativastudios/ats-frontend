@@ -2,7 +2,7 @@
 'use client'
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import './circular-gallery.module.css'
+import styles from './circular-gallery.module.css'
 
 const DEFAULT_FONT = 'bold 30px Manrope'
 const SEGMENTS_X = 32
@@ -11,15 +11,15 @@ const INTRO_SECONDS = 1.4
 const WORLD_HEIGHT = 16.57
 const TEXTURE_BG = '#F8FAF6'
 const CLASSES = {
-  root: 'circular-gallery',
-  canvasHost: 'circular-gallery-canvas-host',
-  canvas: 'circular-gallery-canvas',
-  labels: 'circular-gallery-labels',
-  label: 'circular-gallery-label',
-  caption: 'circular-gallery-caption',
-  captionText: 'circular-gallery-caption-text',
-  close: 'circular-gallery-close',
-  hidden: 'circular-gallery-hidden',
+  root: styles.root,
+  canvasHost: styles.canvasHost,
+  canvas: styles.canvas,
+  labels: styles.labels,
+  label: styles.label,
+  caption: styles.caption,
+  captionText: styles.captionText,
+  close: styles.close,
+  hidden: styles.hidden,
 }
 const STEPS = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }
 
@@ -158,7 +158,7 @@ async function loadFontFromStylesheet(url) {
     const urlMatch = block.match(/url\(\s*['"]?([^'")]+)['"]?\s*\)/)
     if (!familyMatch || !urlMatch) continue
     family = familyMatch[1].trim()
-    const descriptors = {}
+    const descriptors: FontFaceDescriptors = {}
     const weightMatch = block.match(/font-weight:\s*([^;]+);/)
     const styleMatch = block.match(/font-style:\s*([^;]+);/)
     const rangeMatch = block.match(/unicode-range:\s*([^;]+);/)
@@ -228,7 +228,7 @@ const link = (gl) => {
     gl.deleteProgram(program)
     return null
   }
-  const uniforms = {}
+  const uniforms: Record<string, WebGLUniformLocation | null> = {}
   const count = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)
   for (let i = 0; i < count; i++) {
     const info = gl.getActiveUniform(program, i)
@@ -454,7 +454,7 @@ export function CircularGallery({
     let raf = 0
     let last = 0
     let visible = true
-    let snapTimer = 0
+    let snapTimer: ReturnType<typeof setTimeout> | undefined
     let lastItems = null
     let typing = false
 

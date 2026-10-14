@@ -1,4 +1,4 @@
-:global(.circular-gallery) {
+.root {
   position: relative;
   width: 100%;
   height: 100%;
@@ -9,15 +9,15 @@
   cursor: grab;
 }
 
-:global(.circular-gallery[data-pointer]) {
+.root[data-pointer] {
   cursor: pointer;
 }
 
-:global(.circular-gallery[data-dragging]) {
+.root[data-dragging] {
   cursor: grabbing;
 }
 
-:global(.circular-gallery-canvas-host) {
+.canvasHost {
   position: absolute;
   inset: 0;
   display: block;
@@ -25,19 +25,19 @@
   height: 100%;
 }
 
-:global(.circular-gallery-canvas) {
+.canvas {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-:global(.circular-gallery-labels) {
+.labels {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-:global(.circular-gallery-label) {
+.label {
   position: absolute;
   top: 0;
   left: 0;
@@ -46,7 +46,7 @@
   will-change: transform, opacity;
 }
 
-:global(.circular-gallery-caption) {
+.caption {
   position: absolute;
   top: 0;
   left: 50%;
@@ -56,13 +56,13 @@
   pointer-events: none;
 }
 
-:global(.circular-gallery-caption-text) {
+.captionText {
   margin: 0;
   line-height: 1.5;
   opacity: 0.65;
 }
 
-:global(.circular-gallery-close) {
+.close {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -81,21 +81,21 @@
   transition: opacity 0.2s ease;
 }
 
-:global(.circular-gallery-close[data-visible]) {
+.close[data-visible] {
   opacity: 0.8;
   pointer-events: auto;
 }
 
-:global(.circular-gallery-close:hover) {
+.close:hover {
   opacity: 1;
 }
 
-:global(.circular-gallery-close:focus-visible) {
+.close:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
 
-:global(.circular-gallery-hidden) {
+.hidden {
   position: absolute;
   width: 1px;
   height: 1px;

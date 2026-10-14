@@ -154,7 +154,7 @@ export function buildAssignmentCandidateRows(input: {
         stage: application.stage,
         status: application.status,
         isEligible: result.ok,
-        reason: result.ok ? null : result.reason,
+        reason: result.ok === false ? result.reason : null,
       }
     })
     .sort((a, b) => {

@@ -9,7 +9,7 @@ import esMessages from "@/messages/es.json"
 import { MOCK_IDS } from "@/lib/pruebas/mock-fixtures"
 import { resetMockStore, setMockScenario } from "@/lib/pruebas/mock-service"
 
-const paramsState = {
+const paramsState: { assignmentId: string } = {
   assignmentId: MOCK_IDS.assignmentSofiaPending,
 }
 

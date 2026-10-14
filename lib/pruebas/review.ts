@@ -317,7 +317,7 @@ export function validateReviewDrafts(
   const errors: Record<string, "empty" | "invalid"> = {}
   for (const item of items) {
     const parsed = parseReviewPoints(item.pointsRaw, item.maxPoints)
-    if (!parsed.ok) {
+    if (parsed.ok === false) {
       errors[item.questionId] = parsed.reason
     }
   }

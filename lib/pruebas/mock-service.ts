@@ -661,7 +661,7 @@ export async function assign(input: {
       existingAssignments: store.assignments,
       targetVacancyId: input.vacancyId,
     })
-    if (!result.ok) {
+    if (result.ok === false) {
       failures.push({ applicationId, reason: result.reason })
       continue
     }
@@ -886,7 +886,7 @@ export async function createSession(input: {
     sessionsForAssignment,
     now: MOCK_NOW,
   })
-  if (!start.ok) {
+  if (start.ok === false) {
     throw new MockServiceError(start.reason)
   }
   const attemptNumber = sessionsForAssignment.length + 1

@@ -161,7 +161,7 @@ export function resolveCandidateDemo(
     sessionsForAssignment,
     now: nowIso,
   })
-  if (!start.ok) {
+  if (start.ok === false) {
     if (start.reason === "attempts_exhausted") {
       return { screen: "attempts_exhausted", payload }
     }

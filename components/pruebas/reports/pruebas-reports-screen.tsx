@@ -560,7 +560,7 @@ export function PruebasReportsScreen() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(pageRows as typeof technicalRows).map((row) => (
+                    {(pageRows as unknown as typeof technicalRows).map((row) => (
                       <tr
                         key={row.assignmentId}
                         className="border-b border-border last:border-b-0"
@@ -594,7 +594,7 @@ export function PruebasReportsScreen() {
                 className="flex flex-col gap-3 lg:hidden"
                 data-testid="reports-cards"
               >
-                {(pageRows as typeof technicalRows).map((row) => (
+                {(pageRows as unknown as typeof technicalRows).map((row) => (
                   <li
                     key={row.assignmentId}
                     className="glass-card flex flex-col gap-2 rounded-xl border border-border p-4"
@@ -640,7 +640,7 @@ export function PruebasReportsScreen() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(pageRows as typeof dimensionRows).map((row) => (
+                    {(pageRows as unknown as typeof dimensionRows).map((row) => (
                       <tr
                         key={`${row.assignmentId}-${row.dimension}`}
                         className="border-b border-border last:border-b-0"
@@ -668,7 +668,7 @@ export function PruebasReportsScreen() {
                 className="flex flex-col gap-3 lg:hidden"
                 data-testid="reports-cards"
               >
-                {(pageRows as typeof dimensionRows).map((row) => (
+                {(pageRows as unknown as typeof dimensionRows).map((row) => (
                   <li
                     key={`${row.assignmentId}-${row.dimension}`}
                     className="glass-card flex flex-col gap-2 rounded-xl border border-border p-4"
