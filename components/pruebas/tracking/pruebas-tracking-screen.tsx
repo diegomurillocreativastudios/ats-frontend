@@ -845,6 +845,15 @@ export function PruebasTrackingScreen() {
                   {t("detail.openReview")}
                 </Link>
               ) : null}
+              {selectedRow.status === "completed" ? (
+                <Link
+                  href={`${PRUEBAS_HOME_HREF}/resultados/${selectedRow.assignment.id}`}
+                  className="inline-flex min-h-11 items-center justify-center rounded-md border border-emerald-300 bg-emerald-50 px-4 font-sans text-sm font-medium text-emerald-900 hover:bg-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                  data-testid="tracking-open-result"
+                >
+                  {t("detail.openResult")}
+                </Link>
+              ) : null}
             </div>
 
             {canPerformTrackingAction(selectedRow.actions, "extend") ? (

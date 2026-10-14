@@ -1244,7 +1244,8 @@
         "extendHint": "La date doit être postérieure à l’horloge de démonstration.",
         "simulateFailure": "Simuler un échec de l’opération",
         "openCandidate": "Ouvrir l’expérience candidat",
-        "openReview": "Ouvrir la révision manuelle"
+        "openReview": "Ouvrir la révision manuelle",
+        "openResult": "Voir le résultat"
       },
       "timeline": {
         "title": "Chronologie",
@@ -1379,6 +1380,117 @@
         "retry": "Réessayer",
         "notFoundTitle": "Révision indisponible",
         "notFoundDescription": "Cette affectation n’est pas dans la file de révision ou a déjà été notée."
+      }
+    },
+    "results": {
+      "title": "Résultats",
+      "description": "Consultez les résultats techniques et psychométriques avec des données de démonstration.",
+      "scopeNotice": "Les résultats sont simulés. Ils ne modifient pas le score d’adéquation et ne décident pas d’une embauche.",
+      "count": "{count, plural, one {# résultat} other {# résultats}}",
+      "filteredCount": "{count, plural, one {# visible} other {# visibles}}",
+      "search": "Rechercher",
+      "searchPlaceholder": "Candidat, poste ou évaluation",
+      "filters": {
+        "title": "Filtres",
+        "toggle": "Filtres",
+        "regionLabel": "Filtres des résultats",
+        "vacancy": "Poste",
+        "kind": "Type",
+        "status": "Statut",
+        "assignedFrom": "Assignée du",
+        "assignedTo": "Assignée au",
+        "all": "Tous",
+        "clear": "Effacer les filtres"
+      },
+      "kind": {
+        "technical": "Technique",
+        "psychometric": "Psychométrique"
+      },
+      "status": {
+        "reviewed": "Notée",
+        "pending": "En attente de révision",
+        "no_result": "Sans résultat"
+      },
+      "table": {
+        "candidate": "Candidat",
+        "vacancy": "Poste",
+        "version": "Version",
+        "kind": "Type",
+        "status": "Statut",
+        "score": "Score",
+        "assignedAt": "Assignée",
+        "actions": "Actions",
+        "open": "Voir le résultat",
+        "scoreValue": "{score} / {max}",
+        "scoreEmpty": "—"
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "pageSizeAria": "Taille de page",
+        "regionAria": "Pagination des résultats",
+        "summary": "Page {page} sur {totalPages}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "count": "{count, plural, one {# résultat} other {# résultats}}"
+      },
+      "detail": {
+        "title": "Résultat de {name}",
+        "titleFallback": "Résultat",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToList": "Retour aux résultats",
+        "instructions": "Instructions de l’évaluation",
+        "score": "Score",
+        "scoreValue": "{score} / {max}",
+        "reviewStatus": "Statut de révision",
+        "sessionTime": "Temps de session",
+        "sessionStarted": "Début",
+        "sessionDeadline": "Limite",
+        "sessionMissing": "Aucune session n’est enregistrée dans la démonstration.",
+        "categoriesTitle": "Score par catégorie",
+        "categoriesInsufficient": "Ce résultat de démonstration n’a pas de scores par catégorie.",
+        "dimensionsTitle": "Dimensions de l’instrument",
+        "dimensionsFootnote": "Échelle de l’instrument en démonstration : 0 à 100. Ce n’est pas un pourcentage d’adéquation ni une décision d’embauche.",
+        "dimensionsSummary": "Résumé des dimensions",
+        "questionsTitle": "Réponses",
+        "answer": "Réponse",
+        "noAnswer": "Sans réponse",
+        "verdict": {
+          "correct": "Correct",
+          "incorrect": "Incorrect",
+          "unanswered": "Sans réponse"
+        },
+        "trueFalse": {
+          "true": "Vrai",
+          "false": "Faux"
+        },
+        "likertValue": "Valeur Likert : {value}",
+        "rubric": "Rubrique",
+        "reviewPoints": "Points de révision : {points} / {max}",
+        "reviewNotes": "Observations",
+        "noResultTitle": "Sans résultat",
+        "noResultDescription": "L’affectation est terminée, mais aucun résultat simulé n’est encore associé.",
+        "export": "Exporter",
+        "exportUnavailable": "Disponible lors de la connexion au backend",
+        "viewApplication": "Voir la candidature",
+        "openReview": "Ouvrir la révision manuelle"
+      },
+      "errors": {
+        "generic": "Impossible de terminer l’action de démonstration.",
+        "scenario_error": "Le service simulé a renvoyé une erreur."
+      },
+      "states": {
+        "loading": "Chargement des résultats…",
+        "emptyTitle": "Aucune donnée de démonstration",
+        "emptyDescription": "Le scénario simulé est vide. Réinitialisez les données de démonstration pour continuer.",
+        "listEmptyTitle": "Aucun résultat",
+        "listEmptyDescription": "Il n’y a pas d’affectations terminées avec des résultats dans la démonstration.",
+        "filterEmptyTitle": "Aucun résultat",
+        "filterEmptyDescription": "Aucune ligne ne correspond aux filtres. Ajustez-les ou effacez-les.",
+        "errorTitle": "Impossible de charger les résultats",
+        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "retry": "Réessayer",
+        "notFoundTitle": "Résultat indisponible",
+        "notFoundDescription": "Cette affectation n’existe pas ou n’est pas encore terminée dans la démonstration."
       }
     },
     "candidate": {

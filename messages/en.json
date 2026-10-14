@@ -1244,7 +1244,8 @@
         "extendHint": "The date must be after the demo clock.",
         "simulateFailure": "Simulate operation failure",
         "openCandidate": "Open candidate experience",
-        "openReview": "Open manual review"
+        "openReview": "Open manual review",
+        "openResult": "View result"
       },
       "timeline": {
         "title": "Timeline",
@@ -1379,6 +1380,117 @@
         "retry": "Retry",
         "notFoundTitle": "Review unavailable",
         "notFoundDescription": "This assignment is not in the review queue or was already scored."
+      }
+    },
+    "results": {
+      "title": "Results",
+      "description": "Browse technical and psychometric results with demo data.",
+      "scopeNotice": "Results are simulated. They do not change match score or decide hiring.",
+      "count": "{count, plural, one {# result} other {# results}}",
+      "filteredCount": "{count, plural, one {# visible} other {# visible}}",
+      "search": "Search",
+      "searchPlaceholder": "Candidate, vacancy, or assessment",
+      "filters": {
+        "title": "Filters",
+        "toggle": "Filters",
+        "regionLabel": "Results filters",
+        "vacancy": "Vacancy",
+        "kind": "Type",
+        "status": "Status",
+        "assignedFrom": "Assigned from",
+        "assignedTo": "Assigned to",
+        "all": "All",
+        "clear": "Clear filters"
+      },
+      "kind": {
+        "technical": "Technical",
+        "psychometric": "Psychometric"
+      },
+      "status": {
+        "reviewed": "Reviewed",
+        "pending": "Pending review",
+        "no_result": "No result"
+      },
+      "table": {
+        "candidate": "Candidate",
+        "vacancy": "Vacancy",
+        "version": "Version",
+        "kind": "Type",
+        "status": "Status",
+        "score": "Score",
+        "assignedAt": "Assigned",
+        "actions": "Actions",
+        "open": "View result",
+        "scoreValue": "{score} / {max}",
+        "scoreEmpty": "—"
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Results pagination",
+        "summary": "Page {page} of {totalPages}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# result} other {# results}}"
+      },
+      "detail": {
+        "title": "Result for {name}",
+        "titleFallback": "Result",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToList": "Back to results",
+        "instructions": "Assessment instructions",
+        "score": "Score",
+        "scoreValue": "{score} / {max}",
+        "reviewStatus": "Review status",
+        "sessionTime": "Session time",
+        "sessionStarted": "Started",
+        "sessionDeadline": "Deadline",
+        "sessionMissing": "No session is recorded in the demo.",
+        "categoriesTitle": "Score by category",
+        "categoriesInsufficient": "This demo result has no category scores.",
+        "dimensionsTitle": "Instrument dimensions",
+        "dimensionsFootnote": "Demo instrument scale: 0 to 100. This is not a match percentage or a hiring decision.",
+        "dimensionsSummary": "Dimensions summary",
+        "questionsTitle": "Answers",
+        "answer": "Answer",
+        "noAnswer": "No answer",
+        "verdict": {
+          "correct": "Correct",
+          "incorrect": "Incorrect",
+          "unanswered": "No answer"
+        },
+        "trueFalse": {
+          "true": "True",
+          "false": "False"
+        },
+        "likertValue": "Likert value: {value}",
+        "rubric": "Rubric",
+        "reviewPoints": "Review points: {points} / {max}",
+        "reviewNotes": "Notes",
+        "noResultTitle": "No result",
+        "noResultDescription": "The assignment is completed, but there is no simulated result yet.",
+        "export": "Export",
+        "exportUnavailable": "Available when the backend is connected",
+        "viewApplication": "View application",
+        "openReview": "Open manual review"
+      },
+      "errors": {
+        "generic": "Could not complete the demo action.",
+        "scenario_error": "The simulated service returned an error."
+      },
+      "states": {
+        "loading": "Loading results…",
+        "emptyTitle": "No demo data",
+        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "listEmptyTitle": "No results",
+        "listEmptyDescription": "There are no completed assignments with results in the demo.",
+        "filterEmptyTitle": "No matches",
+        "filterEmptyDescription": "No rows match the filters. Adjust or clear them.",
+        "errorTitle": "Could not load results",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry",
+        "notFoundTitle": "Result unavailable",
+        "notFoundDescription": "This assignment does not exist or is not completed in the demo."
       }
     },
     "candidate": {

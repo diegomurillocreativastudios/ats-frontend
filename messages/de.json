@@ -1244,7 +1244,8 @@
         "extendHint": "Das Datum muss nach der Demo-Uhr liegen.",
         "simulateFailure": "Fehler der Operation simulieren",
         "openCandidate": "Kandidatenerfahrung öffnen",
-        "openReview": "Manuelle Bewertung öffnen"
+        "openReview": "Manuelle Bewertung öffnen",
+        "openResult": "Ergebnis ansehen"
       },
       "timeline": {
         "title": "Zeitlinie",
@@ -1379,6 +1380,117 @@
         "retry": "Erneut versuchen",
         "notFoundTitle": "Bewertung nicht verfügbar",
         "notFoundDescription": "Diese Zuweisung ist nicht in der Warteschlange oder wurde bereits bewertet."
+      }
+    },
+    "results": {
+      "title": "Ergebnisse",
+      "description": "Technische und psychometrische Ergebnisse mit Demo-Daten ansehen.",
+      "scopeNotice": "Ergebnisse sind simuliert. Sie ändern keinen Match-Score und entscheiden keine Einstellung.",
+      "count": "{count, plural, one {# Ergebnis} other {# Ergebnisse}}",
+      "filteredCount": "{count, plural, one {# sichtbar} other {# sichtbar}}",
+      "search": "Suchen",
+      "searchPlaceholder": "Kandidat, Stelle oder Bewertung",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Ergebnisfilter",
+        "vacancy": "Stelle",
+        "kind": "Typ",
+        "status": "Status",
+        "assignedFrom": "Zugewiesen von",
+        "assignedTo": "Zugewiesen bis",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen"
+      },
+      "kind": {
+        "technical": "Technisch",
+        "psychometric": "Psychometrisch"
+      },
+      "status": {
+        "reviewed": "Bewertet",
+        "pending": "Bewertung ausstehend",
+        "no_result": "Kein Ergebnis"
+      },
+      "table": {
+        "candidate": "Kandidat",
+        "vacancy": "Stelle",
+        "version": "Version",
+        "kind": "Typ",
+        "status": "Status",
+        "score": "Punktzahl",
+        "assignedAt": "Zugewiesen",
+        "actions": "Aktionen",
+        "open": "Ergebnis ansehen",
+        "scoreValue": "{score} / {max}",
+        "scoreEmpty": "—"
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Ergebnispaginierung",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Ergebnis} other {# Ergebnisse}}"
+      },
+      "detail": {
+        "title": "Ergebnis für {name}",
+        "titleFallback": "Ergebnis",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToList": "Zurück zu Ergebnissen",
+        "instructions": "Anweisungen der Bewertung",
+        "score": "Punktzahl",
+        "scoreValue": "{score} / {max}",
+        "reviewStatus": "Bewertungsstatus",
+        "sessionTime": "Sitzungszeit",
+        "sessionStarted": "Start",
+        "sessionDeadline": "Frist",
+        "sessionMissing": "In der Demo ist keine Sitzung erfasst.",
+        "categoriesTitle": "Punktzahl nach Kategorie",
+        "categoriesInsufficient": "Dieses Demo-Ergebnis hat keine Kategoriepunktzahlen.",
+        "dimensionsTitle": "Instrumentdimensionen",
+        "dimensionsFootnote": "Demo-Instrumentenskala: 0 bis 100. Kein Eignungsprozentsatz und keine Einstellungsentscheidung.",
+        "dimensionsSummary": "Zusammenfassung der Dimensionen",
+        "questionsTitle": "Antworten",
+        "answer": "Antwort",
+        "noAnswer": "Keine Antwort",
+        "verdict": {
+          "correct": "Richtig",
+          "incorrect": "Falsch",
+          "unanswered": "Keine Antwort"
+        },
+        "trueFalse": {
+          "true": "Wahr",
+          "false": "Falsch"
+        },
+        "likertValue": "Likert-Wert: {value}",
+        "rubric": "Rubrik",
+        "reviewPoints": "Bewertungspunkte: {points} / {max}",
+        "reviewNotes": "Anmerkungen",
+        "noResultTitle": "Kein Ergebnis",
+        "noResultDescription": "Die Zuweisung ist abgeschlossen, aber es gibt noch kein simuliertes Ergebnis.",
+        "export": "Exportieren",
+        "exportUnavailable": "Verfügbar nach Backend-Anbindung",
+        "viewApplication": "Bewerbung ansehen",
+        "openReview": "Manuelle Bewertung öffnen"
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben."
+      },
+      "states": {
+        "loading": "Ergebnisse werden geladen…",
+        "emptyTitle": "Keine Demo-Daten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demo-Daten zurück, um fortzufahren.",
+        "listEmptyTitle": "Keine Ergebnisse",
+        "listEmptyDescription": "Es gibt keine abgeschlossenen Zuweisungen mit Ergebnissen in der Demo.",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zeile entspricht den Filtern. Passe sie an oder setze sie zurück.",
+        "errorTitle": "Ergebnisse konnten nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "notFoundTitle": "Ergebnis nicht verfügbar",
+        "notFoundDescription": "Diese Zuweisung existiert nicht oder ist in der Demo noch nicht abgeschlossen."
       }
     },
     "candidate": {

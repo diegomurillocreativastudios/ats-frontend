@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-11 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento + experiencia candidato demo + cola de revisión manual).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-12 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento + experiencia candidato demo + cola de revisión manual + resultados técnicos y psicométricos).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -324,14 +324,14 @@ hooks/pruebas/
 
 ### Fase UI-12 — Resultados técnicos y psicométricos
 
-- [ ] `/resultados`: listado de resultados y filtros por vacante, candidato, tipo, fecha y estado.
-- [ ] `/resultados/[assignmentId]`: detalle según evaluación técnica o psicométrica.
-- [ ] Técnicos: puntuación, máximo, categorías, aciertos/errores donde proceda, tiempo, rúbrica y revisión.
-- [ ] Psicométricos: dimensiones con escala claramente definida, instrumento y versión; sin semáforo de contratación, sin porcentaje de idoneidad y **sin modificar MatchScore**.
-- [ ] Gráficas con Recharts; leyenda, alternativa textual y consistencia numérica entre breakpoints.
-- [ ] Acción de "Ver postulación" a ubicación real (o pantalla mock indicada), retorno a RRHH.
-- [ ] Casos sin resultado, pendiente de revisión, datos insuficientes y error.
-- [ ] Responsive y exportación **no real** (control deshabilitado claramente o vista previa mock explícita).
+- [x] `/resultados`: listado de resultados y filtros por vacante, candidato, tipo, fecha y estado. 2026-10-13: `PruebasResultsListScreen` + `lib/pruebas/results.ts`; solo asignaciones `completed`.
+- [x] `/resultados/[assignmentId]`: detalle según evaluación técnica o psicométrica. `PruebasResultsDetailScreen`.
+- [x] Técnicos: puntuación, máximo, categorías, aciertos/errores donde proceda, tiempo, rúbrica y revisión. Fixture Diego 12/20; categorías insuficientes si no hay `categoryScores`.
+- [x] Psicométricos: dimensiones con escala claramente definida, instrumento y versión; sin semáforo de contratación, sin porcentaje de idoneidad y **sin modificar MatchScore**. Sofía 81/72/65/70; pie escala 0–100.
+- [x] Gráficas con Recharts; leyenda, alternativa textual y consistencia numérica entre breakpoints. `PruebasResultsScoreChart`.
+- [x] Acción de "Ver postulación" a ubicación real (o pantalla mock indicada), retorno a RRHH. Enlace a `/portal-rrhh/vacantes/{vacancyId}`; seguimiento enlaza al detalle si `completed`.
+- [x] Casos sin resultado, pendiente de revisión, datos insuficientes y error. Lucía sin resultado; Diego pendiente; escenario `error`.
+- [x] Responsive y exportación **no real** (control deshabilitado claramente o vista previa mock explícita). Exportar deshabilitado con copy de backend.
 
 **Criterio:** los resultados corresponden a la versión/answers del fixture; no afirmar decisiones automáticas de contratación.
 
@@ -389,8 +389,8 @@ hooks/pruebas/
 | Asignación | `/portal-pruebas/asignaciones/nueva` | ☑ | ☑ | ☑ | eligible/empty/conflict/success |
 | Seguimiento | `/portal-pruebas/seguimiento` | ☑ | ☑ | ☑ | statuses/actions |
 | Revisión manual | `/portal-pruebas/revision/[assignmentId]` | ☑ | ☑ | ☑ | pending/reviewed |
-| Resultados técnicos | `/portal-pruebas/resultados/[assignmentId]` | ☐ | ☐ | ☐ | scored/no result |
-| Resultados psicométricos | `/portal-pruebas/resultados/[assignmentId]` | ☐ | ☐ | ☐ | dimensions |
+| Resultados técnicos | `/portal-pruebas/resultados/[assignmentId]` | ☑ | ☑ | ☑ | scored/no result |
+| Resultados psicométricos | `/portal-pruebas/resultados/[assignmentId]` | ☑ | ☑ | ☑ | dimensions |
 | Reportes | `/portal-pruebas/reportes` | ☐ | ☐ | ☐ | loading/empty/error |
 | Candidato bienvenida | `/pruebas/[demoToken]` (demo) | ☑ | ☑ | ☑ | eligible/invalid |
 | Candidato resolver/enviar | `/pruebas/[demoToken]` (demo) | ☑ | ☑ | ☑ | in-progress/submit |
@@ -472,3 +472,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - UI-09 reemplazó el placeholder de seguimiento con lista, detalle modal y acciones simuladas; `tracking.ts` + `trackingEvents`; sin BFF.
 - UI-10 añadió `/pruebas/[demoToken]` (sesión staff, sin sidebar), `candidate-session.ts`, `saveSessionAnswers` y enlace desde seguimiento; sin excepción pública ni BFF.
 - UI-11 reemplazó el placeholder de revisión con cola y ficha; `review.ts` + `saveReviewDrafts`/`finishReview`; sesión sembrada de Diego; sin BFF.
+- UI-12 reemplazó el placeholder de resultados con listado y detalle técnico/psicométrico; `results.ts` + enlace desde seguimiento; sin BFF.

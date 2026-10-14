@@ -135,7 +135,7 @@ describe("PruebasTrackingScreen UI", () => {
     ).toBe("cancelled")
   })
 
-  it("links Diego pending review to the manual review detail", async () => {
+  it("links Diego pending review to the manual review detail and results", async () => {
     renderWithIntl(<PruebasTrackingScreen />)
     await openAssignment(MOCK_IDS.assignmentDiegoPendingReview)
 
@@ -143,6 +143,10 @@ describe("PruebasTrackingScreen UI", () => {
     expect(reviewLink).toHaveAttribute(
       "href",
       `/portal-pruebas/revision/${MOCK_IDS.assignmentDiegoPendingReview}`,
+    )
+    expect(screen.getByTestId("tracking-open-result")).toHaveAttribute(
+      "href",
+      `/portal-pruebas/resultados/${MOCK_IDS.assignmentDiegoPendingReview}`,
     )
   })
 
