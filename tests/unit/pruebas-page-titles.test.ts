@@ -5,7 +5,7 @@ import { getPageTitle } from "@/lib/pageTitles"
 describe("getPageTitle — Portal Pruebas", () => {
   it("titula el dashboard del portal", () => {
     expect(getPageTitle("/portal-pruebas")).toBe(
-      "ApplicanTree | Portal Pruebas | Dashboard",
+      "ApplicanTree | Portal Pruebas | Inicio",
     )
   })
 

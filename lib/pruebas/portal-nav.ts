@@ -1,7 +1,7 @@
 export const PRUEBAS_HOME_HREF = "/portal-pruebas"
 
 export type PruebasNavKey =
-  | "dashboard"
+  | "home"
   | "evaluations"
   | "questions"
   | "links"
@@ -30,7 +30,7 @@ export const PRUEBAS_NAV_GROUPS: readonly PruebasNavGroup[] = [
     id: "home",
     groupKey: "home",
     items: [
-      { href: PRUEBAS_HOME_HREF, navKey: "dashboard", exact: true },
+      { href: PRUEBAS_HOME_HREF, navKey: "home", exact: true },
     ],
   },
   {

@@ -41,7 +41,11 @@ describe("PruebasSidebar", () => {
     renderSidebar()
 
     const menu = screen.getByRole("navigation", { name: "Menú pruebas" })
-    expect(within(menu).getByRole("group", { name: "Inicio" })).toBeInTheDocument()
+    expect(within(menu).queryByRole("group", { name: "Inicio" })).not.toBeInTheDocument()
+    expect(within(menu).getByRole("link", { name: "Inicio" })).toHaveAttribute(
+      "href",
+      "/portal-pruebas",
+    )
     expect(within(menu).getByRole("group", { name: "Contenido" })).toBeInTheDocument()
     expect(within(menu).getByRole("group", { name: "Operación" })).toBeInTheDocument()
     expect(within(menu).getByRole("group", { name: "Cierre" })).toBeInTheDocument()
@@ -55,12 +59,12 @@ describe("PruebasSidebar", () => {
     }
   })
 
-  it("marca Dashboard activo solo en la ruta exacta del portal", () => {
+  it("marca Inicio activo solo en la ruta exacta del portal", () => {
     renderSidebar()
 
     const menu = screen.getByRole("navigation", { name: "Menú pruebas" })
     expect(
-      within(menu).getByRole("link", { name: "Dashboard" }),
+      within(menu).getByRole("link", { name: "Inicio" }),
     ).toHaveAttribute("aria-current", "page")
     expect(
       within(menu).getByRole("link", { name: "Evaluaciones" }),
@@ -76,7 +80,7 @@ describe("PruebasSidebar", () => {
       within(menu).getByRole("link", { name: "Evaluaciones" }),
     ).toHaveAttribute("aria-current", "page")
     expect(
-      within(menu).getByRole("link", { name: "Dashboard" }),
+      within(menu).getByRole("link", { name: "Inicio" }),
     ).not.toHaveAttribute("aria-current")
   })
 })

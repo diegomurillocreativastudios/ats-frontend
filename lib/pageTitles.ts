@@ -278,7 +278,7 @@ function titlePortalPruebas(normalizedPath) {
   const rest = normalizedPath.slice(prefix.length)
   const segs = rest.split("/").filter(Boolean)
   if (segs.length === 0) {
-    return joinDocumentTitle(BASE_TITLE, PORTAL_PRUEBAS, "Dashboard")
+    return joinDocumentTitle(BASE_TITLE, PORTAL_PRUEBAS, "Inicio")
   }
 
   const labels = []
@@ -287,7 +287,7 @@ function titlePortalPruebas(normalizedPath) {
     labels.push(PRUEBAS_PATH_LABEL[s] ?? segmentToTitle(s))
   }
   if (labels.length === 0) {
-    return joinDocumentTitle(BASE_TITLE, PORTAL_PRUEBAS, "Dashboard")
+    return joinDocumentTitle(BASE_TITLE, PORTAL_PRUEBAS, "Inicio")
   }
   return joinDocumentTitle(BASE_TITLE, PORTAL_PRUEBAS, ...labels)
 }

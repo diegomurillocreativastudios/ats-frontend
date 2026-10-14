@@ -41,7 +41,7 @@ export function PruebasTopbar({ variant = "desktop" }: PruebasTopbarProps) {
   const navKey = resolvePruebasNavKey(pathname)
   const breadcrumbLabel = navKey
     ? tPortal(`nav.${navKey}`)
-    : tPortal("nav.dashboard")
+    : tPortal("nav.home")
   const pageTrail: TopbarCrumb[] = [{ label: breadcrumbLabel }]
 
   const paddingClass =
