@@ -102,14 +102,16 @@ describe("PruebasAssignmentsScreen UI", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("marks only Sofía eligible and rejects a batch that includes a duplicate", async () => {
+  it("marks Sofía and Nora eligible and assigns Sofía in demo mode", async () => {
     const before = (await listAssignments()).length
     renderWithIntl(<PruebasAssignmentsScreen />)
     await selectOpenVacancyAndTechnicalVersion()
 
     const sofiaCheck = screen.getByTestId(`assignment-check-${MOCK_IDS.appSofia}`)
+    const noraCheck = screen.getByTestId(`assignment-check-${MOCK_IDS.appNora}`)
     const mariaCheck = screen.getByTestId(`assignment-check-${MOCK_IDS.appMaria}`)
     expect(sofiaCheck).not.toBeDisabled()
+    expect(noraCheck).not.toBeDisabled()
     expect(mariaCheck).toBeDisabled()
 
     fireEvent.click(sofiaCheck)

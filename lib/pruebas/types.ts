@@ -33,6 +33,20 @@ export type QuestionKind =
 
 export type SessionStatus = "in_progress" | "submitted" | "expired"
 
+export type TrackingAction = "remind" | "cancel" | "extend" | "retry"
+
+export type TrackingEventKind =
+  | "reminded"
+  | "cancelled"
+  | "extended"
+  | "retried"
+
+/** Visible only when assignment.status === "completed". */
+export type TrackingQualificationLabel =
+  | "answers_submitted"
+  | "pending_review"
+  | "reviewed"
+
 export type MockScenario = "populated" | "empty" | "error" | "loading"
 
 export type EligibilityReason =
@@ -209,6 +223,14 @@ export interface MockReview {
   status: ReviewStatus
 }
 
+export interface MockTrackingEvent {
+  id: string
+  assignmentId: string
+  kind: TrackingEventKind
+  at: string
+  detail?: string
+}
+
 export interface MockPruebasStore {
   companies: MockCompany[]
   vacancies: MockVacancy[]
@@ -222,6 +244,7 @@ export interface MockPruebasStore {
   sessions: MockSession[]
   results: MockResult[]
   reviews: MockReview[]
+  trackingEvents: MockTrackingEvent[]
 }
 
 export type EligibilityResult =

@@ -1180,6 +1180,119 @@
         "noApplicationsTitle": "Keine Bewerbungen",
         "noApplicationsDescription": "Für diese Stelle gibt es in der Demo keine Bewerbungen."
       }
+    },
+    "tracking": {
+      "title": "Nachverfolgung",
+      "description": "Prüfe den Status der Zuweisungen und verwalte Fristen oder Wiederholungen im Demo-Modus.",
+      "scopeNotice": "Nachverfolgungsaktionen sind simuliert. Eine Erinnerung sendet keine echte E-Mail.",
+      "search": "Suchen",
+      "searchPlaceholder": "Kandidat, Stelle oder Bewertung",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Filter der Nachverfolgung",
+        "status": "Zuweisungsstatus",
+        "qualification": "Bewertung",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen"
+      },
+      "status": {
+        "pending": "Ausstehend",
+        "in_progress": "In Bearbeitung",
+        "completed": "Abgeschlossen",
+        "expired": "Abgelaufen",
+        "cancelled": "Abgebrochen"
+      },
+      "qualification": {
+        "answers_submitted": "Abgeschlossen",
+        "pending_review": "Prüfung ausstehend",
+        "reviewed": "Bewertet"
+      },
+      "table": {
+        "candidate": "Kandidat",
+        "vacancy": "Stelle",
+        "version": "Version",
+        "status": "Status",
+        "expiresAt": "Läuft ab",
+        "actions": "Aktionen",
+        "open": "Details anzeigen"
+      },
+      "actions": {
+        "remind": "Erinnern",
+        "cancel": "Abbrechen",
+        "extend": "Frist verlängern",
+        "retry": "Wiederholung erlauben"
+      },
+      "detail": {
+        "title": "Nachverfolgung von {name}",
+        "titleFallback": "Zuweisungsdetails",
+        "close": "Schließen",
+        "vacancy": "Stelle",
+        "version": "Version",
+        "assignedAt": "Zugewiesen",
+        "expiresAt": "Läuft ab",
+        "attempts": "Versuche",
+        "attemptsValue": "{used} von {allowed}",
+        "status": "Status",
+        "applicationInactive": "Die Bewerbung ist nicht mehr aktiv. Abbrechen ist nur bei zulässigem Status möglich.",
+        "applicationFinal": "Die Bewerbung ist in einem Endstatus. Abbrechen ist nur bei zulässigem Status möglich.",
+        "extendDate": "Neues Ablaufdatum",
+        "extendHint": "Das Datum muss nach der Demo-Uhr liegen.",
+        "simulateFailure": "Fehler der Operation simulieren"
+      },
+      "timeline": {
+        "title": "Zeitlinie",
+        "empty": "In der Demo wurden noch keine Aktionen erfasst.",
+        "kind": {
+          "reminded": "Simulierte Erinnerung",
+          "cancelled": "Zuweisung abgebrochen",
+          "extended": "Frist verlängert",
+          "retried": "Wiederholung erlaubt"
+        }
+      },
+      "confirm": {
+        "cancelTitle": "Zuweisung abbrechen",
+        "cancelDescription": "Du brichst die Zuweisung von {name} ab. Die Zeile bleibt in der Demo erhalten.",
+        "cancelConfirm": "Zuweisung abbrechen",
+        "extendTitle": "Frist verlängern",
+        "extendDescription": "Du verlängerst die Frist von {name} auf {date}. War sie abgelaufen, wird sie wieder ausstehend.",
+        "extendConfirm": "Verlängern",
+        "dismiss": "Zurück"
+      },
+      "toasts": {
+        "reminded": "Erinnerung im Demo-Modus erfasst. Es wurde keine E-Mail gesendet.",
+        "cancelled": "Zuweisung im Demo-Modus abgebrochen.",
+        "extended": "Frist im Demo-Modus verlängert.",
+        "retried": "Wiederholung im Demo-Modus erlaubt.",
+        "simulatedFailure": "Die Operation ist simuliert fehlgeschlagen. Es wurden keine Änderungen übernommen."
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "not_found": "Die Zuweisung wurde nicht gefunden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "action_not_allowed": "Diese Aktion ist im aktuellen Status nicht verfügbar.",
+        "application_closed": "Die Bewerbung ist für diese Aktion geschlossen.",
+        "invalid_expires_at": "Das Ablaufdatum ist in der Demo ungültig."
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Paginierung der Nachverfolgung",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Zuweisung} other {# Zuweisungen}}"
+      },
+      "states": {
+        "loading": "Nachverfolgung wird geladen…",
+        "emptyTitle": "Keine Demo-Daten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demo-Daten zurück, um fortzufahren.",
+        "errorTitle": "Nachverfolgung konnte nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zuweisung entspricht den Filtern. Passe die Filter an oder setze sie zurück."
+      }
     }
   },
   "CandidatePortal": {

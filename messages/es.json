@@ -1180,6 +1180,119 @@
         "noApplicationsTitle": "Sin postulaciones",
         "noApplicationsDescription": "No hay postulaciones a esta vacante en la demostración."
       }
+    },
+    "tracking": {
+      "title": "Seguimiento",
+      "description": "Consulta el estado de las asignaciones y gestiona plazos o reintentos en modo demostración.",
+      "scopeNotice": "Las acciones de seguimiento son simuladas. Un recordatorio no envía correo real.",
+      "search": "Buscar",
+      "searchPlaceholder": "Candidato, vacante o evaluación",
+      "filters": {
+        "title": "Filtros",
+        "toggle": "Filtros",
+        "regionLabel": "Filtros de seguimiento",
+        "status": "Estado de asignación",
+        "qualification": "Calificación",
+        "all": "Todos",
+        "clear": "Limpiar filtros"
+      },
+      "status": {
+        "pending": "Pendiente",
+        "in_progress": "En progreso",
+        "completed": "Completada",
+        "expired": "Vencida",
+        "cancelled": "Cancelada"
+      },
+      "qualification": {
+        "answers_submitted": "Completada",
+        "pending_review": "Pendiente de revisión",
+        "reviewed": "Calificada"
+      },
+      "table": {
+        "candidate": "Candidato",
+        "vacancy": "Vacante",
+        "version": "Versión",
+        "status": "Estado",
+        "expiresAt": "Vence",
+        "actions": "Acciones",
+        "open": "Ver detalle"
+      },
+      "actions": {
+        "remind": "Recordar",
+        "cancel": "Cancelar",
+        "extend": "Ampliar plazo",
+        "retry": "Autorizar reintento"
+      },
+      "detail": {
+        "title": "Seguimiento de {name}",
+        "titleFallback": "Detalle de asignación",
+        "close": "Cerrar",
+        "vacancy": "Vacante",
+        "version": "Versión",
+        "assignedAt": "Asignada",
+        "expiresAt": "Vence",
+        "attempts": "Intentos",
+        "attemptsValue": "{used} de {allowed}",
+        "status": "Estado",
+        "applicationInactive": "La postulación ya no está activa. Solo puedes cancelar si el estado lo permite.",
+        "applicationFinal": "La postulación está en un estado final. Solo puedes cancelar si el estado lo permite.",
+        "extendDate": "Nueva fecha de vencimiento",
+        "extendHint": "La fecha debe ser posterior al reloj de demostración.",
+        "simulateFailure": "Simular fallo de la operación"
+      },
+      "timeline": {
+        "title": "Línea de tiempo",
+        "empty": "Aún no hay acciones registradas en la demostración.",
+        "kind": {
+          "reminded": "Recordatorio simulado",
+          "cancelled": "Asignación cancelada",
+          "extended": "Plazo ampliado",
+          "retried": "Reintento autorizado"
+        }
+      },
+      "confirm": {
+        "cancelTitle": "Cancelar asignación",
+        "cancelDescription": "Vas a cancelar la asignación de {name}. La fila se conserva en la demostración.",
+        "cancelConfirm": "Cancelar asignación",
+        "extendTitle": "Ampliar plazo",
+        "extendDescription": "Vas a ampliar el vencimiento de {name} al {date}. Si estaba vencida, vuelve a pendiente.",
+        "extendConfirm": "Ampliar",
+        "dismiss": "Volver"
+      },
+      "toasts": {
+        "reminded": "Recordatorio registrado en modo demostración. No se envió ningún correo.",
+        "cancelled": "Asignación cancelada en modo demostración.",
+        "extended": "Plazo ampliado en modo demostración.",
+        "retried": "Reintento autorizado en modo demostración.",
+        "simulatedFailure": "La operación falló de forma simulada. Ningún cambio se aplicó."
+      },
+      "errors": {
+        "generic": "No se pudo completar la acción de demostración.",
+        "not_found": "No se encontró la asignación.",
+        "scenario_error": "El servicio simulado devolvió un error.",
+        "action_not_allowed": "Esa acción no está disponible en el estado actual.",
+        "application_closed": "La postulación está cerrada para esta acción.",
+        "invalid_expires_at": "La fecha de vencimiento no es válida en la demostración."
+      },
+      "pagination": {
+        "perPage": "Por página",
+        "pageSizeAria": "Tamaño de página",
+        "regionAria": "Paginación de seguimiento",
+        "summary": "Página {page} de {totalPages}",
+        "prev": "Anterior",
+        "next": "Siguiente",
+        "count": "{count, plural, one {# asignación} other {# asignaciones}}"
+      },
+      "states": {
+        "loading": "Cargando seguimiento…",
+        "emptyTitle": "No hay datos de demostración",
+        "emptyDescription": "El escenario simulado está vacío. Restablece los datos de demostración para continuar.",
+        "errorTitle": "No se pudo cargar el seguimiento",
+        "errorDescription": "El servicio simulado devolvió un error. Intenta de nuevo.",
+        "retry": "Reintentar",
+        "filterEmptyTitle": "Sin coincidencias",
+        "filterEmptyDescription": "Ninguna asignación cumple los filtros. Ajusta o limpia los filtros."
+      }
     }
   },
   "CandidatePortal": {

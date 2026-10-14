@@ -1180,6 +1180,119 @@
         "noApplicationsTitle": "Nessuna candidatura",
         "noApplicationsDescription": "Non ci sono candidature per questa posizione nella demo."
       }
+    },
+    "tracking": {
+      "title": "Monitoraggio",
+      "description": "Consulta lo stato delle assegnazioni e gestisci scadenze o nuovi tentativi in modalità dimostrazione.",
+      "scopeNotice": "Le azioni di monitoraggio sono simulate. Un promemoria non invia un’e-mail reale.",
+      "search": "Cerca",
+      "searchPlaceholder": "Candidato, posizione o valutazione",
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri del monitoraggio",
+        "status": "Stato dell’assegnazione",
+        "qualification": "Qualificazione",
+        "all": "Tutti",
+        "clear": "Cancella filtri"
+      },
+      "status": {
+        "pending": "In attesa",
+        "in_progress": "In corso",
+        "completed": "Completata",
+        "expired": "Scaduta",
+        "cancelled": "Annullata"
+      },
+      "qualification": {
+        "answers_submitted": "Completata",
+        "pending_review": "In attesa di revisione",
+        "reviewed": "Valutata"
+      },
+      "table": {
+        "candidate": "Candidato",
+        "vacancy": "Posizione",
+        "version": "Versione",
+        "status": "Stato",
+        "expiresAt": "Scade",
+        "actions": "Azioni",
+        "open": "Vedi dettaglio"
+      },
+      "actions": {
+        "remind": "Promemoria",
+        "cancel": "Annulla",
+        "extend": "Prolunga scadenza",
+        "retry": "Autorizza nuovo tentativo"
+      },
+      "detail": {
+        "title": "Monitoraggio di {name}",
+        "titleFallback": "Dettaglio assegnazione",
+        "close": "Chiudi",
+        "vacancy": "Posizione",
+        "version": "Versione",
+        "assignedAt": "Assegnata",
+        "expiresAt": "Scade",
+        "attempts": "Tentativi",
+        "attemptsValue": "{used} di {allowed}",
+        "status": "Stato",
+        "applicationInactive": "La candidatura non è più attiva. Puoi annullare solo se lo stato lo consente.",
+        "applicationFinal": "La candidatura è in uno stato finale. Puoi annullare solo se lo stato lo consente.",
+        "extendDate": "Nuova data di scadenza",
+        "extendHint": "La data deve essere successiva all’orologio della demo.",
+        "simulateFailure": "Simula errore dell’operazione"
+      },
+      "timeline": {
+        "title": "Cronologia",
+        "empty": "Non ci sono ancora azioni registrate nella demo.",
+        "kind": {
+          "reminded": "Promemoria simulato",
+          "cancelled": "Assegnazione annullata",
+          "extended": "Scadenza prolungata",
+          "retried": "Nuovo tentativo autorizzato"
+        }
+      },
+      "confirm": {
+        "cancelTitle": "Annulla assegnazione",
+        "cancelDescription": "Stai per annullare l’assegnazione di {name}. La riga resta nella demo.",
+        "cancelConfirm": "Annulla assegnazione",
+        "extendTitle": "Prolunga scadenza",
+        "extendDescription": "Stai per prolungare la scadenza di {name} al {date}. Se era scaduta, torna in attesa.",
+        "extendConfirm": "Prolunga",
+        "dismiss": "Indietro"
+      },
+      "toasts": {
+        "reminded": "Promemoria registrato in modalità dimostrazione. Non è stata inviata alcuna e-mail.",
+        "cancelled": "Assegnazione annullata in modalità dimostrazione.",
+        "extended": "Scadenza prolungata in modalità dimostrazione.",
+        "retried": "Nuovo tentativo autorizzato in modalità dimostrazione.",
+        "simulatedFailure": "L’operazione è fallita in modo simulato. Non è stata applicata alcuna modifica."
+      },
+      "errors": {
+        "generic": "Non è stato possibile completare l’azione di dimostrazione.",
+        "not_found": "Assegnazione non trovata.",
+        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "action_not_allowed": "Questa azione non è disponibile nello stato attuale.",
+        "application_closed": "La candidatura è chiusa per questa azione.",
+        "invalid_expires_at": "La data di scadenza non è valida nella demo."
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione del monitoraggio",
+        "summary": "Pagina {page} di {totalPages}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# assegnazione} other {# assegnazioni}}"
+      },
+      "states": {
+        "loading": "Caricamento del monitoraggio…",
+        "emptyTitle": "Nessun dato di dimostrazione",
+        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati di dimostrazione per continuare.",
+        "errorTitle": "Impossibile caricare il monitoraggio",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna assegnazione soddisfa i filtri. Modifica o cancella i filtri."
+      }
     }
   },
   "CandidatePortal": {

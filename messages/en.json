@@ -1180,6 +1180,119 @@
         "noApplicationsTitle": "No applications",
         "noApplicationsDescription": "There are no applications for this vacancy in the demo."
       }
+    },
+    "tracking": {
+      "title": "Tracking",
+      "description": "Review assignment status and manage deadlines or retries in demo mode.",
+      "scopeNotice": "Tracking actions are simulated. A reminder does not send a real email.",
+      "search": "Search",
+      "searchPlaceholder": "Candidate, vacancy, or assessment",
+      "filters": {
+        "title": "Filters",
+        "toggle": "Filters",
+        "regionLabel": "Tracking filters",
+        "status": "Assignment status",
+        "qualification": "Qualification",
+        "all": "All",
+        "clear": "Clear filters"
+      },
+      "status": {
+        "pending": "Pending",
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      },
+      "qualification": {
+        "answers_submitted": "Completed",
+        "pending_review": "Pending review",
+        "reviewed": "Scored"
+      },
+      "table": {
+        "candidate": "Candidate",
+        "vacancy": "Vacancy",
+        "version": "Version",
+        "status": "Status",
+        "expiresAt": "Expires",
+        "actions": "Actions",
+        "open": "View details"
+      },
+      "actions": {
+        "remind": "Remind",
+        "cancel": "Cancel",
+        "extend": "Extend deadline",
+        "retry": "Authorize retry"
+      },
+      "detail": {
+        "title": "Tracking for {name}",
+        "titleFallback": "Assignment details",
+        "close": "Close",
+        "vacancy": "Vacancy",
+        "version": "Version",
+        "assignedAt": "Assigned",
+        "expiresAt": "Expires",
+        "attempts": "Attempts",
+        "attemptsValue": "{used} of {allowed}",
+        "status": "Status",
+        "applicationInactive": "The application is no longer active. You can only cancel when the status allows it.",
+        "applicationFinal": "The application is in a final status. You can only cancel when the status allows it.",
+        "extendDate": "New expiry date",
+        "extendHint": "The date must be after the demo clock.",
+        "simulateFailure": "Simulate operation failure"
+      },
+      "timeline": {
+        "title": "Timeline",
+        "empty": "No actions have been recorded in the demo yet.",
+        "kind": {
+          "reminded": "Simulated reminder",
+          "cancelled": "Assignment cancelled",
+          "extended": "Deadline extended",
+          "retried": "Retry authorized"
+        }
+      },
+      "confirm": {
+        "cancelTitle": "Cancel assignment",
+        "cancelDescription": "You are about to cancel the assignment for {name}. The row is kept in the demo.",
+        "cancelConfirm": "Cancel assignment",
+        "extendTitle": "Extend deadline",
+        "extendDescription": "You are about to extend the deadline for {name} to {date}. If it was expired, it returns to pending.",
+        "extendConfirm": "Extend",
+        "dismiss": "Back"
+      },
+      "toasts": {
+        "reminded": "Reminder recorded in demo mode. No email was sent.",
+        "cancelled": "Assignment cancelled in demo mode.",
+        "extended": "Deadline extended in demo mode.",
+        "retried": "Retry authorized in demo mode.",
+        "simulatedFailure": "The operation failed in a simulated way. No changes were applied."
+      },
+      "errors": {
+        "generic": "The demo action could not be completed.",
+        "not_found": "The assignment was not found.",
+        "scenario_error": "The simulated service returned an error.",
+        "action_not_allowed": "That action is not available in the current status.",
+        "application_closed": "The application is closed for this action.",
+        "invalid_expires_at": "The expiry date is not valid in the demo."
+      },
+      "pagination": {
+        "perPage": "Per page",
+        "pageSizeAria": "Page size",
+        "regionAria": "Tracking pagination",
+        "summary": "Page {page} of {totalPages}",
+        "prev": "Previous",
+        "next": "Next",
+        "count": "{count, plural, one {# assignment} other {# assignments}}"
+      },
+      "states": {
+        "loading": "Loading tracking…",
+        "emptyTitle": "No demo data",
+        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "errorTitle": "Could not load tracking",
+        "errorDescription": "The simulated service returned an error. Try again.",
+        "retry": "Retry",
+        "filterEmptyTitle": "No matches",
+        "filterEmptyDescription": "No assignments match the filters. Adjust or clear the filters."
+      }
     }
   },
   "CandidatePortal": {

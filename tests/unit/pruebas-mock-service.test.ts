@@ -5,12 +5,14 @@ import { blankQuestion } from "@/lib/pruebas/question-editor"
 import {
   MockServiceError,
   assign,
+  cancelAssignment,
   createCompatibleQuestion,
   createLink,
   createQuestion,
   debugSnapshotStore,
   duplicateTest,
   editPublishedTest,
+  extendAssignment,
   getQuestion,
   getTest,
   isQuestionUsedByPublishedVersion,
@@ -19,7 +21,9 @@ import {
   listTests,
   listVersions,
   publishTest,
+  remindAssignment,
   resetMockStore,
+  retryAssignment,
   setLinkActive,
   setMockScenario,
   updateDraftTest,
@@ -303,5 +307,42 @@ describe("assign all-or-nothing", () => {
       expect(result.assignments[0].applicationId).toBe(MOCK_IDS.appSofia)
     }
     expect(debugSnapshotStore().assignments.length).toBe(before + 1)
+  })
+})
+
+describe("assignment tracking mutations", () => {
+  it("reminds, extends expired to pending, retries, and cancels", async () => {
+    setMockScenario("populated")
+
+    const reminded = await remindAssignment(MOCK_IDS.assignmentMariaDup)
+    expect(reminded.kind).toBe("reminded")
+
+    const extended = await extendAssignment(
+      MOCK_IDS.assignmentCarlosExpired,
+      "2026-11-01",
+    )
+    expect(extended.status).toBe("pending")
+    expect(extended.expiresAt).toBe("2026-11-01T18:00:00.000Z")
+
+    resetMockStore()
+    setMockScenario("populated")
+    const retried = await retryAssignment(MOCK_IDS.assignmentCarlosExpired)
+    expect(retried.status).toBe("pending")
+    expect(retried.allowedAttempts).toBe(2)
+
+    const cancelled = await cancelAssignment(MOCK_IDS.assignmentAnaInProgress)
+    expect(cancelled.status).toBe("cancelled")
+    expect(
+      debugSnapshotStore().assignments.some(
+        (item) => item.id === MOCK_IDS.assignmentAnaInProgress,
+      ),
+    ).toBe(true)
+  })
+
+  it("rejects remind on closed application", async () => {
+    setMockScenario("populated")
+    await expect(
+      remindAssignment(MOCK_IDS.assignmentElenaPending),
+    ).rejects.toBeInstanceOf(MockServiceError)
   })
 })

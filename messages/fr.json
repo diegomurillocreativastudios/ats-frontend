@@ -1180,6 +1180,119 @@
         "noApplicationsTitle": "Aucune candidature",
         "noApplicationsDescription": "Il n’y a aucune candidature pour cette offre dans la démonstration."
       }
+    },
+    "tracking": {
+      "title": "Suivi",
+      "description": "Consultez l’état des affectations et gérez les délais ou les nouvelles tentatives en mode démonstration.",
+      "scopeNotice": "Les actions de suivi sont simulées. Un rappel n’envoie pas de véritable e-mail.",
+      "search": "Rechercher",
+      "searchPlaceholder": "Candidat, offre ou évaluation",
+      "filters": {
+        "title": "Filtres",
+        "toggle": "Filtres",
+        "regionLabel": "Filtres du suivi",
+        "status": "État de l’affectation",
+        "qualification": "Qualification",
+        "all": "Tous",
+        "clear": "Effacer les filtres"
+      },
+      "status": {
+        "pending": "En attente",
+        "in_progress": "En cours",
+        "completed": "Terminée",
+        "expired": "Expirée",
+        "cancelled": "Annulée"
+      },
+      "qualification": {
+        "answers_submitted": "Terminée",
+        "pending_review": "En attente de révision",
+        "reviewed": "Notée"
+      },
+      "table": {
+        "candidate": "Candidat",
+        "vacancy": "Offre",
+        "version": "Version",
+        "status": "État",
+        "expiresAt": "Expire",
+        "actions": "Actions",
+        "open": "Voir le détail"
+      },
+      "actions": {
+        "remind": "Rappeler",
+        "cancel": "Annuler",
+        "extend": "Prolonger le délai",
+        "retry": "Autoriser une nouvelle tentative"
+      },
+      "detail": {
+        "title": "Suivi de {name}",
+        "titleFallback": "Détail de l’affectation",
+        "close": "Fermer",
+        "vacancy": "Offre",
+        "version": "Version",
+        "assignedAt": "Affectée",
+        "expiresAt": "Expire",
+        "attempts": "Tentatives",
+        "attemptsValue": "{used} sur {allowed}",
+        "status": "État",
+        "applicationInactive": "La candidature n’est plus active. Vous ne pouvez annuler que si l’état le permet.",
+        "applicationFinal": "La candidature est dans un état final. Vous ne pouvez annuler que si l’état le permet.",
+        "extendDate": "Nouvelle date d’expiration",
+        "extendHint": "La date doit être postérieure à l’horloge de démonstration.",
+        "simulateFailure": "Simuler un échec de l’opération"
+      },
+      "timeline": {
+        "title": "Chronologie",
+        "empty": "Aucune action n’a encore été enregistrée dans la démonstration.",
+        "kind": {
+          "reminded": "Rappel simulé",
+          "cancelled": "Affectation annulée",
+          "extended": "Délai prolongé",
+          "retried": "Nouvelle tentative autorisée"
+        }
+      },
+      "confirm": {
+        "cancelTitle": "Annuler l’affectation",
+        "cancelDescription": "Vous allez annuler l’affectation de {name}. La ligne est conservée dans la démonstration.",
+        "cancelConfirm": "Annuler l’affectation",
+        "extendTitle": "Prolonger le délai",
+        "extendDescription": "Vous allez prolonger l’échéance de {name} au {date}. Si elle était expirée, elle repasse en attente.",
+        "extendConfirm": "Prolonger",
+        "dismiss": "Retour"
+      },
+      "toasts": {
+        "reminded": "Rappel enregistré en mode démonstration. Aucun e-mail n’a été envoyé.",
+        "cancelled": "Affectation annulée en mode démonstration.",
+        "extended": "Délai prolongé en mode démonstration.",
+        "retried": "Nouvelle tentative autorisée en mode démonstration.",
+        "simulatedFailure": "L’opération a échoué de façon simulée. Aucune modification n’a été appliquée."
+      },
+      "errors": {
+        "generic": "L’action de démonstration n’a pas pu être terminée.",
+        "not_found": "L’affectation est introuvable.",
+        "scenario_error": "Le service simulé a renvoyé une erreur.",
+        "action_not_allowed": "Cette action n’est pas disponible dans l’état actuel.",
+        "application_closed": "La candidature est fermée pour cette action.",
+        "invalid_expires_at": "La date d’expiration n’est pas valide dans la démonstration."
+      },
+      "pagination": {
+        "perPage": "Par page",
+        "pageSizeAria": "Taille de page",
+        "regionAria": "Pagination du suivi",
+        "summary": "Page {page} sur {totalPages}",
+        "prev": "Précédent",
+        "next": "Suivant",
+        "count": "{count, plural, one {# affectation} other {# affectations}}"
+      },
+      "states": {
+        "loading": "Chargement du suivi…",
+        "emptyTitle": "Aucune donnée de démonstration",
+        "emptyDescription": "Le scénario simulé est vide. Réinitialisez les données de démonstration pour continuer.",
+        "errorTitle": "Impossible de charger le suivi",
+        "errorDescription": "Le service simulé a renvoyé une erreur. Réessayez.",
+        "retry": "Réessayer",
+        "filterEmptyTitle": "Aucun résultat",
+        "filterEmptyDescription": "Aucune affectation ne correspond aux filtres. Ajustez ou effacez les filtres."
+      }
     }
   },
   "CandidatePortal": {

@@ -95,5 +95,6 @@ export function emptyStoreSnapshot(): MockPruebasStore {
     sessions: [],
     results: [],
     reviews: [],
+    trackingEvents: [],
   }
 }

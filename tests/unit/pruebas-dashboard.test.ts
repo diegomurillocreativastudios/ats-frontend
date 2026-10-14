@@ -20,27 +20,36 @@ describe("buildDashboard", () => {
     expect(snapshot.isStoreEmpty).toBe(false)
     expect(snapshot.isFilterEmpty).toBe(false)
     expect(snapshot.counts).toEqual({
-      assigned: 3,
-      pending: 1,
-      inProgress: 0,
-      completed: 1,
+      assigned: 8,
+      pending: 2,
+      inProgress: 1,
+      completed: 3,
       expired: 1,
-      pendingReview: 0,
+      pendingReview: 1,
     })
     expect(snapshot.dueSoon.map((item) => item.assignmentId)).toEqual([
       MOCK_IDS.assignmentMariaDup,
     ])
-    expect(snapshot.pendingReviews).toEqual([])
+    expect(snapshot.pendingReviews.map((item) => item.assignmentId)).toEqual([
+      MOCK_IDS.assignmentDiegoPendingReview,
+    ])
     expect(snapshot.activitySeries).toEqual([
       { date: "2026-09-20", count: 1 },
+      { date: "2026-09-25", count: 1 },
       { date: "2026-10-01", count: 1 },
       { date: "2026-10-05", count: 1 },
+      { date: "2026-10-08", count: 1 },
+      { date: "2026-10-10", count: 1 },
+      { date: "2026-10-11", count: 1 },
+      { date: "2026-10-12", count: 1 },
     ])
     expect(snapshot.statusDistribution).toEqual(
       expect.arrayContaining([
-        { status: "pending", count: 1 },
-        { status: "completed", count: 1 },
+        { status: "pending", count: 2 },
+        { status: "in_progress", count: 1 },
+        { status: "completed", count: 3 },
         { status: "expired", count: 1 },
+        { status: "cancelled", count: 1 },
       ]),
     )
   })
@@ -92,7 +101,7 @@ describe("getDashboard", () => {
   it("applies scenario gate and returns seed counts", async () => {
     setMockScenario("populated")
     const snapshot = await getDashboard()
-    expect(snapshot.counts.assigned).toBe(3)
+    expect(snapshot.counts.assigned).toBe(8)
   })
 
   it("returns store-empty for empty scenario", async () => {

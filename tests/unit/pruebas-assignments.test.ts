@@ -55,8 +55,10 @@ describe("buildAssignmentCandidateRows", () => {
 
     const byId = new Map(rows.map((row) => [row.applicationId, row]))
     expect(byId.get(MOCK_IDS.appSofia)?.isEligible).toBe(true)
+    expect(byId.get(MOCK_IDS.appNora)?.isEligible).toBe(true)
     expect(byId.get(MOCK_IDS.appMaria)?.reason).toBe("duplicate_assignment")
     expect(byId.get(MOCK_IDS.appCarlos)?.reason).toBe("duplicate_assignment")
+    expect(byId.get(MOCK_IDS.appAna)?.reason).toBe("duplicate_assignment")
     expect(byId.get(MOCK_IDS.appHired)?.isEligible).toBe(false)
     expect(byId.get(MOCK_IDS.appHired)?.reason).toBe("application_inactive")
     expect(rows.some((row) => row.candidateProfileId === MOCK_IDS.candidateLuis)).toBe(

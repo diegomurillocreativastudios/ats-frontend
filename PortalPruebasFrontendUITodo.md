@@ -3,7 +3,7 @@
 > **Producto:** ApplicanTree — Portal Pruebas  
 > **Repositorio objetivo:** `ats-frontend`  
 > **Fecha:** 2026-10-13  
-> **Estado:** Plan de trabajo; **Fase UI-00–UI-08 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones).  
+> **Estado:** Plan de trabajo; **Fase UI-00–UI-09 completadas** (kit + mocks + shell + dashboard + evaluaciones + editor/wizard + banco de preguntas + vinculaciones + asignaciones + seguimiento).  
 > **Objetivo:** implementar **toda la UI navegable y responsive** del Portal Pruebas a partir de `design/portal-pruebas.pen`, usando mocks tipados y sin conexiones reales al backend.  
 > **Documento hermano:** `PortalPruebasTodo.md` (backend .NET). **La integración real se planificará en otro ToDo.**
 
@@ -286,13 +286,13 @@ hooks/pruebas/
 
 ### Fase UI-09 — Seguimiento, gestión de estados y reintentos
 
-- [ ] `/seguimiento`: lista de asignaciones con candidato, vacante, versión, fechas y estado.
-- [ ] Filtros, búsqueda, paginación local, detalle en drawer/página.
-- [ ] Acciones mock según estado: cancelar, reenviar recordatorio **simulado**, ampliar plazo y autorizar reintento.
-- [ ] Distinguir fin de respuestas de calificación: completada, pendiente de revisión, calificada.
-- [ ] Registrar acciones visualmente en timeline de demo; mensajes de confirmación.
-- [ ] Estados de expiración, postulación cerrada y error de operaciones.
-- [ ] Responsive Desktop/Tablet/Mobile y estados de carga/vacío/error.
+- [x] `/seguimiento`: lista de asignaciones con candidato, vacante, versión, fechas y estado. 2026-10-13: `PruebasTrackingScreen` + `lib/pruebas/tracking.ts`.
+- [x] Filtros, búsqueda, paginación local, detalle en drawer/página. Detalle en `Modal` de la misma ruta.
+- [x] Acciones mock según estado: cancelar, reenviar recordatorio **simulado**, ampliar plazo y autorizar reintento.
+- [x] Distinguir fin de respuestas de calificación: completada, pendiente de revisión, calificada.
+- [x] Registrar acciones visualmente en timeline de demo; mensajes de confirmación. `trackingEvents` en el almacén.
+- [x] Estados de expiración, postulación cerrada y error de operaciones.
+- [x] Responsive Desktop/Tablet/Mobile y estados de carga/vacío/error. Tabla `lg+`, tarjetas por debajo.
 
 **Criterio:** acciones solo disponibles en estados compatibles; nunca afirmar envío de correo real.
 
@@ -387,7 +387,7 @@ hooks/pruebas/
 | Editores de preguntas | `/portal-pruebas/preguntas/nueva`, `/[questionId]/editar` | ☑ | ☑ | ☑ | per kind/errors |
 | Vínculos con vacantes | `/portal-pruebas/vinculaciones` | ☑ | ☑ | ☑ | linked/unlinked/inactive |
 | Asignación | `/portal-pruebas/asignaciones/nueva` | ☑ | ☑ | ☑ | eligible/empty/conflict/success |
-| Seguimiento | `/portal-pruebas/seguimiento` | ☐ | ☐ | ☐ | statuses/actions |
+| Seguimiento | `/portal-pruebas/seguimiento` | ☑ | ☑ | ☑ | statuses/actions |
 | Revisión manual | `/portal-pruebas/revision/[assignmentId]` | ☐ | ☐ | ☐ | pending/reviewed |
 | Resultados técnicos | `/portal-pruebas/resultados/[assignmentId]` | ☐ | ☐ | ☐ | scored/no result |
 | Resultados psicométricos | `/portal-pruebas/resultados/[assignmentId]` | ☐ | ☐ | ☐ | dimensions |
@@ -469,3 +469,4 @@ Esta etapa estará **terminada** únicamente cuando:
 - UI-06 reemplazó el placeholder del banco con listado y editor por tipo; `question-editor.ts` + `createQuestion`/`updateQuestion`; sin BFF.
 - UI-07 reemplazó el placeholder de vinculaciones con selector, tabla y activar/desactivar; `links.ts` + `createLink`/`setLinkActive`; sin BFF.
 - UI-08 reemplazó el placeholder de asignaciones con selección de elegibles y lote todo-o-nada; `assignments.ts` + `assign()`; enlaces visuales desde RRHH; sin BFF.
+- UI-09 reemplazó el placeholder de seguimiento con lista, detalle modal y acciones simuladas; `tracking.ts` + `trackingEvents`; sin BFF.

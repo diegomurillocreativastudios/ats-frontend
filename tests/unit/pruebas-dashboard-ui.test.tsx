@@ -59,9 +59,10 @@ describe("PruebasDashboard UI", () => {
 
     const metrics = screen.getByLabelText("Métricas de asignaciones")
     expect(metrics).toHaveTextContent("Asignadas")
-    expect(metrics).toHaveTextContent("3")
+    expect(metrics).toHaveTextContent("8")
     expect(metrics).toHaveTextContent("Pendientes")
     expect(metrics).toHaveTextContent("Completadas")
+    expect(metrics).toHaveTextContent("Pendientes de revisión")
     expect(
       screen.getByRole("link", { name: /Crear o ver evaluaciones/i }),
     ).toHaveAttribute("href", "/portal-pruebas/evaluaciones")

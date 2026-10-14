@@ -3,6 +3,7 @@ import {
   type DashboardFilters,
   type DashboardSnapshot,
 } from "@/lib/pruebas/dashboard"
+import { expiresAtIsoFromYmd, isExpiresAtValid } from "@/lib/pruebas/assignments"
 import {
   evaluateEligibility,
   isVacancyClosed,
@@ -19,6 +20,10 @@ import {
   snapshotStore,
   waitWhileLoading,
 } from "@/lib/pruebas/mock-store"
+import {
+  getTrackingActions,
+  isApplicationClosedForTracking,
+} from "@/lib/pruebas/tracking"
 import type {
   AssessmentKind,
   AssignFailure,
@@ -31,6 +36,8 @@ import type {
   MockResult,
   MockReview,
   MockSession,
+  MockTrackingEvent,
+  TrackingEventKind,
 } from "@/lib/pruebas/types"
 
 export {
@@ -226,6 +233,21 @@ export async function listLinks() {
 export async function listAssignments() {
   const store = await gate()
   return [...store.assignments]
+}
+
+export async function listSessions(): Promise<MockSession[]> {
+  const store = await gate()
+  return [...store.sessions]
+}
+
+export async function listTrackingEvents(
+  assignmentId?: string,
+): Promise<MockTrackingEvent[]> {
+  const store = await gate()
+  const events = assignmentId
+    ? store.trackingEvents.filter((event) => event.assignmentId === assignmentId)
+    : store.trackingEvents
+  return [...events].sort((a, b) => a.at.localeCompare(b.at))
 }
 
 export async function listApplications() {
@@ -640,6 +662,157 @@ export async function assign(input: {
 
   store.assignments.push(...pending)
   return { ok: true, assignments: pending.map((item) => ({ ...item })) }
+}
+
+function appendTrackingEvent(
+  store: MockPruebasStore,
+  assignmentId: string,
+  kind: TrackingEventKind,
+  detail?: string,
+): MockTrackingEvent {
+  const event: MockTrackingEvent = {
+    id: `evt-${store.trackingEvents.length + 1}`,
+    assignmentId,
+    kind,
+    at: MOCK_NOW,
+    detail,
+  }
+  store.trackingEvents.push(event)
+  return event
+}
+
+function requireAssignmentContext(assignmentId: string): {
+  store: MockPruebasStore
+  assignment: MockAssignment
+  isApplicationClosed: boolean
+  attemptsUsed: number
+} {
+  const store = requirePopulatedStore()
+  const assignment = store.assignments.find((item) => item.id === assignmentId)
+  if (!assignment) {
+    throw new MockServiceError("not_found")
+  }
+  const application = store.applications.find(
+    (item) => item.id === assignment.applicationId,
+  )
+  const closed = isApplicationClosedForTracking(application)
+  const attemptsUsed = store.sessions.filter(
+    (session) => session.assignmentId === assignment.id,
+  ).length
+  return {
+    store,
+    assignment,
+    isApplicationClosed: closed.closed,
+    attemptsUsed,
+  }
+}
+
+/**
+ * Simulated reminder — records a timeline event only. Never sends email.
+ */
+export async function remindAssignment(
+  assignmentId: string,
+): Promise<MockTrackingEvent> {
+  await gate()
+  const { store, assignment, isApplicationClosed, attemptsUsed } =
+    requireAssignmentContext(assignmentId)
+  const actions = getTrackingActions({
+    status: assignment.status,
+    isApplicationClosed,
+    attemptsUsed,
+    allowedAttempts: assignment.allowedAttempts,
+  })
+  if (!actions.includes("remind")) {
+    throw new MockServiceError(
+      isApplicationClosed ? "application_closed" : "action_not_allowed",
+    )
+  }
+  return appendTrackingEvent(store, assignment.id, "reminded")
+}
+
+/**
+ * Cancels an assignment without deleting the row.
+ */
+export async function cancelAssignment(
+  assignmentId: string,
+): Promise<MockAssignment> {
+  await gate()
+  const { store, assignment, isApplicationClosed, attemptsUsed } =
+    requireAssignmentContext(assignmentId)
+  const actions = getTrackingActions({
+    status: assignment.status,
+    isApplicationClosed,
+    attemptsUsed,
+    allowedAttempts: assignment.allowedAttempts,
+  })
+  if (!actions.includes("cancel")) {
+    throw new MockServiceError("action_not_allowed")
+  }
+  assignment.status = "cancelled"
+  appendTrackingEvent(store, assignment.id, "cancelled")
+  return { ...assignment }
+}
+
+/**
+ * Extends expiry. Expired assignments return to pending.
+ */
+export async function extendAssignment(
+  assignmentId: string,
+  expiresAtYmd: string,
+): Promise<MockAssignment> {
+  await gate()
+  const { store, assignment, isApplicationClosed, attemptsUsed } =
+    requireAssignmentContext(assignmentId)
+  if (!isExpiresAtValid(expiresAtYmd, MOCK_NOW)) {
+    throw new MockServiceError("invalid_expires_at")
+  }
+  const actions = getTrackingActions({
+    status: assignment.status,
+    isApplicationClosed,
+    attemptsUsed,
+    allowedAttempts: assignment.allowedAttempts,
+    expiresAtYmd,
+    nowIso: MOCK_NOW,
+  })
+  if (!actions.includes("extend")) {
+    throw new MockServiceError(
+      isApplicationClosed ? "application_closed" : "action_not_allowed",
+    )
+  }
+  const expiresAt = expiresAtIsoFromYmd(expiresAtYmd, MOCK_NOW)
+  assignment.expiresAt = expiresAt
+  if (assignment.status === "expired") {
+    assignment.status = "pending"
+  }
+  appendTrackingEvent(store, assignment.id, "extended", expiresAt)
+  return { ...assignment }
+}
+
+/**
+ * Authorizes another attempt on an expired assignment with exhausted attempts.
+ * Does not create a session.
+ */
+export async function retryAssignment(
+  assignmentId: string,
+): Promise<MockAssignment> {
+  await gate()
+  const { store, assignment, isApplicationClosed, attemptsUsed } =
+    requireAssignmentContext(assignmentId)
+  const actions = getTrackingActions({
+    status: assignment.status,
+    isApplicationClosed,
+    attemptsUsed,
+    allowedAttempts: assignment.allowedAttempts,
+  })
+  if (!actions.includes("retry")) {
+    throw new MockServiceError(
+      isApplicationClosed ? "application_closed" : "action_not_allowed",
+    )
+  }
+  assignment.allowedAttempts += 1
+  assignment.status = "pending"
+  appendTrackingEvent(store, assignment.id, "retried")
+  return { ...assignment }
 }
 
 export async function createSession(input: {

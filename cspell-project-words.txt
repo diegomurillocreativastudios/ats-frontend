@@ -83,6 +83,7 @@ dotnet
 econnrefused
 Editá
 egl
+elena
 elsalvador
 Encontrá
 endonym
@@ -150,6 +151,7 @@ multipágina
 navbars
 necesitás
 noasist
+nora
 noshow
 nosniff
 officedocument
