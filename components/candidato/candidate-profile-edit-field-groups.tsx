@@ -476,8 +476,14 @@ function ProfileEditSectorsTags({
   )
 }
 
-export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorFieldsBase) {
+export function ProfileEditJobPreferencesFields({
+  form,
+  patch,
+  saving,
+  fieldErrors,
+}: EditorFieldsBase) {
   const t = useProfileEditTranslations()
+  const jobMinSalaryInvalid = Boolean(fieldErrors?.jobMinSalary)
   return (
     <div className="flex flex-col gap-4">
       <p className={profileEditSectionTitleClass}>{t("form.jobPreferences")}</p>
@@ -499,7 +505,15 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
             disabled={saving}
           />
         </ProfileEditField>
-        <ProfileEditField label={t("form.labels.minSalary")} htmlFor="pf-job-min">
+        <ProfileEditField
+          label={t("form.labels.minSalary")}
+          htmlFor="pf-job-min"
+          required
+          invalid={jobMinSalaryInvalid}
+          error={
+            jobMinSalaryInvalid ? t("form.validation.jobMinSalaryRequired") : null
+          }
+        >
           <input
             id="pf-job-min"
             type="number"
@@ -519,6 +533,7 @@ export function ProfileEditJobPreferencesFields({ form, patch, saving }: EditorF
             }}
             className={profileEditInputClass}
             disabled={saving}
+            aria-invalid={jobMinSalaryInvalid || undefined}
           />
         </ProfileEditField>
         <ProfileEditField label={t("form.labels.educationLevel")} htmlFor="pf-job-edu">

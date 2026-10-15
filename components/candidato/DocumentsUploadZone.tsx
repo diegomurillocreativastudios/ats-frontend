@@ -1,6 +1,17 @@
 "use client"
 
-import { useRef, useState, useCallback, useEffect, type ReactNode, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react"
+import {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useId,
+  type ReactNode,
+  type ChangeEvent,
+  type DragEvent,
+  type KeyboardEvent,
+} from "react"
+import { flushSync } from "react-dom"
 import { useTranslations } from "next-intl"
 import { Upload, X, Sparkles, Loader2, Check } from "lucide-react"
 import { getApiErrorMessage, isSilentError } from "@/lib/api-error"
@@ -61,6 +72,69 @@ function createIngestCycleKey(): string {
     return crypto.randomUUID()
   }
   return `ingest-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+}
+
+function createStagedFileId(file: File): string {
+  return `${file.name}-${file.size}-${file.lastModified}-${createIngestCycleKey()}`
+}
+
+/** Identity for duplicate detection in the staging queue (name + size + mtime). */
+function stagedFileKey(file: File): string {
+  return `${file.name.trim().toLowerCase()}|${file.size}|${file.lastModified}`
+}
+
+/** Collect File objects from a drop — `files` first, then `items` as fallback. */
+function filesFromDataTransfer(dataTransfer: DataTransfer | null): File[] {
+  if (!dataTransfer) return []
+  if (dataTransfer.files?.length) return Array.from(dataTransfer.files)
+  if (!dataTransfer.items?.length) return []
+  const fromItems: File[] = []
+  for (let i = 0; i < dataTransfer.items.length; i++) {
+    const item = dataTransfer.items[i]
+    if (item.kind !== "file") continue
+    const file = item.getAsFile()
+    if (file) fromItems.push(file)
+  }
+  return fromItems
+}
+
+interface StagedFile {
+  id: string
+  file: File
+}
+
+/**
+ * Merge incoming staged files into the queue without duplicates.
+ * When `limit === 1`, replaces the queue with the first incoming file.
+ */
+function mergeStagedWithoutDuplicates(
+  prev: StagedFile[],
+  incoming: StagedFile[],
+  limit: number | null
+): { next: StagedFile[]; skippedDuplicates: number } {
+  if (limit === 1) {
+    if (incoming.length === 0) return { next: prev, skippedDuplicates: 0 }
+    return { next: incoming.slice(0, 1), skippedDuplicates: 0 }
+  }
+
+  const seen = new Set(prev.map((entry) => stagedFileKey(entry.file)))
+  const unique: StagedFile[] = []
+  let skippedDuplicates = 0
+  for (const entry of incoming) {
+    const key = stagedFileKey(entry.file)
+    if (seen.has(key)) {
+      skippedDuplicates += 1
+      continue
+    }
+    seen.add(key)
+    unique.push(entry)
+  }
+
+  if (unique.length === 0) return { next: prev, skippedDuplicates }
+
+  const merged = [...prev, ...unique]
+  const next = limit != null ? merged.slice(-limit) : merged
+  return { next, skippedDuplicates }
 }
 
 export interface DocumentsUploadZoneLeftContext {
@@ -143,22 +217,42 @@ export default function DocumentsUploadZone({
   isRequired = false,
 }: DocumentsUploadZoneProps = {}) {
   const t = useTranslations("CandidatePortal.documents.upload")
+  const reactId = useId()
+  const resolvedInputId = `documents-upload-${reactId}`
   const inputRef = useRef<HTMLInputElement>(null)
+  const dragDepthRef = useRef(0)
   const [isDragging, setIsDragging] = useState(false)
-  const [files, setFiles] = useState<File[]>([])
+  const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([])
+  /** Mutator-only mirror of stagedFiles — never written during render. */
+  const stagedFilesRef = useRef<StagedFile[]>([])
   const [error, setError] = useState<string | null>(null)
   const [processingIndex, setProcessingIndex] = useState<number | null>(null)
   const [isProcessingAll, setIsProcessingAll] = useState(false)
   const [processedIndices, setProcessedIndices] = useState(() => new Set<number>())
   const onFilesChangeRef = useRef(onFilesChange)
+  const files = stagedFiles.map((entry) => entry.file)
+
+  const clearNativeInputValue = useCallback(() => {
+    const input = inputRef.current
+    if (input) input.value = ""
+  }, [])
 
   useEffect(() => {
     onFilesChangeRef.current = onFilesChange
   }, [onFilesChange])
 
   useEffect(() => {
-    onFilesChangeRef.current?.(files)
-  }, [files])
+    onFilesChangeRef.current?.(stagedFiles.map((entry) => entry.file))
+  }, [stagedFiles])
+
+  useEffect(() => {
+    const endDrag = () => {
+      dragDepthRef.current = 0
+      setIsDragging(false)
+    }
+    window.addEventListener("dragend", endDrag)
+    return () => window.removeEventListener("dragend", endDrag)
+  }, [])
 
   const effectiveAcceptedTypes =
     Array.isArray(acceptedTypes) && acceptedTypes.length > 0
@@ -171,8 +265,7 @@ export default function DocumentsUploadZone({
 
   const processFiles = useCallback((fileList: File[]) => {
     if (!fileList?.length) return
-    setError(null)
-    const newFiles: File[] = []
+    const newEntries: StagedFile[] = []
     let firstError: string | null = null
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i]
@@ -183,7 +276,7 @@ export default function DocumentsUploadZone({
         maxSizeBytes
       );
       if (valid) {
-        newFiles.push(file);
+        newEntries.push({ id: createStagedFileId(file), file })
       } else if (!firstError) {
         firstError =
           reason === "size"
@@ -191,78 +284,129 @@ export default function DocumentsUploadZone({
             : t("errorTypeNotAllowed");
       }
     }
-    if (firstError) setError(firstError)
-    if (newFiles.length > 0) {
-      setFiles((prev) => {
-        const limit = maxFiles != null && maxFiles > 0 ? maxFiles : null
-        const merged = limit === 1 ? newFiles.slice(0, 1) : [...prev, ...newFiles]
-        return limit != null ? merged.slice(-limit) : merged
-      })
+
+    if (newEntries.length === 0) {
+      if (firstError) setError(firstError)
+      clearNativeInputValue()
+      return
     }
-  }, [effectiveAcceptedTypes, effectiveAcceptedExtensions, maxFiles, maxSizeBytes, t])
 
-  const handleClick = () => {
-    setError(null);
-    inputRef.current?.click();
-  };
+    const limit = maxFiles != null && maxFiles > 0 ? maxFiles : null
+    let skippedDuplicates = 0
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+    // Commit queue + ref in one synchronous turn so a follow-up drop/click
+    // never merges against a stale queue after clear/remove.
+    flushSync(() => {
+      setStagedFiles((prev) => {
+        const result = mergeStagedWithoutDuplicates(prev, newEntries, limit)
+        skippedDuplicates = result.skippedDuplicates
+        stagedFilesRef.current = result.next
+        return result.next
+      })
+    })
+
+    if (firstError) setError(firstError)
+    else if (skippedDuplicates > 0) {
+      setError(t("errorDuplicate", { count: skippedDuplicates }))
+    } else {
+      setError(null)
+    }
+    clearNativeInputValue()
+  }, [
+    clearNativeInputValue,
+    effectiveAcceptedTypes,
+    effectiveAcceptedExtensions,
+    maxFiles,
+    maxSizeBytes,
+    t,
+  ])
+
+  /** Clear native value only — avoid setState here (re-render can cancel the file dialog). */
+  const preparePicker = useCallback(() => {
+    clearNativeInputValue()
+  }, [clearNativeInputValue])
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLLabelElement>) => {
     if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      handleClick();
+      e.preventDefault()
+      preparePicker()
+      inputRef.current?.click()
     }
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files;
-    if (selected?.length) processFiles(Array.from(selected));
-    e.target.value = "";
+    const selected = e.target.files
+    if (!selected?.length) return
+    const copied = Array.from(selected)
+    e.target.value = ""
+    processFiles(copied)
   };
 
-  const handleDragOver = (e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: DragEvent) => {
+  const handleDragEnter = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault()
     e.stopPropagation()
-    const rel = e.relatedTarget
-    if (rel instanceof Node && e.currentTarget.contains(rel)) return
-    setIsDragging(false)
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "copy"
+    dragDepthRef.current += 1
+    setIsDragging(true)
   }
 
-  const handleDrop = (e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    const dropped = e.dataTransfer?.files;
-    if (dropped?.length) processFiles(Array.from(dropped));
-  };
+  const handleDragOver = (e: DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "copy"
+  }
+
+  const handleDragLeave = (e: DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1)
+    if (dragDepthRef.current === 0) setIsDragging(false)
+  }
+
+  const handleDrop = (e: DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    dragDepthRef.current = 0
+    setIsDragging(false)
+    const dropped = filesFromDataTransfer(e.dataTransfer)
+    if (dropped.length) processFiles(dropped)
+  }
 
   const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    setError(null);
-    setProcessedIndices((prev) => {
-      const next = new Set<number>()
-      prev.forEach((i) => {
-        if (i < index) next.add(i)
-        if (i > index) next.add(i - 1)
+    flushSync(() => {
+      const next = stagedFilesRef.current.filter((_, i) => i !== index)
+      stagedFilesRef.current = next
+      setStagedFiles(next)
+      setError(null)
+      setIsDragging(false)
+      dragDepthRef.current = 0
+      setProcessedIndices((prev) => {
+        const nextIndices = new Set<number>()
+        prev.forEach((i) => {
+          if (i < index) nextIndices.add(i)
+          if (i > index) nextIndices.add(i - 1)
+        })
+        return nextIndices
       })
-      return next
+      if (processingIndex === index) setProcessingIndex(null)
+      else if (processingIndex !== null && processingIndex > index)
+        setProcessingIndex((p) => (p !== null ? p - 1 : null))
     })
-    if (processingIndex === index) setProcessingIndex(null)
-    else if (processingIndex !== null && processingIndex > index)
-      setProcessingIndex((p) => (p !== null ? p - 1 : null))
-  };
+    clearNativeInputValue()
+  }
 
   const clearAll = () => {
-    setFiles([]);
-    setError(null);
-    setProcessedIndices(new Set());
-    setProcessingIndex(null);
-  };
+    flushSync(() => {
+      stagedFilesRef.current = []
+      setStagedFiles([])
+      setError(null)
+      setIsDragging(false)
+      dragDepthRef.current = 0
+      setProcessedIndices(new Set())
+      setProcessingIndex(null)
+    })
+    clearNativeInputValue()
+  }
 
   const resolvedLeftActions =
     typeof leftActions === "function"
@@ -359,18 +503,30 @@ export default function DocumentsUploadZone({
 
   return (
     <div className="flex flex-col gap-4">
-      <div
-        role="button"
+      <input
+        id={resolvedInputId}
+        ref={inputRef}
+        type="file"
+        accept={accept || PDF_DOCX_ACCEPT}
+        multiple
+        className="sr-only"
+        tabIndex={-1}
+        data-testid="documents-upload-input"
+        onChange={handleInputChange}
+      />
+      <label
+        htmlFor={resolvedInputId}
         tabIndex={0}
-        className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-5 transition-colors md:gap-3 md:p-6 ${
+        className={`relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-5 transition-colors md:gap-3 md:p-6 ${
           isDragging
             ? "border-vo-purple bg-ats-arena/70"
             : hasError
               ? "border-destructive bg-destructive/5"
               : "border-border bg-muted hover:border-muted-foreground/30"
         }`}
-        onClick={handleClick}
+        onClick={preparePicker}
         onKeyDown={handleKeyDown}
+        onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -379,25 +535,18 @@ export default function DocumentsUploadZone({
         aria-describedby={describedBy}
         aria-required={isRequired || undefined}
       >
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept || PDF_DOCX_ACCEPT}
-          multiple
-          className="sr-only"
-          aria-hidden
-          onChange={handleInputChange}
-        />
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted-foreground/10 md:h-12 md:w-12">
-          <Upload className="h-5 w-5 text-muted-foreground md:h-6 md:w-6" aria-hidden />
+        <div className="pointer-events-none flex flex-col items-center justify-center gap-2 md:gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted-foreground/10 md:h-12 md:w-12">
+            <Upload className="h-5 w-5 text-muted-foreground md:h-6 md:w-6" aria-hidden />
+          </div>
+          <p className="text-center font-sans text-sm font-medium text-muted-foreground md:text-base">
+            {isDragging ? t("dropActive") : t("dropPrompt")}
+          </p>
+          <p className="text-center font-sans text-xs text-muted-foreground">
+            {helperText || t("helperDefault")}
+          </p>
         </div>
-        <p className="text-center font-sans text-sm font-medium text-muted-foreground md:text-base">
-          {isDragging ? t("dropActive") : t("dropPrompt")}
-        </p>
-        <p className="text-center font-sans text-xs text-muted-foreground">
-          {helperText || t("helperDefault")}
-        </p>
-      </div>
+      </label>
 
       {error && (
         <p className="font-sans text-sm text-destructive" role="alert">
@@ -447,7 +596,8 @@ export default function DocumentsUploadZone({
             aria-label={t("selectedListAria")}
           >
             <ul className="flex flex-col gap-2">
-            {files.map((file, index) => {
+            {stagedFiles.map((entry, index) => {
+              const { file, id } = entry
               const showProcessButton =
                 Boolean(onProcess) &&
                 !stagingOnly &&
@@ -460,7 +610,7 @@ export default function DocumentsUploadZone({
                 (isExternallyProcessing || isExternallyCompleted)
               return (
                 <li
-                  key={`${file.name}-${index}`}
+                  key={id}
                   className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${
                     isExternallyProcessing
                       ? "border-vo-purple bg-vo-purple/5 ring-1 ring-vo-purple/30"

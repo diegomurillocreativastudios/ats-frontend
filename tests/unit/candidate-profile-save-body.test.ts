@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   buildCandidateProfileSaveBody,
+  isValidRequiredJobMinSalary,
   resolveResumeMarkdownForApi,
   type FullProfileFormInput,
 } from "@/lib/candidate-profile"
@@ -74,12 +75,33 @@ describe("resolveResumeMarkdownForApi", () => {
   })
 })
 
+describe("isValidRequiredJobMinSalary", () => {
+  it("rechaza vacío e inválidos; acepta 0 y montos positivos", () => {
+    expect(isValidRequiredJobMinSalary("")).toBe(false)
+    expect(isValidRequiredJobMinSalary("   ")).toBe(false)
+    expect(isValidRequiredJobMinSalary("abc")).toBe(false)
+    expect(isValidRequiredJobMinSalary("-1")).toBe(false)
+    expect(isValidRequiredJobMinSalary("0")).toBe(true)
+    expect(isValidRequiredJobMinSalary("1500.50")).toBe(true)
+  })
+})
+
 describe("buildCandidateProfileSaveBody", () => {
   it("nunca envía resumeMarkdown vacío cuando la ficha tiene identidad", () => {
     const body = buildCandidateProfileSaveBody(baseForm())
     expect(body.resumeMarkdown.trim()).not.toBe("")
     expect(body.headline).toBe("Desarrollador")
     expect(body.nationalId).toBe("12345678-9")
+  })
+
+  it("incluye minSalary y jobPreferences.MinSalary desde jobMinSalary", () => {
+    const body = buildCandidateProfileSaveBody({
+      ...baseForm(),
+      jobMinSalary: "1500.5",
+    })
+    expect(body.minSalary).toBe(1500.5)
+    const prefs = body.jobPreferences as Record<string, unknown>
+    expect(prefs.MinSalary).toBe(1500.5)
   })
 })
 

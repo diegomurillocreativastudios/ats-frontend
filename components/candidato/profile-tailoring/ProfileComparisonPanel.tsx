@@ -98,9 +98,9 @@ export function ProfileComparisonPanel({
 
   return (
     <section className="flex flex-col gap-5 md:gap-6" aria-labelledby="profile-comparison-heading">
-      <header className="relative overflow-hidden rounded-2xl border border-border/80 bg-linear-to-br from-white via-ats-arena/35 to-sky-500/6 p-5 shadow-sm md:p-6">
+      <header className="relative overflow-hidden rounded-2xl border border-border/80 bg-linear-to-br from-white via-ats-arena/35 to-emerald-500/6 p-5 shadow-sm md:p-6">
         <div
-          className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-sky-500/10 blur-3xl"
+          className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl"
           aria-hidden
         />
         <div className="relative space-y-3">
@@ -116,8 +116,8 @@ export function ProfileComparisonPanel({
           <p className="max-w-3xl font-sans text-sm leading-relaxed text-muted-foreground">
             {tDashboard("subtitle")}
           </p>
-          <p className="inline-flex max-w-full items-center gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-1.5 font-sans text-sm font-medium text-foreground">
-            <Target className="h-4 w-4 shrink-0 text-sky-600" aria-hidden />
+          <p className="inline-flex max-w-full items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 font-sans text-sm font-medium text-foreground">
+            <Target className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
             <span className="text-muted-foreground">{tDashboard("targetVacancyLabel")}</span>
             <span className="truncate">
               {resolvedVacancyTitle ?? tDashboard("targetVacancyFallback")}

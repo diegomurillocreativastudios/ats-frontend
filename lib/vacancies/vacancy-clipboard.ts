@@ -3,9 +3,13 @@ import {
   getVacancyDepartmentSummary,
   getVacancyModalityId,
   getVacancyModalitySummary,
+  getVacancyPresentationDueAtUtc,
+  getVacancyTypeId,
+  getVacancyTypeSummary,
 } from "@/lib/vacancy-catalogs"
 import { toRequirementImportance } from "@/lib/vacancies/format-requirement-key"
 import { readVacancyStateCode } from "@/lib/vacancies/vacancy-location"
+import { readVacancyDataProtectionLawIds } from "@/lib/vacancies/vacancy-data-protection-laws"
 
 export const VACANCY_CLIPBOARD_STORAGE_KEY = "ats:vacancy-clipboard"
 export const VACANCY_CLIPBOARD_VERSION = 1 as const
@@ -35,9 +39,14 @@ export interface VacancyClipboardPayload {
   vacancyModalityId: string
   vacancyModalityCode: string
   vacancyModalityName: string
+  vacancyTypeId: string
+  vacancyTypeCode: string
+  vacancyTypeName: string
+  presentationDueAtUtc: string
   companyId: string
   companyName: string
   requirements: VacancyClipboardRequirement[]
+  dataProtectionLawIds: string[]
 }
 
 export interface VacancyClipboardRequirementRow {
@@ -121,6 +130,13 @@ export function parseVacancyClipboardPayload(
   if (value.version !== VACANCY_CLIPBOARD_VERSION) return null
   if (!Array.isArray(value.requirements)) return null
   if (!value.requirements.every(isValidRequirement)) return null
+  if (
+    value.dataProtectionLawIds != null &&
+    (!Array.isArray(value.dataProtectionLawIds) ||
+      !value.dataProtectionLawIds.every((id) => typeof id === "string"))
+  ) {
+    return null
+  }
 
   for (const key of PAYLOAD_STRING_KEYS) {
     if (typeof value[key] !== "string") return null
@@ -141,6 +157,10 @@ export function parseVacancyClipboardPayload(
     vacancyModalityId: value.vacancyModalityId as string,
     vacancyModalityCode: readOptionalString(value.vacancyModalityCode),
     vacancyModalityName: readOptionalString(value.vacancyModalityName),
+    vacancyTypeId: readOptionalString(value.vacancyTypeId),
+    vacancyTypeCode: readOptionalString(value.vacancyTypeCode),
+    vacancyTypeName: readOptionalString(value.vacancyTypeName),
+    presentationDueAtUtc: readOptionalString(value.presentationDueAtUtc),
     companyId: value.companyId as string,
     companyName: readOptionalString(value.companyName),
     requirements: value.requirements.map((requirement) => ({
@@ -148,6 +168,9 @@ export function parseVacancyClipboardPayload(
       requirementValue: requirement.requirementValue,
       scale: requirement.scale,
     })),
+    dataProtectionLawIds: Array.isArray(value.dataProtectionLawIds)
+      ? value.dataProtectionLawIds.filter((id) => id.trim() !== "")
+      : [],
   }
 }
 
@@ -206,6 +229,7 @@ export function buildVacancyClipboardPayload(
   const countryCode = readTrimmedString(countryRaw).toUpperCase()
   const departmentSummary = getVacancyDepartmentSummary(record)
   const modalitySummary = getVacancyModalitySummary(record)
+  const typeSummary = getVacancyTypeSummary(record)
   const resolvedCompanyName =
     readTrimmedString(companyName) ||
     readTrimmedString(record.company) ||
@@ -226,9 +250,14 @@ export function buildVacancyClipboardPayload(
     vacancyModalityId: getVacancyModalityId(record),
     vacancyModalityCode: readTrimmedString(modalitySummary?.code),
     vacancyModalityName: readTrimmedString(modalitySummary?.displayName),
+    vacancyTypeId: getVacancyTypeId(record),
+    vacancyTypeCode: readTrimmedString(typeSummary?.code),
+    vacancyTypeName: readTrimmedString(typeSummary?.displayName),
+    presentationDueAtUtc: getVacancyPresentationDueAtUtc(record) ?? "",
     companyId: readTrimmedString(companyId),
     companyName: resolvedCompanyName,
     requirements: extractRequirements(record),
+    dataProtectionLawIds: readVacancyDataProtectionLawIds(record),
   }
 }
 

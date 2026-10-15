@@ -674,6 +674,12 @@ export function CandidateSelfProfileView({
                       editValue={form.jobMinSalary}
                       onEditChange={(jobMinSalary) => patch({ jobMinSalary })}
                       saving={savingProfile}
+                      invalid={Boolean(fieldErrors.jobMinSalary)}
+                      errorMessage={
+                        fieldErrors.jobMinSalary
+                          ? t("form.validation.jobMinSalaryRequired")
+                          : null
+                      }
                     />
                   }
                 />
@@ -801,6 +807,7 @@ export function CandidateSelfProfileView({
                   setForm={setForm}
                   patch={patch}
                   saving={savingProfile}
+                  fieldErrors={fieldErrors}
                 />
               ) : (
                 <JobPreferencesBlock

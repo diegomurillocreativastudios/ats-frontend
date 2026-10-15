@@ -11,10 +11,10 @@ interface StatusBadgeProps {
 }
 
 const TONE_CLASSES: Record<StatusTone, string> = {
-  current: "border-indigo-500/30 bg-indigo-500/10 text-indigo-700 dark:text-indigo-200",
+  current: "border-gray-400/40 bg-gray-100 text-gray-700 dark:text-gray-200",
   adapted: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200",
   warning: "border-amber-500/35 bg-amber-500/12 text-amber-800 dark:text-amber-200",
-  info: "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-200",
+  info: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200",
   neutral: "border-border/70 bg-muted/40 text-muted-foreground",
 }
 

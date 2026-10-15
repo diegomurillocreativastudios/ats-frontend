@@ -14,6 +14,7 @@ export const authPublicPaths = [
 export function isPublicPath(pathname: string): boolean {
   if (pathname.startsWith("/api/")) return true
   if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) return true
+  if (pathname === "/robots.txt" || pathname === "/sitemap.xml") return true
   if (
     pathname === "/location-catalog" ||
     pathname.startsWith("/location-catalog/")

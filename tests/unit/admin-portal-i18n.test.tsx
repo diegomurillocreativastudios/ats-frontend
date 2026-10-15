@@ -218,7 +218,12 @@ describe("AdminPortal namespace parity (Etapa 13)", () => {
     for (const locale of locales) {
       const ns = messagesByLocale[locale].AdminPortal as Record<string, unknown>
       expect(Object.keys(ns), `subsecciones en ${locale}.json`).toEqual(
-        expect.arrayContaining(["companies", "users", "configuration"]),
+        expect.arrayContaining([
+          "companies",
+          "users",
+          "configuration",
+          "presentationReminders",
+        ]),
       )
     }
   })

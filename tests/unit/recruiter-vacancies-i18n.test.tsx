@@ -69,6 +69,10 @@ vi.mock("@/components/ui/Snackbar", () => ({
   default: () => null,
 }))
 
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
+}))
+
 import VacantesPage from "@/app/portal-rrhh/vacantes/page"
 import { VacancyListCard } from "@/components/rrhh/VacancyListCard"
 import { mapVacancyFromApi } from "@/lib/vacancies/map-vacancy-list-item"

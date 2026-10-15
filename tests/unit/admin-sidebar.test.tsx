@@ -78,6 +78,14 @@ describe("AdminSidebar", () => {
     expect(
       within(administration).getByRole("link", { name: "Tipos de documento" }),
     ).toHaveAttribute("href", "/portal-admin/administracion/tipos-de-documento")
+    expect(
+      within(administration).getByRole("link", {
+        name: "Recordatorios de presentación",
+      }),
+    ).toHaveAttribute(
+      "href",
+      "/portal-admin/administracion/recordatorios-presentacion",
+    )
   })
 
   it("expone los catálogos de vacantes y entrevistas sin expandir", () => {
@@ -114,6 +122,9 @@ describe("AdminSidebar", () => {
       "href",
       "/portal-admin/empresas",
     )
+    expect(
+      within(vacancies).getByRole("link", { name: "Leyes de protección de datos" }),
+    ).toHaveAttribute("href", "/portal-admin/vacantes/leyes-proteccion-datos")
     expect(within(menu).getByRole("link", { name: "Tipos" })).toHaveAttribute(
       "href",
       "/portal-admin/entrevistas/tipos",

@@ -102,7 +102,12 @@ export default function SingleFileUploadZone({
   const resolvedTypeErrorMessage = typeErrorMessage ?? t("typeNotAllowed")
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [inputEpoch, setInputEpoch] = useState(0)
   const [error, setError] = useState<string | null>(null)
+
+  const bumpInputEpoch = useCallback(() => {
+    setInputEpoch((epoch) => epoch + 1)
+  }, [])
 
   const handleFiles = useCallback(
     (incoming: FileList | File[] | null) => {
@@ -131,10 +136,12 @@ export default function SingleFileUploadZone({
       }
       setError(null)
       onFileChange(next)
+      bumpInputEpoch()
     },
     [
       acceptedTypes,
       acceptedExtensions,
+      bumpInputEpoch,
       maxSizeBytes,
       onFileChange,
       resolvedTypeErrorMessage,
@@ -157,15 +164,22 @@ export default function SingleFileUploadZone({
   }
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const selected = event.target.files
-    handleFiles(selected)
-    event.target.value = ""
+    handleFiles(event.target.files)
+  }
+
+  const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    if (disabled) return
+    event.preventDefault()
+    event.stopPropagation()
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"
+    setIsDragging(true)
   }
 
   const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
     if (disabled) return
     event.preventDefault()
     event.stopPropagation()
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"
     setIsDragging(true)
   }
 
@@ -182,14 +196,14 @@ export default function SingleFileUploadZone({
     event.preventDefault()
     event.stopPropagation()
     setIsDragging(false)
-    const dropped = event.dataTransfer?.files
-    handleFiles(dropped ?? null)
+    handleFiles(event.dataTransfer?.files ?? null)
   }
 
   const handleRemove = () => {
     if (disabled) return
     onFileChange(null)
     setError(null)
+    bumpInputEpoch()
   }
 
   return (
@@ -202,7 +216,7 @@ export default function SingleFileUploadZone({
         aria-invalid={hasError || undefined}
         aria-describedby={describedBy}
         aria-required={isRequired || undefined}
-        className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-5 transition-colors md:gap-3 md:p-6 ${
+        className={`relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-5 transition-colors md:gap-3 md:p-6 ${
           isDragging
             ? "border-vo-purple bg-ats-arena/70"
             : hasError
@@ -211,34 +225,40 @@ export default function SingleFileUploadZone({
         } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
+        onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <input
+          key={inputEpoch}
           ref={inputRef}
           id={inputId}
           type="file"
           accept={accept}
           className="sr-only"
           aria-hidden
+          tabIndex={-1}
           disabled={disabled}
+          data-upload-epoch={inputEpoch}
           onChange={handleInputChange}
         />
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted-foreground/10 md:h-12 md:w-12">
-          <Upload
-            className="h-5 w-5 text-muted-foreground md:h-6 md:w-6"
-            aria-hidden
-          />
-        </div>
-        <p className="text-center font-sans text-sm font-medium text-muted-foreground md:text-base">
-          {isDragging ? t("dropActive") : resolvedPrimaryText}
-        </p>
-        {helperText ? (
-          <p className="text-center font-sans text-xs text-muted-foreground">
-            {helperText}
+        <div className="pointer-events-none flex flex-col items-center justify-center gap-2 md:gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted-foreground/10 md:h-12 md:w-12">
+            <Upload
+              className="h-5 w-5 text-muted-foreground md:h-6 md:w-6"
+              aria-hidden
+            />
+          </div>
+          <p className="text-center font-sans text-sm font-medium text-muted-foreground md:text-base">
+            {isDragging ? t("dropActive") : resolvedPrimaryText}
           </p>
-        ) : null}
+          {helperText ? (
+            <p className="text-center font-sans text-xs text-muted-foreground">
+              {helperText}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       {error ? (

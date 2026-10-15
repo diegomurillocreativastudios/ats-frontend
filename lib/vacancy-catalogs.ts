@@ -4,9 +4,14 @@ export interface VacancyCatalogSummary {
   id: string
   code: string
   displayName: string
+  presentationSlaDays?: number
 }
 
 export interface VacancyCatalogSelectOption extends VacancyCatalogSummary {}
+
+export interface VacancyTypeSummary extends VacancyCatalogSummary {
+  presentationSlaDays: number | null
+}
 
 const GUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -212,6 +217,103 @@ export function getVacancyModalityLabel(
   return getVacancyModalitySummary(vacancy)?.displayName ?? "No especificado"
 }
 
+export function getVacancyTypeSummary(
+  vacancy: Record<string, unknown> | null | undefined
+): VacancyTypeSummary | null {
+  const nested = getNestedSummary(vacancy, [
+    "vacancyType",
+    "vacancy_type",
+    "type",
+    "typeSummary",
+  ])
+  const nestedRecord = getRecord(
+    vacancy?.vacancyType ??
+      vacancy?.vacancy_type ??
+      vacancy?.type ??
+      vacancy?.typeSummary
+  )
+  const slaFromNested =
+    nestedRecord != null
+      ? Number(
+          nestedRecord.presentationSlaDays ?? nestedRecord.presentation_sla_days
+        )
+      : NaN
+  const slaFromRoot = Number(
+    vacancy?.presentationSlaDays ?? vacancy?.presentation_sla_days
+  )
+  const presentationSlaDays = Number.isFinite(slaFromNested)
+    ? slaFromNested
+    : Number.isFinite(slaFromRoot)
+      ? slaFromRoot
+      : null
+
+  if (nested) {
+    return {
+      ...nested,
+      presentationSlaDays,
+    }
+  }
+
+  const displayName = getFirstString(vacancy, [
+    "vacancyTypeName",
+    "vacancy_type_name",
+    "typeName",
+    "type_name",
+  ])
+  if (!displayName) return null
+
+  const id = getFirstString(vacancy, ["vacancyTypeId", "vacancy_type_id"])
+  return {
+    id: id ?? displayName,
+    code: displayName,
+    displayName,
+    presentationSlaDays,
+  }
+}
+
+export function getVacancyTypeId(
+  vacancy: Record<string, unknown> | null | undefined
+): string {
+  if (!vacancy) return ""
+
+  const directGuid = toGuidOrNull(
+    vacancy.vacancyTypeId ?? vacancy.vacancy_type_id
+  )
+  if (directGuid) return directGuid
+
+  const nested = getNestedSummary(vacancy, [
+    "vacancyType",
+    "vacancy_type",
+    "type",
+    "typeSummary",
+  ])
+  if (nested && isGuid(nested.id)) return nested.id
+
+  return ""
+}
+
+export function getVacancyTypeLabel(
+  vacancy: Record<string, unknown> | null | undefined
+): string {
+  return getVacancyTypeSummary(vacancy)?.displayName ?? ""
+}
+
+export function getVacancyPresentationDueAtUtc(
+  vacancy: Record<string, unknown> | null | undefined
+): string | null {
+  if (!vacancy) return null
+  const raw =
+    vacancy.presentationDueAtUtc ??
+    vacancy.presentation_due_at_utc ??
+    vacancy.presentationDueAt ??
+    vacancy.presentation_due_at
+  if (raw == null || String(raw).trim() === "") return null
+  const iso = String(raw).trim()
+  const parsed = new Date(iso)
+  if (Number.isNaN(parsed.getTime())) return null
+  return iso
+}
+
 export function mapActiveCatalogItemsToOptions(
   items: VacancyCatalogAdminItem[]
 ): VacancyCatalogSelectOption[] {
@@ -221,6 +323,9 @@ export function mapActiveCatalogItemsToOptions(
       id: item.id,
       code: item.code,
       displayName: item.displayName,
+      ...(item.presentationSlaDays != null
+        ? { presentationSlaDays: item.presentationSlaDays }
+        : {}),
     }))
 }
 

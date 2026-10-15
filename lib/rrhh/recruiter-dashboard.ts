@@ -1,0 +1,692 @@
+import { buildRecruiterVacancyPath } from "@/lib/vacancies/vacancy-public-path"
+
+export const DASHBOARD_UPCOMING_INTERVIEW_DAYS = 7
+export const DASHBOARD_STALE_CANDIDATE_DAYS = 14
+export const DASHBOARD_SLOW_VACANCY_DAYS = 21
+
+export const RECRUITER_DASHBOARD_LINKS = {
+  home: "/portal-rrhh",
+  candidates: "/portal-rrhh/candidatos",
+  vacancies: "/portal-rrhh/vacantes",
+  vacanciesActivas: "/portal-rrhh/vacantes?vista=activas",
+  vacanciesWithoutCandidates: "/portal-rrhh/vacantes?vista=sin-postulaciones",
+  vacanciesPresentationOverdue: "/portal-rrhh/vacantes?vista=fuera-de-plazo",
+  vacanciesUnpublished: "/portal-rrhh/vacantes?vista=no-publicadas",
+  interviews: "/portal-rrhh/entrevistas",
+  calendar: "/portal-rrhh/configuracion/calendario",
+  reports: "/portal-rrhh/reportes",
+  staleCandidatesReport: "/portal-rrhh/reportes/estatus-candidatos-por-etapa",
+  technicalEvaluationsReport: "/portal-rrhh/reportes/evaluaciones-tecnicas",
+} as const
+
+export const REMINDER_DETAIL_PREFIX = "/portal-rrhh/recordatorios"
+
+export const VACANCY_DASHBOARD_ATTENTION_LIMIT = 6
+
+export type DashboardSourceState = "ready" | "partial" | "unavailable" | "error"
+
+export type DashboardSeverity = "critical" | "action" | "upcoming" | "info"
+
+export type DashboardVacancyAttentionSignal =
+  | "critical"
+  | "attention"
+  | "overdue"
+  | "unpublished"
+
+export type DashboardMetricKey =
+  | "activeVacancies"
+  | "upcomingInterviews"
+  | "staleCandidates"
+  | "pendingEvaluations"
+  | "vacanciesWithoutCandidates"
+  | "vacanciesPresentationOverdue"
+  | "vacanciesUnpublished"
+
+export const DASHBOARD_METRIC_KEYS: readonly DashboardMetricKey[] = [
+  "activeVacancies",
+  "upcomingInterviews",
+  "staleCandidates",
+  "pendingEvaluations",
+  "vacanciesWithoutCandidates",
+  "vacanciesPresentationOverdue",
+  "vacanciesUnpublished",
+] as const
+
+/** Metrics shown only in the Vacantes home block (not under Candidatos). */
+export const DASHBOARD_VACANCY_METRIC_KEYS = [
+  "activeVacancies",
+  "vacanciesWithoutCandidates",
+  "vacanciesPresentationOverdue",
+  "vacanciesUnpublished",
+] as const satisfies readonly DashboardMetricKey[]
+
+const VACANCY_METRIC_KEY_SET: ReadonlySet<string> = new Set(
+  DASHBOARD_VACANCY_METRIC_KEYS
+)
+
+export function isVacancyDashboardMetric(key: DashboardMetricKey): boolean {
+  return VACANCY_METRIC_KEY_SET.has(key)
+}
+
+export type DashboardReminderKey =
+  | "upcomingInterviews"
+  | "unconfirmedInterviews"
+  | "newCandidates"
+  | "staleCandidates"
+  | "vacanciesPresentationDueSoon"
+  | "vacanciesPresentationOverdue"
+  | "inactiveVacancies"
+  | "pendingEvaluations"
+  | "pendingTechnicalSheets"
+  | "pendingApprovals"
+  | "overdueFollowUps"
+  | "pendingConsents"
+  | "pendingDocuments"
+
+export const DASHBOARD_VACANCY_REMINDER_KEYS = [
+  "vacanciesPresentationDueSoon",
+  "vacanciesPresentationOverdue",
+  "inactiveVacancies",
+] as const satisfies readonly DashboardReminderKey[]
+
+const VACANCY_REMINDER_KEY_SET: ReadonlySet<string> = new Set(DASHBOARD_VACANCY_REMINDER_KEYS)
+
+export function isVacancyDashboardReminder(key: DashboardReminderKey): boolean {
+  return VACANCY_REMINDER_KEY_SET.has(key)
+}
+
+/** Plazos de presentación: siempre visibles en el panel Vacantes (también en cero). */
+export function isPresentationSlaReminder(key: DashboardReminderKey): boolean {
+  return (
+    key === "vacanciesPresentationDueSoon" ||
+    key === "vacanciesPresentationOverdue"
+  )
+}
+
+export const DASHBOARD_REMINDER_KEYS: readonly DashboardReminderKey[] = [
+  "upcomingInterviews",
+  "unconfirmedInterviews",
+  "newCandidates",
+  "staleCandidates",
+  "vacanciesPresentationDueSoon",
+  "vacanciesPresentationOverdue",
+  "inactiveVacancies",
+  "pendingEvaluations",
+  "pendingTechnicalSheets",
+  "pendingApprovals",
+  "overdueFollowUps",
+  "pendingConsents",
+  "pendingDocuments",
+] as const
+
+export interface DashboardMetric {
+  key: DashboardMetricKey
+  value: number | null
+  sourceState: DashboardSourceState
+  href: string
+}
+
+export interface DashboardReminderContext {
+  days?: number
+  analyzed?: number
+  total?: number
+}
+
+export interface DashboardReminder {
+  key: DashboardReminderKey
+  count: number | null
+  severity: DashboardSeverity
+  href: string | null
+  sourceState: DashboardSourceState
+  dueAt: string | null
+  context: DashboardReminderContext | null
+}
+
+export interface DashboardVacancyAttentionRow {
+  vacancyId: string
+  publicSlug: string | null
+  title: string
+  clientName: string | null
+  daysOpen: number | null
+  candidateCount: number
+  signal: DashboardVacancyAttentionSignal
+  href: string
+}
+
+export interface RecruiterDashboardModel {
+  generatedAt: string
+  metrics: DashboardMetric[]
+  reminders: DashboardReminder[]
+  vacancyAttention: DashboardVacancyAttentionRow[]
+}
+
+const REMINDER_SEVERITY: Record<DashboardReminderKey, DashboardSeverity> = {
+  staleCandidates: "critical",
+  overdueFollowUps: "critical",
+  vacanciesPresentationOverdue: "critical",
+  unconfirmedInterviews: "action",
+  newCandidates: "action",
+  pendingEvaluations: "action",
+  pendingTechnicalSheets: "action",
+  pendingApprovals: "action",
+  pendingConsents: "action",
+  pendingDocuments: "action",
+  upcomingInterviews: "upcoming",
+  vacanciesPresentationDueSoon: "upcoming",
+  inactiveVacancies: "info",
+}
+
+const REMINDER_FALLBACK_LINK: Record<DashboardReminderKey, string | null> = {
+  upcomingInterviews: RECRUITER_DASHBOARD_LINKS.interviews,
+  unconfirmedInterviews: RECRUITER_DASHBOARD_LINKS.interviews,
+  newCandidates: RECRUITER_DASHBOARD_LINKS.candidates,
+  staleCandidates: RECRUITER_DASHBOARD_LINKS.candidates,
+  vacanciesPresentationDueSoon: RECRUITER_DASHBOARD_LINKS.vacancies,
+  vacanciesPresentationOverdue:
+    RECRUITER_DASHBOARD_LINKS.vacanciesPresentationOverdue,
+  inactiveVacancies: RECRUITER_DASHBOARD_LINKS.vacancies,
+  pendingEvaluations: RECRUITER_DASHBOARD_LINKS.technicalEvaluationsReport,
+  pendingTechnicalSheets: RECRUITER_DASHBOARD_LINKS.vacancies,
+  pendingApprovals: null,
+  overdueFollowUps: RECRUITER_DASHBOARD_LINKS.candidates,
+  pendingConsents: null,
+  pendingDocuments: null,
+}
+
+/** Pendientes sin pantalla propia: siempre en preparación, sin enlace. */
+const WITHHELD_REMINDER_KEYS: ReadonlySet<DashboardReminderKey> = new Set([
+  "pendingApprovals",
+  "pendingDocuments",
+  "pendingConsents",
+])
+
+export function isWithheldDashboardReminder(key: DashboardReminderKey): boolean {
+  return WITHHELD_REMINDER_KEYS.has(key)
+}
+
+const METRIC_LINK: Record<DashboardMetricKey, string> = {
+  activeVacancies: RECRUITER_DASHBOARD_LINKS.vacanciesActivas,
+  upcomingInterviews: reminderDetailLink("upcomingInterviews"),
+  staleCandidates: reminderDetailLink("staleCandidates"),
+  pendingEvaluations: reminderDetailLink("pendingEvaluations"),
+  vacanciesWithoutCandidates: RECRUITER_DASHBOARD_LINKS.vacanciesWithoutCandidates,
+  vacanciesPresentationOverdue:
+    RECRUITER_DASHBOARD_LINKS.vacanciesPresentationOverdue,
+  vacanciesUnpublished: RECRUITER_DASHBOARD_LINKS.vacanciesUnpublished,
+}
+
+const METRIC_KEY_SET: ReadonlySet<string> = new Set(DASHBOARD_METRIC_KEYS)
+const REMINDER_KEY_SET: ReadonlySet<string> = new Set(DASHBOARD_REMINDER_KEYS)
+const SOURCE_STATE_SET: ReadonlySet<string> = new Set([
+  "ready",
+  "partial",
+  "unavailable",
+  "error",
+])
+const VACANCY_ATTENTION_SIGNAL_SET: ReadonlySet<string> = new Set([
+  "critical",
+  "attention",
+  "overdue",
+  "unpublished",
+])
+
+export function reminderDetailLink(key: DashboardReminderKey): string {
+  return `${REMINDER_DETAIL_PREFIX}/${key}`
+}
+
+export function isDashboardReminderKey(value: unknown): value is DashboardReminderKey {
+  return typeof value === "string" && REMINDER_KEY_SET.has(value)
+}
+
+export function isDashboardMetricKey(value: unknown): value is DashboardMetricKey {
+  return typeof value === "string" && METRIC_KEY_SET.has(value)
+}
+
+export function normalizeRecruiterDashboard(
+  raw: unknown,
+  now: Date = new Date()
+): RecruiterDashboardModel {
+  const record =
+    raw != null && typeof raw === "object" && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>)
+      : {}
+
+  const generatedAt = readString(record, ["generatedAt", "GeneratedAt"]) ?? now.toISOString()
+  const metrics = normalizeMetrics(record.metrics ?? record.Metrics)
+  const reminders = normalizeReminders(record.reminders ?? record.Reminders)
+  const vacancyAttention = normalizeVacancyAttention(
+    record.vacancyAttention ?? record.VacancyAttention
+  )
+  return { generatedAt, metrics, reminders, vacancyAttention }
+}
+
+function normalizeVacancyAttention(raw: unknown): DashboardVacancyAttentionRow[] {
+  if (!Array.isArray(raw)) return []
+  const rows: DashboardVacancyAttentionRow[] = []
+  const seen = new Set<string>()
+  for (const item of raw) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue
+    const record = item as Record<string, unknown>
+    const vacancyId = readString(record, ["vacancyId", "VacancyId"])
+    if (!vacancyId || seen.has(vacancyId)) continue
+    const signalRaw = readString(record, ["signal", "Signal"])
+    if (!signalRaw || !VACANCY_ATTENTION_SIGNAL_SET.has(signalRaw)) continue
+    const title = readString(record, ["title", "Title"]) ?? ""
+    const publicSlug = readString(record, ["publicSlug", "PublicSlug"])
+    const candidateCount = readInt(record, ["candidateCount", "CandidateCount"]) ?? 0
+    seen.add(vacancyId)
+    rows.push({
+      vacancyId,
+      publicSlug,
+      title,
+      clientName: readString(record, ["clientName", "ClientName"]),
+      daysOpen: readInt(record, ["daysOpen", "DaysOpen"]),
+      candidateCount,
+      signal: signalRaw as DashboardVacancyAttentionSignal,
+      href: buildRecruiterVacancyPath({ id: vacancyId, publicSlug }),
+    })
+    if (rows.length >= VACANCY_DASHBOARD_ATTENTION_LIMIT) break
+  }
+  return rows
+}
+
+function normalizeMetrics(raw: unknown): DashboardMetric[] {
+  const byKey = indexByKey(raw)
+  return DASHBOARD_METRIC_KEYS.map((key) => {
+    const entry = byKey.get(key)
+    return {
+      key,
+      value: entry ? pickCount(entry) : null,
+      sourceState: entry ? pickSourceState(entry) : "unavailable",
+      href: METRIC_LINK[key],
+    }
+  })
+}
+
+function normalizeReminders(raw: unknown): DashboardReminder[] {
+  const byKey = indexByKey(raw)
+  return DASHBOARD_REMINDER_KEYS.map((key) => {
+    const entry = byKey.get(key)
+    const reportedState = entry ? pickSourceState(entry) : "unavailable"
+    const sourceState = isWithheldDashboardReminder(key) ? "unavailable" : reportedState
+    const count = entry ? pickCount(entry) : null
+    const dueAt = entry ? readString(entry, ["dueAt", "DueAt"]) : null
+    const context = entry ? pickContext(entry) : null
+    return {
+      key,
+      count,
+      sourceState,
+      severity: resolveReminderSeverity(key, sourceState, count),
+      dueAt: dueAt ?? null,
+      context: enrichContext(key, context),
+      href: isWithheldDashboardReminder(key)
+        ? null
+        : resolveReminderHref(key, sourceState, count),
+    }
+  })
+}
+
+function resolveReminderSeverity(
+  key: DashboardReminderKey,
+  sourceState: DashboardSourceState,
+  count: number | null
+): DashboardSeverity {
+  const base = REMINDER_SEVERITY[key]
+  if (
+    isPresentationSlaReminder(key) &&
+    (sourceState === "ready" || sourceState === "partial") &&
+    (count == null || count === 0)
+  ) {
+    return "info"
+  }
+  return base
+}
+
+function resolveReminderHref(
+  key: DashboardReminderKey,
+  sourceState: DashboardSourceState,
+  count: number | null
+): string | null {
+  if (sourceState === "ready" || sourceState === "partial") {
+    if (count != null && count > 0) return reminderDetailLink(key)
+    // Plazos de presentación: enlace al listado aunque el conteo sea 0.
+    if (isPresentationSlaReminder(key)) return REMINDER_FALLBACK_LINK[key]
+    return null
+  }
+  if (sourceState === "error") return null
+  return REMINDER_FALLBACK_LINK[key]
+}
+
+function indexByKey(raw: unknown): Map<string, Record<string, unknown>> {
+  const map = new Map<string, Record<string, unknown>>()
+  if (!Array.isArray(raw)) return map
+  for (const item of raw) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue
+    const entry = item as Record<string, unknown>
+    const key = readString(entry, ["key", "Key"])
+    if (key && !map.has(key)) map.set(key, entry)
+  }
+  return map
+}
+
+function pickSourceState(entry: Record<string, unknown>): DashboardSourceState {
+  const raw = readString(entry, ["sourceState", "SourceState", "state", "State"])
+  if (raw && SOURCE_STATE_SET.has(raw)) return raw as DashboardSourceState
+  return "unavailable"
+}
+
+function pickCount(entry: Record<string, unknown>): number | null {
+  const raw = entry.count ?? entry.Count ?? entry.value ?? entry.Value
+  if (raw == null) return null
+  if (typeof raw === "number" && Number.isFinite(raw)) return raw
+  if (typeof raw === "string" && raw.trim() !== "") {
+    const parsed = Number.parseInt(raw, 10)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return null
+}
+
+function pickContext(entry: Record<string, unknown>): DashboardReminderContext | null {
+  const context = entry.context ?? entry.Context
+  if (!context || typeof context !== "object" || Array.isArray(context)) return null
+  const record = context as Record<string, unknown>
+  const result: DashboardReminderContext = {}
+  const days = readInt(record, ["days", "Days"])
+  if (days != null) result.days = days
+  const analyzed = readInt(record, ["analyzed", "Analyzed"])
+  if (analyzed != null) result.analyzed = analyzed
+  const total = readInt(record, ["total", "Total"])
+  if (total != null) result.total = total
+  return Object.keys(result).length > 0 ? result : null
+}
+
+function enrichContext(
+  key: DashboardReminderKey,
+  context: DashboardReminderContext | null
+): DashboardReminderContext | null {
+  const defaults = DEFAULT_REMINDER_CONTEXT[key]
+  if (!defaults && !context) return null
+  return { ...(defaults ?? {}), ...(context ?? {}) }
+}
+
+export function reminderWindowDays(
+  key: DashboardReminderKey,
+  context: DashboardReminderContext | null
+): number | null {
+  if (!isReminderWindowKey(key)) return null
+  if (context?.days != null) return context.days
+  return DEFAULT_REMINDER_CONTEXT[key]?.days ?? null
+}
+
+function isReminderWindowKey(
+  key: DashboardReminderKey
+): key is "upcomingInterviews" | "staleCandidates" | "inactiveVacancies" {
+  return (
+    key === "upcomingInterviews" ||
+    key === "staleCandidates" ||
+    key === "inactiveVacancies"
+  )
+}
+
+const DEFAULT_REMINDER_CONTEXT: Partial<
+  Record<DashboardReminderKey, DashboardReminderContext>
+> = {
+  upcomingInterviews: { days: DASHBOARD_UPCOMING_INTERVIEW_DAYS },
+  staleCandidates: { days: DASHBOARD_STALE_CANDIDATE_DAYS },
+  inactiveVacancies: { days: DASHBOARD_SLOW_VACANCY_DAYS },
+}
+
+function readString(
+  record: Record<string, unknown>,
+  keys: string[]
+): string | null {
+  for (const key of keys) {
+    const value = record[key]
+    if (typeof value === "string" && value.trim() !== "") return value.trim()
+  }
+  return null
+}
+
+function readInt(
+  record: Record<string, unknown>,
+  keys: string[]
+): number | null {
+  for (const key of keys) {
+    const value = record[key]
+    if (typeof value === "number" && Number.isFinite(value)) return value
+    if (typeof value === "string" && value.trim() !== "") {
+      const parsed = Number.parseInt(value, 10)
+      if (Number.isFinite(parsed)) return parsed
+    }
+  }
+  return null
+}
+
+export function isActionableReminder(reminder: DashboardReminder): boolean {
+  if (reminder.sourceState === "error") return true
+  if (reminder.sourceState !== "ready" && reminder.sourceState !== "partial") {
+    return false
+  }
+  // Obligatorios en Vacantes: se muestran aunque el backend reporte 0.
+  if (isPresentationSlaReminder(reminder.key)) return true
+  return reminder.count != null && reminder.count > 0
+}
+
+export function sortDashboardReminders(
+  reminders: readonly DashboardReminder[],
+  getLabel: (key: DashboardReminderKey) => string
+): DashboardReminder[] {
+  return [...reminders].sort((a, b) => {
+    const severityDiff = SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]
+    if (severityDiff !== 0) return severityDiff
+    const dueDiff = compareDueAt(a.dueAt, b.dueAt)
+    if (dueDiff !== 0) return dueDiff
+    return getLabel(a.key).localeCompare(getLabel(b.key))
+  })
+}
+
+function compareDueAt(a: string | null, b: string | null): number {
+  if (a === b) return 0
+  if (a == null) return 1
+  if (b == null) return -1
+  return new Date(a).getTime() - new Date(b).getTime()
+}
+
+const SEVERITY_RANK: Record<DashboardSeverity, number> = {
+  critical: 0,
+  action: 1,
+  upcoming: 2,
+  info: 3,
+}
+
+export interface ReminderDetailItem {
+  id: string
+  applicationId: string | null
+  candidateProfileId: string | null
+  candidateName: string | null
+  candidateTitle: string | null
+  vacancyId: string | null
+  vacancyTitle: string | null
+  companyName: string | null
+  dueAt: string | null
+  statusLabel: string | null
+}
+
+export interface ReminderDetailModel {
+  key: DashboardReminderKey
+  sourceState: DashboardSourceState
+  totalCount: number | null
+  items: ReminderDetailItem[]
+  context: DashboardReminderContext | null
+}
+
+export function normalizeReminderDetail(
+  key: DashboardReminderKey,
+  raw: unknown
+): ReminderDetailModel {
+  const record =
+    raw != null && typeof raw === "object" && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>)
+      : {}
+  const sourceState = pickSourceState(record)
+  const totalCount = readInt(record, ["totalCount", "TotalCount"])
+  const itemsRaw = record.items ?? record.Items ?? record.rows ?? record.Rows
+  const items = Array.isArray(itemsRaw) ? itemsRaw.map(normalizeDetailItem).filter(nonNull) : []
+  return { key, sourceState, totalCount, items, context: pickDetailContext(record) }
+}
+
+function pickDetailContext(record: Record<string, unknown>): DashboardReminderContext | null {
+  const nested = pickContext(record)
+  const flat = pickContext({
+    context: {
+      analyzed: record.analyzed ?? record.Analyzed,
+      total: record.total ?? record.Total,
+      days: record.days ?? record.Days,
+    },
+  })
+  if (!nested && !flat) return null
+  return { ...(flat ?? {}), ...(nested ?? {}) }
+}
+
+function normalizeDetailItem(raw: unknown): ReminderDetailItem | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null
+  const record = raw as Record<string, unknown>
+  const id = readString(record, ["id", "Id", "ID"])
+  if (!id) return null
+  return {
+    id,
+    applicationId: readString(record, ["applicationId", "ApplicationId"]),
+    candidateProfileId: readString(record, [
+      "candidateProfileId",
+      "CandidateProfileId",
+    ]),
+    candidateName: readString(record, ["candidateName", "CandidateName"]),
+    candidateTitle: readString(record, ["candidateTitle", "CandidateTitle"]),
+    vacancyId: readString(record, ["vacancyId", "VacancyId"]),
+    vacancyTitle: readString(record, ["vacancyTitle", "VacancyTitle"]),
+    companyName: readString(record, ["companyName", "CompanyName"]),
+    dueAt: readString(record, ["dueAt", "DueAt"]),
+    statusLabel: readString(record, ["statusLabel", "StatusLabel"]),
+  }
+}
+
+function nonNull<T>(value: T | null): value is T {
+  return value != null
+}
+
+const REMINDERS_WITHOUT_CANDIDATE: ReadonlySet<DashboardReminderKey> = new Set([
+  "vacanciesPresentationDueSoon",
+  "vacanciesPresentationOverdue",
+  "inactiveVacancies",
+])
+
+export function reminderIncludesCandidate(key: DashboardReminderKey): boolean {
+  return !REMINDERS_WITHOUT_CANDIDATE.has(key)
+}
+
+export type ReminderDateColumnKey =
+  | "dateTime"
+  | "since"
+  | "presentationDue"
+  | "lastActivity"
+  | "date"
+
+export function reminderDateColumnKey(key: DashboardReminderKey): ReminderDateColumnKey {
+  switch (key) {
+    case "upcomingInterviews":
+    case "unconfirmedInterviews":
+      return "dateTime"
+    case "staleCandidates":
+      return "since"
+    case "vacanciesPresentationDueSoon":
+    case "vacanciesPresentationOverdue":
+      return "presentationDue"
+    case "inactiveVacancies":
+      return "lastActivity"
+    default:
+      return "date"
+  }
+}
+
+export function reminderIncludesTime(key: DashboardReminderKey): boolean {
+  return reminderDateColumnKey(key) === "dateTime"
+}
+
+export type ReminderRowActionKey = "interview" | "vacancy" | "sheet"
+
+export function reminderRowActionKey(key: DashboardReminderKey): ReminderRowActionKey | null {
+  switch (key) {
+    case "upcomingInterviews":
+    case "unconfirmedInterviews":
+      return "interview"
+    case "pendingTechnicalSheets":
+      return "sheet"
+    case "pendingApprovals":
+    case "pendingDocuments":
+    case "pendingConsents":
+      return null
+    default:
+      return "vacancy"
+  }
+}
+
+export type ReminderStatusKind = "interview" | "vacancy" | "plain"
+
+export function reminderStatusKind(key: DashboardReminderKey): ReminderStatusKind {
+  if (key === "upcomingInterviews" || key === "unconfirmedInterviews") return "interview"
+  if (
+    key === "vacanciesPresentationDueSoon" ||
+    key === "vacanciesPresentationOverdue" ||
+    key === "inactiveVacancies"
+  ) {
+    return "vacancy"
+  }
+  return "plain"
+}
+
+export function isInactiveVacancyStatusToken(value: string): boolean {
+  return value.trim().toLowerCase() === "inactive"
+}
+
+export function resolveReminderRowHref(
+  key: DashboardReminderKey,
+  item: ReminderDetailItem
+): string | null {
+  switch (key) {
+    case "upcomingInterviews":
+    case "unconfirmedInterviews":
+      return interviewRowHref(item)
+    case "vacanciesPresentationDueSoon":
+    case "vacanciesPresentationOverdue":
+    case "inactiveVacancies":
+      return vacancyRowHref(item.vacancyId ?? item.id)
+    case "newCandidates":
+    case "staleCandidates":
+    case "overdueFollowUps":
+    case "pendingEvaluations":
+      return item.vacancyId
+        ? vacancyRowHref(item.vacancyId, item.candidateProfileId)
+        : null
+    case "pendingTechnicalSheets":
+      return item.vacancyId && item.candidateProfileId
+        ? `/portal-rrhh/vacantes/${encodeURIComponent(item.vacancyId)}/candidatos/${encodeURIComponent(item.candidateProfileId)}/technical-sheet`
+        : null
+    case "pendingDocuments":
+    case "pendingConsents":
+    case "pendingApprovals":
+      return null
+  }
+}
+
+function interviewRowHref(item: ReminderDetailItem): string {
+  const path = `/portal-rrhh/interviews/${encodeURIComponent(item.id)}`
+  if (!item.vacancyId) return path
+  return `${path}?vacancyId=${encodeURIComponent(item.vacancyId)}`
+}
+
+function vacancyRowHref(vacancyId: string, candidateProfileId?: string | null): string {
+  const path = `/portal-rrhh/vacantes/${encodeURIComponent(vacancyId)}`
+  const candidate = candidateProfileId?.trim() ?? ""
+  if (candidate === "") return path
+  return `${path}?candidato=${encodeURIComponent(candidate)}`
+}

@@ -246,6 +246,8 @@ export function PublicVacancyDetailPage({
                   showLocation={hasLocation}
                   departmentLabel={hasDepartment ? departmentLabel : null}
                   modalityLabel={hasModality ? modalityLabel : null}
+                  laws={vacancy.dataProtectionLaws}
+                  lawsLabel={t("lawsLabel")}
                 />
 
                 <div className="border-t border-border pt-5">

@@ -76,6 +76,13 @@ describe("CandidateProfileModal", () => {
     expect(screen.queryByText(/Ruta:/)).not.toBeInTheDocument()
     expect(screen.queryByText("analisis_de_datos")).not.toBeInTheDocument()
 
+    expect(
+      screen.getByText(/salen del checklist de requisitos/)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/No indica por sí sola si cada requisito se cumple/)
+    ).toBeInTheDocument()
+
     const strengthsSection = screen.getByRole("heading", { name: "Fortalezas" }).closest("div")
     expect(strengthsSection).not.toBeNull()
     expect(
@@ -193,6 +200,56 @@ describe("CandidateProfileModal", () => {
     expect(screen.getByText("HTML")).toHaveClass("truncate")
     expect(screen.getByText("JavaScript")).toBeInTheDocument()
     expect(screen.getByText("Sin detalle")).toBeInTheDocument()
+  })
+
+  it("does not list recency or relevant years as failed attributes", () => {
+    renderModal(
+      <CandidateProfileModal
+        match={antonelliMatch}
+        uploadedAtLabel="Subido: 13 ago 2026"
+        onClose={() => undefined}
+      />
+    )
+
+    expect(screen.queryByText("Actualidad")).not.toBeInTheDocument()
+    expect(screen.queryByText("Años relevantes")).not.toBeInTheDocument()
+  })
+
+  it("renders requirement verdicts with CV evidence instead of raw attr_ scores", () => {
+    renderModal(
+      <CandidateProfileModal
+        match={{
+          ...antonelliMatch,
+          componentScores: {
+            attr_ingles: 0,
+            attr_power_bi: 0,
+            attribute_aggregate: 0.75,
+            qualitativeScore: 0.9,
+          },
+          matchedAttributes: {},
+          requirementAssessments: [
+            { key: "ingles", verdict: "Met", score: 1, evidence: "Inglés intermedio-alto (B2)" },
+            { key: "power_bi", verdict: "Unavailable", score: null },
+            { key: "sql", verdict: "NotMet", score: 0 },
+            { key: "excel", verdict: "Partial", score: 0.5, candidateValue: "básico" },
+          ],
+          requiresManualReview: true,
+          scoreBreakdown: { attributesIncludedInTotal: false, attributeCoverage: 0.4 },
+        }}
+        uploadedAtLabel="Subido: 13 ago 2026"
+        onClose={() => undefined}
+      />
+    )
+
+    expect(screen.getByText("Inglés intermedio-alto (B2)")).toBeInTheDocument()
+    expect(screen.getByText("Cumple")).toBeInTheDocument()
+    expect(screen.getByText("Cumple parcialmente")).toBeInTheDocument()
+    expect(screen.getByText("No cumple")).toBeInTheDocument()
+    expect(screen.getByText("No evaluado")).toBeInTheDocument()
+    expect(screen.getByText("básico")).toBeInTheDocument()
+    expect(screen.getByText(/requiere revisión manual/)).toBeInTheDocument()
+    expect(screen.getByText(/no se incluyeron en el puntaje total/)).toBeInTheDocument()
+    expect(screen.getByText(/40%/)).toBeInTheDocument()
   })
 
   it("shows Application.MatchScore instead of semanticScore", () => {

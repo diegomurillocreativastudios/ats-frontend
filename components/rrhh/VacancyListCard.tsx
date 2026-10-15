@@ -6,10 +6,12 @@ import type { LucideIcon } from "lucide-react"
 import {
   Briefcase,
   Building2,
+  CalendarClock,
   Code,
   LayoutGrid,
   MapPin,
   Palette,
+  Target,
 } from "lucide-react"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyPublicationBadge } from "@/components/rrhh/vacancy-publication-badge"
@@ -135,6 +137,18 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
             className={`flex flex-col gap-1.5 font-sans text-[13px] sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1 ${isReadOnly ? "text-slate-500" : "text-muted-foreground"}`}
           >
             <VacancyMetaItem icon={Building2} value={vacancy.company} muted={isReadOnly} />
+            {vacancy.vacancyType.trim() !== "" ? (
+              <>
+                <span className="hidden text-muted-foreground/60 sm:inline" aria-hidden>
+                  ·
+                </span>
+                <VacancyMetaItem
+                  icon={Target}
+                  value={vacancy.vacancyType}
+                  muted={isReadOnly}
+                />
+              </>
+            ) : null}
             <span className="hidden text-muted-foreground/60 sm:inline" aria-hidden>
               ·
             </span>
@@ -154,6 +168,33 @@ export function VacancyListCard({ vacancy, onRefresh, onSnackbar }: VacancyListC
               ·
             </span>
             <VacancyMetaItem icon={LayoutGrid} value={vacancy.department} muted={isReadOnly} />
+            {vacancy.presentationDueAtLabel ? (
+              <>
+                <span className="hidden text-muted-foreground/60 sm:inline" aria-hidden>
+                  ·
+                </span>
+                <span
+                  className={`inline-flex min-w-0 max-w-full items-center gap-1.5 ${
+                    vacancy.isPresentationOverdue
+                      ? "text-destructive"
+                      : isReadOnly
+                        ? "text-slate-500"
+                        : ""
+                  }`}
+                >
+                  <CalendarClock className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
+                  <span className="truncate">
+                    {vacancy.isPresentationOverdue
+                      ? t("cards.presentationOverdue", {
+                          date: vacancy.presentationDueAtLabel,
+                        })
+                      : t("cards.presentationDue", {
+                          date: vacancy.presentationDueAtLabel,
+                        })}
+                  </span>
+                </span>
+              </>
+            ) : null}
           </div>
         </div>
       </div>

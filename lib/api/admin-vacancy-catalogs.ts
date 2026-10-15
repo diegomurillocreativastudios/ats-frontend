@@ -1,6 +1,10 @@
 import { apiClient } from "@/lib/api"
 
-export type VacancyCatalogKind = "departments" | "modalities" | "softSkills"
+export type VacancyCatalogKind =
+  | "departments"
+  | "modalities"
+  | "softSkills"
+  | "vacancyTypes"
 
 export interface VacancyCatalogAdminItem {
   id: string
@@ -10,6 +14,8 @@ export interface VacancyCatalogAdminItem {
   sortOrder: number
   isActive: boolean
   vacanciesCount?: number
+  /** Days for presentation SLA; only set for vacancy types. */
+  presentationSlaDays?: number
 }
 
 export interface VacancyCatalogFormValues {
@@ -18,11 +24,13 @@ export interface VacancyCatalogFormValues {
   description?: string
   sortOrder: number
   isActive: boolean
+  presentationSlaDays?: number
 }
 
 function getCatalogBasePath(kind: VacancyCatalogKind): string {
   if (kind === "departments") return "/api/admin/vacancy-departments"
   if (kind === "modalities") return "/api/admin/vacancy-modalities"
+  if (kind === "vacancyTypes") return "/api/admin/vacancy-types"
   return "/api/admin/vacancy-soft-skills"
 }
 
@@ -48,8 +56,18 @@ function normalizeVacanciesCount(raw: Record<string, unknown>): number | undefin
   return Number.isFinite(parsed) ? parsed : undefined
 }
 
+function normalizePresentationSlaDays(
+  raw: Record<string, unknown>
+): number | undefined {
+  const value = raw.presentationSlaDays ?? raw.presentation_sla_days
+  if (value == null || value === "") return undefined
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
 function mapCatalogItem(raw: unknown): VacancyCatalogAdminItem {
   const item = raw as Record<string, unknown>
+  const presentationSlaDays = normalizePresentationSlaDays(item)
 
   return {
     id: toStringValue(item.id ?? item.uuid),
@@ -59,6 +77,7 @@ function mapCatalogItem(raw: unknown): VacancyCatalogAdminItem {
     sortOrder: toNumberValue(item.sortOrder ?? item.sort_order ?? item.order, 0),
     isActive: Boolean(item.isActive ?? item.is_active ?? true),
     vacanciesCount: normalizeVacanciesCount(item),
+    ...(presentationSlaDays != null ? { presentationSlaDays } : {}),
   }
 }
 
@@ -76,6 +95,9 @@ function normalizeListPayload(payload: unknown): VacancyCatalogAdminItem[] {
       record.modalities ??
       record.softSkills ??
       record.soft_skills ??
+      record.vacancyTypes ??
+      record.vacancy_types ??
+      record.types ??
       record.results
 
     if (Array.isArray(items)) {

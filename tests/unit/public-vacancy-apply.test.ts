@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest"
 import {
   formatApplicationSourceBadge,
+  isPersonalApplicationSource,
   mapApplicationSourceLabel,
 } from "@/lib/application-source"
 import {
   buildPublicApplyFormData,
+  formatPublicApplyMinSalaryDisplay,
   getPublicApplyErrorMessage,
   isAllowedCvFile,
+  isAlreadyAppliedConflict,
   isCvFileWithinSizeLimit,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
+  parsePublicApplyMinSalary,
   PUBLIC_CV_MAX_BYTES,
+  sanitizePublicApplySalaryInput,
 } from "@/lib/public-vacancy-apply"
 
 describe("application source labels", () => {
@@ -33,6 +38,12 @@ describe("application source labels", () => {
 
   it("returns Origen desconocido for unexpected numeric values", () => {
     expect(formatApplicationSourceBadge(99)).toBe("Origen desconocido")
+  })
+
+  it("detects personal application source for icon badges", () => {
+    expect(isPersonalApplicationSource(1)).toBe(true)
+    expect(isPersonalApplicationSource(0)).toBe(false)
+    expect(isPersonalApplicationSource(undefined)).toBe(false)
   })
 })
 
@@ -97,10 +108,40 @@ describe("public vacancy apply helpers", () => {
     expect(getPublicApplyErrorMessage(500, {})).toContain("error inesperado")
   })
 
+  it("maps documentType required 400 without calling it a file format error", () => {
+    expect(
+      getPublicApplyErrorMessage(
+        400,
+        "documentTypeCode or documentTypeId is required when nationalId is provided."
+      )
+    ).toMatch(/tipo de documento/i)
+    expect(
+      getPublicApplyErrorMessage(
+        400,
+        '"documentTypeCode or documentTypeId is required when nationalId is provided."'
+      )
+    ).toMatch(/tipo de documento/i)
+    expect(
+      getPublicApplyErrorMessage(
+        400,
+        "documentTypeCode or documentTypeId is required when nationalId is provided."
+      )
+    ).not.toMatch(/Formato de archivo/i)
+  })
+
   it("maps AUTH_CONSENT error codes from personal-appliance", () => {
     expect(
       getPublicApplyErrorMessage(400, { code: "AUTH_CONSENT_VALIDATION" })
     ).toContain("autorización")
+    expect(
+      getPublicApplyErrorMessage(400, { code: "AUTH_CONSENT_REQUIRED" })
+    ).toContain("aceptar la autorización")
+    expect(
+      getPublicApplyErrorMessage(400, {
+        title: "One or more validation errors occurred.",
+        errors: { AuthConsent: ["The AuthConsent field is required."] },
+      })
+    ).toContain("aceptar la autorización")
     expect(
       getPublicApplyErrorMessage(409, { code: "AUTH_CONSENT_VERSION_MISMATCH" })
     ).toContain("actualizó")
@@ -109,6 +150,28 @@ describe("public vacancy apply helpers", () => {
         code: "AUTH_CONSENT_NATIONAL_ID_CONFLICT",
       })
     ).toContain("documento de identidad")
+  })
+
+  it("maps ALREADY_APPLIED 409 without treating consent 409 the same", () => {
+    expect(
+      isAlreadyAppliedConflict(409, { code: "ALREADY_APPLIED", message: "x" })
+    ).toBe(true)
+    expect(
+      isAlreadyAppliedConflict(409, {
+        code: "AUTH_CONSENT_VERSION_MISMATCH",
+      })
+    ).toBe(false)
+    expect(
+      getPublicApplyErrorMessage(409, {
+        code: "ALREADY_APPLIED",
+        message: "Candidate has already applied to this vacancy.",
+      })
+    ).toContain("Ya postulaste")
+    expect(
+      getPublicApplyErrorMessage(409, {
+        message: "Candidate has already applied to this vacancy.",
+      })
+    ).toContain("Ya postulaste")
   })
 
   it("prefers backend message on 422 when present", () => {
@@ -125,6 +188,17 @@ describe("public vacancy apply helpers", () => {
     })
     expect(parsed.email).toBe("Correo inválido")
     expect(parsed.firstName).toBe("Requerido")
+  })
+
+  it("sanitizes and parses minSalary helpers", () => {
+    expect(sanitizePublicApplySalaryInput("1a2b3.4c5")).toBe("123.45")
+    expect(sanitizePublicApplySalaryInput("12.34.56")).toBe("12.3456")
+    expect(parsePublicApplyMinSalary("")).toBeNull()
+    expect(parsePublicApplyMinSalary("-1")).toBeNull()
+    expect(parsePublicApplyMinSalary("1500.50")).toBe(1500.5)
+    expect(parsePublicApplyMinSalary("0")).toBe(0)
+    expect(formatPublicApplyMinSalaryDisplay("1500.5")).toBe("1500.50")
+    expect(formatPublicApplyMinSalaryDisplay("")).toBe("")
   })
 
   it("builds FormData with expected keys", () => {
@@ -145,7 +219,7 @@ describe("public vacancy apply helpers", () => {
     expect(fd.get("cvFile")).toBe(file)
     const candidate = JSON.parse(String(fd.get("candidate") ?? "{}")) as Record<
       string,
-      string
+      unknown
     >
     expect(candidate.firstName).toBe("Ana")
     expect(candidate.lastName).toBe("López")
@@ -153,6 +227,30 @@ describe("public vacancy apply helpers", () => {
     expect(candidate.source).toBe("linkedin")
     expect(candidate.notes).toBe("hola")
     expect(candidate).not.toHaveProperty("outputLanguage")
+    expect(candidate).not.toHaveProperty("minSalary")
+    expect(candidate).not.toHaveProperty("jobPreferences")
+  })
+
+  it("includes minSalary as a number in candidate JSON when provided", () => {
+    const file = new File(["%PDF"], "x.pdf", { type: "application/pdf" })
+    const fd = buildPublicApplyFormData(
+      "vacancy-123",
+      {
+        firstName: "Ana",
+        lastName: "López",
+        email: "a@b.co",
+        minSalary: 1500.5,
+        cvFile: file,
+      },
+      "ES"
+    )
+    const candidate = JSON.parse(String(fd.get("candidate") ?? "{}")) as Record<
+      string,
+      unknown
+    >
+    expect(candidate.minSalary).toBe(1500.5)
+    expect(typeof candidate.minSalary).toBe("number")
+    expect(candidate).not.toHaveProperty("jobPreferences")
   })
 
   it("appends authConsent JSON when provided", () => {

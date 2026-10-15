@@ -108,6 +108,9 @@ async function fillAndSubmit(locale: "es" | "en" = "es") {
   fireEvent.change(screen.getByLabelText(labels.documentNumber), {
     target: { value: "01234567-8" },
   })
+  fireEvent.change(screen.getByLabelText(labels.minSalary), {
+    target: { value: "1500.00" },
+  })
   const cvInput = document.getElementById("apply-cv") as HTMLInputElement
   fireEvent.change(cvInput, {
     target: {
@@ -229,7 +232,7 @@ describe("PublicVacancyApplicationForm", () => {
     expect(screen.getByPlaceholderText("1234-5678")).toBeInTheDocument()
   })
 
-  it("exige teléfono, tipo de documento y número de documento al enviar", async () => {
+  it("exige teléfono, tipo de documento, número de documento y pretensión salarial al enviar", async () => {
     renderForm()
 
     fireEvent.click(await screen.findByRole("button", { name: "Enviar postulación" }))
@@ -239,6 +242,21 @@ describe("PublicVacancyApplicationForm", () => {
     expect(screen.getByText("Ingresa tu teléfono.")).toBeInTheDocument()
     expect(screen.getByText("Selecciona un tipo de documento.")).toBeInTheDocument()
     expect(screen.getByText("Ingresa tu número de documento.")).toBeInTheDocument()
+    expect(screen.getByText("Ingresa tu pretensión salarial.")).toBeInTheDocument()
+  })
+
+  it("incluye minSalary numérico en el JSON candidate al enviar", async () => {
+    postFormData.mockResolvedValue("ok")
+    renderForm()
+    await fillAndSubmit()
+
+    await waitFor(() => expect(postFormData).toHaveBeenCalled())
+    const candidate = JSON.parse(String(getLastFormData().get("candidate") ?? "{}")) as Record<
+      string,
+      unknown
+    >
+    expect(candidate.minSalary).toBe(1500)
+    expect(typeof candidate.minSalary).toBe("number")
   })
 
   it("muestra la bandera del país junto al prefijo telefónico", async () => {
@@ -258,10 +276,33 @@ describe("PublicVacancyApplicationForm", () => {
     expect(Boolean(flagImg) || Boolean(flagEmoji)).toBe(true)
   })
 
+  const getCvInput = () =>
+    screen.getByTestId("apply-cv-input") as HTMLInputElement
+
+  const getCvDropzone = () =>
+    screen.getByRole("button", { name: /Seleccionar PDF|CV_|mi-cv/i })
+
+  const dropCvFile = (file: File) => {
+    const dataTransfer = {
+      files: [file],
+      items: [
+        {
+          kind: "file",
+          type: file.type,
+          getAsFile: () => file,
+        },
+      ],
+      types: ["Files"],
+    }
+    fireEvent.drop(getCvDropzone(), { dataTransfer })
+  }
+
   it("muestra el dropzone de currículum con el texto de selección y la ayuda", async () => {
     renderForm()
 
-    expect(await screen.findByRole("button", { name: "Seleccionar PDF" })).toBeInTheDocument()
+    expect(
+      await screen.findByRole("button", { name: "Seleccionar PDF" })
+    ).toBeInTheDocument()
     expect(
       screen.getByText("Solo se acepta formato PDF (máx. 15 MB).")
     ).toBeInTheDocument()
@@ -270,7 +311,7 @@ describe("PublicVacancyApplicationForm", () => {
   it("rechaza un currículum que no es PDF", async () => {
     renderForm()
 
-    const input = document.getElementById("apply-cv") as HTMLInputElement
+    const input = getCvInput()
     const file = new File(["cv"], "mi-cv.docx", {
       type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     })
@@ -284,11 +325,117 @@ describe("PublicVacancyApplicationForm", () => {
   it("muestra el nombre del archivo al seleccionar un PDF válido", async () => {
     renderForm()
 
-    const input = document.getElementById("apply-cv") as HTMLInputElement
+    const input = getCvInput()
     const file = new File(["cv"], "mi-cv.pdf", { type: "application/pdf" })
     fireEvent.change(input, { target: { files: [file] } })
 
     expect(await screen.findByText("mi-cv.pdf")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Quitar mi-cv.pdf" })).toBeInTheDocument()
+  })
+
+  it("vuelve a aceptar el mismo PDF tras quitarlo", async () => {
+    renderForm()
+
+    const shared = new File(["%PDF"], "CV_reupload.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+    fireEvent.change(getCvInput(), { target: { files: [shared] } })
+    expect(await screen.findByText("CV_reupload.pdf")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Quitar CV_reupload.pdf" }))
+    expect(screen.queryByText("CV_reupload.pdf")).not.toBeInTheDocument()
+    expect(getCvInput().value).toBe("")
+
+    fireEvent.change(getCvInput(), { target: { files: [shared] } })
+    expect(await screen.findByText("CV_reupload.pdf")).toBeInTheDocument()
+  })
+
+  it("vuelve a listar el mismo File tras quitarlo vía drop", async () => {
+    renderForm()
+
+    const shared = new File(["%PDF"], "CV_Jose_Portillo.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+    dropCvFile(shared)
+    expect(await screen.findByText("CV_Jose_Portillo.pdf")).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Quitar CV_Jose_Portillo.pdf" })
+    )
+    expect(screen.queryByText("CV_Jose_Portillo.pdf")).not.toBeInTheDocument()
+
+    dropCvFile(shared)
+    expect(await screen.findByText("CV_Jose_Portillo.pdf")).toBeInTheDocument()
+  })
+
+  it("acepta drop cuando solo vienen items de DataTransfer", async () => {
+    renderForm()
+
+    const shared = new File(["%PDF"], "CV_items.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+    const dropzone = await screen.findByLabelText("Seleccionar PDF")
+    fireEvent.drop(dropzone, {
+      dataTransfer: {
+        files: [] as File[],
+        items: [
+          {
+            kind: "file",
+            type: shared.type,
+            getAsFile: () => shared,
+          },
+        ],
+        types: ["Files"],
+      },
+    })
+    expect(await screen.findByText("CV_items.pdf")).toBeInTheDocument()
+  })
+
+  it("permite subir y quitar el mismo PDF muchas veces seguidas", async () => {
+    renderForm()
+
+    const shared = new File(["%PDF"], "CV_ciclo.pdf", {
+      type: "application/pdf",
+      lastModified: 1_700_000_000_000,
+    })
+
+    for (let cycle = 0; cycle < 8; cycle++) {
+      fireEvent.change(getCvInput(), { target: { files: [shared] } })
+      expect(await screen.findByText("CV_ciclo.pdf")).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole("button", { name: "Quitar CV_ciclo.pdf" }))
+      expect(screen.queryByText("CV_ciclo.pdf")).not.toBeInTheDocument()
+    }
+
+    dropCvFile(shared)
+    expect(await screen.findByText("CV_ciclo.pdf")).toBeInTheDocument()
+  })
+
+  it("precarga datos y bloquea el correo cuando isEmailLocked", async () => {
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <PublicVacancyApplicationForm
+          vacancyId="vac-1"
+          initialValues={{
+            firstName: "Ana",
+            lastName: "López",
+            email: "ana@example.com",
+            phone: "77778888",
+            nationalId: "01234567-8",
+          }}
+          isEmailLocked
+          skipEmailConfirmation
+        />
+      </NextIntlClientProvider>
+    )
+
+    const email = await screen.findByLabelText(/Correo/)
+    expect(email).toHaveValue("ana@example.com")
+    expect(email).toHaveAttribute("readonly")
+    expect(screen.getByLabelText("Nombres *")).toHaveValue("Ana")
+    expect(screen.getByLabelText("Apellidos *")).toHaveValue("López")
   })
 })

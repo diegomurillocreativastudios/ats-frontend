@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl"
 import {
   formatRequirementKey,
+  isRequirementPriorityTerm,
   toRequirementImportance,
 } from "@/lib/vacancies/format-requirement-key"
 
@@ -27,7 +28,8 @@ function toLevelText(value: unknown, unspecified: string): string {
     return nested === "" ? unspecified : nested
   }
   const text = String(value).trim()
-  return text === "" ? unspecified : text
+  if (text === "" || isRequirementPriorityTerm(text)) return unspecified
+  return text
 }
 
 function toDisplayText(value: unknown): string {
@@ -94,9 +96,14 @@ export function RequirementsDisplay({ value, attributeWeights }: RequirementsDis
       buildRequirementRows(entries, attributeWeights, t("unspecified"))
     )
     const hasImportance = rows.some((row) => row.importance != null)
-    const uniqueLevels = new Set(rows.map((row) => row.levelText))
-    const sharedLevel = uniqueLevels.size === 1 ? rows[0]?.levelText ?? null : null
-    const gridClass = sharedLevel
+    const unspecified = t("unspecified")
+    const hasRealLevel = rows.some((row) => row.levelText !== unspecified)
+    const uniqueLevels = new Set(
+      rows.filter((row) => row.levelText !== unspecified).map((row) => row.levelText)
+    )
+    const sharedLevel =
+      hasRealLevel && uniqueLevels.size === 1 ? [...uniqueLevels][0] ?? null : null
+    const gridClass = !hasRealLevel || sharedLevel
       ? hasImportance
         ? "sm:grid-cols-[minmax(0,1fr)_9rem]"
         : "sm:grid-cols-[minmax(0,1fr)]"
@@ -106,7 +113,16 @@ export function RequirementsDisplay({ value, attributeWeights }: RequirementsDis
 
     return (
       <div>
-        {sharedLevel ? (
+        {!hasRealLevel ? (
+          hasImportance ? (
+            <div
+              className={`mb-1 hidden gap-3 px-1 font-sans text-xs font-medium text-muted-foreground sm:grid ${gridClass}`}
+            >
+              <span>{t("skill")}</span>
+              <span className="text-right">{t("importance")}</span>
+            </div>
+          ) : null
+        ) : sharedLevel ? (
           <p className="mb-3 flex flex-wrap items-center gap-2 font-sans text-sm text-muted-foreground">
             <span>{t("expectedLevel")}</span>
             <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
@@ -137,7 +153,7 @@ export function RequirementsDisplay({ value, attributeWeights }: RequirementsDis
               className={`grid grid-cols-1 gap-2 py-2.5 sm:items-center sm:gap-3 ${gridClass}`}
             >
               <span className="font-sans text-sm font-medium text-foreground">{row.label}</span>
-              {sharedLevel ? null : (
+              {hasRealLevel && !sharedLevel ? (
                 <div className="flex items-center justify-between gap-2 sm:justify-start">
                   <span className="font-sans text-xs text-muted-foreground sm:hidden">
                     {t("expectedLevel")}
@@ -146,7 +162,7 @@ export function RequirementsDisplay({ value, attributeWeights }: RequirementsDis
                     {row.levelText}
                   </span>
                 </div>
-              )}
+              ) : null}
               {row.importance != null ? (
                 <div className="flex items-center justify-between gap-2 sm:justify-end">
                   <span className="font-sans text-xs text-muted-foreground sm:hidden">

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import {
   buildCandidateProfileSaveBody,
   getBirthDateInputValidationErrorCode,
+  isValidRequiredJobMinSalary,
   type BirthDateValidationErrorCode,
   type CandidateProfile,
   type CandidateProfileRequiredFieldErrors,
@@ -27,6 +28,7 @@ const REQUIRED_FIELD_IDS: Record<keyof CandidateProfileRequiredFieldErrors, stri
   headline: "pf-headline",
   summary: "pf-summary",
   nationalId: "pf-national-id",
+  jobMinSalary: "pf-hero-salary",
 }
 
 const REQUIRED_FIELD_ORDER: (keyof CandidateProfileRequiredFieldErrors)[] = [
@@ -35,6 +37,7 @@ const REQUIRED_FIELD_ORDER: (keyof CandidateProfileRequiredFieldErrors)[] = [
   "headline",
   "summary",
   "nationalId",
+  "jobMinSalary",
 ]
 
 function firstInvalidRequiredField(
@@ -48,7 +51,8 @@ function focusProfileField(fieldId: string): void {
 }
 
 const DEFAULT_EDITOR_MESSAGES: CandidateProfileEditorMessages = {
-  requiredFields: "Completá nombres, apellidos, titular, resumen y documento de identidad.",
+  requiredFields:
+    "Completá nombres, apellidos, titular, resumen, documento de identidad y pretensión salarial.",
   birthDate: {
     invalid: "Fecha inválida",
     futureDate: "La fecha no puede estar en el futuro",
@@ -137,6 +141,7 @@ export function useCandidateProfileEditor({
       if ("headline" in partial) delete next.headline
       if ("summary" in partial) delete next.summary
       if ("nationalId" in partial) delete next.nationalId
+      if ("jobMinSalary" in partial) delete next.jobMinSalary
       return next
     })
   }, [])
@@ -157,6 +162,9 @@ export function useCandidateProfileEditor({
       if (!h) nextFieldErrors.headline = true
       if (!s) nextFieldErrors.summary = true
       if (!n) nextFieldErrors.nationalId = true
+      if (!isValidRequiredJobMinSalary(form.jobMinSalary)) {
+        nextFieldErrors.jobMinSalary = true
+      }
       const firstInvalid = firstInvalidRequiredField(nextFieldErrors)
       if (firstInvalid) {
         setFieldErrors(nextFieldErrors)

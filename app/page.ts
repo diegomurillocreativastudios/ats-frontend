@@ -2,10 +2,12 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { APP_NAME } from "@/lib/app-brand"
 import { AUTH_COOKIES } from "@/lib/auth"
+import { NOINDEX_NOFOLLOW } from "@/lib/seo/public-metadata"
 
 export const metadata = {
   title: { absolute: `${APP_NAME} | Inicio` },
   description: "Portal de reclutamiento",
+  robots: NOINDEX_NOFOLLOW,
 }
 
 export default async function HomePage() {

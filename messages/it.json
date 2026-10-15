@@ -37,6 +37,7 @@
     "myProfile": "Il mio profilo",
     "documents": "Documenti",
     "interviews": "Colloqui",
+    "opportunitiesPortal": "Portale opportunità",
     "candidates": "Candidati",
     "vacancies": "Posizioni",
     "reports": "Report",
@@ -52,11 +53,14 @@
     "departments": "Reparti",
     "modalities": "Modalità",
     "documentTypes": "Tipi di documento",
+    "presentationReminders": "Promemoria di presentazione",
     "interviewTypes": "Tipi",
     "interviewModalities": "Modalità",
     "interviewStatuses": "Stati",
     "tailorProfile": "Adatta il mio profilo",
-    "softSkills": "Competenze trasversali"
+    "softSkills": "Competenze trasversali",
+    "dataProtectionLaws": "Leggi sulla protezione dei dati",
+    "vacancyTypes": "Tipi di vacante"
   },
   "Topbar": {
     "portalCandidate": "Portale candidato",
@@ -67,7 +71,8 @@
     "navigationMenu": "Menu di navigazione",
     "userMenu": "Menu utente",
     "breadcrumb": "Percorso di navigazione",
-    "adminShortcut": "Amministrazione"
+    "adminShortcut": "Amministrazione",
+    "portalPruebas": "Portale Prove"
   },
   "Sidebar": {
     "goHome": "Vai alla home",
@@ -82,7 +87,9 @@
     "accountMenu": "Menu account",
     "roleAdmin": "Amministratore",
     "roleRecruiter": "Recruiter",
-    "roleCandidate": "Candidato"
+    "roleCandidate": "Candidato",
+    "ariaPruebas": "Navigazione Portale Prove",
+    "menuPruebas": "Menu prove"
   },
   "Auth": {
     "login": {
@@ -427,6 +434,10 @@
         "title": "Tipi di documento",
         "description": "Gestione del catalogo globale dei tipi di documento di identità"
       },
+      "presentationReminders": {
+        "title": "Promemoria di presentazione",
+        "description": "Tipi di posizione e invio automatico per modello Notification, più invio manuale ai recruiter"
+      },
       "interviewsCatalog": {
         "title": "Colloqui",
         "description": "Cataloghi di tipi, modalità e stati dei colloqui"
@@ -454,10 +465,18 @@
       "softSkills": {
         "title": "Competenze trasversali",
         "description": "Gestione del catalogo globale delle competenze trasversali per il feedback del colloquio"
+      },
+      "dataProtectionLaws": {
+        "title": "Leggi sulla protezione dei dati",
+        "description": "Gestione delle leggi sulla protezione dei dati collegate alle offerte"
+      },
+      "vacancyTypes": {
+        "title": "Tipi di vacante",
+        "description": "Gestione dei tipi di vacante e delle scadenze di presentazione"
       }
     },
     "root": {
-      "description": "Portal del candidate - Resumen de tu proceso de seleccion"
+      "description": "Esplora le offerte attive e candidati su ApplicanTree."
     },
     "candidatePortal": {
       "home": {
@@ -500,20 +519,37 @@
     "publicOpportunities": {
       "list": {
         "title": "ApplicanTree | Portale opportunità",
-        "description": "Esplora offerte attive per dipartimento e modalità"
+        "description": "Esplora offerte attive per dipartimento e modalità su ApplicanTree."
       },
       "detail": {
         "title": "ApplicanTree | Portale opportunità | Offerta",
-        "description": "Dettaglio pubblico di un'offerta attiva"
+        "description": "Dettaglio pubblico di un'offerta attiva su ApplicanTree."
       },
       "apply": {
         "title": "ApplicanTree | Portale opportunità | Candidati",
-        "description": "Modulo pubblico per candidarsi a un'offerta attiva"
+        "description": "Modulo pubblico per candidarsi a un'offerta attiva su ApplicanTree."
       }
     },
     "privacyPolicy": {
-      "title": "Informativa sulla privacy | Applicantree ATS",
-      "description": "Informativa sulla privacy di Applicantree ATS."
+      "title": "Informativa sulla privacy | ApplicanTree",
+      "description": "Informativa sulla privacy di ApplicanTree."
+    },
+    "notFound": {
+      "title": "Pagina non trovata",
+      "description": "La pagina che cerchi non esiste su ApplicanTree.",
+      "back": "Vedi le offerte"
+    },
+    "recruiterDashboard": {
+      "title": "ApplicanTree | Portale HR | Home",
+      "description": "Dashboard di attività e promemoria del portale HR"
+    },
+    "pruebasPortal": {
+      "title": "Portale Prove",
+      "description": "Valutazioni tecniche e psicometriche con dati dimostrativi"
+    },
+    "pruebasCandidateDemo": {
+      "title": "Svolgi valutazione (demo)",
+      "description": "Esperienza candidato per svolgere una valutazione in modalità dimostrazione."
     }
   },
   "PortalSelection": {
@@ -532,7 +568,1125 @@
     "rrhhAria": "Vai al portale di reclutamento HR",
     "adminName": "Portale amministrazione",
     "adminDesc": "Utenti e configurazione della piattaforma",
-    "adminAria": "Vai al portale di amministrazione"
+    "adminAria": "Vai al portale di amministrazione",
+    "pruebasName": "Portale Prove",
+    "pruebasDesc": "Valutazioni, assegnazioni e risultati (demo)",
+    "pruebasAria": "Vai al portale prove"
+  },
+  "PruebasPortal": {
+    "placeholder": "Questa sezione sarà completata in una fase successiva. Per ora conferma solo il percorso e la navigazione del portale.",
+    "nav": {
+      "groups": {
+        "home": "Inizio",
+        "content": "Contenuti",
+        "operations": "Operazioni",
+        "closing": "Chiusura"
+      },
+      "home": "Inizio",
+      "evaluations": "Valutazioni",
+      "questions": "Banca domande",
+      "links": "Collegamenti",
+      "assignments": "Assegnazioni",
+      "tracking": "Monitoraggio",
+      "review": "Revisione",
+      "results": "Risultati",
+      "reports": "Report"
+    },
+    "dashboard": {
+      "title": "Dashboard valutazioni",
+      "description": "Riepilogo di assegnazioni e revisioni delle valutazioni.",
+      "metricsAria": "Metriche delle assegnazioni",
+      "metrics": {
+        "assigned": "Assegnate",
+        "pending": "In attesa",
+        "inProgress": "In corso",
+        "completed": "Completate",
+        "expired": "Scadute",
+        "cancelled": "Annullate",
+        "pendingReview": "In attesa di revisione"
+      },
+      "shortcuts": {
+        "title": "Azioni rapide",
+        "evaluations": "Crea o vedi valutazioni",
+        "links": "Collega alle vacanti",
+        "assignments": "Assegna candidati",
+        "results": "Vedi risultati"
+      },
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri della dashboard",
+        "company": "Azienda",
+        "vacancy": "Vacante",
+        "kind": "Categoria",
+        "status": "Stato",
+        "assignedFrom": "Assegnata da",
+        "assignedTo": "Assegnata fino a",
+        "all": "Tutte",
+        "clear": "Pulisci filtri",
+        "kindTechnical": "Tecnica",
+        "kindPsychometric": "Psicometrica",
+        "statusPending": "In attesa",
+        "statusInProgress": "In corso",
+        "statusCompleted": "Completata",
+        "statusExpired": "Scaduta",
+        "statusCancelled": "Annullata",
+        "statusPendingManualReview": "Revisione manuale"
+      },
+      "charts": {
+        "activityTitle": "Assegnazioni per giorno",
+        "activityLegend": "Assegnate",
+        "activityEmpty": "Nessuna assegnazione nell’intervallo attuale.",
+        "activitySummary": "Riepilogo assegnazioni per giorno",
+        "distributionTitle": "Distribuzione per stato",
+        "distributionEmpty": "Nessuno stato da mostrare."
+      },
+      "attention": {
+        "title": "Richiedono attenzione",
+        "dueSoonTitle": "In scadenza",
+        "dueSoonEmpty": "Nessuna assegnazione scade nei prossimi 14 giorni.",
+        "reviewTitle": "Revisione manuale",
+        "reviewEmpty": "Nessun risultato in attesa di revisione.",
+        "expiresLabel": "Scade {date}",
+        "openTracking": "Vai al monitoraggio",
+        "openReview": "Vai alla revisione"
+      },
+      "activity": {
+        "title": "Attività recente",
+        "empty": "Nessuna attività recente con i filtri attuali.",
+        "assignedLabel": "Assegnata {date}",
+        "openItem": "Apri"
+      },
+      "states": {
+        "loading": "Caricamento della dashboard…",
+        "emptyTitle": "Nessuna assegnazione",
+        "emptyDescription": "Non ci sono ancora valutazioni assegnate nel tuo ambito autorizzato. Assegna un test o regola i filtri più avanti.",
+        "errorTitle": "Impossibile caricare la dashboard",
+        "errorDescription": "Non siamo riusciti a caricare il riepilogo. Riprova tra pochi secondi.",
+        "retry": "Riprova",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna assegnazione soddisfa i filtri. Modificali o puliscili."
+      }
+    },
+    "evaluations": {
+      "title": "Valutazioni",
+      "description": "Catalogo di prove tecniche e psicometriche. Stati di definizione: bozza, pubblicata e archiviata.",
+      "create": "Nuova valutazione",
+      "search": "Cerca per titolo",
+      "searchPlaceholder": "Nome della valutazione",
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri delle valutazioni",
+        "kind": "Categoria",
+        "status": "Stato",
+        "all": "Tutte",
+        "clear": "Pulisci filtri",
+        "kindTechnical": "Tecnica",
+        "kindPsychometric": "Psicometrica",
+        "statusDraft": "Bozza",
+        "statusPublished": "Pubblicata",
+        "statusArchived": "Archiviata"
+      },
+      "table": {
+        "title": "Titolo",
+        "kind": "Categoria",
+        "status": "Stato",
+        "createdAt": "Creata",
+        "actions": "Azioni",
+        "view": "Vedi",
+        "openActions": "Apri azioni di {title}"
+      },
+      "actions": {
+        "view": "Vedi",
+        "edit": "Modifica bozza",
+        "duplicate": "Duplica",
+        "publish": "Pubblica",
+        "archive": "Archivia",
+        "versions": "Versioni"
+      },
+      "status": {
+        "draft": "Bozza",
+        "published": "Pubblicata",
+        "archived": "Archiviata"
+      },
+      "kind": {
+        "technical": "Tecnica",
+        "psychometric": "Psicometrica"
+      },
+      "questionKind": {
+        "single_choice": "Scelta singola",
+        "multiple_choice": "Scelta multipla",
+        "true_false": "Vero o falso",
+        "likert": "Likert",
+        "numeric": "Numerica",
+        "open": "Aperta"
+      },
+      "duplicateTitle": "Copia di {title}",
+      "confirmPublish": {
+        "title": "Pubblica valutazione",
+        "description": "Si congela una versione immutabile. Modificare dopo non altera questo snapshot.",
+        "confirm": "Pubblica",
+        "cancel": "Annulla"
+      },
+      "confirmArchive": {
+        "title": "Archivia valutazione",
+        "description": "La valutazione passerà ad Archiviata. Potrai ancora visualizzarla e duplicarla.",
+        "confirm": "Archivia",
+        "cancel": "Annulla"
+      },
+      "toasts": {
+        "published": "Valutazione pubblicata.",
+        "archived": "Valutazione archiviata.",
+        "duplicated": "È stata creata una copia in bozza.",
+        "error": "Impossibile completare l’azione."
+      },
+      "errors": {
+        "not_found": "Valutazione non trovata.",
+        "not_draft": "Si può modificare solo una bozza.",
+        "not_published": "Una bozza si può aprire solo da una valutazione pubblicata.",
+        "test_archived": "La valutazione è archiviata e non può essere pubblicata.",
+        "no_draft": "Non c'è una bozza pronta da pubblicare.",
+        "no_published_version": "Non c’è una versione pubblicata da clonare.",
+        "questions_required": "Aggiungi almeno una domanda prima di pubblicare.",
+        "questions_incompatible": "Alcune domande sono incompatibili con la categoria.",
+        "publish_integrity": "Impossibile pubblicare senza alterare le versioni esistenti.",
+        "scenario_error": "Impossibile completare l’azione."
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Risultati per pagina",
+        "regionAria": "Paginazione delle valutazioni",
+        "summary": "Pagina {page} di {totalPages}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count} valutazioni"
+      },
+      "states": {
+        "loading": "Caricamento valutazioni…",
+        "emptyTitle": "Ancora nessuna valutazione",
+        "emptyDescription": "Crea la prima valutazione tecnica o psicometrica per iniziare.",
+        "errorTitle": "Impossibile caricare le valutazioni",
+        "errorDescription": "Impossibile caricare il catalogo. Riprova.",
+        "retry": "Riprova",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna valutazione soddisfa i filtri. Modificali o puliscili.",
+        "notFoundTitle": "Valutazione non trovata",
+        "notFoundDescription": "L’identificatore non esiste o non hai accesso.",
+        "backToList": "Torna all'elenco"
+      },
+      "detail": {
+        "title": "Dettaglio valutazione",
+        "summary": "Riepilogo",
+        "configuration": "Configurazione",
+        "questions": "Domande",
+        "links": "Collegamenti alle posizioni",
+        "linkVacancy": "Collega posizione",
+        "linkVacancyDisabled": "Solo le valutazioni pubblicate possono essere collegate.",
+        "instructions": "Istruzioni",
+        "duration": "Durata",
+        "durationValue": "{minutes} min",
+        "maxAttempts": "Tentativi massimi",
+        "versionLabel": "Versione {number}",
+        "draftVersion": "Bozza",
+        "noVersion": "Nessuna configurazione di versione.",
+        "noQuestions": "Questa versione non ha domande.",
+        "noLinks": "Nessun collegamento a posizioni mostrato qui.",
+        "linkActive": "Attivo",
+        "linkInactive": "Inattivo",
+        "points": "{points} pt",
+        "dimension": "Dimensione: {dimension}",
+        "createdAt": "Creata",
+        "openVersions": "Vedi versioni",
+        "linksCtaDescription": "I collegamenti si gestiscono da Collegamenti, associati a una posizione."
+      },
+      "versions": {
+        "title": "Versioni",
+        "description": "Cronologia delle versioni. Gli snapshot pubblicati sono di sola lettura.",
+        "listLabel": "Cronologia versioni",
+        "selectPrompt": "Seleziona una versione per vedere lo snapshot.",
+        "publishedAt": "Pubblicata {date}",
+        "draftLabel": "Bozza",
+        "versionNumber": "Versione {number}",
+        "snapshot": "Snapshot",
+        "readonlyNotice": "Questa versione pubblicata non può essere modificata qui.",
+        "snapshotUnavailable": "Impossibile caricare lo snapshot delle domande di questa versione."
+      },
+      "editor": {
+        "createTitle": "Nuova valutazione",
+        "createDescription": "Crea e pubblica una prova tecnica o psicometrica.",
+        "editTitle": "Modifica valutazione",
+        "editDescription": "Modifica la bozza. Pubblicare congela una versione immutabile.",
+        "steps": {
+          "info": "Informazioni",
+          "config": "Configurazione",
+          "questions": "Domande",
+          "preview": "Anteprima",
+          "publish": "Pubblicazione",
+          "navLabel": "Passaggi della procedura"
+        },
+        "fields": {
+          "title": "Nome",
+          "description": "Descrizione",
+          "kind": "Tipo",
+          "kindTechnical": "Tecnica",
+          "kindPsychometric": "Psicometrica",
+          "instructions": "Istruzioni",
+          "duration": "Durata (minuti)",
+          "maxAttempts": "Tentativi massimi",
+          "expiryNotice": "Nell'assegnazione in dimostrazione, l'invito scade dopo {days} giorni. Questo valore non viene salvato qui."
+        },
+        "errors": {
+          "titleRequired": "Inserisci un nome.",
+          "titleTooLong": "Il nome non può superare {max} caratteri.",
+          "descriptionRequired": "Inserisci una descrizione.",
+          "descriptionTooLong": "La descrizione non può superare {max} caratteri.",
+          "kindRequired": "Scegli il tipo di valutazione.",
+          "instructionsRequired": "Inserisci le istruzioni.",
+          "durationInvalid": "La durata deve essere un intero tra {min} e {max}.",
+          "attemptsInvalid": "I tentativi devono essere un intero tra {min} e {max}.",
+          "questionsRequired": "Aggiungi almeno una domanda compatibile.",
+          "questionsIncompatible": "Ci sono domande incompatibili con il tipo scelto. Rimuovile o cambia il tipo.",
+          "notFoundTitle": "Valutazione non trovata",
+          "notFoundDescription": "L'identificatore non esiste o la valutazione è archiviata e non può essere modificata.",
+          "backToList": "Torna all'elenco",
+          "saveFailed": "Impossibile salvare la bozza dimostrativa. Controlla e riprova."
+        },
+        "questions": {
+          "bankTitle": "Banca disponibile",
+          "attachedTitle": "Domande della valutazione",
+          "attach": "Aggiungi",
+          "remove": "Rimuovi",
+          "moveUp": "Su",
+          "moveDown": "Giù",
+          "addNew": "Crea domanda minima",
+          "emptyBank": "Nessuna domanda compatibile disponibile.",
+          "emptyAttached": "Ancora nessuna domanda in questa valutazione.",
+          "incompatibleBadge": "Incompatibile"
+        },
+        "preview": {
+          "staffTitle": "Riepilogo per il personale",
+          "candidateTitle": "Vista candidato",
+          "questionCount": "{count} domande",
+          "duration": "Durata: {minutes} min",
+          "attempts": "Tentativi: {count}",
+          "expiry": "Scadenza tipica dell’assegnazione: {days} giorni",
+          "totalPoints": "Punteggio totale: {points}",
+          "dimensions": "Dimensioni: {list}",
+          "noDimensions": "Nessuna dimensione",
+          "candidateHint": "Così il candidato vedrà le domande. Non si mostrano risposte corrette né punteggi interni."
+        },
+        "publish": {
+          "summaryTitle": "Pronto per pubblicare",
+          "versionNotice": "Verrà pubblicata la versione {number}. Questo snapshot resterà congelato. Modificare dopo creerà una nuova bozza.",
+          "confirmTitle": "Pubblica valutazione",
+          "confirmDescription": "Si congela la versione {number}. Modificare dopo non altera questo snapshot.",
+          "confirm": "Pubblica",
+          "cancel": "Annulla"
+        },
+        "clonePublished": {
+          "title": "Crea bozza dalla versione pubblicata",
+          "description": "La versione pubblicata resta intatta. Si aprirà una nuova bozza da modificare.",
+          "confirm": "Crea bozza",
+          "cancel": "Annulla"
+        },
+        "actions": {
+          "back": "Indietro",
+          "next": "Avanti",
+          "saveDraft": "Salva bozza",
+          "publish": "Pubblica",
+          "saving": "Salvataggio…",
+          "publishing": "Pubblicazione…"
+        },
+        "toasts": {
+          "saved": "Bozza salvata.",
+          "published": "Valutazione pubblicata.",
+          "cloned": "È stata creata una bozza dalla versione pubblicata.",
+          "error": "Impossibile completare l’azione."
+        },
+        "detailEditDraft": "Modifica e crea bozza"
+      }
+    },
+    "questionsBank": {
+      "title": "Banca delle domande",
+      "description": "Domande della bozza di una valutazione. Scegli una prova per elencare, creare e modificare.",
+      "create": "Nuova domanda",
+      "createTitle": "Nuova domanda",
+      "editTitle": "Modifica domanda",
+      "editorDescription": "Configura il tipo e i campi. L’anteprima mostra ciò che vedrà il candidato.",
+      "publishedWarning": "Se questa domanda è già usata in una versione pubblicata, il salvataggio crea una copia (nuovo identificatore). I risultati storici non cambiano.",
+      "search": "Cerca per testo",
+      "searchPlaceholder": "Testo della domanda",
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri della banca delle domande",
+        "kind": "Tipo",
+        "all": "Tutti",
+        "clear": "Cancella filtri",
+        "test": "Valutazione",
+        "selectTest": "Seleziona una valutazione"
+      },
+      "kind": {
+        "single_choice": "Scelta singola",
+        "multiple_choice": "Scelta multipla",
+        "true_false": "Vero o falso",
+        "likert": "Likert",
+        "numeric": "Numerica",
+        "open": "Aperta"
+      },
+      "table": {
+        "prompt": "Testo",
+        "kind": "Tipo",
+        "actions": "Azioni",
+        "preview": "Anteprima",
+        "edit": "Modifica"
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Elementi per pagina",
+        "regionAria": "Paginazione della banca",
+        "summary": "Pagina {page} di {totalPages}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count} domande"
+      },
+      "fields": {
+        "kind": "Tipo di domanda",
+        "prompt": "Testo",
+        "options": "Opzioni",
+        "addOption": "Aggiungi opzione",
+        "optionPlaceholder": "Opzione {index}",
+        "optionLabel": "Testo dell’opzione {index}",
+        "markCorrect": "Segna l’opzione {index} come corretta",
+        "correct": "Corretta",
+        "correctAnswer": "Risposta corretta",
+        "true": "Vero",
+        "false": "Falso",
+        "points": "Punti",
+        "maxPoints": "Punti massimi",
+        "dimension": "Dimensione",
+        "reversed": "Item invertito",
+        "expected": "Risposta attesa",
+        "tolerance": "Tolleranza",
+        "rubric": "Rubrica",
+        "moveUp": "Sposta su l’opzione {index}",
+        "moveDown": "Sposta giù l’opzione {index}",
+        "removeOption": "Rimuovi l’opzione {index}"
+      },
+      "hints": {
+        "multipleChoiceScoring": "Il punteggio è tutto o niente: i punti solo se si selezionano tutte le opzioni corrette e nessuna errata.",
+        "likertScale": "La scala Likert è fissa da 1 a 5. Non ci sono risposta corretta né punti.",
+        "numericDemo": "La tolleranza definisce il margine accettato rispetto al valore atteso.",
+        "openReview": "Le risposte aperte richiedono revisione manuale nella coda di revisione."
+      },
+      "validation": {
+        "promptRequired": "Inserisci un testo.",
+        "promptTooLong": "Il testo non può superare 500 caratteri.",
+        "optionsMin": "Aggiungi almeno due opzioni.",
+        "optionLabelRequired": "Ogni opzione deve avere un testo.",
+        "correctOptionRequired": "Segna l’opzione corretta.",
+        "correctOptionsRequired": "Segna almeno un’opzione corretta.",
+        "pointsRange": "I punti devono essere un intero tra 1 e 100.",
+        "dimensionRequired": "Indica la dimensione dell’item.",
+        "expectedRequired": "Indica la risposta numerica attesa.",
+        "toleranceRange": "La tolleranza deve essere zero o un numero positivo.",
+        "rubricRequired": "Inserisci la rubrica di valutazione."
+      },
+      "preview": {
+        "title": "Anteprima candidato",
+        "hint": "Così il candidato vedrà la domanda. Risposte corrette e punteggi restano nascosti.",
+        "emptyPrompt": "Il testo apparirà qui.",
+        "emptyOption": "Opzione senza testo",
+        "trueLabel": "Vero",
+        "falseLabel": "Falso",
+        "likertScaleAria": "Scala da 1 a 5",
+        "numericLabel": "La tua risposta",
+        "openLabel": "La tua risposta"
+      },
+      "actions": {
+        "cancel": "Annulla",
+        "save": "Salva",
+        "backToList": "Torna alla banca"
+      },
+      "discard": {
+        "title": "Annulla le modifiche",
+        "description": "Ci sono modifiche non salvate. Se esci ora, andranno perse.",
+        "confirm": "Annulla",
+        "cancel": "Continua a modificare"
+      },
+      "toasts": {
+        "saved": "Domanda salvata.",
+        "cloned": "È stata salvata una copia della domanda perché era usata in una versione pubblicata.",
+        "error": "Impossibile completare l’azione."
+      },
+      "errors": {
+        "scenario_error": "Non è stato possibile completare la richiesta.",
+        "not_found": "Domanda non trovata."
+      },
+      "states": {
+        "loading": "Caricamento della banca delle domande…",
+        "emptyTitle": "Nessuna domanda in questa bozza",
+        "emptyDescription": "Aggiungi la prima domanda alla valutazione selezionata.",
+        "errorTitle": "Impossibile caricare la banca",
+        "errorDescription": "Si è verificato un problema nel caricamento delle domande. Riprova.",
+        "retry": "Riprova",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna domanda soddisfa i filtri. Modifica o cancella i filtri.",
+        "notFoundTitle": "Domanda non trovata",
+        "notFoundDescription": "Non esiste una domanda con questo identificatore oppure non hai accesso.",
+        "noTestsTitle": "Nessuna valutazione",
+        "noTestsDescription": "Crea una valutazione per aggiungere domande alla sua bozza.",
+        "createTest": "Crea valutazione",
+        "selectTestTitle": "Seleziona una valutazione",
+        "selectTestDescription": "Le domande stanno nella bozza di ogni prova. Scegline una per continuare.",
+        "missingTestTitle": "Valutazione mancante",
+        "missingTestDescription": "Apri la banca da una valutazione selezionata per creare o modificare domande."
+      }
+    },
+    "links": {
+      "title": "Collegamenti",
+      "description": "Associa una versione pubblicata a una posizione aperta. Collegare non assegna candidati e non invia inviti.",
+      "form": {
+        "title": "Nuovo collegamento",
+        "version": "Versione pubblicata",
+        "versionPlaceholder": "Seleziona una versione",
+        "vacancy": "Posizione",
+        "vacancyPlaceholder": "Seleziona una posizione",
+        "companySummary": "Azienda: {company}",
+        "companyEmpty": "Seleziona una posizione per vedere l'azienda.",
+        "excludedVacancies": "Posizioni non disponibili: {list}.",
+        "excludedVacancyItem": "{title} (chiusa)",
+        "excludedListSeparator": "; ",
+        "submit": "Collega"
+      },
+      "validation": {
+        "versionRequired": "Seleziona una versione pubblicata.",
+        "vacancyRequired": "Seleziona una posizione aperta."
+      },
+      "list": {
+        "title": "Collegamenti esistenti",
+        "test": "Valutazione",
+        "version": "Versione",
+        "versionValue": "v{number}",
+        "vacancy": "Posizione",
+        "company": "Azienda",
+        "status": "Stato",
+        "statusActive": "Attivo",
+        "statusInactive": "Inattivo",
+        "linkedAt": "Data",
+        "actions": "Azioni",
+        "deactivate": "Disattiva",
+        "reactivate": "Riattiva"
+      },
+      "confirm": {
+        "createTitle": "Conferma collegamento",
+        "createDescription": "Collegherai {version} a {vacancy}. Non verranno assegnati candidati né inviate e-mail.",
+        "createConfirm": "Collega",
+        "deactivateTitle": "Disattiva collegamento",
+        "deactivateDescription": "Disattiverai {version} su {vacancy}. La cronologia resta e potrai riattivarlo dopo.",
+        "deactivateConfirm": "Disattiva",
+        "reactivateTitle": "Riattiva collegamento",
+        "reactivateDescription": "Riattiverai {version} su {vacancy}. Continuerà a non assegnare candidati né inviare e-mail.",
+        "reactivateConfirm": "Riattiva",
+        "cancel": "Annulla"
+      },
+      "toasts": {
+        "linked": "Collegamento creato in modalità demo.",
+        "deactivated": "Collegamento disattivato in modalità demo.",
+        "reactivated": "Collegamento riattivato in modalità demo."
+      },
+      "errors": {
+        "generic": "Impossibile completare l'azione demo.",
+        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "not_found": "La risorsa richiesta non è stata trovata.",
+        "duplicate_link": "Esiste già un collegamento per quella versione e posizione.",
+        "vacancy_closed": "La posizione è chiusa e non può essere collegata.",
+        "version_not_published": "Si possono collegare solo versioni pubblicate.",
+        "test_not_published": "Si possono collegare solo valutazioni pubblicate."
+      },
+      "states": {
+        "loading": "Caricamento dei collegamenti…",
+        "emptyTitle": "Nessun dato demo",
+        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati demo per continuare.",
+        "errorTitle": "Impossibile caricare i collegamenti",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "listEmptyTitle": "Nessun collegamento",
+        "listEmptyDescription": "In questa demo non ci sono ancora versioni collegate a posizioni."
+      }
+    },
+    "assignments": {
+      "title": "Assegnazioni",
+      "description": "Assegna una versione collegata alle candidature attive della posizione. Nella demo non vengono inviate e-mail.",
+      "backToRrhh": "Indietro",
+      "backToRrhhAria": "Torna alle Risorse umane",
+      "form": {
+        "title": "Nuova assegnazione",
+        "vacancy": "Posizione",
+        "vacancyPlaceholder": "Seleziona una posizione",
+        "version": "Versione collegata attiva",
+        "versionPlaceholder": "Seleziona una versione",
+        "companySummary": "Azienda: {company}",
+        "companyEmpty": "Seleziona una posizione per vedere l’azienda.",
+        "excludedVacancies": "Posizioni non disponibili: {list}.",
+        "excludedVacancyItem": "{title} (chiusa)",
+        "excludedListSeparator": "; ",
+        "noActiveLinks": "Questa posizione non ha versioni con collegamento attivo. Collega prima una prova pubblicata.",
+        "expiresAt": "Scade il",
+        "expiresHint": "Valore demo: {days} giorni dall’orologio simulato.",
+        "attempts": "Tentativi consentiti",
+        "submit": "Assegna selezionati"
+      },
+      "validation": {
+        "vacancyRequired": "Seleziona una posizione aperta.",
+        "versionRequired": "Seleziona una versione con collegamento attivo.",
+        "selectionRequired": "Seleziona almeno un candidato idoneo.",
+        "expiresInvalid": "La data di scadenza non può essere precedente a oggi nella demo.",
+        "attemptsInvalid": "I tentativi devono essere un intero maggiore o uguale a 1."
+      },
+      "candidates": {
+        "title": "Candidature della posizione",
+        "select": "Seleziona",
+        "selectAria": "Seleziona {name}",
+        "name": "Candidato",
+        "email": "E-mail",
+        "stage": "Fase",
+        "eligibility": "Idoneità",
+        "eligible": "Idoneo",
+        "selectedCount": "{count, plural, one {# selezionato} other {# selezionati}}",
+        "selectEligible": "Seleziona idonei",
+        "clearSelection": "Cancella selezione"
+      },
+      "reasons": {
+        "vacancy_mismatch": "Posizione diversa",
+        "application_inactive": "Candidatura inattiva",
+        "application_final": "Stato finale",
+        "vacancy_closed": "Posizione chiusa",
+        "link_inactive": "Collegamento inattivo",
+        "test_not_published": "Prova non pubblicata",
+        "duplicate_assignment": "Già assegnato",
+        "unknown": "Non idoneo"
+      },
+      "preview": {
+        "title": "Anteprima destinatari",
+        "summary": "{version} · {vacancy} · scade {expires} · {attempts, plural, one {# tentativo} other {# tentativi}}",
+        "noEmail": "Non verrà inviata alcuna e-mail. Viene creata solo l’assegnazione demo."
+      },
+      "confirm": {
+        "title": "Conferma assegnazione",
+        "description": "Assegnerai {count, plural, one {# candidato} other {# candidati}} a {version} su {vacancy}. Scade il {expires}. Tentativi: {attempts}. Non verranno inviate e-mail.",
+        "confirm": "Assegna",
+        "cancel": "Annulla"
+      },
+      "toasts": {
+        "assigned": "{count, plural, one {# assegnazione creata in modalità demo.} other {# assegnazioni create in modalità demo.}}",
+        "rejected": "Non è stata creata alcuna assegnazione. {details}",
+        "failureItem": "{name}: {reason}",
+        "failureSeparator": "; "
+      },
+      "errors": {
+        "generic": "Impossibile completare l’azione demo.",
+        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "link_missing": "Non esiste un collegamento attivo per quella versione e posizione."
+      },
+      "states": {
+        "loading": "Caricamento assegnazioni…",
+        "emptyTitle": "Nessun dato demo",
+        "emptyDescription": "Lo scenario simulato è vuoto. Ripristina i dati demo per continuare.",
+        "errorTitle": "Impossibile caricare le assegnazioni",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "selectPromptTitle": "Scegli posizione e versione",
+        "selectPromptDescription": "Seleziona una posizione aperta e una versione con collegamento attivo per vedere le candidature idonee.",
+        "noApplicationsTitle": "Nessuna candidatura",
+        "noApplicationsDescription": "Non ci sono candidature per questa posizione nella demo."
+      }
+    },
+    "tracking": {
+      "title": "Monitoraggio",
+      "description": "Consulta lo stato delle assegnazioni e gestisci scadenze o nuovi tentativi in modalità dimostrazione.",
+      "search": "Cerca",
+      "searchPlaceholder": "Candidato, posizione o valutazione",
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri del monitoraggio",
+        "status": "Stato dell’assegnazione",
+        "qualification": "Qualificazione",
+        "all": "Tutti",
+        "clear": "Cancella filtri"
+      },
+      "status": {
+        "pending": "In attesa",
+        "in_progress": "In corso",
+        "completed": "Completata",
+        "expired": "Scaduta",
+        "cancelled": "Annullata"
+      },
+      "qualification": {
+        "answers_submitted": "Completata",
+        "pending_review": "In attesa di revisione",
+        "reviewed": "Valutata"
+      },
+      "table": {
+        "candidate": "Candidato",
+        "vacancy": "Posizione",
+        "version": "Versione",
+        "status": "Stato",
+        "expiresAt": "Scade",
+        "actions": "Azioni",
+        "open": "Vedi dettaglio"
+      },
+      "actions": {
+        "remind": "Promemoria",
+        "cancel": "Annulla",
+        "extend": "Prolunga scadenza",
+        "retry": "Autorizza nuovo tentativo"
+      },
+      "detail": {
+        "title": "Monitoraggio di {name}",
+        "titleFallback": "Dettaglio assegnazione",
+        "close": "Chiudi",
+        "vacancy": "Posizione",
+        "version": "Versione",
+        "assignedAt": "Assegnata",
+        "expiresAt": "Scade",
+        "attempts": "Tentativi",
+        "attemptsValue": "{used} di {allowed}",
+        "status": "Stato",
+        "applicationInactive": "La candidatura non è più attiva. Puoi annullare solo se lo stato lo consente.",
+        "applicationFinal": "La candidatura è in uno stato finale. Puoi annullare solo se lo stato lo consente.",
+        "extendDate": "Nuova data di scadenza",
+        "extendHint": "La data deve essere successiva all’orologio della demo.",
+        "simulateFailure": "Simula errore dell’operazione",
+        "openCandidate": "Apri esperienza candidato",
+        "openReview": "Apri revisione manuale",
+        "openResult": "Vedi risultato"
+      },
+      "timeline": {
+        "title": "Cronologia",
+        "empty": "Non ci sono ancora azioni registrate nella demo.",
+        "kind": {
+          "reminded": "Promemoria simulato",
+          "cancelled": "Assegnazione annullata",
+          "extended": "Scadenza prolungata",
+          "retried": "Nuovo tentativo autorizzato",
+          "reviewed": "Revisione manuale completata"
+        }
+      },
+      "confirm": {
+        "cancelTitle": "Annulla assegnazione",
+        "cancelDescription": "Stai per annullare l’assegnazione di {name}. La riga resta nella demo.",
+        "cancelConfirm": "Annulla assegnazione",
+        "extendTitle": "Prolunga scadenza",
+        "extendDescription": "Stai per prolungare la scadenza di {name} al {date}. Se era scaduta, torna in attesa.",
+        "extendConfirm": "Prolunga",
+        "dismiss": "Indietro"
+      },
+      "toasts": {
+        "reminded": "Promemoria registrato in modalità dimostrazione. Non è stata inviata alcuna e-mail.",
+        "cancelled": "Assegnazione annullata in modalità dimostrazione.",
+        "extended": "Scadenza prolungata in modalità dimostrazione.",
+        "retried": "Nuovo tentativo autorizzato in modalità dimostrazione.",
+        "simulatedFailure": "L’operazione è fallita in modo simulato. Non è stata applicata alcuna modifica."
+      },
+      "errors": {
+        "generic": "Non è stato possibile completare l’azione di dimostrazione.",
+        "not_found": "Assegnazione non trovata.",
+        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "action_not_allowed": "Questa azione non è disponibile nello stato attuale.",
+        "application_closed": "La candidatura è chiusa per questa azione.",
+        "invalid_expires_at": "La data di scadenza non è valida nella demo."
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione del monitoraggio",
+        "summary": "Pagina {page} di {totalPages}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# assegnazione} other {# assegnazioni}}"
+      },
+      "states": {
+        "loading": "Caricamento del monitoraggio…",
+        "emptyTitle": "Nessun dato di dimostrazione",
+        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati di dimostrazione per continuare.",
+        "errorTitle": "Impossibile caricare il monitoraggio",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna assegnazione soddisfa i filtri. Modifica o cancella i filtri."
+      }
+    },
+    "review": {
+      "title": "Revisione manuale",
+      "description": "Valuta le risposte aperte in attesa con la rubrica della dimostrazione.",
+      "pendingCount": "{count, plural, one {# in attesa} other {# in attesa}}",
+      "filteredCount": "{count, plural, one {# visibile} other {# visibili}}",
+      "search": "Cerca",
+      "searchPlaceholder": "Candidato o posizione",
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri di revisione",
+        "vacancy": "Posizione",
+        "all": "Tutte",
+        "clear": "Pulisci filtri"
+      },
+      "table": {
+        "candidate": "Candidato",
+        "vacancy": "Posizione",
+        "version": "Versione",
+        "openQuestions": "Aperte",
+        "completedAt": "Inviata",
+        "actions": "Azioni",
+        "open": "Revisiona"
+      },
+      "detail": {
+        "title": "Revisione di {name}",
+        "titleFallback": "Revisione manuale",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToQueue": "Torna alla coda",
+        "instructions": "Istruzioni della valutazione",
+        "questionLabel": "Domanda aperta {index}",
+        "answer": "Risposta del candidato",
+        "noAnswer": "Nessuna risposta",
+        "rubric": "Rubrica",
+        "maxPoints": "Massimo: {max} punti",
+        "points": "Punti assegnati",
+        "pointsHint": "Intero da 0 a {max}.",
+        "notes": "Osservazioni (facoltativo)",
+        "save": "Salva",
+        "saving": "Salvataggio…",
+        "finish": "Termina revisione"
+      },
+      "validation": {
+        "pointsRequired": "Indica i punti assegnati.",
+        "pointsInvalid": "Usa un intero da 0 a {max}."
+      },
+      "confirm": {
+        "finishTitle": "Termina revisione",
+        "finishDescription": "Stai per segnare come revisionata la valutazione di {name}. Il monitoraggio non la mostrerà più come in attesa.",
+        "finishConfirm": "Termina",
+        "dismiss": "Indietro"
+      },
+      "toasts": {
+        "saved": "Bozza di revisione salvata in modalità dimostrazione.",
+        "finished": "Revisione terminata in modalità dimostrazione.",
+        "validationFailed": "Correggi i punti non validi prima di continuare."
+      },
+      "errors": {
+        "generic": "Non è stato possibile completare l’azione di dimostrazione.",
+        "not_found": "Revisione non trovata.",
+        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "action_not_allowed": "Questa azione non è disponibile nello stato attuale.",
+        "invalid_points": "I punti indicati non sono validi."
+      },
+      "states": {
+        "loading": "Caricamento della coda di revisione…",
+        "emptyTitle": "Nessun dato di dimostrazione",
+        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati di dimostrazione per continuare.",
+        "queueEmptyTitle": "Niente in attesa di revisione",
+        "queueEmptyDescription": "Non ci sono risultati con risposte aperte in attesa nella demo.",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna riga soddisfa i filtri. Modificali o puliscili.",
+        "errorTitle": "Impossibile caricare la revisione",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "notFoundTitle": "Revisione non disponibile",
+        "notFoundDescription": "Questa assegnazione non è in coda di revisione o è già stata valutata."
+      }
+    },
+    "results": {
+      "title": "Risultati",
+      "description": "Consulta i risultati tecnici e psicometrici con dati di dimostrazione.",
+      "count": "{count, plural, one {# risultato} other {# risultati}}",
+      "filteredCount": "{count, plural, one {# visibile} other {# visibili}}",
+      "search": "Cerca",
+      "searchPlaceholder": "Candidato, posizione o valutazione",
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri dei risultati",
+        "vacancy": "Posizione",
+        "kind": "Tipo",
+        "status": "Stato",
+        "assignedFrom": "Assegnata dal",
+        "assignedTo": "Assegnata al",
+        "all": "Tutti",
+        "clear": "Pulisci filtri"
+      },
+      "kind": {
+        "technical": "Tecnica",
+        "psychometric": "Psicometrica"
+      },
+      "status": {
+        "reviewed": "Valutata",
+        "pending": "In attesa di revisione",
+        "no_result": "Senza risultato"
+      },
+      "table": {
+        "candidate": "Candidato",
+        "vacancy": "Posizione",
+        "version": "Versione",
+        "kind": "Tipo",
+        "status": "Stato",
+        "score": "Punteggio",
+        "assignedAt": "Assegnata",
+        "actions": "Azioni",
+        "open": "Vedi risultato",
+        "scoreValue": "{score} / {max}",
+        "scoreEmpty": "—"
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione dei risultati",
+        "summary": "Pagina {page} di {totalPages}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# risultato} other {# risultati}}"
+      },
+      "detail": {
+        "title": "Risultato di {name}",
+        "titleFallback": "Risultato",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToList": "Torna ai risultati",
+        "instructions": "Istruzioni della valutazione",
+        "score": "Punteggio",
+        "scoreValue": "{score} / {max}",
+        "reviewStatus": "Stato di revisione",
+        "sessionTime": "Tempo della sessione",
+        "sessionStarted": "Inizio",
+        "sessionDeadline": "Scadenza",
+        "sessionMissing": "Non c’è una sessione registrata nella dimostrazione.",
+        "categoriesTitle": "Punteggio per categoria",
+        "categoriesInsufficient": "Questo risultato di dimostrazione non ha punteggi per categoria.",
+        "dimensionsTitle": "Dimensioni dello strumento",
+        "dimensionsFootnote": "Scala dello strumento in dimostrazione: da 0 a 100. Non è una percentuale di idoneità né una decisione di assunzione.",
+        "dimensionsSummary": "Riepilogo delle dimensioni",
+        "questionsTitle": "Risposte",
+        "answer": "Risposta",
+        "noAnswer": "Senza risposta",
+        "verdict": {
+          "correct": "Corretta",
+          "incorrect": "Errata",
+          "unanswered": "Senza risposta"
+        },
+        "trueFalse": {
+          "true": "Vero",
+          "false": "Falso"
+        },
+        "likertValue": "Valore Likert: {value}",
+        "rubric": "Rubrica",
+        "reviewPoints": "Punti di revisione: {points} / {max}",
+        "reviewNotes": "Note",
+        "noResultTitle": "Senza risultato",
+        "noResultDescription": "L’assegnazione è completata, ma non c’è ancora un risultato simulato associato.",
+        "export": "Esporta",
+        "exportUnavailable": "Disponibile quando si collega il backend",
+        "viewApplication": "Vedi candidatura",
+        "openReview": "Apri revisione manuale"
+      },
+      "errors": {
+        "generic": "Impossibile completare l’azione di dimostrazione.",
+        "scenario_error": "Il servizio simulato ha restituito un errore."
+      },
+      "states": {
+        "loading": "Caricamento dei risultati…",
+        "emptyTitle": "Nessun dato di dimostrazione",
+        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati di dimostrazione per continuare.",
+        "listEmptyTitle": "Nessun risultato",
+        "listEmptyDescription": "Non ci sono assegnazioni completate con risultati nella dimostrazione.",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna riga soddisfa i filtri. Modificali o puliscili.",
+        "errorTitle": "Impossibile caricare i risultati",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova",
+        "notFoundTitle": "Risultato non disponibile",
+        "notFoundDescription": "Questa assegnazione non esiste o non è ancora completata nella dimostrazione."
+      }
+    },
+    "reports": {
+      "title": "Report",
+      "description": "Catalogo di report dimostrativi con anteprima simulata. Non vengono generati file.",
+      "catalogAria": "Catalogo report",
+      "catalog": {
+        "assignments-by-status": {
+          "title": "Assegnazioni per stato",
+          "description": "Conteggio e elenco delle assegnazioni filtrate per posizione e data."
+        },
+        "technical-scores": {
+          "title": "Punteggi tecnici",
+          "description": "Risultati tecnici con punteggio e massimo del fixture."
+        },
+        "psychometric-dimensions": {
+          "title": "Dimensioni psicometriche",
+          "description": "Dimensioni dello strumento su una scala da 0 a 100."
+        }
+      },
+      "filters": {
+        "title": "Filtri",
+        "toggle": "Filtri",
+        "regionLabel": "Filtri dei report",
+        "vacancy": "Posizione",
+        "assignedFrom": "Assegnata da",
+        "assignedTo": "Assegnata fino a",
+        "all": "Tutte",
+        "clear": "Pulisci filtri"
+      },
+      "status": {
+        "pending": "In attesa",
+        "in_progress": "In corso",
+        "completed": "Completata",
+        "expired": "Scaduta",
+        "cancelled": "Annullata"
+      },
+      "table": {
+        "candidate": "Candidato",
+        "vacancy": "Posizione",
+        "test": "Valutazione",
+        "status": "Stato",
+        "score": "Punteggio",
+        "maxScore": "Massimo",
+        "dimension": "Dimensione",
+        "assignedAt": "Assegnata",
+        "scoreValue": "{score} / {max}"
+      },
+      "charts": {
+        "statusTitle": "Assegnazioni per stato",
+        "statusSummary": "Riepilogo delle assegnazioni per stato",
+        "technicalTitle": "Punteggio tecnico",
+        "technicalSummary": "Riepilogo dei punteggi tecnici",
+        "dimensionsTitle": "Dimensioni dello strumento",
+        "dimensionsSummary": "Riepilogo delle dimensioni psicometriche",
+        "dimensionsFootnote": "Scala dello strumento in dimostrazione: da 0 a 100. Non è una percentuale di idoneità né una decisione di assunzione.",
+        "empty": "Nessun dato per il grafico con i filtri attuali."
+      },
+      "export": {
+        "pdf": "Esporta PDF",
+        "csv": "Esporta CSV",
+        "unavailable": "Disponibile quando si collega il backend"
+      },
+      "pagination": {
+        "perPage": "Per pagina",
+        "pageSizeAria": "Dimensione pagina",
+        "regionAria": "Paginazione del report",
+        "summary": "Pagina {page} di {totalPages}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "count": "{count, plural, one {# riga} other {# righe}}"
+      },
+      "count": "{count, plural, one {# riga} other {# righe}}",
+      "filteredCount": "{count, plural, one {# visibile} other {# visibili}}",
+      "errors": {
+        "generic": "Impossibile completare l’azione di dimostrazione.",
+        "scenario_error": "Il servizio simulato ha restituito un errore."
+      },
+      "states": {
+        "loading": "Caricamento report…",
+        "emptyTitle": "Nessun dato di dimostrazione",
+        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati di dimostrazione per continuare.",
+        "filterEmptyTitle": "Nessuna corrispondenza",
+        "filterEmptyDescription": "Nessuna riga soddisfa i filtri. Modificali o puliscili.",
+        "errorTitle": "Impossibile caricare i report",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova"
+      },
+      "panel": {
+        "title": "Prove",
+        "description": "Esempi simulati del portale Pruebas. Non corrispondono alla candidatura aperta.",
+        "candidate": "Candidato",
+        "test": "Valutazione",
+        "status": "Stato",
+        "open": "Vedi",
+        "openResults": "Vedi risultato",
+        "openTracking": "Vedi monitoraggio",
+        "empty": "Non ci sono esempi di prove nella dimostrazione."
+      }
+    },
+    "candidate": {
+      "welcome": {
+        "vacancy": "Posizione: {title}",
+        "duration": "Durata",
+        "durationValue": "{minutes} minuti",
+        "expires": "Scadenza assegnazione",
+        "instructions": "Istruzioni",
+        "privacy": "Modalità dimostrazione: le risposte sono salvate solo in questa sessione locale simulata. Non vengono inviate a un server e non servono per decisioni di assunzione.",
+        "start": "Inizia",
+        "resume": "Continua"
+      },
+      "taking": {
+        "progress": "Domanda {current} di {total}",
+        "timer": "Tempo rimanente: {time}",
+        "prev": "Precedente",
+        "next": "Successiva",
+        "submit": "Invia valutazione",
+        "required": "Rispondi a questa domanda prima di continuare.",
+        "saveFailed": "Non è stato possibile salvare le risposte nella demo. Riprova.",
+        "submitFailed": "Non è stato possibile inviare la valutazione nella demo."
+      },
+      "question": {
+        "optionsAria": "Opzioni di risposta",
+        "trueFalseAria": "Vero o falso",
+        "likertAria": "Scala di accordo",
+        "trueLabel": "Vero",
+        "falseLabel": "Falso",
+        "numericLabel": "La tua risposta numerica",
+        "openLabel": "La tua risposta"
+      },
+      "confirm": {
+        "title": "Invia valutazione",
+        "description": "Stai per inviare le risposte in modalità dimostrazione. Non vedrai punteggi né soluzioni al termine.",
+        "submit": "Invia",
+        "cancel": "Continua a rispondere"
+      },
+      "done": {
+        "title": "Valutazione inviata",
+        "description": "Le risposte sono state registrate nella demo. Il risultato non viene mostrato al candidato."
+      },
+      "blocked": {
+        "invalid": {
+          "title": "Link non valido",
+          "description": "Non abbiamo trovato un’assegnazione demo per questo link."
+        },
+        "applicationClosed": {
+          "title": "Candidatura chiusa",
+          "description": "Questa candidatura non è più attiva. Non puoi svolgere questa valutazione."
+        },
+        "cancelled": {
+          "title": "Assegnazione annullata",
+          "description": "Questa assegnazione è stata annullata nella demo."
+        },
+        "expired": {
+          "title": "Assegnazione scaduta",
+          "description": "Il termine di questa assegnazione è scaduto."
+        },
+        "timeUp": {
+          "title": "Tempo scaduto",
+          "description": "Il tempo di questa sessione è terminato. Non puoi inviare altre risposte."
+        },
+        "attemptsExhausted": {
+          "title": "Tentativi esauriti",
+          "description": "Hai usato tutti i tentativi consentiti per questa assegnazione."
+        }
+      },
+      "demo": {
+        "simulateSaveFailure": "Simula errore di salvataggio",
+        "simulateTimeUp": "Simula tempo scaduto"
+      },
+      "actions": {
+        "back": "Indietro",
+        "exit": "Esci al monitoraggio"
+      },
+      "states": {
+        "loading": "Caricamento esperienza candidato…",
+        "errorTitle": "Impossibile caricare la demo",
+        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "retry": "Riprova"
+      }
+    }
   },
   "CandidatePortal": {
     "home": {
@@ -558,7 +1712,8 @@
     "activities": {
       "title": "Prossime attività",
       "emptyTitle": "Non hai attività in programma",
-      "emptyDescription": "Quando avrai colloqui, valutazioni o appuntamenti programmati, appariranno qui."
+      "emptyDescription": "Quando avrai colloqui, valutazioni o appuntamenti programmati, appariranno qui.",
+      "interviewLinkAria": "Vedi i colloqui"
     },
     "applications": {
       "title": "Le mie candidature",
@@ -631,6 +1786,7 @@
         "helperDefault": "PDF, DOCX fino a 15 MB",
         "errorTypeNotAllowed": "Tipo non consentito. Solo PDF o DOCX.",
         "errorTooLarge": "Il file supera 15 MB ({size}).",
+        "errorDuplicate": "{count, plural, one {Questo file è già nell'elenco.} other {# file erano già nell'elenco e sono stati esclusi.}}",
         "selectedCount": "{count, plural, one {# file selezionato} other {# file selezionati}}",
         "selectedListAria": "Elenco dei file selezionati",
         "processAll": "Elabora tutti",
@@ -994,7 +2150,8 @@
             "futureDate": "La data non può essere nel futuro",
             "tooYoung": "Devi avere almeno 18 anni"
           },
-          "requiredFields": "Nomi, cognomi, titolo, riepilogo e documento di identità sono obbligatori.",
+          "requiredFields": "Nomi, cognomi, titolo, riepilogo, documento di identità e pretesa salariale sono obbligatori.",
+          "jobMinSalaryRequired": "Inserisci la tua pretesa salariale (importo mensile in USD).",
           "resumeRequired": "Il profilo deve includere il curriculum in testo. Carica un CV in Documenti o contatta il supporto."
         }
       },
@@ -1328,7 +2485,21 @@
         "empty": "No jobs match your search.",
         "resultsAria": "Resultados de vacantes",
         "selectedFallback": "Selected job",
-        "clear": "Remove"
+        "clear": "Remove",
+        "useThisVacancy": "Usa questa offerta",
+        "selectedBadge": "Selezionata",
+        "detailLoading": "Caricamento dei dettagli dell'offerta…",
+        "detailError": "Impossibile caricare i dettagli dell'offerta.",
+        "detailEmpty": "Questa offerta non ha altri dettagli pubblicati.",
+        "sections": {
+          "description": "Descrizione",
+          "details": "Dettagli",
+          "advantages": "Vantaggi",
+          "responsibilities": "Responsabilità",
+          "requirements": "Requisiti",
+          "benefits": "Benefit",
+          "salary": "Stipendio"
+        }
       },
       "history": {
         "title": "Version history",
@@ -1658,6 +2829,8 @@
         "downloadCvAria": "Scarica CV in PDF",
         "generateTechnicalSheet": "Genera scheda tecnica",
         "generateTechnicalSheetAria": "Genera la scheda tecnica di questo candidato",
+        "assignTest": "Assegna prova",
+        "assignTestAria": "Vai alle assegnazioni delle prove (demo)",
         "cancel": "Annulla",
         "cancelAria": "Annulla la modifica senza salvare",
         "save": "Salva modifiche",
@@ -1820,7 +2993,8 @@
             "futureDate": "La data non può essere nel futuro",
             "tooYoung": "Devi avere almeno 18 anni"
           },
-          "requiredFields": "Nomi, cognomi, titolo, riepilogo e documento di identità sono obbligatori.",
+          "requiredFields": "Nomi, cognomi, titolo, riepilogo, documento di identità e pretesa salariale sono obbligatori.",
+          "jobMinSalaryRequired": "Inserisci la pretesa salariale (importo mensile in USD).",
           "resumeRequired": "Il profilo deve includere il curriculum in testo. Carica un CV o contatta il supporto."
         }
       },
@@ -2003,7 +3177,8 @@
         "allFemale": "Tutte",
         "allMale": "Tutti",
         "filterByAria": "Filtra per {label}",
-        "clearFilters": "Cancella filtri"
+        "clearFilters": "Cancella filtri",
+        "vacancyType": "Tipo"
       },
       "cards": {
         "untitled": "Senza titolo",
@@ -2012,7 +3187,9 @@
         "cardReadOnlyAria": "Posizione inattiva, sola lettura: {title}",
         "logoAlt": "Logo di {company}",
         "published": "Pubblicata",
-        "archived": "Archiviata"
+        "archived": "Archiviata",
+        "presentationDue": "Presentazione: {date}",
+        "presentationOverdue": "Presentazione scaduta: {date}"
       },
       "statuses": {
         "active": "Attiva",
@@ -2036,6 +3213,15 @@
       "emptyStates": {
         "noVacancies": "Nessuna posizione trovata",
         "noVacanciesFiltered": "Nessuna posizione trovata con i filtri applicati"
+      },
+      "views": {
+        "activas": "Posizioni attive in mostra.",
+        "sin-postulaciones": "Posizioni senza candidature in mostra.",
+        "fuera-de-plazo": "Visualizzazione vacanti fuori termine di presentazione.",
+        "no-publicadas": "Posizioni non pubblicate in mostra.",
+        "backToList": "Vedi tutte le posizioni",
+        "empty": "Nessuna posizione corrisponde a questo criterio.",
+        "untitled": "Posizione senza titolo"
       },
       "loadingStates": {
         "loading": "Caricamento posizioni..."
@@ -2100,21 +3286,40 @@
             "label": "Modalità",
             "ariaLabel": "Modalità della posizione"
           },
+          "dataProtectionLaws": {
+            "label": "Leggi sulla protezione dei dati",
+            "helper": "Scegli almeno una legge. Il paese ne suggerisce una; puoi cambiare la selezione.",
+            "placeholder": "Seleziona una o più leggi",
+            "empty": "Non ci sono leggi attive.",
+            "inactive": "Inattiva",
+            "loading": "Caricamento delle leggi…",
+            "loadFailed": "Impossibile caricare le leggi."
+          },
           "unspecifiedOption": "Non specificato",
           "requirements": {
             "label": "Requisiti",
             "namePlaceholder": "Nome (es.: Patente di guida)",
-            "valuePlaceholder": "Valore (es.: Pesante)",
+            "valuePlaceholder": "Livello o criterio atteso (es: B2, avanzato, 3+ anni)",
             "importanceLabel": "Importanza (1-10)",
-            "helper": "Ogni requisito ha un nome, un valore e un livello medio da 1 a 10.",
+            "helper": "Nel nome indica cosa è richiesto (es: Inglese) e nel criterio il livello atteso (es: B2). L'importanza (1-10) indica quanto pesa il requisito, non il livello del candidato.",
             "nameAria": "Requisito {index} - Nome",
-            "valueAria": "Requisito {index} - Valore",
-            "scaleAria": "Requisito {index} - Livello medio da 1 a 10",
+            "valueAria": "Requisito {index} - Livello o criterio atteso",
+            "scaleAria": "Requisito {index} - Importanza da 1 a 10",
             "removeAria": "Elimina requisito {index}"
           },
           "isPublished": {
             "label": "Pubblica sul portale delle opportunità",
             "helper": "Se la disattivi, la posizione viene salvata come Archiviata: i candidati non la vedranno e potrai pubblicarla in seguito."
+          },
+          "vacancyType": {
+            "label": "Tipo di vacante",
+            "ariaLabel": "Tipo di vacante",
+            "placeholder": "Seleziona un tipo"
+          },
+          "presentationDueAt": {
+            "label": "Scadenza di presentazione",
+            "ariaLabel": "Scadenza di presentazione dei candidati",
+            "helper": "Impegno interno per presentare candidati. Suggerito dal tipo di vacante."
           }
         },
         "actions": {
@@ -2139,15 +3344,19 @@
           "nameRequired": "Il nome è obbligatorio",
           "descriptionRequired": "La descrizione è obbligatoria",
           "companyRequired": "Seleziona un'azienda cliente",
-          "requirementValueRequired": "Valore obbligatorio",
-          "requirementNameRequired": "Nome obbligatorio"
+          "requirementValueRequired": "Livello o criterio atteso obbligatorio",
+          "requirementNameRequired": "Nome obbligatorio",
+          "lawsRequired": "Seleziona almeno una legge sulla protezione dei dati.",
+          "vacancyTypeRequired": "Seleziona un tipo di vacante",
+          "presentationDueAtRequired": "La scadenza di presentazione è obbligatoria",
+          "presentationDueAtInvalid": "Inserisci una data valida"
         },
         "errors": {
           "createFailed": "Impossibile creare la posizione. Riprova.",
           "companiesLoadFailed": "Impossibile caricare i clienti.",
           "companiesLoadFallbackSuffix": "Verrà utilizzata l'azienda predefinita.",
-          "catalogsLoadFailed": "Impossibile caricare reparti e modalità.",
-          "catalogsLoadFallbackSuffix": "La posizione può comunque essere creata senza questi campi."
+          "catalogsLoadFailed": "Impossibile caricare i cataloghi della vacante.",
+          "catalogsLoadFallbackSuffix": "Controlla la connessione e riprova."
         }
       },
       "detail": {
@@ -2178,11 +3387,20 @@
           "importanceAria": "Importanza {value} su 10",
           "unspecified": "—"
         },
+        "laws": {
+          "none": "Nessuna legge collegata",
+          "active": "Attiva",
+          "inactive": "Inattiva"
+        },
         "headerMeta": {
           "department": "Dipartimento",
           "modality": "Modalità",
           "location": "Sede",
-          "created": "Creata il {date}"
+          "laws": "Leggi sulla protezione dei dati",
+          "created": "Creata il {date}",
+          "vacancyType": "Tipo di vacante",
+          "presentationDueAt": "Scadenza di presentazione",
+          "presentationDueOverdue": "Scaduta ({date})"
         },
         "actions": {
           "backToVacancies": "Torna alle posizioni",
@@ -2196,6 +3414,8 @@
           "finishProcessAria": "Concludi il processo della posizione",
           "interviews": "Colloqui",
           "interviewsAria": "Vedi i colloqui di questa posizione",
+          "assignTest": "Assegna prova",
+          "assignTestAria": "Vai alle assegnazioni delle prove (demo)",
           "results": "Risultati",
           "resultsAria": "Vedi risultati e metriche di questa posizione",
           "copy": "Copia",
@@ -2449,7 +3669,7 @@
           "aiDisclosure": "Il contenuto seguente è stato generato da IA e viene mostrato senza modifiche.",
           "attributes": "Attributi",
           "attributesDetail": "Dettaglio attributi ({count})",
-          "attributesZeroHint": "Uno 0% non sempre abbassa il punteggio combinato: attualità o anni pertinenti si misurano a parte.",
+          "attributesZeroHint": "Uno 0% non abbassa sempre l'insieme: i requisiti obbligatori sono valutati a parte.",
           "attributeLevelFallback": "Nessun dettaglio",
           "qualitativeScore": "Punteggio qualitativo",
           "semanticSimilarity": "Similarità semantica",
@@ -2460,6 +3680,8 @@
           "routePrefix": "Percorso:",
           "strengths": "Punti di forza",
           "considerations": "Aspetti da considerare",
+          "checklistHint": "I punti di forza e gli aspetti da considerare derivano dalla lista dei requisiti. Non sostituiscono la lettura generale.",
+          "qualitativeScoreHint": "Lettura generale del profilo. Da sola non dice se ogni requisito è soddisfatto.",
           "qualitativeReasoning": "Ragionamento qualitativo",
           "totalMatchScore": "Punteggio totale di corrispondenza:",
           "totalMatchScoreShort": "Corrispondenza",
@@ -2471,7 +3693,13 @@
           "viewFullProfile": "Vedi profilo completo",
           "close": "Chiudi",
           "profileAria": "Profilo di {name}",
-          "closeProfileAria": "Chiudi profilo"
+          "closeProfileAria": "Chiudi profilo",
+          "verdictMet": "Soddisfa",
+          "verdictPartial": "Soddisfa in parte",
+          "verdictNotMet": "Non soddisfa",
+          "verdictUnavailable": "Non valutato",
+          "manualReviewNotice": "Un requisito obbligatorio non è stato verificato nel CV: serve una revisione manuale.",
+          "attributesExcludedHint": "È stato possibile valutare solo il {coverage} dei requisiti; gli attributi non sono stati inclusi nel punteggio totale."
         },
         "scoreKeys": {
           "qualitative": "Punteggio qualitativo",
@@ -2488,6 +3716,10 @@
         },
         "kanban": {
           "score": "Punteggio",
+          "analysis": "Analisi",
+          "analysisAria": "Vedi analisi IA di {name}",
+          "sourcePersonalAria": "Candidatura personale (auto-candidatura)",
+          "sourceRecruiterAria": "Candidato caricato dal recruiter",
           "columnAria": "Colonna {stage}",
           "moveStageAria": "Sposta {name} in un'altra fase",
           "statusAria": "Stato di {name}",
@@ -2988,20 +4220,230 @@
       }
     },
     "dashboard": {
-      "statsAria": "Statistiche della dashboard",
-      "activeCandidates": "Candidati attivi",
-      "openVacancies": "Posizioni aperte",
-      "interviewsToday": "Colloqui oggi",
-      "hiresThisMonth": "Assunzioni del mese",
-      "recentActivityAria": "Attività recente",
-      "recentActivityTitle": "Attività recente",
-      "recentCandidatesAria": "Candidati recenti",
-      "recentCandidatesTitle": "Candidati recenti",
-      "newCandidatesBadge": "{count} nuovi",
-      "mockBadges": {
-        "interview": "Interview",
-        "evaluation": "Evaluacion",
-        "hired": "Contratado"
+      "breadcrumb": "Home",
+      "title": "Dashboard Risorse umane",
+      "description": "Dai priorità a posizioni, colloqui e candidati che richiedono la tua attenzione.",
+      "refresh": "Aggiorna",
+      "refreshing": "Aggiornamento…",
+      "loading": "Caricamento dashboard…",
+      "updatedAt": "Aggiornato alle {time}",
+      "metricsTitle": "Riepilogo",
+      "metrics": {
+        "activeVacancies": "Posizioni attive",
+        "upcomingInterviews": "Colloqui imminenti",
+        "staleCandidates": "Candidati fermi",
+        "pendingEvaluations": "Valutazioni in sospeso",
+        "vacanciesWithoutCandidates": "Senza candidature",
+        "vacanciesPresentationOverdue": "Fuori termine di presentazione",
+        "vacanciesUnpublished": "Non pubblicate"
+      },
+      "metricLinkAria": "{label}: {value}. Vedi dettaglio",
+      "metricUpcomingWindow": "Prossimi {days} giorni",
+      "metricPartial": "Conteggio parziale: il totale reale può essere maggiore",
+      "metricUnavailable": "Dato non ancora disponibile",
+      "metricError": "Impossibile caricare",
+      "valueUnavailable": "nessun dato",
+      "remindersTitle": "Da gestire",
+      "remindersDescription": "Ordinati per urgenza e data.",
+      "remindersEmpty": "Nessuna attività in sospeso al momento.",
+      "severity": {
+        "critical": "Urgente",
+        "action": "Da fare",
+        "upcoming": "Imminente",
+        "info": "Informativo"
+      },
+      "nextAt": "Prossimo: {date}",
+      "oldestAt": "Più vecchio: {date}",
+      "partialNote": "Basato su {analyzed} di {total} record; il totale reale può essere maggiore.",
+      "errorNote": "Impossibile caricare questo dato. Prova ad aggiornare la dashboard.",
+      "unavailableTitle": "Promemoria in preparazione",
+      "unavailableDescription": "Non abbiamo ancora i dati per calcolarli.",
+      "unavailableBadge": "Nessun dato",
+      "inactiveVacanciesRule": "Considerata inattiva dopo {days} giorni.",
+      "openModule": "Apri modulo",
+      "openModuleAria": "Apri il modulo relativo a {title}",
+      "containers": {
+        "vacancies": "Posizioni",
+        "candidates": "Candidati"
+      },
+      "vacancies": {
+        "description": "Segnali delle posizioni aperte che richiedono follow-up.",
+        "metrics": {
+          "withoutCandidates": "Senza candidature",
+          "overdue": "Fuori termine",
+          "unpublished": "Non pubblicate"
+        },
+        "attentionTitle": "Posizioni che richiedono attenzione",
+        "attentionEmpty": "Nessuna posizione di questa pagina richiede attenzione.",
+        "signals": {
+          "critical": "Critica",
+          "attention": "Attenzione",
+          "overdue": "Fuori termine",
+          "unpublished": "Non pubblicata"
+        },
+        "daysOpen": "{days, plural, one {# giorno aperta} other {# giorni aperta}}",
+        "candidateCount": "{count, plural, one {# candidatura} other {# candidature}}",
+        "openVacancy": "Apri posizione",
+        "openVacancyAria": "Apri posizione {title}",
+        "untitled": "Posizione senza titolo",
+        "partialProgress": "Avanzamento posizioni: basato su {analyzed} di {total} record; il totale reale può essere maggiore.",
+        "partialList": "Elenco posizioni: basato su {analyzed} di {total} record; il totale reale può essere maggiore.",
+        "loading": "Caricamento posizioni…",
+        "panelError": {
+          "title": "Non è stato possibile caricare i segnali delle posizioni",
+          "description": "Il blocco candidati resta disponibile.",
+          "retry": "Riprova"
+        }
+      },
+      "shortcutsTitle": "Accessi rapidi",
+      "shortcuts": {
+        "candidates": {
+          "title": "Candidati",
+          "description": "Cerca profili e registra i follow-up."
+        },
+        "vacancies": {
+          "title": "Posizioni",
+          "description": "Gestisci la pipeline di ogni posizione."
+        },
+        "interviews": {
+          "title": "Colloqui",
+          "description": "Pianifica e consulta i colloqui."
+        },
+        "calendar": {
+          "title": "Calendario",
+          "description": "Collega e consulta il tuo calendario."
+        },
+        "reports": {
+          "title": "Report",
+          "description": "Consulta indicatori ed esporta report."
+        }
+      },
+      "reminders": {
+        "upcomingInterviews": {
+          "title": "Colloqui imminenti",
+          "description": "{count, plural, one {# colloquio programmato} other {# colloqui programmati}} nei prossimi {days} giorni.",
+          "action": "Vedi colloqui"
+        },
+        "unconfirmedInterviews": {
+          "title": "Colloqui da confermare",
+          "action": "Vedi colloqui",
+          "description": "{count, plural, one {# colloquio da confermare} other {# colloqui da confermare}}."
+        },
+        "newCandidates": {
+          "title": "Nuovi candidati da esaminare",
+          "action": "Esamina candidature",
+          "description": "{count, plural, one {# nuova candidatura da esaminare} other {# nuove candidature da esaminare}}."
+        },
+        "staleCandidates": {
+          "title": "Candidati fermi",
+          "description": "{count, plural, one {# candidato} other {# candidati}} senza cambio di fase da {days} giorni o più.",
+          "action": "Esamina candidati"
+        },
+        "inactiveVacancies": {
+          "title": "Posizioni senza attività recente",
+          "action": "Vedi posizioni",
+          "description": "{count, plural, one {# posizione senza attività recente} other {# posizioni senza attività recente}}."
+        },
+        "pendingEvaluations": {
+          "title": "Valutazioni tecniche in sospeso",
+          "description": "{count, plural, one {# valutazione non completata} other {# valutazioni non completate}}.",
+          "action": "Vedi valutazioni"
+        },
+        "pendingTechnicalSheets": {
+          "title": "Schede tecniche in sospeso",
+          "action": "Vedi schede",
+          "description": "{count, plural, one {# scheda tecnica in sospeso} other {# schede tecniche in sospeso}}."
+        },
+        "pendingApprovals": {
+          "title": "Approvazioni in sospeso",
+          "action": "Vedi posizioni",
+          "description": "Nessuna informazione disponibile al momento."
+        },
+        "overdueFollowUps": {
+          "title": "Follow-up in ritardo",
+          "action": "Vedi candidati",
+          "description": "{count, plural, one {# follow-up in ritardo} other {# follow-up in ritardo}}."
+        },
+        "pendingConsents": {
+          "title": "Consensi in sospeso",
+          "description": "{count, plural, one {# consenso in sospeso} other {# consensi in sospeso}}.",
+          "action": "Vedi consensi"
+        },
+        "pendingDocuments": {
+          "title": "Documenti in sospeso",
+          "description": "{count, plural, one {# documento in sospeso} other {# documenti in sospeso}}.",
+          "action": "Vedi documenti"
+        },
+        "vacanciesPresentationDueSoon": {
+          "title": "Presentazione in scadenza",
+          "action": "Vedi vacanti",
+          "description": "{count, plural, one {# vacante con termine di presentazione in scadenza} other {# vacanti con termine di presentazione in scadenza}}."
+        },
+        "vacanciesPresentationOverdue": {
+          "title": "Fuori termine di presentazione",
+          "action": "Vedi vacanti",
+          "description": "{count, plural, one {# vacante fuori termine di presentazione} other {# vacanti fuori termine di presentazione}}."
+        }
+      },
+      "panelError": {
+        "title": "Impossibile caricare la dashboard",
+        "description": "Riprova tra pochi secondi o aggiorna la pagina.",
+        "retry": "Riprova"
+      },
+      "reminderDetail": {
+        "title": "In sospeso: {label}",
+        "description": "Rivedi il dettaglio e apri ciascun caso per gestirlo.",
+        "backToDashboard": "Torna alla dashboard",
+        "loading": "Caricamento in corso…",
+        "empty": "Nessun elemento in sospeso per questo promemoria.",
+        "error": "Impossibile caricare il dettaglio. Riprova.",
+        "unavailable": "Questo promemoria non ha ancora dati disponibili.",
+        "partialGeneric": "Conteggio parziale: il totale reale può essere maggiore.",
+        "inactiveStatus": "Inattiva",
+        "window": {
+          "upcomingInterviews": "Prossimi {days} giorni.",
+          "staleCandidates": "Senza cambio di fase da {days} giorni o più.",
+          "inactiveVacancies": "Senza attività dopo {days} giorni."
+        },
+        "rowActions": {
+          "interview": "Apri colloquio",
+          "interviewAria": "Apri colloquio: {label}",
+          "vacancy": "Apri posizione",
+          "vacancyAria": "Apri posizione: {label}",
+          "sheet": "Apri scheda",
+          "sheetAria": "Apri scheda: {label}"
+        },
+        "columns": {
+          "candidate": "Candidato",
+          "vacancy": "Posizione",
+          "company": "Azienda",
+          "dueAt": "Data",
+          "dateTime": "Data e ora",
+          "since": "Dal",
+          "lastActivity": "Ultima attività",
+          "status": "Stato",
+          "actions": "Azioni",
+          "presentationDue": "Presentazione"
+        },
+        "invalidKey": {
+          "breadcrumb": "Promemoria sconosciuto",
+          "title": "Promemoria sconosciuto",
+          "description": "L'URL non corrisponde ad alcun promemoria della dashboard."
+        },
+        "pagination": {
+          "perPage": "Per pagina",
+          "pageSizeAria": "Dimensione pagina",
+          "regionAria": "Paginazione elementi in sospeso",
+          "summary": "Pagina {page} di {total}",
+          "prev": "Precedente",
+          "next": "Successivo",
+          "count": "{count, plural, one {# in sospeso} other {# in sospeso}}"
+        },
+        "metadata": {
+          "title": "ApplicanTree | Portale HR | {label}",
+          "invalidTitle": "ApplicanTree | Portale HR | Promemoria sconosciuto",
+          "invalidDescription": "Il promemoria richiesto non esiste."
+        }
       }
     },
     "technicalSheet": {
@@ -3535,7 +4977,8 @@
         "table": {
           "name": "Nome",
           "description": "Descrizione",
-          "actions": "Azioni"
+          "actions": "Azioni",
+          "presentationSlaDays": "Termine (giorni)"
         },
         "actions": {
           "refresh": "Aggiorna",
@@ -3560,14 +5003,18 @@
           "descriptionLabel": "Descrizione",
           "namePlaceholder": "Nome del {singular}",
           "descriptionPlaceholder": "Breve descrizione del {singular}",
-          "loading": "Caricamento {singular}…"
+          "loading": "Caricamento {singular}…",
+          "presentationSlaDaysLabel": "Giorni di termine di presentazione",
+          "presentationSlaDaysPlaceholder": "es. 3"
         },
         "validation": {
           "nameRequired": "Il nome è obbligatorio.",
           "codeRequired": "Il codice è obbligatorio.",
           "codePattern": "Usa solo minuscole, numeri e trattini.",
           "sortOrderRequired": "L'ordine è obbligatorio.",
-          "sortOrderInvalid": "Inserisci un numero intero valido."
+          "sortOrderInvalid": "Inserisci un numero intero valido.",
+          "presentationSlaDaysRequired": "I giorni di termine sono obbligatori.",
+          "presentationSlaDaysInvalid": "Inserisci un intero maggiore di 0."
         },
         "errors": {
           "loadCatalog": "Impossibile caricare il catalogo.",
@@ -3589,7 +5036,8 @@
           "loadError": "Errore nel caricamento dei {plural}",
           "list": "Elenco dei {plural}"
         },
-        "dash": "—"
+        "dash": "—",
+        "presentationSlaDaysValue": "{days, plural, one {# giorno} other {# giorni}}"
       },
       "departments": {
         "title": "Dipartimenti",
@@ -3647,6 +5095,110 @@
         "formCreateTitle": "Nuova {singularCapitalized}",
         "formEditTitle": "Modifica {singular}",
         "deleteTitle": "Elimina {singular}"
+      },
+      "vacancyTypes": {
+        "title": "Tipi di vacante",
+        "singular": "tipo di vacante",
+        "singularCapitalized": "Tipo di vacante",
+        "plural": "tipi di vacante",
+        "article": "il",
+        "createCta": "Crea tipo di vacante",
+        "emptyMessage": "Nessun tipo di vacante creato ancora",
+        "headingDescription": "Gestisci i tipi di vacante e il termine interno di presentazione dei candidati.",
+        "createSuccess": "Tipo di vacante creato.",
+        "updateSuccess": "Tipo di vacante aggiornato.",
+        "activateSuccess": "Tipo di vacante attivato.",
+        "deactivateSuccess": "Tipo di vacante disattivato.",
+        "deleteSuccess": "Tipo di vacante eliminato.",
+        "deleteConflictMessage": "Impossibile eliminare perché è collegato a vacanti esistenti.",
+        "formCreateTitle": "Nuovo {singularCapitalized}",
+        "formEditTitle": "Modifica {singular}",
+        "deleteTitle": "Elimina {singular}"
+      }
+    },
+    "dataProtectionLaws": {
+      "page": {
+        "title": "Leggi sulla protezione dei dati",
+        "description": "Mantieni le leggi che i recruiter collegano a ogni offerta. Il testo legale si salva qui.",
+        "createCta": "Crea legge"
+      },
+      "table": {
+        "name": "Nome",
+        "jurisdiction": "Ambito",
+        "actions": "Azioni",
+        "active": "Attiva",
+        "inactive": "Inattiva",
+        "missingBody": "Senza testo legale"
+      },
+      "form": {
+        "createTitle": "Nuova legge",
+        "editTitle": "Modifica legge",
+        "nameLabel": "Nome",
+        "codeLabel": "Codice",
+        "codePlaceholder": "ley-proteccion-datos-el-salvador",
+        "jurisdictionLabel": "Ambito",
+        "jurisdictionSv": "El Salvador",
+        "jurisdictionEu": "Unione europea",
+        "jurisdictionOther": "Altro",
+        "jurisdictionOtherLabel": "Codice dell'ambito",
+        "referenceLabel": "Riferimento ufficiale",
+        "summaryLabel": "Riepilogo",
+        "localeLabel": "Lingua del testo",
+        "locales": {
+          "es": "Spagnolo",
+          "en": "Inglese",
+          "de": "Tedesco",
+          "fr": "Francese",
+          "it": "Italiano"
+        },
+        "bodyLabel": "Testo legale vigente",
+        "bodyPlaceholder": "Scrivi il testo che si applica a questa legge.",
+        "activeLabel": "Legge attiva",
+        "activeHint": "Una legge inattiva non si può aggiungere alle nuove offerte. Le offerte che la usano già conservano il collegamento.",
+        "save": "Salva",
+        "saveChanges": "Salva modifiche"
+      },
+      "validation": {
+        "nameRequired": "Il nome è obbligatorio.",
+        "nameMax": "Il nome non può superare {max} caratteri.",
+        "codeRequired": "Il codice è obbligatorio.",
+        "codeMax": "Il codice non può superare {max} caratteri.",
+        "codePattern": "Usa lettere minuscole, numeri e trattini.",
+        "jurisdictionRequired": "L'ambito è obbligatorio.",
+        "jurisdictionPattern": "Usa da 2 a 8 lettere o numeri.",
+        "referenceMax": "Il riferimento non può superare {max} caratteri.",
+        "summaryMax": "Il riepilogo non può superare {max} caratteri.",
+        "localeRequired": "Scegli una lingua."
+      },
+      "errors": {
+        "loadCatalog": "Impossibile caricare il catalogo.",
+        "saveFailed": "Impossibile salvare la legge.",
+        "deleteFailed": "Impossibile eliminare la legge.",
+        "deleteConflict": "Impossibile eliminare la legge perché ci sono offerte collegate. Disattivala se non deve più essere usata nelle nuove offerte."
+      },
+      "toasts": {
+        "created": "Legge creata.",
+        "updated": "Legge aggiornata.",
+        "deleted": "Legge eliminata."
+      },
+      "emptyStates": {
+        "noItems": "Nessuna legge ancora",
+        "createHint": "Quando esiste una legge, i recruiter possono collegarla a un'offerta."
+      },
+      "deleteConfirm": {
+        "title": "Elimina legge",
+        "message": "Eliminare questa legge? Si può eliminare solo se nessuna offerta la usa."
+      },
+      "actions": {
+        "refresh": "Aggiorna",
+        "retry": "Riprova",
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "cancel": "Annulla"
+      },
+      "aria": {
+        "loadError": "Errore nel caricamento delle leggi",
+        "list": "Elenco delle leggi sulla protezione dei dati"
       }
     },
     "documentTypes": {
@@ -3870,6 +5422,80 @@
       "title": "Impostazioni",
       "description": "Questa vista è pronta per centralizzare le impostazioni del portale admin."
     },
+    "presentationReminders": {
+      "page": {
+        "title": "Promemoria di presentazione",
+        "description": "Aggiungi righe con modello Notification, un tipo di posizione e invio automatico; usa Invia ora su ogni riga quando serve."
+      },
+      "loading": "Caricamento impostazioni…",
+      "templates": {
+        "title": "Modelli e tipi di posizione",
+        "description": "Aggiungi righe, scegli un modello Notification (puoi ripeterlo), un tipo di posizione e l'invio automatico e invia da ogni riga.",
+        "tableAria": "Impostazioni promemoria per modello",
+        "columns": {
+          "template": "Modello",
+          "vacancyTypes": "Tipo di posizione",
+          "autoSend": "Invio automatico"
+        },
+        "add": "Aggiungi",
+        "remove": "Rimuovi riga",
+        "selectTemplate": "Seleziona modello",
+        "unsaved": "Non salvato",
+        "unsavedHint": "Ci sono modifiche non salvate. Premi Salva impostazioni.",
+        "emptyRows": "Nessuna riga configurata. Aggiungine una per iniziare.",
+        "noneOption": "Seleziona tipo",
+        "autoSendEnabled": "Invio automatico attivo",
+        "timeOfDay": "Ora",
+        "timeZone": "Fuso orario"
+      },
+      "manual": {
+        "title": "Invia ora",
+        "description": "Usa le impostazioni salvate della riga (modello e tipo di posizione).",
+        "needsBinding": "Aggiungi almeno una riga con modello e un tipo di posizione, poi salva prima di inviare."
+      },
+      "empty": {
+        "noTemplates": "Non ci sono modelli Notification. Creali in Modelli per poterli assegnare qui.",
+        "goToTemplates": "Vai a Modelli",
+        "noVacancyTypes": "Non ci sono tipi di posizione attivi. Creali nel catalogo dei tipi.",
+        "goToVacancyTypes": "Vai ai Tipi di posizione"
+      },
+      "scopes": {
+        "label": "Ambito del promemoria",
+        "dueSoon": {
+          "label": "In scadenza",
+          "helper": "Solo posizioni con scadenza di presentazione imminente."
+        },
+        "overdue": {
+          "label": "Fuori termine",
+          "helper": "Solo posizioni con scadenza di presentazione già scaduta."
+        },
+        "all": {
+          "label": "Entrambe",
+          "helper": "Include posizioni in scadenza e fuori termine."
+        }
+      },
+      "actions": {
+        "save": "Salva impostazioni",
+        "send": "Invia promemoria via email",
+        "retry": "Riprova"
+      },
+      "confirm": {
+        "title": "Invia promemoria",
+        "message": "Verrà inviato un digest a tutti i recruiter con le impostazioni salvate.",
+        "confirm": "Invia"
+      },
+      "errors": {
+        "loadFailed": "Impossibile caricare le impostazioni dei promemoria di presentazione.",
+        "loadAria": "Errore nel caricamento dei promemoria di presentazione"
+      },
+      "toasts": {
+        "saved": "Impostazioni salvate.",
+        "saveError": "Impossibile salvare le impostazioni.",
+        "success": "Promemoria inviato: {sent} inviati, {failed} non riusciti, {recipients} destinatari.",
+        "skipped": "{reason} (inviati: {sent}, non riusciti: {failed}, destinatari: {recipients})",
+        "error": "Impossibile inviare il promemoria."
+      }
+    },
     "shell": {
       "userFallback": "Usuario",
       "roleFallback": "Administrador"
@@ -3951,6 +5577,7 @@
       "modality": "Modalità",
       "location": "Ubicazione",
       "salary": "Stipendio",
+      "lawsLabel": "Leggi sulla protezione dei dati",
       "publishedLabel": "Pubblicazione",
       "requirementsHeading": "Requisiti dell'offerta",
       "detailsHeading": "Dettagli dell'offerta",
@@ -3996,12 +5623,17 @@
         "documentTypeRequired": "Seleziona un tipo di documento.",
         "documentNumberRequired": "Inserisci il numero di documento.",
         "cvRequired": "Allega il tuo CV in PDF.",
+        "minSalaryRequired": "Inserisci la tua pretesa salariale.",
+        "minSalaryInvalid": "Inserisci un importo valido (solo numeri, minimo 0).",
         "reviewFields": "Controlla i campi indicati.",
         "consentSubmitFailed": "Non siamo riusciti a salvare la tua autorizzazione e il consenso. Riprova.",
         "consentValidation": "Controlla l'autorizzazione e il consenso e riprova.",
         "consentVersionMismatch": "Il documento di autorizzazione è stato aggiornato. Ricarica la pagina e riprova.",
         "consentNationalIdConflict": "Quel documento di identità è già collegato a un altro profilo. Usa un altro valore o contatta l'assistenza.",
-        "vacancyUnavailable": "Questa posizione non è più disponibile. I tuoi dati non sono stati inviati."
+        "vacancyUnavailable": "Questa posizione non è più disponibile. I tuoi dati non sono stati inviati.",
+        "alreadyApplied": "Hai già candidatura per questa posizione. Controlla lo stato nel portale candidato.",
+        "alreadyAppliedCta": "Vai al portale candidato",
+        "consentRequired": "Devi accettare l'autorizzazione e il consenso per candidarti."
       },
       "fields": {
         "firstName": "Nomi *",
@@ -4013,6 +5645,8 @@
         "source": "Come hai conosciuto questa offerta?",
         "linkedin": "Profilo LinkedIn",
         "website": "Sito web o portfolio",
+        "minSalary": "Pretesa salariale *",
+        "minSalaryCurrency": "USD",
         "notes": "Note",
         "resume": "Curriculum (PDF) *"
       },
@@ -4026,6 +5660,7 @@
         "lastName": "Es. Martinez",
         "email": "name@example.com",
         "phone": "1234-5678",
+        "minSalary": "0.00",
         "loadingCountries": "Caricamento paesi…",
         "searchCountry": "Cerca paese, ISO o prefisso",
         "noCountries": "Nessun paese trovato"
@@ -4087,6 +5722,8 @@
       "ariaMain": "Navigazione principale del portale opportunità",
       "ariaGoToPortal": "Vai al portale opportunità",
       "ariaGoToSelection": "Vai alla selezione del portale",
+      "ariaGoToCandidatePortal": "Vai al portale candidato",
+      "goToCandidatePortal": "Il mio portale",
       "changePortal": "Cambia portale",
       "portalsShort": "Portali"
     },
@@ -4113,7 +5750,36 @@
       "checklistEmail": "Usa la stessa email associata al tuo account candidato.",
       "checklistData": "Completa nomi, cognomi ed email con dati reali.",
       "formSectionLabel": "Modulo di candidatura",
-      "documentTitle": "ApplicanTree | Portale opportunità | Candidati a {title}"
+      "documentTitle": "ApplicanTree | Portale opportunità | Candidati a {title}",
+      "alreadyApplied": {
+        "title": "Sei già in processo",
+        "body": "Hai già candidatura per questa posizione. Puoi seguire lo stato dal tuo portale candidato.",
+        "cta": "Vai al portale candidato"
+      },
+      "loggedIn": {
+        "sectionLabel": "Candidatura con il tuo profilo",
+        "formSectionLabel": "Completa i dati mancanti",
+        "title": "Conferma la candidatura",
+        "body": "Useremo i dati e il CV del tuo profilo candidato. Non serve compilare di nuovo tutto il modulo.",
+        "cta": "Candidati con il mio profilo",
+        "editDetails": "Completa o modifica i dati",
+        "cvOnFile": "CV salvato nel tuo profilo",
+        "cvDownloadFailed": "Non è stato possibile recuperare il CV dal profilo. Caricalo di nuovo o modifica i dati.",
+        "submitFailed": "Non è stato possibile inviare la candidatura. Riprova.",
+        "beforeSubmit": "Con il tuo account",
+        "checklistProfile": "I dati del tuo profilo verranno inviati automaticamente.",
+        "checklistCv": "Useremo il CV salvato nel tuo profilo.",
+        "checklistReview": "Controlla il riepilogo e conferma con un clic.",
+        "checklistComplete": "Completa i campi ancora mancanti nel profilo.",
+        "checklistCvUpload": "Allega un CV in PDF se non ne hai ancora uno salvato.",
+        "fields": {
+          "name": "Nome",
+          "email": "Email",
+          "phone": "Telefono",
+          "document": "Documento",
+          "cv": "CV"
+        }
+      }
     },
     "unavailable": {
       "title": "Questa offerta non è più disponibile",

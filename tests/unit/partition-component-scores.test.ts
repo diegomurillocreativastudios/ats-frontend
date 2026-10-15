@@ -18,11 +18,23 @@ describe("partitionComponentScores", () => {
 
     expect(partitioned.attributeIndividuals.map(([key]) => key)).toEqual([
       "Analisis_de_datos",
-      "Recency",
     ])
     expect(partitioned.aggregateEntry?.[1]).toBe(1)
     expect(partitioned.qualitativeEntry?.[1]).toBe(0.99)
     expect(partitioned.semanticEntry?.[1]).toBe(0.777)
+  })
+
+  it("keeps recency and relevant years out of the attribute rows", () => {
+    const partitioned = partitionComponentScores([
+      ["attr_ingles", 0.5],
+      ["recency", 0],
+      ["Recency", 0],
+      ["relevant_years", 0],
+      ["RelevantYears", 0],
+      ["Relevant years", 0],
+    ])
+
+    expect(partitioned.attributeIndividuals.map(([key]) => key)).toEqual(["attr_ingles"])
   })
 })
 

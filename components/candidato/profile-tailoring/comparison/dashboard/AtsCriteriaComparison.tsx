@@ -35,7 +35,7 @@ function CriteriaBar({
   variant: "current" | "adapted"
   label: string
 }) {
-  const color = variant === "current" ? "bg-indigo-500" : "bg-emerald-500"
+  const color = variant === "current" ? "bg-gray-500" : "bg-emerald-500"
   return (
     <div className="min-w-0 flex-1">
       <div className="mb-1 flex items-center justify-between gap-2">

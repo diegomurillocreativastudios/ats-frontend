@@ -73,7 +73,7 @@ export default function MyPostulationsCard({
               <button
                 key={post.id}
                 onClick={() => onSelectApplication?.(post)}
-                className="flex flex-col gap-3 rounded-lg border border-border bg-background p-4 text-left transition-all hover:border-blue-300 hover:shadow-sm"
+                className="flex flex-col gap-3 rounded-lg border border-border bg-background p-4 text-left transition-all hover:border-ats-cobre-light hover:shadow-sm"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
@@ -110,7 +110,7 @@ export default function MyPostulationsCard({
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
                     <div
-                      className="h-full rounded-full bg-blue-500 transition-all"
+                      className="h-full rounded-full bg-ats-terracotta transition-all"
                       style={{ width: `${progressPercentage}%` }}
                       role="progressbar"
                       aria-valuenow={progressPercentage}

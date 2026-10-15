@@ -81,7 +81,7 @@ export function buildTechnicalSheetPageHtml(options: TechnicalSheetPageShellOpti
     </div>
     <div style="position:absolute;bottom:0;left:0;right:0;height:58px;background:#256D35;"></div>
   </div>
-  <header class="technical-sheet-page__header" style="position:relative;z-index:5;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:24px;align-items:start;padding:62px 72px 0 20px;box-sizing:border-box;background:#FFFFFF;">
+  <header class="technical-sheet-page__header" style="position:relative;z-index:5;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:24px;align-items:start;padding:62px ${TECHNICAL_SHEET_CONTENT_RIGHT_PX}px 0 20px;box-sizing:border-box;background:#FFFFFF;">
     <div style="display:flex;align-items:center;gap:12px;min-width:0;">
       <img src="${logo}" alt="" width="88" style="width:88px;height:auto;display:block;object-fit:contain;flex-shrink:0;" />
       <div style="line-height:1;min-width:0;">

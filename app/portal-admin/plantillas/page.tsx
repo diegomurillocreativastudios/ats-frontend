@@ -87,7 +87,7 @@ const TemplateCard = ({ template, onEdit, onDelete, t }) => {
             <h3 className="font-sans text-base font-semibold text-foreground">
               {template.name}
             </h3>
-            <span className={`rounded-full px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider ${template.type === 'Notification' ? 'bg-blue-100 text-blue-700' :
+            <span className={`rounded-full px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider ${template.type === 'Notification' ? 'bg-emerald-100 text-emerald-700' :
                 template.type === 'Document' ? 'bg-emerald-100 text-emerald-700' :
                   'bg-amber-100 text-amber-700'
               }`}>

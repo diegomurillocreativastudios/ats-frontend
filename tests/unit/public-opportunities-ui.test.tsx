@@ -112,6 +112,51 @@ describe("portal de oportunidades UI", () => {
     expect(screen.getByRole("link", { name: "Ir al portal de oportunidades" })).toBeInTheDocument()
   })
 
+  it("sin sesión no muestra Mi portal ni Cambiar portal", () => {
+    renderWithIntl(<PublicOpportunitiesNavbar />)
+
+    expect(
+      screen.queryByRole("link", { name: "Ir al portal del candidato" }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: "Ir a selección de portal" }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("candidato logueado ve Mi portal hacia el portal candidato", () => {
+    useCurrentUserMock.mockReturnValue({
+      user: { name: "Ada", email: "ada@example.com", role: "Candidate" },
+      loading: false,
+    })
+
+    renderWithIntl(<PublicOpportunitiesNavbar />)
+
+    const candidateLink = screen.getByRole("link", {
+      name: "Ir al portal del candidato",
+    })
+    expect(candidateLink).toHaveAttribute("href", "/portal-candidato")
+    expect(screen.getByText("Mi portal")).toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: "Ir a selección de portal" }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("admin logueado ve Cambiar portal y no Mi portal", () => {
+    useCurrentUserMock.mockReturnValue({
+      user: { name: "Admin", email: "admin@example.com", role: "Admin" },
+      loading: false,
+    })
+
+    renderWithIntl(<PublicOpportunitiesNavbar />)
+
+    expect(
+      screen.getByRole("link", { name: "Ir a selección de portal" }),
+    ).toHaveAttribute("href", "/seleccion-portal")
+    expect(
+      screen.queryByRole("link", { name: "Ir al portal del candidato" }),
+    ).not.toBeInTheDocument()
+  })
+
   it("compacta el hero y deja los filtros visibles en el listado", async () => {
     renderWithIntl(<PublicVacanciesPage />)
 

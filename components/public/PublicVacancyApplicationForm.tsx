@@ -10,15 +10,22 @@ import {
   type ChangeEvent,
   type DragEvent,
   type FormEvent,
+  type KeyboardEvent,
 } from "react"
+import { flushSync } from "react-dom"
 import { useLocale, useTranslations } from "next-intl"
-import { CheckCircle2, FileText, LoaderCircle, Mail, X } from "lucide-react"
+import { FileText, LoaderCircle, Mail, X } from "lucide-react"
+import { PORTAL_HOME_HREF } from "@/lib/portal-access"
 import {
+  formatPublicApplyMinSalaryDisplay,
   getPublicApplyErrorMessage,
   isAllowedCvFile,
+  isAlreadyAppliedConflict,
   isCvFileWithinSizeLimit,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
+  parsePublicApplyMinSalary,
+  sanitizePublicApplySalaryInput,
   submitPublicVacancyApplication,
   type PublicVacancyApplyValues,
 } from "@/lib/public-vacancy-apply"
@@ -28,8 +35,15 @@ import {
   APPLY_LONG_WAIT_HINT_MS,
   getLoadingBarPercent,
 } from "@/lib/apply-loading-bar"
-import { ApplyStyleProgressBar } from "@/components/public/apply-style-progress-bar"
+import {
+  PublicApplicationSubmitProgress,
+  applySubmitProgressPanelClass,
+} from "@/components/public/public-application-submit-progress"
 import { ApplyEmailConfirmationModal } from "@/components/public/ApplyEmailConfirmationModal"
+import {
+  DEFAULT_APPLY_PHONE_COUNTRY_ISO2,
+  type PublicApplyProfileFields,
+} from "@/lib/public-vacancy-apply-from-profile"
 import {
   ConsentAuthorizationModal,
   type ConsentAuthorizationInitialValues,
@@ -48,9 +62,32 @@ import {
 import { PhoneCountryInput } from "@/components/ui/PhoneCountryInput"
 import { PDF_ONLY_ACCEPT } from "@/lib/upload-constraints"
 
-const DEFAULT_PHONE_COUNTRY_ISO2 = "SV"
+const DEFAULT_PHONE_COUNTRY_ISO2 = DEFAULT_APPLY_PHONE_COUNTRY_ISO2
+
+/** Collect File objects from a drop — `files` first, then `items` as fallback. */
+function filesFromDataTransfer(dataTransfer: DataTransfer | null): File[] {
+  if (!dataTransfer) return []
+  if (dataTransfer.files?.length) return Array.from(dataTransfer.files)
+  if (!dataTransfer.items?.length) return []
+  const fromItems: File[] = []
+  for (let i = 0; i < dataTransfer.items.length; i++) {
+    const item = dataTransfer.items[i]
+    if (item.kind !== "file") continue
+    const file = item.getAsFile()
+    if (file) fromItems.push(file)
+  }
+  return fromItems
+}
 
 export type PublicVacancyApplicationFormTheme = "dark" | "light"
+
+export type PublicVacancyApplicationFormInitialValues = Partial<
+  PublicApplyProfileFields & {
+    documentTypeId: string
+    source: string
+    notes: string
+  }
+>
 
 const SOURCE_OPTION_KEYS = ["social", "friends", "jobFair", "other"] as const
 
@@ -82,6 +119,8 @@ interface PublicVacancyApplicationFormState {
   nationalId: string
   linkedinUrl: string
   websiteUrl: string
+  /** Salary expectation as text (digits / one dot); parsed on submit. */
+  minSalary: string
   source: string
   notes: string
 }
@@ -98,6 +137,7 @@ const initialState: PublicVacancyApplicationFormState = {
   nationalId: "",
   linkedinUrl: "",
   websiteUrl: "",
+  minSalary: "",
   source: "",
   notes: "",
 }
@@ -198,176 +238,56 @@ function CvDropzoneGlyph() {
   )
 }
 
-function getLoadingStepFromPercent(percent: number): 1 | 2 | 3 | 4 {
-  if (percent < 24) return 1
-  if (percent < 48) return 2
-  if (percent < 72) return 3
-  return 4
-}
-
-function applySubmitProgressPanelClass(
-  theme: PublicVacancyApplicationFormTheme,
-  opts: { absolute?: boolean } = {}
-): string {
-  const position = opts.absolute ? "absolute inset-0 z-20 " : ""
-  if (theme === "dark") {
-    return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-[inherit] border border-ats-cobre/25 bg-[linear-gradient(180deg,rgba(32,33,36,0.97)_0%,rgba(32,33,36,0.99)_100%)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl ring-1 ring-white/10`
+function mergeInitialFormState(
+  seed?: PublicVacancyApplicationFormInitialValues | null
+): PublicVacancyApplicationFormState {
+  if (!seed) return initialState
+  return {
+    firstName: seed.firstName?.trim() ?? "",
+    lastName: seed.lastName?.trim() ?? "",
+    email: seed.email?.trim() ?? "",
+    phone: seed.phone?.trim() ?? "",
+    phoneCountryIso2:
+      seed.phoneCountryIso2?.trim().toUpperCase() || DEFAULT_PHONE_COUNTRY_ISO2,
+    documentTypeId: seed.documentTypeId?.trim() ?? "",
+    nationalId: seed.nationalId?.trim() ?? "",
+    linkedinUrl: seed.linkedinUrl?.trim() ?? "",
+    websiteUrl: seed.websiteUrl?.trim() ?? "",
+    minSalary: "",
+    source: seed.source?.trim() ?? "",
+    notes: seed.notes?.trim() ?? "",
   }
-  return `${position}flex w-full min-h-[min(360px,70vh)] flex-col items-center justify-center rounded-lg border border-border bg-white/97 p-6 shadow-xl backdrop-blur-md ring-1 ring-ats-terracotta/15`
-}
-
-function PublicApplicationSubmitProgress({
-  theme,
-  mode,
-  loadingBarPercent = 0,
-  showLongWaitHint = false,
-}: {
-  theme: PublicVacancyApplicationFormTheme
-  mode: "loading" | "success"
-  /** 0–92 (tope del algoritmo compartido con `getLoadingBarPercent`) mientras `mode === "loading"`. */
-  loadingBarPercent?: number
-  showLongWaitHint?: boolean
-}) {
-  const t = useTranslations("PublicOpportunities.applicationForm")
-  const isDark = theme === "dark"
-  const isSuccess = mode === "success"
-  const currentStep = isSuccess ? 5 : getLoadingStepFromPercent(loadingBarPercent)
-  const stepLabels = [
-    t("steps.creation"),
-    t("steps.analysis"),
-    t("steps.application"),
-    t("steps.saved"),
-    t("steps.success"),
-  ]
-  const activeLabel = stepLabels[currentStep - 1] ?? ""
-
-  return (
-    <div
-      className="mx-auto w-full max-w-lg space-y-6"
-      role="status"
-      aria-live="polite"
-      aria-relevant="additions text"
-      aria-busy={!isSuccess}
-    >
-      <div className="flex flex-col items-center text-center">
-        <div
-          className={
-            isDark
-              ? "flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-muted/45 shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
-              : "flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-muted/60 shadow-sm"
-          }
-          aria-hidden
-        >
-          {isSuccess ? (
-            <CheckCircle2
-              className={
-                isDark ? "h-8 w-8 text-ats-cobre" : "h-8 w-8 text-ats-cobre"
-              }
-            />
-          ) : (
-            <LoaderCircle
-              className={
-                isDark
-                  ? "h-7 w-7 animate-spin text-ats-cobre"
-                  : "h-7 w-7 animate-spin text-ats-terracotta"
-              }
-            />
-          )}
-        </div>
-        <p
-          className={
-            isDark
-              ? "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-foreground/50"
-              : "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground"
-          }
-        >
-          {isSuccess ? t("steps.ready") : t("steps.processingTitle")}
-        </p>
-        <p
-          className={
-            isDark
-              ? "mt-2 text-lg font-semibold text-foreground"
-              : "mt-2 text-lg font-semibold text-foreground"
-          }
-        >
-          {activeLabel}
-        </p>
-        {!isSuccess && showLongWaitHint ? (
-          <p
-            className={
-              isDark
-                ? "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
-                : "mt-2 max-w-md text-sm leading-relaxed text-muted-foreground"
-            }
-          >
-            {t("steps.processingLongWait")}
-          </p>
-        ) : null}
-      </div>
-
-      <ApplyStyleProgressBar
-        theme="light"
-        mode={isSuccess ? "success" : "loading"}
-        percent={isSuccess ? 100 : loadingBarPercent}
-      />
-
-      <ol className="grid grid-cols-1 gap-2 sm:grid-cols-5 sm:gap-2" aria-label={t("aria.submitStatus")}>
-        {[1, 2, 3, 4, 5].map((step) => {
-          const isComplete = currentStep > step
-          const isCurrent = currentStep === step
-          const isSuccessStep = step === 5
-          const label = stepLabels[step - 1] ?? ""
-          return (
-            <li
-              key={step}
-              className={
-                isDark
-                  ? `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
-                      isCurrent
-                        ? isSuccessStep
-                          ? "border-ats-cobre/60 bg-ats-cobre/12 text-ats-cobre"
-                          : "border-ats-cobre/50 bg-muted/45 text-foreground"
-                        : isComplete
-                          ? "border-border bg-white/4 text-muted-foreground"
-                          : "border-white/8 bg-muted/20 text-muted-foreground"
-                    }`
-                  : `rounded-xl border px-2 py-2.5 text-center text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
-                      isCurrent
-                        ? isSuccessStep
-                          ? "border-ats-cobre/50 bg-ats-cobre/10 text-ats-cobre"
-                          : "border-ats-terracotta/50 bg-ats-terracotta/8 text-foreground"
-                        : isComplete
-                          ? "border-border bg-muted/50 text-muted-foreground"
-                          : "border-border/60 bg-background text-muted-foreground/60"
-                    }`
-              }
-            >
-              {label}
-            </li>
-          )
-        })}
-      </ol>
-    </div>
-  )
 }
 
 export function PublicVacancyApplicationForm({
   vacancyId,
   theme = "light",
   onRequestClose,
+  initialValues,
+  isEmailLocked = false,
+  skipEmailConfirmation = false,
 }: {
   vacancyId: string
   theme?: PublicVacancyApplicationFormTheme
   /** Tras éxito o al cerrar desde el modal. */
   onRequestClose?: () => void
+  /** Prefill from candidate profile (logged-in fallback). */
+  initialValues?: PublicVacancyApplicationFormInitialValues | null
+  /** When true, email comes from the account and cannot be edited. */
+  isEmailLocked?: boolean
+  /** Logged-in apply: consent then submit, without email confirm modal. */
+  skipEmailConfirmation?: boolean
 }) {
   const t = useTranslations("PublicOpportunities.applicationForm")
   const tCvLanguage = useTranslations("CvOutputLanguage")
   const outputLanguage = toCvOutputLanguage(useLocale())
-  const [values, setValues] = useState<PublicVacancyApplicationFormState>(initialState)
+  const [values, setValues] = useState<PublicVacancyApplicationFormState>(() =>
+    mergeInitialFormState(initialValues)
+  )
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [serverError, setServerError] = useState<string | null>(null)
+  const [showAlreadyAppliedLink, setShowAlreadyAppliedLink] = useState(false)
   const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0)
   const [submitPhase, setSubmitPhase] = useState<"idle" | "loading" | "success">("idle")
   const [loadingOverlay, setLoadingOverlay] = useState({ percent: 0, longWait: false })
@@ -379,9 +299,24 @@ export function PublicVacancyApplicationForm({
   } | null>(null)
   const loadingStartedAtRef = useRef(0)
   const cvInputRef = useRef<HTMLInputElement>(null)
+  const cvDragDepthRef = useRef(0)
   const [isCvDragging, setIsCvDragging] = useState(false)
   const [documentTypes, setDocumentTypes] = useState<IdentityDocumentTypeOptionDto[]>([])
   const [isLoadingDocumentTypes, setIsLoadingDocumentTypes] = useState(true)
+
+  const clearCvNativeInputValue = useCallback(() => {
+    const input = cvInputRef.current
+    if (input) input.value = ""
+  }, [])
+
+  useEffect(() => {
+    const endDrag = () => {
+      cvDragDepthRef.current = 0
+      setIsCvDragging(false)
+    }
+    window.addEventListener("dragend", endDrag)
+    return () => window.removeEventListener("dragend", endDrag)
+  }, [])
 
   const inputClass = themeFieldClass(theme)
   const selectClass = themeSelectClass(theme)
@@ -448,12 +383,23 @@ export function PublicVacancyApplicationForm({
     ) => {
       const { name, value } = event.target
       const key = name as keyof PublicVacancyApplicationFormState
-      setValues((prev) => ({ ...prev, [key]: value }))
+      if (isEmailLocked && key === "email") return
+      const nextValue =
+        key === "minSalary" ? sanitizePublicApplySalaryInput(value) : value
+      setValues((prev) => ({ ...prev, [key]: nextValue }))
       setErrors((prev) => ({ ...prev, [key]: undefined, cvFile: undefined }))
       setServerError(null)
     },
-    []
+    [isEmailLocked]
   )
+
+  const handleMinSalaryBlur = useCallback(() => {
+    setValues((prev) => {
+      const formatted = formatPublicApplyMinSalaryDisplay(prev.minSalary)
+      if (!formatted) return prev
+      return { ...prev, minSalary: formatted }
+    })
+  }, [])
 
   const handlePhoneChange = useCallback((phone: string) => {
     setValues((prev) => ({ ...prev, phone }))
@@ -467,46 +413,83 @@ export function PublicVacancyApplicationForm({
   }, [])
 
   const applyCvFile = useCallback(
-    (file: File | null, input?: HTMLInputElement | null) => {
+    (file: File | null) => {
       if (file && !isAllowedCvFile(file)) {
-        if (input) input.value = ""
-        setCvFile(null)
-        setErrors((prev) => ({ ...prev, cvFile: t("validation.fileType") }))
-        setServerError(null)
+        flushSync(() => {
+          setCvFile(null)
+          setErrors((prev) => ({ ...prev, cvFile: t("validation.fileType") }))
+          setServerError(null)
+          setIsCvDragging(false)
+          cvDragDepthRef.current = 0
+        })
+        clearCvNativeInputValue()
         return
       }
       if (file && !isCvFileWithinSizeLimit(file)) {
-        if (input) input.value = ""
-        setCvFile(null)
-        setErrors((prev) => ({ ...prev, cvFile: t("validation.fileTooLarge") }))
-        setServerError(null)
+        flushSync(() => {
+          setCvFile(null)
+          setErrors((prev) => ({ ...prev, cvFile: t("validation.fileTooLarge") }))
+          setServerError(null)
+          setIsCvDragging(false)
+          cvDragDepthRef.current = 0
+        })
+        clearCvNativeInputValue()
         return
       }
-      setCvFile(file)
-      setErrors((prev) => ({ ...prev, cvFile: undefined }))
-      setServerError(null)
+      // Commit in one synchronous turn so clear → immediate re-drop never races.
+      flushSync(() => {
+        setCvFile(file)
+        setErrors((prev) => ({ ...prev, cvFile: undefined }))
+        setServerError(null)
+        setIsCvDragging(false)
+        cvDragDepthRef.current = 0
+      })
+      clearCvNativeInputValue()
     },
-    [t]
+    [clearCvNativeInputValue, t]
   )
 
   const handleFileChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      applyCvFile(event.target.files?.[0] ?? null, event.target)
+      const selected = event.target.files?.[0] ?? null
+      event.target.value = ""
+      if (!selected) return
+      applyCvFile(selected)
     },
     [applyCvFile]
   )
 
-  const handleCvDropzoneClick = useCallback(() => {
+  /** Clear native value only — avoid setState here (re-render can cancel the file dialog). */
+  const prepareCvPicker = useCallback(() => {
     if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+    clearCvNativeInputValue()
+  }, [clearCvNativeInputValue, rateLimitSecondsLeft, submitPhase])
+
+  const openCvPicker = useCallback(() => {
+    if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+    // Reset before opening so selecting the same path fires `change` again.
+    prepareCvPicker()
     cvInputRef.current?.click()
-  }, [rateLimitSecondsLeft, submitPhase])
+  }, [prepareCvPicker, rateLimitSecondsLeft, submitPhase])
+
+  const handleCvDragEnter = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"
+      cvDragDepthRef.current += 1
+      setIsCvDragging(true)
+    },
+    [rateLimitSecondsLeft, submitPhase]
+  )
 
   const handleCvDragOver = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
       if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
       event.preventDefault()
       event.stopPropagation()
-      setIsCvDragging(true)
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"
     },
     [rateLimitSecondsLeft, submitPhase]
   )
@@ -514,9 +497,8 @@ export function PublicVacancyApplicationForm({
   const handleCvDragLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    const related = event.relatedTarget
-    if (related instanceof Node && event.currentTarget.contains(related)) return
-    setIsCvDragging(false)
+    cvDragDepthRef.current = Math.max(0, cvDragDepthRef.current - 1)
+    if (cvDragDepthRef.current === 0) setIsCvDragging(false)
   }, [])
 
   const handleCvDrop = useCallback(
@@ -524,15 +506,27 @@ export function PublicVacancyApplicationForm({
       if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
       event.preventDefault()
       event.stopPropagation()
+      cvDragDepthRef.current = 0
       setIsCvDragging(false)
-      applyCvFile(event.dataTransfer?.files?.[0] ?? null, cvInputRef.current)
+      const dropped = filesFromDataTransfer(event.dataTransfer)
+      if (dropped.length) applyCvFile(dropped[0] ?? null)
     },
     [applyCvFile, rateLimitSecondsLeft, submitPhase]
   )
 
+  const handleCvDropzoneKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        openCvPicker()
+      }
+    },
+    [openCvPicker, rateLimitSecondsLeft, submitPhase]
+  )
+
   const handleRemoveCvFile = useCallback(() => {
     if (submitPhase === "loading" || rateLimitSecondsLeft > 0) return
-    if (cvInputRef.current) cvInputRef.current.value = ""
     applyCvFile(null)
   }, [applyCvFile, rateLimitSecondsLeft, submitPhase])
 
@@ -549,6 +543,11 @@ export function PublicVacancyApplicationForm({
     if (!values.nationalId.trim()) {
       next.nationalId = t("validation.documentNumberRequired")
     }
+    if (!values.minSalary.trim()) {
+      next.minSalary = t("validation.minSalaryRequired")
+    } else if (parsePublicApplyMinSalary(values.minSalary) == null) {
+      next.minSalary = t("validation.minSalaryInvalid")
+    }
     if (!cvFile) next.cvFile = t("validation.cvRequired")
     else if (!isAllowedCvFile(cvFile)) next.cvFile = t("validation.fileType")
     else if (!isCvFileWithinSizeLimit(cvFile)) next.cvFile = t("validation.fileTooLarge")
@@ -561,32 +560,41 @@ export function PublicVacancyApplicationForm({
     values.phone,
     values.documentTypeId,
     values.nationalId,
+    values.minSalary,
     cvFile,
     t,
   ])
 
-  const executeSubmit = useCallback(async () => {
-    if (!cvFile || !acceptedConsent) return
+  const executeSubmit = useCallback(async (
+    consentOverride?: ConsentAuthorizationSubmitPayload
+  ) => {
+    const authConsent = consentOverride ?? acceptedConsent?.payload
+    if (!cvFile || !authConsent) return
 
     setSubmitPhase("loading")
     setLoadingOverlay({ percent: 0, longWait: false })
     setServerError(null)
+    setShowAlreadyAppliedLink(false)
     setErrors({})
     setIsConfirmEmailModalOpen(false)
 
+    const minSalary = parsePublicApplyMinSalary(values.minSalary)
+    if (minSalary == null) return
+
     const payload: PublicVacancyApplyValues = {
-      firstName: values.firstName,
-      lastName: values.lastName,
+      firstName: consentOverride?.firstNames ?? values.firstName,
+      lastName: consentOverride?.lastNames ?? values.lastName,
       email: values.email,
-      phone: values.phone,
+      phone: consentOverride?.phoneNationalNumber || values.phone,
       documentTypeId: values.documentTypeId,
-      nationalId: values.nationalId,
+      nationalId: consentOverride?.identityDocument || values.nationalId,
       linkedinUrl: values.linkedinUrl,
       websiteUrl: values.websiteUrl,
       source: values.source,
       notes: values.notes,
+      minSalary,
       cvFile,
-      authConsent: acceptedConsent.payload,
+      authConsent,
     }
 
     try {
@@ -627,6 +635,12 @@ export function PublicVacancyApplicationForm({
       }
       if (consentCode === "AUTH_CONSENT_VALIDATION") {
         setServerError(t("validation.consentValidation"))
+        return
+      }
+
+      if (isAlreadyAppliedConflict(status, body)) {
+        setServerError(t("validation.alreadyApplied"))
+        setShowAlreadyAppliedLink(true)
         return
       }
 
@@ -699,13 +713,25 @@ export function PublicVacancyApplicationForm({
 
       const snapshot = buildApplyConsentSnapshot(values)
       if (acceptedConsent?.snapshot === snapshot) {
+        if (skipEmailConfirmation) {
+          void executeSubmit()
+          return
+        }
         setIsConfirmEmailModalOpen(true)
         return
       }
 
       setIsConsentModalOpen(true)
     },
-    [submitPhase, rateLimitSecondsLeft, validateClient, values, acceptedConsent]
+    [
+      submitPhase,
+      rateLimitSecondsLeft,
+      validateClient,
+      values,
+      acceptedConsent,
+      skipEmailConfirmation,
+      executeSubmit,
+    ]
   )
 
   const consentInitialValues = useMemo<ConsentAuthorizationInitialValues>(
@@ -755,9 +781,20 @@ export function PublicVacancyApplicationForm({
         }),
       })
       setIsConsentModalOpen(false)
+      if (skipEmailConfirmation) {
+        await executeSubmit(payload)
+        return
+      }
       setIsConfirmEmailModalOpen(true)
     },
-    [values.email, values.phone, values.phoneCountryIso2, values.nationalId]
+    [
+      values.email,
+      values.phone,
+      values.phoneCountryIso2,
+      values.nationalId,
+      skipEmailConfirmation,
+      executeSubmit,
+    ]
   )
 
   if (submitPhase === "success") {
@@ -820,9 +857,17 @@ export function PublicVacancyApplicationForm({
         className={`grid grid-cols-1 gap-x-4 gap-y-5 transition-opacity duration-200 sm:grid-cols-2 ${showProgressOverlay ? "pointer-events-none select-none opacity-[0.38] blur-[0.5px]" : ""}`}
       >
       {serverError ? (
-        <p className={`sm:col-span-2 ${errClass}`} role="alert">
-          {serverError}
-        </p>
+        <div className="sm:col-span-2 space-y-2" role="alert">
+          <p className={errClass}>{serverError}</p>
+          {showAlreadyAppliedLink ? (
+            <Link
+              href={PORTAL_HOME_HREF.candidate}
+              className="inline-flex text-sm font-medium text-ats-cobre underline-offset-4 hover:underline"
+            >
+              {t("validation.alreadyAppliedCta")}
+            </Link>
+          ) : null}
+        </div>
       ) : null}
 
       <div className="space-y-2">
@@ -880,7 +925,8 @@ export function PublicVacancyApplicationForm({
             value={values.email}
             onChange={handleChange}
             className={inputClass}
-            disabled={disabled}
+            disabled={disabled || isEmailLocked}
+            readOnly={isEmailLocked}
             autoComplete="email"
             placeholder={t("placeholders.email")}
             aria-invalid={Boolean(errors.email)}
@@ -1029,6 +1075,55 @@ export function PublicVacancyApplicationForm({
           />
         </div>
       <div className="space-y-2">
+        <label htmlFor="apply-minSalary" className={labelClass}>
+          {t("fields.minSalary")}
+        </label>
+        <div
+          className={
+            theme === "dark"
+              ? "flex h-11 items-center rounded-2xl border border-border bg-muted/35 px-3 focus-within:ring-2 focus-within:ring-ats-cobre"
+              : "flex h-11 items-center rounded-lg border border-border bg-background px-3 focus-within:ring-2 focus-within:ring-ats-terracotta"
+          }
+        >
+          <div
+            className="shrink-0 select-none text-sm text-muted-foreground"
+            aria-hidden
+          >
+            $
+          </div>
+          <input
+            id="apply-minSalary"
+            name="minSalary"
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            value={values.minSalary}
+            onChange={handleChange}
+            onBlur={handleMinSalaryBlur}
+            className="block min-w-0 grow bg-transparent py-2 pl-1 pr-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            disabled={disabled}
+            placeholder={t("placeholders.minSalary")}
+            aria-invalid={Boolean(errors.minSalary)}
+            aria-describedby={
+              errors.minSalary
+                ? "apply-minSalary-currency apply-minSalary-err"
+                : "apply-minSalary-currency"
+            }
+          />
+          <div
+            id="apply-minSalary-currency"
+            className="shrink-0 select-none text-sm text-muted-foreground"
+          >
+            {t("fields.minSalaryCurrency")}
+          </div>
+        </div>
+        {errors.minSalary ? (
+          <p id="apply-minSalary-err" className={errClass} role="alert">
+            {errors.minSalary}
+          </p>
+        ) : null}
+      </div>
+      <div className="space-y-2">
         <label htmlFor="apply-notes" className={labelClass}>
           {t("fields.notes")}
         </label>
@@ -1052,16 +1147,22 @@ export function PublicVacancyApplicationForm({
         <label htmlFor="apply-cv" className={labelClass}>
           {t("fields.resume")}
         </label>
-        <div
-          className="relative"
-          onDragOver={handleCvDragOver}
-          onDragLeave={handleCvDragLeave}
-          onDrop={handleCvDrop}
-        >
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={handleCvDropzoneClick}
+        <div className="relative">
+          {/*
+            Dropzone stays a div (not label[htmlFor]): dropping onto a label
+            tied to <input type="file"> often opens the picker instead of
+            accepting the file. Click still opens via prepare + input.click().
+          */}
+          <div
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled || undefined}
+            onClick={openCvPicker}
+            onKeyDown={handleCvDropzoneKeyDown}
+            onDragEnter={handleCvDragEnter}
+            onDragOver={handleCvDragOver}
+            onDragLeave={handleCvDragLeave}
+            onDrop={handleCvDrop}
             aria-label={
               isCvDragging
                 ? t("file.dropActive")
@@ -1072,7 +1173,7 @@ export function PublicVacancyApplicationForm({
             aria-describedby={
               errors.cvFile ? "apply-cv-helper apply-cv-err" : "apply-cv-helper"
             }
-            aria-invalid={Boolean(errors.cvFile)}
+            aria-invalid={Boolean(errors.cvFile) || undefined}
             className={themeCvDropzoneClass(theme, {
               isDragging: isCvDragging,
               hasFile: Boolean(cvFile),
@@ -1080,35 +1181,37 @@ export function PublicVacancyApplicationForm({
               disabled,
             })}
           >
-            {cvFile ? (
-              <FileText
-                className={
-                  theme === "dark"
-                    ? "mx-auto size-12 text-ats-cobre"
-                    : "mx-auto size-12 text-ats-terracotta"
-                }
-                strokeWidth={1.5}
-                aria-hidden
-              />
-            ) : (
-              <CvDropzoneGlyph />
-            )}
-            <span className="mt-2 block text-sm font-semibold text-foreground">
-              {isCvDragging
-                ? t("file.dropActive")
-                : cvFile
-                  ? cvFile.name
-                  : t("file.selectPdf")}
-            </span>
-            <span
-              id="apply-cv-helper"
-              className="mt-1 block text-xs text-muted-foreground"
-            >
-              {cvFile
-                ? `${formatCvFileSize(cvFile.size)} · ${t("file.changeFile")}`
-                : t("file.helper")}
-            </span>
-          </button>
+            <div className="pointer-events-none">
+              {cvFile ? (
+                <FileText
+                  className={
+                    theme === "dark"
+                      ? "mx-auto size-12 text-ats-cobre"
+                      : "mx-auto size-12 text-ats-terracotta"
+                  }
+                  strokeWidth={1.5}
+                  aria-hidden
+                />
+              ) : (
+                <CvDropzoneGlyph />
+              )}
+              <span className="mt-2 block text-sm font-semibold text-foreground">
+                {isCvDragging
+                  ? t("file.dropActive")
+                  : cvFile
+                    ? cvFile.name
+                    : t("file.selectPdf")}
+              </span>
+              <span
+                id="apply-cv-helper"
+                className="mt-1 block text-xs text-muted-foreground"
+              >
+                {cvFile
+                  ? `${formatCvFileSize(cvFile.size)} · ${t("file.changeFile")}`
+                  : t("file.helper")}
+              </span>
+            </div>
+          </div>
           {cvFile ? (
             <button
               type="button"
@@ -1116,8 +1219,8 @@ export function PublicVacancyApplicationForm({
               disabled={disabled}
               className={
                 theme === "dark"
-                  ? "absolute right-3 top-3 rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                  : "absolute right-3 top-3 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                  ? "pointer-events-auto absolute right-3 top-3 z-10 rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                  : "pointer-events-auto absolute right-3 top-3 z-10 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
               }
               aria-label={t("file.removeAria", { fileName: cvFile.name })}
             >
@@ -1131,9 +1234,10 @@ export function PublicVacancyApplicationForm({
             type="file"
             accept={PDF_ONLY_ACCEPT}
             onChange={handleFileChange}
-            className="sr-only"
+            className="pointer-events-none sr-only"
             tabIndex={-1}
             disabled={disabled}
+            data-testid="apply-cv-input"
           />
         </div>
         {errors.cvFile ? (
@@ -1187,7 +1291,9 @@ export function PublicVacancyApplicationForm({
     
     <ApplyEmailConfirmationModal
       isOpen={isConfirmEmailModalOpen}
-      onConfirm={executeSubmit}
+      onConfirm={() => {
+        void executeSubmit()
+      }}
       onCancel={() => setIsConfirmEmailModalOpen(false)}
       email={values.email}
       theme={theme}

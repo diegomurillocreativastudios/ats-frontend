@@ -9,13 +9,21 @@ import {
   PRIVACY_POLICY_PRODUCT_NAME,
 } from "@/lib/legal/privacy-policy"
 import { publicOpportunitiesTheme as theme } from "@/lib/public-opportunities-theme"
+import {
+  buildPublicPageMetadata,
+  INDEX_FOLLOW,
+} from "@/lib/seo/public-metadata"
+import { readPublicOrigin } from "@/lib/seo/site-origin"
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata.privacyPolicy")
-  return {
-    title: { absolute: t("title") },
+  return buildPublicPageMetadata({
+    title: t("title"),
     description: t("description"),
-  }
+    canonicalPath: "/privacy-policy",
+    origin: readPublicOrigin(),
+    robots: INDEX_FOLLOW,
+  })
 }
 
 interface PolicySectionProps {

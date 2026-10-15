@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import {
   findApplicationIdForCandidate,
+  mergeApplicationWithRichMatch,
   overlayVacancyApplicants,
 } from "@/lib/api/vacancy-applications"
 import { apiClient } from "@/lib/api"
@@ -16,9 +17,17 @@ describe("overlayVacancyApplicants", () => {
     vi.mocked(apiClient.getWithHeaders).mockReset()
   })
 
-  it("replaces nested applicants with the applications list", async () => {
+  it("merges applications over rich GetVacancy match rows (keeps IA analysis)", async () => {
     vi.mocked(apiClient.getWithHeaders).mockResolvedValueOnce({
-      data: [{ candidateProfileId: "p1", name: "Ana" }],
+      data: [
+        {
+          applicationId: "app-1",
+          candidateProfileId: "p1",
+          name: "Ana",
+          matchScore: 0.86,
+          applicationStage: "Aplicantes",
+        },
+      ],
       headers: new Headers({
         "X-Total-Count": "1",
         "X-Page": "1",
@@ -29,7 +38,17 @@ describe("overlayVacancyApplicants", () => {
     const merged = await overlayVacancyApplicants("vac-1", {
       id: "vac-1",
       title: "Dev",
-      applicants: [{ candidateProfileId: "old" }],
+      applicants: [],
+      aiMatchSuggestions: [
+        {
+          applicationId: "app-1",
+          candidateProfileId: "p1",
+          name: "Ana",
+          totalScore: 0.86,
+          qualitativeReasoning: "Buen fit .NET",
+          componentScores: { Skills: 0.9 },
+        },
+      ],
     })
 
     expect(apiClient.getWithHeaders).toHaveBeenCalledWith(
@@ -38,7 +57,17 @@ describe("overlayVacancyApplicants", () => {
     expect(merged).toMatchObject({
       id: "vac-1",
       title: "Dev",
-      applicants: [{ candidateProfileId: "p1", name: "Ana" }],
+      applicants: [
+        {
+          applicationId: "app-1",
+          candidateProfileId: "p1",
+          name: "Ana",
+          matchScore: 0.86,
+          applicationStage: "Aplicantes",
+          qualitativeReasoning: "Buen fit .NET",
+          componentScores: { Skills: 0.9 },
+        },
+      ],
     })
   })
 
@@ -49,6 +78,43 @@ describe("overlayVacancyApplicants", () => {
     const original = { id: "vac-1", applicants: [{ candidateProfileId: "nested" }] }
     const merged = await overlayVacancyApplicants("vac-1", original)
     expect(merged).toBe(original)
+  })
+})
+
+describe("mergeApplicationWithRichMatch", () => {
+  it("matches rich analysis by profile when applicationId differs in shape", () => {
+    const richIndex = {
+      byApplicationId: new Map<string, Record<string, unknown>>(),
+      byProfileId: new Map<string, Record<string, unknown>>([
+        [
+          "p1",
+          {
+            candidateProfileId: "p1",
+            qualitativeReasoningPositive: "Solid",
+            componentScores: { Semantic: 0.8 },
+          },
+        ],
+      ]),
+    }
+
+    expect(
+      mergeApplicationWithRichMatch(
+        {
+          id: "app-9",
+          candidateProfileId: "p1",
+          applicationStage: "En espera",
+          matchScore: 0.7,
+        },
+        richIndex
+      )
+    ).toMatchObject({
+      id: "app-9",
+      candidateProfileId: "p1",
+      applicationStage: "En espera",
+      matchScore: 0.7,
+      qualitativeReasoningPositive: "Solid",
+      componentScores: { Semantic: 0.8 },
+    })
   })
 })
 

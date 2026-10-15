@@ -49,12 +49,12 @@ const VARIANT_CONFIG = {
   },
   info: {
     container:
-      "border-blue-400 bg-blue-400 shadow-lg ring-1 ring-blue-300/50",
+      "border-ats-cobre bg-ats-cobre shadow-lg ring-1 ring-ats-cobre/50",
     icon: Info,
     iconClass: "text-white shrink-0",
     textClass: "text-white",
     closeClass:
-      "text-white/90 hover:bg-background/20 hover:text-white focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-400",
+      "text-white/90 hover:bg-background/20 hover:text-white focus:ring-white focus:ring-offset-2 focus:ring-offset-ats-cobre",
     role: "status",
     ariaLive: "polite",
   },

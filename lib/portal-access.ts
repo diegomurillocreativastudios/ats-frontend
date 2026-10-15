@@ -10,6 +10,7 @@ export const PORTAL_KEYS = [
   "candidate",
   "opportunities",
   "rrhh",
+  "pruebas",
   "admin",
 ] as const
 
@@ -19,6 +20,7 @@ export const PORTAL_HOME_HREF: Record<PortalKey, string> = {
   candidate: "/portal-candidato",
   opportunities: "/portal-oportunidades",
   rrhh: "/portal-rrhh",
+  pruebas: "/portal-pruebas",
   admin: "/portal-admin/administracion/usuarios",
 }
 
@@ -30,10 +32,10 @@ export function getAccessiblePortalKeys(
   role: string | null | undefined,
 ): PortalKey[] {
   if (isAdminRole(role)) {
-    return ["candidate", "opportunities", "rrhh", "admin"]
+    return ["candidate", "opportunities", "rrhh", "pruebas", "admin"]
   }
   if (isRecruiterRole(role)) {
-    return ["opportunities", "rrhh"]
+    return ["opportunities", "rrhh", "pruebas"]
   }
   if (isCandidateRole(role)) {
     return ["candidate"]

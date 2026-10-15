@@ -37,6 +37,7 @@
     "myProfile": "Mein Profil",
     "documents": "Dokumente",
     "interviews": "Interviews",
+    "opportunitiesPortal": "Stellenportal",
     "candidates": "Kandidaten",
     "vacancies": "Stellen",
     "reports": "Berichte",
@@ -52,11 +53,14 @@
     "departments": "Abteilungen",
     "modalities": "Modalitäten",
     "documentTypes": "Dokumenttypen",
+    "presentationReminders": "Präsentationserinnerungen",
     "interviewTypes": "Typen",
     "interviewModalities": "Modalitäten",
     "interviewStatuses": "Status",
     "tailorProfile": "Profil anpassen",
-    "softSkills": "Soft Skills"
+    "softSkills": "Soft Skills",
+    "dataProtectionLaws": "Datenschutzgesetze",
+    "vacancyTypes": "Vakanztypen"
   },
   "Topbar": {
     "portalCandidate": "Kandidatenportal",
@@ -67,7 +71,8 @@
     "navigationMenu": "Navigationsmenü",
     "userMenu": "Benutzermenü",
     "breadcrumb": "Brotkrümelnavigation",
-    "adminShortcut": "Verwaltung"
+    "adminShortcut": "Verwaltung",
+    "portalPruebas": "Portal Prüfungen"
   },
   "Sidebar": {
     "goHome": "Zur Startseite",
@@ -82,7 +87,9 @@
     "accountMenu": "Kontomenü",
     "roleAdmin": "Administrator",
     "roleRecruiter": "Recruiter",
-    "roleCandidate": "Kandidat"
+    "roleCandidate": "Kandidat",
+    "ariaPruebas": "Navigation Portal Prüfungen",
+    "menuPruebas": "Prüfungen-Menü"
   },
   "Auth": {
     "login": {
@@ -427,6 +434,10 @@
         "title": "Dokumenttypen",
         "description": "Verwaltung des globalen Katalogs für Ausweisdokumenttypen"
       },
+      "presentationReminders": {
+        "title": "Präsentationserinnerungen",
+        "description": "Vakanztypen und automatischer Versand pro Notification-Vorlage sowie manueller Versand an Recruiter"
+      },
       "interviewsCatalog": {
         "title": "Interviews",
         "description": "Kataloge für Interviewtypen, -modalitäten und -status"
@@ -454,10 +465,18 @@
       "softSkills": {
         "title": "Soft Skills",
         "description": "Verwaltung des globalen Katalogs von Soft Skills für Interview-Feedback"
+      },
+      "dataProtectionLaws": {
+        "title": "Datenschutzgesetze",
+        "description": "Verwaltung der Datenschutzgesetze, die mit Stellen verknüpft werden"
+      },
+      "vacancyTypes": {
+        "title": "Vakanztypen",
+        "description": "Verwaltung der Vakanztypen und Präsentationsfristen"
       }
     },
     "root": {
-      "description": "Portal del candidate - Resumen de tu proceso de seleccion"
+      "description": "Aktive Stellen entdecken und sich bei ApplicanTree bewerben."
     },
     "candidatePortal": {
       "home": {
@@ -500,20 +519,37 @@
     "publicOpportunities": {
       "list": {
         "title": "ApplicanTree | Stellenportal",
-        "description": "Aktive Stellen nach Abteilung und Arbeitsmodell durchsuchen"
+        "description": "Aktive Stellen nach Abteilung und Arbeitsmodell auf ApplicanTree durchsuchen."
       },
       "detail": {
         "title": "ApplicanTree | Stellenportal | Stellenangebot",
-        "description": "Öffentliche Details einer aktiven Stelle"
+        "description": "Öffentliche Details einer aktiven Stelle auf ApplicanTree."
       },
       "apply": {
         "title": "ApplicanTree | Stellenportal | Bewerben",
-        "description": "Öffentliches Formular zur Bewerbung auf eine aktive Stelle"
+        "description": "Öffentliches Formular zur Bewerbung auf eine aktive Stelle bei ApplicanTree."
       }
     },
     "privacyPolicy": {
-      "title": "Datenschutzerklärung | Applicantree ATS",
-      "description": "Datenschutzerklärung für Applicantree ATS."
+      "title": "Datenschutzerklärung | ApplicanTree",
+      "description": "Datenschutzerklärung von ApplicanTree."
+    },
+    "notFound": {
+      "title": "Seite nicht gefunden",
+      "description": "Die gesuchte Seite gibt es bei ApplicanTree nicht.",
+      "back": "Stellen ansehen"
+    },
+    "recruiterDashboard": {
+      "title": "ApplicanTree | HR-Portal | Startseite",
+      "description": "Dashboard mit offenen Aufgaben und Erinnerungen des HR-Portals"
+    },
+    "pruebasPortal": {
+      "title": "Portal Prüfungen",
+      "description": "Technische und psychometrische Prüfungen mit Demodaten"
+    },
+    "pruebasCandidateDemo": {
+      "title": "Bewertung ablegen (Demo)",
+      "description": "Kandidatenerfahrung zum Ablegen von Tests im Demomodus."
     }
   },
   "PortalSelection": {
@@ -532,7 +568,1125 @@
     "rrhhAria": "Zum HR-Recruiting-Portal",
     "adminName": "Verwaltungsportal",
     "adminDesc": "Benutzer und Plattformkonfiguration",
-    "adminAria": "Zum Verwaltungsportal"
+    "adminAria": "Zum Verwaltungsportal",
+    "pruebasName": "Portal Prüfungen",
+    "pruebasDesc": "Prüfungen, Zuweisungen und Ergebnisse (Demo)",
+    "pruebasAria": "Zum Prüfungen-Portal gehen"
+  },
+  "PruebasPortal": {
+    "placeholder": "Dieser Bereich wird in einer späteren Phase fertiggestellt. Derzeit bestätigt er nur die Route und die Portalnavigation.",
+    "nav": {
+      "groups": {
+        "home": "Start",
+        "content": "Inhalt",
+        "operations": "Betrieb",
+        "closing": "Abschluss"
+      },
+      "home": "Start",
+      "evaluations": "Prüfungen",
+      "questions": "Fragenkatalog",
+      "links": "Verknüpfungen",
+      "assignments": "Zuweisungen",
+      "tracking": "Nachverfolgung",
+      "review": "Überprüfung",
+      "results": "Ergebnisse",
+      "reports": "Berichte"
+    },
+    "dashboard": {
+      "title": "Prüfungs-Dashboard",
+      "description": "Überblick über Zuweisungen und Überprüfungen von Prüfungen.",
+      "metricsAria": "Kennzahlen zu Zuweisungen",
+      "metrics": {
+        "assigned": "Zugewiesen",
+        "pending": "Ausstehend",
+        "inProgress": "In Bearbeitung",
+        "completed": "Abgeschlossen",
+        "expired": "Abgelaufen",
+        "cancelled": "Abgebrochen",
+        "pendingReview": "Prüfung ausstehend"
+      },
+      "shortcuts": {
+        "title": "Schnellzugriffe",
+        "evaluations": "Prüfungen erstellen oder ansehen",
+        "links": "Mit Stellen verknüpfen",
+        "assignments": "Kandidaten zuweisen",
+        "results": "Ergebnisse ansehen"
+      },
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Dashboard-Filter",
+        "company": "Unternehmen",
+        "vacancy": "Stelle",
+        "kind": "Kategorie",
+        "status": "Status",
+        "assignedFrom": "Zugewiesen ab",
+        "assignedTo": "Zugewiesen bis",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen",
+        "kindTechnical": "Technisch",
+        "kindPsychometric": "Psychometrisch",
+        "statusPending": "Ausstehend",
+        "statusInProgress": "In Bearbeitung",
+        "statusCompleted": "Abgeschlossen",
+        "statusExpired": "Abgelaufen",
+        "statusCancelled": "Abgebrochen",
+        "statusPendingManualReview": "Manuelle Prüfung"
+      },
+      "charts": {
+        "activityTitle": "Zuweisungen pro Tag",
+        "activityLegend": "Zugewiesen",
+        "activityEmpty": "Keine Zuweisungen im aktuellen Zeitraum.",
+        "activitySummary": "Zusammenfassung der Zuweisungen pro Tag",
+        "distributionTitle": "Verteilung nach Status",
+        "distributionEmpty": "Keine Status zum Anzeigen."
+      },
+      "attention": {
+        "title": "Benötigen Aufmerksamkeit",
+        "dueSoonTitle": "Bald fällig",
+        "dueSoonEmpty": "Keine Zuweisung läuft in den nächsten 14 Tagen ab.",
+        "reviewTitle": "Manuelle Prüfung",
+        "reviewEmpty": "Keine Ergebnisse mit ausstehender Prüfung.",
+        "expiresLabel": "Fällig {date}",
+        "openTracking": "Zur Nachverfolgung",
+        "openReview": "Zur Überprüfung"
+      },
+      "activity": {
+        "title": "Letzte Aktivität",
+        "empty": "Keine aktuelle Aktivität mit den Filtern.",
+        "assignedLabel": "Zugewiesen {date}",
+        "openItem": "Öffnen"
+      },
+      "states": {
+        "loading": "Dashboard wird geladen…",
+        "emptyTitle": "Keine Zuweisungen",
+        "emptyDescription": "Es gibt noch keine Prüfungszuweisungen in Ihrem autorisierten Bereich. Weisen Sie später eine Prüfung zu oder passen Sie die Filter an.",
+        "errorTitle": "Dashboard konnte nicht geladen werden",
+        "errorDescription": "Die Zusammenfassung konnte nicht geladen werden. Bitte in wenigen Sekunden erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zuweisung entspricht den Filtern. Passen Sie sie an oder setzen Sie sie zurück."
+      }
+    },
+    "evaluations": {
+      "title": "Bewertungen",
+      "description": "Katalog technischer und psychometrischer Tests. Definitionsstatus: Entwurf, veröffentlicht und archiviert.",
+      "create": "Neue Bewertung",
+      "search": "Nach Titel suchen",
+      "searchPlaceholder": "Name der Bewertung",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Filter für Bewertungen",
+        "kind": "Kategorie",
+        "status": "Status",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen",
+        "kindTechnical": "Technisch",
+        "kindPsychometric": "Psychometrisch",
+        "statusDraft": "Entwurf",
+        "statusPublished": "Veröffentlicht",
+        "statusArchived": "Archiviert"
+      },
+      "table": {
+        "title": "Titel",
+        "kind": "Kategorie",
+        "status": "Status",
+        "createdAt": "Erstellt",
+        "actions": "Aktionen",
+        "view": "Ansehen",
+        "openActions": "Aktionen für {title} öffnen"
+      },
+      "actions": {
+        "view": "Ansehen",
+        "edit": "Entwurf bearbeiten",
+        "duplicate": "Duplizieren",
+        "publish": "Veröffentlichen",
+        "archive": "Archivieren",
+        "versions": "Versionen"
+      },
+      "status": {
+        "draft": "Entwurf",
+        "published": "Veröffentlicht",
+        "archived": "Archiviert"
+      },
+      "kind": {
+        "technical": "Technisch",
+        "psychometric": "Psychometrisch"
+      },
+      "questionKind": {
+        "single_choice": "Einzelauswahl",
+        "multiple_choice": "Mehrfachauswahl",
+        "true_false": "Wahr oder falsch",
+        "likert": "Likert",
+        "numeric": "Numerisch",
+        "open": "Offen"
+      },
+      "duplicateTitle": "Kopie von {title}",
+      "confirmPublish": {
+        "title": "Bewertung veröffentlichen",
+        "description": "Eine unveränderliche Version wird eingefroren. Späteres Bearbeiten ändert diesen Snapshot nicht.",
+        "confirm": "Veröffentlichen",
+        "cancel": "Abbrechen"
+      },
+      "confirmArchive": {
+        "title": "Bewertung archivieren",
+        "description": "Die Bewertung wird archiviert. Sie können sie weiterhin ansehen und duplizieren.",
+        "confirm": "Archivieren",
+        "cancel": "Abbrechen"
+      },
+      "toasts": {
+        "published": "Bewertung veröffentlicht.",
+        "archived": "Bewertung archiviert.",
+        "duplicated": "Eine Entwurfs-Kopie wurde erstellt.",
+        "error": "Die Aktion konnte nicht abgeschlossen werden."
+      },
+      "errors": {
+        "not_found": "Die Bewertung wurde nicht gefunden.",
+        "not_draft": "Nur ein Entwurf kann bearbeitet werden.",
+        "not_published": "Ein Entwurf kann nur aus einer veröffentlichten Bewertung geöffnet werden.",
+        "test_archived": "Die Bewertung ist archiviert und kann nicht veröffentlicht werden.",
+        "no_draft": "Es gibt keinen Entwurf zum Veröffentlichen.",
+        "no_published_version": "Es gibt keine veröffentlichte Version zum Klonen.",
+        "questions_required": "Fügen Sie vor dem Veröffentlichen mindestens eine Frage hinzu.",
+        "questions_incompatible": "Einige Fragen sind mit der Kategorie nicht kompatibel.",
+        "publish_integrity": "Veröffentlichen ohne Änderung bestehender Versionen nicht möglich.",
+        "scenario_error": "Die Aktion konnte nicht abgeschlossen werden."
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Ergebnisse pro Seite",
+        "regionAria": "Paginierung der Bewertungen",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count} Bewertungen"
+      },
+      "states": {
+        "loading": "Bewertungen werden geladen…",
+        "emptyTitle": "Noch keine Bewertungen",
+        "emptyDescription": "Erstellen Sie die erste technische oder psychometrische Bewertung, um zu starten.",
+        "errorTitle": "Bewertungen konnten nicht geladen werden",
+        "errorDescription": "Der Katalog konnte nicht geladen werden. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Bewertung entspricht den Filtern. Passen Sie sie an oder setzen Sie sie zurück.",
+        "notFoundTitle": "Bewertung nicht gefunden",
+        "notFoundDescription": "Die Kennung existiert nicht oder Sie haben keinen Zugriff.",
+        "backToList": "Zurück zur Liste"
+      },
+      "detail": {
+        "title": "Bewertungsdetail",
+        "summary": "Zusammenfassung",
+        "configuration": "Konfiguration",
+        "questions": "Fragen",
+        "links": "Stellenverknüpfungen",
+        "linkVacancy": "Stelle verknüpfen",
+        "linkVacancyDisabled": "Nur veröffentlichte Bewertungen können verknüpft werden.",
+        "instructions": "Anweisungen",
+        "duration": "Dauer",
+        "durationValue": "{minutes} Min.",
+        "maxAttempts": "Maximale Versuche",
+        "versionLabel": "Version {number}",
+        "draftVersion": "Entwurf",
+        "noVersion": "Keine Versionskonfiguration.",
+        "noQuestions": "Diese Version hat keine Fragen.",
+        "noLinks": "Hier werden keine Stellenverknüpfungen angezeigt.",
+        "linkActive": "Aktiv",
+        "linkInactive": "Inaktiv",
+        "points": "{points} Pkt.",
+        "dimension": "Dimension: {dimension}",
+        "createdAt": "Erstellt",
+        "openVersions": "Versionen ansehen",
+        "linksCtaDescription": "Verknüpfungen werden unter Verknüpfungen verwaltet und einer Stelle zugeordnet."
+      },
+      "versions": {
+        "title": "Versionen",
+        "description": "Versionsverlauf. Veröffentlichte Snapshots sind schreibgeschützt.",
+        "listLabel": "Versionsverlauf",
+        "selectPrompt": "Wählen Sie eine Version, um den Snapshot anzuzeigen.",
+        "publishedAt": "Veröffentlicht {date}",
+        "draftLabel": "Entwurf",
+        "versionNumber": "Version {number}",
+        "snapshot": "Snapshot",
+        "readonlyNotice": "Diese veröffentlichte Version kann hier nicht bearbeitet werden.",
+        "snapshotUnavailable": "Der Fragen-Snapshot dieser Version konnte nicht geladen werden."
+      },
+      "editor": {
+        "createTitle": "Neue Bewertung",
+        "createDescription": "Erstellen und veröffentlichen Sie einen technischen oder psychometrischen Test.",
+        "editTitle": "Bewertung bearbeiten",
+        "editDescription": "Bearbeiten Sie den Entwurf. Veröffentlichen friert eine unveränderliche Version ein.",
+        "steps": {
+          "info": "Informationen",
+          "config": "Konfiguration",
+          "questions": "Fragen",
+          "preview": "Vorschau",
+          "publish": "Veröffentlichung",
+          "navLabel": "Assistentenschritte"
+        },
+        "fields": {
+          "title": "Name",
+          "description": "Beschreibung",
+          "kind": "Typ",
+          "kindTechnical": "Technisch",
+          "kindPsychometric": "Psychometrisch",
+          "instructions": "Anweisungen",
+          "duration": "Dauer (Minuten)",
+          "maxAttempts": "Maximale Versuche",
+          "expiryNotice": "Bei der Zuweisung in der Demo läuft die Einladung nach {days} Tagen ab. Dieser Wert wird hier nicht gespeichert."
+        },
+        "errors": {
+          "titleRequired": "Gib einen Namen ein.",
+          "titleTooLong": "Der Name darf {max} Zeichen nicht überschreiten.",
+          "descriptionRequired": "Gib eine Beschreibung ein.",
+          "descriptionTooLong": "Die Beschreibung darf {max} Zeichen nicht überschreiten.",
+          "kindRequired": "Wähle den Bewertungstyp.",
+          "instructionsRequired": "Gib die Anweisungen ein.",
+          "durationInvalid": "Die Dauer muss eine ganze Zahl zwischen {min} und {max} sein.",
+          "attemptsInvalid": "Die Versuche müssen eine ganze Zahl zwischen {min} und {max} sein.",
+          "questionsRequired": "Füge mindestens eine kompatible Frage hinzu.",
+          "questionsIncompatible": "Einige Fragen sind mit dem gewählten Typ unverträglich. Entferne sie oder ändere den Typ.",
+          "notFoundTitle": "Bewertung nicht gefunden",
+          "notFoundDescription": "Die Kennung existiert nicht oder die Bewertung ist archiviert und kann nicht bearbeitet werden.",
+          "backToList": "Zurück zur Liste",
+          "saveFailed": "Der Demo-Entwurf konnte nicht gespeichert werden. Prüfe und versuche es erneut."
+        },
+        "questions": {
+          "bankTitle": "Verfügbare Bank",
+          "attachedTitle": "Fragen der Bewertung",
+          "attach": "Hinzufügen",
+          "remove": "Entfernen",
+          "moveUp": "Nach oben",
+          "moveDown": "Nach unten",
+          "addNew": "Minimale Frage erstellen",
+          "emptyBank": "Keine kompatiblen Fragen verfügbar.",
+          "emptyAttached": "Noch keine Fragen in dieser Bewertung.",
+          "incompatibleBadge": "Unverträglich"
+        },
+        "preview": {
+          "staffTitle": "Zusammenfassung für Personal",
+          "candidateTitle": "Kandidatensicht",
+          "questionCount": "{count} Fragen",
+          "duration": "Dauer: {minutes} Min.",
+          "attempts": "Versuche: {count}",
+          "expiry": "Typische Ablaufzeit der Zuweisung: {days} Tage",
+          "totalPoints": "Gesamtpunktzahl: {points}",
+          "dimensions": "Dimensionen: {list}",
+          "noDimensions": "Keine Dimensionen",
+          "candidateHint": "So sieht die Kandidatin die Fragen. Korrekte Antworten und interne Punkte werden nicht angezeigt."
+        },
+        "publish": {
+          "summaryTitle": "Bereit zur Veröffentlichung",
+          "versionNotice": "Version {number} wird veröffentlicht. Dieser Snapshot wird eingefroren. Späteres Bearbeiten erstellt einen neuen Entwurf.",
+          "confirmTitle": "Bewertung veröffentlichen",
+          "confirmDescription": "Version {number} wird eingefroren. Späteres Bearbeiten ändert diesen Snapshot nicht.",
+          "confirm": "Veröffentlichen",
+          "cancel": "Abbrechen"
+        },
+        "clonePublished": {
+          "title": "Entwurf aus veröffentlichter Version erstellen",
+          "description": "Die veröffentlichte Version bleibt unverändert. Ein neuer Entwurf wird zum Bearbeiten geöffnet.",
+          "confirm": "Entwurf erstellen",
+          "cancel": "Abbrechen"
+        },
+        "actions": {
+          "back": "Zurück",
+          "next": "Weiter",
+          "saveDraft": "Entwurf speichern",
+          "publish": "Veröffentlichen",
+          "saving": "Wird gespeichert…",
+          "publishing": "Wird veröffentlicht…"
+        },
+        "toasts": {
+          "saved": "Entwurf gespeichert.",
+          "published": "Bewertung veröffentlicht.",
+          "cloned": "Aus der veröffentlichten Version wurde ein Entwurf erstellt.",
+          "error": "Die Aktion konnte nicht abgeschlossen werden."
+        },
+        "detailEditDraft": "Bearbeiten und Entwurf erstellen"
+      }
+    },
+    "questionsBank": {
+      "title": "Fragenkatalog",
+      "description": "Fragen im Entwurf einer Bewertung. Wähle eine Prüfung zum Auflisten, Erstellen und Bearbeiten.",
+      "create": "Neue Frage",
+      "createTitle": "Neue Frage",
+      "editTitle": "Frage bearbeiten",
+      "editorDescription": "Typ und Felder konfigurieren. Die Vorschau zeigt, was die Kandidatin oder der Kandidat sieht.",
+      "publishedWarning": "Wenn diese Frage bereits in einer veröffentlichten Version verwendet wird, erzeugt Speichern eine Kopie (neue Kennung). Historische Ergebnisse ändern sich nicht.",
+      "search": "Nach Fragetext suchen",
+      "searchPlaceholder": "Fragetext",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Filter des Fragenkatalogs",
+        "kind": "Typ",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen",
+        "test": "Bewertung",
+        "selectTest": "Bewertung auswählen"
+      },
+      "kind": {
+        "single_choice": "Einzelauswahl",
+        "multiple_choice": "Mehrfachauswahl",
+        "true_false": "Wahr oder falsch",
+        "likert": "Likert",
+        "numeric": "Numerisch",
+        "open": "Offen"
+      },
+      "table": {
+        "prompt": "Fragetext",
+        "kind": "Typ",
+        "actions": "Aktionen",
+        "preview": "Vorschau",
+        "edit": "Bearbeiten"
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Anzahl pro Seite",
+        "regionAria": "Seitennummerierung des Fragenkatalogs",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count} Fragen"
+      },
+      "fields": {
+        "kind": "Fragetyp",
+        "prompt": "Fragetext",
+        "options": "Optionen",
+        "addOption": "Option hinzufügen",
+        "optionPlaceholder": "Option {index}",
+        "optionLabel": "Text der Option {index}",
+        "markCorrect": "Option {index} als richtig markieren",
+        "correct": "Richtig",
+        "correctAnswer": "Richtige Antwort",
+        "true": "Wahr",
+        "false": "Falsch",
+        "points": "Punkte",
+        "maxPoints": "Maximale Punkte",
+        "dimension": "Dimension",
+        "reversed": "Umgekehrtes Item",
+        "expected": "Erwartete Antwort",
+        "tolerance": "Toleranz",
+        "rubric": "Bewertungsraster",
+        "moveUp": "Option {index} nach oben",
+        "moveDown": "Option {index} nach unten",
+        "removeOption": "Option {index} entfernen"
+      },
+      "hints": {
+        "multipleChoiceScoring": "Die Bewertung ist alles oder nichts: Punkte nur, wenn alle richtigen und keine falschen Optionen gewählt sind.",
+        "likertScale": "Die Likert-Skala ist fest von 1 bis 5. Es gibt keine richtige Antwort und keine Punkte.",
+        "numericDemo": "Die Toleranz definiert den akzeptierten Spielraum um den erwarteten Wert.",
+        "openReview": "Offene Antworten brauchen eine manuelle Prüfung in der Prüfungswarteschlange."
+      },
+      "validation": {
+        "promptRequired": "Gib einen Fragetext ein.",
+        "promptTooLong": "Der Fragetext darf höchstens 500 Zeichen haben.",
+        "optionsMin": "Füge mindestens zwei Optionen hinzu.",
+        "optionLabelRequired": "Jede Option braucht einen Text.",
+        "correctOptionRequired": "Markiere die richtige Option.",
+        "correctOptionsRequired": "Markiere mindestens eine richtige Option.",
+        "pointsRange": "Punkte müssen eine ganze Zahl zwischen 1 und 100 sein.",
+        "dimensionRequired": "Gib die Dimension des Items an.",
+        "expectedRequired": "Gib die erwartete numerische Antwort an.",
+        "toleranceRange": "Die Toleranz muss null oder eine positive Zahl sein.",
+        "rubricRequired": "Gib das Bewertungsraster ein."
+      },
+      "preview": {
+        "title": "Kandidaten-Vorschau",
+        "hint": "So sieht die Kandidatin oder der Kandidat die Frage. Richtige Antworten und Punkte bleiben verborgen.",
+        "emptyPrompt": "Der Fragetext erscheint hier.",
+        "emptyOption": "Option ohne Text",
+        "trueLabel": "Wahr",
+        "falseLabel": "Falsch",
+        "likertScaleAria": "Skala von 1 bis 5",
+        "numericLabel": "Deine Antwort",
+        "openLabel": "Deine Antwort"
+      },
+      "actions": {
+        "cancel": "Abbrechen",
+        "save": "Speichern",
+        "backToList": "Zurück zum Katalog"
+      },
+      "discard": {
+        "title": "Änderungen verwerfen",
+        "description": "Es gibt ungespeicherte Änderungen. Beim Verlassen gehen sie verloren.",
+        "confirm": "Verwerfen",
+        "cancel": "Weiter bearbeiten"
+      },
+      "toasts": {
+        "saved": "Frage gespeichert.",
+        "cloned": "Es wurde eine Kopie der Frage gespeichert, weil sie in einer veröffentlichten Version verwendet wurde.",
+        "error": "Die Aktion konnte nicht abgeschlossen werden."
+      },
+      "errors": {
+        "scenario_error": "Die Anfrage konnte nicht abgeschlossen werden.",
+        "not_found": "Frage nicht gefunden."
+      },
+      "states": {
+        "loading": "Fragenkatalog wird geladen…",
+        "emptyTitle": "Keine Fragen in diesem Entwurf",
+        "emptyDescription": "Füge die erste Frage zur ausgewählten Bewertung hinzu.",
+        "errorTitle": "Katalog konnte nicht geladen werden",
+        "errorDescription": "Beim Laden der Fragen ist ein Problem aufgetreten. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Frage entspricht den Filtern. Passe die Filter an oder setze sie zurück.",
+        "notFoundTitle": "Frage nicht gefunden",
+        "notFoundDescription": "Es gibt keine Frage mit dieser Kennung oder du hast keinen Zugriff.",
+        "noTestsTitle": "Keine Bewertungen",
+        "noTestsDescription": "Erstelle eine Bewertung, um Fragen zu ihrem Entwurf hinzuzufügen.",
+        "createTest": "Bewertung erstellen",
+        "selectTestTitle": "Bewertung auswählen",
+        "selectTestDescription": "Fragen liegen im Entwurf jeder Prüfung. Wähle eine aus, um fortzufahren.",
+        "missingTestTitle": "Bewertung fehlt",
+        "missingTestDescription": "Öffne den Katalog aus einer ausgewählten Bewertung, um Fragen zu erstellen oder zu bearbeiten."
+      }
+    },
+    "links": {
+      "title": "Verknüpfungen",
+      "description": "Verknüpfe eine veröffentlichte Version mit einer offenen Stelle. Verknüpfen weist keine Kandidaten zu und sendet keine Einladungen.",
+      "form": {
+        "title": "Neue Verknüpfung",
+        "version": "Veröffentlichte Version",
+        "versionPlaceholder": "Version auswählen",
+        "vacancy": "Stelle",
+        "vacancyPlaceholder": "Stelle auswählen",
+        "companySummary": "Unternehmen: {company}",
+        "companyEmpty": "Wähle eine Stelle, um das Unternehmen zu sehen.",
+        "excludedVacancies": "Nicht verfügbare Stellen: {list}.",
+        "excludedVacancyItem": "{title} (geschlossen)",
+        "excludedListSeparator": "; ",
+        "submit": "Verknüpfen"
+      },
+      "validation": {
+        "versionRequired": "Wähle eine veröffentlichte Version.",
+        "vacancyRequired": "Wähle eine offene Stelle."
+      },
+      "list": {
+        "title": "Bestehende Verknüpfungen",
+        "test": "Bewertung",
+        "version": "Version",
+        "versionValue": "v{number}",
+        "vacancy": "Stelle",
+        "company": "Unternehmen",
+        "status": "Status",
+        "statusActive": "Aktiv",
+        "statusInactive": "Inaktiv",
+        "linkedAt": "Datum",
+        "actions": "Aktionen",
+        "deactivate": "Deaktivieren",
+        "reactivate": "Reaktivieren"
+      },
+      "confirm": {
+        "createTitle": "Verknüpfung bestätigen",
+        "createDescription": "Du verknüpfst {version} mit {vacancy}. Es werden keine Kandidaten zugewiesen und keine E-Mails gesendet.",
+        "createConfirm": "Verknüpfen",
+        "deactivateTitle": "Verknüpfung deaktivieren",
+        "deactivateDescription": "Du deaktivierst {version} für {vacancy}. Der Verlauf bleibt erhalten und du kannst später reaktivieren.",
+        "deactivateConfirm": "Deaktivieren",
+        "reactivateTitle": "Verknüpfung reaktivieren",
+        "reactivateDescription": "Du reaktivierst {version} für {vacancy}. Es weist weiterhin keine Kandidaten zu und sendet keine E-Mails.",
+        "reactivateConfirm": "Reaktivieren",
+        "cancel": "Abbrechen"
+      },
+      "toasts": {
+        "linked": "Verknüpfung im Demomodus erstellt.",
+        "deactivated": "Verknüpfung im Demomodus deaktiviert.",
+        "reactivated": "Verknüpfung im Demomodus reaktiviert."
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "not_found": "Die angeforderte Ressource wurde nicht gefunden.",
+        "duplicate_link": "Für diese Version und Stelle existiert bereits eine Verknüpfung.",
+        "vacancy_closed": "Die Stelle ist geschlossen und kann nicht verknüpft werden.",
+        "version_not_published": "Nur veröffentlichte Versionen können verknüpft werden.",
+        "test_not_published": "Nur veröffentlichte Bewertungen können verknüpft werden."
+      },
+      "states": {
+        "loading": "Verknüpfungen werden geladen…",
+        "emptyTitle": "Keine Demodaten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demodaten zurück, um fortzufahren.",
+        "errorTitle": "Verknüpfungen konnten nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Versuche es erneut.",
+        "retry": "Erneut versuchen",
+        "listEmptyTitle": "Keine Verknüpfungen",
+        "listEmptyDescription": "In dieser Demo sind noch keine Versionen mit Stellen verknüpft."
+      }
+    },
+    "assignments": {
+      "title": "Zuweisungen",
+      "description": "Weise eine verknüpfte Version aktiven Bewerbungen der Stelle zu. In der Demo werden keine E-Mails gesendet.",
+      "backToRrhh": "Zurück",
+      "backToRrhhAria": "Zurück zu Personalwesen",
+      "form": {
+        "title": "Neue Zuweisung",
+        "vacancy": "Stelle",
+        "vacancyPlaceholder": "Stelle auswählen",
+        "version": "Aktive verknüpfte Version",
+        "versionPlaceholder": "Version auswählen",
+        "companySummary": "Unternehmen: {company}",
+        "companyEmpty": "Wähle eine Stelle, um das Unternehmen zu sehen.",
+        "excludedVacancies": "Nicht verfügbare Stellen: {list}.",
+        "excludedVacancyItem": "{title} (geschlossen)",
+        "excludedListSeparator": "; ",
+        "noActiveLinks": "Diese Stelle hat keine Versionen mit aktiver Verknüpfung. Verknüpfe zuerst eine veröffentlichte Prüfung.",
+        "expiresAt": "Läuft ab am",
+        "expiresHint": "Demo-Standard: {days} Tage ab der simulierten Uhrzeit.",
+        "attempts": "Erlaubte Versuche",
+        "submit": "Auswahl zuweisen"
+      },
+      "validation": {
+        "vacancyRequired": "Wähle eine offene Stelle.",
+        "versionRequired": "Wähle eine Version mit aktiver Verknüpfung.",
+        "selectionRequired": "Wähle mindestens einen berechtigten Kandidaten.",
+        "expiresInvalid": "Das Ablaufdatum darf nicht vor dem Demo-Heute liegen.",
+        "attemptsInvalid": "Versuche müssen eine ganze Zahl größer oder gleich 1 sein."
+      },
+      "candidates": {
+        "title": "Bewerbungen dieser Stelle",
+        "select": "Auswählen",
+        "selectAria": "{name} auswählen",
+        "name": "Kandidat",
+        "email": "E-Mail",
+        "stage": "Phase",
+        "eligibility": "Berechtigung",
+        "eligible": "Berechtigt",
+        "selectedCount": "{count, plural, one {# ausgewählt} other {# ausgewählt}}",
+        "selectEligible": "Berechtigte auswählen",
+        "clearSelection": "Auswahl löschen"
+      },
+      "reasons": {
+        "vacancy_mismatch": "Andere Stelle",
+        "application_inactive": "Inaktive Bewerbung",
+        "application_final": "Endstatus",
+        "vacancy_closed": "Stelle geschlossen",
+        "link_inactive": "Verknüpfung inaktiv",
+        "test_not_published": "Prüfung nicht veröffentlicht",
+        "duplicate_assignment": "Bereits zugewiesen",
+        "unknown": "Nicht berechtigt"
+      },
+      "preview": {
+        "title": "Vorschau der Empfänger",
+        "summary": "{version} · {vacancy} · läuft ab {expires} · {attempts, plural, one {# Versuch} other {# Versuche}}",
+        "noEmail": "Es wird keine E-Mail gesendet. Es wird nur die Demo-Zuweisung erstellt."
+      },
+      "confirm": {
+        "title": "Zuweisung bestätigen",
+        "description": "Du weist {count, plural, one {# Kandidaten} other {# Kandidaten}} {version} für {vacancy} zu. Läuft ab am {expires}. Versuche: {attempts}. Es werden keine E-Mails gesendet.",
+        "confirm": "Zuweisen",
+        "cancel": "Abbrechen"
+      },
+      "toasts": {
+        "assigned": "{count, plural, one {# Zuweisung im Demo-Modus erstellt.} other {# Zuweisungen im Demo-Modus erstellt.}}",
+        "rejected": "Es wurde keine Zuweisung erstellt. {details}",
+        "failureItem": "{name}: {reason}",
+        "failureSeparator": "; "
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "link_missing": "Für diese Version und Stelle gibt es keine aktive Verknüpfung."
+      },
+      "states": {
+        "loading": "Zuweisungen werden geladen…",
+        "emptyTitle": "Keine Demo-Daten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demo-Daten zurück, um fortzufahren.",
+        "errorTitle": "Zuweisungen konnten nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "selectPromptTitle": "Stelle und Version wählen",
+        "selectPromptDescription": "Wähle eine offene Stelle und eine Version mit aktiver Verknüpfung, um berechtigte Bewerbungen zu sehen.",
+        "noApplicationsTitle": "Keine Bewerbungen",
+        "noApplicationsDescription": "Für diese Stelle gibt es in der Demo keine Bewerbungen."
+      }
+    },
+    "tracking": {
+      "title": "Nachverfolgung",
+      "description": "Prüfe den Status der Zuweisungen und verwalte Fristen oder Wiederholungen im Demo-Modus.",
+      "search": "Suchen",
+      "searchPlaceholder": "Kandidat, Stelle oder Bewertung",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Filter der Nachverfolgung",
+        "status": "Zuweisungsstatus",
+        "qualification": "Bewertung",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen"
+      },
+      "status": {
+        "pending": "Ausstehend",
+        "in_progress": "In Bearbeitung",
+        "completed": "Abgeschlossen",
+        "expired": "Abgelaufen",
+        "cancelled": "Abgebrochen"
+      },
+      "qualification": {
+        "answers_submitted": "Abgeschlossen",
+        "pending_review": "Prüfung ausstehend",
+        "reviewed": "Bewertet"
+      },
+      "table": {
+        "candidate": "Kandidat",
+        "vacancy": "Stelle",
+        "version": "Version",
+        "status": "Status",
+        "expiresAt": "Läuft ab",
+        "actions": "Aktionen",
+        "open": "Details anzeigen"
+      },
+      "actions": {
+        "remind": "Erinnern",
+        "cancel": "Abbrechen",
+        "extend": "Frist verlängern",
+        "retry": "Wiederholung erlauben"
+      },
+      "detail": {
+        "title": "Nachverfolgung von {name}",
+        "titleFallback": "Zuweisungsdetails",
+        "close": "Schließen",
+        "vacancy": "Stelle",
+        "version": "Version",
+        "assignedAt": "Zugewiesen",
+        "expiresAt": "Läuft ab",
+        "attempts": "Versuche",
+        "attemptsValue": "{used} von {allowed}",
+        "status": "Status",
+        "applicationInactive": "Die Bewerbung ist nicht mehr aktiv. Abbrechen ist nur bei zulässigem Status möglich.",
+        "applicationFinal": "Die Bewerbung ist in einem Endstatus. Abbrechen ist nur bei zulässigem Status möglich.",
+        "extendDate": "Neues Ablaufdatum",
+        "extendHint": "Das Datum muss nach der Demo-Uhr liegen.",
+        "simulateFailure": "Fehler der Operation simulieren",
+        "openCandidate": "Kandidatenerfahrung öffnen",
+        "openReview": "Manuelle Bewertung öffnen",
+        "openResult": "Ergebnis ansehen"
+      },
+      "timeline": {
+        "title": "Zeitlinie",
+        "empty": "In der Demo wurden noch keine Aktionen erfasst.",
+        "kind": {
+          "reminded": "Simulierte Erinnerung",
+          "cancelled": "Zuweisung abgebrochen",
+          "extended": "Frist verlängert",
+          "retried": "Wiederholung erlaubt",
+          "reviewed": "Manuelle Bewertung abgeschlossen"
+        }
+      },
+      "confirm": {
+        "cancelTitle": "Zuweisung abbrechen",
+        "cancelDescription": "Du brichst die Zuweisung von {name} ab. Die Zeile bleibt in der Demo erhalten.",
+        "cancelConfirm": "Zuweisung abbrechen",
+        "extendTitle": "Frist verlängern",
+        "extendDescription": "Du verlängerst die Frist von {name} auf {date}. War sie abgelaufen, wird sie wieder ausstehend.",
+        "extendConfirm": "Verlängern",
+        "dismiss": "Zurück"
+      },
+      "toasts": {
+        "reminded": "Erinnerung im Demo-Modus erfasst. Es wurde keine E-Mail gesendet.",
+        "cancelled": "Zuweisung im Demo-Modus abgebrochen.",
+        "extended": "Frist im Demo-Modus verlängert.",
+        "retried": "Wiederholung im Demo-Modus erlaubt.",
+        "simulatedFailure": "Die Operation ist simuliert fehlgeschlagen. Es wurden keine Änderungen übernommen."
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "not_found": "Die Zuweisung wurde nicht gefunden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "action_not_allowed": "Diese Aktion ist im aktuellen Status nicht verfügbar.",
+        "application_closed": "Die Bewerbung ist für diese Aktion geschlossen.",
+        "invalid_expires_at": "Das Ablaufdatum ist in der Demo ungültig."
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Paginierung der Nachverfolgung",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Zuweisung} other {# Zuweisungen}}"
+      },
+      "states": {
+        "loading": "Nachverfolgung wird geladen…",
+        "emptyTitle": "Keine Demo-Daten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demo-Daten zurück, um fortzufahren.",
+        "errorTitle": "Nachverfolgung konnte nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zuweisung entspricht den Filtern. Passe die Filter an oder setze sie zurück."
+      }
+    },
+    "review": {
+      "title": "Manuelle Bewertung",
+      "description": "Bewerte offene Antworten anhand der Demo-Rubrik.",
+      "pendingCount": "{count, plural, one {# ausstehend} other {# ausstehend}}",
+      "filteredCount": "{count, plural, one {# sichtbar} other {# sichtbar}}",
+      "search": "Suchen",
+      "searchPlaceholder": "Kandidat oder Stelle",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Bewertungsfilter",
+        "vacancy": "Stelle",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen"
+      },
+      "table": {
+        "candidate": "Kandidat",
+        "vacancy": "Stelle",
+        "version": "Version",
+        "openQuestions": "Offen",
+        "completedAt": "Eingereicht",
+        "actions": "Aktionen",
+        "open": "Bewerten"
+      },
+      "detail": {
+        "title": "Bewertung von {name}",
+        "titleFallback": "Manuelle Bewertung",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToQueue": "Zurück zur Warteschlange",
+        "instructions": "Anweisungen der Bewertung",
+        "questionLabel": "Offene Frage {index}",
+        "answer": "Antwort des Kandidaten",
+        "noAnswer": "Keine Antwort",
+        "rubric": "Rubrik",
+        "maxPoints": "Maximum: {max} Punkte",
+        "points": "Vergebene Punkte",
+        "pointsHint": "Ganzzahl von 0 bis {max}.",
+        "notes": "Anmerkungen (optional)",
+        "save": "Speichern",
+        "saving": "Speichern…",
+        "finish": "Bewertung abschließen"
+      },
+      "validation": {
+        "pointsRequired": "Gib die vergebenen Punkte an.",
+        "pointsInvalid": "Verwende eine Ganzzahl von 0 bis {max}."
+      },
+      "confirm": {
+        "finishTitle": "Bewertung abschließen",
+        "finishDescription": "Du markierst die Bewertung von {name} als geprüft. Die Nachverfolgung zeigt sie nicht mehr als ausstehend.",
+        "finishConfirm": "Abschließen",
+        "dismiss": "Zurück"
+      },
+      "toasts": {
+        "saved": "Bewertungsentwurf im Demo-Modus gespeichert.",
+        "finished": "Bewertung im Demo-Modus abgeschlossen.",
+        "validationFailed": "Korrigiere ungültige Punkte, bevor du fortfährst."
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "not_found": "Die Bewertung wurde nicht gefunden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "action_not_allowed": "Diese Aktion ist im aktuellen Status nicht verfügbar.",
+        "invalid_points": "Die angegebenen Punkte sind ungültig."
+      },
+      "states": {
+        "loading": "Bewertungswarteschlange wird geladen…",
+        "emptyTitle": "Keine Demo-Daten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demo-Daten zurück, um fortzufahren.",
+        "queueEmptyTitle": "Nichts zur Bewertung ausstehend",
+        "queueEmptyDescription": "Es gibt keine Ergebnisse mit ausstehenden offenen Antworten in der Demo.",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zeile entspricht den Filtern. Passe sie an oder setze sie zurück.",
+        "errorTitle": "Bewertung konnte nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "notFoundTitle": "Bewertung nicht verfügbar",
+        "notFoundDescription": "Diese Zuweisung ist nicht in der Warteschlange oder wurde bereits bewertet."
+      }
+    },
+    "results": {
+      "title": "Ergebnisse",
+      "description": "Technische und psychometrische Ergebnisse mit Demo-Daten ansehen.",
+      "count": "{count, plural, one {# Ergebnis} other {# Ergebnisse}}",
+      "filteredCount": "{count, plural, one {# sichtbar} other {# sichtbar}}",
+      "search": "Suchen",
+      "searchPlaceholder": "Kandidat, Stelle oder Bewertung",
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Ergebnisfilter",
+        "vacancy": "Stelle",
+        "kind": "Typ",
+        "status": "Status",
+        "assignedFrom": "Zugewiesen von",
+        "assignedTo": "Zugewiesen bis",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen"
+      },
+      "kind": {
+        "technical": "Technisch",
+        "psychometric": "Psychometrisch"
+      },
+      "status": {
+        "reviewed": "Bewertet",
+        "pending": "Bewertung ausstehend",
+        "no_result": "Kein Ergebnis"
+      },
+      "table": {
+        "candidate": "Kandidat",
+        "vacancy": "Stelle",
+        "version": "Version",
+        "kind": "Typ",
+        "status": "Status",
+        "score": "Punktzahl",
+        "assignedAt": "Zugewiesen",
+        "actions": "Aktionen",
+        "open": "Ergebnis ansehen",
+        "scoreValue": "{score} / {max}",
+        "scoreEmpty": "—"
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Ergebnispaginierung",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Ergebnis} other {# Ergebnisse}}"
+      },
+      "detail": {
+        "title": "Ergebnis für {name}",
+        "titleFallback": "Ergebnis",
+        "subtitle": "{vacancy} · {test} · v{version}",
+        "backToList": "Zurück zu Ergebnissen",
+        "instructions": "Anweisungen der Bewertung",
+        "score": "Punktzahl",
+        "scoreValue": "{score} / {max}",
+        "reviewStatus": "Bewertungsstatus",
+        "sessionTime": "Sitzungszeit",
+        "sessionStarted": "Start",
+        "sessionDeadline": "Frist",
+        "sessionMissing": "In der Demo ist keine Sitzung erfasst.",
+        "categoriesTitle": "Punktzahl nach Kategorie",
+        "categoriesInsufficient": "Dieses Demo-Ergebnis hat keine Kategoriepunktzahlen.",
+        "dimensionsTitle": "Instrumentdimensionen",
+        "dimensionsFootnote": "Demo-Instrumentenskala: 0 bis 100. Kein Eignungsprozentsatz und keine Einstellungsentscheidung.",
+        "dimensionsSummary": "Zusammenfassung der Dimensionen",
+        "questionsTitle": "Antworten",
+        "answer": "Antwort",
+        "noAnswer": "Keine Antwort",
+        "verdict": {
+          "correct": "Richtig",
+          "incorrect": "Falsch",
+          "unanswered": "Keine Antwort"
+        },
+        "trueFalse": {
+          "true": "Wahr",
+          "false": "Falsch"
+        },
+        "likertValue": "Likert-Wert: {value}",
+        "rubric": "Rubrik",
+        "reviewPoints": "Bewertungspunkte: {points} / {max}",
+        "reviewNotes": "Anmerkungen",
+        "noResultTitle": "Kein Ergebnis",
+        "noResultDescription": "Die Zuweisung ist abgeschlossen, aber es gibt noch kein simuliertes Ergebnis.",
+        "export": "Exportieren",
+        "exportUnavailable": "Verfügbar nach Backend-Anbindung",
+        "viewApplication": "Bewerbung ansehen",
+        "openReview": "Manuelle Bewertung öffnen"
+      },
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben."
+      },
+      "states": {
+        "loading": "Ergebnisse werden geladen…",
+        "emptyTitle": "Keine Demo-Daten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demo-Daten zurück, um fortzufahren.",
+        "listEmptyTitle": "Keine Ergebnisse",
+        "listEmptyDescription": "Es gibt keine abgeschlossenen Zuweisungen mit Ergebnissen in der Demo.",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zeile entspricht den Filtern. Passe sie an oder setze sie zurück.",
+        "errorTitle": "Ergebnisse konnten nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen",
+        "notFoundTitle": "Ergebnis nicht verfügbar",
+        "notFoundDescription": "Diese Zuweisung existiert nicht oder ist in der Demo noch nicht abgeschlossen."
+      }
+    },
+    "reports": {
+      "title": "Berichte",
+      "description": "Demo-Berichtskatalog mit simulierter Vorschau. Es werden keine Dateien erzeugt.",
+      "catalogAria": "Berichtskatalog",
+      "catalog": {
+        "assignments-by-status": {
+          "title": "Zuweisungen nach Status",
+          "description": "Zählung und Liste der Zuweisungen gefiltert nach Stelle und Datum."
+        },
+        "technical-scores": {
+          "title": "Technische Punktzahlen",
+          "description": "Technische Ergebnisse mit Punktzahl und Maximum aus dem Fixture."
+        },
+        "psychometric-dimensions": {
+          "title": "Psychometrische Dimensionen",
+          "description": "Instrumentdimensionen auf einer Skala von 0 bis 100."
+        }
+      },
+      "filters": {
+        "title": "Filter",
+        "toggle": "Filter",
+        "regionLabel": "Berichtsfilter",
+        "vacancy": "Stelle",
+        "assignedFrom": "Zugewiesen von",
+        "assignedTo": "Zugewiesen bis",
+        "all": "Alle",
+        "clear": "Filter zurücksetzen"
+      },
+      "status": {
+        "pending": "Ausstehend",
+        "in_progress": "In Bearbeitung",
+        "completed": "Abgeschlossen",
+        "expired": "Abgelaufen",
+        "cancelled": "Abgebrochen"
+      },
+      "table": {
+        "candidate": "Kandidat",
+        "vacancy": "Stelle",
+        "test": "Bewertung",
+        "status": "Status",
+        "score": "Punktzahl",
+        "maxScore": "Maximum",
+        "dimension": "Dimension",
+        "assignedAt": "Zugewiesen",
+        "scoreValue": "{score} / {max}"
+      },
+      "charts": {
+        "statusTitle": "Zuweisungen nach Status",
+        "statusSummary": "Zusammenfassung der Zuweisungen nach Status",
+        "technicalTitle": "Technische Punktzahl",
+        "technicalSummary": "Zusammenfassung der technischen Punktzahlen",
+        "dimensionsTitle": "Instrumentdimensionen",
+        "dimensionsSummary": "Zusammenfassung der psychometrischen Dimensionen",
+        "dimensionsFootnote": "Demo-Instrumentskala: 0 bis 100. Dies ist kein Eignungsprozentsatz und keine Einstellungsentscheidung.",
+        "empty": "Keine Diagrammdaten für die aktuellen Filter."
+      },
+      "export": {
+        "pdf": "PDF exportieren",
+        "csv": "CSV exportieren",
+        "unavailable": "Verfügbar nach Backend-Anbindung"
+      },
+      "pagination": {
+        "perPage": "Pro Seite",
+        "pageSizeAria": "Seitengröße",
+        "regionAria": "Berichtspaginierung",
+        "summary": "Seite {page} von {totalPages}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "count": "{count, plural, one {# Zeile} other {# Zeilen}}"
+      },
+      "count": "{count, plural, one {# Zeile} other {# Zeilen}}",
+      "filteredCount": "{count, plural, one {# sichtbar} other {# sichtbar}}",
+      "errors": {
+        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
+        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben."
+      },
+      "states": {
+        "loading": "Berichte werden geladen…",
+        "emptyTitle": "Keine Demodaten",
+        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demodaten zurück, um fortzufahren.",
+        "filterEmptyTitle": "Keine Treffer",
+        "filterEmptyDescription": "Keine Zeile erfüllt die Filter. Passe sie an oder setze sie zurück.",
+        "errorTitle": "Berichte konnten nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Versuche es erneut.",
+        "retry": "Erneut versuchen"
+      },
+      "panel": {
+        "title": "Tests",
+        "description": "Simulierte Beispiele aus Portal Pruebas. Sie gehören nicht zur geöffneten Bewerbung.",
+        "candidate": "Kandidat",
+        "test": "Bewertung",
+        "status": "Status",
+        "open": "Ansehen",
+        "openResults": "Ergebnis ansehen",
+        "openTracking": "Nachverfolgung ansehen",
+        "empty": "Es gibt keine Testbeispiele in der Demo."
+      }
+    },
+    "candidate": {
+      "welcome": {
+        "vacancy": "Stelle: {title}",
+        "duration": "Dauer",
+        "durationValue": "{minutes} Minuten",
+        "expires": "Zuweisung endet",
+        "instructions": "Anweisungen",
+        "privacy": "Demomodus: Ihre Antworten werden nur in dieser simulierten lokalen Sitzung gespeichert. Sie werden nicht an einen Server gesendet und nicht für Einstellungsentscheidungen verwendet.",
+        "start": "Starten",
+        "resume": "Fortsetzen"
+      },
+      "taking": {
+        "progress": "Frage {current} von {total}",
+        "timer": "Verbleibende Zeit: {time}",
+        "prev": "Zurück",
+        "next": "Weiter",
+        "submit": "Bewertung absenden",
+        "required": "Beantworten Sie diese Frage, bevor Sie fortfahren.",
+        "saveFailed": "Antworten konnten in der Demo nicht gespeichert werden. Bitte erneut versuchen.",
+        "submitFailed": "Die Bewertung konnte in der Demo nicht gesendet werden."
+      },
+      "question": {
+        "optionsAria": "Antwortoptionen",
+        "trueFalseAria": "Wahr oder falsch",
+        "likertAria": "Zustimmungsskala",
+        "trueLabel": "Wahr",
+        "falseLabel": "Falsch",
+        "numericLabel": "Ihre numerische Antwort",
+        "openLabel": "Ihre Antwort"
+      },
+      "confirm": {
+        "title": "Bewertung absenden",
+        "description": "Sie senden Ihre Antworten im Demomodus. Sie sehen danach keine Punkte oder Lösungen.",
+        "submit": "Absenden",
+        "cancel": "Weiter beantworten"
+      },
+      "done": {
+        "title": "Bewertung gesendet",
+        "description": "Ihre Antworten wurden in der Demo erfasst. Das Ergebnis wird dem Kandidaten nicht angezeigt."
+      },
+      "blocked": {
+        "invalid": {
+          "title": "Ungültiger Link",
+          "description": "Für diesen Link wurde keine Demo-Zuweisung gefunden."
+        },
+        "applicationClosed": {
+          "title": "Bewerbung geschlossen",
+          "description": "Diese Bewerbung ist nicht mehr aktiv. Sie können diese Bewertung nicht ablegen."
+        },
+        "cancelled": {
+          "title": "Zuweisung storniert",
+          "description": "Diese Zuweisung wurde in der Demo storniert."
+        },
+        "expired": {
+          "title": "Zuweisung abgelaufen",
+          "description": "Die Frist für diese Zuweisung ist abgelaufen."
+        },
+        "timeUp": {
+          "title": "Zeit abgelaufen",
+          "description": "Die Zeit für diese Sitzung ist abgelaufen. Sie können keine weiteren Antworten senden."
+        },
+        "attemptsExhausted": {
+          "title": "Keine Versuche mehr",
+          "description": "Sie haben alle erlaubten Versuche für diese Zuweisung verwendet."
+        }
+      },
+      "demo": {
+        "simulateSaveFailure": "Speicherfehler simulieren",
+        "simulateTimeUp": "Zeitablauf simulieren"
+      },
+      "actions": {
+        "back": "Zurück",
+        "exit": "Zur Nachverfolgung"
+      },
+      "states": {
+        "loading": "Kandidatenerfahrung wird geladen…",
+        "errorTitle": "Demo konnte nicht geladen werden",
+        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen"
+      }
+    }
   },
   "CandidatePortal": {
     "home": {
@@ -558,7 +1712,8 @@
     "activities": {
       "title": "Anstehende Aktivitäten",
       "emptyTitle": "Du hast keine anstehenden Aktivitäten",
-      "emptyDescription": "Wenn du Gespräche, Bewertungen oder geplante Termine hast, erscheinen sie hier."
+      "emptyDescription": "Wenn du Gespräche, Bewertungen oder geplante Termine hast, erscheinen sie hier.",
+      "interviewLinkAria": "Interviews anzeigen"
     },
     "applications": {
       "title": "Meine Bewerbungen",
@@ -631,6 +1786,7 @@
         "helperDefault": "PDF, DOCX bis zu 15 MB",
         "errorTypeNotAllowed": "Typ nicht zulässig. Nur PDF oder DOCX.",
         "errorTooLarge": "Die Datei überschreitet 15 MB ({size}).",
+        "errorDuplicate": "{count, plural, one {Diese Datei ist bereits in der Liste.} other {# Dateien waren bereits in der Liste und wurden übersprungen.}}",
         "selectedCount": "{count, plural, one {# Datei ausgewählt} other {# Dateien ausgewählt}}",
         "selectedListAria": "Liste der ausgewählten Dateien",
         "processAll": "Alle verarbeiten",
@@ -994,7 +2150,8 @@
             "futureDate": "Das Datum darf nicht in der Zukunft liegen",
             "tooYoung": "Du musst mindestens 18 Jahre alt sein"
           },
-          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
+          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung, Ausweisdokument und Gehaltsvorstellung sind Pflichtfelder.",
+          "jobMinSalaryRequired": "Gib deine Gehaltsvorstellung ein (Monatsbetrag in USD).",
           "resumeRequired": "Das Profil muss Lebenslauftext enthalten. Lade einen CV unter Dokumente hoch oder kontaktiere den Support."
         }
       },
@@ -1328,7 +2485,21 @@
         "empty": "No jobs match your search.",
         "resultsAria": "Resultados de vacantes",
         "selectedFallback": "Selected job",
-        "clear": "Remove"
+        "clear": "Remove",
+        "useThisVacancy": "Diese Stelle verwenden",
+        "selectedBadge": "Ausgewählt",
+        "detailLoading": "Stellendetails werden geladen…",
+        "detailError": "Die Stellendetails konnten nicht geladen werden.",
+        "detailEmpty": "Für diese Stelle sind keine weiteren Details veröffentlicht.",
+        "sections": {
+          "description": "Beschreibung",
+          "details": "Details",
+          "advantages": "Vorteile",
+          "responsibilities": "Aufgaben",
+          "requirements": "Anforderungen",
+          "benefits": "Leistungen",
+          "salary": "Gehalt"
+        }
       },
       "history": {
         "title": "Version history",
@@ -1658,6 +2829,8 @@
         "downloadCvAria": "Lebenslauf als PDF herunterladen",
         "generateTechnicalSheet": "Technisches Blatt erstellen",
         "generateTechnicalSheetAria": "Technisches Blatt dieses Kandidaten erstellen",
+        "assignTest": "Prüfung zuweisen",
+        "assignTestAria": "Zu Zuweisungen von Prüfungen (Demo)",
         "cancel": "Abbrechen",
         "cancelAria": "Bearbeitung ohne Speichern abbrechen",
         "save": "Änderungen speichern",
@@ -1820,7 +2993,8 @@
             "futureDate": "Das Datum darf nicht in der Zukunft liegen",
             "tooYoung": "Du musst mindestens 18 Jahre alt sein"
           },
-          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
+          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung, Ausweisdokument und Gehaltsvorstellung sind Pflichtfelder.",
+          "jobMinSalaryRequired": "Gib die Gehaltsvorstellung ein (Monatsbetrag in USD).",
           "resumeRequired": "Das Profil muss Lebenslauftext enthalten. Lade einen CV hoch oder kontaktiere den Support."
         }
       },
@@ -2003,7 +3177,8 @@
         "allFemale": "Alle",
         "allMale": "Alle",
         "filterByAria": "Filtern nach {label}",
-        "clearFilters": "Filter zurücksetzen"
+        "clearFilters": "Filter zurücksetzen",
+        "vacancyType": "Typ"
       },
       "cards": {
         "untitled": "Ohne Titel",
@@ -2012,7 +3187,9 @@
         "cardReadOnlyAria": "Inaktive Stelle, nur Ansicht: {title}",
         "logoAlt": "Logo von {company}",
         "published": "Veröffentlicht",
-        "archived": "Archiviert"
+        "archived": "Archiviert",
+        "presentationDue": "Präsentation: {date}",
+        "presentationOverdue": "Präsentation überfällig: {date}"
       },
       "statuses": {
         "active": "Aktiv",
@@ -2036,6 +3213,15 @@
       "emptyStates": {
         "noVacancies": "Keine Stellen gefunden",
         "noVacanciesFiltered": "Keine Stellen mit den angewendeten Filtern gefunden"
+      },
+      "views": {
+        "activas": "Aktive Stellen werden angezeigt.",
+        "sin-postulaciones": "Stellen ohne Bewerbungen werden angezeigt.",
+        "fuera-de-plazo": "Zeigt Vakanzen mit überschrittener Präsentationsfrist.",
+        "no-publicadas": "Nicht veröffentlichte Stellen werden angezeigt.",
+        "backToList": "Alle Stellen anzeigen",
+        "empty": "Keine Stelle entspricht diesem Kriterium.",
+        "untitled": "Stelle ohne Titel"
       },
       "loadingStates": {
         "loading": "Stellen werden geladen..."
@@ -2100,21 +3286,40 @@
             "label": "Arbeitsmodell",
             "ariaLabel": "Arbeitsmodell der Stelle"
           },
+          "dataProtectionLaws": {
+            "label": "Datenschutzgesetze",
+            "helper": "Wähle mindestens ein Gesetz. Das Land schlägt eines vor; die Auswahl kannst du ändern.",
+            "placeholder": "Ein oder mehrere Gesetze auswählen",
+            "empty": "Es gibt keine aktiven Gesetze.",
+            "inactive": "Inaktiv",
+            "loading": "Gesetze werden geladen…",
+            "loadFailed": "Die Gesetze konnten nicht geladen werden."
+          },
           "unspecifiedOption": "Nicht angegeben",
           "requirements": {
             "label": "Anforderungen",
             "namePlaceholder": "Name (z. B.: Führerschein)",
-            "valuePlaceholder": "Wert (z. B.: Schwer)",
+            "valuePlaceholder": "Erwartetes Niveau oder Kriterium (z. B. B2, fortgeschritten, 3+ Jahre)",
             "importanceLabel": "Wichtigkeit (1-10)",
-            "helper": "Jede Anforderung hat einen Namen, einen Wert und ein durchschnittliches Niveau von 1 bis 10.",
+            "helper": "Im Namen steht, was verlangt wird (z. B. Englisch), im Kriterium das erwartete Niveau (z. B. B2). Die Wichtigkeit (1-10) gibt das Gewicht der Anforderung an, nicht das Niveau des Kandidaten.",
             "nameAria": "Anforderung {index} - Name",
-            "valueAria": "Anforderung {index} - Wert",
-            "scaleAria": "Anforderung {index} - Durchschnittliches Niveau von 1 bis 10",
+            "valueAria": "Anforderung {index} - Erwartetes Niveau oder Kriterium",
+            "scaleAria": "Anforderung {index} - Wichtigkeit von 1 bis 10",
             "removeAria": "Anforderung {index} entfernen"
           },
           "isPublished": {
             "label": "Im Stellenportal veröffentlichen",
             "helper": "Wenn du dies deaktivierst, wird die Stelle als Archiviert gespeichert: Bewerber sehen sie nicht und du kannst sie später veröffentlichen."
+          },
+          "vacancyType": {
+            "label": "Vakanztyp",
+            "ariaLabel": "Vakanztyp",
+            "placeholder": "Typ auswählen"
+          },
+          "presentationDueAt": {
+            "label": "Präsentationsfrist",
+            "ariaLabel": "Frist zur Kandidatenpräsentation",
+            "helper": "Internes Ziel zur Präsentation von Kandidaten. Vorschlag laut Vakanztyp."
           }
         },
         "actions": {
@@ -2139,15 +3344,19 @@
           "nameRequired": "Der Name ist erforderlich",
           "descriptionRequired": "Die Beschreibung ist erforderlich",
           "companyRequired": "Wähle ein Kundenunternehmen aus",
-          "requirementValueRequired": "Wert erforderlich",
-          "requirementNameRequired": "Name erforderlich"
+          "requirementValueRequired": "Erwartetes Niveau oder Kriterium erforderlich",
+          "requirementNameRequired": "Name erforderlich",
+          "lawsRequired": "Wähle mindestens ein Datenschutzgesetz.",
+          "vacancyTypeRequired": "Wähle einen Vakanztyp",
+          "presentationDueAtRequired": "Präsentationsfrist ist erforderlich",
+          "presentationDueAtInvalid": "Gib ein gültiges Datum ein"
         },
         "errors": {
           "createFailed": "Die Stelle konnte nicht erstellt werden. Bitte versuche es erneut.",
           "companiesLoadFailed": "Die Kunden konnten nicht geladen werden.",
           "companiesLoadFallbackSuffix": "Es wird das Standardunternehmen verwendet.",
-          "catalogsLoadFailed": "Abteilungen und Arbeitsmodelle konnten nicht geladen werden.",
-          "catalogsLoadFallbackSuffix": "Die Stelle kann auch ohne diese Felder erstellt werden."
+          "catalogsLoadFailed": "Vakanzkataloge konnten nicht geladen werden.",
+          "catalogsLoadFallbackSuffix": "Prüfe die Verbindung und versuche es erneut."
         }
       },
       "detail": {
@@ -2178,11 +3387,20 @@
           "importanceAria": "Wichtigkeit {value} von 10",
           "unspecified": "—"
         },
+        "laws": {
+          "none": "Keine verknüpften Gesetze",
+          "active": "Aktiv",
+          "inactive": "Inaktiv"
+        },
         "headerMeta": {
           "department": "Abteilung",
           "modality": "Arbeitsmodell",
           "location": "Standort",
-          "created": "Erstellt am {date}"
+          "laws": "Datenschutzgesetze",
+          "created": "Erstellt am {date}",
+          "vacancyType": "Vakanztyp",
+          "presentationDueAt": "Präsentationsfrist",
+          "presentationDueOverdue": "Überfällig ({date})"
         },
         "actions": {
           "backToVacancies": "Zurück zu Stellen",
@@ -2196,6 +3414,8 @@
           "finishProcessAria": "Stellenprozess abschließen",
           "interviews": "Vorstellungsgespräche",
           "interviewsAria": "Vorstellungsgespräche dieser Stelle anzeigen",
+          "assignTest": "Prüfung zuweisen",
+          "assignTestAria": "Zu Zuweisungen von Prüfungen (Demo)",
           "results": "Ergebnisse",
           "resultsAria": "Ergebnisse und Kennzahlen dieser Stelle anzeigen",
           "copy": "Kopieren",
@@ -2449,7 +3669,7 @@
           "aiDisclosure": "Der folgende Inhalt wurde von KI generiert und unverändert angezeigt.",
           "attributes": "Attribute",
           "attributesDetail": "Attributdetails ({count})",
-          "attributesZeroHint": "Ein Wert von 0 % senkt nicht immer den Gesamtwert: Aktualität oder relevante Jahre werden getrennt gemessen.",
+          "attributesZeroHint": "0 % senkt die Gesamtwertung nicht immer: Pflichtanforderungen werden separat bewertet.",
           "attributeLevelFallback": "Kein Detail",
           "qualitativeScore": "Qualitative Punktzahl",
           "semanticSimilarity": "Semantische Ähnlichkeit",
@@ -2460,6 +3680,8 @@
           "routePrefix": "Pfad:",
           "strengths": "Stärken",
           "considerations": "Zu berücksichtigende Aspekte",
+          "checklistHint": "Stärken und zu berücksichtigende Aspekte stammen aus der Anforderungsliste. Sie ersetzen nicht die allgemeine Einschätzung.",
+          "qualitativeScoreHint": "Allgemeine Einschätzung des Profils. Sie sagt für sich nicht, ob jede Anforderung erfüllt ist.",
           "qualitativeReasoning": "Qualitative Begründung",
           "totalMatchScore": "Gesamte Matching-Punktzahl:",
           "totalMatchScoreShort": "Abgleich",
@@ -2471,7 +3693,13 @@
           "viewFullProfile": "Vollständiges Profil anzeigen",
           "close": "Schließen",
           "profileAria": "Profil von {name}",
-          "closeProfileAria": "Profil schließen"
+          "closeProfileAria": "Profil schließen",
+          "verdictMet": "Erfüllt",
+          "verdictPartial": "Teilweise erfüllt",
+          "verdictNotMet": "Nicht erfüllt",
+          "verdictUnavailable": "Nicht bewertet",
+          "manualReviewNotice": "Eine Pflichtanforderung konnte im Lebenslauf nicht geprüft werden: manuelle Prüfung erforderlich.",
+          "attributesExcludedHint": "Nur {coverage} der Anforderungen konnten bewertet werden; die Attribute wurden nicht in die Gesamtpunktzahl einbezogen."
         },
         "scoreKeys": {
           "qualitative": "Qualitative Punktzahl",
@@ -2488,6 +3716,10 @@
         },
         "kanban": {
           "score": "Punktzahl",
+          "analysis": "Analyse",
+          "analysisAria": "KI-Analyse für {name} anzeigen",
+          "sourcePersonalAria": "Persönliche Bewerbung (Selbstbewerbung)",
+          "sourceRecruiterAria": "Vom Recruiter hochgeladener Kandidat",
           "columnAria": "Spalte {stage}",
           "moveStageAria": "{name} in eine andere Phase verschieben",
           "statusAria": "Status von {name}",
@@ -2988,20 +4220,230 @@
       }
     },
     "dashboard": {
-      "statsAria": "Dashboard-Statistiken",
-      "activeCandidates": "Aktive Kandidaten",
-      "openVacancies": "Offene Stellen",
-      "interviewsToday": "Interviews heute",
-      "hiresThisMonth": "Einstellungen diesen Monat",
-      "recentActivityAria": "Letzte Aktivität",
-      "recentActivityTitle": "Letzte Aktivität",
-      "recentCandidatesAria": "Neueste Kandidaten",
-      "recentCandidatesTitle": "Neueste Kandidaten",
-      "newCandidatesBadge": "{count} neu",
-      "mockBadges": {
-        "interview": "Interview",
-        "evaluation": "Evaluacion",
-        "hired": "Contratado"
+      "breadcrumb": "Startseite",
+      "title": "Personal-Dashboard",
+      "description": "Priorisiere Stellen, Interviews und Kandidaten, die deine Aufmerksamkeit brauchen.",
+      "refresh": "Aktualisieren",
+      "refreshing": "Wird aktualisiert…",
+      "loading": "Dashboard wird geladen…",
+      "updatedAt": "Aktualisiert um {time}",
+      "metricsTitle": "Übersicht",
+      "metrics": {
+        "activeVacancies": "Aktive Stellen",
+        "upcomingInterviews": "Anstehende Interviews",
+        "staleCandidates": "Stagnierende Kandidaten",
+        "pendingEvaluations": "Offene Bewertungen",
+        "vacanciesWithoutCandidates": "Ohne Bewerbungen",
+        "vacanciesPresentationOverdue": "Präsentationsfrist überschritten",
+        "vacanciesUnpublished": "Nicht veröffentlicht"
+      },
+      "metricLinkAria": "{label}: {value}. Details anzeigen",
+      "metricUpcomingWindow": "Nächste {days} Tage",
+      "metricPartial": "Teilzählung: Die tatsächliche Summe kann höher sein",
+      "metricUnavailable": "Daten noch nicht verfügbar",
+      "metricError": "Konnte nicht geladen werden",
+      "valueUnavailable": "keine Daten",
+      "remindersTitle": "Offene Aufgaben",
+      "remindersDescription": "Nach Dringlichkeit und Datum sortiert.",
+      "remindersEmpty": "Derzeit keine offenen Aufgaben.",
+      "severity": {
+        "critical": "Dringend",
+        "action": "Zu erledigen",
+        "upcoming": "Anstehend",
+        "info": "Information"
+      },
+      "nextAt": "Nächstes: {date}",
+      "oldestAt": "Ältestes: {date}",
+      "partialNote": "Basierend auf {analyzed} von {total} Datensätzen; die tatsächliche Summe kann höher sein.",
+      "errorNote": "Diese Daten konnten nicht geladen werden. Aktualisiere das Dashboard.",
+      "unavailableTitle": "Erinnerungen in Vorbereitung",
+      "unavailableDescription": "Für die Berechnung fehlen noch Daten.",
+      "unavailableBadge": "Keine Daten",
+      "inactiveVacanciesRule": "Gilt nach {days} Tagen als inaktiv.",
+      "openModule": "Modul öffnen",
+      "openModuleAria": "Modul zu {title} öffnen",
+      "containers": {
+        "vacancies": "Stellen",
+        "candidates": "Kandidaten"
+      },
+      "vacancies": {
+        "description": "Signale zu offenen Stellen, die Nachverfolgung brauchen.",
+        "metrics": {
+          "withoutCandidates": "Ohne Bewerbungen",
+          "overdue": "Überfällig",
+          "unpublished": "Nicht veröffentlicht"
+        },
+        "attentionTitle": "Stellen, die Aufmerksamkeit brauchen",
+        "attentionEmpty": "Keine Stelle auf dieser Seite braucht Aufmerksamkeit.",
+        "signals": {
+          "critical": "Kritisch",
+          "attention": "Aufmerksamkeit",
+          "overdue": "Überfällig",
+          "unpublished": "Nicht veröffentlicht"
+        },
+        "daysOpen": "{days, plural, one {# Tag offen} other {# Tage offen}}",
+        "candidateCount": "{count, plural, one {# Bewerbung} other {# Bewerbungen}}",
+        "openVacancy": "Stelle öffnen",
+        "openVacancyAria": "Stelle {title} öffnen",
+        "untitled": "Stelle ohne Titel",
+        "partialProgress": "Stellenfortschritt: basierend auf {analyzed} von {total} Datensätzen; die tatsächliche Summe kann höher sein.",
+        "partialList": "Stellenliste: basierend auf {analyzed} von {total} Datensätzen; die tatsächliche Summe kann höher sein.",
+        "loading": "Stellen werden geladen…",
+        "panelError": {
+          "title": "Die Stellensignale konnten nicht geladen werden",
+          "description": "Der Kandidatenblock bleibt verfügbar.",
+          "retry": "Erneut versuchen"
+        }
+      },
+      "shortcutsTitle": "Schnellzugriffe",
+      "shortcuts": {
+        "candidates": {
+          "title": "Kandidaten",
+          "description": "Profile suchen und Nachverfolgungen erfassen."
+        },
+        "vacancies": {
+          "title": "Stellen",
+          "description": "Die Pipeline jeder Stelle verwalten."
+        },
+        "interviews": {
+          "title": "Interviews",
+          "description": "Interviews planen und prüfen."
+        },
+        "calendar": {
+          "title": "Kalender",
+          "description": "Kalender verbinden und prüfen."
+        },
+        "reports": {
+          "title": "Berichte",
+          "description": "Kennzahlen ansehen und Berichte exportieren."
+        }
+      },
+      "reminders": {
+        "upcomingInterviews": {
+          "title": "Anstehende Interviews",
+          "description": "{count, plural, one {# Interview geplant} other {# Interviews geplant}} in den nächsten {days} Tagen.",
+          "action": "Interviews ansehen"
+        },
+        "unconfirmedInterviews": {
+          "title": "Interviews ohne Bestätigung",
+          "action": "Interviews ansehen",
+          "description": "{count, plural, one {# Interview ohne Bestätigung} other {# Interviews ohne Bestätigung}}."
+        },
+        "newCandidates": {
+          "title": "Neue Kandidaten zur Prüfung",
+          "action": "Bewerbungen prüfen",
+          "description": "{count, plural, one {# neue Bewerbung zu prüfen} other {# neue Bewerbungen zu prüfen}}."
+        },
+        "staleCandidates": {
+          "title": "Stagnierende Kandidaten",
+          "description": "{count, plural, one {# Kandidat} other {# Kandidaten}} seit {days} Tagen oder länger ohne Phasenwechsel.",
+          "action": "Kandidaten prüfen"
+        },
+        "inactiveVacancies": {
+          "title": "Stellen ohne aktuelle Aktivität",
+          "action": "Stellen ansehen",
+          "description": "{count, plural, one {# Stelle ohne aktuelle Aktivität} other {# Stellen ohne aktuelle Aktivität}}."
+        },
+        "pendingEvaluations": {
+          "title": "Offene technische Bewertungen",
+          "description": "{count, plural, one {# Bewertung nicht abgeschlossen} other {# Bewertungen nicht abgeschlossen}}.",
+          "action": "Bewertungen ansehen"
+        },
+        "pendingTechnicalSheets": {
+          "title": "Offene technische Datenblätter",
+          "action": "Datenblätter ansehen",
+          "description": "{count, plural, one {# technisches Datenblatt offen} other {# technische Datenblätter offen}}."
+        },
+        "pendingApprovals": {
+          "title": "Offene Freigaben",
+          "action": "Stellen ansehen",
+          "description": "Noch keine Informationen verfügbar."
+        },
+        "overdueFollowUps": {
+          "title": "Überfällige Nachverfolgungen",
+          "action": "Kandidaten ansehen",
+          "description": "{count, plural, one {# überfällige Nachverfolgung} other {# überfällige Nachverfolgungen}}."
+        },
+        "pendingConsents": {
+          "title": "Offene Einwilligungen",
+          "description": "{count, plural, one {# offene Einwilligung} other {# offene Einwilligungen}}.",
+          "action": "Einwilligungen ansehen"
+        },
+        "pendingDocuments": {
+          "title": "Offene Dokumente",
+          "description": "{count, plural, one {# offenes Dokument} other {# offene Dokumente}}.",
+          "action": "Dokumente ansehen"
+        },
+        "vacanciesPresentationDueSoon": {
+          "title": "Präsentationsfrist bald fällig",
+          "action": "Vakanzen ansehen",
+          "description": "{count, plural, one {# Vakanz mit bald fälliger Präsentationsfrist} other {# Vakanzen mit bald fälliger Präsentationsfrist}}."
+        },
+        "vacanciesPresentationOverdue": {
+          "title": "Präsentationsfrist überschritten",
+          "action": "Vakanzen ansehen",
+          "description": "{count, plural, one {# Vakanz mit überschrittener Präsentationsfrist} other {# Vakanzen mit überschrittener Präsentationsfrist}}."
+        }
+      },
+      "panelError": {
+        "title": "Das Dashboard konnte nicht geladen werden",
+        "description": "Bitte in wenigen Sekunden erneut versuchen oder Seite neu laden.",
+        "retry": "Erneut versuchen"
+      },
+      "reminderDetail": {
+        "title": "Offen: {label}",
+        "description": "Prüfe die Details und öffne jeden Fall, um ihn zu bearbeiten.",
+        "backToDashboard": "Zurück zum Dashboard",
+        "loading": "Offene Punkte werden geladen…",
+        "empty": "Keine offenen Punkte für diese Erinnerung.",
+        "error": "Details konnten nicht geladen werden. Erneut versuchen.",
+        "unavailable": "Für diese Erinnerung sind noch keine Daten verfügbar.",
+        "partialGeneric": "Teilzählung: Die tatsächliche Summe kann höher sein.",
+        "inactiveStatus": "Inaktiv",
+        "window": {
+          "upcomingInterviews": "Nächste {days} Tage.",
+          "staleCandidates": "Seit {days} Tagen oder länger ohne Etappenwechsel.",
+          "inactiveVacancies": "Ohne Aktivität nach {days} Tagen."
+        },
+        "rowActions": {
+          "interview": "Interview öffnen",
+          "interviewAria": "Interview öffnen: {label}",
+          "vacancy": "Stelle öffnen",
+          "vacancyAria": "Stelle öffnen: {label}",
+          "sheet": "Datenblatt öffnen",
+          "sheetAria": "Datenblatt öffnen: {label}"
+        },
+        "columns": {
+          "candidate": "Kandidat",
+          "vacancy": "Stelle",
+          "company": "Unternehmen",
+          "dueAt": "Datum",
+          "dateTime": "Datum und Uhrzeit",
+          "since": "Seit",
+          "lastActivity": "Letzte Aktivität",
+          "status": "Status",
+          "actions": "Aktionen",
+          "presentationDue": "Präsentation"
+        },
+        "invalidKey": {
+          "breadcrumb": "Unbekannte Erinnerung",
+          "title": "Unbekannte Erinnerung",
+          "description": "Die URL entspricht keiner Dashboard-Erinnerung."
+        },
+        "pagination": {
+          "perPage": "Pro Seite",
+          "pageSizeAria": "Seitengröße",
+          "regionAria": "Paginierung offene Punkte",
+          "summary": "Seite {page} von {total}",
+          "prev": "Zurück",
+          "next": "Weiter",
+          "count": "{count, plural, one {# offen} other {# offen}}"
+        },
+        "metadata": {
+          "title": "ApplicanTree | HR-Portal | {label}",
+          "invalidTitle": "ApplicanTree | HR-Portal | Unbekannte Erinnerung",
+          "invalidDescription": "Die angeforderte Erinnerung existiert nicht."
+        }
       }
     },
     "technicalSheet": {
@@ -3535,7 +4977,8 @@
         "table": {
           "name": "Name",
           "description": "Beschreibung",
-          "actions": "Aktionen"
+          "actions": "Aktionen",
+          "presentationSlaDays": "Frist (Tage)"
         },
         "actions": {
           "refresh": "Aktualisieren",
@@ -3560,14 +5003,18 @@
           "descriptionLabel": "Beschreibung",
           "namePlaceholder": "Name des {singular}",
           "descriptionPlaceholder": "Kurze Beschreibung des {singular}",
-          "loading": "{singular} wird geladen…"
+          "loading": "{singular} wird geladen…",
+          "presentationSlaDaysLabel": "Tage bis Präsentationsfrist",
+          "presentationSlaDaysPlaceholder": "z. B. 3"
         },
         "validation": {
           "nameRequired": "Der Name ist erforderlich.",
           "codeRequired": "Der Code ist erforderlich.",
           "codePattern": "Verwenden Sie nur Kleinbuchstaben, Zahlen und Bindestriche.",
           "sortOrderRequired": "Die Reihenfolge ist erforderlich.",
-          "sortOrderInvalid": "Geben Sie eine gültige ganze Zahl ein."
+          "sortOrderInvalid": "Geben Sie eine gültige ganze Zahl ein.",
+          "presentationSlaDaysRequired": "Die Präsentationsfrist in Tagen ist erforderlich.",
+          "presentationSlaDaysInvalid": "Gib eine ganze Zahl größer als 0 ein."
         },
         "errors": {
           "loadCatalog": "Katalog konnte nicht geladen werden.",
@@ -3589,7 +5036,8 @@
           "loadError": "Fehler beim Laden der {plural}",
           "list": "Liste der {plural}"
         },
-        "dash": "—"
+        "dash": "—",
+        "presentationSlaDaysValue": "{days, plural, one {# Tag} other {# Tage}}"
       },
       "departments": {
         "title": "Abteilungen",
@@ -3647,6 +5095,110 @@
         "formCreateTitle": "Neuer {singularCapitalized}",
         "formEditTitle": "{singular} bearbeiten",
         "deleteTitle": "{singular} löschen"
+      },
+      "vacancyTypes": {
+        "title": "Vakanztypen",
+        "singular": "Vakanztyp",
+        "singularCapitalized": "Vakanztyp",
+        "plural": "Vakanztypen",
+        "article": "der",
+        "createCta": "Vakanztyp erstellen",
+        "emptyMessage": "Noch keine Vakanztypen erstellt",
+        "headingDescription": "Verwalte Vakanztypen und die interne Frist zur Kandidatenpräsentation.",
+        "createSuccess": "Vakanztyp erstellt.",
+        "updateSuccess": "Vakanztyp aktualisiert.",
+        "activateSuccess": "Vakanztyp aktiviert.",
+        "deactivateSuccess": "Vakanztyp deaktiviert.",
+        "deleteSuccess": "Vakanztyp gelöscht.",
+        "deleteConflictMessage": "Löschen nicht möglich, weil er mit bestehenden Vakanzen verknüpft ist.",
+        "formCreateTitle": "Neuer {singularCapitalized}",
+        "formEditTitle": "{singular} bearbeiten",
+        "deleteTitle": "{singular} löschen"
+      }
+    },
+    "dataProtectionLaws": {
+      "page": {
+        "title": "Datenschutzgesetze",
+        "description": "Pflegen Sie die Gesetze, die Recruiter mit jeder Stelle verknüpfen. Der Rechtstext wird hier gespeichert.",
+        "createCta": "Gesetz anlegen"
+      },
+      "table": {
+        "name": "Name",
+        "jurisdiction": "Zuständigkeit",
+        "actions": "Aktionen",
+        "active": "Aktiv",
+        "inactive": "Inaktiv",
+        "missingBody": "Ohne Rechtstext"
+      },
+      "form": {
+        "createTitle": "Neues Gesetz",
+        "editTitle": "Gesetz bearbeiten",
+        "nameLabel": "Name",
+        "codeLabel": "Code",
+        "codePlaceholder": "ley-proteccion-datos-el-salvador",
+        "jurisdictionLabel": "Zuständigkeit",
+        "jurisdictionSv": "El Salvador",
+        "jurisdictionEu": "Europäische Union",
+        "jurisdictionOther": "Andere",
+        "jurisdictionOtherLabel": "Code der Zuständigkeit",
+        "referenceLabel": "Offizielle Referenz",
+        "summaryLabel": "Zusammenfassung",
+        "localeLabel": "Sprache des Textes",
+        "locales": {
+          "es": "Spanisch",
+          "en": "Englisch",
+          "de": "Deutsch",
+          "fr": "Französisch",
+          "it": "Italienisch"
+        },
+        "bodyLabel": "Aktueller Rechtstext",
+        "bodyPlaceholder": "Schreiben Sie den Text, der für dieses Gesetz gilt.",
+        "activeLabel": "Gesetz aktiv",
+        "activeHint": "Ein inaktives Gesetz kann neuen Stellen nicht hinzugefügt werden. Stellen, die es bereits nutzen, behalten die Verknüpfung.",
+        "save": "Speichern",
+        "saveChanges": "Änderungen speichern"
+      },
+      "validation": {
+        "nameRequired": "Der Name ist erforderlich.",
+        "nameMax": "Der Name darf höchstens {max} Zeichen haben.",
+        "codeRequired": "Der Code ist erforderlich.",
+        "codeMax": "Der Code darf höchstens {max} Zeichen haben.",
+        "codePattern": "Verwenden Sie Kleinbuchstaben, Zahlen und Bindestriche.",
+        "jurisdictionRequired": "Die Zuständigkeit ist erforderlich.",
+        "jurisdictionPattern": "Verwenden Sie 2 bis 8 Buchstaben oder Zahlen.",
+        "referenceMax": "Die Referenz darf höchstens {max} Zeichen haben.",
+        "summaryMax": "Die Zusammenfassung darf höchstens {max} Zeichen haben.",
+        "localeRequired": "Wählen Sie eine Sprache."
+      },
+      "errors": {
+        "loadCatalog": "Der Katalog konnte nicht geladen werden.",
+        "saveFailed": "Das Gesetz konnte nicht gespeichert werden.",
+        "deleteFailed": "Das Gesetz konnte nicht gelöscht werden.",
+        "deleteConflict": "Das Gesetz kann nicht gelöscht werden, weil Stellen verknüpft sind. Deaktivieren Sie es, wenn es für neue Stellen nicht mehr gelten soll."
+      },
+      "toasts": {
+        "created": "Gesetz erstellt.",
+        "updated": "Gesetz aktualisiert.",
+        "deleted": "Gesetz gelöscht."
+      },
+      "emptyStates": {
+        "noItems": "Noch keine Gesetze",
+        "createHint": "Sobald ein Gesetz existiert, können Recruiter es mit einer Stelle verknüpfen."
+      },
+      "deleteConfirm": {
+        "title": "Gesetz löschen",
+        "message": "Dieses Gesetz löschen? Das ist nur möglich, wenn keine Stelle es verwendet."
+      },
+      "actions": {
+        "refresh": "Aktualisieren",
+        "retry": "Erneut versuchen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "cancel": "Abbrechen"
+      },
+      "aria": {
+        "loadError": "Fehler beim Laden der Gesetze",
+        "list": "Liste der Datenschutzgesetze"
       }
     },
     "documentTypes": {
@@ -3870,6 +5422,80 @@
       "title": "Einstellungen",
       "description": "Diese Ansicht ist bereit, die Einstellungen des Admin-Portals zu zentralisieren."
     },
+    "presentationReminders": {
+      "page": {
+        "title": "Präsentationserinnerungen",
+        "description": "Füge Zeilen mit Notification-Vorlage, einem Vakanztyp und automatischem Versand hinzu; nutze Jetzt senden in jeder Zeile bei Bedarf."
+      },
+      "loading": "Einstellungen werden geladen…",
+      "templates": {
+        "title": "Vorlagen und Vakanztypen",
+        "description": "Füge Zeilen hinzu, wähle eine Notification-Vorlage (Wiederholung erlaubt), einen Vakanztyp und den automatischen Versand und sende pro Zeile.",
+        "tableAria": "Erinnerungseinstellungen nach Vorlage",
+        "columns": {
+          "template": "Vorlage",
+          "vacancyTypes": "Vakanztyp",
+          "autoSend": "Automatischer Versand"
+        },
+        "add": "Hinzufügen",
+        "remove": "Zeile entfernen",
+        "selectTemplate": "Vorlage auswählen",
+        "unsaved": "Nicht gespeichert",
+        "unsavedHint": "Es gibt ungespeicherte Änderungen. Klicke auf Einstellungen speichern.",
+        "emptyRows": "Noch keine Zeilen konfiguriert. Füge eine hinzu, um zu starten.",
+        "noneOption": "Typ auswählen",
+        "autoSendEnabled": "Automatischer Versand aktiv",
+        "timeOfDay": "Uhrzeit",
+        "timeZone": "Zeitzone"
+      },
+      "manual": {
+        "title": "Jetzt senden",
+        "description": "Nutzt die gespeicherten Einstellungen der Zeile (Vorlage und Vakanztyp).",
+        "needsBinding": "Füge mindestens eine Zeile mit Vorlage und Vakanztyp hinzu und speichere, bevor du sendest."
+      },
+      "empty": {
+        "noTemplates": "Es gibt keine Notification-Vorlagen. Erstelle sie unter Vorlagen, um sie hier zuzuweisen.",
+        "goToTemplates": "Zu Vorlagen",
+        "noVacancyTypes": "Es gibt keine aktiven Vakanztypen. Erstelle sie im Katalog der Vakanztypen.",
+        "goToVacancyTypes": "Zu Vakanztypen"
+      },
+      "scopes": {
+        "label": "Umfang der Erinnerung",
+        "dueSoon": {
+          "label": "Bald fällig",
+          "helper": "Nur Stellen mit bald ablaufender Präsentationsfrist."
+        },
+        "overdue": {
+          "label": "Überfällig",
+          "helper": "Nur Stellen, deren Präsentationsfrist bereits abgelaufen ist."
+        },
+        "all": {
+          "label": "Beides",
+          "helper": "Enthält bald fällige und überfällige Stellen."
+        }
+      },
+      "actions": {
+        "save": "Einstellungen speichern",
+        "send": "Erinnerung per E-Mail senden",
+        "retry": "Erneut versuchen"
+      },
+      "confirm": {
+        "title": "Erinnerung senden",
+        "message": "Ein Digest wird mit den gespeicherten Einstellungen an alle Recruiter gesendet.",
+        "confirm": "Senden"
+      },
+      "errors": {
+        "loadFailed": "Einstellungen für Präsentationserinnerungen konnten nicht geladen werden.",
+        "loadAria": "Fehler beim Laden der Präsentationserinnerungen"
+      },
+      "toasts": {
+        "saved": "Einstellungen gespeichert.",
+        "saveError": "Einstellungen konnten nicht gespeichert werden.",
+        "success": "Erinnerung gesendet: {sent} gesendet, {failed} fehlgeschlagen, {recipients} Empfänger.",
+        "skipped": "{reason} (gesendet: {sent}, fehlgeschlagen: {failed}, Empfänger: {recipients})",
+        "error": "Die Erinnerung konnte nicht gesendet werden."
+      }
+    },
     "shell": {
       "userFallback": "Usuario",
       "roleFallback": "Administrador"
@@ -3951,6 +5577,7 @@
       "modality": "Arbeitsmodell",
       "location": "Standort",
       "salary": "Gehalt",
+      "lawsLabel": "Datenschutzgesetze",
       "publishedLabel": "Veröffentlichung",
       "requirementsHeading": "Anforderungen der Stelle",
       "detailsHeading": "Details der Stelle",
@@ -3996,12 +5623,17 @@
         "documentTypeRequired": "Wählen Sie einen Dokumenttyp.",
         "documentNumberRequired": "Geben Sie Ihre Dokumentnummer ein.",
         "cvRequired": "Fügen Sie Ihren Lebenslauf als PDF bei.",
+        "minSalaryRequired": "Geben Sie Ihre Gehaltsvorstellung ein.",
+        "minSalaryInvalid": "Geben Sie einen gültigen Betrag ein (nur Zahlen, mindestens 0).",
         "reviewFields": "Überprüfen Sie die angegebenen Felder.",
         "consentSubmitFailed": "Wir konnten Ihre Autorisierung und Einwilligung nicht speichern. Bitte versuchen Sie es erneut.",
         "consentValidation": "Bitte überprüfen Sie die Autorisierung und Einwilligung und versuchen Sie es erneut.",
         "consentVersionMismatch": "Das Autorisierungsdokument wurde aktualisiert. Laden Sie die Seite neu und versuchen Sie es erneut.",
         "consentNationalIdConflict": "Dieses Ausweisdokument ist bereits mit einem anderen Profil verknüpft. Verwenden Sie einen anderen Wert oder kontaktieren Sie den Support.",
-        "vacancyUnavailable": "Diese Stelle ist nicht mehr verfügbar. Deine Daten wurden nicht gesendet."
+        "vacancyUnavailable": "Diese Stelle ist nicht mehr verfügbar. Deine Daten wurden nicht gesendet.",
+        "alreadyApplied": "Du hast dich bereits beworben. Den Status findest du im Kandidatenportal.",
+        "alreadyAppliedCta": "Zum Kandidatenportal",
+        "consentRequired": "Du musst die Autorisierung und Einwilligung akzeptieren, um dich zu bewerben."
       },
       "fields": {
         "firstName": "Vornamen *",
@@ -4013,6 +5645,8 @@
         "source": "Wie haben Sie von dieser Stelle erfahren?",
         "linkedin": "LinkedIn-Profil",
         "website": "Website oder Portfolio",
+        "minSalary": "Gehaltsvorstellung *",
+        "minSalaryCurrency": "USD",
         "notes": "Notizen",
         "resume": "Lebenslauf (PDF) *"
       },
@@ -4026,6 +5660,7 @@
         "lastName": "z. B. Martinez",
         "email": "name@example.com",
         "phone": "1234-5678",
+        "minSalary": "0.00",
         "loadingCountries": "Länder werden geladen...",
         "searchCountry": "Land, ISO oder Vorwahl suchen",
         "noCountries": "Keine Länder gefunden"
@@ -4087,6 +5722,8 @@
       "ariaMain": "Hauptnavigation des Stellenportals",
       "ariaGoToPortal": "Zum Stellenportal",
       "ariaGoToSelection": "Zur Portal-Auswahl",
+      "ariaGoToCandidatePortal": "Zum Kandidatenportal",
+      "goToCandidatePortal": "Mein Portal",
       "changePortal": "Portal wechseln",
       "portalsShort": "Portale"
     },
@@ -4113,7 +5750,36 @@
       "checklistEmail": "Verwenden Sie dieselbe E-Mail wie bei Ihrem Kandidatenkonto.",
       "checklistData": "Geben Sie Vornamen, Nachnamen und E-Mail mit echten Daten an.",
       "formSectionLabel": "Bewerbungsformular",
-      "documentTitle": "ApplicanTree | Stellenportal | Bewerbung für {title}"
+      "documentTitle": "ApplicanTree | Stellenportal | Bewerbung für {title}",
+      "alreadyApplied": {
+        "title": "Du bist bereits im Prozess",
+        "body": "Du hast dich bereits auf diese Stelle beworben. Den Status findest du in deinem Kandidatenportal.",
+        "cta": "Zum Kandidatenportal"
+      },
+      "loggedIn": {
+        "sectionLabel": "Bewerbung mit Ihrem Profil",
+        "formSectionLabel": "Fehlende Angaben ergänzen",
+        "title": "Bewerbung bestätigen",
+        "body": "Wir verwenden die Daten und den Lebenslauf aus Ihrem Bewerberprofil. Sie müssen das vollständige Formular nicht erneut ausfüllen.",
+        "cta": "Mit meinem Profil bewerben",
+        "editDetails": "Angaben ergänzen oder bearbeiten",
+        "cvOnFile": "Lebenslauf in Ihrem Profil gespeichert",
+        "cvDownloadFailed": "Der Lebenslauf konnte nicht aus Ihrem Profil geladen werden. Laden Sie ihn erneut hoch oder bearbeiten Sie Ihre Angaben.",
+        "submitFailed": "Die Bewerbung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+        "beforeSubmit": "Mit Ihrem Konto",
+        "checklistProfile": "Ihre Profildaten werden automatisch übermittelt.",
+        "checklistCv": "Wir verwenden den in Ihrem Profil gespeicherten Lebenslauf.",
+        "checklistReview": "Prüfen Sie die Zusammenfassung und bestätigen Sie mit einem Klick.",
+        "checklistComplete": "Ergänzen Sie noch fehlende Felder in Ihrem Profil.",
+        "checklistCvUpload": "Laden Sie einen PDF-Lebenslauf hoch, falls noch keiner gespeichert ist.",
+        "fields": {
+          "name": "Name",
+          "email": "E-Mail",
+          "phone": "Telefon",
+          "document": "Ausweisdokument",
+          "cv": "Lebenslauf"
+        }
+      }
     },
     "unavailable": {
       "title": "Diese Stelle ist nicht mehr verfügbar",

@@ -2,8 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useEffect } from "react";
-import { useTranslations } from "next-intl";
 import { getPageTitle } from "@/lib/pageTitles";
+import { shouldLeaveDocumentTitleToServer } from "@/lib/seo/public-metadata";
 
 /**
  * En el cliente usa la URL real (window.location) como fallback cuando
@@ -24,30 +24,38 @@ const getCurrentPath = (pathname) => {
  */
 export default function PageTitle() {
   const pathname = usePathname();
-  const tPrivacyPolicy = useTranslations("Metadata.privacyPolicy");
-
-  const resolveTitle = (path: string) => {
-    if (path === "/privacy-policy") {
-      return tPrivacyPolicy("title");
-    }
-    return getPageTitle(path);
-  };
 
   useLayoutEffect(() => {
     const path = getCurrentPath(pathname ?? undefined);
-    document.title = resolveTitle(path);
-  }, [pathname, tPrivacyPolicy]);
+    if (shouldLeaveDocumentTitleToServer(path)) return;
+    document.title = getPageTitle(path);
+  }, [pathname]);
 
   useEffect(() => {
     const path = getCurrentPath(pathname ?? undefined);
-    const expected = resolveTitle(path);
+    if (shouldLeaveDocumentTitleToServer(path)) return;
+    const expected = getPageTitle(path);
     const apply = () => {
       if (document.title !== expected) document.title = expected;
     };
     apply();
-    const t = setTimeout(apply, 0);
-    return () => clearTimeout(t);
-  }, [pathname, tPrivacyPolicy]);
+    // Next.js may re-apply layout metadata after paint; reassert briefly.
+    const timeouts = [0, 50, 200].map((ms) => setTimeout(apply, ms));
+    const titleEl = document.querySelector("title");
+    const observer =
+      titleEl && typeof MutationObserver !== "undefined"
+        ? new MutationObserver(apply)
+        : null;
+    observer?.observe(titleEl, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+    return () => {
+      for (const timeout of timeouts) clearTimeout(timeout);
+      observer?.disconnect();
+    };
+  }, [pathname]);
 
   return null;
 }

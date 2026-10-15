@@ -61,9 +61,9 @@ export function AdaptationSummaryPanel({
   }, [checklist])
 
   return (
-    <article className="flex flex-col gap-4 rounded-2xl border border-sky-500/20 bg-linear-to-b from-sky-500/[0.05] via-white to-white p-4 shadow-sm md:p-5">
+    <article className="flex flex-col gap-4 rounded-2xl border border-emerald-500/20 bg-linear-to-b from-emerald-500/[0.05] via-white to-white p-4 shadow-sm md:p-5">
       <div className="flex items-start gap-3">
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/12 text-sky-600">
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/12 text-emerald-600">
           <Briefcase className="h-5 w-5" aria-hidden />
         </span>
         <div>
@@ -101,7 +101,7 @@ export function AdaptationSummaryPanel({
         })}
       </div>
 
-      <article className="rounded-xl border border-sky-500/25 bg-sky-500/5 p-4">
+      <article className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4">
         <h4 className="font-sans text-sm font-semibold text-foreground">{t("conclusionTitle")}</h4>
         <p className="mt-2 font-sans text-sm leading-relaxed text-foreground/90">{conclusion}</p>
       </article>

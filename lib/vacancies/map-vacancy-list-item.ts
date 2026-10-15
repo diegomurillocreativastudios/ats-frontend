@@ -9,7 +9,14 @@ import {
   getVacancyDepartmentLabel,
   getVacancyModalityId,
   getVacancyModalityLabel,
+  getVacancyPresentationDueAtUtc,
+  getVacancyTypeId,
+  getVacancyTypeLabel,
 } from "@/lib/vacancy-catalogs"
+import {
+  formatPresentationDueAtLabel,
+  isPresentationDueOverdue,
+} from "@/lib/vacancies/presentation-due-at"
 import { readPublicSlug } from "@/lib/vacancies/vacancy-public-path"
 
 export type VacancyListStatusKey = "activa" | "cerrada" | "pausada" | "borrador"
@@ -27,6 +34,11 @@ export interface VacancyListItem {
   departmentId: string
   modality: string
   modalityId: string
+  vacancyType: string
+  vacancyTypeId: string
+  presentationDueAtUtc: string | null
+  presentationDueAtLabel: string | null
+  isPresentationOverdue: boolean
   location: string
   requirementsSummary: string
   requirementsRaw: unknown
@@ -141,6 +153,11 @@ export const mapVacancyFromApi = (
   const departmentId = getVacancyDepartmentId(item)
   const modality = getVacancyModalityLabel(item)
   const modalityId = getVacancyModalityId(item)
+  const vacancyType = getVacancyTypeLabel(item)
+  const vacancyTypeId = getVacancyTypeId(item)
+  const presentationDueAtUtc = getVacancyPresentationDueAtUtc(item)
+  const presentationDueAtLabel = formatPresentationDueAtLabel(presentationDueAtUtc)
+  const isPresentationOverdue = isPresentationDueOverdue(presentationDueAtUtc)
   const location = String(
     item?.location ?? item?.work_arrangement ?? companyRaw ?? "—"
   )
@@ -185,6 +202,11 @@ export const mapVacancyFromApi = (
     departmentId,
     modality,
     modalityId,
+    vacancyType,
+    vacancyTypeId,
+    presentationDueAtUtc,
+    presentationDueAtLabel,
+    isPresentationOverdue,
     location,
     requirementsSummary,
     requirementsRaw,

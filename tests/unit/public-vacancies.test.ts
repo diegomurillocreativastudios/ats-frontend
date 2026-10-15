@@ -152,17 +152,59 @@ describe("public vacancies API helpers", () => {
     ])
   })
 
-  it("does not expose salary in public opportunity detail", () => {
-    const detail = normalizeOpportunityDetail({
+  it("maps salary from the public payload and omits it when absent", () => {
+    const withSalary = normalizeOpportunityDetail({
       id: "vac-1",
       title: "Backend Engineer",
       companyName: "Creativa Studios",
       salary: "$2,500 - $3,500",
-      salaryRange: "$2,500 - $3,500",
+    })
+    const fromRange = normalizeOpportunityDetail({
+      id: "vac-2",
+      title: "Backend Engineer",
+      companyName: "Creativa Studios",
+      salary_range: "800-1200",
+    })
+    const withoutSalary = normalizeOpportunityDetail({
+      id: "vac-3",
+      title: "Backend Engineer",
+      companyName: "Creativa Studios",
+      salary: "   ",
     })
 
-    expect(detail).not.toBeNull()
-    expect(detail).not.toHaveProperty("salary")
+    expect(withSalary?.salary).toBe("$2,500 - $3,500")
+    expect(fromRange?.salary).toBe("800-1200")
+    expect(withoutSalary?.salary).toBeUndefined()
+  })
+
+  it("maps embedded data protection laws and defaults to an empty list", () => {
+    const withLaws = normalizeOpportunityDetail({
+      id: "vac-1",
+      title: "Backend Engineer",
+      companyName: "Creativa Studios",
+      data_protection_laws: [
+        {
+          id: "law-sv",
+          code: "lpd-sv",
+          display_name: "Ley de Protección de Datos",
+          jurisdiction_code: "sv",
+        },
+      ],
+    })
+    const withoutLaws = normalizeOpportunityDetail({
+      id: "vac-2",
+      title: "Backend Engineer",
+      companyName: "Creativa Studios",
+    })
+
+    expect(withLaws?.dataProtectionLaws).toEqual([
+      expect.objectContaining({
+        id: "law-sv",
+        displayName: "Ley de Protección de Datos",
+        jurisdictionCode: "SV",
+      }),
+    ])
+    expect(withoutLaws?.dataProtectionLaws).toEqual([])
   })
 
 })

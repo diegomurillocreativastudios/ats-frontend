@@ -88,11 +88,19 @@ describe("admin portal nav", () => {
     expect(
       resolveAdminPortalNavLabelKey("/portal-admin/vacantes/modalidades"),
     ).toBe("modalities")
+    expect(resolveAdminPortalNavLabelKey("/portal-admin/vacantes/tipos")).toBe(
+      "vacancyTypes",
+    )
     expect(
       resolveAdminPortalNavLabelKey(
         "/portal-admin/vacantes/habilidades-blandas",
       ),
     ).toBe("softSkills")
+    expect(
+      resolveAdminPortalNavLabelKey(
+        "/portal-admin/vacantes/leyes-proteccion-datos",
+      ),
+    ).toBe("dataProtectionLaws")
     expect(resolveAdminPortalNavLabelKey("/portal-admin/empresas")).toBe(
       "companies",
     )
@@ -122,6 +130,11 @@ describe("admin portal nav", () => {
         "/portal-admin/administracion/tipos-de-documento",
       ),
     ).toBe("documentTypes")
+    expect(
+      resolveAdminPortalNavLabelKey(
+        "/portal-admin/administracion/recordatorios-presentacion",
+      ),
+    ).toBe("presentationReminders")
     expect(resolveAdminPortalNavLabelKey("/portal-admin/entrevistas/general")).toBe(
       "interviewsCalendar",
     )
@@ -165,6 +178,17 @@ describe("admin portal nav", () => {
       { href: "/portal-admin/administracion/usuarios", labelKey: "users" },
     ])
     expect(
+      resolveAdminPortalBreadcrumbTrail(
+        "/portal-admin/administracion/recordatorios-presentacion",
+      ),
+    ).toEqual([
+      { href: "/portal-admin/administracion", labelKey: "administration" },
+      {
+        href: "/portal-admin/administracion/recordatorios-presentacion",
+        labelKey: "presentationReminders",
+      },
+    ])
+    expect(
       resolveAdminPortalBreadcrumbTrail("/portal-admin/entrevistas/general"),
     ).toEqual([
       { href: "/portal-admin/entrevistas", labelKey: "interviews" },
@@ -176,6 +200,17 @@ describe("admin portal nav", () => {
     expect(resolveAdminPortalBreadcrumbTrail("/portal-admin/empresas")).toEqual([
       { href: "/portal-admin/vacantes", labelKey: "vacancies" },
       { href: "/portal-admin/empresas", labelKey: "companies" },
+    ])
+    expect(
+      resolveAdminPortalBreadcrumbTrail(
+        "/portal-admin/vacantes/leyes-proteccion-datos",
+      ),
+    ).toEqual([
+      { href: "/portal-admin/vacantes", labelKey: "vacancies" },
+      {
+        href: "/portal-admin/vacantes/leyes-proteccion-datos",
+        labelKey: "dataProtectionLaws",
+      },
     ])
   })
 })

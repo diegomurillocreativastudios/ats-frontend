@@ -88,7 +88,7 @@ export function ProfileSummaryCard({
   const badgeTone = variant === "current" ? "current" : "adapted"
   const cardAccent =
     variant === "current"
-      ? "border-indigo-500/20 bg-linear-to-b from-indigo-500/[0.04] to-white"
+      ? "border-gray-400/30 bg-linear-to-b from-gray-100/80 to-white"
       : "border-emerald-500/20 bg-linear-to-b from-emerald-500/[0.05] to-white"
 
   return (
@@ -107,7 +107,7 @@ export function ProfileSummaryCard({
         <span
           className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-display text-sm font-bold ${
             variant === "current"
-              ? "bg-indigo-500/12 text-indigo-700 dark:text-indigo-200"
+              ? "bg-gray-100 text-gray-700 dark:text-gray-200"
               : "bg-emerald-500/12 text-emerald-700 dark:text-emerald-200"
           }`}
           aria-hidden
@@ -223,7 +223,7 @@ export function ProfileSummaryCard({
                   className={`relative z-1 mt-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border ${
                     variant === "adapted"
                       ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600"
-                      : "border-indigo-500/30 bg-indigo-500/10 text-indigo-600"
+                      : "border-gray-400/40 bg-gray-100 text-gray-700"
                   }`}
                   aria-hidden
                 >

@@ -15,6 +15,7 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  Target,
   Trash2,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -58,12 +59,14 @@ interface CatalogFormState {
   description: string
   sortOrder: string
   isActive: boolean
+  presentationSlaDays: string
 }
 
 interface CatalogFormErrors {
   displayName?: string
   code?: string
   sortOrder?: string
+  presentationSlaDays?: string
 }
 
 type CatalogValidationTranslator = (
@@ -72,7 +75,9 @@ type CatalogValidationTranslator = (
     | "codeRequired"
     | "codePattern"
     | "sortOrderRequired"
-    | "sortOrderInvalid",
+    | "sortOrderInvalid"
+    | "presentationSlaDaysRequired"
+    | "presentationSlaDaysInvalid",
 ) => string
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -102,6 +107,7 @@ function createDefaultFormState(items: VacancyCatalogAdminItem[]): CatalogFormSt
     description: "",
     sortOrder: getNextSortOrder(items),
     isActive: true,
+    presentationSlaDays: "3",
   }
 }
 
@@ -112,17 +118,21 @@ function mapItemToFormState(item: VacancyCatalogAdminItem): CatalogFormState {
     description: item.description ?? "",
     sortOrder: String(item.sortOrder ?? 0),
     isActive: item.isActive,
+    presentationSlaDays:
+      item.presentationSlaDays != null ? String(item.presentationSlaDays) : "",
   }
 }
 
 function validateCatalogForm(
   values: CatalogFormState,
   tValidation: CatalogValidationTranslator,
+  requirePresentationSlaDays: boolean,
 ): CatalogFormErrors {
   const errors: CatalogFormErrors = {}
   const normalizedName = values.displayName.trim()
   const normalizedCode = values.code.trim()
   const normalizedSortOrder = values.sortOrder.trim()
+  const normalizedSlaDays = values.presentationSlaDays.trim()
 
   if (normalizedName === "") {
     errors.displayName = tValidation("nameRequired")
@@ -143,17 +153,35 @@ function validateCatalogForm(
     }
   }
 
+  if (requirePresentationSlaDays) {
+    if (normalizedSlaDays === "") {
+      errors.presentationSlaDays = tValidation("presentationSlaDaysRequired")
+    } else {
+      const parsed = Number(normalizedSlaDays)
+      if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 1) {
+        errors.presentationSlaDays = tValidation("presentationSlaDaysInvalid")
+      }
+    }
+  }
+
   return errors
 }
 
-function buildPayload(values: CatalogFormState): VacancyCatalogFormValues {
-  return {
+function buildPayload(
+  values: CatalogFormState,
+  includePresentationSlaDays: boolean,
+): VacancyCatalogFormValues {
+  const payload: VacancyCatalogFormValues = {
     displayName: values.displayName.trim(),
     code: values.code.trim(),
     description: values.description.trim() || undefined,
     sortOrder: Number(values.sortOrder),
     isActive: values.isActive,
   }
+  if (includePresentationSlaDays) {
+    payload.presentationSlaDays = Number(values.presentationSlaDays)
+  }
+  return payload
 }
 
 export function AdminVacancyCatalogContent({
@@ -167,8 +195,11 @@ export function AdminVacancyCatalogContent({
       ? Building2
       : catalog === "modalities"
         ? Briefcase
-        : Handshake
+        : catalog === "vacancyTypes"
+          ? Target
+          : Handshake
   const isDepartmentCatalog = catalog === "departments"
+  const isVacancyTypesCatalog = catalog === "vacancyTypes"
 
   const kindValues = {
     singular: tKind("singular"),
@@ -315,15 +346,17 @@ export function AdminVacancyCatalogContent({
     event.preventDefault()
     if (formSubmitting) return
 
-    const validationErrors = validateCatalogForm(formState, (key) =>
-      tShared(`validation.${key}`)
+    const validationErrors = validateCatalogForm(
+      formState,
+      (key) => tShared(`validation.${key}`),
+      isVacancyTypesCatalog,
     )
     if (Object.keys(validationErrors).length > 0) {
       setFormErrors(validationErrors)
       return
     }
 
-    const payload = buildPayload(formState)
+    const payload = buildPayload(formState, isVacancyTypesCatalog)
     setFormSubmitting(true)
 
     try {
@@ -360,6 +393,9 @@ export function AdminVacancyCatalogContent({
         description: item.description,
         sortOrder: item.sortOrder,
         isActive: nextIsActive,
+        ...(isVacancyTypesCatalog && item.presentationSlaDays != null
+          ? { presentationSlaDays: item.presentationSlaDays }
+          : {}),
       })
 
       setConflictTarget(null)
@@ -452,7 +488,7 @@ export function AdminVacancyCatalogContent({
       {!listError ? (
         <AdminSurface aria-label={tShared("aria.list", { plural: kindValues.plural })}>
           {loading ? (
-            <AdminTableSkeleton columns={3} />
+            <AdminTableSkeleton columns={isVacancyTypesCatalog ? 4 : 3} />
           ) : isEmpty ? (
             <AdminEmptyState
               icon={CatalogIcon}
@@ -470,6 +506,7 @@ export function AdminVacancyCatalogContent({
               <table className="w-full table-fixed border-collapse text-left font-sans text-sm">
                 <colgroup>
                   <col />
+                  {isVacancyTypesCatalog ? <col className="w-40" /> : null}
                   <col />
                   <col className="w-72" />
                 </colgroup>
@@ -478,6 +515,11 @@ export function AdminVacancyCatalogContent({
                     <th className={ADMIN_TH_CLASS}>
                       {tShared("table.name")}
                     </th>
+                    {isVacancyTypesCatalog ? (
+                      <th className={ADMIN_TH_CLASS}>
+                        {tShared("table.presentationSlaDays")}
+                      </th>
+                    ) : null}
                     <th className={ADMIN_TH_CLASS}>
                       {tShared("table.description")}
                     </th>
@@ -504,6 +546,15 @@ export function AdminVacancyCatalogContent({
                           ) : null}
                         </div>
                       </td>
+                      {isVacancyTypesCatalog ? (
+                        <td className={`${ADMIN_TD_CLASS} text-muted-foreground`}>
+                          {item.presentationSlaDays != null
+                            ? tShared("presentationSlaDaysValue", {
+                                days: item.presentationSlaDays,
+                              })
+                            : tShared("dash")}
+                        </td>
+                      ) : null}
                       <td className={`${ADMIN_TD_CLASS} text-muted-foreground`}>
                         {item.description?.trim() || tShared("dash")}
                       </td>
@@ -618,6 +669,31 @@ export function AdminVacancyCatalogContent({
                 })}
                 disabled={formSubmitting}
               />
+              {isVacancyTypesCatalog ? (
+                <Input
+                  id={`${catalog}-presentationSlaDays`}
+                  name="presentationSlaDays"
+                  type="number"
+                  min={1}
+                  step={1}
+                  label={tShared("form.presentationSlaDaysLabel")}
+                  required
+                  value={formState.presentationSlaDays}
+                  error={formErrors.presentationSlaDays || ""}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    setFormState((current) => ({
+                      ...current,
+                      presentationSlaDays: event.target.value,
+                    }))
+                    setFormErrors((current) => ({
+                      ...current,
+                      presentationSlaDays: undefined,
+                    }))
+                  }}
+                  placeholder={tShared("form.presentationSlaDaysPlaceholder")}
+                  disabled={formSubmitting}
+                />
+              ) : null}
             </div>
 
             <div>

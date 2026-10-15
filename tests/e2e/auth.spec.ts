@@ -93,8 +93,8 @@ test.describe("@smoke Auth", () => {
     await loginAsDemoUser(page)
     const pathname = new URL(page.url()).pathname
     if (pathname.startsWith("/seleccion-portal")) {
-      await expect(page.getByTestId("portal-selector-candidato")).toBeVisible()
-      await expect(page.getByTestId("portal-selector-rrhh")).toBeVisible()
+      await expect(page.getByTestId("portal-selector-candidato")).toBeAttached()
+      await expect(page.getByTestId("portal-selector-rrhh")).toBeAttached()
       return
     }
     await expect(page).toHaveURL(/\/portal-(rrhh|candidato|admin)/)

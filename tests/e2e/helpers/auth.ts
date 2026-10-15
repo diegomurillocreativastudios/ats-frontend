@@ -72,7 +72,7 @@ export async function openRRHHPortalFromSelector(page: Page): Promise<void> {
   const pathname = new URL(page.url()).pathname
   if (/^\/portal-rrhh(\/|$)/.test(pathname)) return
 
-  await page.getByTestId("portal-selector-rrhh").click()
+  await page.getByTestId("portal-selector-rrhh").click({ force: true })
   await page.waitForURL(/\/portal-rrhh(\/|$)/, { timeout: 15_000 })
 }
 
@@ -83,6 +83,17 @@ export async function openAdminPortalFromSelector(page: Page): Promise<void> {
   const pathname = new URL(page.url()).pathname
   if (/^\/portal-admin(\/|$)/.test(pathname)) return
 
-  await page.getByTestId("portal-selector-admin").click()
+  await page.getByTestId("portal-selector-admin").click({ force: true })
   await page.waitForURL(/\/portal-admin(\/|$)/, { timeout: 15_000 })
+}
+
+/**
+ * Desde `/seleccion-portal`, entra al Portal Pruebas. Si el login ya dejó al usuario ahí, no hace nada.
+ */
+export async function openPruebasPortalFromSelector(page: Page): Promise<void> {
+  const pathname = new URL(page.url()).pathname
+  if (/^\/portal-pruebas(\/|$)/.test(pathname)) return
+
+  await page.getByTestId("portal-selector-pruebas").click({ force: true })
+  await page.waitForURL(/\/portal-pruebas(\/|$)/, { timeout: 15_000 })
 }

@@ -65,4 +65,31 @@ describe("RequirementsDisplay", () => {
     expect(screen.getByText("Avanzado")).toBeInTheDocument()
     expect(screen.getByText("Intermedio")).toBeInTheDocument()
   })
+
+  it("does not show importance words as the expected level", () => {
+    renderDisplay(
+      <RequirementsDisplay
+        value={{
+          "Manejo de paquete Office": "alta",
+          "De 2 a 5 años de experiencia como asistente administrativo(a)": "alto",
+          "Redacción de informes y actas": "media",
+          "Inglés intermedio - alto": "media",
+        }}
+        attributeWeights={{
+          "Manejo de paquete Office": 0.9,
+          "De 2 a 5 años de experiencia como asistente administrativo(a)": 0.7,
+          "Redacción de informes y actas": 0.6,
+          "Inglés intermedio - alto": 0.5,
+        }}
+      />
+    )
+
+    expect(screen.queryByText("Nivel esperado")).not.toBeInTheDocument()
+    expect(screen.queryByText("alta")).not.toBeInTheDocument()
+    expect(screen.queryByText("alto")).not.toBeInTheDocument()
+    expect(screen.queryByText("media")).not.toBeInTheDocument()
+    expect(screen.getByText("9/10")).toBeInTheDocument()
+    expect(screen.getByText("7/10")).toBeInTheDocument()
+    expect(screen.getByText("Manejo de paquete Office")).toBeInTheDocument()
+  })
 })

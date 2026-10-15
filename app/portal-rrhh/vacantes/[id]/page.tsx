@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeft,
   ArrowRight,
   Ban,
+  Brain,
   Briefcase,
+  Building2,
   CheckSquare,
   FileText,
   Gift,
@@ -24,10 +26,12 @@ import {
   Users,
 } from "lucide-react";
 import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell";
+import { buildAssignTestHref } from "@/lib/pruebas/reports";
 import Snackbar from "@/components/ui/Snackbar";
 import { CopyPublicVacancyLinkButton } from "@/components/shared/copy-public-vacancy-link-button";
 import { apiClient } from "@/lib/api"
 import { listAdminVacancyCatalog } from "@/lib/api/admin-vacancy-catalogs"
+import { listRecruiterDataProtectionLaws } from "@/lib/api/data-protection-laws"
 import {
   adminStagesCatalogHref,
   listCompanyApplicantStatuses,
@@ -53,7 +57,10 @@ import {
   getApiErrorMessage,
 } from "@/lib/api-error"
 import { buildSafeLogoDataUri } from "@/lib/safe-logo-data-uri"
-import { formatApplicationSourceBadge } from "@/lib/application-source"
+import {
+  formatApplicationSourceBadge,
+  isPersonalApplicationSource,
+} from "@/lib/application-source"
 import DeleteConfirmModal from "@/components/rrhh/DeleteConfirmModal"
 import RematchButton from "@/components/rrhh/RematchButton"
 import { VacancyReadOnlyBanner } from "@/components/rrhh/VacancyReadOnlyBanner"
@@ -61,6 +68,7 @@ import { VacancyFinishedSummary } from "@/components/rrhh/VacancyFinishedSummary
 import { FinishVacancyProcessModal } from "@/components/rrhh/FinishVacancyProcessModal"
 import { VacancyPasteConfirmModal } from "@/components/rrhh/vacancy-paste-confirm-modal"
 import { VacancyLocationFields } from "@/components/rrhh/VacancyLocationFields"
+import { VacancyDataProtectionLawsField } from "@/components/rrhh/VacancyDataProtectionLawsField"
 import { RequirementsDisplay } from "@/components/rrhh/requirements-display"
 import { toRequirementStorageKey } from "@/lib/vacancies/format-requirement-key"
 import {
@@ -89,8 +97,12 @@ import {
 import { VacancyAiSearchLoadingState } from "@/components/rrhh/vacancy-ai-search-loading-state"
 import { VACANCY_PRELIMINARY_MATCH_TYPICAL_MS } from "@/lib/apply-loading-bar"
 import {
+  buildPersonIdentityKeySet,
+  filterCandidatesNotInProcess,
   getApplicantPrimaryScore01,
   getCandidateId,
+  getKanbanRowId,
+  isPersonInIdentitySet,
   normalizeKanbanStage,
   parseFallbackKanbanStages,
   pickApplicantDisplayName,
@@ -128,6 +140,17 @@ import {
   normalizeStateCode,
   readVacancyStateCode,
 } from "@/lib/vacancies/vacancy-location";
+import {
+  normalizeDataProtectionLawIds,
+  sameDataProtectionLawIds,
+  suggestDataProtectionLawIds,
+} from "@/lib/vacancies/data-protection-law-suggestion";
+import {
+  mergeLinkedLawOptions,
+  readVacancyDataProtectionLawIds,
+  readVacancyDataProtectionLaws,
+  type VacancyDataProtectionLaw,
+} from "@/lib/vacancies/vacancy-data-protection-laws";
 import { formatVacancyDetailDocumentTitle } from "@/lib/pageTitles";
 import {
   getVacancyDepartmentId,
@@ -136,9 +159,20 @@ import {
   getVacancyModalityId,
   getVacancyModalityLabel,
   getVacancyModalitySummary,
+  getVacancyPresentationDueAtUtc,
+  getVacancyTypeId,
+  getVacancyTypeLabel,
+  getVacancyTypeSummary,
   mapActiveCatalogItemsToOptions,
   mergeCatalogOption,
 } from "@/lib/vacancy-catalogs";
+import {
+  dateInputValueToPresentationDueAtUtc,
+  formatPresentationDueAtLabel,
+  isPresentationDueOverdue,
+  presentationDueAtUtcToDateInputValue,
+  suggestPresentationDueAtUtc,
+} from "@/lib/vacancies/presentation-due-at";
 import { getVacancyStatusLabel } from "@/lib/vacancies/vacancy-status-labels";
 import { VACANCY_STATUS_STYLES } from "@/lib/vacancies/vacancy-status-styles";
 import {
@@ -548,8 +582,10 @@ const KanbanCard = ({
 }) => {
   const tTechnicalSheet = useTranslations("RecruiterPortal.technicalSheet")
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching")
+  const locale = useLocale();
   const [technicalSheetOpen, setTechnicalSheetOpen] = useState(false);
   const [interviewFeedbackOpen, setInterviewFeedbackOpen] = useState(false);
+  const [analysisModalOpen, setAnalysisModalOpen] = useState(false);
   const sheetCandidateProfileId =
     match.candidateProfileId != null && String(match.candidateProfileId).trim() !== ""
       ? String(match.candidateProfileId).trim()
@@ -562,9 +598,9 @@ const KanbanCard = ({
   );
   const rawScore = getApplicantPrimaryScore01(match);
   const score = rawScore != null ? (rawScore * 100).toFixed(0) : "—";
-  const applicationSourceLabel = formatApplicationSourceBadge(
-    match.applicationSource ?? match.application_source
-  );
+  const applicationSourceRaw = match.applicationSource ?? match.application_source;
+  const isPersonalSource = isPersonalApplicationSource(applicationSourceRaw);
+  const applicationSourceLabel = formatApplicationSourceBadge(applicationSourceRaw);
   const applicationId = readApplicationId(match);
   const interviewDone = readInterviewDoneFromApplicant(match);
   const hasInterviewFeedback = readHasInterviewFeedbackFromApplicant(match);
@@ -642,9 +678,10 @@ const KanbanCard = ({
         draggable={!readOnly}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        className={`flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md ${readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"}`}
+        data-candidate-profile-id={sheetCandidateProfileId ?? undefined}
+        className={`flex flex-col gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md data-[focused-candidate=true]:ring-2 data-[focused-candidate=true]:ring-vo-purple data-[focused-candidate=true]:ring-offset-2 ${readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing data-[dragging=true]:opacity-50 data-[dragging=true]:cursor-grabbing"}`}
         role={readOnly ? undefined : "button"}
-        tabIndex={readOnly ? undefined : 0}
+        tabIndex={readOnly ? -1 : 0}
         aria-label={readOnly ? undefined : tMatching("kanban.moveStageAria", { name: displayName })}
         aria-describedby={`kanban-card-${candidateId}`}
       >
@@ -682,10 +719,36 @@ const KanbanCard = ({
             <span className="text-muted-foreground">{tMatching("kanban.score")}</span>
             <span className="font-semibold tabular-nums text-foreground">{score}</span>
           </div>
-          <span className="inline-flex shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-foreground">
-            {applicationSourceLabel}
+          <span
+            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-muted-foreground"
+            title={applicationSourceLabel}
+            aria-label={
+              isPersonalSource
+                ? tMatching("kanban.sourcePersonalAria")
+                : tMatching("kanban.sourceRecruiterAria")
+            }
+          >
+            {isPersonalSource ? (
+              <User className="h-3.5 w-3.5" aria-hidden />
+            ) : (
+              <Building2 className="h-3.5 w-3.5" aria-hidden />
+            )}
           </span>
         </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setAnalysisModalOpen(true);
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 font-sans text-xs font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+          aria-label={tMatching("kanban.analysisAria", { name: displayName })}
+        >
+          <Brain className="h-3.5 w-3.5" aria-hidden />
+          {tMatching("kanban.analysis")}
+        </button>
 
         {hasStatuses ? (
           <select
@@ -786,6 +849,14 @@ const KanbanCard = ({
           candidateLabel={displayName}
           vacancyLabel={vacancyTitle}
           onComplete={onInterviewFeedbackComplete}
+        />
+      ) : null}
+      {analysisModalOpen ? (
+        <CandidateProfileModal
+          match={match}
+          candidateId={candidateId}
+          uploadedAtLabel={`${tMatching("uploadedPrefix")} ${formatDate(match.uploadedAt, locale)}`}
+          onClose={() => setAnalysisModalOpen(false)}
         />
       ) : null}
     </>
@@ -1035,14 +1106,17 @@ const KanbanColumn = ({
   );
 };
 
-export default function VacanteDetallePage() {
+function VacanteDetallePage() {
   const t = useTranslations("RecruiterPortal.vacancies");
   const tDetail = useTranslations("RecruiterPortal.vacancies.detail");
   const tForm = useTranslations("RecruiterPortal.vacancies.form");
   const tMatching = useTranslations("RecruiterPortal.vacancies.matching");
   const locale = useLocale();
   const params = useParams();
+  const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const focusedCandidateId = searchParams.get("candidato")?.trim() ?? "";
   const pathSegmentRaw = params?.id ?? null;
   const pathSegment = Array.isArray(pathSegmentRaw)
     ? pathSegmentRaw[0]
@@ -1062,6 +1136,12 @@ export default function VacanteDetallePage() {
   const [editStateCode, setEditStateCode] = useState("");
   const [editVacancyDepartmentId, setEditVacancyDepartmentId] = useState("");
   const [editVacancyModalityId, setEditVacancyModalityId] = useState("");
+  const [editVacancyTypeId, setEditVacancyTypeId] = useState("");
+  const [editPresentationDueDate, setEditPresentationDueDate] = useState("");
+  const [editDataProtectionLawIds, setEditDataProtectionLawIds] = useState<string[]>([]);
+  const [lawOptions, setLawOptions] = useState<VacancyDataProtectionLaw[]>([]);
+  const [loadingLaws, setLoadingLaws] = useState(false);
+  const [lawsLoadError, setLawsLoadError] = useState<string | null>(null);
   const [editCompanyId, setEditCompanyId] = useState("");
   const [editRequirements, setEditRequirements] = useState(() => [createEmptyRequirement()]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
@@ -1069,6 +1149,7 @@ export default function VacanteDetallePage() {
   const [saveVacancyError, setSaveVacancyError] = useState(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [modalityOptions, setModalityOptions] = useState([]);
+  const [typeOptions, setTypeOptions] = useState([]);
   const [loadingVacancyCatalogs, setLoadingVacancyCatalogs] = useState(false);
   const [vacancyCatalogsError, setVacancyCatalogsError] = useState(null);
   const [snackbar, setSnackbar] = useState({
@@ -1124,6 +1205,8 @@ export default function VacanteDetallePage() {
   const etapasSectionMobileRef = useRef(null);
   const pendingPastePayloadRef = useRef<VacancyClipboardPayload | null>(null);
   const originalCompanyIdAtEditRef = useRef("");
+  const lawSelectionTouchedRef = useRef(false);
+  const presentationDueTouchedRef = useRef(false);
 
   const vacancyDepartmentSummary = useMemo(
     () =>
@@ -1141,6 +1224,22 @@ export default function VacanteDetallePage() {
     [vacancy]
   );
 
+  const vacancyTypeSummary = useMemo(
+    () =>
+      getVacancyTypeSummary(
+        vacancy && typeof vacancy === "object" ? vacancy : null
+      ),
+    [vacancy]
+  );
+
+  const vacancyPresentationDueAtUtc = useMemo(
+    () =>
+      getVacancyPresentationDueAtUtc(
+        vacancy && typeof vacancy === "object" ? vacancy : null
+      ),
+    [vacancy]
+  );
+
   const mergedDepartmentOptions = useMemo(
     () => mergeCatalogOption(departmentOptions, vacancyDepartmentSummary),
     [departmentOptions, vacancyDepartmentSummary]
@@ -1149,6 +1248,11 @@ export default function VacanteDetallePage() {
   const mergedModalityOptions = useMemo(
     () => mergeCatalogOption(modalityOptions, vacancyModalitySummary),
     [modalityOptions, vacancyModalitySummary]
+  );
+
+  const mergedTypeOptions = useMemo(
+    () => mergeCatalogOption(typeOptions, vacancyTypeSummary),
+    [typeOptions, vacancyTypeSummary]
   );
 
   const createCatalogSummary = useCallback((option) => {
@@ -1248,22 +1352,62 @@ export default function VacanteDetallePage() {
     setVacancyCatalogsError(null)
 
     try {
-      const [departments, modalities] = await Promise.all([
+      const [departments, modalities, vacancyTypes] = await Promise.all([
         listAdminVacancyCatalog("departments"),
         listAdminVacancyCatalog("modalities"),
+        listAdminVacancyCatalog("vacancyTypes"),
       ])
 
       setDepartmentOptions(mapActiveCatalogItemsToOptions(departments))
       setModalityOptions(mapActiveCatalogItemsToOptions(modalities))
+      setTypeOptions(mapActiveCatalogItemsToOptions(vacancyTypes))
     } catch (err) {
       setDepartmentOptions([])
       setModalityOptions([])
+      setTypeOptions([])
       setVacancyCatalogsError(
         getApiErrorMessage(err) ||
           t("form.errors.catalogsLoadFailed")
       )
     } finally {
       setLoadingVacancyCatalogs(false)
+    }
+  }, [t])
+
+  useEffect(() => {
+    if (focusedCandidateId === "" || loading) return
+    const selector = `[data-candidate-profile-id="${CSS.escape(focusedCandidateId)}"]`
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>(selector))
+    document.querySelectorAll<HTMLElement>("[data-focused-candidate]").forEach((node) => {
+      node.removeAttribute("data-focused-candidate")
+    })
+    const visible = nodes.find((node) => node.getClientRects().length > 0) ?? null
+    if (!visible) return
+    visible.setAttribute("data-focused-candidate", "true")
+    visible.scrollIntoView({ block: "center" })
+    visible.focus({ preventScroll: true })
+  }, [focusedCandidateId, loading, vacancy])
+
+  useEffect(() => {
+    let cancelled = false
+    const loadLaws = async () => {
+      setLoadingLaws(true)
+      setLawsLoadError(null)
+      try {
+        const laws = await listRecruiterDataProtectionLaws()
+        if (!cancelled) setLawOptions(laws)
+      } catch (err) {
+        if (!cancelled) {
+          setLawOptions([])
+          setLawsLoadError(getApiErrorMessage(err) || t("form.fields.dataProtectionLaws.loadFailed"))
+        }
+      } finally {
+        if (!cancelled) setLoadingLaws(false)
+      }
+    }
+    void loadLaws()
+    return () => {
+      cancelled = true
     }
   }, [t])
 
@@ -1335,6 +1479,7 @@ export default function VacanteDetallePage() {
     vacancyId != null && vacancyId !== ""
       ? `/portal-rrhh/entrevistas/${encodeURIComponent(vacancyId)}`
       : "/portal-rrhh/entrevistas";
+  const assignTestHref = buildAssignTestHref(pathname || "/portal-rrhh/vacantes");
 
   useEffect(() => {
     let cancelled = false;
@@ -1371,6 +1516,21 @@ export default function VacanteDetallePage() {
     setEditAdvantages(v.advantages == null ? "" : String(v.advantages));
     setEditVacancyDepartmentId(getVacancyDepartmentId(v))
     setEditVacancyModalityId(getVacancyModalityId(v))
+    setEditVacancyTypeId(getVacancyTypeId(v))
+    setEditPresentationDueDate(
+      presentationDueAtUtcToDateInputValue(getVacancyPresentationDueAtUtc(v))
+    )
+    presentationDueTouchedRef.current = false
+    const linkedLawIds = readVacancyDataProtectionLawIds(v)
+    if (linkedLawIds.length > 0) {
+      setEditDataProtectionLawIds(linkedLawIds)
+    } else {
+      const country =
+        ccRaw != null && String(ccRaw).trim() !== ""
+          ? String(ccRaw).trim().toUpperCase()
+          : ""
+      setEditDataProtectionLawIds(suggestDataProtectionLawIds(country, lawOptions))
+    }
 
     const rawReqs = v.requirements;
     const reqObj =
@@ -1415,12 +1575,20 @@ export default function VacanteDetallePage() {
         };
       })
     );
-  }, []);
+  }, [lawOptions]);
 
   const validateEditForm = useCallback(() => {
     const nextErrors: Record<string, string> = {};
     if (!String(editTitle ?? "").trim()) nextErrors.title = t("form.validation.nameRequired");
     if (!String(editDescription ?? "").trim()) nextErrors.description = t("form.validation.descriptionRequired");
+    if (!String(editVacancyTypeId ?? "").trim()) {
+      nextErrors.vacancyType = t("form.validation.vacancyTypeRequired");
+    }
+    if (!String(editPresentationDueDate ?? "").trim()) {
+      nextErrors.presentationDueAt = t("form.validation.presentationDueAtRequired");
+    } else if (!dateInputValueToPresentationDueAtUtc(editPresentationDueDate)) {
+      nextErrors.presentationDueAt = t("form.validation.presentationDueAtInvalid");
+    }
 
     editRequirements.forEach((req) => {
       const hasName = !!String(req.requirementName ?? "").trim();
@@ -1429,15 +1597,28 @@ export default function VacanteDetallePage() {
       if (!hasName && hasValue) nextErrors[`req-name-${req.id}`] = t("form.validation.requirementNameRequired");
     });
 
+    if (normalizeDataProtectionLawIds(editDataProtectionLawIds).length === 0) {
+      nextErrors.laws = t("form.validation.lawsRequired");
+    }
+
     setEditErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
-  }, [editTitle, editDescription, editRequirements, t]);
+  }, [
+    editTitle,
+    editDescription,
+    editVacancyTypeId,
+    editPresentationDueDate,
+    editRequirements,
+    editDataProtectionLawIds,
+    t,
+  ]);
 
   const handleEditVacancy = useCallback(() => {
     if (!vacancy || !readVacancyIsActive(vacancy)) return;
     setSaveVacancyError(null);
     setEditErrors({});
     setVacancyCatalogsError(null);
+    lawSelectionTouchedRef.current = false;
     const resolvedCompanyId = resolveVacancyCompanyId(
       vacancy && typeof vacancy === "object" ? vacancy : null
     );
@@ -1446,6 +1627,14 @@ export default function VacanteDetallePage() {
     hydrateEditFormFromVacancy(vacancy);
     setIsEditing(true);
   }, [vacancy, hydrateEditFormFromVacancy]);
+
+  useEffect(() => {
+    if (!isEditing || lawSelectionTouchedRef.current) return
+    if (readVacancyDataProtectionLawIds(vacancy).length > 0) return
+    setEditDataProtectionLawIds(
+      suggestDataProtectionLawIds(editCountryCode, lawOptions)
+    )
+  }, [isEditing, vacancy, editCountryCode, lawOptions])
 
   const handleCopyVacancy = useCallback(async () => {
     if (!vacancy || typeof vacancy !== "object") return;
@@ -1514,9 +1703,34 @@ export default function VacanteDetallePage() {
         mergedModalityOptions
       )
     );
+    const resolvedTypeId = resolveClipboardCatalogId(
+      payload.vacancyTypeId ?? "",
+      payload.vacancyTypeCode ?? "",
+      payload.vacancyTypeName ?? "",
+      mergedTypeOptions
+    );
+    setEditVacancyTypeId(resolvedTypeId);
+    const pastedDueAt = String(payload.presentationDueAtUtc ?? "").trim();
+    if (pastedDueAt !== "") {
+      presentationDueTouchedRef.current = true;
+      setEditPresentationDueDate(
+        presentationDueAtUtcToDateInputValue(pastedDueAt)
+      );
+    } else if (resolvedTypeId !== "") {
+      presentationDueTouchedRef.current = false;
+      const selected = mergedTypeOptions.find((option) => option.id === resolvedTypeId);
+      const slaDays = selected?.presentationSlaDays;
+      if (slaDays != null && slaDays >= 1) {
+        setEditPresentationDueDate(
+          presentationDueAtUtcToDateInputValue(suggestPresentationDueAtUtc(slaDays))
+        );
+      }
+    }
     setEditRequirements(clipboardPayloadToRequirementRows(payload.requirements));
+    lawSelectionTouchedRef.current = true;
+    setEditDataProtectionLawIds(normalizeDataProtectionLawIds(payload.dataProtectionLawIds));
     setEditErrors({});
-  }, [mergedDepartmentOptions, mergedModalityOptions]);
+  }, [mergedDepartmentOptions, mergedModalityOptions, mergedTypeOptions]);
 
   const handleRequestPaste = useCallback(async () => {
     const payload = await readVacancyClipboard();
@@ -1628,6 +1842,10 @@ export default function VacanteDetallePage() {
     );
     const nextDepartmentId = editVacancyDepartmentId || null;
     const nextModalityId = editVacancyModalityId || null;
+    const nextTypeId = editVacancyTypeId || null;
+    const nextPresentationDueAtUtc =
+      dateInputValueToPresentationDueAtUtc(editPresentationDueDate);
+    const currentPresentationDueAtUtc = getVacancyPresentationDueAtUtc(vacancy);
 
     const hasOtherFormChanges =
       nextTitle !== String(vacancy?.title ?? "").trim() ||
@@ -1642,6 +1860,12 @@ export default function VacanteDetallePage() {
       nextStateCode !== currentStateCode ||
       nextDepartmentId !== (getVacancyDepartmentId(vacancy) || null) ||
       nextModalityId !== (getVacancyModalityId(vacancy) || null) ||
+      nextTypeId !== (getVacancyTypeId(vacancy) || null) ||
+      nextPresentationDueAtUtc !== currentPresentationDueAtUtc ||
+      !sameDataProtectionLawIds(
+        editDataProtectionLawIds,
+        readVacancyDataProtectionLawIds(vacancy)
+      ) ||
       JSON.stringify(requirements) !==
         JSON.stringify(
           vacancy?.requirements &&
@@ -1671,11 +1895,14 @@ export default function VacanteDetallePage() {
           },
           vacancyDepartmentId: nextDepartmentId,
           vacancyModalityId: nextModalityId,
+          vacancyTypeId: nextTypeId,
+          presentationDueAtUtc: nextPresentationDueAtUtc,
         };
         appendVacancyLocationToPayload(payload, {
           countryCode: editCountryCode,
           stateCode: editStateCode,
         });
+        payload.dataProtectionLawIds = normalizeDataProtectionLawIds(editDataProtectionLawIds);
         if (companyChanged) {
           payload.companyId = editCompanyId;
         }
@@ -1695,6 +1922,9 @@ export default function VacanteDetallePage() {
         const selectedModality = mergedModalityOptions.find(
           (option) => option.id === editVacancyModalityId
         );
+        const selectedType = mergedTypeOptions.find(
+          (option) => option.id === editVacancyTypeId
+        );
 
         const nextDepartmentSummary =
           getVacancyDepartmentSummary(updatedRecord) ??
@@ -1705,6 +1935,16 @@ export default function VacanteDetallePage() {
           getVacancyModalitySummary(updatedRecord) ??
           createCatalogSummary(selectedModality) ??
           null;
+
+        const selectedTypeSummary = createCatalogSummary(selectedType)
+        const nextTypeSummary =
+          getVacancyTypeSummary(updatedRecord) ??
+          (selectedTypeSummary
+            ? {
+                ...selectedTypeSummary,
+                presentationSlaDays: selectedType?.presentationSlaDays ?? null,
+              }
+            : null);
 
         const nextCompanyName =
           companySelectOptions.find((c) => c.id === editCompanyId)?.name ??
@@ -1735,6 +1975,24 @@ export default function VacanteDetallePage() {
           modality: nextModalitySummary?.displayName ?? null,
           workArrangement: nextModalitySummary?.displayName ?? null,
           work_arrangement: nextModalitySummary?.displayName ?? null,
+          vacancyTypeId: editVacancyTypeId || null,
+          vacancy_type_id: editVacancyTypeId || null,
+          vacancyType: nextTypeSummary,
+          vacancy_type: nextTypeSummary,
+          presentationDueAtUtc: nextPresentationDueAtUtc,
+          presentation_due_at_utc: nextPresentationDueAtUtc,
+          dataProtectionLawIds: payload.dataProtectionLawIds,
+          dataProtectionLaws:
+            readVacancyDataProtectionLaws(updatedRecord).length > 0
+              ? readVacancyDataProtectionLaws(updatedRecord)
+              : normalizeDataProtectionLawIds(editDataProtectionLawIds)
+                  .map((id) =>
+                    mergeLinkedLawOptions(
+                      lawOptions,
+                      readVacancyDataProtectionLaws(vacancy)
+                    ).find((law) => law.id === id)
+                  )
+                  .filter((law): law is VacancyDataProtectionLaw => law != null),
         }));
 
         const nextPublicSlug = readPublicSlug(updatedRecord)
@@ -1786,11 +2044,16 @@ export default function VacanteDetallePage() {
     editStateCode,
     editVacancyDepartmentId,
     editVacancyModalityId,
+    editVacancyTypeId,
+    editPresentationDueDate,
+    editDataProtectionLawIds,
+    lawOptions,
     editRequirements,
     validateEditForm,
     fetchVacancy,
     mergedDepartmentOptions,
     mergedModalityOptions,
+    mergedTypeOptions,
     createCatalogSummary,
     companySelectOptions,
     t,
@@ -2078,9 +2341,9 @@ export default function VacanteDetallePage() {
 
     if (applicants.length > 0 && finalStageNames.size > 0) {
       return applicants.some((applicant, index) => {
-        const candidateId = getCandidateId(applicant, index)
+        const rowId = getKanbanRowId(applicant, index)
         const rawStageName =
-          candidateStageOverrides[candidateId] ??
+          candidateStageOverrides[rowId] ??
           applicant?.applicationStage ??
           applicant?.stage ??
           applicant?.stageName ??
@@ -2098,17 +2361,23 @@ export default function VacanteDetallePage() {
     return canFinishProcess && !isVacancyDone && !isVacancyReadOnly
   }, [canFinishProcess, isVacancyDone, isVacancyReadOnly])
 
-  /** Stable key for matching (same person in search vs aiMatchSuggestions). */
-  const getMatchKey = (m) => m?.candidateDocumentId ?? m?.candidateProfileId ?? null;
+  /**
+   * Posibles candidatos: AI suggestions minus anyone already in Etapas.
+   * Backend may still return included people in aiMatchSuggestions after "Incluir al proceso".
+   */
+  const possibleCandidatesToDisplay = useMemo(
+    () => filterCandidatesNotInProcess(vacancyCandidates, applicants),
+    [vacancyCandidates, applicants]
+  );
 
   /** Search results to show: exclude anyone already in aiMatchSuggestions or applicants. */
   const searchResultsToDisplay = useMemo(() => {
     if (smartCandidates == null || smartCandidates.length === 0) return [];
-    const existingKeys = new Set([
-      ...vacancyCandidates.map((m) => getMatchKey(m)).filter(Boolean),
-      ...applicants.map((m) => getMatchKey(m)).filter(Boolean),
+    const existingKeys = buildPersonIdentityKeySet([
+      ...vacancyCandidates,
+      ...applicants,
     ]);
-    return smartCandidates.filter((m) => !existingKeys.has(getMatchKey(m)));
+    return smartCandidates.filter((m) => !isPersonInIdentitySet(m, existingKeys));
   }, [smartCandidates, vacancyCandidates, applicants]);
 
   /** Candidates from Search only (for selection and Match button in Search container). */
@@ -2133,7 +2402,7 @@ export default function VacanteDetallePage() {
       return columnStages.map((stage) => ({ stage, candidates: [] }));
     }
     const withMeta = applicants.map((match, i) => {
-      const candidateId = getCandidateId(match, i);
+      const candidateId = getKanbanRowId(match, i);
       const stage =
         candidateStageOverrides[candidateId] ??
         normalizeKanbanStage(
@@ -2161,7 +2430,7 @@ export default function VacanteDetallePage() {
       if (loadingMoveStage || pendingStageMove) return;
       setApplicationStatusError(null);
       const applicantIndex = applicants.findIndex(
-        (m, i) => getCandidateId(m, i) === candidateId
+        (m, i) => getKanbanRowId(m, i) === candidateId
       );
       const applicant =
         applicantIndex >= 0 ? applicants[applicantIndex] : null;
@@ -2449,7 +2718,7 @@ export default function VacanteDetallePage() {
       if (isVacancyReadOnly) return;
       setApplicationStatusError(null);
       const applicant = applicants.find(
-        (m, i) => getCandidateId(m, i) === candidateId
+        (m, i) => getKanbanRowId(m, i) === candidateId
       );
       const applicationId = applicant?.applicationId ?? applicant?.application_id;
       if (!applicationId) {
@@ -2533,7 +2802,7 @@ export default function VacanteDetallePage() {
 
   const handleStartProcess = useCallback(async () => {
     if (!vacancyId || isVacancyReadOnly) return;
-    const candidateProfileIds = vacancyCandidates
+    const candidateProfileIds = possibleCandidatesToDisplay
       .map((match, index) => (selectedPossibleCandidateIds.has(getCandidateId(match, index)) ? match.candidateProfileId : null))
       .filter((pid) => pid != null && String(pid).trim() !== "");
     if (candidateProfileIds.length === 0) return;
@@ -2559,7 +2828,7 @@ export default function VacanteDetallePage() {
     } finally {
       setLoadingStartProcess(false);
     }
-  }, [vacancyId, vacancyCandidates, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas, isVacancyReadOnly, tMatching]);
+  }, [vacancyId, possibleCandidatesToDisplay, selectedPossibleCandidateIds, fetchVacancy, scrollToEtapas, isVacancyReadOnly, tMatching]);
 
   /** Selected candidate document IDs to send to the match API. */
   const selectedDocumentIds = displayCandidates
@@ -2670,6 +2939,15 @@ export default function VacanteDetallePage() {
   ]);
 
   const selectedCount = selectedCandidateIds.size;
+
+  const linkedLaws = useMemo(
+    () => readVacancyDataProtectionLaws(vacancy),
+    [vacancy]
+  );
+  const lawFieldOptions = useMemo(
+    () => mergeLinkedLawOptions(lawOptions, linkedLaws),
+    [lawOptions, linkedLaws]
+  );
 
   const breadcrumbLabel = vacancy?.title ? vacancy.title : tDetail("page.fallbackTitle");
 
@@ -2856,6 +3134,86 @@ export default function VacanteDetallePage() {
                               />
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-type-desktop">
+                                    {t("form.fields.vacancyType.label")}
+                                  </label>
+                                  <select
+                                    id="edit-vacancy-type-desktop"
+                                    value={editVacancyTypeId}
+                                    onChange={(e) => {
+                                      const nextTypeId = e.target.value
+                                      setEditVacancyTypeId(nextTypeId)
+                                      setEditErrors((prev) => {
+                                        const next = { ...prev }
+                                        delete next.vacancyType
+                                        return next
+                                      })
+                                      if (!presentationDueTouchedRef.current && nextTypeId !== "") {
+                                        const selected = mergedTypeOptions.find(
+                                          (option) => option.id === nextTypeId
+                                        )
+                                        const slaDays = selected?.presentationSlaDays
+                                        if (slaDays != null && slaDays >= 1) {
+                                          setEditPresentationDueDate(
+                                            presentationDueAtUtcToDateInputValue(
+                                              suggestPresentationDueAtUtc(slaDays)
+                                            )
+                                          )
+                                        }
+                                      }
+                                    }}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label={t("form.fields.vacancyType.ariaLabel")}
+                                    aria-invalid={Boolean(editErrors.vacancyType)}
+                                    disabled={loadingVacancyCatalogs}
+                                  >
+                                    <option value="">{t("form.fields.vacancyType.placeholder")}</option>
+                                    {mergedTypeOptions.map((option) => (
+                                      <option key={option.id} value={option.id}>
+                                        {option.displayName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {editErrors.vacancyType ? (
+                                    <p className="font-sans text-sm text-vo-pink" role="alert">
+                                      {editErrors.vacancyType}
+                                    </p>
+                                  ) : null}
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-presentation-due-desktop">
+                                    {t("form.fields.presentationDueAt.label")}
+                                  </label>
+                                  <input
+                                    id="edit-vacancy-presentation-due-desktop"
+                                    type="date"
+                                    value={editPresentationDueDate}
+                                    onChange={(e) => {
+                                      presentationDueTouchedRef.current = true
+                                      setEditPresentationDueDate(e.target.value)
+                                      setEditErrors((prev) => {
+                                        const next = { ...prev }
+                                        delete next.presentationDueAt
+                                        return next
+                                      })
+                                    }}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label={t("form.fields.presentationDueAt.ariaLabel")}
+                                    aria-invalid={Boolean(editErrors.presentationDueAt)}
+                                    disabled={savingVacancy}
+                                  />
+                                  <p className="font-sans text-xs text-muted-foreground">
+                                    {t("form.fields.presentationDueAt.helper")}
+                                  </p>
+                                  {editErrors.presentationDueAt ? (
+                                    <p className="font-sans text-sm text-vo-pink" role="alert">
+                                      {editErrors.presentationDueAt}
+                                    </p>
+                                  ) : null}
+                                </div>
+                              </div>
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-desktop">
                                     {t("form.fields.department.label")}
                                   </label>
@@ -2901,15 +3259,44 @@ export default function VacanteDetallePage() {
                                   {vacancyCatalogsError}
                                 </p>
                               ) : null}
-                            </div>
+                            <VacancyDataProtectionLawsField
+                              laws={lawFieldOptions}
+                              selectedIds={editDataProtectionLawIds}
+                              onChange={(ids) => {
+                                lawSelectionTouchedRef.current = true
+                                setEditDataProtectionLawIds(ids)
+                              }}
+                              legend={t("form.fields.dataProtectionLaws.label")}
+                              helper={t("form.fields.dataProtectionLaws.helper")}
+                              placeholder={t("form.fields.dataProtectionLaws.placeholder")}
+                              emptyLabel={t("form.fields.dataProtectionLaws.empty")}
+                              inactiveLabel={t("form.fields.dataProtectionLaws.inactive")}
+                              loadingLabel={t("form.fields.dataProtectionLaws.loading")}
+                              loadErrorLabel={t("form.fields.dataProtectionLaws.loadFailed")}
+                              loading={loadingLaws}
+                              loadError={lawsLoadError}
+                              error={editErrors.laws}
+                              errorId="edit-vacancy-laws-error-desktop"
+                              disabled={savingVacancy}
+                            />
+                          </div>
                           ) : (
                             <VacancyReadOnlyIdentity
                               title={emptyToDash(vacancy.title)}
                               companyName={vacancyCompanyDisplayName}
                               department={getVacancyDepartmentLabel(vacancy)}
                               modality={getVacancyModalityLabel(vacancy)}
+                              vacancyType={getVacancyTypeLabel(vacancy)}
+                              presentationDueAtLabel={formatPresentationDueAtLabel(
+                                vacancyPresentationDueAtUtc,
+                                locale
+                              )}
+                              isPresentationOverdue={isPresentationDueOverdue(
+                                vacancyPresentationDueAtUtc
+                              )}
                               countryCode={vacancy.countryCode ?? vacancy.country_code}
                               stateCode={vacancy.stateCode ?? vacancy.state_code}
+                              laws={linkedLaws}
                               createdAtLabel={tDetail("headerMeta.created", {
                                 date: formatShortDate(vacancy.createdAt, locale),
                               })}
@@ -2960,6 +3347,13 @@ export default function VacanteDetallePage() {
                               aria-label={tDetail("actions.interviewsAria")}
                             >
                               {tDetail("actions.interviews")}
+                            </Link>
+                            <Link
+                              href={assignTestHref}
+                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              aria-label={tDetail("actions.assignTestAria")}
+                            >
+                              {tDetail("actions.assignTest")}
                             </Link>
                             <Link
                               href={resultadosHref}
@@ -3430,7 +3824,7 @@ export default function VacanteDetallePage() {
                           <Users className="h-5 w-5" aria-hidden />
                           {tMatching("possibleCandidates")}
                           <span className="font-sans text-sm font-normal text-muted-foreground">
-                            ({vacancyCandidates.length})
+                            ({possibleCandidatesToDisplay.length})
                           </span>
                         </h2>
                         <AiDisclosureBadge label={tMatching("preliminaryAnalysisBadge")} />
@@ -3462,7 +3856,7 @@ export default function VacanteDetallePage() {
                         className="rounded-xl border border-border bg-card p-6"
                         aria-label={tMatching("aria.possibleCandidates")}
                       >
-                        {vacancyCandidates.length === 0 ? (
+                        {possibleCandidatesToDisplay.length === 0 ? (
                           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
                             <p className="font-sans text-sm text-muted-foreground">
@@ -3471,7 +3865,7 @@ export default function VacanteDetallePage() {
                           </div>
                         ) : (
                           <ul className="flex flex-col gap-4" role="list">
-                            {vacancyCandidates.map((match, index) => {
+                            {possibleCandidatesToDisplay.map((match, index) => {
                               const candidateId = getCandidateId(match, index);
                               return (
                                 <li key={candidateId}>
@@ -3705,6 +4099,86 @@ export default function VacanteDetallePage() {
                               />
                               <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-type-mobile">
+                                    {t("form.fields.vacancyType.label")}
+                                  </label>
+                                  <select
+                                    id="edit-vacancy-type-mobile"
+                                    value={editVacancyTypeId}
+                                    onChange={(e) => {
+                                      const nextTypeId = e.target.value
+                                      setEditVacancyTypeId(nextTypeId)
+                                      setEditErrors((prev) => {
+                                        const next = { ...prev }
+                                        delete next.vacancyType
+                                        return next
+                                      })
+                                      if (!presentationDueTouchedRef.current && nextTypeId !== "") {
+                                        const selected = mergedTypeOptions.find(
+                                          (option) => option.id === nextTypeId
+                                        )
+                                        const slaDays = selected?.presentationSlaDays
+                                        if (slaDays != null && slaDays >= 1) {
+                                          setEditPresentationDueDate(
+                                            presentationDueAtUtcToDateInputValue(
+                                              suggestPresentationDueAtUtc(slaDays)
+                                            )
+                                          )
+                                        }
+                                      }
+                                    }}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label={t("form.fields.vacancyType.ariaLabel")}
+                                    aria-invalid={Boolean(editErrors.vacancyType)}
+                                    disabled={loadingVacancyCatalogs}
+                                  >
+                                    <option value="">{t("form.fields.vacancyType.placeholder")}</option>
+                                    {mergedTypeOptions.map((option) => (
+                                      <option key={option.id} value={option.id}>
+                                        {option.displayName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {editErrors.vacancyType ? (
+                                    <p className="font-sans text-sm text-vo-pink" role="alert">
+                                      {editErrors.vacancyType}
+                                    </p>
+                                  ) : null}
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-presentation-due-mobile">
+                                    {t("form.fields.presentationDueAt.label")}
+                                  </label>
+                                  <input
+                                    id="edit-vacancy-presentation-due-mobile"
+                                    type="date"
+                                    value={editPresentationDueDate}
+                                    onChange={(e) => {
+                                      presentationDueTouchedRef.current = true
+                                      setEditPresentationDueDate(e.target.value)
+                                      setEditErrors((prev) => {
+                                        const next = { ...prev }
+                                        delete next.presentationDueAt
+                                        return next
+                                      })
+                                    }}
+                                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-vo-purple focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
+                                    aria-label={t("form.fields.presentationDueAt.ariaLabel")}
+                                    aria-invalid={Boolean(editErrors.presentationDueAt)}
+                                    disabled={savingVacancy}
+                                  />
+                                  <p className="font-sans text-xs text-muted-foreground">
+                                    {t("form.fields.presentationDueAt.helper")}
+                                  </p>
+                                  {editErrors.presentationDueAt ? (
+                                    <p className="font-sans text-sm text-vo-pink" role="alert">
+                                      {editErrors.presentationDueAt}
+                                    </p>
+                                  ) : null}
+                                </div>
+                              </div>
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div className="flex flex-col gap-2">
                                   <label className="font-sans text-sm font-medium text-foreground" htmlFor="edit-vacancy-department-mobile">
                                     {t("form.fields.department.label")}
                                   </label>
@@ -3750,6 +4224,26 @@ export default function VacanteDetallePage() {
                                 {vacancyCatalogsError}
                               </p>
                             ) : null}
+                            <VacancyDataProtectionLawsField
+                              laws={lawFieldOptions}
+                              selectedIds={editDataProtectionLawIds}
+                              onChange={(ids) => {
+                                lawSelectionTouchedRef.current = true
+                                setEditDataProtectionLawIds(ids)
+                              }}
+                              legend={t("form.fields.dataProtectionLaws.label")}
+                              helper={t("form.fields.dataProtectionLaws.helper")}
+                              placeholder={t("form.fields.dataProtectionLaws.placeholder")}
+                              emptyLabel={t("form.fields.dataProtectionLaws.empty")}
+                              inactiveLabel={t("form.fields.dataProtectionLaws.inactive")}
+                              loadingLabel={t("form.fields.dataProtectionLaws.loading")}
+                              loadErrorLabel={t("form.fields.dataProtectionLaws.loadFailed")}
+                              loading={loadingLaws}
+                              loadError={lawsLoadError}
+                              error={editErrors.laws}
+                              errorId="edit-vacancy-laws-error-mobile"
+                              disabled={savingVacancy}
+                            />
                           </div>
                         ) : (
                           <VacancyReadOnlyIdentity
@@ -3757,8 +4251,17 @@ export default function VacanteDetallePage() {
                             companyName={vacancyCompanyDisplayName}
                             department={getVacancyDepartmentLabel(vacancy)}
                             modality={getVacancyModalityLabel(vacancy)}
+                            vacancyType={getVacancyTypeLabel(vacancy)}
+                            presentationDueAtLabel={formatPresentationDueAtLabel(
+                              vacancyPresentationDueAtUtc,
+                              locale
+                            )}
+                            isPresentationOverdue={isPresentationDueOverdue(
+                              vacancyPresentationDueAtUtc
+                            )}
                             countryCode={vacancy.countryCode ?? vacancy.country_code}
                             stateCode={vacancy.stateCode ?? vacancy.state_code}
+                            laws={linkedLaws}
                             createdAtLabel={tDetail("headerMeta.created", {
                               date: formatShortDate(vacancy.createdAt, locale),
                             })}
@@ -3789,6 +4292,13 @@ export default function VacanteDetallePage() {
                             aria-label={tDetail("actions.interviewsAria")}
                           >
                             {tDetail("actions.interviews")}
+                          </Link>
+                          <Link
+                            href={assignTestHref}
+                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                            aria-label={tDetail("actions.assignTestAria")}
+                          >
+                            {tDetail("actions.assignTest")}
                           </Link>
                           <Link
                             href={resultadosHref}
@@ -4266,7 +4776,7 @@ export default function VacanteDetallePage() {
                         <Users className="h-4 w-4" aria-hidden />
                         {tMatching("possibleCandidates")}
                         <span className="font-sans text-sm font-normal text-muted-foreground">
-                          ({vacancyCandidates.length})
+                          ({possibleCandidatesToDisplay.length})
                         </span>
                       </h2>
                       <AiDisclosureBadge label={tMatching("preliminaryAnalysisBadge")} />
@@ -4298,7 +4808,7 @@ export default function VacanteDetallePage() {
                       className="rounded-xl border border-border bg-card p-5"
                       aria-label={tMatching("aria.possibleCandidates")}
                     >
-                      {vacancyCandidates.length === 0 ? (
+                      {possibleCandidatesToDisplay.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                           <Users className="h-10 w-10 text-muted-foreground" aria-hidden />
                           <p className="font-sans text-sm text-muted-foreground">
@@ -4307,7 +4817,7 @@ export default function VacanteDetallePage() {
                         </div>
                       ) : (
                         <ul className="flex flex-col gap-4" role="list">
-                          {vacancyCandidates.map((match, index) => {
+                          {possibleCandidatesToDisplay.map((match, index) => {
                             const candidateId = getCandidateId(match, index);
                             return (
                               <li key={candidateId}>
@@ -4433,5 +4943,13 @@ export default function VacanteDetallePage() {
         />
       ) : null}
     </>
+  );
+}
+
+export default function VacanteDetalleRoute() {
+  return (
+    <Suspense fallback={null}>
+      <VacanteDetallePage />
+    </Suspense>
   );
 }

@@ -19,12 +19,15 @@ import {
   isRecruiterCandidateCvError,
 } from "@/lib/api/recruiter-candidate-cv"
 import {
+  buildAttributeRowsFromAssessments,
   buildAttributeTableRows,
   COMPONENT_SCORE_RECORD_KEYS,
   MATCHED_ATTRIBUTE_RECORD_KEYS,
   pickNamedRecord,
+  pickRequirementAssessments,
   toAttributeLevel,
   type AttributeTableRow,
+  type RequirementVerdict,
 } from "@/lib/vacancies/build-attribute-table-rows"
 import {
   formatScorePercent,
@@ -59,6 +62,19 @@ export interface CandidateProfileMatch {
   qualitativeReasoning?: string | null
   qualitativeReasoningPositive?: string | null
   qualitativeReasoningNegative?: string | null
+  requirementAssessments?: unknown[] | null
+  requiresManualReview?: boolean | null
+  scoreBreakdown?: {
+    attributesIncludedInTotal?: boolean | null
+    attributeCoverage?: number | null
+  } | null
+}
+
+const VERDICT_BADGE_CLASSES: Record<RequirementVerdict, string> = {
+  Met: "bg-emerald-100 text-emerald-800",
+  Partial: "bg-emerald-100 text-emerald-800",
+  NotMet: "bg-amber-100 text-amber-900",
+  Unavailable: "bg-slate-200 text-slate-700",
 }
 
 interface CandidateProfileModalProps {
@@ -144,6 +160,8 @@ interface ScoreBarRowProps {
   isTotalRow?: boolean
   hideLabel?: boolean
   levelFallback?: string | null
+  verdict?: RequirementVerdict
+  verdictLabel?: string | null
 }
 
 function ScoreBarRow({
@@ -157,6 +175,8 @@ function ScoreBarRow({
   isTotalRow = false,
   hideLabel = false,
   levelFallback = null,
+  verdict,
+  verdictLabel = null,
 }: ScoreBarRowProps) {
   const percentLabel = formatScorePercent(value) ?? emptyToDash(value)
   const barWidth = scoreBarWidth(value)
@@ -168,7 +188,7 @@ function ScoreBarRow({
     <li
       className={
         isTotalRow
-          ? "flex flex-col gap-1 rounded-lg border border-sky-200/80 bg-sky-50/70 px-3 py-3"
+          ? "flex flex-col gap-1 rounded-lg border border-emerald-200/80 bg-emerald-50/70 px-3 py-3"
           : "flex flex-col gap-1"
       }
     >
@@ -203,13 +223,24 @@ function ScoreBarRow({
           {percentLabel}
         </span>
       </div>
-      {displayLevel != null && (
-        <p
-          className="truncate font-sans text-[10px] leading-3 text-slate-400"
-          title={displayLevel}
-        >
-          {displayLevel}
-        </p>
+      {(displayLevel != null || (verdict != null && verdictLabel != null)) && (
+        <div className="flex min-w-0 items-center gap-2">
+          {verdict != null && verdictLabel != null && (
+            <span
+              className={`shrink-0 rounded px-1.5 py-0.5 font-sans text-[10px] font-medium leading-3 ${VERDICT_BADGE_CLASSES[verdict]}`}
+            >
+              {verdictLabel}
+            </span>
+          )}
+          {displayLevel != null && (
+            <p
+              className="truncate font-sans text-[10px] leading-3 text-slate-400"
+              title={displayLevel}
+            >
+              {displayLevel}
+            </p>
+          )}
+        </div>
       )}
     </li>
   )
@@ -319,9 +350,21 @@ export function CandidateProfileModal({
   const matchedAttributesEntries = objectEntries(
     pickNamedRecord(match, MATCHED_ATTRIBUTE_RECORD_KEYS)
   )
+  const requirementAssessments = pickRequirementAssessments(match)
   const attributeTableRows = sortAttributeRows(
-    buildAttributeTableRows(sortedAttributeIndividuals, matchedAttributesEntries, getScoreLabel)
+    requirementAssessments.length > 0
+      ? buildAttributeRowsFromAssessments(requirementAssessments, getScoreLabel)
+      : buildAttributeTableRows(sortedAttributeIndividuals, matchedAttributesEntries, getScoreLabel)
   )
+  const verdictLabels: Record<RequirementVerdict, string> = {
+    Met: tModal("verdictMet"),
+    Partial: tModal("verdictPartial"),
+    NotMet: tModal("verdictNotMet"),
+    Unavailable: tModal("verdictUnavailable"),
+  }
+  const requiresManualReview = match.requiresManualReview === true
+  const attributesExcludedFromTotal = match.scoreBreakdown?.attributesIncludedInTotal === false
+  const attributeCoveragePercent = formatScorePercent(match.scoreBreakdown?.attributeCoverage)
 
   const qualitativeReasoningLegacy = toTrimmedText(match.qualitativeReasoning)
   const qualitativeReasoningPositive = toTrimmedText(match.qualitativeReasoningPositive)
@@ -431,11 +474,21 @@ export function CandidateProfileModal({
               {hasScoreSections && (
                 <div className="flex flex-col gap-5">
                   {hasAttributeBlock && (
-                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-sky-200/60">
-                      <h3 className="mb-3.5 font-sans text-sm font-semibold text-sky-900">
+                    <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/60">
+                      <h3 className="mb-3.5 font-sans text-sm font-semibold text-emerald-900">
                         {tModal("attributes")}
                       </h3>
-                      {showZeroHint && (
+                      {requiresManualReview && (
+                        <p className="mb-3 rounded-md bg-amber-50 px-3 py-2 font-sans text-xs leading-relaxed text-amber-900" role="status">
+                          {tModal("manualReviewNotice")}
+                        </p>
+                      )}
+                      {attributesExcludedFromTotal && (
+                        <p className="mb-3 font-sans text-xs leading-relaxed text-slate-600">
+                          {tModal("attributesExcludedHint", { coverage: attributeCoveragePercent ?? "—" })}
+                        </p>
+                      )}
+                      {showZeroHint && requirementAssessments.length === 0 && (
                         <p className="mb-3 font-sans text-xs leading-relaxed text-slate-600">
                           {tModal("attributesZeroHint")}
                         </p>
@@ -451,11 +504,15 @@ export function CandidateProfileModal({
                             barClass={
                               typeof row.score === "number" && row.score <= 0
                                 ? "bg-amber-500"
-                                : "bg-sky-500"
+                                : "bg-ats-terracotta"
                             }
                             valueClass="text-slate-900"
                             barTrackClass="bg-slate-300/80"
-                            levelFallback={tModal("attributeLevelFallback")}
+                            levelFallback={
+                              row.verdict === "Unavailable" ? null : tModal("attributeLevelFallback")
+                            }
+                            verdict={row.verdict}
+                            verdictLabel={row.verdict != null ? verdictLabels[row.verdict] : null}
                           />
                         ))}
                         {aggregateEntry != null && (
@@ -463,7 +520,7 @@ export function CandidateProfileModal({
                             label={getScoreLabel(aggregateEntry[0])}
                             value={aggregateEntry[1]}
                             labelClass="text-slate-800"
-                            barClass="bg-sky-600"
+                            barClass="bg-ats-cobre"
                             valueClass="text-slate-900"
                             barTrackClass="bg-slate-300/80"
                             isTotalRow
@@ -484,6 +541,9 @@ export function CandidateProfileModal({
                           accentClass="text-amber-800"
                         />
                       </div>
+                      <p className="mb-3 font-sans text-xs leading-relaxed text-slate-600">
+                        {tModal("qualitativeScoreHint")}
+                      </p>
                       <ul className="flex flex-col gap-2.5" role="list">
                         <ScoreBarRow
                           label={getScoreLabel(qualitativeEntry[0])}
@@ -527,6 +587,9 @@ export function CandidateProfileModal({
 
               {hasSplitQualitative ? (
                 <div className="flex flex-col gap-4">
+                  <p className="font-sans text-xs leading-relaxed text-slate-600">
+                    {tModal("checklistHint")}
+                  </p>
                   {qualitativeReasoningPositive != null && (
                     <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/50">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">

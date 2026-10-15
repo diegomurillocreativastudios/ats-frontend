@@ -88,15 +88,15 @@ export function FinishVacancyProcessModal({
       closeOnEscape={!loading}
     >
       <div className="flex flex-col gap-5">
-        <div className="flex items-start gap-3 rounded-lg border border-sky-200 bg-sky-50 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-100">
-            <CheckCircle2 className="h-5 w-5 text-sky-600" aria-hidden />
+        <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
           </div>
           <div className="min-w-0 space-y-1">
-            <p className="font-sans text-sm font-semibold text-sky-900">
+            <p className="font-sans text-sm font-semibold text-emerald-900">
               {t("completedTitle")}
             </p>
-            <p className="font-sans text-sm text-sky-800">
+            <p className="font-sans text-sm text-emerald-800">
               {t("completedBody")}
             </p>
           </div>

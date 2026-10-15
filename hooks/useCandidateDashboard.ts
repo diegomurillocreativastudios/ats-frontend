@@ -27,9 +27,16 @@ export function useCandidateDashboard() {
         applications: apps.map((row) => {
           const ext = row as CandidatePortalApplicationRow & {
             application_source?: unknown
+            vacancy_id?: unknown
           }
+          const vacancyRaw = row.vacancyId ?? ext.vacancy_id
+          const vacancyId =
+            typeof vacancyRaw === "string" && vacancyRaw.trim() !== ""
+              ? vacancyRaw.trim()
+              : undefined
           return {
             ...row,
+            vacancyId,
             companyLine: (row.companyLine ?? "").trim(),
             applicationSource: normalizeApplicationSource(
               row.applicationSource ?? ext.application_source

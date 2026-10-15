@@ -68,6 +68,19 @@ describe("PublicVacancyDetailPage", () => {
 • Experiencia comprobable en colocación de créditos.`,
       requirements: ["Licencia de conducir vigente"],
       advantages: "Seguro médico privado",
+      dataProtectionLaws: [
+        {
+          id: "law-sv",
+          code: "lpd-sv",
+          displayName: "Ley de Protección de Datos",
+          jurisdictionCode: "SV",
+          officialReference: "",
+          summary: "",
+          locale: "es",
+          body: "",
+          isActive: true,
+        },
+      ],
     })
   })
 
@@ -97,7 +110,10 @@ describe("PublicVacancyDetailPage", () => {
     expect(within(applyRail).getByText("El Salvador, San Salvador")).toBeInTheDocument()
     expect(within(applyRail).getByText("Estrategia de carrera")).toBeInTheDocument()
     expect(within(applyRail).getByText("Presencial")).toBeInTheDocument()
+    expect(within(applyRail).getByText("Leyes de protección de datos")).toBeInTheDocument()
+    expect(within(applyRail).getByText("Ley de Protección de Datos · SV")).toBeInTheDocument()
     expect(applyRail.querySelector(".lucide-building")).not.toBeNull()
+    expect(applyRail.querySelector(".lucide-scale")).not.toBeNull()
     expect(screen.queryByText("No especificado")).not.toBeInTheDocument()
     expect(screen.getByText("Objetivo del puesto")).toBeInTheDocument()
     expect(screen.getByText(/Prisma Capital/)).toBeInTheDocument()
