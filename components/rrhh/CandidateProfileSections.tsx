@@ -8,6 +8,7 @@ import {
 } from "react"
 import { useTranslations } from "next-intl"
 import { ExternalLink, Link2, Phone } from "lucide-react"
+import { formatSalaryUsd } from "@/components/candidato/candidate-salary-expectation-card"
 
 const SPANISH_FALLBACKS: Record<string, string> = {
   "fields.sectors": "Sectores",
@@ -189,8 +190,19 @@ export const JobPreferencesBlock = ({
   const sectors = Array.isArray(parsed?.Sectors) ? parsed.Sectors : []
   const sectorsText = sectors.length > 0 ? sectors.join(", ") : null
 
-  const minSalary =
-    parsed?.MinSalary ?? parsed?.minSalary ?? fallbackMinSalary ?? null
+  // Prefer profile.minSalary over JobPreferences (CV) when both exist.
+  const minSalaryRaw =
+    fallbackMinSalary != null && !Number.isNaN(Number(fallbackMinSalary))
+      ? fallbackMinSalary
+      : (parsed?.MinSalary ?? parsed?.minSalary ?? null)
+  const minSalaryNum =
+    minSalaryRaw != null && String(minSalaryRaw).trim() !== ""
+      ? Number(minSalaryRaw)
+      : null
+  const minSalaryDisplay =
+    minSalaryNum != null && !Number.isNaN(minSalaryNum)
+      ? formatSalaryUsd(minSalaryNum)
+      : null
   const disabilityRaw = parsed?.Disability ?? parsed?.disability
   const disabilityDisplay =
     disabilityRaw === true
@@ -205,7 +217,7 @@ export const JobPreferencesBlock = ({
 
   const items = [
     { label: label("fields.desiredRole"), value: parsed?.DesiredRole ?? parsed?.desiredRole },
-    { label: label("fields.minSalary"), value: minSalary },
+    { label: label("fields.minSalary"), value: minSalaryDisplay },
     {
       label: label("fields.educationLevel"),
       value: parsed?.EducationLevel ?? parsed?.educationLevel,

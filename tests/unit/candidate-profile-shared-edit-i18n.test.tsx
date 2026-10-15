@@ -243,6 +243,7 @@ describe("useCandidateProfileEditor messages (Etapa 15)", () => {
       headline: true,
       summary: true,
       nationalId: true,
+      jobMinSalary: true,
     })
   })
 
@@ -257,8 +258,10 @@ describe("useCandidateProfileEditor messages (Etapa 15)", () => {
       headline: true,
       summary: true,
       nationalId: true,
+      jobMinSalary: true,
     })
   })
+
 })
 
 describe("RecruiterPortal.candidateDetail edit namespace parity (Etapa 15)", () => {
@@ -288,6 +291,7 @@ describe("RecruiterPortal.candidateDetail edit namespace parity (Etapa 15)", () 
         ).form as Record<string, unknown>
       ).validation as Record<string, unknown>
       expect(validation).toHaveProperty("requiredFields")
+      expect(validation).toHaveProperty("jobMinSalaryRequired")
       expect(validation).toHaveProperty("resumeRequired")
       expect(validation).toHaveProperty("birthDate")
     }
@@ -365,5 +369,23 @@ describe("JobPreferencesBlock canonical values (Etapa 15)", () => {
       </NextIntlClientProvider>,
     )
     expect(screen.getByText("Inmediata")).toBeInTheDocument()
+  })
+
+  it("formatea el salario mínimo en USD", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messagesByLocale.en}>
+        <CandidateProfileSectionsProvider namespace="CandidatePortal.profile">
+          <JobPreferencesBlock
+            prefs={{}}
+            fallbackMinSalary={3123}
+            fallbackAvailability={null}
+            fallbackHasDisability={null}
+          />
+        </CandidateProfileSectionsProvider>
+      </NextIntlClientProvider>,
+    )
+    const salaryDd = screen.getByText("Minimum salary").closest("div")?.querySelector("dd")
+    expect(salaryDd?.textContent).toMatch(/3123/)
+    expect(salaryDd?.textContent).toMatch(/US\$|\$/)
   })
 })

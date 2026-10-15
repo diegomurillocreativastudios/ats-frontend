@@ -20,6 +20,8 @@ export interface PublicVacancyApplyValues {
   websiteUrl?: string
   source?: string
   notes?: string
+  /** Salary expectation (USD). Required on the public form; optional on logged-in apply. */
+  minSalary?: number
   cvFile: File
   /** Evidencia de consent and auth aceptada antes de postular (misma forma que POST auth-consent). */
   authConsent?: CandidateAuthConsentSubmitBody
@@ -40,6 +42,40 @@ interface CandidatePersonalAppliancePayload {
   websiteUrl: string
   source: string
   notes: string
+  minSalary?: number
+}
+
+/** Deja solo dígitos y como máximo un punto decimal (sin letras ni signos). */
+export function sanitizePublicApplySalaryInput(raw: string): string {
+  let out = ""
+  let hasDot = false
+  for (const ch of raw) {
+    if (ch >= "0" && ch <= "9") {
+      out += ch
+      continue
+    }
+    if (ch === "." && !hasDot) {
+      out += ch
+      hasDot = true
+    }
+  }
+  return out
+}
+
+/** Parse salary expectation: empty / invalid / negative → null; otherwise number. */
+export function parsePublicApplyMinSalary(raw: string): number | null {
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  const n = Number(trimmed)
+  if (!Number.isFinite(n) || n < 0) return null
+  return n
+}
+
+/** Formato visual con dos decimales; vacío si no hay número válido. */
+export function formatPublicApplyMinSalaryDisplay(raw: string): string {
+  const n = parsePublicApplyMinSalary(raw)
+  if (n == null) return ""
+  return n.toFixed(2)
 }
 
 function getRecord(value: unknown): Record<string, unknown> | null {
@@ -258,6 +294,14 @@ export function buildPublicApplyFormData(
 
   if (values.nationalId?.trim()) {
     candidate.nationalId = values.nationalId.trim()
+  }
+
+  if (
+    values.minSalary != null &&
+    Number.isFinite(values.minSalary) &&
+    values.minSalary >= 0
+  ) {
+    candidate.minSalary = values.minSalary
   }
 
   fd.append("vacancyId", vacancyId.trim())

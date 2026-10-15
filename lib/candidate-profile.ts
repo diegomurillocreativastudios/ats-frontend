@@ -403,6 +403,15 @@ export interface CandidateProfileRequiredFieldErrors {
   headline?: boolean
   summary?: boolean
   nationalId?: boolean
+  jobMinSalary?: boolean
+}
+
+/** True when salary expectation / min salary is a finite number ≥ 0 (not empty). */
+export function isValidRequiredJobMinSalary(raw: string): boolean {
+  const trimmed = raw.trim()
+  if (!trimmed) return false
+  const n = Number(trimmed)
+  return Number.isFinite(n) && n >= 0
 }
 
 export interface FullProfileFormInput {

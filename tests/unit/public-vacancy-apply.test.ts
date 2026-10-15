@@ -6,13 +6,16 @@ import {
 } from "@/lib/application-source"
 import {
   buildPublicApplyFormData,
+  formatPublicApplyMinSalaryDisplay,
   getPublicApplyErrorMessage,
   isAllowedCvFile,
   isAlreadyAppliedConflict,
   isCvFileWithinSizeLimit,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
+  parsePublicApplyMinSalary,
   PUBLIC_CV_MAX_BYTES,
+  sanitizePublicApplySalaryInput,
 } from "@/lib/public-vacancy-apply"
 
 describe("application source labels", () => {
@@ -187,6 +190,17 @@ describe("public vacancy apply helpers", () => {
     expect(parsed.firstName).toBe("Requerido")
   })
 
+  it("sanitizes and parses minSalary helpers", () => {
+    expect(sanitizePublicApplySalaryInput("1a2b3.4c5")).toBe("123.45")
+    expect(sanitizePublicApplySalaryInput("12.34.56")).toBe("12.3456")
+    expect(parsePublicApplyMinSalary("")).toBeNull()
+    expect(parsePublicApplyMinSalary("-1")).toBeNull()
+    expect(parsePublicApplyMinSalary("1500.50")).toBe(1500.5)
+    expect(parsePublicApplyMinSalary("0")).toBe(0)
+    expect(formatPublicApplyMinSalaryDisplay("1500.5")).toBe("1500.50")
+    expect(formatPublicApplyMinSalaryDisplay("")).toBe("")
+  })
+
   it("builds FormData with expected keys", () => {
     const file = new File(["%PDF"], "x.pdf", { type: "application/pdf" })
     const fd = buildPublicApplyFormData("vacancy-123", {
@@ -205,7 +219,7 @@ describe("public vacancy apply helpers", () => {
     expect(fd.get("cvFile")).toBe(file)
     const candidate = JSON.parse(String(fd.get("candidate") ?? "{}")) as Record<
       string,
-      string
+      unknown
     >
     expect(candidate.firstName).toBe("Ana")
     expect(candidate.lastName).toBe("López")
@@ -213,6 +227,30 @@ describe("public vacancy apply helpers", () => {
     expect(candidate.source).toBe("linkedin")
     expect(candidate.notes).toBe("hola")
     expect(candidate).not.toHaveProperty("outputLanguage")
+    expect(candidate).not.toHaveProperty("minSalary")
+    expect(candidate).not.toHaveProperty("jobPreferences")
+  })
+
+  it("includes minSalary as a number in candidate JSON when provided", () => {
+    const file = new File(["%PDF"], "x.pdf", { type: "application/pdf" })
+    const fd = buildPublicApplyFormData(
+      "vacancy-123",
+      {
+        firstName: "Ana",
+        lastName: "López",
+        email: "a@b.co",
+        minSalary: 1500.5,
+        cvFile: file,
+      },
+      "ES"
+    )
+    const candidate = JSON.parse(String(fd.get("candidate") ?? "{}")) as Record<
+      string,
+      unknown
+    >
+    expect(candidate.minSalary).toBe(1500.5)
+    expect(typeof candidate.minSalary).toBe("number")
+    expect(candidate).not.toHaveProperty("jobPreferences")
   })
 
   it("appends authConsent JSON when provided", () => {

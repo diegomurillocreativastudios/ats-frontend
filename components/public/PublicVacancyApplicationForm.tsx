@@ -17,12 +17,15 @@ import { useLocale, useTranslations } from "next-intl"
 import { FileText, LoaderCircle, Mail, X } from "lucide-react"
 import { PORTAL_HOME_HREF } from "@/lib/portal-access"
 import {
+  formatPublicApplyMinSalaryDisplay,
   getPublicApplyErrorMessage,
   isAllowedCvFile,
   isAlreadyAppliedConflict,
   isCvFileWithinSizeLimit,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
+  parsePublicApplyMinSalary,
+  sanitizePublicApplySalaryInput,
   submitPublicVacancyApplication,
   type PublicVacancyApplyValues,
 } from "@/lib/public-vacancy-apply"
@@ -116,6 +119,8 @@ interface PublicVacancyApplicationFormState {
   nationalId: string
   linkedinUrl: string
   websiteUrl: string
+  /** Salary expectation as text (digits / one dot); parsed on submit. */
+  minSalary: string
   source: string
   notes: string
 }
@@ -132,6 +137,7 @@ const initialState: PublicVacancyApplicationFormState = {
   nationalId: "",
   linkedinUrl: "",
   websiteUrl: "",
+  minSalary: "",
   source: "",
   notes: "",
 }
@@ -247,6 +253,7 @@ function mergeInitialFormState(
     nationalId: seed.nationalId?.trim() ?? "",
     linkedinUrl: seed.linkedinUrl?.trim() ?? "",
     websiteUrl: seed.websiteUrl?.trim() ?? "",
+    minSalary: "",
     source: seed.source?.trim() ?? "",
     notes: seed.notes?.trim() ?? "",
   }
@@ -377,12 +384,22 @@ export function PublicVacancyApplicationForm({
       const { name, value } = event.target
       const key = name as keyof PublicVacancyApplicationFormState
       if (isEmailLocked && key === "email") return
-      setValues((prev) => ({ ...prev, [key]: value }))
+      const nextValue =
+        key === "minSalary" ? sanitizePublicApplySalaryInput(value) : value
+      setValues((prev) => ({ ...prev, [key]: nextValue }))
       setErrors((prev) => ({ ...prev, [key]: undefined, cvFile: undefined }))
       setServerError(null)
     },
     [isEmailLocked]
   )
+
+  const handleMinSalaryBlur = useCallback(() => {
+    setValues((prev) => {
+      const formatted = formatPublicApplyMinSalaryDisplay(prev.minSalary)
+      if (!formatted) return prev
+      return { ...prev, minSalary: formatted }
+    })
+  }, [])
 
   const handlePhoneChange = useCallback((phone: string) => {
     setValues((prev) => ({ ...prev, phone }))
@@ -526,6 +543,11 @@ export function PublicVacancyApplicationForm({
     if (!values.nationalId.trim()) {
       next.nationalId = t("validation.documentNumberRequired")
     }
+    if (!values.minSalary.trim()) {
+      next.minSalary = t("validation.minSalaryRequired")
+    } else if (parsePublicApplyMinSalary(values.minSalary) == null) {
+      next.minSalary = t("validation.minSalaryInvalid")
+    }
     if (!cvFile) next.cvFile = t("validation.cvRequired")
     else if (!isAllowedCvFile(cvFile)) next.cvFile = t("validation.fileType")
     else if (!isCvFileWithinSizeLimit(cvFile)) next.cvFile = t("validation.fileTooLarge")
@@ -538,6 +560,7 @@ export function PublicVacancyApplicationForm({
     values.phone,
     values.documentTypeId,
     values.nationalId,
+    values.minSalary,
     cvFile,
     t,
   ])
@@ -555,6 +578,9 @@ export function PublicVacancyApplicationForm({
     setErrors({})
     setIsConfirmEmailModalOpen(false)
 
+    const minSalary = parsePublicApplyMinSalary(values.minSalary)
+    if (minSalary == null) return
+
     const payload: PublicVacancyApplyValues = {
       firstName: consentOverride?.firstNames ?? values.firstName,
       lastName: consentOverride?.lastNames ?? values.lastName,
@@ -566,6 +592,7 @@ export function PublicVacancyApplicationForm({
       websiteUrl: values.websiteUrl,
       source: values.source,
       notes: values.notes,
+      minSalary,
       cvFile,
       authConsent,
     }
@@ -1047,6 +1074,55 @@ export function PublicVacancyApplicationForm({
             placeholder="https://…"
           />
         </div>
+      <div className="space-y-2">
+        <label htmlFor="apply-minSalary" className={labelClass}>
+          {t("fields.minSalary")}
+        </label>
+        <div
+          className={
+            theme === "dark"
+              ? "flex h-11 items-center rounded-2xl border border-border bg-muted/35 px-3 focus-within:ring-2 focus-within:ring-ats-cobre"
+              : "flex h-11 items-center rounded-lg border border-border bg-background px-3 focus-within:ring-2 focus-within:ring-ats-terracotta"
+          }
+        >
+          <div
+            className="shrink-0 select-none text-sm text-muted-foreground"
+            aria-hidden
+          >
+            $
+          </div>
+          <input
+            id="apply-minSalary"
+            name="minSalary"
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            value={values.minSalary}
+            onChange={handleChange}
+            onBlur={handleMinSalaryBlur}
+            className="block min-w-0 grow bg-transparent py-2 pl-1 pr-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            disabled={disabled}
+            placeholder={t("placeholders.minSalary")}
+            aria-invalid={Boolean(errors.minSalary)}
+            aria-describedby={
+              errors.minSalary
+                ? "apply-minSalary-currency apply-minSalary-err"
+                : "apply-minSalary-currency"
+            }
+          />
+          <div
+            id="apply-minSalary-currency"
+            className="shrink-0 select-none text-sm text-muted-foreground"
+          >
+            {t("fields.minSalaryCurrency")}
+          </div>
+        </div>
+        {errors.minSalary ? (
+          <p id="apply-minSalary-err" className={errClass} role="alert">
+            {errors.minSalary}
+          </p>
+        ) : null}
+      </div>
       <div className="space-y-2">
         <label htmlFor="apply-notes" className={labelClass}>
           {t("fields.notes")}

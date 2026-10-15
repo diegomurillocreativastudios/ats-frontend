@@ -108,6 +108,9 @@ async function fillAndSubmit(locale: "es" | "en" = "es") {
   fireEvent.change(screen.getByLabelText(labels.documentNumber), {
     target: { value: "01234567-8" },
   })
+  fireEvent.change(screen.getByLabelText(labels.minSalary), {
+    target: { value: "1500.00" },
+  })
   const cvInput = document.getElementById("apply-cv") as HTMLInputElement
   fireEvent.change(cvInput, {
     target: {
@@ -229,7 +232,7 @@ describe("PublicVacancyApplicationForm", () => {
     expect(screen.getByPlaceholderText("1234-5678")).toBeInTheDocument()
   })
 
-  it("exige teléfono, tipo de documento y número de documento al enviar", async () => {
+  it("exige teléfono, tipo de documento, número de documento y pretensión salarial al enviar", async () => {
     renderForm()
 
     fireEvent.click(await screen.findByRole("button", { name: "Enviar postulación" }))
@@ -239,6 +242,21 @@ describe("PublicVacancyApplicationForm", () => {
     expect(screen.getByText("Ingresa tu teléfono.")).toBeInTheDocument()
     expect(screen.getByText("Selecciona un tipo de documento.")).toBeInTheDocument()
     expect(screen.getByText("Ingresa tu número de documento.")).toBeInTheDocument()
+    expect(screen.getByText("Ingresa tu pretensión salarial.")).toBeInTheDocument()
+  })
+
+  it("incluye minSalary numérico en el JSON candidate al enviar", async () => {
+    postFormData.mockResolvedValue("ok")
+    renderForm()
+    await fillAndSubmit()
+
+    await waitFor(() => expect(postFormData).toHaveBeenCalled())
+    const candidate = JSON.parse(String(getLastFormData().get("candidate") ?? "{}")) as Record<
+      string,
+      unknown
+    >
+    expect(candidate.minSalary).toBe(1500)
+    expect(typeof candidate.minSalary).toBe("number")
   })
 
   it("muestra la bandera del país junto al prefijo telefónico", async () => {

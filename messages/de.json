@@ -2150,7 +2150,8 @@
             "futureDate": "Das Datum darf nicht in der Zukunft liegen",
             "tooYoung": "Du musst mindestens 18 Jahre alt sein"
           },
-          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
+          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung, Ausweisdokument und Gehaltsvorstellung sind Pflichtfelder.",
+          "jobMinSalaryRequired": "Gib deine Gehaltsvorstellung ein (Monatsbetrag in USD).",
           "resumeRequired": "Das Profil muss Lebenslauftext enthalten. Lade einen CV unter Dokumente hoch oder kontaktiere den Support."
         }
       },
@@ -2992,7 +2993,8 @@
             "futureDate": "Das Datum darf nicht in der Zukunft liegen",
             "tooYoung": "Du musst mindestens 18 Jahre alt sein"
           },
-          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung und Ausweisdokument sind Pflichtfelder.",
+          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung, Ausweisdokument und Gehaltsvorstellung sind Pflichtfelder.",
+          "jobMinSalaryRequired": "Gib die Gehaltsvorstellung ein (Monatsbetrag in USD).",
           "resumeRequired": "Das Profil muss Lebenslauftext enthalten. Lade einen CV hoch oder kontaktiere den Support."
         }
       },
@@ -5621,6 +5623,8 @@
         "documentTypeRequired": "Wählen Sie einen Dokumenttyp.",
         "documentNumberRequired": "Geben Sie Ihre Dokumentnummer ein.",
         "cvRequired": "Fügen Sie Ihren Lebenslauf als PDF bei.",
+        "minSalaryRequired": "Geben Sie Ihre Gehaltsvorstellung ein.",
+        "minSalaryInvalid": "Geben Sie einen gültigen Betrag ein (nur Zahlen, mindestens 0).",
         "reviewFields": "Überprüfen Sie die angegebenen Felder.",
         "consentSubmitFailed": "Wir konnten Ihre Autorisierung und Einwilligung nicht speichern. Bitte versuchen Sie es erneut.",
         "consentValidation": "Bitte überprüfen Sie die Autorisierung und Einwilligung und versuchen Sie es erneut.",
@@ -5641,6 +5645,8 @@
         "source": "Wie haben Sie von dieser Stelle erfahren?",
         "linkedin": "LinkedIn-Profil",
         "website": "Website oder Portfolio",
+        "minSalary": "Gehaltsvorstellung *",
+        "minSalaryCurrency": "USD",
         "notes": "Notizen",
         "resume": "Lebenslauf (PDF) *"
       },
@@ -5654,6 +5660,7 @@
         "lastName": "z. B. Martinez",
         "email": "name@example.com",
         "phone": "1234-5678",
+        "minSalary": "0.00",
         "loadingCountries": "Länder werden geladen...",
         "searchCountry": "Land, ISO oder Vorwahl suchen",
         "noCountries": "Keine Länder gefunden"

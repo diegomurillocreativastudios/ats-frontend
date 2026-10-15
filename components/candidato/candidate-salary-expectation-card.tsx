@@ -40,8 +40,14 @@ export const resolveCandidateMinSalary = (
     }
   }
 
+  // Prefer profile.minSalary (apply form / ficha) over JobPreferences from CV.
+  // Otherwise a CV value like 500 hides a form value like 4000 stored on the profile.
+  if (fallbackMinSalary != null && !Number.isNaN(Number(fallbackMinSalary))) {
+    return Number(fallbackMinSalary)
+  }
+
   const parsed = parseJsonObjectIfString(jobPrefs)
-  const raw = parsed?.MinSalary ?? parsed?.minSalary ?? fallbackMinSalary ?? null
+  const raw = parsed?.MinSalary ?? parsed?.minSalary ?? null
   if (raw == null) return null
   const n = Number(raw)
   return Number.isNaN(n) ? null : n
@@ -62,6 +68,9 @@ interface CandidateSalaryExpectationCardProps {
   onEditChange?: (value: string) => void
   saving?: boolean
   className?: string
+  /** True when required salary expectation is missing on save. */
+  invalid?: boolean
+  errorMessage?: string | null
 }
 
 export function CandidateSalaryExpectationCard({
@@ -72,6 +81,8 @@ export function CandidateSalaryExpectationCard({
   onEditChange,
   saving = false,
   className = "",
+  invalid = false,
+  errorMessage = null,
 }: CandidateSalaryExpectationCardProps) {
   const t = useTranslations("CandidatePortal.profile")
   const amount = resolveCandidateMinSalary(
@@ -80,10 +91,11 @@ export function CandidateSalaryExpectationCard({
     isEditing ? editValue : undefined
   )
   const hasAmount = amount != null
+  const isInvalid = Boolean(invalid || errorMessage)
 
   return (
     <aside
-      className={`flex h-full w-full min-w-0 flex-col rounded-2xl border border-vo-purple/25 bg-vo-purple/[0.06] p-4 md:p-5 ${className}`}
+      className={`flex h-full w-full min-w-0 flex-col rounded-2xl border border-vo-purple/25 bg-vo-purple/[0.06] p-4 md:p-5 ${className} ${isInvalid ? "border-destructive" : ""}`}
       aria-labelledby="pretension-salarial-titulo"
     >
       <div className="flex items-center gap-3">
@@ -106,8 +118,12 @@ export function CandidateSalaryExpectationCard({
 
       {isEditing ? (
         <div className="mt-4 flex flex-1 flex-col">
-          <label htmlFor="pf-hero-salary" className={profileEditLabelClass}>
+          <label
+            htmlFor="pf-hero-salary"
+            className={`${profileEditLabelClass} ${isInvalid ? "text-destructive" : ""}`}
+          >
             {t("salary.monthlyLabel")}
+            <span className="text-destructive"> *</span>
           </label>
           <div className="relative mt-1.5">
             <span
@@ -133,12 +149,22 @@ export function CandidateSalaryExpectationCard({
                   onEditChange?.(sanitized)
                 }
               }}
-              className={`${profileEditInputClass} pl-7 tabular-nums`}
+              className={`${profileEditInputClass} pl-7 tabular-nums ${isInvalid ? "border-destructive focus-visible:ring-destructive" : ""}`}
               disabled={saving}
               placeholder={t("salary.placeholder")}
-              aria-describedby="pretension-salarial-ayuda"
+              aria-invalid={isInvalid || undefined}
+              aria-describedby={
+                isInvalid
+                  ? "pretension-salarial-err pretension-salarial-ayuda"
+                  : "pretension-salarial-ayuda"
+              }
             />
           </div>
+          {errorMessage ? (
+            <p id="pretension-salarial-err" className="mt-1.5 font-sans text-sm text-destructive" role="alert">
+              {errorMessage}
+            </p>
+          ) : null}
           <p
             id="pretension-salarial-ayuda"
             className="mt-auto pt-3 font-sans text-xs leading-relaxed text-muted-foreground"

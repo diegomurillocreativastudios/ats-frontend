@@ -2150,7 +2150,8 @@
             "futureDate": "La date ne peut pas être dans le futur",
             "tooYoung": "Vous devez avoir au moins 18 ans"
           },
-          "requiredFields": "Les prénoms, noms de famille, titre, résumé et pièce d'identité sont obligatoires.",
+          "requiredFields": "Les prénoms, noms de famille, titre, résumé, pièce d'identité et prétention salariale sont obligatoires.",
+          "jobMinSalaryRequired": "Saisissez votre prétention salariale (montant mensuel en USD).",
           "resumeRequired": "Le profil doit inclure le CV en texte. Téléversez un CV dans Documents ou contactez le support."
         }
       },
@@ -2992,7 +2993,8 @@
             "futureDate": "La date ne peut pas être dans le futur",
             "tooYoung": "Vous devez avoir au moins 18 ans"
           },
-          "requiredFields": "Les prénoms, noms de famille, titre, résumé et pièce d'identité sont obligatoires.",
+          "requiredFields": "Les prénoms, noms de famille, titre, résumé, pièce d'identité et prétention salariale sont obligatoires.",
+          "jobMinSalaryRequired": "Saisissez la prétention salariale (montant mensuel en USD).",
           "resumeRequired": "Le profil doit inclure le CV en texte. Téléversez un CV ou contactez le support."
         }
       },
@@ -5621,6 +5623,8 @@
         "documentTypeRequired": "Sélectionnez un type de document.",
         "documentNumberRequired": "Saisissez votre numéro de document.",
         "cvRequired": "Joignez votre CV en PDF.",
+        "minSalaryRequired": "Saisissez votre prétention salariale.",
+        "minSalaryInvalid": "Saisissez un montant valide (chiffres uniquement, minimum 0).",
         "reviewFields": "Vérifiez les champs indiqués.",
         "consentSubmitFailed": "Nous n'avons pas pu enregistrer votre autorisation et consentement. Veuillez réessayer.",
         "consentValidation": "Veuillez vérifier l'autorisation et le consentement, puis réessayer.",
@@ -5641,6 +5645,8 @@
         "source": "Comment avez-vous connu cette offre ?",
         "linkedin": "Profil LinkedIn",
         "website": "Site web ou portfolio",
+        "minSalary": "Prétention salariale *",
+        "minSalaryCurrency": "USD",
         "notes": "Notes",
         "resume": "CV (PDF) *"
       },
@@ -5654,6 +5660,7 @@
         "lastName": "Ex. Martinez",
         "email": "name@example.com",
         "phone": "1234-5678",
+        "minSalary": "0.00",
         "loadingCountries": "Chargement des pays…",
         "searchCountry": "Rechercher un pays, ISO ou indicatif",
         "noCountries": "Aucun pays trouvé"
