@@ -263,13 +263,19 @@ export function ProfileEditHeroFields({
   )
 }
 
-export function ProfileEditNationalIdField({ form, patch, saving, fieldErrors }: EditorFieldsBase) {
+export function ProfileEditNationalIdField({
+  form,
+  patch,
+  saving,
+  fieldErrors,
+  required = true,
+}: EditorFieldsBase & { required?: boolean }) {
   const t = useProfileEditTranslations()
   const nationalIdInvalid = Boolean(fieldErrors?.nationalId)
   return (
     <ProfileEditField
       label={t("form.labels.nationalId")}
-      required
+      required={required}
       htmlFor="pf-national-id"
       invalid={nationalIdInvalid}
     >

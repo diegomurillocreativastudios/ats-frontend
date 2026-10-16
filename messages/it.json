@@ -2836,7 +2836,7 @@
         "save": "Salva modifiche",
         "saving": "Salvataggio…",
         "editProfile": "Modifica profilo",
-        "requiredHint": "Titolo, riepilogo e documento d'identità sono obbligatori al salvataggio.",
+        "requiredHint": "Titolo e riepilogo sono obbligatori al salvataggio.",
         "retry": "Riprova"
       },
       "hero": {
@@ -2993,7 +2993,7 @@
             "futureDate": "La data non può essere nel futuro",
             "tooYoung": "Devi avere almeno 18 anni"
           },
-          "requiredFields": "Nomi, cognomi, titolo, riepilogo, documento di identità e pretesa salariale sono obbligatori.",
+          "requiredFields": "Nomi, cognomi, titolo, riepilogo e pretesa salariale sono obbligatori.",
           "jobMinSalaryRequired": "Inserisci la pretesa salariale (importo mensile in USD).",
           "resumeRequired": "Il profilo deve includere il curriculum in testo. Carica un CV o contatta il supporto."
         }

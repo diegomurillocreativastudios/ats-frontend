@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl"
 
 import { CandidateSelfProfileView } from "@/components/candidato/candidate-self-profile-view"
@@ -190,22 +190,29 @@ describe("ProfileEditHeroFields namespace (Etapa 15)", () => {
 })
 
 describe("useCandidateProfileEditor messages (Etapa 15)", () => {
+  const emptyEnrichedNd: Record<string, unknown> = {}
+
   function EditorHarness({
     messages,
     initialProfile,
+    requireNationalId,
+    onSave = vi.fn(async () => {}),
   }: {
     messages?: Partial<CandidateProfileEditorMessages>
     initialProfile?: Parameters<typeof useCandidateProfileEditor>[0]["initialProfile"]
+    requireNationalId?: boolean
+    onSave?: (body: unknown) => Promise<void>
   }) {
     const { validationError, fieldErrors, handleSubmit, triggerLabel } = useCandidateProfileEditor({
       initialProfile: initialProfile ?? null,
-      enrichedNd: {},
+      enrichedNd: emptyEnrichedNd,
       isCreating: !initialProfile,
-      onSave: vi.fn(async () => {}),
+      onSave,
       saving: false,
       saveError: null,
       onDismissSaveError: vi.fn(),
       messages,
+      requireNationalId,
     })
 
     return (
@@ -262,6 +269,47 @@ describe("useCandidateProfileEditor messages (Etapa 15)", () => {
     })
   })
 
+  it("no exige nationalId cuando requireNationalId es false (T1909)", () => {
+    render(<EditorHarness requireNationalId={false} />)
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }))
+    const errors = JSON.parse(screen.getByTestId("field-errors").textContent ?? "{}") as Record<
+      string,
+      boolean
+    >
+    expect(errors.nationalId).toBeUndefined()
+    expect(errors).toMatchObject({
+      firstName: true,
+      lastName: true,
+      headline: true,
+      summary: true,
+      jobMinSalary: true,
+    })
+  })
+
+  it("guarda con nationalId vacío si requireNationalId es false (T1909)", async () => {
+    const onSave = vi.fn(async () => {})
+    render(
+      <EditorHarness
+        requireNationalId={false}
+        onSave={onSave}
+        initialProfile={
+          {
+            ...canonicalFixture,
+            nationalId: "",
+            minSalary: 1000,
+          } as never
+        }
+      />,
+    )
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Submit" }))
+    })
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledTimes(1)
+    })
+    expect(onSave.mock.calls[0]?.[0]).toMatchObject({ nationalId: "" })
+  })
+
 })
 
 describe("RecruiterPortal.candidateDetail edit namespace parity (Etapa 15)", () => {
@@ -294,6 +342,23 @@ describe("RecruiterPortal.candidateDetail edit namespace parity (Etapa 15)", () 
       expect(validation).toHaveProperty("jobMinSalaryRequired")
       expect(validation).toHaveProperty("resumeRequired")
       expect(validation).toHaveProperty("birthDate")
+    }
+  })
+
+  it("no lista documento de identidad como obligatorio en copy RRHH (T1909)", () => {
+    for (const locale of locales) {
+      const detail = (messagesByLocale[locale].RecruiterPortal as Record<string, unknown>)
+        .candidateDetail as Record<string, unknown>
+      const requiredHint = (detail.actions as Record<string, string>).requiredHint
+      const requiredFields = (
+        (detail.form as Record<string, unknown>).validation as Record<string, string>
+      ).requiredFields
+      expect(requiredHint.toLowerCase()).not.toMatch(
+        /documento|identity|ausweis|pi[eè]ce d'identit|document/i,
+      )
+      expect(requiredFields.toLowerCase()).not.toMatch(
+        /documento de identidad|id document|ausweisdokument|pi[eè]ce d'identit|documento d'identit|documento di identit/i,
+      )
     }
   })
 })

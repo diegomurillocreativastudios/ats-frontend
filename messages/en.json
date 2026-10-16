@@ -2836,7 +2836,7 @@
         "save": "Save changes",
         "saving": "Saving…",
         "editProfile": "Edit profile",
-        "requiredHint": "Headline, summary and ID document are required when saving.",
+        "requiredHint": "Headline and summary are required when saving.",
         "retry": "Retry"
       },
       "hero": {
@@ -2993,7 +2993,7 @@
             "futureDate": "The date cannot be in the future",
             "tooYoung": "You must be at least 18 years old"
           },
-          "requiredFields": "First names, last names, headline, summary, ID document and salary expectation are required.",
+          "requiredFields": "First names, last names, headline, summary and salary expectation are required.",
           "jobMinSalaryRequired": "Enter the salary expectation (monthly amount in USD).",
           "resumeRequired": "The profile must include resume text. Upload a CV or contact support."
         }

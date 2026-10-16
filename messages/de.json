@@ -2836,7 +2836,7 @@
         "save": "Änderungen speichern",
         "saving": "Wird gespeichert…",
         "editProfile": "Profil bearbeiten",
-        "requiredHint": "Titel, Zusammenfassung und Ausweisdokument sind beim Speichern erforderlich.",
+        "requiredHint": "Titel und Zusammenfassung sind beim Speichern erforderlich.",
         "retry": "Erneut versuchen"
       },
       "hero": {
@@ -2993,7 +2993,7 @@
             "futureDate": "Das Datum darf nicht in der Zukunft liegen",
             "tooYoung": "Du musst mindestens 18 Jahre alt sein"
           },
-          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung, Ausweisdokument und Gehaltsvorstellung sind Pflichtfelder.",
+          "requiredFields": "Vornamen, Nachnamen, Überschrift, Zusammenfassung und Gehaltsvorstellung sind Pflichtfelder.",
           "jobMinSalaryRequired": "Gib die Gehaltsvorstellung ein (Monatsbetrag in USD).",
           "resumeRequired": "Das Profil muss Lebenslauftext enthalten. Lade einen CV hoch oder kontaktiere den Support."
         }

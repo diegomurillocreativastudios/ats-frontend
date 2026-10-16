@@ -2836,7 +2836,7 @@
         "save": "Guardar cambios",
         "saving": "Guardando…",
         "editProfile": "Editar perfil",
-        "requiredHint": "Titular, resumen y documento de identidad son obligatorios al guardar.",
+        "requiredHint": "Titular y resumen son obligatorios al guardar.",
         "retry": "Reintentar"
       },
       "hero": {
@@ -2993,7 +2993,7 @@
             "futureDate": "La fecha no puede estar en el futuro",
             "tooYoung": "Debés tener al menos 18 años"
           },
-          "requiredFields": "Completá nombres, apellidos, titular, resumen, documento de identidad y pretensión salarial.",
+          "requiredFields": "Completá nombres, apellidos, titular, resumen y pretensión salarial.",
           "jobMinSalaryRequired": "Ingresá la pretensión salarial (monto mensual en USD).",
           "resumeRequired": "El perfil debe incluir currículum en texto. Cargá un CV o contactá soporte."
         }
