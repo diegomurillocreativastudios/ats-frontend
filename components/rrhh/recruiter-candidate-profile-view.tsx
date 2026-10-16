@@ -73,6 +73,7 @@ import {
   isRecruiterCandidateCvError,
 } from "@/lib/api/recruiter-candidate-cv"
 import { TechnicalSheetModal } from "@/components/rrhh/technical-sheet/technical-sheet-modal"
+import { SHOW_PRUEBAS_CROSS_PORTAL_UI } from "@/lib/pruebas/feature"
 import { buildAssignTestHref } from "@/lib/pruebas/reports"
 import { buildTechnicalSheetPayloadFromRecruiterProfile } from "@/lib/technical-sheet/profile-to-technical-sheet-payload"
 import { getApiErrorMessage } from "@/lib/api-error"
@@ -158,9 +159,9 @@ export function RecruiterCandidateProfileView({
 }: RecruiterCandidateProfileViewProps) {
   const t = useTranslations("RecruiterPortal.candidateDetail")
   const pathname = usePathname()
-  const assignTestHref = buildAssignTestHref(
-    pathname || "/portal-rrhh/candidatos",
-  )
+  const assignTestHref = SHOW_PRUEBAS_CROSS_PORTAL_UI
+    ? buildAssignTestHref(pathname || "/portal-rrhh/candidatos")
+    : null
   const nd = (profile?.normalizedData ?? {}) as Record<string, unknown>
 
   const {
@@ -435,14 +436,16 @@ export function RecruiterCandidateProfileView({
                 </div>
               ) : null}
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
-                <Link
-                  href={assignTestHref}
-                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
-                  aria-label={t("actions.assignTestAria")}
-                >
-                  <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
-                  {t("actions.assignTest")}
-                </Link>
+                {assignTestHref ? (
+                  <Link
+                    href={assignTestHref}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                    aria-label={t("actions.assignTestAria")}
+                  >
+                    <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
+                    {t("actions.assignTest")}
+                  </Link>
+                ) : null}
                 <button
                   type="button"
                   onClick={handleCancelEdit}
@@ -506,14 +509,16 @@ export function RecruiterCandidateProfileView({
                   </button>
                 </>
               ) : null}
-              <Link
-                href={assignTestHref}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
-                aria-label={t("actions.assignTestAria")}
-              >
-                <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
-                {t("actions.assignTest")}
-              </Link>
+              {assignTestHref ? (
+                <Link
+                  href={assignTestHref}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
+                  aria-label={t("actions.assignTestAria")}
+                >
+                  <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
+                  {t("actions.assignTest")}
+                </Link>
+              ) : null}
               <button
                 type="button"
                 onClick={handleOpenEdit}

@@ -3,6 +3,7 @@ import {
   getTechnicalSheetCandidateHeaderFacts,
   pickCandidateDisplayRecord,
 } from "@/lib/technical-sheet/candidate-from-payload"
+import { formatTechnicalSheetSalaryExpectation } from "@/lib/technical-sheet/format-technical-sheet-salary"
 
 /**
  * Contexto de plantilla de ficha (sin DOMPurify/jsdom).
@@ -151,13 +152,15 @@ function enrichCandidateAdditionalFacts(candidate: Record<string, unknown>): voi
   )
   if (workMode) candidate.workMode = workMode
 
-  const salaryExpectation = pickNonEmptyString(
+  const salaryRaw = pickNonEmptyString(
     candidate.salaryExpectation,
     candidate.SalaryExpectation,
     candidate.minSalary,
     candidate.MinSalary
   )
-  if (salaryExpectation) candidate.salaryExpectation = salaryExpectation
+  if (salaryRaw) {
+    candidate.salaryExpectation = formatTechnicalSheetSalaryExpectation(salaryRaw)
+  }
 }
 
 /**

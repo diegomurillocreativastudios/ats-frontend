@@ -225,6 +225,6 @@ describe("expandEachBlocks & renderTechnicalSheetHtml", () => {
     expect(candidate.country).toBe("Costa Rica")
     expect(candidate.workMode).toBe("Remoto")
     expect(candidate.availability).toBe("Inmediata")
-    expect(candidate.salaryExpectation).toBe("3000")
+    expect(candidate.salaryExpectation).toBe("$3,000 USD")
   })
 })

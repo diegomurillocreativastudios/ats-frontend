@@ -26,6 +26,7 @@ import {
   Users,
 } from "lucide-react";
 import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell";
+import { SHOW_PRUEBAS_CROSS_PORTAL_UI } from "@/lib/pruebas/feature";
 import { buildAssignTestHref } from "@/lib/pruebas/reports";
 import Snackbar from "@/components/ui/Snackbar";
 import { CopyPublicVacancyLinkButton } from "@/components/shared/copy-public-vacancy-link-button";
@@ -1479,7 +1480,9 @@ function VacanteDetallePage() {
     vacancyId != null && vacancyId !== ""
       ? `/portal-rrhh/entrevistas/${encodeURIComponent(vacancyId)}`
       : "/portal-rrhh/entrevistas";
-  const assignTestHref = buildAssignTestHref(pathname || "/portal-rrhh/vacantes");
+  const assignTestHref = SHOW_PRUEBAS_CROSS_PORTAL_UI
+    ? buildAssignTestHref(pathname || "/portal-rrhh/vacantes")
+    : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -3348,13 +3351,15 @@ function VacanteDetallePage() {
                             >
                               {tDetail("actions.interviews")}
                             </Link>
-                            <Link
-                              href={assignTestHref}
-                              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                              aria-label={tDetail("actions.assignTestAria")}
-                            >
-                              {tDetail("actions.assignTest")}
-                            </Link>
+                            {assignTestHref ? (
+                              <Link
+                                href={assignTestHref}
+                                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                                aria-label={tDetail("actions.assignTestAria")}
+                              >
+                                {tDetail("actions.assignTest")}
+                              </Link>
+                            ) : null}
                             <Link
                               href={resultadosHref}
                               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
@@ -4293,13 +4298,15 @@ function VacanteDetallePage() {
                           >
                             {tDetail("actions.interviews")}
                           </Link>
-                          <Link
-                            href={assignTestHref}
-                            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
-                            aria-label={tDetail("actions.assignTestAria")}
-                          >
-                            {tDetail("actions.assignTest")}
-                          </Link>
+                          {assignTestHref ? (
+                            <Link
+                              href={assignTestHref}
+                              className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"
+                              aria-label={tDetail("actions.assignTestAria")}
+                            >
+                              {tDetail("actions.assignTest")}
+                            </Link>
+                          ) : null}
                           <Link
                             href={resultadosHref}
                             className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-background px-4 py-2.5 font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-vo-purple focus:ring-offset-2"

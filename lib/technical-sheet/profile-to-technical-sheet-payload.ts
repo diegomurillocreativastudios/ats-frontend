@@ -16,6 +16,7 @@ import {
   extractRecruiterCandidateDetail,
   type RecruiterCandidateDetailState,
 } from "@/lib/recruiter-candidate-profile-api"
+import { formatTechnicalSheetSalaryExpectation } from "@/lib/technical-sheet/format-technical-sheet-salary"
 
 const trimStr = (v: unknown): string => {
   if (v == null) return ""
@@ -42,13 +43,7 @@ function firstNonEmptyRaw(...sources: unknown[]): unknown {
 }
 
 function formatSalaryExpectation(value: unknown): string {
-  if (value == null || value === "") return ""
-  if (typeof value === "number" && !Number.isNaN(value)) {
-    return String(value)
-  }
-  const n = Number(value)
-  if (!Number.isNaN(n)) return String(n)
-  return trimStr(value)
+  return formatTechnicalSheetSalaryExpectation(value)
 }
 
 function readJobPreferences(nd: Record<string, unknown>): Record<string, unknown> {

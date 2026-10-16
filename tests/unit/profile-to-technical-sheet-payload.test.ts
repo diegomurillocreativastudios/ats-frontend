@@ -50,7 +50,7 @@ describe("buildTechnicalSheetPayloadFromRecruiterProfile", () => {
       profileSummary: "Desarrolladora senior",
       country: "El Salvador",
       availability: "Inmediata",
-      salaryExpectation: "2500",
+      salaryExpectation: "$2,500 USD",
       technicalSkills: ["React", "TypeScript"],
     })
 
@@ -122,7 +122,7 @@ describe("buildTechnicalSheetPayloadFromRecruiterProfile", () => {
       profileSummary: "Canonical summary",
       country: "Costa Rica",
       availability: "2 semanas",
-      salaryExpectation: "3000",
+      salaryExpectation: "$3,000 USD",
       technicalSkills: ["Node"],
     })
   })
