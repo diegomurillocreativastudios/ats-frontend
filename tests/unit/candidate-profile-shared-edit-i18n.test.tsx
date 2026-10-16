@@ -287,7 +287,7 @@ describe("useCandidateProfileEditor messages (Etapa 15)", () => {
   })
 
   it("guarda con nationalId vacío si requireNationalId es false (T1909)", async () => {
-    const onSave = vi.fn(async () => {})
+    const onSave = vi.fn(async (_body: unknown) => {})
     render(
       <EditorHarness
         requireNationalId={false}
@@ -307,7 +307,9 @@ describe("useCandidateProfileEditor messages (Etapa 15)", () => {
     await waitFor(() => {
       expect(onSave).toHaveBeenCalledTimes(1)
     })
-    expect(onSave.mock.calls[0]?.[0]).toMatchObject({ nationalId: "" })
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ nationalId: "" }),
+    )
   })
 
 })
