@@ -425,6 +425,7 @@ describe("PublicVacancyApplicationForm", () => {
             email: "ana@example.com",
             phone: "77778888",
             nationalId: "01234567-8",
+            minSalary: 3000,
           }}
           isEmailLocked
           skipEmailConfirmation
@@ -437,5 +438,34 @@ describe("PublicVacancyApplicationForm", () => {
     expect(email).toHaveAttribute("readonly")
     expect(screen.getByLabelText("Nombres *")).toHaveValue("Ana")
     expect(screen.getByLabelText("Apellidos *")).toHaveValue("López")
+    expect(screen.getByLabelText(/Pretensión salarial/)).toHaveValue("3000.00")
+    expect(screen.getByLabelText("Seleccionar PDF")).toBeInTheDocument()
+  })
+
+  it("oculta el cargador de CV cuando useSavedProfileCv", async () => {
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <PublicVacancyApplicationForm
+          vacancyId="vac-1"
+          initialValues={{
+            firstName: "Ana",
+            lastName: "López",
+            email: "ana@example.com",
+            phone: "77778888",
+            nationalId: "01234567-8",
+            minSalary: 2500,
+          }}
+          isEmailLocked
+          skipEmailConfirmation
+          useSavedProfileCv
+        />
+      </NextIntlClientProvider>
+    )
+
+    expect(await screen.findByLabelText(/Pretensión salarial/)).toHaveValue(
+      "2500.00"
+    )
+    expect(screen.queryByLabelText("Seleccionar PDF")).not.toBeInTheDocument()
+    expect(screen.queryByTestId("apply-cv-input")).not.toBeInTheDocument()
   })
 })

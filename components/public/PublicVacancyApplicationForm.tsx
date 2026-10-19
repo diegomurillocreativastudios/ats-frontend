@@ -40,6 +40,7 @@ import {
   applySubmitProgressPanelClass,
 } from "@/components/public/public-application-submit-progress"
 import { ApplyEmailConfirmationModal } from "@/components/public/ApplyEmailConfirmationModal"
+import { downloadCandidateProfileCvAsFile } from "@/lib/candidate-profile-cv"
 import {
   DEFAULT_APPLY_PHONE_COUNTRY_ISO2,
   type PublicApplyProfileFields,
@@ -238,6 +239,15 @@ function CvDropzoneGlyph() {
   )
 }
 
+function formatInitialMinSalary(
+  value: number | null | undefined
+): string {
+  if (value == null) return ""
+  const n = Number(value)
+  if (!Number.isFinite(n) || n < 0) return ""
+  return formatPublicApplyMinSalaryDisplay(String(n))
+}
+
 function mergeInitialFormState(
   seed?: PublicVacancyApplicationFormInitialValues | null
 ): PublicVacancyApplicationFormState {
@@ -253,7 +263,7 @@ function mergeInitialFormState(
     nationalId: seed.nationalId?.trim() ?? "",
     linkedinUrl: seed.linkedinUrl?.trim() ?? "",
     websiteUrl: seed.websiteUrl?.trim() ?? "",
-    minSalary: "",
+    minSalary: formatInitialMinSalary(seed.minSalary),
     source: seed.source?.trim() ?? "",
     notes: seed.notes?.trim() ?? "",
   }
@@ -266,6 +276,7 @@ export function PublicVacancyApplicationForm({
   initialValues,
   isEmailLocked = false,
   skipEmailConfirmation = false,
+  useSavedProfileCv = false,
 }: {
   vacancyId: string
   theme?: PublicVacancyApplicationFormTheme
@@ -277,6 +288,8 @@ export function PublicVacancyApplicationForm({
   isEmailLocked?: boolean
   /** Logged-in apply: consent then submit, without email confirm modal. */
   skipEmailConfirmation?: boolean
+  /** Logged-in apply: reuse CV already stored on the candidate profile. */
+  useSavedProfileCv?: boolean
 }) {
   const t = useTranslations("PublicOpportunities.applicationForm")
   const tCvLanguage = useTranslations("CvOutputLanguage")
@@ -548,9 +561,11 @@ export function PublicVacancyApplicationForm({
     } else if (parsePublicApplyMinSalary(values.minSalary) == null) {
       next.minSalary = t("validation.minSalaryInvalid")
     }
-    if (!cvFile) next.cvFile = t("validation.cvRequired")
-    else if (!isAllowedCvFile(cvFile)) next.cvFile = t("validation.fileType")
-    else if (!isCvFileWithinSizeLimit(cvFile)) next.cvFile = t("validation.fileTooLarge")
+    if (!useSavedProfileCv) {
+      if (!cvFile) next.cvFile = t("validation.cvRequired")
+      else if (!isAllowedCvFile(cvFile)) next.cvFile = t("validation.fileType")
+      else if (!isCvFileWithinSizeLimit(cvFile)) next.cvFile = t("validation.fileTooLarge")
+    }
 
     return next
   }, [
@@ -562,6 +577,7 @@ export function PublicVacancyApplicationForm({
     values.nationalId,
     values.minSalary,
     cvFile,
+    useSavedProfileCv,
     t,
   ])
 
@@ -569,7 +585,8 @@ export function PublicVacancyApplicationForm({
     consentOverride?: ConsentAuthorizationSubmitPayload
   ) => {
     const authConsent = consentOverride ?? acceptedConsent?.payload
-    if (!cvFile || !authConsent) return
+    if (!authConsent) return
+    if (!useSavedProfileCv && !cvFile) return
 
     setSubmitPhase("loading")
     setLoadingOverlay({ percent: 0, longWait: false })
@@ -579,7 +596,36 @@ export function PublicVacancyApplicationForm({
     setIsConfirmEmailModalOpen(false)
 
     const minSalary = parsePublicApplyMinSalary(values.minSalary)
-    if (minSalary == null) return
+    if (minSalary == null) {
+      setSubmitPhase("idle")
+      return
+    }
+
+    let resolvedCvFile = cvFile
+    if (useSavedProfileCv) {
+      try {
+        resolvedCvFile = await downloadCandidateProfileCvAsFile()
+      } catch {
+        setSubmitPhase("idle")
+        setServerError(t("validation.fileInvalid"))
+        return
+      }
+      if (!isAllowedCvFile(resolvedCvFile)) {
+        setSubmitPhase("idle")
+        setServerError(t("validation.fileType"))
+        return
+      }
+      if (!isCvFileWithinSizeLimit(resolvedCvFile)) {
+        setSubmitPhase("idle")
+        setServerError(t("validation.fileTooLarge"))
+        return
+      }
+    }
+
+    if (!resolvedCvFile) {
+      setSubmitPhase("idle")
+      return
+    }
 
     const payload: PublicVacancyApplyValues = {
       firstName: consentOverride?.firstNames ?? values.firstName,
@@ -593,7 +639,7 @@ export function PublicVacancyApplicationForm({
       source: values.source,
       notes: values.notes,
       minSalary,
-      cvFile,
+      cvFile: resolvedCvFile,
       authConsent,
     }
 
@@ -697,7 +743,16 @@ export function PublicVacancyApplicationForm({
 
       setServerError(getPublicApplyErrorMessage(status, body))
     }
-  }, [cvFile, values, vacancyId, t, tCvLanguage, outputLanguage, acceptedConsent])
+  }, [
+    cvFile,
+    values,
+    vacancyId,
+    t,
+    tCvLanguage,
+    outputLanguage,
+    acceptedConsent,
+    useSavedProfileCv,
+  ])
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -1143,109 +1198,111 @@ export function PublicVacancyApplicationForm({
         ) : null}
       </div>
 
-      <div className="space-y-2 sm:col-span-2">
-        <label htmlFor="apply-cv" className={labelClass}>
-          {t("fields.resume")}
-        </label>
-        <div className="relative">
-          {/*
-            Dropzone stays a div (not label[htmlFor]): dropping onto a label
-            tied to <input type="file"> often opens the picker instead of
-            accepting the file. Click still opens via prepare + input.click().
-          */}
-          <div
-            role="button"
-            tabIndex={disabled ? -1 : 0}
-            aria-disabled={disabled || undefined}
-            onClick={openCvPicker}
-            onKeyDown={handleCvDropzoneKeyDown}
-            onDragEnter={handleCvDragEnter}
-            onDragOver={handleCvDragOver}
-            onDragLeave={handleCvDragLeave}
-            onDrop={handleCvDrop}
-            aria-label={
-              isCvDragging
-                ? t("file.dropActive")
-                : cvFile
-                  ? cvFile.name
-                  : t("file.selectPdf")
-            }
-            aria-describedby={
-              errors.cvFile ? "apply-cv-helper apply-cv-err" : "apply-cv-helper"
-            }
-            aria-invalid={Boolean(errors.cvFile) || undefined}
-            className={themeCvDropzoneClass(theme, {
-              isDragging: isCvDragging,
-              hasFile: Boolean(cvFile),
-              hasError: Boolean(errors.cvFile),
-              disabled,
-            })}
-          >
-            <div className="pointer-events-none">
-              {cvFile ? (
-                <FileText
-                  className={
-                    theme === "dark"
-                      ? "mx-auto size-12 text-ats-cobre"
-                      : "mx-auto size-12 text-ats-terracotta"
-                  }
-                  strokeWidth={1.5}
-                  aria-hidden
-                />
-              ) : (
-                <CvDropzoneGlyph />
-              )}
-              <span className="mt-2 block text-sm font-semibold text-foreground">
-                {isCvDragging
+      {useSavedProfileCv ? null : (
+        <div className="space-y-2 sm:col-span-2">
+          <label htmlFor="apply-cv" className={labelClass}>
+            {t("fields.resume")}
+          </label>
+          <div className="relative">
+            {/*
+              Dropzone stays a div (not label[htmlFor]): dropping onto a label
+              tied to <input type="file"> often opens the picker instead of
+              accepting the file. Click still opens via prepare + input.click().
+            */}
+            <div
+              role="button"
+              tabIndex={disabled ? -1 : 0}
+              aria-disabled={disabled || undefined}
+              onClick={openCvPicker}
+              onKeyDown={handleCvDropzoneKeyDown}
+              onDragEnter={handleCvDragEnter}
+              onDragOver={handleCvDragOver}
+              onDragLeave={handleCvDragLeave}
+              onDrop={handleCvDrop}
+              aria-label={
+                isCvDragging
                   ? t("file.dropActive")
                   : cvFile
                     ? cvFile.name
-                    : t("file.selectPdf")}
-              </span>
-              <span
-                id="apply-cv-helper"
-                className="mt-1 block text-xs text-muted-foreground"
-              >
-                {cvFile
-                  ? `${formatCvFileSize(cvFile.size)} · ${t("file.changeFile")}`
-                  : t("file.helper")}
-              </span>
-            </div>
-          </div>
-          {cvFile ? (
-            <button
-              type="button"
-              onClick={handleRemoveCvFile}
-              disabled={disabled}
-              className={
-                theme === "dark"
-                  ? "pointer-events-auto absolute right-3 top-3 z-10 rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                  : "pointer-events-auto absolute right-3 top-3 z-10 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                    : t("file.selectPdf")
               }
-              aria-label={t("file.removeAria", { fileName: cvFile.name })}
+              aria-describedby={
+                errors.cvFile ? "apply-cv-helper apply-cv-err" : "apply-cv-helper"
+              }
+              aria-invalid={Boolean(errors.cvFile) || undefined}
+              className={themeCvDropzoneClass(theme, {
+                isDragging: isCvDragging,
+                hasFile: Boolean(cvFile),
+                hasError: Boolean(errors.cvFile),
+                disabled,
+              })}
             >
-              <X className="size-4" aria-hidden />
-            </button>
+              <div className="pointer-events-none">
+                {cvFile ? (
+                  <FileText
+                    className={
+                      theme === "dark"
+                        ? "mx-auto size-12 text-ats-cobre"
+                        : "mx-auto size-12 text-ats-terracotta"
+                    }
+                    strokeWidth={1.5}
+                    aria-hidden
+                  />
+                ) : (
+                  <CvDropzoneGlyph />
+                )}
+                <span className="mt-2 block text-sm font-semibold text-foreground">
+                  {isCvDragging
+                    ? t("file.dropActive")
+                    : cvFile
+                      ? cvFile.name
+                      : t("file.selectPdf")}
+                </span>
+                <span
+                  id="apply-cv-helper"
+                  className="mt-1 block text-xs text-muted-foreground"
+                >
+                  {cvFile
+                    ? `${formatCvFileSize(cvFile.size)} · ${t("file.changeFile")}`
+                    : t("file.helper")}
+                </span>
+              </div>
+            </div>
+            {cvFile ? (
+              <button
+                type="button"
+                onClick={handleRemoveCvFile}
+                disabled={disabled}
+                className={
+                  theme === "dark"
+                    ? "pointer-events-auto absolute right-3 top-3 z-10 rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                    : "pointer-events-auto absolute right-3 top-3 z-10 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                }
+                aria-label={t("file.removeAria", { fileName: cvFile.name })}
+              >
+                <X className="size-4" aria-hidden />
+              </button>
+            ) : null}
+            <input
+              ref={cvInputRef}
+              id="apply-cv"
+              name="cvFile"
+              type="file"
+              accept={PDF_ONLY_ACCEPT}
+              onChange={handleFileChange}
+              className="pointer-events-none sr-only"
+              tabIndex={-1}
+              disabled={disabled}
+              data-testid="apply-cv-input"
+            />
+          </div>
+          {errors.cvFile ? (
+            <p id="apply-cv-err" className={errClass} role="alert">
+              {errors.cvFile}
+            </p>
           ) : null}
-          <input
-            ref={cvInputRef}
-            id="apply-cv"
-            name="cvFile"
-            type="file"
-            accept={PDF_ONLY_ACCEPT}
-            onChange={handleFileChange}
-            className="pointer-events-none sr-only"
-            tabIndex={-1}
-            disabled={disabled}
-            data-testid="apply-cv-input"
-          />
         </div>
-        {errors.cvFile ? (
-          <p id="apply-cv-err" className={errClass} role="alert">
-            {errors.cvFile}
-          </p>
-        ) : null}
-      </div>
+      )}
 
       <div
         className={`flex flex-col gap-3 border-t pt-4 sm:col-span-2 sm:flex-row sm:items-center ${

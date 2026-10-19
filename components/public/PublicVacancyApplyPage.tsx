@@ -282,6 +282,8 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
   const isApplyActionBootstrapping =
     isCandidate && Boolean(vacancy?.id) && isAlreadyAppliedLoading
 
+  const hasSavedProfileCv = candidateProfile?.hasCvFile === true
+
   const checklistItems =
     applyMode === "confirm"
       ? ([
@@ -292,7 +294,9 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
       : applyMode === "prefill"
         ? ([
             t("loggedIn.checklistComplete"),
-            t("loggedIn.checklistCvUpload"),
+            hasSavedProfileCv
+              ? t("loggedIn.checklistCv")
+              : t("loggedIn.checklistCvUpload"),
             t("checklistEmail"),
           ] as const)
         : ([t("checklistCv"), t("checklistEmail"), t("checklistData")] as const)
@@ -457,6 +461,9 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
                       }
                       isEmailLocked={lockedEmail}
                       skipEmailConfirmation={applyMode === "prefill"}
+                      useSavedProfileCv={
+                        applyMode === "prefill" && hasSavedProfileCv
+                      }
                     />
                   )}
                 </div>

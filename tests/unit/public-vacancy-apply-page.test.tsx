@@ -64,12 +64,15 @@ vi.mock("@/components/public/ApplyPrivacyNoticeDialog", () => ({
 vi.mock("@/components/public/PublicVacancyApplicationForm", () => ({
   PublicVacancyApplicationForm: ({
     isEmailLocked,
+    useSavedProfileCv,
   }: {
     isEmailLocked?: boolean
+    useSavedProfileCv?: boolean
   }) => (
     <div>
       formulario de postulación
       {isEmailLocked ? <span>email-locked</span> : null}
+      {useSavedProfileCv ? <span>saved-profile-cv</span> : null}
     </div>
   ),
 }))
@@ -252,6 +255,12 @@ describe("PublicVacancyApplyPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "editar datos mock" }))
     expect(await screen.findByText("formulario de postulación")).toBeInTheDocument()
     expect(screen.getByText("email-locked")).toBeInTheDocument()
+    expect(screen.getByText("saved-profile-cv")).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        esMessages.PublicOpportunities.apply.loggedIn.checklistCv
+      )
+    ).toBeInTheDocument()
   })
 
   it("usa formulario con prefill cuando el candidato no tiene CV guardado", async () => {
@@ -276,7 +285,13 @@ describe("PublicVacancyApplyPage", () => {
       expect(screen.getByText("formulario de postulación")).toBeInTheDocument()
     })
     expect(screen.getByText("email-locked")).toBeInTheDocument()
+    expect(screen.queryByText("saved-profile-cv")).not.toBeInTheDocument()
     expect(screen.queryByText("confirmación logueada")).not.toBeInTheDocument()
+    expect(
+      screen.getByText(
+        esMessages.PublicOpportunities.apply.loggedIn.checklistCvUpload
+      )
+    ).toBeInTheDocument()
   })
 
   it("bloquea el CTA cuando el candidato ya postuló a la vacante", async () => {

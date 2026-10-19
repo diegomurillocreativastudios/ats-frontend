@@ -44,10 +44,21 @@ export const sanitizeNonNegativeSalaryInput = (value: string): string => {
   return parsed < 0 ? "" : stripped
 }
 
+/** Solo dígitos 0-9. Sin letras, signos, separadores ni decimales. */
+export const sanitizeDigitsOnlySalaryInput = (value: string): string =>
+  value.replace(/\D/g, "")
+
 export const blockNegativeNumberKeys = (e: KeyboardEvent<HTMLInputElement>): void => {
   if (e.key === "-" || e.key === "+" || e.key === "e" || e.key === "E") {
     e.preventDefault()
   }
+}
+
+export const blockNonDigitKeys = (e: KeyboardEvent<HTMLInputElement>): void => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return
+  if (e.key.length !== 1) return
+  if (e.key >= "0" && e.key <= "9") return
+  e.preventDefault()
 }
 
 export const profileEditLabelClass =
@@ -520,27 +531,50 @@ export function ProfileEditJobPreferencesFields({
             jobMinSalaryInvalid ? t("form.validation.jobMinSalaryRequired") : null
           }
         >
-          <input
-            id="pf-job-min"
-            type="number"
-            min={0}
-            step="1"
-            inputMode="numeric"
-            value={form.jobMinSalary}
-            onChange={(e) => patch({ jobMinSalary: sanitizeNonNegativeSalaryInput(e.target.value) })}
-            onKeyDown={blockNegativeNumberKeys}
-            onPaste={(e) => {
-              const pasted = e.clipboardData.getData("text")
-              const sanitized = sanitizeNonNegativeSalaryInput(pasted)
-              if (sanitized !== pasted) {
-                e.preventDefault()
-                patch({ jobMinSalary: sanitized })
+          <div
+            className={`flex items-center rounded-xl border bg-background px-3 focus-within:ring-2 focus-within:ring-offset-2 ${
+              jobMinSalaryInvalid
+                ? "border-destructive focus-within:ring-destructive"
+                : "border-border focus-within:ring-vo-purple"
+            } ${saving ? "opacity-60" : ""}`}
+          >
+            <span
+              className="shrink-0 select-none font-sans text-sm text-muted-foreground"
+              aria-hidden
+            >
+              $
+            </span>
+            <input
+              id="pf-job-min"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              pattern="[0-9]*"
+              value={form.jobMinSalary}
+              onChange={(e) =>
+                patch({ jobMinSalary: sanitizeDigitsOnlySalaryInput(e.target.value) })
               }
-            }}
-            className={profileEditInputClass}
-            disabled={saving}
-            aria-invalid={jobMinSalaryInvalid || undefined}
-          />
+              onKeyDown={blockNonDigitKeys}
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData("text")
+                const sanitized = sanitizeDigitsOnlySalaryInput(pasted)
+                if (sanitized !== pasted) {
+                  e.preventDefault()
+                  patch({ jobMinSalary: sanitized })
+                }
+              }}
+              className="block min-w-0 grow border-0 bg-transparent py-2.5 pl-1 pr-2 font-sans text-sm text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+              disabled={saving}
+              aria-invalid={jobMinSalaryInvalid || undefined}
+              aria-describedby="pf-job-min-currency"
+            />
+            <span
+              id="pf-job-min-currency"
+              className="shrink-0 select-none font-sans text-sm text-muted-foreground"
+            >
+              {t("form.labels.minSalaryCurrency")}
+            </span>
+          </div>
         </ProfileEditField>
         <ProfileEditField label={t("form.labels.educationLevel")} htmlFor="pf-job-edu">
           <input
