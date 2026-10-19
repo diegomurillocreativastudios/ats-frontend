@@ -9,9 +9,8 @@ import {
 } from "@/lib/portal-access"
 
 describe("getAccessiblePortalKeys", () => {
-  it("da al admin las cinco vistas incluyendo pruebas", () => {
+  it("da al admin oportunidades, RRHH, pruebas y admin (sin portal candidato)", () => {
     expect(getAccessiblePortalKeys("Admin")).toEqual([
-      "candidate",
       "opportunities",
       "rrhh",
       "pruebas",

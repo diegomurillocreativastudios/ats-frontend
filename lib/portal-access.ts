@@ -32,7 +32,7 @@ export function getAccessiblePortalKeys(
   role: string | null | undefined,
 ): PortalKey[] {
   if (isAdminRole(role)) {
-    return ["candidate", "opportunities", "rrhh", "pruebas", "admin"]
+    return ["opportunities", "rrhh", "pruebas", "admin"]
   }
   if (isRecruiterRole(role)) {
     return ["opportunities", "rrhh", "pruebas"]

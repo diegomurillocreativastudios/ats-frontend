@@ -53,13 +53,12 @@ export async function requirePortalAdminUser(): Promise<BackendSessionUserPayloa
 }
 
 /**
- * Exige sesión de candidato (o admin). Recruiter sin admin → selección de portal.
+ * Exige sesión con rol de candidato. Otros roles → selección de portal.
  */
 export async function requirePortalCandidateUser(): Promise<BackendSessionUserPayload> {
   const result = await lookupServerSession()
   if (result.status !== "ok") redirectForSessionFailure(result)
-  const { role } = result.user
-  if (!isAdminRole(role) && !isCandidateRole(role)) {
+  if (!isCandidateRole(result.user.role)) {
     redirect("/seleccion-portal")
   }
   return result.user
