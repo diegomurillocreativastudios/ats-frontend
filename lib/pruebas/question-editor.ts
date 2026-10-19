@@ -158,12 +158,95 @@ export function blankQuestion(
   }
 }
 
+/** Options and scoring kept while the author changes question type. */
+export interface ChoiceDraft {
+  options: MockQuestionOption[]
+  correctOptionId: string
+  correctOptionIds: string[]
+  points: number
+}
+
+export function readChoiceDraft(question: MockQuestion): ChoiceDraft | null {
+  if (question.kind === "single_choice") {
+    return {
+      options: question.options.map((option) => ({ ...option })),
+      correctOptionId: question.correctOptionId,
+      correctOptionIds: question.correctOptionId
+        ? [question.correctOptionId]
+        : [],
+      points: question.points,
+    }
+  }
+  if (question.kind === "multiple_choice") {
+    const correctOptionId =
+      question.correctOptionIds.find((id) =>
+        question.options.some((option) => option.id === id),
+      ) ??
+      question.options[0]?.id ??
+      ""
+    return {
+      options: question.options.map((option) => ({ ...option })),
+      correctOptionId,
+      correctOptionIds: question.correctOptionIds.filter((id) =>
+        question.options.some((option) => option.id === id),
+      ),
+      points: question.points,
+    }
+  }
+  return null
+}
+
+function withChoiceDraft(next: MockQuestion, draft: ChoiceDraft): MockQuestion {
+  if (next.kind !== "single_choice" && next.kind !== "multiple_choice") {
+    return next
+  }
+  const options = draft.options.map((option) => ({ ...option }))
+  if (options.length === 0) return next
+  if (next.kind === "single_choice") {
+    const correctOptionId = options.some(
+      (option) => option.id === draft.correctOptionId,
+    )
+      ? draft.correctOptionId
+      : (options[0]?.id ?? next.correctOptionId)
+    return {
+      ...next,
+      options,
+      correctOptionId,
+      points: draft.points,
+    }
+  }
+  const correctOptionIds = draft.correctOptionIds.filter((id) =>
+    options.some((option) => option.id === id),
+  )
+  const fallbackId = options[0]?.id
+  return {
+    ...next,
+    options,
+    correctOptionIds:
+      correctOptionIds.length > 0
+        ? correctOptionIds
+        : fallbackId
+          ? [fallbackId]
+          : [],
+    points: draft.points,
+  }
+}
+
+/**
+ * Changes the question type. The prompt stays. Choice options, which ones
+ * are correct, and points stay too — including after a round trip through
+ * a type that does not show options.
+ */
 export function switchQuestionKind(
   current: MockQuestion,
   nextKind: QuestionKind,
+  preservedChoice: ChoiceDraft | null = null,
 ): MockQuestion {
   if (current.kind === nextKind) return current
-  return blankQuestion(nextKind, current.prompt, current.id)
+  const next = blankQuestion(nextKind, current.prompt, current.id)
+  const draft = readChoiceDraft(current) ?? preservedChoice
+  if (!draft) return next
+  return withChoiceDraft(next, draft)
 }
 
 function isPointsInRange(value: number): boolean {

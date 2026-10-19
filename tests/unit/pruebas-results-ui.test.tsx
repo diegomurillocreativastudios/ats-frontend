@@ -39,7 +39,7 @@ afterEach(() => {
 })
 
 describe("PruebasResultsListScreen UI", () => {
-  it("lists Sofía, Diego and Lucía among completed results", async () => {
+  it("lists Diego and Lucía among completed technical results", async () => {
     renderWithIntl(<PruebasResultsListScreen />)
 
     await waitFor(() => {
@@ -49,9 +49,8 @@ describe("PruebasResultsListScreen UI", () => {
     })
 
     expect(
-      screen.getAllByTestId(`results-open-${MOCK_IDS.assignmentSofiaPending}`)
-        .length,
-    ).toBeGreaterThan(0)
+      screen.queryByTestId(`results-open-${MOCK_IDS.assignmentSofiaPending}`),
+    ).not.toBeInTheDocument()
     expect(
       screen.getAllByTestId(
         `results-open-${MOCK_IDS.assignmentDiegoPendingReview}`,
@@ -61,6 +60,7 @@ describe("PruebasResultsListScreen UI", () => {
       screen.getAllByTestId(`results-open-${MOCK_IDS.assignmentLuciaSubmitted}`)
         .length,
     ).toBeGreaterThan(0)
+    expect(screen.queryByLabelText("Tipo")).not.toBeInTheDocument()
   })
 
   it("shows error state when the mock scenario fails", async () => {

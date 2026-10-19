@@ -127,13 +127,15 @@ describe("PruebasDashboard UI", () => {
     expect(
       screen.getByRole("link", { name: /Crear o ver evaluaciones/i }),
     ).toHaveAttribute("href", "/portal-pruebas/evaluaciones")
-    expect(fetchAssessmentsDashboard).toHaveBeenCalled()
+    expect(fetchAssessmentsDashboard).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "technical" }),
+    )
   })
 
   it("shows filter-empty without replacing the page chrome", async () => {
     fetchAssessmentsDashboard.mockImplementation(
-      async (filters: { kind?: string | null; assignmentStatus?: string | null }) => {
-        if (filters.kind === "psychometric" && filters.assignmentStatus === "pending") {
+      async (filters: { assignmentStatus?: string | null }) => {
+        if (filters.assignmentStatus === "cancelled") {
           return populatedView({
             counts: {
               assigned: 0,
@@ -166,11 +168,9 @@ describe("PruebasDashboard UI", () => {
       expect(screen.getByLabelText("Empresa")).toBeInTheDocument()
     })
 
-    fireEvent.change(screen.getByLabelText("Categoría"), {
-      target: { value: "psychometric" },
-    })
+    expect(screen.queryByLabelText("Categoría")).not.toBeInTheDocument()
     fireEvent.change(screen.getByLabelText("Estado"), {
-      target: { value: "pending" },
+      target: { value: "cancelled" },
     })
 
     await waitFor(() => {
@@ -238,8 +238,8 @@ describe("PruebasDashboard UI", () => {
       expect(screen.getByLabelText("Empresa")).toBeInTheDocument()
     })
 
-    fireEvent.change(screen.getByLabelText("Categoría"), {
-      target: { value: "technical" },
+    fireEvent.change(screen.getByLabelText("Estado"), {
+      target: { value: "cancelled" },
     })
 
     await waitFor(() => {

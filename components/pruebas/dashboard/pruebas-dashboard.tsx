@@ -31,9 +31,9 @@ import {
 } from "@/lib/api/recruiter-assessments-dashboard"
 import { fetchRecruiterVacancyOptions } from "@/lib/api/admin-interviews-calendar"
 import { listRecruiterCompanies } from "@/lib/api/recruiter-companies"
+import { PORTAL_ASSESSMENT_KIND } from "@/lib/pruebas/assessment-kind"
 import { formatMockDate } from "@/lib/pruebas/formatters"
 import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
-import type { AssessmentKind } from "@/lib/pruebas/types"
 
 const CONTROL_CLASS =
   "h-11 w-full rounded-md border border-border bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
@@ -141,7 +141,10 @@ export function PruebasDashboard() {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await fetchAssessmentsDashboard(nextFilters)
+      const data = await fetchAssessmentsDashboard({
+        ...nextFilters,
+        kind: PORTAL_ASSESSMENT_KIND,
+      })
       setSnapshot(data)
     } catch (cause) {
       setError(getApiErrorMessage(cause))
@@ -246,7 +249,7 @@ export function PruebasDashboard() {
         disabled={isLoading}
         desktopClassName="w-full rounded-xl border border-border bg-card p-3 md:p-4"
       >
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
           <FilterField id="pruebas-filter-company" label={t("filters.company")}>
             <select
               id="pruebas-filter-company"
@@ -280,25 +283,6 @@ export function PruebasDashboard() {
                   {vacancy.label}
                 </option>
               ))}
-            </select>
-          </FilterField>
-
-          <FilterField id="pruebas-filter-kind" label={t("filters.kind")}>
-            <select
-              id="pruebas-filter-kind"
-              className={CONTROL_CLASS}
-              value={filters.kind ?? ""}
-              onChange={(event) =>
-                patchFilters({
-                  kind: (event.target.value || null) as AssessmentKind | null,
-                })
-              }
-            >
-              <option value="">{t("filters.all")}</option>
-              <option value="technical">{t("filters.kindTechnical")}</option>
-              <option value="psychometric">
-                {t("filters.kindPsychometric")}
-              </option>
             </select>
           </FilterField>
 

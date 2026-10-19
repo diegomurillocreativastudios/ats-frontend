@@ -32,12 +32,10 @@ import {
   type EvaluationAction,
   type EvaluationListFilters,
 } from "@/lib/pruebas/evaluations"
+import { PORTAL_ASSESSMENT_KIND } from "@/lib/pruebas/assessment-kind"
 import { formatMockDate } from "@/lib/pruebas/formatters"
 import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
-import type {
-  AssessmentKind,
-  AssessmentLifecycleStatus,
-} from "@/lib/pruebas/types"
+import type { AssessmentLifecycleStatus } from "@/lib/pruebas/types"
 
 const CONTROL_CLASS =
   "h-11 w-full rounded-md border border-border bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
@@ -88,9 +86,10 @@ export function PruebasEvaluationsList() {
     setIsLoading(true)
     setLoadError(null)
     try {
-      const rows = await listAssessmentTests()
-      setTests(rows)
-      setIsStoreEmpty(rows.length === 0)
+      const rows = await listAssessmentTests({ type: PORTAL_ASSESSMENT_KIND })
+      const technical = rows.filter((row) => row.kind === PORTAL_ASSESSMENT_KIND)
+      setTests(technical)
+      setIsStoreEmpty(technical.length === 0)
     } catch (error) {
       setTests([])
       setIsStoreEmpty(false)
@@ -284,7 +283,7 @@ export function PruebasEvaluationsList() {
         disabled={isLoading}
         desktopClassName="w-full rounded-xl border border-border bg-card p-3 md:p-4"
       >
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div className="flex flex-col gap-1.5 sm:col-span-2">
             <label
               htmlFor="pruebas-eval-search"
@@ -300,30 +299,6 @@ export function PruebasEvaluationsList() {
               value={filters.query}
               onChange={(event) => patchFilters({ query: event.target.value })}
             />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="pruebas-eval-kind"
-              className="font-sans text-sm font-medium text-foreground"
-            >
-              {t("filters.kind")}
-            </label>
-            <select
-              id="pruebas-eval-kind"
-              className={CONTROL_CLASS}
-              value={filters.kind ?? ""}
-              onChange={(event) =>
-                patchFilters({
-                  kind: (event.target.value || null) as AssessmentKind | null,
-                })
-              }
-            >
-              <option value="">{t("filters.all")}</option>
-              <option value="technical">{t("filters.kindTechnical")}</option>
-              <option value="psychometric">
-                {t("filters.kindPsychometric")}
-              </option>
-            </select>
           </div>
           <div className="flex flex-col gap-1.5">
             <label

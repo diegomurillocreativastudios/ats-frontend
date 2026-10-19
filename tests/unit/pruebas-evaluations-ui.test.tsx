@@ -100,10 +100,12 @@ describe("PruebasEvaluationsList UI", () => {
       ).toBeInTheDocument()
     })
 
-    expect(screen.getAllByText("Razonamiento lógico").length).toBeGreaterThan(0)
-    expect(
-      screen.getAllByText("Borrador de comunicación").length,
-    ).toBeGreaterThan(0)
+    expect(screen.getAllByText("Borrador de comunicación").length).toBeGreaterThan(
+      0,
+    )
+    expect(screen.queryByText("Razonamiento lógico")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Categoría")).not.toBeInTheDocument()
+    expect(listAssessmentTests).toHaveBeenCalledWith({ type: "technical" })
 
     const badges = screen.getAllByTestId("assessment-status-badge")
     const statuses = badges.map((badge) => badge.getAttribute("data-status"))

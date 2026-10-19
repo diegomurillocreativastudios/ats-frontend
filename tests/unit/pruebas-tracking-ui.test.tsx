@@ -52,7 +52,7 @@ describe("PruebasTrackingScreen UI", () => {
       ).toBeInTheDocument()
     })
 
-    expect(screen.getAllByTestId("tracking-row").length).toBe(8)
+    expect(screen.getAllByTestId("tracking-row").length).toBe(7)
 
     await openAssignment(MOCK_IDS.assignmentCarlosExpired)
     expect(screen.getByTestId("tracking-action-retry")).toBeInTheDocument()

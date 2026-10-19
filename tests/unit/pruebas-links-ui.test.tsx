@@ -4,15 +4,41 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { NextIntlClientProvider } from "next-intl"
 
 import { PruebasLinksScreen } from "@/components/pruebas/links/pruebas-links-screen"
+import type {
+  AssessmentLinkRow,
+  AssessmentLinksCatalog,
+} from "@/lib/api/recruiter-assessments-links"
+import type { AssessmentTestView } from "@/lib/api/recruiter-assessments-tests"
 import esMessages from "@/messages/es.json"
-import { MOCK_IDS } from "@/lib/pruebas/mock-fixtures"
-import {
-  debugSnapshotStore,
-  listLinks,
-  resetMockStore,
-  setMockScenario,
-} from "@/lib/pruebas/mock-service"
-import { waitForDialogClosed } from "@/tests/helpers/wait-for-dialog-closed"
+
+const getAssessmentLinksCatalog = vi.fn()
+const createAssessmentLink = vi.fn()
+const setAssessmentLinkActive = vi.fn()
+const listAssessmentTests = vi.fn()
+
+vi.mock("@/lib/api/recruiter-assessments-links", async () => {
+  const actual = await vi.importActual<
+    typeof import("@/lib/api/recruiter-assessments-links")
+  >("@/lib/api/recruiter-assessments-links")
+  return {
+    ...actual,
+    getAssessmentLinksCatalog: (...args: unknown[]) =>
+      getAssessmentLinksCatalog(...args),
+    createAssessmentLink: (...args: unknown[]) => createAssessmentLink(...args),
+    setAssessmentLinkActive: (...args: unknown[]) =>
+      setAssessmentLinkActive(...args),
+  }
+})
+
+vi.mock("@/lib/api/recruiter-assessments-tests", async () => {
+  const actual = await vi.importActual<
+    typeof import("@/lib/api/recruiter-assessments-tests")
+  >("@/lib/api/recruiter-assessments-tests")
+  return {
+    ...actual,
+    listAssessmentTests: (...args: unknown[]) => listAssessmentTests(...args),
+  }
+})
 
 const searchParamsGet = vi.fn<(key: string) => string | null>(() => null)
 
@@ -26,6 +52,91 @@ vi.mock("next/navigation", () => ({
   }),
 }))
 
+const sampleTests: AssessmentTestView[] = [
+  {
+    id: "test-tech",
+    title: "Análisis de datos",
+    description: "Tech",
+    kind: "technical",
+    lifecycleStatus: "published",
+    draftVersion: 1,
+    createdAt: "2026-10-01T00:00:00Z",
+  },
+  {
+    id: "test-psycho",
+    title: "Perfil de dimensiones",
+    description: "Psycho",
+    kind: "psychometric",
+    lifecycleStatus: "published",
+    draftVersion: 1,
+    createdAt: "2026-09-01T00:00:00Z",
+  },
+]
+
+const activeLink: AssessmentLinkRow = {
+  id: "link-active",
+  testVersionId: "ver-tech-1",
+  testId: "test-tech",
+  testTitle: "Análisis de datos",
+  versionNumber: 1,
+  vacancyId: "vac-open",
+  vacancyTitle: "Analista de datos",
+  companyId: "co-1",
+  companyName: "Applican Demo",
+  active: true,
+  linkedAt: "2026-10-10T00:00:00Z",
+}
+
+const inactivePsychoLink: AssessmentLinkRow = {
+  id: "link-inactive",
+  testVersionId: "ver-psycho-1",
+  testId: "test-psycho",
+  testTitle: "Perfil de dimensiones",
+  versionNumber: 1,
+  vacancyId: "vac-open",
+  vacancyTitle: "Analista de datos",
+  companyId: "co-1",
+  companyName: "Applican Demo",
+  active: false,
+  linkedAt: "2026-10-12T00:00:00Z",
+}
+
+const sampleCatalog: AssessmentLinksCatalog = {
+  versions: [
+    {
+      id: "ver-tech-1",
+      testId: "test-tech",
+      testTitle: "Análisis de datos",
+      versionNumber: 1,
+    },
+    {
+      id: "ver-psycho-1",
+      testId: "test-psycho",
+      testTitle: "Perfil de dimensiones",
+      versionNumber: 1,
+    },
+  ],
+  vacancies: [
+    {
+      id: "vac-open",
+      title: "Analista de datos",
+      companyId: "co-1",
+      companyName: "Applican Demo",
+      linkable: true,
+      unavailableReason: null,
+    },
+    {
+      id: "vac-closed",
+      title: "Inventario de almacén",
+      companyId: "co-1",
+      companyName: "Applican Demo",
+      linkable: false,
+      unavailableReason: "closed",
+    },
+  ],
+  links: [activeLink, inactivePsychoLink],
+}
+
 function renderWithIntl(ui: ReactNode) {
   return render(
     <NextIntlClientProvider locale="es" messages={esMessages}>
@@ -34,18 +145,34 @@ function renderWithIntl(ui: ReactNode) {
   )
 }
 
+function apiError(code: string, status = 409) {
+  const error = new Error(code) as Error & {
+    status: number
+    body: { code: string; message: string }
+  }
+  error.status = status
+  error.body = { code, message: code }
+  return error
+}
+
 beforeEach(() => {
-  resetMockStore()
-  setMockScenario("populated")
+  getAssessmentLinksCatalog.mockReset()
+  createAssessmentLink.mockReset()
+  setAssessmentLinkActive.mockReset()
+  listAssessmentTests.mockReset()
   searchParamsGet.mockReturnValue(null)
+  getAssessmentLinksCatalog.mockResolvedValue(sampleCatalog)
+  listAssessmentTests.mockResolvedValue(sampleTests)
+  createAssessmentLink.mockResolvedValue(activeLink)
+  setAssessmentLinkActive.mockResolvedValue({ ...activeLink, active: false })
 })
 
 afterEach(() => {
-  resetMockStore()
+  vi.clearAllMocks()
 })
 
 describe("PruebasLinksScreen UI", () => {
-  it("shows excluded closed vacancy and seeded rows", async () => {
+  it("shows excluded closed vacancy and technical rows only", async () => {
     renderWithIntl(<PruebasLinksScreen />)
 
     await waitFor(() => {
@@ -68,24 +195,46 @@ describe("PruebasLinksScreen UI", () => {
       within(vacancySelect).getByRole("option", { name: "Analista de datos" }),
     ).toBeInTheDocument()
 
-    expect(await screen.findAllByTestId("link-row")).not.toHaveLength(0)
+    const versionSelect = screen.getByTestId("links-version-select")
+    expect(
+      within(versionSelect).getByRole("option", {
+        name: /Análisis de datos · v1/,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      within(versionSelect).queryByRole("option", {
+        name: /Perfil de dimensiones/,
+      }),
+    ).not.toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("link-row").length).toBeGreaterThan(0)
+    })
+    const linkIds = new Set(
+      screen
+        .getAllByTestId("link-row")
+        .map((row) => row.getAttribute("data-link-id")),
+    )
+    expect(linkIds).toEqual(new Set(["link-active"]))
+    expect(linkIds.has("link-inactive")).toBe(false)
   })
 
-  it("preselects version from query and rejects duplicate links", async () => {
+  it("preselects version from query and shows duplicate_link", async () => {
     searchParamsGet.mockImplementation((key: string) =>
-      key === "version" ? MOCK_IDS.versionTechnicalV1 : null,
+      key === "version" ? "ver-tech-1" : null,
     )
-    const before = (await listLinks()).length
+    createAssessmentLink.mockRejectedValueOnce(apiError("duplicate_link", 409))
+
     renderWithIntl(<PruebasLinksScreen />)
 
     await waitFor(() => {
       expect(screen.getByTestId("links-version-select")).toHaveValue(
-        MOCK_IDS.versionTechnicalV1,
+        "ver-tech-1",
       )
     })
 
     fireEvent.change(screen.getByTestId("links-vacancy-select"), {
-      target: { value: MOCK_IDS.vacancyOpen },
+      target: { value: "vac-open" },
     })
     fireEvent.click(screen.getByTestId("links-submit"))
 
@@ -99,26 +248,52 @@ describe("PruebasLinksScreen UI", () => {
         screen.getByText(/Ya existe un vínculo para esa versión y vacante/i),
       ).toBeInTheDocument()
     })
-    expect((await listLinks()).length).toBe(before)
   })
 
-  it("reactivates an inactive link without creating a new row", async () => {
-    const before = (await listLinks()).length
+  it("deactivates and reactivates a technical link", async () => {
+    const inactiveTech: AssessmentLinkRow = {
+      ...activeLink,
+      active: false,
+    }
+    getAssessmentLinksCatalog
+      .mockResolvedValueOnce(sampleCatalog)
+      .mockResolvedValueOnce({
+        ...sampleCatalog,
+        links: [inactiveTech, inactivePsychoLink],
+      })
+      .mockResolvedValueOnce(sampleCatalog)
+
+    setAssessmentLinkActive
+      .mockResolvedValueOnce(inactiveTech)
+      .mockResolvedValueOnce(activeLink)
+
     renderWithIntl(<PruebasLinksScreen />)
 
     await waitFor(() => {
-      expect(screen.getAllByTestId("link-row").length).toBeGreaterThan(0)
+      expect(
+        screen.getAllByRole("button", { name: "Desactivar" }).length,
+      ).toBeGreaterThan(0)
     })
 
-    const inactiveRow = screen
-      .getAllByTestId("link-row")
-      .find(
-        (row) => row.getAttribute("data-link-id") === MOCK_IDS.linkInactive,
-      )!
+    fireEvent.click(screen.getAllByRole("button", { name: "Desactivar" })[0]!)
+    const deactivateDialog = await screen.findByRole("dialog", {
+      name: "Desactivar vínculo",
+    })
     fireEvent.click(
-      within(inactiveRow).getByRole("button", { name: "Reactivar" }),
+      within(deactivateDialog).getByRole("button", { name: "Desactivar" }),
     )
 
+    await waitFor(() => {
+      expect(setAssessmentLinkActive).toHaveBeenCalledWith("link-active", false)
+    })
+
+    await waitFor(() => {
+      expect(
+        screen.getAllByRole("button", { name: "Reactivar" }).length,
+      ).toBeGreaterThan(0)
+    })
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Reactivar" })[0]!)
     const reactivateDialog = await screen.findByRole("dialog", {
       name: "Reactivar vínculo",
     })
@@ -127,16 +302,7 @@ describe("PruebasLinksScreen UI", () => {
     )
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Vínculo reactivado en modo demostración/i),
-      ).toBeInTheDocument()
+      expect(setAssessmentLinkActive).toHaveBeenCalledWith("link-active", true)
     })
-    await waitForDialogClosed("Reactivar vínculo")
-
-    expect((await listLinks()).length).toBe(before)
-    const storeLink = debugSnapshotStore().links.find(
-      (item) => item.id === MOCK_IDS.linkInactive,
-    )
-    expect(storeLink?.active).toBe(true)
   })
 })

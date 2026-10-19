@@ -87,32 +87,19 @@ describe("PruebasReportsScreen UI", () => {
     )
   })
 
-  it("switches to psychometric dimensions for Sofía", async () => {
+  it("does not offer the psychometric dimensions report", async () => {
     renderWithIntl(<PruebasReportsScreen />)
 
     await waitFor(() => {
-      expect(
-        screen.getByTestId("reports-catalog-psychometric-dimensions"),
-      ).toBeInTheDocument()
-    })
-
-    fireEvent.click(
-      screen.getByTestId("reports-catalog-psychometric-dimensions"),
-    )
-
-    await waitFor(() => {
-      expect(
-        screen.getByTestId("reports-chart-psychometric-dimensions"),
-      ).toBeInTheDocument()
+      expect(screen.getByTestId("reports-catalog")).toBeInTheDocument()
     })
 
     expect(
-      screen.getByTestId("reports-chart-psychometric-dimensions-footnote"),
-    ).toHaveTextContent(/0 a 100/i)
-    expect(screen.getAllByText("Análisis").length).toBeGreaterThan(0)
+      screen.queryByTestId("reports-catalog-psychometric-dimensions"),
+    ).not.toBeInTheDocument()
     expect(
-      screen.getAllByTestId("reports-dimension-score").length,
-    ).toBeGreaterThan(0)
+      screen.getByTestId("reports-catalog-technical-scores"),
+    ).toBeInTheDocument()
   })
 
   it("shows empty state when filters match nothing", async () => {

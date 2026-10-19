@@ -11,6 +11,7 @@ import { LoadingSkeleton } from "@/components/pruebas/shared/loading-skeleton"
 import { ListPaginationBar } from "@/components/ui/list-pagination-bar"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { ResponsiveFilters } from "@/components/ui/responsive-filters"
+import { PORTAL_ASSESSMENT_KIND } from "@/lib/pruebas/assessment-kind"
 import { formatMockDate } from "@/lib/pruebas/formatters"
 import {
   listApplications,
@@ -31,7 +32,6 @@ import {
   type ResultsListStatus,
 } from "@/lib/pruebas/results"
 import type {
-  AssessmentKind,
   MockApplication,
   MockAssessmentTest,
   MockAssessmentVersion,
@@ -53,7 +53,6 @@ const EMPTY_FILTERS: ResultsListFilters = {
   assignedTo: null,
 }
 
-const KIND_OPTIONS: readonly AssessmentKind[] = ["technical", "psychometric"]
 const STATUS_OPTIONS: readonly ResultsListStatus[] = [
   "reviewed",
   "pending",
@@ -167,7 +166,7 @@ export function PruebasResultsListScreen() {
         tests,
         versions,
         results,
-      }),
+      }).filter((row) => row.kind === PORTAL_ASSESSMENT_KIND),
     [
       assignments,
       applications,
@@ -320,33 +319,6 @@ export function PruebasResultsListScreen() {
               {vacancyOptions.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.title}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="pruebas-results-kind"
-              className="font-sans text-sm font-medium text-foreground"
-            >
-              {t("filters.kind")}
-            </label>
-            <select
-              id="pruebas-results-kind"
-              data-testid="results-filter-kind"
-              className={CONTROL_CLASS}
-              value={filters.kind ?? ""}
-              onChange={(event) =>
-                setFilters((current) => ({
-                  ...current,
-                  kind: (event.target.value || null) as AssessmentKind | null,
-                }))
-              }
-            >
-              <option value="">{t("filters.all")}</option>
-              {KIND_OPTIONS.map((kind) => (
-                <option key={kind} value={kind}>
-                  {t(`kind.${kind}`)}
                 </option>
               ))}
             </select>

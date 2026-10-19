@@ -545,7 +545,7 @@
     },
     "pruebasPortal": {
       "title": "Assessments Portal",
-      "description": "Technical and psychometric assessments with demo data"
+      "description": "Technical assessments with demo data"
     },
     "pruebasCandidateDemo": {
       "title": "Take assessment (demo)",
@@ -670,7 +670,7 @@
     },
     "evaluations": {
       "title": "Assessments",
-      "description": "Catalog of technical and psychometric tests. Definition statuses: draft, published, and archived.",
+      "description": "Catalog of technical tests. Definition statuses: draft, published, and archived.",
       "create": "New assessment",
       "search": "Search by title",
       "searchPlaceholder": "Assessment name",
@@ -765,7 +765,7 @@
       "states": {
         "loading": "Loading assessments…",
         "emptyTitle": "No evaluations yet",
-        "emptyDescription": "Create the first technical or psychometric evaluation to get started.",
+        "emptyDescription": "Create the first technical evaluation to get started.",
         "errorTitle": "Could not load assessments",
         "errorDescription": "The catalog could not be loaded. Try again.",
         "retry": "Retry",
@@ -814,7 +814,7 @@
       },
       "editor": {
         "createTitle": "New evaluation",
-        "createDescription": "Create and publish a technical or psychometric test.",
+        "createDescription": "Create and publish a technical test.",
         "editTitle": "Edit evaluation",
         "editDescription": "Edit the draft. Publishing freezes an immutable version.",
         "steps": {
@@ -1092,13 +1092,13 @@
         "cancel": "Cancel"
       },
       "toasts": {
-        "linked": "Link created in demo mode.",
-        "deactivated": "Link deactivated in demo mode.",
-        "reactivated": "Link reactivated in demo mode."
+        "linked": "Link created.",
+        "deactivated": "Link deactivated.",
+        "reactivated": "Link reactivated."
       },
       "errors": {
-        "generic": "Could not complete the demo action.",
-        "scenario_error": "The simulated service returned an error.",
+        "generic": "Could not complete the action.",
+        "scenario_error": "Could not load links.",
         "not_found": "The requested resource was not found.",
         "duplicate_link": "A link already exists for that version and vacancy.",
         "vacancy_closed": "The vacancy is closed and cannot be linked.",
@@ -1107,13 +1107,13 @@
       },
       "states": {
         "loading": "Loading links…",
-        "emptyTitle": "No demo data",
-        "emptyDescription": "The simulated scenario is empty. Reset the demo data to continue.",
+        "emptyTitle": "Nothing to link yet",
+        "emptyDescription": "Publish a technical assessment or make sure you have vacancies available to create links.",
         "errorTitle": "Could not load links",
-        "errorDescription": "The simulated service returned an error. Try again.",
+        "errorDescription": "Could not load the catalog. Try again.",
         "retry": "Retry",
         "listEmptyTitle": "No links",
-        "listEmptyDescription": "No versions are linked to vacancies in this demo yet."
+        "listEmptyDescription": "No versions are linked to vacancies yet."
       }
     },
     "assignments": {
@@ -1400,7 +1400,7 @@
     },
     "results": {
       "title": "Results",
-      "description": "Browse technical and psychometric results with demo data.",
+      "description": "Browse technical results with demo data.",
       "count": "{count, plural, one {# result} other {# results}}",
       "filteredCount": "{count, plural, one {# visible} other {# visible}}",
       "search": "Search",

@@ -10,53 +10,82 @@ import { ErrorState } from "@/components/pruebas/shared/error-state"
 import { LoadingSkeleton } from "@/components/pruebas/shared/loading-skeleton"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import Snackbar from "@/components/ui/Snackbar"
+import {
+  createAssessmentLink,
+  getAssessmentLinksCatalog,
+  resolveAssessmentLinkErrorMessage,
+  setAssessmentLinkActive,
+  type AssessmentLinkRow,
+  type AssessmentLinkVacancyOption,
+  type AssessmentLinkVersionOption,
+} from "@/lib/api/recruiter-assessments-links"
+import { listAssessmentTests } from "@/lib/api/recruiter-assessments-tests"
+import { PORTAL_ASSESSMENT_KIND } from "@/lib/pruebas/assessment-kind"
 import { formatMockDate } from "@/lib/pruebas/formatters"
-import {
-  buildLinkListRows,
-  buildPublishedVersionOptions,
-  partitionVacanciesForLinking,
-  type LinkListRow,
-} from "@/lib/pruebas/links"
-import {
-  createLink,
-  listCompanies,
-  listLinks,
-  listTests,
-  listVacancies,
-  listVersions,
-  MockServiceError,
-  setLinkActive,
-} from "@/lib/pruebas/mock-service"
-import type {
-  MockAssessmentLink,
-  MockAssessmentTest,
-  MockAssessmentVersion,
-  MockCompany,
-  MockVacancy,
-} from "@/lib/pruebas/types"
 
 const CONTROL_CLASS =
   "h-11 w-full rounded-md border border-border bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
 
 type ConfirmKind = "create" | "deactivate" | "reactivate"
 
-const LINK_ERROR_CODES = new Set([
-  "duplicate_link",
-  "vacancy_closed",
-  "version_not_published",
-  "test_not_published",
-  "not_found",
-  "scenario_error",
-])
+interface VersionSelectOption {
+  versionId: string
+  testId: string
+  testTitle: string
+  versionNumber: number
+  label: string
+}
 
-function resolveErrorMessage(
-  error: unknown,
-  t: ReturnType<typeof useTranslations<"PruebasPortal.links">>,
-): string {
-  if (error instanceof MockServiceError && LINK_ERROR_CODES.has(error.code)) {
-    return t(`errors.${error.code}` as "errors.duplicate_link")
+interface VacancySelectOption {
+  vacancyId: string
+  title: string
+  companyName: string
+}
+
+function buildVersionSelectOptions(
+  versions: readonly AssessmentLinkVersionOption[],
+  technicalTestIds: ReadonlySet<string>,
+): VersionSelectOption[] {
+  return versions
+    .filter((version) => technicalTestIds.has(version.testId))
+    .map((version) => ({
+      versionId: version.id,
+      testId: version.testId,
+      testTitle: version.testTitle,
+      versionNumber: version.versionNumber,
+      label: `${version.testTitle} · v${version.versionNumber}`,
+    }))
+    .sort((a, b) => {
+      const titleCmp = a.testTitle.localeCompare(b.testTitle)
+      if (titleCmp !== 0) return titleCmp
+      return b.versionNumber - a.versionNumber
+    })
+}
+
+function partitionCatalogVacancies(
+  vacancies: readonly AssessmentLinkVacancyOption[],
+): {
+  open: VacancySelectOption[]
+  excluded: { vacancyId: string; title: string }[]
+} {
+  const open: VacancySelectOption[] = []
+  const excluded: { vacancyId: string; title: string }[] = []
+  for (const vacancy of vacancies) {
+    if (vacancy.linkable) {
+      open.push({
+        vacancyId: vacancy.id,
+        title: vacancy.title,
+        companyName: vacancy.companyName,
+      })
+      continue
+    }
+    if (vacancy.unavailableReason === "closed") {
+      excluded.push({ vacancyId: vacancy.id, title: vacancy.title })
+    }
   }
-  return t("errors.generic")
+  open.sort((a, b) => a.title.localeCompare(b.title))
+  excluded.sort((a, b) => a.title.localeCompare(b.title))
+  return { open, excluded }
 }
 
 export function PruebasLinksScreen() {
@@ -64,20 +93,21 @@ export function PruebasLinksScreen() {
   const locale = useLocale()
   const searchParams = useSearchParams()
 
-  const [links, setLinks] = useState<MockAssessmentLink[]>([])
-  const [tests, setTests] = useState<MockAssessmentTest[]>([])
-  const [versions, setVersions] = useState<MockAssessmentVersion[]>([])
-  const [vacancies, setVacancies] = useState<MockVacancy[]>([])
-  const [companies, setCompanies] = useState<MockCompany[]>([])
+  const [versions, setVersions] = useState<AssessmentLinkVersionOption[]>([])
+  const [vacancies, setVacancies] = useState<AssessmentLinkVacancyOption[]>([])
+  const [links, setLinks] = useState<AssessmentLinkRow[]>([])
+  const [technicalTestIds, setTechnicalTestIds] = useState<Set<string>>(
+    () => new Set(),
+  )
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [isStoreEmpty, setIsStoreEmpty] = useState(false)
+  const [isCatalogEmpty, setIsCatalogEmpty] = useState(false)
 
   const [versionId, setVersionId] = useState("")
   const [vacancyId, setVacancyId] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
   const [confirmKind, setConfirmKind] = useState<ConfirmKind | null>(null)
-  const [confirmRow, setConfirmRow] = useState<LinkListRow | null>(null)
+  const [confirmRow, setConfirmRow] = useState<AssessmentLinkRow | null>(null)
   const [isConfirmLoading, setIsConfirmLoading] = useState(false)
   const [preselectApplied, setPreselectApplied] = useState(false)
 
@@ -91,34 +121,37 @@ export function PruebasLinksScreen() {
     setIsLoading(true)
     setLoadError(null)
     try {
-      const [linkRows, testRows, versionRows, vacancyRows, companyRows] =
-        await Promise.all([
-          listLinks(),
-          listTests(),
-          listVersions(),
-          listVacancies(),
-          listCompanies(),
-        ])
-      setLinks(linkRows)
-      setTests(testRows)
-      setVersions(versionRows)
-      setVacancies(vacancyRows)
-      setCompanies(companyRows)
-      setIsStoreEmpty(
-        testRows.length === 0 && vacancyRows.length === 0 && linkRows.length === 0,
+      const [catalog, tests] = await Promise.all([
+        getAssessmentLinksCatalog(),
+        listAssessmentTests(),
+      ])
+      const technicalIds = new Set(
+        tests
+          .filter((test) => test.kind === PORTAL_ASSESSMENT_KIND)
+          .map((test) => test.id),
       )
-    } catch (error) {
-      setLinks([])
-      setTests([])
+      const filteredVersions = catalog.versions.filter((version) =>
+        technicalIds.has(version.testId),
+      )
+      const filteredLinks = catalog.links.filter((link) =>
+        technicalIds.has(link.testId),
+      )
+      setVersions(filteredVersions)
+      setVacancies(catalog.vacancies)
+      setLinks(filteredLinks)
+      setTechnicalTestIds(technicalIds)
+      setIsCatalogEmpty(
+        filteredVersions.length === 0 &&
+          catalog.vacancies.length === 0 &&
+          filteredLinks.length === 0,
+      )
+    } catch {
       setVersions([])
       setVacancies([])
-      setCompanies([])
-      setIsStoreEmpty(false)
-      setLoadError(
-        error instanceof MockServiceError
-          ? t("errors.scenario_error")
-          : t("errors.generic"),
-      )
+      setLinks([])
+      setTechnicalTestIds(new Set())
+      setIsCatalogEmpty(false)
+      setLoadError(t("errors.generic"))
     } finally {
       setIsLoading(false)
     }
@@ -129,18 +162,18 @@ export function PruebasLinksScreen() {
   }, [load])
 
   const versionOptions = useMemo(
-    () => buildPublishedVersionOptions(tests, versions),
-    [tests, versions],
+    () => buildVersionSelectOptions(versions, technicalTestIds),
+    [versions, technicalTestIds],
   )
 
   const { open: openVacancies, excluded: excludedVacancies } = useMemo(
-    () => partitionVacanciesForLinking(vacancies, companies),
-    [vacancies, companies],
+    () => partitionCatalogVacancies(vacancies),
+    [vacancies],
   )
 
   const rows = useMemo(
-    () => buildLinkListRows(links, tests, versions, vacancies, companies),
-    [links, tests, versions, vacancies, companies],
+    () => [...links].sort((a, b) => b.linkedAt.localeCompare(a.linkedAt)),
+    [links],
   )
 
   useEffect(() => {
@@ -181,9 +214,9 @@ export function PruebasLinksScreen() {
     setConfirmRow(null)
   }
 
-  const openToggleConfirm = (row: LinkListRow) => {
+  const openToggleConfirm = (row: AssessmentLinkRow) => {
     setConfirmRow(row)
-    setConfirmKind(row.link.active ? "deactivate" : "reactivate")
+    setConfirmKind(row.active ? "deactivate" : "reactivate")
   }
 
   const handleConfirm = async () => {
@@ -191,13 +224,13 @@ export function PruebasLinksScreen() {
     setIsConfirmLoading(true)
     try {
       if (confirmKind === "create") {
-        await createLink({ vacancyId, testVersionId: versionId })
+        await createAssessmentLink({ vacancyId, testVersionId: versionId })
         showToast("success", t("toasts.linked"))
         setVacancyId("")
         setFormError(null)
       } else if (confirmRow) {
         const nextActive = confirmKind === "reactivate"
-        await setLinkActive(confirmRow.link.id, nextActive)
+        await setAssessmentLinkActive(confirmRow.id, nextActive)
         showToast(
           "success",
           nextActive ? t("toasts.reactivated") : t("toasts.deactivated"),
@@ -207,7 +240,12 @@ export function PruebasLinksScreen() {
       setConfirmRow(null)
       await load()
     } catch (error) {
-      showToast("error", resolveErrorMessage(error, t))
+      showToast(
+        "error",
+        resolveAssessmentLinkErrorMessage(error, (key) =>
+          t(key as "errors.generic"),
+        ),
+      )
       setConfirmKind(null)
       setConfirmRow(null)
     } finally {
@@ -290,7 +328,7 @@ export function PruebasLinksScreen() {
     )
   }
 
-  if (isStoreEmpty) {
+  if (isCatalogEmpty) {
     return (
       <div className="flex flex-col gap-6 px-4 py-6 md:px-6 lg:px-8">
         <PortalPageHeader
@@ -461,10 +499,10 @@ export function PruebasLinksScreen() {
                 <tbody>
                   {rows.map((row) => (
                     <tr
-                      key={row.link.id}
+                      key={row.id}
                       className="border-t border-border"
                       data-testid="link-row"
-                      data-link-id={row.link.id}
+                      data-link-id={row.id}
                     >
                       <td className="px-4 py-3 text-foreground">
                         {row.testTitle}
@@ -483,18 +521,18 @@ export function PruebasLinksScreen() {
                       <td className="px-4 py-3">
                         <span
                           className={
-                            row.link.active
+                            row.active
                               ? "inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-900"
                               : "inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
                           }
                         >
-                          {row.link.active
+                          {row.active
                             ? t("list.statusActive")
                             : t("list.statusInactive")}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {formatMockDate(row.link.linkedAt, locale)}
+                        {formatMockDate(row.linkedAt, locale)}
                       </td>
                       <td className="px-4 py-3">
                         <button
@@ -502,7 +540,7 @@ export function PruebasLinksScreen() {
                           onClick={() => openToggleConfirm(row)}
                           className="inline-flex h-11 items-center rounded-md border border-border bg-background px-3 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
                         >
-                          {row.link.active
+                          {row.active
                             ? t("list.deactivate")
                             : t("list.reactivate")}
                         </button>
@@ -516,10 +554,10 @@ export function PruebasLinksScreen() {
             <ul className="flex flex-col gap-3 lg:hidden">
               {rows.map((row) => (
                 <li
-                  key={row.link.id}
+                  key={row.id}
                   className="glass-card flex flex-col gap-3 rounded-2xl p-4"
                   data-testid="link-row"
-                  data-link-id={row.link.id}
+                  data-link-id={row.id}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
@@ -534,12 +572,12 @@ export function PruebasLinksScreen() {
                     </div>
                     <span
                       className={
-                        row.link.active
+                        row.active
                           ? "inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-900"
                           : "inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
                       }
                     >
-                      {row.link.active
+                      {row.active
                         ? t("list.statusActive")
                         : t("list.statusInactive")}
                     </span>
@@ -562,7 +600,7 @@ export function PruebasLinksScreen() {
                         {t("list.linkedAt")}
                       </dt>
                       <dd className="text-foreground">
-                        {formatMockDate(row.link.linkedAt, locale)}
+                        {formatMockDate(row.linkedAt, locale)}
                       </dd>
                     </div>
                   </dl>
@@ -571,9 +609,7 @@ export function PruebasLinksScreen() {
                     onClick={() => openToggleConfirm(row)}
                     className="inline-flex h-11 w-full items-center justify-center rounded-md border border-border bg-background px-3 font-sans text-sm font-medium text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2"
                   >
-                    {row.link.active
-                      ? t("list.deactivate")
-                      : t("list.reactivate")}
+                    {row.active ? t("list.deactivate") : t("list.reactivate")}
                   </button>
                 </li>
               ))}

@@ -22,6 +22,7 @@ import {
   resolveCompanyName,
   type AssignCandidateRow,
 } from "@/lib/pruebas/assignments"
+import { PORTAL_ASSESSMENT_KIND } from "@/lib/pruebas/assessment-kind"
 import { MOCK_NOW } from "@/lib/pruebas/mock-fixtures"
 import {
   assign,
@@ -164,7 +165,12 @@ export function PruebasAssignmentsScreen() {
 
   const versionOptions = useMemo(
     () =>
-      buildActiveLinkedVersionOptions(vacancyId, links, tests, versions),
+      buildActiveLinkedVersionOptions(
+        vacancyId,
+        links,
+        tests.filter((test) => test.kind === PORTAL_ASSESSMENT_KIND),
+        versions,
+      ),
     [vacancyId, links, tests, versions],
   )
 

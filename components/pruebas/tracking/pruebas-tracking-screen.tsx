@@ -13,6 +13,7 @@ import Modal from "@/components/ui/Modal"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { ResponsiveFilters } from "@/components/ui/responsive-filters"
 import Snackbar from "@/components/ui/Snackbar"
+import { PORTAL_ASSESSMENT_KIND } from "@/lib/pruebas/assessment-kind"
 import { defaultExpiresAtYmd } from "@/lib/pruebas/assignments"
 import { ASSIGNMENT_STATUSES, formatMockDate } from "@/lib/pruebas/formatters"
 import { MOCK_NOW } from "@/lib/pruebas/mock-fixtures"
@@ -236,7 +237,13 @@ export function PruebasTrackingScreen() {
   const rows = useMemo(
     () =>
       buildTrackingRows({
-        assignments,
+        assignments: assignments.filter((assignment) => {
+          const version = versions.find((item) => item.id === assignment.testVersionId)
+          const test = version
+            ? tests.find((item) => item.id === version.testId)
+            : undefined
+          return test?.kind === PORTAL_ASSESSMENT_KIND
+        }),
         applications,
         candidates,
         vacancies,

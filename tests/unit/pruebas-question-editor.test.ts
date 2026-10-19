@@ -5,6 +5,7 @@ import {
   filterQuestions,
   isQuestionValid,
   normalizeQuestionForSave,
+  readChoiceDraft,
   switchQuestionKind,
   validateQuestion,
 } from "@/lib/pruebas/question-editor"
@@ -80,6 +81,68 @@ describe("question-editor kind switch", () => {
       expect("points" in likert).toBe(false)
       expect("correctOptionId" in likert).toBe(false)
     }
+  })
+
+  it("keeps written options when switching between single and multiple choice", () => {
+    const single: MockQuestion = {
+      ...blankQuestion("single_choice", "Que es React.js"),
+      options: [
+        { id: "a", label: "Una librería" },
+        { id: "b", label: "Un lenguaje" },
+        { id: "c", label: "Un framework" },
+      ],
+      correctOptionId: "a",
+      points: 4,
+    }
+
+    const multiple = switchQuestionKind(single, "multiple_choice")
+    expect(multiple.kind).toBe("multiple_choice")
+    if (multiple.kind !== "multiple_choice") return
+    expect(multiple.prompt).toBe("Que es React.js")
+    expect(multiple.options.map((option) => option.label)).toEqual([
+      "Una librería",
+      "Un lenguaje",
+      "Un framework",
+    ])
+    expect(multiple.correctOptionIds).toEqual(["a"])
+    expect(multiple.points).toBe(4)
+
+    const back = switchQuestionKind(
+      { ...multiple, correctOptionIds: ["a", "c"] },
+      "single_choice",
+    )
+    expect(back.kind).toBe("single_choice")
+    if (back.kind !== "single_choice") return
+    expect(back.options.map((option) => option.label)).toEqual([
+      "Una librería",
+      "Un lenguaje",
+      "Un framework",
+    ])
+    expect(back.correctOptionId).toBe("a")
+    expect(back.points).toBe(4)
+  })
+
+  it("restores options after leaving a choice type and coming back", () => {
+    const single: MockQuestion = {
+      ...blankQuestion("single_choice", "Enunciado"),
+      options: [
+        { id: "a", label: "Sí" },
+        { id: "b", label: "No" },
+      ],
+      correctOptionId: "b",
+      points: 2,
+    }
+    const draft = readChoiceDraft(single)
+    const likert = switchQuestionKind(single, "likert", draft)
+    expect(likert.kind).toBe("likert")
+
+    const restored = switchQuestionKind(likert, "multiple_choice", draft)
+    expect(restored.kind).toBe("multiple_choice")
+    if (restored.kind !== "multiple_choice") return
+    expect(restored.prompt).toBe("Enunciado")
+    expect(restored.options.map((option) => option.label)).toEqual(["Sí", "No"])
+    expect(restored.correctOptionIds).toEqual(["b"])
+    expect(restored.points).toBe(2)
   })
 })
 

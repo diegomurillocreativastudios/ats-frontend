@@ -10,6 +10,7 @@ import { LoadingSkeleton } from "@/components/pruebas/shared/loading-skeleton"
 import { ListPaginationBar } from "@/components/ui/list-pagination-bar"
 import PortalPageHeader from "@/components/ui/PortalPageHeader"
 import { ResponsiveFilters } from "@/components/ui/responsive-filters"
+import { PORTAL_ASSESSMENT_KIND } from "@/lib/pruebas/assessment-kind"
 import { formatMockDate } from "@/lib/pruebas/formatters"
 import {
   listApplications,
@@ -147,17 +148,25 @@ export function PruebasReportsScreen() {
     void load()
   }, [load])
 
+  const portalStore = useMemo(
+    () => ({
+      ...store,
+      tests: store.tests.filter((test) => test.kind === PORTAL_ASSESSMENT_KIND),
+    }),
+    [store],
+  )
+
   const statusRows = useMemo(
-    () => buildAssignmentStatusReportRows(store, filters),
-    [store, filters],
+    () => buildAssignmentStatusReportRows(portalStore, filters),
+    [portalStore, filters],
   )
   const technicalRows = useMemo(
-    () => buildTechnicalScoreReportRows(store, filters),
-    [store, filters],
+    () => buildTechnicalScoreReportRows(portalStore, filters),
+    [portalStore, filters],
   )
   const dimensionRows = useMemo(
-    () => buildPsychometricDimensionReportRows(store, filters),
-    [store, filters],
+    () => buildPsychometricDimensionReportRows(portalStore, filters),
+    [portalStore, filters],
   )
 
   const activeRows =

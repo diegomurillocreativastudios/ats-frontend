@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
@@ -29,9 +29,11 @@ import {
   normalizeQuestionForSave,
   PROMPT_MAX,
   questionsEqual,
+  readChoiceDraft,
   removeOption,
   switchQuestionKind,
   validateQuestion,
+  type ChoiceDraft,
   type QuestionFieldErrorKey,
   type QuestionFieldErrors,
 } from "@/lib/pruebas/question-editor"
@@ -72,6 +74,7 @@ export function PruebasQuestionEditor({
   const [isSaving, setIsSaving] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const choiceDraftRef = useRef<ChoiceDraft | null>(null)
 
   const isDirty = useMemo(() => {
     if (!baseline) return mode === "create" && form.prompt.trim().length > 0
@@ -86,6 +89,7 @@ export function PruebasQuestionEditor({
       const question = await getQuestionForTest(testId, questionId)
       setForm(question)
       setBaseline(question)
+      choiceDraftRef.current = readChoiceDraft(question)
     } catch (error) {
       if (getAssessmentQuestionHttpStatus(error) === 404) {
         setLoadError("not_found")
@@ -106,6 +110,7 @@ export function PruebasQuestionEditor({
       const blank = blankQuestion("single_choice")
       setForm(blank)
       setBaseline(blank)
+      choiceDraftRef.current = null
     }
   }, [mode])
 
@@ -113,7 +118,13 @@ export function PruebasQuestionEditor({
     if (!(BANK_QUESTION_KINDS as readonly string[]).includes(kind)) {
       return
     }
-    setForm((current) => switchQuestionKind(current, kind))
+    setForm((current) => {
+      const fromCurrent = readChoiceDraft(current)
+      if (fromCurrent) {
+        choiceDraftRef.current = fromCurrent
+      }
+      return switchQuestionKind(current, kind, choiceDraftRef.current)
+    })
     setFieldErrors({})
   }
 

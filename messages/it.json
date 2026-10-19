@@ -545,7 +545,7 @@
     },
     "pruebasPortal": {
       "title": "Portale Prove",
-      "description": "Valutazioni tecniche e psicometriche con dati dimostrativi"
+      "description": "Valutazioni tecniche con dati dimostrativi"
     },
     "pruebasCandidateDemo": {
       "title": "Svolgi valutazione (demo)",
@@ -670,7 +670,7 @@
     },
     "evaluations": {
       "title": "Valutazioni",
-      "description": "Catalogo di prove tecniche e psicometriche. Stati di definizione: bozza, pubblicata e archiviata.",
+      "description": "Catalogo di prove tecniche. Stati di definizione: bozza, pubblicata e archiviata.",
       "create": "Nuova valutazione",
       "search": "Cerca per titolo",
       "searchPlaceholder": "Nome della valutazione",
@@ -765,7 +765,7 @@
       "states": {
         "loading": "Caricamento valutazioni…",
         "emptyTitle": "Ancora nessuna valutazione",
-        "emptyDescription": "Crea la prima valutazione tecnica o psicometrica per iniziare.",
+        "emptyDescription": "Crea la prima valutazione tecnica per iniziare.",
         "errorTitle": "Impossibile caricare le valutazioni",
         "errorDescription": "Impossibile caricare il catalogo. Riprova.",
         "retry": "Riprova",
@@ -814,7 +814,7 @@
       },
       "editor": {
         "createTitle": "Nuova valutazione",
-        "createDescription": "Crea e pubblica una prova tecnica o psicometrica.",
+        "createDescription": "Crea e pubblica una prova tecnica.",
         "editTitle": "Modifica valutazione",
         "editDescription": "Modifica la bozza. Pubblicare congela una versione immutabile.",
         "steps": {
@@ -1092,13 +1092,13 @@
         "cancel": "Annulla"
       },
       "toasts": {
-        "linked": "Collegamento creato in modalità demo.",
-        "deactivated": "Collegamento disattivato in modalità demo.",
-        "reactivated": "Collegamento riattivato in modalità demo."
+        "linked": "Collegamento creato.",
+        "deactivated": "Collegamento disattivato.",
+        "reactivated": "Collegamento riattivato."
       },
       "errors": {
-        "generic": "Impossibile completare l'azione demo.",
-        "scenario_error": "Il servizio simulato ha restituito un errore.",
+        "generic": "Impossibile completare l'azione.",
+        "scenario_error": "Impossibile caricare i collegamenti.",
         "not_found": "La risorsa richiesta non è stata trovata.",
         "duplicate_link": "Esiste già un collegamento per quella versione e posizione.",
         "vacancy_closed": "La posizione è chiusa e non può essere collegata.",
@@ -1107,13 +1107,13 @@
       },
       "states": {
         "loading": "Caricamento dei collegamenti…",
-        "emptyTitle": "Nessun dato demo",
-        "emptyDescription": "Lo scenario simulato è vuoto. Reimposta i dati demo per continuare.",
+        "emptyTitle": "Niente da collegare ancora",
+        "emptyDescription": "Pubblica una valutazione tecnica o assicurati di avere posizioni disponibili per creare collegamenti.",
         "errorTitle": "Impossibile caricare i collegamenti",
-        "errorDescription": "Il servizio simulato ha restituito un errore. Riprova.",
+        "errorDescription": "Impossibile caricare il catalogo. Riprova.",
         "retry": "Riprova",
         "listEmptyTitle": "Nessun collegamento",
-        "listEmptyDescription": "In questa demo non ci sono ancora versioni collegate a posizioni."
+        "listEmptyDescription": "Non ci sono ancora versioni collegate a posizioni."
       }
     },
     "assignments": {
@@ -1400,7 +1400,7 @@
     },
     "results": {
       "title": "Risultati",
-      "description": "Consulta i risultati tecnici e psicometrici con dati di dimostrazione.",
+      "description": "Consulta i risultati tecnici con dati di dimostrazione.",
       "count": "{count, plural, one {# risultato} other {# risultati}}",
       "filteredCount": "{count, plural, one {# visibile} other {# visibili}}",
       "search": "Cerca",

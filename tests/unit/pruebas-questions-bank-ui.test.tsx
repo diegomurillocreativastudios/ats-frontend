@@ -230,4 +230,56 @@ describe("PruebasQuestionEditor UI", () => {
       )
     })
   })
+
+  it("keeps written options when the question type changes", async () => {
+    renderWithIntl(<PruebasQuestionEditor mode="create" />)
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: "Nueva pregunta" }),
+      ).toBeInTheDocument()
+    })
+
+    const optionInputs = screen.getAllByLabelText(/Texto de la opción/)
+    fireEvent.change(optionInputs[0]!, { target: { value: "Una librería" } })
+    fireEvent.change(optionInputs[1]!, { target: { value: "Un lenguaje" } })
+    fireEvent.click(screen.getByRole("button", { name: "Añadir opción" }))
+    fireEvent.change(screen.getByLabelText("Texto de la opción 3"), {
+      target: { value: "Un framework" },
+    })
+
+    fireEvent.change(screen.getByLabelText("Tipo de pregunta"), {
+      target: { value: "multiple_choice" },
+    })
+
+    expect(screen.getByLabelText("Texto de la opción 1")).toHaveValue(
+      "Una librería",
+    )
+    expect(screen.getByLabelText("Texto de la opción 2")).toHaveValue(
+      "Un lenguaje",
+    )
+    expect(screen.getByLabelText("Texto de la opción 3")).toHaveValue(
+      "Un framework",
+    )
+
+    fireEvent.change(screen.getByLabelText("Tipo de pregunta"), {
+      target: { value: "true_false" },
+    })
+    expect(
+      screen.queryByLabelText("Texto de la opción 1"),
+    ).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText("Tipo de pregunta"), {
+      target: { value: "single_choice" },
+    })
+    expect(screen.getByLabelText("Texto de la opción 1")).toHaveValue(
+      "Una librería",
+    )
+    expect(screen.getByLabelText("Texto de la opción 2")).toHaveValue(
+      "Un lenguaje",
+    )
+    expect(screen.getByLabelText("Texto de la opción 3")).toHaveValue(
+      "Un framework",
+    )
+  })
 })

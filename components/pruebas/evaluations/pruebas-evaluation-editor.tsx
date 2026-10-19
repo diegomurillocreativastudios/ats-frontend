@@ -36,6 +36,7 @@ import {
   type AssessmentTestView,
   type AssessmentVersionView,
 } from "@/lib/api/recruiter-assessments-tests"
+import { PORTAL_ASSESSMENT_KIND } from "@/lib/pruebas/assessment-kind"
 import {
   ATTEMPTS_MAX,
   ATTEMPTS_MIN,
@@ -63,7 +64,7 @@ import {
 } from "@/lib/pruebas/evaluation-editor"
 import { resolveCurrentVersion } from "@/lib/pruebas/evaluations"
 import { PRUEBAS_HOME_HREF } from "@/lib/pruebas/portal-nav"
-import type { AssessmentKind, MockQuestion } from "@/lib/pruebas/types"
+import type { MockQuestion } from "@/lib/pruebas/types"
 
 const CONTROL_CLASS =
   "h-11 w-full rounded-md border border-border bg-background px-3 font-sans text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-vo-purple focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
@@ -163,7 +164,7 @@ export function PruebasEvaluationEditor({
       const nextForm: EvaluationEditorForm = {
         title: detail.test.title,
         description: detail.test.description,
-        kind: detail.test.kind,
+        kind: PORTAL_ASSESSMENT_KIND,
         instructions: current?.instructions ?? "",
         durationMinutes: current?.durationMinutes ?? 45,
         maxAttempts: current?.maxAttempts ?? 1,
@@ -285,7 +286,7 @@ export function PruebasEvaluationEditor({
         const created = await createAssessmentTest({
           title: form.title.trim(),
           description: form.description.trim(),
-          kind: form.kind,
+          kind: PORTAL_ASSESSMENT_KIND,
         })
         id = created.id
         setTest(created)
@@ -296,7 +297,7 @@ export function PruebasEvaluationEditor({
       const updated = await updateAssessmentTest(id, {
         title: form.title.trim(),
         description: form.description.trim(),
-        kind: form.kind,
+        kind: PORTAL_ASSESSMENT_KIND,
         instructions: form.instructions.trim(),
         durationMinutes: form.durationMinutes,
         maxAttempts: form.maxAttempts,
@@ -788,39 +789,6 @@ function InfoStep({
           )}
         />
       </Field>
-      <fieldset className="flex flex-col gap-2">
-        <legend className="font-sans text-sm font-medium text-foreground">
-          {t("fields.kind")}
-        </legend>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          {(
-            [
-              ["technical", "fields.kindTechnical"],
-              ["psychometric", "fields.kindPsychometric"],
-            ] as const
-          ).map(([value, labelKey]) => (
-            <label
-              key={value}
-              className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-4 font-sans text-sm"
-            >
-              <input
-                type="radio"
-                name="editor-kind"
-                value={value}
-                checked={form.kind === value}
-                onChange={() => onChange({ kind: value as AssessmentKind })}
-                className="size-4 text-vo-purple focus-visible:ring-2 focus-visible:ring-vo-purple"
-              />
-              {t(labelKey)}
-            </label>
-          ))}
-        </div>
-        {errors.kindRequired ? (
-          <p className="font-sans text-sm text-destructive" role="alert">
-            {fieldErrorMessage("kindRequired", t)}
-          </p>
-        ) : null}
-      </fieldset>
     </div>
   )
 }

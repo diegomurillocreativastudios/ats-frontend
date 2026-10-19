@@ -545,7 +545,7 @@
     },
     "pruebasPortal": {
       "title": "Portal Prüfungen",
-      "description": "Technische und psychometrische Prüfungen mit Demodaten"
+      "description": "Technische Prüfungen mit Demodaten"
     },
     "pruebasCandidateDemo": {
       "title": "Bewertung ablegen (Demo)",
@@ -670,7 +670,7 @@
     },
     "evaluations": {
       "title": "Bewertungen",
-      "description": "Katalog technischer und psychometrischer Tests. Definitionsstatus: Entwurf, veröffentlicht und archiviert.",
+      "description": "Katalog technischer Tests. Definitionsstatus: Entwurf, veröffentlicht und archiviert.",
       "create": "Neue Bewertung",
       "search": "Nach Titel suchen",
       "searchPlaceholder": "Name der Bewertung",
@@ -765,7 +765,7 @@
       "states": {
         "loading": "Bewertungen werden geladen…",
         "emptyTitle": "Noch keine Bewertungen",
-        "emptyDescription": "Erstellen Sie die erste technische oder psychometrische Bewertung, um zu starten.",
+        "emptyDescription": "Erstellen Sie die erste technische Bewertung, um zu starten.",
         "errorTitle": "Bewertungen konnten nicht geladen werden",
         "errorDescription": "Der Katalog konnte nicht geladen werden. Bitte erneut versuchen.",
         "retry": "Erneut versuchen",
@@ -814,7 +814,7 @@
       },
       "editor": {
         "createTitle": "Neue Bewertung",
-        "createDescription": "Erstellen und veröffentlichen Sie einen technischen oder psychometrischen Test.",
+        "createDescription": "Erstellen und veröffentlichen Sie einen technischen Test.",
         "editTitle": "Bewertung bearbeiten",
         "editDescription": "Bearbeiten Sie den Entwurf. Veröffentlichen friert eine unveränderliche Version ein.",
         "steps": {
@@ -1092,13 +1092,13 @@
         "cancel": "Abbrechen"
       },
       "toasts": {
-        "linked": "Verknüpfung im Demomodus erstellt.",
-        "deactivated": "Verknüpfung im Demomodus deaktiviert.",
-        "reactivated": "Verknüpfung im Demomodus reaktiviert."
+        "linked": "Verknüpfung erstellt.",
+        "deactivated": "Verknüpfung deaktiviert.",
+        "reactivated": "Verknüpfung reaktiviert."
       },
       "errors": {
-        "generic": "Die Demo-Aktion konnte nicht abgeschlossen werden.",
-        "scenario_error": "Der simulierte Dienst hat einen Fehler zurückgegeben.",
+        "generic": "Die Aktion konnte nicht abgeschlossen werden.",
+        "scenario_error": "Verknüpfungen konnten nicht geladen werden.",
         "not_found": "Die angeforderte Ressource wurde nicht gefunden.",
         "duplicate_link": "Für diese Version und Stelle existiert bereits eine Verknüpfung.",
         "vacancy_closed": "Die Stelle ist geschlossen und kann nicht verknüpft werden.",
@@ -1107,13 +1107,13 @@
       },
       "states": {
         "loading": "Verknüpfungen werden geladen…",
-        "emptyTitle": "Keine Demodaten",
-        "emptyDescription": "Das simulierte Szenario ist leer. Setze die Demodaten zurück, um fortzufahren.",
+        "emptyTitle": "Noch nichts zum Verknüpfen",
+        "emptyDescription": "Veröffentliche eine technische Bewertung oder stelle sicher, dass Stellen verfügbar sind.",
         "errorTitle": "Verknüpfungen konnten nicht geladen werden",
-        "errorDescription": "Der simulierte Dienst hat einen Fehler zurückgegeben. Versuche es erneut.",
+        "errorDescription": "Der Katalog konnte nicht geladen werden. Versuche es erneut.",
         "retry": "Erneut versuchen",
         "listEmptyTitle": "Keine Verknüpfungen",
-        "listEmptyDescription": "In dieser Demo sind noch keine Versionen mit Stellen verknüpft."
+        "listEmptyDescription": "Es sind noch keine Versionen mit Stellen verknüpft."
       }
     },
     "assignments": {
@@ -1400,7 +1400,7 @@
     },
     "results": {
       "title": "Ergebnisse",
-      "description": "Technische und psychometrische Ergebnisse mit Demo-Daten ansehen.",
+      "description": "Technische Ergebnisse mit Demo-Daten ansehen.",
       "count": "{count, plural, one {# Ergebnis} other {# Ergebnisse}}",
       "filteredCount": "{count, plural, one {# sichtbar} other {# sichtbar}}",
       "search": "Suchen",

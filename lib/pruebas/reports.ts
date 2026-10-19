@@ -18,7 +18,6 @@ export type ReportKey =
 export const REPORT_CATALOG_KEYS: readonly ReportKey[] = [
   "assignments-by-status",
   "technical-scores",
-  "psychometric-dimensions",
 ] as const
 
 export const DEFAULT_REPORT_KEY: ReportKey = "assignments-by-status"

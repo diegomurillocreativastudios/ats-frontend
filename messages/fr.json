@@ -545,7 +545,7 @@
     },
     "pruebasPortal": {
       "title": "Portail Évaluations",
-      "description": "Évaluations techniques et psychométriques avec données de démonstration"
+      "description": "Évaluations techniques avec données de démonstration"
     },
     "pruebasCandidateDemo": {
       "title": "Passer l’évaluation (démo)",
@@ -670,7 +670,7 @@
     },
     "evaluations": {
       "title": "Évaluations",
-      "description": "Catalogue de tests techniques et psychométriques. Statuts de définition : brouillon, publié et archivé.",
+      "description": "Catalogue de tests techniques. Statuts de définition : brouillon, publié et archivé.",
       "create": "Nouvelle évaluation",
       "search": "Rechercher par titre",
       "searchPlaceholder": "Nom de l'évaluation",
@@ -765,7 +765,7 @@
       "states": {
         "loading": "Chargement des évaluations…",
         "emptyTitle": "Aucune évaluation pour le moment",
-        "emptyDescription": "Créez la première évaluation technique ou psychométrique pour commencer.",
+        "emptyDescription": "Créez la première évaluation technique pour commencer.",
         "errorTitle": "Impossible de charger les évaluations",
         "errorDescription": "Impossible de charger le catalogue. Réessayez.",
         "retry": "Réessayer",
@@ -814,7 +814,7 @@
       },
       "editor": {
         "createTitle": "Nouvelle évaluation",
-        "createDescription": "Créez et publiez un test technique ou psychométrique.",
+        "createDescription": "Créez et publiez un test technique.",
         "editTitle": "Modifier l'évaluation",
         "editDescription": "Modifiez le brouillon. Publier fige une version immuable.",
         "steps": {
@@ -1092,13 +1092,13 @@
         "cancel": "Annuler"
       },
       "toasts": {
-        "linked": "Association créée en mode démonstration.",
-        "deactivated": "Association désactivée en mode démonstration.",
-        "reactivated": "Association réactivée en mode démonstration."
+        "linked": "Association créée.",
+        "deactivated": "Association désactivée.",
+        "reactivated": "Association réactivée."
       },
       "errors": {
-        "generic": "Impossible de terminer l’action de démonstration.",
-        "scenario_error": "Le service simulé a renvoyé une erreur.",
+        "generic": "Impossible de terminer l’action.",
+        "scenario_error": "Impossible de charger les associations.",
         "not_found": "La ressource demandée est introuvable.",
         "duplicate_link": "Une association existe déjà pour cette version et cette offre.",
         "vacancy_closed": "L’offre est fermée et ne peut pas être associée.",
@@ -1107,13 +1107,13 @@
       },
       "states": {
         "loading": "Chargement des associations…",
-        "emptyTitle": "Aucune donnée de démonstration",
-        "emptyDescription": "Le scénario simulé est vide. Réinitialise les données de démonstration pour continuer.",
+        "emptyTitle": "Rien à associer pour le moment",
+        "emptyDescription": "Publie une évaluation technique ou vérifie que des offres sont disponibles pour créer des associations.",
         "errorTitle": "Impossible de charger les associations",
-        "errorDescription": "Le service simulé a renvoyé une erreur. Réessaie.",
+        "errorDescription": "Impossible de charger le catalogue. Réessaie.",
         "retry": "Réessayer",
         "listEmptyTitle": "Aucune association",
-        "listEmptyDescription": "Aucune version n’est encore associée à une offre dans cette démonstration."
+        "listEmptyDescription": "Aucune version n’est encore associée à une offre."
       }
     },
     "assignments": {
@@ -1400,7 +1400,7 @@
     },
     "results": {
       "title": "Résultats",
-      "description": "Consultez les résultats techniques et psychométriques avec des données de démonstration.",
+      "description": "Consultez les résultats techniques avec des données de démonstration.",
       "count": "{count, plural, one {# résultat} other {# résultats}}",
       "filteredCount": "{count, plural, one {# visible} other {# visibles}}",
       "search": "Rechercher",
