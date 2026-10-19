@@ -55,6 +55,10 @@ export function candidateProfilePayloadToRecruiterNormalizedLayer(
     o.BirthDate = p.birthDate
   }
 
+  if (p.minSalary != null && Number.isFinite(Number(p.minSalary))) {
+    o.MinSalary = Number(p.minSalary)
+  }
+
   if (p.jobPreferences != null && typeof p.jobPreferences === "object") {
     o.JobPreferences = p.jobPreferences
   }

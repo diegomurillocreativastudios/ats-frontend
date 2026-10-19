@@ -70,6 +70,7 @@ const profile = {
   email: "ana@example.com",
   phoneNumber: "77778888",
   hasCvFile: true,
+  minSalary: 2500,
 }
 
 describe("PublicVacancyLoggedInApplyConfirm", () => {
@@ -93,6 +94,11 @@ describe("PublicVacancyLoggedInApplyConfirm", () => {
       </NextIntlClientProvider>
     )
 
+    expect(
+      screen.getByText(esMessages.PublicOpportunities.apply.loggedIn.fields.minSalary)
+    ).toBeInTheDocument()
+    expect(screen.getByText("$2,500 USD")).toBeInTheDocument()
+
     fireEvent.click(
       screen.getByRole("button", {
         name: esMessages.PublicOpportunities.apply.loggedIn.cta,
@@ -109,6 +115,7 @@ describe("PublicVacancyLoggedInApplyConfirm", () => {
       email: "ana@example.com",
       nationalId: "01234567-8",
       documentTypeId: "11111111-1111-1111-1111-111111111111",
+      minSalary: 2500,
     })
   })
 

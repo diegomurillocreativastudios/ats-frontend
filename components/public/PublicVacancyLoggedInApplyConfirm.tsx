@@ -37,6 +37,7 @@ import {
   type PublicVacancyApplyValues,
 } from "@/lib/public-vacancy-apply"
 import { mapCandidateProfileToApplyFields } from "@/lib/public-vacancy-apply-from-profile"
+import { formatTechnicalSheetSalaryExpectation } from "@/lib/technical-sheet/format-technical-sheet-salary"
 
 export function PublicVacancyLoggedInApplyConfirm({
   vacancyId,
@@ -129,6 +130,7 @@ export function PublicVacancyLoggedInApplyConfirm({
           nationalId: fields.nationalId,
           linkedinUrl: fields.linkedinUrl,
           websiteUrl: fields.websiteUrl,
+          ...(fields.minSalary != null ? { minSalary: fields.minSalary } : {}),
           cvFile,
           ...(authConsent ? { authConsent } : {}),
         }
@@ -232,6 +234,7 @@ export function PublicVacancyLoggedInApplyConfirm({
       fields.firstName,
       fields.lastName,
       fields.linkedinUrl,
+      fields.minSalary,
       fields.nationalId,
       fields.phone,
       fields.websiteUrl,
@@ -361,6 +364,12 @@ export function PublicVacancyLoggedInApplyConfirm({
             <dt className="text-muted-foreground">{t("fields.document")}</dt>
             <dd className="mt-0.5 font-medium text-foreground">
               {fields.nationalId}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{t("fields.minSalary")}</dt>
+            <dd className="mt-0.5 font-medium text-foreground">
+              {formatTechnicalSheetSalaryExpectation(fields.minSalary)}
             </dd>
           </div>
           <div className="sm:col-span-2">

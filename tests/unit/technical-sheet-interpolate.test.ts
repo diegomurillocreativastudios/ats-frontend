@@ -227,4 +227,30 @@ describe("expandEachBlocks & renderTechnicalSheetHtml", () => {
     expect(candidate.availability).toBe("Inmediata")
     expect(candidate.salaryExpectation).toBe("$3,000 USD")
   })
+
+  it("fills salaryExpectation from nested JobPreferences.MinSalary", () => {
+    const ctx = buildTechnicalSheetTemplateContext({
+      candidate: {
+        firstName: "Luis",
+        lastName: "Pérez",
+        JobPreferences: { MinSalary: 2800 },
+      },
+    })
+    const candidate = ctx.candidate as Record<string, unknown>
+    expect(candidate.salaryExpectation).toBe("$2,800 USD")
+  })
+
+  it("fills salaryExpectation from application sibling when candidate has none", () => {
+    const ctx = buildTechnicalSheetTemplateContext({
+      candidate: {
+        firstName: "María",
+        lastName: "López",
+      },
+      application: {
+        minSalary: 3200,
+      },
+    })
+    const candidate = ctx.candidate as Record<string, unknown>
+    expect(candidate.salaryExpectation).toBe("$3,200 USD")
+  })
 })

@@ -295,4 +295,31 @@ describe("buildTechnicalSheetPayloadFromRecruiterApiResponses", () => {
       technicalSkills: ["HTML", "CSS"],
     })
   })
+
+  it("maps profileRaw.minSalary into candidate.salaryExpectation when detail has none", () => {
+    const payload = buildTechnicalSheetPayloadFromRecruiterApiResponses({
+      candidateId: "cp-salary",
+      detailRaw: {
+        id: "cp-salary",
+        normalizedData: {
+          FirstName: "Salary",
+          LastName: "Only",
+        },
+      },
+      profileRaw: {
+        id: "cp-salary",
+        firstName: "Salary",
+        lastName: "Only",
+        summary: "",
+        headline: "",
+        resumeMarkdown: "",
+        nationalId: "",
+        minSalary: 4500,
+      },
+    })
+
+    expect((payload.candidate as Record<string, unknown>).salaryExpectation).toBe(
+      "$4,500 USD"
+    )
+  })
 })

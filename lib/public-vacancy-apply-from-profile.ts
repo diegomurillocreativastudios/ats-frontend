@@ -20,6 +20,8 @@ export interface PublicApplyProfileFields {
   nationalId: string
   linkedinUrl: string
   websiteUrl: string
+  /** Pretensión salarial (USD) desde perfil / JobPreferences; null si no hay dato válido. */
+  minSalary: number | null
 }
 
 function trimStr(value: unknown): string {
@@ -79,6 +81,32 @@ function extractSocialUrls(socialLinks: unknown): {
   return { linkedinUrl, websiteUrl }
 }
 
+function asJobPreferencesRecord(value: unknown): Record<string, unknown> | null {
+  if (value == null || typeof value !== "object" || Array.isArray(value)) {
+    return null
+  }
+  return value as Record<string, unknown>
+}
+
+/**
+ * Pretensión salarial del perfil: `minSalary` raíz gana sobre JobPreferences del CV.
+ */
+export function resolveApplyMinSalaryFromProfile(
+  profile: CandidateProfile
+): number | null {
+  if (profile.minSalary != null && Number.isFinite(Number(profile.minSalary))) {
+    const n = Number(profile.minSalary)
+    if (n >= 0) return n
+  }
+  const jp = asJobPreferencesRecord(profile.jobPreferences)
+  if (!jp) return null
+  const raw = jp.MinSalary ?? jp.minSalary
+  if (raw == null || raw === "") return null
+  const n = Number(raw)
+  if (!Number.isFinite(n) || n < 0) return null
+  return n
+}
+
 /** Campos de formulario / appliance derivados del perfil del candidato. */
 export function mapCandidateProfileToApplyFields(
   profile: CandidateProfile
@@ -94,6 +122,7 @@ export function mapCandidateProfileToApplyFields(
     nationalId: trimStr(profile.nationalId),
     linkedinUrl,
     websiteUrl,
+    minSalary: resolveApplyMinSalaryFromProfile(profile),
   }
 }
 
@@ -110,7 +139,8 @@ export function isProfileReadyForQuickApply(
     fields.email !== "" &&
     fields.phone !== "" &&
     fields.nationalId !== "" &&
-    fields.documentTypeId !== ""
+    fields.documentTypeId !== "" &&
+    fields.minSalary != null
   )
 }
 

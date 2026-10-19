@@ -52,10 +52,14 @@ export function mapRecruiterCandidateLoadError(
   }
 }
 
-const mapSaveError = (
+/**
+ * Mensaje de error de PUT de perfil (banner y snackbar de RRHH).
+ * Puede ser vacío si el API no trae body; el caller usa toast genérico.
+ */
+export function mapRecruiterCandidateSaveError(
   err: unknown,
   t: (key: string) => string,
-): string => {
+): string {
   const status = getErrorStatus(err)
   let message = getApiErrorMessage(err)
   if (status === 400) {
@@ -139,7 +143,7 @@ export function useRecruiterCandidateProfile(candidateId: string | null) {
         )
         await load()
       } catch (err: unknown) {
-        const msg = mapSaveError(err, t)
+        const msg = mapRecruiterCandidateSaveError(err, t)
         setSaveError(msg)
         throw err
       } finally {

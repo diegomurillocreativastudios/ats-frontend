@@ -3,7 +3,7 @@ import {
   getTechnicalSheetCandidateHeaderFacts,
   pickCandidateDisplayRecord,
 } from "@/lib/technical-sheet/candidate-from-payload"
-import { formatTechnicalSheetSalaryExpectation } from "@/lib/technical-sheet/format-technical-sheet-salary"
+import { resolveTechnicalSheetSalaryExpectation } from "@/lib/technical-sheet/resolve-technical-sheet-salary"
 
 /**
  * Contexto de plantilla de ficha (sin DOMPurify/jsdom).
@@ -112,11 +112,19 @@ function pickNonEmptyString(...values: unknown[]): string {
   return ""
 }
 
+function asApplicationRecord(value: unknown): Record<string, unknown> | null {
+  if (value == null || typeof value !== "object" || Array.isArray(value)) return null
+  return value as Record<string, unknown>
+}
+
 /**
  * Rellena `country` / preferencias cuando el payload de vacante trae dirección
  * o claves PascalCase pero no los bindings del esquema (`candidate.country`, etc.).
  */
-function enrichCandidateAdditionalFacts(candidate: Record<string, unknown>): void {
+function enrichCandidateAdditionalFacts(
+  candidate: Record<string, unknown>,
+  application?: Record<string, unknown> | null
+): void {
   const country = pickNonEmptyString(
     candidate.country,
     candidate.Country,
@@ -152,14 +160,12 @@ function enrichCandidateAdditionalFacts(candidate: Record<string, unknown>): voi
   )
   if (workMode) candidate.workMode = workMode
 
-  const salaryRaw = pickNonEmptyString(
-    candidate.salaryExpectation,
-    candidate.SalaryExpectation,
-    candidate.minSalary,
-    candidate.MinSalary
-  )
-  if (salaryRaw) {
-    candidate.salaryExpectation = formatTechnicalSheetSalaryExpectation(salaryRaw)
+  const salaryExpectation = resolveTechnicalSheetSalaryExpectation({
+    candidate,
+    application,
+  })
+  if (salaryExpectation) {
+    candidate.salaryExpectation = salaryExpectation
   }
 }
 
@@ -196,8 +202,12 @@ export function buildTechnicalSheetTemplateContext(
     candRaw["technicalSkills"] = skillsRaw
   }
 
+  const applicationBag = asApplicationRecord(
+    payload.application ?? payload.applicationInfo ?? payload.postulation
+  )
+
   normalizeCandidateRecordForTemplateHtml(candRaw)
-  enrichCandidateAdditionalFacts(candRaw)
+  enrichCandidateAdditionalFacts(candRaw, applicationBag)
 
   const langsCheck = candRaw["languages"]
   if (
@@ -214,10 +224,7 @@ export function buildTechnicalSheetTemplateContext(
     header,
     candidate: candRaw,
     vacancy,
-    application: (payload.application ??
-      payload.applicationInfo ??
-      payload.postulation ??
-      {}) as Record<string, unknown>,
+    application: applicationBag ?? {},
     match: (payload.match ?? payload.matching ?? {}) as Record<string, unknown>,
     interviews: payload.interviews ?? payload.interviewList ?? [],
     personal: (payload.personal ?? payload.personalData ?? {}) as Record<string, unknown>,

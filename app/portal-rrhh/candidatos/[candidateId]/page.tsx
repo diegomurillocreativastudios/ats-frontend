@@ -8,7 +8,10 @@ import { ArrowLeft, UserX } from "lucide-react"
 import { RrhhPortalShell } from "@/components/rrhh/rrhh-portal-shell"
 import { RecruiterCandidateProfileView } from "@/components/rrhh/recruiter-candidate-profile-view"
 import Snackbar from "@/components/ui/Snackbar"
-import { useRecruiterCandidateProfile } from "@/hooks/use-recruiter-candidate-profile"
+import {
+  mapRecruiterCandidateSaveError,
+  useRecruiterCandidateProfile,
+} from "@/hooks/use-recruiter-candidate-profile"
 import type { CandidateProfileSaveBody } from "@/lib/candidate-profile"
 import { formatCandidatoDetailDocumentTitle } from "@/lib/pageTitles"
 
@@ -49,11 +52,12 @@ export default function CandidatoDetallePage() {
           variant: "success",
           message: t("toasts.saveSuccess"),
         })
-      } catch {
+      } catch (err: unknown) {
         setSnackbar({
           open: true,
           variant: "error",
-          message: t("toasts.saveError"),
+          message:
+            mapRecruiterCandidateSaveError(err, t) || t("toasts.saveError"),
         })
       }
     },

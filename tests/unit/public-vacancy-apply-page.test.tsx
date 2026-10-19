@@ -109,6 +109,7 @@ const readyProfile = {
   email: "ana@example.com",
   phoneNumber: "77778888",
   hasCvFile: true,
+  minSalary: 2500,
   authAndConsentVerification: true,
 }
 

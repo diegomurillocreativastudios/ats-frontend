@@ -22,6 +22,7 @@ function baseProfile(
     email: "ana@example.com",
     phoneNumber: "77778888",
     hasCvFile: true,
+    minSalary: 2500,
     ...overrides,
   }
 }
@@ -47,10 +48,31 @@ describe("public-vacancy-apply-from-profile", () => {
       nationalId: "01234567-8",
       linkedinUrl: "https://linkedin.com/in/ana",
       websiteUrl: "https://ana.dev",
+      minSalary: 2500,
     })
   })
 
-  it("requires minimum fields and CV for quick apply", () => {
+  it("maps minSalary from JobPreferences when profile root is empty", () => {
+    const fields = mapCandidateProfileToApplyFields(
+      baseProfile({
+        minSalary: null,
+        jobPreferences: { MinSalary: 3200 },
+      })
+    )
+    expect(fields.minSalary).toBe(3200)
+  })
+
+  it("prefers profile.minSalary over JobPreferences", () => {
+    const fields = mapCandidateProfileToApplyFields(
+      baseProfile({
+        minSalary: 4000,
+        jobPreferences: { MinSalary: 500 },
+      })
+    )
+    expect(fields.minSalary).toBe(4000)
+  })
+
+  it("requires minimum fields, CV and salary for quick apply", () => {
     expect(isProfileReadyForQuickApply(baseProfile())).toBe(true)
     expect(
       isProfileReadyForQuickApply(baseProfile({ hasCvFile: false }))
@@ -62,6 +84,9 @@ describe("public-vacancy-apply-from-profile", () => {
       isProfileReadyForQuickApply(
         baseProfile({ identityDocumentTypeId: null })
       )
+    ).toBe(false)
+    expect(
+      isProfileReadyForQuickApply(baseProfile({ minSalary: null }))
     ).toBe(false)
     expect(isProfileReadyForQuickApply(null)).toBe(false)
   })

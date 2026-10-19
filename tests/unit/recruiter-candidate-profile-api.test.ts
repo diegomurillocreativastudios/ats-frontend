@@ -119,4 +119,29 @@ describe("buildRecruiterCandidateProfilePutPayload", () => {
     expect(payload.normalizedData?.id).toBe("x")
     expect(payload.normalizedData?.LegacyField).toBe("keep")
   })
+
+  it("omite la clave nationalId cuando viene vacío (T1909)", () => {
+    const body: CandidateProfileSaveBody = {
+      headline: "Dev",
+      summary: "Sum",
+      resumeMarkdown: "# md",
+      nationalId: "   ",
+      firstName: "Ana",
+    }
+    const payload = buildRecruiterCandidateProfilePutPayload(body, {})
+    expect(payload.candidateProfile).not.toHaveProperty("nationalId")
+    expect(payload.candidateProfile.headline).toBe("Dev")
+    expect(payload.candidateProfile.firstName).toBe("Ana")
+  })
+
+  it("incluye nationalId cuando tiene texto (T1909)", () => {
+    const body: CandidateProfileSaveBody = {
+      headline: "Dev",
+      summary: "Sum",
+      resumeMarkdown: "# md",
+      nationalId: " 01234567-8 ",
+    }
+    const payload = buildRecruiterCandidateProfilePutPayload(body, {})
+    expect(payload.candidateProfile.nationalId).toBe("01234567-8")
+  })
 })

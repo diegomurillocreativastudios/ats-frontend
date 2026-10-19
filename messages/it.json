@@ -5777,6 +5777,7 @@
           "email": "Email",
           "phone": "Telefono",
           "document": "Documento",
+          "minSalary": "Pretesa salariale",
           "cv": "CV"
         }
       }

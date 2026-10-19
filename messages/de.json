@@ -5777,6 +5777,7 @@
           "email": "E-Mail",
           "phone": "Telefon",
           "document": "Ausweisdokument",
+          "minSalary": "Gehaltsvorstellung",
           "cv": "Lebenslauf"
         }
       }

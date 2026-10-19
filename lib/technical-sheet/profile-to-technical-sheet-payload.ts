@@ -16,7 +16,7 @@ import {
   extractRecruiterCandidateDetail,
   type RecruiterCandidateDetailState,
 } from "@/lib/recruiter-candidate-profile-api"
-import { formatTechnicalSheetSalaryExpectation } from "@/lib/technical-sheet/format-technical-sheet-salary"
+import { resolveTechnicalSheetSalaryExpectation } from "@/lib/technical-sheet/resolve-technical-sheet-salary"
 
 const trimStr = (v: unknown): string => {
   if (v == null) return ""
@@ -40,10 +40,6 @@ function firstNonEmptyRaw(...sources: unknown[]): unknown {
     if (Array.isArray(source)) return source
   }
   return []
-}
-
-function formatSalaryExpectation(value: unknown): string {
-  return formatTechnicalSheetSalaryExpectation(value)
 }
 
 function readJobPreferences(nd: Record<string, unknown>): Record<string, unknown> {
@@ -141,13 +137,10 @@ export function buildTechnicalSheetPayloadFromRecruiterProfile(input: {
     jp.DesiredWorkMode,
     jp.desiredWorkMode
   )
-  const salaryExpectation = formatSalaryExpectation(
-    canonical?.minSalary ??
-      nd.MinSalary ??
-      nd.minSalary ??
-      jp.MinSalary ??
-      jp.minSalary
-  )
+  const salaryExpectation = resolveTechnicalSheetSalaryExpectation({
+    profileMinSalary: canonical?.minSalary,
+    candidate: nd,
+  })
 
   const birthCity = pickStr(
     canonical?.birthCity,

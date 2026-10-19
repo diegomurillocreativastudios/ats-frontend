@@ -12,9 +12,15 @@ export interface RecruiterCandidateDetailState {
   normalizedDataParseFailed: boolean
 }
 
+/** PUT reclutador: nationalId se omite si viene vacío (T1909); no se envía "" ni null. */
+export type RecruiterCandidateProfilePutCandidate = Omit<
+  CandidateProfileSaveBody,
+  "nationalId"
+> & { nationalId?: string }
+
 export interface RecruiterCandidateProfilePutBody {
   normalizedData?: Record<string, unknown>
-  candidateProfile: CandidateProfileSaveBody
+  candidateProfile: RecruiterCandidateProfilePutCandidate
 }
 
 const META_KEYS = new Set([
@@ -121,8 +127,13 @@ export function buildRecruiterCandidateProfilePutPayload(
   existingNormalizedData: Record<string, unknown>
 ): RecruiterCandidateProfilePutBody {
   const layer = candidateProfilePayloadToRecruiterNormalizedLayer(candidateProfile)
+  const nationalId = candidateProfile.nationalId.trim()
+  const { nationalId: _discardedNationalId, ...withoutNationalId } = candidateProfile
+  const forPut: RecruiterCandidateProfilePutCandidate = nationalId
+    ? { ...withoutNationalId, nationalId }
+    : withoutNationalId
   return {
-    candidateProfile,
+    candidateProfile: forPut,
     normalizedData: { ...existingNormalizedData, ...layer },
   }
 }

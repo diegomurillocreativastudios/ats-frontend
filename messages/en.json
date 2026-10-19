@@ -5777,6 +5777,7 @@
           "email": "Email",
           "phone": "Phone",
           "document": "ID document",
+          "minSalary": "Salary expectation",
           "cv": "Resume"
         }
       }
