@@ -117,8 +117,12 @@ html, body { margin: 0; padding: 0; }
 }
 .technical-sheet-content article,
 article.ts-article {
+  display: flow-root;
   margin: 0;
   padding: 0;
+  font-size: 13.5px;
+  line-height: 1.42;
+  color: #256D35;
 }
 article.ts-article > section,
 .technical-sheet-content article > section {
@@ -128,6 +132,12 @@ article.ts-article > section,
 }
 article.ts-article > section > h2,
 .technical-sheet-content article > section > h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-decoration: underline;
   break-after: avoid;
   page-break-after: avoid;
 }

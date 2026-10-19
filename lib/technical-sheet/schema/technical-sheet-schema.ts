@@ -1,6 +1,58 @@
 import { z } from "zod"
 import { DEFAULT_TECHNICAL_SHEET_SCHEMA } from "@/lib/technical-sheet/schema/technical-sheet-default-schema"
-import type { TechnicalSheetSchema } from "@/lib/technical-sheet/schema/technical-sheet-schema-types"
+import type {
+  FactsItem,
+  FactsSection,
+  TechnicalSheetSchema,
+} from "@/lib/technical-sheet/schema/technical-sheet-schema-types"
+
+/** Same binding as DEFAULT_TECHNICAL_SHEET_SCHEMA «Información adicional». */
+export const TECHNICAL_SHEET_SALARY_EXPECTATION_FACT: FactsItem = {
+  label: "Expectativa salarial",
+  value: "{{candidate.salaryExpectation}}",
+}
+
+function factsItemBindsSalaryExpectation(item: FactsItem): boolean {
+  if (item.value.includes("candidate.salaryExpectation")) return true
+  return /expectativa\s*salarial|pretensi[oó]n\s*salarial/i.test(item.label)
+}
+
+function schemaHasSalaryExpectationFact(schema: TechnicalSheetSchema): boolean {
+  return schema.sections.some(
+    (section) =>
+      section.type === "facts" && section.items.some(factsItemBindsSalaryExpectation)
+  )
+}
+
+/**
+ * Guarantees the salary-expectation fact row exists on a facts section.
+ * Saved admin templates sometimes omit it even though the default schema includes it.
+ * Does not rename other facts or invent a facts section when none exists.
+ */
+export function ensureTechnicalSheetSalaryExpectationFact(
+  schema: TechnicalSheetSchema
+): TechnicalSheetSchema {
+  if (schemaHasSalaryExpectationFact(schema)) return schema
+
+  const preferIdx = schema.sections.findIndex(
+    (section) =>
+      section.type === "facts" && /informaci[oó]n\s*adicional/i.test(section.title)
+  )
+  const factsIdx =
+    preferIdx >= 0
+      ? preferIdx
+      : schema.sections.findIndex((section) => section.type === "facts")
+
+  if (factsIdx < 0) return schema
+
+  const section = schema.sections[factsIdx] as FactsSection
+  const nextSections = schema.sections.slice()
+  nextSections[factsIdx] = {
+    ...section,
+    items: [...section.items, TECHNICAL_SHEET_SALARY_EXPECTATION_FACT],
+  }
+  return { ...schema, sections: nextSections }
+}
 
 const labeledBindingSchema = z.object({
   label: z.string(),
@@ -119,6 +171,14 @@ export function resolveTechnicalSheetSchema(contentTemplate: string | unknown): 
   source: "template" | "default"
 } {
   const parsed = safeParseTechnicalSheetSchema(contentTemplate)
-  if (parsed.success) return { schema: parsed.data, source: "template" }
-  return { schema: DEFAULT_TECHNICAL_SHEET_SCHEMA, source: "default" }
+  if (parsed.success) {
+    return {
+      schema: ensureTechnicalSheetSalaryExpectationFact(parsed.data),
+      source: "template",
+    }
+  }
+  return {
+    schema: ensureTechnicalSheetSalaryExpectationFact(DEFAULT_TECHNICAL_SHEET_SCHEMA),
+    source: "default",
+  }
 }

@@ -79,10 +79,12 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
                 "style",
                 `position:absolute;left:-99999px;top:0;width:${TECH_SHEET_INNER_W}px;visibility:hidden;pointer-events:none;font-size:13.5px;line-height:1.42;color:#256D35`
               )
-              ghost.innerHTML = `<div style="width:${TECH_SHEET_INNER_W}px;box-sizing:border-box">${html}</div>`
+              ghost.innerHTML = `<div style="width:${TECH_SHEET_INNER_W}px;box-sizing:border-box"><article class="ts-article" style="display:flow-root;margin:0;padding:0">${html}</article></div>`
               doc.body.appendChild(ghost)
-              const inner = ghost.firstElementChild as HTMLElement
-              const h = inner.scrollHeight
+              const articleEl = ghost.querySelector("article.ts-article") as HTMLElement | null
+              const h =
+                articleEl?.offsetHeight ??
+                (ghost.firstElementChild as HTMLElement).scrollHeight
               ghost.remove()
               return h
             }
@@ -147,7 +149,7 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
               const sections = [...article.querySelectorAll(":scope > section")]
               if (sections.length === 0) {
                 const inner = article.innerHTML.trim() || "<p></p>"
-                const h = measureHtmlBlock(doc, `<article class="ts-article">${inner}</article>`)
+                const h = measureHtmlBlock(doc, inner)
                 return [{ html: inner, h }]
               }
 
@@ -185,31 +187,33 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
               return blocks
             }
 
-            function packBlocks(blocks: { html: string; h: number }[], maxPx: number): string[][] {
+            function packBlocks(
+              blocks: { html: string; h: number }[],
+              maxPx: number,
+              doc: Document
+            ): string[][] {
               const pages: string[][] = []
               let cur: string[] = []
-              let sum = 0
 
               for (const b of blocks) {
                 if (b.h > maxPx) {
                   if (cur.length) {
                     pages.push(cur)
                     cur = []
-                    sum = 0
                   }
                   pages.push([b.html])
                   continue
                 }
 
-                if (sum + b.h <= maxPx) {
-                  cur.push(b.html)
-                  sum += b.h
+                const trial = [...cur, b.html]
+                const trialH = measureHtmlBlock(doc, trial.join(""))
+                if (trialH <= maxPx) {
+                  cur = trial
                   continue
                 }
 
                 if (cur.length) pages.push(cur)
                 cur = [b.html]
-                sum = b.h
               }
 
               if (cur.length) pages.push(cur)
@@ -228,7 +232,7 @@ export async function renderPaginatedTechnicalSheetPdfFromInterpolated(
               if (flat.length === 0) {
                 return [`<article class="ts-article"></article>`]
               }
-              const packed = packBlocks(flat, maxPx)
+              const packed = packBlocks(flat, maxPx, doc)
               return packed.map((parts) => `<article class="ts-article">${parts.join("")}</article>`)
             }
 

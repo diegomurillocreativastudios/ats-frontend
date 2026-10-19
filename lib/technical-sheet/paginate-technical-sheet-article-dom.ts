@@ -10,16 +10,28 @@ interface TechnicalSheetBlock {
   h: number
 }
 
+/**
+ * Wraps a content fragment so measurement sees the same CSS as painted pages
+ * (`article.ts-article > section { margin-bottom: 28px }`). Packed page HTML
+ * must keep the unwrapped fragment.
+ */
+export function wrapTechnicalSheetFragmentForMeasure(html: string): string {
+  return `<article class="ts-article">${html}</article>`
+}
+
 function measureHtmlBlock(doc: Document, html: string): number {
   const ghost = doc.createElement("div")
   ghost.setAttribute(
     "style",
     `position:absolute;left:-99999px;top:0;width:${TECH_SHEET_INNER_W}px;visibility:hidden;pointer-events:none;font-size:13.5px;line-height:1.42;color:#256D35`
   )
-  ghost.innerHTML = `<div style="width:${TECH_SHEET_INNER_W}px;box-sizing:border-box">${html}</div>`
+  // flow-root keeps section margin-bottom inside the measured box (scrollHeight
+  // otherwise ignores the last child's collapsing margin — that was clipping the
+  // final «Expectativa salarial» line under the green footer).
+  ghost.innerHTML = `<div style="width:${TECH_SHEET_INNER_W}px;box-sizing:border-box"><article class="ts-article" style="display:flow-root;margin:0;padding:0">${html}</article></div>`
   doc.body.appendChild(ghost)
-  const inner = ghost.firstElementChild as HTMLElement
-  const h = inner.scrollHeight
+  const article = ghost.querySelector("article.ts-article") as HTMLElement | null
+  const h = article?.offsetHeight ?? (ghost.firstElementChild as HTMLElement).scrollHeight
   ghost.remove()
   return h
 }
@@ -84,7 +96,7 @@ function buildFlatBlocks(article: Element, doc: Document, maxPx: number): Techni
   const sections = [...article.querySelectorAll(":scope > section")]
   if (sections.length === 0) {
     const inner = article.innerHTML.trim() || "<p></p>"
-    const h = measureHtmlBlock(doc, `<article class="ts-article">${inner}</article>`)
+    const h = measureHtmlBlock(doc, inner)
     return [{ html: inner, h }]
   }
 
@@ -121,31 +133,33 @@ function buildFlatBlocks(article: Element, doc: Document, maxPx: number): Techni
   return blocks
 }
 
-function packBlocks(blocks: TechnicalSheetBlock[], maxPx: number): string[][] {
+function packBlocks(
+  blocks: TechnicalSheetBlock[],
+  maxPx: number,
+  doc: Document
+): string[][] {
   const pages: string[][] = []
   let cur: string[] = []
-  let sum = 0
 
   for (const b of blocks) {
     if (b.h > maxPx) {
       if (cur.length) {
         pages.push(cur)
         cur = []
-        sum = 0
       }
       pages.push([b.html])
       continue
     }
 
-    if (sum + b.h <= maxPx) {
-      cur.push(b.html)
-      sum += b.h
+    const trial = [...cur, b.html]
+    const trialH = measureHtmlBlock(doc, trial.join(""))
+    if (trialH <= maxPx) {
+      cur = trial
       continue
     }
 
     if (cur.length) pages.push(cur)
     cur = [b.html]
-    sum = b.h
   }
 
   if (cur.length) pages.push(cur)
@@ -176,6 +190,6 @@ export const paginateTechnicalSheetArticleToPageBodies = function (
     return [`<article class="ts-article"></article>`]
   }
 
-  const packed = packBlocks(flat, maxContentPx)
+  const packed = packBlocks(flat, maxContentPx, doc)
   return packed.map((parts) => `<article class="ts-article">${parts.join("")}</article>`)
 }

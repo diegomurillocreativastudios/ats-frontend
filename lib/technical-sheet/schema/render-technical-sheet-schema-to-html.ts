@@ -37,6 +37,7 @@ export function getTechnicalSheetSchemaPreviewCss(): string {
     }
 
     article.ts-article {
+      display: flow-root;
       margin: 0;
       padding: 0;
       font-size: 13.5px;

@@ -45,6 +45,60 @@ describe("resolveTechnicalSheetSchema", () => {
     expect(resolved.source).toBe("template")
     expect(resolved.schema.sections).toHaveLength(1)
   })
+
+  it("añade Expectativa salarial si la plantilla de hechos no la trae", () => {
+    const custom = {
+      version: 1,
+      kind: "technical-sheet",
+      sections: [
+        {
+          type: "facts",
+          title: "Información adicional",
+          items: [
+            { label: "Disponibilidad", value: "{{candidate.availability}}" },
+            { label: "Modalidad", value: "{{candidate.workMode}}" },
+            { label: "País", value: "{{candidate.country}}" },
+          ],
+        },
+      ],
+    }
+    const resolved = resolveTechnicalSheetSchema(JSON.stringify(custom))
+    expect(resolved.source).toBe("template")
+    const facts = resolved.schema.sections.find((s) => s.type === "facts")
+    expect(facts?.type).toBe("facts")
+    if (facts?.type !== "facts") return
+    expect(facts.items).toHaveLength(4)
+    expect(facts.items[3]).toEqual({
+      label: "Expectativa salarial",
+      value: "{{candidate.salaryExpectation}}",
+    })
+  })
+
+  it("no duplica Expectativa salarial si ya está en la plantilla", () => {
+    const custom = {
+      version: 1,
+      kind: "technical-sheet",
+      sections: [
+        {
+          type: "facts",
+          title: "Información adicional",
+          items: [
+            { label: "País", value: "{{candidate.country}}" },
+            {
+              label: "Expectativa salarial",
+              value: "{{candidate.salaryExpectation}}",
+            },
+          ],
+        },
+      ],
+    }
+    const resolved = resolveTechnicalSheetSchema(JSON.stringify(custom))
+    const facts = resolved.schema.sections.find((s) => s.type === "facts")
+    if (facts?.type !== "facts") throw new Error("expected facts")
+    expect(facts.items.filter((i) => i.value.includes("salaryExpectation"))).toHaveLength(
+      1
+    )
+  })
 })
 
 describe("renderTechnicalSheetSchemaToHtml", () => {
