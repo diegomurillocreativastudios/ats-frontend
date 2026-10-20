@@ -4,10 +4,10 @@ import {
   CV_OUTPUT_LANGUAGE_FIELD,
   type CvOutputLanguage,
 } from "@/lib/cv-output-language"
-import { MIME_PDF, UPLOAD_MAX_BYTES_15_MB } from "@/lib/upload-constraints"
+import { MIME_PDF, UPLOAD_MAX_BYTES_35_MB, formatCvTooLargeMessage } from "@/lib/upload-constraints"
 
-/** Límite alineado con backend security-hardening (CV ≤ 15 MB). */
-export const PUBLIC_CV_MAX_BYTES = UPLOAD_MAX_BYTES_15_MB
+/** Límite alineado con backend security-hardening (CV ≤ 35 MiB). */
+export const PUBLIC_CV_MAX_BYTES = UPLOAD_MAX_BYTES_35_MB
 
 export interface PublicVacancyApplyValues {
   firstName: string
@@ -191,7 +191,11 @@ export function isAuthConsentRequiredError(
   )
 }
 
-export function getPublicApplyErrorMessage(status: number, body: unknown): string {
+export function getPublicApplyErrorMessage(
+  status: number,
+  body: unknown,
+  sizeBytes?: number
+): string {
   const record = getRecord(body)
   const code =
     record && typeof record.code === "string" ? record.code.trim() : ""
@@ -233,7 +237,12 @@ export function getPublicApplyErrorMessage(status: number, body: unknown): strin
     )
   }
   if (status === 413) {
-    return fromApi ?? "El CV no puede superar 15 MB."
+    return (
+      fromApi ??
+      (typeof sizeBytes === "number"
+        ? formatCvTooLargeMessage(sizeBytes)
+        : "Limite para CVs de Candidatos 35 Mb")
+    )
   }
   if (status === 415) {
     return (

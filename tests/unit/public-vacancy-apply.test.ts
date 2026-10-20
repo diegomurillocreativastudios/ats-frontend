@@ -68,7 +68,7 @@ describe("public vacancy apply helpers", () => {
     expect(isAllowedCvFile(new File([], "cv.doc", { type: "" }))).toBe(false)
   })
 
-  it("rejects files larger than 15 MB", () => {
+  it("rejects files larger than 35 MB", () => {
     const oversized = {
       name: "cv.pdf",
       type: "application/pdf",
@@ -86,7 +86,9 @@ describe("public vacancy apply helpers", () => {
   it("returns specific messages for 403, 404, 413, 415, 422 and 429", () => {
     expect(getPublicApplyErrorMessage(403, {})).toContain("coincidir")
     expect(getPublicApplyErrorMessage(404, {})).toContain("disponible")
-    expect(getPublicApplyErrorMessage(413, {})).toContain("15 MB")
+    expect(getPublicApplyErrorMessage(413, {}, 36 * 1024 * 1024)).toBe(
+      "Limite para CVs de Candidatos 35 Mb, este archivo tiene 36 Mb"
+    )
     expect(getPublicApplyErrorMessage(415, {})).toMatch(/PDF válido|coincide/)
     expect(getPublicApplyErrorMessage(422, {})).toContain("procesar")
     expect(getPublicApplyErrorMessage(429, {})).toContain("Demasiados intentos")

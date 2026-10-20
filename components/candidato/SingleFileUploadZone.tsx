@@ -11,11 +11,11 @@ import {
 import { useTranslations } from "next-intl"
 import { Upload, X, FileText } from "lucide-react"
 import {
-  UPLOAD_MAX_BYTES_15_MB,
+  UPLOAD_MAX_BYTES_35_MB,
   validateUploadFile,
 } from "@/lib/upload-constraints"
 
-const DEFAULT_MAX_SIZE_BYTES = UPLOAD_MAX_BYTES_15_MB
+const DEFAULT_MAX_SIZE_BYTES = UPLOAD_MAX_BYTES_35_MB
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`
@@ -52,13 +52,13 @@ interface SingleFileUploadZoneProps {
   acceptedExtensions?: string[]
   /** Valor para el atributo `accept` del input file. */
   accept?: string
-  /** Texto secundario debajo del prompt principal (p. ej. "Solo archivos PDF hasta 15 MB"). */
+  /** Texto secundario debajo del prompt principal (p. ej. "Solo archivos PDF hasta 35 MB"). */
   helperText?: string
   /** Texto principal del dropzone (p. ej. "Arrastra el documento aquí o haz clic para subir"). */
   primaryText?: string
   /** Etiqueta accesible para el botón del dropzone. */
   ariaLabel?: string
-  /** Tamaño máximo permitido. Por defecto 15 MB. */
+  /** Tamaño máximo permitido. Por defecto 35 MB. */
   maxSizeBytes?: number
   /** Mensaje de error a mostrar cuando el tipo de archivo no es válido. */
   typeErrorMessage?: string

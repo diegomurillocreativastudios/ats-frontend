@@ -19,7 +19,8 @@ import {
   PDF_DOCX_ACCEPT,
   PDF_DOCX_EXTENSIONS,
   PDF_DOCX_TYPES,
-  UPLOAD_MAX_BYTES_15_MB,
+  UPLOAD_MAX_BYTES_35_MB,
+  formatCvSizeMegabytes,
   getUploadApiErrorMessage,
   validateUploadFile,
 } from "@/lib/upload-constraints"
@@ -187,7 +188,7 @@ interface DocumentsUploadZoneProps {
   onFilesChange?: (files: File[]) => void
   /** Índice del archivo que un padre está procesando (p. ej. ingest en modal RRHH) */
   externalProcessingIndex?: number | null
-  /** Tamaño máximo por archivo. Por defecto 15 MB (BE-SEC-016). */
+  /** Tamaño máximo por archivo. Por defecto 35 MB (BE-SEC-016). */
   maxSizeBytes?: number
   /** Marca el dropzone como inválido (p. ej. campo obligatorio vacío). */
   hasError?: boolean
@@ -211,7 +212,7 @@ export default function DocumentsUploadZone({
   maxFiles,
   onFilesChange,
   externalProcessingIndex = null,
-  maxSizeBytes = UPLOAD_MAX_BYTES_15_MB,
+  maxSizeBytes = UPLOAD_MAX_BYTES_35_MB,
   hasError = false,
   describedBy,
   isRequired = false,
@@ -269,7 +270,7 @@ export default function DocumentsUploadZone({
     let firstError: string | null = null
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i]
-      const { valid, reason, size } = validateFile(
+      const { valid, reason } = validateFile(
         file,
         effectiveAcceptedTypes,
         effectiveAcceptedExtensions,
@@ -280,7 +281,7 @@ export default function DocumentsUploadZone({
       } else if (!firstError) {
         firstError =
           reason === "size"
-            ? t("errorTooLarge", { size: size ?? "" })
+            ? t("errorTooLarge", { size: formatCvSizeMegabytes(file.size) })
             : t("errorTypeNotAllowed");
       }
     }

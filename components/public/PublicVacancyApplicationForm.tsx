@@ -30,6 +30,7 @@ import {
   type PublicVacancyApplyValues,
 } from "@/lib/public-vacancy-apply"
 import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
+import { formatCvSizeMegabytes } from "@/lib/upload-constraints"
 import {
   APPLY_LOADING_TICK_MS,
   APPLY_LONG_WAIT_HINT_MS,
@@ -441,7 +442,12 @@ export function PublicVacancyApplicationForm({
       if (file && !isCvFileWithinSizeLimit(file)) {
         flushSync(() => {
           setCvFile(null)
-          setErrors((prev) => ({ ...prev, cvFile: t("validation.fileTooLarge") }))
+          setErrors((prev) => ({
+            ...prev,
+            cvFile: t("validation.fileTooLarge", {
+              size: formatCvSizeMegabytes(file.size),
+            }),
+          }))
           setServerError(null)
           setIsCvDragging(false)
           cvDragDepthRef.current = 0
@@ -564,7 +570,10 @@ export function PublicVacancyApplicationForm({
     if (!useSavedProfileCv) {
       if (!cvFile) next.cvFile = t("validation.cvRequired")
       else if (!isAllowedCvFile(cvFile)) next.cvFile = t("validation.fileType")
-      else if (!isCvFileWithinSizeLimit(cvFile)) next.cvFile = t("validation.fileTooLarge")
+      else if (!isCvFileWithinSizeLimit(cvFile))
+        next.cvFile = t("validation.fileTooLarge", {
+          size: formatCvSizeMegabytes(cvFile.size),
+        })
     }
 
     return next
@@ -617,7 +626,11 @@ export function PublicVacancyApplicationForm({
       }
       if (!isCvFileWithinSizeLimit(resolvedCvFile)) {
         setSubmitPhase("idle")
-        setServerError(t("validation.fileTooLarge"))
+        setServerError(
+          t("validation.fileTooLarge", {
+            size: formatCvSizeMegabytes(resolvedCvFile.size),
+          })
+        )
         return
       }
     }
@@ -711,11 +724,14 @@ export function PublicVacancyApplicationForm({
       }
 
       if (status === 413) {
+        const sizeBytes = resolvedCvFile?.size ?? cvFile?.size
         setErrors((prev) => ({
           ...prev,
-          cvFile: t("validation.fileTooLarge"),
+          cvFile: t("validation.fileTooLarge", {
+            size: formatCvSizeMegabytes(sizeBytes ?? 0),
+          }),
         }))
-        setServerError(getPublicApplyErrorMessage(status, body))
+        setServerError(getPublicApplyErrorMessage(status, body, sizeBytes))
         return
       }
 

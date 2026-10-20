@@ -22,6 +22,7 @@ import {
   getLoadingBarPercent,
 } from "@/lib/apply-loading-bar"
 import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
+import { formatCvSizeMegabytes } from "@/lib/upload-constraints"
 import {
   getCvOutputLanguageErrorKind,
   toCvOutputLanguage,
@@ -111,7 +112,11 @@ export function PublicVacancyLoggedInApplyConfirm({
         }
         if (!isCvFileWithinSizeLimit(cvFile)) {
           setSubmitPhase("idle")
-          setServerError(tForm("validation.fileTooLarge"))
+          setServerError(
+            tForm("validation.fileTooLarge", {
+              size: formatCvSizeMegabytes(cvFile.size),
+            })
+          )
           return
         }
 

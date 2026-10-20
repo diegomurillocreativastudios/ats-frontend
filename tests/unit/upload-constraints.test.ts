@@ -7,11 +7,12 @@ import {
   PDF_DOCX_TXT_EXTENSIONS,
   PDF_DOCX_TXT_TYPES,
   UPLOAD_MAX_BYTES_5_MB,
-  UPLOAD_MAX_BYTES_15_MB,
+  UPLOAD_MAX_BYTES_35_MB,
   VACANCY_FILE_EXTENSIONS,
   VACANCY_FILE_TYPES,
   UPLOAD_MAX_BYTES_10_MB,
   getUploadApiErrorMessage,
+  formatCvTooLargeMessage,
   validateUploadFile,
 } from "@/lib/upload-constraints"
 
@@ -19,7 +20,7 @@ describe("validateUploadFile", () => {
   const pdfDocx = {
     types: PDF_DOCX_TYPES,
     extensions: PDF_DOCX_EXTENSIONS,
-    maxBytes: UPLOAD_MAX_BYTES_15_MB,
+    maxBytes: UPLOAD_MAX_BYTES_35_MB,
   }
 
   it("accepts pdf/docx by extension or mime", () => {
@@ -57,7 +58,7 @@ describe("validateUploadFile", () => {
       type: "application/pdf",
     })
     Object.defineProperty(oversized, "size", {
-      value: UPLOAD_MAX_BYTES_15_MB + 1,
+      value: UPLOAD_MAX_BYTES_35_MB + 1,
     })
     expect(validateUploadFile(oversized, pdfDocx)).toEqual({
       valid: false,
@@ -69,7 +70,7 @@ describe("validateUploadFile", () => {
     const withTxt = {
       types: PDF_DOCX_TXT_TYPES,
       extensions: PDF_DOCX_TXT_EXTENSIONS,
-      maxBytes: UPLOAD_MAX_BYTES_15_MB,
+      maxBytes: UPLOAD_MAX_BYTES_35_MB,
     }
     expect(
       validateUploadFile(
@@ -131,6 +132,17 @@ describe("validateUploadFile", () => {
         vacancy
       ).valid
     ).toBe(false)
+  })
+})
+
+describe("formatCvTooLargeMessage", () => {
+  it("matches the API sentence and drops a trailing zero", () => {
+    expect(formatCvTooLargeMessage(10.4 * 1024 * 1024)).toBe(
+      "Limite para CVs de Candidatos 35 Mb, este archivo tiene 10.4 Mb"
+    )
+    expect(formatCvTooLargeMessage(36 * 1024 * 1024)).toBe(
+      "Limite para CVs de Candidatos 35 Mb, este archivo tiene 36 Mb"
+    )
   })
 })
 

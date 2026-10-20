@@ -1,7 +1,35 @@
 import { getApiErrorMessage } from "@/lib/api-error"
 
-/** CV / documents / ingest — aligned with BE-SEC-016 (15 MB). */
-export const UPLOAD_MAX_BYTES_15_MB = 15 * 1024 * 1024
+/** CV / documents / ingest — aligned with BE-SEC-016 (35 MiB per file). */
+export const UPLOAD_MAX_BYTES_35_MB = 35 * 1024 * 1024
+
+/** Multipart overhead so a file at the cap still fits the request body. */
+export const CV_MULTIPART_SLACK_BYTES = 2 * 1024 * 1024
+
+/** Whole-body ceiling for one CV (file cap plus slack). */
+export const UPLOAD_MAX_SINGLE_CV_BODY_BYTES =
+  UPLOAD_MAX_BYTES_35_MB + CV_MULTIPART_SLACK_BYTES
+
+/** Whole-body ceiling for ingest (CV plus identity document, plus slack). */
+export const UPLOAD_MAX_INGEST_BODY_BYTES =
+  UPLOAD_MAX_BYTES_35_MB * 2 + CV_MULTIPART_SLACK_BYTES
+
+/**
+ * Megabytes for the CV size sentence: one decimal, trailing .0 omitted.
+ * Matches DocumentContentProbe.FormatCvTooLargeMessage.
+ */
+export function formatCvSizeMegabytes(sizeBytes: number): string {
+  const tenths = Math.round((sizeBytes / (1024 * 1024)) * 10)
+  const safe = tenths < 0 ? 0 : tenths
+  const whole = Math.trunc(safe / 10)
+  const fraction = Math.abs(safe % 10)
+  return fraction === 0 ? String(whole) : `${whole}.${fraction}`
+}
+
+/** Spanish CV size rejection, same wording as the API. */
+export function formatCvTooLargeMessage(sizeBytes: number): string {
+  return `Limite para CVs de Candidatos 35 Mb, este archivo tiene ${formatCvSizeMegabytes(sizeBytes)} Mb`
+}
 
 /** Vacancy tailoring multipart file — ~10 MB. */
 export const UPLOAD_MAX_BYTES_10_MB = 10 * 1024 * 1024
