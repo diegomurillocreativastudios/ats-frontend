@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   getAccessiblePortalKeys,
+  getPortalsForSelection,
   PORTAL_HOME_HREF,
   PORTAL_SELECTION_PATH,
   resolvePostAuthPath,
@@ -45,6 +46,37 @@ describe("getAccessiblePortalKeys", () => {
 
   it("expone el home del portal de pruebas", () => {
     expect(PORTAL_HOME_HREF.pruebas).toBe("/portal-pruebas")
+  })
+})
+
+describe("getPortalsForSelection", () => {
+  it("oculta Portal Pruebas en el selector por defecto", () => {
+    expect(getPortalsForSelection("Admin")).toEqual([
+      "candidate",
+      "opportunities",
+      "rrhh",
+      "admin",
+    ])
+    expect(getPortalsForSelection("Recruiter")).toEqual([
+      "opportunities",
+      "rrhh",
+    ])
+    expect(getPortalsForSelection("Candidate")).toEqual(["candidate"])
+  })
+
+  it("muestra Portal Pruebas cuando el interruptor está activo", () => {
+    expect(
+      getPortalsForSelection("Admin", { showPruebasPortal: true }),
+    ).toEqual([
+      "candidate",
+      "opportunities",
+      "rrhh",
+      "pruebas",
+      "admin",
+    ])
+    expect(
+      getPortalsForSelection("Recruiter", { showPruebasPortal: true }),
+    ).toEqual(["opportunities", "rrhh", "pruebas"])
   })
 })
 

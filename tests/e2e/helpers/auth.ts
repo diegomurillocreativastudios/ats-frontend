@@ -88,12 +88,17 @@ export async function openAdminPortalFromSelector(page: Page): Promise<void> {
 }
 
 /**
- * Desde `/seleccion-portal`, entra al Portal Pruebas. Si el login ya dejó al usuario ahí, no hace nada.
+ * Entra al Portal Pruebas. Si la tarjeta no está en el selector, abre la ruta directa.
  */
 export async function openPruebasPortalFromSelector(page: Page): Promise<void> {
   const pathname = new URL(page.url()).pathname
   if (/^\/portal-pruebas(\/|$)/.test(pathname)) return
 
-  await page.getByTestId("portal-selector-pruebas").click({ force: true })
+  const card = page.getByTestId("portal-selector-pruebas")
+  if ((await card.count()) > 0) {
+    await card.click({ force: true })
+  } else {
+    await page.goto("/portal-pruebas")
+  }
   await page.waitForURL(/\/portal-pruebas(\/|$)/, { timeout: 15_000 })
 }

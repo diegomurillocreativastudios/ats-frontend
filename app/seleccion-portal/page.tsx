@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { getServerSessionUser } from "@/lib/server-session-user"
 import {
-  getAccessiblePortalKeys,
+  getPortalsForSelection,
   PORTAL_HOME_HREF,
   resolveSolePortalHref,
   type PortalKey,
@@ -111,7 +111,7 @@ export default async function SeleccionPortalPage() {
     redirect(solePortalHref)
   }
 
-  const accessiblePortals = getAccessiblePortalKeys(sessionUser.role)
+  const accessiblePortals = getPortalsForSelection(sessionUser.role)
   const t = await getTranslations("PortalSelection")
 
   const portals: PortalSelectionItem[] = accessiblePortals.map((portalKey) => {

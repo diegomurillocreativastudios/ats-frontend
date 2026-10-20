@@ -1,3 +1,4 @@
+import { SHOW_PRUEBAS_IN_PORTAL_SELECTION } from "@/lib/pruebas/feature"
 import {
   isAdminRole,
   isCandidateRole,
@@ -41,6 +42,21 @@ export function getAccessiblePortalKeys(
     return ["candidate"]
   }
   return []
+}
+
+/**
+ * Portals listed on `/seleccion-portal`.
+ * Access to `/portal-pruebas` is unchanged; only the picker card is optional.
+ */
+export function getPortalsForSelection(
+  role: string | null | undefined,
+  options?: { showPruebasPortal?: boolean },
+): PortalKey[] {
+  const portals = getAccessiblePortalKeys(role)
+  const showPruebasPortal =
+    options?.showPruebasPortal ?? SHOW_PRUEBAS_IN_PORTAL_SELECTION
+  if (showPruebasPortal) return portals
+  return portals.filter((portal) => portal !== "pruebas")
 }
 
 /**
