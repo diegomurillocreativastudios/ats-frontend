@@ -51,9 +51,20 @@ describe("buildContentSecurityPolicy", () => {
     expect(csp).toContain("upgrade-insecure-requests")
     expect(csp).toContain("https://flagcdn.com")
     expect(csp).toContain("connect-src 'self'")
+    expect(csp).not.toContain("https://api.example.com")
     expect(csp).not.toContain("jsdelivr")
     expect(csp).toContain("frame-ancestors 'none'")
     expect(csp).toContain("report-uri /api/csp-report")
+  })
+
+  it("adds only the given API origin to connect-src", () => {
+    const csp = buildContentSecurityPolicy({
+      nonce: "testnonce",
+      isDev: false,
+      apiOrigin: "https://api.example.com",
+    })
+    expect(csp).toContain("connect-src 'self' https://api.example.com")
+    expect(csp).not.toContain("*")
   })
 
   it("allows unsafe-eval only in development", () => {

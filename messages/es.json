@@ -1785,7 +1785,7 @@
         "dropPrompt": "Arrastra archivos aquí o haz clic para subir",
         "helperDefault": "PDF, DOCX hasta 35 MB",
         "errorTypeNotAllowed": "Tipo no permitido. Solo PDF o DOCX.",
-        "errorTooLarge": "Limite para CVs de Candidatos 35 Mb, este archivo tiene {size} Mb",
+        "errorTooLarge": "El archivo supera 35 MB ({size} MB).",
         "errorDuplicate": "{count, plural, one {Ese archivo ya está en la lista.} other {# archivos ya estaban en la lista y se omitieron.}}",
         "selectedCount": "{count, plural, one {# archivo seleccionado} other {# archivos seleccionados}}",
         "selectedListAria": "Lista de archivos seleccionados",

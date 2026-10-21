@@ -1,4 +1,5 @@
 import type { NextRequest, NextResponse } from "next/server"
+import { resolvePublicApiOrigin } from "@/lib/public-api-origin"
 import { shouldApplyPrivateNoStore, applyPrivateNoStore } from "@/lib/security/cache-headers"
 
 export const CSP_REPORT_PATH = "/api/csp-report"
@@ -10,6 +11,8 @@ export interface BuildCspOptions {
   nonce: string
   isDev?: boolean
   upgradeInsecureRequests?: boolean
+  /** Public API origin already validated by resolvePublicApiOrigin. */
+  apiOrigin?: string | null
 }
 
 /**
@@ -83,6 +86,9 @@ export function getStaticSecurityHeaders(options?: {
  */
 export function buildContentSecurityPolicy(options: BuildCspOptions): string {
   const isDev = options.isDev ?? process.env.NODE_ENV === "development"
+  const connectSrc = options.apiOrigin
+    ? `'self' ${options.apiOrigin}`
+    : "'self'"
   const scriptSrc = [
     "'self'",
     `'nonce-${options.nonce}'`,
@@ -100,7 +106,7 @@ export function buildContentSecurityPolicy(options: BuildCspOptions): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://flagcdn.com",
     "font-src 'self'",
-    "connect-src 'self'",
+    `connect-src ${connectSrc}`,
     "frame-src 'self'",
     "worker-src 'self' blob:",
     "manifest-src 'self'",
@@ -150,6 +156,7 @@ export function applySecurityHeaders(
     nonce,
     isDev: options?.isDev,
     upgradeInsecureRequests: isHttps,
+    apiOrigin: resolvePublicApiOrigin(),
   })
   const headerName = cspHeaderName(mode)
 

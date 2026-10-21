@@ -1,6 +1,12 @@
 import { extractStructuredApiErrorMessage } from "@/lib/api-error"
 import { csrfHeaders } from "@/lib/auth/csrf-client"
 import { parseRetryAfterSeconds } from "@/lib/auth/retry-after"
+import {
+  buildDirectUploadRequest,
+  estimateFormDataBytes,
+  exceedsVercelFunctionBodyLimit,
+  fetchUploadGrant,
+} from "@/lib/direct-backend-upload"
 
 /** Incluye application/json y application/problem+json (validación ASP.NET). */
 function isJsonContentType(contentType: string): boolean {
@@ -83,15 +89,113 @@ export interface ApiResponseMeta<T = unknown> {
   headers: Headers
 }
 
+function sessionExpiredError(): ApiClientError {
+  const err = new Error("Sesión expirada") as ApiClientError
+  err.status = 401
+  return err
+}
+
+type LargeUploadTarget =
+  | { mode: "bff" }
+  | { mode: "direct"; url: string; headers: Record<string, string> }
+
+/**
+ * Bodies above the Vercel Function cap ask the grant route where to send them.
+ * On Vercel they go straight to the API without the session cookie.
+ * On other hosts the grant says to stay on the BFF, which can accept the body.
+ */
+async function resolveLargeUpload(
+  endpoint: string,
+  isRetry: boolean
+): Promise<LargeUploadTarget> {
+  const loadPlan = async () => {
+    const granted = await fetchUploadGrant()
+    if (!granted.ok) {
+      const err = new Error(granted.message) as ApiClientError
+      err.status = granted.status
+      throw err
+    }
+    if (!granted.direct) {
+      return { mode: "bff" as const }
+    }
+    return {
+      mode: "plan" as const,
+      plan: buildDirectUploadRequest(endpoint, granted.grant),
+    }
+  }
+
+  let loaded = await loadPlan()
+  if (
+    loaded.mode === "plan" &&
+    !loaded.plan.ok &&
+    loaded.plan.reason === "unauthorized" &&
+    !isRetry &&
+    typeof window !== "undefined"
+  ) {
+    const refreshed = await tryRefresh()
+    if (refreshed) {
+      loaded = await loadPlan()
+    }
+  }
+
+  if (loaded.mode === "bff") {
+    return { mode: "bff" }
+  }
+
+  const plan = loaded.plan
+  if (plan.ok) {
+    return { mode: "direct", url: plan.url, headers: plan.headers }
+  }
+
+  if (plan.reason === "unauthorized") {
+    if (typeof window !== "undefined") {
+      window.location.href = "/auth/iniciar-sesion"
+    }
+    throw sessionExpiredError()
+  }
+
+  if (plan.reason === "missing-api-url") {
+    const err = new Error(
+      "No se puede enviar este archivo porque la URL pública del API no está configurada."
+    ) as ApiClientError
+    err.status = 500
+    throw err
+  }
+
+  const err = new Error("Ruta de carga inválida") as ApiClientError
+  err.status = 400
+  throw err
+}
+
 export const apiClient = {
   async requestWithMeta(
     endpoint: string,
     options: ApiRequestOptions = {},
     isRetry = false
   ): Promise<ApiResponseMeta> {
-    const url = resolveBffUrl(endpoint)
     const isFormData = options.body instanceof FormData
-    const headers = await buildHeaders(options, isFormData)
+    const sendDirect =
+      isFormData &&
+      typeof window !== "undefined" &&
+      exceedsVercelFunctionBodyLimit(estimateFormDataBytes(options.body as FormData))
+
+    let url: string
+    let headers: Record<string, string>
+    let credentials: RequestCredentials = "include"
+    if (sendDirect) {
+      const target = await resolveLargeUpload(endpoint, isRetry)
+      if (target.mode === "bff") {
+        url = resolveBffUrl(endpoint)
+        headers = await buildHeaders(options, isFormData)
+      } else {
+        url = target.url
+        headers = target.headers
+        credentials = "omit"
+      }
+    } else {
+      url = resolveBffUrl(endpoint)
+      headers = await buildHeaders(options, isFormData)
+    }
     if (isFormData) {
       delete headers["Content-Type"]
     }
@@ -99,7 +203,7 @@ export const apiClient = {
     const config: RequestInit = {
       ...options,
       headers,
-      credentials: "include",
+      credentials,
     }
 
     const res = await fetch(url, config)
@@ -120,9 +224,7 @@ export const apiClient = {
         return this.requestWithMeta(endpoint, options, true)
       }
       window.location.href = "/auth/iniciar-sesion"
-      const err = new Error("Sesión expirada") as ApiClientError
-      err.status = 401
-      throw err
+      throw sessionExpiredError()
     }
 
     if (!res.ok) {
