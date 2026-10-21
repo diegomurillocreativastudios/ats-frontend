@@ -14,7 +14,9 @@ export const TECHNICAL_SHEET_SALARY_EXPECTATION_FACT: FactsItem = {
 
 function factsItemBindsSalaryExpectation(item: FactsItem): boolean {
   if (item.value.includes("candidate.salaryExpectation")) return true
-  return /expectativa\s*salarial|pretensi[oó]n\s*salarial/i.test(item.label)
+  return /expectativa\s*salarial|pretension\s*salarial|pretensión\s*salarial/i.test(
+    item.label
+  )
 }
 
 function schemaHasSalaryExpectationFact(schema: TechnicalSheetSchema): boolean {
@@ -36,7 +38,8 @@ export function ensureTechnicalSheetSalaryExpectationFact(
 
   const preferIdx = schema.sections.findIndex(
     (section) =>
-      section.type === "facts" && /informaci[oó]n\s*adicional/i.test(section.title)
+      section.type === "facts" &&
+      /informacion\s*adicional|información\s*adicional/i.test(section.title)
   )
   const factsIdx =
     preferIdx >= 0
