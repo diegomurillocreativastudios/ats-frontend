@@ -1,11 +1,9 @@
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { resolvePublicApiOrigin } from "@/lib/public-api-origin"
 
 describe("resolvePublicApiOrigin", () => {
-  const originalNodeEnv = process.env.NODE_ENV
-
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv
+    vi.unstubAllEnvs()
   })
 
   it("returns the https origin and drops a trailing slash", () => {
@@ -23,10 +21,10 @@ describe("resolvePublicApiOrigin", () => {
   })
 
   it("allows http only in development", () => {
-    process.env.NODE_ENV = "production"
+    vi.stubEnv("NODE_ENV", "production")
     expect(resolvePublicApiOrigin("http://localhost:10000")).toBeNull()
 
-    process.env.NODE_ENV = "development"
+    vi.stubEnv("NODE_ENV", "development")
     expect(resolvePublicApiOrigin("http://localhost:10000")).toBe(
       "http://localhost:10000"
     )

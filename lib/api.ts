@@ -110,12 +110,12 @@ async function resolveLargeUpload(
 ): Promise<LargeUploadTarget> {
   const loadPlan = async () => {
     const granted = await fetchUploadGrant()
-    if (!granted.ok) {
+    if (granted.ok === false) {
       const err = new Error(granted.message) as ApiClientError
       err.status = granted.status
       throw err
     }
-    if (!granted.direct) {
+    if (granted.direct === false) {
       return { mode: "bff" as const }
     }
     return {
@@ -125,16 +125,18 @@ async function resolveLargeUpload(
   }
 
   let loaded = await loadPlan()
-  if (
-    loaded.mode === "plan" &&
-    !loaded.plan.ok &&
-    loaded.plan.reason === "unauthorized" &&
-    !isRetry &&
-    typeof window !== "undefined"
-  ) {
-    const refreshed = await tryRefresh()
-    if (refreshed) {
-      loaded = await loadPlan()
+  if (loaded.mode === "plan") {
+    const plan = loaded.plan
+    if (
+      plan.ok === false &&
+      plan.reason === "unauthorized" &&
+      !isRetry &&
+      typeof window !== "undefined"
+    ) {
+      const refreshed = await tryRefresh()
+      if (refreshed) {
+        loaded = await loadPlan()
+      }
     }
   }
 
@@ -143,7 +145,7 @@ async function resolveLargeUpload(
   }
 
   const plan = loaded.plan
-  if (plan.ok) {
+  if (plan.ok === true) {
     return { mode: "direct", url: plan.url, headers: plan.headers }
   }
 

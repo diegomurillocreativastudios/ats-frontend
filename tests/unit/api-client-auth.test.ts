@@ -177,7 +177,7 @@ describe("apiClient auth hardening (HttpOnly BFF)", () => {
   })
 
   it("posts a CV over 4 MB directly to the API without cookies", async () => {
-    const fetchMock = vi.fn(async (url: string) => {
+    const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
       if (url === "/api/auth/upload-grant") {
         return {
           ok: true,
@@ -224,7 +224,7 @@ describe("apiClient auth hardening (HttpOnly BFF)", () => {
   })
 
   it("posts a large public CV without a bearer when there is no session", async () => {
-    const fetchMock = vi.fn(async (url: string) => {
+    const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
       if (url === "/api/auth/upload-grant") {
         return {
           ok: true,
@@ -264,7 +264,7 @@ describe("apiClient auth hardening (HttpOnly BFF)", () => {
   })
 
   it("posts a large CV through the BFF when the grant is not direct", async () => {
-    const fetchMock = vi.fn(async (url: string) => {
+    const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
       if (url === "/api/auth/upload-grant") {
         return {
           ok: true,
