@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Search, Eye, Users, Plus, ClipboardList } from "lucide-react";
@@ -12,7 +12,10 @@ import AgregarCandidatoModal from "@/components/candidato/AgregarCandidatoModal"
 import CandidateFollowUpModal, {
   type CandidateProfile,
 } from "@/components/candidato/CandidateFollowUpModal";
-import { listRecruiterCandidatesAll } from "@/lib/api/recruiter-candidates";
+import {
+  listRecruiterCandidatesAll,
+  listRecruiterCandidatesUnpaged,
+} from "@/lib/api/recruiter-candidates";
 import { QUERY_PAGE_SIZE_DEFAULT } from "@/lib/api/query-paging";
 import { formatPhoneSvDisplay } from "@/lib/formatPhoneSv";
 import { getInitials } from "@/lib/getInitials";
@@ -91,6 +94,30 @@ const mapCandidateFromApi = (item, index = 0, noNameLabel = "Sin nombre") => {
     evaluations,
     hired: recruitment?.hired ?? false,
   };
+};
+
+type CandidateRow = ReturnType<typeof mapCandidateFromApi>;
+
+const candidateMatchesQuery = (candidate: CandidateRow, query: string) => {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return (
+    candidate.name.toLowerCase().includes(q) ||
+    (candidate.email !== "—" && candidate.email.toLowerCase().includes(q)) ||
+    (candidate.phone !== "—" && candidate.phone.toLowerCase().includes(q)) ||
+    (candidate.country !== "—" && candidate.country.toLowerCase().includes(q)) ||
+    (candidate.headline !== "—" && candidate.headline.toLowerCase().includes(q)) ||
+    (candidate.summary !== "—" && candidate.summary.toLowerCase().includes(q))
+  );
+};
+
+const readLoadError = (err: unknown, fallback: string) => {
+  if (err != null && typeof err === "object") {
+    const record = err as { message?: unknown; detail?: unknown };
+    if (typeof record.message === "string" && record.message) return record.message;
+    if (typeof record.detail === "string" && record.detail) return record.detail;
+  }
+  return fallback;
 };
 
 const CandidateRow = ({ candidate, onFollowUpClick }) => {
@@ -251,13 +278,19 @@ const CandidateCard = ({ candidate, onFollowUpClick }) => {
 
 export default function CandidatosPage() {
   const t = useTranslations("RecruiterPortal.candidates");
-  const [candidates, setCandidates] = useState([]);
+  const [candidates, setCandidates] = useState<CandidateRow[]>([]);
+  const [searchPool, setSearchPool] = useState<CandidateRow[] | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(QUERY_PAGE_SIZE_DEFAULT);
   const [totalCount, setTotalCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchRequestId = useRef(0);
+  const searchLoadState = useRef<"idle" | "loading" | "ready" | "error">("idle");
+  const searchQueryRef = useRef(searchQuery);
+  searchQueryRef.current = searchQuery;
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateProfile | null>(null);
@@ -286,13 +319,14 @@ export default function CandidatosPage() {
   };
 
   const handleCandidateUpdated = (updatedCandidate: CandidateProfile) => {
-    setCandidates((prev) =>
-      prev.map((c) =>
+    const mergeUpdated = (list: CandidateRow[]) =>
+      list.map((c) =>
         c.id === updatedCandidate.id || c.profileId === updatedCandidate.id
           ? { ...c, ...updatedCandidate }
           : c
-      )
-    );
+      );
+    setCandidates((prev) => mergeUpdated(prev));
+    setSearchPool((prev) => (prev ? mergeUpdated(prev) : prev));
     handleSnackbar(t("followUpSaved"), "success");
   };
 
@@ -307,9 +341,7 @@ export default function CandidatosPage() {
       );
       setTotalCount(result.totalCount);
     } catch (err) {
-      setFetchError(
-        err?.message ?? err?.detail ?? t("loadError")
-      );
+      setFetchError(readLoadError(err, t("loadError")));
       setCandidates([]);
       setTotalCount(0);
     } finally {
@@ -317,24 +349,54 @@ export default function CandidatosPage() {
     }
   }, [t, page, pageSize]);
 
+  const loadSearchPool = useCallback(async () => {
+    const requestId = ++searchRequestId.current;
+    searchLoadState.current = "loading";
+    setSearchError(null);
+    try {
+      const items = await listRecruiterCandidatesUnpaged();
+      if (requestId !== searchRequestId.current) return;
+      const noNameLabel = t("noName");
+      setSearchPool(items.map((item, i) => mapCandidateFromApi(item, i, noNameLabel)));
+      searchLoadState.current = "ready";
+    } catch (err) {
+      if (requestId !== searchRequestId.current) return;
+      if (!searchQueryRef.current.trim()) {
+        searchLoadState.current = "idle";
+        return;
+      }
+      searchLoadState.current = "error";
+      setSearchError(readLoadError(err, t("loadError")));
+    }
+  }, [t]);
+
   useEffect(() => {
     fetchCandidates();
   }, [fetchCandidates]);
 
-  const filteredCandidates = candidates.filter((c) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      c.name.toLowerCase().includes(q) ||
-      (c.email !== "—" && c.email.toLowerCase().includes(q)) ||
-      (c.phone !== "—" && c.phone.toLowerCase().includes(q)) ||
-      (c.country !== "—" && c.country.toLowerCase().includes(q)) ||
-      (c.headline !== "—" && c.headline.toLowerCase().includes(q)) ||
-      (c.summary !== "—" && c.summary.toLowerCase().includes(q))
-    );
-  });
+  const isSearching = searchQuery.trim().length > 0;
+
+  useEffect(() => {
+    if (!isSearching || searchPool !== null) return;
+    if (searchLoadState.current === "loading" || searchLoadState.current === "error") {
+      return;
+    }
+    void loadSearchPool();
+  }, [isSearching, searchPool, loadSearchPool]);
+
+  const showLoading = isSearching ? searchPool == null && !searchError : loading;
+  const listError = isSearching ? searchError : fetchError;
+  const visibleCandidates = isSearching
+    ? (searchPool ?? []).filter((candidate) => candidateMatchesQuery(candidate, searchQuery))
+    : candidates;
 
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
+
+  const retrySearch = () => {
+    searchLoadState.current = "idle";
+    setSearchError(null);
+    void loadSearchPool();
+  };
 
   const handlePageChange = (nextPage) => setPage(nextPage);
 
@@ -344,6 +406,13 @@ export default function CandidatosPage() {
   };
 
   const handleCandidatesMutated = () => {
+    searchRequestId.current += 1;
+    searchLoadState.current = "idle";
+    setSearchPool(null);
+    setSearchError(null);
+    if (searchQueryRef.current.trim()) {
+      void loadSearchPool();
+    }
     if (page !== 1) {
       setPage(1);
       return;
@@ -397,7 +466,7 @@ export default function CandidatosPage() {
         />
       </div>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card">
-        {loading ? (
+        {showLoading ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
             <div
               className="h-8 w-8 animate-spin rounded-full border-2 border-vo-purple border-t-transparent"
@@ -407,20 +476,20 @@ export default function CandidatosPage() {
               {t("loading")}
             </p>
           </div>
-        ) : fetchError ? (
+        ) : listError ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
             <p className="font-sans text-sm text-destructive" role="alert">
-              {fetchError}
+              {listError}
             </p>
             <button
               type="button"
-              onClick={fetchCandidates}
+              onClick={isSearching ? retrySearch : fetchCandidates}
               className="inline-flex items-center gap-2 rounded-md bg-vo-purple px-5 py-2.5 font-sans text-sm font-medium text-white transition-colors hover:bg-vo-purple-hover"
             >
               {t("retry")}
             </button>
           </div>
-        ) : filteredCandidates.length === 0 ? (
+        ) : visibleCandidates.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
             <Users className="h-12 w-12 text-muted-foreground" aria-hidden />
             <p className="font-sans text-sm text-muted-foreground">
@@ -430,7 +499,7 @@ export default function CandidatosPage() {
         ) : (
           <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
             <div className="flex flex-col gap-3 md:hidden">
-              {filteredCandidates.map((candidate, index) => (
+              {visibleCandidates.map((candidate, index) => (
                 <CandidateCard
                   key={`${candidate.id}-${index}`}
                   candidate={candidate}
@@ -463,7 +532,7 @@ export default function CandidatosPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCandidates.map((candidate, index) => (
+                  {visibleCandidates.map((candidate, index) => (
                     <CandidateRow
                       key={`${candidate.id}-${index}`}
                       candidate={candidate}
@@ -476,7 +545,7 @@ export default function CandidatosPage() {
           </div>
         )}
       </div>
-      {!loading && !fetchError ? (
+      {!isSearching && !loading && !fetchError ? (
         <div className="shrink-0">
           <ListPaginationBar
             page={page}

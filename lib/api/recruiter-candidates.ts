@@ -1,5 +1,7 @@
+import { apiClient } from "@/lib/api"
 import {
   fetchHeaderPagedList,
+  unwrapListArray,
   type HeaderPagedResult,
 } from "@/lib/api/query-paging"
 
@@ -12,4 +14,10 @@ export async function listRecruiterCandidatesAll(
   } = {}
 ): Promise<HeaderPagedResult<unknown>> {
   return fetchHeaderPagedList(CANDIDATES_ALL_PATH, params)
+}
+
+/** Full list for recruiter search. No page or pageSize query. */
+export async function listRecruiterCandidatesUnpaged(): Promise<unknown[]> {
+  const data = await apiClient.get(CANDIDATES_ALL_PATH)
+  return unwrapListArray(data)
 }
