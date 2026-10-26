@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { UPLOAD_MAX_BYTES_15_MB } from "@/lib/upload-constraints"
+import { UPLOAD_MAX_SINGLE_CV_BODY_BYTES } from "@/lib/upload-constraints"
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({
@@ -99,7 +99,7 @@ describe("POST /api/candidate/[id]/documents", () => {
         method: "POST",
         headers: {
           "content-type": "multipart/form-data; boundary=abc",
-          "content-length": String(UPLOAD_MAX_BYTES_15_MB + 1),
+          "content-length": String(UPLOAD_MAX_SINGLE_CV_BODY_BYTES + 1),
         },
         body: "x",
       }

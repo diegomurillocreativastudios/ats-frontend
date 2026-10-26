@@ -31,7 +31,7 @@ import {
   PDF_ONLY_ACCEPT,
   PDF_ONLY_EXTENSIONS,
   PDF_ONLY_TYPES,
-  UPLOAD_MAX_BYTES_15_MB,
+  UPLOAD_MAX_BYTES_35_MB,
   getUploadApiErrorMessage,
 } from "@/lib/upload-constraints";
 
@@ -445,7 +445,7 @@ export default function AgregarCandidatoModal({
               helperText={t("cvHelperText")}
               ariaLabel={t("cvAria")}
               typeErrorMessage={t("cvTypeError")}
-              maxSizeBytes={UPLOAD_MAX_BYTES_15_MB}
+              maxSizeBytes={UPLOAD_MAX_BYTES_35_MB}
               disabled={isSubmittingCandidate}
               inputId="candidato-cv-input"
               hasError={Boolean(cvFieldError)}
@@ -460,7 +460,7 @@ export default function AgregarCandidatoModal({
               helperText={t("cvHelperTextPdfOnly")}
               stagingOnly
               processAllAcceptedFiles
-              maxSizeBytes={UPLOAD_MAX_BYTES_15_MB}
+              maxSizeBytes={UPLOAD_MAX_BYTES_35_MB}
               onFilesChange={handleCvFilesChange}
               externalProcessingIndex={externalProcessingIndex}
               hasError={Boolean(cvFieldError)}
@@ -594,7 +594,7 @@ export default function AgregarCandidatoModal({
                 helperText={t("identityHelperText")}
                 ariaLabel={t("identityAria")}
                 typeErrorMessage={t("identityTypeError")}
-                maxSizeBytes={UPLOAD_MAX_BYTES_15_MB}
+                maxSizeBytes={UPLOAD_MAX_BYTES_35_MB}
                 disabled={isSubmittingCandidate}
                 inputId="candidato-identity-input"
               />

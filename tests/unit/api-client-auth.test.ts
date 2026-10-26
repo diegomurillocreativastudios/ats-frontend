@@ -155,4 +155,169 @@ describe("apiClient auth hardening (HttpOnly BFF)", () => {
       expect(apiError.message.startsWith("{")).toBe(false)
     }
   })
+
+  it("keeps a small multipart body on the same-origin BFF", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => "application/json" },
+      json: async () => ({ id: "logo" }),
+    })
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    const formData = new FormData()
+    formData.append("name", "Acme")
+    await apiClient.postFormData("/api/admin/companies", formData)
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe("/api/bff/api/admin/companies")
+    expect(init.credentials).toBe("include")
+    expect((init.headers as Record<string, string>).Authorization).toBeUndefined()
+  })
+
+  it("posts a CV over 4 MB directly to the API without cookies", async () => {
+    const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
+      if (url === "/api/auth/upload-grant") {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => "application/json" },
+          json: async () => ({
+            direct: true,
+            apiBaseUrl: "https://api.example.com",
+            accessToken: "session-token",
+          }),
+        }
+      }
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => "application/json" },
+        json: async () => ({ id: "doc-1" }),
+      }
+    })
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    const formData = new FormData()
+    formData.append(
+      "file",
+      new File([new Uint8Array(4_200_000)], "cv.pdf", { type: "application/pdf" })
+    )
+
+    await apiClient.postFormData("/api/candidate/cand-1/documents", formData)
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    const [grantUrl, grantInit] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(grantUrl).toBe("/api/auth/upload-grant")
+    expect(grantInit.credentials).toBe("include")
+
+    const [uploadUrl, uploadInit] = fetchMock.mock.calls[1] as [string, RequestInit]
+    expect(uploadUrl).toBe(
+      "https://api.example.com/api/candidate/cand-1/documents"
+    )
+    expect(uploadInit.credentials).toBe("omit")
+    expect(uploadInit.body).toBe(formData)
+    expect((uploadInit.headers as Record<string, string>).Authorization).toBe(
+      "Bearer session-token"
+    )
+  })
+
+  it("posts a large public CV without a bearer when there is no session", async () => {
+    const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
+      if (url === "/api/auth/upload-grant") {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => "application/json" },
+          json: async () => ({
+            direct: true,
+            apiBaseUrl: "https://api.example.com",
+            accessToken: null,
+          }),
+        }
+      }
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => "text/plain" },
+        text: async () => "Application pipeline executed successfully.",
+      }
+    })
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    const formData = new FormData()
+    formData.append(
+      "cvFile",
+      new File([new Uint8Array(4_200_000)], "cv.pdf", { type: "application/pdf" })
+    )
+
+    const result = await apiClient.postFormData(
+      "/api/candidate/personal-appliance",
+      formData
+    )
+
+    expect(result).toBe("Application pipeline executed successfully.")
+    const [, uploadInit] = fetchMock.mock.calls[1] as [string, RequestInit]
+    expect(uploadInit.credentials).toBe("omit")
+    expect((uploadInit.headers as Record<string, string>).Authorization).toBeUndefined()
+  })
+
+  it("posts a large CV through the BFF when the grant is not direct", async () => {
+    const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
+      if (url === "/api/auth/upload-grant") {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => "application/json" },
+          json: async () => ({ direct: false }),
+        }
+      }
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => "application/json" },
+        json: async () => ({ id: "doc-1" }),
+      }
+    })
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    const formData = new FormData()
+    formData.append(
+      "file",
+      new File([new Uint8Array(4_200_000)], "cv.pdf", { type: "application/pdf" })
+    )
+
+    await apiClient.postFormData("/api/candidate/cand-1/documents", formData)
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    const [uploadUrl, uploadInit] = fetchMock.mock.calls[1] as [string, RequestInit]
+    expect(uploadUrl).toBe("/api/bff/api/candidate/cand-1/documents")
+    expect(uploadInit.credentials).toBe("include")
+    expect((uploadInit.headers as Record<string, string>).Authorization).toBeUndefined()
+  })
+
+  it("does not fall back to the BFF when the grant fails", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      status: 500,
+      headers: { get: () => "application/json" },
+      json: async () => ({
+        message:
+          "No se puede enviar este archivo porque la URL pública del API no está configurada.",
+      }),
+    }))
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    const formData = new FormData()
+    formData.append(
+      "file",
+      new File([new Uint8Array(4_200_000)], "cv.pdf", { type: "application/pdf" })
+    )
+
+    await expect(
+      apiClient.postFormData("/api/candidate/cand-1/documents", formData)
+    ).rejects.toMatchObject({ status: 500 })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
 })

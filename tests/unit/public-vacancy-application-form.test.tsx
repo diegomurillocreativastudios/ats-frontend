@@ -263,7 +263,7 @@ describe("PublicVacancyApplicationForm", () => {
 
     expect(await screen.findByRole("button", { name: "Seleccionar PDF" })).toBeInTheDocument()
     expect(
-      screen.getByText("Solo se acepta formato PDF (máx. 15 MB).")
+      screen.getByText("Solo se acepta formato PDF (máx. 35 MB).")
     ).toBeInTheDocument()
   })
 

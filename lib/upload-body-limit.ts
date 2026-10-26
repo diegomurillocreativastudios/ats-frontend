@@ -1,8 +1,9 @@
 import {
   UPLOAD_MAX_BYTES_5_MB,
   UPLOAD_MAX_BYTES_10_MB,
-  UPLOAD_MAX_BYTES_15_MB,
   UPLOAD_MAX_BYTES_20_MB,
+  UPLOAD_MAX_INGEST_BODY_BYTES,
+  UPLOAD_MAX_SINGLE_CV_BODY_BYTES,
 } from "@/lib/upload-constraints"
 
 const BODY_TOO_LARGE_MESSAGE =
@@ -10,7 +11,8 @@ const BODY_TOO_LARGE_MESSAGE =
 
 /**
  * Path-aware upload body ceiling for Backend-for-Frontend and leftover upload routes.
- * Defaults to 20 MB (current BFF ceiling); never opens above that.
+ * CV routes match the API transport cap (per-file 35 MiB plus multipart slack).
+ * Other mutations stay at 20 MB.
  */
 export function getUploadMaxBytesForBackendPath(backendPath: string): number {
   const path = (backendPath.split("?")[0] || "").replace(/\/+$/, "") || "/"
@@ -27,12 +29,15 @@ export function getUploadMaxBytesForBackendPath(backendPath: string): number {
     return UPLOAD_MAX_BYTES_10_MB
   }
 
+  if (path === "/Ingest/upload") {
+    return UPLOAD_MAX_INGEST_BODY_BYTES
+  }
+
   if (
-    path === "/Ingest/upload" ||
     path === "/api/candidate/personal-appliance" ||
     /^\/api\/candidate\/[^/]+\/documents$/.test(path)
   ) {
-    return UPLOAD_MAX_BYTES_15_MB
+    return UPLOAD_MAX_SINGLE_CV_BODY_BYTES
   }
 
   if (/^\/api\/recruiter\/report-documents\/[^/]+\/pdf$/.test(path)) {

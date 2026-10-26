@@ -43,6 +43,10 @@ const nextConfig = {
   output: "standalone",
   // FE-SEC-010: do not advertise the framework stack
   poweredByHeader: false,
+  // Above the largest CV ingest body (two 35 MiB files plus multipart slack).
+  experimental: {
+    proxyClientMaxBodySize: "80mb",
+  },
   // jsdom/isomorphic-dompurify must stay external: webpack rewrites __dirname and
   // breaks fs.readFileSync(.../browser/default-stylesheet.css) during "Collecting page data".
   serverExternalPackages: [

@@ -56,7 +56,7 @@ describe("DocumentsUploadZone i18n (Etapa 5C)", () => {
     expect(
       screen.getByText("Arrastra archivos aquí o haz clic para subir"),
     ).toBeInTheDocument()
-    expect(screen.getByText("PDF, DOCX hasta 15 MB")).toBeInTheDocument()
+    expect(screen.getByText("PDF, DOCX hasta 35 MB")).toBeInTheDocument()
   })
 
   it("renderiza los mismos textos traducidos en inglés", () => {
@@ -64,7 +64,7 @@ describe("DocumentsUploadZone i18n (Etapa 5C)", () => {
     expect(
       screen.getByText("Drag files here or click to upload"),
     ).toBeInTheDocument()
-    expect(screen.getByText("PDF, DOCX up to 15 MB")).toBeInTheDocument()
+    expect(screen.getByText("PDF, DOCX up to 35 MB")).toBeInTheDocument()
   })
 })
 
@@ -140,7 +140,7 @@ describe("AgregarCandidatoModal i18n (Etapa 5C)", () => {
     ).not.toBeInTheDocument()
     expect(screen.queryByText("Documento de identidad")).not.toBeInTheDocument()
     expect(
-      screen.getByText("Solo archivos PDF hasta 15 MB"),
+      screen.getByText("Solo archivos PDF hasta 35 MB"),
     ).toBeInTheDocument()
   })
 
@@ -155,7 +155,7 @@ describe("AgregarCandidatoModal i18n (Etapa 5C)", () => {
     ).toBeInTheDocument()
     expect(screen.getByText("Documento de identidad")).toBeInTheDocument()
     expect(
-      screen.getByText("PDF, DOCX o TXT hasta 15 MB"),
+      screen.getByText("PDF, DOCX o TXT hasta 35 MB"),
     ).toBeInTheDocument()
   })
 })

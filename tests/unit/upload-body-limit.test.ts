@@ -6,7 +6,8 @@ import {
 import {
   UPLOAD_MAX_BYTES_5_MB,
   UPLOAD_MAX_BYTES_10_MB,
-  UPLOAD_MAX_BYTES_15_MB,
+  UPLOAD_MAX_INGEST_BODY_BYTES,
+  UPLOAD_MAX_SINGLE_CV_BODY_BYTES,
   UPLOAD_MAX_BYTES_20_MB,
 } from "@/lib/upload-constraints"
 
@@ -32,16 +33,16 @@ describe("getUploadMaxBytesForBackendPath", () => {
     ).toBe(UPLOAD_MAX_BYTES_10_MB)
   })
 
-  it("applies 15 MB for ingest, public apply, and candidate documents", () => {
+  it("applies the CV transport ceiling for ingest, public apply, and candidate documents", () => {
     expect(getUploadMaxBytesForBackendPath("/Ingest/upload")).toBe(
-      UPLOAD_MAX_BYTES_15_MB
+      UPLOAD_MAX_INGEST_BODY_BYTES
     )
     expect(
       getUploadMaxBytesForBackendPath("/api/candidate/personal-appliance")
-    ).toBe(UPLOAD_MAX_BYTES_15_MB)
+    ).toBe(UPLOAD_MAX_SINGLE_CV_BODY_BYTES)
     expect(
       getUploadMaxBytesForBackendPath("/api/candidate/cand-1/documents")
-    ).toBe(UPLOAD_MAX_BYTES_15_MB)
+    ).toBe(UPLOAD_MAX_SINGLE_CV_BODY_BYTES)
   })
 
   it("applies 20 MB for report PDF history and default mutations", () => {
