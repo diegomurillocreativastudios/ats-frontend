@@ -173,6 +173,7 @@ export function RecruiterCandidateProfileView({
     saving: savingProfile,
     saveError: saveProfileError,
     onDismissSaveError: clearSaveProfileError,
+    requireNationalId: false,
     messages: {
       requiredFields: t("form.validation.requiredFields"),
       birthDate: {
@@ -617,6 +618,7 @@ export function RecruiterCandidateProfileView({
                 patch={patch}
                 saving={savingProfile}
                 fieldErrors={fieldErrors}
+                required={false}
               />
               <ProfileEditContactFields
                 form={form}

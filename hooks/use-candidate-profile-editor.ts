@@ -67,6 +67,8 @@ export interface UseCandidateProfileEditorParams {
   saveError: string | null
   onDismissSaveError: () => void
   messages?: Partial<CandidateProfileEditorMessages>
+  /** When false, nationalId is optional (recruiter edit). Default true (candidate portal). */
+  requireNationalId?: boolean
 }
 
 export function useCandidateProfileEditor({
@@ -78,6 +80,7 @@ export function useCandidateProfileEditor({
   saveError,
   onDismissSaveError,
   messages: messagesOverride,
+  requireNationalId = true,
 }: UseCandidateProfileEditorParams) {
   const messages: CandidateProfileEditorMessages = useMemo(
     () => ({
@@ -156,7 +159,7 @@ export function useCandidateProfileEditor({
       if (!lastName) nextFieldErrors.lastName = true
       if (!h) nextFieldErrors.headline = true
       if (!s) nextFieldErrors.summary = true
-      if (!n) nextFieldErrors.nationalId = true
+      if (requireNationalId && !n) nextFieldErrors.nationalId = true
       const firstInvalid = firstInvalidRequiredField(nextFieldErrors)
       if (firstInvalid) {
         setFieldErrors(nextFieldErrors)
@@ -176,7 +179,7 @@ export function useCandidateProfileEditor({
         /* saveError lo muestra el padre */
       }
     },
-    [form, messages, onDismissSaveError, onSave]
+    [form, messages, onDismissSaveError, onSave, requireNationalId]
   )
 
   return {

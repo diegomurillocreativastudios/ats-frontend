@@ -40,8 +40,13 @@ export const resolveCandidateMinSalary = (
     }
   }
 
+  // Prefer profile.minSalary over JobPreferences from the CV.
+  if (fallbackMinSalary != null && !Number.isNaN(Number(fallbackMinSalary))) {
+    return Number(fallbackMinSalary)
+  }
+
   const parsed = parseJsonObjectIfString(jobPrefs)
-  const raw = parsed?.MinSalary ?? parsed?.minSalary ?? fallbackMinSalary ?? null
+  const raw = parsed?.MinSalary ?? parsed?.minSalary ?? null
   if (raw == null) return null
   const n = Number(raw)
   return Number.isNaN(n) ? null : n

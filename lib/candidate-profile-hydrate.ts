@@ -134,14 +134,15 @@ export const buildFullFormStateFromSources = (
     sectors,
     jobDesiredRole: str(jobPrefs?.DesiredRole ?? jobPrefs?.desiredRole),
     jobMinSalary: (() => {
+      // Prefer profile.minSalary (apply / ficha) over CV-derived JobPreferences.
+      if (p?.minSalary != null && !Number.isNaN(Number(p.minSalary))) {
+        return String(p.minSalary)
+      }
       const fromPrefs =
         jobPrefs?.MinSalary != null || jobPrefs?.minSalary != null
           ? String(jobPrefs.MinSalary ?? jobPrefs.minSalary ?? "")
           : ""
-      if (fromPrefs !== "") return fromPrefs
-      return p?.minSalary != null && !Number.isNaN(Number(p.minSalary))
-        ? String(p.minSalary)
-        : ""
+      return fromPrefs
     })(),
     jobEducationLevel: str(jobPrefs?.EducationLevel ?? jobPrefs?.educationLevel),
     jobDesiredCity: str(jobPrefs?.DesiredCity ?? jobPrefs?.desiredCity),
