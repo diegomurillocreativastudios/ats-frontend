@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api"
 import type { CandidateAuthConsentSubmitBody } from "@/lib/candidate-auth-consent"
+import type { CandidateProfile } from "@/lib/candidate-profile"
 import {
   CV_OUTPUT_LANGUAGE_FIELD,
   type CvOutputLanguage,
@@ -20,6 +21,7 @@ export interface PublicVacancyApplyValues {
   websiteUrl?: string
   source?: string
   notes?: string
+  minSalary?: number
   cvFile: File
   /** Evidencia de consent and auth aceptada antes de postular (misma forma que POST auth-consent). */
   authConsent?: CandidateAuthConsentSubmitBody
@@ -40,6 +42,62 @@ interface CandidatePersonalAppliancePayload {
   websiteUrl: string
   source: string
   notes: string
+  minSalary?: number
+}
+
+function asJobPreferencesRecord(value: unknown): Record<string, unknown> | null {
+  if (value == null || typeof value !== "object" || Array.isArray(value)) return null
+  return value as Record<string, unknown>
+}
+
+/** Profile salary expectation: root minSalary wins over CV JobPreferences. */
+export function resolveApplyMinSalaryFromProfile(
+  profile: Pick<CandidateProfile, "minSalary" | "jobPreferences">
+): number | null {
+  if (profile.minSalary != null && Number.isFinite(Number(profile.minSalary))) {
+    const n = Number(profile.minSalary)
+    if (n >= 0) return n
+  }
+  const prefs = asJobPreferencesRecord(profile.jobPreferences)
+  if (!prefs) return null
+  const raw = prefs.MinSalary ?? prefs.minSalary
+  if (raw == null || raw === "") return null
+  const n = Number(raw)
+  if (!Number.isFinite(n) || n < 0) return null
+  return n
+}
+
+/** Deja solo dígitos y como máximo un punto decimal. */
+export function sanitizePublicApplySalaryInput(raw: string): string {
+  let out = ""
+  let hasDot = false
+  for (const ch of raw) {
+    if (ch >= "0" && ch <= "9") {
+      out += ch
+      continue
+    }
+    if (ch === "." && !hasDot) {
+      out += ch
+      hasDot = true
+    }
+  }
+  return out
+}
+
+/** Vacío, inválido o negativo → null. */
+export function parsePublicApplyMinSalary(raw: string): number | null {
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  const n = Number(trimmed)
+  if (!Number.isFinite(n) || n < 0) return null
+  return n
+}
+
+/** Formato visual con dos decimales; vacío si no hay número válido. */
+export function formatPublicApplyMinSalaryDisplay(raw: string): string {
+  const n = parsePublicApplyMinSalary(raw)
+  if (n == null) return ""
+  return n.toFixed(2)
 }
 
 function getRecord(value: unknown): Record<string, unknown> | null {
@@ -184,6 +242,14 @@ export function buildPublicApplyFormData(
 
   if (values.nationalId?.trim()) {
     candidate.nationalId = values.nationalId.trim()
+  }
+
+  if (
+    values.minSalary != null &&
+    Number.isFinite(values.minSalary) &&
+    values.minSalary >= 0
+  ) {
+    candidate.minSalary = values.minSalary
   }
 
   fd.append("vacancyId", vacancyId.trim())

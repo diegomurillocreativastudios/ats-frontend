@@ -7,6 +7,11 @@ import { useTranslations } from "next-intl"
 import { ArrowLeft, CheckCircle2 } from "lucide-react"
 import { ApplyPrivacyNoticeDialog } from "@/components/public/ApplyPrivacyNoticeDialog"
 import { PublicVacancyApplicationForm } from "@/components/public/PublicVacancyApplicationForm"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
+import { apiClient } from "@/lib/api"
+import { normalizeCandidateProfileFromApi } from "@/lib/candidate-profile"
+import { resolveApplyMinSalaryFromProfile } from "@/lib/public-vacancy-apply"
+import { isCandidateRole } from "@/lib/roles"
 import { PublicOpportunitiesShell } from "@/components/public/PublicOpportunitiesShell"
 import { PublicVacancyUnavailable } from "@/components/public/PublicVacancyUnavailable"
 import { ApplicationTipsWidget } from "@/components/public/ApplicationTipsWidget"
@@ -53,6 +58,9 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [hasAcceptedPrivacy, setHasAcceptedPrivacy] = useState(false)
   const [isUnavailable, setIsUnavailable] = useState(false)
+  const [initialMinSalary, setInitialMinSalary] = useState<number | null>(null)
+  const { user, loading: isAuthLoading } = useCurrentUser()
+  const isCandidate = Boolean(user && isCandidateRole(user.role))
 
   const queryString = searchParams.toString()
   const opportunitiesHref = queryString
@@ -113,6 +121,33 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
       isCancelled = true
     }
   }, [t, vacancyId, router, queryString])
+
+  useEffect(() => {
+    if (isAuthLoading) return
+    if (!isCandidate) {
+      setInitialMinSalary(null)
+      return
+    }
+
+    let isCancelled = false
+
+    async function loadProfileSalary() {
+      try {
+        const profileRaw = await apiClient.get("/api/candidate/profile")
+        if (isCancelled) return
+        const profile = normalizeCandidateProfileFromApi(profileRaw)
+        setInitialMinSalary(resolveApplyMinSalaryFromProfile(profile))
+      } catch {
+        if (!isCancelled) setInitialMinSalary(null)
+      }
+    }
+
+    void loadProfileSalary()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [isAuthLoading, isCandidate])
 
   useEffect(() => {
     if (!vacancy?.title) return
@@ -239,6 +274,7 @@ export function PublicVacancyApplyPage({ vacancyId }: { vacancyId: string }) {
                   <PublicVacancyApplicationForm
                     vacancyId={vacancy.id}
                     theme="light"
+                    initialMinSalary={initialMinSalary}
                   />
                 </div>
               </section>

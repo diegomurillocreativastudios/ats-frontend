@@ -3996,6 +3996,8 @@
         "documentTypeRequired": "Select a document type.",
         "documentNumberRequired": "Enter your document number.",
         "cvRequired": "Attach your CV in PDF.",
+        "minSalaryRequired": "Enter your salary expectation.",
+        "minSalaryInvalid": "Enter a valid amount (numbers only, minimum 0).",
         "reviewFields": "Review the indicated fields.",
         "consentSubmitFailed": "We could not save your authorization and consent. Please try again.",
         "consentValidation": "Please review the authorization and consent and try again.",
@@ -4013,6 +4015,8 @@
         "source": "How did you hear about this vacancy?",
         "linkedin": "LinkedIn profile",
         "website": "Website or portfolio",
+        "minSalary": "Salary expectation *",
+        "minSalaryCurrency": "USD",
         "notes": "Notes",
         "resume": "Resume (PDF) *"
       },
@@ -4026,6 +4030,7 @@
         "lastName": "e.g. Martinez",
         "email": "name@example.com",
         "phone": "1234-5678",
+        "minSalary": "0.00",
         "loadingCountries": "Loading countries…",
         "searchCountry": "Search country, ISO or code",
         "noCountries": "No countries found"

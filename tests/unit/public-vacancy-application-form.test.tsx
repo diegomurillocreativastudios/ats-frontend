@@ -108,6 +108,9 @@ async function fillAndSubmit(locale: "es" | "en" = "es") {
   fireEvent.change(screen.getByLabelText(labels.documentNumber), {
     target: { value: "01234567-8" },
   })
+  fireEvent.change(screen.getByLabelText(labels.minSalary), {
+    target: { name: "minSalary", value: "4000" },
+  })
   const cvInput = document.getElementById("apply-cv") as HTMLInputElement
   fireEvent.change(cvInput, {
     target: {

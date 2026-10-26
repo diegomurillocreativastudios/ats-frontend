@@ -3996,6 +3996,8 @@
         "documentTypeRequired": "Wählen Sie einen Dokumenttyp.",
         "documentNumberRequired": "Geben Sie Ihre Dokumentnummer ein.",
         "cvRequired": "Fügen Sie Ihren Lebenslauf als PDF bei.",
+        "minSalaryRequired": "Geben Sie Ihre Gehaltsvorstellung ein.",
+        "minSalaryInvalid": "Geben Sie einen gültigen Betrag ein (nur Zahlen, mindestens 0).",
         "reviewFields": "Überprüfen Sie die angegebenen Felder.",
         "consentSubmitFailed": "Wir konnten Ihre Autorisierung und Einwilligung nicht speichern. Bitte versuchen Sie es erneut.",
         "consentValidation": "Bitte überprüfen Sie die Autorisierung und Einwilligung und versuchen Sie es erneut.",
@@ -4013,6 +4015,8 @@
         "source": "Wie haben Sie von dieser Stelle erfahren?",
         "linkedin": "LinkedIn-Profil",
         "website": "Website oder Portfolio",
+        "minSalary": "Gehaltsvorstellung *",
+        "minSalaryCurrency": "USD",
         "notes": "Notizen",
         "resume": "Lebenslauf (PDF) *"
       },
@@ -4026,6 +4030,7 @@
         "lastName": "z. B. Martinez",
         "email": "name@example.com",
         "phone": "1234-5678",
+        "minSalary": "0.00",
         "loadingCountries": "Länder werden geladen...",
         "searchCountry": "Land, ISO oder Vorwahl suchen",
         "noCountries": "Keine Länder gefunden"

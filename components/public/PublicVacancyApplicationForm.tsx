@@ -15,10 +15,13 @@ import { useLocale, useTranslations } from "next-intl"
 import { CheckCircle2, FileText, LoaderCircle, Mail, X } from "lucide-react"
 import {
   getPublicApplyErrorMessage,
+  formatPublicApplyMinSalaryDisplay,
   isAllowedCvFile,
   isCvFileWithinSizeLimit,
   isValidEmailFormat,
   parsePublicApplyFieldErrors,
+  parsePublicApplyMinSalary,
+  sanitizePublicApplySalaryInput,
   submitPublicVacancyApplication,
   type PublicVacancyApplyValues,
 } from "@/lib/public-vacancy-apply"
@@ -84,6 +87,7 @@ interface PublicVacancyApplicationFormState {
   linkedinUrl: string
   websiteUrl: string
   source: string
+  minSalary: string
   notes: string
 }
 
@@ -100,6 +104,7 @@ const initialState: PublicVacancyApplicationFormState = {
   linkedinUrl: "",
   websiteUrl: "",
   source: "",
+  minSalary: "",
   notes: "",
 }
 
@@ -356,11 +361,14 @@ export function PublicVacancyApplicationForm({
   vacancyId,
   theme = "light",
   onRequestClose,
+  initialMinSalary = null,
 }: {
   vacancyId: string
   theme?: PublicVacancyApplicationFormTheme
   /** Tras éxito o al cerrar desde el modal. */
   onRequestClose?: () => void
+  /** Profile salary when a candidate session is present. */
+  initialMinSalary?: number | null
 }) {
   const t = useTranslations("PublicOpportunities.applicationForm")
   const tCvLanguage = useTranslations("CvOutputLanguage")
@@ -383,6 +391,13 @@ export function PublicVacancyApplicationForm({
   const [isCvDragging, setIsCvDragging] = useState(false)
   const [documentTypes, setDocumentTypes] = useState<IdentityDocumentTypeOptionDto[]>([])
   const [isLoadingDocumentTypes, setIsLoadingDocumentTypes] = useState(true)
+
+  useEffect(() => {
+    if (submitPhase === "success" || initialMinSalary == null) return
+    const formatted = formatPublicApplyMinSalaryDisplay(String(initialMinSalary))
+    if (!formatted) return
+    setValues((prev) => (prev.minSalary.trim() ? prev : { ...prev, minSalary: formatted }))
+  }, [initialMinSalary, submitPhase])
 
   const inputClass = themeFieldClass(theme)
   const selectClass = themeSelectClass(theme)
@@ -449,7 +464,10 @@ export function PublicVacancyApplicationForm({
     ) => {
       const { name, value } = event.target
       const key = name as keyof PublicVacancyApplicationFormState
-      setValues((prev) => ({ ...prev, [key]: value }))
+      setValues((prev) => ({
+        ...prev,
+        [key]: key === "minSalary" ? sanitizePublicApplySalaryInput(value) : value,
+      }))
       setErrors((prev) => ({ ...prev, [key]: undefined, cvFile: undefined }))
       setServerError(null)
     },
@@ -460,6 +478,14 @@ export function PublicVacancyApplicationForm({
     setValues((prev) => ({ ...prev, phone }))
     setErrors((prev) => ({ ...prev, phone: undefined }))
     setServerError(null)
+  }, [])
+
+  const handleMinSalaryBlur = useCallback(() => {
+    setValues((prev) => {
+      const formatted = formatPublicApplyMinSalaryDisplay(prev.minSalary)
+      if (formatted === prev.minSalary) return prev
+      return { ...prev, minSalary: formatted }
+    })
   }, [])
 
   const handlePhoneCountryChange = useCallback((iso2: string) => {
@@ -555,6 +581,11 @@ export function PublicVacancyApplicationForm({
     if (!values.nationalId.trim()) {
       next.nationalId = t("validation.documentNumberRequired")
     }
+    if (!values.minSalary.trim()) {
+      next.minSalary = t("validation.minSalaryRequired")
+    } else if (parsePublicApplyMinSalary(values.minSalary) == null) {
+      next.minSalary = t("validation.minSalaryInvalid")
+    }
     if (!cvFile) next.cvFile = t("validation.cvRequired")
     else if (!isAllowedCvFile(cvFile)) next.cvFile = t("validation.fileType")
     else if (!isCvFileWithinSizeLimit(cvFile))
@@ -570,6 +601,7 @@ export function PublicVacancyApplicationForm({
     values.phone,
     values.documentTypeId,
     values.nationalId,
+    values.minSalary,
     cvFile,
     t,
   ])
@@ -594,6 +626,7 @@ export function PublicVacancyApplicationForm({
       websiteUrl: values.websiteUrl,
       source: values.source,
       notes: values.notes,
+      minSalary: parsePublicApplyMinSalary(values.minSalary) ?? undefined,
       cvFile,
       authConsent: acceptedConsent.payload,
     }
@@ -1039,6 +1072,52 @@ export function PublicVacancyApplicationForm({
             placeholder="https://…"
           />
         </div>
+      <div className="space-y-2">
+        <label htmlFor="apply-minSalary" className={labelClass}>
+          {t("fields.minSalary")}
+        </label>
+        <div
+          className={
+            theme === "dark"
+              ? "flex h-11 items-center rounded-2xl border border-border bg-muted/35 px-3 focus-within:ring-2 focus-within:ring-ats-cobre"
+              : "flex h-11 items-center rounded-lg border border-border bg-background px-3 focus-within:ring-2 focus-within:ring-ats-terracotta"
+          }
+        >
+          <div className="shrink-0 select-none text-sm text-muted-foreground" aria-hidden>
+            $
+          </div>
+          <input
+            id="apply-minSalary"
+            name="minSalary"
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            value={values.minSalary}
+            onChange={handleChange}
+            onBlur={handleMinSalaryBlur}
+            className="block min-w-0 grow bg-transparent py-2 pl-1 pr-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            disabled={disabled}
+            placeholder={t("placeholders.minSalary")}
+            aria-invalid={Boolean(errors.minSalary)}
+            aria-describedby={
+              errors.minSalary
+                ? "apply-minSalary-currency apply-minSalary-err"
+                : "apply-minSalary-currency"
+            }
+          />
+          <div
+            id="apply-minSalary-currency"
+            className="shrink-0 select-none text-sm text-muted-foreground"
+          >
+            {t("fields.minSalaryCurrency")}
+          </div>
+        </div>
+        {errors.minSalary ? (
+          <p id="apply-minSalary-err" className={errClass} role="alert">
+            {errors.minSalary}
+          </p>
+        ) : null}
+      </div>
       <div className="space-y-2">
         <label htmlFor="apply-notes" className={labelClass}>
           {t("fields.notes")}

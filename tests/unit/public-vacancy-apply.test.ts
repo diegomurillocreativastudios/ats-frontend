@@ -5,6 +5,7 @@ import {
 } from "@/lib/application-source"
 import {
   buildPublicApplyFormData,
+  resolveApplyMinSalaryFromProfile,
   getPublicApplyErrorMessage,
   isAllowedCvFile,
   isCvFileWithinSizeLimit,
@@ -155,6 +156,42 @@ describe("public vacancy apply helpers", () => {
     expect(candidate.source).toBe("linkedin")
     expect(candidate.notes).toBe("hola")
     expect(candidate).not.toHaveProperty("outputLanguage")
+    expect(candidate).not.toHaveProperty("minSalary")
+  })
+
+  it("includes minSalary when the amount is a finite number", () => {
+    const file = new File(["%PDF"], "x.pdf", { type: "application/pdf" })
+    const fd = buildPublicApplyFormData(
+      "vacancy-123",
+      {
+        firstName: "Ana",
+        lastName: "López",
+        email: "a@b.co",
+        minSalary: 4000,
+        cvFile: file,
+      },
+      "ES"
+    )
+    const candidate = JSON.parse(String(fd.get("candidate") ?? "{}")) as Record<
+      string,
+      unknown
+    >
+    expect(candidate.minSalary).toBe(4000)
+  })
+
+  it("prefers profile.minSalary over CV JobPreferences", () => {
+    expect(
+      resolveApplyMinSalaryFromProfile({
+        minSalary: 4000,
+        jobPreferences: { MinSalary: 500 },
+      })
+    ).toBe(4000)
+    expect(
+      resolveApplyMinSalaryFromProfile({
+        minSalary: null,
+        jobPreferences: { minSalary: 500 },
+      })
+    ).toBe(500)
   })
 
   it("appends authConsent JSON when provided", () => {

@@ -3996,6 +3996,8 @@
         "documentTypeRequired": "Selecciona un tipo de documento.",
         "documentNumberRequired": "Ingresa tu número de documento.",
         "cvRequired": "Adjunta tu CV en PDF.",
+        "minSalaryRequired": "Ingresa tu pretensión salarial.",
+        "minSalaryInvalid": "Ingresa un monto válido (solo números, mínimo 0).",
         "reviewFields": "Revisa los datos indicados.",
         "consentSubmitFailed": "No pudimos guardar tu autorización y consentimiento. Intenta nuevamente.",
         "consentValidation": "Revisa la autorización y consentimiento e intenta de nuevo.",
@@ -4013,6 +4015,8 @@
         "source": "¿Cómo supiste de esta vacante?",
         "linkedin": "Perfil de LinkedIn",
         "website": "Sitio web o portafolio",
+        "minSalary": "Pretensión salarial *",
+        "minSalaryCurrency": "USD",
         "notes": "Notas",
         "resume": "Currículum (PDF) *"
       },
@@ -4026,6 +4030,7 @@
         "lastName": "Ej. Martínez",
         "email": "correo@ejemplo.com",
         "phone": "1234-5678",
+        "minSalary": "0.00",
         "loadingCountries": "Cargando países…",
         "searchCountry": "Buscar país, ISO o código",
         "noCountries": "No se encontraron países"
