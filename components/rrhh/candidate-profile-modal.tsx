@@ -33,6 +33,13 @@ import {
   formatScorePercent,
   scoreBarWidth,
 } from "@/lib/vacancies/format-score-percent"
+import {
+  NO_GAP_REQUIREMENTS_NOTE,
+  NO_MET_REQUIREMENTS_NOTE,
+  pickHardGateMessages,
+  presentRequirementObservations,
+  type ObservationRow,
+} from "@/lib/vacancies/present-requirement-observations"
 import { getApplicantPrimaryScore01 } from "@/lib/rrhh/vacancy-pipeline-stats"
 import {
   formatScoreKey,
@@ -63,6 +70,9 @@ export interface CandidateProfileMatch {
   qualitativeReasoningPositive?: string | null
   qualitativeReasoningNegative?: string | null
   requirementAssessments?: unknown[] | null
+  negativeReasons?: unknown
+  NegativeReasons?: unknown
+  negative_reasons?: unknown
   requiresManualReview?: boolean | null
   scoreBreakdown?: {
     attributesIncludedInTotal?: boolean | null
@@ -75,6 +85,19 @@ const VERDICT_BADGE_CLASSES: Record<RequirementVerdict, string> = {
   Partial: "bg-emerald-100 text-emerald-800",
   NotMet: "bg-amber-100 text-amber-900",
   Unavailable: "bg-slate-200 text-slate-700",
+}
+
+const OBSERVATION_CHIP_CLASSES: Record<Exclude<RequirementVerdict, "Met">, string> = {
+  Partial: "bg-slate-100 text-slate-700",
+  NotMet: "bg-slate-200 text-slate-800",
+  Unavailable: "border border-slate-300 bg-background text-slate-600",
+}
+
+const OBSERVATION_DOT_CLASSES: Record<RequirementVerdict, string> = {
+  Met: "fill-green-500",
+  Partial: "fill-yellow-500",
+  NotMet: "fill-indigo-500",
+  Unavailable: "fill-blue-500",
 }
 
 interface CandidateProfileModalProps {
@@ -246,6 +269,48 @@ function ScoreBarRow({
   )
 }
 
+function ObservationRows({
+  rows,
+  chipLabels,
+}: {
+  rows: ObservationRow[]
+  chipLabels: Partial<Record<RequirementVerdict, string>>
+}) {
+  return (
+    <ul className="flex flex-col gap-3" role="list">
+      {rows.map((row, index) => {
+        const chipLabel = chipLabels[row.verdict]
+        const chipClass =
+          row.verdict === "Met" ? null : OBSERVATION_CHIP_CLASSES[row.verdict]
+        return (
+          <li key={`${index}-${row.key}`} className="flex flex-col gap-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className="inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 font-sans text-xs font-medium text-slate-900 inset-ring inset-ring-slate-200">
+                <svg
+                  viewBox="0 0 6 6"
+                  aria-hidden="true"
+                  className={`size-1.5 ${OBSERVATION_DOT_CLASSES[row.verdict]}`}
+                >
+                  <circle r={3} cx={3} cy={3} />
+                </svg>
+                {row.title}
+              </h4>
+              {chipLabel != null && chipClass != null && (
+                <span
+                  className={`shrink-0 rounded px-1.5 py-0.5 font-sans text-[10px] font-medium leading-4 ${chipClass}`}
+                >
+                  {chipLabel}
+                </span>
+              )}
+            </div>
+            <p className="font-sans text-sm leading-relaxed text-slate-700">{row.body}</p>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
 /**
  * Recruiter screening modal: familiar stacked layout with improved attribute deduplication.
  */
@@ -369,6 +434,32 @@ export function CandidateProfileModal({
   const qualitativeReasoningLegacy = toTrimmedText(match.qualitativeReasoning)
   const qualitativeReasoningPositive = toTrimmedText(match.qualitativeReasoningPositive)
   const qualitativeReasoningNegative = toTrimmedText(match.qualitativeReasoningNegative)
+  const metAssessments = requirementAssessments.filter((item) => item.verdict === "Met")
+  const gapAssessments = requirementAssessments.filter(
+    (item) => item.verdict === "Partial" || item.verdict === "NotMet" || item.verdict === "Unavailable"
+  )
+  const positivePresentation =
+    qualitativeReasoningPositive == null
+      ? null
+      : presentRequirementObservations(
+          qualitativeReasoningPositive,
+          metAssessments,
+          NO_MET_REQUIREMENTS_NOTE
+        )
+  const negativePresentation =
+    qualitativeReasoningNegative == null
+      ? null
+      : presentRequirementObservations(
+          qualitativeReasoningNegative,
+          gapAssessments,
+          NO_GAP_REQUIREMENTS_NOTE
+        )
+  const observationChipLabels: Partial<Record<RequirementVerdict, string>> = {
+    Partial: tModal("observationPartial"),
+    NotMet: tModal("observationNotMet"),
+    Unavailable: tModal("observationUnavailable"),
+  }
+  const hardGateMessages = pickHardGateMessages(match)
   const hasSplitQualitative =
     qualitativeReasoningPositive != null || qualitativeReasoningNegative != null
   const hasQualitativeBlock =
@@ -395,7 +486,10 @@ export function CandidateProfileModal({
   )
 
   const hasContent =
-    componentScores.length > 0 || hasQualitativeBlock || matchedAttributesEntries.length > 0
+    componentScores.length > 0 ||
+    hasQualitativeBlock ||
+    matchedAttributesEntries.length > 0 ||
+    hardGateMessages.length > 0
 
   return (
     <div
@@ -590,24 +684,47 @@ export function CandidateProfileModal({
                   <p className="font-sans text-xs leading-relaxed text-slate-600">
                     {tModal("checklistHint")}
                   </p>
-                  {qualitativeReasoningPositive != null && (
+                  {positivePresentation != null && (
                     <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-emerald-200/50">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-emerald-900">
                         {tModal("strengths")}
                       </h3>
-                      <p className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-700">
-                        {qualitativeReasoningPositive}
-                      </p>
+                      {positivePresentation.kind === "rows" ? (
+                        <ObservationRows rows={positivePresentation.rows} chipLabels={{}} />
+                      ) : (
+                        <p
+                          className={
+                            positivePresentation.kind === "empty-note"
+                              ? "font-sans text-sm leading-relaxed text-slate-500"
+                              : "whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-700"
+                          }
+                        >
+                          {qualitativeReasoningPositive}
+                        </p>
+                      )}
                     </div>
                   )}
-                  {qualitativeReasoningNegative != null && (
+                  {negativePresentation != null && (
                     <div className="rounded-xl border border-border bg-background p-4 shadow-sm ring-1 ring-amber-200/70">
                       <h3 className="mb-3 font-sans text-sm font-semibold text-amber-950">
                         {tModal("considerations")}
                       </h3>
-                      <p className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-700">
-                        {qualitativeReasoningNegative}
-                      </p>
+                      {negativePresentation.kind === "rows" ? (
+                        <ObservationRows
+                          rows={negativePresentation.rows}
+                          chipLabels={observationChipLabels}
+                        />
+                      ) : (
+                        <p
+                          className={
+                            negativePresentation.kind === "empty-note"
+                              ? "font-sans text-sm leading-relaxed text-slate-500"
+                              : "whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-700"
+                          }
+                        >
+                          {qualitativeReasoningNegative}
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -622,6 +739,24 @@ export function CandidateProfileModal({
                     </p>
                   </div>
                 )
+              )}
+
+              {hardGateMessages.length > 0 && (
+                <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
+                  <h3 className="mb-3 font-sans text-sm font-semibold text-slate-900">
+                    {tModal("eligibilityTitle")}
+                  </h3>
+                  <ul className="flex flex-col gap-2" role="list">
+                    {hardGateMessages.map((message, index) => (
+                      <li
+                        key={`${index}-${message}`}
+                        className="font-sans text-sm leading-relaxed text-slate-700"
+                      >
+                        {message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           )}
