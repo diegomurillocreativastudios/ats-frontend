@@ -6,17 +6,6 @@ export const QUERY_PAGE_SIZE_DEFAULT = 10
 export const QUERY_FETCH_ALL_PAGE_SIZE = 100
 export const QUERY_FETCH_ALL_MAX_PAGES = 50
 export const QUERY_PAGE_SIZE_OPTIONS = [10, 50, 100] as const
-/** POST search-candidates limit max. */
-export const QUERY_SEARCH_LIMIT_MAX = 50
-export const QUERY_SEARCH_CANDIDATES_LIMIT = 20
-
-export function clampSearchLimit(
-  limit?: number,
-  fallback = QUERY_SEARCH_CANDIDATES_LIMIT
-): number {
-  if (limit == null || !Number.isFinite(limit) || limit <= 0) return fallback
-  return Math.min(Math.floor(limit), QUERY_SEARCH_LIMIT_MAX)
-}
 
 export interface HeaderPagedResult<T> {
   items: T[]
