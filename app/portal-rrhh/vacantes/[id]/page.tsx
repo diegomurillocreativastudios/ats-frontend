@@ -43,11 +43,7 @@ import {
 } from "@/lib/api/recruiter-vacancies"
 import { finishVacancyProcess } from "@/lib/api/recruiter-vacancy-finish"
 import { fetchRecruiterVacancyByPathSegment } from "@/lib/api/recruiter-vacancy-by-path"
-import {
-  QUERY_SEARCH_CANDIDATES_LIMIT,
-  clampSearchLimit,
-  unwrapListArray,
-} from "@/lib/api/query-paging"
+import { unwrapListArray } from "@/lib/api/query-paging"
 import {
   extractStructuredApiErrorMessage,
   getApiErrorMessage,
@@ -1928,7 +1924,7 @@ export default function VacanteDetallePage() {
       }
 
       try {
-        const url = `/api/recruiter/vacancies/${vacancyId}/search-candidates?limit=${clampSearchLimit(QUERY_SEARCH_CANDIDATES_LIMIT)}&minScore=0.7`;
+        const url = `/api/recruiter/vacancies/${vacancyId}/search-candidates?minScore=0.7`;
         const data = await apiClient.post(url, {});
         const list = unwrapListArray(data);
         setSmartCandidates(list);

@@ -5,7 +5,6 @@ import {
   buildPageQuery,
   clampQueryPage,
   clampQueryPageSize,
-  clampSearchLimit,
   fetchAllHeaderPagedList,
   fetchHeaderPagedList,
   readPagingMeta,
@@ -38,11 +37,6 @@ describe("query paging helpers", () => {
     expect(clampQueryPageSize(undefined)).toBe(10)
     expect(clampQueryPageSize(200)).toBe(QUERY_PAGE_SIZE_MAX)
     expect(clampQueryPageSize(20)).toBe(20)
-  })
-
-  it("clamps search limit to max 50", () => {
-    expect(clampSearchLimit(20)).toBe(20)
-    expect(clampSearchLimit(200)).toBe(50)
   })
 
   it("unwraps arrays and common envelopes", () => {
