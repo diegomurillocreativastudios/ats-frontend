@@ -25,10 +25,14 @@ const getCurrentPath = (pathname) => {
 export default function PageTitle() {
   const pathname = usePathname();
   const tPrivacyPolicy = useTranslations("Metadata.privacyPolicy");
+  const tMaintenance = useTranslations("Metadata.maintenance");
 
   const resolveTitle = (path: string) => {
     if (path === "/privacy-policy") {
       return tPrivacyPolicy("title");
+    }
+    if (path === "/mantenimiento") {
+      return tMaintenance("title");
     }
     return getPageTitle(path);
   };
@@ -36,7 +40,7 @@ export default function PageTitle() {
   useLayoutEffect(() => {
     const path = getCurrentPath(pathname ?? undefined);
     document.title = resolveTitle(path);
-  }, [pathname, tPrivacyPolicy]);
+  }, [pathname, tPrivacyPolicy, tMaintenance]);
 
   useEffect(() => {
     const path = getCurrentPath(pathname ?? undefined);
@@ -47,7 +51,7 @@ export default function PageTitle() {
     apply();
     const t = setTimeout(apply, 0);
     return () => clearTimeout(t);
-  }, [pathname, tPrivacyPolicy]);
+  }, [pathname, tPrivacyPolicy, tMaintenance]);
 
   return null;
 }

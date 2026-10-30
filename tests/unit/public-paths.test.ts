@@ -22,6 +22,10 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/privacy-policy")).toBe(true)
   })
 
+  it("allows the maintenance page without auth", () => {
+    expect(isPublicPath("/mantenimiento")).toBe(true)
+  })
+
   it("allows linkedin sso success without auth", () => {
     expect(isPublicPath("/auth/sso/success")).toBe(true)
     expect(isPublicPath("/auth/sso/success/")).toBe(true)

@@ -345,6 +345,11 @@
       "ref": "Ref: {digest}"
     }
   },
+  "Maintenance": {
+    "title": "ApplicanTree está en mantenimiento",
+    "description": "Estamos haciendo mejoras. Volvemos en un momento.",
+    "loading": "Cargando…"
+  },
   "Metadata": {
     "auth": {
       "login": {
@@ -514,6 +519,10 @@
     "privacyPolicy": {
       "title": "Política de privacidad | Applicantree ATS",
       "description": "Política de privacidad de Applicantree ATS."
+    },
+    "maintenance": {
+      "title": "ApplicanTree está en mantenimiento",
+      "description": "Estamos haciendo mejoras. Volvemos en un momento."
     }
   },
   "PortalSelection": {

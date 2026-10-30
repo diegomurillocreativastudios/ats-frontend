@@ -345,6 +345,11 @@
       "ref": "Ref: {digest}"
     }
   },
+  "Maintenance": {
+    "title": "ApplicanTree ist in Wartung",
+    "description": "Wir nehmen Verbesserungen vor. Wir sind gleich wieder da.",
+    "loading": "Wird geladen…"
+  },
   "Metadata": {
     "auth": {
       "login": {
@@ -514,6 +519,10 @@
     "privacyPolicy": {
       "title": "Datenschutzerklärung | Applicantree ATS",
       "description": "Datenschutzerklärung für Applicantree ATS."
+    },
+    "maintenance": {
+      "title": "ApplicanTree ist in Wartung",
+      "description": "Wir nehmen Verbesserungen vor. Wir sind gleich wieder da."
     }
   },
   "PortalSelection": {

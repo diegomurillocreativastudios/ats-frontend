@@ -49,6 +49,7 @@ describe("FE-SEC-024 cache control", () => {
     expect(shouldApplyPrivateNoStore("/portal-admin/administracion/usuarios")).toBe(
       true
     )
+    expect(shouldApplyPrivateNoStore("/mantenimiento")).toBe(true)
   })
 
   it("does not apply to public marketing pages or Next static assets", () => {

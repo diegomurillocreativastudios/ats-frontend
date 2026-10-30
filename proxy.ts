@@ -1,11 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { AUTH_COOKIES } from "@/lib/auth"
 import { assertMutationCsrf } from "@/lib/auth/csrf"
+import {
+  isMaintenanceMode,
+  MAINTENANCE_API_MESSAGE,
+  MAINTENANCE_PATH,
+} from "@/lib/maintenance-mode"
 import { isPublicPath } from "@/lib/auth/public-paths"
 import {
   PORTAL_HOME_HREF,
   PORTAL_SELECTION_PATH,
 } from "@/lib/portal-access"
+import { applyPrivateNoStore } from "@/lib/security/cache-headers"
 import {
   applySecurityHeaders,
   generateCspNonce,
@@ -43,6 +49,39 @@ function secureResponse(
   return applySecurityHeaders(response, { request, nonce })
 }
 
+const MAINTENANCE_RETRY_AFTER_SECONDS = "3600"
+
+/**
+ * When maintenance is on, only the maintenance page renders.
+ * API calls get 503. Every other path redirects without preserving the query,
+ * so a cached 307 cannot keep a `from` target after the flag is turned off.
+ * `applyPrivateNoStore` is explicit: public paths such as `/` are not covered
+ * by `shouldApplyPrivateNoStore`.
+ */
+function maintenanceGate(
+  request: NextRequest,
+  pathname: string,
+  nonce: string
+): NextResponse | null {
+  if (!isMaintenanceMode()) return null
+  if (pathname === MAINTENANCE_PATH) {
+    return nextWithSecurity(request, nonce)
+  }
+  if (pathname.startsWith("/api/")) {
+    const response = NextResponse.json(
+      { message: MAINTENANCE_API_MESSAGE },
+      {
+        status: 503,
+        headers: { "Retry-After": MAINTENANCE_RETRY_AFTER_SECONDS },
+      }
+    )
+    return applyPrivateNoStore(secureResponse(request, response, nonce))
+  }
+  const dest = new URL(MAINTENANCE_PATH, request.url)
+  const response = NextResponse.redirect(dest, 307)
+  return applyPrivateNoStore(secureResponse(request, response, nonce))
+}
+
 /**
  * Edge proxy: auth gate by access-token presence only.
  * Role-based portal isolation lives in server layouts (backend session).
@@ -51,6 +90,9 @@ function secureResponse(
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const nonce = generateCspNonce()
+
+  const maintenance = maintenanceGate(request, pathname, nonce)
+  if (maintenance) return maintenance
 
   if (pathname === "/chromium-pack.tar") {
     return secureResponse(request, new NextResponse(null, { status: 404 }), nonce)

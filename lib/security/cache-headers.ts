@@ -21,6 +21,7 @@ export function shouldApplyPrivateNoStore(pathname: string): boolean {
   if (pathname.startsWith("/portal-rrhh")) return true
   if (pathname.startsWith("/portal-candidato")) return true
   if (pathname.startsWith("/portal-admin")) return true
+  if (pathname === "/mantenimiento") return true
   return false
 }
 

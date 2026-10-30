@@ -9,6 +9,7 @@ export const authPublicPaths = [
   "/recuperar-contrasena",
   "/portal-oportunidades",
   "/privacy-policy",
+  "/mantenimiento",
 ] as const
 
 export function isPublicPath(pathname: string): boolean {
